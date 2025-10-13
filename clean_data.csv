@@ -1,0 +1,26 @@
+﻿id,question,answer,category_main,category_sub,tags,program,course_codes,year,complexity,requires_admin,solution_type
+1,"Em là sinh viên ngành An toàn thông tin K61. Em chưa học môn An toàn hệ thống (IT4190 - 3 tín chỉ) nhưng môn này là môn điều kiện của môn Đánh giá kiểm định an toàn hệ thống thông tin (IT4810). Em đã học học phần ""An toàn và bảo mật thông tin"" để xét tương đương với môn Nhập môn an toàn thông tin rồi. Vậy làm thế nào để em có thể đăng ký môn IT4810 khi chưa học môn điều kiện IT4190 ạ?","Chào em,
+
+Môn An toàn hệ thống (IT4190) là môn bắt buộc 3 tín chỉ của chương trình kỹ sư An toàn thông tin, có tính chất chuyên sâu theo ngành nên không có học phần tương đương ở các chương trình đào tạo khác.
+
+Trong trường hợp của em, em cần làm đơn xin mở học phần IT4190 dưới dạng lớp đồ án/Project với quy trình như sau:
+
+1. Viết đơn xin mở lớp, nêu rõ lý do (môn điều kiện và không mở lại)
+2. Nộp đơn lên Văn phòng Viện CNTT-TT để Viện xác nhận
+3. Nộp lên Phòng Đào tạo để phê duyệt (Phòng Đào tạo là đơn vị quyết định cuối cùng, Viện chỉ xác nhận)
+
+Em nên tập hợp các bạn còn nợ môn này để làm đơn đăng ký chung. Em có thể học môn này ở học kỳ cuối (học kỳ bảo vệ ĐATN).
+
+Chúc em thành công!",HỌC TẬP,Điều kiện tiên quyết; Đăng ký học phần đặc biệt,IT4190;IT4810;môn điều kiện;học phần tương đương;lớp project;đồ án;không mở lại,An toàn thông tin,IT4190;IT4810,K61,high,TRUE,procedural
+2,"Em là sinh viên lớp CNTT 2.2 K59, chuyên ngành Công nghệ Phần Mềm. Kỳ này em có đăng ký đồ án tốt nghiệp kỹ sư. Em muốn hỏi khi nào thì có kết quả phân công giảng viên hướng dẫn đồ án của bộ môn Công nghệ Phần Mềm để em liên hệ với giảng viên ạ?","Chào em,
+
+Em có thể lên trang https://qldt.hust.edu.vn để biết thông tin và trao đổi với giáo viên hướng dẫn. Kết quả phân công giảng viên hướng dẫn đồ án tốt nghiệp đã được công bố trên hệ thống.
+
+Em có thể tra cứu thông tin giáo viên hướng dẫn của mình và liên hệ trực tiếp với thầy/cô.
+
+Chúc em thành công!",ĐIỀU KIỆN TỐT NGHIỆP,Đồ án tốt nghiệp; Phân công giảng viên hướng dẫn,đồ án tốt nghiệp;giảng viên hướng dẫn;phân công;bộ môn Công nghệ Phần Mềm;kỹ sư;tra cứu hệ thống,Công nghệ Phần Mềm,đồ án tốt nghiệp,K59,low,FALSE,referral
+3,Em muốn hỏi ngành Công nghệ thông tin Việt Nhật đầu ra có yêu cầu tiếng Anh không ạ? Và thời gian đào tạo là bao lâu ạ?,"Chào em,
+
+Ngành Công nghệ thông tin Việt Nhật có thời gian đào tạo là 5 năm và ra trường với bằng kỹ sư. Chương trình này không yêu cầu điều kiện đầu ra cho tiếng Anh.
+
+Chúc em thành công!",CHƯƠNG TRÌNH ĐÀO TẠO,Thông tin chương trình; Điều kiện đầu ra,Công nghệ thông tin Việt Nhật;thời gian đào tạo;điều kiện đầu ra;tiếng Anh;5 năm;bằng kỹ sư,Công nghệ thông tin Việt Nhật,,,low,false,direct
