@@ -1,0 +1,3658 @@
+{
+  "schema_name": "DoclingDocument",
+  "version": "1.8.0",
+  "name": "01_1 2015 TT Lien tich_QD danh gia QP-AN",
+  "origin": {
+    "mimetype": "application/pdf",
+    "binary_hash": 6697693614385936664,
+    "filename": "01_1 2015 TT Lien tich_QD danh gia QP-AN.pdf"
+  },
+  "furniture": {
+    "self_ref": "#/furniture",
+    "children": [],
+    "content_layer": "furniture",
+    "name": "_root_",
+    "label": "unspecified"
+  },
+  "body": {
+    "self_ref": "#/body",
+    "children": [
+      {
+        "$ref": "#/texts/0"
+      },
+      {
+        "$ref": "#/texts/1"
+      },
+      {
+        "$ref": "#/texts/2"
+      },
+      {
+        "$ref": "#/texts/3"
+      },
+      {
+        "$ref": "#/texts/4"
+      },
+      {
+        "$ref": "#/texts/5"
+      },
+      {
+        "$ref": "#/texts/6"
+      },
+      {
+        "$ref": "#/texts/7"
+      },
+      {
+        "$ref": "#/texts/8"
+      },
+      {
+        "$ref": "#/texts/9"
+      },
+      {
+        "$ref": "#/texts/10"
+      },
+      {
+        "$ref": "#/texts/11"
+      },
+      {
+        "$ref": "#/texts/12"
+      },
+      {
+        "$ref": "#/texts/13"
+      },
+      {
+        "$ref": "#/texts/14"
+      },
+      {
+        "$ref": "#/texts/15"
+      },
+      {
+        "$ref": "#/texts/16"
+      },
+      {
+        "$ref": "#/texts/17"
+      },
+      {
+        "$ref": "#/texts/18"
+      },
+      {
+        "$ref": "#/texts/19"
+      },
+      {
+        "$ref": "#/texts/20"
+      },
+      {
+        "$ref": "#/texts/21"
+      },
+      {
+        "$ref": "#/texts/22"
+      },
+      {
+        "$ref": "#/texts/23"
+      },
+      {
+        "$ref": "#/texts/24"
+      },
+      {
+        "$ref": "#/texts/25"
+      },
+      {
+        "$ref": "#/texts/26"
+      },
+      {
+        "$ref": "#/groups/0"
+      },
+      {
+        "$ref": "#/texts/28"
+      },
+      {
+        "$ref": "#/texts/29"
+      },
+      {
+        "$ref": "#/groups/1"
+      },
+      {
+        "$ref": "#/texts/32"
+      },
+      {
+        "$ref": "#/groups/2"
+      },
+      {
+        "$ref": "#/texts/35"
+      },
+      {
+        "$ref": "#/groups/3"
+      },
+      {
+        "$ref": "#/texts/39"
+      },
+      {
+        "$ref": "#/texts/40"
+      },
+      {
+        "$ref": "#/groups/4"
+      },
+      {
+        "$ref": "#/texts/42"
+      },
+      {
+        "$ref": "#/texts/43"
+      },
+      {
+        "$ref": "#/groups/5"
+      },
+      {
+        "$ref": "#/texts/56"
+      },
+      {
+        "$ref": "#/groups/6"
+      },
+      {
+        "$ref": "#/texts/59"
+      },
+      {
+        "$ref": "#/texts/60"
+      },
+      {
+        "$ref": "#/texts/61"
+      },
+      {
+        "$ref": "#/texts/62"
+      },
+      {
+        "$ref": "#/texts/63"
+      },
+      {
+        "$ref": "#/groups/7"
+      },
+      {
+        "$ref": "#/texts/66"
+      },
+      {
+        "$ref": "#/groups/8"
+      },
+      {
+        "$ref": "#/texts/72"
+      },
+      {
+        "$ref": "#/texts/73"
+      },
+      {
+        "$ref": "#/texts/74"
+      },
+      {
+        "$ref": "#/texts/75"
+      },
+      {
+        "$ref": "#/texts/76"
+      },
+      {
+        "$ref": "#/texts/77"
+      },
+      {
+        "$ref": "#/groups/9"
+      },
+      {
+        "$ref": "#/texts/83"
+      },
+      {
+        "$ref": "#/texts/84"
+      },
+      {
+        "$ref": "#/texts/85"
+      },
+      {
+        "$ref": "#/texts/86"
+      },
+      {
+        "$ref": "#/texts/87"
+      },
+      {
+        "$ref": "#/groups/10"
+      },
+      {
+        "$ref": "#/texts/91"
+      },
+      {
+        "$ref": "#/groups/11"
+      },
+      {
+        "$ref": "#/texts/94"
+      },
+      {
+        "$ref": "#/texts/95"
+      },
+      {
+        "$ref": "#/texts/96"
+      },
+      {
+        "$ref": "#/texts/97"
+      },
+      {
+        "$ref": "#/groups/12"
+      },
+      {
+        "$ref": "#/texts/100"
+      },
+      {
+        "$ref": "#/texts/101"
+      },
+      {
+        "$ref": "#/texts/102"
+      },
+      {
+        "$ref": "#/groups/13"
+      },
+      {
+        "$ref": "#/texts/105"
+      },
+      {
+        "$ref": "#/texts/106"
+      },
+      {
+        "$ref": "#/texts/107"
+      },
+      {
+        "$ref": "#/texts/108"
+      }
+    ],
+    "content_layer": "body",
+    "name": "_root_",
+    "label": "unspecified"
+  },
+  "groups": [
+    {
+      "self_ref": "#/groups/0",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/27"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/1",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/30"
+        },
+        {
+          "$ref": "#/texts/31"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/2",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/33"
+        },
+        {
+          "$ref": "#/texts/34"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/3",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/36"
+        },
+        {
+          "$ref": "#/texts/37"
+        },
+        {
+          "$ref": "#/texts/38"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/4",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/41"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/5",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/44"
+        },
+        {
+          "$ref": "#/texts/45"
+        },
+        {
+          "$ref": "#/texts/46"
+        },
+        {
+          "$ref": "#/texts/47"
+        },
+        {
+          "$ref": "#/texts/48"
+        },
+        {
+          "$ref": "#/texts/49"
+        },
+        {
+          "$ref": "#/texts/50"
+        },
+        {
+          "$ref": "#/texts/51"
+        },
+        {
+          "$ref": "#/texts/52"
+        },
+        {
+          "$ref": "#/texts/53"
+        },
+        {
+          "$ref": "#/texts/54"
+        },
+        {
+          "$ref": "#/texts/55"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/6",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/57"
+        },
+        {
+          "$ref": "#/texts/58"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/7",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/64"
+        },
+        {
+          "$ref": "#/texts/65"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/8",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/67"
+        },
+        {
+          "$ref": "#/texts/68"
+        },
+        {
+          "$ref": "#/texts/69"
+        },
+        {
+          "$ref": "#/texts/70"
+        },
+        {
+          "$ref": "#/texts/71"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/9",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/78"
+        },
+        {
+          "$ref": "#/texts/79"
+        },
+        {
+          "$ref": "#/texts/80"
+        },
+        {
+          "$ref": "#/texts/81"
+        },
+        {
+          "$ref": "#/texts/82"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/10",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/88"
+        },
+        {
+          "$ref": "#/texts/89"
+        },
+        {
+          "$ref": "#/texts/90"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/11",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/92"
+        },
+        {
+          "$ref": "#/texts/93"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/12",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/98"
+        },
+        {
+          "$ref": "#/texts/99"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/13",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/103"
+        },
+        {
+          "$ref": "#/texts/104"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    }
+  ],
+  "texts": [
+    {
+      "self_ref": "#/texts/0",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 64.08,
+            "t": 786.662,
+            "r": 70.56,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "2",
+      "text": "2"
+    },
+    {
+      "self_ref": "#/texts/1",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 176.4,
+            "t": 786.662,
+            "r": 419.532,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            39
+          ]
+        }
+      ],
+      "orig": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015",
+      "text": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015"
+    },
+    {
+      "self_ref": "#/texts/2",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 1.0,
+            "t": 842.0,
+            "r": 144.0,
+            "b": 821.0,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            9
+          ]
+        }
+      ],
+      "orig": "<unknown>",
+      "text": "<unknown>"
+    },
+    {
+      "self_ref": "#/texts/3",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 123.12,
+            "t": 753.968,
+            "r": 476.699,
+            "b": 739.298,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            41
+          ]
+        }
+      ],
+      "orig": "PH Ầ N V Ă N B Ả N QUY PH Ạ M PHÁP LU Ậ T",
+      "text": "PH Ầ N V Ă N B Ả N QUY PH Ạ M PHÁP LU Ậ T",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/4",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 122.52,
+            "t": 719.03,
+            "r": 476.755,
+            "b": 687.781,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            70
+          ]
+        }
+      ],
+      "orig": "B Ộ GIÁO D Ụ C VÀ Đ ÀO T Ạ O - B Ộ LAO ĐỘ NG TH ƯƠ NG BINH VÀ XÃ H Ộ I",
+      "text": "B Ộ GIÁO D Ụ C VÀ Đ ÀO T Ạ O - B Ộ LAO ĐỘ NG TH ƯƠ NG BINH VÀ XÃ H Ộ I",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/5",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 60.0,
+            "t": 667.022,
+            "r": 256.677,
+            "b": 626.58,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            70
+          ]
+        }
+      ],
+      "orig": "B Ộ GIÁO D Ụ C VÀ Đ ÀO T Ạ O B Ộ LAO ĐỘ NG - TH ƯƠ NG BINH VÀ XÃ H Ộ I",
+      "text": "B Ộ GIÁO D Ụ C VÀ Đ ÀO T Ạ O B Ộ LAO ĐỘ NG - TH ƯƠ NG BINH VÀ XÃ H Ộ I"
+    },
+    {
+      "self_ref": "#/texts/6",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 83.28,
+            "t": 607.622,
+            "r": 235.198,
+            "b": 597.059,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            27
+          ]
+        }
+      ],
+      "orig": "S ố : 18/2015/TTLT-BGD Đ T-",
+      "text": "S ố : 18/2015/TTLT-BGD Đ T-"
+    },
+    {
+      "self_ref": "#/texts/7",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 268.319,
+            "t": 667.022,
+            "r": 532.909,
+            "b": 641.58,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            77
+          ]
+        }
+      ],
+      "orig": "C Ộ NG HÒA XÃ H Ộ I CH Ủ NGH Ĩ A VI Ệ T NAM Độ c l ậ p - T ự do - H ạ nh phúc",
+      "text": "C Ộ NG HÒA XÃ H Ộ I CH Ủ NGH Ĩ A VI Ệ T NAM Độ c l ậ p - T ự do - H ạ nh phúc"
+    },
+    {
+      "self_ref": "#/texts/8",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 308.88,
+            "t": 607.622,
+            "r": 495.478,
+            "b": 597.059,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            36
+          ]
+        }
+      ],
+      "orig": "Hà N ộ i, ngày 08 tháng 9 n ă m 2015",
+      "text": "Hà N ộ i, ngày 08 tháng 9 n ă m 2015"
+    },
+    {
+      "self_ref": "#/texts/9",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 128.88,
+            "t": 592.743,
+            "r": 193.439,
+            "b": 582.18,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            9
+          ]
+        }
+      ],
+      "orig": "BL Đ TBXH",
+      "text": "BL Đ TBXH"
+    },
+    {
+      "self_ref": "#/texts/10",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 221.041,
+            "t": 569.211,
+            "r": 353.223,
+            "b": 557.768,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            18
+          ]
+        }
+      ],
+      "orig": "THÔNG T Ư LIÊN T Ị",
+      "text": "THÔNG T Ư LIÊN T Ị",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/11",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 353.282,
+            "t": 569.211,
+            "r": 377.79,
+            "b": 557.768,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            2
+          ]
+        }
+      ],
+      "orig": "CH",
+      "text": "CH",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/12",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 87.486,
+            "t": 553.131,
+            "r": 514.95,
+            "b": 509.528,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            189
+          ]
+        }
+      ],
+      "orig": "Quy đị nh t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c t ậ p môn h ọ c Giáo d ụ c qu ố c phòng và an ninh trong các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c",
+      "text": "Quy đị nh t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c t ậ p môn h ọ c Giáo d ụ c qu ố c phòng và an ninh trong các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c"
+    },
+    {
+      "self_ref": "#/texts/13",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 64.089,
+            "t": 482.931,
+            "r": 534.881,
+            "b": 455.527,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            154
+          ]
+        }
+      ],
+      "orig": "C ă n c ứ Lu ậ t Giáo d ụ c ngày 14 tháng 6 n ă m 2005; Lu ậ t s ử a đổ i, b ổ sung m ộ t s ố đ i ề u c ủ a Lu ậ t Giáo d ụ c ngày 25 tháng 11 n ă m 2009;",
+      "text": "C ă n c ứ Lu ậ t Giáo d ụ c ngày 14 tháng 6 n ă m 2005; Lu ậ t s ử a đổ i, b ổ sung m ộ t s ố đ i ề u c ủ a Lu ậ t Giáo d ụ c ngày 25 tháng 11 n ă m 2009;"
+    },
+    {
+      "self_ref": "#/texts/14",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 87.01,
+            "t": 446.931,
+            "r": 368.94,
+            "b": 435.487,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            58
+          ]
+        }
+      ],
+      "orig": "C ă n c ứ Lu ậ t Giáo d ụ c đạ i h ọ c ngày 18 tháng 6 n ă",
+      "text": "C ă n c ứ Lu ậ t Giáo d ụ c đạ i h ọ c ngày 18 tháng 6 n ă"
+    },
+    {
+      "self_ref": "#/texts/15",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 369.0,
+            "t": 446.931,
+            "r": 418.83,
+            "b": 435.488,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            7
+          ]
+        }
+      ],
+      "orig": "m 2012;",
+      "text": "m 2012;"
+    },
+    {
+      "self_ref": "#/texts/16",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 87.0,
+            "t": 427.011,
+            "r": 455.579,
+            "b": 415.568,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            71
+          ]
+        }
+      ],
+      "orig": "C ă n c ứ Lu ậ t Giáo d ụ c qu ố c phòng và an ninh ngày 19 tháng 6 n ă",
+      "text": "C ă n c ứ Lu ậ t Giáo d ụ c qu ố c phòng và an ninh ngày 19 tháng 6 n ă"
+    },
+    {
+      "self_ref": "#/texts/17",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 455.64,
+            "t": 427.011,
+            "r": 505.469,
+            "b": 415.568,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            7
+          ]
+        }
+      ],
+      "orig": "m 2013;",
+      "text": "m 2013;"
+    },
+    {
+      "self_ref": "#/texts/18",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 87.0,
+            "t": 406.97,
+            "r": 403.139,
+            "b": 395.527,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            63
+          ]
+        }
+      ],
+      "orig": "C ă n c ứ Lu ậ t Giáo d ụ c ngh ề nghi ệ p ngày 27 tháng 11 n ă",
+      "text": "C ă n c ứ Lu ậ t Giáo d ụ c ngh ề nghi ệ p ngày 27 tháng 11 n ă"
+    },
+    {
+      "self_ref": "#/texts/19",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 403.199,
+            "t": 406.97,
+            "r": 452.889,
+            "b": 395.527,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            7
+          ]
+        }
+      ],
+      "orig": "m 2014;",
+      "text": "m 2014;"
+    },
+    {
+      "self_ref": "#/texts/20",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 64.075,
+            "t": 386.929,
+            "r": 534.87,
+            "b": 343.445,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            198
+          ]
+        }
+      ],
+      "orig": "C ă n c ứ Ngh ị đị nh s ố 32/2008/N Đ -CP ngày 19 tháng 3 n ă m 2008 c ủ a Chính ph ủ quy đị nh ch ứ c n ă ng, nhi ệ m v ụ , quy ề n h ạ n và c ơ c ấ u t ổ ch ứ c c ủ a B ộ Giáo d ụ c và Đ ào t ạ o;",
+      "text": "C ă n c ứ Ngh ị đị nh s ố 32/2008/N Đ -CP ngày 19 tháng 3 n ă m 2008 c ủ a Chính ph ủ quy đị nh ch ứ c n ă ng, nhi ệ m v ụ , quy ề n h ạ n và c ơ c ấ u t ổ ch ứ c c ủ a B ộ Giáo d ụ c và Đ ào t ạ o;"
+    },
+    {
+      "self_ref": "#/texts/21",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 64.08,
+            "t": 334.971,
+            "r": 534.872,
+            "b": 291.4870000000001,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            211
+          ]
+        }
+      ],
+      "orig": "C ă n c ứ Ngh ị đị nh s ố 106/2012/N Đ -CP ngày 20 tháng 12 n ă m 2012 c ủ a Chính ph ủ quy đị nh ch ứ c n ă ng, nhi ệ m v ụ , quy ề n h ạ n và c ơ c ấ u t ổ ch ứ c c ủ a B ộ Lao độ ng Th ươ ng binh và Xã h ộ i;",
+      "text": "C ă n c ứ Ngh ị đị nh s ố 106/2012/N Đ -CP ngày 20 tháng 12 n ă m 2012 c ủ a Chính ph ủ quy đị nh ch ứ c n ă ng, nhi ệ m v ụ , quy ề n h ạ n và c ơ c ấ u t ổ ch ứ c c ủ a B ộ Lao độ ng Th ươ ng binh và Xã h ộ i;"
+    },
+    {
+      "self_ref": "#/texts/22",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 64.084,
+            "t": 283.01,
+            "r": 534.876,
+            "b": 255.48699999999997,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            174
+          ]
+        }
+      ],
+      "orig": "C ă n c ứ Ngh ị đị nh s ố 13/2014/N Đ -CP ngày 25 tháng 02 n ă m 2014 c ủ a Chính ph ủ quy đị nh chi ti ế t và bi ệ n pháp thi hành Lu ậ t Giáo d ụ c qu ố c phòng và an ninh;",
+      "text": "C ă n c ứ Ngh ị đị nh s ố 13/2014/N Đ -CP ngày 25 tháng 02 n ă m 2014 c ủ a Chính ph ủ quy đị nh chi ti ế t và bi ệ n pháp thi hành Lu ậ t Giáo d ụ c qu ố c phòng và an ninh;"
+    },
+    {
+      "self_ref": "#/texts/23",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 64.08,
+            "t": 247.01,
+            "r": 534.868,
+            "b": 187.447,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            319
+          ]
+        }
+      ],
+      "orig": "B ộ tr ưở ng B ộ Giáo d ụ c và Đ ào t ạ o, B ộ tr ưở ng B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i ban hành Thông t ư liên t ị ch quy đị nh t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c t ậ p môn h ọ c Giáo d ụ c qu ố c phòng và an ninh trong các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c.",
+      "text": "B ộ tr ưở ng B ộ Giáo d ụ c và Đ ào t ạ o, B ộ tr ưở ng B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i ban hành Thông t ư liên t ị ch quy đị nh t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c t ậ p môn h ọ c Giáo d ụ c qu ố c phòng và an ninh trong các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c."
+    },
+    {
+      "self_ref": "#/texts/24",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 205.8,
+            "t": 166.60900000000004,
+            "r": 329.998,
+            "b": 138.606,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            25
+          ]
+        }
+      ],
+      "orig": "Ch ươ ng I NH Ữ NG QUY ĐỊ",
+      "text": "Ch ươ ng I NH Ữ NG QUY ĐỊ",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/25",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 312.599,
+            "t": 150.04899999999998,
+            "r": 392.671,
+            "b": 138.606,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            8
+          ]
+        }
+      ],
+      "orig": "NH CHUNG",
+      "text": "NH CHUNG",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/26",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 86.76,
+            "t": 117.529,
+            "r": 382.35,
+            "b": 106.08600000000001,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            62
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 1. Ph ạ m vi đ i ề u ch ỉ nh và đố i t ượ ng áp d ụ ng",
+      "text": "Đ i ề u 1. Ph ạ m vi đ i ề u ch ỉ nh và đố i t ượ ng áp d ụ ng",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/27",
+      "parent": {
+        "$ref": "#/groups/0"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 86.76,
+            "t": 96.77099999999996,
+            "r": 533.913,
+            "b": 85.32799999999997,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            96
+          ]
+        }
+      ],
+      "orig": "1. Thông t ư liên t ị ch này quy đị nh v ề t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c",
+      "text": "Thông t ư liên t ị ch này quy đị nh v ề t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/28",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 176.4,
+            "t": 786.662,
+            "r": 419.532,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            39
+          ]
+        }
+      ],
+      "orig": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015",
+      "text": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015"
+    },
+    {
+      "self_ref": "#/texts/29",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 525.36,
+            "t": 786.662,
+            "r": 531.84,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "3",
+      "text": "3"
+    },
+    {
+      "self_ref": "#/texts/30",
+      "parent": {
+        "$ref": "#/groups/1"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 64.08,
+            "t": 754.491,
+            "r": 534.888,
+            "b": 726.248,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            136
+          ]
+        }
+      ],
+      "orig": "t ậ p môn h ọ c Giáo d ụ c qu ố c phòng và an ninh (GDQP&AN) trong các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c.",
+      "text": "t ậ p môn h ọ c Giáo d ụ c qu ố c phòng và an ninh (GDQP&AN) trong các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c.",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/31",
+      "parent": {
+        "$ref": "#/groups/1"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 64.08,
+            "t": 716.451,
+            "r": 534.878,
+            "b": 653.408,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            331
+          ]
+        }
+      ],
+      "orig": "2. Thông t ư này áp d ụ ng đố i v ớ i các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c, g ồ m: tr ườ ng trung c ấ p, tr ườ ng cao đẳ ng, tr ườ ng đạ i h ọ c, h ọ c vi ệ n, đạ i h ọ c vùng, đạ i  h ọ c Qu ố c gia, trung tâm GDQP&AN (sau đ ây g ọ i  chung là c ơ s ở giáo d ụ c); t ổ ch ứ c, cá nhân có liên quan.",
+      "text": "Thông t ư này áp d ụ ng đố i v ớ i các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c, g ồ m: tr ườ ng trung c ấ p, tr ườ ng cao đẳ ng, tr ườ ng đạ i h ọ c, h ọ c vi ệ n, đạ i h ọ c vùng, đạ i  h ọ c Qu ố c gia, trung tâm GDQP&AN (sau đ ây g ọ i  chung là c ơ s ở giáo d ụ c); t ổ ch ứ c, cá nhân có liên quan.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/32",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 86.76,
+            "t": 643.73,
+            "r": 281.314,
+            "b": 632.287,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            40
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 2. V ị trí, m ụ c tiêu môn h ọ c",
+      "text": "Đ i ề u 2. V ị trí, m ụ c tiêu môn h ọ c",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/33",
+      "parent": {
+        "$ref": "#/groups/2"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 64.08,
+            "t": 622.491,
+            "r": 534.862,
+            "b": 576.608,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            193
+          ]
+        }
+      ],
+      "orig": "1. GDQP&AN là n ộ i dung c ơ b ả n trong vi ệ c xây d ự ng n ề n qu ố c phòng toàn dân, an ninh nhân dân, là môn h ọ c chính khóa thu ộ c ch ươ ng trình giáo d ụ c c ủ a các c ơ s ở giáo d ụ c.",
+      "text": "GDQP&AN là n ộ i dung c ơ b ả n trong vi ệ c xây d ự ng n ề n qu ố c phòng toàn dân, an ninh nhân dân, là môn h ọ c chính khóa thu ộ c ch ươ ng trình giáo d ụ c c ủ a các c ơ s ở giáo d ụ c.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/34",
+      "parent": {
+        "$ref": "#/groups/2"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 64.077,
+            "t": 566.93,
+            "r": 534.897,
+            "b": 452.167,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            616
+          ]
+        }
+      ],
+      "orig": "2. Môn h ọ c GDQP&AN trang b ị cho h ọ c sinh, sinh viên nh ữ ng hi ể u bi ế t  c ơ b ả n v ề n ề n qu ố c phòng toàn dân, an ninh nhân dân, quan đ i ể m c ủ a Đả ng, chính sách, pháp lu ậ t c ủ a nhà n ướ c v ề qu ố c phòng và an ninh; truy ề n th ố ng ch ố ng ngo ạ i xâm c ủ a dân t ộ c, l ự c l ượ ng v ũ trang nhân dân và ngh ệ thu ậ t  quân s ự Vi ệ t  Nam; xây d ự ng n ề n  qu ố c  phòng toàn dân, an ninh nhân dân, l ự c  l ượ ng v ũ trang  nhân dân; có ki ế n th ứ c c ơ b ả n, c ầ n thi ế t v ề phòng th ủ dân s ự , k ỹ n ă ng quân s ự ; s ẵ n sàng th ự c hi ệ n ngh ĩ a v ụ quân s ự b ả o v ệ T ổ qu ố c.",
+      "text": "Môn h ọ c GDQP&AN trang b ị cho h ọ c sinh, sinh viên nh ữ ng hi ể u bi ế t  c ơ b ả n v ề n ề n qu ố c phòng toàn dân, an ninh nhân dân, quan đ i ể m c ủ a Đả ng, chính sách, pháp lu ậ t c ủ a nhà n ướ c v ề qu ố c phòng và an ninh; truy ề n th ố ng ch ố ng ngo ạ i xâm c ủ a dân t ộ c, l ự c l ượ ng v ũ trang nhân dân và ngh ệ thu ậ t  quân s ự Vi ệ t  Nam; xây d ự ng n ề n  qu ố c  phòng toàn dân, an ninh nhân dân, l ự c  l ượ ng v ũ trang  nhân dân; có ki ế n th ứ c c ơ b ả n, c ầ n thi ế t v ề phòng th ủ dân s ự , k ỹ n ă ng quân s ự ; s ẵ n sàng th ự c hi ệ n ngh ĩ a v ụ quân s ự b ả o v ệ T ổ qu ố c.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/35",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 86.759,
+            "t": 442.49,
+            "r": 439.127,
+            "b": 431.047,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            65
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 3. Nguyên t ắ c, yêu c ầ u d ạ y, h ọ c môn h ọ c GDQP&AN",
+      "text": "Đ i ề u 3. Nguyên t ắ c, yêu c ầ u d ạ y, h ọ c môn h ọ c GDQP&AN",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/36",
+      "parent": {
+        "$ref": "#/groups/3"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 64.081,
+            "t": 421.25,
+            "r": 534.891,
+            "b": 323.76800000000003,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            544
+          ]
+        }
+      ],
+      "orig": "1. D ạ y, h ọ c môn h ọ c GDQP&AN ph ả i b ả o đả m tính toàn di ệ n, có tr ọ ng tâm, tr ọ ng đ i ể m b ằ ng các hình th ứ c phù h ợ p; k ế t h ợ p gi ữ a lý lu ậ n và th ự c ti ễ n, gi ữ a lý thuy ế t và th ự c hành; phù h ợ p v ớ i quy ch ế t ổ ch ứ c đ ào t ạ o c ủ a t ừ ng trình độ ; ph ả i g ắ n li ề n v ớ i giáo d ụ c ý th ứ c t ổ ch ứ c k ỷ lu ậ t, tinh th ầ n t ậ p th ể ; d ạ y, h ọ c môn h ọ c GDQP&AN t ạ i các c ơ s ở giáo d ụ c ph ả i g ắ n k ế t v ớ i giáo d ụ c th ự c t ế , k ỹ n ă ng th ự c hành và ho ạ t độ ng ngo ạ i khóa.",
+      "text": "D ạ y, h ọ c môn h ọ c GDQP&AN ph ả i b ả o đả m tính toàn di ệ n, có tr ọ ng tâm, tr ọ ng đ i ể m b ằ ng các hình th ứ c phù h ợ p; k ế t h ợ p gi ữ a lý lu ậ n và th ự c ti ễ n, gi ữ a lý thuy ế t và th ự c hành; phù h ợ p v ớ i quy ch ế t ổ ch ứ c đ ào t ạ o c ủ a t ừ ng trình độ ; ph ả i g ắ n li ề n v ớ i giáo d ụ c ý th ứ c t ổ ch ứ c k ỷ lu ậ t, tinh th ầ n t ậ p th ể ; d ạ y, h ọ c môn h ọ c GDQP&AN t ạ i các c ơ s ở giáo d ụ c ph ả i g ắ n k ế t v ớ i giáo d ụ c th ự c t ế , k ỹ n ă ng th ự c hành và ho ạ t độ ng ngo ạ i khóa.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/37",
+      "parent": {
+        "$ref": "#/groups/3"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 64.078,
+            "t": 314.091,
+            "r": 534.871,
+            "b": 251.048,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            296
+          ]
+        }
+      ],
+      "orig": "2. Giáo viên, gi ả ng viên d ạ y GDQP&AN khi gi ả ng d ạ y t ạ i gi ả ng đườ ng ho ặ c trên thao tr ườ ng ph ả i mang m ặ c trang ph ụ c GDQP&AN theo quy đị nh; giáo viên, gi ả ng viên là s ĩ quan quân độ i,  công an bi ệ t phái ph ả i  mang m ặ c theo Đ i ề u l ệ nh quân độ i, công an nhân dân.",
+      "text": "Giáo viên, gi ả ng viên d ạ y GDQP&AN khi gi ả ng d ạ y t ạ i gi ả ng đườ ng ho ặ c trên thao tr ườ ng ph ả i mang m ặ c trang ph ụ c GDQP&AN theo quy đị nh; giáo viên, gi ả ng viên là s ĩ quan quân độ i,  công an bi ệ t phái ph ả i  mang m ặ c theo Đ i ề u l ệ nh quân độ i, công an nhân dân.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/38",
+      "parent": {
+        "$ref": "#/groups/3"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 64.077,
+            "t": 241.25099999999998,
+            "r": 534.87,
+            "b": 195.36799999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            272
+          ]
+        }
+      ],
+      "orig": "3. Giáo viên, gi ả ng viên, cán b ộ qu ả n lý, h ọ c sinh, sinh viên gi ả ng d ạ y và h ọ c t ậ p môn h ọ c GDQP&AN ph ả i th ự c hi ệ n đ úng, đủ k ế ho ạ ch gi ả ng d ạ y, h ọ c t ậ p, n ộ i quy, quy t ắ c v ề đả m b ả o an toàn v ề ng ườ i, v ũ khí, trang thi ế t b ị .",
+      "text": "Giáo viên, gi ả ng viên, cán b ộ qu ả n lý, h ọ c sinh, sinh viên gi ả ng d ạ y và h ọ c t ậ p môn h ọ c GDQP&AN ph ả i th ự c hi ệ n đ úng, đủ k ế ho ạ ch gi ả ng d ạ y, h ọ c t ậ p, n ộ i quy, quy t ắ c v ề đả m b ả o an toàn v ề ng ườ i, v ũ khí, trang thi ế t b ị .",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/39",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 182.999,
+            "t": 173.091,
+            "r": 416.428,
+            "b": 144.72800000000007,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            48
+          ]
+        }
+      ],
+      "orig": "Ch ươ ng II QU Ả N LÝ VÀ T Ổ CH Ứ C D Ạ Y, H Ọ C",
+      "text": "Ch ươ ng II QU Ả N LÝ VÀ T Ổ CH Ứ C D Ạ Y, H Ọ C",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/40",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 86.76,
+            "t": 122.45100000000002,
+            "r": 480.662,
+            "b": 111.00800000000004,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            72
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 4. Đố i t ượ ng đượ c mi ễ n, t ạ m hoãn h ọ c môn h ọ c GDQP&AN",
+      "text": "Đ i ề u 4. Đố i t ượ ng đượ c mi ễ n, t ạ m hoãn h ọ c môn h ọ c GDQP&AN",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/41",
+      "parent": {
+        "$ref": "#/groups/4"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 86.759,
+            "t": 101.45100000000002,
+            "r": 377.317,
+            "b": 90.00800000000004,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            53
+          ]
+        }
+      ],
+      "orig": "1. Đố i t ượ ng đượ c mi ễ n h ọ c môn h ọ c GDQP&AN:",
+      "text": "Đố i t ượ ng đượ c mi ễ n h ọ c môn h ọ c GDQP&AN:",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/42",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.08,
+            "t": 786.662,
+            "r": 70.56,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "4",
+      "text": "4"
+    },
+    {
+      "self_ref": "#/texts/43",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 176.4,
+            "t": 786.662,
+            "r": 419.532,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            39
+          ]
+        }
+      ],
+      "orig": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015",
+      "text": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015"
+    },
+    {
+      "self_ref": "#/texts/44",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.081,
+            "t": 754.011,
+            "r": 534.87,
+            "b": 725.168,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            137
+          ]
+        }
+      ],
+      "orig": "a) H ọ c sinh, sinh viên có gi ấ y ch ứ ng nh ậ n s ĩ quan d ự b ị ho ặ c b ằ ng t ố t nghi ệ p do các tr ườ ng quân độ i, công an c ấ p;",
+      "text": "H ọ c sinh, sinh viên có gi ấ y ch ứ ng nh ậ n s ĩ quan d ự b ị ho ặ c b ằ ng t ố t nghi ệ p do các tr ườ ng quân độ i, công an c ấ p;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/45",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 86.76,
+            "t": 715.01,
+            "r": 534.149,
+            "b": 703.567,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            92
+          ]
+        }
+      ],
+      "orig": "b) H ọ c sinh, sinh viên đ ã có ch ứ ng ch ỉ GDQP&AN t ươ ng ứ ng v ớ i trình độ đ ào t ạ o;",
+      "text": "H ọ c sinh, sinh viên đ ã có ch ứ ng ch ỉ GDQP&AN t ươ ng ứ ng v ớ i trình độ đ ào t ạ o;",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/46",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 86.757,
+            "t": 693.53,
+            "r": 332.558,
+            "b": 682.087,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            49
+          ]
+        }
+      ],
+      "orig": "c) H ọ c sinh, sinh viên là ng ườ i n ướ c ngoài.",
+      "text": "H ọ c sinh, sinh viên là ng ườ i n ướ c ngoài.",
+      "enumerated": true,
+      "marker": "c)"
+    },
+    {
+      "self_ref": "#/texts/47",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.077,
+            "t": 672.051,
+            "r": 534.873,
+            "b": 625.687,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            258
+          ]
+        }
+      ],
+      "orig": "2. Đố i t ượ ng đượ c mi ễ n h ọ c, mi ễ n thi h ọ c ph ầ n, n ộ i dung trong ch ươ ng trình GDQP&AN, g ồ m: h ọ c sinh, sinh viên có gi ấ y xác nh ậ n k ế t qu ả h ọ c t ậ p các h ọ c ph ầ n, n ộ i dung đ ó đạ t t ừ 5 đ i ể m tr ở lên theo thang đ i ể m 10.",
+      "text": "Đố i t ượ ng đượ c mi ễ n h ọ c, mi ễ n thi h ọ c ph ầ n, n ộ i dung trong ch ươ ng trình GDQP&AN, g ồ m: h ọ c sinh, sinh viên có gi ấ y xác nh ậ n k ế t qu ả h ọ c t ậ p các h ọ c ph ầ n, n ộ i dung đ ó đạ t t ừ 5 đ i ể m tr ở lên theo thang đ i ể m 10.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/48",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 86.76,
+            "t": 615.53,
+            "r": 485.311,
+            "b": 604.087,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            84
+          ]
+        }
+      ],
+      "orig": "3. Đố i t ượ ng đượ c mi ễ n h ọ c, các n ộ i dung th ự c hành k ỹ n ă ng quân s ự :",
+      "text": "Đố i t ượ ng đượ c mi ễ n h ọ c, các n ộ i dung th ự c hành k ỹ n ă ng quân s ự :",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/49",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.077,
+            "t": 594.05,
+            "r": 534.893,
+            "b": 565.207,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            148
+          ]
+        }
+      ],
+      "orig": "a) H ọ c sinh, sinh viên là ng ườ i khuy ế t t ậ t, có gi ấ y xác nh ậ n khuy ế t t ậ t theo quy đị nh c ủ a pháp lu ậ t v ề ng ườ i khuy ế t t ậ t;",
+      "text": "H ọ c sinh, sinh viên là ng ườ i khuy ế t t ậ t, có gi ấ y xác nh ậ n khuy ế t t ậ t theo quy đị nh c ủ a pháp lu ậ t v ề ng ườ i khuy ế t t ậ t;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/50",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.077,
+            "t": 555.05,
+            "r": 534.869,
+            "b": 526.207,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            166
+          ]
+        }
+      ],
+      "orig": "b) H ọ c sinh, sinh viên không đủ s ứ c kho ẻ v ề th ể l ự c ho ặ c m ắ c nh ữ ng b ệ nh lý thu ộ c di ệ n mi ễ n làm ngh ĩ a v ụ quân s ự theo quy đị nh hi ệ n hành;",
+      "text": "H ọ c sinh, sinh viên không đủ s ứ c kho ẻ v ề th ể l ự c ho ặ c m ắ c nh ữ ng b ệ nh lý thu ộ c di ệ n mi ễ n làm ngh ĩ a v ụ quân s ự theo quy đị nh hi ệ n hành;",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/51",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 86.76,
+            "t": 516.05,
+            "r": 503.081,
+            "b": 504.607,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            80
+          ]
+        }
+      ],
+      "orig": "c) H ọ c sinh, sinh viên đ ã hoàn thành ngh ĩ a v ụ quân s ự , công an nhân dân.",
+      "text": "H ọ c sinh, sinh viên đ ã hoàn thành ngh ĩ a v ụ quân s ự , công an nhân dân.",
+      "enumerated": true,
+      "marker": "c)"
+    },
+    {
+      "self_ref": "#/texts/52",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 86.761,
+            "t": 494.57,
+            "r": 400.958,
+            "b": 483.127,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            57
+          ]
+        }
+      ],
+      "orig": "4. Đố i t ượ ng đượ c t ạ m hoãn h ọ c môn h ọ c GDQP&AN:",
+      "text": "Đố i t ượ ng đượ c t ạ m hoãn h ọ c môn h ọ c GDQP&AN:",
+      "enumerated": true,
+      "marker": "4."
+    },
+    {
+      "self_ref": "#/texts/53",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.08,
+            "t": 473.09,
+            "r": 531.46,
+            "b": 444.248,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            197
+          ]
+        }
+      ],
+      "orig": "a) H ọ c sinh, sinh viên vì lý do s ứ c kh ỏ e ph ả i d ừ ng h ọ c trong th ờ i gian dài để đ i ề u tr ị , ph ả i có gi ấ y xác nh ậ n c ủ a b ệ nh vi ệ n n ơ i h ọ c sinh, sinh viên đ i ề u tr ị ;",
+      "text": "H ọ c sinh, sinh viên vì lý do s ứ c kh ỏ e ph ả i d ừ ng h ọ c trong th ờ i gian dài để đ i ề u tr ị , ph ả i có gi ấ y xác nh ậ n c ủ a b ệ nh vi ệ n n ơ i h ọ c sinh, sinh viên đ i ề u tr ị ;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/54",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.08,
+            "t": 434.09,
+            "r": 531.421,
+            "b": 405.247,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            125
+          ]
+        }
+      ],
+      "orig": "b) H ọ c sinh, sinh viên là n ữ đ ang mang thai ho ặ c trong th ờ i gian ngh ỉ ch ế độ thai s ả n theo quy đị nh hi ệ n hành.",
+      "text": "H ọ c sinh, sinh viên là n ữ đ ang mang thai ho ặ c trong th ờ i gian ngh ỉ ch ế độ thai s ả n theo quy đị nh hi ệ n hành.",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/55",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.077,
+            "t": 395.09,
+            "r": 534.879,
+            "b": 331.206,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            323
+          ]
+        }
+      ],
+      "orig": "5. Giám đố c, hi ệ u tr ưở ng các c ơ s ở giáo d ụ c xem xét t ạ m hoãn h ọ c môn h ọ c GDQP&AN cho các đố i t ượ ng quy đị nh t ạ i đ i ể m a, đ i ể m b kho ả n 4 Đ i ề u này. H ế t th ờ i gian t ạ m hoãn, các c ơ s ở giáo d ụ c b ố trí cho h ọ c sinh, sinh viên vào h ọ c các l ớ p phù h ợ p để hoàn thành ch ươ ng trình.",
+      "text": "Giám đố c, hi ệ u tr ưở ng các c ơ s ở giáo d ụ c xem xét t ạ m hoãn h ọ c môn h ọ c GDQP&AN cho các đố i t ượ ng quy đị nh t ạ i đ i ể m a, đ i ể m b kho ả n 4 Đ i ề u này. H ế t th ờ i gian t ạ m hoãn, các c ơ s ở giáo d ụ c b ố trí cho h ọ c sinh, sinh viên vào h ọ c các l ớ p phù h ợ p để hoàn thành ch ươ ng trình.",
+      "enumerated": true,
+      "marker": "5."
+    },
+    {
+      "self_ref": "#/texts/56",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 86.762,
+            "t": 321.049,
+            "r": 333.4,
+            "b": 309.606,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            42
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 5. Giáo viên, gi ả ng viên GDQP&AN",
+      "text": "Đ i ề u 5. Giáo viên, gi ả ng viên GDQP&AN",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/57",
+      "parent": {
+        "$ref": "#/groups/6"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.08,
+            "t": 299.571,
+            "r": 534.881,
+            "b": 235.688,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            307
+          ]
+        }
+      ],
+      "orig": "1. Giáo viên, gi ả ng viên GDQP&AN bao g ồ m giáo viên, gi ả ng viên có trình độ chu ẩ n theo quy đị nh t ạ i kho ả n 1 và kho ả n 2 Đ i ề u 6 Ngh ị đị nh s ố 13/2014/N Đ -CP ngày 25 tháng 02 n ă m 2014 c ủ a Chính ph ủ quy đị nh chi ti ế t và bi ệ n pháp thi hành Lu ậ t Giáo d ụ c qu ố c phòng và an ninh.",
+      "text": "Giáo viên, gi ả ng viên GDQP&AN bao g ồ m giáo viên, gi ả ng viên có trình độ chu ẩ n theo quy đị nh t ạ i kho ả n 1 và kho ả n 2 Đ i ề u 6 Ngh ị đị nh s ố 13/2014/N Đ -CP ngày 25 tháng 02 n ă m 2014 c ủ a Chính ph ủ quy đị nh chi ti ế t và bi ệ n pháp thi hành Lu ậ t Giáo d ụ c qu ố c phòng và an ninh.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/58",
+      "parent": {
+        "$ref": "#/groups/6"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.077,
+            "t": 225.52999999999997,
+            "r": 534.868,
+            "b": 179.16700000000003,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            253
+          ]
+        }
+      ],
+      "orig": "2. Các c ơ s ở giáo d ụ c xây d ự ng k ế ho ạ ch đ ào t ạ o, b ồ i  d ưỡ ng, c ậ p nh ậ t  ki ế n th ứ c qu ố c phòng và an ninh, ph ươ ng pháp d ạ y h ọ c b ả o đả m trình độ chu ẩ n phù h ợ p v ớ i yêu c ầ u gi ả ng d ạ y ở t ừ ng trình độ đ ào t ạ o.",
+      "text": "Các c ơ s ở giáo d ụ c xây d ự ng k ế ho ạ ch đ ào t ạ o, b ồ i  d ưỡ ng, c ậ p nh ậ t  ki ế n th ứ c qu ố c phòng và an ninh, ph ươ ng pháp d ạ y h ọ c b ả o đả m trình độ chu ẩ n phù h ợ p v ớ i yêu c ầ u gi ả ng d ạ y ở t ừ ng trình độ đ ào t ạ o.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/59",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 86.756,
+            "t": 169.00900000000001,
+            "r": 380.813,
+            "b": 157.56600000000003,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            52
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 6. Qu ả n lý giáo viên, gi ả ng viên GDQP&AN",
+      "text": "Đ i ề u 6. Qu ả n lý giáo viên, gi ả ng viên GDQP&AN",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/60",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 64.079,
+            "t": 147.53099999999995,
+            "r": 534.913,
+            "b": 83.64700000000005,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            334
+          ]
+        }
+      ],
+      "orig": "Các c ơ s ở giáo d ụ c th ự c hi ệ n qu ả n lý độ i ng ũ giáo viên, gi ả ng viên GDQP&AN nh ư giáo viên, gi ả ng viên môn h ọ c khác. Gi ả ng viên GDQP&AN là s ĩ quan quân độ i bi ệ t phái do c ơ quan, đơ n v ị bi ệ t phái s ĩ quan và các tr ườ ng qu ả n lý theo quy đị nh c ủ a Chính ph ủ v ề bi ệ t phái s ĩ quan quân độ i, công an.",
+      "text": "Các c ơ s ở giáo d ụ c th ự c hi ệ n qu ả n lý độ i ng ũ giáo viên, gi ả ng viên GDQP&AN nh ư giáo viên, gi ả ng viên môn h ọ c khác. Gi ả ng viên GDQP&AN là s ĩ quan quân độ i bi ệ t phái do c ơ quan, đơ n v ị bi ệ t phái s ĩ quan và các tr ườ ng qu ả n lý theo quy đị nh c ủ a Chính ph ủ v ề bi ệ t phái s ĩ quan quân độ i, công an."
+    },
+    {
+      "self_ref": "#/texts/61",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 176.4,
+            "t": 786.662,
+            "r": 419.532,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            39
+          ]
+        }
+      ],
+      "orig": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015",
+      "text": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015"
+    },
+    {
+      "self_ref": "#/texts/62",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 525.36,
+            "t": 786.662,
+            "r": 531.84,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "5",
+      "text": "5"
+    },
+    {
+      "self_ref": "#/texts/63",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 86.76,
+            "t": 754.011,
+            "r": 321.036,
+            "b": 742.568,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            56
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 7. C ơ s ở v ậ t ch ấ t, thi ế t b ị d ạ y h ọ c",
+      "text": "Đ i ề u 7. C ơ s ở v ậ t ch ấ t, thi ế t b ị d ạ y h ọ c",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/64",
+      "parent": {
+        "$ref": "#/groups/7"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.08,
+            "t": 733.491,
+            "r": 534.877,
+            "b": 673.209,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            323
+          ]
+        }
+      ],
+      "orig": "1. Các c ơ s ở giáo d ụ c có trung tâm, khoa ho ặ c b ộ môn GDQP&AN th ự c hi ệ n nhi ệ m v ụ GDQP&AN ph ả i có phòng h ọ c chuyên dùng, thao tr ườ ng t ổ ng h ợ p; có đủ c ơ s ở v ậ t ch ấ t, thi ế t b ị d ạ y h ọ c GDQP&AN theo quy đị nh hi ệ n hành v ề danh m ụ c thi ế t b ị d ạ y h ọ c t ố i thi ể u môn h ọ c GDQP&AN.",
+      "text": "Các c ơ s ở giáo d ụ c có trung tâm, khoa ho ặ c b ộ môn GDQP&AN th ự c hi ệ n nhi ệ m v ụ GDQP&AN ph ả i có phòng h ọ c chuyên dùng, thao tr ườ ng t ổ ng h ợ p; có đủ c ơ s ở v ậ t ch ấ t, thi ế t b ị d ạ y h ọ c GDQP&AN theo quy đị nh hi ệ n hành v ề danh m ụ c thi ế t b ị d ạ y h ọ c t ố i thi ể u môn h ọ c GDQP&AN.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/65",
+      "parent": {
+        "$ref": "#/groups/7"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.08,
+            "t": 664.372,
+            "r": 534.886,
+            "b": 636.607,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            117
+          ]
+        }
+      ],
+      "orig": "2. Qu ả n lý, s ử d ụ ng và b ả o qu ả n v ũ khí, trang thi ế t b ị GDQP&AN th ự c hi ệ n theo quy đị nh hi ệ n hành.",
+      "text": "Qu ả n lý, s ử d ụ ng và b ả o qu ả n v ũ khí, trang thi ế t b ị GDQP&AN th ự c hi ệ n theo quy đị nh hi ệ n hành.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/66",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 86.759,
+            "t": 627.771,
+            "r": 356.313,
+            "b": 616.328,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            57
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 8. Qu ả n lý môn h ọ c và t ổ ch ứ c d ạ y, h ọ c",
+      "text": "Đ i ề u 8. Qu ả n lý môn h ọ c và t ổ ch ứ c d ạ y, h ọ c",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/67",
+      "parent": {
+        "$ref": "#/groups/8"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.079,
+            "t": 607.371,
+            "r": 534.872,
+            "b": 579.729,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            116
+          ]
+        }
+      ],
+      "orig": "1. Các c ơ s ở giáo d ụ c ngh ề nghi ệ p t ổ ch ứ c d ạ y, h ọ c GDQP&AN theo k ế ho ạ ch đ ào t ạ o c ủ a c ơ s ở .",
+      "text": "Các c ơ s ở giáo d ụ c ngh ề nghi ệ p t ổ ch ứ c d ạ y, h ọ c GDQP&AN theo k ế ho ạ ch đ ào t ạ o c ủ a c ơ s ở .",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/68",
+      "parent": {
+        "$ref": "#/groups/8"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.076,
+            "t": 570.771,
+            "r": 534.867,
+            "b": 543.128,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            141
+          ]
+        }
+      ],
+      "orig": "2. Các c ơ s ở giáo d ụ c đạ i h ọ c có khoa, b ộ môn GDQP&AN t ổ ch ứ c d ạ y, h ọ c t ậ p trung theo k ế ho ạ ch đ ào t ạ o c ủ a c ơ s ở .",
+      "text": "Các c ơ s ở giáo d ụ c đạ i h ọ c có khoa, b ộ môn GDQP&AN t ổ ch ứ c d ạ y, h ọ c t ậ p trung theo k ế ho ạ ch đ ào t ạ o c ủ a c ơ s ở .",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/69",
+      "parent": {
+        "$ref": "#/groups/8"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.08,
+            "t": 534.171,
+            "r": 534.869,
+            "b": 506.528,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            105
+          ]
+        }
+      ],
+      "orig": "3. Các trung tâm GDQP&AN t ổ ch ứ c d ạ y, h ọ c t ậ p trung theo k ế ho ạ ch đ ào t ạ o c ủ a trung tâm.",
+      "text": "Các trung tâm GDQP&AN t ổ ch ứ c d ạ y, h ọ c t ậ p trung theo k ế ho ạ ch đ ào t ạ o c ủ a trung tâm.",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/70",
+      "parent": {
+        "$ref": "#/groups/8"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.082,
+            "t": 497.571,
+            "r": 534.891,
+            "b": 453.608,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            290
+          ]
+        }
+      ],
+      "orig": "4. Các c ơ s ở giáo d ụ c t ổ ch ứ c d ạ y, h ọ c th ự c hành k ỹ thu ậ t, chi ế n thu ậ t, thu ố c n ổ và b ắ n đạ n th ậ t  ph ả i  h ợ p đồ ng v ớ i  c ơ quan quân s ự đị a ph ươ ng, đơ n v ị quân độ i, công an để b ả o đả m tuy ệ t đố i an toàn v ề ng ườ i, v ũ khí, trang thi ế t b ị .",
+      "text": "Các c ơ s ở giáo d ụ c t ổ ch ứ c d ạ y, h ọ c th ự c hành k ỹ thu ậ t, chi ế n thu ậ t, thu ố c n ổ và b ắ n đạ n th ậ t  ph ả i  h ợ p đồ ng v ớ i  c ơ quan quân s ự đị a ph ươ ng, đơ n v ị quân độ i, công an để b ả o đả m tuy ệ t đố i an toàn v ề ng ườ i, v ũ khí, trang thi ế t b ị .",
+      "enumerated": true,
+      "marker": "4."
+    },
+    {
+      "self_ref": "#/texts/71",
+      "parent": {
+        "$ref": "#/groups/8"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.082,
+            "t": 444.771,
+            "r": 534.875,
+            "b": 400.809,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            238
+          ]
+        }
+      ],
+      "orig": "5. L ớ p h ọ c lý thuy ế t  n ế u b ố trí  l ớ p ghép ph ả i  phù h ợ p v ớ i  ph ươ ng pháp d ạ y h ọ c và đ i ề u ki ệ n c ụ th ể c ủ a các c ơ s ở giáo d ụ c, nh ư ng không quá 150 ng ườ i; l ớ p h ọ c th ự c hành không quá 40 ng ườ i.",
+      "text": "L ớ p h ọ c lý thuy ế t  n ế u b ố trí  l ớ p ghép ph ả i  phù h ợ p v ớ i  ph ươ ng pháp d ạ y h ọ c và đ i ề u ki ệ n c ụ th ể c ủ a các c ơ s ở giáo d ụ c, nh ư ng không quá 150 ng ườ i; l ớ p h ọ c th ự c hành không quá 40 ng ườ i.",
+      "enumerated": true,
+      "marker": "5."
+    },
+    {
+      "self_ref": "#/texts/72",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 85.205,
+            "t": 379.612,
+            "r": 512.9,
+            "b": 351.848,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            75
+          ]
+        }
+      ],
+      "orig": "Ch ươ ng III Đ ÁNH GIÁ K Ế T QU Ả H Ọ C T Ậ P VÀ C Ấ P CH Ứ NG CH Ỉ GDQP&AN",
+      "text": "Ch ươ ng III Đ ÁNH GIÁ K Ế T QU Ả H Ọ C T Ậ P VÀ C Ấ P CH Ứ NG CH Ỉ GDQP&AN",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/73",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 86.763,
+            "t": 330.651,
+            "r": 274.381,
+            "b": 319.2080000000001,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            41
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 9. Đ ánh giá k ế t qu ả h ọ c t ậ",
+      "text": "Đ i ề u 9. Đ ánh giá k ế t qu ả h ọ c t ậ",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/74",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 274.442,
+            "t": 330.651,
+            "r": 285.749,
+            "b": 319.2080000000001,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "p",
+      "text": "p",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/75",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.08,
+            "t": 310.37200000000007,
+            "r": 524.499,
+            "b": 282.60699999999997,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            180
+          ]
+        }
+      ],
+      "orig": "Đ ánh giá k ế t  qu ả h ọ c  t ậ p  GDQP&AN đố i  v ớ i  h ọ c  sinh,  sinh  viên  th ự c  hi ệ theo quy đị nh hi ệ n hành v ề quy ch ế đ ào t ạ o c ủ a t ừ ng trình độ đ ào t ạ o.",
+      "text": "Đ ánh giá k ế t  qu ả h ọ c  t ậ p  GDQP&AN đố i  v ớ i  h ọ c  sinh,  sinh  viên  th ự c  hi ệ theo quy đị nh hi ệ n hành v ề quy ch ế đ ào t ạ o c ủ a t ừ ng trình độ đ ào t ạ o."
+    },
+    {
+      "self_ref": "#/texts/76",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 86.758,
+            "t": 273.77099999999996,
+            "r": 361.124,
+            "b": 262.328,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            61
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 10. Đ i ề u ki ệ n, th ẩ m quy ề n c ấ p ch ứ ng ch ỉ",
+      "text": "Đ i ề u 10. Đ i ề u ki ệ n, th ẩ m quy ề n c ấ p ch ứ ng ch ỉ",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/77",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 361.196,
+            "t": 273.77099999999996,
+            "r": 436.98,
+            "b": 262.328,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            7
+          ]
+        }
+      ],
+      "orig": "GDQP&AN",
+      "text": "GDQP&AN",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/78",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.074,
+            "t": 253.37099999999998,
+            "r": 534.919,
+            "b": 225.72900000000004,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            136
+          ]
+        }
+      ],
+      "orig": "1. Sinh viên có đ i ể m trung bình chung môn h ọ c đạ t t ừ 5 đ i ể m tr ở lên (theo thang đ i ể m 10) đượ c c ấ p ch ứ ng ch ỉ GDQP&AN.",
+      "text": "Sinh viên có đ i ể m trung bình chung môn h ọ c đạ t t ừ 5 đ i ể m tr ở lên (theo thang đ i ể m 10) đượ c c ấ p ch ứ ng ch ỉ GDQP&AN.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/79",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 86.758,
+            "t": 216.77099999999996,
+            "r": 333.138,
+            "b": 205.32799999999997,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            45
+          ]
+        }
+      ],
+      "orig": "2. Th ẩ m quy ề n c ấ p ch ứ ng ch ỉ GDQP&AN:",
+      "text": "Th ẩ m quy ề n c ấ p ch ứ ng ch ỉ GDQP&AN:",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/80",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.082,
+            "t": 196.49199999999996,
+            "r": 534.868,
+            "b": 168.84799999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            140
+          ]
+        }
+      ],
+      "orig": "a) Giám đố c, hi ệ u tr ưở ng các c ơ s ở giáo d ụ c đượ c t ổ ch ứ c d ạ y, h ọ c GDQP&AN thì có th ẩ m quy ề n c ấ p ch ứ ng ch ỉ GDQP&AN;",
+      "text": "Giám đố c, hi ệ u tr ưở ng các c ơ s ở giáo d ụ c đượ c t ổ ch ứ c d ạ y, h ọ c GDQP&AN thì có th ẩ m quy ề n c ấ p ch ứ ng ch ỉ GDQP&AN;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/81",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.079,
+            "t": 159.89099999999996,
+            "r": 534.868,
+            "b": 132.24900000000002,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            96
+          ]
+        }
+      ],
+      "orig": "b) Giám đố c trung tâm GDQP&AN c ấ p ch ứ ng ch ỉ GDQP&AN theo quy đị nh v ề liên k ế t GDQP&AN.",
+      "text": "Giám đố c trung tâm GDQP&AN c ấ p ch ứ ng ch ỉ GDQP&AN theo quy đị nh v ề liên k ế t GDQP&AN.",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/82",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 64.077,
+            "t": 123.29200000000003,
+            "r": 534.869,
+            "b": 79.32899999999995,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            211
+          ]
+        }
+      ],
+      "orig": "3. Vi ệ c in, qu ả n lý, c ấ p phát ch ứ ng ch ỉ GDQP&AN th ự c hi ệ n theo quy đị nh hi ệ n hành do c ơ quan có th ẩ m quy ề n qu ả n lý nhà n ướ c v ề giáo d ụ c ngh ề nghi ệ p, giáo d ụ c đạ i h ọ c ban hành.",
+      "text": "Vi ệ c in, qu ả n lý, c ấ p phát ch ứ ng ch ỉ GDQP&AN th ự c hi ệ n theo quy đị nh hi ệ n hành do c ơ quan có th ẩ m quy ề n qu ả n lý nhà n ướ c v ề giáo d ụ c ngh ề nghi ệ p, giáo d ụ c đạ i h ọ c ban hành.",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/83",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 524.4,
+            "t": 310.371,
+            "r": 534.869,
+            "b": 298.928,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "n",
+      "text": "n"
+    },
+    {
+      "self_ref": "#/texts/84",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 64.08,
+            "t": 786.662,
+            "r": 70.56,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "6",
+      "text": "6"
+    },
+    {
+      "self_ref": "#/texts/85",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 176.4,
+            "t": 786.662,
+            "r": 419.532,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            39
+          ]
+        }
+      ],
+      "orig": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015",
+      "text": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015"
+    },
+    {
+      "self_ref": "#/texts/86",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 222.839,
+            "t": 754.131,
+            "r": 376.71,
+            "b": 725.407,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            36
+          ]
+        }
+      ],
+      "orig": "Ch ươ ng IV T Ổ CH Ứ C TH Ự C HI Ệ N",
+      "text": "Ch ươ ng IV T Ổ CH Ứ C TH Ự C HI Ệ N",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/87",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 86.762,
+            "t": 702.289,
+            "r": 385.862,
+            "b": 690.846,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            60
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 11. Trách nhi ệ m c ủ a B ộ Giáo d ụ c và Đ ào t ạ o",
+      "text": "Đ i ề u 11. Trách nhi ệ m c ủ a B ộ Giáo d ụ c và Đ ào t ạ o",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/88",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 64.083,
+            "t": 680.929,
+            "r": 531.456,
+            "b": 652.205,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            131
+          ]
+        }
+      ],
+      "orig": "1. Ch ỉ đạ o, qu ả n lý và t ổ ch ứ c th ự c hi ệ n công tác GDQP&AN trong các c ơ s ở giáo d ụ c thu ộ c th ẩ m quy ề n qu ả n lý.",
+      "text": "Ch ỉ đạ o, qu ả n lý và t ổ ch ứ c th ự c hi ệ n công tác GDQP&AN trong các c ơ s ở giáo d ụ c thu ộ c th ẩ m quy ề n qu ả n lý.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/89",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 64.079,
+            "t": 642.409,
+            "r": 534.877,
+            "b": 579.007,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            284
+          ]
+        }
+      ],
+      "orig": "2.  Ch ủ trì,  ph ố i  h ợ p  v ớ i  B ộ Qu ố c  phòng,  B ộ Công  an,  B ộ Lao độ ng  Th ươ ng binh và Xã h ộ i và các c ơ quan liên quan t ổ ch ứ c đ ào t ạ o, b ồ i d ưỡ ng, t ậ p hu ấ n cho độ i ng ũ cán b ộ qu ả n lý, giáo viên, gi ả ng viên GDQP&AN trong các c ơ s ở giáo d ụ c.",
+      "text": " Ch ủ trì,  ph ố i  h ợ p  v ớ i  B ộ Qu ố c  phòng,  B ộ Công  an,  B ộ Lao độ ng  Th ươ ng binh và Xã h ộ i và các c ơ quan liên quan t ổ ch ứ c đ ào t ạ o, b ồ i d ưỡ ng, t ậ p hu ấ n cho độ i ng ũ cán b ộ qu ả n lý, giáo viên, gi ả ng viên GDQP&AN trong các c ơ s ở giáo d ụ c.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/90",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 64.079,
+            "t": 569.21,
+            "r": 534.87,
+            "b": 523.087,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            241
+          ]
+        }
+      ],
+      "orig": "3. Ch ủ trì, ph ố i h ợ p v ớ i B ộ Qu ố c phòng, B ộ Công an, B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i  t ổ ch ứ c thanh tra, ki ể m tra công tác GDQP&AN trong các c ơ s ở giáo d ụ c thu ộ c th ẩ m quy ề n qu ả n lý, các trung tâm GDQP&AN.",
+      "text": "Ch ủ trì, ph ố i h ợ p v ớ i B ộ Qu ố c phòng, B ộ Công an, B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i  t ổ ch ứ c thanh tra, ki ể m tra công tác GDQP&AN trong các c ơ s ở giáo d ụ c thu ộ c th ẩ m quy ề n qu ả n lý, các trung tâm GDQP&AN.",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/91",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 86.759,
+            "t": 513.29,
+            "r": 471.662,
+            "b": 501.847,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            73
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 12. Trách nhi ệ m c ủ a B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i",
+      "text": "Đ i ề u 12. Trách nhi ệ m c ủ a B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/92",
+      "parent": {
+        "$ref": "#/groups/11"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 64.08,
+            "t": 491.93,
+            "r": 531.212,
+            "b": 463.208,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            131
+          ]
+        }
+      ],
+      "orig": "1. Ch ỉ đạ o, qu ả n lý và t ổ ch ứ c th ự c hi ệ n công tác GDQP&AN t ạ i các c ơ s ở giáo d ụ c thu ộ c th ẩ m quy ề n qu ả n lý.",
+      "text": "Ch ỉ đạ o, qu ả n lý và t ổ ch ứ c th ự c hi ệ n công tác GDQP&AN t ạ i các c ơ s ở giáo d ụ c thu ộ c th ẩ m quy ề n qu ả n lý.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/93",
+      "parent": {
+        "$ref": "#/groups/11"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 64.081,
+            "t": 453.411,
+            "r": 534.873,
+            "b": 407.288,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            204
+          ]
+        }
+      ],
+      "orig": "2. Ch ủ trì, ph ố i h ợ p v ớ i B ộ Qu ố c phòng, B ộ Công an, B ộ Giáo d ụ c và Đ ào t ạ o t ổ ch ứ c thanh tra, ki ể m tra công tác GDQP&AN t ạ i các c ơ s ở giáo d ụ c thu ộ c th ẩ m quy ề n qu ả n lý.",
+      "text": "Ch ủ trì, ph ố i h ợ p v ớ i B ộ Qu ố c phòng, B ộ Công an, B ộ Giáo d ụ c và Đ ào t ạ o t ổ ch ứ c thanh tra, ki ể m tra công tác GDQP&AN t ạ i các c ơ s ở giáo d ụ c thu ộ c th ẩ m quy ề n qu ả n lý.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/94",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 86.76,
+            "t": 397.491,
+            "r": 329.036,
+            "b": 386.048,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            50
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 13. Trách nhi ệ m c ủ a c ơ s ở giáo d ụ c",
+      "text": "Đ i ề u 13. Trách nhi ệ m c ủ a c ơ s ở giáo d ụ c",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/95",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 64.084,
+            "t": 376.13,
+            "r": 534.897,
+            "b": 347.407,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            146
+          ]
+        }
+      ],
+      "orig": "Ch ủ độ ng xây d ự ng k ế ho ạ ch t ổ ch ứ c d ạ y, h ọ c, đ ánh giá k ế t qu ả môn h ọ c GDQP&AN và th ự c hi ệ n ch ế độ báo cáo theo quy đị nh.",
+      "text": "Ch ủ độ ng xây d ự ng k ế ho ạ ch t ổ ch ứ c d ạ y, h ọ c, đ ánh giá k ế t qu ả môn h ọ c GDQP&AN và th ự c hi ệ n ch ế độ báo cáo theo quy đị nh."
+    },
+    {
+      "self_ref": "#/texts/96",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 214.438,
+            "t": 324.28999999999996,
+            "r": 383.984,
+            "b": 295.447,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            35
+          ]
+        }
+      ],
+      "orig": "Ch ươ ng V Đ I Ề U KHO Ả N THI HÀNH",
+      "text": "Ch ươ ng V Đ I Ề U KHO Ả N THI HÀNH",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/97",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 86.758,
+            "t": 272.32899999999995,
+            "r": 247.466,
+            "b": 260.88599999999997,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            33
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 14. Hi ệ u l ự c thi hành",
+      "text": "Đ i ề u 14. Hi ệ u l ự c thi hành",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/98",
+      "parent": {
+        "$ref": "#/groups/12"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 86.757,
+            "t": 251.08899999999994,
+            "r": 526.585,
+            "b": 239.64599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            90
+          ]
+        }
+      ],
+      "orig": "1. Thông t ư liên t ị ch này có hi ệ u l ự c thi hành k ể t ừ ngày 23 tháng 10 n ă m 2015.",
+      "text": "Thông t ư liên t ị ch này có hi ệ u l ự c thi hành k ể t ừ ngày 23 tháng 10 n ă m 2015.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/99",
+      "parent": {
+        "$ref": "#/groups/12"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 64.077,
+            "t": 229.72900000000004,
+            "r": 534.911,
+            "b": 79.92700000000002,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            793
+          ]
+        }
+      ],
+      "orig": "2. Thông t ư liên t ị ch này thay th ế nh ữ ng quy đị nh v ề t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c t ậ p môn h ọ c GDQP&AN trong các tr ườ ng trung c ấ p, tr ườ ng cao đẳ ng, tr ườ ng đạ i h ọ c, h ọ c vi ệ n, đạ i h ọ c vùng, đạ i h ọ c Qu ố c gia, trung tâm GDQP&AN ban hành kèm theo Thông t ư s ố 40/2012/TT-BGD Đ T ngày 19 tháng 11 n ă m 2012 c ủ a B ộ Giáo d ụ c và Đ ào t ạ o ban hành Quy đị nh t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả môn h ọ c môn h ọ c Giáo d ụ c qu ố c phòng - an ninh; Quy ế t đị nh s ố 63/2008/Q Đ -BL Đ TBXH ngày 25 tháng 11 n ă m 2008 c ủ a B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i ban hành Quy ch ế t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c t ậ p môn h ọ c Giáo d ụ c qu ố c phòng và - an ninh trong các c ơ s ở d ạ y ngh ề .",
+      "text": "Thông t ư liên t ị ch này thay th ế nh ữ ng quy đị nh v ề t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c t ậ p môn h ọ c GDQP&AN trong các tr ườ ng trung c ấ p, tr ườ ng cao đẳ ng, tr ườ ng đạ i h ọ c, h ọ c vi ệ n, đạ i h ọ c vùng, đạ i h ọ c Qu ố c gia, trung tâm GDQP&AN ban hành kèm theo Thông t ư s ố 40/2012/TT-BGD Đ T ngày 19 tháng 11 n ă m 2012 c ủ a B ộ Giáo d ụ c và Đ ào t ạ o ban hành Quy đị nh t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả môn h ọ c môn h ọ c Giáo d ụ c qu ố c phòng - an ninh; Quy ế t đị nh s ố 63/2008/Q Đ -BL Đ TBXH ngày 25 tháng 11 n ă m 2008 c ủ a B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i ban hành Quy ch ế t ổ ch ứ c d ạ y, h ọ c và đ ánh giá k ế t qu ả h ọ c t ậ p môn h ọ c Giáo d ụ c qu ố c phòng và - an ninh trong các c ơ s ở d ạ y ngh ề .",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/100",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 6,
+          "bbox": {
+            "l": 176.4,
+            "t": 786.662,
+            "r": 419.532,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            39
+          ]
+        }
+      ],
+      "orig": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015",
+      "text": "CÔNG BÁO/S ố 1003 + 1004/Ngày 25-9-2015"
+    },
+    {
+      "self_ref": "#/texts/101",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 6,
+          "bbox": {
+            "l": 525.36,
+            "t": 786.662,
+            "r": 531.84,
+            "b": 776.099,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "7",
+      "text": "7"
+    },
+    {
+      "self_ref": "#/texts/102",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 6,
+          "bbox": {
+            "l": 86.76,
+            "t": 754.851,
+            "r": 273.882,
+            "b": 743.408,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            34
+          ]
+        }
+      ],
+      "orig": "Đ i ề u 15. Trách nhi ệ m thi hành",
+      "text": "Đ i ề u 15. Trách nhi ệ m thi hành",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/103",
+      "parent": {
+        "$ref": "#/groups/13"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 6,
+          "bbox": {
+            "l": 64.081,
+            "t": 734.45,
+            "r": 534.892,
+            "b": 656.887,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            383
+          ]
+        }
+      ],
+      "orig": "1. Các B ộ , c ơ quan ngang B ộ , c ơ quan thu ộ c Chính ph ủ , T ổ ch ứ c Chính tr ị -Xã h ộ i và ch ủ t ị ch Ủ y ban nhân dân các t ỉ nh, thành ph ố tr ự c thu ộ c Trung ươ ng, giám đố c, hi ệ u tr ưở ng các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c, các trung tâm GDQP&AN và các đơ n v ị có liên quan ch ị u trách nhi ệ m thi hành Thông t ư liên t ị ch này.",
+      "text": "Các B ộ , c ơ quan ngang B ộ , c ơ quan thu ộ c Chính ph ủ , T ổ ch ứ c Chính tr ị -Xã h ộ i và ch ủ t ị ch Ủ y ban nhân dân các t ỉ nh, thành ph ố tr ự c thu ộ c Trung ươ ng, giám đố c, hi ệ u tr ưở ng các c ơ s ở giáo d ụ c ngh ề nghi ệ p, c ơ s ở giáo d ụ c đạ i h ọ c, các trung tâm GDQP&AN và các đơ n v ị có liên quan ch ị u trách nhi ệ m thi hành Thông t ư liên t ị ch này.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/104",
+      "parent": {
+        "$ref": "#/groups/13"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 6,
+          "bbox": {
+            "l": 64.078,
+            "t": 647.931,
+            "r": 534.873,
+            "b": 603.367,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            228
+          ]
+        }
+      ],
+      "orig": "2.  Trong quá trình t ổ ch ứ c  th ự c  hi ệ n,  n ế u  có  nh ữ ng v ấ n đề v ướ ng m ắ c,  c ầ n ph ả n ánh k ị p th ờ i v ề B ộ Giáo d ụ c và Đ ào t ạ o, B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i để xem xét, gi ả i quy ế t./.",
+      "text": " Trong quá trình t ổ ch ứ c  th ự c  hi ệ n,  n ế u  có  nh ữ ng v ấ n đề v ướ ng m ắ c,  c ầ n ph ả n ánh k ị p th ờ i v ề B ộ Giáo d ụ c và Đ ào t ạ o, B ộ Lao độ ng - Th ươ ng binh và Xã h ộ i để xem xét, gi ả i quy ế t./.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/105",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 6,
+          "bbox": {
+            "l": 60.479,
+            "t": 587.222,
+            "r": 334.678,
+            "b": 546.78,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            72
+          ]
+        }
+      ],
+      "orig": "KT. B Ộ TR ƯỞ NG B Ộ LAO ĐỘ NG - TH ƯƠ NG BINH VÀ XÃ H Ộ I TH Ứ TR ƯỞ NG",
+      "text": "KT. B Ộ TR ƯỞ NG B Ộ LAO ĐỘ NG - TH ƯƠ NG BINH VÀ XÃ H Ộ I TH Ứ TR ƯỞ NG"
+    },
+    {
+      "self_ref": "#/texts/106",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 6,
+          "bbox": {
+            "l": 152.76,
+            "t": 526.131,
+            "r": 242.52,
+            "b": 514.688,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            16
+          ]
+        }
+      ],
+      "orig": "Hu ỳ nh V ă n Tí",
+      "text": "Hu ỳ nh V ă n Tí"
+    },
+    {
+      "self_ref": "#/texts/107",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 6,
+          "bbox": {
+            "l": 361.799,
+            "t": 587.222,
+            "r": 538.561,
+            "b": 546.78,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            59
+          ]
+        }
+      ],
+      "orig": "KT. B Ộ TR ƯỞ NG B Ộ GIÁO D Ụ C VÀ Đ ÀO T Ạ O TH Ứ TR ƯỞ NG",
+      "text": "KT. B Ộ TR ƯỞ NG B Ộ GIÁO D Ụ C VÀ Đ ÀO T Ạ O TH Ứ TR ƯỞ NG"
+    },
+    {
+      "self_ref": "#/texts/108",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 6,
+          "bbox": {
+            "l": 413.04,
+            "t": 526.131,
+            "r": 487.2,
+            "b": 514.688,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            12
+          ]
+        }
+      ],
+      "orig": "Bùi V ă n Ga",
+      "text": "Bùi V ă n Ga"
+    }
+  ],
+  "pictures": [],
+  "tables": [],
+  "key_value_items": [],
+  "form_items": [],
+  "pages": {
+    "1": {
+      "size": {
+        "width": 595.2200317382812,
+        "height": 842.0
+      },
+      "page_no": 1
+    },
+    "2": {
+      "size": {
+        "width": 595.2200317382812,
+        "height": 842.0
+      },
+      "page_no": 2
+    },
+    "3": {
+      "size": {
+        "width": 595.2200317382812,
+        "height": 842.0
+      },
+      "page_no": 3
+    },
+    "4": {
+      "size": {
+        "width": 595.2200317382812,
+        "height": 842.0
+      },
+      "page_no": 4
+    },
+    "5": {
+      "size": {
+        "width": 595.2200317382812,
+        "height": 842.0
+      },
+      "page_no": 5
+    },
+    "6": {
+      "size": {
+        "width": 595.2200317382812,
+        "height": 842.0
+      },
+      "page_no": 6
+    }
+  }
+}
