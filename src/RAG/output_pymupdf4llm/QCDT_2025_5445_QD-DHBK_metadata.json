@@ -1,0 +1,5 @@
+{
+  "converter": "pymupdf4llm",
+  "pdf_path": "..\\quydinh\\QCDT_2025_5445_QD-DHBK.pdf",
+  "conversion_options": {}
+}

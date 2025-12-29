@@ -1,0 +1,29 @@
+{
+  "total_documents": 511,
+  "dimension": 1024,
+  "index_type": "IndexFlatIP",
+  "source_files": {
+    "QCDT_2025_5445_QD-DHBK": 161,
+    "QD_ngoai_ngu_tu_K68_CQ_final": 73,
+    "Quy chế CTSV ĐHBK Hà Nội 2025.3.10_final_clean": 136,
+    "Quy định QLSV nước ngoài 2023_clean": 38,
+    "Quy định xét cấp HB tài trợ 2024 LasVer_clean": 33,
+    "QĐ Học bổng KKHT 2023_clean": 15,
+    "QĐ thi Olympic và ĐMST 2023_clean": 27,
+    "QĐ đánh giá điểm rèn luyện sinh viên 2023_clean": 28
+  },
+  "levels": {
+    "header": 8,
+    "parent": 174,
+    "child": 329
+  },
+  "chapters": {
+    "I": 35,
+    "II": 44,
+    "III": 16,
+    "IV": 29,
+    "V": 27,
+    "VI": 5
+  },
+  "unique_chunk_ids": 350
+}
