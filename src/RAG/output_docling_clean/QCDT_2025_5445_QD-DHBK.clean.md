@@ -37,11 +37,7 @@ Theo đề nghị của Trưởng Ban Đào tạo.
 
 (Ban hành kèm theo Quyết định số /QĐ-ĐHBK, ngày tháng năm 2025 của Giám đốc Đại học Bách khoa Hà Nội)
 
-## QUY CHẾ ĐÀO TẠO
-
-(Ban hành kèm theo Quyết định số /QĐ-ĐHBK, ngày tháng năm 2025 của Giám đốc Đại học Bách khoa Hà Nội)
-
-## CHƯƠNG I NHỮNG QUY ĐỊNH CHUNG
+# CHƯƠNG I NHỮNG QUY ĐỊNH CHUNG
 
 ## Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng
 
@@ -176,7 +172,7 @@ trình, cách thức đánh giá học phần, nội dung học tập, phương 
 5. Học phí của lớp học phần rút gọn được tính ở mức 50% so với lớp học phần bình thường.
 6. Học phí đối với NCS được tính theo năm học, trong đó đã bao gồm học phí của các học phần tiến sĩ (không bao gồm các học phần bổ sung).
 
-## CHƯƠNG II ĐÀO TẠO ĐẠI HỌC
+# CHƯƠNG II ĐÀO TẠO ĐẠI HỌC
 
 ## Điều 10. Đăng ký học tập chương trình đại học
 
@@ -280,7 +276,7 @@ Các học phần tốt nghiệp bao gồm đồ án tốt nghiệp cử nhân, 
 - b) Thời gian nghỉ học tạm thời do sinh viên bị ốm, thai sản hoặc tai nạn buộc phải điều trị thời gian dài không tính vào thời gian chậm tiến độ nếu tổng cộng không vượt quá 04 học kỳ chính; thời gian nghỉ trên 04 học kỳ được tính vào thời gian học chậm tiến độ.
 - c) Thời gian nghỉ học tạm thời do sinh viên được điều động vào lực lượng vũ trang (là thời gian được ghi trong quyết định của cấp có thẩm quyền) không tính vào thời gian học chậm tiến độ.
 - d) Đối với trường hợp xin nghỉ học tạm thời vì những lý do khác với lý do tại điểm b và điểm c khoản 2 Điều này, sinh viên phải học ít nhất một học kỳ. Thời gian nghỉ học tối đa cho phép là 04 học kỳ chính và được tính vào thời gian học chậm tiến độ. Sinh viên thuộc diện này sẽ bị xét buộc thôi học nếu nghỉ quá 04 học kỳ chính.
-7. đ) Sinh viên phải nộp đơn đề nghị tiếp nhận trở lại học chậm nhất 1 tuần trước khi bắt đầu học kỳ mới. Đối với trường hợp được điều động vào lực lượng vũ trang hoặc đi làm nghĩa vụ quốc tế, sinh viên phải nộp kèm theo giấy xác nhận đã hoàn thành nhiệm vụ.
+- đ) Sinh viên phải nộp đơn đề nghị tiếp nhận trở lại học chậm nhất 1 tuần trước khi bắt đầu học kỳ mới. Đối với trường hợp được điều động vào lực lượng vũ trang hoặc đi làm nghĩa vụ quốc tế, sinh viên phải nộp kèm theo giấy xác nhận đã hoàn thành nhiệm vụ.
 3. Sinh viên xin nghỉ tạm thời trong thời gian thi kết thúc học phần theo Kế hoạch năm học thì chế độ nghỉ tạm thời có hiệu lực từ khi bắt đầu kỳ kế tiếp. Sinh viên có thể thực hiện thủ tục hoãn thi với các học phần chưa thi.
 4. Khi chế độ nghỉ tạm thời có hiệu lực thì các học phần đã đăng ký học trong học kỳ sẽ bị hủy và tính học phí theo quy định tại khoản 4 Điều 9 Quy chế này, ngoại trừ các trường hợp được quy định tại điểm b, điểm c khoản 2 Điều 16 Quy chế này sẽ do Giám đốc ĐHBK Hà Nội quyết định việc tính học phí.
 
@@ -323,7 +319,7 @@ Các trường hợp này được xem xét chuyển nếu còn trong thời gia
 - b) Nâng hai mức cảnh báo học tập đối với sinh viên có số TC không đạt trong học kỳ lớn hơn 16 hoặc tự ý bỏ học, không đăng ký học tập.
 - c) Áp dụng cảnh báo học tập mức 3 đối với sinh viên có số TC nợ đọng từ đầu khóa lớn hơn 24.
 - d) Sinh viên đang bị cảnh báo học tập mức 1 và mức 2, nếu số TC không đạt trong học kỳ nhỏ hơn hoặc bằng 4 thì được hạ một mức cảnh báo học tập.
-6. đ) Sinh viên đang bị cảnh báo học tập mức 3, nếu số TC nợ đọng từ đầu khóa nhỏ hơn hoặc bằng 24 thì được hạ cảnh báo học tập xuống mức 2. Việc hạ mức cảnh báo học
+- đ) Sinh viên đang bị cảnh báo học tập mức 3, nếu số TC nợ đọng từ đầu khóa nhỏ hơn hoặc bằng 24 thì được hạ cảnh báo học tập xuống mức 2. Việc hạ mức cảnh báo học
 
 tập này không phụ thuộc vào điều kiện nâng mức cảnh báo học tập tại mục a và mục b khoản này.
 
@@ -339,7 +335,7 @@ tập này không phụ thuộc vào điều kiện nâng mức cảnh báo họ
 
 Các hành vi vi phạm và mức kỷ luật thực hiện theo quy định tại Quy chế công tác sinh viên đại học chính quy hiện hành của Đại học.
 
-## CHƯƠNG III ĐÀO TẠO KỸ SƯ
+# CHƯƠNG III ĐÀO TẠO KỸ SƯ
 
 ## Điều 21. Đăng ký học tập chương trình kỹ sư
 
@@ -392,7 +388,7 @@ Các hành vi vi phạm và mức kỷ luật thực hiện theo quy định t�
 
 Việc xử lý vi phạm đối với học viên thực hiện theo Điều 20 Quy chế này.
 
-## CHƯƠNG IV
+# CHƯƠNG IV
 
 ## ĐÀO TẠO THẠC SĨ
 
@@ -557,9 +553,11 @@ hoàn toàn bằng ngôn ngữ nước ngoài. Yêu cầu ngoại ngữ đầu v
 1. Đánh giá luận án tiến sĩ cấp cơ sở được quy định cụ thể như sau:
 - a) NCS được bảo vệ luận án cấp cơ sở nếu đáp ứng đầy đủ các điều kiện quy định tại khoản 1 Điều 41 Quy chế này và hoàn thành hồ sơ đăng ký bảo vệ cấp cơ sở trong thời hạn
 
-đủ 90 ngày tính đến thời điểm kết thúc thời gian học tập chương trình tiến sĩ quy định tại thủ tục xin gia hạn thời gian học tập theo quy định.
-
-- khoản 3 Điều 3 Quy chế này. Trong trường hợp không đủ thời gian 90 ngày, NCS phải làm b) Hội đồng đánh giá luận án cấp cơ sở (sau đây gọi tắt là hội đồng cấp cơ sở) do hiệu trưởng trường/trưởng khoa/viện trưởng thừa uỷ quyền của Giám đốc ĐHBK Hà Nội ra quyết định thành lập có 7 thành viên gồm chủ tịch, thư ký, 2 phản biện và các uỷ viên. Khoảng thời gian tổ chức đánh giá luận án cấp cơ sở là sau 21 ngày và trước 45 ngày tính từ ngày ban hành quyết định thành lập hội đồng cấp cơ sở. c) Luận án tiến sĩ được tiến hành đánh giá ở cấp cơ sở dưới hình thức sinh hoạt khoa học được tổ chức một lần hoặc nhiều lần, cho đến khi luận án được đề nghị đưa ra đánh giá ở hội đồng đánh giá luận án cấp Đại học. d) Luận án chỉ được đề nghị đưa ra đánh giá ở hội đồng đánh giá luận án cấp Đại học khi có tối thiểu 6 thành viên của hội đồng cấp cơ sở ở lần đánh giá cuối cùng đồng ý thông qua (ghi trong phiếu nhận xét luận án). đ) Trong vòng 20 ngày sau khi kết thúc đánh giá luận án cấp cơ sở, NCS phải hoàn thành đầy đủ việc sửa chữa và bổ sung toàn văn luận án theo đề nghị của hội đồng cấp cơ sở. 2. Toàn văn luận án và tóm tắt luận án của NCS được gửi lấy ý kiến của các phản biện độc lập trước khi được đưa ra đánh giá ở hội đồng đánh giá luận án cấp Đại học. NCS hoàn thành bản tiếp thu ý kiến của các phản biện dưới sự trợ giúp của người hướng dẫn trong thời hạn 15 ngày kể từ ngày nhận được kết quả đánh giá của các phản biện độc lập. 3. Đánh giá luận án tiến sĩ cấp Đại học được quy định cụ thể như sau:
+đủ 90 ngày tính đến thời điểm kết thúc thời gian học tập chương trình tiến sĩ quy định tại thủ tục xin gia hạn thời gian học tập theo quy định khoản 3 Điều 3 Quy chế này. Trong trường hợp không đủ thời gian 90 ngày, NCS phải làm 
+- b) Hội đồng đánh giá luận án cấp cơ sở (sau đây gọi tắt là hội đồng cấp cơ sở) do hiệu trưởng trường/trưởng khoa/viện trưởng thừa uỷ quyền của Giám đốc ĐHBK Hà Nội ra quyết định thành lập có 7 thành viên gồm chủ tịch, thư ký, 2 phản biện và các uỷ viên. Khoảng thời gian tổ chức đánh giá luận án cấp cơ sở là sau 21 ngày và trước 45 ngày tính từ ngày ban hành quyết định thành lập hội đồng cấp cơ sở. 
+- c) Luận án tiến sĩ được tiến hành đánh giá ở cấp cơ sở dưới hình thức sinh hoạt khoa học được tổ chức một lần hoặc nhiều lần, cho đến khi luận án được đề nghị đưa ra đánh giá ở hội đồng đánh giá luận án cấp Đại học. 
+- d) Luận án chỉ được đề nghị đưa ra đánh giá ở hội đồng đánh giá luận án cấp Đại học khi có tối thiểu 6 thành viên của hội đồng cấp cơ sở ở lần đánh giá cuối cùng đồng ý thông qua (ghi trong phiếu nhận xét luận án). 
+- đ) Trong vòng 20 ngày sau khi kết thúc đánh giá luận án cấp cơ sở, NCS phải hoàn thành đầy đủ việc sửa chữa và bổ sung toàn văn luận án theo đề nghị của hội đồng cấp cơ sở. 2. Toàn văn luận án và tóm tắt luận án của NCS được gửi lấy ý kiến của các phản biện độc lập trước khi được đưa ra đánh giá ở hội đồng đánh giá luận án cấp Đại học. NCS hoàn thành bản tiếp thu ý kiến của các phản biện dưới sự trợ giúp của người hướng dẫn trong thời hạn 15 ngày kể từ ngày nhận được kết quả đánh giá của các phản biện độc lập. 3. Đánh giá luận án tiến sĩ cấp Đại học được quy định cụ thể như sau:
 - a) NCS được bảo vệ luận án cấp Đại học nếu đáp ứng đầy đủ các điều kiện quy định tại khoản 2 Điều 40 Quy chế này và hoàn thành hồ sơ đề nghị đánh giá luận án ở hội đồng đánh giá luận án cấp Đại học.
 - b) Hội đồng đánh giá luận án cấp Đại học do Giám đốc ĐHBK Hà Nội ra quyết định thành lập có 7 thành viên gồm chủ tịch, thư ký, 3 phản biện và các uỷ viên. Thời gian tổ chức bảo vệ luận án cấp Đại học trong vòng 2 tháng kể từ ngày ban hành quyết định thành lập hội đồng cấp Đại học; không tổ chức họp hội đồng cấp Đại học trong trường hợp chủ tịch hoặc thư ký hoặc có từ 2 thành viên hội đồng trở lên vắng mặt.
 - c) Thời gian, địa điểm tổ chức đánh giá luận án, tóm tắt và toàn văn luận án, thông tin về những điểm mới của luận án bằng tiếng Việt và tiếng Anh (hoặc tiếng nước ngoài khác) được công bố công khai trên trang thông tin điện tử của ĐHBK Hà Nội chậm nhất 7 ngày trước ngày bảo vệ.
@@ -604,9 +602,7 @@ Kết quả các học phần tiến sĩ của NCS đã tích lũy trong CTĐT t
 3. NCS đã thôi học, đăng ký dự tuyển lại và được công nhận là NCS mới của ĐHBK Hà Nội.
 4. Kết quả các học phần tiến sĩ có giá trị công nhận trong thời hạn 05 năm. Những học phần được công nhận phải có điểm đánh giá đạt từ điểm C (hoặc quy đổi tương đương) trở lên. Việc công nhận và chuyển đổi kết quả học tập trên của NCS phải phù hợp với nội dung, yêu cầu của CTĐT, được thực hiện trên cơ sở đề xuất của tiểu ban xét tuyển đầu vào. Trường hợp chuyển cơ sở đào tạo hoặc là NCS mới, việc công nhận và chuyển đổi kết quả học tập tối đa không quá 50% tổng khối lượng của các học phần tiến sĩ trong CTĐT.
 
-## CHƯƠNG VI
-
-## TỔ CHỨC THỰC HIỆN
+## CHƯƠNG VI TỔ CHỨC THỰC HIỆN
 
 ## Điều 47. Quy định chuyển tiếp
 

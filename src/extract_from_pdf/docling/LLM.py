@@ -59,7 +59,7 @@ class FreeRAG:
     def answer(
         self,
         question: str,
-        top_k: int = 3,
+        top_k: int = 5,
         filters: Dict = None,
         stream: bool = False,
         verbose: bool = True,

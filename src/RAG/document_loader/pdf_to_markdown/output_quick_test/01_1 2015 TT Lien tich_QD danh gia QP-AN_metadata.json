@@ -1,0 +1,21 @@
+{
+  "pdf_path": "d:\\GR\\src\\RAG\\quydinh\\01_1 2015 TT Lien tich_QD danh gia QP-AN.pdf",
+  "markdown_path": "output_quick_test\\01_1 2015 TT Lien tich_QD danh gia QP-AN.md",
+  "method_used": "docling",
+  "analysis": {
+    "path": "d:\\GR\\src\\RAG\\quydinh\\01_1 2015 TT Lien tich_QD danh gia QP-AN.pdf",
+    "num_pages": 6,
+    "is_text_based": true,
+    "has_vietnamese": true,
+    "encoding_confidence": {
+      "utf8": 0.1936,
+      "windows1258": 0.0,
+      "tcvn3": 0.0,
+      "corrupted": 0.01
+    },
+    "has_embedded_fonts": true,
+    "vietnamese_fonts_detected": [],
+    "recommended_method": "docling"
+  },
+  "error_log": []
+}

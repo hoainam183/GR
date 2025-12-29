@@ -58,7 +58,7 @@ def clean_markdown(text: str) -> str:
 
 if __name__ == "__main__":
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    output_dir = os.path.join(BASE_DIR, "../output")
+    output_dir = os.path.join(BASE_DIR, "../output_docling_clean")
 
     # Kiểm tra thư mục output có tồn tại
     if not os.path.isdir(output_dir):
