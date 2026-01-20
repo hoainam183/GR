@@ -1,0 +1,23 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\begin{center}
+    \Large{\textbf{TÓM TẮT NỘI DUNG ĐỒ ÁN}}\\
+\end{center}
+\vspace{1cm}
+Đồ án tập trung vào việc nghiên cứu và xây dựng hệ thống hỗ trợ tự động trả lời các câu hỏi tư vấn học tập của sinh viên qua email. Mục tiêu chính là tự động thu thập, xử lý và phản hồi các thắc mắc của sinh viên một cách hiệu quả, nhằm giảm tải khối lượng công việc thủ công cho giảng viên và nâng cao trải nghiệm hỗ trợ học tập cho sinh viên.
+
+Trong giai đoạn đầu, một script thu thập dữ liệu (data crawler) đã được xây dựng nhằm tự động trích xuất nội dung từ hệ thống email, đặc biệt là các chuỗi trao đổi giữa sinh viên và giảng viên. Sau khi thu thập, dữ liệu được làm sạch và xử lý tiền xử lý, chỉ giữ lại các câu hỏi thực sự do sinh viên gửi và các phản hồi từ giảng viên. Việc xử lý bao gồm loại bỏ nội dung trùng lặp, tiêu đề email không liên quan, chữ ký, định dạng HTML và các yếu tố gây nhiễu khác, đảm bảo tập dữ liệu đầu vào có chất lượng cao phục vụ cho bước huấn luyện mô hình.
+
+Tiếp theo, một mô hình học máy đơn giản đã được xây dựng với mục tiêu tự động trả lời các câu hỏi phổ biến của sinh viên. Tuy nhiên, do hạn chế về dữ liệu và mức độ đa dạng của câu hỏi, độ chính xác của mô hình còn thấp, chưa đáp ứng yêu cầu triển khai thực tế. Dù vậy, kết quả ban đầu đã cho thấy tiềm năng phát triển của hệ thống trong tương lai nếu được mở rộng về quy mô dữ liệu, áp dụng các mô hình ngôn ngữ tiên tiến và tích hợp thêm các yếu tố ngữ cảnh.
+
+Đồ án là nền tảng bước đầu cho các nghiên cứu tiếp theo về chatbot học thuật, hệ thống hỏi – đáp tự động trong môi trường giáo dục đại học.
+
+\begin{flushright}
+Sinh viên thực hiện\\
+\begin{tabular}{@{}c@{}}
+\textit{(Ký và ghi rõ họ tên)}
+\end{tabular}
+\end{flushright}
+
+\end{document}

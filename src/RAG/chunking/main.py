@@ -1,5 +1,6 @@
 from pathlib import Path
 from chunker.hierarchical_legal_chunker import ArticleLevelLegalChunker
+from chunker.olmocr_legal_chunker import OlmOcrLegalChunker
 
 
 def main_pipeline(
@@ -13,7 +14,9 @@ def main_pipeline(
     Args:
         markdown_path: Path to markdown file
         output_dir: Output directory for chunks
-        chunker_type: Type of chunker ('hierarchical', 'character', 'recursive')
+        chunker_type: Type of chunker ('hierarchical', 'olmocr', 'character', 'recursive')
+            - 'hierarchical': For Docling OCR output (with markdown headings)
+            - 'olmocr': For OLM OCR output (plain text, no markdown headings)
     """
     print(f"\n🔪 Bắt đầu chunking: {markdown_path}")
     print(f"   Chunker type: {chunker_type}")
@@ -24,11 +27,20 @@ def main_pipeline(
 
     # Select chunker
     if chunker_type == "hierarchical":
+        # For Docling OCR output (with markdown headings #, ##)
         chunker = ArticleLevelLegalChunker(
-            min_child_size=500,  # ✅ Tham số mới
-            max_child_size=1000,  # ✅ Tham số mới
-            parent_size_limit=4000,  # ✅ Tham số mới
+            min_child_size=500,
+            max_child_size=1000,
+            parent_size_limit=4000,
             chunk_overlap=150,
+        )
+    elif chunker_type == "olmocr":
+        # For OLM OCR output (plain text, no markdown headings)
+        chunker = OlmOcrLegalChunker(
+            min_child_size=300,
+            max_child_size=1000,
+            parent_size_limit=4000,
+            chunk_overlap=100,
         )
     # elif chunker_type == "character":
     #     chunker = CharacterChunker(chunk_size=1200, chunk_overlap=200)
@@ -44,12 +56,18 @@ def main_pipeline(
     # Print stats
     print(f"\n✅ Kết quả chunking:")
     print(f"   - Total chunks: {stats['total_chunks']}")
-    print(f"   - Parent chunks: {stats['parent_chunks']}")
-    print(f"   - Child chunks: {stats['child_chunks']}")
+    print(f"   - By level: {stats.get('by_level', {})}")
+    if "parent_chunks" in stats:
+        print(f"   - Parent chunks: {stats['parent_chunks']}")
+        print(f"   - Child chunks: {stats['child_chunks']}")
     print(f"   - Avg chunk size: {stats['avg_chunk_size']:.0f} chars")
     print(
         f"   - Size range: {stats['min_chunk_size']} - {stats['max_chunk_size']} chars"
     )
+    if stats.get("chunks_with_tables"):
+        print(f"   - Chunks with tables: {stats['chunks_with_tables']}")
+    if stats.get("appendix_chunks"):
+        print(f"   - Appendix chunks: {stats['appendix_chunks']}")
 
     # Save with filename based on input markdown
     markdown_stem = Path(
@@ -69,30 +87,45 @@ def main_pipeline(
     print("=" * 60)
     print(f"\nOutput: {chunks_path}")
     print(f"Total chunks: {stats['total_chunks']}")
-    print(f"  - Parents: {stats['parent_chunks']}")
-    print(f"  - Children: {stats['child_chunks']}")
+    print(f"By level: {stats.get('by_level', {})}")
     print("=" * 60)
 
     return chunks, stats
 
 
-if __name__ == "__main__":
-    # Process all markdown files in output_docling_clean folder
-    input_dir = Path("../output_docling_clean")
-    output_dir = Path("../chunks_by_articles")
+def process_folder(
+    input_dir: str,
+    output_dir: str,
+    chunker_type: str = "hierarchical",
+    pattern: str = "*.md",
+):
+    """
+    Process all markdown files in a folder
+
+    Args:
+        input_dir: Input folder with markdown files
+        output_dir: Output folder for chunk JSON files
+        chunker_type: 'hierarchical' for Docling OCR, 'olmocr' for OLM OCR
+        pattern: Glob pattern for files (default: *.md)
+    """
+    input_path = Path(input_dir)
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
 
     # Get all .md files
-    md_files = list(input_dir.glob("*.md"))
+    md_files = list(input_path.glob(pattern))
 
     # Get already chunked files
     existing_chunks = set()
-    if output_dir.exists():
-        for chunk_file in output_dir.glob("*_chunks.json"):
-            # Extract base name (remove _chunks.json suffix)
-            base_name = chunk_file.stem.replace("_chunks", "")
-            existing_chunks.add(base_name)
+    for chunk_file in output_path.glob("*_chunks.json"):
+        base_name = chunk_file.stem.replace("_chunks", "")
+        existing_chunks.add(base_name)
 
     print(f"\n{'=' * 60}")
+    print(f"📁 Input: {input_dir}")
+    print(f"📂 Output: {output_dir}")
+    print(f"🔧 Chunker: {chunker_type}")
+    print(f"{'=' * 60}")
     print(f"Tìm thấy {len(md_files)} file markdown")
     print(f"Đã chunk: {len(existing_chunks)} file")
     print(f"{'=' * 60}\n")
@@ -100,14 +133,14 @@ if __name__ == "__main__":
     # Filter out already chunked files
     files_to_process = []
     for md_file in md_files:
-        # Get base name (remove .clean.md or .md suffix)
         stem = md_file.stem
-        if stem.endswith(".clean"):
-            base_name = stem[:-6]
-        else:
-            base_name = stem
+        # Remove common suffixes
+        for suffix in [".clean", "_converted", "_cleaned"]:
+            if stem.endswith(suffix):
+                stem = stem[: -len(suffix)]
+                break
 
-        if base_name not in existing_chunks:
+        if stem not in existing_chunks:
             files_to_process.append(md_file)
         else:
             print(f"⏭️  Bỏ qua (đã chunk): {md_file.name}")
@@ -117,6 +150,9 @@ if __name__ == "__main__":
     print(f"{'=' * 60}\n")
 
     # Process each file
+    success_count = 0
+    error_count = 0
+
     for idx, md_file in enumerate(files_to_process, 1):
         print(f"\n{'=' * 60}")
         print(f"[{idx}/{len(files_to_process)}] Processing: {md_file.name}")
@@ -125,13 +161,94 @@ if __name__ == "__main__":
         try:
             chunks, stats = main_pipeline(
                 markdown_path=str(md_file),
-                output_dir=str(output_dir),
-                chunker_type="hierarchical",
+                output_dir=str(output_path),
+                chunker_type=chunker_type,
             )
+            success_count += 1
         except Exception as e:
             print(f"❌ Lỗi khi xử lý {md_file.name}: {e}")
+            error_count += 1
             continue
 
     print(f"\n{'=' * 60}")
     print("✅ HOÀN THÀNH TẤT CẢ!")
+    print(f"   ✓ Thành công: {success_count} file")
+    if error_count > 0:
+        print(f"   ✗ Lỗi: {error_count} file")
     print(f"{'=' * 60}")
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Chunk legal documents for RAG",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Chunk Docling OCR output (default)
+  python main.py --input ../output_docling_clean --output ../chunks_by_articles
+  
+  # Chunk OLM OCR output
+  python main.py --input ../../olmocr/cleaned --output ../olmocr_chunks --chunker olmocr
+  
+  # Single file
+  python main.py --file document.md --output ./chunks --chunker olmocr
+        """,
+    )
+
+    parser.add_argument(
+        "--input", "-i", type=str, help="Input folder with markdown files"
+    )
+    parser.add_argument(
+        "--file", "-f", type=str, help="Single markdown file to process"
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        type=str,
+        default="../chunks_by_articles",
+        help="Output folder for chunk JSON files (default: ../chunks_by_articles)",
+    )
+    parser.add_argument(
+        "--chunker",
+        "-c",
+        type=str,
+        choices=["hierarchical", "olmocr"],
+        default="hierarchical",
+        help="Chunker type: 'hierarchical' for Docling OCR, 'olmocr' for OLM OCR (default: hierarchical)",
+    )
+    parser.add_argument(
+        "--pattern",
+        "-p",
+        type=str,
+        default="*.md",
+        help="Glob pattern for input files (default: *.md)",
+    )
+
+    args = parser.parse_args()
+
+    if args.file:
+        # Process single file
+        main_pipeline(
+            markdown_path=args.file,
+            output_dir=args.output,
+            chunker_type=args.chunker,
+        )
+    elif args.input:
+        # Process folder
+        process_folder(
+            input_dir=args.input,
+            output_dir=args.output,
+            chunker_type=args.chunker,
+            pattern=args.pattern,
+        )
+    else:
+        # Default: process Docling OCR output
+        print("No input specified. Use --help for usage.")
+        print("\nRunning default: Docling OCR chunking...")
+        process_folder(
+            input_dir="../output_docling_clean",
+            output_dir="../chunks_by_articles",
+            chunker_type="hierarchical",
+        )

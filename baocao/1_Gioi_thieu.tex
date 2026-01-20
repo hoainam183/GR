@@ -1,0 +1,77 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+
+\section{Đặt vấn đề}
+\label{sec:dvd}
+
+Trong môi trường giáo dục đại học hiện nay, đặc biệt tại các trường có quy mô lớn và đào tạo chuyên sâu như \textbf{Trường Đại học Bách Khoa Hà Nội}, việc trao đổi thông tin giữa sinh viên và giảng viên là một nhu cầu thiết yếu. Một trong những kênh trao đổi phổ biến và chính thống nhất là \textit{email}, nơi sinh viên thường xuyên gửi các câu hỏi liên quan đến các vấn đề như:
+
+\begin{itemize}
+    \item Nội dung bài giảng chưa hiểu rõ;
+    \item Lịch học, lịch thi, lịch báo cáo đồ án;
+    \item Hướng dẫn bài tập, dự án, cách nộp bài;
+    \item Thủ tục học vụ như xin nghỉ học, rút môn, đăng ký lại, \ldots
+\end{itemize}
+
+Với hàng trăm sinh viên mỗi kỳ học, giảng viên thường xuyên nhận được một lượng lớn email có nội dung lặp đi lặp lại. Việc phản hồi thủ công từng email gây ra áp lực không nhỏ, ảnh hưởng đến thời gian dành cho giảng dạy, nghiên cứu khoa học và các công việc chuyên môn khác.
+
+
+\section{Các giải pháp hiện tại và hạn chế}
+\label{sec:giaiphap}
+
+Hiện nay, phần lớn việc phản hồi email của giảng viên đối với sinh viên vẫn được thực hiện thủ công, chưa có sự hỗ trợ từ các hệ thống tự động hóa. Thực trạng này dẫn đến nhiều vấn đề bất cập, đặc biệt trong bối cảnh số lượng sinh viên ngày càng tăng và khối lượng trao đổi qua email ngày càng lớn. Một số hạn chế chính có thể kể đến như sau:
+
+\begin{itemize}
+    \item \textbf{Tốn thời gian:} Việc phải trả lời lặp lại nhiều câu hỏi giống nhau từ các sinh viên khác nhau gây lãng phí thời gian và công sức của giảng viên;
+    
+    \item \textbf{Chậm trễ trong phản hồi:} Khối lượng email lớn có thể khiến giảng viên bỏ sót hoặc phản hồi chậm, ảnh hưởng đến tiến độ học tập và xử lý công việc của sinh viên;
+    
+    \item \textbf{Chưa tận dụng công nghệ hiện đại:} Mặc dù các kỹ thuật xử lý ngôn ngữ tự nhiên (NLP) và trí tuệ nhân tạo (AI) đã có những bước tiến mạnh mẽ, hoạt động trao đổi qua email giữa sinh viên và giảng viên vẫn chưa được tích hợp vào các hệ thống hỗ trợ tự động hóa hiệu quả.
+\end{itemize}
+
+
+\section{Mục tiêu và định hướng giải pháp}
+Trước nhu cầu cấp thiết về việc tự động hóa quá trình phản hồi email học thuật, việc xây dựng một hệ thống chatbot ứng dụng xử lý ngôn ngữ tự nhiên (NLP) được xem là một hướng tiếp cận phù hợp và đầy tiềm năng. Một hệ thống như vậy cần có khả năng thực hiện các chức năng sau:
+
+\begin{itemize}
+    \item \textbf{Tự động đọc và phân tích email:} Trích xuất nội dung quan trọng từ email đầu vào, nhận diện ngữ cảnh và chủ đề chính;
+    
+    \item \textbf{Phân loại và xử lý nội dung:} Xác định chủ đề của email, phân biệt các loại yêu cầu như câu hỏi học thuật, lịch học, thủ tục học vụ, v.v., và tìm kiếm câu trả lời phù hợp từ cơ sở dữ liệu lịch sử;
+
+    \item \textbf{Tự động phản hồi:} Gửi phản hồi đến sinh viên đối với các câu hỏi phổ biến, lặp đi lặp lại, mà không cần sự can thiệp trực tiếp từ giảng viên;
+
+    \item \textbf{Tối ưu hóa công việc giảng viên:} Giảm tải các tác vụ lặp lại, nâng cao hiệu quả xử lý công việc học vụ và tập trung hơn cho hoạt động giảng dạy, nghiên cứu.
+\end{itemize}. 
+
+\section{Đóng góp của đồ án}
+\label{sec:donggop}
+
+Đồ án có ba đóng góp chính như sau:
+
+\begin{enumerate}
+    \item \textbf{Đề xuất phương pháp tiền xử lý dữ liệu email:} Loại bỏ nhiễu, văn bản trích dẫn lặp lại, mã HTML và nội dung không liên quan nhằm làm sạch nội dung email, đảm bảo chất lượng đầu vào cho mô hình học máy;
+
+    \item \textbf{Xây dựng quy trình tự động trích xuất cặp câu hỏi – trả lời từ email:} Phân loại email dựa trên người gửi (sinh viên hoặc giảng viên), từ đó hình thành các cặp hỏi – đáp theo từng chuỗi hội thoại (\textit{thread}) để phục vụ việc huấn luyện chatbot;
+
+    \item \textbf{Huấn luyện thử nghiệm mô hình ngôn ngữ nhẹ (TinyLLaMA):} Tận dụng mô hình ngôn ngữ kích thước nhỏ, phù hợp với môi trường tài nguyên hạn chế; bước đầu cho thấy khả năng phản hồi tự động các câu hỏi phổ biến từ sinh viên.
+\end{enumerate}
+
+
+\section{Bố cục đồ án}
+
+Phần còn lại của báo cáo đồ án tốt nghiệp này được tổ chức như sau.
+
+Chương 2 trình bày ngữ cảnh bài toán, các đặc điểm của hệ thống email học vụ, và nhu cầu thực tế trong việc hỗ trợ giảng viên trả lời các câu hỏi lặp lại từ sinh viên. Chương này cũng khảo sát một số nghiên cứu liên quan về hệ thống chatbot học vụ, các mô hình trả lời câu hỏi, cũng như giới thiệu các kiến thức nền tảng phục vụ triển khai như xử lý ngôn ngữ tự nhiên, mô hình TinyLLaMA, phương pháp huấn luyện LoRA và cách tương tác với Gmail API. Đây là chương mang tính nền tảng lý thuyết, giúp người đọc hiểu được bối cảnh và công nghệ chính sẽ được áp dụng trong các chương sau.
+
+Chương 3 trình bày tổng quan giải pháp đề xuất của đồ án, với đóng góp chính là xây dựng một pipeline chatbot học vụ gồm ba thành phần chính: thu thập và xử lý dữ liệu từ email, huấn luyện mô hình ngôn ngữ TinyLLaMA bằng phương pháp LoRA, và sinh phản hồi tự động cho các câu hỏi mới. Chương này giới thiệu chi tiết luồng xử lý của toàn hệ thống thông qua biểu đồ và mô tả rõ chức năng, vai trò của từng khối trong giải pháp tổng thể. Từ kiến thức nền tảng ở chương trước, chương này đóng vai trò định hình toàn bộ thiết kế giải pháp.
+
+Chương 4 đi sâu vào phần cài đặt và huấn luyện mô hình, trình bày chi tiết từng bước trong pipeline như xử lý dữ liệu, chuẩn hóa định dạng prompt, token hóa văn bản, cấu hình mô hình TinyLLaMA với LoRA, và quá trình fine-tune mô hình bằng Trainer của thư viện Transformers. Những đoạn mã giả, cấu hình kỹ thuật, cùng với chiến lược tối ưu tài nguyên cũng được trình bày trong chương này nhằm đảm bảo mô hình có thể huấn luyện hiệu quả trên thiết bị hạn chế.
+
+Chương 5 tập trung vào việc đánh giá chất lượng của mô hình chatbot sau khi huấn luyện. Các tiêu chí như perplexity, BLEU, eval loss và tỷ lệ phản hồi đúng được sử dụng để đánh giá cả định tính lẫn định lượng. Mô hình TinyLLaMA sau fine-tune được so sánh với phiên bản chưa huấn luyện, từ đó chỉ ra rõ ràng mức cải thiện. Chương này cũng phân tích ưu điểm, hạn chế, đồng thời đề xuất các cải tiến về prompt, cách sinh phản hồi và lựa chọn tham số huấn luyện.
+
+Chương 6 trình bày các thực nghiệm chi tiết hơn với các kịch bản khác nhau như so sánh mô hình với baseline, đánh giá theo độ dài câu hỏi và kiểm tra hiệu suất trên tập dữ liệu thực tế. Các bảng số liệu, đồ thị và phân tích chi tiết giúp người đọc hình dung rõ tác động của từng yếu tố đến chất lượng mô hình. Những kết quả từ chương này đóng vai trò minh chứng cho tính thực tiễn và hiệu quả của giải pháp đề xuất.
+
+Cuối cùng, chương 7 đưa ra phần kết luận và hướng phát triển của đồ án. Những đóng góp chính được tổng kết lại, các hạn chế được nhìn nhận một cách khách quan, và các hướng mở rộng trong tương lai như tích hợp RAG, sử dụng mô hình lớn hơn hoặc triển khai thực tế được đề xuất nhằm nâng cao chất lượng và phạm vi ứng dụng của hệ thống.
+
+\end{document}

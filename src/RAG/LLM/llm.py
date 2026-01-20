@@ -2,14 +2,10 @@
 
 import sys
 from pathlib import Path
-
-# Add RAG/embedding to path để import được các modules
-embedding_path = Path(__file__).parent.parent / "embedding"
-sys.path.insert(0, str(embedding_path))
-
-from embedding import create_pipeline
 from typing import List, Dict
 import json
+
+from src.RAG.embedding.embedding import create_pipeline
 
 
 class GeminiRAG:

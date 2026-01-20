@@ -1,15 +1,15 @@
-# RAG với Gemini LLM
+# LLM Module
 
 Hệ thống RAG (Retrieval-Augmented Generation) sử dụng Google Gemini để trả lời câu hỏi về Quy chế đào tạo.
 
-## 📋 Cấu trúc
+## 📁 Cấu trúc thư mục
 
 ```
 LLM/
-├── llm.py              # Core RAG class với Gemini
-├── main.py             # Script chạy interactive mode
+├── llm.py              # Core GeminiRAG class
+├── main.py             # Interactive mode script
 ├── requirements.txt    # Dependencies
-└── README.md          # Tài liệu này
+└── README.md           # Documentation
 ```
 
 ## 🚀 Setup

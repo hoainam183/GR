@@ -13,9 +13,9 @@ from typing import List, Dict, Any, Optional, Union
 from langchain_huggingface import HuggingFaceEmbeddings
 from tqdm import tqdm
 
-from config import PipelineConfig, DEFAULT_CONFIG
-from vector_store import Document
-from faiss_store import FaissVectorStore, FaissConfig
+from .config import PipelineConfig, DEFAULT_CONFIG
+from .vector_store import Document
+from .faiss_store import FaissVectorStore, FaissConfig
 
 
 class EmbeddingPipeline:

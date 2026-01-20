@@ -9,12 +9,33 @@ FAISS = Facebook AI Similarity Search
 import os
 import json
 import pickle
+import sys
 import numpy as np
 import faiss
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
+from pathlib import Path
 
-from vector_store import VectorStore, Document, SearchResult, VectorStoreConfig
+from .vector_store import VectorStore, Document, SearchResult, VectorStoreConfig
+
+
+# Pickle compatibility: Handle old module paths
+class _CompatibilityUnpickler(pickle.Unpickler):
+    """Custom unpickler that redirects old module paths to new ones"""
+
+    def find_class(self, module, name):
+        # Redirect old module paths
+        redirects = {
+            "vector_store": "embedding.vector_store",
+            "faiss_store": "embedding.faiss_store",
+        }
+
+        for old_path, new_path in redirects.items():
+            if module.startswith(old_path):
+                module = module.replace(old_path, new_path, 1)
+                break
+
+        return super().find_class(module, name)
 
 
 @dataclass
@@ -276,6 +297,9 @@ class FaissVectorStore(VectorStore):
         load_dir = path or self.config.save_path
 
         # Load FAISS index
+        embedding_dir = Path(__file__).parent
+        load_dir = embedding_dir / load_dir.lstrip("./")
+        load_dir = str(load_dir)
         index_path = os.path.join(load_dir, "faiss.index")
         if not os.path.exists(index_path):
             raise FileNotFoundError(f"Index not found at {index_path}")
@@ -287,10 +311,19 @@ class FaissVectorStore(VectorStore):
             res = faiss.StandardGpuResources()
             self.index = faiss.index_cpu_to_gpu(res, 0, self.index)
 
-        # Load metadata
+        # Load metadata with pickle compatibility
         metadata_path = os.path.join(load_dir, "metadata.pkl")
         with open(metadata_path, "rb") as f:
-            data = pickle.load(f)
+            try:
+                data = pickle.load(f)
+            except ModuleNotFoundError as e:
+                # Try loading with compatibility unpickler
+                print(
+                    f"⚠️  Module path changed, attempting compatibility load..."
+                )
+                f.seek(0)
+                data = _CompatibilityUnpickler(f).load()
+
             self.id_to_index = data["id_to_index"]
             self.index_to_metadata = data["index_to_metadata"]
             self.documents = data["documents"]

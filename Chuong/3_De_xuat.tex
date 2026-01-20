@@ -1,0 +1,387 @@
+\documentclass[../DoAn.tex]{subfiles}
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{a4paper, margin=1in}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{olive}
+}
+
+\begin{document}
+
+\section{Mở đầu chương}
+Trong bối cảnh sinh viên cần tra cứu nhanh chóng các quy định đào tạo, việc xây dựng một hệ thống RAG Chatbot là giải pháp phù hợp và hiệu quả. Chương này trình bày tổng quan về giải pháp được đề xuất: xây dựng hệ thống hỏi-đáp tự động về quy chế đào tạo ĐHBK Hà Nội, sử dụng công nghệ Retrieval-Augmented Generation.
+
+Nội dung chương bao gồm việc mô tả kiến trúc tổng thể của hệ thống, các thành phần chính và cách thức hoạt động của từng module, luồng xử lý dữ liệu từ đầu vào đến đầu ra, cũng như các công nghệ được sử dụng.
+
+\section{Kiến trúc tổng thể hệ thống}
+
+\subsection{Sơ đồ kiến trúc}
+Hệ thống được thiết kế theo kiến trúc 3 tầng:
+
+\begin{verbatim}
++-------------------------------------------------------------+
+|                         FRONTEND                             |
+|                  React + TypeScript + Vite                   |
+|                   (chat-companion/)                          |
++-----------------------------+-------------------------------+
+                              | HTTP/REST
+                              v
++-------------------------------------------------------------+
+|                         BACKEND                              |
+|                  FastAPI (backend/main.py)                   |
+|                                                              |
+|   +-------------+    +-----------+    +-------------+       |
+|   |   /chat     |    |  /health  |    |  RAGLogger  |       |
+|   |  Endpoint   |    |  Endpoint |    |  (CSV Log)  |       |
+|   +------+------+    +-----------+    +-------------+       |
++----------+----------------------------------------------+---+
+           |
+           v
++-------------------------------------------------------------+
+|                       RAG PIPELINE                           |
+|                       (src/RAG/)                             |
+|                                                              |
+|   +-------------------------------------------------------+ |
+|   |                     GeminiRAG                         | |
+|   |                   (LLM/llm.py)                        | |
+|   |                                                       | |
+|   | answer(question) -> retrieve() -> build_prompt()      | |
+|   |                                 -> generate()         | |
+|   +-------------------------+-----------------------------+ |
+|                             |                               |
+|   +-------------------------v-----------------------------+ |
+|   |                EmbeddingPipeline                      | |
+|   |            (embedding/embedding.py)                   | |
+|   |                                                       | |
+|   | search(query) -> embed() -> vector_store.search()     | |
+|   +-------------------------+-----------------------------+ |
+|                             |                               |
+|   +-------------------------v-----------------------------+ |
+|   |                FaissVectorStore                       | |
+|   |            (embedding/faiss_store.py)                 | |
+|   |                                                       | |
+|   | IndexFlatIP (1024d) + Metadata Store                  | |
+|   | 1,247 chunks from 16 documents                        | |
+|   +-------------------------------------------------------+ |
++-------------------------------------------------------------+
+\end{verbatim}
+
+\subsection{Các thành phần chính}
+
+\subsubsection{Frontend Layer}
+\begin{itemize}
+    \item \textbf{Framework:} React 18 với TypeScript
+    \item \textbf{Build tool:} Vite
+    \item \textbf{State management:} React Query (@tanstack/react-query)
+    \item \textbf{Routing:} React Router DOM
+    \item \textbf{Components:} 54 UI components
+\end{itemize}
+
+\subsubsection{Backend Layer}
+\begin{itemize}
+    \item \textbf{Framework:} FastAPI (Python 3.10+)
+    \item \textbf{Endpoints:} /chat, /health
+    \item \textbf{Logging:} CSV-based interaction logging
+    \item \textbf{CORS:} Hỗ trợ cross-origin requests
+\end{itemize}
+
+\subsubsection{RAG Pipeline}
+\begin{itemize}
+    \item \textbf{LLM:} Gemini 2.5 Flash
+    \item \textbf{Embedding:} intfloat/multilingual-e5-large (1024d)
+    \item \textbf{Vector Store:} FAISS IndexFlatIP
+    \item \textbf{Chunking:} OlmOcrLegalChunker
+\end{itemize}
+
+\section{Module xử lý PDF}
+
+\subsection{Multi-Converter Pipeline}
+Hệ thống hỗ trợ 3 PDF converters với fallback mechanism:
+
+\begin{verbatim}
+                    PDF Input
+                        |
+         +--------------+--------------+
+         v              v              v
+    +---------+    +---------+    +---------+
+    | Docling |    |PyMuPDF4 |    | olmOCR  |
+    | (Text)  |    |  LLM    |    | (Vision)|
+    +----+----+    +----+----+    +----+----+
+         |              |              |
+         v              v              v
+    Check Font     Check Font     Always OK
+    Encoding       Encoding       (Vision-based)
+         |              |              |
+         +------+-------+--------------+
+                |
+                v
+           Markdown Output
+\end{verbatim}
+
+\subsection{So sánh các Converter}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Tiêu chí} & \textbf{Docling} & \textbf{PyMuPDF4LLM} & \textbf{olmOCR} \\
+\hline
+Speed & 8s/34pages & 3s/34pages & ~60s/34pages \\
+\hline
+Vietnamese accuracy & 99.5\% & 99.9\% & 99.9\% \\
+\hline
+Font issues & Có thể fail & Có thể fail & Không ảnh hưởng \\
+\hline
+Table extraction & Tốt & Trung bình & Xuất sắc \\
+\hline
+Structure detection & Xuất sắc & Tốt & Tốt \\
+\hline
+GPU required & Không & Không & Có \\
+\hline
+\end{tabular}
+\caption{So sánh các PDF converter}
+\end{table}
+
+\subsection{olmOCR - Giải pháp cho PDF lỗi font}
+Nhiều văn bản PDF quy chế có vấn đề về font encoding:
+
+\begin{verbatim}
+Văn bản gốc: "Điều 1. Phạm vi và đối tượng áp dụng"
+Lỗi font:    "Äiá»u 1. Phạm vi và đá»i tượng áp dụng"
+\end{verbatim}
+
+olmOCR sử dụng vision-based OCR, không phụ thuộc font embedding, giải quyết hoàn toàn vấn đề này.
+
+\section{Module Chunking}
+
+\subsection{OlmOcrLegalChunker}
+\textbf{File:} \texttt{src/RAG/chunking/chunker/olmocr\_legal\_chunker.py}\\
+\textbf{Kích thước:} 1,126 dòng, 40,500 bytes
+
+\subsubsection{Cấu trúc ChunkLevel}
+\begin{lstlisting}[language=Python]
+class ChunkLevel:
+    HEADER = "header"      # Phan dau van ban (QD, can cu)
+    PARENT = "parent"      # 1 Dieu day du + context Chuong
+    CHILD = "child"        # Khoan trong Dieu
+    APPENDIX = "appendix"  # Phu luc
+    RECURSIVE = "recursive" # Fallback chunks
+\end{lstlisting}
+
+\subsubsection{ChunkData Metadata}
+\begin{lstlisting}[language=Python]
+@dataclass
+class ChunkData:
+    content: str
+    level: ChunkLevel
+    chapter: Optional[str]        # "I", "II", "III"
+    chapter_title: Optional[str]  # "QUY DINH CHUNG"
+    article: Optional[str]        # "1", "2", "18"
+    article_title: Optional[str]  # "Dieu kien tot nghiep"
+    clause: Optional[str]         # "1", "2", "3"
+    has_table: bool
+    is_appendix: bool
+    chunk_id: int
+    readable_id: str              # "c1_d5_k2"
+    parent_id: Optional[str]
+\end{lstlisting}
+
+\subsubsection{Cấu hình mặc định}
+\begin{lstlisting}[language=Python]
+OlmOcrLegalChunker(
+    min_child_size=300,       # Minimum child chunk size
+    max_child_size=1000,      # Maximum child chunk size
+    parent_size_limit=4000,   # Merge dieu nho thanh 1 parent
+    chunk_overlap=100,        # Overlap giua chunks
+    fallback_chunk_size=1000, # Size cho RecursiveTextSplitter
+    fallback_chunk_overlap=200
+)
+\end{lstlisting}
+
+\section{Module Embedding và Vector Store}
+
+\subsection{EmbeddingPipeline}
+\textbf{File:} \texttt{src/RAG/embedding/embedding.py}\\
+\textbf{Kích thước:} 419 dòng
+
+\begin{lstlisting}[language=Python]
+class EmbeddingPipeline:
+    def __init__(self, config: PipelineConfig):
+        # Initialize E5 embedding model
+        # Initialize FAISS vector store
+    
+    def build_embedding_input(self, chunk: Dict) -> str:
+        """
+        Toi uu cho E5 model:
+        - Natural language structure
+        - Hierarchical context (Chuong > Dieu > Khoan)
+        """
+    
+    def process_single_file(self, chunks_file, source_file):
+        """Process 1 file chunks.json"""
+    
+    def search(self, query: str, top_k: int = 5):
+        """Semantic search voi metadata filtering"""
+\end{lstlisting}
+
+\subsection{FaissVectorStore}
+\textbf{File:} \texttt{src/RAG/embedding/faiss\_store.py}\\
+\textbf{Kích thước:} 366 dòng
+
+\begin{lstlisting}[language=Python]
+@dataclass
+class FaissConfig:
+    index_type: str = "IndexFlatIP"  # Cosine similarity
+    dimension: int = 1024            # E5-large dimension
+    save_path: str = "./vector_store"
+    use_gpu: bool = False
+
+class FaissVectorStore:
+    def add_documents(self, documents: List[Document])
+    def search(self, query_embedding, top_k=5, filters=None)
+    def delete_by_metadata(self, filters: Dict) -> int
+    def save(self, path: str)
+    def load(self, path: str)
+\end{lstlisting}
+
+\section{Module LLM và Generation}
+
+\subsection{GeminiRAG}
+\textbf{File:} \texttt{src/RAG/LLM/llm.py}\\
+\textbf{Kích thước:} 274 dòng
+
+\begin{lstlisting}[language=Python]
+class GeminiRAG:
+    def __init__(self, api_key, model_name="gemini-2.5-flash"):
+        # Load embedding pipeline
+        # Setup Gemini client
+    
+    def answer(self, question, top_k=5, stream=False):
+        """
+        RAG Pipeline:
+        1. Embed query
+        2. Retrieve relevant chunks (top_k)
+        3. Build prompt with context
+        4. Generate answer with Gemini
+        5. Return answer + sources
+        """
+\end{lstlisting}
+
+\subsection{Prompt Template}
+\begin{lstlisting}[language=Python]
+prompt = """Ban la tro ly AI chuyen ve Quy che dao tao 
+cua Dai hoc Bach khoa Ha Noi.
+
+Nhiem vu: Tra loi cau hoi cua sinh vien dua tren 
+ngu canh tu quy che.
+
+Ngu canh tu Quy che:
+{context}
+
+Cau hoi: {question}
+
+Huong dan:
+1. Tra loi CHINH XAC dua tren ngu canh
+2. Trich dan dieu khoan cu the neu co
+3. Neu khong tim thay, noi "Khong tim thay thong tin"
+4. Giai thich ro rang, de hieu
+
+Tra loi bang tieng Viet:"""
+\end{lstlisting}
+
+\subsection{Generation Config}
+\begin{lstlisting}[language=Python]
+generation_config = {
+    "temperature": 0.3,     # Low for factual accuracy
+    "top_p": 0.95,
+    "top_k": 40,
+    "max_output_tokens": 8192,
+}
+\end{lstlisting}
+
+\section{Backend API}
+
+\subsection{FastAPI Endpoints}
+\textbf{File:} \texttt{backend/main.py}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Endpoint} & \textbf{Method} & \textbf{Description} \\
+\hline
+/ & GET & Health check \\
+\hline
+/health & GET & RAG system status \\
+\hline
+/chat & POST & Main chat endpoint \\
+\hline
+\end{tabular}
+\caption{API Endpoints}
+\end{table}
+
+\subsection{Request/Response Models}
+\begin{lstlisting}[language=Python]
+class QuestionRequest(BaseModel):
+    question: str
+    top_k: Optional[int] = 5
+
+class AnswerResponse(BaseModel):
+    question: str
+    answer: str
+    retrieved_documents: List[RetrievedDocument]
+    num_documents: int
+    model_name: str
+\end{lstlisting}
+
+\section{Frontend}
+
+\subsection{Project Structure}
+\begin{verbatim}
+frontend/chat-companion/
++-- src/
+|   +-- App.tsx              # Main app voi routing
+|   +-- main.tsx             # Entry point
+|   +-- pages/
+|   |   +-- Index.tsx        # Chat interface
+|   |   +-- NotFound.tsx     # 404 page
+|   +-- components/          # 54 UI components
+|   +-- services/            # API services
+|   +-- hooks/               # Custom React hooks
++-- package.json
+\end{verbatim}
+
+\subsection{Tính năng chính}
+\begin{itemize}
+    \item \textbf{Chat Interface:} Nhập câu hỏi, gửi bằng Enter
+    \item \textbf{Source Display:} Hiển thị retrieved documents với metadata
+    \item \textbf{UX Features:} Loading indicator, message history, responsive design
+\end{itemize}
+
+\section{Kết luận chương}
+Chương này đã trình bày tổng quan về kiến trúc và các thành phần của hệ thống RAG Chatbot. Các module chính bao gồm:
+\begin{itemize}
+    \item Multi-converter PDF pipeline với fallback mechanism
+    \item OlmOcrLegalChunker cho văn bản pháp lý Việt Nam
+    \item EmbeddingPipeline với E5 Multilingual
+    \item FaissVectorStore cho semantic search
+    \item GeminiRAG cho answer generation
+    \item FastAPI backend và React frontend
+\end{itemize}
+
+Trong các chương tiếp theo, từng thành phần sẽ được trình bày chi tiết với mã nguồn và kết quả thực nghiệm.
+
+\end{document}
