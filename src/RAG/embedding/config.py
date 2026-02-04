@@ -37,8 +37,8 @@ class ChunkProcessingConfig:
 
     # Input/Output paths
     input_chunks_dir: str = "../chunks_by_articles"  # Thư mục chứa chunks.json
-    output_dir: str = "./output"
-    vector_store_dir: str = "./vector_store"
+    output_dir: str = "./embedding/output"
+    vector_store_dir: str = r"D:\GR\src\RAG\embedding\vector_store"
 
     # Processing options
     context_strategy: str = "optimized"  # "optimized" hoặc "alternative"

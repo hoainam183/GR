@@ -1,0 +1,224 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Kết luận}
+
+Trong khuôn khổ đồ án tốt nghiệp, sinh viên đã xây dựng thành công hệ thống RAG (Retrieval-Augmented Generation) Chatbot hỗ trợ sinh viên hỏi-đáp tự động về các quy định, quy chế đào tạo của Đại học Bách khoa Hà Nội. Đồ án đã giải quyết được các vấn đề chính sau:
+
+\begin{itemize}
+    \item Xây dựng pipeline xử lý PDF đa phương thức với Docling, PyMuPDF4LLM và olmOCR, đặc biệt giải quyết vấn đề font encoding cho văn bản tiếng Việt;
+    
+    \item Phát triển OlmOcrLegalChunker với khả năng nhận diện cấu trúc Chương-Điều-Khoản-Điểm, bảo toàn metadata và ngữ cảnh pháp lý;
+    
+    \item Triển khai EmbeddingPipeline với mô hình E5 Multilingual (1024 chiều) và FaissVectorStore cho semantic search hiệu quả;
+    
+    \item Xây dựng GeminiRAG tích hợp Gemini 2.5 Flash để sinh câu trả lời chính xác với trích dẫn nguồn;
+    
+    \item Phát triển Hybrid Search kết hợp BM25 và Semantic Search với RRF fusion, đạt Hit Rate 99.35\%;
+    
+    \item Triển khai Cross-encoder Reranking với BAAI/bge-reranker-v2-m3 để cải thiện độ chính xác;
+    
+    \item Phát triển Backend API với FastAPI và Frontend với React 18 + TypeScript + Vite.
+\end{itemize}
+
+\section{Kết quả đạt được}
+
+Hệ thống đã xử lý thành công 16 văn bản quy chế đào tạo, tạo ra 1,247 chunks được lưu trong vector store. Kết quả đạt được:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Metric} & \textbf{Kết quả} & \textbf{Ghi chú} \\
+\hline
+Độ chính xác tiếng Việt & 99.5\%+ & olmOCR vision-based \\
+\hline
+Thời gian phản hồi & 2-4 giây/query & End-to-end latency \\
+\hline
+olmOCR success rate & 100\% & Không phụ thuộc font \\
+\hline
+Hybrid Search Hit Rate & 99.35\% & BM25 + Semantic + RRF \\
+\hline
+MRR & 92.31\% & Mean Reciprocal Rank \\
+\hline
+Evaluation Dataset & 155 câu hỏi & 4 loại: factual, reasoning, comparative, calculation \\
+\hline
+\end{tabular}
+\caption{Tổng hợp kết quả đạt được}
+\end{table}
+
+\section{So sánh với các hệ thống tương tự}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Tiêu chí} & \textbf{Hệ thống này} & \textbf{ChatGPT} & \textbf{Rule-based Bot} \\
+\hline
+Domain knowledge & Chuyên biệt HUST & General & Cố định \\
+\hline
+Cập nhật tài liệu & Dễ dàng (re-index) & Cần fine-tune & Viết lại rule \\
+\hline
+Trích dẫn nguồn & Có (Điều, Khoản) & Không & Không \\
+\hline
+Tiếng Việt & Tối ưu (pyvi) & Tốt & Phụ thuộc rule \\
+\hline
+Hallucination & Thấp (RAG) & Cao & Không có \\
+\hline
+Chi phí vận hành & Thấp & Cao (API) & Rất thấp \\
+\hline
+\end{tabular}
+\caption{So sánh với các hệ thống tương tự}
+\end{table}
+
+\section{Bài học kinh nghiệm (Lessons Learned)}
+
+\subsection{Về xử lý PDF tiếng Việt}
+\begin{itemize}
+    \item Font encoding là vấn đề phổ biến với PDF Việt Nam cũ - cần có fallback mechanism
+    \item Vision-based OCR (olmOCR) là giải pháp cuối cùng đáng tin cậy
+    \item Table extraction cần xử lý riêng, không nên dựa vào text extraction thông thường
+\end{itemize}
+
+\subsection{Về Retrieval}
+\begin{itemize}
+    \item Semantic search đơn thuần không đủ cho văn bản pháp lý - cần kết hợp BM25
+    \item Truy vấn phủ định tiếng Việt (``không được xét'') cần xử lý đặc biệt
+    \item RRF fusion hiệu quả hơn weighted sum vì không cần normalize điểm
+\end{itemize}
+
+\subsection{Về Chunking}
+\begin{itemize}
+    \item Bảo toàn cấu trúc Chương-Điều-Khoản quan trọng cho trích dẫn
+    \item Parent-child chunk hierarchy giúp context đầy đủ hơn
+    \item Metadata (source file, article, clause) cần thiết cho transparency
+\end{itemize}
+
+\section{Hạn chế còn tồn tại}
+
+\begin{itemize}
+    \item Chưa có query caching, mỗi query phải embedding lại;
+    \item Chưa tận dụng lịch sử hội thoại, không hỗ trợ follow-up questions;
+    \item FAISS Flat index chưa scale được cho dataset rất lớn;
+    \item Chưa có cơ chế update tài liệu tự động;
+    \item Cross-encoder reranking làm tăng latency.
+\end{itemize}
+
+\section{Hướng phát triển trong tương lai}
+
+\textit{Lưu ý: Giao diện chatbot hiện tại chỉ là demo để kiểm tra khả năng retrieval của hệ thống. Mục tiêu chính của đề tài là xây dựng hệ thống tự động trả lời email tư vấn học tập cho sinh viên.}
+
+\subsection{Phase 1: Hoàn thiện hệ thống RAG (1-2 tháng)}
+\begin{itemize}
+    \item \textbf{[HOÀN THÀNH]} Build evaluation dataset với 100+ test queries $\rightarrow$ \textit{155 câu hỏi}
+    \item \textbf{[HOÀN THÀNH]} Hybrid search kết hợp BM25 + semantic retrieval $\rightarrow$ \textit{Hit Rate 99.35\%}
+    \item \textbf{[HOÀN THÀNH]} Re-ranking với cross-encoder để tăng precision
+    \item Implement query caching (semantic + exact match) để giảm latency
+    \item Table-aware chunking strategy cho các bảng phức tạp
+\end{itemize}
+
+\subsection{Phase 2: Xây dựng Email Processing Pipeline (2-3 tháng)}
+\begin{itemize}
+    \item \textbf{Email Parser:} Tích hợp IMAP/POP3 để đọc email từ hộp thư phòng đào tạo
+    \item \textbf{Intent Classification:} Phân loại email theo chủ đề (học bổng, tốt nghiệp, ngoại ngữ, đăng ký môn...)
+    \item \textbf{Entity Extraction:} Trích xuất thông tin sinh viên (MSSV, họ tên, khóa, chương trình)
+    \item \textbf{Context Enrichment:} Bổ sung context từ hồ sơ sinh viên nếu có quyền truy cập
+    \item \textbf{Response Generation:} Sinh email trả lời với format chuẩn, trích dẫn điều khoản
+    \item \textbf{Draft Review System:} Cán bộ review và approve trước khi gửi
+\end{itemize}
+
+\subsection{Phase 3: Triển khai Email Bot (3-4 tháng)}
+\begin{itemize}
+    \item \textbf{Email Sender:} Tích hợp SMTP để gửi email trả lời tự động
+    \item \textbf{Template System:} Hệ thống template email theo từng loại câu hỏi
+    \item \textbf{Signature Management:} Quản lý chữ ký email của phòng đào tạo
+    \item \textbf{CC/Forward Logic:} Tự động forward email phức tạp cho cán bộ phụ trách
+    \item \textbf{Response Time SLA:} Đảm bảo thời gian phản hồi < 30 phút trong giờ hành chính
+\end{itemize}
+
+\subsection{Phase 4: Giám sát và cải thiện (Liên tục)}
+\begin{itemize}
+    \item \textbf{Quality Monitoring:} Dashboard theo dõi chất lượng câu trả lời
+    \item \textbf{Feedback Loop:} Thu thập phản hồi từ sinh viên và cán bộ
+    \item \textbf{Escalation Rules:} Quy tắc chuyển tiếp email cần xử lý thủ công
+    \item \textbf{Knowledge Base Update:} Cập nhật quy chế mới khi có thay đổi
+    \item \textbf{Analytics:} Thống kê các câu hỏi thường gặp (FAQ) để cải thiện tài liệu
+\end{itemize}
+
+\subsection{Kiến trúc hệ thống Email trả lời tự động}
+\begin{verbatim}
++-------------------------------------------------------------+
+|              HỆ THỐNG TỰ ĐỘNG TRẢ LỜI EMAIL                  |
++-------------------------------------------------------------+
+|                                                              |
+|    Email Server (IMAP)                                       |
+|         |                                                    |
+|         v                                                    |
+|    +------------------+                                      |
+|    |  Email Parser    | --> Extract: Subject, Body, Sender   |
+|    +------------------+                                      |
+|         |                                                    |
+|         v                                                    |
+|    +------------------+                                      |
+|    | Intent Classifier| --> Phân loại: Học bổng, Tốt nghiệp..|
+|    +------------------+                                      |
+|         |                                                    |
+|         v                                                    |
+|    +------------------+                                      |
+|    |   RAG Pipeline   | --> Hybrid Search + Reranking        |
+|    | (Đã hoàn thành)  |                                      |
+|    +------------------+                                      |
+|         |                                                    |
+|         v                                                    |
+|    +------------------+                                      |
+|    | Response Builder | --> Template + Citations             |
+|    +------------------+                                      |
+|         |                                                    |
+|         v                                                    |
+|    +------------------+     +------------------+              |
+|    | Draft for Review | --> | Cán bộ Approve  |              |
+|    +------------------+     +------------------+              |
+|                                    |                         |
+|                                    v                         |
+|                            +------------------+              |
+|                            |   SMTP Sender    |              |
+|                            +------------------+              |
+|                                    |                         |
+|                                    v                         |
+|                            Email đến Sinh viên               |
++-------------------------------------------------------------+
+\end{verbatim}
+
+\section{Tiềm năng ứng dụng}
+
+\subsection{Tại ĐHBK Hà Nội}
+\begin{itemize}
+    \item \textbf{Phòng Đào tạo:} Tự động trả lời email về quy chế, thủ tục học vụ
+    \item \textbf{Phòng Công tác Sinh viên:} Hỗ trợ tra cứu quy định về học bổng, kỷ luật
+    \item \textbf{Các Viện/Khoa:} Tư vấn chương trình đào tạo, đăng ký môn học
+    \item \textbf{Trung tâm Ngoại ngữ:} Hướng dẫn về chuẩn đầu ra, quy đổi chứng chỉ
+\end{itemize}
+
+\subsection{Mở rộng ra các trường khác}
+\begin{itemize}
+    \item Chuyển giao công nghệ cho các trường đại học khác
+    \item Xây dựng platform SaaS cho education domain
+    \item Hỗ trợ đa ngôn ngữ (tiếng Anh, tiếng Trung) cho sinh viên quốc tế
+\end{itemize}
+
+\section{Kết luận cuối cùng}
+
+Tổng kết lại, đồ án ``\textbf{Nghiên cứu và đề xuất mô hình tự động trả lời email tư vấn học tập cho sinh viên}'' đã hoàn thành giai đoạn đầu tiên - xây dựng và đánh giá hệ thống RAG làm nền tảng cho email bot. Các đóng góp chính:
+
+\begin{enumerate}
+    \item \textbf{Pipeline xử lý PDF đa phương thức} giải quyết vấn đề font encoding tiếng Việt
+    \item \textbf{Chunking strategy cho văn bản pháp lý} bảo toàn cấu trúc Chương-Điều-Khoản
+    \item \textbf{Hybrid Search với RRF fusion} đạt Hit Rate 99.35\%
+    \item \textbf{Cross-encoder reranking} cải thiện độ chính xác retrieval
+    \item \textbf{Evaluation framework} với 155 câu hỏi đa dạng
+    \item \textbf{Demo chatbot} để kiểm tra khả năng retrieval trước khi tích hợp email
+\end{enumerate}
+
+Hệ thống RAG đã chứng minh khả năng truy xuất chính xác thông tin từ văn bản quy chế, là tiền đề quan trọng để phát triển hệ thống tự động trả lời email tư vấn học tập trong các giai đoạn tiếp theo.
+
+\end{document}

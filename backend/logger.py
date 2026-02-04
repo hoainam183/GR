@@ -34,33 +34,21 @@ class RAGLogger:
                     [
                         "timestamp",
                         "question",
-                        "num_retrieved_docs",
-                        "retrieved_docs",
+                        "answer",
                         "model_name",
                     ]
                 )
 
-    def log(self, question: str, sources: List[Dict], model_name: str):
+    def log(self, question: str, answer: str, model_name: str):
         """
         Log a RAG interaction
 
         Args:
             question: User's question
-            sources: List of retrieved documents
+            answer: LLM's answer
             model_name: Name of LLM model used
         """
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        num_docs = len(sources)
-
-        # Format retrieved docs - only content, separated by newlines
-        retrieved_contents = []
-        for i, source in enumerate(sources, 1):
-            content = source.get("content", "")
-            # Add rank prefix for clarity
-            retrieved_contents.append(f"[{i}] {content}")
-
-        # Join with double newline for readability
-        retrieved_docs_text = "\n\n".join(retrieved_contents)
 
         # Write to CSV with UTF-8 BOM for Excel compatibility
         with open(self.log_file, "a", newline="", encoding="utf-8-sig") as f:
@@ -69,8 +57,7 @@ class RAGLogger:
                 [
                     timestamp,
                     question,
-                    num_docs,
-                    retrieved_docs_text,
+                    answer,
                     model_name,
                 ]
             )
@@ -83,22 +70,9 @@ if __name__ == "__main__":
     logger = RAGLogger("test_logs.csv")
 
     # Test log
-    sources = [
-        {
-            "content": "Test content 1",
-            "score": 0.95,
-            "metadata": {"source_file": "test.pdf", "article": "Điều 1"},
-        },
-        {
-            "content": "Test content 2",
-            "score": 0.87,
-            "metadata": {"source_file": "test2.pdf", "article": "Điều 2"},
-        },
-    ]
-
     logger.log(
         question="Test question?",
-        sources=sources,
+        answer="This is the LLM's answer to the test question.",
         model_name="gemini-2.5-flash",
     )
 

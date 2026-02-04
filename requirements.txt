@@ -7,6 +7,7 @@
 # Core Python Packages
 # ----------------------------------------------------------------------------
 python-dotenv>=1.0.0
+pandas>=2.0.0
 
 # ----------------------------------------------------------------------------
 # FastAPI Backend
@@ -35,6 +36,10 @@ langchain-text-splitters>=1.0.0
 sentence-transformers>=5.1.2
 faiss-cpu>=1.12.0  # Use faiss-gpu if you have GPU
 numpy>=1.24.0
+
+# Reranking
+transformers>=4.40.0  # For cross-encoder reranker (BGE-reranker-v2-m3)
+torch>=2.0.0  # Required for transformers
 
 # Retrieval
 rank-bm25>=0.2.2
@@ -65,6 +70,7 @@ pillow>=11.3.0
 tqdm>=4.65.0
 rich>=14.2.0
 tiktoken>=0.12.0
+requests>=2.31.0
 
 # ----------------------------------------------------------------------------
 # Development (Optional - uncomment if needed)

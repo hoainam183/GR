@@ -2,14 +2,12 @@
 
 import sys
 from pathlib import Path
-
-# Add RAG/embedding to path để import được các modules
-embedding_path = Path(__file__).parent.parent / "embedding"
-sys.path.insert(0, str(embedding_path))
-
-from embedding import create_pipeline
 from typing import List, Dict
 import json
+
+from src.RAG.embedding.embedding import create_pipeline
+from src.RAG.embedding.reranker import create_reranker
+from src.RAG.embedding.hybrid_search import create_hybrid_searcher
 
 
 class GeminiRAG:
@@ -22,6 +20,8 @@ class GeminiRAG:
         api_key: str = None,
         model_name: str = None,
         pipeline=None,
+        use_hybrid: bool = True,
+        use_reranker: bool = True,
     ):
         """
         Initialize Gemini RAG
@@ -30,6 +30,8 @@ class GeminiRAG:
             api_key: Gemini API key
             model_name: Model name (optional)
             pipeline: EmbeddingPipeline instance (optional)
+            use_hybrid: Enable hybrid search (BM25 + Semantic) (default: True)
+            use_reranker: Enable reranking with cross-encoder (default: True)
         """
         print("🔄 Initializing Gemini RAG System...")
 
@@ -56,6 +58,29 @@ class GeminiRAG:
                 os.chdir(current_dir)
         else:
             self.pipeline = pipeline
+
+        # Setup hybrid search
+        self.use_hybrid = use_hybrid
+        self.hybrid_searcher = None
+        if use_hybrid:
+            print("   Creating hybrid searcher...")
+            self.hybrid_searcher = create_hybrid_searcher(
+                semantic_weight=0.5, fusion_method="rrf"
+            )
+            print("   ✅ Hybrid search enabled")
+
+        # Setup reranker
+        self.use_reranker = use_reranker
+        self.reranker = None
+        if use_reranker:
+            print("   Loading reranker model...")
+            self.reranker = create_reranker(
+                model_name="BAAI/bge-reranker-v2-m3",
+                device="cpu",
+                enable_deduplication=True,
+                enable_reranking=True,
+            )
+            print("   ✅ Reranker loaded")
 
         # Setup LLM
         self.llm_provider = "gemini"
@@ -97,15 +122,42 @@ class GeminiRAG:
         if verbose:
             print("📚 Retrieving relevant chunks...")
 
+        # Retrieve more results if using hybrid or reranker
+        initial_top_k = (
+            top_k * 4 if (self.use_hybrid or self.use_reranker) else top_k
+        )
+
         # Use pipeline to search
         results = self.pipeline.search(
             query=question,
-            top_k=top_k,
+            top_k=initial_top_k,
             filters=filters,
         )
 
         if verbose:
-            print(f"   Retrieved {len(results)} chunks\n")
+            print(f"   Retrieved {len(results)} initial chunks")
+
+        # Step 1.5: Apply Hybrid Search (BM25 + Semantic)
+        if self.use_hybrid and self.hybrid_searcher and results:
+            if verbose:
+                print("   Applying hybrid search (BM25 + Semantic)...")
+            hybrid_top_k = top_k * 2 if self.use_reranker else top_k
+            results = self.hybrid_searcher.hybrid_search(
+                question, results, top_k=hybrid_top_k
+            )
+            if verbose:
+                print(f"   → {len(results)} chunks after hybrid search")
+
+        # Step 1.6: Apply Reranking (Cross-encoder + Deduplication)
+        if self.use_reranker and self.reranker and results:
+            if verbose:
+                print("   Applying reranker (Cross-encoder + Deduplication)...")
+            results = self.reranker.process(question, results, top_k=top_k)
+            if verbose:
+                print(f"   → {len(results)} chunks after reranking")
+
+        if verbose:
+            print(f"   ✅ Final: {len(results)} chunks\n")
 
         # Step 2: Build context
         context = self._build_context(results)
@@ -174,10 +226,9 @@ Câu hỏi: {question}
 
 Hướng dẫn:
 1. Trả lời CHÍNH XÁC dựa trên ngữ cảnh
-2. Trích dẫn điều khoản cụ thể nếu có
-3. Nếu không tìm thấy thông tin, nói "Không tìm thấy thông tin trong quy chế"
-4. Giải thích rõ ràng, dễ hiểu
-5. Liệt kê đầy đủ nếu có điều kiện/yêu cầu
+2. Nếu không tìm thấy thông tin, nói "Không tìm thấy thông tin trong quy chế"
+3. Giải thích rõ ràng, dễ hiểu
+4. Liệt kê đầy đủ nếu có điều kiện/yêu cầu
 
 Trả lời bằng tiếng Việt:"""
 
