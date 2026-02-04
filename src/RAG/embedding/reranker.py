@@ -35,6 +35,11 @@ class RerankerConfig:
     initial_top_k: int = 20  # Retrieve more for reranking
     final_top_k: int = 5  # Return after reranking
 
+    # Score threshold - chỉ giữ documents có điểm cross-encoder >= threshold
+    # Nếu None hoặc <= 0: giữ tất cả top_k documents
+    # Giá trị thường dùng: 0.3-0.7 tùy theo model và dataset
+    score_threshold: float = 0.7  # Chỉ giữ documents có CE score >= 0.5
+
 
 class ContentDeduplicator:
     """
@@ -184,6 +189,7 @@ class CrossEncoderReranker:
         self.config = config
         self.model = None
         self.tokenizer = None
+        self.cross_encoder = None  # sentence-transformers CrossEncoder
         self._initialized = False
 
     def _lazy_init(self):
@@ -191,20 +197,55 @@ class CrossEncoderReranker:
         if self._initialized:
             return
 
-        print(f"🔄 Loading cross-encoder model: {self.config.model_name}")
+        try:
+            print(f"🔄 Loading cross-encoder model: {self.config.model_name}")
+            print(f"   This may take a few minutes on first load...")
 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.config.model_name)
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            self.config.model_name
-        )
+            # Use sentence-transformers instead which is more stable
+            from sentence_transformers import CrossEncoder
 
-        # Move to device
-        device = torch.device(self.config.device)
-        self.model = self.model.to(device)
-        self.model.eval()
+            print(f"   Using CrossEncoder from sentence-transformers...")
+            self.cross_encoder = CrossEncoder(
+                self.config.model_name,
+                max_length=self.config.max_length,
+                device=self.config.device,
+            )
 
-        self._initialized = True
-        print(f"✅ Cross-encoder loaded on {self.config.device}")
+            self._initialized = True
+            print(f"✅ Cross-encoder loaded on {self.config.device}")
+
+        except Exception as e:
+            print(f"❌ Error loading cross-encoder: {e}")
+            print(f"   Trying fallback with transformers...")
+
+            try:
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    self.config.model_name, trust_remote_code=True
+                )
+
+                print(f"   ✓ Tokenizer loaded")
+
+                self.model = AutoModelForSequenceClassification.from_pretrained(
+                    self.config.model_name, trust_remote_code=True
+                )
+
+                print(f"   ✓ Model loaded")
+
+                # Move to device
+                device = torch.device(self.config.device)
+                self.model = self.model.to(device)
+                self.model.eval()
+
+                self._initialized = True
+                self.cross_encoder = None  # Flag to use manual method
+                print(f"✅ Cross-encoder loaded on {self.config.device}")
+
+            except Exception as e2:
+                print(f"❌ Error loading cross-encoder: {e2}")
+                print(f"   Disabling reranking")
+                self.config.enable_reranking = False
+                self._initialized = False
+                raise
 
     def compute_scores(self, query: str, documents: List[str]) -> List[float]:
         """
@@ -222,6 +263,15 @@ class CrossEncoderReranker:
         if not documents:
             return []
 
+        # Use sentence-transformers CrossEncoder if available (faster)
+        if hasattr(self, "cross_encoder") and self.cross_encoder is not None:
+            pairs = [[query, doc] for doc in documents]
+            scores = self.cross_encoder.predict(pairs, show_progress_bar=False)
+            return (
+                scores.tolist() if hasattr(scores, "tolist") else list(scores)
+            )
+
+        # Fallback to manual method
         device = torch.device(self.config.device)
         scores = []
 
@@ -322,19 +372,27 @@ class RerankerPipeline:
         query: str,
         results: List[SearchResult],
         top_k: Optional[int] = None,
+        score_threshold: Optional[float] = None,
     ) -> List[SearchResult]:
         """
-        Process search results: deduplicate and rerank.
+        Process search results: deduplicate, rerank, and filter by score.
 
         Args:
             query: The search query
             results: Initial search results
-            top_k: Number of results to return (default from config)
+            top_k: Maximum number of results to return (default from config)
+            score_threshold: Minimum cross-encoder score to keep (default from config)
+                           Set to None or 0 to keep all top_k results
 
         Returns:
-            Processed list of SearchResult
+            Processed list of SearchResult (có thể ít hơn top_k nếu filter theo score)
         """
         top_k = top_k or self.config.final_top_k
+        threshold = (
+            score_threshold
+            if score_threshold is not None
+            else self.config.score_threshold
+        )
 
         # Step 1: Deduplicate
         if self.config.enable_deduplication:
@@ -356,7 +414,28 @@ class RerankerPipeline:
         else:
             reranked_results = deduped_results
 
-        # Step 3: Return top-k
+        # Step 3: Filter by score threshold (chỉ áp dụng nếu đã rerank với cross-encoder)
+        if self.config.enable_reranking and threshold and threshold > 0:
+            filtered_results = [
+                r for r in reranked_results if r.score >= threshold
+            ]
+            filtered_count = len(reranked_results) - len(filtered_results)
+
+            # Đảm bảo luôn có ít nhất 1 document (document có điểm cao nhất)
+            # Điều này quan trọng để hệ thống luôn trả về kết quả cho user
+            if len(filtered_results) == 0 and len(reranked_results) > 0:
+                # Giữ document có điểm cao nhất (đã sort theo score descending)
+                filtered_results = [reranked_results[0]]
+                print(
+                    f"🔄 Score filter (threshold={threshold}): All docs below threshold, keeping top 1 (score={reranked_results[0].score:.4f})"
+                )
+            elif filtered_count > 0:
+                print(
+                    f"🔄 Score filter (threshold={threshold}): {len(reranked_results)} → {len(filtered_results)} (removed {filtered_count} low-score docs)"
+                )
+            reranked_results = filtered_results
+
+        # Step 4: Return top-k (có thể ít hơn nếu đã filter)
         return reranked_results[:top_k]
 
 
@@ -366,6 +445,7 @@ def create_reranker(
     device: str = "cpu",
     enable_deduplication: bool = True,
     enable_reranking: bool = True,
+    score_threshold: float = 0.5,
 ) -> RerankerPipeline:
     """
     Factory function to create reranker pipeline.
@@ -375,6 +455,8 @@ def create_reranker(
         device: Device to use ("cpu" or "cuda")
         enable_deduplication: Whether to deduplicate results
         enable_reranking: Whether to rerank with cross-encoder
+        score_threshold: Minimum cross-encoder score to keep documents
+                        Set to 0 or None to keep all top_k results
 
     Returns:
         RerankerPipeline instance
@@ -384,5 +466,6 @@ def create_reranker(
         device=device,
         enable_deduplication=enable_deduplication,
         enable_reranking=enable_reranking,
+        score_threshold=score_threshold,
     )
     return RerankerPipeline(config)

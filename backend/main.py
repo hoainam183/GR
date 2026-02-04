@@ -147,18 +147,9 @@ async def chat(request: QuestionRequest):
         )
 
         # Log to CSV
-        sources_for_log = [
-            {
-                "content": doc.content,
-                "score": doc.score,
-                "metadata": doc.metadata,
-            }
-            for doc in retrieved_docs
-        ]
-
         logger.log(
             question=result["question"],
-            sources=sources_for_log,
+            answer=result["answer"],
             model_name=result["model_name"],
         )
 

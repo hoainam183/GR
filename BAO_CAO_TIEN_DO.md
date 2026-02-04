@@ -3,7 +3,7 @@
 
 **Người thực hiện:** Sinh viên nghiên cứu  
 **Thời gian:** Tháng 12/2024 - Tháng 01/2026  
-**Ngày báo cáo:** 20/01/2026
+**Ngày báo cáo:** 26/01/2026
 
 ---
 
@@ -747,6 +747,45 @@ Top source files by chunk count:
 | **LLM generation** | 1.5-3s |
 | **Vietnamese accuracy** | 99.5%+ |
 
+### 10.4. Hybrid Search Evaluation Results (21/01/2026)
+
+**Cấu hình:**
+- **Hybrid Search (BM25):** Enabled
+- **Reranking (Cross-encoder):** Disabled
+- **Top K:** 5
+- **Evaluation Dataset:** 154 samples
+
+**Overall Metrics:**
+
+| Metric | Value |
+|--------|-------|
+| **Hit Rate@5** | 99.35% |
+| **MRR** | 92.31% |
+| **Precision@5** | 19.87% |
+| **Recall@5** | 99.35% |
+
+**Metrics by Question Type:**
+
+| Type | Count | Hit Rate | MRR | Precision | Recall |
+|------|-------|----------|-----|-----------|--------|
+| **calculation** | 4 | 100.0% | 100.0% | 20.0% | 100.0% |
+| **comparative** | 11 | 100.0% | 95.45% | 20.0% | 100.0% |
+| **factual** | 124 | 100.0% | 92.06% | 20.0% | 100.0% |
+| **reasoning** | 15 | 93.33% | 90.0% | 18.67% | 93.33% |
+
+**Metrics by Difficulty:**
+
+| Difficulty | Count | Hit Rate | MRR | Precision | Recall |
+|------------|-------|----------|-----|-----------|--------|
+| **easy** | 36 | 100.0% | 85.65% | 20.0% | 100.0% |
+| **medium** | 102 | 99.02% | 95.02% | 19.80% | 99.02% |
+| **hard** | 16 | 100.0% | 90.0% | 20.0% | 100.0% |
+
+**Nhận xét:**
+- Hybrid search đạt **Hit Rate 99.35%** - gần như tất cả các câu hỏi đều tìm được document liên quan
+- **MRR 92.31%** cho thấy document liên quan thường xuất hiện ở vị trí đầu tiên
+- Câu hỏi dạng **reasoning** có kết quả thấp hơn một chút (93.33% hit rate) - cần cải thiện
+
 ### 10.3. PDF Processing Results
 
 | Converter | Success Rate | Avg Speed |
@@ -781,11 +820,11 @@ Top source files by chunk count:
 **Priority 1 - Critical (1-2 tháng):**
 - [ ] Implement query caching (semantic + exact match)
 - [ ] Add conversation history management
-- [ ] Build evaluation dataset (100+ test queries)
+- [x] Build evaluation dataset (100+ test queries) ✅ **Hoàn thành: 155 câu hỏi**
 - [ ] Implement basic metrics dashboard
 
 **Priority 2 - Important (2-3 tháng):**
-- [ ] Hybrid search (BM25 + semantic)
+- [x] Hybrid search (BM25 + semantic) ✅ **Hoàn thành: Hit Rate 99.35%**
 - [ ] Query rewriting với context
 - [ ] Re-ranking với cross-encoder
 - [ ] Table-aware chunking strategy
@@ -845,5 +884,5 @@ GEMINI_API_KEY=your_api_key_here
 
 ---
 
-**Ngày hoàn thành báo cáo:** 20/01/2026  
-**Phiên bản:** 2.0
+**Ngày hoàn thành báo cáo:** 26/01/2026  
+**Phiên bản:** 3.0

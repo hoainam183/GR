@@ -54,7 +54,8 @@ def process_batch_files():
     pipeline = create_pipeline()
 
     # Tìm tất cả files chunks
-    chunks_dir = Path("../chunks_by_articles")
+    # chunks_dir = Path("../chunks_by_articles")
+    chunks_dir = Path("./olmocr_chunks")
     chunk_files = list(chunks_dir.glob("*_chunks.json"))
 
     if not chunk_files:

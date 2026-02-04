@@ -107,6 +107,150 @@ FAISS là thư viện do Meta phát triển để tìm kiếm và clustering vec
     \item Độ chính xác cao nhất
 \end{itemize}
 
+\subsection{Thuật toán BM25 (Best Matching 25)}
+
+\subsubsection{Tổng quan}
+BM25 là thuật toán xếp hạng tài liệu dựa trên từ khóa, được phát triển từ mô hình xác suất. BM25 là cải tiến của TF-IDF với các tham số điều chỉnh để xử lý tốt hơn độ dài tài liệu và tần suất từ.
+
+\subsubsection{Công thức BM25}
+Điểm BM25 cho một truy vấn $Q$ gồm các từ $q_1, q_2, ..., q_n$ với tài liệu $D$:
+
+\begin{equation}
+\text{BM25}(D, Q) = \sum_{i=1}^{n} \text{IDF}(q_i) \cdot \frac{f(q_i, D) \cdot (k_1 + 1)}{f(q_i, D) + k_1 \cdot (1 - b + b \cdot \frac{|D|}{avgdl})}
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $f(q_i, D)$: Tần suất từ $q_i$ trong tài liệu $D$
+    \item $|D|$: Độ dài tài liệu $D$
+    \item $avgdl$: Độ dài trung bình của tất cả tài liệu
+    \item $k_1$: Tham số điều khiển độ bão hòa tần suất từ (thường 1.2-2.0)
+    \item $b$: Tham số chuẩn hóa độ dài tài liệu (0-1, thường 0.75)
+\end{itemize}
+
+\subsubsection{IDF trong BM25}
+\begin{equation}
+\text{IDF}(q_i) = \ln \left( \frac{N - n(q_i) + 0.5}{n(q_i) + 0.5} + 1 \right)
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $N$: Tổng số tài liệu
+    \item $n(q_i)$: Số tài liệu chứa từ $q_i$
+\end{itemize}
+
+\subsubsection{Cấu hình BM25 trong đề tài}
+Đề tài sử dụng thư viện \texttt{rank\_bm25} với cấu hình:
+\begin{itemize}
+    \item $k_1 = 1.5$: Điều chỉnh độ bão hòa tần suất từ
+    \item $b = 0.75$: Chuẩn hóa độ dài tài liệu
+    \item Vietnamese tokenizer sử dụng \texttt{pyvi} cho phân từ tiếng Việt
+\end{itemize}
+
+\subsubsection{Ưu điểm BM25 cho văn bản pháp lý}
+\begin{itemize}
+    \item Tìm kiếm chính xác từ khóa (như mã điều khoản, tên riêng)
+    \item Xử lý tốt các truy vấn phủ định (``không được xét'', ``không đủ điều kiện'')
+    \item Không cần GPU, tốc độ nhanh
+    \item Hiệu quả với các thuật ngữ chuyên ngành ít xuất hiện
+\end{itemize}
+
+\subsection{Cross-encoder Reranking}
+
+\subsubsection{Khái niệm Cross-encoder}
+Cross-encoder là mô hình transformer xử lý đồng thời cặp (query, document) và cho ra điểm relevance trực tiếp. Khác với bi-encoder (embedding riêng query và document), cross-encoder cho phép attention hai chiều giữa query và document.
+
+\subsubsection{So sánh Bi-encoder và Cross-encoder}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Đặc điểm} & \textbf{Bi-encoder} & \textbf{Cross-encoder} \\
+\hline
+Tốc độ & Nhanh (pre-compute embeddings) & Chậm (pair-wise scoring) \\
+\hline
+Độ chính xác & Trung bình & Cao \\
+\hline
+Khả năng scale & Tốt (vector index) & Kém (O(n) scoring) \\
+\hline
+Use case & Initial retrieval & Reranking top-k \\
+\hline
+\end{tabular}
+\caption{So sánh Bi-encoder và Cross-encoder}
+\end{table}
+
+\subsubsection{Mô hình BAAI/bge-reranker-v2-m3}
+Đề tài sử dụng mô hình \texttt{BAAI/bge-reranker-v2-m3} với đặc điểm:
+\begin{itemize}
+    \item Multilingual: Hỗ trợ 100+ ngôn ngữ bao gồm tiếng Việt
+    \item State-of-the-art trên các benchmark reranking
+    \item Context length: 512 tokens
+    \item Đầu ra: Điểm relevance score cho cặp (query, document)
+\end{itemize}
+
+\subsubsection{Pipeline Reranking trong đề tài}
+\begin{enumerate}
+    \item \textbf{Deduplication}: Loại bỏ document trùng lặp (similarity threshold 0.85)
+    \item \textbf{Cross-encoder scoring}: Tính điểm relevance cho từng cặp query-document
+    \item \textbf{Re-sorting}: Sắp xếp lại theo điểm cross-encoder
+    \item \textbf{Top-k selection}: Chọn k kết quả tốt nhất
+\end{enumerate}
+
+\subsection{Hybrid Search}
+
+\subsubsection{Tại sao cần Hybrid Search?}
+Semantic search (dense retrieval) và BM25 (sparse retrieval) có điểm mạnh bổ sung:
+
+\begin{itemize}
+    \item \textbf{Semantic Search}:
+    \begin{itemize}
+        \item Hiểu ngữ nghĩa và ý định
+        \item Tìm được synonym và paraphrase
+        \item Yếu với từ khóa cụ thể và thuật ngữ chuyên ngành
+    \end{itemize}
+    \item \textbf{BM25}:
+    \begin{itemize}
+        \item Exact keyword matching
+        \item Tốt với thuật ngữ chuyên ngành
+        \item Xử lý tốt truy vấn phủ định
+        \item Yếu với synonym và paraphrase
+    \end{itemize}
+\end{itemize}
+
+Hybrid search kết hợp cả hai để tận dụng điểm mạnh của mỗi phương pháp.
+
+\subsubsection{Reciprocal Rank Fusion (RRF)}
+RRF là phương pháp kết hợp kết quả từ nhiều hệ thống retrieval mà không cần normalize điểm.
+
+\textbf{Công thức RRF:}
+\begin{equation}
+\text{RRF}(d) = \sum_{r \in R} \frac{1}{k + \text{rank}_r(d)}
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $d$: Document cần tính điểm
+    \item $R$: Tập các hệ thống retrieval (semantic, BM25)
+    \item $\text{rank}_r(d)$: Hạng của document $d$ trong hệ thống $r$
+    \item $k$: Hằng số smoothing (thường 60)
+\end{itemize}
+
+\subsubsection{Cấu hình Hybrid Search trong đề tài}
+\begin{itemize}
+    \item \textbf{Fusion method}: Reciprocal Rank Fusion (RRF)
+    \item \textbf{RRF constant k}: 60
+    \item \textbf{Semantic weight}: 0.6 (khi dùng weighted sum)
+    \item \textbf{Negation boosting}: Tăng điểm BM25 cho các document chứa cụm phủ định khi query có phủ định
+\end{itemize}
+
+\subsubsection{Xử lý truy vấn phủ định tiếng Việt}
+Đề tài triển khai cơ chế đặc biệt để xử lý các truy vấn phủ định:
+\begin{itemize}
+    \item Nhận diện pattern phủ định: ``không được xét'', ``không đủ điều kiện'', ``bị loại''
+    \item Boost điểm BM25 cho các document chứa cụm phủ định tương ứng
+    \item Negation boost factor: 2.0-3.0 tùy mức độ cụ thể của pattern
+\end{itemize}
+
 \subsection{Large Language Models (LLM)}
 
 \subsubsection{Gemini 2.5 Flash}

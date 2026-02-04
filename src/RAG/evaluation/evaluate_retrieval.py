@@ -2,6 +2,11 @@
 Retrieval Evaluation Script
 Đánh giá hiệu suất retrieval của RAG system bằng cách so sánh với ground truth dataset.
 
+Hỗ trợ đánh giá:
+- Semantic search only
+- Hybrid search (BM25 + Semantic)
+- With/without reranking (Cross-encoder)
+
 Metrics:
 - Precision@K: Số documents relevant / K documents retrieved
 - Recall@K: Số documents relevant retrieved / Tổng documents relevant
@@ -12,6 +17,8 @@ Usage:
     python evaluate_retrieval.py
     python evaluate_retrieval.py --top-k 10
     python evaluate_retrieval.py --limit 10  # Test với 10 samples
+    python evaluate_retrieval.py --no-hybrid  # Disable hybrid search
+    python evaluate_retrieval.py --no-rerank  # Disable reranking
 """
 
 import csv
@@ -41,6 +48,8 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from embedding.embedding import create_pipeline
+from embedding.hybrid_search import create_hybrid_searcher
+from embedding.reranker import create_reranker
 
 
 @dataclass
@@ -83,11 +92,15 @@ class RetrievalEvalReport:
     total_samples: int
     top_k: int
 
+    # Configuration
+    use_hybrid: bool = False
+    use_reranker: bool = False
+
     # Aggregated metrics
-    precision_at_k: float
-    recall_at_k: float
-    hit_rate_at_k: float
-    mrr: float  # Mean Reciprocal Rank
+    precision_at_k: float = 0.0
+    recall_at_k: float = 0.0
+    hit_rate_at_k: float = 0.0
+    mrr: float = 0.0  # Mean Reciprocal Rank
 
     # By question type
     metrics_by_type: Dict[str, Dict[str, float]] = field(default_factory=dict)
@@ -102,15 +115,27 @@ class RetrievalEvalReport:
 
 
 class RetrievalEvaluator:
-    """Retrieval System Evaluator using local pipeline"""
+    """Retrieval System Evaluator using local pipeline with BM25 + Reranking"""
 
-    def __init__(self, top_k: int = 5, verbose: bool = True):
+    def __init__(
+        self,
+        top_k: int = 5,
+        verbose: bool = True,
+        use_hybrid: bool = True,
+        use_reranker: bool = True,
+        score_threshold: float = 0.5,
+    ):
         self.top_k = top_k
         self.verbose = verbose
+        self.use_hybrid = use_hybrid
+        self.use_reranker = use_reranker
+        self.score_threshold = score_threshold
         self.pipeline = None
+        self.hybrid_searcher = None
+        self.reranker = None
 
     def load_pipeline(self):
-        """Load embedding pipeline and vector store"""
+        """Load embedding pipeline, vector store, hybrid searcher, and reranker"""
         if self.verbose:
             print("📦 Loading embedding pipeline...")
 
@@ -130,6 +155,44 @@ class RetrievalEvaluator:
                 "❌ Vector store not found! Please run embedding first:\n"
                 "   python run_embedding.py"
             )
+
+        # Setup hybrid searcher (BM25 + Semantic)
+        if self.use_hybrid:
+            if self.verbose:
+                print("🔗 Setting up hybrid searcher (BM25 + Semantic)...")
+            self.hybrid_searcher = create_hybrid_searcher(
+                semantic_weight=0.5, fusion_method="rrf"
+            )
+            if self.verbose:
+                print("   ✅ Hybrid search enabled")
+
+        # Setup reranker (Cross-encoder)
+        if self.use_reranker:
+            try:
+                if self.verbose:
+                    print("🎯 Loading reranker model...")
+                    print(
+                        "   Note: This may take 5-10 minutes on first load (downloading ~1.3GB model)"
+                    )
+                    print("   If it hangs, use --no-rerank to skip reranking")
+
+                self.reranker = create_reranker(
+                    model_name="BAAI/bge-reranker-v2-m3",
+                    device="cpu",
+                    enable_deduplication=True,
+                    enable_reranking=True,
+                    score_threshold=self.score_threshold,
+                )
+
+                if self.verbose:
+                    print("   ✅ Reranker loaded")
+                    print(f"   Score threshold: {self.score_threshold}")
+
+            except Exception as e:
+                print(f"❌ Failed to load reranker: {e}")
+                print("   Continuing without reranking...")
+                self.use_reranker = False
+                self.reranker = None
 
     def load_dataset(self, csv_path: str) -> List[EvaluationSample]:
         """Load evaluation dataset from CSV"""
@@ -206,7 +269,7 @@ class RetrievalEvaluator:
 
     def retrieve(self, query: str) -> Tuple[List[str], List[float]]:
         """
-        Retrieve documents for a query
+        Retrieve documents for a query with optional hybrid search and reranking
 
         Returns:
             sources: List of source file names
@@ -217,8 +280,42 @@ class RetrievalEvaluator:
                 "Pipeline not loaded. Call load_pipeline() first."
             )
 
-        results = self.pipeline.search(query, top_k=self.top_k)
+        # Calculate initial top_k (retrieve more if using hybrid/reranking)
+        initial_top_k = (
+            self.top_k * 4
+            if (self.use_hybrid or self.use_reranker)
+            else self.top_k * 2  # Lấy nhiều hơn để có thể filter theo threshold
+        )
 
+        # Step 1: Semantic search
+        results = self.pipeline.search(query, top_k=initial_top_k)
+
+        # Step 2: Apply Hybrid Search (BM25 + Semantic)
+        if self.use_hybrid and self.hybrid_searcher and results:
+            hybrid_top_k = self.top_k * 2 if self.use_reranker else self.top_k
+            results = self.hybrid_searcher.hybrid_search(
+                query, results, top_k=hybrid_top_k
+            )
+
+        # Step 3: Apply Reranking (Cross-encoder + Deduplication)
+        if self.use_reranker and self.reranker and results:
+            results = self.reranker.process(query, results, top_k=self.top_k)
+        else:
+            # Nếu không dùng reranker, áp dụng threshold cho semantic/hybrid scores
+            if self.score_threshold and self.score_threshold > 0 and results:
+                filtered_results = [
+                    r for r in results if r.score >= self.score_threshold
+                ]
+                # Đảm bảo luôn có ít nhất 1 document
+                if len(filtered_results) == 0:
+                    filtered_results = [
+                        results[0]
+                    ]  # Giữ document có score cao nhất
+                results = filtered_results[: self.top_k]
+            else:
+                results = results[: self.top_k]
+
+        # Extract sources and scores
         sources = []
         scores = []
 
@@ -238,8 +335,10 @@ class RetrievalEvaluator:
         hit, rank = self.check_source_match(sample.expected_source, sources)
 
         # Calculate metrics
-        # Precision@K: relevant_retrieved / K (với 1 relevant doc, = 1/K nếu hit)
-        precision = 1.0 / self.top_k if hit else 0.0
+        # Precision: relevant_retrieved / actual_retrieved_docs
+        # Với score threshold, số documents trả về có thể < top_k
+        num_retrieved = len(sources)
+        precision = 1.0 / num_retrieved if (hit and num_retrieved > 0) else 0.0
 
         # Recall@K: relevant_retrieved / total_relevant (với 1 relevant doc, = 1 nếu hit)
         recall = 1.0 if hit else 0.0
@@ -288,6 +387,8 @@ class RetrievalEvaluator:
         return RetrievalEvalReport(
             total_samples=n,
             top_k=self.top_k,
+            use_hybrid=self.use_hybrid,
+            use_reranker=self.use_reranker,
             precision_at_k=avg_precision,
             recall_at_k=avg_recall,
             hit_rate_at_k=hit_rate,
@@ -328,6 +429,16 @@ def print_report(report: RetrievalEvalReport):
     print("\n" + "=" * 70)
     print("📊 RETRIEVAL EVALUATION REPORT")
     print("=" * 70)
+
+    # Configuration info
+    print(f"\n⚙️  CONFIGURATION")
+    print("-" * 50)
+    print(
+        f"   • Hybrid Search (BM25): {'✅ Enabled' if report.use_hybrid else '❌ Disabled'}"
+    )
+    print(
+        f"   • Reranking (Cross-encoder): {'✅ Enabled' if report.use_reranker else '❌ Disabled'}"
+    )
 
     print(
         f"\n📈 OVERALL METRICS (n={report.total_samples}, top_k={report.top_k})"
@@ -437,6 +548,23 @@ def save_summary_csv(report: RetrievalEvalReport, output_path: str):
     with open(path, "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
 
+        # Configuration
+        writer.writerow(["CONFIGURATION"])
+        writer.writerow(["Setting", "Value"])
+        writer.writerow(
+            [
+                "Hybrid Search (BM25)",
+                "Enabled" if report.use_hybrid else "Disabled",
+            ]
+        )
+        writer.writerow(
+            [
+                "Reranking (Cross-encoder)",
+                "Enabled" if report.use_reranker else "Disabled",
+            ]
+        )
+        writer.writerow([])
+
         # Overall metrics
         writer.writerow(["OVERALL METRICS"])
         writer.writerow(["Metric", "Value"])
@@ -497,6 +625,9 @@ def run_evaluation(
     top_k: int = 5,
     limit: int = None,
     output_dir: str = None,
+    use_hybrid: bool = True,
+    use_reranker: bool = True,
+    score_threshold: float = 0.5,
 ):
     """
     Run retrieval evaluation
@@ -506,12 +637,15 @@ def run_evaluation(
         top_k: Number of documents to retrieve
         limit: Limit number of samples (for testing)
         output_dir: Directory to save results
+        use_hybrid: Enable hybrid search (BM25 + Semantic)
+        use_reranker: Enable reranking (Cross-encoder)
+        score_threshold: Minimum cross-encoder score to keep documents (0 = keep all)
     """
     # Default paths
     if dataset_path is None:
         dataset_path = (
             Path(__file__).parent.parent.parent.parent
-            / "rag_evaluation_dataset.csv"
+            / "rag_evaluation_dataset_expanded.csv"
         )
 
     if output_dir is None:
@@ -519,12 +653,21 @@ def run_evaluation(
 
     print("🚀 Retrieval Evaluation Script")
     print("=" * 50)
-    print(f"   Dataset:  {dataset_path}")
-    print(f"   Top K:    {top_k}")
+    print(f"   Dataset:      {dataset_path}")
+    print(f"   Top K:        {top_k}")
+    print(f"   Hybrid (BM25): {'✅ Enabled' if use_hybrid else '❌ Disabled'}")
+    print(f"   Reranking:    {'✅ Enabled' if use_reranker else '❌ Disabled'}")
+    print(f"   Score Threshold: {score_threshold}")
     print("=" * 50)
 
     # Initialize evaluator
-    evaluator = RetrievalEvaluator(top_k=top_k, verbose=True)
+    evaluator = RetrievalEvaluator(
+        top_k=top_k,
+        verbose=True,
+        use_hybrid=use_hybrid,
+        use_reranker=use_reranker,
+        score_threshold=score_threshold,
+    )
 
     # Load pipeline
     evaluator.load_pipeline()
@@ -546,13 +689,25 @@ def run_evaluation(
 
     # Save results
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # Add config suffix to filename
+    config_suffix = ""
+    if use_hybrid:
+        config_suffix += "_hybrid"
+    if use_reranker:
+        config_suffix += "_rerank"
+    if not config_suffix:
+        config_suffix = "_semantic_only"
+
     output_dir = Path(output_dir)
 
     save_results_csv(
-        report, str(output_dir / f"retrieval_detailed_{timestamp}.csv")
+        report,
+        str(output_dir / f"retrieval_detailed{config_suffix}_{timestamp}.csv"),
     )
     save_summary_csv(
-        report, str(output_dir / f"retrieval_summary_{timestamp}.csv")
+        report,
+        str(output_dir / f"retrieval_summary{config_suffix}_{timestamp}.csv"),
     )
 
     return report
@@ -586,6 +741,22 @@ def main():
         default=None,
         help="Directory to save results",
     )
+    parser.add_argument(
+        "--no-hybrid",
+        action="store_true",
+        help="Disable hybrid search (BM25 + Semantic)",
+    )
+    parser.add_argument(
+        "--no-rerank",
+        action="store_true",
+        help="Disable reranking (Cross-encoder)",
+    )
+    parser.add_argument(
+        "--score-threshold",
+        type=float,
+        default=0.5,
+        help="Minimum cross-encoder score to keep documents (default: 0.5, use 0 to keep all)",
+    )
 
     args = parser.parse_args()
 
@@ -594,6 +765,9 @@ def main():
         top_k=args.top_k,
         limit=args.limit,
         output_dir=args.output_dir,
+        use_hybrid=not args.no_hybrid,
+        use_reranker=not args.no_rerank,
+        score_threshold=args.score_threshold,
     )
 
 

@@ -3,6 +3,7 @@ Simple Search/Retrieval Script
 Sử dụng để tìm kiếm trong vector store đã được tạo
 
 Features:
+- Hybrid search (BM25 + Semantic search)
 - Post-retrieval deduplication (remove parent-child duplicates)
 - Cross-encoder reranking using BGE-reranker-v2-m3
 """
@@ -10,6 +11,7 @@ Features:
 from typing import Optional
 from .embedding import create_pipeline
 from .reranker import RerankerPipeline, RerankerConfig, create_reranker
+from .hybrid_search import create_hybrid_searcher, HybridSearcher
 
 
 def search(
@@ -17,22 +19,27 @@ def search(
     top_k: int = 5,
     source_file: str = None,
     use_reranker: bool = True,
+    use_hybrid: bool = True,
     initial_top_k: int = 20,
+    semantic_weight: float = 0.5,
 ):
     """
-    Tìm kiếm trong vector store với deduplication và reranking
+    Tìm kiếm trong vector store với hybrid search, deduplication và reranking
 
     Args:
         query: Câu hỏi/query cần tìm
         top_k: Số lượng kết quả trả về cuối cùng
         source_file: Lọc theo file cụ thể (optional)
         use_reranker: Sử dụng cross-encoder reranking (default: True)
+        use_hybrid: Sử dụng hybrid search BM25 + Semantic (default: True)
         initial_top_k: Số lượng kết quả lấy ban đầu để rerank (default: 20)
+        semantic_weight: Trọng số cho semantic search trong hybrid (0-1, default: 0.5)
 
     Example:
         search("điều kiện tốt nghiệp", top_k=5)
         search("quy định học phí", source_file="QCDT_2025")
         search("học bổng KKHT", use_reranker=False)  # Disable reranking
+        search("không được xét học bổng", use_hybrid=True)  # Hybrid for negation queries
     """
     print("=" * 70)
     print(f"🔍 SEARCH: {query}")
@@ -55,11 +62,12 @@ def search(
         print(f"📋 Filter: source_file = {source_file}")
 
     # Determine how many results to retrieve initially
-    retrieve_k = initial_top_k if use_reranker else top_k
+    retrieve_k = initial_top_k if (use_reranker or use_hybrid) else top_k
     print(f"📊 Initial retrieval: {retrieve_k}, Final top_k: {top_k}")
+    print(f"🔄 Hybrid search: {'enabled' if use_hybrid else 'disabled'}")
     print(f"🔄 Reranker: {'enabled' if use_reranker else 'disabled'}\n")
 
-    # Search (retrieve more if using reranker)
+    # Search (retrieve more if using reranker or hybrid)
     results = pipeline.search(query, top_k=retrieve_k, filters=filters)
 
     if not results:
@@ -67,6 +75,18 @@ def search(
         return []
 
     print(f"✅ Initial retrieval: {len(results)} results")
+
+    # Apply hybrid search (BM25 + Semantic)
+    if use_hybrid:
+        hybrid_searcher = create_hybrid_searcher(
+            semantic_weight=semantic_weight, fusion_method="rrf"
+        )
+        # Pass all results to hybrid search, it will re-rank them
+        hybrid_top_k = initial_top_k if use_reranker else top_k
+        results = hybrid_searcher.hybrid_search(
+            query, results, top_k=hybrid_top_k
+        )
+        print(f"✅ After hybrid search: {len(results)} results")
 
     # Apply reranker (deduplication + cross-encoder)
     if use_reranker:
@@ -91,11 +111,21 @@ def search(
         print("=" * 70)
         print(f"Result #{i} - Score: {result.score:.4f}")
 
+        # Show hybrid scores if available
+        hybrid_score = result.metadata.get("hybrid_score")
+        semantic_score = result.metadata.get("semantic_score")
+        bm25_score = result.metadata.get("bm25_score")
+        if hybrid_score is not None:
+            print(
+                f"         (Hybrid: {hybrid_score:.4f}, Semantic: {semantic_score:.4f}, BM25: {bm25_score:.4f})"
+            )
+
         # Show original score if reranked
         original_score = result.metadata.get("original_score")
-        if original_score is not None:
+        ce_score = result.metadata.get("ce_score")
+        if original_score is not None and ce_score is not None:
             print(
-                f"         (Original: {original_score:.4f}, CE: {result.metadata.get('ce_score', 'N/A'):.4f})"
+                f"         (Original: {original_score:.4f}, CE: {ce_score:.4f})"
             )
 
         print("=" * 70)
@@ -269,7 +299,7 @@ if __name__ == "__main__":
     # ============================================
 
     # Thay đổi query ở đây
-    query = "Sinh viên nào không được xét cấp học bổng KKHT?"
+    query = "Sinh viên đã học tích lũy trước 20 tín chỉ của chương trình kỹ sư thì được công nhận bao nhiêu tín chỉ?"
 
     # With reranking (default) - slower but more accurate
     search(query, top_k=5, use_reranker=True, initial_top_k=20)

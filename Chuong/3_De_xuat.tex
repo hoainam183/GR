@@ -104,7 +104,120 @@ Hệ thống được thiết kế theo kiến trúc 3 tầng:
     \item \textbf{Embedding:} intfloat/multilingual-e5-large (1024d)
     \item \textbf{Vector Store:} FAISS IndexFlatIP
     \item \textbf{Chunking:} OlmOcrLegalChunker
+    \item \textbf{Hybrid Search:} BM25 + Semantic với RRF Fusion
+    \item \textbf{Reranking:} Cross-encoder BAAI/bge-reranker-v2-m3
 \end{itemize}
+
+\section{Module Hybrid Search và Reranking}
+
+\subsection{Kiến trúc Hybrid Search Pipeline}
+\begin{verbatim}
++-------------------------------------------------------------+
+|                    HYBRID SEARCH PIPELINE                    |
++-------------------------------------------------------------+
+|                                                              |
+|    User Query: "Sinh vien nao khong duoc xet hoc bong?"     |
+|                              |                               |
+|              +---------------+---------------+               |
+|              v                               v               |
+|    +------------------+           +------------------+       |
+|    |   BM25 Search    |           | Semantic Search  |       |
+|    | (rank_bm25 +     |           | (E5 embedding +  |       |
+|    |  pyvi tokenizer) |           |  FAISS cosine)   |       |
+|    +--------+---------+           +--------+---------+       |
+|             |                              |                 |
+|             v                              v                 |
+|      BM25 Scores                    Cosine Scores            |
+|      [0.85, 0.72, ...]             [0.91, 0.88, ...]         |
+|             |                              |                 |
+|             +-------------+----------------+                 |
+|                           v                                  |
+|              +------------------------+                      |
+|              |   RRF Fusion (k=60)    |                      |
+|              | score = 1/(k + rank)   |                      |
+|              +------------------------+                      |
+|                           |                                  |
+|                           v                                  |
+|              +------------------------+                      |
+|              |   Negation Boost       |                      |
+|              | (for "khong duoc xet") |                      |
+|              +------------------------+                      |
+|                           |                                  |
+|                           v                                  |
+|                    Top-20 Hybrid Results                     |
++-------------------------------------------------------------+
+\end{verbatim}
+
+\subsection{Kiến trúc Reranking Pipeline}
+\begin{verbatim}
++-------------------------------------------------------------+
+|                    RERANKING PIPELINE                        |
++-------------------------------------------------------------+
+|                                                              |
+|                 Top-20 Hybrid Results                        |
+|                           |                                  |
+|                           v                                  |
+|              +------------------------+                      |
+|              |    Deduplication       |                      |
+|              | similarity_threshold   |                      |
+|              |      = 0.85            |                      |
+|              +------------------------+                      |
+|                           |                                  |
+|                           v                                  |
+|              +------------------------+                      |
+|              |   Cross-encoder        |                      |
+|              | BAAI/bge-reranker-v2-m3|                      |
+|              +------------------------+                      |
+|                           |                                  |
+|                           v                                  |
+|              +------------------------+                      |
+|              |   Re-sort by CE Score  |                      |
+|              +------------------------+                      |
+|                           |                                  |
+|                           v                                  |
+|                    Top-5 Final Results                       |
++-------------------------------------------------------------+
+\end{verbatim}
+
+\subsection{Cấu hình Hybrid Search}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Tham số} & \textbf{Giá trị} & \textbf{Mô tả} \\
+\hline
+BM25 k1 & 1.5 & Điều khiển độ bão hòa tần suất từ \\
+\hline
+BM25 b & 0.75 & Chuẩn hóa độ dài tài liệu \\
+\hline
+RRF k & 60 & Hằng số smoothing cho RRF \\
+\hline
+Semantic weight & 0.6 & Trọng số semantic (khi dùng weighted sum) \\
+\hline
+Negation boost & 2.0-3.0 & Hệ số tăng cho truy vấn phủ định \\
+\hline
+\end{tabular}
+\caption{Cấu hình Hybrid Search}
+\end{table}
+
+\subsection{Cấu hình Reranking}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Tham số} & \textbf{Giá trị} & \textbf{Mô tả} \\
+\hline
+Model & bge-reranker-v2-m3 & Cross-encoder model \\
+\hline
+Max length & 512 tokens & Độ dài tối đa input \\
+\hline
+Dedup threshold & 0.85 & Ngưỡng similarity cho deduplication \\
+\hline
+Top-k output & 5 & Số lượng kết quả cuối cùng \\
+\hline
+\end{tabular}
+\caption{Cấu hình Reranking Pipeline}
+\end{table}
 
 \section{Module xử lý PDF}
 
@@ -172,17 +285,17 @@ olmOCR sử dụng vision-based OCR, không phụ thuộc font embedding, giải
 \textbf{Kích thước:} 1,126 dòng, 40,500 bytes
 
 \subsubsection{Cấu trúc ChunkLevel}
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 class ChunkLevel:
     HEADER = "header"      # Phan dau van ban (QD, can cu)
     PARENT = "parent"      # 1 Dieu day du + context Chuong
     CHILD = "child"        # Khoan trong Dieu
     APPENDIX = "appendix"  # Phu luc
     RECURSIVE = "recursive" # Fallback chunks
-\end{lstlisting}
+\end{verbatim}
 
 \subsubsection{ChunkData Metadata}
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 @dataclass
 class ChunkData:
     content: str
@@ -197,10 +310,10 @@ class ChunkData:
     chunk_id: int
     readable_id: str              # "c1_d5_k2"
     parent_id: Optional[str]
-\end{lstlisting}
+\end{verbatim}
 
 \subsubsection{Cấu hình mặc định}
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 OlmOcrLegalChunker(
     min_child_size=300,       # Minimum child chunk size
     max_child_size=1000,      # Maximum child chunk size
@@ -209,7 +322,7 @@ OlmOcrLegalChunker(
     fallback_chunk_size=1000, # Size cho RecursiveTextSplitter
     fallback_chunk_overlap=200
 )
-\end{lstlisting}
+\end{verbatim}
 
 \section{Module Embedding và Vector Store}
 
@@ -217,7 +330,7 @@ OlmOcrLegalChunker(
 \textbf{File:} \texttt{src/RAG/embedding/embedding.py}\\
 \textbf{Kích thước:} 419 dòng
 
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 class EmbeddingPipeline:
     def __init__(self, config: PipelineConfig):
         # Initialize E5 embedding model
@@ -235,13 +348,13 @@ class EmbeddingPipeline:
     
     def search(self, query: str, top_k: int = 5):
         """Semantic search voi metadata filtering"""
-\end{lstlisting}
+\end{verbatim}
 
 \subsection{FaissVectorStore}
 \textbf{File:} \texttt{src/RAG/embedding/faiss\_store.py}\\
 \textbf{Kích thước:} 366 dòng
 
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 @dataclass
 class FaissConfig:
     index_type: str = "IndexFlatIP"  # Cosine similarity
@@ -255,7 +368,7 @@ class FaissVectorStore:
     def delete_by_metadata(self, filters: Dict) -> int
     def save(self, path: str)
     def load(self, path: str)
-\end{lstlisting}
+\end{verbatim}
 
 \section{Module LLM và Generation}
 
@@ -263,7 +376,7 @@ class FaissVectorStore:
 \textbf{File:} \texttt{src/RAG/LLM/llm.py}\\
 \textbf{Kích thước:} 274 dòng
 
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 class GeminiRAG:
     def __init__(self, api_key, model_name="gemini-2.5-flash"):
         # Load embedding pipeline
@@ -278,10 +391,10 @@ class GeminiRAG:
         4. Generate answer with Gemini
         5. Return answer + sources
         """
-\end{lstlisting}
+\end{verbatim}
 
 \subsection{Prompt Template}
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 prompt = """Ban la tro ly AI chuyen ve Quy che dao tao 
 cua Dai hoc Bach khoa Ha Noi.
 
@@ -300,17 +413,17 @@ Huong dan:
 4. Giai thich ro rang, de hieu
 
 Tra loi bang tieng Viet:"""
-\end{lstlisting}
+\end{verbatim}
 
 \subsection{Generation Config}
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 generation_config = {
     "temperature": 0.3,     # Low for factual accuracy
     "top_p": 0.95,
     "top_k": 40,
     "max_output_tokens": 8192,
 }
-\end{lstlisting}
+\end{verbatim}
 
 \section{Backend API}
 
@@ -334,7 +447,7 @@ generation_config = {
 \end{table}
 
 \subsection{Request/Response Models}
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 class QuestionRequest(BaseModel):
     question: str
     top_k: Optional[int] = 5
@@ -345,7 +458,7 @@ class AnswerResponse(BaseModel):
     retrieved_documents: List[RetrievedDocument]
     num_documents: int
     model_name: str
-\end{lstlisting}
+\end{verbatim}
 
 \section{Frontend}
 

@@ -24,10 +24,13 @@ class _CompatibilityUnpickler(pickle.Unpickler):
     """Custom unpickler that redirects old module paths to new ones"""
 
     def find_class(self, module, name):
-        # Redirect old module paths
+        # Redirect old module paths to src.RAG.embedding
         redirects = {
-            "vector_store": "embedding.vector_store",
-            "faiss_store": "embedding.faiss_store",
+            "vector_store": "src.RAG.embedding.vector_store",
+            "faiss_store": "src.RAG.embedding.faiss_store",
+            "embedding.vector_store": "src.RAG.embedding.vector_store",
+            "embedding.faiss_store": "src.RAG.embedding.faiss_store",
+            "embedding.chunking": "src.RAG.embedding.chunking",
         }
 
         for old_path, new_path in redirects.items():
@@ -297,10 +300,11 @@ class FaissVectorStore(VectorStore):
         load_dir = path or self.config.save_path
 
         # Load FAISS index
-        embedding_dir = Path(__file__).parent
-        load_dir = embedding_dir / load_dir.lstrip("./")
-        load_dir = str(load_dir)
+        # embedding_dir = Path(__file__).parent
+        # load_dir = embedding_dir / load_dir.lstrip("./")
+        # load_dir = str(load_dir)
         index_path = os.path.join(load_dir, "faiss.index")
+        print(index_path)
         if not os.path.exists(index_path):
             raise FileNotFoundError(f"Index not found at {index_path}")
 

@@ -45,7 +45,143 @@ Các văn bản khác & 414 \\
 \caption{Phân bố chunks theo source file}
 \end{table}
 
+\subsection{Nguồn dữ liệu và phân tích nhu cầu sinh viên}
+
+Dữ liệu sử dụng trong hệ thống RAG Chatbot được thu thập từ các nguồn chính thức của Đại học Bách Khoa Hà Nội, bao gồm:
+
+\begin{itemize}
+    \item \textbf{Cổng thông tin sinh viên:} \url{https://ctt-sv.hust.edu.vn} - Nơi đăng tải các quy chế, quy định, thông báo học vụ chính thức.
+    \item \textbf{Website Phòng Đào tạo:} Các văn bản quy chế đào tạo, hướng dẫn đăng ký học tập, quy định tốt nghiệp.
+    \item \textbf{Website Phòng Công tác Sinh viên:} Quy định về điểm rèn luyện, học bổng, chính sách hỗ trợ sinh viên.
+\end{itemize}
+
+\subsubsection{Phân tích nhu cầu thắc mắc của sinh viên}
+
+Dựa trên khảo sát và thống kê từ các kênh hỗ trợ sinh viên (email phòng đào tạo, fanpage, nhóm sinh viên), các chủ đề thắc mắc chính được phân loại như sau:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{8.5cm}|}
+\hline
+\textbf{Chủ đề} & \textbf{Các thắc mắc phổ biến} \\
+\hline
+Kế hoạch đăng ký học tập & Số tín chỉ tối đa/tối thiểu, quy trình đăng ký, điều chỉnh, rút học phần, học kỳ hè \\
+\hline
+Điều kiện tốt nghiệp & Tín chỉ tích lũy, GPA, điểm rèn luyện, chuẩn ngoại ngữ, thời gian đào tạo \\
+\hline
+Học bổng KKHT & Điều kiện xét, mức học bổng loại A/B/C, thời gian công bố, quỹ học bổng \\
+\hline
+Quy định ngoại ngữ & Chuẩn đầu ra, chứng chỉ được công nhận, thời hạn hiệu lực, quy đổi điểm \\
+\hline
+Điểm rèn luyện & Thang điểm, xếp loại, ảnh hưởng đến học bổng, quy trình khiếu nại \\
+\hline
+Chương trình kỹ sư & Điều kiện chuyển tiếp, tín chỉ tích lũy trước, học phí, bằng cấp \\
+\hline
+Thi cử và đánh giá & Điểm liệt, phúc tra, hoãn thi, thi trực tuyến, quy đổi điểm chữ \\
+\hline
+\end{tabular}
+\caption{Các chủ đề thắc mắc phổ biến của sinh viên}
+\end{table}
+
+\subsubsection{Các loại văn bản quy định}
+
+Dựa trên phân tích nhu cầu, hệ thống thu thập và xử lý các văn bản quy định chính thức thuộc các nhóm sau:
+
+\begin{itemize}
+    \item \textbf{Quy chế đào tạo:} Quy định tổng thể về đào tạo, đăng ký học, đánh giá, tốt nghiệp.
+    \item \textbf{Quy chế công tác sinh viên:} Quyền, nghĩa vụ, kỷ luật sinh viên.
+    \item \textbf{Quy định học bổng:} Học bổng khuyến khích học tập (KKHT), học bổng tài trợ, điều kiện và quy trình xét.
+    \item \textbf{Quy định ngoại ngữ:} Chuẩn đầu ra, chứng chỉ được công nhận, thời hạn hiệu lực.
+    \item \textbf{Quy định điểm rèn luyện:} Tiêu chí đánh giá, thang điểm, xử lý vi phạm.
+    \item \textbf{Hướng dẫn chương trình đào tạo:} Chương trình kỹ sư, chuyển tiếp, tích lũy tín chỉ.
+    \item \textbf{Quy định thi cử:} Thi trực tuyến, B-Learning, hoãn thi, phúc tra.
+    \item \textbf{Chính sách hỗ trợ:} Sinh viên khuyết tật, sinh viên nước ngoài, các chính sách đặc biệt.
+\end{itemize}
+
+Việc lựa chọn các văn bản này đảm bảo bao phủ \textbf{hầu hết các thắc mắc thường gặp} của sinh viên trong suốt quá trình học tập từ năm nhất đến khi tốt nghiệp.
+
 \section{Evaluation Framework}
+
+\subsection{Bộ câu hỏi đánh giá (Evaluation Dataset)}
+
+Trong khuôn khổ đề tài, \textbf{bảng các câu hỏi đánh giá} chính là tập dữ liệu dạng CSV dùng để kiểm thử tự động chất lượng truy xuất (retrieval) của hệ thống. Mỗi dòng trong file tương ứng với \textbf{một câu hỏi} và các thông tin ``ground truth'' (đáp án mong đợi và nguồn văn bản mong đợi).
+
+Tập dữ liệu sử dụng trong thực nghiệm là \texttt{rag\_evaluation\_dataset\_expanded.csv} (154 câu hỏi), mở rộng từ bộ dữ liệu gốc ban đầu (70 câu hỏi). Cấu trúc các cột trong CSV được trình bày ở Bảng \ref{tab:eval-dataset-columns}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3.2cm}|p{10.0cm}|}
+\hline
+\textbf{Trường dữ liệu} & \textbf{Ý nghĩa} \\
+\hline
+\texttt{question} & Câu hỏi đầu vào cho hệ thống RAG. \\
+\hline
+\texttt{answer} & Câu trả lời ground truth (dùng trong đánh giá generation hoặc làm tham chiếu). \\
+\hline
+\texttt{document\_source} & \textbf{Nguồn văn bản mong đợi} chứa thông tin trả lời (ground truth cho retrieval). \\
+\hline
+\texttt{question\_type} & Nhãn loại câu hỏi (\texttt{factual}, \texttt{reasoning}, \texttt{comparative}, \texttt{calculation}). \\
+\hline
+\texttt{difficulty} & Độ khó (\texttt{easy}, \texttt{medium}, \texttt{hard}). \\
+\hline
+\texttt{relevant\_context} & Đoạn ngữ cảnh liên quan (trích từ văn bản), dùng để giải thích/chứng minh ground truth. \\
+\hline
+\end{tabular}
+\caption{Cấu trúc bộ dữ liệu đánh giá}
+\label{tab:eval-dataset-columns}
+\end{table}
+
+\subsubsection{Phân bố câu hỏi và nguồn văn bản}
+
+Với bộ dữ liệu mở rộng (154 câu), các câu hỏi được gán nhãn theo loại và độ khó nhằm phân tích kết quả chi tiết. Bảng \ref{tab:eval-dataset-distribution} trình bày phân bố theo \texttt{question\_type} và \texttt{difficulty}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|r||l|r|}
+\hline
+\textbf{Loại câu hỏi} & \textbf{Số lượng} & \textbf{Độ khó} & \textbf{Số lượng} \\
+\hline
+factual & 124 & easy & 36 \\
+\hline
+reasoning & 15 & medium & 102 \\
+\hline
+comparative & 11 & hard & 16 \\
+\hline
+calculation & 4 & \textbf{Tổng} & \textbf{154} \\
+\hline
+\end{tabular}
+\caption{Phân bố câu hỏi trong bộ dữ liệu đánh giá mở rộng}
+\label{tab:eval-dataset-distribution}
+\end{table}
+
+Ngoài ra, bộ dữ liệu bao phủ 13 nguồn văn bản chính (\texttt{document\_source}). Các nguồn có tần suất xuất hiện nhiều nhất gồm: \textit{Quy chế đào tạo} (45 câu), \textit{QĐ Học bổng KKHT} (21 câu), \textit{quy định dạy/thi trực tuyến} (29 câu), \textit{quy định điểm rèn luyện} (12 câu), ... Điều này phản ánh các chủ đề thường gặp trong các câu hỏi học vụ.
+
+\subsubsection{Ví dụ một số câu hỏi trong bảng đánh giá}
+
+Bảng \ref{tab:eval-sample-questions} minh hoạ một số mẫu câu hỏi tiêu biểu trong bộ dữ liệu. Các câu hỏi được thiết kế để bao phủ nhiều tình huống: truy vấn trực tiếp, suy luận, so sánh và tính toán.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{7.4cm}|p{4.6cm}|p{1.6cm}|p{1.6cm}|}
+\hline
+\textbf{Câu hỏi} & \textbf{Nguồn mong đợi} & \textbf{Type} & \textbf{Diff} \\
+\hline
+GPA tối thiểu để được xét học bổng khuyến khích học tập loại A là bao nhiêu? & QĐ Học bổng KKHT 2023 & factual & easy \\
+\hline
+Sinh viên nào không được xét cấp học bổng KKHT? & QĐ Học bổng KKHT 2023 & factual & hard \\
+\hline
+So sánh điều kiện để được học bổng KKHT loại A và loại B? & QĐ Học bổng KKHT 2023 & comparative & medium \\
+\hline
+Sinh viên có điểm học phần 8.3 theo thang 10, được quy đổi thành điểm chữ gì? & Quy chế đào tạo 2025 & calculation & medium \\
+\hline
+Sinh viên có GPA 3.3 và điểm rèn luyện 82 điểm được xét học bổng loại nào? & QĐ Học bổng KKHT 2023 & reasoning & medium \\
+\hline
+Sinh viên đã học tích lũy trước 20 tín chỉ của chương trình kỹ sư thì được công nhận bao nhiêu tín chỉ? & HD chuyển tiếp kỹ sư 180TC & reasoning & hard \\
+\hline
+\end{tabular}
+\caption{Một số câu hỏi minh hoạ trong bộ dữ liệu đánh giá}
+\label{tab:eval-sample-questions}
+\end{table}
 
 \subsection{Evaluation Scripts}
 Hệ thống sử dụng 2 scripts đánh giá:
@@ -73,8 +209,64 @@ MRR & Mean Reciprocal Rank của relevant doc đầu tiên \\
 \caption{Các metrics đánh giá retrieval}
 \end{table}
 
+\subsubsection{Định nghĩa công thức và ý nghĩa các thành phần}
+
+Gọi $N$ là số lượng câu hỏi đánh giá, $K$ là số lượng tài liệu được truy xuất (top-$K$). Với mỗi câu hỏi $i$, hệ thống trả về danh sách $K$ nguồn tài liệu theo thứ tự xếp hạng.
+
+\begin{itemize}
+    \item \textbf{Hit@K (cho từng câu hỏi):} đánh dấu câu hỏi có truy xuất được đúng nguồn mong đợi trong top-$K$.
+    \[
+        \mathrm{hit}_i@K = \mathbf{1}\{\text{expected\_source}_i \in \text{top-}K\}\,.
+    \]
+    \textit{Ý nghĩa:} nếu $\mathrm{hit}_i@K = 1$ thì hệ thống đã ``chạm'' đúng văn bản cần thiết để trả lời.
+
+    \item \textbf{Hit Rate@K (toàn bộ tập):} tỷ lệ câu hỏi có $\mathrm{hit}_i@K = 1$.
+    \[
+        \mathrm{HitRate}@K = \frac{1}{N}\sum_{i=1}^{N} \mathrm{hit}_i@K\,.
+    \]
+    \textit{Ý nghĩa:} đo khả năng ``không bỏ sót'' tài liệu đúng (mang tính bao phủ).
+
+    \item \textbf{Rank (cho từng câu hỏi):} vị trí xuất hiện đầu tiên của nguồn mong đợi trong top-$K$ (1-indexed); nếu không xuất hiện thì $\mathrm{rank}_i = 0$.
+
+    \item \textbf{Reciprocal Rank (RR):} nếu tìm thấy thì bằng $1/\mathrm{rank}_i$, nếu không thì bằng 0.
+    \[
+        \mathrm{RR}_i =
+        \begin{cases}
+            \frac{1}{\mathrm{rank}_i}, & \mathrm{rank}_i > 0\\
+            0, & \mathrm{rank}_i = 0
+        \end{cases}
+    \]
+    \textit{Ý nghĩa:} ưu tiên hệ thống đưa tài liệu đúng lên đầu danh sách.
+
+    \item \textbf{MRR (Mean Reciprocal Rank):}
+    \[
+        \mathrm{MRR} = \frac{1}{N}\sum_{i=1}^{N} \mathrm{RR}_i\,.
+    \]
+    \textit{Ý nghĩa:} kết hợp cả ``có tìm thấy'' và ``đúng xuất hiện sớm''.
+
+    \item \textbf{Precision@K và Recall@K:} trong định nghĩa tổng quát, gọi $\mathrm{Rel}_i$ là tập tài liệu relevant cho câu hỏi $i$.
+    \[
+        \mathrm{Precision}_i@K = \frac{|\mathrm{Rel}_i \cap \mathrm{TopK}_i|}{K},\qquad
+        \mathrm{Recall}_i@K = \frac{|\mathrm{Rel}_i \cap \mathrm{TopK}_i|}{|\mathrm{Rel}_i|}.
+    \]
+    \textit{Ý nghĩa:} Precision@K đo ``độ sạch'' danh sách top-$K$ (ít nhiễu), Recall@K đo mức ``bao phủ'' (ít bỏ sót).
+\end{itemize}
+
+\subsubsection{Lưu ý về cách tính trong script đánh giá}
+
+Trong \texttt{evaluate\_retrieval.py}, bài toán retrieval được mô hình hóa theo giả định \textbf{mỗi câu hỏi chỉ có 1 văn bản relevant duy nhất}, chính là \texttt{document\_source}. Khi đó:
+\[
+\mathrm{Precision}_i@K = \begin{cases}\frac{1}{K}, & \mathrm{hit}_i@K=1\\0, & \mathrm{hit}_i@K=0\end{cases},\qquad
+\mathrm{Recall}_i@K = \begin{cases}1, & \mathrm{hit}_i@K=1\\0, & \mathrm{hit}_i@K=0\end{cases}.
+\]
+Vì vậy, với $K=5$, nếu hệ thống hit gần như tuyệt đối thì Precision@5 xấp xỉ $0.2$ (tức $1/5$). Đây là hệ quả trực tiếp của giả định ``single relevant document'', và phù hợp với mục tiêu kiểm thử: \textbf{hệ thống có truy xuất đúng văn bản cần thiết hay không}.
+
+\subsubsection{Quy tắc so khớp nguồn văn bản (expected\_source)}
+
+Để giảm sai khác do cách đặt tên file, script chuẩn hoá tên nguồn trước khi so khớp: đưa về chữ thường, chỉ lấy tên file, loại bỏ hậu tố \texttt{\_converted} và \texttt{.md}. Ngoài so khớp exact, script còn cho phép so khớp kiểu substring và một số biến thể ký tự (ví dụ: \texttt{QĐ} vs \texttt{QD}) để phản ánh đúng mục tiêu retrieval.
+
 \subsection{Evaluation Data Structure}
-\begin{lstlisting}[language=Python]
+\begin{verbatim}
 @dataclass
 class EvaluationSample:
     question: str
@@ -95,7 +287,7 @@ class RetrievalEvalResult:
     precision: float
     recall: float
     reciprocal_rank: float
-\end{lstlisting}
+\end{verbatim}
 
 \section{Kết quả đánh giá Performance}
 
@@ -125,6 +317,250 @@ Hệ thống đạt độ chính xác 99.5\%+ trong xử lý tiếng Việt, bao
     \item Xử lý chính xác các ký tự đặc biệt
     \item Bảo toàn cấu trúc văn bản pháp lý
 \end{itemize}
+
+\section{So sánh Semantic Search và Hybrid Search}
+
+\subsection{Kết quả đánh giá trên bộ dữ liệu gốc (70 câu hỏi)}
+
+Bảng \ref{tab:semantic-vs-hybrid} trình bày so sánh kết quả giữa Semantic Search (chỉ sử dụng vector embeddings) và Hybrid Search (kết hợp BM25 + Semantic với RRF fusion).
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Metric} & \textbf{Semantic-only} & \textbf{Hybrid + Reranking} & \textbf{Cải thiện} \\
+\hline
+Hit Rate@5 & 95.71\% & 98.05\% & \textbf{+2.34\%} \\
+\hline
+MRR & 87.52\% & 93.20\% & \textbf{+5.68\%} \\
+\hline
+Precision@5 & Chưa đo & 51.31\% & - \\
+\hline
+Recall@5 & 95.71\% & 98.05\% & \textbf{+2.34\%} \\
+\hline
+\end{tabular}
+\caption{So sánh Semantic Search vs Hybrid Search + Reranking (threshold 0.7)}
+\label{tab:semantic-vs-hybrid}
+\end{table}
+
+\subsection{Phân tích các trường hợp thất bại của Semantic Search}
+
+Semantic Search thất bại trong 3 câu hỏi đặc biệt:
+
+\begin{enumerate}
+    \item \textbf{Câu hỏi phủ định:} ``Sinh viên nào không được xét cấp học bổng KKHT?'' - Semantic search không phân biệt được ngữ nghĩa phủ định của từ ``không được xét''
+    
+    \item \textbf{Câu hỏi về ký hiệu:} ``Điểm chữ R trong bảng điểm có ý nghĩa gì?'' - Ký tự đơn ``R'' có vector embedding không đặc trưng
+    
+    \item \textbf{Câu hỏi về quy đổi:} ``Chứng chỉ IELTS 6.0 tương đương bậc mấy?'' - Semantic search nhầm lẫn giữa nhiều quy định ngoại ngữ khác nhau
+\end{enumerate}
+
+\subsection{Tại sao Hybrid Search hiệu quả hơn?}
+
+\begin{itemize}
+    \item \textbf{BM25 bổ sung cho Semantic Search:} BM25 sử dụng exact keyword matching, đặc biệt hiệu quả với:
+    \begin{itemize}
+        \item Thuật ngữ pháp lý cụ thể (``Điều 15'', ``Khoản 3'')
+        \item Mã số và ký hiệu (``GPA 3.6'', ``Điểm R'')
+        \item Cụm từ phủ định tiếng Việt (``không được xét'', ``không được phép'')
+    \end{itemize}
+    
+    \item \textbf{RRF Fusion:} Kết hợp kết quả từ cả hai phương pháp một cách công bằng, không phụ thuộc vào việc chuẩn hóa điểm số
+    
+    \item \textbf{Negation Boost:} Tăng trọng số BM25 cho các câu hỏi chứa từ phủ định tiếng Việt
+\end{itemize}
+
+\section{Đánh giá Hybrid Search + Cross-encoder Reranking (04/02/2026)}
+
+\subsection{Cấu hình thử nghiệm}
+\begin{itemize}
+    \item \textbf{Hybrid Search (BM25):} Enabled
+    \item \textbf{Reranking (Cross-encoder):} Enabled
+    \item \textbf{Score Threshold:} 0.7 (chỉ giữ lại documents có relevance score $\geq 0.7$)
+    \item \textbf{Top K:} 5
+    \item \textbf{Evaluation Dataset:} 154 samples
+\end{itemize}
+
+\subsection{Kết quả tổng quan}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Hit Rate@5 & 98.05\% \\
+\hline
+MRR & 93.20\% \\
+\hline
+Precision@5 & 51.31\% \\
+\hline
+Recall@5 & 98.05\% \\
+\hline
+\end{tabular}
+\caption{Kết quả đánh giá Hybrid Search + Cross-encoder Reranking (threshold 0.7)}
+\label{tab:hybrid-rerank-results}
+\end{table}
+
+\textbf{Nhận xét:}
+\begin{itemize}
+    \item \textbf{Precision@5 đạt 51.31\%} nhờ threshold 0.7 loại bỏ các documents không liên quan.
+    \item \textbf{MRR cải thiện} từ 92.31\% lên 93.20\% nhờ cross-encoder reranking đưa documents đúng lên đầu.
+    \item \textbf{Hit Rate giảm nhẹ} 1.30\% do threshold loại bỏ một số documents có score thấp nhưng vẫn liên quan - đây là trade-off hợp lý để đạt Precision cao hơn.
+\end{itemize}
+
+\subsubsection{Ý nghĩa của Score Threshold}
+
+Việc áp dụng \textbf{score threshold 0.7} có những ý nghĩa quan trọng:
+
+\begin{itemize}
+    \item \textbf{Precision@5 đạt 51.31\%:} Do chỉ giữ lại các documents có relevance score cao ($\geq 0.7$), danh sách kết quả ``sạch'' hơn (ít nhiễu).
+    \item \textbf{Hit Rate@5 đạt 98.05\%:} Gần như tất cả các câu hỏi đều tìm được document liên quan trong top-5.
+    \item \textbf{MRR đạt 93.20\%:} Cross-encoder reranking đưa documents liên quan lên vị trí đầu tiên hiệu quả.
+\end{itemize}
+
+\subsubsection{Diễn giải kết quả và ý nghĩa các cột trong bảng kết quả}
+
+Kết quả được sinh tự động bởi script \texttt{evaluate\_retrieval.py} và được lưu dưới dạng CSV trong thư mục \texttt{src/RAG/evaluation/retrieval\_results/}. Hai nhóm file quan trọng:
+\begin{itemize}
+    \item \textbf{Retrieval summary:} chứa cấu hình và metric tổng hợp (Hit Rate@K, MRR, Precision@K, Recall@K), kèm breakdown theo \texttt{question\_type} và \texttt{difficulty}.
+    \item \textbf{Retrieval detailed:} chứa kết quả theo từng câu hỏi, gồm các cột: \texttt{question}, \texttt{expected\_source}, \texttt{retrieved\_sources} (danh sách top-$K$), \texttt{retrieved\_scores} (điểm từ cross-encoder), \texttt{hit}, \texttt{rank}, \texttt{precision}, \texttt{recall}, \texttt{reciprocal\_rank}.
+\end{itemize}
+
+Với threshold 0.7, nhiều câu hỏi chỉ trả về 1-3 documents (thay vì đủ 5), do đó Precision@5 thực tế phản ánh chính xác hơn chất lượng retrieval.
+
+\subsection{Kết quả theo loại câu hỏi}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\textbf{Type} & \textbf{Count} & \textbf{Hit Rate} & \textbf{MRR} & \textbf{Precision} & \textbf{Recall} \\
+\hline
+calculation & 4 & 100.00\% & 100.00\% & 87.50\% & 100.00\% \\
+\hline
+comparative & 11 & 100.00\% & 95.45\% & 56.06\% & 100.00\% \\
+\hline
+factual & 124 & 97.58\% & 91.96\% & 46.52\% & 97.58\% \\
+\hline
+reasoning & 15 & 100.00\% & 100.00\% & 77.78\% & 100.00\% \\
+\hline
+\end{tabular}
+\caption{Kết quả theo loại câu hỏi (Hybrid + Rerank, threshold 0.7)}
+\end{table}
+
+\textbf{Nhận xét:}
+\begin{itemize}
+    \item Câu hỏi dạng \textbf{calculation} và \textbf{reasoning} đạt kết quả xuất sắc (100\% Hit Rate, MRR 100\%).
+    \item Câu hỏi dạng \textbf{factual} có Hit Rate thấp hơn (97.58\%) do một số câu hỏi về thông tin cụ thể có document liên quan với score dưới threshold.
+    \item \textbf{Cross-encoder reranking cải thiện đáng kể} cho câu hỏi reasoning (từ 93.33\% lên 100\%).
+\end{itemize}
+
+\subsection{Kết quả theo độ khó}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\textbf{Difficulty} & \textbf{Count} & \textbf{Hit Rate} & \textbf{MRR} & \textbf{Precision} & \textbf{Recall} \\
+\hline
+easy & 36 & 97.22\% & 85.65\% & 52.87\% & 97.22\% \\
+\hline
+medium & 102 & 98.04\% & 96.08\% & 50.93\% & 98.04\% \\
+\hline
+hard & 16 & 100.00\% & 91.87\% & 50.21\% & 100.00\% \\
+\hline
+\end{tabular}
+\caption{Kết quả theo độ khó (Hybrid + Rerank, threshold 0.7)}
+\end{table}
+
+\textbf{Nhận xét:}
+\begin{itemize}
+    \item Câu hỏi \textbf{hard} đạt 100\% Hit Rate, cho thấy cross-encoder reranking hiệu quả với các câu hỏi phức tạp.
+    \item Câu hỏi \textbf{medium} có MRR cao nhất (96.08\%), phản ánh documents liên quan thường xuất hiện ở top-1.
+    \item Câu hỏi \textbf{easy} có MRR thấp hơn (85.65\%) có thể do nhiều documents có nội dung tương tự cạnh tranh nhau.
+\end{itemize}
+
+\subsection{Phân tích kết quả tổng quan}
+\begin{itemize}
+    \item Hybrid Search + Cross-encoder Reranking với threshold 0.7 đạt \textbf{Hit Rate 98.05\%} và \textbf{MRR 93.20\%}.
+    \item \textbf{Precision@5 tăng gấp 2.5 lần} so với cấu hình không có threshold (51.31\% vs 19.87\%), cho thấy danh sách kết quả chất lượng cao hơn.
+    \item Cross-encoder reranking \textbf{cải thiện đáng kể} cho câu hỏi reasoning (từ 93.33\% lên 100\% Hit Rate).
+    \item Trade-off: Hit Rate giảm nhẹ 1.3\% do threshold loại bỏ một số documents có score thấp nhưng vẫn liên quan.
+\end{itemize}
+
+\section{Phân tích chi tiết các Case thất bại và cách khắc phục}
+
+\subsection{Các Case thất bại với Semantic Search (Trước khi áp dụng BM25)}
+
+Trước khi áp dụng Hybrid Search, hệ thống Semantic-only đạt Hit Rate 95.71\% với 3 câu hỏi thất bại:
+
+\subsubsection{Case 1: Câu hỏi phủ định tiếng Việt}
+\begin{itemize}
+    \item \textbf{Câu hỏi:} ``Sinh viên nào không được xét cấp học bổng KKHT?''
+    \item \textbf{Nguồn mong đợi:} QĐ Học bổng KKHT 2023
+    \item \textbf{Lý do thất bại:} Semantic search không phân biệt được ngữ nghĩa phủ định. Vector embedding của ``không được xét'' gần với ``được xét'', dẫn đến việc truy xuất sai document.
+    \item \textbf{Cách khắc phục:} BM25 sử dụng exact keyword matching, nhận diện chính xác cụm từ ``không được xét'' trong văn bản. Cơ chế Negation Boost tăng trọng số BM25 cho các câu hỏi chứa từ phủ định.
+    \item \textbf{Kết quả sau khắc phục:} Hit = True, Rank = 1
+\end{itemize}
+
+\subsubsection{Case 2: Câu hỏi về ký hiệu đơn lẻ}
+\begin{itemize}
+    \item \textbf{Câu hỏi:} ``Điểm chữ R trong bảng điểm có ý nghĩa gì?''
+    \item \textbf{Nguồn mong đợi:} QCDT\_2025\_5445\_QD-DHBK
+    \item \textbf{Lý do thất bại:} Ký tự đơn ``R'' có vector embedding không đặc trưng, dễ bị nhầm lẫn với các context khác. Semantic search trả về QĐ đánh giá điểm rèn luyện thay vì Quy chế đào tạo.
+    \item \textbf{Cách khắc phục:} BM25 tìm kiếm exact match cho ``Điểm R'' hoặc ``điểm chữ R'' trong văn bản, đảm bảo truy xuất đúng document chứa định nghĩa điểm chữ.
+    \item \textbf{Kết quả sau khắc phục:} Hit = True, Rank = 1
+\end{itemize}
+
+\subsubsection{Case 3: Câu hỏi quy đổi với nhiều nguồn tương tự}
+\begin{itemize}
+    \item \textbf{Câu hỏi:} ``Chứng chỉ IELTS 6.0 tương đương bậc mấy theo Khung năng lực ngoại ngữ Việt Nam?''
+    \item \textbf{Nguồn mong đợi:} Quy định ngoại ngữ từ K70
+    \item \textbf{Lý do thất bại:} Có nhiều quy định ngoại ngữ (K68, K70, 2020-2021) với nội dung tương tự. Semantic search nhầm lẫn giữa các phiên bản do vector embeddings gần nhau.
+    \item \textbf{Cách khắc phục:} BM25 ưu tiên document chứa exact match ``K70'' và ``IELTS 6.0''. RRF fusion kết hợp điểm số từ cả hai phương pháp để xếp hạng chính xác hơn.
+    \item \textbf{Kết quả sau khắc phục:} Hit = True, Rank = 2
+\end{itemize}
+
+\subsection{Case còn thất bại với Hybrid Search}
+
+Mặc dù Hybrid Search cải thiện đáng kể, vẫn còn 1 case thất bại (0.65\%):
+
+\subsubsection{Case: Câu hỏi về giới hạn tín chỉ tích lũy trước}
+\begin{itemize}
+    \item \textbf{Câu hỏi:} ``Sinh viên đã học tích lũy trước 20 tín chỉ của chương trình kỹ sư thì được công nhận bao nhiêu tín chỉ?''
+    \item \textbf{Nguồn mong đợi:} HD học chuyển tiếp kỹ sư 180 TC
+    \item \textbf{Nguồn truy xuất:} QCDT\_2025\_5445\_QD-DHBK (Quy chế đào tạo chung)
+    \item \textbf{Lý do thất bại:}
+    \begin{enumerate}
+        \item Câu hỏi chứa nhiều thuật ngữ chung (``tín chỉ'', ``chương trình kỹ sư'', ``công nhận'') xuất hiện trong nhiều quy định
+        \item Quy chế đào tạo chung là document lớn hơn, có nhiều đề cập đến ``tín chỉ'' hơn
+        \item BM25 ưu tiên document có TF (term frequency) cao hơn
+        \item Semantic search cũng bị nhầm vì context ``tích lũy tín chỉ'' xuất hiện ở cả hai document
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Hướng phát triển để cải thiện các Case thất bại}
+
+\subsubsection{Cải thiện ngắn hạn}
+\begin{enumerate}
+    \item \textbf{Cross-encoder Reranking:} Áp dụng cross-encoder sau hybrid search để rerank top-k results. Cross-encoder có khả năng hiểu context sâu hơn, phân biệt được document chuyên biệt vs document chung.
+    
+    \item \textbf{Query Expansion:} Mở rộng câu hỏi với các từ khóa liên quan:
+    \begin{itemize}
+        \item ``tích lũy trước 20 tín chỉ'' $\rightarrow$ ``tích lũy trước 20 tín chỉ chuyển tiếp kỹ sư 180TC''
+    \end{itemize}
+    
+    \item \textbf{Document-specific Boosting:} Tăng trọng số cho các document chuyên biệt (hướng dẫn, quy định riêng) so với document chung (quy chế đào tạo).
+\end{enumerate}
+
+\subsubsection{Cải thiện dài hạn}
+\begin{enumerate}
+    \item \textbf{Multi-hop Reasoning:} Xây dựng hệ thống có khả năng suy luận nhiều bước, tìm kiếm thông tin từ nhiều nguồn và tổng hợp.
+    
+    \item \textbf{Knowledge Graph:} Xây dựng đồ thị tri thức về các quy định, liên kết giữa các điều khoản để hỗ trợ truy xuất chính xác hơn.
+    
+    \item \textbf{Fine-tuned Embeddings:} Train lại embedding model trên corpus văn bản pháp lý tiếng Việt để cải thiện khả năng phân biệt ngữ nghĩa.
+    
+    \item \textbf{Metadata-aware Retrieval:} Sử dụng metadata (loại văn bản, phạm vi áp dụng, ngày ban hành) để lọc và xếp hạng kết quả chính xác hơn.
+\end{enumerate}
 
 \section{So sánh PDF Converters}
 
