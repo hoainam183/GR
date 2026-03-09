@@ -1,0 +1,80 @@
+[
+  {
+    "id": "613f72f9-962c-4b32-bcc9-0087fac77401",
+    "chunk_id": "chunk_0000",
+    "readable_id": "chunk_0000",
+    "content": "# THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP\n\n| Khối kiến thức | Tín chỉ | Mô tả |\n|---|---|---|\n| **Giáo dục đại cương** | **65** | |\n| Toán và khoa học cơ bản | 32 | Gồm các học phần như Đại số, Giải tích, Phương trình vi phân và chuỗi, Xác suất thống kê, Toán rời rạc, Tính toán khoa học, Vật lý, Điện tử cho CNTT, Xử lý tín hiệu số, Nhập môn CNTT và truyền thông. |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT. |\n| Giáo dục thể chất / Giáo dục quốc phòng An ninh | - | Theo quy định của Bộ GD&ĐT. |\n| Tiếng Anh | 8 | Gồm 2 học phần tiếng Anh cơ bản được tính tích lũy 8 tín chỉ. |\n| Tiếng Pháp | 9 | Gồm 6 học phần tiếng Pháp, trong đó có 3 học phần được tính tích luỹ 9TC. Theo quy định 2048/QĐ-ĐHBK, sinh viên có chứng chỉ tiếng Pháp quốc tế DELF B1 hoặc tương đương sẽ được miễn tất cả 6 học phần. |\n| Tiếng Pháp chuyên ngành | 3 | Gồm 1 học phần tiếng Pháp chuyên ngành CNTT, có tích hợp các kỹ năng hội nhập nghề nghiệp. |\n| **Giáo dục chuyên nghiệp** | **81** | |",
+    "metadata": {
+      "doc_type": "curriculum",
+      "level": "recursive",
+      "doc_title": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP",
+      "source": "",
+      "section_h1": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP",
+      "section_h2": null,
+      "section_h3": null,
+      "section_h4": null,
+      "hierarchy_path": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP",
+      "chunk_index": 0,
+      "total_chunks": 3,
+      "chunk_size": 1041,
+      "has_table": true,
+      "effective_date": null,
+      "expiry_date": null,
+      "applicable_cohort": null,
+      "applicable_major": "Công nghệ Thông tin Việt-Pháp",
+      "document_type": "international_program"
+    }
+  },
+  {
+    "id": "98f0387f-e4da-40c0-8699-814aa6b9d780",
+    "chunk_id": "chunk_0001",
+    "readable_id": "chunk_0001",
+    "content": "| Khối kiến thức | Tín chỉ | Mô tả |\n|---|---|---|\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 49 | Bao gồm: Các học phần cung cấp kiến thức cơ sở, nền tảng cho ngành Công nghệ thông tin, chú trọng phần thực hành. Một số học phần tiêu biểu: các học phần về lập trình, kỹ thuật phần mềm, cấu trúc dữ liệu và thuật toán, cơ sở dữ liệu, nguyên lý hệ điều hành, kiến trúc máy tính, ngôn ngữ và phương pháp dịch,… 3 học phần đồ án môn học (projects), là bước đệm cho đồ án tốt nghiệp, cho phép sinh viên phát triển kỹ năng, vận dụng các kiến thức lý thuyết và công nghệ đã học để giải quyết các bài toán thực tế. |\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức: Bắt buộc (3TC): các kỹ năng viết báo cáo kỹ thuật và thuyết trình. Tự chọn (6TC): các kiến thức bổ trợ về tâm lý, kỹ năng mềm, tư duy công nghệ, thiết kế, quản trị, khởi nghiệp. |",
+    "metadata": {
+      "doc_type": "curriculum",
+      "level": "recursive",
+      "doc_title": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP",
+      "source": "",
+      "section_h1": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP",
+      "section_h2": null,
+      "section_h3": null,
+      "section_h4": null,
+      "hierarchy_path": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP",
+      "chunk_index": 1,
+      "total_chunks": 3,
+      "chunk_size": 863,
+      "has_table": true,
+      "effective_date": null,
+      "expiry_date": null,
+      "applicable_cohort": null,
+      "applicable_major": "Công nghệ Thông tin Việt-Pháp",
+      "document_type": "international_program"
+    }
+  },
+  {
+    "id": "c25cab99-f62f-4736-bb2e-94616194a170",
+    "chunk_id": "chunk_0002",
+    "readable_id": "chunk_0002",
+    "content": "| Khối kiến thức | Tín chỉ | Mô tả |\n|---|---|---|\n| Chuyên ngành (Tự chọn theo định hướng) | 15 | Chương trình gồm 2 module định hướng, cả 2 có chung các học phần học máy và khai phá dữ liệu, học sâu và ứng dụng, nhập môn khoa học dữ liệu. Module 1 (AI and Big Data): Phát triển hệ thống web / di động tích hợp AI và xử lý dữ liệu lớn, với giao diện thân thiện và trải nghiệm người dùng tối ưu. Module 2 (AI and IoT): Phát triển các hệ thống web / nhúng và các ứng dụng tích hợp AI trong thiết bị thông minh. |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba, tại doanh nghiệp. |\n| Đồ án tốt nghiệp cử nhân | 6 | |\n| **Tổng cộng** | **146 tín chỉ** | |",
+    "metadata": {
+      "doc_type": "curriculum",
+      "level": "recursive",
+      "doc_title": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP",
+      "source": "",
+      "section_h1": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP",
+      "section_h2": null,
+      "section_h3": null,
+      "section_h4": null,
+      "hierarchy_path": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN CÔNG NGHỆ THÔNG TIN VIỆT PHÁP",
+      "chunk_index": 2,
+      "total_chunks": 3,
+      "chunk_size": 664,
+      "has_table": true,
+      "effective_date": null,
+      "expiry_date": null,
+      "applicable_cohort": null,
+      "applicable_major": "Công nghệ Thông tin Việt-Pháp",
+      "document_type": "international_program"
+    }
+  }
+]

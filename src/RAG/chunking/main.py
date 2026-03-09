@@ -1,6 +1,7 @@
 from pathlib import Path
 from chunker.hierarchical_legal_chunker import ArticleLevelLegalChunker
 from chunker.olmocr_legal_chunker import OlmOcrLegalChunker
+from chunker.recursive_chunker import RecursiveChunker
 
 
 def main_pipeline(
@@ -42,10 +43,14 @@ def main_pipeline(
             parent_size_limit=4000,
             chunk_overlap=100,
         )
+    elif chunker_type == "recursive":
+        chunker = RecursiveChunker(
+            chunk_size=1024,
+            chunk_overlap=150,
+            parent_chunk_max_chars=10000,
+        )
     # elif chunker_type == "character":
     #     chunker = CharacterChunker(chunk_size=1200, chunk_overlap=200)
-    # elif chunker_type == "recursive":
-    #     chunker = RecursiveCharacterChunker(chunk_size=1200, chunk_overlap=200)
     else:
         raise ValueError(f"Unknown chunker type: {chunker_type}")
 
@@ -214,9 +219,9 @@ Examples:
         "--chunker",
         "-c",
         type=str,
-        choices=["hierarchical", "olmocr"],
+        choices=["hierarchical", "olmocr", "recursive"],
         default="hierarchical",
-        help="Chunker type: 'hierarchical' for Docling OCR, 'olmocr' for OLM OCR (default: hierarchical)",
+        help="Chunker type: 'hierarchical' for Docling OCR, 'olmocr' for OLM OCR, 'recursive' for general docs (default: hierarchical)",
     )
     parser.add_argument(
         "--pattern",

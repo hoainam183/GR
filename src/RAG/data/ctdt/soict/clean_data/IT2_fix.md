@@ -1,0 +1,1120 @@
+# TRƯỜNG ĐẠI HỌC BÁCH KHOA HÀ NỘI
+## VIỆN CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG
+
+# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2017
+## CỬ NHÂN KỸ THUẬT MÁY TÍNH
+
+---
+
+**Tên chương trình:** Kỹ thuật Máy tính  
+**Trình độ đào tạo:** Cử nhân  
+**Ngành đào tạo:** Kỹ thuật Máy tính  
+**Mã ngành:** 7480106  
+**Thời gian đào tạo:** 4 năm  
+**Bằng tốt nghiệp:** Cử nhân Kỹ thuật máy tính  
+**Khối lượng kiến thức toàn khóa:** 132 tín chỉ  
+
+---
+
+## 1. Mục tiêu chương trình đào tạo
+
+### 1.1 Mục tiêu chung
+
+- Đào tạo nhân lực chất lượng cao có khả năng tạo ra tri thức, sản phẩm mới, phục vụ xã hội và đất nước.
+- Đào tạo người học có phẩm chất chính trị, đạo đức; có kiến thức cơ sở và chuyên môn vững vàng, có kỹ năng thực hành nghề nghiệp, năng lực nghiên cứu, có khả năng sáng tạo để giải quyết vấn đề liên quan đến lĩnh vực Kỹ thuật máy tính, Truyền thông dữ liệu và An toàn thông tin, thích nghi với môi trường làm việc, có khả năng tự học để thích ứng với sự phát triển không ngừng của khoa học và công nghệ.
+
+### 1.2 Mục tiêu cụ thể
+
+Mục tiêu cụ thể của chương trình đào tạo cử nhân Kỹ thuật máy tính là trang bị cho người tốt nghiệp:
+
+- Kiến thức kỹ thuật vững chắc về ngành Kỹ thuật máy tính: các kiến thức cơ bản về toán, lý, điện tử, về thuật toán, cơ sở dữ liệu; phân tích và thiết kế hệ thống thông tin; Kiến thức về hạ tầng, các cơ chế kết nối, điều khiển, vận hành, an toàn thông tin của hệ thống máy tính và mạng truyền thông dữ liệu. Đủ năng lực phát hiện và giải quyết vấn đề liên quan đến xây dựng, triển khai phần cứng và phần mềm của các hệ thống tính toán.
+- Có kỹ năng vận dụng kiến thức, kỹ năng lập luận và tư duy hệ thống để giải quyết các vấn đề chuyên sâu của ngành và trong thực tế. Có thái độ và đạo đức nghề nghiệp phù hợp.
+- Có kỹ năng giao tiếp, làm việc nhóm, khả năng sử dụng tiếng Anh hiệu quả và thái độ làm việc chuyên nghiệp phù hợp với môi trường cộng tác đa ngành và quốc tế.
+- Có khả năng áp dụng các kiến thức chuyên môn, hình thành ý tưởng, phân tích, đưa ra giải pháp để giải quyết hiệu quả các vấn đề phù hợp điều kiện kinh tế - xã hội thực tế.
+
+---
+
+## 2. Chuẩn đầu ra của chương trình đào tạo
+
+Sau khi tốt nghiệp, Cử nhân Kỹ thuật máy tính của Trường ĐHBK Hà Nội phải đạt được:
+
+**1. Có kiến thức cơ sở chuyên môn vững chắc** để thích ứng tốt với những công việc khác nhau trong lĩnh vực rộng của ngành Kỹ thuật máy tính, có khả năng tham gia thiết kế, xây dựng, triển khai và vận hành các hệ thống máy tính, hệ thống nhúng, hệ thống mạng truyền thông, các dịch vụ mạng, các giải pháp an toàn an ninh không gian mạng:
+
+- 1.1. Nắm vững các kiến thức Toán và khoa học cơ bản, toán cho công nghệ thông tin phục vụ giải quyết các bài toán kỹ thuật.
+- 1.2. Khả năng áp dụng các kiến thức cơ sở cốt lõi ngành bao gồm hệ thống máy tính, giải thuật và lập trình, mạng máy tính và truyền thông dữ liệu, kỹ thuật phát triển phần mềm, an toàn an ninh thông tin, xử lý mã hoá thông tin và tín hiệu, dịch vụ mạng, … trong nghiên cứu và phát triển các hệ thống, sản phẩm, giải pháp kỹ thuật Hệ thống máy tính, Truyền thông Mạng máy tính và An toàn thông tin.
+- 1.3. Hiểu biết, nắm vững và có khả năng áp dụng các kiến thức chuyên ngành, tiếp cận các định hướng ứng dụng về Mạng máy tính & Truyền thông dữ liệu, An toàn thông tin, Máy tính và hệ thống nhúng trong xây dựng và phát triển các hệ thống, dịch vụ, giải pháp kỹ thuật Kỹ thuật máy tính.
+
+**2. Kỹ năng chuyên nghiệp và phẩm chất cá nhân** cần thiết để thành công trong nghề nghiệp:
+
+- 2.1. Phân tích và giải quyết vấn đề kỹ thuật, hiểu biết các phương pháp tiếp cận khác nhau của quá trình xây dựng công nghệ, thích hợp với mọi mặt: kinh tế - xã hội, đạo đức nghề nghiệp, luật pháp và an toàn thông tin.
+- 2.2. Khả năng thử nghiệm, nghiên cứu và khám phá tri thức.
+- 2.3. Tư duy hệ thống và tư duy phê bình.
+- 2.4. Tính năng động, sáng tạo và nghiêm túc.
+- 2.5. Đạo đức và trách nhiệm nghề nghiệp.
+- 2.6. Hiểu biết các vấn đề đương đại và ý thức học suốt đời.
+
+**3. Kỹ năng xã hội** cần thiết để làm việc hiệu quả trong nhóm đa ngành và trong môi trường quốc tế:
+
+- 3.1. Kỹ năng tổ chức, lãnh đạo và làm việc theo nhóm (đa ngành).
+- 3.2. Kỹ năng giao tiếp hiệu quả thông qua viết, thuyết trình, thảo luận, đàm phán, làm chủ tình huống, sử dụng hiệu quả các công cụ và phương tiện hiện đại.
+- 3.3. Kỹ năng sử dụng tiếng Anh hiệu quả trong công việc, đạt điểm TOEIC ≥ 500.
+
+**4. Năng lực tham gia thiết kế phát triển, cài đặt và bảo trì** các hệ thống, sản phẩm, giải pháp kỹ thuật Công nghệ thông tin trong bối cảnh kinh tế, xã hội và môi trường:
+
+- 4.1. Nhận thức về mối liên hệ mật thiết giữa giải pháp công nghệ thông tin với các yếu tố kinh tế, xã hội và môi trường trong thế giới toàn cầu hóa.
+- 4.2. Nhận biết vấn đề và hình thành ý tưởng giải pháp công nghệ thông tin, tham gia xây dựng dự án công nghệ thông tin.
+- 4.3. Tham gia thiết kế các hệ thống, sản phẩm, giải pháp kỹ thuật Công nghệ thông tin.
+- 4.4. Tham gia cài đặt, triển khai các hệ thống, sản phẩm, giải pháp kỹ thuật Công nghệ thông tin.
+- 4.5. Khai thác, bảo trì các hệ thống, sản phẩm, giải pháp kỹ thuật Công nghệ thông tin.
+
+---
+
+## 3. Nội dung chương trình
+
+### 3.1 Cấu trúc chung của chương trình đào tạo
+
+| Khối kiến thức | Tín chỉ | Ghi chú |
+|---|---|---|
+| Giáo dục đại cương | 51 | |
+| - Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |
+| - Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |
+| - GDTC/GD QP-AN | - | Theo quy định của Bộ GD&ĐT |
+| - Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |
+| Giáo dục chuyên nghiệp | 81 | |
+| - Cơ sở và cốt lõi ngành | 48 (±2) | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai |
+| - Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |
+| - Tự chọn theo môđun | 16 (±2) | Khối kiến thức Tự chọn theo môđun tạo điều kiện cho sinh viên học tiếp cận theo một lĩnh vực ứng dụng |
+| - Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba |
+| - Đồ án tốt nghiệp cử nhân | 6 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng |
+| **Tổng cộng** | **132 tín chỉ** | |
+
+### 3.2 Danh mục học phần và kế hoạch học tập chuẩn
+
+#### Lý luận chính trị + Pháp luật đại cương (13 tín chỉ)
+
+| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |
+|---|---|---|---|---|
+| 1 | SSH1111 | Triết học Mác - Lênin | 3(3-0-0-6) | 1 |
+| 2 | SSH1121 | Kinh tế chính trị Mác - Lênin | 2(2-0-0-4) | 2 |
+| 3 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 3 |
+| 4 | SSH1141 | Lịch sử Đảng Cộng sản Việt Nam | 2(2-0-0-4) | 4 |
+| 5 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 5 |
+| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 1 |
+
+#### Giáo dục thể chất (5 tín chỉ)
+
+| TT | Mã số | Tên học phần | Tín chỉ |
+|---|---|---|---|
+| 7 | PE1014 | Lý luận thể dục thể thao | 1(0-0-2-0) |
+| 8 | PE1024 | Bơi lội | 1(0-0-2-0) |
+| 9 | Tự chọn trong danh mục | Tự chọn thể dục 1 | 1(0-0-2-0) |
+| 10 | Tự chọn trong danh mục | Tự chọn thể dục 2 | 1(0-0-2-0) |
+| 11 | Tự chọn trong danh mục | Tự chọn thể dục 3 | 1(0-0-2-0) |
+
+#### Giáo dục Quốc phòng - An ninh (165 tiết)
+
+| TT | Mã số | Tên học phần | Tín chỉ |
+|---|---|---|---|
+| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |
+| 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |
+| 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-2-0-8) |
+
+#### Tiếng Anh (6 tín chỉ)
+
+| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |
+|---|---|---|---|---|
+| 15 | FL1100 | Tiếng Anh I | 3(0-6-0-6) | 1 |
+| 16 | FL1101 | Tiếng Anh II | 3(0-6-0-6) | 2 |
+
+#### Toán và Khoa học cơ bản (32 tín chỉ)
+
+| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |
+|---|---|---|---|---|
+| 17 | MI1111 | Giải tích I | 4(3-2-0-8) | 1 |
+| 18 | MI1121 | Giải tích II | 3(2-2-0-6) | 2 |
+| 19 | MI1131 | Giải tích III | 3(2-2-0-6) | 3 |
+| 20 | MI1141 | Đại số | 4(3-2-0-8) | 1 |
+| 21 | MI2020 | Xác suất thống kê | 3(2-2-0-6) | 3 |
+| 22 | PH1110 | Vật lý đại cương I | 3(2-1-1-6) | 2 |
+| 23 | PH1120 | Vật lý đại cương II | 3(2-1-1-6) | 3 |
+| 24 | IT1110 | Tin học đại cương | 4(3-1-1-8) | 2 |
+| 25 | MI2010 | Phương pháp tính | 2(2-0-0-4) | 3 |
+| 26 | IT3020 | Toán rời rạc | 3(3-1-0-6) | 3 |
+
+#### Cơ sở và cốt lõi ngành (48 tín chỉ)
+
+| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |
+|---|---|---|---|---|
+| 27 | IT2000 | Nhập môn CNTT và TT | 3(2-0-2-6) | 1 |
+| 28 | IT3420 | Điện tử cho CNTT | 2(2-1-0-4) | 3 |
+| 29 | IT3011 | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 4 |
+| 30 | IT3030 | Kiến trúc máy tính | 3(3-1-0-6) | 4 |
+| 31 | IT3040 | Kỹ thuật lập trình | 2(2-0-1-4) | 5 |
+| 32 | IT3070 | Nguyên lý hệ điều hành | 3(3-1-0-6) | 4 |
+| 33 | IT3170 | Thuật toán ứng dụng | 2(2-0-1-4) | |
+| 34 | IT3080 | Mạng máy tính | 3(3-0-1-6) | 5 |
+| 35 | IT3090 | Cơ sở dữ liệu | 3(2-1-1-6) | 5 |
+| 36 | IT3100 | Lập trình hướng đối tượng | 2(2-1-0-4) | 4 |
+| 37 | IT3150 | Project I | 2(0-0-4-8) | 5 |
+| 38 | IT4593 | Nhập môn Kỹ thuật truyền thông | 2(2-1-0-4) | 5 |
+| 39 | IT4172 | Xử lý tín hiệu | 2(2-1-0-4) | 5 |
+| 40 | IT3120 | Phân tích thiết kế hệ thống | 2(2-1-0-4) | 6 |
+| 41 | IT4060 | Lập trình mạng | 2(2-1-0-4) | 6 |
+| 42 | IT3180 | Nhập môn công nghệ phần mềm | 3(2-2-0-6) | 5 |
+| 43 | IT4015 | Nhập môn an toàn thông tin | 3(3-1-0-6) | 6 |
+| 44 | IT3931 | Project II | 2(0-0-4-8) | 6 |
+| 45 | IT4611 | Các hệ thống phân tán và ứng dụng | 2(2-1-0-4) | 7 |
+| 46 | IT3943 | Project III | 3(0-0-6-12) | 7 |
+
+#### Kiến thức bổ trợ (9 tín chỉ)
+
+**Bắt buộc:**
+
+| TT | Mã số | Tên học phần | Tín chỉ |
+|---|---|---|---|
+| 47 | IT2030 | Technical Writing and Presentation | 3(2-2-0-6) |
+
+**Tự chọn (chọn 6 tín chỉ):**
+
+| TT | Mã số | Tên học phần | Tín chỉ |
+|---|---|---|---|
+| 48 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) |
+| 49 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) |
+| 50 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) |
+| 51 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) |
+| 52 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) |
+| 53 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) |
+
+#### Tự chọn theo định hướng ứng dụng (16 tín chỉ)
+
+**Mô đun 1: Hệ thống nhúng và IoT**
+
+| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |
+|---|---|---|---|---|
+| 54 | IT4210 | Hệ nhúng | 3(3-0-1-6) | 6 |
+| 55 | IT4785 | Phát triển ứng dụng cho thiết bị di động | 2(2-1-0-4) | 5 |
+| 56 | IT4735 | IoT và ứng dụng | 2(2-1-0-4) | 7 |
+| 57 | IT4651 | Thiết kế và triển khai mạng IP | 3(2-0-2-6) | 6 |
+| 58 | IT4409 | Công nghệ Web và dịch vụ trực tuyến | 3(2-2-0-6) | 7 |
+| 59 | IT4931 | Lưu trữ và xử lý dữ liệu lớn | 3(3-1-0-6) | 8 |
+
+**Mô đun 2: Mạng máy tính và Truyền thông dữ liệu (16 tín chỉ)**
+
+| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |
+|---|---|---|---|---|
+| 60 | IT4651 | Thiết kế và triển khai mạng IP | 3(2-0-2-6) | 6 |
+| 61 | IT4409 | Công nghệ Web và dịch vụ trực tuyến | 3(2-2-0-6) | 7 |
+| 62 | IT4735 | IoT và ứng dụng | 2(2-1-0-4) | 7 |
+| 63 | IT4681 | Truyền thông đa phương tiện | 3(2-1-1-6) | 7 |
+| 64 | IT4263 | An ninh mạng | 3(2-0-2-6) | 7 |
+| 65 | IT4785 | Phát triển ứng dụng cho thiết bị di động | 2(2-1-0-4) | 5 |
+
+**Mô đun 3: An toàn thông tin (16 tín chỉ)**
+
+| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |
+|---|---|---|---|---|
+| 66 | IT4025 | Mật mã ứng dụng | 3(3-1-0-6) | 7 |
+| 67 | IT4263 | An ninh mạng | 3(2-0-2-6) | 7 |
+| 68 | IT4785 | Phát triển ứng dụng cho thiết bị di động | 2(2-1-0-4) | 5 |
+| 69 | IT4651 | Thiết kế và triển khai mạng IP | 3(2-0-2-6) | 6 |
+| 70 | IT4409 | Công nghệ Web và dịch vụ trực tuyến | 3(2-2-0-6) | 7 |
+| 71 | IT4831 | Phòng chống tấn công mạng | 2(2-0-1-4) | 8 |
+
+#### Thực tập và Đồ án tốt nghiệp (8 tín chỉ)
+
+| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |
+|---|---|---|---|---|
+| 72 | IT4991 | Thực tập kỹ thuật | 2(0-0-4-4) | 7 |
+| 73 | IT4997 | Đồ án tốt nghiệp Cử nhân | 6(0-0-12-12) | 8 |
+
+---
+
+## 4. Mô tả tóm tắt học phần
+
+### 4.1 Khối kiến thức Giáo dục đại cương
+
+---
+
+#### SSH1110 – Những nguyên lý cơ bản của chủ nghĩa Mác-Lênin I
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên những cơ sở lý luận cơ bản nhất để từ đó có thể tiếp cận được nội dung môn học Tư tưởng Hồ Chí Minh và Đường lối cách mạng của Đảng Cộng sản Việt Nam, hiểu biết nền tảng tư tưởng của Đảng; Xây dựng niềm tin, lý tưởng cách mạng cho sinh viên; Từng bước xác lập thế giới quan, nhân sinh quan và phương pháp luận chung nhất để tiếp cận các khoa học chuyên ngành được đào tạo.
+
+**Nội dung:** Giới thiệu khái lược về chủ nghĩa Mác-Lênin và một số vấn đề chung của môn học. Những nội dung cơ bản về thế giới quan và phương pháp luận của chủ nghĩa Mác-Lênin.
+
+---
+
+#### SSH1120 – Những nguyên lý cơ bản của chủ nghĩa Mác-Lênin II
+
+- **Khối lượng:** 3(2-1-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** SSH1110
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên những hiểu biết về các nguyên lý cơ bản của chủ nghĩa Mác-Lênin từ đó xác lập cơ sở lý luận để có thể tiếp cận nội dung môn học Tư tưởng Hồ Chí Minh và môn học Đường lối cách mạng của Đảng Cộng sản Việt Nam. Từng bước xác lập thế giới quan, phương pháp luận chung nhất để sinh viên tiếp cận các khoa học chuyên ngành được đào tạo. Xây dựng, phát triển nhân sinh quan cách mạng và tu dưỡng đạo đức con người mới.
+
+**Nội dung:** Những nội dung cơ bản của phần Kinh tế Chính trị Mác - Lênin và Chủ nghĩa xã hội khoa học. Trọng tâm của học thuyết kinh tế của chủ nghĩa Mác-Lênin về phương thức sản xuất tư bản chủ nghĩa; Những nội dung cơ bản lý luận của chủ nghĩa Mác-Lênin về chủ nghĩa xã hội; Chủ nghĩa xã hội hiện thực và triển vọng.
+
+---
+
+#### SSH1050 – Tư tưởng Hồ Chí Minh
+
+- **Khối lượng:** 2(2-0-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** SSH1110, SSH1120
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên những hiểu biết có tính hệ thống về tư tưởng, đạo đức, giá trị văn hoá Hồ Chí Minh và những kiến thức cơ bản về sự vận dụng sáng tạo chủ nghĩa Mác - Lênin của Hồ Chí Minh ở Việt nam. Cùng với môn học Những nguyên lý cơ bản của chủ nghĩa Mác-Lênin tạo lập cho sinh viên những hiểu biết về nền tảng tư tưởng, kim chỉ nam hành động của Đảng và của cách mạng nước ta.
+
+**Nội dung:** Khái quát cơ sở, quá trình hình thành và phát triển tư tưởng Hồ Chí Minh; Những nội dung cơ bản của tư tưởng Hồ Chí Minh về con đường cách mạng Việt nam trong cách mạng giải phóng dân tộc và xây dựng Chủ nghĩa xã hội.
+
+---
+
+#### SSH1130 – Đường lối cách mạng của Đảng CSVN
+
+- **Khối lượng:** 3(2-1-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** SSH1110, SSH1120, SSH1050
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên những nội dung cơ bản của đường lối cách mạng của Đảng Cộng sản Việt Nam, trong đó chủ yếu tập trung vào đường lối của Đảng thời kỳ đổi mới trên một số lĩnh vực cơ bản của đời sống xã hội phục vụ cho cuộc sống và công tác. Xây dựng cho sinh viên niềm tin vào sự lãnh đạo của Đảng, theo mục tiêu, lý tưởng của Đảng. Giúp sinh viên vận dụng kiến thức chuyên ngành để chủ động, tích cực trong giải quyết những vấn đề kinh tế, chính trị, văn hoá, xã hội theo đường lối, chính sách, pháp luật của Đảng và Nhà nước.
+
+**Nội dung:** Nội dung chủ yếu của môn học là cung cấp cho sinh viên những hiểu biết cơ bản có hệ thống về đường lối của Đảng trong các thời kỳ cách mạng, đặc biệt là đường lối trong thời kỳ đổi mới đất nước: Đường lối công nghiệp hóa. Đường lối xây dựng nền kinh tế thị trường định hướng xã hội chủ nghĩa. Đường lối xây dựng hệ thống chính trị. Đường lối xây dựng, phát triển nền văn hóa và giải quyết các vấn đề xã hội. Đường lối đối ngoại.
+
+---
+
+#### EM1170 – Pháp luật đại cương
+
+- **Khối lượng:** 2(2-0-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Trang bị cho sinh viên những lý thuyết chung về khái niệm cơ bản của khoa học pháp lý về Nhà nước và Pháp luật, những nội dung cơ bản của các ngành luật gốc như Hiến pháp, Hành chính, Dân sự, Hình sự trong hệ thống Pháp luật Việt Nam. Đồng thời trang bị cho sinh viên kiến thức Pháp luật chuyên ngành giúp sinh viên biết áp dụng Pháp luật trong cuộc sống và công việc.
+
+**Nội dung:** Khái quát về nguồn gốc ra đời nhà nước và pháp luật; bản chất, chức năng và các kiểu nhà nước, pháp luật; về bộ máy Nhà nước CHXHCN Việt Nam; về hệ thống văn bản quy phạm pháp luật; thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp lý. Giới thiệu những nội dung cơ bản nhất của những ngành luật chủ yếu ở nước ta hiện nay.
+
+---
+
+#### MIL1110 – Đường lối quân sự của Đảng
+
+- **Khối lượng:** 0(3-0-0-6)
+- **Học phần học trước:** SSH1130
+
+**Mục tiêu:** Trang bị cho sinh viên những kiến thức cơ bản của chủ nghĩa Mác - Lênin, tư tưởng Hồ Chí Minh về chiến tranh, quân đội và bảo vệ Tổ quốc; nhận thức đúng về nguồn gốc, bản chất chiến tranh; các quan điểm của Đảng về xây dựng nền quốc phòng toàn dân, lực lượng vũ trang nhân dân để tiến hành chiến tranh nhân dân bảo vệ Tổ quốc Việt Nam XHCN. Giúp sinh viên bước đầu tìm hiểu nghệ thuật đánh giặc của ông cha ta và nghệ thuật quân sự Việt Nam từ khi có Đảng.
+
+**Nội dung:** Đối tượng, phương pháp nghiên cứu môn học Giáo dục quốc phòng - an ninh; Quan điểm của chủ nghĩa Mác - Lênin, tư tưởng Hồ Chí Minh về chiến tranh, quân đội và bảo vệ Tổ quốc; Xây dựng nền quốc phòng toàn dân, an ninh nhân dân; Chiến tranh nhân dân bảo vệ Tổ quốc Việt Nam xã hội chủ nghĩa; Xây dựng lực lượng vũ trang nhân dân Việt Nam; Kết hợp phát triển kinh tế - xã hội với tăng cường củng cố quốc phòng - an ninh; Nghệ thuật quân sự Việt Nam.
+
+---
+
+#### MIL1120 – Công tác quốc phòng, an ninh
+
+- **Khối lượng:** 0(3-0-0-6)
+
+**Mục tiêu:** Giúp sinh viên nhận thức được âm mưu thủ đoạn của các thế lực thù địch đối với cách mạng Việt Nam trong giai đoạn hiện nay, trên cơ sở đó đấu tranh, phòng chống chiến lược 'diễn biến hòa bình', bạo loạn lật đổ của các thế lực thù địch; đấu tranh phòng chống địch lợi dụng vấn đề dân tộc và tôn giáo chống phá cách mạng Việt Nam để giữ gìn an ninh chính trị và bảo vệ toàn vẹn lãnh thổ Việt Nam XHCN.
+
+Trang bị cho sinh viên kiến thức về chiến tranh công nghệ cao; kiến thức về xây dựng lực lượng dân quân tự vệ, lực lượng dự bị động viên, phong trào toàn dân đấu tranh phòng chống tội phạm và tệ nạn xã hội, bảo vệ an ninh quốc gia và giữ gìn trật tự, an toàn xã hội; bảo vệ vững chắc chủ quyền lãnh thổ biên giới, biển đảo Việt Nam.
+
+**Nội dung:** Phòng chống chiến lược 'diễn biến hòa bình', bạo loạn lật đổ của các thế lực thù địch đối với cách mạng Việt Nam; Phòng chống địch tiến công hoả lực bằng vũ khí công nghệ cao; Xây dựng lực lượng dân quân tự vệ, lực lượng dự bị động viên và động viên công nghiệp quốc phòng; Xây dựng và bảo vệ chủ quyền lãnh thổ, biên giới quốc gia; Một số nội dung cơ bản về dân tộc, tôn giáo và đấu tranh phòng chống địch lợi dụng vấn đề dân tộc và tôn giáo chống phá cách mạng Việt Nam; Những vấn đề cơ bản về bảo vệ an ninh quốc gia và giữ gìn trật tự, an toàn xã hội; Những vấn đề cơ bản về đấu tranh phòng chống tội phạm và tệ nạn xã hội; Xây dựng phong trào toàn dân bảo vệ an ninh Tổ quốc.
+
+---
+
+#### MIL1130 – Quân sự chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC)
+
+- **Khối lượng:** 0(3-2-0-8)
+
+**Mục tiêu:** Trang bị cho sinh viên kiến thức chung về quân sự phổ thông, những kỹ năng quân sự cần thiết nhằm đáp ứng yêu cầu xây dựng, củng cố lực lượng vũ trang nhân dân, sẵn sàng tham gia lực lượng dân quân tự vệ, dự bị động viên và thực hiện nghĩa vụ quân sự bảo vệ Tổ quốc.
+
+Hiểu biết và sử dụng được một số loại phương tiện, vũ khí thông thường; có kiến thức về chiến thuật bộ binh; biết cách phòng, tránh vũ khí hủy diệt lớn và thành thạo kỹ thuật băng bó, chuyển thương.
+
+**Nội dung:** Đội ngũ đơn vị và ba môn quân sự phối hợp; Sử dụng bản đồ địa hình quân sự; Giới thiệu một số loại vũ khí bộ binh; Thuốc nổ; Phòng chống vũ khí hủy diệt lớn; Cấp cứu ban đầu vết thương chiến tranh; Từng người trong chiến đấu tiến công và phòng ngự; Kỹ thuật bắn súng tiểu liên AK (CKC).
+
+---
+
+#### FL1100 – Tiếng Anh I
+
+- **Khối lượng:** 3(0-6-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần dành cho những sinh viên mới bắt đầu học tiếng Anh, giúp sinh viên hình thành và rèn luyện khả năng Nghe, Nói, Đọc và Viết bằng tiếng Anh. Kết thúc học phần, sinh viên đạt được những kỹ năng tương đương TOEIC 250 điểm, hoặc trình độ ngôn ngữ bậc 2/6 theo chuẩn khung năng lực Ngoại ngữ 6 bậc của Việt Nam.
+
+**Nội dung:**
+- Kĩ năng Nghe: sinh viên được nghe các bài hội thoại hoặc độc thoại đơn giản về các chủ điểm khác nhau trong cuộc sống.
+- Kĩ năng Nói: thực hành nói trong các tình huống, luyện kĩ trọng âm của các từ riêng lẻ, ngữ điệu và trọng âm trong câu.
+- Kĩ năng Đọc: làm quen và rèn luyện các kĩ năng đọc hiểu; đọc nhanh lấy ý chính, đọc nhanh lấy thông tin cụ thể, đọc suy luận ý tác giả, đoán từ qua ngữ cảnh, mở rộng từ vựng.
+- Kĩ năng Viết: thực hành các bài tập viết ở mức độ đơn giản.
+
+---
+
+#### FL1101 – Tiếng Anh II
+
+- **Khối lượng:** 3(0-6-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Kết thúc học phần, sinh viên đạt được những kỹ năng tương đương TOEIC 300 điểm, hoặc trình độ ngôn ngữ bậc 2/6 theo chuẩn khung năng lực Ngoại ngữ 6 bậc của Việt Nam.
+
+**Nội dung:** Các chủ đề khác nhau như: thể thao, công việc, thành công, kỳ nghỉ, những ngày đặc biệt…; Từ vựng cơ bản liên quan tới các chủ đề của mỗi bài học. Các hiện tượng ngữ pháp như thì hiện tại đơn, quá khứ đơn, tương lai, hiện tại hoàn thành, động từ khuyết thiếu, so sánh. Luyện về trọng âm, ngữ điệu; Các kỹ năng ngôn ngữ nghe, nói, đọc, viết ở mức độ sơ cấp.
+
+---
+
+#### MI1111 – Giải tích I
+
+- **Khối lượng:** 4(3-2-0-8)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** MI1141
+
+**Mục tiêu:** Cung cấp cho sinh viên những kiến thức cơ bản về hàm số một biến số và nhiều biến số. Trên cơ sở đó, sinh viên có thể học tiếp các học phần sau về Toán cũng như các môn học kỹ thuật khác, góp phần tạo nên nền tảng Toán học cơ bản cho các ngành kỹ thuật, công nghệ và kinh tế.
+
+**Nội dung:** Giới hạn, liên tục, phép tính vi phân của hàm số một biến số và nhiều biến số, phép tính tích phân của hàm số một biến số.
+
+---
+
+#### MI1121 – Giải tích II
+
+- **Khối lượng:** 3(2-2-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** MI1111
+- **Học phần song hành:** MI1131
+
+**Mục tiêu:** Cung cấp cho sinh viên những kiến thức cơ bản về Ứng dụng của phép tính vi phân vào hình học, Tích phân phụ thuộc tham số, Tích phân bội hai và bội ba, Tích phân đường và Tích phân mặt, Lý thuyết trường. Trên cơ sở đó, sinh viên có thể học tiếp các học phần sau về Toán cũng như các môn học kỹ thuật khác, góp phần tạo nên nền tảng Toán học cơ bản cho kỹ sư các ngành công nghệ và kinh tế.
+
+**Nội dung:** Ứng dụng phép tính vi phân vào hình học, tích phân phụ thuộc tham số, tích phân bội hai và bội ba, tích phân đường loại một và loại hai, tích phân mặt loại một và loại hai, lý thuyết trường.
+
+---
+
+#### MI1131 – Giải tích III
+
+- **Khối lượng:** 3(2-2-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** MI1111, MI1141
+- **Học phần song hành:** MI1121
+
+**Mục tiêu:** Cung cấp các kiến thức và kỹ năng tính toán về chuỗi và các phương trình vi phân cơ bản, biến đổi Laplace một phía, hình thành kiến thức Toán học nền tảng cho sinh viên các ngành công nghệ, cung cấp các công cụ toán học và mô hình hóa để sinh viên sử dụng trong các bài toán kỹ thuật như dao động cơ học, xử lý tín hiệu, và một số vấn đề thực tế liên quan đến phương trình vi phân thường.
+
+**Nội dung:** Chuỗi số, chuỗi hàm, chuỗi Fourier, phương trình vi phân cấp I, phương trình vi phân tuyến tính cấp II, hệ phương trình vi phân cấp I, Biến đổi Laplace, một số mô hình bài toán kỹ thuật.
+
+---
+
+#### MI1141 – Đại số
+
+- **Khối lượng:** 4(3-2-0-8)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Rèn luyện cho sinh viên kỹ năng tư duy logic, sáng tạo và sự tập trung. Học xong học phần này sinh viên có thể hiểu và vận dụng các kiến thức về tập hợp ánh xạ, logic, một số cấu trúc đại số trong việc biểu diễn cũng như tư duy về các lĩnh vực khác nhau; nắm được các tư tưởng cũng như kỹ thuật tính toán của đại số tuyến tính. Trên cơ sở đó, sinh viên có thể học tiếp các học phần sau về Toán cũng như các môn học kỹ thuật khác, góp phần tạo nên nền tảng Toán học cơ bản cho sinh viên các ngành kỹ thuật và công nghệ.
+
+**Nội dung:** Các nội dung cơ bản về tập hợp, ánh xạ, logic, cấu trúc nhóm, vành, trường, trường số phức. Các vấn đề cơ bản của đại số tuyến tính như ma trận, định thức, hệ phương trình, không gian véc tơ, ánh xạ tuyến tính, véc tơ riêng, trị riêng, dạng song tuyến tính, dạng toàn phương và không gian Euclide, đường và mặt bậc hai.
+
+---
+
+#### MI2020 – Xác suất thống kê
+
+- **Khối lượng:** 3(2-2-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** MI1111, MI1121
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên những kiến thức về xác suất là các khái niệm và quy tắc suy diễn xác suất cũng như về biến ngẫu nhiên và các phân phối xác suất thông dụng (một và hai chiều); các khái niệm cơ bản của thống kê toán học nhằm giúp sinh viên biết cách xử lý các bài toán thống kê trong các mô hình ước lượng, kiểm định giả thiết và hồi quy tuyến tính. Trên cơ sở đó sinh viên có được một phương pháp tiếp cận với mô hình thực tế và có kiến thức cần thiết để đưa ra lời giải đúng cho các bài toán đó.
+
+**Nội dung:** Sự kiện ngẫu nhiên và phép tính xác suất, đại lượng ngẫu nhiên, phân phối xác suất, véc tơ ngẫu nhiên, lý thuyết ước lượng thống kê, lý thuyết quyết định thống kê.
+
+---
+
+#### PH1110 – Vật lý đại cương I
+
+- **Khối lượng:** 3(2-1-1-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** MI1111, MI1141
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên những kiến thức cơ bản về Vật lý đại cương phần cơ, nhiệt, làm cơ sở để sinh viên học các môn kỹ thuật.
+
+**Nội dung:** Hệ quy chiếu và hệ quy chiếu quán tính. Các đại lượng vật lý cơ bản và những quy luật liên quan như: Động lượng, các định lý và định luật về động lượng; mômen động lượng, các định lý và định luật về mômen động lượng; động năng, thế năng, định luật bảo toàn cơ năng. Vận dụng xét chuyển động quay vật rắn, dao động và sóng cơ. Thuyết động học phân tử sử dụng thống kê giải thích và tính các lượng: nhiệt độ, áp suất, nội năng (khí lý tưởng). Vận dụng định luật bảo toàn và chuyển hóa năng lượng vào các quá trình chuyển trạng thái nhiệt. Xét chiều diễn biến của các quá trình nhiệt, nguyên lý tăng entrôpi; ứng dụng vào động cơ nhiệt. Trạng thái tới hạn.
+
+---
+
+#### PH1120 – Vật lý đại cương II
+
+- **Khối lượng:** 3(2-1-1-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** PH1110
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên những kiến thức cơ bản về Vật lý đại cương (điện từ). Sau khi học xong phần này, sinh viên cần nắm được: Khái niệm về trường: điện trường, từ trường. Các tính chất, các định luật về điện trường (định luật Coulomb, định lý O-G), về từ trường (định luật Biot-Savart-Laplace, định luật Ampere). Mối quan hệ giữa từ trường và điện trường (định luật Faraday, các luận điểm của Maxwell), trường điện từ thống nhất. Tính đặc biệt của lực từ và ứng dụng của nó. Sự ảnh hưởng lẫn nhau giữa môi trường chất và trường điện từ (điện môi, vật dẫn, sắt từ, hiệu ứng áp điện). Biết vận dụng vào kỹ thuật: điện tử, phát dẫn điện, sóng điện từ.
+
+**Nội dung:** Các loại trường: Điện trường, từ trường; các tính chất, các đại lượng đặc trưng (cường độ, điện thế, từ thông, ...) và các định lý, định luật liên quan. Ảnh hưởng qua lại giữa trường và chất. Quan hệ giữa từ trường và điện trường, trường điện từ thống nhất. Vận dụng xét dao động và sóng điện từ.
+
+---
+
+### 4.2 Khối kiến thức bổ trợ
+
+---
+
+#### EM1010 – Quản trị học đại cương
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Hiểu được Quản trị học và vai trò của quản trị trong việc cao hiệu quả hoạt động của tổ chức. Hiểu được các kiến thức về các chức năng quản trị trong quản trị một tổ chức. Biết cách vận dụng các nội dung lý thuyết về những nguyên tắc quản trị, nguyên tắc và phương pháp lập kế hoạch, các mô hình tổ chức, phương cách lãnh đạo, phương pháp kiểm tra trong quản lý tổ chức.
+
+**Nội dung:**
+- Tổng quan về quản trị một tổ chức: khái niệm về quản trị, quá trình quản trị, nhà quản lý là ai? Họ làm việc ở đâu? Họ có những vai trò quản trị gì? Khái niệm về tổ chức, các đặc điểm của một tổ chức, môi trường hoạt động của một tổ chức.
+- Chức năng về lập kế hoạch gồm các nội dung về khái niệm, vai trò của công tác lập kế hoạch, các loại kế hoạch, các căn cứ, phương pháp và quy trình lập kế hoạch, các yếu tố ảnh hưởng đến công tác lập kế hoạch.
+- Chức năng tổ chức bao gồm các nội dung: khái niệm và vai trò của chức năng tổ chức, các nội dung của chức năng tổ chức: thiết kế cơ cấu, thiết kế quá trình tổ chức quản lý, tổ chức nhân sự.
+- Chức năng lãnh đạo bao gồm các khái niệm về chức năng lãnh đạo, nội dung và vai trò của chức năng lãnh đạo, các phong cách lãnh đạo phổ biến trong các tổ chức.
+- Chức năng kiểm tra bao gồm các khái niệm về hoạt động kiểm tra, các vai trò của chức năng kiểm tra, các phương pháp và hình thức kiểm tra, đặc điểm của một hệ thống kiểm tra hiệu quả và các nguyên tắc kiểm tra có hiệu quả.
+
+---
+
+#### EM1180 – Văn hóa kinh doanh và tinh thần khởi nghiệp
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Trang bị cho sinh viên những kiến thức và kỹ năng:
+- Hiểu những kiến thức cơ bản về văn hoá và văn hoá kinh doanh, vai trò ảnh hưởng của văn hoá kinh doanh như một nhân tố quan trọng đối với sự phát triển kinh doanh trong doanh nghiệp.
+- Hiểu biết và có tinh thần khởi nghiệp nói chung; khởi nghiệp công nghệ (Startup) nói riêng.
+- Có khả năng tạo lập, phân công nhiệm vụ, phối hợp công việc trong làm việc nhóm.
+- Biết nhận diện và thu thập các tài liệu cần thiết qua sách vở, quan sát, phỏng vấn.
+
+**Nội dung:**
+- Giới thiệu khái quát về văn hoá doanh nghiệp và vai trò của văn hoá doanh nghiệp: Khái niệm văn hoá; Văn hoá doanh nghiệp; Văn hoá doanh nhân.
+- Triết lý kinh doanh: Khái niệm, vai trò của triết lý kinh doanh; Nội dung của triết lý kinh doanh; Cách thức xây dựng triết lý kinh doanh của DN; Triết lý kinh doanh của các doanh nghiệp Việt Nam.
+- Đạo đức kinh doanh và trách nhiệm xã hội: Khái niệm, vai trò của đạo đức kinh doanh; Trách nhiệm xã hội của doanh nghiệp; Các khía cạnh thể hiện của đạo đức kinh doanh.
+- Văn hoá doanh nhân: Khái niệm văn hoá doanh nhân; Các nhân tố ảnh hưởng đến văn hoá doanh nhân; Các bộ phận cấu thành văn hoá doanh nhân; Phong cách doanh nhân; Các tiêu chuẩn đánh giá văn hoá doanh nhân.
+- Văn hoá doanh nghiệp: Khái niệm văn hoá doanh nghiệp; Các bước xây dựng văn hoá doanh nghiệp; Các mô hình văn hoá doanh nghiệp trên thế giới; Thực trạng xây dựng văn hoá ở các doanh nghiệp Việt Nam; Giải pháp xây dựng mô hình văn hoá doanh nghiệp phù hợp ở Việt Nam.
+- Tinh thần khởi nghiệp: Khái niệm và ý nghĩa của tinh thần khởi nghiệp; Các hình thức khởi nghiệp và khởi nghiệp công nghệ; Lựa chọn mô hình khởi nghiệp.
+
+---
+
+#### ED3280 – Tâm lý học ứng dụng
+
+- **Khối lượng:** 2(1-2-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên những kiến thức cơ bản của khoa học tâm lý và ứng dụng trong cuộc sống cũng như trong học tập và hoạt động nghề nghiệp. Giúp sinh viên hiểu về bản thân, hiểu về người khác, từ đó có hành vi, ứng xử một cách thích hợp, nâng cao hiệu quả học tập, làm chủ cảm xúc, phát triển và hoàn thiện nhân cách của bản thân thích ứng với sự thay đổi của xã hội và của cơ cấu nghề nghiệp trong tương lai.
+
+Rèn luyện kỹ năng làm việc nhóm, kỹ năng ra quyết định, kỹ năng thuyết trình, kỹ năng đưa và nhận các thông tin phản hồi và thái độ cần thiết đáp ứng với nghề nghiệp trong tương lai.
+
+**Nội dung:**
+- Khám phá về đời sống tâm lý con người: Sự cần thiết của tâm lý học trong cuộc sống và hoạt động nghề nghiệp; Khái niệm tâm lí, tâm lý học; Bản chất, chức năng của tâm lý người; Các hiện tượng tâm lý cơ bản.
+- Đặc điểm tâm lý lứa tuổi sinh viên và các hoạt động cơ bản của sinh viên kỹ thuật: Đặc điểm tâm lý lứa tuổi sinh viên; Những điều kiện ảnh hưởng đến sự phát triển tâm lý lứa tuổi sinh viên; Hoạt động học tập, hoạt động NCKH và hoạt động chính trị - xã hội của sinh viên trong nhà trường.
+- Xây dựng bầu không khí tích cực cho sinh viên trong nhà trường: Các hiện tượng tâm lí xã hội thường gặp trong nhóm học tập và tập thể sinh viên; Một số qui luật tâm lí xã hội tác động đến tập thể sinh viên; Những vấn đề xung đột trong nhóm học tập của sinh viên.
+- Phát triển tư duy sáng tạo và năng lực sáng tạo kỹ thuật cho sinh viên.
+- Nhân cách và nhân cách sáng tạo: Nhân cách - Các phẩm chất nhân cách; Đặc điểm kiểu nhân cách sinh viên với học tập và nghề nghiệp; Nhân cách sáng tạo.
+
+---
+
+#### ED3220 – Kỹ năng mềm
+
+- **Khối lượng:** 2(1-2-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên tầm quan trọng của các kĩ năng phát triển cá nhân trong học tập, công việc và cuộc sống; trang bị cho sinh viên các kiến thức cốt lõi để phát triển các kĩ năng cá nhân; giúp sinh viên thực hành, luyện tập để cơ bản hình thành các kĩ năng phát triển cá nhân; qua đó, sinh viên có được thái độ nhận thức đúng đắn về nhu cầu rèn luyện các kĩ năng học tập và làm việc thiết yếu, thích ứng với xã hội hiện đại và thực tiễn nghề nghiệp trong tương lai.
+
+Các kĩ năng phát triển cá nhân bao gồm: Tìm hiểu bản thân, xác lập mục tiêu cá nhân; Phát triển tư duy tích cực, sáng tạo và đổi mới; Quản lý thời gian hiệu quả; Nghệ thuật giao tiếp và thuyết trình; Nghệ thuật thuyết phục dựa trên tâm lí; Làm việc nhóm hiệu quả.
+
+**Nội dung:**
+- Nhóm và làm việc nhóm: Tại sao phải làm việc nhóm; Kiến thức cơ bản về nhóm; Giới thiệu kỹ năng cá nhân nền tảng để làm việc theo nhóm; Giới thiệu Kỹ năng cá nhân trong phối hợp với các thành viên khác.
+- Kỹ năng cá nhân nền tảng - Thành tích cá nhân: Tư duy tích cực; Giá trị sống; Quản lý thời gian.
+- Kỹ năng cá nhân phối hợp - Thành tích tập thể: Giao tiếp hiệu quả; Thuyết trình hiệu quả; Nghệ thuật thuyết phục.
+- Kỹ năng tổ chức tham gia hoạt động nhóm: Thành lập nhóm; Họp nhóm; Lập và theo dõi kế hoạch; Giải quyết các vấn đề nhóm; Đánh giá hoạt động nhóm.
+
+---
+
+#### ET3262 – Tư duy công nghệ và thiết kế kỹ thuật
+
+- **Khối lượng:** 2(1-2-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Cung cấp cho sinh viên tư duy về các bước trong quy trình thiết kế sản phẩm. Cung cấp các kiến thức và kỹ năng về các bước thiết kế sản phẩm đúng ngay từ đầu giúp giảm thời gian thiết kế sản phẩm công nghệ. Củng cố các kỹ năng làm việc nhóm, thuyết trình, lên kế hoạch, viết báo cáo và thái độ cần thiết trong công việc.
+
+**Nội dung:**
+- Về kiến thức: Quy trình chung của thiết kế kỹ thuật; Kỹ năng giải quyết vấn đề; Quy trình thiết kế kỹ thuật; Kỹ thuật xác định bộ chỉ tiêu kỹ thuật trong quy trình thiết kế; Lập bảng kế hoạch nhằm thiết kế sản phẩm; Kỹ thuật lựa chọn giải pháp thay thế trong quy trình thiết kế; Kỹ năng kiểm định.
+- Giới thiệu Thiết kế thực nghiệm (DoE): Nguyên lý cơ bản của DoE; Đi sâu vào nhận dạng và xác định vấn đề, lựa chọn các nhân tố ảnh hưởng; Phương pháp xác định kích thước mẫu.
+- Thi đấu giữa các đội: Thiết kế và hoàn thiện sản phẩm đặt ra từ tuần 1; Báo cáo tổng kết; Thuyết trình bảo vệ quy trình thiết kế sản phẩm; Kiểm tra toàn bộ các kỹ năng đã học.
+
+---
+
+#### TEX3123 – Thiết kế mỹ thuật công nghiệp
+
+- **Khối lượng:** 2(1-2-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Môn học này nhằm cung cấp cho người học những kiến thức cơ bản nhất về thiết kế với một số nguyên tắc trong thiết kế sản phẩm, quá trình thiết kế mỹ thuật công nghiệp, các yếu tố thiết kế, các nguyên tắc trong bố cục thiết kế, hồ sơ thiết kế. Giúp người học có kỹ năng vận dụng hiểu biết vào việc nghiên cứu, tổng hợp, đánh giá và thuyết trình về giải pháp cải tiến, phát triển thiết kế mỹ thuật sản phẩm trong sản xuất công nghiệp.
+
+Ngoài ra môn học cũng cung cấp cho sinh viên các kỹ năng làm việc nhóm, thuyết trình và thái độ cần thiết để làm việc trong công ty sau này.
+
+**Nội dung:**
+- Tổng quan về mỹ thuật công nghiệp: khái niệm về sản phẩm và thiết kế mỹ thuật sản phẩm công nghiệp. Vai trò của tư duy thiết kế và thiết kế mỹ thuật công nghiệp, một số nguyên tắc trong thiết kế sản phẩm, nguyên tắc Ergonomics trong thiết kế sản phẩm.
+- Quá trình thiết kế mỹ thuật công nghiệp: hình thành nhiệm vụ thiết kế, xây dựng nhiệm vụ thiết kế, hình thành và xây dựng giải pháp thiết kế, hoàn thành giải pháp thiết kế.
+- Các yếu tố trong thiết kế mỹ thuật công nghiệp: hình dáng, đường nét, mầu sắc, kích cỡ, chất liệu và không gian.
+- Các nguyên tắc trong bố cục thiết kế: cân bằng, nhịp điệu, thống nhất, điểm nhấn.
+- Hồ sơ thiết kế mỹ thuật công nghiệp: khái niệm, vai trò, phân loại, yêu cầu, cấu trúc, trình bày và đánh giá.
+
+---
+
+#### IT2030 – Technical Writing and Presentation
+
+- **Khối lượng:** 3(2-2-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Sau khi hoàn thành khóa học, sinh viên sẽ có khả năng viết các tài liệu khoa học và kỹ thuật một cách chính xác và chuyên nghiệp cũng như trình bày các báo cáo này cho khán giả một cách tự tin và thuyết phục.
+
+**Nội dung:** Khóa học sẽ cung cấp cho sinh viên các nguyên lý và kỹ năng viết các tài liệu khoa học kỹ thuật và thuyết trình hiệu quả. Sinh viên được giới thiệu toàn bộ quá trình viết bao gồm lập kế hoạch, soạn thảo, đánh giá và chỉnh sửa. Các vấn đề về phân tích các mục tiêu của văn bản, tổ chức thông tin, sử dụng các công cụ hỗ trợ đồ họa cũng được giới thiệu. Nhờ đó, sinh viên có thể viết báo cáo kỹ thuật, luận văn, tóm tắt, đề xuất, CV, v.v... một cách chính xác và chuyên nghiệp. Ngoài ra, các kỹ năng thuyết trình hiệu quả như sử dụng giọng nói, thay đổi giọng điệu, ngôn ngữ cơ thể cũng được giới thiệu trong khóa học này. Trong khóa học, sinh viên sẽ làm việc theo nhóm để hình thành ý tưởng và chuẩn bị các tài liệu cần thiết cho bài viết và thuyết trình, từ đó rèn luyện kỹ năng làm việc nhóm và thái độ làm việc tích cực.
+
+---
+
+### 4.3 Khối kiến thức Giáo dục chuyên nghiệp
+
+---
+
+#### IT2000 – Nhập môn Công nghệ Thông tin và Truyền thông
+
+- **Khối lượng:** 3(2-0-2-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này cung cấp cho sinh viên các kiến thức cơ bản về ngành CNTT, giúp sinh viên nhận thức sâu hơn về đặc điểm của ngành CNTT và yêu cầu công việc sau này, tự khám phá kiến thức thông qua thực hành, đồng thời rèn luyện một số kỹ năng tay nghề tối thiểu. Giúp sinh viên bước đầu học phương pháp giải quyết bài toán thực tiễn, phát triển kỹ năng chuyên nghiệp và kỹ năng xã hội, tạo điều kiện cho sinh viên học phương pháp lập nhóm và làm việc theo nhóm. Giúp sinh viên có được sự say mê cùng sự tự tin cần thiết trong học tập trong con đường nghề nghiệp sau này.
+
+**Nội dung:** Giới thiệu kiến thức cơ bản về ngành CNTT và môi trường học tập, các cơ hội nghề nghiệp ngành CNTT, tương lai và tầm nhìn của CNTT. Giới thiệu các kỹ năng làm việc trong ngành CNTT bao gồm kỹ năng làm việc nhóm, kỹ năng nghiên cứu, kỹ năng viết báo cáo và thuyết trình. Giới thiệu đạo đức ngành CNTT; qui trình thực hiện một dự án thực tế.
+
+---
+
+#### IT3420 – Điện tử cho Công nghệ thông tin
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này nhằm cung cấp cho sinh viên các kiến thức cơ bản về kỹ thuật điện tử tương tự và điện tử số cần thiết cho sinh viên CNTT, làm cơ sở để phân tích và thiết kế hệ thống máy tính, hệ thống nhúng và hệ thống IoT. Ngoài ra, học phần này cũng cung cấp cho sinh viên một số kỹ năng như sử dụng các phần mềm thiết kế, mô phỏng phần cứng, đọc hiểu tài liệu thiết kế, nhận biết và phân loại các linh kiện điện tử.
+
+**Nội dung:** Một số khái niệm cơ bản về điện tử, các hệ thống điện tử; các linh kiện điện tử và thông số kỹ thuật của chúng; một số mạch điện tử tương tự cơ bản; đại số logic boole; các cổng logic cơ bản; phân tích và thiết kế mạch tổ hợp; phân tích và thiết kế mạch dãy.
+
+---
+
+#### IT3011 – Cấu trúc dữ liệu và thuật toán
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Tin học đại học
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần cung cấp cho sinh viên các kiến thức cơ bản về cấu trúc dữ liệu và thuật toán cần thiết cho việc phát triển các thuật toán, xây dựng các phần mềm ứng dụng thực tế.
+
+Sau khi hoàn thành học phần, sinh viên có khả năng cài đặt các cấu trúc dữ liệu cơ bản như ngăn xếp, hàng đợi, hàng đợi có độ ưu tiên, danh sách liên kết, cây và bảng băm. Sinh viên có khả năng thiết kế và cài đặt các chương trình ứng dụng các cấu trúc dữ liệu học được vào các hệ thống thông tin phức tạp. Sinh viên sẽ hiểu và cài đặt được các thuật toán sắp xếp cơ bản và phức tạp như sắp xếp nhanh, sắp xếp vun đống, thuật toán trên đồ thị. Sinh viên sẽ được trang bị các kỹ thuật thuật toán như đệ quy, chia để trị, quy hoạch động trong việc giải quyết các bài toán tối ưu tổ hợp. Sinh viên cũng có sẽ có khả năng phân tích hiệu quả của các cấu trúc dữ liệu và thuật toán giải các bài toán khác nhau.
+
+**Nội dung:** Khái niệm về cấu trúc dữ liệu và thuật toán; các mẫu thiết kế thuật toán đệ quy, đệ quy có nhớ, đề quy quay lui, chia để trị, tham lam, quy hoạch động; các cấu trúc dữ liệu về danh sách liên kết, ngăn xếp, hàng đợi, cây, cây nhị phân; các thuật toán sắp xếp chèn, sắp xếp lựa chọn, sắp xếp nổi bọt, sắp xếp trộn, sắp xếp nhanh, sắp xếp vun đống; tìm kiếm nhị phân, cây nhị phân tìm kiếm, bảng băm, thuật toán tìm kiếm xâu mẫu. Cấu trúc dữ liệu biểu diễn đồ thị, thuật toán tìm kiếm theo chiều rộng, tìm kiếm theo chiều sâu, thuật toán tìm cây khung nhỏ nhất, đường đi ngắn nhất.
+
+---
+
+#### IT3040 – Kỹ thuật lập trình
+
+- **Khối lượng:** 2(2-0-1-4)
+- **Học phần tiên quyết:** IT1110
+- **Học phần học trước:** IT3011, IT3100
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần Kỹ thuật lập trình trang bị cho sinh viên những kỹ thuật cơ bản nhất mà một lập trình viên chuyên nghiệp cần phải nắm vững để viết mã nguồn hiệu quả. Các kiến thức giảng dạy góp phần quan trọng giúp sinh viên phát triển được các ứng dụng phần mềm chất lượng cao trong thực tế. Học phần này trang bị cho sinh viên các kỹ thuật lập trình quan trọng như quản lý bộ nhớ, hàm, kỹ thuật đệ quy, kỹ thuật sử dụng các cấu trúc dữ liệu để giải quyết vấn đề, kỹ thuật viết mã nguồn hiệu quả, kỹ thuật lập trình phòng ngừa, kỹ thuật gỡ rối, tinh chỉnh mã nguồn, phong cách lập trình. Học phần có các buổi thực hành nhằm rèn luyện và nâng cao kỹ năng lập trình của sinh viên.
+
+**Nội dung:** Tổng quan về kỹ thuật lập trình. Quản lý bộ nhớ. Hàm. Kỹ thuật viết mã nguồn hiệu quả. Phong cách lập trình. Kỹ thuật đệ quy và khử đệ quy. Kỹ thuật sử dụng cấu trúc dữ liệu cơ bản. Kỹ thuật lập trình phòng ngừa. Kỹ thuật gỡ rối, kiểm thử và tinh chỉnh mã nguồn.
+
+---
+
+#### IT3070 – Nguyên lý hệ điều hành
+
+- **Khối lượng:** 3(3-1-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT1110
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này nhằm cung cấp cho sinh viên những hiểu biết cơ bản về nguyên lý hoạt động của các hệ điều hành hiện đại; giúp sinh viên hiểu và đánh giá được các giải thuật sử dụng trong hệ điều hành qua đó có thể vận dụng các giải thuật này vào giải quyết các bài toán trong thực tế. Học phần cũng giới thiệu một số dịch vụ hệ thống cơ bản (liên quan tới tiến trình, luồng, mạng, bộ nhớ, thư mục, file) của hệ điều hành Windows/Linux, qua đó giúp sinh viên nâng cao kỹ năng lập trình tương tranh, lập trình mức hệ thống. Ngoài ra, thông qua các bài tập, bài tập lớn, học phần cũng giúp sinh viên phát triển các kỹ năng cần thiết cho công việc sau này như nghiên cứu tài liệu, quản lý thời gian, làm việc nhóm, viết báo cáo, thuyết trình...
+
+**Nội dung:** Học phần gồm các nội dung chính: Tổng quan về hệ điều hành; Quản lý tiến trình (gồm các chủ đề: khái niệm tiến trình và luồng; lập lịch CPU; đồng bộ tiến trình; bế tắc và xử lý bế tắc); Quản lý bộ nhớ (phân phối bộ nhớ, chuyển hóa địa chỉ, bộ nhớ ảo); Quản lý file (quản lý thiết bị lưu trữ, thư mục, cài đặt hệ thống file); Hệ thống vào ra và An toàn hệ thống.
+
+---
+
+#### IT3090 – Cơ sở dữ liệu
+
+- **Khối lượng:** 3(2-1-1-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3011
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này nhằm cung cấp cho sinh viên các khái niệm cơ bản về hệ cơ sở dữ liệu và những vấn đề mang tính nguyên lý của các hệ cơ sở dữ liệu; khái niệm về các mô hình dữ liệu trong đó đặc biệt nhấn mạnh vào mô hình dữ liệu quan hệ, các ngôn ngữ truy vấn CSDL; khai thác và sử dụng các hệ quản trị cơ sở dữ liệu quan hệ; các phương pháp thiết kế CSDL; một số vấn đề và kỹ thuật về quản trị hệ CSDL như tổ chức lưu trữ, chỉ mục, tối ưu truy vấn và đảm bảo tính toàn vẹn của dữ liệu.
+
+Bên cạnh đó, học phần cũng cung cấp các kỹ năng làm việc nhóm, kỹ năng phản biện, kỹ năng phân tích-giải quyết vấn đề thông qua làm và chữa bài tập, tổ chức các nhóm thảo luận các tình huống/bài toán thực tế ứng dụng các kiến thức được học trong học phần này.
+
+**Nội dung:** Các khái niệm cơ bản về CSDL, mô hình dữ liệu, ngôn ngữ dữ liệu; Thiết kế cơ sở dữ liệu; Tổ chức dữ liệu vật lý; Tối ưu hóa truy vấn; An toàn và toàn vẹn dữ liệu.
+
+---
+
+#### IT3100 – Lập trình hướng đối tượng
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** IT1110
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Môn học này nhằm cung cấp cho sinh viên các khái niệm, nguyên lý, các kỹ thuật lập trình và thiết kế chương trình theo cách tiếp cận hướng đối tượng. Ngôn ngữ minh họa là ngôn ngữ lập trình Java. Ngoài ra môn học cũng cung cấp cho sinh viên các kỹ năng làm việc nhóm, thuyết trình và thái độ cần thiết để làm việc trong công ty sau này.
+
+**Nội dung:** Sinh viên trước tiên được giới thiệu về công nghệ hướng đối tượng, cơ bản về ngôn ngữ lập trình Java và ngôn ngữ mô hình hóa thống nhất UML. Tiếp đến, sinh viên được trang bị kiến thức về các nguyên lý trong lập trình hướng đối tượng như trừu tượng hóa, đóng gói, kế thừa, và đa hình và cách áp dụng các nguyên lý này để tối ưu hóa mã nguồn theo tiếp cận lập trình hướng đối tượng. Các kỹ thuật kết tập, hợp thành, kế thừa với lớp trừu tượng và giao diện, lập trình tổng quát, xử lý ngoại lệ, và lập trình giao diện GUI sẽ lần lượt được trình bày cho sinh viên. Trên cơ sở đó, sinh viên có khả năng thiết kế chương trình theo cách tiếp cận hướng đối tượng và trình bày thiết kế của mình bằng biểu đồ lớp trong ngôn ngữ UML.
+
+---
+
+#### IT3120 – Phân tích thiết kế hệ thống
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3090, IT3100
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần giới thiệu một tiếp cận hướng đối tượng trong phân tích và thiết kế các hệ thống phần mềm. Sinh viên được cung cấp các kiến thức cơ bản trong việc mô hình hóa các hệ thống phần mềm, từ yêu cầu đến cấu trúc và hành vi, bao gồm ngôn ngữ mô hình hóa UML, các công cụ mô hình hóa, và quy trình mô hình hóa. Ngoài ra học phần cũng cung cấp cho sinh viên các kỹ năng làm việc nhóm, biên soạn tài liệu, thuyết trình và thái độ cần thiết để làm việc trong các dự án phát triển phần mềm sau này.
+
+**Nội dung:** Vòng đời phát triển hệ thống phần mềm; kỹ nghệ yêu cầu; phân tích chức năng hệ thống; phân tích cấu trúc hệ thống; phân tích hành vi hệ thống; thiết kế kiến trúc hệ thống; thiết kế chi tiết cho các lớp; thiết kế giao diện; thiết kế cơ sở dữ liệu.
+
+---
+
+#### IT3170 – Thuật toán ứng dụng
+
+- **Khối lượng:** 2(2-0-1-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3011
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần sẽ bao quát các vấn đề cơ bản và nâng cao trong phân tích thiết kế và cài đặt thuật toán, từ đó ứng dụng vào giải các bài tập trực tuyến và các bài toán ứng dụng thực tế. Các bài toán được mô tả dưới dạng ứng dụng đa ngành như: giao thông, mạng truyền thông, tin sinh học, xếp lịch, trí tuệ nhân tạo, xử lý dữ liệu, hệ thống phần mềm…. Ngoài việc làm chủ được các kỹ thuật cơ bản của thuật toán, sinh viên được học các kỹ năng cài đặt và cài đặt nhanh các loại thuật toán và cấu trúc dữ liệu cơ bản và tiên tiến khác nhau.
+
+**Nội dung:** Các chủ đề bao gồm: Cấu trúc dữ liệu và thư viện thuật toán cơ bản, Đệ qui và nhánh cận, Thuật toán tham lam, Chia để trị, Quy hoạch động, CTDL và thuật toán trên đồ thị, Xử lý xâu, Lớp bài toán NP-đầy đủ. Các chủ đề đều được minh họa giải trên các bài toán ứng dụng thực tế.
+
+---
+
+#### IT3180 – Nhập môn công nghệ phần mềm
+
+- **Khối lượng:** 3(2-2-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3011
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này giới thiệu các hoạt động chính trong quy trình phát triển phần mềm, bắt đầu từ khi xác định yêu cầu cho đến khi triển khai, vận hành một phần mềm trong thực tiễn. Trong đó, học phần tập trung vào các kiến thức về vòng đời phần mềm, quy trình phát triển phần mềm, các mô hình phần mềm, quản lý dự án phần mềm, quản lý cấu hình - phiên bản, phân tích thiết kế, xây dựng và đảm bảo chất lượng phần mềm.
+
+Sinh viên được trải nghiệm phát triển một phần mềm theo quy trình trong thực tiễn từ xác định yêu cầu, phân tích thiết kế, lập trình, kiểm thử, và triển khai phần mềm qua bài tập/bài tập lớn.
+
+**Nội dung:** Tổng quan về Công nghệ phần mềm; Vòng đời phần mềm, So sánh các mô hình quy trình phần mềm; Phương pháp Agile; Quản lý cấu hình phần mềm; Kỹ nghệ yêu cầu phần mềm. Thiết kế phần mềm: các khái niệm trong thiết kế phần mềm, thiết kế kiến trúc, thiết kế chi tiết, thiết kế giao diện người dùng; Xây dựng phần mềm; Quản lý chất lượng phần mềm: các thuật ngữ về kiểm thử, phương pháp kiểm thử hộp trắng, hộp đen; Quản lý dự án phần mềm,...
+
+---
+
+#### IT4060 – Lập trình mạng
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT1110, IT3080
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Môn học này nhằm cung cấp cho sinh viên các kỹ thuật lập trình mạng cơ bản với thư viện Socket trên nền tảng Windows và Linux. Bên cạnh nội dung chính về lập trình Socket, môn học này cũng bổ trợ cho sinh viên các kỹ thuật lập trình cơ bản trên cả hai hệ điều hành như: lập trình đa luồng, lập trình với giao diện đồ họa.
+
+Ngoài ra môn học cũng cung cấp cho sinh viên các kỹ năng làm việc nhóm, thuyết trình để làm việc trong công ty sau này.
+
+**Nội dung:** Giới thiệu về lập trình mạng và lập trình socket dựa trên thư viện Winsock. Giới thiệu về lập trình đa luồng. Các phương pháp vào ra trong lập trình socket. Tìm hiểu và cài đặt một số giao thức phổ biến.
+
+---
+
+#### IT4785 – Phát triển ứng dụng cho thiết bị di động
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT1110
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Môn học này nhằm cung cấp cho sinh viên các kỹ thuật lập trình để xây dựng ứng dụng cho thiết bị di động. Nội dung chính sẽ tập trung vào các lý thuyết và công nghệ xây dựng ứng dụng trên nền tảng Android - nền tảng chiếm thị phần lớn nhất trong các thiết bị di động hiện nay. Bên cạnh đó, sinh viên cũng sẽ được trang bị các kỹ thuật để phát triển các ứng dụng có thể triển khai đa nền tảng: Android, iOS, và Windows.
+
+**Nội dung:** Giới thiệu chung về phát triển ứng dụng di động. Cấu trúc một chương trình Android, các thành phần cơ bản của Android. Lập trình với giao diện cơ bản; lập trình với giao diện nâng cao. Luồng và bộ đếm thời gian, các thành phần thông báo. Thao tác với file, dịch vụ. Lập trình native. Lập trình đa nền tảng.
+
+---
+
+#### IT3030 – Kiến trúc máy tính
+
+- **Khối lượng:** 3(3-1-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT1110, IT2000
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần cung cấp cho sinh viên các kiến thức cơ bản về kiến trúc tập lệnh và tổ chức của máy tính hiện đại, cũng như những vấn đề cơ bản trong thiết kế máy tính. Các nội dung chính của học phần bao gồm: Tổng quan về máy tính hiện đại và đánh giá hiệu năng máy tính, các kiến thức cơ bản về logic số và số học máy tính, kiến trúc tập lệnh và cơ bản về lập trình hợp ngữ, tổ chức các thành phần cơ bản của hệ thống máy tính: bộ xử lý, bộ nhớ và hệ thống vào-ra, kiến trúc máy tính song song. Từ đó sinh viên có khả năng tối ưu hóa các phần mềm, nâng cao hiệu năng hệ thống, khai thác và quản trị hiệu quả các hệ thống máy tính và có nền tảng tốt cho việc thiết kế máy tính. Ngoài ra học phần cũng cung cấp cho sinh viên các kỹ năng làm việc nhóm, kỹ năng nghiên cứu.
+
+**Nội dung:** Giới thiệu chung; Các kiến thức cơ bản về logic số; Hệ thống máy tính; Số học máy tính; Kiến trúc tập lệnh; Bộ xử lý; Bộ nhớ; Hệ thống vào-ra; Các kiến trúc máy tính song song.
+
+---
+
+#### IT4593 – Nhập môn Kỹ thuật Truyền thông
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần cung cấp cho sinh viên các kiến thức cơ bản về hệ thống truyền tin, các thành phần cơ bản của hệ thống truyền tin, những bài toán đảm bảo tốc độ và độ chính xác truyền tin, mã hóa, mã hóa nguồn và mã chống nhiễu, điều chế/giải điều chế, kiến trúc bộ thu/phát, kỹ thuật truyền.
+
+**Nội dung:** Mô hình và yêu cầu cơ bản của hệ thống truyền tin; Điều chế/Giải điều chế; Thông tin và định lượng thông tin; Mã hiệu, Điều kiện phân tách mã, Biểu diễn mã; Mã hóa nguồn; Kênh và thông lượng kênh, Mã hóa kênh; Bộ thu/bộ phát; Kỹ thuật truyền đồng bộ/không đồng bộ.
+
+---
+
+#### IT3080 – Mạng máy tính
+
+- **Khối lượng:** 3(3-0-1-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT1110
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Môn học này có mục tiêu giúp sinh viên nắm vững kiến thức về hệ thống mạng máy tính, truyền thông dữ liệu trên môi trường mạng, môi trường phân tán, làm nền tảng cho việc thiết kế, xây dựng, vận hành hệ thống mạng, IoT và truyền thông dữ liệu.
+
+**Nội dung:** Các khái niệm cơ bản về mạng máy tính, mô hình OSI và TCP/IP. Mạng cục bộ, các phương thức đa truy cập và kết nối mạng cục bộ sử dụng Bridge, Switch, Hub. Kết nối liên mạng sử dụng giao thức Internet Protocol (IP) và các vấn đề liên quan (định tuyến, đánh địa chỉ...). Giao thức TCP/UDP và quá trình quản lý kết nối, cơ chế cửa sổ trượt, điều khiển luồng, điều khiển tắc nghẽn... Các ứng dụng phổ biến trên Internet (Mail...).
+
+---
+
+#### IT4210 – Hệ nhúng
+
+- **Khối lượng:** 3(3-0-1-6)
+- **Học phần học trước:** IT1110
+
+**Mục tiêu:** Học phần IT4210 giới thiệu các kiến thức liên quan tới việc xây dựng những hệ thống tính toán có tương tác trực tiếp với các quá trình vật lý nhằm tạo nên những thiết bị hay ứng dụng trực tiếp giúp nâng cao đời sống con người.
+
+Ngoài ra, môn học cũng trang bị các kỹ năng về sử dụng các công cụ trong lĩnh vực phát triển ứng dụng hệ nhúng, bao gồm công cụ thiết kế, mô phỏng, công cụ lập trình, và kỹ năng đọc tài liệu kỹ thuật.
+
+**Nội dung:**
+- Tổng quan về hệ nhúng và qui trình phát triển hệ nhúng, kiến trúc và các thành phần của vi xử lý, vi điều khiển.
+- Thiết kế, xây dựng phần cứng hệ nhúng cùng các mạch phụ trợ cơ bản.
+- Ghép nối hệ nhúng với các thiết bị ngoại vi cơ bản.
+- Xây dựng phần mềm cho hệ nhúng bằng hợp ngữ hoặc C/C++ cho các chức năng cơ bản như giao tiếp ngoại vi LED, 7-seg LED, LED matrix, buttons/keypad, bộ định thời/đếm, xử lý ngắt, và các module truyền thông UART, SPI, I2C, USB.
+
+---
+
+#### IT4172 – Xử lý tín hiệu
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này nhằm cung cấp cho sinh viên các kiến thức cơ bản về xử lý tín hiệu đặc biệt là xử lý tín hiệu số được dùng rộng rãi trong xử lý tiếng nói, xử lý ảnh và truyền thông số nói chung. Bên cạnh đó, môn học cũng giới thiệu cho sinh viên các lĩnh vực mà xử lý tín hiệu sẽ được áp dụng, kỹ năng thuyết trình và làm việc nhóm, tư duy và phương pháp luận cần có để làm việc trong môi trường khoa học và công nghệ sau khi ra trường.
+
+**Nội dung:** Học phần cung cấp các khái niệm cơ bản về tín hiệu và hệ xử lý tín hiệu, các đặc trưng cơ bản của tín hiệu và hệ xử lý tín hiệu trong miền thời gian và miền tần số. Biến đổi Laplace, biến đổi Z và biến đổi Fourier được trình bày như là công cụ thường dùng để phân tích và tổng hợp các hệ xử lý tín hiệu. Môn học cũng trang bị kiến thức tổng quan cho sinh viên về các bộ lọc số FIR và IIR và đặc tính cơ bản của hai loại bộ lọc này.
+
+---
+
+#### IT4735 – IoT và ứng dụng
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3030
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này có mục đích cung cấp cho sinh viên hiểu được các kiến thức tổng quan về Internet of Things (IoT) và xây dựng ứng dụng cụ thể dựa trên các công nghệ của Internet of Things. Nội dung chính của học phần bao gồm: Kiến thức tổng quan về Internet of Things; kiến trúc, mô hình phân lớp và các thành phần của hệ thống IoT điển hình; các giao thức truyền thông trong IoT; các lĩnh vực ứng dụng của IoT; thu thập, xử lý và phân tích dữ liệu IoT; độ tin cậy, bảo mật và quyền riêng tư trong môi trường IoT.
+
+**Nội dung:** Kiến thức tổng quan về Internet of Things; kiến trúc, mô hình phân lớp và các thành phần của hệ thống IoT điển hình; các giao thức truyền thông trong IoT; các lĩnh vực ứng dụng của IoT; thu thập, xử lý và phân tích dữ liệu IoT; độ tin cậy, bảo mật và quyền riêng tư trong môi trường IoT; bài tập nhóm xây dựng một ứng dụng cụ thể của IoT.
+
+---
+
+#### IT4931 – Lưu trữ và xử lý dữ liệu lớn
+
+- **Khối lượng:** 3(3-1-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Dữ liệu lớn yêu cầu cần có các cơ chế, kỹ thuật xử lý dữ liệu ở quy mô lớn và hiệu quả. Học phần này nhằm cung cấp cho người học các kiến thức về công nghệ lưu trữ dữ liệu lớn, các hệ quản trị cơ sở dữ liệu NoSQL, NewSQL, các nguyên lý xử lý dữ liệu song song, phân tán, theo khối, theo luồng, xử lý sự kiện phức tạp, quản lý luồng công việc. Bên cạnh đó, người học được làm quen và vận dụng các công nghệ xử lý dữ liệu lớn trên nền tảng Hadoop Map Reduce, và Spark.
+
+**Nội dung:** Tổng quan về lưu trữ và xử lý dữ liệu lớn, hệ sinh thái Hadoop, HDFS, cơ sở dữ liệu phi quan hệ NoSQL, các kĩ thuật xử lý dữ liệu lớn theo khối, theo luồng, một số giải thuật và thư viện xử lý dữ liệu lớn tiêu biểu.
+
+---
+
+#### IT4681 – Truyền thông đa phương tiện
+
+- **Khối lượng:** 3(2-1-1-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3080, IT4172
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này nhằm cung cấp cho sinh viên kiến thức công nghệ để xây dựng và phát triển các ứng dụng truyền thông dữ liệu đa phương tiện, truyền thông video trực tuyến trên môi trường mạng Internet và liên mạng viễn thông, bao gồm những hiểu biết về công nghệ nền tảng cho các hệ thống truyền thông dữ liệu đa phương tiện qua mạng Internet, về công nghệ các chuẩn mã hóa nén dữ liệu đa phương tiện (các bộ CODEC), các kiến thức về giao thức và công nghệ truyền dòng dữ liệu đa phương tiện (Data Streaming) trong các ứng dụng chủ yếu hiện nay.
+
+**Nội dung:** Giới thiệu tổng quan về hệ thống truyền thông đa phương tiện. Các thiết bị đa phương tiện và lập trình đa phương tiện. Công nghệ các chuẩn mã hóa - nén ảnh, video. Công nghệ các chuẩn mã hóa - nén âm thanh. Các giao thức và kỹ thuật truyền dòng dữ liệu đa phương tiện. Các ứng dụng truyền thông đa phương tiện qua mạng IP.
+
+---
+
+#### IT4263 – An ninh mạng
+
+- **Khối lượng:** 3(2-0-2-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3080, IT4010
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này cung cấp các kiến thức cơ bản về an toàn an ninh thông tin trên môi trường mạng, các nguy cơ bảo mật và các giải pháp an toàn thông tin trên mạng TCP/IP, mạng LAN, WAN, các kỹ năng phân tích, nhận diện các hành vi tấn công trong mạng, quét và rà soát lỗ hổng an toàn bảo mật trên các dịch vụ mạng.
+
+**Nội dung:** Mô hình an toàn an ninh mạng, ứng dụng các hệ mật mã trong các giao thức mạng, giao thức xác thực; Phân tích lỗ hổng và các nguy cơ bảo mật trên bộ giao thức TCP/IP; các nguy cơ an toàn bảo mật đối với mạng LAN và WLAN, lỗ hổng và các nguy cơ của các dịch vụ mạng.
+
+---
+
+#### IT4611 – Các hệ thống phân tán và ứng dụng
+
+- **Khối lượng:** 2(2-1-0-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** Không
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Mục tiêu của khóa học này là cung cấp kiến thức cho phép người học hiểu được các nguyên lý và kỹ thuật thiết kế các hệ thống phân tán và giới thiệu các ứng dụng phân tán hiện đại. Phần kỹ thuật thiết kế bao gồm khái niệm về các tiến trình phân tán, giao tiếp trong hệ thống phân tán, phần mềm trung gian, cơ chế khóa, đồng bộ thời gian, các mô hình nhất quán dữ liệu, cơ chế vượt qua lỗi, các mô hình lập trình phân tán, song song, bảo mật trong hệ thống phân tán, các công nghệ lưu trữ dữ liệu phân tán. Các ứng dụng phân tán hiện đại gồm: điện toán đám mây, công nghệ chuỗi khối, .... Bên cạnh đó, người học cũng được thực hành các kiến thức học được thông qua đồ án thiết kế và xây dựng một hệ thống phân tán. Trong quá trình thực hiện đồ án này, người học được rèn luyện các kĩ năng mềm khác như: làm việc nhóm, thuyết trình, phân tích và xử lý vấn đề.
+
+**Nội dung:** Giới thiệu hệ thống phân tán, kiến trúc các hệ thống phân tán, trao đổi thông tin trong hệ thống phân tán, định danh, đồng bộ hóa thời gian, nhất quán hóa dữ liệu và sao lưu, chống chịu lỗi, các mô hình lập trình, và giới thiệu các hệ thống phân tán hiện đại.
+
+---
+
+#### IT4409 – Công nghệ web và dịch vụ trực tuyến
+
+- **Khối lượng:** 3(2-2-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3090, IT3100
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần cung cấp các kiến thức cần thiết để xây dựng và phát triển các ứng dụng, dịch vụ trực tuyến trên môi trường web. Sau khi học xong học phần này, sinh viên có khả năng sử dụng một ngôn ngữ lập trình như JSP, PHP để phát triển ứng dụng web cho các lĩnh vực khác nhau như: hệ quản trị nội dung (CMS), cổng thông tin (Portal), hay các ứng dụng điện tử (eCommerce, eLearning, eGoverment,...) và nắm vững được các công nghệ web, các platform, framework hiện đang thịnh hành.
+
+**Nội dung:** Internet, web, kiến trúc ứng dụng web, HTML, CSS, Javascript, PHP, JSP, Ajax, DOM, XML, SOA, An toàn bảo mật web, v.v.
+
+---
+
+#### IT4025 – Mật mã ứng dụng
+
+- **Khối lượng:** 3(3-1-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT4010
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Mật mã là công cụ không thể thiếu để bảo vệ an toàn thông tin trong các hệ thống máy tính. Môn học Mật Mã Ứng Dụng giúp sinh viên hiểu các thành phần cơ bản của mật mã và sử dụng chúng một cách đúng đắn.
+
+**Nội dung:** Môn học giới thiệu kiến thức cơ bản về mật mã hiện đại: mã đối xứng, mã công khai, hàm băm, sơ đồ mã hóa có xác thực, chữ ký điện tử và các giao thức mật mã. Ngoài ra, các phương pháp tấn công và phương pháp chứng minh tính an toàn của một số sơ đồ mật mã cụ thể cũng được trình bày chi tiết.
+
+---
+
+#### IT4015 – Nhập môn an toàn thông tin
+
+- **Khối lượng:** 3(3-1-0-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3020, IT3070
+- **Học phần song hành:** IT3080
+
+**Mục tiêu:** Sinh viên nắm được các khái niệm cơ bản của an toàn thông tin (ATTT); các nguyên lý và kỹ thuật cơ bản xây dựng các hệ mã mật, một số ứng dụng mã mật. Sinh viên nắm quy trình xây dựng hệ thống ATTT, biết phân tích và vận dụng các giao thức mật mã phổ biến để xây dựng các giải pháp an toàn cho các hệ thống tin học nói chung, phần mềm nói riêng, đặc biệt là các giải pháp bảo vệ phần mềm làm việc trên Internet.
+
+Sau khi học xong học phần này, yêu cầu sinh viên có khả năng:
+- Nắm vững ý nghĩa, tầm quan trọng và mục đích cụ thể của an toàn bảo mật thông tin trong đời sống
+- Hiểu biết các bước cần thiết trong xây dựng giải pháp ATBM trong thực tế, từ việc phân tích yêu cầu, xây dựng chính sách đến tìm giải pháp kỹ thuật cụ thể
+- Nắm vững các nền tảng kỹ thuật cơ bản trong ATBM như mật mã, xác thực, điều khiển truy nhập
+- Hiểu biết và vận dụng các giải pháp, công cụ có sẵn trong các lĩnh vực phổ biến khác nhau, đặc biệt là liên quan đến an toàn mạng máy tính.
+
+**Nội dung:** Tổng quan về an toàn thông tin, tầm quan trọng và mục tiêu cụ thể. Các nguyên tắc, cơ chế và cài đặt của an toàn thông tin và bảo vệ dữ liệu: các phương pháp tấn công và phòng chống. Các công cụ kỹ thuật nền tảng như các hệ thống mật mã, xác thực, điều khiển truy nhập và giao thức. Các kiến thức mở rộng về an toàn thông tin trong thực tế như an toàn dịch vụ Internet và ứng dụng Web.
+
+---
+
+#### IT4831 – Phòng chống tấn công mạng
+
+- **Khối lượng:** 2(2-0-1-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT4263
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Sau khi hoàn thành học phần này, sinh viên có thể phân tích, lựa chọn giải pháp, triển khai và vận hành các thành phần phần cứng và phần mềm trong hệ thống phòng chống tấn công mạng. Bên cạnh đó, sinh viên nhận thức được tầm quan trọng và có hiểu biết về các quy trình nghiệp vụ và các nhiệm vụ để vận hành và bảo vệ an toàn cho hệ thống mạng máy tính.
+
+**Nội dung:** Học phần này giới thiệu cho sinh viên các kiến thức cơ bản về các mô hình tấn công và phòng chống tấn công trên mạng máy tính. Học phần cung cấp các kiến thức về các giải pháp công nghệ trong các hệ thống phòng chống tấn công như mạng riêng ảo (VPN), hệ thống hạ tầng khóa công khai (PKI) và các ứng dụng; hệ thống tường lửa (firewall); hệ thống phát hiện và đánh chặn tấn công (IDPS). Bên cạnh đó, học phần cũng giới thiệu các nội dung kiến thức về phát triển và triển khai các tác vụ vận hành an toàn bảo mật cho hệ thống công nghệ thông tin như thiết kế an toàn bảo mật cho hệ thống mạng, xây dựng và triển khai chính sách an toàn bảo mật, quy trình ứng phó sự cố an toàn bảo mật, gia cố hệ thống, sao lưu dự phòng hệ thống. Học phần cung cấp cho sinh viên các kỹ năng triển khai và vận hành các sản phẩm giải pháp công nghệ phổ biến trong các hệ thống phòng chống tấn công mạng như VPN, tường lửa, hệ thống phát hiện xâm nhập IDS.
+
+---
+
+#### IT4651 – Thiết kế và triển khai mạng IP
+
+- **Khối lượng:** 3(2-0-2-6)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3080
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần hướng đến cung cấp cho sinh viên các kiến thức chuyên sâu về mạng IP. Kết thúc học phần, sinh viên có thể làm chủ một mạng IP theo mô hình switching hoặc routing, bao gồm từ khâu phân tích yêu cầu, thiết kế logic hệ thống mạng, triển khai các thiết bị physic cho hệ thống mạng, và xây dựng cũng như vận hành các dịch vụ trên mạng IP này. Các kiến thức mới về công nghệ mạng IP cũng được đề cập ở mức giới thiệu, giúp sinh viên có thể lựa chọn các hướng nghiên cứu chuyên sâu.
+
+**Nội dung:** Kiến thức chuyên sâu về mạng IP, phương pháp thiết kế một mạng IP, các kỹ thuật triển khai mạng IP nội bộ và kết nối với mạng IP công cộng (Internet), các kỹ thuật triển khai các dịch vụ trên mạng IP nội bộ và liên kết với các dịch vụ tương ứng trên mạng Internet. Một phần lớn thời lượng của học phần này là các bài thực hành.
+
+---
+
+#### IT3150 – Project I
+
+- **Khối lượng:** 2(0-0-4-8)
+- **Học phần tiên quyết:** IT1110
+- **Học phần học trước:** IT3011
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này nhằm mục đích hệ thống hóa một số kiến thức cơ sở cốt lõi ngành, giúp sinh viên có khả năng liên kết kiến thức của một nhóm học phần để xây dựng một ứng dụng cụ thể. Ngoài ra học phần cũng giúp sinh viên phát triển các kỹ năng lập trình chuyên nghiệp (quy ước lập trình, gỡ rối, kiểm thử) cũng như các kỹ năng mềm khác (làm việc nhóm, quản lý thời gian, viết báo cáo, thuyết trình...).
+
+**Nội dung:** Sử dụng ngôn ngữ lập trình C/C++/Java... cài đặt một số ứng dụng đơn giản có sử dụng các cấu trúc dữ liệu và các giải thuật từ đơn giản tới phức tạp; Viết báo cáo và thuyết trình kết quả.
+
+---
+
+#### IT3931 – Project II
+
+- **Khối lượng:** 2(0-0-4-8)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3150
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này giúp sinh viên làm quen với việc tìm hiểu các bài toán lý thuyết hoặc công nghệ của ngành KTMT và vận dụng các kiến thức thu nhận được vào giải quyết một số bài toán cụ thể. Ngoài ra môn học cũng cung cấp cho sinh viên các kỹ năng làm việc nhóm, nghiên cứu tài liệu, viết báo cáo, thuyết trình.
+
+**Nội dung:** Sinh viên được chia thành các nhóm, mỗi nhóm do một giảng viên phụ trách và được giao nhiệm vụ tìm hiểu một bài toán lý thuyết hoặc một vấn đề công nghệ cụ thể và vận dụng để giải quyết một bài toán cụ thể. Sinh viên được yêu cầu lập báo cáo các công việc đã thực hiện.
+
+---
+
+#### IT3943 – Project III
+
+- **Khối lượng:** 3(0-0-6-12)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3931
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Học phần này là bước đệm chuẩn bị cho đồ án tốt nghiệp, nhằm định hướng cách giải quyết và chứng minh tính tiền khả thi của giải pháp sẽ sử dụng trong đồ án tốt nghiệp. Ngoài ra học phần cung cấp và củng cố cho sinh viên kỹ năng làm việc nhóm, tìm tài liệu, phân tích yêu cầu, vận dụng các công nghệ và lý thuyết đã học để mô hình hóa bài toán kinh tế xã hội trong thực tế.
+
+**Nội dung:** Sinh viên được hướng dẫn cá nhân hoặc theo nhóm và được giao tìm hiểu một vấn đề cụ thể, đề xuất giải pháp và kiểm chứng tính tiền khả thi của giải pháp bằng cài đặt thử nghiệm hoặc chứng minh lý thuyết. Sinh viên được yêu cầu lập báo cáo về các công việc đã thực hiện.
+
+---
+
+#### IT4991 – Thực tập kỹ thuật
+
+- **Khối lượng:** 2(0-0-6-4)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT3150 (Project I)
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Tạo môi trường và điều kiện cho sinh viên làm quen với thực tế nghề nghiệp, bổ sung những kiến thức học trong trường, hiểu biết thêm về quan hệ tác động qua lại giữa giải pháp kỹ thuật với bối cảnh kinh tế và xã hội. Giúp sinh viên hiểu biết thêm về ý nghĩa thiết thực của các học phần trong chương trình đào tạo, dần hình thành được định hướng chuyên môn cho mình. Tạo điều kiện cho sinh viên tham gia trong một tập thể đa ngành để giải quyết một vấn đề cụ thể của thực tế.
+
+**Nội dung:** Thực hiện 4 tuần tại một cơ sở ngoài trường, thời gian do viện bố trí hoặc sinh viên tự sắp xếp. Chia thành nhóm nhỏ hoặc từng cá nhân sinh viên, có cán bộ giảng dạy giám sát. Sinh viên phải làm đề cương và được cán bộ giám sát thông qua.
+
+---
+
+#### IT4997 – Đồ án tốt nghiệp Cử nhân
+
+- **Khối lượng:** 6(0-0-12-12)
+- **Học phần tiên quyết:** Không
+- **Học phần học trước:** IT4991
+- **Học phần song hành:** Không
+
+**Mục tiêu:** Liên kết và củng cố kiến thức cốt lõi, mở rộng và nâng cao kiến thức chuyên môn của ngành rộng. Phát triển năng lực xây dựng ý tưởng, thiết kế, cài đặt một sản phẩm hoặc một giải pháp kỹ thuật Công nghệ thông tin. Rèn luyện các kỹ năng trình bày, thuyết trình, kỹ năng giao tiếp và làm việc nhóm, kỹ năng sử dụng ngoại ngữ.
+
+**Nội dung:** Sinh viên được giao một đề tài cụ thể trong lĩnh vực kỹ thuật máy tính, vận dụng những kiến thức thu nhận được từ các học phần đã học để giải quyết các nhiệm vụ của đề tài dưới sự hướng dẫn của một giảng viên. Sinh viên được yêu cầu phát triển sản phẩm liên quan tới đề tài, viết thuyết minh đồ án và thuyết trình về các công việc đã thực hiện trước hội đồng chấm đồ án tốt nghiệp.
+
+---
+
+## 5. Quá trình cập nhật chương trình đào tạo
+
+### LẦN CẬP NHẬT: 01
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):
+
+### LẦN CẬP NHẬT: 02
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):
+
+### LẦN CẬP NHẬT: 03
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):
+
+### LẦN CẬP NHẬT: 04
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):
+
+### LẦN CẬP NHẬT: 05
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):
+
+### LẦN CẬP NHẬT: 06
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):
+
+### LẦN CẬP NHẬT: 07
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):
+
+### LẦN CẬP NHẬT: 08
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):
+
+### LẦN CẬP NHẬT: 09
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):
+
+### LẦN CẬP NHẬT: 10
+
+- Số Quyết định/Tờ trình/Công văn:
+- Ký ngày:
+- Phòng Đào tạo nhận ngày:
+- Áp dụng từ khóa:
+- Áp dụng từ kỳ:
+- Nội dung tóm tắt của đề xuất cập nhật (kèm ghi chú nếu có):

@@ -328,18 +328,18 @@ Bảng \ref{tab:semantic-vs-hybrid} trình bày so sánh kết quả giữa Sema
 \centering
 \begin{tabular}{|l|l|l|l|}
 \hline
-\textbf{Metric} & \textbf{Semantic-only} & \textbf{Hybrid + Reranking} & \textbf{Cải thiện} \\
+\textbf{Metric} & \textbf{Semantic-only} & \textbf{Hybrid Search} & \textbf{Cải thiện} \\
 \hline
-Hit Rate@5 & 95.71\% & 98.05\% & \textbf{+2.34\%} \\
+Hit Rate@5 & 95.71\% & 99.35\% & \textbf{+3.64\%} \\
 \hline
-MRR & 87.52\% & 93.20\% & \textbf{+5.68\%} \\
+MRR & 87.52\% & 92.31\% & \textbf{+4.79\%} \\
 \hline
-Precision@5 & Chưa đo & 51.31\% & - \\
+Precision@5 & 19.14\% & 19.87\% & +0.73\% \\
 \hline
-Recall@5 & 95.71\% & 98.05\% & \textbf{+2.34\%} \\
+Recall@5 & 95.71\% & 99.35\% & +3.64\% \\
 \hline
 \end{tabular}
-\caption{So sánh Semantic Search vs Hybrid Search + Reranking (threshold 0.7)}
+\caption{So sánh Semantic Search vs Hybrid Search}
 \label{tab:semantic-vs-hybrid}
 \end{table}
 
@@ -401,9 +401,29 @@ Recall@5 & 98.05\% \\
 \label{tab:hybrid-rerank-results}
 \end{table}
 
+\subsection{So sánh Hybrid Search vs Hybrid + Reranking}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Metric} & \textbf{Hybrid Search} & \textbf{Hybrid + Reranking} & \textbf{Cải thiện} \\
+\hline
+Hit Rate@5 & 99.35\% & 98.05\% & -1.30\% \\
+\hline
+MRR & 92.31\% & 93.20\% & \textbf{+0.89\%} \\
+\hline
+Precision@5 & 19.87\% & 51.31\% & \textbf{+31.44\%} \\
+\hline
+Recall@5 & 99.35\% & 98.05\% & -1.30\% \\
+\hline
+\end{tabular}
+\caption{So sánh Hybrid Search vs Hybrid + Reranking (threshold 0.7)}
+\label{tab:hybrid-vs-rerank}
+\end{table}
+
 \textbf{Nhận xét:}
 \begin{itemize}
-    \item \textbf{Precision@5 đạt 51.31\%} nhờ threshold 0.7 loại bỏ các documents không liên quan.
+    \item \textbf{Precision@5 tăng đáng kể} từ 19.87\% lên 51.31\% (+31.44\%) nhờ threshold 0.7 loại bỏ các documents không liên quan.
     \item \textbf{MRR cải thiện} từ 92.31\% lên 93.20\% nhờ cross-encoder reranking đưa documents đúng lên đầu.
     \item \textbf{Hit Rate giảm nhẹ} 1.30\% do threshold loại bỏ một số documents có score thấp nhưng vẫn liên quan - đây là trade-off hợp lý để đạt Precision cao hơn.
 \end{itemize}

@@ -181,6 +181,8 @@ python standalone_pipeline.py "document.pdf"
 
 # Batch standalone
 python batch_standalone.py "d:/pdfs/" "./output"
+
+python main.py --input <input_dir> --output <output_dir> --chunker parent_child --pattern "*_fix.md"
 ```
 
 ## 📝 Best Practices
