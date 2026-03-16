@@ -1,0 +1,389 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Mở đầu chương}
+Chương này trình bày chi tiết quá trình triển khai Phase 1 của hệ thống RAG v2: thu thập dữ liệu, làm sạch dữ liệu, và xây dựng pipeline chunking. Đây là giai đoạn nền tảng, quyết định chất lượng của toàn bộ hệ thống retrieval ở các phase sau.
+
+Các nội dung triển khai bao gồm:
+\begin{itemize}
+    \item Thu thập và làm sạch dữ liệu từ 3 nguồn (quydinh, ctdt, stsv);
+    \item Xử lý PDF với nhiều công cụ (Docling, PyMuPDF4LLM, olmOCR);
+    \item Triển khai chi tiết 4 loại chunker chuyên biệt;
+    \item Làm giàu metadata tự động cho chunks CTDT.
+\end{itemize}
+
+\section{Thu thập và xử lý dữ liệu quy định (quydinh)}
+
+\subsection{Xử lý PDF với olmOCR}
+
+\subsubsection{Vấn đề font encoding}
+Nhiều văn bản PDF quy chế có lỗi font, khi extract text sẽ cho ra ký tự sai:
+\begin{verbatim}
+Văn bản gốc: "Điều 1. Phạm vi và đối tượng áp dụng"
+Lỗi font:    "Äiá»u 1. Phạm vi và đá»i tượng áp dụng"
+\end{verbatim}
+
+\subsubsection{Giải pháp olmOCR}
+olmOCR sử dụng vision-based OCR, xử lý PDF bằng cách chụp ảnh từng trang rồi nhận diện ký tự bằng mô hình vision, không phụ thuộc vào font embedding:
+\begin{verbatim}
+# Batch processing 16 files quy dinh
+python olmocr/batch_convert.py --input data/quydinh/ 
+                               --output data/quydinh/olmocr/
+# Kết quả: 16/16 files converted successfully
+\end{verbatim}
+
+\subsubsection{So sánh các PDF converter}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Tiêu chí} & \textbf{Docling} & \textbf{PyMuPDF4LLM} & \textbf{olmOCR} \\
+\hline
+Tốc độ & 8s/34 trang & 3s/34 trang & 60s/34 trang \\
+\hline
+Độ chính xác TV & 99.5\% & 99.9\% & 99.9\% \\
+\hline
+Font issues & Có thể fail & Có thể fail & Không ảnh hưởng \\
+\hline
+Table extraction & Tốt & Trung bình & Xuất sắc \\
+\hline
+Structure detection & Xuất sắc & Tốt & Tốt \\
+\hline
+GPU required & Không & Không & Có \\
+\hline
+\end{tabular}
+\caption{So sánh các PDF converter}
+\end{table}
+
+\textbf{Quyết định thiết kế:} Sử dụng olmOCR cho văn bản quy định (đảm bảo 100\% success rate), Docling/PyMuPDF4LLM cho CTDT (tốc độ nhanh, structure detection tốt).
+
+\subsection{Làm sạch dữ liệu quy định}
+Sau khi OCR, văn bản Markdown cần qua bước làm sạch:
+\begin{itemize}
+    \item Loại bỏ header/footer lặp lại giữa các trang;
+    \item Xóa watermark, page numbers, và các artifact từ OCR;
+    \item Chuẩn hóa ký tự đặc biệt tiếng Việt;
+    \item Chuyển đổi HTML table (output từ olmOCR) sang Markdown table;
+    \item Sửa lỗi ngắt dòng bất thường giữa các đoạn văn.
+\end{itemize}
+
+\section{Thu thập và xử lý dữ liệu CTDT}
+
+\subsection{Cấu trúc thư mục}
+Mỗi khoa/viện có cấu trúc thư mục chuẩn:
+\begin{verbatim}
+data/ctdt/
+  soict/                    # Viện CNTT&TT
+    *.pdf                   # PDF gốc (8 files)
+    output_docling/         # Docling OCR output
+    clean_data/             # Markdown đã làm sạch
+    chunks_recursive.../    # Chunks JSON
+  cokhi/                    # Trường Cơ khí
+  dien-dientu/              # Viện Điện  
+  hoa/                      # Viện KT Hóa học
+  toan/                     # Viện Toán UD&TH
+  vatlieu/                  # Viện KH&KT Vật liệu
+\end{verbatim}
+
+\subsection{Pipeline Docling OCR}
+Sử dụng Docling cho các PDF CTDT có layout phức tạp (nhiều bảng, cấu trúc heading):
+\begin{verbatim}
+# Docling OCR output: markdown với headings
+# Ví dụ output:
+# Chương trình đào tạo Công nghệ Thông tin
+## Thông tin chung
+| Ngành đào tạo | Công nghệ Thông tin |
+| Mã ngành      | ITE10                |
+## Khối kiến thức
+### Kiến thức đại cương
+| STT | Mã HP | Tên học phần | TC |
+|-----|-------|-------------|-----|
+| 1   | MI1111| Giải tích I | 4   |
+\end{verbatim}
+
+\subsection{Làm sạch dữ liệu CTDT}
+Bước làm sạch cho CTDT focus vào:
+\begin{itemize}
+    \item Chuẩn hóa heading level (H1 cho tiêu đề chính, H2 cho phần, H3 cho mục con);
+    \item Sửa bảng markdown bị lỗi format (thiếu separator line, cell không align);
+    \item Loại bỏ nội dung trùng lặp giữa các trang;
+    \item Thêm suffix \texttt{\_fix.md} cho files đã làm sạch.
+\end{itemize}
+
+\section{Thu thập và xử lý dữ liệu STSV}
+
+\subsection{Crawl dữ liệu từ cổng thông tin}
+Dữ liệu STSV được crawl từ API của cổng thông tin sinh viên, mỗi tài liệu là một bài viết chứa thông tin hướng dẫn:
+\begin{verbatim}
+# Ví dụ 1 file JSON:
+{
+    "DocumentID": 42,
+    "Title": "Hướng dẫn sử dụng cổng thông tin sinh viên",
+    "TypeDoc": "Sổ tay SV",
+    "Description": "## Giới thiệu\n1. Truy cập...\n2. Đăng nhập...",
+    "TimeCreate": "2025-08-15T00:00:00"
+}
+\end{verbatim}
+
+\subsection{Làm sạch dữ liệu STSV}
+\textbf{File:} \texttt{data/stsv/clean\_data/clean\_data.py}
+
+Bước làm sạch bao gồm:
+\begin{itemize}
+    \item Loại bỏ HTML tags còn sót trong Description;
+    \item Chuẩn hóa markdown formatting (list, heading, link);
+    \item Loại bỏ tài liệu trùng lặp hoặc rỗng;
+    \item Gộp tất cả thành file \texttt{data.json} duy nhất để STSVChunker xử lý.
+\end{itemize}
+
+\section{Triển khai OlmOcrLegalChunker}
+
+\subsection{Nhận diện cấu trúc văn bản}
+Chunker sử dụng các regex patterns để nhận diện cấu trúc pháp lý:
+\begin{verbatim}
+# Regex patterns for legal structure
+CHAPTER_PATTERN = r'^(?:CHƯƠNG|Chương)\s+...'
+ARTICLE_PATTERN = r'^(?:Điều|ĐIỀU)\s+(\d+)...'
+CLAUSE_PATTERN  = r'^\s*(\d+)\.\s+'
+POINT_PATTERN   = r'^\s*[a-zđ]\)\s+'
+\end{verbatim}
+
+\subsection{Thuật toán chunking}
+\begin{verbatim}
+def chunk_document(self, content, source_file):
+    # 1. Trích xuất metadata văn bản (căn cứ, ngày ban hành)
+    doc_metadata = self._extract_doc_metadata(content)
+    
+    # 2. Tạo header chunk
+    header = self._extract_header(content)
+    
+    # 3. Chia theo Chương
+    chapters = self._split_by_chapters(content)
+    
+    # 4. Trong mỗi Chương: chia theo Điều
+    for chapter in chapters:
+        articles = self._split_by_articles(chapter)
+        
+        for article in articles:
+            # 5. Tạo parent chunk (toàn bộ Điều)
+            parent = self._create_parent_chunk(article, chapter)
+            
+            # 6. Tạo child chunks (từng Khoản)
+            children = self._create_child_chunks(article, parent)
+    
+    # 7. Xử lý phụ lục
+    appendix = self._extract_appendix(content)
+    
+    return chunks, stats
+\end{verbatim}
+
+\subsection{Readable ID Format}
+Mỗi chunk được gán readable ID phản ánh vị trí trong cấu trúc pháp lý:
+\begin{verbatim}
+def _generate_readable_id(self, chapter, article, clause):
+    # c1_d5_k2 = Chương 1, Điều 5, Khoản 2
+    parts = []
+    if chapter: parts.append(f"c{chapter}")
+    if article: parts.append(f"d{article}")
+    if clause:  parts.append(f"k{clause}")
+    return "_".join(parts)
+    
+# Ví dụ: c1_d5_k2 → Chương I, Điều 5, Khoản 2
+# Ví dụ: c3_d18   → Chương III, Điều 18 (parent, toàn bộ điều)
+# Ví dụ: header   → Phần header văn bản
+\end{verbatim}
+
+\section{Triển khai RecursiveChunker}
+
+\subsection{Chiến lược H2 Section-based}
+RecursiveChunker tách document theo H2 section boundaries:
+
+\begin{verbatim}
+def chunk_document(self, text, source=None):
+    # 1. Trích xuất tiêu đề document
+    doc_title = self._extract_document_title(text)
+    
+    # 2. Trích xuất tất cả headings
+    headings = self._extract_section_headings(text)
+    
+    # 3. Trích xuất các section H2
+    h2_sections = self._extract_h2_sections(text)
+    
+    # 4. Xử lý phần preamble (trước H2 đầu tiên)
+    preamble = text[:h2_sections[0]['start_pos']]
+    
+    all_chunks = []
+    for section in h2_sections:
+        # 5. Parent chunk = toàn bộ section H2
+        parent = self._create_parent_from_section(section)
+        
+        # 6. Child chunks = tách section bằng TextSplitter
+        children = self._split_text_to_chunks(
+            section['content'], doc_title, headings, source
+        )
+        
+        all_chunks.extend([parent] + children)
+    
+    return all_chunks, stats
+\end{verbatim}
+
+\subsection{Bảo vệ bảng Markdown}
+Kỹ thuật protect-and-restore để tránh tách giữa bảng:
+
+\begin{verbatim}
+def _protect_tables_in_text(self, text):
+    """Thay bảng bằng placeholder trước khi split."""
+    table_map = {}
+    
+    def replace_table(match):
+        table_text = match.group(0)
+        if len(table_text) <= self.chunk_size:
+            # Bảng nhỏ: bảo vệ nguyên vẹn
+            placeholder = f"__TABLE_{len(table_map):04d}__"
+            table_map[placeholder] = table_text
+            return placeholder
+        # Bảng lớn: để TextSplitter xử lý
+        return table_text
+    
+    protected = re.sub(TABLE_PATTERN, replace_table, text)
+    return protected, table_map
+\end{verbatim}
+
+Khi chunk chứa bảng lớn cần tách, bảng được chia theo rows với header preserved:
+\begin{verbatim}
+def _split_table_by_rows(self, table_text, max_rows=0):
+    """Tách bảng thành nhiều phần, mỗi phần có header."""
+    # header_line + separator_line + N data_rows
+    # Tính max_rows dựa trên chunk_size nếu max_rows=0
+\end{verbatim}
+
+\subsection{Inject context cho sub-items}
+Xử lý trường hợp chunk bắt đầu bằng sub-item không có context:
+\begin{verbatim}
+# Trước inject:
+"b) Đối với sinh viên thuộc diện chính sách..."
+
+# Sau inject (tìm khoản cha từ section text gốc):
+"3. Căn cứ kế hoạch tuyển sinh hàng năm:
+
+b) Đối với sinh viên thuộc diện chính sách..."
+\end{verbatim}
+
+\section{Triển khai STSVChunker}
+
+\subsection{Phân loại nội dung tự động}
+STSVChunker phân tích nội dung Description và chọn chiến lược phù hợp:
+
+\begin{verbatim}
+def _segment(self, description, title, type_doc):
+    # Loại 1: Ngắn (< 1500 chars) -> 1 chunk
+    if len(description) <= SINGLE_CHUNK_THRESHOLD:
+        return [(description, None, None)]
+    
+    # Loại 2: Có phần Roman (I., II., III.)
+    if _RE_ROMAN.search(description):
+        return self._split_by_roman_then_items(description)
+    
+    # Loại 3: Có mục số (1., 2., ...)
+    if _RE_NUMBERED.search(description):
+        return self._split_by_numbered_items(description)
+    
+    # Loại 4: Văn xuôi thuần
+    return [(description, None, None)]
+\end{verbatim}
+
+\subsection{Sequential tracking cho mục số}
+Để tránh nhầm lẫn sub-items (ví dụ ``1. Miễn học phần...'' xuất hiện trong mục 8) với mục cấp cao, STSVChunker sử dụng sequential tracking:
+\begin{verbatim}
+# Chỉ nhận mục mới khi số thứ tự đúng = expected
+# 1 -> 2 -> 3 -> ... (tuần tự)
+expected_num = None
+for line in lines:
+    m = re.match(r'^(\d{1,2})\.\s+\S', stripped)
+    if m:
+        num = int(m.group(1))
+        if expected_num is None and num == 1:
+            expected_num = 1
+        if expected_num is not None and num == expected_num:
+            # Đây là mục cấp cao mới
+            expected_num = num + 1
+\end{verbatim}
+
+\subsection{Context prefix cho retrieval}
+Mỗi chunk được thêm prefix để đảm bảo context khi retrieval:
+\begin{verbatim}
+def _build_content(self, text, title, type_doc, section_ctx):
+    # Prefix: [Title | TypeDoc | Section_context]
+    parts = [title]
+    if type_doc:     parts.append(type_doc)
+    if section_ctx:  parts.append(section_ctx)
+    prefix = " | ".join(parts)
+    return f"[{prefix}]\n{text}"
+
+# Ví dụ output:
+# [Hướng dẫn đăng ký học tập | Sổ tay SV | II. Đăng ký học phần]
+# 1. Truy cập hệ thống SIS tại https://sis.hust.edu.vn
+# 2. Chọn mục "Đăng ký học phần"
+\end{verbatim}
+
+\section{Triển khai Metadata Enrichment cho CTDT}
+
+\subsection{Trích xuất ngày ban hành}
+Thuật toán trích xuất ngày ban hành theo thứ tự ưu tiên:
+\begin{verbatim}
+def extract_effective_date(text, filename):
+    # Priority 1: Date in filename (YYYY.MM.DD, YYYY-MM-DD)
+    # Priority 2: "ngày DD tháng MM năm YYYY" trong 2000 char đầu
+    # Priority 3: "ngày DD/MM/YYYY" trong 2000 char đầu
+    # Priority 4: Năm trong tiêu đề "CHƯƠNG TRÌNH ... 2017"
+    # Priority 5: Năm trong filename
+\end{verbatim}
+
+\subsection{Xác định khóa áp dụng}
+Phát hiện khóa áp dụng từ filename và nội dung:
+\begin{verbatim}
+def extract_applicable_cohort(text, filename):
+    # Tìm pattern K65, K68, K70, ... trong filename và content
+    # Trả về danh sách sorted: "K65, K68, K70"
+\end{verbatim}
+
+\subsection{Xác định ngành đào tạo}
+Chiến lược nhiều tầng để xác định ngành:
+\begin{enumerate}
+    \item Trường ``Ngành đào tạo:'' trong nội dung (plain text hoặc table);
+    \item Trường ``Tên chương trình:'' trong nội dung;
+    \item H1 heading nếu là tên ngành (không phải heading tổng quát);
+    \item Program code mapping từ filename (IT2 $\rightarrow$ ``Kỹ thuật Máy tính'');
+    \item Keyword patterns trong filename;
+    \item H2 heading đầu tiên nếu là tên ngành.
+\end{enumerate}
+
+\subsection{Phân loại loại tài liệu}
+Phân loại tự động dựa trên filename và tiêu đề:
+\begin{verbatim}
+DOCUMENT_TYPE_RULES = [
+    (r"tài\s*năng|talent",       "talent_program"),
+    (r"tiên\s*tiến|CTTT",        "advanced_program"),
+    (r"chất\s*lượng\s*cao|KSCLC","high_quality_program"),
+    (r"việt.*pháp|ITEP",         "international_program"),
+    (r"tích\s*hợp.*cử\s*nhân",  "integrated_program"),
+    (r"khung\s*CT",              "training_framework"),
+]
+# Default: "curriculum"
+\end{verbatim}
+
+\section{Kết luận chương}
+Chương này đã trình bày chi tiết quá trình triển khai Phase 1 của hệ thống RAG v2:
+
+\begin{itemize}
+    \item \textbf{Thu thập dữ liệu}: 16 PDF quy định, CTDT từ 6 khoa/viện, 83 tài liệu JSON STSV;
+    \item \textbf{Xử lý PDF}: olmOCR cho văn bản pháp lý (100\% success rate), Docling/PyMuPDF cho CTDT;
+    \item \textbf{OlmOcrLegalChunker}: Nhận diện tự động cấu trúc Chương-Điều-Khoản, tạo parent-child chunks với readable ID;
+    \item \textbf{RecursiveChunker}: Bảo vệ bảng markdown, inject context cho sub-items, parent-child dựa trên H2 sections;
+    \item \textbf{STSVChunker}: Phân loại nội dung tự động (4 loại), sequential tracking cho mục số;
+    \item \textbf{Metadata Enrichment}: Tự động trích xuất ngày ban hành, khóa áp dụng, ngành đào tạo.
+\end{itemize}
+
+Phase 1 tạo nền tảng dữ liệu sạch và chunks chất lượng cao cho các phase tiếp theo (Embedding, Retrieval, Reranking).
+
+\end{document}

@@ -1,0 +1,418 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Mở đầu chương}
+Chương này trình bày kết quả đánh giá thực nghiệm hệ thống RAG v2, bao gồm:
+\begin{itemize}
+    \item Thống kê tổng quan dữ liệu đã thu thập và kết quả chunking;
+    \item Thiết lập thực nghiệm: bộ dữ liệu đánh giá, các metrics, và cấu hình phương pháp;
+    \item Đánh giá Retrieval: so sánh 6 phương pháp retrieval trên 25 bộ dữ liệu, tổng cộng 2.390 câu hỏi;
+    \item Phân tích kết quả: ưu nhược điểm mỗi phương pháp, ảnh hưởng của cấu hình hybrid.
+\end{itemize}
+
+\section{Tổng quan dữ liệu hệ thống}
+
+\subsection{Thống kê tổng hợp}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Nguồn dữ liệu} & \textbf{Số files gốc} & \textbf{Số chunks} & \textbf{Tỷ lệ} \\
+\hline
+Quy định đào tạo (quydinh) & 16 PDF & 806 & 29.3\% \\
+\hline
+Chương trình đào tạo (ctdt) & 38 PDF (6 khoa) & 1.572 & 57.1\% \\
+\hline
+Thông tin sinh viên (stsv) & 83 JSON & 374 & 13.6\% \\
+\hline
+\textbf{Tổng cộng} & \textbf{137 files} & \textbf{2.752} & \textbf{100\%} \\
+\hline
+\end{tabular}
+\caption{Thống kê tổng hợp dữ liệu hệ thống RAG v2}
+\end{table}
+
+Hệ thống đã xử lý thành công tổng cộng \textbf{2.752 chunks} từ 137 tài liệu nguồn, bao phủ 3 nhóm dữ liệu chính phục vụ nhu cầu tra cứu quy chế đào tạo của sinh viên.
+
+\subsection{Phân tích nhu cầu sinh viên}
+
+Dữ liệu được thu thập dựa trên phân tích các thắc mắc phổ biến:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{8.5cm}|}
+\hline
+\textbf{Chủ đề} & \textbf{Các thắc mắc phổ biến} \\
+\hline
+Đăng ký học tập & Tín chỉ tối đa/tối thiểu, quy trình đăng ký, rút học phần \\
+\hline
+Điều kiện tốt nghiệp & Tín chỉ tích lũy, GPA, chuẩn ngoại ngữ, thời gian \\
+\hline
+Học bổng KKHT & Điều kiện xét, mức A/B/C, quỹ học bổng \\
+\hline
+Quy định ngoại ngữ & Chuẩn đầu ra, chứng chỉ công nhận, quy đổi điểm \\
+\hline
+Điểm rèn luyện & Thang điểm, xếp loại, ảnh hưởng học bổng \\
+\hline
+Chương trình đào tạo & Danh mục học phần, tiến trình mẫu, điều kiện tiên quyết \\
+\hline
+\end{tabular}
+\caption{Các chủ đề thắc mắc phổ biến của sinh viên}
+\end{table}
+
+\section{Thiết lập thực nghiệm đánh giá Retrieval}
+
+\subsection{Bộ dữ liệu đánh giá}
+
+Hệ thống được đánh giá trên \textbf{25 bộ dữ liệu} khác nhau, bao phủ nhiều chủ đề quy chế đào tạo. Mỗi bộ chứa các câu hỏi kèm \texttt{relevant\_doc\_ids} (danh sách UUID chunk chính xác cần truy xuất):
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{|l|l|p{5.5cm}|}
+\hline
+\textbf{Bộ dữ liệu} & \textbf{Số queries} & \textbf{Chủ đề} \\
+\hline
+dataset\_TT18\_2015\_GDQP\_AN\_1 & 100 & Thông tư giáo dục QP-AN \\
+\hline
+rag\_eval\_ks\_180tc\_2 & 100 & Hướng dẫn học chuyển tiếp KS 180TC \\
+\hline
+rag\_eval\_hocbong\_kkht\_3 & 100 & Quy định học bổng KKHT \\
+\hline
+rag\_eval\_olympic\_doitruyen\_4 & 100 & QĐ thi Olympic và đội tuyển \\
+\hline
+rag\_eval\_sv\_nuoc\_ngoai\_DHBK\_5 & 200 & Quản lý sinh viên nước ngoài \\
+\hline
+rag\_eval\_ngoaingu\_DHBK\_6.1 & 100 & Quy định ngoại ngữ ĐHBK (phần 1) \\
+\hline
+rag\_eval\_ngoaingu\_phuluc\_DHBK\_6.2 & 100 & Phụ lục ngoại ngữ ĐHBK \\
+\hline
+dataset\_chuan\_tieng\_anh\_K63\_K64\_7 & 55 & Chuẩn tiếng Anh K63--K64 \\
+\hline
+dataset\_chuan\_ngoaingu\_chuongtrinh\_dacbiet\_8 & 60 & Chuẩn ngoại ngữ CT đặc biệt \\
+\hline
+ren\_luyen\_dataset\_9 & 100 & Quy định điểm rèn luyện \\
+\hline
+rag\_eval\_dataset\_chunks\_0000\_0037\_10.1 & 100 & Quy chế đào tạo (chunks 0--37) \\
+\hline
+rag\_eval\_dataset\_chunks\_0038\_0071\_10.2 & 100 & Quy chế đào tạo (chunks 38--71) \\
+\hline
+dataset\_chunk\_0072\_0105 & 100 & Quy chế đào tạo (chunks 72--105) \\
+\hline
+dataset\_chunks\_0106\_0138 & 100 & Quy chế đào tạo (chunks 106--138) \\
+\hline
+dataset\_QD6126\_sv\_khuyet\_tat\_11 & 50 & QĐ sinh viên khuyết tật \\
+\hline
+dataset\_QD1515\_day\_hoc\_truc\_tuyen\_12 & 100 & QĐ dạy học trực tuyến \\
+\hline
+thi\_truc\_tuyen\_dataset\_13 & 100 & Quy định thi trực tuyến \\
+\hline
+dataset\_khung\_renluyen\_2020\_2021\_9\_14 & 70 & Khung rèn luyện 2020--2021 \\
+\hline
+dataset\_ngoai\_ngu\_DHBK\_15 & 100 & Ngoại ngữ ĐHBK (tổng hợp) \\
+\hline
+dataset\_ngoai\_ngu\_DHBK\_p2\_15.2 & 100 & Ngoại ngữ ĐHBK (phần 2) \\
+\hline
+dataset\_ngoaingu\_DHBKHN\_16 & 200 & Ngoại ngữ ĐHBK Hà Nội \\
+\hline
+rag\_dataset\_17.2 & 100 & Quy chế đào tạo (tổng hợp) \\
+\hline
+dataset\_chunk\_file\_01\_17.1 & 100 & Quy chế đào tạo (file 01) \\
+\hline
+dataset\_hoc\_bong\_tai\_tro\_dhbk\_18 & 55 & Học bổng tài trợ ĐHBK \\
+\hline
+\hline
+\textbf{Tổng cộng} & \textbf{2.390} & \\
+\hline
+\end{tabular}
+\caption{25 bộ dữ liệu đánh giá retrieval}
+\end{table}
+
+\subsection{Các metrics đánh giá}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Metric} & \textbf{Mô tả} \\
+\hline
+Hit@1 & Tỷ lệ câu hỏi có tài liệu đúng ở vị trí top-1 \\
+\hline
+Hit@K (K=5) & Tỷ lệ câu hỏi có ít nhất 1 tài liệu đúng trong top-5 \\
+\hline
+Precision@K & Tỷ lệ tài liệu đúng trong top-K trên tổng K tài liệu \\
+\hline
+Recall@K & Tỷ lệ tài liệu đúng được tìm thấy trong top-K trên tổng số đúng \\
+\hline
+MRR & Mean Reciprocal Rank -- trung bình nghịch đảo hạng đầu tiên đúng \\
+\hline
+Latency (ms) & Thời gian trung bình cho mỗi truy vấn \\
+\hline
+\end{tabular}
+\caption{Các metrics đánh giá retrieval}
+\end{table}
+
+\textbf{Công thức:}
+\begin{equation}
+\text{Hit@K} = \frac{1}{N} \sum_{i=1}^{N} \mathbb{1}\left[ |R_i \cap G_i| > 0 \right]
+\end{equation}
+
+\begin{equation}
+\text{Precision@K} = \frac{1}{N} \sum_{i=1}^{N} \frac{|R_i \cap G_i|}{K}
+\end{equation}
+
+\begin{equation}
+\text{Recall@K} = \frac{1}{N} \sum_{i=1}^{N} \frac{|R_i \cap G_i|}{|G_i|}
+\end{equation}
+
+\begin{equation}
+\text{MRR} = \frac{1}{N} \sum_{i=1}^{N} \frac{1}{\text{rank}_i}
+\end{equation}
+
+Trong đó $R_i$ là top-K tài liệu truy xuất, $G_i$ là ground-truth, $\text{rank}_i$ là vị trí đầu tiên xuất hiện tài liệu đúng.
+
+\subsection{Các phương pháp Retrieval được đánh giá}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{7.5cm}|l|}
+\hline
+\textbf{Phương pháp} & \textbf{Mô tả} & \textbf{Loại} \\
+\hline
+BGE-M3 (Qdrant) & Vector search với BAAI/bge-m3 (1024d) & Dense \\
+\hline
+E5 (Qdrant) & Vector search với multilingual-e5-large (1024d) & Dense \\
+\hline
+Elasticsearch & BM25 full-text search, multi\_match fields=[text, title] & Sparse \\
+\hline
+Hybrid v1.0/k0.0 & Hybrid search chỉ vector (pool\_k=15) & Hybrid \\
+\hline
+Hybrid v0.8/k0.2 & Hybrid search: 80\% vector + 20\% keyword & Hybrid \\
+\hline
+Hybrid v0.7/k0.3 & Hybrid search: 70\% vector + 30\% keyword & Hybrid \\
+\hline
+\end{tabular}
+\caption{6 phương pháp retrieval được đánh giá}
+\end{table}
+
+\textbf{Cấu hình chung:}
+\begin{itemize}
+    \item K = 5 (top-5 kết quả), top\_k = 20 candidates;
+    \item Qdrant collections: \texttt{stsv}, \texttt{quydinh};
+    \item Elasticsearch indexes cùng tên, multi\_match với fuzziness=AUTO;
+    \item Hybrid: sử dụng cả BGE-M3 và E5 embeddings, vector/keyword pool\_k = 15.
+\end{itemize}
+
+\section{Kết quả đánh giá Retrieval tổng thể (OVERALL)}
+
+\subsection{So sánh tổng thể 6 phương pháp}
+
+Kết quả đánh giá trên toàn bộ \textbf{2.390 queries} từ \textbf{25 bộ dữ liệu} được tổng hợp trong bảng sau:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+\textbf{Phương pháp} & \textbf{Hit@1} & \textbf{Hit@5} & \textbf{P@5} & \textbf{R@5} & \textbf{MRR} & \textbf{Lat.(ms)} \\
+\hline
+BGE-M3 & 0.503 & 0.732 & 0.159 & 0.686 & 0.602 & 111.4 \\
+\hline
+E5 & 0.565 & 0.845 & 0.187 & 0.800 & 0.687 & 88.7 \\
+\hline
+Elasticsearch & 0.221 & 0.470 & 0.098 & 0.434 & 0.332 & 58.0 \\
+\hline
+Hybrid v1.0/k0.0 & 0.569 & 0.857 & 0.189 & 0.809 & 0.694 & 218.2 \\
+\hline
+\textbf{Hybrid v0.8/k0.2} & \textbf{0.587} & \textbf{0.864} & \textbf{0.191} & \textbf{0.816} & \textbf{0.708} & 205.6 \\
+\hline
+Hybrid v0.7/k0.3 & 0.586 & 0.863 & 0.190 & 0.814 & 0.706 & 204.3 \\
+\hline
+\end{tabular}
+\caption{So sánh OVERALL trên toàn bộ 2.390 queries (25 bộ dữ liệu)}
+\end{table}
+
+\textbf{Nhận xét chính:}
+\begin{enumerate}
+    \item \textbf{Hybrid v0.8/k0.2 đạt kết quả tốt nhất tổng thể} với Hit@5 = 86.4\%, Recall@5 = 81.6\%, và MRR = 0.708;
+    \item \textbf{E5 outperforms BGE-M3} khi dùng đơn lẻ (MRR: 0.687 vs 0.602), cho thấy E5 phù hợp hơn với dữ liệu tiếng Việt pháp lý;
+    \item \textbf{Elasticsearch (BM25) yếu nhất} (Hit@5 = 47.0\%), do keyword matching không bắt được ngữ nghĩa;
+    \item \textbf{Hybrid search cải thiện rõ rệt so với single-model}:
+    \begin{itemize}
+        \item So với E5 alone: Recall@5 tăng từ 80.0\% lên 81.6\% (+1.6\%);
+        \item So với BGE-M3 alone: Recall@5 tăng từ 68.6\% lên 81.6\% (+13\%);
+    \end{itemize}
+    \item \textbf{Trọng số keyword 20\% (v0.8/k0.2) tối ưu hơn 30\%} (v0.7/k0.3) và 0\% (v1.0/k0.0).
+\end{enumerate}
+
+\subsection{Thời gian đáp ứng}
+\begin{itemize}
+    \item \textbf{Elasticsearch nhanh nhất}: 58.0ms trung bình (chỉ keyword matching, không cần embedding);
+    \item \textbf{Dense search}: E5 = 88.7ms, BGE-M3 = 111.4ms (embedding query + Qdrant search);
+    \item \textbf{Hybrid search}: 204--218ms (embedding + Qdrant + Elasticsearch + fusion) -- chấp nhận được cho ứng dụng chatbot real-time.
+\end{itemize}
+
+\section{Hybrid Search: So sánh các cấu hình trọng số}
+
+Để đánh giá ảnh hưởng của trọng số keyword trong hybrid search, 3 cấu hình được so sánh trên 8 bộ dữ liệu tiêu biểu:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{4cm}|l|l|l|l|l|l|}
+\hline
+\textbf{Bộ dữ liệu} & \multicolumn{2}{c|}{\textbf{v1.0/k0.0}} & \multicolumn{2}{c|}{\textbf{v0.8/k0.2}} & \multicolumn{2}{c|}{\textbf{v0.7/k0.3}} \\
+\cline{2-7}
+& R@5 & MRR & R@5 & MRR & R@5 & MRR \\
+\hline
+QCDT ĐHBK (100) & 0.92 & 0.811 & \textbf{0.93} & \textbf{0.818} & \textbf{0.94} & \textbf{0.821} \\
+\hline
+Eval chunks (200) & 0.92 & 0.813 & 0.92 & \textbf{0.835} & \textbf{0.93} & \textbf{0.845} \\
+\hline
+Quydinh (200) & 0.87 & 0.782 & 0.88 & \textbf{0.785} & 0.88 & 0.772 \\
+\hline
+Ngoại ngữ (100) & 0.70 & 0.644 & 0.72 & 0.672 & 0.72 & \textbf{0.688} \\
+\hline
+TT18 QP-AN (50) & 0.99 & 0.927 & 0.99 & \textbf{0.937} & 0.99 & 0.916 \\
+\hline
+Học bổng (50) & 0.84 & 0.744 & \textbf{0.88} & 0.731 & 0.85 & 0.712 \\
+\hline
+Olympic (50) & 0.84 & 0.742 & 0.84 & 0.711 & 0.83 & 0.685 \\
+\hline
+Rèn luyện (50) & 0.84 & 0.594 & 0.82 & 0.602 & 0.82 & 0.600 \\
+\hline
+\end{tabular}
+\caption{So sánh 3 cấu hình Hybrid Search trên 8 bộ dữ liệu tiêu biểu}
+\end{table}
+
+\textbf{Nhận xét:}
+\begin{itemize}
+    \item \textbf{Thêm keyword weight giúp cải thiện Recall} cho các dataset có thuật ngữ cụ thể (QCDT: 92\% $\rightarrow$ 94\%, Ngoại ngữ: 70\% $\rightarrow$ 72\%);
+    \item \textbf{Cấu hình v0.8/k0.2 cân bằng nhất}: MRR cao nhất tổng thể (0.708), đồng thời duy trì Recall@5 tốt (81.6\%);
+    \item \textbf{Quá nhiều keyword weight (30\%) giảm MRR} trên một số dataset (Olympic: 0.742 $\rightarrow$ 0.685, TT18: 0.927 $\rightarrow$ 0.916), vì BM25 noise làm giảm ranking quality;
+    \item \textbf{Rèn luyện là bộ dữ liệu khó nhất}: MRR chỉ $\sim$0.60, do văn bản điểm rèn luyện có nhiều tiêu chí đánh giá tương tự nhau.
+\end{itemize}
+
+\section{Phân tích chuyên sâu}
+
+\subsection{Ảnh hưởng của Hybrid Search}
+
+So sánh phương pháp tốt nhất đơn lẻ (E5) với Hybrid v0.8/k0.2:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Metric} & \textbf{E5 (đơn lẻ)} & \textbf{Hybrid v0.8/k0.2} & \textbf{Chênh lệch} & \textbf{Cải thiện} \\
+\hline
+Hit@1 & 0.565 & 0.587 & +0.022 & +3.9\% \\
+\hline
+Hit@5 & 0.845 & 0.864 & +0.019 & +2.2\% \\
+\hline
+Precision@5 & 0.187 & 0.191 & +0.004 & +2.1\% \\
+\hline
+Recall@5 & 0.800 & 0.816 & +0.016 & +2.0\% \\
+\hline
+MRR & 0.687 & 0.708 & +0.021 & +3.1\% \\
+\hline
+\end{tabular}
+\caption{Cải thiện khi sử dụng Hybrid Search so với E5 đơn lẻ}
+\end{table}
+
+Mặc dù cải thiện tuyệt đối nhỏ (2--4\%), hybrid search \textbf{nhất quán cải thiện trên tất cả metrics}, đặc biệt quan trọng với hệ thống RAG vì mỗi phần trăm recall tăng thêm đều giúp LLM có thêm context chính xác.
+
+\subsection{Phân tích Sparse vs Dense}
+
+BM25 (Elasticsearch) kém dense retrieval ở mọi bộ dữ liệu. Nguyên nhân chính:
+\begin{itemize}
+    \item Keyword matching không bắt được \textbf{paraphrase}: ``chuẩn ngoại ngữ đầu ra'' vs ``yêu cầu tiếng Anh khi tốt nghiệp'';
+    \item Tiếng Việt có nhiều \textbf{biến thể diễn đạt}: ``học bổng'' vs ``hỗ trợ tài chính'', ``GPA'' vs ``điểm trung bình tích lũy'';
+    \item Tuy nhiên, BM25 bổ trợ dense search trong hybrid vì bắt được \textbf{exact terms} (mã điều khoản, con số cụ thể).
+\end{itemize}
+
+\subsection{Phân tích các trường hợp khó}
+
+\subsubsection{Bộ dữ liệu Rèn luyện (MRR thấp nhất)}
+\begin{itemize}
+    \item MRR tốt nhất chỉ đạt $\sim$0.60 (Hybrid);
+    \item \textbf{Nguyên nhân}: Văn bản rèn luyện có nhiều tiêu chí đánh giá tương tự (25 tiêu chí con), các chunk chứa nội dung gần giống nhau nhưng chỉ 1--2 chunk là relevant;
+    \item BGE-M3 đặc biệt yếu (MRR = 0.509), do không phân biệt được các tiêu chí rèn luyện tương tự.
+\end{itemize}
+
+\subsubsection{Bộ dữ liệu Ngoại ngữ (Recall thấp)}
+\begin{itemize}
+    \item Recall@5 tốt nhất = 72\% (Hybrid), thấp hơn trung bình;
+    \item \textbf{Nguyên nhân}: Quy định ngoại ngữ có nhiều bảng quy đổi tương đương, thông tin phân tán qua nhiều chunk; một câu hỏi có thể cần thông tin từ nhiều chunk (multi-hop retrieval).
+\end{itemize}
+
+\subsubsection{Bộ dữ liệu TT18 QP-AN (tốt nhất)}
+\begin{itemize}
+    \item Recall@5 = 99\%, Hit@5 = 100\% (Hybrid);
+    \item \textbf{Nguyên nhân}: Thông tư QP-AN có cấu trúc rõ ràng, mỗi điều khoản đề cập một chủ đề riêng biệt, ít overlap giữa các chunk.
+\end{itemize}
+
+\subsection{So sánh tốc độ}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Phương pháp} & \textbf{Latency TB (ms)} & \textbf{Đánh giá} \\
+\hline
+Elasticsearch & 58.0 & Nhanh nhất, phù hợp real-time \\
+\hline
+E5 (Qdrant) & 88.7 & Nhanh, chấp nhận được \\
+\hline
+BGE-M3 (Qdrant) & 111.4 & Trung bình \\
+\hline
+Hybrid v0.8/k0.2 & 205.6 & Chậm hơn nhưng vẫn chấp nhận được \\
+\hline
+\end{tabular}
+\caption{So sánh thời gian đáp ứng}
+\end{table}
+
+\textbf{Nhận xét:} Tất cả phương pháp đều có latency dưới 300ms, phù hợp cho ứng dụng chatbot. Hybrid search chậm hơn $\sim$2.3x so với E5 đơn lẻ (206ms vs 89ms) nhưng trade-off chất lượng xứng đáng.
+
+\section{Pipeline đánh giá}
+
+\subsection{Evaluate Retrieval}
+\textbf{File:} \texttt{evaluate\_retrieval.py} (734 dòng)
+
+Script đánh giá tự động chạy 6 phương pháp retrieval trên tất cả 25 datasets:
+\begin{itemize}
+    \item Kết nối Qdrant (collections: stsv, quydinh) và Elasticsearch;
+    \item Load 2 mô hình embedding (BGE-M3, E5);
+    \item Chạy từng query, tính metrics, ghi kết quả CSV per-query và summary;
+    \item Tạo file \texttt{comparison\_all\_methods.csv} so sánh tổng hợp.
+\end{itemize}
+
+\subsection{Evaluate Phase 3 (Retrieval + Generation + Self-Eval)}
+\textbf{File:} \texttt{evaluate\_phase3.py} (653 dòng)
+
+Pipeline đánh giá end-to-end:
+\begin{enumerate}
+    \item \textbf{Retrieval}: Hybrid search (BGE-M3 + E5 + Elasticsearch);
+    \item \textbf{Compute metrics}: Hit@1, Hit@K, Precision@K, Recall@K, MRR;
+    \item \textbf{Generate answer}: Sử dụng Gemini 2.0 Flash với RAG prompt;
+    \item \textbf{Self-evaluate}: Gemini đánh giá câu trả lời theo 3 tiêu chí:
+    \begin{itemize}
+        \item \textbf{Relevance}: Câu trả lời có liên quan đến câu hỏi không?
+        \item \textbf{Faithfulness}: Câu trả lời có trung thực với context không (hallucination check)?
+        \item \textbf{Completeness}: Câu trả lời có đầy đủ thông tin không?
+    \end{itemize}
+\end{enumerate}
+
+\section{Kết luận chương}
+
+Kết quả thực nghiệm cho thấy:
+
+\begin{enumerate}
+    \item \textbf{Hybrid Search v0.8/k0.2 là cấu hình tối ưu}: Hit@5 = 86.4\%, Recall@5 = 81.6\%, MRR = 0.708 trên 2.390 queries (25 bộ dữ liệu), vượt trội so với tất cả phương pháp đơn lẻ;
+    
+    \item \textbf{E5 embedding tốt hơn BGE-M3 cho tiếng Việt pháp lý}: MRR 0.687 vs 0.602, cho thấy E5 hiểu ngữ nghĩa tiếng Việt tốt hơn trong miền tài liệu quy chế;
+    
+    \item \textbf{BM25 yếu khi đứng một mình nhưng bổ trợ hiệu quả cho dense retrieval}: Thêm 20\% trọng số keyword cải thiện Recall@5 từ 80.0\% lên 81.6\%;
+    
+    \item \textbf{Thời gian đáp ứng chấp nhận được}: Hybrid search trung bình 206ms/query, phù hợp cho chatbot real-time;
+    
+    \item \textbf{Chất lượng phụ thuộc mạnh vào đặc thù tài liệu}: Dataset rèn luyện và ngoại ngữ khó hơn (MRR $\sim$0.6--0.7), do overlap nội dung và multi-hop. Cần cải thiện bằng reranking (Phase 2) và query reflection.
+\end{enumerate}
+
+\end{document}

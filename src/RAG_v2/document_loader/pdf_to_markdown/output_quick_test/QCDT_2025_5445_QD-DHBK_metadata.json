@@ -1,0 +1,21 @@
+{
+  "pdf_path": "d:\\GR\\src\\extract_from_pdf\\quydinh\\QCDT_2025_5445_QD-DHBK.pdf",
+  "markdown_path": "output_quick_test\\QCDT_2025_5445_QD-DHBK.md",
+  "method_used": "docling",
+  "analysis": {
+    "path": "d:\\GR\\src\\extract_from_pdf\\quydinh\\QCDT_2025_5445_QD-DHBK.pdf",
+    "num_pages": 34,
+    "is_text_based": true,
+    "has_vietnamese": true,
+    "encoding_confidence": {
+      "utf8": 0.1376,
+      "windows1258": 0.0,
+      "tcvn3": 0.0,
+      "corrupted": 0.002
+    },
+    "has_embedded_fonts": true,
+    "vietnamese_fonts_detected": [],
+    "recommended_method": "docling"
+  },
+  "error_log": []
+}
