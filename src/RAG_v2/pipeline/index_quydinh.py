@@ -17,7 +17,6 @@ Usage (from RAG_v2/):
 
 from __future__ import annotations
 
-import argparse
 import json
 import logging
 import sys
@@ -46,10 +45,21 @@ DEFAULT_CHUNKS_DIR = (
     / "data"
     / "quydinh"
     / "olmocr"
-    / "chunks_recursive_parent_child"
+    / "chunks_recursive_parent_child_3"
 )
 DEFAULT_COLLECTION = "quydinh"
 DEFAULT_BATCH_SIZE = 32
+
+# ---------------------------------------------------------------------------
+# Config — chỉnh tham số tại đây, không dùng CLI
+# ---------------------------------------------------------------------------
+CONFIG = {
+    "chunks_dir": DEFAULT_CHUNKS_DIR,
+    "collection": DEFAULT_COLLECTION,
+    "qdrant_host": "localhost",
+    "qdrant_port": 6333,
+    "batch_size": DEFAULT_BATCH_SIZE,
+}
 
 
 # ---------------------------------------------------------------------------
@@ -83,6 +93,40 @@ def load_chunks_from_dir(chunks_dir: Path) -> List[Dict[str, Any]]:
         len(json_files),
     )
     return all_chunks
+
+
+def filter_new_chunks(
+    chunks: List[Dict[str, Any]],
+    store: QdrantStore,
+    check_batch_size: int = 100,
+) -> List[Dict[str, Any]]:
+    """Return only chunks whose IDs are NOT yet in the collection.
+
+    Uses Qdrant ``retrieve`` in batches to check existence without
+    loading vectors — fast even for large collections.
+    """
+    ids = [c.get("id") or c["chunk_id"] for c in chunks]
+
+    existing_ids: set = set()
+    for start in range(0, len(ids), check_batch_size):
+        batch_ids = ids[start : start + check_batch_size]
+        results = store.client.retrieve(
+            collection_name=store.collection_name,
+            ids=batch_ids,
+            with_payload=False,
+            with_vectors=False,
+        )
+        existing_ids.update(str(r.id) for r in results)
+
+    new_chunks = [
+        c for c, id_ in zip(chunks, ids) if str(id_) not in existing_ids
+    ]
+    logger.info(
+        "Incremental check: %d already indexed, %d new chunks to add.",
+        len(existing_ids),
+        len(new_chunks),
+    )
+    return new_chunks
 
 
 def embed_batch(
@@ -145,46 +189,9 @@ def index_chunks(
 # ---------------------------------------------------------------------------
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Index quydinh (or any) chunks folder into Qdrant"
-    )
-    parser.add_argument(
-        "--chunks-dir",
-        type=Path,
-        default=DEFAULT_CHUNKS_DIR,
-        help="Directory containing *_chunks.json files",
-    )
-    parser.add_argument(
-        "--collection",
-        default=DEFAULT_COLLECTION,
-        help="Qdrant collection name (default: quydinh)",
-    )
-    parser.add_argument(
-        "--qdrant-host",
-        default="localhost",
-        help="Qdrant host",
-    )
-    parser.add_argument(
-        "--qdrant-port",
-        type=int,
-        default=6333,
-        help="Qdrant port",
-    )
-    parser.add_argument(
-        "--batch-size",
-        type=int,
-        default=DEFAULT_BATCH_SIZE,
-        help="Number of chunks per embedding + upsert batch",
-    )
-    return parser.parse_args()
-
-
 def main() -> None:
-    args = parse_args()
-
     # 1. Load all chunks from the folder
-    chunks = load_chunks_from_dir(args.chunks_dir)
+    chunks = load_chunks_from_dir(CONFIG["chunks_dir"])
 
     # 2. Init embedders
     logger.info("Loading BGE-M3 embedder …")
@@ -196,19 +203,37 @@ def main() -> None:
     # 3. Init Qdrant store  (_ensure_collection creates it if not exists)
     logger.info(
         "Connecting to Qdrant at %s:%d, collection='%s' …",
-        args.qdrant_host,
-        args.qdrant_port,
-        args.collection,
+        CONFIG["qdrant_host"],
+        CONFIG["qdrant_port"],
+        CONFIG["collection"],
     )
     store = QdrantStore(
-        host=args.qdrant_host,
-        port=args.qdrant_port,
-        collection_name=args.collection,
+        host=CONFIG["qdrant_host"],
+        port=CONFIG["qdrant_port"],
+        collection_name=CONFIG["collection"],
     )
 
-    # 4. Embed + index
-    index_chunks(chunks, store, bge, e5, batch_size=args.batch_size)
+    # 4. Filter out already-indexed chunks (incremental mode)
+    new_chunks = filter_new_chunks(chunks, store)
+    if not new_chunks:
+        logger.info(
+            "Nothing to index — all chunks already exist in the collection."
+        )
+        return
+
+    # 5. Embed + index only new chunks
+    index_chunks(new_chunks, store, bge, e5, batch_size=CONFIG["batch_size"])
+
+
+def delete_collection() -> None:
+    store = QdrantStore(
+        host=CONFIG["qdrant_host"],
+        port=CONFIG["qdrant_port"],
+        collection_name=CONFIG["collection"],
+    )
+    store.delete_collection()
 
 
 if __name__ == "__main__":
+    # delete_collection()
     main()

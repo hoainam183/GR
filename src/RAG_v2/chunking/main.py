@@ -47,7 +47,7 @@ def main_pipeline(
     elif chunker_type == "recursive":
         chunker = RecursiveChunker(
             chunk_size=1024,
-            chunk_overlap=150,
+            chunk_overlap=0,
             parent_chunk_max_chars=10000,
         )
     # elif chunker_type == "character":

@@ -51,17 +51,16 @@ class MultiCollectionSearch:
         rrf_k: int = 60,
         max_workers: int = 4,
         collection_score_weight: float = 1.0,
+        vector_weight: float = 0.7,
+        keyword_weight: float = 0.3,
     ) -> None:
         """Initialise multi-collection search.
 
         Args:
-            collection_score_weight: Weight applied to the per-collection hybrid
-                score when computing the global ranking.  Set to 0 for pure
-                positional RRF (original behaviour).  Default 1.0 blends the
-                within-collection quality signal into the global score so that
-                a high-quality result from one collection is not outranked by
-                a lower-quality result from another collection that happened to
-                land at the same positional rank.
+            vector_weight: Weight for normalised vector score in final fusion.
+            keyword_weight: Weight for normalised keyword (BM25) score in final fusion.
+                vector_weight > keyword_weight gives priority to semantic search.
+            rrf_k / collection_score_weight: Kept for backward compatibility.
         """
         if not searchers:
             raise ValueError(
@@ -71,6 +70,8 @@ class MultiCollectionSearch:
         self.rrf_k = rrf_k
         self.max_workers = max_workers
         self.collection_score_weight = collection_score_weight
+        self.vector_weight = vector_weight
+        self.keyword_weight = keyword_weight
 
     # ------------------------------------------------------------------
     # Factory helpers
@@ -136,6 +137,8 @@ class MultiCollectionSearch:
             rrf_k=rrf_k,
             max_workers=max_workers,
             collection_score_weight=collection_score_weight,
+            vector_weight=vector_weight,
+            keyword_weight=keyword_weight,
         )
 
     # ------------------------------------------------------------------
@@ -150,131 +153,190 @@ class MultiCollectionSearch:
         top_k: int = 10,
         vector_top_k: int = 20,
         keyword_top_k: int = 20,
+        vector_pool_k: int = 15,
+        keyword_pool_k: int = 15,
         score_threshold: Optional[float] = None,
     ) -> List[Dict[str, Any]]:
         """Search all collections and return a globally ranked list.
 
-        Each result dict includes a ``"collection"`` key indicating which
-        collection the document came from.
+        Strategy:
+          1. Fetch ``vector_top_k`` vector candidates per collection from Qdrant
+             (BGE-M3 + E5 score-fused internally by :class:`QdrantStore`).
+          2. Fetch ``keyword_top_k`` keyword candidates per collection from ES.
+          3. Pool all vector results globally, sort by raw cosine score,
+             deduplicate by ID, keep top ``vector_pool_k``.
+          4. Pool all keyword results globally, sort by BM25 score,
+             deduplicate by ID, keep top ``keyword_pool_k``.
+          5. Min-max normalise both score sets independently, then combine::
+
+                 score = vector_weight * norm_vec + keyword_weight * norm_kw
+
+             Higher ``vector_weight`` gives priority to semantic search.
 
         Args:
             query: Raw user query string (used for BM25).
             bge_m3_query: Query vector from BGE-M3.
             e5_query: Query vector from E5.
-            top_k: Number of final results.
+            top_k: Number of final results to return.
             vector_top_k: Candidates fetched from Qdrant per collection.
             keyword_top_k: Candidates fetched from ES per collection.
+            vector_pool_k: Size of the global vector candidate pool after sorting.
+            keyword_pool_k: Size of the global keyword candidate pool after sorting.
             score_threshold: Optional minimum cosine similarity for Qdrant.
 
         Returns:
             List of result dicts sorted by global fused score (descending).
         """
-        per_collection: Dict[str, List[Dict[str, Any]]] = {}
+        all_vector: List[Dict[str, Any]] = []
+        all_keyword: List[Dict[str, Any]] = []
 
-        def _search_one(name: str, hybrid: HybridSearch) -> Tuple[str, List]:
-            results = hybrid.search(
-                query=query,
+        def _fetch_one(
+            name: str, hybrid: HybridSearch
+        ) -> Tuple[str, List[Dict], List[Dict]]:
+            vecs = hybrid.qdrant.search(
                 bge_m3_query=bge_m3_query,
                 e5_query=e5_query,
-                top_k=vector_top_k
-                + keyword_top_k,  # fetch more for global merge
-                vector_top_k=vector_top_k,
-                keyword_top_k=keyword_top_k,
+                top_k=vector_top_k,
                 score_threshold=score_threshold,
             )
-            return name, results
+            kws = hybrid.es.keyword_search(query=query, top_k=keyword_top_k)
+            return name, vecs, kws
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
             futures = {
-                pool.submit(_search_one, name, hybrid): name
+                pool.submit(_fetch_one, name, hybrid): name
                 for name, hybrid in self.searchers
             }
             for fut in as_completed(futures):
-                name, results = fut.result()
-                per_collection[name] = results
-                logger.info("Collection '%s': %d results", name, len(results))
+                name, vecs, kws = fut.result()
+                logger.info(
+                    "Collection '%s': %d vector, %d keyword",
+                    name,
+                    len(vecs),
+                    len(kws),
+                )
+                for item in vecs:
+                    all_vector.append(
+                        {
+                            **item,
+                            "collection": name,
+                            "id": f"{name}/{item['id']}",
+                        }
+                    )
+                for item in kws:
+                    all_keyword.append(
+                        {
+                            **item,
+                            "collection": name,
+                            "id": f"{name}/{item['id']}",
+                        }
+                    )
 
-        return self._global_rrf(per_collection, top_k)
+        # Sort globally by raw score (desc), dedup by ID, take top pool_k
+        all_vector.sort(key=lambda x: x["score"], reverse=True)
+        vector_pool = self._dedup_pool(all_vector, vector_pool_k)
+
+        all_keyword.sort(key=lambda x: x["score"], reverse=True)
+        keyword_pool = self._dedup_pool(all_keyword, keyword_pool_k)
+
+        return self._score_fusion(vector_pool, keyword_pool, top_k)
 
     # ------------------------------------------------------------------
-    # Global RRF merge
+    # Score fusion helpers
     # ------------------------------------------------------------------
 
-    def _global_rrf(
+    @staticmethod
+    def _dedup_pool(
+        results: List[Dict[str, Any]], k: int
+    ) -> List[Dict[str, Any]]:
+        """Return first ``k`` items with unique IDs (results assumed pre-sorted)."""
+        seen: set = set()
+        out: List[Dict[str, Any]] = []
+        for item in results:
+            if item["id"] not in seen:
+                seen.add(item["id"])
+                out.append(item)
+            if len(out) >= k:
+                break
+        return out
+
+    def _score_fusion(
         self,
-        per_collection: Dict[str, List[Dict[str, Any]]],
+        vector_pool: List[Dict[str, Any]],
+        keyword_pool: List[Dict[str, Any]],
         top_k: int,
     ) -> List[Dict[str, Any]]:
-        """Merge per-collection ranked lists with a second RRF pass.
+        """Combine vector and keyword pools via min-max normalised score weighting.
 
-        Global score combines two signals:
-          1. Positional RRF: ``1 / (rrf_k + rank)`` — standard RRF weighting.
-          2. Collection score: the per-collection hybrid (vector+BM25) RRF
-             score, scaled by ``collection_score_weight``.
-
-        Blending both signals prevents a high-ranked but low-quality result
-        from one collection from outranking a slightly lower-ranked but
-        higher-quality result from another collection.
-
-        Document IDs are namespaced as ``"<collection>/<id>"`` so the same
-        chunk-id in two different collections remains distinct.
-
-        Parent/child deduplication: when a parent chunk and one of its
-        children carry identical text, only the higher-scoring copy is kept.
+        Both score ranges are independently normalised to [0, 1] so that the
+        ``vector_weight`` / ``keyword_weight`` ratio directly controls the
+        semantic-vs-keyword trade-off.
         """
+        # --- Normalisation bounds (pools are already sorted desc) ---
+        if vector_pool:
+            v_max = vector_pool[0]["score"]
+            v_min = vector_pool[-1]["score"]
+            v_range = v_max - v_min if v_max != v_min else 1.0
+        else:
+            v_min = v_range = 1.0
+
+        if keyword_pool:
+            k_max = keyword_pool[0]["score"]
+            k_min = keyword_pool[-1]["score"]
+            k_range = k_max - k_min if k_max != k_min else 1.0
+        else:
+            k_min = k_range = 1.0
+
         combined: Dict[str, Dict[str, Any]] = {}
 
-        for col_name, results in per_collection.items():
-            for rank_0, item in enumerate(results):
-                global_id = f"{col_name}/{item['id']}"
-                col_score = item.get("score", 0.0)
-                positional = rrf_score(rank_0 + 1, self.rrf_k)
-                total = positional + self.collection_score_weight * col_score
+        for item in vector_pool:
+            norm_v = (item["score"] - v_min) / v_range
+            doc_id = item["id"]
+            combined[doc_id] = {
+                **item,
+                "vector_score": item["score"],
+                "keyword_score": 0.0,
+                "norm_vector": norm_v,
+                "norm_keyword": 0.0,
+            }
 
-                if global_id in combined:
-                    # Same doc arrived from multiple collections (shouldn't
-                    # normally happen since IDs are namespaced, but guard it).
-                    combined[global_id]["global_rrf"] += total
-                else:
-                    combined[global_id] = {
-                        "id": item["id"],
-                        "collection": col_name,
-                        "text": item["text"],
-                        "metadata": item.get("metadata", {}),
-                        "vector_rank": item.get("vector_rank", 0),
-                        "keyword_rank": item.get("keyword_rank", 0),
-                        "vector_score": item.get("vector_score", 0.0),
-                        "keyword_score": item.get("keyword_score", 0.0),
-                        "bge_score": item.get("bge_score", 0.0),
-                        "e5_score": item.get("e5_score", 0.0),
-                        "collection_score": col_score,
-                        "global_rrf": total,
-                    }
+        for item in keyword_pool:
+            norm_k = (item["score"] - k_min) / k_range
+            doc_id = item["id"]
+            if doc_id in combined:
+                combined[doc_id]["keyword_score"] = item["score"]
+                combined[doc_id]["norm_keyword"] = norm_k
+            else:
+                combined[doc_id] = {
+                    **item,
+                    "vector_score": 0.0,
+                    "keyword_score": item["score"],
+                    "norm_vector": 0.0,
+                    "norm_keyword": norm_k,
+                }
+
+        for entry in combined.values():
+            entry["score"] = (
+                self.vector_weight * entry["norm_vector"]
+                + self.keyword_weight * entry["norm_keyword"]
+            )
 
         ranked = sorted(
-            combined.values(), key=lambda x: x["global_rrf"], reverse=True
+            combined.values(), key=lambda x: x["score"], reverse=True
         )
 
-        # --- Parent/child deduplication -----------------------------------
-        # When a parent chunk and its children have identical text (parent
-        # retrieval), keep only the first occurrence (already highest score).
+        # Text-level deduplication (parent/child chunks with identical text)
         seen_texts: set = set()
         deduped: List[Dict[str, Any]] = []
         for item in ranked:
             text_key = item["text"].strip()
             if text_key in seen_texts:
                 logger.debug(
-                    "Dedup: dropping duplicate text from %s/%s",
-                    item["collection"],
-                    item["id"],
+                    "Dedup: dropping duplicate text from %s", item["id"]
                 )
                 continue
             seen_texts.add(text_key)
             deduped.append(item)
-
-        # Rename global_rrf → score for API consistency
-        for item in deduped:
-            item["score"] = item.pop("global_rrf")
 
         return deduped[:top_k]
 

@@ -37,12 +37,12 @@ ES_PORT = 9200
 TOP_K = 5  # số kết quả cuối cùng trả về
 VECTOR_TOP_K = 20  # số ứng viên lấy từ Qdrant mỗi collection
 KEYWORD_TOP_K = 20  # số ứng viên lấy từ ES mỗi collection
+VECTOR_POOL_K = 15  # giữ lại bao nhiêu doc từ pool vector toàn cục
+KEYWORD_POOL_K = 15  # giữ lại bao nhiêu doc từ pool keyword toàn cục
 RRF_K = 60
-VECTOR_WEIGHT = 1.0
-KEYWORD_WEIGHT = 1.0
-# Trọng số áp dụng lên per-collection hybrid score trong global fusion.
-# 0 = RRF thuần theo vị trí (hành vi cũ); 1.0 = kết hợp cả score tập hợp.
-COLLECTION_SCORE_WEIGHT = 1.0
+VECTOR_WEIGHT = 0.8  # ưu tiên vector search cao hơn keyword
+KEYWORD_WEIGHT = 0.2
+COLLECTION_SCORE_WEIGHT = 1.0  # kept for backward compat (unused)
 
 # Câu hỏi cần tìm kiếm
 QUERIES = [
@@ -65,20 +65,22 @@ def print_results(query: str, results: list[dict]) -> None:
         title = meta.get("title", "—")
         type_doc = meta.get("type_doc", "—")
         collection = r.get("collection", "—")
-        v_rank = r.get("vector_rank", 0)
-        k_rank = r.get("keyword_rank", 0)
         score = r["score"]
-        col_score = r.get("collection_score", 0.0)
+        norm_vec = r.get("norm_vector", 0.0)
+        norm_kw = r.get("norm_keyword", 0.0)
+        vec_raw = r.get("vector_score", 0.0)
+        kw_raw = r.get("keyword_score", 0.0)
         bge = r.get("bge_score", 0.0)
         e5 = r.get("e5_score", 0.0)
         text_preview = textwrap.fill(
             r["text"][:220], width=width - 6, subsequent_indent="       "
         )
         print(
-            f"\n  [{i}] score={score:.5f}  col_score={col_score:.5f}"
-            f"  bge={bge:.4f}  e5={e5:.4f}"
-            f"  vec_rank={v_rank}  kw_rank={k_rank}"
+            f"\n  [{i}] score={score:.5f}"
+            f"  norm_vec={norm_vec:.4f}  norm_kw={norm_kw:.4f}"
+            f"  vec_raw={vec_raw:.4f}  kw_raw={kw_raw:.4f}"
         )
+        print(f"      bge={bge:.4f}  e5={e5:.4f}")
         print(f"      collection : {collection}")
         print(f"      title      : {title}")
         print(f"      type_doc   : {type_doc}")
@@ -123,6 +125,8 @@ if __name__ == "__main__":
             top_k=TOP_K,
             vector_top_k=VECTOR_TOP_K,
             keyword_top_k=KEYWORD_TOP_K,
+            vector_pool_k=VECTOR_POOL_K,
+            keyword_pool_k=KEYWORD_POOL_K,
         )
         print_results(query, results)
 

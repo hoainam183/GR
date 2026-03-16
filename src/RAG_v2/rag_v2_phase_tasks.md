@@ -57,26 +57,26 @@
 
 ### Tasks
 
-- [ ] **2.1 Reranking Layer**
-  - [ ] Implement `BGEReranker` trong `reranking/bge_reranker.py`
-    - [ ] Load model BAAI/bge-reranker-v2-m3
-    - [ ] `rerank(query, documents)` → sorted docs với relevance score
-    - [ ] Top-K selection sau rerank (default: top 5)
+- [x] **2.1 Reranking Layer**
+  - [x] Implement `BGEReranker` trong `reranking/bge_reranker.py`
+    - [x] Load model BAAI/bge-reranker-v2-m3
+    - [x] `rerank(query, documents)` → sorted docs với relevance score
+    - [x] Top-K selection sau rerank (default: top 5)
   - [ ] Tích hợp reranker vào hybrid search pipeline
 
-- [ ] **2.2 Query Router**
-  - [ ] Implement `QueryRouter` trong `query/router.py`
-    - [ ] Phân loại intent: Chit-chat / Cần RAG / Cần Search Tool
-    - [ ] Dùng LLM (OpenAI) để classify với few-shot prompt
-    - [ ] Return routing decision: `{"intent": "rag"|"chitchat"|"tool_search"}`
-  - [ ] Viết prompts trong `query/prompts.py`
+- [x] **2.2 Query Router**
+  - [x] Implement `QueryRouter` trong `query/router.py`
+    - [x] Phân loại intent: Chit-chat / Cần RAG / Cần Search Tool
+    - [x] Dùng LLM (OpenAI) để classify với few-shot prompt
+    - [x] Return routing decision: `{"intent": "rag"|"chitchat"|"tool_search"}`
+  - [x] Viết prompts trong `query/prompts.py`
 
-- [ ] **2.3 Query Reflection**
-  - [ ] Implement `QueryReflector` trong `query/reflection.py`
-    - [ ] Rewrite query — viết lại rõ ràng hơn
-    - [ ] Clarify — làm rõ câu hỏi mơ hồ
-    - [ ] Format — chuẩn hóa format query
-    - [ ] Add context — thêm context từ chat history (MongoDB)
+- [x] **2.3 Query Reflection**
+  - [x] Implement `QueryReflector` trong `query/reflection.py`
+    - [x] Rewrite query — viết lại rõ ràng hơn
+    - [x] Clarify — làm rõ câu hỏi mơ hồ
+    - [x] Format — chuẩn hóa format query
+    - [x] Add context — thêm context từ chat history (MongoDB)
   - [ ] Chain: Router → Reflection → Embedding (cho RAG flow)
 
 ### ✅ Kết quả đạt được sau Phase 2
@@ -95,22 +95,22 @@
 
 ### Tasks
 
-- [ ] **3.1 Chat Model Layer**
-  - [ ] Implement `ChatModel` trong `llm/chat_model.py`
-    - [ ] Wrapper cho OpenAI GPT API (hoặc model khác)
-    - [ ] `generate(query, context, history)` → response
-    - [ ] Streaming response support
-  - [ ] Thiết kế System Prompt trong `llm/prompts.py`
-    - [ ] Prompt cho RAG answer (có context, trích dẫn nguồn)
-    - [ ] Prompt cho Chitchat (chào hỏi, thân thiện)
-    - [ ] Prompt cho university domain (ngữ cảnh đại học)
+- [x] **3.1 Chat Model Layer**
+  - [x] Implement `ChatModel` trong `llm/chat_model.py`
+    - [x] Wrapper cho OpenAI GPT API (hoặc model khác)
+    - [x] `generate(query, context, history)` → response
+    - [x] Streaming response support
+  - [x] Thiết kế System Prompt trong `llm/prompts.py`
+    - [x] Prompt cho RAG answer (có context, trích dẫn nguồn)
+    - [x] Prompt cho Chitchat (chào hỏi, thân thiện)
+    - [x] Prompt cho university domain (ngữ cảnh đại học)
 
-- [ ] **3.2 Self Evaluation**
-  - [ ] Implement `SelfEvaluator` trong `llm/self_eval.py`
-    - [ ] Check response quality: có trả lời đúng câu hỏi không?
-    - [ ] Check hallucination: response có dựa trên context không?
-    - [ ] Check completeness: response có đầy đủ không?
-    - [ ] Return decision: `{"pass": true/false, "reason": "..."}`
+- [x] **3.2 Self Evaluation**
+  - [x] Implement `SelfEvaluator` trong `llm/self_eval.py`
+    - [x] Check response quality: có trả lời đúng câu hỏi không?
+    - [x] Check hallucination: response có dựa trên context không?
+    - [x] Check completeness: response có đầy đủ không?
+    - [x] Return decision: `{"pass": true/false, "reason": "..."}`
   - [ ] Nếu FAIL → trigger fallback (Tavily search → re-generate)
 
 ### ✅ Kết quả đạt được sau Phase 3

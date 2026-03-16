@@ -1,0 +1,412 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Mở đầu chương}
+Chương này trình bày tổng quan về giải pháp đề xuất: xây dựng hệ thống RAG Chatbot hỏi-đáp tài liệu quy chế đào tạo ĐHBK Hà Nội. Nội dung chương tập trung vào kiến trúc tổng thể 8 tầng của hệ thống, pipeline thu thập và xử lý đa nguồn dữ liệu, và thiết kế các chiến lược chunking chuyên biệt cho từng loại tài liệu.
+
+Đây là phần công việc thuộc Phase 1 của dự án, bao gồm: thu thập dữ liệu, làm sạch dữ liệu, và xây dựng pipeline chunking -- tạo nền tảng cho toàn bộ hệ thống.
+
+\section{Kiến trúc tổng thể hệ thống RAG v2}
+
+\subsection{Sơ đồ kiến trúc 8 tầng}
+Hệ thống được thiết kế theo kiến trúc 8 tầng, mỗi tầng đảm nhận chức năng chuyên biệt:
+
+\begin{verbatim}
+User Query
+    |
+    v
++-------------------------------------------+
+| 1. Query Router & Reflection              |
+|    - Phân loại: chitchat / RAG / tool      |
+|    - Rewrite, clarify, format query        |
+|    - Thêm context từ chat history          |
++-------------------------------------------+
+    |
+    v (nếu RAG)
++-------------------------------------------+
+| 2. Embedding Layer                         |
+|    - BGE-M3 (dense + sparse + ColBERT)     |
+|    - E5-large (dense)                      |
+|    - Ensemble: weighted average            |
++-------------------------------------------+
+    |
+    v
++-------------------------------------------+
+| 3. Hybrid Retrieval                        |
+|    - Qdrant: Vector Search (dense)         |
+|    - Elasticsearch: BM25 (keyword)         |
+|    - RRF Fusion kết hợp kết quả            |
++-------------------------------------------+
+    |
+    v
++-------------------------------------------+
+| 4. Reranking Layer                         |
+|    - BAAI/bge-reranker-v2-m3               |
+|    - Dedup + Cross-encoder scoring         |
+|    - Top-K selection                       |
++-------------------------------------------+
+    |
+    v
++-------------------------------------------+
+| 5. Chat Model Layer                        |
+|    - Gemini 2.5 Flash                      |
+|    - RAG prompt + chitchat prompt          |
+|    - Streaming response                    |
++-------------------------------------------+
+    |
+    v
++-------------------------------------------+
+| 6. Self Evaluation                         |
+|    - Check relevance, hallucination        |
+|    - Check completeness                    |
+|    - Pass/Fail decision                    |
++-------------------------------------------+
+    |
+    v (nếu Fail)
++-------------------------------------------+
+| 7. Tool Search (Tavily)                    |
+|    - Web search fallback                   |
+|    - Re-generate với context mới           |
++-------------------------------------------+
+    |
+    v
++-------------------------------------------+
+| 8. MongoDB Memory                          |
+|    - Lưu chat history                      |
+|    - Quản lý conversation state            |
+|    - Track metadata (sources, scores)      |
++-------------------------------------------+
+\end{verbatim}
+
+\subsection{Luồng xử lý tổng thể}
+
+\subsubsection{Luồng Chit-chat}
+Khi Query Router phân loại câu hỏi là chit-chat (chào hỏi, hỏi thăm):
+\begin{verbatim}
+User --> QueryRouter --> "chitchat"
+  --> ChatModel (Gemini)
+  --> Final Answer
+  --> Lưu MongoDB
+\end{verbatim}
+
+\subsubsection{Luồng RAG (cần truy xuất tài liệu)}
+Khi câu hỏi cần dựa trên tài liệu quy chế:
+\begin{verbatim}
+User --> QueryRouter --> "rag"
+  --> QueryReflector (rewrite + add context)
+  --> EnsembleEmbedder (BGE-M3 + E5)
+  --> HybridSearch (Qdrant + Elasticsearch)
+  --> BGEReranker --> Top 5 Docs
+  --> ChatModel (generate answer)
+  --> SelfEvaluator (check quality)
+    |-- OK --> Final Answer --> Lưu MongoDB
+    |-- FAIL --> TavilySearch --> ChatModel
+                --> Final Answer --> Lưu MongoDB
+\end{verbatim}
+
+\section{Pipeline thu thập và xử lý dữ liệu}
+
+\subsection{Tổng quan nguồn dữ liệu}
+Hệ thống thu thập dữ liệu từ 3 nguồn chính, mỗi nguồn có đặc điểm và pipeline xử lý riêng:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Nguồn} & \textbf{Định dạng} & \textbf{Số lượng} & \textbf{Đặc điểm} \\
+\hline
+Quy định (quydinh) & PDF & 16 files & Cấu trúc Chương-Điều-Khoản \\
+\hline
+CTDT (ctdt) & PDF & 6 khoa, nhiều ngành & Bảng, heading markdown \\
+\hline
+STSV (stsv) & JSON & 83 files & Web crawl, text ngắn \\
+\hline
+\end{tabular}
+\caption{Tổng quan nguồn dữ liệu hệ thống}
+\end{table}
+
+\subsection{Nguồn 1: Văn bản quy định đào tạo (quydinh)}
+Đây là nguồn dữ liệu cốt lõi của hệ thống, bao gồm 16 văn bản PDF pháp lý chính thức:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{9cm}|}
+\hline
+\textbf{STT} & \textbf{Tên văn bản} \\
+\hline
+1 & Quy chế đào tạo 2025 (QCDT\_2025\_5445\_QD-DHBK) \\
+\hline
+2 & Quy chế công tác sinh viên ĐHBK Hà Nội 2025 \\
+\hline
+3 & Quyết định học bổng KKHT 2023 \\
+\hline
+4 & Quy định ngoại ngữ từ K65, K68, K70 \\
+\hline
+5 & Quy định đánh giá điểm rèn luyện sinh viên 2023 \\
+\hline
+6 & Khung đánh giá rèn luyện 2020-2021 \\
+\hline
+7 & HD học chuyển tiếp kỹ sư 180 TC \\
+\hline
+8 & QĐ tổ chức dạy học trực tuyến \\
+\hline
+9 & QĐ tổ chức thi trực tuyến \\
+\hline
+10 & QĐ thi Olympic và ĐMST 2023 \\
+\hline
+11 & Quy định quản lý SV nước ngoài 2023 \\
+\hline
+12 & Quy định xét cấp HB tài trợ 2024 \\
+\hline
+13 & QĐ hướng dẫn chính sách HT cho SV khuyết tật \\
+\hline
+14 & TT liên tịch QĐ đánh giá QP-AN \\
+\hline
+\end{tabular}
+\caption{Danh sách văn bản quy định đào tạo}
+\end{table}
+
+\subsubsection{Pipeline xử lý PDF quy định}
+Pipeline xử lý PDF cho văn bản quy định gồm các bước:
+\begin{enumerate}
+    \item \textbf{Thu thập}: Tải PDF từ website Phòng Đào tạo và Phòng Công tác Sinh viên;
+    \item \textbf{OCR/Convert}: Sử dụng olmOCR (vision-based) để chuyển đổi PDF sang Markdown, đảm bảo xử lý được PDF lỗi font;
+    \item \textbf{Làm sạch}: Loại bỏ header/footer, watermark, page numbers; sửa lỗi ký tự; chuẩn hóa format;
+    \item \textbf{Chunking}: Sử dụng \texttt{OlmOcrLegalChunker} chuyên biệt cho cấu trúc pháp lý.
+\end{enumerate}
+
+\subsection{Nguồn 2: Chương trình đào tạo (ctdt)}
+Dữ liệu chương trình đào tạo được tổ chức theo khoa/viện:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Thư mục} & \textbf{Khoa/Viện} & \textbf{Ví dụ ngành} \\
+\hline
+cokhi & Trường Cơ khí & KT Cơ khí, KT Cơ điện tử \\
+\hline
+dien-dientu & Viện Điện & KT Điện, KT Điều khiển \\
+\hline
+hoa & Viện KT Hóa học & Công nghệ Hóa học \\
+\hline
+soict & Viện CNTT\&TT & CNTT, KHMT, ATTT \\
+\hline
+toan & Viện Toán UD\&TH & Toán Tin \\
+\hline
+vatlieu & Viện KH\&KT Vật liệu & KT Vật liệu \\
+\hline
+\end{tabular}
+\caption{Phân bố dữ liệu CTDT theo khoa/viện}
+\end{table}
+
+\subsubsection{Pipeline xử lý CTDT}
+\begin{enumerate}
+    \item \textbf{Thu thập}: Tải PDF chương trình đào tạo từ website các khoa/viện;
+    \item \textbf{OCR/Convert}: Sử dụng Docling hoặc PyMuPDF4LLM (có markdown heading);
+    \item \textbf{Làm sạch}: Chuẩn hóa heading, sửa bảng, loại bỏ artifact, lưu vào thư mục \texttt{clean\_data/};
+    \item \textbf{Chunking}: Sử dụng \texttt{RecursiveChunker} với bảo vệ bảng markdown, lưu vào \texttt{chunks\_recursive\_parent\_child/};
+    \item \textbf{Làm giàu metadata}: Tự động trích xuất ngày ban hành, khóa áp dụng, ngành đào tạo, loại tài liệu.
+\end{enumerate}
+
+\subsection{Nguồn 3: Thông tin sinh viên (stsv)}
+Dữ liệu từ Cổng thông tin sinh viên (\url{https://ctt-sv.hust.edu.vn}) gồm 83 tài liệu dạng JSON:
+
+\subsubsection{Cấu trúc dữ liệu STSV}
+Mỗi tài liệu là một file JSON với cấu trúc:
+\begin{verbatim}
+{
+    "DocumentID": int,
+    "Title": "Tên tài liệu",
+    "TypeDoc": "Sổ tay SV" | "Kit nhập học" | ...,
+    "Description": "Nội dung chính (markdown-like)",
+    "CreaterID": str,
+    "TimeCreate": str,
+    "Status": int
+}
+\end{verbatim}
+
+\subsubsection{Các chủ đề chính}
+Dữ liệu STSV bao phủ nhiều chủ đề:
+\begin{itemize}
+    \item Hướng dẫn thủ tục nhập học, đăng ký ký túc xá;
+    \item Hướng dẫn sử dụng cổng thông tin, email sinh viên;
+    \item Thủ tục học bổng, bảo hiểm y tế, chính sách hỗ trợ;
+    \item Hướng dẫn các thủ tục thường gặp (cấp giấy tờ, chuyển sinh hoạt Đoàn);
+    \item Lịch kế hoạch đào tạo, tuần định hướng;
+    \item Thông tin liên hệ các phòng ban.
+\end{itemize}
+
+\subsubsection{Pipeline xử lý STSV}
+\begin{enumerate}
+    \item \textbf{Thu thập}: Crawl dữ liệu từ API cổng thông tin sinh viên, lưu dưới dạng JSON;
+    \item \textbf{Làm sạch}: Chuẩn hóa nội dung, loại bỏ HTML tags, sửa encoding, lưu vào \texttt{clean\_data/data.json};
+    \item \textbf{Chunking}: Sử dụng \texttt{STSVChunker} chuyên biệt, lưu vào \texttt{chunks/stsv\_all\_chunks.json}.
+\end{enumerate}
+
+\section{Module Chunking}
+
+\subsection{Tổng quan hệ thống Chunking}
+Hệ thống chunking được thiết kế với 4 loại chunker chuyên biệt, phục vụ cho từng loại tài liệu khác nhau:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{4cm}|p{5.5cm}|}
+\hline
+\textbf{Chunker} & \textbf{Dùng cho} & \textbf{Chiến lược} \\
+\hline
+OlmOcrLegalChunker & Văn bản pháp lý (olmOCR output) & Nhận diện Chương-Điều-Khoản \\
+\hline
+ArticleLevelLegalChunker & Văn bản pháp lý (Docling output) & Tương tự, detect Markdown heading \\
+\hline
+RecursiveChunker & CTDT, tài liệu có heading & H2 section + RecursiveTextSplitter \\
+\hline
+STSVChunker & Dữ liệu JSON STSV & Roman/numbered items, recursive split \\
+\hline
+\end{tabular}
+\caption{Các chunker chuyên biệt trong hệ thống}
+\end{table}
+
+\subsection{OlmOcrLegalChunker -- Chunker cho văn bản pháp lý}
+\textbf{File:} \texttt{chunker/olmocr\_legal\_chunker.py} (1,126 dòng, 40,500 bytes)
+
+\subsubsection{Chiến lược tổng thể}
+OlmOcrLegalChunker tự động nhận diện cấu trúc pháp lý Việt Nam và tạo chunks với metadata:
+\begin{enumerate}
+    \item Nhận diện và tách phần Header (căn cứ pháp lý, quyết định ban hành);
+    \item Phân chia theo Chương (Chapter);
+    \item Trong mỗi Chương, phân chia theo Điều (Article);
+    \item Mỗi Điều đầy đủ tạo thành 1 \textbf{parent chunk};
+    \item Trong Điều, tách từng Khoản (Clause) thành \textbf{child chunk};
+    \item Nhận diện và xử lý phụ lục (Appendix) riêng.
+\end{enumerate}
+
+\subsubsection{Cấu trúc metadata}
+Mỗi chunk mang theo metadata đầy đủ:
+\begin{verbatim}
+{
+    "id": "uuid",
+    "readable_id": "c1_d5_k2",
+    "content": "Nội dung chunk...",
+    "parent_id": "parent-uuid",
+    "metadata": {
+        "level": "child",
+        "chapter": "I",
+        "chapter_full": "CHƯƠNG I: QUY ĐỊNH CHUNG",
+        "article": "5",
+        "article_full": "Điều 5. Điều kiện tôt nghiệp",
+        "clause": "2",
+        "chunk_size": 856,
+        "has_table": false,
+        "is_appendix": false
+    }
+}
+\end{verbatim}
+
+\subsubsection{Cấu hình mặc định}
+\begin{verbatim}
+OlmOcrLegalChunker(
+    min_child_size=300,       # Kích thước tối thiểu child chunk
+    max_child_size=1000,      # Kích thước tối đa child chunk
+    parent_size_limit=4000,   # Merge điều nhỏ thành 1 parent
+    chunk_overlap=100,        # Overlap giữa chunks
+    fallback_chunk_size=1000, # Size cho RecursiveTextSplitter
+    fallback_chunk_overlap=200
+)
+\end{verbatim}
+
+\subsection{RecursiveChunker -- Chunker cho tài liệu CTDT}
+\textbf{File:} \texttt{chunker/recursive\_chunker.py} (1,260 dòng, 52,522 bytes)
+
+\subsubsection{Chiến lược Parent-Child dựa trên H2 Section}
+RecursiveChunker sử dụng chiến lược phân cấp:
+\begin{enumerate}
+    \item Trích xuất tất cả các section H2 từ document;
+    \item Mỗi section H2 đầy đủ tạo thành 1 \textbf{parent chunk} (truncate nếu quá dài);
+    \item Nội dung trong mỗi section H2 được tách thành các \textbf{child chunks} bằng RecursiveCharacterTextSplitter;
+    \item Child chunks luôn nhỏ hơn hoặc bằng parent chunk.
+\end{enumerate}
+
+\subsubsection{Xử lý đặc biệt}
+RecursiveChunker có nhiều xử lý đặc biệt để đảm bảo chất lượng:
+\begin{itemize}
+    \item \textbf{Bảo vệ bảng markdown}: Bảng nhỏ hơn \texttt{chunk\_size} được bảo vệ nguyên vẹn, không bị tách giữa bảng. Bảng quá lớn được tách theo rows với header preserved;
+    \item \textbf{Sửa bảng bị tách}: Nếu chunk bắt đầu giữa bảng (thiếu header), tự động tìm và ghép header từ chunk trước;
+    \item \textbf{Inject section context}: Chunk không có heading được tự động thêm heading context từ metadata;
+    \item \textbf{Inject khoản cha}: Với chunk bắt đầu bằng sub-item (a), b), c)...), tự động tìm và thêm khoản số cha;
+    \item \textbf{Loại bỏ trùng lặp heading}: Xử lý heading bị duplicate do context injection + merging.
+\end{itemize}
+
+\subsubsection{Cấu hình mặc định}
+\begin{verbatim}
+RecursiveChunker(
+    chunk_size=1024,              # Kích thước tối đa child chunk
+    chunk_overlap=0,              # Không overlap (H2 boundary đủ context)
+    protect_tables=True,          # Bảo vệ bảng markdown
+    add_section_context=True,     # Thêm heading context
+    min_chunk_size=50,            # Kích thước tối thiều (loại tiny)
+    parent_chunk_max_chars=10000  # Giới hạn parent chunk
+)
+\end{verbatim}
+
+\subsection{STSVChunker -- Chunker cho dữ liệu JSON STSV}
+\textbf{File:} \texttt{chunker/stsv\_chunker.py} (508 dòng, 20,516 bytes)
+
+\subsubsection{Phân loại nội dung và chiến lược}
+STSVChunker phân loại nội dung Description của mỗi tài liệu JSON thành 4 loại:
+
+\begin{enumerate}
+    \item \textbf{Loại 1 -- Ngắn} ($<$ 1.500 ký tự): Giữ nguyên toàn bộ làm 1 chunk duy nhất;
+    \item \textbf{Loại 2 -- Có phần Roman} (I., II., III.): Tách theo ranh giới phần Roman, trong mỗi phần tiếp tục tách theo mục số;
+    \item \textbf{Loại 3 -- Có mục số} (1., 2., ...): Mục dài ($>$ 300 ký tự) tạo chunk riêng, mục ngắn gộp nhiều mục;
+    \item \textbf{Loại 4 -- Văn xuôi thuần}: Sử dụng RecursiveCharacterTextSplitter.
+\end{enumerate}
+
+\subsubsection{Context prefix}
+Mỗi chunk được thêm prefix chứa context: \texttt{[Title | TypeDoc | Section\_context]} giúp chunk có thể đứng độc lập khi retrieval, không mất ngữ cảnh nguồn.
+
+\subsection{Metadata Enrichment -- Làm giàu metadata}
+\textbf{File:} \texttt{enrich\_metadata.py} (575 dòng, 19,409 bytes)
+
+Pipeline làm giàu metadata tự động trích xuất các trường bổ sung cho chunks CTDT:
+\begin{itemize}
+    \item \textbf{effective\_date}: Ngày ban hành/hiệu lực, trích xuất từ tên file hoặc nội dung header;
+    \item \textbf{applicable\_cohort}: Khóa áp dụng (K65, K68, K70...), phát hiện từ filename và content;
+    \item \textbf{applicable\_major}: Ngành đào tạo, xác định qua nhiều nguồn (trường ``Ngành đào tạo'', H1 heading, program code mapping);
+    \item \textbf{document\_type}: Phân loại tài liệu (curriculum, talent\_program, advanced\_program, international\_program, ...).
+\end{itemize}
+
+\section{Pipeline Chunking tổng hợp}
+\textbf{File:} \texttt{main.py} (356 dòng, 12,023 bytes)
+
+Module \texttt{main.py} cung cấp pipeline tổng hợp với CLI interface:
+\begin{verbatim}
+# Chunking văn bản pháp lý (olmOCR output)
+python main.py --chunker olmocr --input <input_dir> --output <output>
+
+# Chunking CTDT (Docling/PyMuPDF output)
+python main.py --chunker recursive --input <input_dir> --output <output>
+
+# Chunking dữ liệu STSV (JSON)
+python main.py --chunker stsv --input <stsv_dir>
+\end{verbatim}
+
+Pipeline có các tính năng:
+\begin{itemize}
+    \item \textbf{Skip logic}: Tự động bỏ qua files đã được chunking, tránh xử lý lại;
+    \item \textbf{Batch processing}: Xử lý tất cả files trong thư mục;
+    \item \textbf{Thống kê}: In thống kê chi tiết sau khi chunking (total chunks, by level, avg/min/max size).
+\end{itemize}
+
+\section{Kết luận chương}
+Chương này đã trình bày:
+\begin{itemize}
+    \item \textbf{Kiến trúc 8 tầng}: Thiết kế tổng thể hệ thống RAG v2 với luồng xử lý rõ ràng cho cả trường hợp chitchat và RAG;
+    \item \textbf{Pipeline dữ liệu đa nguồn}: Thu thập và xử lý 3 nhóm dữ liệu (quy định PDF, CTDT PDF, STSV JSON) với pipeline chuyên biệt;
+    \item \textbf{Hệ thống chunking chuyên biệt}: 4 loại chunker cho 4 loại tài liệu, đảm bảo bảo toàn cấu trúc và metadata;
+    \item \textbf{Metadata enrichment}: Tự động trích xuất thông tin bổ sung cho CTDT.
+\end{itemize}
+
+Chương tiếp theo sẽ trình bày chi tiết việc triển khai kỹ thuật các module này, bao gồm mã nguồn, thuật toán, và các quyết định thiết kế.
+
+\end{document}
