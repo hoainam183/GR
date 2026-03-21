@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 # Nếu tên ES index giống tên collection thì chỉ cần ghi tên collection.
 COLLECTIONS = [
     # ("stsv", "stsv"),
-    ("quydinh", "quydinh"),
+    # ("quydinh", "quydinh"),
+    ("kehoach", "kehoach"),
     # ("ten_collection_moi", "ten_es_index_moi"),
 ]
 

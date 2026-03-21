@@ -1,11 +1,13 @@
-"""Chat Model — OpenAI GPT wrapper with streaming and multi-prompt support."""
+"""Chat Model — Gemini wrapper with streaming and multi-prompt support."""
 
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Generator, List, Optional
+import os
+from typing import Any, Dict, Generator, List, Optional, cast
 
 from openai import OpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 from .prompts import (
     CHITCHAT_SYSTEM_PROMPT,
@@ -19,22 +21,23 @@ from .prompts import (
 logger = logging.getLogger(__name__)
 
 # ─── Constants ──────────────────────────────────────────────────────────────────
-DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_MODEL = "gemini-2.5-flash"
 DEFAULT_MAX_TOKENS = 1024
 DEFAULT_TEMPERATURE = 0.3
+_GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 class ChatModel:
-    """Wrapper around OpenAI Chat API with prompt selection and streaming.
+    """Wrapper around Gemini API (via OpenAI-compatible endpoint) with streaming and multi-prompt support.
 
     Supports two modes:
     - **RAG**: answer grounded in retrieved context documents.
     - **Chitchat**: friendly conversational response.
 
     Parameters:
-        api_key: OpenAI API key. If *None*, reads from ``OPENAI_API_KEY`` env var.
-        model: Chat model identifier (e.g. ``gpt-4o-mini``, ``gpt-4o``).
+        api_key: Google API key. If *None*, reads from ``GOOGLE_API_KEY`` env var.
+        model: Gemini model identifier (e.g. ``gemini-2.5-flash``).
         temperature: Sampling temperature.
         max_tokens: Maximum tokens in the generated response.
     """
@@ -49,7 +52,8 @@ class ChatModel:
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self._client = OpenAI(api_key=api_key)
+        resolved_key = api_key or os.environ.get("GOOGLE_API_KEY")
+        self._client = OpenAI(api_key=resolved_key, base_url=_GEMINI_BASE_URL)
 
     # ------------------------------------------------------------------
     # Public API
@@ -77,12 +81,12 @@ class ChatModel:
 
         response = self._client.chat.completions.create(
             model=self.model,
-            messages=messages,
+            messages=cast(List[ChatCompletionMessageParam], messages),
             temperature=self.temperature,
             max_tokens=self.max_tokens,
         )
 
-        content = response.choices[0].message.content.strip()
+        content = (response.choices[0].message.content or "").strip()
         logger.info(
             "ChatModel [%s]: query=%r → %d chars",
             mode,
@@ -113,7 +117,7 @@ class ChatModel:
 
         stream = self._client.chat.completions.create(
             model=self.model,
-            messages=messages,
+            messages=cast(List[ChatCompletionMessageParam], messages),
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             stream=True,
@@ -144,7 +148,7 @@ class ChatModel:
         history: Optional[List[Dict[str, str]]],
         mode: str,
     ) -> List[Dict[str, str]]:
-        """Assemble the message list for the OpenAI API."""
+        """Assemble the message list for the Gemini API."""
         if mode == "chitchat":
             return self._build_chitchat_messages(query, history)
         return self._build_rag_messages(query, context, history)

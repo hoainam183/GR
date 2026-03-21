@@ -32,6 +32,7 @@ sys.path.insert(0, str(_ROOT))
 
 from embedding.bge_m3 import BGEm3Embedder
 from embedding.e5_multilingual import E5MultilingualEmbedder
+from reranking.bge_reranker import BGEReranker
 from retrieval.multi_collection_search import MultiCollectionSearch
 
 # ---------------------------------------------------------------------------
@@ -57,9 +58,14 @@ CONFIG = {
     "datasets": None,  # None → tất cả CSV trong evaluation/
     "no_bge": True,
     "no_e5": True,
-    "no_es": False,
+    "no_es": True,
     "no_hybrid": False,
+    "no_rerank": False,
+    # rerank_pool_k: số doc từ hybrid đưa vào reranker (nên >= top_k)
+    "rerank_pool_k": 20,
     "score_threshold": 0.6,
+    # hybrid_score_threshold: lọc kết quả hybrid theo RRF score tối thiểu
+    "hybrid_score_threshold": 0.2,
     # Danh sách cấu hình hybrid để test — mỗi config sinh ra một method riêng.
     # vector_weight + keyword_weight không cần tổng = 1 (min-max normalize độc lập).
     # vector_pool_k: số doc giữ lại từ pool vector toàn cục.
@@ -588,11 +594,12 @@ def main() -> None:
                 tk: int,
                 vp: int,
                 kp: int,
+                hybrid_score_thr: float,
             ):
                 def _fn(query: str) -> List[Dict[str, Any]]:
                     bge_vec = bge_emb.embed_query(query)
                     e5_vec = e5_emb.embed_query(query)
-                    return searcher.search(
+                    results = searcher.search(
                         query=query,
                         bge_m3_query=bge_vec,
                         e5_query=e5_vec,
@@ -602,6 +609,11 @@ def main() -> None:
                         vector_pool_k=vp,
                         keyword_pool_k=kp,
                     )
+                    if hybrid_score_thr is not None:
+                        results = [
+                            r for r in results if r["score"] >= hybrid_score_thr
+                        ]
+                    return results
 
                 return _fn
 
@@ -612,6 +624,7 @@ def main() -> None:
                 top_k,
                 hcfg.get("vector_pool_k", 15),
                 hcfg.get("keyword_pool_k", 15),
+                CONFIG.get("hybrid_score_threshold"),
             )
             RESULT_DIRS[label] = EVAL_DIR / label
             logger.info(
@@ -628,6 +641,125 @@ def main() -> None:
         logger.info(
             "Hybrid search skipped — requires BGE-M3, E5, and Elasticsearch to all be available."
         )
+
+    # ------------------------------------------------------------------
+    # Build reranked variants of hybrid methods
+    # ------------------------------------------------------------------
+    reranker: Optional[BGEReranker] = None
+    if not CONFIG["no_rerank"] and not CONFIG["no_hybrid"]:
+        logger.info("Loading BGE reranker …")
+        try:
+            reranker = BGEReranker(top_k=CONFIG["rerank_pool_k"])
+            logger.info("BGE reranker loaded.")
+        except Exception as exc:
+            logger.warning("Could not load BGE reranker: %s — skipping.", exc)
+
+    if reranker is not None:
+        # Build reranked versions of all existing hybrid methods
+        hybrid_method_labels = [
+            label
+            for label in list(methods_to_run.keys())
+            if label.startswith("hybrid_")
+        ]
+        for label in hybrid_method_labels:
+            reranked_label = f"{label}_reranked"
+            pool_k = CONFIG["rerank_pool_k"]
+            reranked_label_key = reranked_label
+
+            # Capture variables for closure
+            def _make_reranked_fn2(
+                _base_label: str,
+                _reranker: BGEReranker,
+                _hcfg: Dict[str, Any],
+                _bge_emb: BGEm3Embedder,
+                _e5_emb: E5MultilingualEmbedder,
+                _collections: List[str],
+                _es_idxs: List[str],
+                _pool_k: int,
+                _score_threshold: Optional[float],
+                _qdrant_host: str,
+                _qdrant_port: int,
+                _es_host: str,
+                _es_port: int,
+            ):
+                try:
+                    _searcher = MultiCollectionSearch.from_collection_names(
+                        collection_names=_collections,
+                        es_index_names=(
+                            _es_idxs if _es_idxs != _collections else None
+                        ),
+                        qdrant_host=_qdrant_host,
+                        qdrant_port=_qdrant_port,
+                        es_host=_es_host,
+                        es_port=_es_port,
+                        vector_weight=_hcfg["vector_weight"],
+                        keyword_weight=_hcfg["keyword_weight"],
+                    )
+                except Exception as exc:
+                    logger.warning(
+                        "Could not build searcher for reranked '%s': %s",
+                        _base_label,
+                        exc,
+                    )
+                    return None
+
+                def _fn(query: str) -> List[Dict[str, Any]]:
+                    bge_vec = _bge_emb.embed_query(query)
+                    e5_vec = _e5_emb.embed_query(query)
+                    candidates = _searcher.search(
+                        query=query,
+                        bge_m3_query=bge_vec,
+                        e5_query=e5_vec,
+                        top_k=_pool_k,
+                        vector_top_k=_pool_k,
+                        keyword_top_k=_pool_k,
+                        vector_pool_k=_hcfg.get("vector_pool_k", 15),
+                        keyword_pool_k=_hcfg.get("keyword_pool_k", 15),
+                        score_threshold=_score_threshold,
+                    )
+                    return _reranker.rerank(query, candidates)
+
+                return _fn
+
+            if (
+                bge_embedder is not None
+                and e5_embedder is not None
+                and es_client is not None
+            ):
+                # Find matching hybrid config by label
+                matching_hcfg = next(
+                    (
+                        h
+                        for h in CONFIG["hybrid_configs"]
+                        if _hybrid_label(h) == label
+                    ),
+                    None,
+                )
+                if matching_hcfg is not None:
+                    reranked_fn = _make_reranked_fn2(
+                        label,
+                        reranker,
+                        matching_hcfg,
+                        bge_embedder,
+                        e5_embedder,
+                        collections,
+                        es_indexes,
+                        pool_k,
+                        score_threshold,
+                        CONFIG["qdrant_host"],
+                        CONFIG["qdrant_port"],
+                        CONFIG["es_host"],
+                        CONFIG["es_port"],
+                    )
+                    if reranked_fn is not None:
+                        methods_to_run[reranked_label_key] = reranked_fn
+                        RESULT_DIRS[reranked_label_key] = (
+                            EVAL_DIR / reranked_label_key
+                        )
+                        logger.info(
+                            "  ✓ Reranked method '%s' ready.",
+                            reranked_label_key,
+                        )
 
     if not methods_to_run:
         logger.error("No retrieval methods are available. Aborting.")

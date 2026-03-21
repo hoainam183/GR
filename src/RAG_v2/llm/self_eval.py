@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import Any, Dict, Optional
 
 from openai import OpenAI
@@ -13,12 +14,13 @@ from .prompts import SELF_EVAL_SYSTEM_PROMPT, SELF_EVAL_USER_TEMPLATE
 logger = logging.getLogger(__name__)
 
 # ─── Constants ──────────────────────────────────────────────────────────────────
-DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_MODEL = "gemini-2.5-flash"
+_GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 class SelfEvaluator:
-    """Evaluates the quality of a generated response using an LLM judge.
+    """Evaluates the quality of a generated response using an LLM judge (Gemini).
 
     Checks three criteria:
     - **Relevance**: does the answer address the question?
@@ -28,8 +30,8 @@ class SelfEvaluator:
     Returns a pass/fail decision with detailed reasoning.
 
     Parameters:
-        api_key: OpenAI API key. If *None*, reads from ``OPENAI_API_KEY`` env var.
-        model: Model used for evaluation (should be fast and cheap).
+        api_key: Google API key. If *None*, reads from ``GOOGLE_API_KEY`` env var.
+        model: Gemini model used for evaluation.
         temperature: Sampling temperature (low for consistent evaluation).
     """
 
@@ -41,7 +43,8 @@ class SelfEvaluator:
     ) -> None:
         self.model = model
         self.temperature = temperature
-        self._client = OpenAI(api_key=api_key)
+        resolved_key = api_key or os.environ.get("GOOGLE_API_KEY")
+        self._client = OpenAI(api_key=resolved_key, base_url=_GEMINI_BASE_URL)
 
     # ------------------------------------------------------------------
     # Public API

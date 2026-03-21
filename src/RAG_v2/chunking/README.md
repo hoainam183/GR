@@ -186,6 +186,7 @@ python main.py --input <input_dir> --output <output_dir> --chunker parent_child 
 python main.py --input "d:\GR\src\RAG\data\ctdt\vatlieu\clean_data" --output "d:\GR\src\RAG\data\ctdt\vatlieu\chunks_recursive_parent_child" --chunker recursive --pattern "*_fix.md"
 python main.py --input "D:\GR\src\RAG_v2\data\quydinh\olmocr\cleaned" --output "D:\GR\src\RAG_v2\data\quydinh\olmocr\chunks_recursive_parent_child_3" --chunker recursive --pattern "*.md"     
 python main.py --chunker stsv --input path/to/stsv
+python main.py --file ../data/kehoach/output_full.json --output ../data/kehoach/chunks --chunker kehoach
 ```
 
 ## 📝 Best Practices

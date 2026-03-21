@@ -129,26 +129,26 @@
 
 ### Tasks
 
-- [ ] **4.1 Tavily Search Tool**
-  - [ ] Implement `TavilySearchTool` trong `tools/tavily_search.py`
-    - [ ] `search(query)` → web search results
-    - [ ] Parse và format kết quả thành context cho LLM
+- [x] **4.1 Tavily Search Tool**
+  - [x] Implement `TavilySearchTool` trong `tools/tavily_search.py`
+    - [x] `search(query)` → web search results
+    - [x] Parse và format kết quả thành context cho LLM
     - [ ] Rate limiting và error handling
   - [ ] Tích hợp vào self-eval fallback pipeline:
     - Self-eval FAIL → Tavily search → Chat Model → Final answer
 
-- [ ] **4.2 MongoDB Memory Layer**
+- [x] **4.2 MongoDB Memory Layer**
   - [ ] Setup MongoDB (Docker hoặc MongoDB Atlas)
-  - [ ] Implement `MongoClient` trong `memory/mongo_client.py`
-    - [ ] Connection pooling, retry logic
-  - [ ] Implement `ChatHistoryStore` trong `memory/chat_history.py`
-    - [ ] `save_message(session_id, role, content)` — lưu tin nhắn
-    - [ ] `get_history(session_id, limit)` — lấy N tin gần nhất
-    - [ ] `clear_history(session_id)` — xóa lịch sử
-  - [ ] Implement `ConversationState` trong `memory/conversation.py`
-    - [ ] Lưu final answer + metadata (sources, scores)
-    - [ ] Update conversation state (active/closed)
-    - [ ] Track session metadata (created_at, last_active)
+  - [x] Implement `MongoClient` trong `memory/mongo_client.py`
+    - [x] Connection pooling, retry logic
+  - [x] Implement `ChatHistoryStore` trong `memory/chat_history.py`
+    - [x] `save_message(session_id, role, content)` — lưu tin nhắn
+    - [x] `get_history(session_id, limit)` — lấy N tin gần nhất
+    - [x] `clear_history(session_id)` — xóa lịch sử
+  - [x] Implement `ConversationState` trong `memory/conversation.py`
+    - [x] Lưu final answer + metadata (sources, scores)
+    - [x] Update conversation state (active/closed)
+    - [x] Track session metadata (created_at, last_active)
 
 ### ✅ Kết quả đạt được sau Phase 4
 
@@ -166,29 +166,29 @@
 
 ### Tasks
 
-- [ ] **5.1 Pipeline Orchestration**
-  - [ ] Implement `RAGPipeline` trong `pipeline/rag_pipeline.py`
-    - [ ] Kết nối: Router → Reflection → Embedding → Hybrid Search → Rerank → Chat Model → Self Eval
-    - [ ] `process(user_message, session_id)` — entry point
-  - [ ] Implement flows trong `pipeline/flows.py`
-    - [ ] `chitchat_flow()`: Router → Chat Model → Save MongoDB
-    - [ ] `rag_flow()`: Router → Reflection → Embed → Search → Rerank → Top 5 → Chat Model → Self Eval → (Tavily fallback) → Save MongoDB
+- [x] **5.1 Pipeline Orchestration**
+  - [x] Implement `RAGPipeline` trong `pipeline/rag_pipeline.py`
+    - [x] Kết nối: Router → Reflection → Embedding → Hybrid Search → Rerank → Chat Model → Self Eval
+    - [x] `process(user_message, session_id)` — entry point
+  - [x] Implement flows trong `pipeline/flows.py`
+    - [x] `chitchat_flow()`: Router → Chat Model → Save MongoDB
+    - [x] `rag_flow()`: Router → Reflection → Embed → Search → Rerank → Top 5 → Chat Model → Self Eval → (Tavily fallback) → Save MongoDB
 
-- [ ] **5.2 FastAPI Backend**
-  - [ ] Implement FastAPI app trong `api/main.py`
-    - [ ] CORS, middleware, error handling
-  - [ ] Implement routes:
-    - [ ] `POST /chat` — SSE streaming response trong `api/routes/chat.py`
-    - [ ] `GET /health` — health check trong `api/routes/health.py`
-  - [ ] Pydantic schemas trong `api/schemas.py`
-    - [ ] `ChatRequest`, `ChatResponse`, `HealthResponse`
-  - [ ] Singleton pattern cho models (tránh load lại)
+- [x] **5.2 FastAPI Backend**
+  - [x] Implement FastAPI app trong `api/main.py`
+    - [x] CORS, middleware, error handling
+  - [x] Implement routes:
+    - [x] `POST /chat` — SSE streaming response trong `api/routes/chat.py`
+    - [x] `GET /health` — health check trong `api/routes/health.py`
+  - [x] Pydantic schemas trong `api/schemas.py`
+    - [x] `ChatRequest`, `ChatResponse`, `HealthResponse`
+  - [x] Singleton pattern cho models (tránh load lại)
 
-- [ ] **5.3 Configuration**
-  - [ ] Implement `Settings` trong `config/settings.py`
-    - [ ] Dùng Pydantic BaseSettings + `.env` file
-    - [ ] Config cho: OpenAI, Qdrant, Elasticsearch, MongoDB, Tavily, Models
-  - [ ] Tạo `.env.example` với tất cả biến môi trường
+- [x] **5.3 Configuration**
+  - [x] Implement `Settings` trong `config/settings.py`
+    - [x] Dùng Pydantic BaseSettings + `.env` file
+    - [x] Config cho: OpenAI, Qdrant, Elasticsearch, MongoDB, Tavily, Models
+  - [x] Tạo `.env.example` với tất cả biến môi trường
 
 ### ✅ Kết quả đạt được sau Phase 5
 
