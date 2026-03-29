@@ -18,14 +18,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from dotenv import load_dotenv
 
-from embedding.bge_m3 import BGEm3Embedder
-from embedding.e5_multilingual import E5MultilingualEmbedder
-from llm.chat_model import ChatModel
+from config.settings import Settings
+from embedding import BGEm3Embedder, E5MultilingualEmbedder
+from llm import BaseLLM, create_llm
 from llm.self_eval import SelfEvaluator
 from query.reflection import QueryReflector
 from query.router import QueryRouter
-from reranking.bge_reranker import BGEReranker
-from retrieval.multi_collection_search import MultiCollectionSearch
+from reranking import create_reranker
+from retrieval import create_retriever
 from tools.tavily_search import TavilySearchTool
 
 from .flows import (
@@ -37,38 +37,36 @@ from .flows import (
 
 logger = logging.getLogger(__name__)
 
+
 # ---------------------------------------------------------------------------
-# Config — adjust here, no CLI needed
+# Config — built from Settings (centralised Pydantic config)
 # ---------------------------------------------------------------------------
-CONFIG = {
-    # Collections to search
-    "collections": ["stsv", "quydinh", "kehoach", "ctdt"],
-    # Qdrant / ES connection
-    "qdrant_host": "localhost",
-    "qdrant_port": 6333,
-    "es_host": "localhost",
-    "es_port": 9200,
-    # Retrieval params
-    "top_k": 5,
-    "vector_top_k": 20,
-    "keyword_top_k": 20,
-    "vector_pool_k": 15,
-    "keyword_pool_k": 15,
-    "vector_weight": 0.8,
-    "keyword_weight": 0.2,
-    # Reranker
-    "reranker_top_k": 5,
-    # Chat model
-    "model": "gemini-2.5-flash",
-    "temperature": 0.3,
-    "max_tokens": 1024 * 5,
-    # Router
-    "router_mode": "classifier",
-    # Reflection / Self-eval / Tavily
-    "reflection_enabled": True,
-    "self_eval_enabled": False,
-    "tavily_fallback_enabled": False,
-}
+
+
+def _settings_to_cfg(settings: Settings) -> Dict[str, Any]:
+    """Convert a ``Settings`` instance to the legacy cfg dict expected by flows."""
+    return {
+        "collections": settings.collections,
+        "qdrant_host": settings.qdrant_host,
+        "qdrant_port": settings.qdrant_port,
+        "es_host": settings.elasticsearch_host,
+        "es_port": settings.elasticsearch_port,
+        "top_k": settings.top_k,
+        "vector_top_k": settings.vector_top_k,
+        "keyword_top_k": settings.keyword_top_k,
+        "vector_pool_k": settings.vector_pool_k,
+        "keyword_pool_k": settings.keyword_pool_k,
+        "vector_weight": settings.vector_weight,
+        "keyword_weight": settings.keyword_weight,
+        "reranker_top_k": settings.reranker_top_k,
+        "model": settings.chat_model,
+        "temperature": settings.chat_temperature,
+        "max_tokens": settings.chat_max_tokens,
+        "router_mode": settings.router_mode,
+        "reflection_enabled": settings.reflection_enabled,
+        "self_eval_enabled": settings.self_eval_enabled,
+        "tavily_fallback_enabled": settings.tavily_fallback_enabled,
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -92,6 +90,7 @@ class RAGPipeline:
 
     def __init__(
         self,
+        settings: Optional[Settings] = None,
         api_key: Optional[str] = None,
         config: Optional[Dict[str, Any]] = None,
         env_path: Optional[str] = None,
@@ -102,8 +101,13 @@ class RAGPipeline:
         else:
             load_dotenv(dotenv_path=PROJECT_ROOT / ".env")
 
-        cfg = {**CONFIG, **(config or {})}
-        resolved_key = api_key or os.environ.get("GOOGLE_API_KEY")
+        if settings is None:
+            settings = Settings()
+        # Allow callers who still pass api_key to override settings
+        if api_key:
+            settings.google_api_key = api_key
+        base_cfg = _settings_to_cfg(settings)
+        cfg = {**base_cfg, **(config or {})}
 
         logger.info("Initialising RAG v2 Pipeline …")
 
@@ -122,43 +126,34 @@ class RAGPipeline:
                     exc_info=True,
                 )
 
-        # Embedders
+        # Embedders (dual named-vector: BGE-M3 + E5 for hybrid search)
         logger.info("Loading BGE-M3 embedder …")
         self._bge = BGEm3Embedder()
         logger.info("Loading E5-multilingual embedder …")
         self._e5 = E5MultilingualEmbedder()
 
-        # Multi-collection hybrid search
+        # Multi-collection hybrid search via factory
         logger.info(
             "Connecting to retrieval stores (collections=%s) …",
             cfg["collections"],
         )
-        self._searcher = MultiCollectionSearch.from_collection_names(
-            collection_names=cfg["collections"],
-            qdrant_host=cfg["qdrant_host"],
-            qdrant_port=cfg["qdrant_port"],
-            es_host=cfg["es_host"],
-            es_port=cfg["es_port"],
-            vector_weight=cfg["vector_weight"],
-            keyword_weight=cfg["keyword_weight"],
-        )
+        self._searcher = create_retriever(settings)
 
-        # Reranker
-        logger.info("Loading BGE reranker …")
-        self._reranker = BGEReranker(top_k=cfg["reranker_top_k"])
+        # Reranker via factory
+        logger.info("Loading reranker …")
+        _reranker = create_reranker(settings)
+        assert (
+            _reranker is not None
+        ), "A reranker is required. Set RERANKER_PROVIDER in .env (e.g. bge)."
+        self._reranker = _reranker
 
-        # Chat model (Gemini via OpenAI-compatible endpoint)
-        self._chat = ChatModel(
-            api_key=resolved_key,
-            model=cfg["model"],
-            temperature=cfg["temperature"],
-            max_tokens=cfg["max_tokens"],
-        )
+        # Chat model via factory
+        self._chat: BaseLLM = create_llm(settings)
 
-        # Self evaluator
+        # Self evaluator (reuses same LLM instance — no extra API client)
         self._self_eval: Optional[SelfEvaluator] = None
         if cfg.get("self_eval_enabled", False):
-            self._self_eval = SelfEvaluator(api_key=resolved_key)
+            self._self_eval = SelfEvaluator(llm=self._chat)
             logger.info("Self evaluator loaded.")
 
         # Tavily web search fallback

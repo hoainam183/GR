@@ -5,6 +5,11 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Generator, List, Optional
 
+from embedding.base import BaseEmbedder
+from llm.base import BaseLLM
+from llm.self_eval import SelfEvaluator
+from reranking.base import BaseReranker
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,14 +47,14 @@ def chitchat_flow(
     *,
     question: str,
     history: Optional[List[Dict[str, str]]],
-    chat_model: Any,
+    chat_model: BaseLLM,
 ) -> Dict[str, Any]:
     """Router → Chat Model → response (no retrieval).
 
     Args:
         question: The user message.
         history: Recent chat turns.
-        chat_model: A ``ChatModel`` instance.
+        chat_model: A :class:`~llm.base.BaseLLM` instance.
 
     Returns:
         Dict with ``answer``, ``sources``, ``intent``.
@@ -77,7 +82,7 @@ def chitchat_flow_stream(
     *,
     question: str,
     history: Optional[List[Dict[str, str]]],
-    chat_model: Any,
+    chat_model: BaseLLM,
 ) -> Generator[str, None, None]:
     """Streaming variant of :func:`chitchat_flow`."""
     trimmed = _trim_history(history)
@@ -96,12 +101,12 @@ def rag_flow(
     question: str,
     history: Optional[List[Dict[str, str]]],
     reflector: Any | None,
-    bge_embedder: Any,
-    e5_embedder: Any,
+    bge_embedder: BaseEmbedder,
+    e5_embedder: BaseEmbedder,
     searcher: Any,
-    reranker: Any,
-    chat_model: Any,
-    self_evaluator: Any | None,
+    reranker: BaseReranker,
+    chat_model: BaseLLM,
+    self_evaluator: Optional[SelfEvaluator],
     tavily_tool: Any | None,
     cfg: Dict[str, Any],
 ) -> Dict[str, Any]:
@@ -111,11 +116,11 @@ def rag_flow(
         question: Raw user question.
         history: Chat history.
         reflector: ``QueryReflector`` (or *None* to skip reflection).
-        bge_embedder: BGE-M3 embedder.
-        e5_embedder: E5 embedder.
+        bge_embedder: BGE-M3 :class:`~embedding.base.BaseEmbedder`.
+        e5_embedder: E5 :class:`~embedding.base.BaseEmbedder`.
         searcher: ``MultiCollectionSearch`` instance.
-        reranker: ``BGEReranker`` instance.
-        chat_model: ``ChatModel`` instance.
+        reranker: :class:`~reranking.base.BaseReranker` instance.
+        chat_model: :class:`~llm.base.BaseLLM` instance.
         self_evaluator: ``SelfEvaluator`` (or *None* to skip).
         tavily_tool: ``TavilySearchTool`` (or *None* to skip).
         cfg: Pipeline config dict with retrieval params.
@@ -129,7 +134,8 @@ def rag_flow(
     search_query = question
     if reflector is not None:
         try:
-            search_query = reflector.rewrite(question, history=trimmed)
+            result = reflector.reflect(question, chat_history=trimmed)
+            search_query = result.get("rewritten", question)
             logger.info("Reflected query: %r", search_query[:80])
         except Exception:
             logger.warning(
@@ -206,11 +212,11 @@ def rag_flow_stream(
     question: str,
     history: Optional[List[Dict[str, str]]],
     reflector: Any | None,
-    bge_embedder: Any,
-    e5_embedder: Any,
+    bge_embedder: BaseEmbedder,
+    e5_embedder: BaseEmbedder,
     searcher: Any,
-    reranker: Any,
-    chat_model: Any,
+    reranker: BaseReranker,
+    chat_model: BaseLLM,
     cfg: Dict[str, Any],
 ) -> tuple[Generator[str, None, None], List[Dict[str, Any]]]:
     """Streaming RAG flow — retrieval runs first, then generation is streamed.
@@ -224,7 +230,8 @@ def rag_flow_stream(
     search_query = question
     if reflector is not None:
         try:
-            search_query = reflector.rewrite(question, history=trimmed)
+            result = reflector.reflect(question, chat_history=trimmed)
+            search_query = result.get("rewritten", question)
         except Exception:
             logger.warning(
                 "Reflection failed, using original query", exc_info=True
@@ -267,7 +274,7 @@ def _tavily_fallback(
     question: str,
     answer: str,
     tavily_tool: Any | None,
-    chat_model: Any,
+    chat_model: BaseLLM,
     history: List[Dict[str, str]],
 ) -> str:
     """Use Tavily web search to re-generate the answer when self-eval fails."""

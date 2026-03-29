@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     Parameters:
         google_api_key: Google API key for Gemini.
-        openai_api_key: OpenAI API key (for query reflection).
+        openai_api_key: OpenAI API key (optional, not used by default pipeline).
         tavily_api_key: Tavily API key for web search fallback.
         qdrant_host: Qdrant server hostname.
         qdrant_port: Qdrant server port.
@@ -52,10 +52,27 @@ class Settings(BaseSettings):
         api_port: FastAPI listen port.
     """
 
+    # --- Provider Selectors (change in .env, no code edits needed) ---
+    llm_provider: str = "gemini"  # gemini | openai | azure | ollama
+    embedding_provider: str = "ensemble"  # ensemble | bge_m3 | e5
+    reranker_provider: str = "bge"  # bge | cohere | none
+
     # --- API Keys ---
     google_api_key: str = ""
     openai_api_key: str = ""
     tavily_api_key: str = ""
+
+    # Unified LLM API key alias (active provider's key resolved by factory)
+    llm_api_key: str = ""
+
+    # --- Azure OpenAI ---
+    azure_openai_endpoint: str = ""
+    azure_openai_api_key: str = ""
+    azure_openai_api_version: str = "2024-02-01"
+    azure_openai_deployment: str = ""
+
+    # --- Ollama ---
+    ollama_base_url: str = "http://localhost:11434"
 
     # --- Qdrant ---
     qdrant_host: str = "localhost"
@@ -88,14 +105,18 @@ class Settings(BaseSettings):
     keyword_weight: float = 0.2
 
     # --- Reranker ---
+    reranker_model: str = "BAAI/bge-reranker-v2-m3"
     reranker_top_k: int = 5
 
     # --- Router ---
     router_mode: str = "classifier"
 
     # --- Evaluation & Fallback ---
-    self_eval_enabled: bool = False
-    tavily_fallback_enabled: bool = False
+    self_eval_enabled: bool = True
+    tavily_fallback_enabled: bool = True
+
+    # --- Reflection ---
+    reflection_enabled: bool = True
 
     # --- CORS ---
     cors_origins: List[str] = ["*"]

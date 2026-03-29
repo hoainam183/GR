@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Dict, List, Optional
+
 # ─── RAG Answer Prompt ──────────────────────────────────────────────────────────
 
 RAG_SYSTEM_PROMPT = """\
@@ -65,38 +67,129 @@ CHITCHAT_USER_WITH_HISTORY_TEMPLATE = """\
 # ─── Self Evaluation Prompt ─────────────────────────────────────────────────────
 
 SELF_EVAL_SYSTEM_PROMPT = """\
-You are a strict quality evaluator for a Vietnamese university chatbot's responses.
-Evaluate the assistant's answer against the provided context and user query.
+Bạn là một đánh giá viên chất lượng nghiêm ngặt cho câu trả lời của chatbot trường đại học Việt Nam.
+Đánh giá câu trả lời của trợ lý dựa trên ngữ cảnh được cung cấp và câu hỏi của người dùng.
 
-Check these criteria:
-1. **Relevance**: Does the answer address the user's question?
-2. **Faithfulness**: Is the answer grounded in the provided context? No hallucination.
-3. **Completeness**: Does the answer cover all relevant information from the context?
+Kiểm tra các tiêu chí sau:
+1. **Mức độ liên quan (Relevance)**: Câu trả lời có đúng với câu hỏi của người dùng không?
+2. **Tính trung thực (Faithfulness)**: Câu trả lời có dựa trên ngữ cảnh được cung cấp không? Không bịa đặt thông tin.
+3. **Tính đầy đủ (Completeness)**: Câu trả lời có bao gồm tất cả thông tin liên quan từ ngữ cảnh không?
 
-Respond with a single JSON object:
+Trả lời bằng một đối tượng JSON duy nhất:
 {
   "pass": true/false,
   "relevance": "good" | "partial" | "bad",
   "faithfulness": "grounded" | "partially_grounded" | "hallucinated",
   "completeness": "complete" | "partial" | "incomplete",
-  "reason": "<brief explanation in English>"
+  "reason": "<giải thích ngắn gọn bằng tiếng Việt>"
 }
 
-Rules:
-- Set "pass" to true ONLY if relevance is "good", faithfulness is "grounded", \
-and completeness is at least "partial".
-- Be strict about hallucination: if the answer contains claims not in the context, \
-set faithfulness to "hallucinated" and pass to false.
-- Do NOT include any text outside the JSON object."""
+Quy tắc:
+- Đặt "pass" là true CHỈ KHI relevance là "good", faithfulness là "grounded", \
+và completeness ít nhất là "partial".
+- Nghiêm ngặt về bịa đặt: nếu câu trả lời chứa thông tin không có trong ngữ cảnh, \
+đặt faithfulness là "hallucinated" và pass là false.
+- KHÔNG viết bất kỳ văn bản nào ngoài đối tượng JSON."""
 
 SELF_EVAL_USER_TEMPLATE = """\
-### User Query:
+### Câu hỏi người dùng:
 {query}
 
-### Retrieved Context:
+### Ngữ cảnh đã truy xuất:
 {context}
 
-### Assistant Response:
+### Câu trả lời của trợ lý:
 {response}
 
-Evaluate the response:"""
+Đánh giá câu trả lời:"""
+
+
+# ─── Message-Assembly Helpers ───────────────────────────────────────────────────
+
+
+def _format_history(history: List[Dict[str, str]]) -> str:
+    """Format chat history into a readable string."""
+    return "\n".join(
+        f"{msg['role'].capitalize()}: {msg['content']}" for msg in history
+    )
+
+
+def build_rag_messages(
+    query: str,
+    context: str,
+    history: Optional[List[Dict[str, str]]] = None,
+) -> List[Dict[str, str]]:
+    """Build OpenAI-style messages for RAG mode.
+
+    Args:
+        query: The user question.
+        context: Retrieved document context.
+        history: Optional conversation history (list of ``{role, content}`` dicts).
+
+    Returns:
+        List of ``{role, content}`` message dicts.
+    """
+    messages: List[Dict[str, str]] = [
+        {"role": "system", "content": RAG_SYSTEM_PROMPT},
+    ]
+
+    if history:
+        history_text = _format_history(history)
+        user_content = RAG_USER_WITH_HISTORY_TEMPLATE.format(
+            history=history_text,
+            context=context,
+            query=query,
+        )
+    else:
+        user_content = RAG_USER_TEMPLATE.format(
+            context=context,
+            query=query,
+        )
+
+    messages.append({"role": "user", "content": user_content})
+    return messages
+
+
+def build_chitchat_messages(
+    query: str,
+    history: Optional[List[Dict[str, str]]] = None,
+) -> List[Dict[str, str]]:
+    """Build OpenAI-style messages for chitchat mode.
+
+    Args:
+        query: The user message.
+        history: Optional conversation history (list of ``{role, content}`` dicts).
+
+    Returns:
+        List of ``{role, content}`` message dicts.
+    """
+    messages: List[Dict[str, str]] = [
+        {"role": "system", "content": CHITCHAT_SYSTEM_PROMPT},
+    ]
+
+    if history:
+        history_text = _format_history(history)
+        user_content = CHITCHAT_USER_WITH_HISTORY_TEMPLATE.format(
+            history=history_text,
+            query=query,
+        )
+    else:
+        user_content = CHITCHAT_USER_TEMPLATE.format(query=query)
+
+    messages.append({"role": "user", "content": user_content})
+    return messages
+
+
+def build_self_eval_messages(user_content: str) -> List[Dict[str, str]]:
+    """Build OpenAI-style messages for self-evaluation mode.
+
+    Args:
+        user_content: Pre-formatted evaluation prompt (query + context + response).
+
+    Returns:
+        List of ``{role, content}`` message dicts.
+    """
+    return [
+        {"role": "system", "content": SELF_EVAL_SYSTEM_PROMPT},
+        {"role": "user", "content": user_content},
+    ]

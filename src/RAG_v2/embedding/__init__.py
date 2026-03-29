@@ -1,56 +1,54 @@
 """Embedding Layer - BGE-M3, Multilingual-E5-Large, Ensemble"""
 
-from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from .base import BaseEmbedder
+
+# Map provider name → dotted module path inside embedding/
+_PROVIDER_MODULES: dict[str, str] = {
+    "bge_m3": "embedding.bge_m3",
+    "e5": "embedding.e5_multilingual",
+    "ensemble": "embedding.ensemble",
+}
 
 
-class BaseEmbedder(ABC):
-    """Abstract base class for all embedding models."""
+def create_embedder(settings: "Settings") -> BaseEmbedder:  # type: ignore[name-defined]
+    """Lazy-import and instantiate the configured embedding model.
 
-    @abstractmethod
-    def embed(self, texts: List[str]) -> List[List[float]]:
-        """Embed a list of texts into dense vectors.
+    Args:
+        settings: Application settings instance.
 
-        Args:
-            texts: List of input strings to embed.
+    Returns:
+        A concrete BaseEmbedder for the configured provider.
 
-        Returns:
-            List of embedding vectors (each a list of floats).
-        """
-        ...
+    Raises:
+        ValueError: If *settings.embedding_provider* is not recognised.
+    """
+    provider = settings.embedding_provider
+    if provider == "bge_m3":
+        from embedding.bge_m3 import BGEm3Embedder
 
-    @abstractmethod
-    def embed_query(self, text: str) -> List[float]:
-        """Embed a single query text.
+        return BGEm3Embedder()
+    if provider == "e5":
+        from embedding.e5_multilingual import E5MultilingualEmbedder
 
-        Args:
-            text: The query string.
+        return E5MultilingualEmbedder()
+    if provider == "ensemble":
+        from embedding.bge_m3 import BGEm3Embedder
+        from embedding.e5_multilingual import E5MultilingualEmbedder
+        from embedding.ensemble import EnsembleEmbedder
 
-        Returns:
-            A single embedding vector.
-        """
-        ...
-
-    @abstractmethod
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        """Embed a list of document texts.
-
-        Args:
-            texts: List of document strings.
-
-        Returns:
-            List of embedding vectors.
-        """
-        ...
-
-    @property
-    @abstractmethod
-    def dimension(self) -> int:
-        """Return the dimension of the embedding vectors."""
-        ...
+        return EnsembleEmbedder([BGEm3Embedder(), E5MultilingualEmbedder()])
+    raise ValueError(
+        f"Unknown embedding provider '{provider}'. "
+        f"Known providers: {list(_PROVIDER_MODULES)}"
+    )
 
 
-from embedding.bge_m3 import BGEm3Embedder
+# Backwards-compatible concrete class exports.
+from .bge_m3 import BGEm3Embedder
 from embedding.e5_multilingual import E5MultilingualEmbedder
 from embedding.ensemble import EnsembleEmbedder
 
@@ -59,4 +57,5 @@ __all__ = [
     "BGEm3Embedder",
     "E5MultilingualEmbedder",
     "EnsembleEmbedder",
+    "create_embedder",
 ]

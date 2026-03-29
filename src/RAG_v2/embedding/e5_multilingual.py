@@ -44,7 +44,15 @@ class E5MultilingualEmbedder(BaseEmbedder):
         logger.info(
             "Loading E5-multilingual model '%s' on %s", model_name, device
         )
-        self._model = SentenceTransformer(model_name, device=device)
+        self._model = SentenceTransformer(
+            model_name,
+            device=device,
+            model_kwargs={
+                "low_cpu_mem_usage": True,
+                "torch_dtype": torch.float16,
+                "use_safetensors": False,
+            },
+        )
         self._model.max_seq_length = max_length
 
     # ------------------------------------------------------------------

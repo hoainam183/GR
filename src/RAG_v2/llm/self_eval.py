@@ -4,23 +4,17 @@ from __future__ import annotations
 
 import json
 import logging
-import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from openai import OpenAI
-
-from .prompts import SELF_EVAL_SYSTEM_PROMPT, SELF_EVAL_USER_TEMPLATE
+from llm.base import BaseLLM
+from .prompts import SELF_EVAL_USER_TEMPLATE
 
 logger = logging.getLogger(__name__)
-
-# ─── Constants ──────────────────────────────────────────────────────────────────
-DEFAULT_MODEL = "gemini-2.5-flash"
-_GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 class SelfEvaluator:
-    """Evaluates the quality of a generated response using an LLM judge (Gemini).
+    """Evaluates the quality of a generated response using an LLM judge.
 
     Checks three criteria:
     - **Relevance**: does the answer address the question?
@@ -30,21 +24,11 @@ class SelfEvaluator:
     Returns a pass/fail decision with detailed reasoning.
 
     Parameters:
-        api_key: Google API key. If *None*, reads from ``GOOGLE_API_KEY`` env var.
-        model: Gemini model used for evaluation.
-        temperature: Sampling temperature (low for consistent evaluation).
+        llm: A :class:`~llm.base.BaseLLM` instance used as the evaluation judge.
     """
 
-    def __init__(
-        self,
-        api_key: Optional[str] = None,
-        model: str = DEFAULT_MODEL,
-        temperature: float = 0.0,
-    ) -> None:
-        self.model = model
-        self.temperature = temperature
-        resolved_key = api_key or os.environ.get("GOOGLE_API_KEY")
-        self._client = OpenAI(api_key=resolved_key, base_url=_GEMINI_BASE_URL)
+    def __init__(self, llm: BaseLLM) -> None:
+        self._llm = llm
 
     # ------------------------------------------------------------------
     # Public API
@@ -67,16 +51,12 @@ class SelfEvaluator:
             Dict with keys: ``pass`` (bool), ``relevance``, ``faithfulness``,
             ``completeness``, and ``reason`` (str).
         """
-        messages = self._build_messages(query, context, response)
-
-        llm_response = self._client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=self.temperature,
-            max_tokens=256,
+        user_content = SELF_EVAL_USER_TEMPLATE.format(
+            query=query,
+            context=context,
+            response=response,
         )
-
-        raw = llm_response.choices[0].message.content.strip()
+        raw = self._llm.generate(query=user_content, mode="self_eval")
         result = self._parse_evaluation(raw)
 
         logger.info(
@@ -93,23 +73,6 @@ class SelfEvaluator:
     # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
-
-    def _build_messages(
-        self,
-        query: str,
-        context: str,
-        response: str,
-    ) -> list:
-        """Assemble the evaluation prompt messages."""
-        user_content = SELF_EVAL_USER_TEMPLATE.format(
-            query=query,
-            context=context,
-            response=response,
-        )
-        return [
-            {"role": "system", "content": SELF_EVAL_SYSTEM_PROMPT},
-            {"role": "user", "content": user_content},
-        ]
 
     def _parse_evaluation(self, raw: str) -> Dict[str, Any]:
         """Parse the LLM's JSON evaluation response.
