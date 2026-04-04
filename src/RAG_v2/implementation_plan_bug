@@ -1,0 +1,259 @@
+# 📋 RAG v2 — Phase Cải Thiện Tiếp Theo
+
+> Tiếp nối Phase 1–6 đã hoàn thành. Các phase mới tập trung vào:
+> sửa bug, xử lý cross-reference, nâng cao retrieval, và tối ưu chất lượng.
+
+---
+
+## Phase 7: Bug Fixes & Feature Activation
+
+> **Mục tiêu**: Sửa các bugs nghiêm trọng và kích hoạt các features đã build nhưng chưa bật.
+> **Thời lượng ước tính**: 2–3 ngày
+> **Ưu tiên**: 🔴 Cao nhất
+
+### Tasks
+
+- [ ] **7.1 Sửa bug Query Reflection**
+  - [ ] Sửa [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py) line 132 & 227: `reflector.rewrite()` → `reflector.reflect()`
+  - [ ] Đọc return format của `reflect()` và map đúng field `rewritten` cho `search_query`
+  - [ ] Test: chạy pipeline với reflection enabled, verify query được rewrite đúng
+  - **File**: [pipeline/flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)
+
+- [ ] **7.2 Kích hoạt Self-Evaluation**
+  - [ ] Set `self_eval_enabled = True` trong `config/settings.py`
+  - [ ] Chuyển self-eval prompt sang tiếng Việt (hiện bằng English đánh giá content Việt)
+  - [ ] Test: chạy pipeline, verify self-eval trả về pass/fail đúng
+  - **Files**: `config/settings.py`, `llm/self_eval.py`
+
+- [ ] **7.3 Kích hoạt Tavily Fallback**
+  - [ ] Set `tavily_fallback_enabled = True` trong `config/settings.py`
+  - [ ] Thêm retry logic + rate limiting cho Tavily API calls
+  - [ ] Test: simulate self-eval FAIL → verify Tavily search được trigger
+  - **Files**: `config/settings.py`, `tools/tavily_search.py`
+
+- [ ] **7.4 Sửa bug payload.pop("text")**
+  - [ ] `QdrantStore._fuse_results()`: đổi `payload.pop("text")` → `payload.get("text", "")`
+  - [ ] Test: verify payload không bị mutate sau search
+  - **File**: [retrieval/qdrant_store.py](file:///d:/GR/src/RAG_v2/retrieval/qdrant_store.py)
+
+- [ ] **7.5 Đồng bộ Config**
+  - [ ] Xóa `CONFIG` dict literal trong `rag_pipeline.py`, dùng `Settings` class thống nhất
+  - [ ] Verify tất cả pipeline sử dụng `Settings` instance
+  - **Files**: `pipeline/rag_pipeline.py`, `config/settings.py`
+
+### ✅ Kết quả đạt được sau Phase 7
+
+| Deliverable | Mô tả |
+|------------|-------|
+| **Query Reflection hoạt động** | Query được rewrite trước khi search |
+| **Self-Eval active** | Câu trả lời được kiểm tra chất lượng |
+| **Tavily fallback active** | Web search khi RAG answer kém |
+| **Clean code** | Không còn bugs ảnh hưởng chức năng |
+
+---
+
+## Phase 8: Cross-Reference Extraction & Retrieval Enhancement
+
+> **Mục tiêu**: Trích xuất cross-references giữa các quy định và nâng cao chất lượng retrieval.
+> **Thời lượng ước tính**: 1–2 tuần
+> **Ưu tiên**: 🔴 Cao
+
+### Tasks
+
+- [ ] **8.1 Cross-Reference Extractor**
+  - [ ] Tạo file `chunking/cross_reference_extractor.py`
+  - [ ] Implement regex patterns để phát hiện cross-references:
+    - `"theo/tại Điều X"` → internal reference (cùng file)
+    - `"theo Quy chế/Quy định Y"` → external reference (file khác)
+    - `"khoản X Điều Y"` → specific clause reference
+    - `"Quyết định số .../QĐ-ĐHBK"` → document reference
+  - [ ] Test với tất cả 16 files quy định, thống kê cross-references tìm được
+  - **Output**: Module trích xuất cross-references
+
+- [ ] **8.2 Enrichment Cross-References vào Metadata**
+  - [ ] Thêm field `cross_references` vào chunk metadata trong quá trình chunking
+  - [ ] Format: `[{"type": "internal|external", "target": "Điều X", "target_doc": "...", "context": "..."}]`
+  - [ ] Re-run chunking cho 16 files quy định để thêm cross-references
+  - [ ] Re-index vào Qdrant + Elasticsearch
+  - **Files**: [chunking/chunker/olmocr_legal_chunker.py](file:///d:/GR/src/RAG_v2/chunking/chunker/olmocr_legal_chunker.py), [chunking/chunker/hierarchical_legal_chunker.py](file:///d:/GR/src/RAG_v2/chunking/chunker/hierarchical_legal_chunker.py)
+
+- [ ] **8.3 Context Expansion trong Retrieval**
+  - [ ] Tạo file `retrieval/context_expander.py`
+  - [ ] Khi retrieve được chunk có cross-references → tự động search thêm chunk được tham chiếu
+  - [ ] Implement `search_by_article(article_number, collection)` trong `QdrantStore`
+  - [ ] Giới hạn expansion: tối đa 3 additional chunks để không quá tải context
+  - [ ] Tích hợp vào [rag_flow()](file:///d:/GR/src/RAG_v2/pipeline/flows.py#94-202) trong [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py) (sau rerank, trước LLM)
+  - **Files**: `retrieval/context_expander.py`, [retrieval/qdrant_store.py](file:///d:/GR/src/RAG_v2/retrieval/qdrant_store.py), [pipeline/flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)
+
+- [ ] **8.4 Tối ưu Embedding Weights**
+  - [ ] Thay đổi E5 weight: `bge_weight=0.3, e5_weight=0.7` (dựa trên eval data)
+  - [ ] Hoặc thử nghiệm chỉ dùng E5 (giảm 50% latency embedding)
+  - [ ] Chạy evaluation so sánh trước/sau
+  - **File**: [retrieval/qdrant_store.py](file:///d:/GR/src/RAG_v2/retrieval/qdrant_store.py)
+
+- [ ] **8.5 Metadata Filtering**
+  - [ ] Implement metadata filter trong Qdrant search (filter by [applicable_cohort](file:///d:/GR/src/RAG_v2/chunking/enrich_metadata.py#227-255), [chapter](file:///d:/GR/src/RAG_v2/chunking/chunker/hierarchical_legal_chunker.py#92-96))
+  - [ ] Khi user hỏi "K70 cần mấy tín chỉ ngoại ngữ?" → filter `applicable_cohort = K70`
+  - [ ] Detect metadata hints từ query (regex hoặc LLM-based)
+  - **Files**: [retrieval/qdrant_store.py](file:///d:/GR/src/RAG_v2/retrieval/qdrant_store.py), `query/metadata_filter.py` (new)
+
+- [ ] **8.6 Parent Chunk Retrieval**
+  - [ ] Khi retrieve child chunk → kéo parent chunk tương ứng để cung cấp full context cho LLM
+  - [ ] Implement `get_parent_chunk(child_id)` dựa trên `parent_id` trong metadata
+  - [ ] Chỉ kéo parent nếu parent content khác biệt đáng kể so với child
+  - **Files**: [retrieval/qdrant_store.py](file:///d:/GR/src/RAG_v2/retrieval/qdrant_store.py), [pipeline/flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)
+
+### ✅ Kết quả đạt được sau Phase 8
+
+| Deliverable | Mô tả |
+|------------|-------|
+| **Cross-Reference Extraction** | Tự động phát hiện tham chiếu chéo giữa các điều/file |
+| **Context Expansion** | Tự động kéo thêm điều khoản liên quan khi retrieval |
+| **Metadata Filtering** | Filter kết quả theo khóa, chương, ngành |
+| **Parent Retrieval** | Full context từ parent chunk khi cần |
+| **Optimized Weights** | E5 weight tối ưu dựa trên evaluation |
+
+---
+
+## Phase 9: Multi-hop Retrieval & Advanced Features
+
+> **Mục tiêu**: Xây dựng multi-hop retrieval cho câu hỏi phức tạp và cải thiện prompt.
+> **Thời lượng ước tính**: 1–2 tuần
+> **Ưu tiên**: 🟡 Trung bình
+
+### Tasks
+
+- [ ] **9.1 Multi-hop Retrieval**
+  - [ ] Tạo file `pipeline/multi_hop.py`
+  - [ ] Sau khi retrieve lần 1 + generate answer → LLM đánh giá có cần tìm thêm không
+  - [ ] Prompt: "Dựa trên tài liệu đã tìm, có điều khoản nào được nhắc đến nhưng chưa có context không?"
+  - [ ] Nếu có → trigger retrieval round 2 với query cụ thể hơn
+  - [ ] Giới hạn: tối đa 2 hops (tránh latency quá cao)
+  - [ ] Tích hợp vào [rag_flow()](file:///d:/GR/src/RAG_v2/pipeline/flows.py#94-202) như optional feature
+  - **Files**: `pipeline/multi_hop.py`, [pipeline/flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)
+
+- [ ] **9.2 Cải thiện RAG Prompt**
+  - [ ] Thêm instruction: "Nếu tài liệu nhắc đến điều khoản khác mà không có đủ thông tin, hãy nói rõ cho user biết"
+  - [ ] Thêm citation format rõ ràng: `[Nguồn: Điều X, Quy chế Y]`
+  - [ ] Thêm instruction xử lý câu hỏi so sánh giữa các quy định
+  - **File**: `llm/prompts.py`
+
+- [ ] **9.3 Query Decomposition**
+  - [ ] Tạo file `query/decomposer.py`
+  - [ ] Với câu hỏi phức tạp → tách thành nhiều sub-queries
+  - [ ] Ví dụ: "So sánh quy định ngoại ngữ K65 và K70" → 2 sub-queries riêng
+  - [ ] Retrieve riêng cho mỗi sub-query → merge results
+  - **Files**: `query/decomposer.py`, [pipeline/flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)
+
+- [ ] **9.4 Caching Layer**
+  - [ ] Cache embedding results cho repeated queries
+  - [ ] Cache retrieval results (TTL = 5 phút)
+  - [ ] Implement simple in-memory LRU cache hoặc Redis
+  - **Files**: `embedding/cache.py` (new), `retrieval/cache.py` (new)
+
+### ✅ Kết quả đạt được sau Phase 9
+
+| Deliverable | Mô tả |
+|------------|-------|
+| **Multi-hop Retrieval** | Tự động tìm thêm context khi câu trả lời chưa đủ |
+| **Better Prompts** | Citation rõ ràng, xử lý câu hỏi phức tạp |
+| **Query Decomposition** | Tách câu hỏi phức tạp thành sub-queries |
+| **Caching** | Giảm latency cho repeated queries |
+
+---
+
+## Phase 10: Quality Assurance & DevOps
+
+> **Mục tiêu**: Đảm bảo chất lượng, testing, và sẵn sàng deploy.
+> **Thời lượng ước tính**: 1–2 tuần
+> **Ưu tiên**: 🟢 Sau cùng
+
+### Tasks
+
+- [ ] **10.1 End-to-End Evaluation**
+  - [ ] Tạo evaluation dataset cho cross-reference queries (20+ Q&A pairs)
+  - [ ] Đánh giá trước/sau Phase 8 (cross-reference handling)
+  - [ ] Đánh giá trước/sau Phase 9 (multi-hop)
+  - [ ] Metrics: Hit Rate, MRR, Answer Completeness, Cross-ref Coverage
+
+- [ ] **10.2 Package Hóa**
+  - [ ] Tạo `pyproject.toml` → loại bỏ tất cả `sys.path.insert`
+  - [ ] Editable install: `pip install -e .`
+  - [ ] Tạo `Makefile` cho các lệnh thường dùng (test, lint, run)
+  - **Files**: `pyproject.toml` (new), loại bỏ `sys.path.insert` ở tất cả files
+
+- [ ] **10.3 Testing**
+  - [ ] Unit tests cho cross-reference extractor
+  - [ ] Unit tests cho context expander
+  - [ ] Integration test cho full pipeline (với cross-references)
+  - [ ] Test coverage target: ≥ 70% cho modules mới
+
+- [ ] **10.4 API Hardening**
+  - [ ] Thêm rate limiting cho API endpoints
+  - [ ] Error handling cho model loading failures
+  - [ ] Health check endpoint verify tất cả services (Qdrant, ES, MongoDB)
+  - [ ] Request validation + logging
+  - **Files**: `api/main.py`, `api/routes/`
+
+- [ ] **10.5 Viết báo cáo**
+  - [ ] Cập nhật chương Đề xuất (Chapter 3) — thêm cross-reference handling
+  - [ ] Cập nhật chương Phân tích (Chapter 4) — thêm implementation details
+  - [ ] Cập nhật chương Thực nghiệm (Chapter 5) — thêm evaluation mới
+  - [ ] Cập nhật chương Kết luận (Chapter 6)
+  - **Files**: [Baocao/3_De_xuat.tex](file:///d:/GR/src/RAG_v2/Baocao/3_De_xuat.tex), [Baocao/4_Phan_tich_ly_thuyet.tex](file:///d:/GR/src/RAG_v2/Baocao/4_Phan_tich_ly_thuyet.tex), `Baocao/5_Thuc_nghiem.tex`, `Baocao/6_Ket_luan.tex`
+
+### ✅ Kết quả đạt được sau Phase 10
+
+| Deliverable | Mô tả |
+|------------|-------|
+| **Evaluation Report** | So sánh trước/sau cross-reference handling |
+| **Clean Package** | Proper Python package, không còn sys.path hack |
+| **Test Suite** | Unit + integration tests cho modules mới |
+| **Production-ready API** | Rate limiting, error handling, health checks |
+| **Báo cáo hoàn chỉnh** | Cập nhật tất cả chapters |
+
+---
+
+## Tổng Kết Timeline
+
+| Phase | Nội dung | Thời lượng | Ưu tiên | Dependencies |
+|-------|---------|------------|---------|-------------|
+| Phase 7 | Bug Fixes & Feature Activation | 2–3 ngày | 🔴 Cao nhất | Không |
+| Phase 8 | Cross-Reference & Retrieval Enhancement | 1–2 tuần | 🔴 Cao | Phase 7 |
+| Phase 9 | Multi-hop & Advanced Features | 1–2 tuần | 🟡 Trung bình | Phase 8 |
+| Phase 10 | Quality & DevOps | 1–2 tuần | 🟢 Sau cùng | Phase 8, 9 |
+
+**Tổng thời gian ước tính: 4–7 tuần**
+
+```mermaid
+gantt
+    title RAG v2 Improvement Roadmap
+    dateFormat YYYY-MM-DD
+    section Phase 7
+        Bug Fixes & Activation    :p7, 2026-03-29, 3d
+    section Phase 8  
+        Cross-Ref Extractor       :p8a, after p7, 4d
+        Context Expansion         :p8b, after p8a, 3d
+        Embedding + Metadata      :p8c, after p8a, 3d
+        Parent Retrieval          :p8d, after p8b, 2d
+    section Phase 9
+        Multi-hop Retrieval       :p9a, after p8d, 5d
+        Query Decomposition       :p9b, after p9a, 3d
+        Caching                   :p9c, after p8d, 3d
+    section Phase 10
+        Evaluation                :p10a, after p9a, 4d
+        Package + Testing         :p10b, after p9b, 4d
+        Báo cáo                   :p10c, after p10a, 5d
+```
+
+---
+
+## Thứ Tự Thực Hiện Đề Xuất
+
+> [!TIP]
+> **Nên làm tuần tự**: Phase 7 → 8 → 9 → 10
+> 
+> Phase 7 chỉ mất 2-3 ngày nhưng **unlock** được 3 features đã build sẵn.
+> Phase 8 là **core improvement** — cross-reference handling sẽ nâng chất lượng rõ rệt.
+> Phase 9 là **nice-to-have** — multi-hop cho edge cases.
+> Phase 10 là **polish** — có thể làm song song với Phase 9.

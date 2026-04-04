@@ -200,7 +200,7 @@ class QdrantStore:
 
         for hit in bge_results:
             pid = str(hit.id)
-            payload = hit.payload or {}
+            payload = dict(hit.payload or {})
             text = payload.pop("text", "")
             combined[pid] = {
                 "id": pid,
@@ -212,7 +212,7 @@ class QdrantStore:
 
         for hit in e5_results:
             pid = str(hit.id)
-            payload = hit.payload or {}
+            payload = dict(hit.payload or {})
             text = payload.pop("text", "")
             if pid in combined:
                 combined[pid]["e5_score"] = hit.score
@@ -234,6 +234,137 @@ class QdrantStore:
             combined.values(), key=lambda x: x["score"], reverse=True
         )
         return ranked[:top_k]
+
+    # ------------------------------------------------------------------
+    # Point lookup by IDs
+    # ------------------------------------------------------------------
+
+    def get_by_ids(self, ids: List[str]) -> List[Dict[str, Any]]:
+        """Fetch points by their IDs.
+
+        Args:
+            ids: List of point ID strings.
+
+        Returns:
+            List of dicts: ``{"id", "text", "metadata"}``.
+            Missing IDs are silently skipped.
+        """
+        if not ids:
+            return []
+
+        points = self.client.retrieve(
+            collection_name=self.collection_name,
+            ids=ids,
+            with_payload=True,
+            with_vectors=False,
+        )
+
+        results: List[Dict[str, Any]] = []
+        for point in points:
+            payload = dict(point.payload or {})
+            text = payload.pop("text", "")
+            results.append(
+                {
+                    "id": str(point.id),
+                    "text": text,
+                    "metadata": payload,
+                }
+            )
+        logger.info(
+            "Retrieved %d/%d points from '%s'.",
+            len(results),
+            len(ids),
+            self.collection_name,
+        )
+        return results
+
+    # ------------------------------------------------------------------
+    # Metadata update
+    # ------------------------------------------------------------------
+
+    def update_metadata_by_ids(
+        self,
+        ids: List[str],
+        metadata: Dict[str, Any],
+        overwrite: bool = False,
+    ) -> None:
+        """Update payload fields for specific point IDs without re-indexing vectors.
+
+        Args:
+            ids: List of point ID strings to update.
+            metadata: Dict of payload fields to set/update.
+            overwrite: If True, replace the entire payload (except 'text' is kept
+                       only if included in *metadata*). If False (default), merge
+                       the provided fields into the existing payload.
+        """
+        if not ids:
+            return
+
+        selector = models.PointIdsList(points=ids)
+        if overwrite:
+            self.client.overwrite_payload(
+                collection_name=self.collection_name,
+                payload=metadata,
+                points=selector,
+            )
+        else:
+            self.client.set_payload(
+                collection_name=self.collection_name,
+                payload=metadata,
+                points=selector,
+            )
+        logger.info(
+            "Updated metadata for %d point(s) in '%s' (overwrite=%s).",
+            len(ids),
+            self.collection_name,
+            overwrite,
+        )
+
+    def update_metadata_by_filter(
+        self,
+        filter_key: str,
+        filter_value: Any,
+        metadata: Dict[str, Any],
+        overwrite: bool = False,
+    ) -> None:
+        """Update payload fields for all points matching a filter condition.
+
+        Args:
+            filter_key: Payload key to filter on (e.g. ``"source"``).
+            filter_value: Expected value for the filter key.
+            metadata: Dict of payload fields to set/update.
+            overwrite: If True, replace the entire payload for matched points.
+                       If False (default), merge the provided fields.
+        """
+        selector = models.FilterSelector(
+            filter=models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key=filter_key,
+                        match=models.MatchValue(value=filter_value),
+                    )
+                ]
+            )
+        )
+        if overwrite:
+            self.client.overwrite_payload(
+                collection_name=self.collection_name,
+                payload=metadata,
+                points=selector,
+            )
+        else:
+            self.client.set_payload(
+                collection_name=self.collection_name,
+                payload=metadata,
+                points=selector,
+            )
+        logger.info(
+            "Updated metadata where %s='%s' in '%s' (overwrite=%s).",
+            filter_key,
+            filter_value,
+            self.collection_name,
+            overwrite,
+        )
 
     # ------------------------------------------------------------------
     # Delete

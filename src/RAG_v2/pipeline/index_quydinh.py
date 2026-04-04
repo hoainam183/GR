@@ -41,13 +41,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 DEFAULT_CHUNKS_DIR = (
-    PROJECT_ROOT
-    / "data"
-    / "quydinh"
-    / "olmocr"
-    / "chunks_recursive_parent_child_3"
+    PROJECT_ROOT / "data" / "ctdt" / "vatlieu" / "chunks_recursive_parent_child"
 )
-DEFAULT_COLLECTION = "quydinh"
+DEFAULT_COLLECTION = "ctdt"
 DEFAULT_BATCH_SIZE = 32
 
 # ---------------------------------------------------------------------------

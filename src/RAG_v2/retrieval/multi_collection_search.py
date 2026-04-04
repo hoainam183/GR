@@ -156,6 +156,7 @@ class MultiCollectionSearch:
         vector_pool_k: int = 15,
         keyword_pool_k: int = 15,
         score_threshold: Optional[float] = None,
+        active_collections: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """Search all collections and return a globally ranked list.
 
@@ -183,10 +184,41 @@ class MultiCollectionSearch:
             vector_pool_k: Size of the global vector candidate pool after sorting.
             keyword_pool_k: Size of the global keyword candidate pool after sorting.
             score_threshold: Optional minimum cosine similarity for Qdrant.
+            active_collections: If provided, only search these collections.
+                Unregistered names are logged as warnings and skipped.
 
         Returns:
             List of result dicts sorted by global fused score (descending).
         """
+        # Determine which searchers to use
+        if active_collections is not None:
+            registered = {name for name, _ in self.searchers}
+            for col in active_collections:
+                if col not in registered:
+                    logger.warning(
+                        "Requested collection '%s' is not registered — skipping.",
+                        col,
+                    )
+            target_searchers = [
+                (name, hybrid)
+                for name, hybrid in self.searchers
+                if name in active_collections
+            ]
+            if not target_searchers:
+                logger.warning(
+                    "No matching collections for %s — falling back to all.",
+                    active_collections,
+                )
+                target_searchers = self.searchers
+            logger.info(
+                "Searching %d/%d collections: %s",
+                len(target_searchers),
+                len(self.searchers),
+                [n for n, _ in target_searchers],
+            )
+        else:
+            target_searchers = self.searchers
+
         all_vector: List[Dict[str, Any]] = []
         all_keyword: List[Dict[str, Any]] = []
 
@@ -205,7 +237,7 @@ class MultiCollectionSearch:
         with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
             futures = {
                 pool.submit(_fetch_one, name, hybrid): name
-                for name, hybrid in self.searchers
+                for name, hybrid in target_searchers
             }
             for fut in as_completed(futures):
                 name, vecs, kws = fut.result()
@@ -348,6 +380,11 @@ class MultiCollectionSearch:
     def collection_names(self) -> List[str]:
         """Names of all registered collections."""
         return [name for name, _ in self.searchers]
+
+    @property
+    def qdrant_stores(self) -> Dict[str, QdrantStore]:
+        """Mapping of collection name → QdrantStore instance."""
+        return {name: hybrid.qdrant for name, hybrid in self.searchers}
 
     def collection_counts(self) -> Dict[str, Dict[str, int]]:
         """Return {collection_name: {qdrant: n, es: n}} document counts."""

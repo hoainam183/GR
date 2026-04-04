@@ -1,5 +1,6 @@
 from pathlib import Path
 from chunker.hierarchical_legal_chunker import ArticleLevelLegalChunker
+from chunker.kehoach_chunker import KeHoachChunker
 from chunker.olmocr_legal_chunker import OlmOcrLegalChunker
 from chunker.recursive_chunker import RecursiveChunker
 from chunker.stsv_chunker import STSVChunker
@@ -178,6 +179,87 @@ def stsv_pipeline(
     return all_chunks
 
 
+def kehoach_pipeline(
+    input_path: str,
+    output_dir: str,
+    chunk_size: int = 1024,
+    chunk_overlap: int = 150,
+    long_item_threshold: int = 300,
+):
+    """
+    Pipeline dành riêng cho dữ liệu kế hoạch/thông báo (định dạng JSON mảng).
+
+    Args:
+        input_path:           Đường dẫn file JSON (mảng bài viết) hoặc thư mục chứa JSON
+        output_dir:           Thư mục lưu file chunks
+        chunk_size:           Kích thước tối đa mỗi chunk (ký tự)
+        chunk_overlap:        Overlap giữa các chunk
+        long_item_threshold:  Ngưỡng coi mục là "dài" (→ chunk riêng)
+    """
+    import json as _json
+    from pathlib import Path as _Path
+
+    input_p = _Path(input_path)
+    output_p = _Path(output_dir)
+    output_p.mkdir(parents=True, exist_ok=True)
+
+    if input_p.is_file():
+        json_files = [input_p]
+    else:
+        json_files = sorted(input_p.glob("*.json"))
+
+    print(f"\n{'=' * 60}")
+    print(f"📁 Input  : {input_path}")
+    print(f"📂 Output : {output_dir}")
+    print(
+        f"🔧 Chunker: kehoach  (chunk_size={chunk_size}, long_item={long_item_threshold})"
+    )
+    print(f"{'=' * 60}")
+    print(f"Tìm thấy {len(json_files)} file JSON")
+    print(f"{'=' * 60}\n")
+
+    chunker = KeHoachChunker(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        long_item_threshold=long_item_threshold,
+    )
+
+    all_chunks: list = []
+    success_count = 0
+    error_count = 0
+
+    for idx, fp in enumerate(json_files, 1):
+        print(f"[{idx:03d}/{len(json_files)}] {fp.name} ", end="")
+        try:
+            file_chunks = chunker.chunk_file(fp)
+            all_chunks.extend(file_chunks)
+            print(f"→ {len(file_chunks)} chunk(s)")
+            success_count += 1
+        except Exception as exc:
+            print(f"❌ LỖI: {exc}")
+            error_count += 1
+
+    combined_out = output_p / "kehoach_all_chunks.json"
+    with open(combined_out, "w", encoding="utf-8") as f:
+        _json.dump(all_chunks, f, ensure_ascii=False, indent=2)
+
+    sizes = [c["metadata"]["chunk_size"] for c in all_chunks]
+    print(f"\n{'=' * 60}")
+    print("✅ KEHOACH PIPELINE COMPLETED!")
+    print(f"{'=' * 60}")
+    print(f"   ✓ Files   : {success_count} / {len(json_files)}")
+    if error_count:
+        print(f"   ✗ Lỗi    : {error_count}")
+    print(f"   Chunks   : {len(all_chunks)}")
+    if sizes:
+        print(f"   Avg size : {sum(sizes)/len(sizes):.0f} ký tự")
+        print(f"   Min/Max  : {min(sizes)} / {max(sizes)} ký tự")
+    print(f"   Output   : {combined_out}")
+    print(f"{'=' * 60}")
+
+    return all_chunks
+
+
 def process_folder(
     input_dir: str,
     output_dir: str,
@@ -299,9 +381,9 @@ Examples:
         "--chunker",
         "-c",
         type=str,
-        choices=["hierarchical", "olmocr", "recursive", "stsv"],
+        choices=["hierarchical", "olmocr", "recursive", "stsv", "kehoach"],
         default="hierarchical",
-        help="Chunker type: 'hierarchical' for Docling OCR, 'olmocr' for OLM OCR, 'recursive' for general docs, 'stsv' for student handbook JSON (default: hierarchical)",
+        help="Chunker type: 'hierarchical' for Docling OCR, 'olmocr' for OLM OCR, 'recursive' for general docs, 'stsv' for student handbook JSON, 'kehoach' for announcement/schedule JSON (default: hierarchical)",
     )
     parser.add_argument(
         "--pattern",
@@ -327,6 +409,24 @@ Examples:
             )
             stsv_pipeline(
                 input_dir=args.input,
+                output_dir=out,
+            )
+    elif args.chunker == "kehoach":
+        # KeHoach JSON pipeline (file or folder)
+        if not args.input and not args.file:
+            print(
+                "❌ --input hoặc --file là bắt buộc khi dùng --chunker kehoach"
+            )
+            parser.print_help()
+        else:
+            src = args.file or args.input
+            out = (
+                args.output
+                if args.output != "../chunks_by_articles"
+                else str(Path(src).parent / "chunks")
+            )
+            kehoach_pipeline(
+                input_path=src,
                 output_dir=out,
             )
     elif args.file:

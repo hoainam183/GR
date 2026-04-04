@@ -57,6 +57,7 @@ class HybridSearch:
         vector_top_k: int = 20,
         keyword_top_k: int = 20,
         score_threshold: Optional[float] = None,
+        hybrid_score_threshold: Optional[float] = None,
         qdrant_filters: Optional[qdrant_models.Filter] = None,
         es_filters: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
@@ -69,7 +70,8 @@ class HybridSearch:
             top_k: Number of final results to return after fusion.
             vector_top_k: Candidates to fetch from Qdrant.
             keyword_top_k: Candidates to fetch from Elasticsearch.
-            score_threshold: Optional minimum similarity for vector search.
+            score_threshold: Optional minimum cosine similarity for Qdrant vector search.
+            hybrid_score_threshold: Optional minimum RRF score to keep after fusion.
             qdrant_filters: Optional Qdrant filter conditions.
             es_filters: Optional Elasticsearch filter clauses.
 
@@ -97,8 +99,32 @@ class HybridSearch:
         # Step 3 — RRF fusion
         fused = self._rrf_fuse(vector_results, keyword_results)
 
-        # Step 4 — Return top-K
+        # Step 4 — Filter by hybrid RRF score threshold
+        if hybrid_score_threshold is not None:
+            fused = self.filter_by_score(fused, hybrid_score_threshold)
+
+        # Step 5 — Return top-K
         return fused[:top_k]
+
+    # ------------------------------------------------------------------
+    # Score Filtering
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def filter_by_score(
+        results: List[Dict[str, Any]],
+        min_score: float,
+    ) -> List[Dict[str, Any]]:
+        """Filter fused results by minimum RRF score.
+
+        Args:
+            results: Ranked list of fused result dicts (each must have ``"score"``).
+            min_score: Minimum fused RRF score to keep.
+
+        Returns:
+            Filtered list preserving original order.
+        """
+        return [r for r in results if r["score"] >= min_score]
 
     # ------------------------------------------------------------------
     # RRF Fusion

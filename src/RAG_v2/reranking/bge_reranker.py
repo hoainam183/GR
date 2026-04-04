@@ -8,6 +8,8 @@ from typing import Any, Dict, List, Optional
 import torch
 from FlagEmbedding import FlagReranker
 
+from reranking.base import BaseReranker, register_reranker
+
 logger = logging.getLogger(__name__)
 
 # ─── Constants ──────────────────────────────────────────────────────────────────
@@ -16,7 +18,8 @@ DEFAULT_TOP_K = 5
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-class BGEReranker:
+@register_reranker("bge")
+class BGEReranker(BaseReranker):
     """Cross-encoder reranker using BAAI/bge-reranker-v2-m3.
 
     Scores every (query, document) pair independently and returns

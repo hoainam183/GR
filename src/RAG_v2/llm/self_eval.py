@@ -4,16 +4,12 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from openai import OpenAI
-
-from .prompts import SELF_EVAL_SYSTEM_PROMPT, SELF_EVAL_USER_TEMPLATE
+from llm.base import BaseLLM
+from .prompts import SELF_EVAL_USER_TEMPLATE
 
 logger = logging.getLogger(__name__)
-
-# ─── Constants ──────────────────────────────────────────────────────────────────
-DEFAULT_MODEL = "gpt-4o-mini"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -28,20 +24,11 @@ class SelfEvaluator:
     Returns a pass/fail decision with detailed reasoning.
 
     Parameters:
-        api_key: OpenAI API key. If *None*, reads from ``OPENAI_API_KEY`` env var.
-        model: Model used for evaluation (should be fast and cheap).
-        temperature: Sampling temperature (low for consistent evaluation).
+        llm: A :class:`~llm.base.BaseLLM` instance used as the evaluation judge.
     """
 
-    def __init__(
-        self,
-        api_key: Optional[str] = None,
-        model: str = DEFAULT_MODEL,
-        temperature: float = 0.0,
-    ) -> None:
-        self.model = model
-        self.temperature = temperature
-        self._client = OpenAI(api_key=api_key)
+    def __init__(self, llm: BaseLLM) -> None:
+        self._llm = llm
 
     # ------------------------------------------------------------------
     # Public API
@@ -64,16 +51,12 @@ class SelfEvaluator:
             Dict with keys: ``pass`` (bool), ``relevance``, ``faithfulness``,
             ``completeness``, and ``reason`` (str).
         """
-        messages = self._build_messages(query, context, response)
-
-        llm_response = self._client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=self.temperature,
-            max_tokens=256,
+        user_content = SELF_EVAL_USER_TEMPLATE.format(
+            query=query,
+            context=context,
+            response=response,
         )
-
-        raw = llm_response.choices[0].message.content.strip()
+        raw = self._llm.generate(query=user_content, mode="self_eval")
         result = self._parse_evaluation(raw)
 
         logger.info(
@@ -91,22 +74,19 @@ class SelfEvaluator:
     # Internal
     # ------------------------------------------------------------------
 
-    def _build_messages(
-        self,
-        query: str,
-        context: str,
-        response: str,
-    ) -> list:
-        """Assemble the evaluation prompt messages."""
-        user_content = SELF_EVAL_USER_TEMPLATE.format(
-            query=query,
-            context=context,
-            response=response,
-        )
-        return [
-            {"role": "system", "content": SELF_EVAL_SYSTEM_PROMPT},
-            {"role": "user", "content": user_content},
-        ]
+    @staticmethod
+    def _strip_markdown_fences(text: str) -> str:
+        """Remove markdown code fences (```json ... ```) wrapping JSON."""
+        stripped = text.strip()
+        if stripped.startswith("```"):
+            # Remove opening fence (```json or ```)
+            first_newline = stripped.find("\n")
+            if first_newline != -1:
+                stripped = stripped[first_newline + 1 :]
+            # Remove closing fence
+            if stripped.rstrip().endswith("```"):
+                stripped = stripped.rstrip()[:-3].rstrip()
+        return stripped
 
     def _parse_evaluation(self, raw: str) -> Dict[str, Any]:
         """Parse the LLM's JSON evaluation response.
@@ -114,7 +94,8 @@ class SelfEvaluator:
         Falls back to a failing result when parsing fails.
         """
         try:
-            data = json.loads(raw)
+            cleaned = self._strip_markdown_fences(raw)
+            data = json.loads(cleaned)
             # Ensure required keys exist
             return {
                 "pass": bool(data.get("pass", False)),

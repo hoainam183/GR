@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import logging
+import os
+import time
 from typing import Any, Dict, List, Optional
 
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 
 from .prompts import (
     REWRITE_NO_HISTORY_TEMPLATE,
@@ -16,8 +18,11 @@ from .prompts import (
 logger = logging.getLogger(__name__)
 
 # ─── Constants ──────────────────────────────────────────────────────────────────
-DEFAULT_MODEL = "gpt-4o-mini"
+_GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+DEFAULT_MODEL = "gemini-2.0-flash"
 DEFAULT_HISTORY_LIMIT = 5
+_MAX_RETRIES = 3
+_BASE_RETRY_DELAY = 2.0  # seconds
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -35,8 +40,9 @@ class QueryReflector:
     improved version.
 
     Parameters:
-        api_key: OpenAI API key. If *None*, reads from ``OPENAI_API_KEY`` env var.
-        model: Chat model used for query rewriting.
+        api_key: Google API key for Gemini. If *None*, reads from
+            ``GOOGLE_API_KEY`` env var.
+        model: Gemini model identifier used for query rewriting.
         temperature: Sampling temperature.
         history_limit: Maximum number of recent history messages to include.
     """
@@ -51,7 +57,8 @@ class QueryReflector:
         self.model = model
         self.temperature = temperature
         self.history_limit = history_limit
-        self._client = OpenAI(api_key=api_key)
+        resolved_key = api_key or os.getenv("GOOGLE_API_KEY", "")
+        self._client = OpenAI(api_key=resolved_key, base_url=_GEMINI_BASE_URL)
 
     # ------------------------------------------------------------------
     # Public API
@@ -79,12 +86,30 @@ class QueryReflector:
             {"role": "user", "content": user_prompt},
         ]
 
-        response = self._client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=self.temperature,
-            max_tokens=256,
-        )
+        # Retry with exponential backoff for rate-limit errors
+        last_exc: Optional[Exception] = None
+        for attempt in range(_MAX_RETRIES):
+            try:
+                response = self._client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    temperature=self.temperature,
+                    max_tokens=256,
+                )
+                break
+            except RateLimitError as exc:
+                last_exc = exc
+                if attempt < _MAX_RETRIES - 1:
+                    delay = _BASE_RETRY_DELAY * (2**attempt)
+                    logger.warning(
+                        "Reflection rate-limited (attempt %d/%d), retrying in %.1fs",
+                        attempt + 1,
+                        _MAX_RETRIES,
+                        delay,
+                    )
+                    time.sleep(delay)
+        else:
+            raise last_exc  # type: ignore[misc]
 
         rewritten = response.choices[0].message.content.strip()
 

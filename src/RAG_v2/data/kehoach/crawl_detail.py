@@ -21,6 +21,7 @@ from datetime import datetime
 INPUT_FILE = "output_ctt_bkhn.json"
 OUTPUT_FILE = "output_full.json"
 DELAY = 1.0  # giây giữa các request
+BASE_URL = "https://ctt.hust.edu.vn"  # for resolving relative links
 # ─────────────────────────────────────────────
 
 logging.basicConfig(
@@ -46,15 +47,22 @@ def resolve_links(container):
     """
     Thay thế <a href="url">text</a> thành text (url)
     trước khi get_text() để không mất đường link.
+    Xử lý cả URL tuyệt đối (http/https) lẫn URL tương đối (/Upload/...).
     """
     for a in container.find_all("a"):
         href = a.get("href", "").strip()
         text = a.get_text(strip=True)
-        if href and href.startswith("http"):
-            # "TẠI ĐÂY" → "TẠI ĐÂY (https://...)"
-            a.replace_with(f"{text} ({href})")
+        if href:
+            if href.startswith("http"):
+                full_url = href
+            elif href.startswith("/"):
+                full_url = BASE_URL + href
+            else:
+                # anchor-only or javascript: — preserve text only
+                a.replace_with(text)
+                continue
+            a.replace_with(f"{text} ({full_url})")
         else:
-            # link tương đối hoặc rỗng — giữ text thôi
             a.replace_with(text)
 
 
