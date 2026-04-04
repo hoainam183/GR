@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Backend Dockerfile — RAG v2
+#
+# Strategy: mount HuggingFace cache as a Docker volume so models are
+# downloaded once and reused across container restarts.
+# ─────────────────────────────────────────────────────────────────────────────
+
+FROM python:3.11-slim
+
+# System deps for ML libraries
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# ── Install Python dependencies ──────────────────────────────────────────────
+# Copy requirements before code so Docker layer cache is reused on code changes
+COPY requirements.txt ./
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# ── Copy application code ─────────────────────────────────────────────────────
+# Copy the entire RAG_v2 source tree into /app/RAG_v2
+COPY src/RAG_v2/ ./RAG_v2/
+
+WORKDIR /app/RAG_v2
+
+# ── Runtime configuration ─────────────────────────────────────────────────────
+ENV PYTHONPATH=/app/RAG_v2
+# HuggingFace cache → bind-mounted volume (models survive container restarts)
+ENV HF_HOME=/hf_cache
+ENV TRANSFORMERS_CACHE=/hf_cache
+# Suppress symlink warning on Linux server (no issue on Linux)
+ENV HF_HUB_DISABLE_SYMLINKS_WARNING=1
+
+EXPOSE 8000
+
+# Healthcheck — waits up to 5 min for model load on first boot
+HEALTHCHECK --interval=30s --timeout=10s --start-period=300s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

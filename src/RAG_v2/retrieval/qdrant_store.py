@@ -236,6 +236,49 @@ class QdrantStore:
         return ranked[:top_k]
 
     # ------------------------------------------------------------------
+    # Point lookup by IDs
+    # ------------------------------------------------------------------
+
+    def get_by_ids(self, ids: List[str]) -> List[Dict[str, Any]]:
+        """Fetch points by their IDs.
+
+        Args:
+            ids: List of point ID strings.
+
+        Returns:
+            List of dicts: ``{"id", "text", "metadata"}``.
+            Missing IDs are silently skipped.
+        """
+        if not ids:
+            return []
+
+        points = self.client.retrieve(
+            collection_name=self.collection_name,
+            ids=ids,
+            with_payload=True,
+            with_vectors=False,
+        )
+
+        results: List[Dict[str, Any]] = []
+        for point in points:
+            payload = dict(point.payload or {})
+            text = payload.pop("text", "")
+            results.append(
+                {
+                    "id": str(point.id),
+                    "text": text,
+                    "metadata": payload,
+                }
+            )
+        logger.info(
+            "Retrieved %d/%d points from '%s'.",
+            len(results),
+            len(ids),
+            self.collection_name,
+        )
+        return results
+
+    # ------------------------------------------------------------------
     # Metadata update
     # ------------------------------------------------------------------
 

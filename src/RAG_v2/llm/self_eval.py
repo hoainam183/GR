@@ -74,13 +74,28 @@ class SelfEvaluator:
     # Internal
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _strip_markdown_fences(text: str) -> str:
+        """Remove markdown code fences (```json ... ```) wrapping JSON."""
+        stripped = text.strip()
+        if stripped.startswith("```"):
+            # Remove opening fence (```json or ```)
+            first_newline = stripped.find("\n")
+            if first_newline != -1:
+                stripped = stripped[first_newline + 1 :]
+            # Remove closing fence
+            if stripped.rstrip().endswith("```"):
+                stripped = stripped.rstrip()[:-3].rstrip()
+        return stripped
+
     def _parse_evaluation(self, raw: str) -> Dict[str, Any]:
         """Parse the LLM's JSON evaluation response.
 
         Falls back to a failing result when parsing fails.
         """
         try:
-            data = json.loads(raw)
+            cleaned = self._strip_markdown_fences(raw)
+            data = json.loads(cleaned)
             # Ensure required keys exist
             return {
                 "pass": bool(data.get("pass", False)),

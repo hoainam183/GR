@@ -1,4 +1,10 @@
-"""MongoLogger — session & query logging to MongoDB."""
+"""MongoLogger — session, turn & query logging to MongoDB.
+
+Schema (3 collections):
+    sessions  — one doc per conversation (no embedded turns)
+    turns     — one doc per turn (separated for scalability)
+    query_logs — flat analytics entry per turn
+"""
 
 from __future__ import annotations
 
@@ -14,7 +20,12 @@ logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 class MongoLogger:
-    """Persist chat sessions and query logs to MongoDB.
+    """Persist chat sessions, turns, and query logs to MongoDB.
+
+    Collections:
+        sessions   — lightweight session metadata (no embedded turns).
+        turns      — one document per turn, linked by ``session_id``.
+        query_logs — flat analytics, one doc per turn.
 
     Parameters:
         uri: MongoDB connection URI.
@@ -25,12 +36,13 @@ class MongoLogger:
         self._client: MongoClient = MongoClient(uri)
         self._db = self._client[database]
         self._sessions = self._db["sessions"]
+        self._turns = self._db["turns"]
         self._query_logs = self._db["query_logs"]
         self._ensure_indexes()
         logger.info("MongoLogger connected to %s / %s", uri, database)
 
     # ------------------------------------------------------------------
-    # Public API
+    # Public API — sessions
     # ------------------------------------------------------------------
 
     def new_session(self, user_id: Optional[str] = None) -> str:
@@ -41,13 +53,32 @@ class MongoLogger:
             {
                 "session_id": session_id,
                 "user_id": user_id,
+                "title": None,
                 "created_at": now,
                 "updated_at": now,
                 "turn_count": 0,
-                "turns": [],
             }
         )
         return session_id
+
+    def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Return the session metadata (or *None*)."""
+        return self._sessions.find_one({"session_id": session_id}, {"_id": 0})
+
+    def list_sessions(
+        self, user_id: str, limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """Return sessions for a user, newest first."""
+        cursor = (
+            self._sessions.find({"user_id": user_id}, {"_id": 0})
+            .sort("updated_at", DESCENDING)
+            .limit(limit)
+        )
+        return list(cursor)
+
+    # ------------------------------------------------------------------
+    # Public API — turns
+    # ------------------------------------------------------------------
 
     def log_turn(
         self,
@@ -58,41 +89,51 @@ class MongoLogger:
         reflected_question: Optional[str] = None,
         latency_ms: int = 0,
     ) -> int:
-        """Append a turn to the session and insert a flat query_log entry.
+        """Insert a turn document and a flat query_log entry.
 
         Returns:
             The 1-based ``turn_id`` of the newly logged turn.
         """
         now = datetime.now(timezone.utc)
 
-        # Compute next turn_id from current turn_count
-        session = self._sessions.find_one({"session_id": session_id})
-        turn_id = (session["turn_count"] + 1) if session else 1
+        # Atomically increment turn_count and get updated session
+        session = self._sessions.find_one_and_update(
+            {"session_id": session_id},
+            {
+                "$inc": {"turn_count": 1},
+                "$set": {"updated_at": now},
+            },
+            return_document=True,  # return AFTER update
+        )
+        turn_id = session["turn_count"] if session else 1
 
         intent = result.get("intent", "rag")
         answer = result.get("answer", "")
         num_sources = result.get("num_sources", 0)
         model_name = result.get("model_name", "")
 
-        turn_doc = {
-            "turn_id": turn_id,
-            "question": question,
-            "answer": answer,
-            "intent": intent,
-            "reflected_question": reflected_question,
-            "num_sources": num_sources,
-            "latency_ms": latency_ms,
-            "timestamp": now,
-        }
+        # Auto-set session title from first question
+        if session and turn_id == 1:
+            title = question[:80] + ("…" if len(question) > 80 else "")
+            self._sessions.update_one(
+                {"session_id": session_id},
+                {"$set": {"title": title}},
+            )
 
-        # Push turn into session and bump counters
-        self._sessions.update_one(
-            {"session_id": session_id},
+        # Insert into turns collection
+        self._turns.insert_one(
             {
-                "$push": {"turns": turn_doc},
-                "$inc": {"turn_count": 1},
-                "$set": {"updated_at": now},
-            },
+                "session_id": session_id,
+                "turn_id": turn_id,
+                "question": question,
+                "answer": answer,
+                "intent": intent,
+                "reflected_question": reflected_question,
+                "num_sources": num_sources,
+                "model_name": model_name,
+                "latency_ms": latency_ms,
+                "timestamp": now,
+            }
         )
 
         # Flat analytics entry
@@ -114,24 +155,35 @@ class MongoLogger:
 
         return turn_id
 
+    def get_turns(
+        self, session_id: str, limit: int = 100
+    ) -> List[Dict[str, Any]]:
+        """Return turns for a session, oldest first."""
+        cursor = (
+            self._turns.find({"session_id": session_id}, {"_id": 0})
+            .sort("turn_id", ASCENDING)
+            .limit(limit)
+        )
+        return list(cursor)
+
     def get_history(
         self, session_id: str, max_turns: int = 10
     ) -> List[Dict[str, str]]:
         """Return recent turns as ``[{"role": ..., "content": ...}]``."""
-        session = self._sessions.find_one({"session_id": session_id})
-        if not session:
-            return []
-
-        turns = session.get("turns", [])[-max_turns:]
+        # Fetch the last N turns (sorted ascending so oldest is first)
+        pipeline = [
+            {"$match": {"session_id": session_id}},
+            {"$sort": {"turn_id": DESCENDING}},
+            {"$limit": max_turns},
+            {"$sort": {"turn_id": ASCENDING}},
+            {"$project": {"_id": 0, "question": 1, "answer": 1}},
+        ]
+        turns = list(self._turns.aggregate(pipeline))
         history: List[Dict[str, str]] = []
         for t in turns:
             history.append({"role": "user", "content": t["question"]})
             history.append({"role": "assistant", "content": t["answer"]})
         return history
-
-    def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
-        """Return the full session document (or *None*)."""
-        return self._sessions.find_one({"session_id": session_id}, {"_id": 0})
 
     # ------------------------------------------------------------------
     # Internal
@@ -139,10 +191,19 @@ class MongoLogger:
 
     def _ensure_indexes(self) -> None:
         """Create indexes if they don't already exist."""
+        # sessions
         self._sessions.create_index("session_id", unique=True)
         self._sessions.create_index(
             [("user_id", ASCENDING), ("updated_at", DESCENDING)]
         )
+        # turns
+        self._turns.create_index(
+            [("session_id", ASCENDING), ("turn_id", ASCENDING)], unique=True
+        )
+        self._turns.create_index(
+            [("session_id", ASCENDING), ("timestamp", ASCENDING)]
+        )
+        # query_logs
         self._query_logs.create_index("session_id")
         self._query_logs.create_index("timestamp")
         self._query_logs.create_index("user_id")

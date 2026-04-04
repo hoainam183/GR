@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from typing import Any, Dict, Generator, List, Optional, cast
 
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 from openai.types.chat import ChatCompletionMessageParam
 
 from llm import register_llm
@@ -24,6 +25,8 @@ DEFAULT_MODEL = "gemini-2.5-flash"
 DEFAULT_MAX_TOKENS = 1024
 DEFAULT_TEMPERATURE = 0.3
 _GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+_MAX_RETRIES = 3
+_BASE_RETRY_DELAY = 2.0  # seconds
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -79,12 +82,31 @@ class GeminiLLM(BaseLLM):
         """
         messages = self._build_messages(query, context, history, mode)
 
-        response = self._client.chat.completions.create(
-            model=self.model,
-            messages=cast(List[ChatCompletionMessageParam], messages),
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-        )
+        # Retry with exponential backoff for rate-limit errors
+        last_exc: Optional[Exception] = None
+        for attempt in range(_MAX_RETRIES):
+            try:
+                response = self._client.chat.completions.create(
+                    model=self.model,
+                    messages=cast(List[ChatCompletionMessageParam], messages),
+                    temperature=self.temperature,
+                    max_tokens=self.max_tokens,
+                )
+                break
+            except RateLimitError as exc:
+                last_exc = exc
+                if attempt < _MAX_RETRIES - 1:
+                    delay = _BASE_RETRY_DELAY * (2**attempt)
+                    logger.warning(
+                        "GeminiLLM rate-limited [%s] (attempt %d/%d), retrying in %.1fs",
+                        mode,
+                        attempt + 1,
+                        _MAX_RETRIES,
+                        delay,
+                    )
+                    time.sleep(delay)
+        else:
+            raise last_exc  # type: ignore[misc]
 
         content = (response.choices[0].message.content or "").strip()
         logger.info(

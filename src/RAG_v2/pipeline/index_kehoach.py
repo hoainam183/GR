@@ -200,5 +200,20 @@ def delete_collection() -> None:
 
 
 if __name__ == "__main__":
-    # delete_collection()
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Index kehoach chunks into Qdrant"
+    )
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="Delete the collection first, then re-index all chunks from scratch",
+    )
+    args = parser.parse_args()
+
+    if args.reset:
+        logger.info("--reset: deleting existing collection …")
+        delete_collection()
+
     main()

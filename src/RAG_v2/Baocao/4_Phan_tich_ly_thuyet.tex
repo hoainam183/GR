@@ -372,18 +372,721 @@ DOCUMENT_TYPE_RULES = [
 # Default: "curriculum"
 \end{verbatim}
 
-\section{Kết luận chương}
-Chương này đã trình bày chi tiết quá trình triển khai Phase 1 của hệ thống RAG v2:
+%% =====================================================================
+%% PHASE 4: Tool Search (Tavily) + MongoDB Memory
+%% =====================================================================
 
+\section{Triển khai Phase 4: Tool Search và MongoDB Memory}
+
+Phase 4 bổ sung hai thành phần quan trọng: (1) Tavily Web Search -- cơ chế fallback khi RAG không đủ context để trả lời, và (2) MongoDB Memory -- tầng lưu trữ lịch sử hội thoại và trạng thái phiên làm việc.
+
+\subsection{Tavily Search Tool}
+\textbf{File:} \texttt{tools/tavily\_search.py} (145 dòng, 5.793 bytes)
+
+\subsubsection{Vai trò trong hệ thống}
+Tavily Search Tool đóng vai trò fallback khi Self Evaluator đánh giá câu trả lời từ RAG không đạt yêu cầu. Khi đó, hệ thống tự động tìm kiếm web để bổ sung context mới, sau đó sinh lại câu trả lời:
+\begin{verbatim}
+SelfEvaluator → FAIL
+  → TavilySearchTool.search(query)
+  → Lấy web context mới
+  → ChatModel.generate(query, web_context)
+  → Final Answer (sinh lại từ web context)
+\end{verbatim}
+
+\subsubsection{Kiến trúc class TavilySearchTool}
+\begin{verbatim}
+class TavilySearchTool:
+    def __init__(self, api_key, max_results=5,
+                 max_retries=3, min_retry_delay=1.0):
+        self._client = TavilyClient(api_key=resolved_key)
+        self._last_call_time = 0.0  # Rate limiting
+
+    def search(self, query, max_results=None,
+               search_depth="basic", include_answer=True):
+        # Rate limiting + Exponential backoff retry
+        # Returns: {query, answer, results, context}
+
+    def _parse_results(response) -> List[Dict]:
+        # Extract: title, url, content từ raw response
+
+    def _format_context(results) -> str:
+        # Format thành numbered text block cho LLM
+\end{verbatim}
+
+\subsubsection{Các tính năng chính}
 \begin{itemize}
-    \item \textbf{Thu thập dữ liệu}: 16 PDF quy định, CTDT từ 6 khoa/viện, 83 tài liệu JSON STSV;
-    \item \textbf{Xử lý PDF}: olmOCR cho văn bản pháp lý (100\% success rate), Docling/PyMuPDF cho CTDT;
-    \item \textbf{OlmOcrLegalChunker}: Nhận diện tự động cấu trúc Chương-Điều-Khoản, tạo parent-child chunks với readable ID;
-    \item \textbf{RecursiveChunker}: Bảo vệ bảng markdown, inject context cho sub-items, parent-child dựa trên H2 sections;
-    \item \textbf{STSVChunker}: Phân loại nội dung tự động (4 loại), sequential tracking cho mục số;
-    \item \textbf{Metadata Enrichment}: Tự động trích xuất ngày ban hành, khóa áp dụng, ngành đào tạo.
+    \item \textbf{Rate limiting}: Đảm bảo khoảng cách tối thiểu 1 giây giữa các API call, tránh bị giới hạn bởi Tavily;
+    \item \textbf{Exponential backoff}: Retry tối đa 3 lần với delay tăng dần ($1s \rightarrow 2s \rightarrow 4s$) khi gặp lỗi tạm thời;
+    \item \textbf{Format context cho LLM}: Kết quả web search được format thành chuỗi có đánh số, phù hợp làm context cho prompt RAG:
 \end{itemize}
 
-Phase 1 tạo nền tảng dữ liệu sạch và chunks chất lượng cao cho các phase tiếp theo (Embedding, Retrieval, Reranking).
+\begin{verbatim}
+# Output format của _format_context():
+[1] Tiêu đề bài viết 1
+URL: https://example.com/article1
+Nội dung trích xuất từ trang web...
+
+---
+
+[2] Tiêu đề bài viết 2
+URL: https://example.com/article2
+Nội dung trích xuất từ trang web...
+\end{verbatim}
+
+\subsubsection{Cấu hình API}
+\begin{verbatim}
+TavilySearchTool(
+    api_key="TAVILY_API_KEY",     # Từ .env
+    max_results=5,                # Số kết quả mặc định
+    max_retries=3,                # Số lần retry
+    min_retry_delay=1.0,          # Delay cơ sở (giây)
+)
+# search_depth: "basic" (nhanh) hoặc "advanced" (sâu hơn)
+# include_answer: Tavily tự sinh short answer
+\end{verbatim}
+
+\subsection{MongoDB Memory Layer}
+
+Tầng MongoDB Memory gồm 3 module: \texttt{MongoClient} (kết nối), \texttt{ChatHistoryStore} (lịch sử chat), và \texttt{ConversationState} (trạng thái phiên).
+
+\subsubsection{MongoClient -- Quản lý kết nối}
+\textbf{File:} \texttt{memory/mongo\_client.py} (66 dòng, 2.376 bytes)
+
+MongoClient là wrapper mỏng quanh \texttt{pymongo.MongoClient} với connection pooling:
+\begin{verbatim}
+class MongoClient:
+    def __init__(self, uri="mongodb://localhost:27017",
+                 database="rag_chatbot", max_pool_size=10):
+        self._client = PyMongoClient(
+            uri,
+            maxPoolSize=max_pool_size,
+            serverSelectionTimeoutMS=5000,
+        )
+        self._db = self._client[database]
+
+    @property
+    def db(self) -> Database:
+        """Return the active database handle."""
+
+    def ping(self) -> bool:
+        """Check connectivity."""
+
+    def close(self) -> None:
+        """Close the connection pool."""
+\end{verbatim}
+
+\textbf{Quyết định thiết kế:}
+\begin{itemize}
+    \item \textbf{Connection pooling} (\texttt{maxPoolSize=10}): Tái sử dụng kết nối, giảm overhead cho các request liên tục;
+    \item \textbf{Server selection timeout} (5 giây): Fail fast khi MongoDB không khả dụng, tránh block pipeline;
+    \item Database mặc định: \texttt{rag\_chatbot}.
+\end{itemize}
+
+\subsubsection{ChatHistoryStore -- Lưu trữ lịch sử chat}
+\textbf{File:} \texttt{memory/chat\_history.py} (128 dòng, 4.226 bytes)
+
+ChatHistoryStore cung cấp CRUD operations cho tin nhắn chat, lưu vào collection \texttt{chat\_messages}:
+\begin{verbatim}
+class ChatHistoryStore:
+    def __init__(self, mongo_client, collection_name="chat_messages"):
+        self._collection = mongo_client.db[collection_name]
+        self._ensure_indexes()  # Index: (session_id, timestamp)
+
+    def save_message(self, session_id, role, content) -> str:
+        """Lưu 1 tin nhắn. Returns: inserted _id."""
+        doc = {
+            "session_id": session_id,
+            "role": role,          # "user" hoặc "assistant"
+            "content": content,
+            "timestamp": datetime.now(timezone.utc),
+        }
+
+    def get_history(self, session_id, limit=20) -> List[Dict]:
+        """Lấy N tin nhắn gần nhất, sorted oldest -> newest."""
+        # Sort by timestamp DESC, limit, rồi reverse
+
+    def clear_history(self, session_id) -> int:
+        """Xóa toàn bộ lịch sử của 1 session."""
+\end{verbatim}
+
+\textbf{Index strategy:} Compound index \texttt{(session\_id, timestamp)} cho phép truy vấn nhanh theo session và sắp xếp theo thời gian mà không cần full collection scan.
+
+\subsubsection{ConversationState -- Quản lý trạng thái phiên}
+\textbf{File:} \texttt{memory/conversation.py} (163 dòng, 5.684 bytes)
+
+ConversationState quản lý vòng đời phiên hội thoại và lưu trữ câu trả lời cuối cùng kèm metadata:
+\begin{verbatim}
+class ConversationState:
+    def __init__(self, mongo_client):
+        self._conversations = mongo_client.db["conversations"]
+        self._answers = mongo_client.db["answers"]
+        self._ensure_indexes()
+
+    # Session lifecycle
+    def create_session(self, session_id):
+        """Upsert session: tạo mới hoặc touch nếu đã tồn tại."""
+
+    def update_status(self, session_id, status):
+        """Cập nhật status: "active" -> "closed"."""
+
+    def touch(self, session_id):
+        """Bump last_active timestamp."""
+
+    def get_session(self, session_id) -> Optional[Dict]:
+        """Trả về metadata phiên."""
+
+    # Final answers
+    def save_answer(self, session_id, query, answer,
+                    sources=None, scores=None) -> str:
+        """Lưu câu trả lời + provenance (sources, scores)."""
+
+    def get_answers(self, session_id, limit=10) -> List[Dict]:
+        """Lấy các câu trả lời gần nhất."""
+\end{verbatim}
+
+\textbf{Cấu trúc dữ liệu MongoDB:}
+\begin{verbatim}
+# Collection: conversations
+{
+    "session_id": "uuid-string",
+    "status": "active" | "closed",
+    "created_at": ISODate("2026-03-29T..."),
+    "last_active": ISODate("2026-03-29T...")
+}
+
+# Collection: answers
+{
+    "session_id": "uuid-string",
+    "query": "Điều kiện tốt nghiệp là gì?",
+    "answer": "Theo Điều 5, sinh viên cần...",
+    "sources": [{"title": "...", "score": 0.95}],
+    "scores": {"relevance": 0.9, "faithfulness": 0.85},
+    "timestamp": ISODate("2026-03-29T...")
+}
+\end{verbatim}
+
+\textbf{Quyết định thiết kế:}
+\begin{itemize}
+    \item \textbf{Tách conversations và answers}: Cho phép truy vấn analytics độc lập (ví dụ: thống kê chất lượng câu trả lời theo thời gian);
+    \item \textbf{Upsert pattern} cho \texttt{create\_session}: Idempotent -- gọi nhiều lần không tạo duplicate;
+    \item \textbf{Lưu sources + scores}: Traceability đầy đủ, biết câu trả lời dựa trên tài liệu nào và chất lượng ra sao.
+\end{itemize}
+
+\subsection{MongoLogger -- Logging tích hợp cho Pipeline}
+\textbf{File:} \texttt{pipeline/mongo\_logger.py} (149 dòng, 5.316 bytes)
+
+MongoLogger là module logging cấp cao hơn, được tích hợp trực tiếp vào RAG Pipeline để ghi log mỗi lượt hỏi-đáp:
+\begin{verbatim}
+class MongoLogger:
+    def __init__(self, uri, database):
+        self._sessions = self._db["sessions"]
+        self._query_logs = self._db["query_logs"]
+
+    def new_session(self, user_id=None) -> str:
+        """Tạo session mới với UUID, returns session_id."""
+
+    def log_turn(self, session_id, question, result,
+                 reflected_question=None, latency_ms=0) -> int:
+        """Ghi 1 lượt hỏi-đáp vào session + query_logs."""
+
+    def get_history(self, session_id, max_turns=10):
+        """Trả về lịch sử dạng [{role, content}]."""
+
+    def get_session(self, session_id) -> Optional[Dict]:
+        """Trả về full session document."""
+\end{verbatim}
+
+\textbf{Cấu trúc session document:}
+\begin{verbatim}
+# Collection: sessions
+{
+    "session_id": "uuid",
+    "user_id": "optional",
+    "created_at": ISODate(...),
+    "updated_at": ISODate(...),
+    "turn_count": 3,
+    "turns": [
+        {
+            "turn_id": 1,
+            "question": "Điều kiện tốt nghiệp?",
+            "answer": "Theo quy chế...",
+            "intent": "rag",
+            "num_sources": 5,
+            "latency_ms": 1200,
+            "timestamp": ISODate(...)
+        },
+        ...
+    ]
+}
+
+# Collection: query_logs (flat, cho analytics)
+{
+    "session_id": "uuid",
+    "turn_id": 1,
+    "question": "...",
+    "answer": "...",
+    "intent": "rag",
+    "model_name": "gemini-2.5-flash",
+    "latency_ms": 1200,
+    "timestamp": ISODate(...)
+}
+\end{verbatim}
+
+\textbf{Quyết định thiết kế:}
+\begin{itemize}
+    \item \textbf{Dual storage}: Embedded turns trong session (đọc nhanh toàn bộ hội thoại) + flat query\_logs (analytics, thống kê);
+    \item \textbf{Tự động tính turn\_id}: Dựa trên \texttt{turn\_count} hiện tại, đảm bảo thứ tự tuần tự;
+    \item \textbf{Ghi latency}: Đo thời gian xử lý mỗi lượt, phục vụ monitoring và tối ưu.
+\end{itemize}
+
+%% =====================================================================
+%% PHASE 5: FastAPI Backend + Pipeline Integration
+%% =====================================================================
+
+\section{Triển khai Phase 5: FastAPI Backend và Pipeline Integration}
+
+Phase 5 kết nối tất cả các tầng đã triển khai (Phase 1--4) thành một pipeline thống nhất, đồng thời cung cấp API server qua FastAPI với streaming response.
+
+\subsection{Pipeline Orchestration}
+
+\subsubsection{RAGPipeline -- Điều phối tổng thể}
+\textbf{File:} \texttt{pipeline/rag\_pipeline.py} (327 dòng, 12.283 bytes)
+
+RAGPipeline là class trung tâm, khởi tạo và kết nối tất cả components:
+\begin{verbatim}
+class RAGPipeline:
+    def __init__(self, settings=None, api_key=None,
+                 config=None, mongo_logger=None):
+        # 1. Load settings từ .env
+        settings = Settings()
+
+        # 2. Khởi tạo Query Router (classifier-based)
+        self._router = QueryRouter(mode="classifier")
+
+        # 3. Khởi tạo Query Reflector (LLM-based rewrite)
+        self._reflector = QueryReflector()
+
+        # 4. Load 2 embedding models
+        self._bge = BGEm3Embedder()        # BAAI/bge-m3
+        self._e5 = E5MultilingualEmbedder() # multilingual-e5-large
+
+        # 5. Kết nối retrieval stores (Qdrant + Elasticsearch)
+        self._searcher = create_retriever(settings)
+
+        # 6. Load reranker
+        self._reranker = create_reranker(settings)
+
+        # 7. Khởi tạo Chat model
+        self._chat = create_llm(settings)   # Gemini 2.5 Flash
+
+        # 8. Self evaluator (tái sử dụng LLM instance)
+        self._self_eval = SelfEvaluator(llm=self._chat)
+
+        # 9. Tavily fallback
+        self._tavily = TavilySearchTool(api_key=tavily_key)
+\end{verbatim}
+
+\textbf{Quyết định thiết kế quan trọng:}
+\begin{itemize}
+    \item \textbf{Singleton pattern}: Tất cả models được load 1 lần duy nhất khi khởi tạo pipeline, tránh reload giữa các request;
+    \item \textbf{Factory pattern}: Sử dụng \texttt{create\_llm()}, \texttt{create\_retriever()}, \texttt{create\_reranker()} -- cho phép đổi provider qua \texttt{.env} mà không sửa code;
+    \item \textbf{Self-eval tái sử dụng LLM}: \texttt{SelfEvaluator} dùng cùng instance \texttt{BaseLLM} với chat model, không tạo thêm API client.
+\end{itemize}
+
+\subsubsection{Public API}
+RAGPipeline cung cấp 2 phương thức chính:
+\begin{verbatim}
+def query(self, question, history=None, top_k=None,
+          session_id=None) -> Dict:
+    """Non-streaming: trả về full answer một lần."""
+    # 1. Auto-load history từ MongoDB nếu có session_id
+    # 2. Route query (chitchat/rag)
+    # 3. Gọi flow tương ứng
+    # 4. Log kết quả vào MongoDB
+    # Returns: {question, answer, sources, num_sources,
+    #           intent, model_name}
+
+def query_stream(self, question, history=None, top_k=None,
+                 session_id=None) -> Generator[str]:
+    """Streaming: yield từng token."""
+    # Tương tự query(), nhưng generation streaming
+    # Log vào MongoDB sau khi stream kết thúc
+\end{verbatim}
+
+\subsubsection{Pipeline Flows}
+\textbf{File:} \texttt{pipeline/flows.py} (304 dòng, 10.896 bytes)
+
+Module flows định nghĩa 2 luồng xử lý tách biệt:
+
+\textbf{Chitchat Flow:}
+\begin{verbatim}
+def chitchat_flow(question, history, chat_model) -> Dict:
+    """Router -> Chat Model -> Response (không retrieval)."""
+    trimmed = _trim_history(history, limit=6)
+    answer = chat_model.generate(
+        query=question, history=trimmed, mode="chitchat"
+    )
+    return {"answer": answer, "sources": [], "intent": "chitchat"}
+\end{verbatim}
+
+\textbf{RAG Flow (luồng chính):}
+\begin{verbatim}
+def rag_flow(question, history, reflector, bge_embedder,
+             e5_embedder, searcher, reranker, chat_model,
+             self_evaluator, tavily_tool, cfg) -> Dict:
+    # 1. Reflection: rewrite query cho retrieval tốt hơn
+    search_query = reflector.reflect(question, chat_history)
+
+    # 2. Embed: tạo vector cho cả BGE-M3 và E5
+    bge_vec = bge_embedder.embed_query(search_query)
+    e5_vec = e5_embedder.embed_query(search_query)
+
+    # 3. Hybrid Search: Qdrant + Elasticsearch + RRF fusion
+    raw_results = searcher.search(
+        query=search_query,
+        bge_m3_query=bge_vec, e5_query=e5_vec,
+        top_k=cfg["top_k"] * 4,  # Pool 4x để reranker chọn
+    )
+
+    # 4. Rerank: chọn top-K tài liệu chính xác nhất
+    reranked = reranker.rerank(
+        query=search_query, documents=raw_results,
+        top_k=cfg["top_k"]   # Mặc định: 5
+    )
+
+    # 5. Generate: LLM sinh câu trả lời từ context
+    context = _format_context(reranked)
+    answer = chat_model.generate(
+        query=question, context=context, mode="rag"
+    )
+
+    # 6. Self-eval: kiểm tra chất lượng
+    eval_result = self_evaluator.evaluate(
+        query=question, context=context, response=answer
+    )
+    if not eval_result["pass"]:
+        # 7. Tavily fallback: tìm web, sinh lại
+        answer = _tavily_fallback(question, tavily_tool,
+                                  chat_model, history)
+
+    return {"answer": answer, "sources": reranked, ...}
+\end{verbatim}
+
+\textbf{Tavily Fallback:}
+\begin{verbatim}
+def _tavily_fallback(question, answer, tavily_tool,
+                     chat_model, history) -> str:
+    """Web search -> re-generate khi self-eval FAIL."""
+    search_result = tavily_tool.search(question)
+    web_context = search_result["context"]
+    new_answer = chat_model.generate(
+        query=question, context=web_context, mode="rag"
+    )
+    return new_answer
+\end{verbatim}
+
+\textbf{Helper functions:}
+\begin{itemize}
+    \item \texttt{\_format\_context(documents)}: Chuyển danh sách tài liệu retrieved thành chuỗi context có đánh số, mỗi tài liệu gồm title và text;
+    \item \texttt{\_trim\_history(history, limit=6)}: Giới hạn lịch sử chat gửi cho LLM, giữ 6 lượt gần nhất để tiết kiệm token.
+\end{itemize}
+
+\subsection{FastAPI Backend}
+
+\subsubsection{Application Entry Point}
+\textbf{File:} \texttt{api/main.py} (117 dòng, 3.491 bytes)
+
+Ứng dụng FastAPI sử dụng lifespan pattern để khởi tạo pipeline 1 lần duy nhất:
+\begin{verbatim}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup: load pipeline (models, connections)."""
+    settings = Settings()
+
+    # 1. Khởi tạo MongoLogger (nếu MongoDB enabled)
+    mongo_logger = MongoLogger(
+        uri=settings.mongodb_uri,
+        database=settings.mongodb_database
+    )
+    app.state.mongo_logger = mongo_logger
+
+    # 2. Load RAG Pipeline (blocking, chạy trong executor)
+    app.state.pipeline = await loop.run_in_executor(
+        None,
+        lambda: RAGPipeline(api_key=api_key,
+                            mongo_logger=mongo_logger),
+    )
+
+    yield  # App is running
+    # Shutdown cleanup
+
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="RAG v2 Chatbot API",
+        version="2.0.0",
+        lifespan=lifespan,
+    )
+
+    # CORS middleware
+    app.add_middleware(CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["GET","POST","PUT","DELETE","OPTIONS"],
+    )
+
+    # Register routes
+    app.include_router(chat_router)
+    app.include_router(health_router)
+    app.include_router(session_router)
+
+    return app
+\end{verbatim}
+
+\textbf{Quyết định thiết kế:}
+\begin{itemize}
+    \item \textbf{Lifespan pattern} (thay vì \texttt{on\_startup}): Chuẩn mới của FastAPI, đảm bảo cleanup khi shutdown;
+    \item \textbf{run\_in\_executor}: Load models trong thread pool, không block event loop;
+    \item \textbf{CORS wildcard}: Cho phép frontend từ mọi origin kết nối (phù hợp giai đoạn phát triển);
+    \item \textbf{State pattern}: Pipeline và MongoLogger lưu trong \texttt{app.state}, truy cập từ mọi route.
+\end{itemize}
+
+\subsubsection{Chat Endpoints}
+\textbf{File:} \texttt{api/routes/chat.py} (139 dòng, 4.574 bytes)
+
+Hai endpoint chính cho chat:
+
+\textbf{POST /chat} -- Non-streaming response:
+\begin{verbatim}
+@router.post("/chat", response_model=ChatResponse)
+async def chat(request: Request, body: ChatRequest):
+    pipeline = request.app.state.pipeline
+    mongo_logger = request.app.state.mongo_logger
+
+    # Auto-create session nếu chưa có
+    if body.session_id is None and mongo_logger:
+        session_id = mongo_logger.new_session()
+
+    # Chạy pipeline trong thread pool (non-blocking)
+    result = await loop.run_in_executor(
+        None,
+        lambda: pipeline.query(
+            question=body.question,
+            history=history,
+            top_k=body.top_k,
+            session_id=session_id,
+        ),
+    )
+
+    return ChatResponse(
+        question=result["question"],
+        answer=result["answer"],
+        retrieved_documents=retrieved_docs,
+        num_documents=result["num_sources"],
+        model_name=result["model_name"],
+        intent=result["intent"],
+        session_id=session_id,
+    )
+\end{verbatim}
+
+\textbf{POST /chat/stream} -- Server-Sent Events (SSE):
+\begin{verbatim}
+@router.post("/chat/stream")
+async def chat_stream(request, body) -> StreamingResponse:
+    async def event_generator():
+        # Gửi session_id như SSE event đầu tiên
+        yield f'data: {{"session_id": "{session_id}"}}\n\n'
+
+        # Producer-consumer pattern với asyncio.Queue
+        queue = asyncio.Queue()
+
+        def _produce():
+            for chunk in pipeline.query_stream(...):
+                loop.call_soon_threadsafe(
+                    queue.put_nowait, chunk)
+            loop.call_soon_threadsafe(
+                queue.put_nowait, None)  # sentinel
+
+        loop.run_in_executor(None, _produce)
+
+        while True:
+            chunk = await queue.get()
+            if chunk is None:
+                yield "data: [DONE]\n\n"
+                break
+            yield f"data: {chunk}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream"
+    )
+\end{verbatim}
+
+\textbf{Quyết định thiết kế SSE streaming:}
+\begin{itemize}
+    \item \textbf{Producer-consumer với asyncio.Queue}: Pipeline chạy synchronous trong thread pool (producer), SSE event loop đọc từ queue (consumer) -- bridge giữa sync và async;
+    \item \textbf{Session ID gửi trước}: Frontend nhận session\_id ngay lập tức, không cần đợi câu trả lời;
+    \item \textbf{Sentinel \texttt{[DONE]}}: Chuẩn SSE signaling, frontend biết stream đã kết thúc.
+\end{itemize}
+
+\subsubsection{Health Check và Session Endpoints}
+\textbf{File:} \texttt{api/routes/health.py} (19 dòng), \texttt{api/routes/session.py} (51 dòng)
+
+\begin{verbatim}
+# GET /health
+@router.get("/health", response_model=HealthResponse)
+async def health(request):
+    return HealthResponse(status="healthy", rag_initialized=True)
+
+# POST /session — tạo session mới
+@router.post("")
+async def create_session(request):
+    session_id = mongo_logger.new_session()
+    return {"session_id": session_id, "created_at": ...}
+
+# GET /session/{session_id} — lấy chi tiết session
+@router.get("/{session_id}")
+async def get_session(request, session_id):
+    return mongo_logger.get_session(session_id)
+\end{verbatim}
+
+\subsubsection{API Schemas (Pydantic)}
+\textbf{File:} \texttt{api/schemas.py} (62 dòng, 2.213 bytes)
+
+Sử dụng Pydantic BaseModel cho validation và serialization:
+\begin{verbatim}
+# Request
+class ChatRequest(BaseModel):
+    question: str = Field(..., min_length=1, max_length=4096)
+    top_k: int = Field(default=5, ge=1, le=50)
+    history: Optional[List[HistoryMessage]] = None
+    session_id: Optional[str] = None
+
+class HistoryMessage(BaseModel):
+    role: str = Field(..., pattern="^(user|assistant)$")
+    content: str
+
+# Response
+class ChatResponse(BaseModel):
+    question: str
+    answer: str
+    retrieved_documents: List[RetrievedDocument]
+    num_documents: int
+    model_name: str
+    intent: str
+    session_id: str
+
+class RetrievedDocument(BaseModel):
+    rank: int
+    content: str
+    score: float
+    metadata: Dict[str, Any]
+\end{verbatim}
+
+\textbf{Validation rules:}
+\begin{itemize}
+    \item \texttt{question}: Bắt buộc, 1--4096 ký tự;
+    \item \texttt{top\_k}: 1--50, mặc định 5;
+    \item \texttt{role}: Chỉ chấp nhận \texttt{"user"} hoặc \texttt{"assistant"} (regex pattern).
+\end{itemize}
+
+\subsection{Centralized Configuration}
+
+\subsubsection{Settings class}
+\textbf{File:} \texttt{config/settings.py} (133 dòng, 4.898 bytes)
+
+Toàn bộ cấu hình hệ thống được quản lý tập trung qua Pydantic BaseSettings:
+\begin{verbatim}
+class Settings(BaseSettings):
+    # Provider selectors (đổi qua .env, không sửa code)
+    llm_provider: str = "gemini"     # gemini|openai|azure|ollama
+    embedding_provider: str = "ensemble" # ensemble|bge_m3|e5
+    reranker_provider: str = "bge"    # bge|cohere|none
+
+    # API Keys
+    google_api_key: str = ""
+    openai_api_key: str = ""
+    tavily_api_key: str = ""
+
+    # Infrastructure
+    qdrant_host: str = "localhost"
+    qdrant_port: int = 6333
+    elasticsearch_host: str = "localhost"
+    elasticsearch_port: int = 9200
+    mongodb_uri: str = "mongodb://localhost:27017"
+    mongodb_database: str = "rag_chatbot"
+    mongodb_enabled: bool = True
+
+    # Collections
+    collections: List[str] = ["stsv","quydinh","kehoach","ctdt"]
+
+    # Chat Model
+    chat_model: str = "gemini-2.5-flash"
+    chat_temperature: float = 0.3
+    chat_max_tokens: int = 5120
+
+    # Retrieval
+    top_k: int = 5
+    vector_weight: float = 0.8
+    keyword_weight: float = 0.2
+
+    # Reranker
+    reranker_model: str = "BAAI/bge-reranker-v2-m3"
+    reranker_top_k: int = 5
+
+    # Features
+    self_eval_enabled: bool = True
+    tavily_fallback_enabled: bool = True
+    reflection_enabled: bool = True
+
+    # Server
+    api_host: str = "0.0.0.0"
+    api_port: int = 8000
+
+    model_config = {
+        "env_file": ".env",
+        "extra": "ignore",
+    }
+\end{verbatim}
+
+\textbf{Ưu điểm của Pydantic BaseSettings:}
+\begin{itemize}
+    \item \textbf{Tự động load từ .env}: Không cần parse thủ công;
+    \item \textbf{Type validation}: Đảm bảo kiểu dữ liệu đúng (int, float, List);
+    \item \textbf{Default values}: Mọi config đều có giá trị mặc định hợp lý;
+    \item \textbf{Override qua env var}: Deploy trên server chỉ cần set env var, không sửa code;
+    \item \textbf{Provider pattern}: Đổi LLM từ Gemini sang OpenAI chỉ cần set \texttt{LLM\_PROVIDER=openai} trong \texttt{.env}.
+\end{itemize}
+
+\subsection{Tổng kết API Endpoints}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{Method} & \textbf{Endpoint} & \textbf{Mô tả} \\
+\hline
+GET & /health & Health check, kiểm tra pipeline đã sẵn sàng \\
+\hline
+POST & /chat & Chat non-streaming, trả đầy đủ answer + sources \\
+\hline
+POST & /chat/stream & Chat streaming SSE, trả từng token \\
+\hline
+POST & /session & Tạo session mới \\
+\hline
+GET & /session/\{id\} & Lấy chi tiết session (gồm tất cả turns) \\
+\hline
+\end{tabular}
+\caption{Danh sách API endpoints}
+\end{table}
+
+\section{Kết luận chương}
+Chương này đã trình bày chi tiết quá trình triển khai hệ thống RAG v2 qua các phase:
+
+\begin{itemize}
+    \item \textbf{Phase 1 -- Thu thập và xử lý dữ liệu}: 16 PDF quy định, CTDT từ 6 khoa/viện, 83 tài liệu JSON STSV; 4 loại chunker chuyên biệt tạo ra 2.752 chunks chất lượng cao;
+    \item \textbf{Phase 4 -- Tool Search và MongoDB Memory}: Tavily web search với rate limiting và exponential backoff làm fallback; MongoDB lưu trữ lịch sử chat, trạng thái phiên, và câu trả lời kèm provenance;
+    \item \textbf{Phase 5 -- FastAPI Backend và Pipeline Integration}: RAGPipeline kết nối 8 tầng thành pipeline end-to-end; FastAPI server với SSE streaming, health check, và session management; Pydantic BaseSettings cho centralized configuration.
+\end{itemize}
+
+Kết quả, hệ thống sẵn sàng nhận request từ frontend, xử lý qua toàn bộ pipeline (Router $\rightarrow$ Reflection $\rightarrow$ Embed $\rightarrow$ Search $\rightarrow$ Rerank $\rightarrow$ Generate $\rightarrow$ Self-Eval $\rightarrow$ Fallback), và trả kết quả streaming cho người dùng.
 
 \end{document}

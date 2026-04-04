@@ -159,10 +159,19 @@ class RAGPipeline:
         # Tavily web search fallback
         self._tavily: Optional[TavilySearchTool] = None
         if cfg.get("tavily_fallback_enabled", False):
-            tavily_key = os.environ.get("TAVILY_API_KEY", "")
-            if tavily_key:
+            tavily_key = os.environ.get("TAVILY_API_KEY", "").strip()
+            if tavily_key and tavily_key not in (
+                "",
+                "your-key-here",
+                "CHANGE_ME",
+            ):
                 self._tavily = TavilySearchTool(api_key=tavily_key)
                 logger.info("Tavily search tool loaded.")
+            else:
+                logger.warning(
+                    "Tavily fallback enabled but TAVILY_API_KEY is missing or "
+                    "invalid. Tavily fallback disabled."
+                )
 
         self._cfg = cfg
         self._mongo_logger = mongo_logger
@@ -237,6 +246,7 @@ class RAGPipeline:
             self_evaluator=self._self_eval,
             tavily_tool=self._tavily,
             cfg=flow_cfg,
+            routing_result=routing,
         )
 
         # Log to MongoDB
@@ -303,6 +313,7 @@ class RAGPipeline:
                 reranker=self._reranker,
                 chat_model=self._chat,
                 cfg=flow_cfg,
+                routing_result=routing,
             )
             self.last_sources = reranked
             for chunk in stream:

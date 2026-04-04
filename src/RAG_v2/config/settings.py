@@ -118,6 +118,10 @@ class Settings(BaseSettings):
     # --- Reflection ---
     reflection_enabled: bool = True
 
+    # --- Collection-aware Routing (Phase 8) ---
+    domain_routing_enabled: bool = True
+    domain_confidence_threshold: float = 0.65
+
     # --- CORS ---
     cors_origins: List[str] = ["*"]
 

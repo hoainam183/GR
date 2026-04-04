@@ -8,6 +8,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 from tavily import TavilyClient
+from tavily.errors import InvalidAPIKeyError
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +102,10 @@ class TavilySearchTool:
                     "results": results,
                     "context": context,
                 }
+            except InvalidAPIKeyError:
+                # Auth errors won't be fixed by retrying — fail immediately
+                logger.error("Tavily API key is invalid or missing, aborting")
+                raise
             except Exception as exc:
                 last_exc = exc
                 if attempt < self.max_retries - 1:

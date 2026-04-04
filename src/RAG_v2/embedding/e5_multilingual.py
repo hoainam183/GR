@@ -49,8 +49,7 @@ class E5MultilingualEmbedder(BaseEmbedder):
             device=device,
             model_kwargs={
                 "low_cpu_mem_usage": True,
-                "torch_dtype": torch.float16,
-                "use_safetensors": False,
+                "dtype": torch.float16,
             },
         )
         self._model.max_seq_length = max_length
