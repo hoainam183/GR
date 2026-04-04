@@ -28,4 +28,7 @@ uv.lock
 .DS_Store
 Thumbs.db
 
+# Docker bind-mount data (Qdrant, Elasticsearch, MongoDB)
+src/RAG_v2/volumes/
+
 .env
