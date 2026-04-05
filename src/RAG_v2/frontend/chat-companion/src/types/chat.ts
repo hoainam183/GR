@@ -10,6 +10,7 @@ export interface ChatRequest {
   question: string;
   top_k?: number;
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  session_id?: string;
 }
 
 export interface RetrievedDocument {
@@ -26,4 +27,5 @@ export interface ChatResponse {
   num_documents: number;
   model_name: string;
   intent: string;
+  session_id: string;
 }

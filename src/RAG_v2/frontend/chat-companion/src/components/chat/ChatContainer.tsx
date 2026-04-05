@@ -8,6 +8,7 @@ import TypingIndicator from './TypingIndicator';
 const ChatContainer = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -37,7 +38,12 @@ const ChatContainer = () => {
         content: m.content,
       }));
 
-      const response = await sendMessage(content, historyForApi);
+      const response = await sendMessage(content, historyForApi, 5, sessionId);
+
+      // Persist session_id for subsequent turns in this conversation
+      if (response.session_id && !sessionId) {
+        setSessionId(response.session_id);
+      }
 
       // Add assistant message with sources
       const assistantMessage: Message = {

@@ -29,10 +29,11 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
 
-    # Auto-create session if not provided
+    # Resolve session: create new if absent or stale
     session_id = body.session_id
-    if session_id is None and mongo_logger is not None:
-        session_id = mongo_logger.new_session()
+    if mongo_logger is not None:
+        if session_id is None or mongo_logger.get_session(session_id) is None:
+            session_id = mongo_logger.new_session()
 
     history = (
         [{"role": m.role, "content": m.content} for m in body.history]
@@ -95,10 +96,11 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
 
-    # Auto-create session if not provided
+    # Resolve session: create new if absent or stale
     session_id = body.session_id
-    if session_id is None and mongo_logger is not None:
-        session_id = mongo_logger.new_session()
+    if mongo_logger is not None:
+        if session_id is None or mongo_logger.get_session(session_id) is None:
+            session_id = mongo_logger.new_session()
 
     history = (
         [{"role": m.role, "content": m.content} for m in body.history]
