@@ -32,3 +32,5 @@ Thumbs.db
 src/RAG_v2/volumes/
 
 .env
+*.joblibcc
+*.joblib
