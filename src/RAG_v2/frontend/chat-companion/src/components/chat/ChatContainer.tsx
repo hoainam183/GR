@@ -46,6 +46,8 @@ const ChatContainer = () => {
         content: response.answer,
         timestamp: new Date(),
         sources: response.retrieved_documents,
+        targetCollections: response.target_collections,
+        reflectedQuery: response.reflected_query,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);

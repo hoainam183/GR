@@ -51,6 +51,8 @@ class ChatResponse(BaseModel):
     num_documents: int
     model_name: str
     intent: str
+    target_collections: Optional[List[str]] = None
+    reflected_query: Optional[str] = None
     session_id: str
 
 

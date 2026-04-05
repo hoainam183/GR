@@ -69,6 +69,8 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             num_documents=result["num_sources"],
             model_name=result["model_name"],
             intent=result.get("intent", "rag"),
+            target_collections=result.get("target_collections", []),
+            reflected_query=result.get("reflected_query"),
             session_id=session_id or "",
         )
 

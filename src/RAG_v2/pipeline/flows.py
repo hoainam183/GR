@@ -77,6 +77,7 @@ def chitchat_flow(
         "sources": [],
         "num_sources": 0,
         "intent": "chitchat",
+        "target_collections": [],
         "model_name": chat_model.model,
     }
 
@@ -141,9 +142,9 @@ def rag_flow(
             result = reflector.reflect(question, chat_history=trimmed)
             search_query = result.get("rewritten", question)
             logger.info("Reflected query: %r", search_query[:80])
-        except Exception:
+        except Exception as e:
             logger.warning(
-                "Reflection failed, using original query", exc_info=True
+                "Reflection failed, using original query: %s", e
             )
 
     # 2. Collection-aware routing (Phase 8)
@@ -212,9 +213,9 @@ def rag_flow(
                     chat_model=chat_model,
                     history=trimmed,
                 )
-        except Exception:
+        except Exception as e:
             logger.warning(
-                "Self-evaluation error, keeping original answer", exc_info=True
+                "Self-evaluation error, keeping original answer: %s", getattr(e, "message", str(e))
             )
 
     return {
@@ -223,8 +224,9 @@ def rag_flow(
         "sources": reranked,
         "num_sources": len(reranked),
         "intent": "rag",
+        "target_collections": target_collections or ["all"],
+        "reflected_query": search_query,
         "model_name": chat_model.model,
-        "target_collections": target_collections,
     }
 
 
@@ -254,9 +256,9 @@ def rag_flow_stream(
         try:
             result = reflector.reflect(question, chat_history=trimmed)
             search_query = result.get("rewritten", question)
-        except Exception:
+        except Exception as e:
             logger.warning(
-                "Reflection failed, using original query", exc_info=True
+                "Reflection failed, using original query: %s", getattr(e, "message", str(e))
             )
 
     # Collection-aware routing (Phase 8)
@@ -327,8 +329,8 @@ def _tavily_fallback(
         )
         logger.info("Tavily fallback generated %d chars", len(new_answer))
         return new_answer
-    except Exception:
+    except Exception as e:
         logger.warning(
-            "Tavily fallback failed, returning original answer", exc_info=True
+            "Tavily fallback failed, returning original answer: %s", getattr(e, "message", str(e))
         )
         return answer

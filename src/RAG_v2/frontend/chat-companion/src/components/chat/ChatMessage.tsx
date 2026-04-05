@@ -67,6 +67,26 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             : 'rounded-tl-sm bg-chat-assistant border border-border text-foreground'
         )}
       >
+        {/* Info Area (Target Collections & Reflected Query) */}
+        {!isUser && ((message.targetCollections && message.targetCollections.length > 0) || message.reflectedQuery) && (
+          <div className="mb-3 space-y-1 text-[11px] text-muted-foreground bg-muted/30 p-2 rounded-md border border-border/50">
+            {message.targetCollections && message.targetCollections.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-semibold text-primary/70">Collections:</span>
+                {message.targetCollections.map(col => (
+                  <span key={col} className="bg-primary/10 text-primary px-1.5 rounded-sm">{col}</span>
+                ))}
+              </div>
+            )}
+            {message.reflectedQuery && (
+              <div className="flex items-start gap-1.5">
+                <span className="font-semibold text-primary/70 shrink-0">Reflected:</span>
+                <span className="italic break-words">"{message.reflectedQuery}"</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}

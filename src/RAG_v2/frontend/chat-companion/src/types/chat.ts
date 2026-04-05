@@ -4,6 +4,8 @@ export interface Message {
   content: string;
   timestamp: Date;
   sources?: RetrievedDocument[];
+  targetCollections?: string[];
+  reflectedQuery?: string;
 }
 
 export interface ChatRequest {
@@ -26,4 +28,6 @@ export interface ChatResponse {
   num_documents: number;
   model_name: string;
   intent: string;
+  target_collections?: string[];
+  reflected_query?: string;
 }

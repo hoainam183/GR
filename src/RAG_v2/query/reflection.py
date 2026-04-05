@@ -99,6 +99,10 @@ class QueryReflector:
                 break
             except RateLimitError as exc:
                 last_exc = exc
+                if "Quota exceeded" in str(exc) or "RESOURCE_EXHAUSTED" in str(exc):
+                    logger.warning("Reflection quota exceeded, skipping retries.")
+                    raise exc
+                
                 if attempt < _MAX_RETRIES - 1:
                     delay = _BASE_RETRY_DELAY * (2**attempt)
                     logger.warning(
