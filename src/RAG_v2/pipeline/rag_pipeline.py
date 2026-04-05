@@ -241,6 +241,7 @@ class RAGPipeline:
                     session_id=session_id,
                     question=question,
                     result=result,
+                    reflected_question=result.get("reflected_question"),
                     latency_ms=latency_ms,
                 )
             return result
@@ -269,6 +270,7 @@ class RAGPipeline:
                 session_id=session_id,
                 question=question,
                 result=result,
+                reflected_question=result.get("reflected_question"),
                 latency_ms=latency_ms,
             )
 

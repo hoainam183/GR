@@ -230,6 +230,9 @@ def rag_flow(
         "intent": "rag",
         "model_name": chat_model.model,
         "target_collections": target_collections,
+        "reflected_question": (
+            search_query if search_query != question else None
+        ),
     }
 
 

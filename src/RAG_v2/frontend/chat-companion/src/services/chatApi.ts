@@ -17,12 +17,14 @@ export const sendMessage = async (
   question: string,
   history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
   topK: number = 5,
+  sessionId?: string,
 ): Promise<ChatResponse> => {
   try {
     const response = await apiClient.post<ChatResponse>('/chat', {
       question,
       top_k: topK,
       history,
+      session_id: sessionId,
     } as ChatRequest);
     
     return response.data;
