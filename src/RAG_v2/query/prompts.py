@@ -71,3 +71,27 @@ REWRITE_NO_HISTORY_TEMPLATE = """\
 {query}
 
 Rewrite the query to be clear and specific for document search:"""
+
+
+# ─── Domain Classification Prompt (Tier-3 LLM fallback) ───────────────────────
+
+DOMAIN_CLASSIFICATION_PROMPT = """\
+Classify the following Vietnamese university query into one or more domains.
+
+Domain definitions:
+- ctdt: curriculum, courses, credits, majors, syllabi, degree programmes
+- quydinh: regulations, policies, conditions, scholarships, academic rules
+- kehoach: schedules, deadlines, registration dates, events, calendars
+- stsv: student procedures, dormitory, insurance, student ID cards, support
+
+Query: {query}
+Recent conversation context (may be empty): {context}
+
+Return ONLY valid JSON with no extra text:
+{{"domains": ["domain1", ...], "confidence": "high|medium|low"}}
+
+Rules:
+- List only the domains that are clearly relevant.
+- Use 1–3 domains maximum.
+- "confidence" reflects how certain you are about the domain(s).
+- If the query is clearly about a single domain, list only that domain."""

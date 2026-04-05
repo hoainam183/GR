@@ -22,20 +22,25 @@ def main() -> None:
     from query.domain_classifier import DomainClassifier
     from query.training_data import get_training_data
 
-    # 1. Load training data
+    # 1. Load training data (multi-label format)
     data = get_training_data()
     logger.info("Loaded %d training samples", len(data))
+    multi_label_count = sum(1 for _, lbls in data if len(lbls) > 1)
+    logger.info("  of which %d are multi-label", multi_label_count)
 
     # 2. Init embedder (shared instance)
     embedder = BGEm3Embedder()
 
-    # 3. Train classifier
+    # 3. Train two-stage classifier
     clf = DomainClassifier(embedder=embedder)
     result = clf.train(data, test_size=0.2)
 
     # 4. Print report
     print("\n" + "=" * 60)
-    print(f"  Accuracy: {result['accuracy']:.4f}")
+    print(f"  Stage 1 Intent Accuracy : {result['accuracy']:.4f}")
+    print(
+        f"  Stage 2 Domain  F1      : {result['domain_f1']:.4f}  (samples avg)"
+    )
     print("=" * 60)
     print(result["report"])
 
@@ -43,21 +48,40 @@ def main() -> None:
     save_path = clf.save()
     print(f"\nModel saved to: {save_path}")
 
-    # 6. Quick sanity check
+    # 6. Sanity check — single-label and multi-label cases
     print("\n── Sanity Check ──")
-    test_queries = [
-        "Xin chào!",
-        "Điều kiện xét học bổng khuyến khích là gì?",
-        "Lịch thi cuối kỳ khi nào?",
-        "Thời tiết hôm nay thế nào?",
-        "Thủ tục xin giấy xác nhận sinh viên",
-        "Chương trình đào tạo ngành CNTT có bao nhiêu tín chỉ?",
+    test_cases = [
+        # (query, note)
+        ("Xin chào!", None),
+        ("Thời tiết hôm nay thế nào?", None),
+        ("Điều kiện xét học bổng khuyến khích là gì?", None),
+        ("Lịch thi cuối kỳ khi nào?", None),
+        ("Thủ tục xin giấy xác nhận sinh viên", None),
+        ("Chương trình đào tạo ngành CNTT có bao nhiêu tín chỉ?", None),
+        # Multi-domain
+        (
+            "Ngành CNTT cần bao nhiêu tín chỉ và điều kiện tốt nghiệp ra sao?",
+            "→ expect ctdt + quydinh",
+        ),
+        (
+            "Bao giờ đăng ký KTX và thủ tục đăng ký thế nào?",
+            "→ expect kehoach + stsv",
+        ),
+        # Hard negatives
+        ("Học bổng kỳ này nộp đơn ở đâu?", "→ expect stsv (not quydinh)"),
+        ("Deadline nộp học bổng kỳ này?", "→ expect kehoach (not quydinh)"),
+        (
+            "Mức đóng bảo hiểm y tế sinh viên năm nay",
+            "→ expect quydinh (not stsv)",
+        ),
     ]
-    for q in test_queries:
+    for q, note in test_cases:
         pred = clf.predict(q)
+        domains_str = ", ".join(pred.get("domains") or [pred["label"]])
+        note_str = f"  {note}" if note else ""
         print(
-            f"  [{pred['intent']:>11}] [{pred['label']:>11}] "
-            f"conf={pred['confidence']:.3f}  ← {q}"
+            f"  [{pred['intent']:>11}] [{domains_str:<22}]"
+            f" conf={pred['confidence']:.3f}  ← {q}{note_str}"
         )
 
 

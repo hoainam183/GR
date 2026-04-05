@@ -1,17 +1,20 @@
 """Labeled training data for the domain classifier.
 
-Each sample is a (query, label) tuple. Labels:
+Each sample is a (query, labels) tuple where labels is a list. Labels:
 - ``chitchat``: greetings, small talk, thanks, unrelated topics
 - ``tool_search``: requires real-time / external web data
 - ``ctdt``: chương trình đào tạo, môn học, tín chỉ, khoa/viện
 - ``quydinh``: quy chế, quy định, điều kiện, kỷ luật, học bổng
 - ``kehoach``: lịch thi, lịch học, thông báo, đăng ký môn, sự kiện
 - ``stsv``: thủ tục sinh viên, KTX, bảo hiểm, thẻ SV, hỗ trợ
+
+Multi-label samples (lists with >1 element) represent genuinely cross-domain
+queries where retrieval from multiple collections is needed.
 """
 
 from __future__ import annotations
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 # ─── Label constants ────────────────────────────────────────────────────────────
 LABEL_CHITCHAT = "chitchat"
@@ -33,7 +36,9 @@ ALL_LABELS = [
 # Labels that map to intent="rag"
 RAG_LABELS = {LABEL_CTDT, LABEL_QUYDINH, LABEL_KEHOACH, LABEL_STSV}
 
-# ─── Training samples ──────────────────────────────────────────────────────────
+# ─── Training samples (single-label) ──────────────────────────────────────────
+# Kept as List[Tuple[str, str]] intentionally; get_training_data() converts them
+# to the multi-label format List[Tuple[str, List[str]]] at call time.
 TRAINING_DATA: List[Tuple[str, str]] = [
     # ── chitchat ────────────────────────────────────────────────────────────
     ("Xin chào!", LABEL_CHITCHAT),
@@ -346,6 +351,144 @@ TRAINING_DATA: List[Tuple[str, str]] = [
 ]
 
 
-def get_training_data() -> List[Tuple[str, str]]:
-    """Return a copy of the training data."""
-    return list(TRAINING_DATA)
+# ─── Hard negatives (single-label boundary cases) ─────────────────────────────
+# Queries that look like one domain but belong to another.  These help the
+# classifier learn sharper decision boundaries at the edges.
+HARD_NEGATIVE_DATA: List[Tuple[str, str]] = [
+    # scholarship: procedure vs. condition vs. deadline
+    ("Học bổng kỳ này nộp đơn ở đâu?", LABEL_STSV),  # WHERE → procedure
+    ("Điều kiện học bổng kỳ này là gì?", LABEL_QUYDINH),  # condition → quydinh
+    ("Deadline nộp học bổng kỳ này?", LABEL_KEHOACH),  # deadline → kehoach
+    ("Mẫu đơn xin học bổng lấy ở đâu?", LABEL_STSV),
+    ("Tiêu chí xét học bổng khuyến khích học tập", LABEL_QUYDINH),
+    ("Thời hạn nộp hồ sơ học bổng học kỳ 2", LABEL_KEHOACH),
+    # insurance: procedure vs. deadline
+    ("Đăng ký bảo hiểm y tế ở đâu?", LABEL_STSV),  # WHERE → stsv
+    ("Bao giờ hết hạn đăng ký bảo hiểm?", LABEL_KEHOACH),  # WHEN → kehoach
+    ("Mức đóng bảo hiểm y tế sinh viên năm nay", LABEL_QUYDINH),
+    ("Thủ tục hủy bảo hiểm y tế", LABEL_STSV),
+    # credit limits: ctdt vs. quydinh
+    ("Số tín chỉ tối đa được đăng ký mỗi kỳ", LABEL_QUYDINH),  # rule → quydinh
+    ("Khung chương trình yêu cầu bao nhiêu tín chỉ mỗi kỳ?", LABEL_CTDT),
+    ("Quy định đăng ký tối thiểu bao nhiêu tín chỉ?", LABEL_QUYDINH),
+    # graduation: ctdt vs. quydinh
+    ("Điều kiện làm đồ án tốt nghiệp là gì?", LABEL_CTDT),  # part of ctdt
+    ("Quy định số tín chỉ tích lũy để làm đồ án", LABEL_QUYDINH),
+    ("Môn nào là tiên quyết của đồ án tốt nghiệp?", LABEL_CTDT),
+    # kehoach vs. stsv (registrations with both when/where angles)
+    ("Đăng ký KTX ở đâu?", LABEL_STSV),
+    ("Lịch mở đăng ký KTX học kỳ tới", LABEL_KEHOACH),
+    ("Thời gian đóng học phí là khi nào?", LABEL_KEHOACH),
+    ("Nộp học phí bằng cách nào?", LABEL_STSV),
+    # enterprise scholarship (quydinh vs. stsv)
+    ("Điều kiện nhận học bổng doanh nghiệp ABC", LABEL_QUYDINH),
+    ("Nộp hồ sơ học bổng doanh nghiệp ở phòng nào?", LABEL_STSV),
+    # academic warning
+    ("Sinh viên bị cảnh báo học vụ cần làm gì?", LABEL_STSV),
+    ("Điểm GPA bao nhiêu thì bị cảnh báo học vụ?", LABEL_QUYDINH),
+    # context-sensitive short queries (chatbot follow-ups)
+    ("Còn điều kiện tiên quyết là gì?", LABEL_CTDT),
+    ("Deadline là khi nào?", LABEL_KEHOACH),
+    ("Nộp ở đâu?", LABEL_STSV),
+    ("Bao nhiêu tín chỉ?", LABEL_CTDT),
+    ("Mức phí là bao nhiêu?", LABEL_QUYDINH),
+]
+
+
+# ─── Multi-label training samples ─────────────────────────────────────────────
+# Queries that genuinely span multiple domains.  Each label list is ordered
+# from primary (most relevant) to secondary domain(s).
+MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
+    # ctdt + quydinh
+    (
+        "Học kỳ 3 ngành KHMT học những môn gì và học phí tính thế nào?",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Ngành CNTT cần bao nhiêu tín chỉ và điều kiện tốt nghiệp ra sao?",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Môn học kỳ 1 ngành Điện tử và quy định điểm D tính thế nào?",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Chương trình đào tạo kỹ sư tài năng và điều kiện xét tuyển vào",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Số tín chỉ ngành KTMT và mức học phí mỗi tín chỉ",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    # ctdt + kehoach
+    (
+        "Lịch đăng ký môn học kỳ 2 ngành Cơ điện tử",
+        [LABEL_KEHOACH, LABEL_CTDT],
+    ),
+    (
+        "Khi nào đăng ký thực tập và điều kiện là gì?",
+        [LABEL_KEHOACH, LABEL_CTDT],
+    ),
+    # quydinh + stsv
+    (
+        "Điều kiện nhận học bổng và nộp hồ sơ ở đâu?",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Quy định bảo lưu kết quả học tập và thủ tục xin bảo lưu",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Chính sách miễn giảm học phí và cách đăng ký",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Điều kiện được ở KTX và cách đăng ký phòng",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Quy định sinh viên nước ngoài và thủ tục nhập học",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Tiêu chuẩn xét học bổng khuyến khích và hướng dẫn nộp đơn",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    # quydinh + kehoach
+    (
+        "Điều kiện phúc khảo bài thi và thời hạn nộp đơn",
+        [LABEL_QUYDINH, LABEL_KEHOACH],
+    ),
+    (
+        "Quy trình đăng ký học lại và deadline đăng ký",
+        [LABEL_QUYDINH, LABEL_KEHOACH],
+    ),
+    # kehoach + stsv
+    (
+        "Thời gian đăng ký KTX học kỳ tới và thủ tục",
+        [LABEL_KEHOACH, LABEL_STSV],
+    ),
+    (
+        "Bao giờ đóng bảo hiểm y tế và đóng ở đâu?",
+        [LABEL_KEHOACH, LABEL_STSV],
+    ),
+    (
+        "Lịch nhận bằng tốt nghiệp và cần mang giấy tờ gì?",
+        [LABEL_KEHOACH, LABEL_STSV],
+    ),
+]
+
+
+def get_training_data() -> List[Tuple[str, List[str]]]:
+    """Return all training data in multi-label format.
+
+    Single-label entries are wrapped in a one-element list for a uniform
+    interface with :class:`~query.domain_classifier.DomainClassifier`.
+    """
+    single_as_multi: List[Tuple[str, List[str]]] = [
+        (q, [lbl]) for q, lbl in TRAINING_DATA
+    ]
+    hard_negatives_multi: List[Tuple[str, List[str]]] = [
+        (q, [lbl]) for q, lbl in HARD_NEGATIVE_DATA
+    ]
+    return single_as_multi + hard_negatives_multi + MULTI_LABEL_DATA

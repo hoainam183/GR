@@ -22,11 +22,17 @@ from config.settings import Settings
 from embedding import BGEm3Embedder, E5MultilingualEmbedder
 from llm import BaseLLM, create_llm
 from llm.self_eval import SelfEvaluator
+from query.prompts import DOMAIN_CLASSIFICATION_PROMPT
 from query.reflection import QueryReflector
 from query.router import QueryRouter
+from query.training_data import RAG_LABELS
 from reranking import create_reranker
 from retrieval import create_retriever
 from tools.tavily_search import TavilySearchTool
+
+# Confidence below this threshold triggers the Tier-3 LLM domain fallback.
+_LLM_FALLBACK_THRESHOLD: float = 0.55
+_VALID_DOMAINS = set(RAG_LABELS)
 
 from .flows import (
     chitchat_flow,
@@ -211,10 +217,17 @@ class RAGPipeline:
         if session_id and not history and self._mongo_logger:
             history = self._mongo_logger.get_history(session_id)
 
-        # 1. Route the query
-        routing = self._router.route(question)
+        # 1. Route the query (context-aware — Tier 1)
+        routing = self._router.route(question, chat_history=history)
         intent = routing.get("intent", "rag")
         logger.info("Routing decision: intent=%s", intent)
+
+        # Tier-3: LLM domain fallback for low-confidence RAG routing
+        if (
+            intent == "rag"
+            and (routing.get("confidence") or 1.0) < _LLM_FALLBACK_THRESHOLD
+        ):
+            routing = self._llm_domain_classify(question, history, routing)
 
         if intent == "chitchat":
             result = chitchat_flow(
@@ -261,6 +274,87 @@ class RAGPipeline:
 
         return result
 
+    # ------------------------------------------------------------------
+    # Tier-3: LLM domain classification fallback
+    # ------------------------------------------------------------------
+
+    def _llm_domain_classify(
+        self,
+        question: str,
+        history: Optional[List[Dict[str, str]]],
+        current_routing: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """Call the chat LLM to classify domain when classifier confidence is low.
+
+        Only triggers for ~5% of queries (those near domain boundaries).
+        Replaces the hardcoded MULTI_DOMAIN_FALLBACK with a data-driven decision.
+
+        Args:
+            question: Raw user question.
+            history: Recent chat turns (used for context).
+            current_routing: Routing dict from the classifier.
+
+        Returns:
+            Updated routing dict with ``domains`` and ``domain`` overridden.
+        """
+        try:
+            recent_ctx = ""
+            if history:
+                recent = history[-2:]
+                recent_ctx = " | ".join(
+                    m["content"] for m in recent if m.get("content")
+                )
+
+            prompt = DOMAIN_CLASSIFICATION_PROMPT.format(
+                query=question,
+                context=recent_ctx or "(none)",
+            )
+            raw = self._chat.generate(query=prompt, mode="chitchat")
+
+            import json as _json
+
+            # Strip markdown fences if present
+            clean = raw.strip().strip("```json").strip("```").strip()
+            parsed = _json.loads(clean)
+
+            raw_domains = parsed.get("domains") or []
+            llm_confidence_str = parsed.get("confidence", "medium")
+            # Map LLM confidence string to a numeric value
+            llm_confidence = {"high": 0.85, "medium": 0.65, "low": 0.45}.get(
+                llm_confidence_str, 0.65
+            )
+
+            # Filter to valid RAG domains only
+            valid_domains = [d for d in raw_domains if d in _VALID_DOMAINS]
+            if not valid_domains:
+                logger.warning(
+                    "Tier-3 LLM returned no valid domains (%s); "
+                    "keeping classifier result.",
+                    raw_domains,
+                )
+                return current_routing
+
+            logger.info(
+                "Tier-3 LLM domain override: %s → %s (LLM conf=%s)",
+                current_routing.get("domains"),
+                valid_domains,
+                llm_confidence_str,
+            )
+            updated = dict(current_routing)
+            updated["domains"] = valid_domains
+            updated["domain"] = valid_domains[0]
+            updated["confidence"] = llm_confidence
+            updated["tier3_override"] = True
+            return updated
+
+        except Exception as exc:
+            logger.warning(
+                "Tier-3 LLM domain classification failed (%s); "
+                "keeping classifier result.",
+                exc,
+            )
+            return current_routing
+
     def query_stream(
         self,
         question: str,
@@ -285,8 +379,15 @@ class RAGPipeline:
         if session_id and not history and self._mongo_logger:
             history = self._mongo_logger.get_history(session_id)
 
-        routing = self._router.route(question)
+        routing = self._router.route(question, chat_history=history)
         intent = routing.get("intent", "rag")
+
+        # Tier-3: LLM domain fallback for low-confidence RAG routing
+        if (
+            intent == "rag"
+            and (routing.get("confidence") or 1.0) < _LLM_FALLBACK_THRESHOLD
+        ):
+            routing = self._llm_domain_classify(question, history, routing)
 
         self.last_sources: List[Dict[str, Any]] = []
         self.last_intent: str = intent

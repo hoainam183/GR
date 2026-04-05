@@ -146,15 +146,20 @@ def rag_flow(
                 "Reflection failed, using original query", exc_info=True
             )
 
-    # 2. Collection-aware routing (Phase 8)
+    # 2. Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
     if routing_result:
         domain = routing_result.get("domain")
+        domains = routing_result.get("domains") or ([domain] if domain else [])
         confidence = routing_result.get("confidence", 0.0)
-        target_collections = _collection_selector.select(domain, confidence)
+        target_collections = _collection_selector.select(
+            domain=domain,
+            confidence=confidence,
+            domains=domains,
+        )
         logger.info(
-            "Domain: %s (conf=%.3f) → searching collections: %s",
-            domain,
+            "Domains: %s (conf=%.3f) → searching collections: %s",
+            domains,
             confidence,
             target_collections,
         )
@@ -259,12 +264,17 @@ def rag_flow_stream(
                 "Reflection failed, using original query", exc_info=True
             )
 
-    # Collection-aware routing (Phase 8)
+    # Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
     if routing_result:
         domain = routing_result.get("domain")
+        domains = routing_result.get("domains") or ([domain] if domain else [])
         confidence = routing_result.get("confidence", 0.0)
-        target_collections = _collection_selector.select(domain, confidence)
+        target_collections = _collection_selector.select(
+            domain=domain,
+            confidence=confidence,
+            domains=domains,
+        )
 
     # Embed → Search → Rerank
     bge_vec = bge_embedder.embed_query(search_query)
