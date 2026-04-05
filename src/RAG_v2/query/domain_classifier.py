@@ -96,6 +96,7 @@ class DomainClassifier:
         self,
         data: List[Tuple[str, List[str]]],
         test_size: float = 0.2,
+        val_size: float = 0.15,
         random_state: int = 42,
     ) -> Dict[str, Any]:
         """Embed, fit both stages, and return evaluation report.

@@ -33,7 +33,7 @@ def main() -> None:
 
     # 3. Train two-stage classifier
     clf = DomainClassifier(embedder=embedder)
-    result = clf.train(data, test_size=0.2)
+    result = clf.train(data, test_size=0.2, val_size=0.15)
 
     # 4. Print report
     print("\n" + "=" * 60)
