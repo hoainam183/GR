@@ -4,13 +4,20 @@ Supports two modes:
 - ``"llm"``: uses OpenAI LLM with few-shot classification (original behaviour).
 - ``"classifier"``: uses a lightweight embedding-based ``DomainClassifier``
   (zero API cost, ~10-50 ms latency).
+
+Improvements (Tier 1 + 2):
+- ``build_routing_input`` prepends recent conversation context so that
+  follow-up queries like "Còn điều kiện tiên quyết là gì?" are routed
+  correctly.
+- ``route()`` accepts an optional ``chat_history`` argument.
+- ``domains`` (list) is returned alongside ``domain`` (single primary).
 """
 
 from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from .prompts import ROUTER_FEW_SHOT, ROUTER_SYSTEM_PROMPT
 
@@ -20,6 +27,35 @@ logger = logging.getLogger(__name__)
 VALID_INTENTS = {"chitchat", "rag", "tool_search"}
 DEFAULT_INTENT = "rag"
 DEFAULT_MODEL = "gpt-4o-mini"
+
+# Number of recent chat turns to prepend as context
+_CONTEXT_WINDOW = 2
+
+
+def build_routing_input(
+    query: str,
+    chat_history: Optional[List[Dict[str, str]]] = None,
+) -> str:
+    """Build the input string sent to the classifier / LLM.
+
+    Prepends the last ``_CONTEXT_WINDOW`` message contents so that
+    short follow-up queries are routed with the right domain in mind.
+    BGE-M3 handles long inputs well, so the extra tokens are cheap.
+
+    Args:
+        query: The raw user message.
+        chat_history: List of ``{"role": ..., "content": ...}`` dicts.
+
+    Returns:
+        Contextualised query string.
+    """
+    if not chat_history:
+        return query
+    recent = chat_history[-_CONTEXT_WINDOW:]
+    ctx = " | ".join(m["content"] for m in recent if m.get("content"))
+    if not ctx:
+        return query
+    return f"[CTX: {ctx}] {query}"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -66,41 +102,58 @@ class QueryRouter:
     # Public API
     # ------------------------------------------------------------------
 
-    def route(self, query: str) -> Dict[str, Any]:
+    def route(
+        self,
+        query: str,
+        chat_history: Optional[List[Dict[str, str]]] = None,
+    ) -> Dict[str, Any]:
         """Classify *query* and return a routing decision.
 
         Args:
             query: The raw user message.
+            chat_history: Recent conversation turns used for context-aware
+                          routing.  Passed to ``build_routing_input``.
 
         Returns:
             Dict with keys:
+
             - ``intent``: ``"rag"`` | ``"chitchat"`` | ``"tool_search"``
-            - ``domain``: sub-domain string or *None* (classifier mode only)
-            - ``confidence``: prediction confidence (classifier mode only)
+            - ``domain``: primary sub-domain string or *None*
+            - ``domains``: list of all active RAG domains (may be >1)
+            - ``confidence``: calibrated prediction confidence
         """
         if self.mode == "classifier":
-            return self._route_classifier(query)
+            return self._route_classifier(query, chat_history)
         return self._route_llm(query)
 
     # ------------------------------------------------------------------
     # Classifier-based routing
     # ------------------------------------------------------------------
 
-    def _route_classifier(self, query: str) -> Dict[str, Any]:
-        result = self._classifier.predict(query)
+    def _route_classifier(
+        self,
+        query: str,
+        chat_history: Optional[List[Dict[str, str]]] = None,
+    ) -> Dict[str, Any]:
+        routing_input = build_routing_input(query, chat_history)
+        result = self._classifier.predict(routing_input)
+
         logger.info(
-            "Router(classifier): query=%r → intent=%s, domain=%s, conf=%.3f",
+            "Router(classifier): query=%r → intent=%s, domains=%s, conf=%.3f",
             query[:80],
             result["intent"],
-            result["domain"],
+            result.get("domains"),
             result["confidence"],
         )
         return {
             "intent": result["intent"],
             "domain": result["domain"],
+            "domains": result.get(
+                "domains", [result["domain"]] if result["domain"] else []
+            ),
             "confidence": result["confidence"],
             "label": result["label"],
-            "probabilities": result["probabilities"],
+            "probabilities": result.get("probabilities", {}),
         }
 
     # ------------------------------------------------------------------
@@ -130,6 +183,7 @@ class QueryRouter:
         return {
             "intent": intent,
             "domain": None,
+            "domains": [],
             "confidence": None,
             "raw_response": raw,
         }
