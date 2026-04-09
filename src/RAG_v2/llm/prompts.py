@@ -39,7 +39,16 @@ KHÔNG hiển thị URL thô dài.
 khi sinh viên yêu cầu cụ thể.
 12. KHÔNG bao giờ viết "tại đây" hoặc "TẠI ĐÂY" mà không có URL đi kèm. Nếu tài \
 liệu chỉ có chữ "tại đây" mà không có URL, hãy thay bằng "trên trang web của Phòng \
-Đào tạo HUST (ctt.hust.edu.vn)"."""
+Đào tạo HUST (ctt.hust.edu.vn)".
+
+Quy tắc về SỐ LIỆU CHÍNH XÁC (tín chỉ, điểm, mã ngành, ngày tháng):
+13. Khi các tài liệu tham khảo đưa ra CON SỐ KHÁC NHAU cho cùng một thông tin, \
+hãy ƯU TIÊN tài liệu được liệt kê ĐẦU TIÊN (có độ liên quan cao nhất) và ghi chú \
+rõ: "Theo [tên tài liệu], con số là X. Lưu ý: một số tài liệu khác có thể ghi \
+khác do áp dụng cho đối tượng/khóa học khác nhau."
+14. Với câu hỏi về số tín chỉ, điểm GPA/CPA, hoặc mã ngành, KHÔNG tổng hợp hay \
+trung bình hóa số liệu từ nhiều nguồn — chỉ dùng số liệu từ tài liệu phù hợp nhất \
+với ngành/khóa của sinh viên nếu đã biết."""
 
 RAG_USER_TEMPLATE = """\
 ### Tài liệu tham khảo:

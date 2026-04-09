@@ -12,6 +12,31 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
   const isUser = message.role === 'user';
   const [showSources, setShowSources] = useState(false);
   const hasSources = message.sources && message.sources.length > 0;
+  const timingEntries = Object.entries(message.timingsMs ?? {}).filter(
+    ([, value]) => Number.isFinite(value)
+  );
+  const targetCollectionSet = new Set(message.targetCollections ?? []);
+  const rankedCollectionScores = [...(message.collectionScores ?? [])].sort(
+    (a, b) => b.score - a.score
+  );
+  const displayCollectionScores =
+    rankedCollectionScores.length > 0
+      ? rankedCollectionScores
+      : (message.targetCollections ?? []).map((collection) => ({
+          collection,
+          score: Number.NaN,
+        }));
+  const topTimingEntries = [...timingEntries]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+
+  const formatTimingLabel = (stage: string) =>
+    stage
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  const formatTimingSeconds = (milliseconds: number) =>
+    `${(milliseconds / 1000).toFixed(2)}s`;
 
   return (
     <div
@@ -67,6 +92,58 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             : 'rounded-tl-sm bg-chat-assistant border border-border text-foreground'
         )}
       >
+        {/* Info Area (Target Collections & Reflected Query) */}
+        {!isUser && (displayCollectionScores.length > 0 || message.reflectedQuestion || topTimingEntries.length > 0) && (
+          <div className="mb-3 space-y-1 text-[11px] text-muted-foreground bg-muted/30 p-2 rounded-md border border-border/50">
+            {displayCollectionScores.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-semibold text-primary/70">Collection Ranking:</span>
+                {displayCollectionScores.map(({ collection, score }) => {
+                  const scoreText = Number.isFinite(score)
+                    ? ` (${score.toFixed(3)})`
+                    : '';
+                  const isSelected = targetCollectionSet.has(collection);
+                  return (
+                    <span
+                      key={collection}
+                      className={cn(
+                        'px-1.5 rounded-sm',
+                        isSelected
+                          ? 'bg-primary/20 text-primary font-semibold'
+                          : 'bg-primary/10 text-primary'
+                      )}
+                    >
+                      {collection}
+                      {scoreText}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+            {message.reflectedQuestion && (
+              <div className="flex items-start gap-1.5">
+                <span className="font-semibold text-primary/70 shrink-0">Reflected:</span>
+                <span className="italic break-words">"{message.reflectedQuestion}"</span>
+              </div>
+            )}
+            {topTimingEntries.length > 0 && (
+              <div className="space-y-1">
+                <div className="font-semibold text-primary/70">Timing (s):</div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {topTimingEntries.map(([stage, value]) => (
+                    <span
+                      key={stage}
+                      className="bg-amber-500/10 text-amber-700 px-1.5 rounded-sm"
+                    >
+                      {formatTimingLabel(stage)}: {formatTimingSeconds(value)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}

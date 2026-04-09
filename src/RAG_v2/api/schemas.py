@@ -42,6 +42,13 @@ class RetrievedDocument(BaseModel):
     metadata: Dict[str, Any]
 
 
+class CollectionScore(BaseModel):
+    """Router confidence score for a target collection."""
+
+    collection: str
+    score: float
+
+
 class ChatResponse(BaseModel):
     """Response body for ``POST /chat``."""
 
@@ -51,6 +58,10 @@ class ChatResponse(BaseModel):
     num_documents: int
     model_name: str
     intent: str
+    target_collections: Optional[List[str]] = None
+    collection_scores: Optional[List[CollectionScore]] = None
+    reflected_question: Optional[str] = None
+    timings_ms: Optional[Dict[str, float]] = None
     session_id: str
 
 

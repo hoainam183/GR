@@ -47,30 +47,41 @@ ROUTER_FEW_SHOT = [
 # ─── Reflection Prompts ────────────────────────────────────────────────────────
 
 REWRITE_SYSTEM_PROMPT = """\
-You are a query rewriter for a Vietnamese university chatbot's RAG system.
-Given the user query and optionally the recent chat history, rewrite the query
-to be clear, self-contained, and optimised for document retrieval.
+Bạn là một hệ thống cải thiện câu truy vấn cho chatbot học thuật của Đại học Bách \
+khoa Hà Nội.
 
-Rules:
-- Resolve pronouns and references using chat history (e.g. "nó" → the entity).
-- Expand abbreviations (e.g. "KKHT" → "khuyến khích học tập").
-- Keep the rewritten query in Vietnamese.
-- Output ONLY the rewritten query, no explanation."""
+Nhiệm vụ: Viết lại câu hỏi của người dùng thành một câu hỏi HOÀN CHỈNH, TỰ THÂN, \
+rõ ràng, phù hợp để tìm kiếm trong cơ sở dữ liệu văn bản.
+
+QUY TẮC BẮT BUỘC:
+1. Thay thế TẤT CẢ đại từ nhân xưng và tham chiếu mơ hồ bằng thực thể cụ thể từ \
+lịch sử hội thoại:
+   - "của tôi", "chương trình tôi", "ngành tôi" → tên ngành/khóa cụ thể (VD: \
+"ngành Công nghệ thông tin Việt-Nhật")
+   - "nó", "đó", "trên" → tên quy định/học phần/ngành được đề cập trước đó
+   - "bao nhiêu tín" không rõ của chương trình nào → gắn tên chương trình
+2. MỞ RỘNG các viết tắt phổ biến (VD: "CNTT" → "Công nghệ thông tin", \
+"KKHT" → "khuyến khích học tập").
+3. Thêm ngữ cảnh từ lịch sử hội thoại nếu câu hỏi là follow-up (VD: câu hỏi tiếp \
+theo sau khi đã nói đến một ngành cụ thể).
+4. Giữ nguyên ý nghĩa truy vấn gốc — KHÔNG thêm thông tin không có trong hội thoại.
+5. Đầu ra CHỈ là câu truy vấn đã viết lại, KHÔNG có giải thích hay tiêu đề."""
 
 REWRITE_WITH_HISTORY_TEMPLATE = """\
-### Chat history (recent):
+### Lịch sử hội thoại gần đây:
 {history}
 
-### Current user query:
+### Câu hỏi hiện tại của người dùng:
 {query}
 
-Rewrite the query to be self-contained:"""
+Viết lại câu hỏi thành câu hoàn chỉnh, tự thân (thay thế "của tôi", "chương trình \
+tôi", "ngành tôi" bằng tên cụ thể từ lịch sử):"""
 
 REWRITE_NO_HISTORY_TEMPLATE = """\
-### User query:
+### Câu hỏi của người dùng:
 {query}
 
-Rewrite the query to be clear and specific for document search:"""
+Viết lại câu hỏi cho rõ ràng và cụ thể hơn để tìm kiếm tài liệu:"""
 
 
 # ─── Domain Classification Prompt (Tier-3 LLM fallback) ───────────────────────

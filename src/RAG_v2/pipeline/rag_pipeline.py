@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 import time
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, TYPE_CHECKING
 
@@ -43,6 +44,52 @@ from .flows import (
 
 logger = logging.getLogger(__name__)
 
+# Route + reflection cache — avoids repeat classifier/LLM calls
+_ROUTE_CACHE_TTL_SEC = 45.0
+_ROUTE_CACHE_MAX_SIZE = 256
+_REFLECT_CACHE_TTL_SEC = 30.0
+_REFLECT_CACHE_MAX_SIZE = 256
+
+
+def _build_cache_key(
+    question: str,
+    history: "Optional[List[Dict[str, str]]]",
+) -> str:
+    """Compact cache key from question + last 2 history turns."""
+    q = question.strip().lower()
+    if not history:
+        return q
+    recent = history[-2:]
+    parts = [f"{m.get('role','')}:{str(m.get('content',''))[:120]}" for m in recent]
+    return f"{q}||{'|'.join(parts)}"
+
+
+def _elapsed_ms(start: float) -> float:
+    """Return elapsed milliseconds rounded for compact logs/JSON."""
+    return round((time.perf_counter() - start) * 1000, 2)
+
+
+def _merge_timings(*timings: Optional[Dict[str, float]]) -> Dict[str, float]:
+    """Merge timing dictionaries while preserving insertion order."""
+    merged: Dict[str, float] = {}
+    for timing in timings:
+        if timing:
+            merged.update(timing)
+    return merged
+
+
+def _log_timings(label: str, timings_ms: Dict[str, float]) -> None:
+    """Log timing breakdown sorted by slowest stage first."""
+    if not timings_ms:
+        return
+    ordered = sorted(
+        timings_ms.items(), key=lambda item: item[1], reverse=True
+    )
+    summary = ", ".join(
+        f"{stage}={duration:.1f}" for stage, duration in ordered
+    )
+    logger.info("%s timings (ms): %s", label, summary)
+
 
 # ---------------------------------------------------------------------------
 # Config — built from Settings (centralised Pydantic config)
@@ -71,6 +118,7 @@ def _settings_to_cfg(settings: Settings) -> Dict[str, Any]:
         "router_mode": settings.router_mode,
         "reflection_enabled": settings.reflection_enabled,
         "self_eval_enabled": settings.self_eval_enabled,
+        "self_eval_min_top_score": settings.self_eval_min_top_score,
         "tavily_fallback_enabled": settings.tavily_fallback_enabled,
     }
 
@@ -124,7 +172,7 @@ class RAGPipeline:
         self._reflector: Optional[QueryReflector] = None
         if cfg.get("reflection_enabled", True):
             try:
-                self._reflector = QueryReflector()
+                self._reflector = QueryReflector(settings=settings)
                 logger.info("Query reflector loaded.")
             except Exception:
                 logger.warning(
@@ -181,7 +229,68 @@ class RAGPipeline:
 
         self._cfg = cfg
         self._mongo_logger = mongo_logger
+        self._route_cache: OrderedDict[str, tuple[float, Dict[str, Any]]] = OrderedDict()
+        self._reflect_cache: OrderedDict[str, tuple[float, str]] = OrderedDict()
         logger.info("RAG v2 Pipeline ready.")
+
+    # ------------------------------------------------------------------
+    # Cache helpers
+    # ------------------------------------------------------------------
+
+    def _route_with_cache(
+        self,
+        question: str,
+        history: Optional[List[Dict[str, str]]],
+    ) -> Dict[str, Any]:
+        """Route with a short-lived cache to avoid repeat classifier calls."""
+        import time as _time
+        now = _time.time()
+        key = _build_cache_key(question, history)
+        cached = self._route_cache.get(key)
+        if cached is not None:
+            ts, payload = cached
+            if now - ts <= _ROUTE_CACHE_TTL_SEC:
+                self._route_cache.move_to_end(key)
+                logger.debug("Route cache hit: %r", question[:60])
+                return dict(payload)
+            del self._route_cache[key]
+        routed = self._router.route(question, chat_history=history)
+        self._route_cache[key] = (now, dict(routed))
+        self._route_cache.move_to_end(key)
+        while len(self._route_cache) > _ROUTE_CACHE_MAX_SIZE:
+            self._route_cache.popitem(last=False)
+        return routed
+
+    def _reflect_with_cache(
+        self,
+        question: str,
+        history: Optional[List[Dict[str, str]]],
+    ) -> str:
+        """Reflect with a short-lived cache for similar queries."""
+        import time as _time
+        if self._reflector is None:
+            return question
+        now = _time.time()
+        key = _build_cache_key(question, history)
+        cached = self._reflect_cache.get(key)
+        if cached is not None:
+            ts, rewritten = cached
+            if now - ts <= _REFLECT_CACHE_TTL_SEC:
+                self._reflect_cache.move_to_end(key)
+                logger.debug("Reflect cache hit: %r", question[:60])
+                return rewritten
+            del self._reflect_cache[key]
+        try:
+            result = self._reflector.reflect(question, chat_history=history)
+            rewritten = result.get("rewritten", question)
+        except Exception:
+            logger.warning("Reflection failed", exc_info=True)
+            rewritten = question
+        self._reflect_cache[key] = (now, rewritten)
+        self._reflect_cache.move_to_end(key)
+        while len(self._reflect_cache) > _REFLECT_CACHE_MAX_SIZE:
+            self._reflect_cache.popitem(last=False)
+        return rewritten
 
     # ------------------------------------------------------------------
     # Public API
@@ -211,14 +320,19 @@ class RAGPipeline:
             - ``model_name`` — chat model name
         """
         effective_top_k = top_k or self._cfg["top_k"]
-        t0 = time.perf_counter()
+        pipeline_t0 = time.perf_counter()
+        pipeline_timings: Dict[str, float] = {}
 
         # Auto-load history from MongoDB if session exists and no history given
         if session_id and not history and self._mongo_logger:
+            load_t0 = time.perf_counter()
             history = self._mongo_logger.get_history(session_id)
+            pipeline_timings["history_load"] = _elapsed_ms(load_t0)
 
-        # 1. Route the query (context-aware — Tier 1)
-        routing = self._router.route(question, chat_history=history)
+        # 1. Route the query (context-aware — Tier 1, cached)
+        route_t0 = time.perf_counter()
+        routing = self._route_with_cache(question, history)
+        pipeline_timings["routing"] = _elapsed_ms(route_t0)
         intent = routing.get("intent", "rag")
         logger.info("Routing decision: intent=%s", intent)
 
@@ -227,7 +341,11 @@ class RAGPipeline:
             intent == "rag"
             and (routing.get("confidence") or 1.0) < _LLM_FALLBACK_THRESHOLD
         ):
+            fallback_t0 = time.perf_counter()
             routing = self._llm_domain_classify(question, history, routing)
+            pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(
+                fallback_t0
+            )
 
         if intent == "chitchat":
             result = chitchat_flow(
@@ -235,14 +353,22 @@ class RAGPipeline:
                 history=history,
                 chat_model=self._chat,
             )
+            timings_ms = _merge_timings(
+                pipeline_timings, result.get("timings_ms")
+            )
+            timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
+            result["timings_ms"] = timings_ms
+            _log_timings("query(chitchat)", timings_ms)
+
             if session_id and self._mongo_logger:
-                latency_ms = int((time.perf_counter() - t0) * 1000)
+                latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
                 self._mongo_logger.log_turn(
                     session_id=session_id,
                     question=question,
                     result=result,
                     reflected_question=result.get("reflected_question"),
                     latency_ms=latency_ms,
+                    timings_ms=timings_ms,
                 )
             return result
 
@@ -262,16 +388,21 @@ class RAGPipeline:
             cfg=flow_cfg,
             routing_result=routing,
         )
+        timings_ms = _merge_timings(pipeline_timings, result.get("timings_ms"))
+        timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
+        result["timings_ms"] = timings_ms
+        _log_timings("query(rag)", timings_ms)
 
         # Log to MongoDB
         if session_id and self._mongo_logger:
-            latency_ms = int((time.perf_counter() - t0) * 1000)
+            latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
             self._mongo_logger.log_turn(
                 session_id=session_id,
                 question=question,
                 result=result,
                 reflected_question=result.get("reflected_question"),
                 latency_ms=latency_ms,
+                timings_ms=timings_ms,
             )
 
         return result
@@ -375,13 +506,18 @@ class RAGPipeline:
             Text chunks as they arrive from the API.
         """
         effective_top_k = top_k or self._cfg["top_k"]
-        t0 = time.perf_counter()
+        pipeline_t0 = time.perf_counter()
+        pipeline_timings: Dict[str, float] = {}
 
         # Auto-load history from MongoDB if session exists and no history given
         if session_id and not history and self._mongo_logger:
+            load_t0 = time.perf_counter()
             history = self._mongo_logger.get_history(session_id)
+            pipeline_timings["history_load"] = _elapsed_ms(load_t0)
 
-        routing = self._router.route(question, chat_history=history)
+        route_t0 = time.perf_counter()
+        routing = self._route_with_cache(question, history)
+        pipeline_timings["routing"] = _elapsed_ms(route_t0)
         intent = routing.get("intent", "rag")
 
         # Tier-3: LLM domain fallback for low-confidence RAG routing
@@ -389,23 +525,38 @@ class RAGPipeline:
             intent == "rag"
             and (routing.get("confidence") or 1.0) < _LLM_FALLBACK_THRESHOLD
         ):
+            fallback_t0 = time.perf_counter()
             routing = self._llm_domain_classify(question, history, routing)
+            pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(
+                fallback_t0
+            )
 
         self.last_sources: List[Dict[str, Any]] = []
         self.last_intent: str = intent
+        self.last_timings: Dict[str, float] = {}
 
         full_answer_chunks: List[str] = []
 
         if intent == "chitchat":
+            stream_t0 = time.perf_counter()
+            first_token_ms: Optional[float] = None
             for chunk in chitchat_flow_stream(
                 question=question,
                 history=history,
                 chat_model=self._chat,
             ):
+                if first_token_ms is None:
+                    first_token_ms = _elapsed_ms(stream_t0)
                 full_answer_chunks.append(chunk)
                 yield chunk
+
+            pipeline_timings["stream_first_token"] = round(
+                first_token_ms or 0.0, 2
+            )
+            pipeline_timings["stream_generate"] = _elapsed_ms(stream_t0)
         else:
             flow_cfg = {**self._cfg, "top_k": effective_top_k}
+            flow_timings: Dict[str, float] = {}
             stream, reranked = rag_flow_stream(
                 question=question,
                 history=history,
@@ -417,24 +568,33 @@ class RAGPipeline:
                 chat_model=self._chat,
                 cfg=flow_cfg,
                 routing_result=routing,
+                timings_ms_out=flow_timings,
             )
             self.last_sources = reranked
             for chunk in stream:
                 full_answer_chunks.append(chunk)
                 yield chunk
+            pipeline_timings = _merge_timings(pipeline_timings, flow_timings)
+
+        timings_ms = _merge_timings(pipeline_timings)
+        timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
+        self.last_timings = timings_ms
+        _log_timings(f"query_stream({intent})", timings_ms)
 
         # Log to MongoDB after stream finishes
         if session_id and self._mongo_logger:
-            latency_ms = int((time.perf_counter() - t0) * 1000)
+            latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
             result = {
                 "answer": "".join(full_answer_chunks),
                 "intent": intent,
                 "num_sources": len(self.last_sources),
                 "model_name": self._chat.model,
+                "timings_ms": timings_ms,
             }
             self._mongo_logger.log_turn(
                 session_id=session_id,
                 question=question,
                 result=result,
                 latency_ms=latency_ms,
+                timings_ms=timings_ms,
             )

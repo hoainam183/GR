@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import time
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+if TYPE_CHECKING:
+    from config.settings import Settings
 
 from openai import OpenAI, RateLimitError
 
@@ -23,6 +27,84 @@ DEFAULT_MODEL = "gemini-2.0-flash"
 DEFAULT_HISTORY_LIMIT = 5
 _MAX_RETRIES = 3
 _BASE_RETRY_DELAY = 2.0  # seconds
+
+# Personal pronouns/possessives that indicate the query needs profile enrichment
+_PERSONAL_REFS = re.compile(
+    r"\b(c(?:ủa|ủa tôi|húng tôi)|ng(?:ành|ành tôi)|ch(?:ương trình|ương trình tôi)"
+    r"|kh(?:óa|óa tôi)|t(?:ôi|ôi đang)|mình)\b",
+    re.IGNORECASE,
+)
+
+
+def _extract_profile_note(history: List[Dict[str, str]]) -> str:
+    """Scan conversation history for user-stated facts (major, year, GPA/CPA).
+
+    Returns a short Vietnamese note like:
+        "sinh viên ngành Công nghệ thông tin Việt-Nhật, năm 2, CPA=3.1"
+    or empty string when nothing is found.
+    """
+    if not history:
+        return ""
+
+    profile: Dict[str, str] = {}
+    user_messages = [
+        m.get("content", "") for m in history
+        if m.get("role") == "user" and m.get("content")
+    ]
+
+    for text in user_messages:
+        t = text.lower()
+
+        # Major / programme name
+        if not profile.get("nganh"):
+            # Pattern: "học ngành X", "ngành X", "chuyên ngành X"
+            m = re.search(
+                r"(?:h\u1ecdc ng\u00e0nh|ng\u00e0nh|chuy\u00ean ng\u00e0nh)\s+"
+                r"([^\.,\n\?!]{3,50})",
+                text,
+                re.IGNORECASE,
+            )
+            if m:
+                profile["nganh"] = m.group(1).strip().rstrip(".,!?")
+
+        # Year of study
+        if not profile.get("nam"):
+            m = re.search(
+                r"(?:sinh vi\u00ean n\u0103m|n\u0103m\s+th\u1ee9|n\u0103m)\s*(\d)"
+                r"|(\d)\s*n\u0103m",
+                t,
+            )
+            if m:
+                profile["nam"] = next(g for g in m.groups() if g)
+
+        # Cohort / Khóa
+        if not profile.get("khoa"):
+            m = re.search(r"\bk(\d{2,3})\b|kh\u00f3a\s*(\d{2,3})", t)
+            if m:
+                profile["khoa"] = next(g for g in m.groups() if g)
+
+        # GPA / CPA
+        if not profile.get("gpa"):
+            m = re.search(
+                r"\b(?:cpa|gpa)\s*(?:l\u00e0|=|:)?\s*(\d+[.,]\d+)\b", t
+            )
+            if m:
+                profile["gpa"] = m.group(1).replace(",", ".")
+
+    if not profile:
+        return ""
+
+    parts: List[str] = []
+    if "nganh" in profile:
+        parts.append(f"ng\u00e0nh {profile['nganh']}")
+    if "nam" in profile:
+        parts.append(f"n\u0103m {profile['nam']}")
+    if "khoa" in profile:
+        parts.append(f"K{profile['khoa']}")
+    if "gpa" in profile:
+        parts.append(f"CPA={profile['gpa']}")
+
+    return "sinh vi\u00ean " + ", ".join(parts)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -49,16 +131,42 @@ class QueryReflector:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        model: str = DEFAULT_MODEL,
-        temperature: float = 0.3,
+        settings: Optional["Settings"] = None,
+        api_key: Optional[str] = None,  # For backwards compatibility if any
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
         history_limit: int = DEFAULT_HISTORY_LIMIT,
     ) -> None:
-        self.model = model
-        self.temperature = temperature
+        if settings is None:
+            from config.settings import Settings
+            settings = Settings()
+
+        self.model = model or settings.reflection_model
+        self.temperature = temperature if temperature is not None else settings.reflection_temperature
         self.history_limit = history_limit
-        resolved_key = api_key or os.getenv("GOOGLE_API_KEY", "")
-        self._client = OpenAI(api_key=resolved_key, base_url=_GEMINI_BASE_URL)
+        
+        provider = settings.reflection_provider
+        
+        # Setup OpenAI client parameters based on provider
+        if provider == "gemini":
+            base_url = _GEMINI_BASE_URL
+            resolved_key = api_key or settings.google_api_key or os.getenv("GOOGLE_API_KEY", "")
+        elif provider == "lm_studio":
+            base_url = settings.lm_studio_base_url
+            resolved_key = api_key or "lm-studio"
+        elif provider == "ollama":
+            # For Ollama OpenAI compatibility we append /v1 if missing
+            _base = settings.ollama_base_url
+            base_url = _base if _base.endswith("/v1") else f"{_base}/v1"
+            resolved_key = api_key or "ollama"
+        elif provider == "openai":
+            base_url = "https://api.openai.com/v1"
+            resolved_key = api_key or settings.openai_api_key or os.getenv("OPENAI_API_KEY", "")
+        else:
+            base_url = _GEMINI_BASE_URL
+            resolved_key = api_key or settings.google_api_key or os.getenv("GOOGLE_API_KEY", "")
+            
+        self._client = OpenAI(api_key=resolved_key, base_url=base_url)
 
     # ------------------------------------------------------------------
     # Public API
@@ -135,13 +243,23 @@ class QueryReflector:
         query: str,
         chat_history: Optional[List[Dict[str, str]]] = None,
     ) -> str:
-        """Format the user prompt, optionally including chat history."""
+        """Format the user prompt, optionally including chat history.
+
+        Also extracts a compact user profile (major, year, GPA) from history
+        and prepends it as a one-line note so that even weak local models can
+        resolve "của tôi" / "chương trình tôi" without reading the full history.
+        """
         if chat_history:
             recent = chat_history[-self.history_limit :]
             history_text = "\n".join(
-                f"{msg['role'].capitalize()}: {msg['content']}"
+                f"{'Người dùng' if msg['role'] == 'user' else 'Trợ lý'}: {msg['content']}"
                 for msg in recent
+                if msg.get("content")
             )
+            # Prepend a profile hint extracted from history so model can't miss it
+            profile_note = _extract_profile_note(chat_history)
+            if profile_note:
+                history_text = f"[Thông tin đã biết: {profile_note}]\n" + history_text
             return REWRITE_WITH_HISTORY_TEMPLATE.format(
                 history=history_text, query=query
             )

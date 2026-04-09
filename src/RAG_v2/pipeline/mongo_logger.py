@@ -88,6 +88,7 @@ class MongoLogger:
         *,
         reflected_question: Optional[str] = None,
         latency_ms: int = 0,
+        timings_ms: Optional[Dict[str, float]] = None,
     ) -> int:
         """Insert a turn document and a flat query_log entry.
 
@@ -111,6 +112,10 @@ class MongoLogger:
         answer = result.get("answer", "")
         num_sources = result.get("num_sources", 0)
         model_name = result.get("model_name", "")
+        if timings_ms is None:
+            raw_timings = result.get("timings_ms")
+            if isinstance(raw_timings, dict):
+                timings_ms = raw_timings
 
         # Auto-set session title from first question
         if session and turn_id == 1:
@@ -121,37 +126,39 @@ class MongoLogger:
             )
 
         # Insert into turns collection
-        self._turns.insert_one(
-            {
-                "session_id": session_id,
-                "turn_id": turn_id,
-                "question": question,
-                "answer": answer,
-                "intent": intent,
-                "reflected_question": reflected_question,
-                "num_sources": num_sources,
-                "model_name": model_name,
-                "latency_ms": latency_ms,
-                "timestamp": now,
-            }
-        )
+        turn_doc: Dict[str, Any] = {
+            "session_id": session_id,
+            "turn_id": turn_id,
+            "question": question,
+            "answer": answer,
+            "intent": intent,
+            "reflected_question": reflected_question,
+            "num_sources": num_sources,
+            "model_name": model_name,
+            "latency_ms": latency_ms,
+            "timestamp": now,
+        }
+        if timings_ms is not None:
+            turn_doc["timings_ms"] = timings_ms
+        self._turns.insert_one(turn_doc)
 
         # Flat analytics entry
-        self._query_logs.insert_one(
-            {
-                "session_id": session_id,
-                "user_id": session["user_id"] if session else None,
-                "turn_id": turn_id,
-                "question": question,
-                "answer": answer,
-                "intent": intent,
-                "reflected_question": reflected_question,
-                "num_sources": num_sources,
-                "model_name": model_name,
-                "latency_ms": latency_ms,
-                "timestamp": now,
-            }
-        )
+        query_log_doc: Dict[str, Any] = {
+            "session_id": session_id,
+            "user_id": session["user_id"] if session else None,
+            "turn_id": turn_id,
+            "question": question,
+            "answer": answer,
+            "intent": intent,
+            "reflected_question": reflected_question,
+            "num_sources": num_sources,
+            "model_name": model_name,
+            "latency_ms": latency_ms,
+            "timestamp": now,
+        }
+        if timings_ms is not None:
+            query_log_doc["timings_ms"] = timings_ms
+        self._query_logs.insert_one(query_log_doc)
 
         return turn_id
 

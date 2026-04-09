@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     """
 
     # --- Provider Selectors (change in .env, no code edits needed) ---
-    llm_provider: str = "gemini"  # gemini | openai | azure | ollama
+    llm_provider: str = "lm_studio"  # gemini | openai | azure | ollama | lm_studio
     embedding_provider: str = "ensemble"  # ensemble | bge_m3 | e5
     reranker_provider: str = "bge"  # bge | cohere | none
 
@@ -70,6 +70,9 @@ class Settings(BaseSettings):
     azure_openai_api_key: str = ""
     azure_openai_api_version: str = "2024-02-01"
     azure_openai_deployment: str = ""
+
+    # --- LM Studio / Local ---
+    lm_studio_base_url: str = "http://localhost:1234/v1"
 
     # --- Ollama ---
     ollama_base_url: str = "http://localhost:11434"
@@ -113,10 +116,17 @@ class Settings(BaseSettings):
 
     # --- Evaluation & Fallback ---
     self_eval_enabled: bool = True
-    tavily_fallback_enabled: bool = True
+    # Reranker score threshold: skip self-eval when top chunk score >= this value.
+    # Higher = self-eval triggers less often (faster). Lower = more quality checks.
+    self_eval_min_top_score: float = 0.72
+    tavily_fallback_enabled: bool = False
 
     # --- Reflection ---
     reflection_enabled: bool = True
+    reflection_provider: str = "lm_studio"
+    reflection_model: str = "qwen2.5"
+    reflection_temperature: float = 0.3
+    reflection_max_tokens: int = 512
 
     # --- Collection-aware Routing (Phase 8) ---
     domain_routing_enabled: bool = True

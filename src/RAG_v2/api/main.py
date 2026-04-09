@@ -20,6 +20,7 @@ sys.path.insert(0, str(_RAG_V2_ROOT))
 from pipeline.rag_pipeline import RAGPipeline  # noqa: E402
 from pipeline.mongo_logger import MongoLogger  # noqa: E402
 from config.settings import Settings  # noqa: E402
+from models.database import create_indexes  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +68,13 @@ async def lifespan(app: FastAPI):
         lambda: RAGPipeline(api_key=api_key, mongo_logger=mongo_logger),
     )
 
+    # Create MongoDB indexes (idempotent — safe to call on every startup).
+    try:
+        await create_indexes()
+        logger.info("MongoDB indexes ensured.")
+    except Exception:
+        logger.warning("MongoDB index creation failed", exc_info=True)
+
     logger.info("Backend ready!")
     yield
     logger.info("Shutting down …")
@@ -82,6 +90,7 @@ def create_app() -> FastAPI:
     from .routes.chat import router as chat_router
     from .routes.health import router as health_router
     from .routes.session import router as session_router
+    from routers.auth import router as auth_router
 
     app = FastAPI(
         title="RAG v2 Chatbot API",
@@ -91,9 +100,10 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        # Restrict to the known frontend origin in production; expand as needed.
+        allow_origins=["http://localhost:5173"],
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
         expose_headers=["*"],
     )
@@ -101,6 +111,7 @@ def create_app() -> FastAPI:
     app.include_router(chat_router)
     app.include_router(health_router)
     app.include_router(session_router)
+    app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
     @app.get("/")
     async def root():

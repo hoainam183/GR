@@ -52,6 +52,10 @@ const ChatContainer = () => {
         content: response.answer,
         timestamp: new Date(),
         sources: response.retrieved_documents,
+        targetCollections: response.target_collections,
+        collectionScores: response.collection_scores,
+        reflectedQuestion: response.reflected_question,
+        timingsMs: response.timings_ms,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);

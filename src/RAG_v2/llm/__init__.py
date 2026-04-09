@@ -10,6 +10,7 @@ from .base import BaseLLM
 # Map provider name → dotted module path inside llm/
 _PROVIDER_MODULES: dict[str, str] = {
     "gemini": "llm.gemini",
+    "lm_studio": "llm.lm_studio",
 }
 
 # Provider registry — populated by @register_llm decorators at first call.
@@ -48,12 +49,17 @@ def create_llm(settings: "Settings") -> BaseLLM:  # type: ignore[name-defined]
             )
         importlib.import_module(module_path)  # triggers @register_llm
     cls = _REGISTRY[provider]
-    return cls(
-        api_key=settings.llm_api_key or settings.google_api_key,
-        model=settings.chat_model,
-        temperature=settings.chat_temperature,
-        max_tokens=settings.chat_max_tokens,
-    )
+    kwargs = {
+        "api_key": settings.llm_api_key or settings.google_api_key,
+        "model": settings.chat_model,
+        "temperature": settings.chat_temperature,
+        "max_tokens": settings.chat_max_tokens,
+    }
+    
+    if provider == "lm_studio":
+        kwargs["base_url"] = settings.lm_studio_base_url
+        
+    return cls(**kwargs)
 
 
 # Keep existing exports for backwards compatibility.
