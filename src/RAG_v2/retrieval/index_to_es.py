@@ -30,9 +30,10 @@ logger = logging.getLogger(__name__)
 # Danh sách (qdrant_collection, es_index) cần index.
 # Nếu tên ES index giống tên collection thì chỉ cần ghi tên collection.
 COLLECTIONS = [
-    # ("stsv", "stsv"),
-    # ("quydinh", "quydinh"),
+    ("stsv", "stsv"),
+    ("quydinh", "quydinh"),
     ("kehoach", "kehoach"),
+    ("ctdt", "ctdt"),
     # ("ten_collection_moi", "ten_es_index_moi"),
 ]
 

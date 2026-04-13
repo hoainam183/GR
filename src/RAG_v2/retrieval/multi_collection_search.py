@@ -29,8 +29,15 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Optional, Tuple
 
+from qdrant_client import models as qdrant_models
+
 from .elasticsearch_store import ElasticsearchStore
 from .hybrid_search import HybridSearch, rrf_score
+from .metadata_filters import (
+    CollectionFilter,
+    build_collection_filters,
+    kehoach_recency_bonus,
+)
 from .qdrant_store import QdrantStore
 
 logger = logging.getLogger(__name__)
@@ -157,10 +164,19 @@ class MultiCollectionSearch:
         keyword_pool_k: int = 15,
         score_threshold: Optional[float] = None,
         active_collections: Optional[List[str]] = None,
+        resolved_major: Optional[str] = None,
+        trace_out: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Search all collections and return a globally ranked list.
 
         Strategy:
+          0. **Metadata pre-search** (new): for each active collection, run an
+             ES filter-only query based on detected metadata signals (major,
+             date …).  The returned doc IDs are passed to Qdrant as a
+             ``HasIdCondition`` so vector search is constrained to that subset.
+             Gradual fallback ensures: if the precise filter returns no IDs,
+             the next looser query is tried; if all fail, the full collection is
+             searched.
           1. Fetch ``vector_top_k`` vector candidates per collection from Qdrant
              (BGE-M3 + E5 score-fused internally by :class:`QdrantStore`).
           2. Fetch ``keyword_top_k`` keyword candidates per collection from ES.
@@ -222,18 +238,53 @@ class MultiCollectionSearch:
         all_vector: List[Dict[str, Any]] = []
         all_keyword: List[Dict[str, Any]] = []
 
+        # ── Step 0: Metadata pre-search ───────────────────────────────────────
+        active_col_names = [name for name, _ in target_searchers]
+        col_filter_specs: Dict[str, CollectionFilter] = build_collection_filters(
+            query=query,
+            collections=active_col_names,
+            resolved_major=resolved_major,
+        )
+
+        # Pre-search results: {collection_name: (qdrant_filter, es_filter)}
+        resolved_filters: Dict[
+            str,
+            Tuple[Optional[qdrant_models.Filter], Optional[Dict[str, Any]]],
+        ] = {}
+        filter_traces: Dict[str, Dict[str, Any]] = {}  # trace per collection
+        for col_name, cf in col_filter_specs.items():
+            hybrid = next(
+                (h for n, h in target_searchers if n == col_name), None
+            )
+            if hybrid is None:
+                resolved_filters[col_name] = (None, None)
+                filter_traces[col_name] = {"applied": False, "matched_ids": 0, "filter_desc": None}
+                continue
+            qdrant_f, es_f, ftrace = self._resolve_filter_with_fallback(
+                col_name, hybrid, cf
+            )
+            resolved_filters[col_name] = (qdrant_f, es_f)
+            filter_traces[col_name] = ftrace
+
         def _fetch_one(
             name: str, hybrid: HybridSearch
         ) -> Tuple[str, List[Dict], List[Dict]]:
+            qdrant_filter, es_filter = resolved_filters.get(name, (None, None))
             vecs = hybrid.qdrant.search(
                 bge_m3_query=bge_m3_query,
                 e5_query=e5_query,
                 top_k=vector_top_k,
                 score_threshold=score_threshold,
+                filters=qdrant_filter,
             )
-            kws = hybrid.es.keyword_search(query=query, top_k=keyword_top_k)
+            kws = hybrid.es.keyword_search(
+                query=query,
+                top_k=keyword_top_k,
+                filters=es_filter,
+            )
             return name, vecs, kws
 
+        collection_counts: Dict[str, Dict[str, int]] = {}
         with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
             futures = {
                 pool.submit(_fetch_one, name, hybrid): name
@@ -247,6 +298,7 @@ class MultiCollectionSearch:
                     len(vecs),
                     len(kws),
                 )
+                collection_counts[name] = {"vector": len(vecs), "keyword": len(kws)}
                 for item in vecs:
                     all_vector.append(
                         {
@@ -271,7 +323,79 @@ class MultiCollectionSearch:
         all_keyword.sort(key=lambda x: x["score"], reverse=True)
         keyword_pool = self._dedup_pool(all_keyword, keyword_pool_k)
 
-        return self._score_fusion(vector_pool, keyword_pool, top_k)
+        results = self._score_fusion(vector_pool, keyword_pool, top_k)
+
+        # Populate trace_out if provided
+        if trace_out is not None:
+            trace_out["filters"] = filter_traces
+            trace_out["collection_counts"] = collection_counts
+
+        return results
+
+    # ------------------------------------------------------------------
+    # Metadata pre-search helpers
+    # ------------------------------------------------------------------
+
+    def _resolve_filter_with_fallback(
+        self,
+        col_name: str,
+        hybrid: HybridSearch,
+        cf: CollectionFilter,
+    ) -> Tuple[Optional[qdrant_models.Filter], Optional[Dict[str, Any]], Dict[str, Any]]:
+        """Run ES metadata pre-search and resolve the actual filter pair.
+
+        Tries each query in ``cf.metadata_es_queries`` in order (gradual
+        fallback chain).  The first query returning at least one doc ID
+        determines both the Qdrant ``HasIdCondition`` filter and the ES
+        keyword filter.  If all queries return zero results (or ``cf`` is
+        empty) → returns ``(None, None)`` — no filter applied.
+
+        Args:
+            col_name: Collection name (for logging).
+            hybrid: The :class:`HybridSearch` instance for this collection.
+            cf: :class:`CollectionFilter` containing the query chain.
+
+        Returns:
+            ``(qdrant_filter, es_filter)`` — both ``None`` when no pre-filter.
+        """
+        trace: Dict[str, Any] = {"applied": False, "matched_ids": 0, "filter_desc": None}
+
+        if cf.is_empty:
+            return None, None, trace
+
+        for i, es_query in enumerate(cf.metadata_es_queries):
+            ids = hybrid.es.metadata_filter_search(es_query)
+            logger.info(
+                "Metadata pre-search '%s': %d IDs with filter %s",
+                col_name,
+                len(ids),
+                str(es_query)[:80],
+            )
+            if ids:
+                qdrant_filter = qdrant_models.Filter(
+                    must=[qdrant_models.HasIdCondition(has_id=ids)]
+                )
+                # Describe the filter for the trace
+                es_str = str(es_query)
+                if "term" in es_str and "major_code" in es_str:
+                    fdesc = f"major_code filter (chain[{i}], {len(ids)} IDs)"
+                elif "match" in es_str and "major_name" in es_str:
+                    fdesc = f"major_name fuzzy filter (chain[{i}], {len(ids)} IDs)"
+                elif "applicable_major" in es_str:
+                    fdesc = f"applicable_major filter (chain[{i}], {len(ids)} IDs)"
+                elif "date_str" in es_str or "wildcard" in es_str:
+                    fdesc = f"date filter (chain[{i}], {len(ids)} IDs)"
+                else:
+                    fdesc = f"chain[{i}] filter ({len(ids)} IDs)"
+                trace = {"applied": True, "matched_ids": len(ids), "filter_desc": fdesc}
+                return qdrant_filter, es_query, trace
+
+        # All queries returned zero results → fallback: search entire collection
+        logger.info(
+            "Metadata pre-search '%s': all queries empty — using no filter (fallback)",
+            col_name,
+        )
+        return None, None, trace
 
     # ------------------------------------------------------------------
     # Score fusion helpers
@@ -351,6 +475,9 @@ class MultiCollectionSearch:
             entry["score"] = (
                 self.vector_weight * entry["norm_vector"]
                 + self.keyword_weight * entry["norm_keyword"]
+                # Recency boost for kehoach: newer documents score slightly higher.
+                # Max +0.05, decays linearly over KEHOACH_RECENCY_DECAY_DAYS.
+                + kehoach_recency_bonus(entry)
             )
 
         ranked = sorted(

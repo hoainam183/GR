@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { ChatRequest, ChatResponse } from '@/types/chat';
+import type { ChatRequest, ChatResponse, UserContext } from '@/types/chat';
 
 // Backend API endpoint
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -18,6 +18,8 @@ export const sendMessage = async (
   history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
   topK: number = 5,
   sessionId?: string,
+  userContext?: UserContext,
+  userId?: string,
 ): Promise<ChatResponse> => {
   try {
     const response = await apiClient.post<ChatResponse>('/chat', {
@@ -25,6 +27,8 @@ export const sendMessage = async (
       top_k: topK,
       history,
       session_id: sessionId,
+      user_context: userContext,
+      user_id: userId,
     } as ChatRequest);
     
     return response.data;

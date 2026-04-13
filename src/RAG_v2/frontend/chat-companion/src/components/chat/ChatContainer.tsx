@@ -1,15 +1,46 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import type { Message } from '@/types/chat';
+import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import type { Message, UserContext } from '@/types/chat';
 import { sendMessage } from '@/services/chatApi';
+import { getSession } from '@/services/sessionApi';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import TypingIndicator from './TypingIndicator';
+import type { UserPublic } from '@/services/authApi';
 
-const ChatContainer = () => {
+interface ChatContainerProps {
+  user?: UserPublic | null;
+  sessionId?: string;
+}
+
+const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  // activeSessionId tracks the current session; initialised from the URL param
+  const [activeSessionId, setActiveSessionId] = useState<string | undefined>(sessionIdProp);
+  // Ref mirror — always current even inside stale async closures
+  const activeSessionIdRef = useRef<string | undefined>(sessionIdProp);
+  // Guards async callbacks after component unmount (e.g. logout)
+  const isMountedRef = useRef(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Set to true before calling navigate() from within handleSendMessage so the
+  // resulting sessionIdProp change does NOT clear messages or reload history.
+  const suppressNextHistoryLoad = useRef(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    activeSessionIdRef.current = activeSessionId;
+  }, [activeSessionId]);
+
+  // Mark unmounted on cleanup
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -19,7 +50,58 @@ const ChatContainer = () => {
     scrollToBottom();
   }, [messages, isLoading, scrollToBottom]);
 
+  // When the URL session param changes (user clicks sidebar item or New Chat),
+  // reset state and optionally load history from the backend.
+  useEffect(() => {
+    setActiveSessionId(sessionIdProp);
+
+    // Navigation triggered internally by handleSendMessage — don't reset or reload
+    if (suppressNextHistoryLoad.current) {
+      suppressNextHistoryLoad.current = false;
+      return;
+    }
+
+    // New session selected — reset chat state
+    setMessages([]);
+    setIsLoading(false);
+
+    if (!sessionIdProp) return;
+
+    setIsLoadingHistory(true);
+    getSession(sessionIdProp)
+      .then(({ turns }) => {
+        const loaded: Message[] = turns.flatMap((t) => [
+          {
+            id: `user-${t.turn_id}`,
+            role: 'user' as const,
+            content: t.question,
+            timestamp: new Date(t.timestamp),
+          },
+          {
+            id: `assistant-${t.turn_id}`,
+            role: 'assistant' as const,
+            content: t.answer,
+            timestamp: new Date(t.timestamp),
+            reflectedQuestion: t.reflected_question ?? undefined,
+            timingsMs: t.timings_ms,
+            sources: t.sources,
+            collectionScores: t.collection_scores,
+            targetCollections: t.target_collections,
+          },
+        ]);
+        setMessages(loaded);
+      })
+      .catch((err) => {
+        console.error('Failed to load session history:', err);
+      })
+      .finally(() => setIsLoadingHistory(false));
+  }, [sessionIdProp]);
+
   const handleSendMessage = async (content: string) => {
+    // Snapshot the session at call time — this is the "owner" of this request.
+    // All async callbacks check this against the current session before mutating state.
+    const capturedSessionId = activeSessionId;
+
     // Add user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -38,11 +120,44 @@ const ChatContainer = () => {
         content: m.content,
       }));
 
-      const response = await sendMessage(content, historyForApi, 5, sessionId);
+      // Build user context from profile for query enrichment
+      const userContext: UserContext | undefined = user
+        ? {
+            student_id: user.student_id || undefined,
+            cohort: user.cohort || undefined,
+            major: user.major || undefined,
+            major_code: user.major_code || undefined,
+            full_name: user.full_name || undefined,
+          }
+        : undefined;
 
-      // Persist session_id for subsequent turns in this conversation
-      if (response.session_id && !sessionId) {
-        setSessionId(response.session_id);
+      const userId = user?.email ?? user?.username ?? undefined;
+      const response = await sendMessage(content, historyForApi, 5, capturedSessionId, userContext, userId);
+
+      // Component was unmounted (e.g. logout) — bail out entirely
+      if (!isMountedRef.current) return;
+
+      // User navigated to a different session while this request was in flight.
+      // The backend already persisted the turn; it will show on next refresh/visit.
+      // Do NOT touch the current session's UI.
+      if (activeSessionIdRef.current !== capturedSessionId &&
+          // Exception: capturedSessionId was undefined (new chat) and the URL
+          // has not yet been updated — let the navigate below handle it.
+          capturedSessionId !== undefined) {
+        return;
+      }
+
+      // Update session state + URL if this is the first turn (new chat)
+      if (response.session_id && response.session_id !== capturedSessionId) {
+        // Suppress the history-reload effect that would otherwise clear messages
+        suppressNextHistoryLoad.current = true;
+        setActiveSessionId(response.session_id);
+        navigate(`/chat/${response.session_id}`, { replace: true });
+      }
+
+      // Refresh the sidebar conversation list
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ['sessions', userId] });
       }
 
       // Add assistant message with sources
@@ -60,29 +175,39 @@ const ChatContainer = () => {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Failed to get response:', error);
-      
-      // Add error message
-      const errorMessage: Message = {
-        id: `error-${Date.now()}`,
-        role: 'assistant',
-        content: error instanceof Error 
-          ? error.message 
-          : 'Sorry, I encountered an error. Please try again.',
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, errorMessage]);
+      // Only show error in the session that initiated the request
+      if (isMountedRef.current && activeSessionIdRef.current === capturedSessionId) {
+        console.error('Failed to get response:', error);
+        const errorMessage: Message = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: error instanceof Error
+            ? error.message
+            : 'Sorry, I encountered an error. Please try again.',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      }
     } finally {
-      setIsLoading(false);
+      // Only clear the loading indicator for the session that set it.
+      // If the user has switched sessions, their new session manages its own loading state.
+      if (isMountedRef.current && activeSessionIdRef.current === capturedSessionId) {
+        setIsLoading(false);
+      }
     }
   };
+
+  const greeting = user ? `Xin chào, ${user.full_name.split(' ').pop()}!` : 'Bắt đầu trò chuyện';
 
   return (
     <div className="flex h-full flex-col">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto scrollbar-thin p-4 md:p-6">
-        {messages.length === 0 ? (
+        {isLoadingHistory ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          </div>
+        ) : messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <svg
@@ -99,12 +224,19 @@ const ChatContainer = () => {
                 />
               </svg>
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-foreground">
-              Start a conversation
-            </h3>
+            <h3 className="mb-2 text-lg font-semibold text-foreground">{greeting}</h3>
             <p className="max-w-sm text-sm text-muted-foreground">
-              Ask me anything! I'm here to help with your questions.
+              {user
+                ? `Tôi có thể tư vấn về quy chế học tập, học bổng và các quy định của BKHN.`
+                : 'Ask me anything! I\'m here to help with your questions.'}
             </p>
+            {user && (user.major || user.cohort) && (
+              <p className="mt-1.5 text-xs text-muted-foreground/70">
+                {[user.major, user.cohort ? `Khoá ${user.cohort}` : null]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+            )}
           </div>
         ) : (
           <div className="mx-auto max-w-3xl space-y-4">

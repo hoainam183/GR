@@ -40,10 +40,12 @@ class BGEReranker(BaseReranker):
         use_fp16: Optional[bool] = None,
         batch_size: int = 32,
         top_k: int = DEFAULT_TOP_K,
+        score_threshold: float = 0.0,
     ) -> None:
         self.model_name = model_name
         self.batch_size = batch_size
         self.top_k = top_k
+        self.score_threshold = score_threshold
 
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -69,6 +71,7 @@ class BGEReranker(BaseReranker):
         query: str,
         documents: List[Dict[str, Any]],
         top_k: Optional[int] = None,
+        score_threshold: Optional[float] = None,
     ) -> List[Dict[str, Any]]:
         """Rerank *documents* against *query* and return the top-K.
 
@@ -80,14 +83,17 @@ class BGEReranker(BaseReranker):
             query: The user query.
             documents: Candidate documents from retrieval stage.
             top_k: Override instance default for number of results.
+            score_threshold: Override instance default score threshold.
 
         Returns:
-            Top-K documents sorted by rerank score (descending).
+            Top-K documents sorted by rerank score (descending),
+            filtered to those with rerank_score >= score_threshold.
         """
         if not documents:
             return []
 
         top_k = top_k or self.top_k
+        threshold = score_threshold if score_threshold is not None else self.score_threshold
 
         # Build (query, doc_text) pairs
         pairs = [[query, doc["text"]] for doc in documents]
@@ -106,17 +112,24 @@ class BGEReranker(BaseReranker):
             scored_docs.append(enriched)
 
         scored_docs.sort(key=lambda d: d["rerank_score"], reverse=True)
+        top_docs = scored_docs[:top_k]
+
+        # Apply score threshold
+        filtered = [d for d in top_docs if d["rerank_score"] >= threshold]
+        if len(filtered) < len(top_docs):
+            logger.info(
+                "Score threshold %.2f dropped %d doc(s) → %d remaining",
+                threshold,
+                len(top_docs) - len(filtered),
+                len(filtered),
+            )
 
         logger.info(
             "Reranked %d docs → top %d (best=%.4f, worst=%.4f)",
             len(documents),
-            min(top_k, len(scored_docs)),
-            scored_docs[0]["rerank_score"] if scored_docs else 0.0,
-            (
-                scored_docs[min(top_k, len(scored_docs)) - 1]["rerank_score"]
-                if scored_docs
-                else 0.0
-            ),
+            len(filtered),
+            filtered[0]["rerank_score"] if filtered else 0.0,
+            filtered[-1]["rerank_score"] if filtered else 0.0,
         )
 
-        return scored_docs[:top_k]
+        return filtered

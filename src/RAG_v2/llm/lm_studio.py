@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # ─── Constants ──────────────────────────────────────────────────────────────────
 DEFAULT_MODEL = "qwen/qwen3-8b:2"
 DEFAULT_MAX_TOKENS = 1024
-DEFAULT_TEMPERATURE = 0.3
+DEFAULT_TEMPERATURE = 0.0
 _MAX_RETRIES = 1
 _BASE_RETRY_DELAY = 1.0
 

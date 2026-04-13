@@ -16,7 +16,9 @@ DOMAIN_TO_COLLECTIONS: Dict[str, List[str]] = {
 }
 
 ALL_COLLECTIONS: List[str] = ["stsv", "quydinh", "kehoach", "ctdt"]
-MULTI_DOMAIN_FALLBACK: List[str] = ["quydinh", "stsv"]
+# Include curriculum collection in low-confidence fallback so course queries
+# still retrieve ctdt chunks when router confidence is borderline.
+MULTI_DOMAIN_FALLBACK: List[str] = ["quydinh", "stsv", "ctdt"]
 
 CONFIDENCE_THRESHOLD: float = 0.55  # Tier-1 calibration makes this meaningful
 

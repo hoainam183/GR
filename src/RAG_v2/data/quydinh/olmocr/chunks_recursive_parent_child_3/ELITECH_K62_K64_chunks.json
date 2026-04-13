@@ -23,7 +23,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -52,7 +52,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -80,7 +80,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -109,7 +109,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -137,7 +137,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -166,7 +166,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -194,7 +194,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -223,7 +223,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -251,7 +251,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -280,7 +280,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -308,7 +308,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -337,7 +337,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -365,7 +365,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   },
@@ -393,7 +393,7 @@
       "effective_date": null,
       "expiry_date": null,
       "applicable_cohort": null,
-      "applicable_major": null,
+      "applicable_major":["K62","K63","K64"],
       "document_type": "curriculum"
     }
   }

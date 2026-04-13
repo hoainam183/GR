@@ -7,6 +7,11 @@ from .base import BaseRetriever
 from .qdrant_store import QdrantStore
 from .elasticsearch_store import ElasticsearchStore
 from .hybrid_search import HybridSearch
+from .metadata_filters import (
+    BaseFilterExtractor,
+    CollectionFilter,
+    build_collection_filters,
+)
 from .multi_collection_search import MultiCollectionSearch
 
 
@@ -35,6 +40,9 @@ __all__ = [
     "QdrantStore",
     "ElasticsearchStore",
     "HybridSearch",
+    "BaseFilterExtractor",
+    "CollectionFilter",
+    "build_collection_filters",
     "MultiCollectionSearch",
     "create_retriever",
 ]

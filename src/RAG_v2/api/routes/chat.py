@@ -8,7 +8,13 @@ import logging
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
-from ..schemas import ChatRequest, ChatResponse, RetrievedDocument
+from schemas.chat import (
+    ChatRequest,
+    ChatResponse,
+    CollectionResult,
+    FilterInfo,
+    RetrievedDocument,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +39,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
     session_id = body.session_id
     if mongo_logger is not None:
         if session_id is None or mongo_logger.get_session(session_id) is None:
-            session_id = mongo_logger.new_session()
+            session_id = mongo_logger.new_session(user_id=body.user_id)
 
     history = (
         [{"role": m.role, "content": m.content} for m in body.history]
@@ -50,6 +56,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
                 history=history,
                 top_k=body.top_k,
                 session_id=session_id,
+                user_context=body.user_context.model_dump() if body.user_context else None,
             ),
         )
 
@@ -58,10 +65,38 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
                 rank=i,
                 content=doc.get("text", ""),
                 score=doc.get("rerank_score", doc.get("score", 0.0)),
+                hybrid_score=doc.get("score"),
+                rerank_score=doc.get("rerank_score"),
+                vector_score=doc.get("vector_score"),
+                keyword_score=doc.get("keyword_score"),
+                collection=doc.get("collection"),
                 metadata=doc.get("metadata", {}),
             )
             for i, doc in enumerate(result["sources"], 1)
         ]
+
+        # Build applied_filters list
+        raw_filters = result.get("applied_filters") or {}
+        applied_filters = [
+            FilterInfo(
+                collection=col,
+                applied=bool(info.get("applied")),
+                matched_ids=int(info.get("matched_ids", 0)),
+                filter_desc=info.get("filter_desc"),
+            )
+            for col, info in raw_filters.items()
+        ] if raw_filters else None
+
+        # Build collection_results list
+        raw_counts = result.get("collection_results") or {}
+        collection_results = [
+            CollectionResult(
+                collection=col,
+                vector_count=int(counts.get("vector", 0)),
+                keyword_count=int(counts.get("keyword", 0)),
+            )
+            for col, counts in raw_counts.items()
+        ] if raw_counts else None
 
         return ChatResponse(
             question=result["question"],
@@ -75,6 +110,11 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             reflected_question=result.get("reflected_question"),
             timings_ms=result.get("timings_ms"),
             session_id=session_id or "",
+            routing_probabilities=result.get("routing_probabilities"),
+            reflection_prompt=result.get("reflection_prompt"),
+            llm_prompt=result.get("llm_prompt"),
+            applied_filters=applied_filters,
+            collection_results=collection_results,
         )
 
     except Exception as exc:
@@ -104,7 +144,7 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
     session_id = body.session_id
     if mongo_logger is not None:
         if session_id is None or mongo_logger.get_session(session_id) is None:
-            session_id = mongo_logger.new_session()
+            session_id = mongo_logger.new_session(user_id=body.user_id)
 
     history = (
         [{"role": m.role, "content": m.content} for m in body.history]
@@ -127,6 +167,11 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
                     history=history,
                     top_k=body.top_k,
                     session_id=session_id,
+                    user_context=(
+                        body.user_context.model_dump()
+                        if body.user_context
+                        else None
+                    ),
                 ):
                     loop.call_soon_threadsafe(queue.put_nowait, chunk)
             finally:

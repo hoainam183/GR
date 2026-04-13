@@ -115,50 +115,70 @@ async def get_database() -> AsyncGenerator[AsyncIOMotorDatabase, None]:
 async def create_indexes() -> None:
     """Create all required indexes for the HUST Assistant collections.
 
+    Each ``create_index`` call is wrapped individually so that a pre-existing
+    index with a conflicting name (OperationFailure code 85) only emits a
+    warning rather than aborting the whole startup.
+
     Indexes created:
         users:
-            - unique index on ``email``
-            - unique index on ``microsoft_id``
+            - sparse unique index on ``email``
+            - sparse unique index on ``microsoft_id``
+            - sparse unique index on ``username``
         sessions:
-            - index on ``user_id``  (non-unique, supports per-user queries)
-            - index on ``updated_at`` DESCENDING  (already expected by MongoLogger)
+            - index on ``user_id``
+            - index on ``updated_at`` DESCENDING
         turns:
-            - index on ``session_id`` (fast turn lookup per session)
+            - index on ``session_id``
         query_logs:
             - index on ``session_id``
-
-    This function is idempotent — calling it multiple times is safe.
     """
+    from pymongo.errors import OperationFailure
+
     _, database_name = _get_settings()
     db: AsyncIOMotorDatabase = get_motor_client()[database_name]
 
+    async def safe_create(collection, keys, **kwargs):
+        try:
+            await collection.create_index(keys, **kwargs)
+        except OperationFailure as exc:
+            if exc.code == 85:  # IndexOptionsConflict — already exists differently
+                logger.warning(
+                    "Index on %s already exists with different options, skipping: %s",
+                    collection.name,
+                    exc.details.get("errmsg", str(exc)),
+                )
+            else:
+                raise
+
+    async def drop_if_exists(collection, name: str):
+        """Drop an index by name, silently ignore if it doesn't exist."""
+        try:
+            await collection.drop_index(name)
+            logger.info("Dropped old index '%s' on '%s'", name, collection.name)
+        except OperationFailure:
+            pass  # index does not exist — fine
+
     # ── users collection ─────────────────────────────────────────────────────
     users = db[USERS_COLLECTION]
-    await users.create_index(
-        [("email", ASCENDING)],
-        unique=True,
-        name="email_unique",
-    )
-    await users.create_index(
-        [("microsoft_id", ASCENDING)],
-        unique=True,
-        name="microsoft_id_unique",
-    )
+    # Drop old non-sparse unique indexes if they exist (migration: email/microsoft_id
+    # are now Optional so the indexes need sparse=True to allow multiple nulls).
+    await drop_if_exists(users, "email_unique")
+    await drop_if_exists(users, "microsoft_id_unique")
+    await safe_create(users, [("email", ASCENDING)],
+                      unique=True, sparse=True, name="email_unique")
+    await safe_create(users, [("microsoft_id", ASCENDING)],
+                      unique=True, sparse=True, name="microsoft_id_unique")
+    await safe_create(users, [("username", ASCENDING)],
+                      unique=True, sparse=True, name="username_unique")
     logger.info(
-        "Indexes ensured on collection '%s': email_unique, microsoft_id_unique",
+        "Indexes ensured on collection '%s': email_unique, microsoft_id_unique, username_unique",
         USERS_COLLECTION,
     )
 
     # ── sessions collection ───────────────────────────────────────────────────
     sessions = db[SESSIONS_COLLECTION]
-    await sessions.create_index(
-        [("user_id", ASCENDING)],
-        name="user_id_asc",
-    )
-    await sessions.create_index(
-        [("updated_at", DESCENDING)],
-        name="updated_at_desc",
-    )
+    await safe_create(sessions, [("user_id", ASCENDING)], name="user_id_asc")
+    await safe_create(sessions, [("updated_at", DESCENDING)], name="updated_at_desc")
     logger.info(
         "Indexes ensured on collection '%s': user_id_asc, updated_at_desc",
         SESSIONS_COLLECTION,
@@ -166,22 +186,10 @@ async def create_indexes() -> None:
 
     # ── turns collection ─────────────────────────────────────────────────────
     turns = db[TURNS_COLLECTION]
-    await turns.create_index(
-        [("session_id", ASCENDING)],
-        name="session_id_asc",
-    )
-    logger.info(
-        "Index ensured on collection '%s': session_id_asc",
-        TURNS_COLLECTION,
-    )
+    await safe_create(turns, [("session_id", ASCENDING)], name="session_id_asc")
+    logger.info("Index ensured on collection '%s': session_id_asc", TURNS_COLLECTION)
 
     # ── query_logs collection ────────────────────────────────────────────────
     query_logs = db[QUERY_LOGS_COLLECTION]
-    await query_logs.create_index(
-        [("session_id", ASCENDING)],
-        name="session_id_asc",
-    )
-    logger.info(
-        "Index ensured on collection '%s': session_id_asc",
-        QUERY_LOGS_COLLECTION,
-    )
+    await safe_create(query_logs, [("session_id", ASCENDING)], name="session_id_asc")
+    logger.info("Index ensured on collection '%s': session_id_asc", QUERY_LOGS_COLLECTION)

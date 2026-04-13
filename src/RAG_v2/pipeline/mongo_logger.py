@@ -140,6 +140,26 @@ class MongoLogger:
         }
         if timings_ms is not None:
             turn_doc["timings_ms"] = timings_ms
+
+        # Persist retrieval context so history can be restored with full detail
+        raw_sources = result.get("sources", [])
+        if raw_sources:
+            turn_doc["sources"] = [
+                {
+                    "rank": i,
+                    "content": doc.get("text", ""),
+                    "score": float(doc.get("rerank_score", doc.get("score", 0.0))),
+                    "metadata": doc.get("metadata", {}),
+                }
+                for i, doc in enumerate(raw_sources, 1)
+            ]
+        raw_collection_scores = result.get("collection_scores")
+        if raw_collection_scores:
+            turn_doc["collection_scores"] = raw_collection_scores
+        raw_target_collections = result.get("target_collections")
+        if raw_target_collections:
+            turn_doc["target_collections"] = raw_target_collections
+
         self._turns.insert_one(turn_doc)
 
         # Flat analytics entry

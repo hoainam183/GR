@@ -24,7 +24,9 @@
       "expiry_date": null,
       "applicable_cohort": null,
       "applicable_major": null,
-      "document_type": "curriculum"
+      "document_type": "curriculum",
+      "major_name": "Công nghệ thông tin Việt Pháp",
+      "major_code": "IT-EP"
     }
   },
   {
@@ -52,7 +54,9 @@
       "expiry_date": null,
       "applicable_cohort": null,
       "applicable_major": null,
-      "document_type": "curriculum"
+      "document_type": "curriculum",
+      "major_name": "Công nghệ thông tin Việt Pháp",
+      "major_code": "IT-EP"
     }
   },
   {
@@ -80,7 +84,9 @@
       "expiry_date": null,
       "applicable_cohort": null,
       "applicable_major": null,
-      "document_type": "curriculum"
+      "document_type": "curriculum",
+      "major_name": "Công nghệ thông tin Việt Pháp",
+      "major_code": "IT-EP"
     }
   }
 ]

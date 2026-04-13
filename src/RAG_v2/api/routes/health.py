@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Request
 
-from ..schemas import HealthResponse
+from schemas.chat import HealthResponse
 
 router = APIRouter(tags=["health"])
 

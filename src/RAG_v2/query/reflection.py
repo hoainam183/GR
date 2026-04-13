@@ -36,7 +36,33 @@ _PERSONAL_REFS = re.compile(
 )
 
 
-def _extract_profile_note(history: List[Dict[str, str]]) -> str:
+def _extract_profile_note_from_context(
+    user_context: Optional[Dict[str, Any]],
+) -> str:
+    """Build a short profile note from an authenticated user_context dict.
+
+    Returns a string like:
+        "sinh viên ngành Công nghệ thông tin Việt-Nhật (IT-E6), Khóa K65"
+    or empty string when user_context is None / empty.
+    """
+    if not user_context:
+        return ""
+
+    parts: List[str] = []
+    if user_context.get("major"):
+        major_note = str(user_context["major"])
+        if user_context.get("major_code"):
+            major_note += f" ({user_context['major_code']})"
+        parts.append(f"ngành {major_note}")
+    if user_context.get("cohort"):
+        parts.append(f"Khóa K{user_context['cohort']}")
+    if user_context.get("student_id"):
+        parts.append(f"Mã SV: {user_context['student_id']}")
+
+    return "sinh viên " + ", ".join(parts) if parts else ""
+
+
+
     """Scan conversation history for user-stated facts (major, year, GPA/CPA).
 
     Returns a short Vietnamese note like:
@@ -176,6 +202,7 @@ class QueryReflector:
         self,
         query: str,
         chat_history: Optional[List[Dict[str, str]]] = None,
+        user_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Rewrite *query* into a retrieval-optimised form.
 
@@ -183,11 +210,15 @@ class QueryReflector:
             query: The raw user message.
             chat_history: Recent conversation messages, each a dict with
                 ``"role"`` (``"user"``/``"assistant"``) and ``"content"`` keys.
+            user_context: Authenticated user profile dict (major, major_code,
+                cohort, student_id).  When provided it takes priority over
+                profile facts extracted from history, ensuring that first-turn
+                queries like "ôn thi ngành của tôi" resolve correctly.
 
         Returns:
             Dict with ``{"original": str, "rewritten": str}``.
         """
-        user_prompt = self._build_user_prompt(query, chat_history)
+        user_prompt = self._build_user_prompt(query, chat_history, user_context)
 
         messages = [
             {"role": "system", "content": REWRITE_SYSTEM_PROMPT},
@@ -232,7 +263,7 @@ class QueryReflector:
             len(chat_history) if chat_history else 0,
         )
 
-        return {"original": query, "rewritten": rewritten}
+        return {"original": query, "rewritten": rewritten, "prompt": user_prompt}
 
     # ------------------------------------------------------------------
     # Internal
@@ -242,13 +273,19 @@ class QueryReflector:
         self,
         query: str,
         chat_history: Optional[List[Dict[str, str]]] = None,
+        user_context: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Format the user prompt, optionally including chat history.
 
-        Also extracts a compact user profile (major, year, GPA) from history
-        and prepends it as a one-line note so that even weak local models can
-        resolve "của tôi" / "chương trình tôi" without reading the full history.
+        Builds a compact profile note from authenticated user_context (priority)
+        or falls back to extracting it from chat history.  The note is prepended
+        so even a first-turn query like "ngành của tôi" can be resolved.
         """
+        # Prefer authenticated profile (exact code+name) over history regex.
+        profile_note = _extract_profile_note_from_context(user_context)
+        if not profile_note and chat_history:
+            profile_note = _extract_profile_note(chat_history)
+
         if chat_history:
             recent = chat_history[-self.history_limit :]
             history_text = "\n".join(
@@ -256,11 +293,15 @@ class QueryReflector:
                 for msg in recent
                 if msg.get("content")
             )
-            # Prepend a profile hint extracted from history so model can't miss it
-            profile_note = _extract_profile_note(chat_history)
             if profile_note:
                 history_text = f"[Thông tin đã biết: {profile_note}]\n" + history_text
             return REWRITE_WITH_HISTORY_TEMPLATE.format(
                 history=history_text, query=query
+            )
+        # No history — still inject profile so the model can resolve pronouns.
+        if profile_note:
+            return REWRITE_WITH_HISTORY_TEMPLATE.format(
+                history=f"[Thông tin đã biết: {profile_note}]",
+                query=query,
             )
         return REWRITE_NO_HISTORY_TEMPLATE.format(query=query)

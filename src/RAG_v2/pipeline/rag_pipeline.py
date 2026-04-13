@@ -112,6 +112,7 @@ def _settings_to_cfg(settings: Settings) -> Dict[str, Any]:
         "vector_weight": settings.vector_weight,
         "keyword_weight": settings.keyword_weight,
         "reranker_top_k": settings.reranker_top_k,
+        "reranker_score_threshold": settings.reranker_score_threshold,
         "model": settings.chat_model,
         "temperature": settings.chat_temperature,
         "max_tokens": settings.chat_max_tokens,
@@ -302,6 +303,7 @@ class RAGPipeline:
         history: Optional[List[Dict[str, str]]] = None,
         top_k: Optional[int] = None,
         session_id: Optional[str] = None,
+        user_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Process a user question end-to-end (non-streaming).
 
@@ -360,16 +362,8 @@ class RAGPipeline:
             result["timings_ms"] = timings_ms
             _log_timings("query(chitchat)", timings_ms)
 
-            if session_id and self._mongo_logger:
-                latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
-                self._mongo_logger.log_turn(
-                    session_id=session_id,
-                    question=question,
-                    result=result,
-                    reflected_question=result.get("reflected_question"),
-                    latency_ms=latency_ms,
-                    timings_ms=timings_ms,
-                )
+            # Chitchat turns are intentionally NOT logged to MongoDB to avoid
+            # noise in history and unnecessary storage cost.
             return result
 
         # 2. RAG flow with reflection, self-eval, and Tavily fallback
@@ -387,6 +381,7 @@ class RAGPipeline:
             tavily_tool=self._tavily,
             cfg=flow_cfg,
             routing_result=routing,
+            user_context=user_context,
         )
         timings_ms = _merge_timings(pipeline_timings, result.get("timings_ms"))
         timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
@@ -494,6 +489,7 @@ class RAGPipeline:
         history: Optional[List[Dict[str, str]]] = None,
         top_k: Optional[int] = None,
         session_id: Optional[str] = None,
+        user_context: Optional[Dict[str, Any]] = None,
     ) -> Generator[str, None, None]:
         """Stream the answer token-by-token.
 
@@ -568,6 +564,7 @@ class RAGPipeline:
                 chat_model=self._chat,
                 cfg=flow_cfg,
                 routing_result=routing,
+                user_context=user_context,
                 timings_ms_out=flow_timings,
             )
             self.last_sources = reranked
@@ -581,8 +578,8 @@ class RAGPipeline:
         self.last_timings = timings_ms
         _log_timings(f"query_stream({intent})", timings_ms)
 
-        # Log to MongoDB after stream finishes
-        if session_id and self._mongo_logger:
+        # Log to MongoDB after stream finishes (skip chitchat to reduce noise/cost)
+        if session_id and self._mongo_logger and intent != "chitchat":
             latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
             result = {
                 "answer": "".join(full_answer_chunks),

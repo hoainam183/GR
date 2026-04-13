@@ -45,7 +45,7 @@ const CompleteProfile = () => {
       return;
     }
 
-    localStorage.setItem("hust_token", urlToken);
+    localStorage.setItem("token", urlToken);
     setToken(urlToken);
 
     fetch(`${API_BASE_URL}/auth/me`, {
@@ -106,6 +106,11 @@ const CompleteProfile = () => {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.detail || `Error ${res.status}`);
+      }
+
+      const updatedUser = await res.json().catch(() => null);
+      if (updatedUser) {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
       }
 
       navigate("/chat");

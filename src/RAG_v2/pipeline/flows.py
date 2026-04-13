@@ -10,6 +10,7 @@ from typing import Any, Dict, Generator, List, Optional
 
 from embedding.base import BaseEmbedder
 from llm.base import BaseLLM
+from llm.prompts import build_rag_messages
 from llm.self_eval import SelfEvaluator
 from reranking.base import BaseReranker
 from retrieval.collection_selector import CollectionSelector
@@ -89,11 +90,11 @@ def _format_context(
     used = 0
     for i, doc in enumerate(documents, 1):
         meta = doc.get("metadata", {})
-        title = meta.get("title") or meta.get("source") or "Tài liệu"
+        title = meta.get("title") or meta.get("source") or "Tài liệu không rõ nguồn"
         text = str(doc.get("text", "") or "").strip()
         if len(text) > per_doc_char_limit:
             text = text[:per_doc_char_limit] + "\u2026"  # ellipsis
-        chunk = f"[{i}] {title}\n{text}"
+        chunk = f"--- Văn bản: {title}\n{text}"
         separator_cost = 7 if parts else 0  # len("\n\n---\n\n")
         if used + len(chunk) + separator_cost > total_char_budget:
             break
@@ -164,18 +165,16 @@ def _try_direct_answer(question: str) -> Optional[str]:
     return None
 
 
-def _extract_session_profile(history: Optional[List[Dict[str, str]]]) -> str:
-    """Scan full conversation history for user-stated facts (major, year, GPA).
+def _extract_session_profile_dict(
+    history: Optional[List[Dict[str, str]]],
+) -> Dict[str, str]:
+    """Scan full conversation history and return a raw dict of user-stated facts.
 
-    Returns a compact note like:
-        "Thông tin sinh viên: ngành CNTT, năm 3, CPA=2.4."
-    or empty string when nothing useful is found.
-
-    This allows the LLM to answer personal questions (\"tôi học ngành gì?\") even
-    after the original turn has been trimmed from the context window.
+    Keys: ``"nganh"``, ``"nam"``, ``"khoa"``, ``"gpa"`` (all optional).
+    Returns empty dict when nothing useful is found.
     """
     if not history:
-        return ""
+        return {}
 
     profile: Dict[str, str] = {}
     user_messages = [
@@ -202,6 +201,20 @@ def _extract_session_profile(history: Optional[List[Dict[str, str]]]) -> str:
             if m:
                 profile["gpa"] = m.group(1).replace(",", ".")
 
+    return profile
+
+
+def _extract_session_profile(history: Optional[List[Dict[str, str]]]) -> str:
+    """Scan full conversation history for user-stated facts (major, year, GPA).
+
+    Returns a compact note like:
+        "Thông tin sinh viên: ngành CNTT, năm 3, CPA=2.4."
+    or empty string when nothing useful is found.
+
+    This allows the LLM to answer personal questions (\"tôi học ngành gì?\") even
+    after the original turn has been trimmed from the context window.
+    """
+    profile = _extract_session_profile_dict(history)
     if not profile:
         return ""
 
@@ -216,6 +229,38 @@ def _extract_session_profile(history: Optional[List[Dict[str, str]]]) -> str:
         parts.append(f"CPA={profile['gpa']}")
 
     return "Th\u00f4ng tin sinh vi\u00ean: " + ", ".join(parts) + "."
+
+
+def _build_profile_note_from_user_context(
+    user_context: Optional[Dict[str, Any]],
+) -> str:
+    """Build a compact profile note from the authenticated user's profile dict.
+
+    Returns a string like:
+        "Sinh viên: Nguyễn Hoài Nam | Mã SV: 20204242 | Ngành: CNTT Việt Nhật | Khoá: K65"
+    or empty string when user_context is None / empty.
+
+    This is injected into the search query and context so that user-specific
+    questions ("tôi học ngành gì?") resolve correctly even on the very first
+    turn — without waiting for the LLM to extract profile facts from history.
+    """
+    if not user_context:
+        return ""
+
+    parts: List[str] = []
+    if user_context.get("full_name"):
+        parts.append(f"Sinh viên: {user_context['full_name']}")
+    if user_context.get("student_id"):
+        parts.append(f"Mã SV: {user_context['student_id']}")
+    if user_context.get("major"):
+        major_note = user_context["major"]
+        if user_context.get("major_code"):
+            major_note += f" [{user_context['major_code']}]"
+        parts.append(f"Ngành: {major_note}")
+    if user_context.get("cohort"):
+        parts.append(f"Khoá: {user_context['cohort']}")
+
+    return " | ".join(parts) if parts else ""
 
 
 def _enrich_search_query(
@@ -249,6 +294,36 @@ def _enrich_search_query(
         enriched[:80],
     )
     return enriched
+
+
+def _resolve_major_for_filter(
+    user_context: Optional[Dict[str, Any]],
+    history: Optional[List[Dict[str, str]]],
+) -> Optional[str]:
+    """Resolve the major string for metadata pre-filtering.
+
+    Priority:
+      1. Most recent major mentioned in conversation history.
+      2. Authenticated user profile (``user_context['major']``).
+      3. ``None`` — the extractor will try regex on the current query.
+
+    The returned value may be a major code ('IT-E6') or a name string
+    ('Công nghệ thông tin Việt - Nhật').  The filter extractor handles both.
+    """
+    # Priority 1: scan history for explicit major mention (most recent wins)
+    profile = _extract_session_profile_dict(history)
+    history_major = profile.get("nganh")
+    if history_major:
+        return history_major
+
+    # Priority 2: use authenticated user profile — prefer code (exact) over name
+    if user_context:
+        if user_context.get("major_code"):
+            return str(user_context["major_code"])
+        if user_context.get("major"):
+            return str(user_context["major"])
+
+    return None
 
 
 def _build_collection_scores(
@@ -393,6 +468,7 @@ def rag_flow(
     tavily_tool: Any | None,
     cfg: Dict[str, Any],
     routing_result: Optional[Dict[str, Any]] = None,
+    user_context: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Full RAG flow: Reflect → Embed → Search → Rerank → Generate → SelfEval → (Tavily fallback).
 
@@ -408,6 +484,7 @@ def rag_flow(
         self_evaluator: ``SelfEvaluator`` (or *None* to skip).
         tavily_tool: ``TavilySearchTool`` (or *None* to skip).
         cfg: Pipeline config dict with retrieval params.
+        user_context: Authenticated user profile (major, cohort, student_id …).
 
     Returns:
         Dict with ``answer``, ``sources``, ``intent``, etc.
@@ -421,11 +498,13 @@ def rag_flow(
 
     # 1. Reflection — rewrite query for better retrieval
     search_query = question
+    reflection_prompt: Optional[str] = None
     if reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
-            result = reflector.reflect(question, chat_history=trimmed)
+            result = reflector.reflect(question, chat_history=trimmed, user_context=user_context)
             search_query = result.get("rewritten", question)
+            reflection_prompt = result.get("prompt")
             logger.info("Reflected query: %r", search_query[:80])
         except Exception:
             logger.warning(
@@ -433,13 +512,23 @@ def rag_flow(
             )
         timings_ms["reflection"] = _elapsed_ms(reflection_t0)
 
-    # 1b. Post-reflection enrichment — if the local model left personal pronouns
-    #     unresolved (e.g. "của tôi"), append the extracted session profile so
-    #     that embedding search targets the correct programme.
-    search_query = _enrich_search_query(search_query, history)
+    # 1b. Post-reflection enrichment:
+    #   Priority 1 — use authenticated user profile (always accurate, zero latency).
+    #   Priority 2 — fallback regex scan of history if no user_context given.
+    auth_profile_note = _build_profile_note_from_user_context(user_context)
+    if auth_profile_note:
+        # Prepend profile note as bracketed context for the search query so that
+        # retrieval targets the right programme from the very first turn.
+        if _UNRESOLVED_PERSONAL_REF.search(search_query):
+            search_query = f"{search_query} [{auth_profile_note}]"
+            logger.info("User-context enrichment applied: %r", search_query[:100])
+    else:
+        # Fallback: scan history for user-stated facts
+        search_query = _enrich_search_query(search_query, history)
 
     # 2. Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
+    routing_probabilities: Optional[Dict[str, Any]] = None
     if routing_result:
         routing_t0 = time.perf_counter()
         domain = routing_result.get("domain")
@@ -450,6 +539,7 @@ def rag_flow(
             confidence=confidence,
             domains=domains,
         )
+        routing_probabilities = routing_result.get("probabilities")
         logger.info(
             "Domains: %s (conf=%.3f) → searching collections: %s",
             domains,
@@ -473,7 +563,11 @@ def rag_flow(
     e5_vec = e5_embedder.embed_query(search_query)
     timings_ms["embed_e5"] = _elapsed_ms(embed_t0)
 
-    # 4. Hybrid search
+    # 4. Hybrid search with metadata pre-filtering
+    # Resolve major from conversation history + user profile before searching.
+    resolved_major = _resolve_major_for_filter(user_context, trimmed)
+
+    search_trace: Dict[str, Any] = {}
     search_t0 = time.perf_counter()
     raw_results = searcher.search(
         query=search_query,
@@ -485,6 +579,8 @@ def rag_flow(
         vector_pool_k=cfg.get("vector_pool_k", 15),
         keyword_pool_k=cfg.get("keyword_pool_k", 15),
         active_collections=target_collections,
+        resolved_major=resolved_major,
+        trace_out=search_trace,
     )
     timings_ms["search"] = _elapsed_ms(search_t0)
     logger.info("Retrieved %d raw candidates", len(raw_results))
@@ -498,14 +594,28 @@ def rag_flow(
     logger.info("Reranked to %d documents", len(reranked))
 
 
-    # 6. Format context — inject session profile so user facts survive trimming
+    # 6. Format context — inject profile so user facts survive trimming.
+    #    Priority 1: use authenticated user_context (precise, always present).
+    #    Priority 2: fall back to regex scan of history.
     context_t0 = time.perf_counter()
     context = _format_context(reranked)
-    profile_note = _extract_session_profile(history)
+    profile_note = (
+        auth_profile_note
+        or _extract_session_profile(history)
+    )
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
     timings_ms["format_context"] = _elapsed_ms(context_t0)
 
     # 7. Generate answer with context-length error recovery
+    # Capture the prompt that will be sent to the LLM (for trace/debug).
+    try:
+        llm_messages = build_rag_messages(question, full_context, trimmed)
+        llm_prompt_str: Optional[str] = "\n\n".join(
+            f"[{m['role'].upper()}]\n{m['content']}" for m in llm_messages
+        )
+    except Exception:
+        llm_prompt_str = None
+
     generate_t0 = time.perf_counter()
     recovered = False
     try:
@@ -618,6 +728,12 @@ def rag_flow(
         "collection_scores": collection_scores,
         "reflected_question": search_query,
         "timings_ms": timings_ms,
+        # Extended trace fields
+        "routing_probabilities": routing_probabilities,
+        "reflection_prompt": reflection_prompt,
+        "llm_prompt": llm_prompt_str,
+        "applied_filters": search_trace.get("filters"),
+        "collection_results": search_trace.get("collection_counts"),
     }
 
 
@@ -633,6 +749,7 @@ def rag_flow_stream(
     chat_model: BaseLLM,
     cfg: Dict[str, Any],
     routing_result: Optional[Dict[str, Any]] = None,
+    user_context: Optional[Dict[str, Any]] = None,
     timings_ms_out: Optional[Dict[str, float]] = None,
 ) -> tuple[Generator[str, None, None], List[Dict[str, Any]]]:
     """Streaming RAG flow — retrieval runs first, then generation is streamed.
@@ -652,7 +769,7 @@ def rag_flow_stream(
     if reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
-            result = reflector.reflect(question, chat_history=trimmed)
+            result = reflector.reflect(question, chat_history=trimmed, user_context=user_context)
             search_query = result.get("rewritten", question)
         except Exception:
             logger.warning(
@@ -660,8 +777,16 @@ def rag_flow_stream(
             )
         timings_ms["reflection"] = _elapsed_ms(reflection_t0)
 
-    # Post-reflection enrichment fallback (same as rag_flow)
-    search_query = _enrich_search_query(search_query, history)
+    # Post-reflection enrichment:
+    #   Priority 1 — authenticated user profile.
+    #   Priority 2 — fallback regex scan of history.
+    auth_profile_note = _build_profile_note_from_user_context(user_context)
+    if auth_profile_note:
+        if _UNRESOLVED_PERSONAL_REF.search(search_query):
+            search_query = f"{search_query} [{auth_profile_note}]"
+            logger.info("User-context enrichment applied: %r", search_query[:100])
+    else:
+        search_query = _enrich_search_query(search_query, history)
 
     # Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
@@ -686,6 +811,9 @@ def rag_flow_stream(
     e5_vec = e5_embedder.embed_query(search_query)
     timings_ms["embed_e5"] = _elapsed_ms(embed_t0)
 
+    # Resolve major from conversation history + user profile before searching.
+    resolved_major = _resolve_major_for_filter(user_context, trimmed)
+
     search_t0 = time.perf_counter()
     raw_results = searcher.search(
         query=search_query,
@@ -697,6 +825,7 @@ def rag_flow_stream(
         vector_pool_k=cfg.get("vector_pool_k", 15),
         keyword_pool_k=cfg.get("keyword_pool_k", 15),
         active_collections=target_collections,
+        resolved_major=resolved_major,
     )
     timings_ms["search"] = _elapsed_ms(search_t0)
 
@@ -708,7 +837,7 @@ def rag_flow_stream(
 
     context_t0 = time.perf_counter()
     context = _format_context(reranked)
-    profile_note = _extract_session_profile(history)
+    profile_note = auth_profile_note or _extract_session_profile(history)
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
     timings_ms["format_context"] = _elapsed_ms(context_t0)
     timings_ms["retrieval_total"] = round(

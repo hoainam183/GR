@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginUser } from "@/services/authApi";
+import axios from "axios";
 
 const MicrosoftIcon = () => (
   <svg width="18" height="18" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
@@ -48,24 +50,39 @@ const EyeIcon = ({ show }: { show: boolean }) =>
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ username?: string; password?: string; api?: string }>({});
+  const [loading, setLoading] = useState(false);
 
   const validate = () => {
-    const next: { email?: string; password?: string } = {};
-    if (!email.trim()) next.email = "Email is required.";
-    if (!password) next.password = "Password is required.";
+    const next: { username?: string; password?: string } = {};
+    if (!username.trim()) next.username = "Tên đăng nhập là bắt buộc.";
+    if (!password) next.password = "Mật khẩu là bắt buộc.";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    console.log("Login:", { email, password });
-    navigate("/chat");
+    setLoading(true);
+    setErrors({});
+    try {
+      const result = await loginUser({ username, password });
+      localStorage.setItem("token", result.access_token);
+      localStorage.setItem("user", JSON.stringify(result.user));
+      navigate("/chat");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setErrors({ api: err.response?.data?.detail ?? "Đăng nhập thất bại." });
+      } else {
+        setErrors({ api: "Đăng nhập thất bại." });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,8 +109,8 @@ const LoginPage = () => {
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
               HUST Assistant
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-foreground">Welcome back</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Sign in to your account</p>
+            <h1 className="mt-1 text-2xl font-bold text-foreground">Chào mừng trở lại</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Đăng nhập vào tài khoản của bạn</p>
           </div>
         </div>
 
@@ -126,37 +143,33 @@ const LoginPage = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+          {errors.api && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
+              {errors.api}
+            </p>
+          )}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email" className="text-sm font-medium text-foreground">
-              Email
+            <Label htmlFor="username" className="text-sm font-medium text-foreground">
+              Tên đăng nhập
             </Label>
             <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@sis.hust.edu.vn"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
+              id="username"
+              type="text"
+              autoComplete="username"
+              placeholder="Nhập tên đăng nhập"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className={errors.username ? "border-destructive focus-visible:ring-destructive" : ""}
             />
-            {errors.email && (
-              <p className="text-xs text-destructive">{errors.email}</p>
+            {errors.username && (
+              <p className="text-xs text-destructive">{errors.username}</p>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-sm font-medium text-foreground">
-                Password
-              </Label>
-              <button
-                type="button"
-                className="text-xs text-primary hover:underline"
-                onClick={() => {}}
-              >
-                Forgot password?
-              </button>
-            </div>
+            <Label htmlFor="password" className="text-sm font-medium text-foreground">
+              Mật khẩu
+            </Label>
             <div className="relative">
               <Input
                 id="password"
@@ -182,21 +195,21 @@ const LoginPage = () => {
             )}
           </div>
 
-          <Button type="submit" className="mt-1 w-full font-semibold">
-            Sign In
+          <Button type="submit" className="mt-1 w-full font-semibold" disabled={loading}>
+            {loading ? "Đang đăng nhập…" : "Đăng nhập"}
           </Button>
         </form>
 
         {/* Footer links */}
         <div className="mt-6 flex flex-col items-center gap-2 text-sm text-muted-foreground">
           <p>
-            Don&apos;t have an account?{" "}
+            Chưa có tài khoản?{" "}
             <button
               type="button"
               className="font-medium text-primary hover:underline"
               onClick={() => navigate("/register")}
             >
-              Sign up
+              Đăng ký
             </button>
           </p>
           <button
@@ -204,7 +217,7 @@ const LoginPage = () => {
             className="text-xs hover:text-foreground hover:underline"
             onClick={() => navigate("/")}
           >
-            Back to Home
+            Trở về trang chủ
           </button>
         </div>
       </div>

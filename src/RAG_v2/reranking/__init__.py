@@ -39,7 +39,9 @@ def create_reranker(settings: "Settings") -> Optional[BaseReranker]:  # type: ig
         importlib.import_module(module_path)  # triggers @register_reranker
     cls = _REGISTRY[provider]
     return cls(
-        model_name=settings.reranker_model, top_k=settings.reranker_top_k
+        model_name=settings.reranker_model,
+        top_k=settings.reranker_top_k,
+        score_threshold=settings.reranker_score_threshold,
     )
 
 

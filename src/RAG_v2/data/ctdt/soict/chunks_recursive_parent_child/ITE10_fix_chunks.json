@@ -25,7 +25,9 @@
       "expiry_date": null,
       "applicable_cohort": null,
       "applicable_major": null,
-      "document_type": "curriculum"
+      "document_type": "curriculum",
+      "major_name": "Khoa học Dữ liệu và Trí tuệ Nhân tạo",
+      "major_code":"IT-E10"
     }
   },
   {
@@ -53,7 +55,9 @@
       "expiry_date": null,
       "applicable_cohort": null,
       "applicable_major": null,
-      "document_type": "curriculum"
+      "document_type": "curriculum",
+      "major_name": "Khoa học Dữ liệu và Trí tuệ Nhân tạo",
+      "major_code":"IT-E10"
     }
   },
   {
@@ -81,7 +85,9 @@
       "expiry_date": null,
       "applicable_cohort": null,
       "applicable_major": null,
-      "document_type": "curriculum"
+      "document_type": "curriculum",
+      "major_name": "Khoa học Dữ liệu và Trí tuệ Nhân tạo",
+      "major_code":"IT-E10"
     }
   }
 ]

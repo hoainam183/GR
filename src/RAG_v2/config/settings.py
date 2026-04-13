@@ -110,6 +110,10 @@ class Settings(BaseSettings):
     # --- Reranker ---
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
     reranker_top_k: int = 5
+    # BGE reranker raw-logit threshold. Documents scoring below this are
+    # dropped from the context. 0.0 is the natural decision boundary;
+    # lower to -0.5 if you need more recall, raise to 0.5 for higher precision.
+    reranker_score_threshold: float = 0.0
 
     # --- Router ---
     router_mode: str = "classifier"

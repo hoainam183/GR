@@ -320,6 +320,57 @@ class QdrantStore:
             overwrite,
         )
 
+    def update_metadata_batch(
+        self,
+        id_metadata_pairs: List[tuple],
+        overwrite: bool = False,
+        batch_size: int = 100,
+    ) -> None:
+        """Update metadata for many points, each with its own payload dict.
+
+        This is more efficient than calling ``update_metadata_by_ids`` in a
+        loop when each point has *different* metadata to set.
+
+        Args:
+            id_metadata_pairs: Iterable of ``(id, metadata_dict)`` tuples.
+            overwrite: If True, replace the entire payload for each point.
+                       If False (default), merge the provided fields.
+            batch_size: Number of individual ``set_payload`` / ``overwrite_payload``
+                        calls to issue per iteration.  Each call targets exactly
+                        one point so the batch here groups them for logging only.
+        """
+        total = len(id_metadata_pairs)
+        updated = 0
+        for start in range(0, total, batch_size):
+            batch = id_metadata_pairs[start : start + batch_size]
+            for point_id, meta in batch:
+                selector = models.PointIdsList(points=[point_id])
+                if overwrite:
+                    self.client.overwrite_payload(
+                        collection_name=self.collection_name,
+                        payload=meta,
+                        points=selector,
+                    )
+                else:
+                    self.client.set_payload(
+                        collection_name=self.collection_name,
+                        payload=meta,
+                        points=selector,
+                    )
+            updated += len(batch)
+            logger.info(
+                "update_metadata_batch: %d/%d points processed in '%s'.",
+                updated,
+                total,
+                self.collection_name,
+            )
+        logger.info(
+            "update_metadata_batch done: %d point(s) updated in '%s' (overwrite=%s).",
+            total,
+            self.collection_name,
+            overwrite,
+        )
+
     def update_metadata_by_filter(
         self,
         filter_key: str,

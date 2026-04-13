@@ -1,72 +1,28 @@
-"""Pydantic schemas for API request / response models."""
+"""Backward-compatible re-export shim.
 
-from __future__ import annotations
+All chat/health API schemas have moved to ``schemas.chat``.
+This module re-exports them so existing imports continue to work.
 
-from typing import Any, Dict, List, Optional
+    from api.schemas import ChatRequest  # still valid
+"""
 
-from pydantic import BaseModel, Field
+from schemas.chat import (  # noqa: F401
+    ChatRequest,
+    ChatResponse,
+    CollectionScore,
+    HealthResponse,
+    HistoryMessage,
+    RetrievedDocument,
+    UserContext,
+)
 
+__all__ = [
+    "ChatRequest",
+    "ChatResponse",
+    "CollectionScore",
+    "HealthResponse",
+    "HistoryMessage",
+    "RetrievedDocument",
+    "UserContext",
+]
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Request models
-# ═══════════════════════════════════════════════════════════════════════════════
-
-
-class HistoryMessage(BaseModel):
-    """A single message in the chat history."""
-
-    role: str = Field(..., pattern="^(user|assistant)$")
-    content: str
-
-
-class ChatRequest(BaseModel):
-    """Body for ``POST /chat`` and ``POST /chat/stream``."""
-
-    question: str = Field(..., min_length=1, max_length=4096)
-    top_k: int = Field(default=5, ge=1, le=50)
-    history: Optional[List[HistoryMessage]] = None
-    session_id: Optional[str] = None
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Response models
-# ═══════════════════════════════════════════════════════════════════════════════
-
-
-class RetrievedDocument(BaseModel):
-    """A single retrieved source document."""
-
-    rank: int
-    content: str
-    score: float
-    metadata: Dict[str, Any]
-
-
-class CollectionScore(BaseModel):
-    """Router confidence score for a target collection."""
-
-    collection: str
-    score: float
-
-
-class ChatResponse(BaseModel):
-    """Response body for ``POST /chat``."""
-
-    question: str
-    answer: str
-    retrieved_documents: List[RetrievedDocument]
-    num_documents: int
-    model_name: str
-    intent: str
-    target_collections: Optional[List[str]] = None
-    collection_scores: Optional[List[CollectionScore]] = None
-    reflected_question: Optional[str] = None
-    timings_ms: Optional[Dict[str, float]] = None
-    session_id: str
-
-
-class HealthResponse(BaseModel):
-    """Response body for ``GET /health``."""
-
-    status: str
-    rag_initialized: bool

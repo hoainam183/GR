@@ -27,8 +27,17 @@ from auth.microsoft import (
     get_authorization_url,
     get_microsoft_user_info,
 )
+from auth.password import hash_password, verify_password
 from models.database import USERS_COLLECTION, get_database
-from models.user import UserCreate, UserDocument, UserPublic, UserUpdate
+from models.user import UserDocument
+from schemas.user import (
+    TokenResponse,
+    UserCreate,
+    UserLoginRequest,
+    UserManualCreate,
+    UserPublic,
+    UserUpdate,
+)
 from utils.parse_hust_email import parse_hust_email
 
 router = APIRouter()
@@ -173,6 +182,109 @@ async def callback(
         redirect_url = f"{_FRONTEND_BASE}/complete-profile?token={jwt_token}"
 
     return RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
+
+
+# ─── /auth/register ───────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/register",
+    response_model=UserPublic,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a new user with username/password",
+)
+async def register(
+    body: UserManualCreate,
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> UserPublic:
+    """Create a new manual account.
+
+    Checks that ``username`` is unique, hashes the password with bcrypt, and
+    inserts a new user document.  Returns the public user profile.
+    """
+    # Uniqueness check on username
+    existing = await db[USERS_COLLECTION].find_one({"username": body.username})
+    if existing is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Username '{body.username}' is already taken.",
+        )
+
+    now = datetime.now(timezone.utc)
+    # Build document, omitting None-valued fields so sparse unique indexes
+    # (email, microsoft_id) don't treat absent fields as duplicate null values.
+    _raw = {
+        "username": body.username,
+        "password_hash": hash_password(body.password),
+        "full_name": body.full_name,
+        "student_id": body.student_id,
+        "cohort": body.cohort,
+        "major": body.major,
+        "major_code": body.major_code,
+        "is_profile_complete": True,
+        "is_active": True,
+        "created_at": now,
+        "updated_at": now,
+        "last_login_at": now,
+    }
+    document = {k: v for k, v in _raw.items() if v is not None}
+    result = await db[USERS_COLLECTION].insert_one(document)
+    inserted = await db[USERS_COLLECTION].find_one({"_id": result.inserted_id})
+    return UserPublic.from_document(inserted)
+
+
+# ─── /auth/login (username/password) ─────────────────────────────────────────
+
+
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    summary="Login with username and password",
+)
+async def login(
+    body: UserLoginRequest,
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> TokenResponse:
+    """Authenticate with username + password, return a JWT.
+
+    Looks up the user by ``username``, verifies the bcrypt password hash, and
+    issues a JWT token identical in structure to the OAuth flow.
+    """
+    doc = await db[USERS_COLLECTION].find_one({"username": body.username})
+    if doc is None or not doc.get("password_hash"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password.",
+        )
+
+    if not verify_password(body.password, doc["password_hash"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password.",
+        )
+
+    if not doc.get("is_active", True):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is deactivated.",
+        )
+
+    # Update last login timestamp
+    now = datetime.now(timezone.utc)
+    await db[USERS_COLLECTION].update_one(
+        {"_id": doc["_id"]},
+        {"$set": {"last_login_at": now}},
+    )
+
+    user_id = str(doc["_id"])
+    # Use username as the email claim (informational; get_current_user only uses sub)
+    jwt_token = create_access_token(user_id=user_id, email=body.username)
+
+    return TokenResponse(
+        access_token=jwt_token,
+        token_type="bearer",
+        user=UserPublic.from_document(doc),
+    )
 
 
 # ─── /auth/me  (GET) ──────────────────────────────────────────────────────────

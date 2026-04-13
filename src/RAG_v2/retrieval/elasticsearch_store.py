@@ -159,6 +159,16 @@ class ElasticsearchStore:
                     "total_chunks": {"type": "integer"},
                     "chunk_size": {"type": "integer"},
                     "has_links": {"type": "boolean"},
+                    # Metadata filter fields — must be keyword for exact term queries
+                    "major_code": {"type": "keyword"},
+                    "applicable_major": {"type": "keyword"},
+                    "date_str": {"type": "keyword"},
+                    "document_type": {"type": "keyword"},
+                    "major_name": {
+                        "type": "text",
+                        "analyzer": text_analyzer,
+                        "fields": {"keyword": {"type": "keyword"}},
+                    },
                 }
             },
         }
@@ -218,6 +228,43 @@ class ElasticsearchStore:
     # ------------------------------------------------------------------
     # Search
     # ------------------------------------------------------------------
+
+    def metadata_filter_search(
+        self,
+        es_filter: Dict[str, Any],
+        max_results: int = 1000,
+    ) -> List[str]:
+        """Filter-only search (no text scoring) — returns matching doc IDs.
+
+        Used as the **metadata pre-search step** before hybrid retrieval:
+        run an ES query whose ``filter`` clause targets metadata fields
+        (major_code, date_str, applicable_major …), collect the matching
+        doc IDs, then pass them to Qdrant as ``HasIdCondition`` so vector
+        search is restricted to that pre-filtered subset.
+
+        Args:
+            es_filter: An ES query dict that will be placed inside
+                ``{"bool": {"filter": [es_filter]}}`` — no text scoring.
+            max_results: Upper bound on returned IDs (default 1 000).
+
+        Returns:
+            List of ``_id`` strings for matching documents.
+        """
+        try:
+            resp = self.client.search(
+                index=self.index_name,
+                size=max_results,
+                query={"bool": {"filter": [es_filter]}},
+                source=False,  # don't fetch document bodies — IDs only
+            )
+            return [hit["_id"] for hit in resp["hits"]["hits"]]
+        except Exception:
+            logger.warning(
+                "metadata_filter_search failed for index '%s'",
+                self.index_name,
+                exc_info=True,
+            )
+            return []
 
     def keyword_search(
         self,

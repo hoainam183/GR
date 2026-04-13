@@ -9,6 +9,7 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import CompleteProfile from "./pages/CompleteProfile";
+import TracePage from "./pages/TracePage";
 
 const queryClient = new QueryClient();
 
@@ -21,9 +22,11 @@ const App = () => (
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/chat" element={<Index />} />
+          <Route path="/chat/:sessionId" element={<Index />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
+          <Route path="/trace" element={<TracePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
