@@ -57,14 +57,18 @@ Trước nhu cầu cấp thiết về việc hỗ trợ sinh viên tra cứu quy
 \section{Đóng góp của đồ án}
 \label{sec:donggop}
 
-Đồ án có ba đóng góp chính như sau:
+Đồ án có năm đóng góp chính như sau:
 
 \begin{enumerate}
-    \item \textbf{Xây dựng pipeline xử lý PDF đa phương thức:} Kết hợp Docling, PyMuPDF4LLM và olmOCR để xử lý các văn bản PDF với font encoding phức tạp, đảm bảo độ chính xác cao cho tiếng Việt;
+    \item \textbf{Xây dựng pipeline xử lý PDF đa phương thức:} Kết hợp Docling, PyMuPDF4LLM và olmOCR để xử lý các văn bản PDF với font encoding phức tạp, đảm bảo độ chính xác 99.5\%+ cho tiếng Việt;
 
-    \item \textbf{Phát triển chiến lược chunking cho văn bản pháp lý:} Thiết kế OlmOcrLegalChunker với khả năng nhận diện cấu trúc Chương-Điều-Khoản-Điểm, bảo toàn ngữ cảnh và metadata;
+    \item \textbf{Phát triển 4 chiến lược chunking chuyên biệt:} Thiết kế OlmOcrLegalChunker, RecursiveChunker, STSVChunker và ArticleLevelLegalChunker với khả năng nhận diện cấu trúc Chương-Điều-Khoản-Điểm, bảo toàn ngữ cảnh và metadata;
 
-    \item \textbf{Triển khai hệ thống RAG hoàn chỉnh:} Tích hợp embedding E5 Multilingual, FAISS vector store và Gemini 2.5 Flash để sinh câu trả lời chính xác với trích dẫn nguồn.
+    \item \textbf{Triển khai Hybrid Search với Dual Embedding:} Kết hợp BGE-M3 và E5-Multilingual lưu trên Qdrant Vector Database, kết hợp với Elasticsearch BM25 qua Reciprocal Rank Fusion đạt Hit@5 = 86.4\%;
+
+    \item \textbf{Xây dựng hệ thống RAG 8 tầng hoàn chỉnh:} Tích hợp Query Router, Query Reflection, Cross-encoder Reranking, Gemini 2.5 Flash, Self Evaluation, Tavily fallback và MongoDB Memory;
+
+    \item \textbf{Đánh giá quy mô lớn:} Xây dựng framework đánh giá với 25 bộ dữ liệu, 2.390 câu hỏi, so sánh 6 phương pháp retrieval.
 \end{enumerate}
 
 
@@ -72,14 +76,14 @@ Trước nhu cầu cấp thiết về việc hỗ trợ sinh viên tra cứu quy
 
 Phần còn lại của báo cáo đồ án tốt nghiệp này được tổ chức như sau.
 
-Chương 2 trình bày cơ sở lý thuyết về hệ thống RAG, bao gồm kiến thức nền tảng về NLP, embedding, vector store, và các kỹ thuật chunking cho văn bản pháp lý. Chương này cũng khảo sát các nghiên cứu liên quan về hệ thống hỏi-đáp tự động và phân tích các công nghệ sử dụng trong đề tài.
+Chương 2 trình bày cơ sở lý thuyết về hệ thống RAG, bao gồm kiến thức nền tảng về NLP, embedding (BGE-M3, E5-Multilingual), vector store (Qdrant), và các kỹ thuật chunking cho văn bản pháp lý. Chương này cũng khảo sát các nghiên cứu liên quan và phân tích các công nghệ sử dụng.
 
-Chương 3 trình bày kiến trúc tổng thể của hệ thống RAG Chatbot, mô tả chi tiết các thành phần từ PDF processing, chunking, embedding, vector store đến LLM integration. Chương này giới thiệu luồng xử lý dữ liệu và cách các module tương tác với nhau.
+Chương 3 trình bày kiến trúc tổng thể của hệ thống RAG Chatbot với 8 tầng, mô tả chi tiết pipeline thu thập dữ liệu đa nguồn, các chiến lược chunking chuyên biệt, và luồng xử lý từ query đến response.
 
-Chương 4 đi sâu vào việc cài đặt và triển khai các module chính, bao gồm OlmOcrLegalChunker, EmbeddingPipeline, FaissVectorStore và GeminiRAG. Các đoạn mã nguồn, cấu hình kỹ thuật và chiến lược tối ưu được trình bày chi tiết.
+Chương 4 đi sâu vào việc cài đặt và triển khai toàn bộ các module: xử lý dữ liệu và chunking, Embedding Layer (BGE-M3, E5), Hybrid Retrieval (Qdrant + Elasticsearch + RRF), Reranking (BGE cross-encoder), Query Router \& Reflection, Chat Model (GeminiLLM) và Self Evaluation, Tavily fallback, MongoDB Memory, FastAPI Backend và Pipeline Integration.
 
-Chương 5 tập trung vào việc đánh giá hệ thống, bao gồm các metrics như Precision@K, Recall@K, Hit Rate và MRR. Các thực nghiệm so sánh hiệu suất của các converter PDF và chiến lược chunking cũng được phân tích.
+Chương 5 tập trung vào việc đánh giá hệ thống trên 2.390 câu hỏi từ 25 bộ dữ liệu, so sánh 6 phương pháp retrieval với các metrics Hit@K, Precision@K, Recall@K, MRR.
 
-Cuối cùng, chương 6 đưa ra kết luận và hướng phát triển của đồ án, tổng kết các đóng góp chính, nhìn nhận hạn chế và đề xuất các cải tiến trong tương lai như hybrid search, query caching và re-ranking.
+Cuối cùng, chương 6 đưa ra kết luận và hướng phát triển của đồ án, tổng kết các đóng góp chính, nhìn nhận hạn chế và đề xuất các cải tiến bao gồm query caching, metadata-aware retrieval, và nâng cấp Agentic RAG.
 
 \end{document}

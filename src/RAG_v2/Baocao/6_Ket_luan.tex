@@ -3,27 +3,31 @@
 
 \section{Kết luận}
 
-Trong khuôn khổ đồ án tốt nghiệp, sinh viên đã xây dựng thành công hệ thống RAG (Retrieval-Augmented Generation) Chatbot hỗ trợ sinh viên hỏi-đáp tự động về các quy định, quy chế đào tạo của Đại học Bách khoa Hà Nội. Đồ án đã giải quyết được các vấn đề chính sau:
+Trong khuôn khổ đồ án tốt nghiệp, sinh viên đã xây dựng thành công hệ thống RAG (Retrieval-Augmented Generation) Chatbot hỗ trợ sinh viên hỏi-đáp tự động về các quy định, quy chế đào tạo của Đại học Bách khoa Hà Nội. Hệ thống được thiết kế theo kiến trúc 8 tầng module hóa và đã giải quyết được các vấn đề chính sau:
 
 \begin{itemize}
     \item Xây dựng pipeline xử lý PDF đa phương thức với Docling, PyMuPDF4LLM và olmOCR, đặc biệt giải quyết vấn đề font encoding cho văn bản tiếng Việt;
     
-    \item Phát triển OlmOcrLegalChunker với khả năng nhận diện cấu trúc Chương-Điều-Khoản-Điểm, bảo toàn metadata và ngữ cảnh pháp lý;
+    \item Phát triển 4 loại Chunker chuyên biệt (OlmOcrLegalChunker, RecursiveChunker, STSVChunker, ArticleLevelLegalChunker) với khả năng nhận diện cấu trúc Chương-Điều-Khoản-Điểm, bảo toàn metadata và ngữ cảnh pháp lý;
     
-    \item Triển khai EmbeddingPipeline với mô hình E5 Multilingual (1024 chiều) và FaissVectorStore cho semantic search hiệu quả;
+    \item Triển khai Dual Embedding Pipeline với BGE-M3 và E5-Multilingual (1024 chiều), lưu trữ trên Qdrant Vector Database với dual named vectors;
     
-    \item Xây dựng GeminiRAG tích hợp Gemini 2.5 Flash để sinh câu trả lời chính xác với trích dẫn nguồn;
-    
-    \item Phát triển Hybrid Search kết hợp BM25 và Semantic Search với RRF fusion, đạt Hit Rate 99.35\%;
+    \item Triển khai Hybrid Search kết hợp Qdrant (Vector) + Elasticsearch (BM25) qua Reciprocal Rank Fusion, với cấu hình tối ưu v0.8/k0.2;
     
     \item Triển khai Cross-encoder Reranking với BAAI/bge-reranker-v2-m3 để cải thiện độ chính xác;
     
-    \item Phát triển Backend API với FastAPI và Frontend với React 18 + TypeScript + Vite.
+    \item Phát triển Query Router (dual-mode: classifier + LLM) và Query Reflection (LLM-based rewriting) cho xử lý truy vấn thông minh;
+    
+    \item Xây dựng GeminiLLM tích hợp Gemini 2.5 Flash qua OpenAI-compatible endpoint, với Self Evaluation tự đánh giá chất lượng câu trả lời;
+    
+    \item Tích hợp Tavily Web Search làm fallback và MongoDB Memory cho lịch sử hội thoại;
+    
+    \item Phát triển Backend API với FastAPI (SSE streaming) và Frontend với React 18 + TypeScript + Vite.
 \end{itemize}
 
 \section{Kết quả đạt được}
 
-Hệ thống đã xử lý thành công 16 văn bản quy chế đào tạo, tạo ra 1,247 chunks được lưu trong vector store. Kết quả đạt được:
+Hệ thống đã xử lý thành công 137 tài liệu từ 3 nguồn dữ liệu (16 PDF quy định, 38 PDF chương trình đào tạo từ 6 khoa/viện, 83 file JSON thông tin sinh viên), tạo ra tổng cộng 2.752 chunks chất lượng cao được lưu trữ trên Qdrant Vector Database và Elasticsearch.
 
 \begin{table}[h]
 \centering
@@ -33,18 +37,48 @@ Hệ thống đã xử lý thành công 16 văn bản quy chế đào tạo, t�
 \hline
 Độ chính xác tiếng Việt & 99.5\%+ & olmOCR vision-based \\
 \hline
-Thời gian phản hồi & 2-4 giây/query & End-to-end latency \\
+Thời gian phản hồi & 2--4 giây/query & End-to-end latency \\
 \hline
 olmOCR success rate & 100\% & Không phụ thuộc font \\
 \hline
-Hybrid Search Hit Rate & 99.35\% & BM25 + Semantic + RRF \\
+Hybrid Search Hit@5 & 86.4\% & v0.8/k0.2 (BGE-M3 + E5 + BM25) \\
 \hline
-MRR & 92.31\% & Mean Reciprocal Rank \\
+Hybrid Search Hit@1 & 58.7\% & Tỷ lệ tìm đúng ở vị trí đầu tiên \\
 \hline
-Evaluation Dataset & 155 câu hỏi & 4 loại: factual, reasoning, comparative, calculation \\
+MRR & 70.8\% & Mean Reciprocal Rank \\
+\hline
+Precision@5 & 19.1\% & Multi-label precision \\
+\hline
+Recall@5 & 81.6\% & Multi-label recall \\
+\hline
+Latency (retrieval) & $\sim$206ms & Hybrid search trung bình \\
+\hline
+Evaluation Dataset & 2.390 câu hỏi & 25 bộ dữ liệu, 4 loại query \\
+\hline
+Số chunks & 2.752 & Từ 137 tài liệu, 3 nguồn \\
+\hline
+Số collections & 4 & stsv, quydinh, kehoach, ctdt \\
 \hline
 \end{tabular}
 \caption{Tổng hợp kết quả đạt được}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\textbf{Phương pháp} & \textbf{Hit@1} & \textbf{Hit@5} & \textbf{P@5} & \textbf{R@5} & \textbf{MRR} \\
+\hline
+BGE-M3 & 0.503 & 0.732 & 0.159 & 0.686 & 0.602 \\
+\hline
+E5-Multilingual & 0.565 & 0.845 & 0.187 & 0.800 & 0.687 \\
+\hline
+Elasticsearch (BM25) & 0.221 & 0.470 & 0.098 & 0.434 & 0.332 \\
+\hline
+\textbf{Hybrid v0.8/k0.2} & \textbf{0.587} & \textbf{0.864} & \textbf{0.191} & \textbf{0.816} & \textbf{0.708} \\
+\hline
+\end{tabular}
+\caption{So sánh hiệu suất các phương pháp retrieval trên 2.390 queries}
 \end{table}
 
 \section{So sánh với các hệ thống tương tự}
@@ -97,24 +131,30 @@ Chi phí vận hành & Thấp & Cao (API) & Rất thấp \\
 \section{Hạn chế còn tồn tại}
 
 \begin{itemize}
-    \item Chưa có query caching, mỗi query phải embedding lại;
-    \item Chưa tận dụng lịch sử hội thoại, không hỗ trợ follow-up questions;
-    \item FAISS Flat index chưa scale được cho dataset rất lớn;
-    \item Chưa có cơ chế update tài liệu tự động;
-    \item Cross-encoder reranking làm tăng latency.
+    \item Chưa có query caching (embedding cache, retrieval cache, response cache), mỗi query phải embedding lại;
+    \item Chưa xử lý phạm vi hiệu lực của văn bản: chưa filter theo khóa sinh viên, thời điểm áp dụng;
+    \item Chưa có cơ chế nhận diện Student Context (khóa, ngành) để cá nhân hóa câu trả lời;
+    \item Chưa giải quyết cross-reference giữa các văn bản (``theo quy định tại Điều X'');
+    \item Chưa xử lý document override (văn bản mới thay thế văn bản cũ);
+    \item Chưa có cơ chế update tài liệu tự động khi có quy chế mới;
+    \item Cross-encoder reranking làm tăng latency ($\sim$200ms thêm cho 20 documents).
 \end{itemize}
 
 \section{Hướng phát triển trong tương lai}
 
 \textit{Lưu ý: Giao diện chatbot hiện tại chỉ là demo để kiểm tra khả năng retrieval của hệ thống. Mục tiêu chính của đề tài là xây dựng hệ thống tự động trả lời email tư vấn học tập cho sinh viên.}
 
-\subsection{Phase 1: Hoàn thiện hệ thống RAG (1-2 tháng)}
+\subsection{Phase 1: Hoàn thiện hệ thống RAG (1--2 tháng)}
 \begin{itemize}
-    \item \textbf{[HOÀN THÀNH]} Build evaluation dataset với 100+ test queries $\rightarrow$ \textit{155 câu hỏi}
-    \item \textbf{[HOÀN THÀNH]} Hybrid search kết hợp BM25 + semantic retrieval $\rightarrow$ \textit{Hit Rate 99.35\%}
+    \item \textbf{[HOÀN THÀNH]} Build evaluation dataset với 100+ test queries $\rightarrow$ \textit{2.390 câu hỏi trên 25 bộ dữ liệu}
+    \item \textbf{[HOÀN THÀNH]} Hybrid search kết hợp BM25 + semantic retrieval $\rightarrow$ \textit{Hit@5 = 86.4\%}
     \item \textbf{[HOÀN THÀNH]} Re-ranking với cross-encoder để tăng precision
+    \item \textbf{[HOÀN THÀNH]} Query Router dual-mode (classifier + LLM) + Query Reflection
+    \item \textbf{[HOÀN THÀNH]} Self Evaluation + Tavily fallback + MongoDB Memory
+    \item \textbf{[HOÀN THÀNH]} FastAPI Backend + React Frontend
     \item Implement query caching (semantic + exact match) để giảm latency
-    \item Table-aware chunking strategy cho các bảng phức tạp
+    \item Metadata-aware retrieval: filter theo khóa, ngành, thời điểm áp dụng
+    \item Nâng cấp Agentic RAG: Agent tự lập kế hoạch, phân rã câu hỏi phức hợp
 \end{itemize}
 
 \subsection{Phase 2: Xây dựng Email Processing Pipeline (2-3 tháng)}
@@ -208,17 +248,20 @@ Chi phí vận hành & Thấp & Cao (API) & Rất thấp \\
 
 \section{Kết luận cuối cùng}
 
-Tổng kết lại, đồ án ``\textbf{Nghiên cứu và đề xuất mô hình tự động trả lời email tư vấn học tập cho sinh viên}'' đã hoàn thành giai đoạn đầu tiên - xây dựng và đánh giá hệ thống RAG làm nền tảng cho email bot. Các đóng góp chính:
+Tổng kết lại, đồ án ``\textbf{Nghiên cứu và đề xuất mô hình tự động trả lời email tư vấn học tập cho sinh viên}'' đã hoàn thành giai đoạn đầu tiên --- xây dựng và đánh giá hệ thống RAG hoàn chỉnh 8 tầng làm nền tảng cho email bot. Các đóng góp chính:
 
 \begin{enumerate}
-    \item \textbf{Pipeline xử lý PDF đa phương thức} giải quyết vấn đề font encoding tiếng Việt
-    \item \textbf{Chunking strategy cho văn bản pháp lý} bảo toàn cấu trúc Chương-Điều-Khoản
-    \item \textbf{Hybrid Search với RRF fusion} đạt Hit Rate 99.35\%
-    \item \textbf{Cross-encoder reranking} cải thiện độ chính xác retrieval
-    \item \textbf{Evaluation framework} với 155 câu hỏi đa dạng
-    \item \textbf{Demo chatbot} để kiểm tra khả năng retrieval trước khi tích hợp email
+    \item \textbf{Pipeline xử lý PDF đa phương thức} giải quyết vấn đề font encoding tiếng Việt, xử lý thành công 137 tài liệu từ 3 nguồn dữ liệu
+    \item \textbf{4 loại Chunker chuyên biệt cho văn bản pháp lý} bảo toàn cấu trúc Chương-Điều-Khoản, tạo 2.752 chunks chất lượng cao
+    \item \textbf{Dual Embedding (BGE-M3 + E5)} lưu trữ trên Qdrant với dual named vectors
+    \item \textbf{Hybrid Search với RRF fusion} kết hợp Qdrant + Elasticsearch, đạt Hit@5 = 86.4\% trên 2.390 queries
+    \item \textbf{Cross-encoder reranking} với BAAI/bge-reranker-v2-m3 cải thiện độ chính xác
+    \item \textbf{Query Router dual-mode + Reflection} xử lý truy vấn thông minh, context-aware
+    \item \textbf{GeminiLLM + Self Evaluation} sinh câu trả lời và tự đánh giá chất lượng
+    \item \textbf{Evaluation framework} quy mô lớn với 25 bộ dữ liệu, 2.390 câu hỏi
+    \item \textbf{Full-stack deployment}: FastAPI backend (SSE streaming) + React frontend + Docker
 \end{enumerate}
 
-Hệ thống RAG đã chứng minh khả năng truy xuất chính xác thông tin từ văn bản quy chế, là tiền đề quan trọng để phát triển hệ thống tự động trả lời email tư vấn học tập trong các giai đoạn tiếp theo.
+Hệ thống RAG đã chứng minh khả năng truy xuất chính xác thông tin từ văn bản quy chế đào tạo, với kiến trúc module hóa cho phép dễ dàng mở rộng và tích hợp. Đây là tiền đề quan trọng để phát triển hệ thống tự động trả lời email tư vấn học tập trong các giai đoạn tiếp theo.
 
 \end{document}

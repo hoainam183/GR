@@ -373,6 +373,561 @@ DOCUMENT_TYPE_RULES = [
 \end{verbatim}
 
 %% =====================================================================
+%% EMBEDDING LAYER
+%% =====================================================================
+
+\section{Triển khai Embedding Layer}
+
+Embedding Layer chịu trách nhiệm chuyển đổi văn bản (query và document) thành vector số trong không gian 1024 chiều, phục vụ cho tìm kiếm ngữ nghĩa trong Qdrant.
+
+\subsection{Kiến trúc Clean Architecture}
+
+Toàn bộ module embedding được thiết kế theo mẫu Abstract Base Class + Factory Pattern:
+
+\begin{verbatim}
+# embedding/base.py — Abstract Base Class
+class BaseEmbedder(ABC):
+    @property
+    @abstractmethod
+    def dimension(self) -> int: ...
+
+    @abstractmethod
+    def embed(self, texts: List[str]) -> List[List[float]]: ...
+
+    @abstractmethod
+    def embed_query(self, text: str) -> List[float]: ...
+
+    @abstractmethod
+    def embed_documents(self, texts: List[str]) -> List[List[float]]: ...
+\end{verbatim}
+
+Factory function cho phép đổi provider qua biến môi trường \texttt{EMBEDDING\_PROVIDER}:
+\begin{verbatim}
+# embedding/__init__.py — Factory Pattern
+def create_embedder(settings) -> BaseEmbedder:
+    provider = settings.embedding_provider  # "bge_m3"|"e5"|"ensemble"
+    if provider == "bge_m3":
+        return BGEm3Embedder()
+    if provider == "e5":
+        return E5MultilingualEmbedder()
+    if provider == "ensemble":
+        return EnsembleEmbedder([BGEm3Embedder(), E5MultilingualEmbedder()])
+\end{verbatim}
+
+\subsection{BGE-M3 Embedder}
+\textbf{File:} \texttt{embedding/bge\_m3.py} (140 dòng, 4.547 bytes)
+
+BGEm3Embedder là wrapper cho mô hình \texttt{BAAI/bge-m3} qua thư viện FlagEmbedding:
+\begin{verbatim}
+class BGEm3Embedder(BaseEmbedder):
+    DEFAULT_MODEL = "BAAI/bge-m3"
+
+    def __init__(self, model_name=DEFAULT_MODEL, use_fp16=True,
+                 device=None, batch_size=32, max_length=512):
+        if device is None:
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+        if device == "cpu":
+            use_fp16 = False
+
+        self._model = BGEM3FlagModel(
+            model_name, use_fp16=use_fp16, device=device
+        )
+        self._dimension = 1024
+\end{verbatim}
+
+\textbf{Ba chế độ encoding:}
+\begin{itemize}
+    \item \textbf{Dense encoding} (\texttt{embed()}, \texttt{embed\_query()}): Trả về vector 1024 chiều cho tìm kiếm ngữ nghĩa;
+    \item \textbf{Sparse encoding} (\texttt{encode\_sparse()}): Trả về token-weight dict cho keyword-level matching;
+    \item \textbf{Encode all} (\texttt{encode\_all()}): Trả về cả dense và sparse trong một lần gọi.
+\end{itemize}
+
+\subsection{E5 Multilingual Embedder}
+\textbf{File:} \texttt{embedding/e5\_multilingual.py} (91 dòng, 2.965 bytes)
+
+E5MultilingualEmbedder sử dụng \texttt{sentence-transformers} cho mô hình \texttt{intfloat/multilingual-e5-large}:
+\begin{verbatim}
+class E5MultilingualEmbedder(BaseEmbedder):
+    DEFAULT_MODEL = "intfloat/multilingual-e5-large"
+    QUERY_PREFIX = "query: "
+    PASSAGE_PREFIX = "passage: "
+
+    def __init__(self, model_name=DEFAULT_MODEL, device=None,
+                 batch_size=32, max_length=512):
+        self._model = SentenceTransformer(
+            model_name, device=device,
+            model_kwargs={"low_cpu_mem_usage": True,
+                          "dtype": torch.float16}
+        )
+        self._model.max_seq_length = max_length
+\end{verbatim}
+
+\textbf{Đặc điểm quan trọng:}
+\begin{itemize}
+    \item \textbf{Prefix tự động}: \texttt{embed\_query()} tự thêm \texttt{"query: "}, \texttt{embed\_documents()} tự thêm \texttt{"passage: "} — đúng theo yêu cầu của E5;
+    \item \textbf{Normalize embeddings}: Output được L2-normalize, cho phép dùng cosine similarity trực tiếp;
+    \item \textbf{FP16} để giảm bộ nhớ GPU khi inference.
+\end{itemize}
+
+\subsection{Ensemble Embedder}
+
+EnsembleEmbedder kết hợp nhiều embedders (mặc định BGE-M3 + E5) nhưng trong thực tế, pipeline lưu trữ và tìm kiếm vector của từng mô hình riêng biệt trên Qdrant (named vectors), không tính weighted average.
+
+\textbf{Quyết định thiết kế:}
+\begin{itemize}
+    \item Mỗi mô hình sinh vector độc lập, lưu vào named vector riêng trong Qdrant collection;
+    \item Khi search, Qdrant tìm kiếm trên cả hai named vectors (\texttt{bge\_m3} và \texttt{e5}), sau đó kết hợp kết quả;
+    \item Thiết kế này cho phép linh hoạt: có thể thêm/bớt embedding model mà không cần re-index toàn bộ.
+\end{itemize}
+
+%% =====================================================================
+%% HYBRID RETRIEVAL
+%% =====================================================================
+
+\section{Triển khai Hybrid Retrieval}
+
+Hybrid Retrieval kết hợp vector search (Qdrant) và keyword search (Elasticsearch) qua Reciprocal Rank Fusion, sau đó mở rộng lên multi-collection search song song.
+
+\subsection{Qdrant Vector Store}
+\textbf{File:} \texttt{retrieval/qdrant\_store.py} (16.172 bytes)
+
+QdrantStore là wrapper cho Qdrant client, hỗ trợ dual named vectors:
+\begin{verbatim}
+class QdrantStore:
+    def __init__(self, host, port, collection_name):
+        self._client = QdrantClient(host=host, port=port)
+
+    def create_collection(self, collection_name):
+        self._client.create_collection(
+            collection_name=collection_name,
+            vectors_config={
+                "bge_m3": VectorParams(size=1024,
+                           distance=Distance.COSINE),
+                "e5": VectorParams(size=1024,
+                       distance=Distance.COSINE),
+            }
+        )
+
+    def index_documents(self, documents, bge_vectors, e5_vectors):
+        """Upsert documents với 2 named vectors."""
+
+    def search(self, bge_query, e5_query, top_k=20,
+               qdrant_filters=None):
+        """Search trên cả 2 vectors, kết hợp kết quả."""
+
+    def delete_by_metadata(self, key, value):
+        """Xóa points theo metadata filter."""
+\end{verbatim}
+
+\textbf{Quyết định thiết kế:}
+\begin{itemize}
+    \item \textbf{Dual named vectors}: Mỗi point lưu cả vector BGE-M3 và E5, cho phép search trên từng model riêng hoặc kết hợp;
+    \item \textbf{Metadata payload}: Lưu text, title, source, chunk\_type, readable\_id và tất cả metadata từ chunker;
+    \item \textbf{Hỗ trợ metadata filtering}: Tham số \texttt{qdrant\_filters} cho phép lọc theo \texttt{applicable\_cohort}, \texttt{effective\_date}, v.v.
+\end{itemize}
+
+\subsection{Elasticsearch BM25 Store}
+\textbf{File:} \texttt{retrieval/elasticsearch\_store.py} (13.203 bytes)
+
+ElasticsearchStore cung cấp keyword search với BM25 scoring:
+\begin{verbatim}
+class ElasticsearchStore:
+    def __init__(self, host, port, index_name):
+        self._es = Elasticsearch(f"http://{host}:{port}")
+
+    def create_index(self, index_name):
+        """Tạo index với custom analyzer cho tiếng Việt."""
+        # Analyzer: lowercase + asciifolding + standard tokenizer
+
+    def index_documents(self, documents):
+        """Bulk index chunks."""
+
+    def keyword_search(self, query, top_k=20):
+        """BM25 search với multi_match."""
+        body = {
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["text", "title"],
+                    "fuzziness": "AUTO"
+                }
+            },
+            "size": top_k
+        }
+\end{verbatim}
+
+\textbf{Cấu hình Elasticsearch cho tiếng Việt:}
+\begin{itemize}
+    \item Custom analyzer: \texttt{standard} tokenizer + \texttt{lowercase} + \texttt{asciifolding} (xử lý dấu tiếng Việt);
+    \item \texttt{multi\_match} trên hai fields \texttt{text} và \texttt{title} để tăng recall;
+    \item \texttt{fuzziness=AUTO}: Tự động điều chỉnh mức chấp nhận lỗi chính tả.
+\end{itemize}
+
+\subsection{Hybrid Search với RRF Fusion}
+\textbf{File:} \texttt{retrieval/hybrid\_search.py} (7.319 bytes)
+
+HybridSearch kết hợp kết quả từ Qdrant (vector) và Elasticsearch (keyword) bằng Reciprocal Rank Fusion:
+\begin{verbatim}
+class HybridSearch:
+    def __init__(self, qdrant_store, es_store,
+                 vector_weight=0.8, keyword_weight=0.2):
+        self._qdrant = qdrant_store
+        self._es = es_store
+
+    def search(self, query, bge_m3_query, e5_query,
+               top_k=20, vector_pool_k=15, keyword_pool_k=15):
+        # 1. Vector search → top vector_pool_k
+        vector_results = self._qdrant.search(
+            bge_m3_query, e5_query, top_k=vector_pool_k
+        )
+        # 2. Keyword search → top keyword_pool_k
+        keyword_results = self._es.keyword_search(
+            query, top_k=keyword_pool_k
+        )
+        # 3. RRF fusion kết hợp 2 danh sách
+        fused = self._rrf_fusion(
+            vector_results, keyword_results,
+            self.vector_weight, self.keyword_weight
+        )
+        return fused[:top_k]
+\end{verbatim}
+
+\textbf{Thuật toán RRF (Reciprocal Rank Fusion):}
+\begin{verbatim}
+def _rrf_fusion(self, vector_results, keyword_results,
+                vector_weight, keyword_weight, k=60):
+    scores = {}  # doc_id -> fused_score
+    for rank, doc in enumerate(vector_results):
+        scores[doc.id] = vector_weight / (k + rank + 1)
+    for rank, doc in enumerate(keyword_results):
+        scores[doc.id] += keyword_weight / (k + rank + 1)
+    return sorted(scores, key=scores.get, reverse=True)
+\end{verbatim}
+
+\textbf{Ưu điểm RRF:} Không cần normalize điểm số từ 2 hệ thống có thang điểm khác nhau (cosine similarity vs BM25 score).
+
+\subsection{Multi-Collection Search}
+\textbf{File:} \texttt{retrieval/multi\_collection\_search.py} (21.099 bytes)
+
+MultiCollectionSearch mở rộng hybrid search lên 4 collections (stsv, quydinh, kehoach, ctdt), tìm kiếm song song:
+\begin{verbatim}
+class MultiCollectionSearch:
+    def __init__(self):
+        self._searchers = {}  # name -> HybridSearch
+
+    def register(self, name, hybrid_searcher):
+        """Đăng ký HybridSearch cho 1 collection."""
+
+    def search(self, query, bge_m3_query, e5_query,
+               top_k=20, active_collections=None):
+        """Tìm kiếm song song trên nhiều collections."""
+        # 1. Chọn collections cần search
+        targets = active_collections or list(self._searchers)
+
+        # 2. Search song song (ThreadPoolExecutor)
+        all_results = []
+        for name in targets:
+            results = self._searchers[name].search(...)
+            all_results.extend(results)
+
+        # 3. Global RRF merge + dedup
+        merged = self._global_rrf(all_results)
+        return merged[:top_k]
+\end{verbatim}
+
+\subsection{Collection Selector}
+\textbf{File:} \texttt{retrieval/collection\_selector.py} (5.126 bytes)
+
+CollectionSelector sử dụng kết quả phân loại domain từ QueryRouter để chọn collection phù hợp, giảm noise:
+\begin{verbatim}
+DOMAIN_TO_COLLECTIONS = {
+    "ctdt":     ["ctdt"],
+    "quydinh":  ["quydinh"],
+    "kehoach":  ["kehoach"],
+    "stsv":     ["stsv"],
+}
+CONFIDENCE_THRESHOLD = 0.65
+
+def select(domain, confidence) -> List[str]:
+    if confidence >= CONFIDENCE_THRESHOLD:
+        return DOMAIN_TO_COLLECTIONS.get(domain, ALL_COLLECTIONS)
+    return MULTI_DOMAIN_FALLBACK  # ["quydinh", "stsv"]
+\end{verbatim}
+
+\textbf{Logic}: Confidence cao ($\geq$ 0.65) $\rightarrow$ chỉ search collection tương ứng (nhanh, ít nhiễu). Confidence thấp $\rightarrow$ search fallback (2 collections phổ biến nhất).
+
+%% =====================================================================
+%% RERANKING LAYER
+%% =====================================================================
+
+\section{Triển khai Reranking Layer}
+\textbf{File:} \texttt{reranking/bge\_reranker.py} (136 dòng, 5.013 bytes)
+
+Reranking Layer sử dụng cross-encoder \texttt{BAAI/bge-reranker-v2-m3} để chấm điểm relevance cho từng cặp (query, document), chọn ra top-K tài liệu chính xác nhất.
+
+\subsection{Kiến trúc BGEReranker}
+\begin{verbatim}
+@register_reranker("bge")
+class BGEReranker(BaseReranker):
+    def __init__(self, model_name="BAAI/bge-reranker-v2-m3",
+                 device=None, use_fp16=None,
+                 batch_size=32, top_k=5, score_threshold=0.0):
+        self._model = FlagReranker(
+            model_name, device=device, use_fp16=use_fp16
+        )
+
+    def rerank(self, query, documents, top_k=None,
+               score_threshold=None) -> List[Dict]:
+        # 1. Build (query, doc_text) pairs
+        pairs = [[query, doc["text"]] for doc in documents]
+
+        # 2. Compute relevance scores
+        scores = self._model.compute_score(
+            pairs, batch_size=self.batch_size
+        )
+
+        # 3. Attach rerank_score, sort descending
+        scored_docs = [{**doc, "rerank_score": float(score)}
+                       for doc, score in zip(documents, scores)]
+        scored_docs.sort(key=lambda d: d["rerank_score"],
+                         reverse=True)
+
+        # 4. Top-K + score threshold filter
+        return scored_docs[:top_k]
+\end{verbatim}
+
+\textbf{Quyết định thiết kế:}
+\begin{itemize}
+    \item \textbf{Register decorator}: \texttt{@register\_reranker("bge")} cho phép đổi reranker provider qua config;
+    \item \textbf{Score threshold}: Loại bỏ tài liệu có điểm thấp hơn ngưỡng, tránh đưa context kém vào LLM;
+    \item \textbf{Batch processing}: Xử lý nhiều cặp (query, doc) cùng lúc để tối ưu GPU utilization.
+\end{itemize}
+
+%% =====================================================================
+%% QUERY ROUTER & REFLECTION
+%% =====================================================================
+
+\section{Triển khai Query Router \& Reflection}
+
+\subsection{Query Router --- Dual-mode Routing}
+\textbf{File:} \texttt{query/router.py} (225 dòng, 8.239 bytes)
+
+QueryRouter phân loại câu hỏi thành các intent, hỗ trợ 2 chế độ hoạt động:
+\begin{verbatim}
+class QueryRouter:
+    def __init__(self, mode="classifier", api_key=None):
+        if mode == "llm":
+            self._client = OpenAI(api_key=api_key)  # GPT-4o-mini
+        else:
+            self._classifier = DomainClassifier(embedder=embedder)
+            self._classifier.load(classifier_model_path)
+
+    def route(self, query, chat_history=None) -> Dict:
+        """Returns: {intent, domain, domains, confidence}"""
+        if self.mode == "classifier":
+            return self._route_classifier(query, chat_history)
+        return self._route_llm(query)
+\end{verbatim}
+
+\textbf{2 chế độ hoạt động:}
+\begin{itemize}
+    \item \textbf{Classifier mode} (mặc định): Sử dụng DomainClassifier (LogisticRegression + BGE-M3 embedding), zero API cost, latency $\sim$10--50ms. Phân loại 6 labels: chitchat, tool\_search, ctdt, quydinh, kehoach, stsv;
+    \item \textbf{LLM mode}: Sử dụng GPT-4o-mini với few-shot prompt. Chính xác hơn nhưng tốn API call.
+\end{itemize}
+
+\subsubsection{Context-aware routing}
+Router hỗ trợ routing nhận biết ngữ cảnh hội thoại:
+\begin{verbatim}
+def build_routing_input(query, chat_history=None) -> str:
+    """Thêm context từ 2 tin nhắn gần nhất."""
+    if not chat_history:
+        return query
+    recent = chat_history[-2:]  # 2 tin gần nhất
+    ctx = " | ".join(m["content"] for m in recent)
+    return f"[CTX: {ctx}] {query}"
+\end{verbatim}
+
+Ví dụ: Khi user hỏi ``Còn điều kiện tiên quyết là gì?'' -- câu follow-up không có từ khóa domain, nhưng nhờ context từ lượt trước (``Cho tôi biết về CTDT ngành CNTT''), router biết phân loại đúng vào domain \texttt{ctdt}.
+
+\subsection{Domain Classifier}
+\textbf{File:} \texttt{query/domain\_classifier.py} (15.280 bytes)
+
+DomainClassifier là bộ phân loại lightweight đã train, sử dụng embedding + LogisticRegression:
+\begin{itemize}
+    \item \textbf{Training data}: 600+ câu huấn luyện trong \texttt{training\_data.py} (27.967 bytes), bao phủ 6 domains;
+    \item \textbf{Pipeline}: Text $\rightarrow$ BGE-M3 embedding $\rightarrow$ LogisticRegression $\rightarrow$ label + probability;
+    \item \textbf{Output}: \texttt{\{"intent": "rag", "domain": "quydinh", "confidence": 0.87, "domains": ["quydinh"]\}};
+    \item \textbf{Lưu/Load model}: Sử dụng \texttt{joblib} để serialize/deserialize model đã train.
+\end{itemize}
+
+\subsection{Query Reflection --- LLM-based Query Rewriting}
+\textbf{File:} \texttt{query/reflection.py} (308 dòng, 11.954 bytes)
+
+QueryReflector sử dụng LLM (Gemini) để viết lại câu hỏi trước khi đưa vào retrieval:
+\begin{verbatim}
+class QueryReflector:
+    def __init__(self, settings=None):
+        # Hỗ trợ 4 providers: gemini, lm_studio, ollama, openai
+        self._client = OpenAI(
+            api_key=resolved_key, base_url=base_url
+        )
+
+    def reflect(self, query, chat_history=None,
+                user_context=None) -> Dict:
+        """Rewrite query -> {original, rewritten, prompt}"""
+        user_prompt = self._build_user_prompt(
+            query, chat_history, user_context
+        )
+        messages = [
+            {"role": "system", "content": REWRITE_SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt},
+        ]
+        # Gọi LLM với exponential backoff retry
+        response = self._client.chat.completions.create(...)
+        return {"original": query, "rewritten": rewritten}
+\end{verbatim}
+
+\textbf{Các tính năng nổi bật:}
+\begin{itemize}
+    \item \textbf{Giải tham chiếu đại từ}: ``nó'' $\rightarrow$ ``quy chế đào tạo 2025'';
+    \item \textbf{Mở rộng viết tắt}: ``ĐHBK'' $\rightarrow$ ``Đại học Bách Khoa Hà Nội'';
+    \item \textbf{Profile extraction tự động}: Regex scan lịch sử hội thoại để phát hiện ngành, khóa, GPA:
+\end{itemize}
+\begin{verbatim}
+# Tự động phát hiện thông tin sinh viên từ lịch sử chat:
+# "Tôi học ngành CNTT K68, GPA 3.2"
+# -> profile_note = "sinh viên ngành CNTT, K68, CPA=3.2"
+\end{verbatim}
+\begin{itemize}
+    \item \textbf{User context ưu tiên}: Nếu có thông tin đăng nhập (student profile), ưu tiên hơn regex extraction;
+    \item \textbf{Exponential backoff}: Retry tối đa 3 lần (2s $\rightarrow$ 4s $\rightarrow$ 8s) khi bị rate-limit;
+    \item \textbf{Multi-provider}: Hỗ trợ Gemini, OpenAI, LM Studio, Ollama qua cùng OpenAI-compatible API.
+\end{itemize}
+
+%% =====================================================================
+%% CHAT MODEL + SELF EVALUATION
+%% =====================================================================
+
+\section{Triển khai Chat Model và Self Evaluation}
+
+\subsection{Chat Model --- GeminiLLM}
+\textbf{File:} \texttt{llm/gemini.py} (179 dòng, 6.556 bytes)
+
+GeminiLLM là provider chính cho LLM, sử dụng Gemini 2.5 Flash qua OpenAI-compatible endpoint:
+\begin{verbatim}
+@register_llm("gemini")
+class GeminiLLM(BaseLLM):
+    def __init__(self, api_key=None,
+                 model="gemini-2.5-flash",
+                 temperature=0.3, max_tokens=1024):
+        self._client = OpenAI(
+            api_key=resolved_key,
+            base_url="https://generativelanguage.googleapis.com"
+                     "/v1beta/openai/"
+        )
+
+    def generate(self, query, context=None, history=None,
+                 mode="rag") -> str:
+        """Non-streaming generation."""
+        messages = self._build_messages(
+            query, context, history, mode
+        )
+        # Retry with exponential backoff
+        response = self._client.chat.completions.create(
+            model=self.model, messages=messages,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+        )
+        return response.choices[0].message.content.strip()
+
+    def generate_stream(self, query, context=None,
+                        history=None, mode="rag"):
+        """Streaming generation — yield từng token."""
+        # Tương tự generate(), nhưng stream=True
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
+\end{verbatim}
+
+\textbf{3 chế độ prompt:}
+\begin{itemize}
+    \item \texttt{mode="rag"}: Build RAG prompt với context từ tài liệu, yêu cầu trích dẫn nguồn (Điều, Khoản);
+    \item \texttt{mode="chitchat"}: Build chitchat prompt, trả lời thân thiện, không yêu cầu context;
+    \item \texttt{mode="self\_eval"}: Build self-evaluation prompt, yêu cầu LLM đánh giá câu trả lời.
+\end{itemize}
+
+\textbf{Quyết định thiết kế:}
+\begin{itemize}
+    \item \textbf{OpenAI-compatible endpoint}: Gemini API tương thích với OpenAI SDK, cho phép dùng chung code cho nhiều provider;
+    \item \textbf{Register decorator}: \texttt{@register\_llm("gemini")} cho phép đổi LLM provider qua \texttt{.env} (\texttt{LLM\_PROVIDER=gemini|openai|lm\_studio});
+    \item \textbf{Temperature=0.3}: Giá trị thấp để câu trả lời ổn định, chính xác cho domain pháp lý.
+\end{itemize}
+
+\subsection{Hệ thống Prompt}
+\textbf{File:} \texttt{llm/prompts.py} (8.343 bytes)
+
+Module prompts cung cấp các hàm builder cho từng loại message:
+\begin{verbatim}
+def build_rag_messages(query, context, history=None):
+    """Build messages cho RAG mode."""
+    # System: Vai trò trợ lý tư vấn ĐHBK, yêu cầu trích dẫn
+    # Context: Tài liệu retrieved [1], [2], ...
+    # History: N lượt chat gần nhất (nếu có)
+    # User: Câu hỏi gốc
+
+def build_chitchat_messages(query, history=None):
+    """Build messages cho chitchat mode."""
+    # System: Trợ lý thân thiện, chào hỏi tự nhiên
+
+def build_self_eval_messages(user_content):
+    """Build messages cho self-evaluation mode."""
+    # System: Judge đánh giá relevance/faithfulness/completeness
+\end{verbatim}
+
+\subsection{Self Evaluation --- Tự đánh giá chất lượng}
+\textbf{File:} \texttt{llm/self\_eval.py} (121 dòng, 4.479 bytes)
+
+SelfEvaluator sử dụng cùng instance LLM để đánh giá câu trả lời vừa sinh ra:
+\begin{verbatim}
+class SelfEvaluator:
+    def __init__(self, llm: BaseLLM):
+        self._llm = llm  # Tái sử dụng LLM instance
+
+    def evaluate(self, query, context, response) -> Dict:
+        """Đánh giá response theo 3 tiêu chí."""
+        user_content = SELF_EVAL_USER_TEMPLATE.format(
+            query=query, context=context, response=response
+        )
+        raw = self._llm.generate(
+            query=user_content, mode="self_eval"
+        )
+        return self._parse_evaluation(raw)
+        # Returns: {pass, relevance, faithfulness,
+        #           completeness, reason}
+\end{verbatim}
+
+\textbf{3 tiêu chí đánh giá:}
+\begin{itemize}
+    \item \textbf{Relevance} (\texttt{good/partial/bad}): Câu trả lời có đúng chủ đề câu hỏi không?
+    \item \textbf{Faithfulness} (\texttt{grounded/partial/hallucinated}): Thông tin có dựa trên context không? (kiểm tra hallucination)
+    \item \textbf{Completeness} (\texttt{complete/partial/incomplete}): Có đầy đủ thông tin cần thiết không?
+\end{itemize}
+
+\textbf{Output format (JSON):}
+\begin{verbatim}
+{
+    "pass": true,
+    "relevance": "good",
+    "faithfulness": "grounded",
+    "completeness": "complete",
+    "reason": "Câu trả lời đúng và đầy đủ, trích dẫn Điều 5..."
+}
+\end{verbatim}
+
+\textbf{Khi \texttt{pass=false}}: Pipeline tự động kích hoạt Tavily Search Tool (Phase 4) để tìm kiếm web bổ sung context, sau đó sinh lại câu trả lời.
+
+%% =====================================================================
 %% PHASE 4: Tool Search (Tavily) + MongoDB Memory
 %% =====================================================================
 
@@ -1079,12 +1634,24 @@ GET & /session/\{id\} & Lấy chi tiết session (gồm tất cả turns) \\
 \end{table}
 
 \section{Kết luận chương}
-Chương này đã trình bày chi tiết quá trình triển khai hệ thống RAG v2 qua các phase:
+Chương này đã trình bày chi tiết quá trình triển khai toàn bộ hệ thống RAG v2 qua 8 module chính:
 
 \begin{itemize}
-    \item \textbf{Phase 1 -- Thu thập và xử lý dữ liệu}: 16 PDF quy định, CTDT từ 6 khoa/viện, 83 tài liệu JSON STSV; 4 loại chunker chuyên biệt tạo ra 2.752 chunks chất lượng cao;
-    \item \textbf{Phase 4 -- Tool Search và MongoDB Memory}: Tavily web search với rate limiting và exponential backoff làm fallback; MongoDB lưu trữ lịch sử chat, trạng thái phiên, và câu trả lời kèm provenance;
-    \item \textbf{Phase 5 -- FastAPI Backend và Pipeline Integration}: RAGPipeline kết nối 8 tầng thành pipeline end-to-end; FastAPI server với SSE streaming, health check, và session management; Pydantic BaseSettings cho centralized configuration.
+    \item \textbf{Thu thập và xử lý dữ liệu}: 137 tài liệu từ 3 nguồn (16 PDF quy định, 38 PDF CTDT từ 6 khoa/viện, 83 JSON STSV); 4 loại chunker chuyên biệt tạo ra 2.752 chunks chất lượng cao; Metadata Enrichment tự động trích xuất thời điểm hiệu lực, khóa áp dụng;
+    
+    \item \textbf{Embedding Layer}: Dual embedding với BGE-M3 (dense + sparse) và E5-Multilingual (1024 chiều), kiến trúc Clean Architecture với Factory Pattern cho phép đổi provider qua \texttt{.env};
+    
+    \item \textbf{Hybrid Retrieval}: Qdrant Vector Store (dual named vectors) + Elasticsearch BM25, kết hợp qua RRF fusion với cấu hình tối ưu v0.8/k0.2; Multi-Collection Search song song trên 4 collections; Collection Selector chọn collection theo domain confidence;
+    
+    \item \textbf{Reranking Layer}: Cross-encoder BAAI/bge-reranker-v2-m3 chấm điểm từng cặp (query, document), top-K selection với score threshold;
+    
+    \item \textbf{Query Router \& Reflection}: Router dual-mode (classifier zero-cost + LLM) phân loại 6 labels; Reflection viết lại query (giải tham chiếu, mở rộng viết tắt, profile extraction tự động);
+    
+    \item \textbf{Chat Model \& Self Evaluation}: GeminiLLM (Gemini 2.5 Flash) với 3 mode (RAG, chitchat, self\_eval); SelfEvaluator đánh giá relevance, faithfulness, completeness;
+    
+    \item \textbf{Tool Search và MongoDB Memory}: Tavily web search với rate limiting và exponential backoff làm fallback; MongoDB lưu trữ lịch sử chat, trạng thái phiên, và câu trả lời kèm provenance;
+    
+    \item \textbf{FastAPI Backend và Pipeline Integration}: RAGPipeline kết nối 8 tầng thành pipeline end-to-end; FastAPI server với SSE streaming, health check, và session management; Pydantic BaseSettings cho centralized configuration.
 \end{itemize}
 
 Kết quả, hệ thống sẵn sàng nhận request từ frontend, xử lý qua toàn bộ pipeline (Router $\rightarrow$ Reflection $\rightarrow$ Embed $\rightarrow$ Search $\rightarrow$ Rerank $\rightarrow$ Generate $\rightarrow$ Self-Eval $\rightarrow$ Fallback), và trả kết quả streaming cho người dùng.

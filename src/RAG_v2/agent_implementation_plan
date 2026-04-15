@@ -1,0 +1,295 @@
+# Nâng cấp RAG v2 → Agentic RAG: Tích hợp AI Agent vào hệ thống Chatbot
+
+## Bối cảnh & Phân tích hiện trạng
+
+### Hệ thống hiện tại (RAG v2 — 8 Layers)
+Hệ thống hiện tại là một **RAG pipeline tuyến tính (linear pipeline)** — mỗi câu hỏi đi qua một chuỗi bước cố định:
+
+```
+Query → Router → Reflection → Embed → Search → Rerank → Generate → SelfEval → (Tavily fallback)
+```
+
+**Hạn chế chính:**
+1. **Không có khả năng lập kế hoạch (planning)** — pipeline luôn chạy cùng một luồng, không thể tự quyết định chiến lược xử lý tùy bài toán
+2. **Không thể phân rã câu hỏi phức hợp** — ví dụ: "So sánh quy định học bổng KKHT giữa K65 và K70" cần tách thành 2 sub-query → search riêng → tổng hợp
+3. **Tool sử dụng thụ động** — Tavily chỉ được dùng khi SelfEval fail, không chủ động quyết định dùng tool
+4. **Không có vòng lặp cải thiện (iterative refinement)** — nếu kết quả kém, chỉ có 1 lần retry qua Tavily
+5. **Router cứng nhắc** — chỉ phân 3 loại (chitchat/rag/tool_search), không xử lý được câu hỏi cần kết hợp nhiều chiến lược
+
+### Tại sao AI Agent phù hợp?
+
+AI Agent bổ sung khả năng:
+- **Reasoning & Planning**: LLM tự lập kế hoạch xử lý dựa trên độ phức tạp câu hỏi
+- **Dynamic Tool Use**: Tự chọn tool phù hợp (RAG search, web search, calendar lookup, etc.)
+- **Multi-step Reasoning**: Phân rã → tìm kiếm lặp → tổng hợp
+- **Self-correction Loop**: Tự đánh giá và retry thông minh hơn
+
+---
+
+## Đề xuất kiến trúc: Agentic RAG
+
+### Tổng quan
+
+```
+User Query
+    │
+    ▼
+┌─────────────────────────┐
+│   Agent Orchestrator     │  ← LLM "não bộ" — lập kế hoạch & điều phối
+│   (ReAct / Plan-Execute) │
+└────────┬────────────────┘
+         │
+    ┌────┴────────────────────────────────────┐
+    │           Available Tools               │
+    ├─────────────────────────────────────────┤
+    │                                         │
+    │  🔍 rag_search     — RAG pipeline cũ    │
+    │  🌐 web_search     — Tavily search      │
+    │  📅 academic_calendar — Tra lịch học     │
+    │  💬 chitchat       — Trả lời chào hỏi   │
+    │  📋 compare_docs   — So sánh tài liệu    │
+    │  🔄 clarify_query  — Hỏi lại user       │
+    │                                         │
+    └─────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│   Response Synthesizer   │  ← Tổng hợp kết quả từ nhiều tool calls
+└────────┬────────────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│   MongoDB Memory         │  ← Lưu trạng thái agent + history
+└─────────────────────────┘
+```
+
+### So sánh kiến trúc
+
+| Khía cạnh | RAG v2 hiện tại | Agentic RAG đề xuất |
+|---|---|---|
+| **Luồng xử lý** | Tuyến tính, cố định | Vòng lặp động, agent quyết định |
+| **Routing** | Rule-based classifier | LLM tự lập kế hoạch |
+| **Tool use** | Passive (chỉ Tavily fallback) | Active (agent chọn tool) |
+| **Multi-step** | Không hỗ trợ | Phân rã query → nhiều bước |
+| **Self-correction** | 1 lần (SelfEval → Tavily) | Vòng lặp cho đến khi OK |
+| **Câu hỏi phức hợp** | Kém | Tốt (plan-and-solve) |
+| **Latency** | Nhanh (~2-5s) | Chậm hơn (~5-15s cho complex) |
+| **Cost** | Thấp (1-2 LLM calls) | Cao hơn (3-8 LLM calls) |
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Lựa chọn framework Agent**: Có 2 hướng chính:
+> 1. **LangGraph** — Framework state machine cho agent, phổ biến, nhiều tài liệu. Tuy nhiên thêm dependency nặng.
+> 2. **Custom ReAct Loop** — Tự viết agent loop dựa trên function calling của Gemini. Nhẹ, kiểm soát tốt, phù hợp graduation thesis (hiểu rõ mechanism). **→ Đề xuất chọn hướng này.**
+>
+> Bạn muốn chọn hướng nào?
+
+> [!IMPORTANT]
+> **Phạm vi tích hợp**: Agent sẽ thay thế hoàn toàn pipeline hiện tại hay chỉ là layer bổ sung?
+> - **Phương án A (Đề xuất)**: Agent là layer mới bao ngoài — câu hỏi đơn giản vẫn chạy pipeline cũ (nhanh), câu hỏi phức tạp mới kích hoạt agent (tránh overhead không cần thiết)
+> - **Phương án B**: Agent thay thế hoàn toàn — mọi câu hỏi đều qua agent
+
+> [!WARNING]
+> **Chi phí API**: Agentic RAG tốn nhiều LLM call hơn (3-8x so với RAG thông thường). Với Gemini 2.5 Flash miễn phí rate-limited, cần tính toán kỹ.
+
+---
+
+## Proposed Changes
+
+### Phase 1: Agent Core — ReAct Agent Loop
+> Xây dựng cốt lõi agent với ReAct pattern (Reason + Act)
+
+#### [NEW] [agent/](file:///d:/GR/src/RAG_v2/agent/) — Thư mục module agent mới
+
+#### [NEW] [agent/state.py](file:///d:/GR/src/RAG_v2/agent/state.py)
+- `AgentState` dataclass: lưu trạng thái agent qua mỗi bước
+  - `messages`: danh sách message (system, user, assistant, tool)
+  - `current_plan`: kế hoạch đang thực thi
+  - `tool_results`: kết quả từ các tool calls
+  - `iteration`: số bước đã thực hiện 
+  - `max_iterations`: giới hạn vòng lặp (default=5, tránh infinite loop)
+  - `final_answer`: câu trả lời cuối cùng
+
+#### [NEW] [agent/tools.py](file:///d:/GR/src/RAG_v2/agent/tools.py)
+- Định nghĩa các tool cho agent dưới dạng **function declarations** (Gemini function calling format):
+  - `rag_search(query, collection_filter?)` — gọi RAG pipeline hiện tại
+  - `web_search(query)` — gọi Tavily
+  - `chitchat_reply(message)` — trả lời chào hỏi
+  - `compare_documents(query_a, query_b)` — so sánh 2 nguồn
+  - `clarify_question(options)` — yêu cầu user làm rõ
+- Mỗi tool là một Python function nhận input → trả output string
+
+#### [NEW] [agent/react_agent.py](file:///d:/GR/src/RAG_v2/agent/react_agent.py)
+- `ReActAgent` class — core agent loop:
+  ```
+  while not done and iteration < max_iterations:
+      1. LLM nhận state → quyết định action (tool call hoặc final answer)
+      2. Nếu tool call → execute tool → append result vào state
+      3. Nếu final answer → return
+  ```
+- Sử dụng Gemini function calling API (đã dùng OpenAI-compatible endpoint)
+- System prompt hướng dẫn agent reasoning strategy
+
+#### [NEW] [agent/prompts.py](file:///d:/GR/src/RAG_v2/agent/prompts.py)
+- `AGENT_SYSTEM_PROMPT`: Hướng dẫn agent về role, tools, reasoning strategy
+- `PLANNING_PROMPT`: Template cho bước lập kế hoạch
+- `SYNTHESIS_PROMPT`: Template cho bước tổng hợp kết quả
+
+---
+
+### Phase 2: Tool Adapters — Bọc Pipeline hiện tại thành Tools
+
+#### [NEW] [agent/tool_adapters.py](file:///d:/GR/src/RAG_v2/agent/tool_adapters.py)
+- `RAGSearchAdapter`: Bọc RAG pipeline hiện tại (embed → search → rerank → format context)
+  - Input: query string + optional collection filter
+  - Output: formatted context string + sources metadata
+- `WebSearchAdapter`: Bọc TavilySearchTool
+- `ChitchatAdapter`: Bọc chitchat_flow
+- `CompareDocumentsAdapter`: 2x RAG search + comparison prompt
+- Mỗi adapter implements interface `Tool(name, description, parameters, execute)`
+
+---
+
+### Phase 3: Complexity Router — Phân loại độ phức tạp câu hỏi
+
+#### [NEW] [agent/complexity_router.py](file:///d:/GR/src/RAG_v2/agent/complexity_router.py)
+- `ComplexityRouter`: Quyết định dùng **pipeline cũ (nhanh)** hay **agent (thông minh hơn)**
+- Tiêu chí phân loại:
+  - **Simple** → pipeline cũ: câu hỏi đơn, 1 domain, rõ ràng
+  - **Complex** → agent: câu hỏi phức hợp, so sánh, multi-domain, mơ hồ
+- Sử dụng heuristic + LLM classifier (lightweight)
+
+---
+
+### Phase 4: Tích hợp vào Pipeline & API
+
+#### [MODIFY] [rag_pipeline.py](file:///d:/GR/src/RAG_v2/pipeline/rag_pipeline.py)
+- Thêm `_agent` member: `ReActAgent` instance
+- Sửa `query()` method: sau routing, nếu ComplexityRouter → "complex" thì chuyển sang agent
+- Thêm `query_agent()` method: public API cho agent mode
+- Giữ nguyên `query()` và `query_stream()` cũ cho backward compatibility
+
+#### [MODIFY] [api/routes/chat.py](file:///d:/GR/src/RAG_v2/api/routes/chat.py)
+- Thêm endpoint `/api/chat/agent` cho agent mode
+- Hoặc thêm parameter `mode: "auto" | "rag" | "agent"` vào `/api/chat`
+
+#### [MODIFY] [config/settings.py](file:///d:/GR/src/RAG_v2/config/settings.py)
+- Thêm settings cho agent:
+  - `agent_enabled: bool = True`
+  - `agent_max_iterations: int = 5`
+  - `agent_model: str = "gemini-2.5-flash"` (có thể dùng model khác cho agent)
+  - `complexity_threshold: float = 0.6`
+
+---
+
+### Phase 5: MongoDB Agent State Logging
+
+#### [MODIFY] [pipeline/mongo_logger.py](file:///d:/GR/src/RAG_v2/pipeline/mongo_logger.py)
+- Thêm collection `agent_traces` — lưu trace agent (mỗi step, tool calls, reasoning)
+- Thêm method `log_agent_trace(session_id, trace)` 
+- Giúp debug và phân tích hiệu quả agent
+
+---
+
+### Phase 6: Báo cáo & Documentation
+
+#### [MODIFY] [Baocao/3_De_xuat.tex](file:///d:/GR/src/RAG_v2/Baocao/3_De_xuat.tex)
+- Cập nhật kiến trúc: từ 8-layer → 8-layer + Agent Orchestrator
+- Thêm section: "Agentic RAG — Nâng cấp hệ thống với AI Agent"
+- Bổ sung sơ đồ luồng xử lý mới
+
+---
+
+## Kiến trúc File sau khi hoàn thành
+
+```
+RAG_v2/
+├── agent/                    ← [MỚI] Module Agent
+│   ├── __init__.py
+│   ├── state.py              ← AgentState dataclass
+│   ├── react_agent.py        ← ReAct loop chính
+│   ├── tools.py              ← Tool function declarations
+│   ├── tool_adapters.py      ← Bọc pipeline cũ thành tools
+│   ├── complexity_router.py  ← Simple vs Complex classifier
+│   └── prompts.py            ← Agent system prompts
+├── pipeline/
+│   ├── rag_pipeline.py       ← [SỬA] Thêm agent integration
+│   ├── flows.py              ← [GIỮ NGUYÊN]
+│   └── mongo_logger.py       ← [SỬA] Thêm agent trace logging
+├── api/
+│   └── routes/chat.py        ← [SỬA] Thêm agent endpoint
+├── config/
+│   └── settings.py           ← [SỬA] Thêm agent settings
+└── ... (các module khác giữ nguyên)
+```
+
+---
+
+## Ví dụ hoạt động
+
+### Câu hỏi đơn giản → Pipeline cũ (nhanh)
+```
+User: "Điều kiện tốt nghiệp ĐHBK là gì?"
+→ ComplexityRouter: SIMPLE
+→ RAG pipeline cũ (2-3s)
+→ Trả lời trực tiếp
+```
+
+### Câu hỏi phức tạp → Agent (thông minh hơn)
+```
+User: "So sánh quy định học bổng KKHT của K65 và K70, 
+       và cho biết điều kiện nào khác nhau?"
+
+→ ComplexityRouter: COMPLEX → Agent mode
+
+Agent Step 1 (Think): "Cần tìm quy định HB cho K65 và K70 riêng biệt"
+Agent Step 2 (Act): rag_search("quy định học bổng KKHT K65")
+Agent Step 3 (Act): rag_search("quy định học bổng KKHT K70") 
+Agent Step 4 (Act): compare_documents(result_1, result_2)
+Agent Step 5 (Think): "Đã có đủ thông tin, tổng hợp câu trả lời"
+Agent Step 6: Final Answer (tổng hợp so sánh)
+```
+
+### Câu hỏi mơ hồ → Agent hỏi lại
+```
+User: "Cho tôi biết về học bổng"
+
+→ ComplexityRouter: COMPLEX (mơ hồ)
+
+Agent Step 1 (Think): "Câu hỏi quá chung, cần hỏi rõ"
+Agent Step 2 (Act): clarify_question(
+    "Bạn muốn tìm hiểu về loại học bổng nào?
+     1. Học bổng KKHT 
+     2. Học bổng tài trợ
+     3. Điều kiện nhận học bổng"
+)
+```
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> 1. **Framework**: Bạn muốn dùng **Custom ReAct Loop** (đề xuất, nhẹ, hiểu rõ) hay **LangGraph** (nhiều feature sẵn)?
+> 2. **Phạm vi**: Phương án A (agent bổ sung, câu đơn giản vẫn chạy pipeline cũ) hay Phương án B (agent thay thế hoàn toàn)?
+> 3. **Budget API**: Bạn có giới hạn số API call/ngày không? Agent tốn 3-8x so với pipeline cũ.
+> 4. **Thêm tools nào**: Ngoài RAG search, web search, compare — bạn muốn thêm tool nào khác? (ví dụ: tra lịch học kỳ, tính GPA, ...)
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Unit test cho `ReActAgent` với mocked tools
+- Unit test cho `ComplexityRouter` phân loại đúng simple/complex
+- Integration test: agent + RAG pipeline (end-to-end)
+- So sánh chất lượng: agent vs pipeline cũ trên bộ câu hỏi phức tạp
+
+### Manual Verification
+- Test với 10 câu hỏi đơn giản → đảm bảo vẫn chạy pipeline cũ (không regression)
+- Test với 10 câu hỏi phức tạp → agent xử lý tốt hơn pipeline cũ
+- Đo latency trung bình cả 2 mode
+- Review agent trace logs trong MongoDB
