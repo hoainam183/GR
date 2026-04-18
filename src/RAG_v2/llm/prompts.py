@@ -1,7 +1,7 @@
 """System Prompts for Chat Model — RAG, Chitchat, and Self-Evaluation."""
 
 from __future__ import annotations
-
+import logging
 from typing import Dict, List, Optional
 
 # ─── RAG Answer Prompt ──────────────────────────────────────────────────────────
@@ -145,6 +145,7 @@ def build_rag_messages(
     Returns:
         List of ``{role, content}`` message dicts.
     """
+    logger = logging.getLogger(__name__)
     messages: List[Dict[str, str]] = [
         {"role": "system", "content": RAG_SYSTEM_PROMPT},
     ]
@@ -162,7 +163,12 @@ def build_rag_messages(
             query=query,
         )
 
+    # Thêm log ở đây để check nội dung
+    logger.info("=== RAG USER CONTENT ===")
+    logger.info(user_content)
+    logger.info("========================")
     messages.append({"role": "user", "content": user_content})
+    
     return messages
 
 

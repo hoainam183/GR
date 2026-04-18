@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import ChatContainer from '@/components/chat/ChatContainer';
 import { ConversationSidebar } from '@/components/sidebar/ConversationSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import type { UserPublic } from '@/services/authApi';
+import { getMe, type UserPublic } from '@/services/authApi';
 import { Activity } from 'lucide-react';
 
 // ── UserMenu drop-down ──────────────────────────────────────────────────────
@@ -103,31 +103,56 @@ const Index = () => {
 
   // On mount: handle OAuth ?token= param OR read from localStorage
   useEffect(() => {
-    const urlToken = searchParams.get('token');
-    if (urlToken) {
-      localStorage.setItem('token', urlToken);
-      // Remove token from URL without a reload
-      navigate('/chat', { replace: true });
-    }
+    let cancelled = false;
 
-    const storedToken = urlToken || localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const bootstrapUser = async () => {
+      const urlToken = searchParams.get('token');
+      if (urlToken) {
+        localStorage.setItem('token', urlToken);
+        // Remove token from URL without a reload
+        navigate('/chat', { replace: true });
+      }
 
-    if (!storedToken) {
-      navigate('/login', { replace: true });
-      return;
-    }
+      const storedToken = urlToken || localStorage.getItem('token');
+      if (!storedToken) {
+        navigate('/login', { replace: true });
+        return;
+      }
 
-    if (storedUser) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          if (!cancelled) {
+            setUser(JSON.parse(storedUser) as UserPublic);
+          }
+          return;
+        } catch {
+          localStorage.removeItem('user');
+        }
+      }
+
       try {
-        setUser(JSON.parse(storedUser) as UserPublic);
+        const profile = await getMe(storedToken);
+        if (cancelled) {
+          return;
+        }
+        setUser(profile);
+        localStorage.setItem('user', JSON.stringify(profile));
       } catch {
-        // malformed — treat as logged out
+        if (cancelled) {
+          return;
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         navigate('/login', { replace: true });
       }
-    }
+    };
+
+    bootstrapUser();
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigate, searchParams]);
 
   const handleLogout = () => {

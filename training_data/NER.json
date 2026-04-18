@@ -1,0 +1,533 @@
+[
+  {
+    "text": "học phần này thuộc chương trình đào tạo an toàn thông tin k61 ạ.",
+    "entities": [
+      [
+        39,
+        56,
+        "MAJOR"
+      ],
+      [
+        57,
+        60,
+        "COHORT"
+      ]
+    ]
+  },
+  {
+    "text": "em nhầm mã học phần ở câu hỏi trên ạ, môn An Toàn Hệ Thống, mã học phần là IT4190 ạ",
+    "entities": [
+      [
+        42,
+        58,
+        "SUBJECT"
+      ],
+      [
+        75,
+        81,
+        "SUBJECT_CODE"
+      ]
+    ]
+  },
+  {
+    "text": "Dạ, nhưng em muốn hỏi môn An toàn hệ thống này là môn điều kiện của môn Đánh giá kiểm định an toàn hệ thống thông tin ạ. Em chưa học môn an toàn hệ thống ạ, vậy làm thế em có thể đăng kí môn Đánh giá kiểm định an toàn hệ thống thông tin, mã học phần IT4810 ạ.",
+    "entities": [
+      [
+        26,
+        42,
+        "SUBJECT"
+      ],
+      [
+        72,
+        117,
+        "SUBJECT"
+      ],
+      [
+        137,
+        153,
+        "SUBJECT"
+      ],
+      [
+        191,
+        236,
+        "SUBJECT"
+      ],
+      [
+        250,
+        256,
+        "SUBJECT_CODE"
+      ]
+    ]
+  },
+  {
+    "text": "em đã học học phần An Toàn và bảo mật thông tin để xét tương đương với môn nhập môn an toàn thông tin rồi ạ",
+    "entities": [
+      [
+        19,
+        47,
+        "SUBJECT"
+      ],
+      [
+        75,
+        100,
+        "SUBJECT"
+      ]
+    ]
+  },
+  {
+    "text": "hiện tại trang của viện không vào được ạ, em có thể lấy mẫu đơn ở đâu ạ?",
+    "entities": []
+  },
+  {
+    "text": "kì này em không đăng kí xin mở lớp dưới dạng lớp đồ án thay thế môn An toàn hệ thống mã học phần là IT4190, em có thể xin đăng kí mở lớp Project3 vào kì hè được không ạ? Để kì sau em có thể đăng kí được môn Đánh giá kiểm định an toàn hệ thống thông tin, mã học phần IT4810 ạ.",
+    "entities": [
+      [
+        68,
+        84,
+        "SUBJECT"
+      ],
+      [
+        100,
+        106,
+        "SUBJECT_CODE"
+      ],
+      [
+        137,
+        145,
+        "SUBJECT"
+      ],
+      [
+        207,
+        252,
+        "SUBJECT"
+      ],
+      [
+        266,
+        272,
+        "SUBJECT_CODE"
+      ]
+    ]
+  },
+  {
+    "text": "Nếu em không thể đăng kí được môn An toàn hệ thống dưới dạng Project trong kì hè và em không thể học được môn Đánh giá kiểm định an toàn hệ thống thông tin ở kì sau. Thì em sẽ phải làm thế nào ạ? Lại đăng kí mở lớp môn Đánh giá kiểm định an toàn hệ thống thông tin, mã học phần IT4810 dưới dạng project3 tiếp được không ạ?. Bởi vì ngành An toàn thông tin đào tạo nốt k61 và từ k62 trở đi không đào tạo nữa ạ.",
+    "entities": [
+      [
+        34,
+        50,
+        "SUBJECT"
+      ],
+      [
+        110,
+        155,
+        "SUBJECT"
+      ],
+      [
+        219,
+        264,
+        "SUBJECT"
+      ],
+      [
+        278,
+        284,
+        "SUBJECT_CODE"
+      ],
+      [
+        295,
+        303,
+        "SUBJECT"
+      ],
+      [
+        337,
+        354,
+        "MAJOR"
+      ],
+      [
+        367,
+        370,
+        "COHORT"
+      ],
+      [
+        377,
+        380,
+        "COHORT"
+      ]
+    ]
+  },
+  {
+    "text": "Dạ. Sau khi nghe tư vấn xong em lên phòng đạo tạo của viện thì các cô bảo hết hạn đăng kí không đăng kí được ạ?",
+    "entities": []
+  },
+  {
+    "text": "Phòng đào tạo bảo rằng là đăng kí học phần thay thế môn an toàn hệ thống ạ",
+    "entities": [
+      [
+        56,
+        72,
+        "SUBJECT"
+      ]
+    ]
+  },
+  {
+    "text": "bây giờ em phải liên lạc với thầy Linh Giang ạ",
+    "entities": []
+  },
+  {
+    "text": "Như đã thảo luận ở trên em có đăng kí 2 môn học là IT4409 và IT4735 lên em đã chọn môn IT4409 là môn thay thế cho môn An toàn hệ thống và em đã làm đơn và nộp đơn lên viện và đã được kí xác nhận, nhưng do môn IT4409 có lịch muộn hơn những môn em đã đăng kí và em không thể đăng kí do trùng lịch với các môn khác. Em đã xem cả môn IT4735 và cũng bị trùng lịch. Em lên làm thế nào bây giờ ạ?",
+    "entities": [
+      [
+        55,
+        61,
+        "SUBJECT_CODE"
+      ],
+      [
+        65,
+        71,
+        "SUBJECT_CODE"
+      ],
+      [
+        91,
+        97,
+        "SUBJECT_CODE"
+      ],
+      [
+        122,
+        138,
+        "SUBJECT"
+      ],
+      [
+        215,
+        221,
+        "SUBJECT_CODE"
+      ],
+      [
+        338,
+        344,
+        "SUBJECT_CODE"
+      ]
+    ]
+  },
+  {
+    "text": "dạ vâng ạ, kì sau em có thể học môn nào thay thế cho môn lập trình hệ thống ạ",
+    "entities": [
+      [
+        59,
+        78,
+        "SUBJECT"
+      ]
+    ]
+  },
+  {
+    "text": "dạ nhưng em hoc môn lập trình hệ thống rồi ạ",
+    "entities": [
+      [
+        20,
+        39,
+        "SUBJECT"
+      ]
+    ]
+  },
+  {
+    "text": "dạ, em còn toàn môn mở lần cuối vào kì này thôi ạ, nên em không thể đăng kí được ạ.",
+    "entities": []
+  },
+  {
+    "text": "Em kính chào các thầy, các cô. Em tên là Hà Hữu Linh, sinh viên lớp KHMT.02-K62 ạ Em xin phép được hỏi một câu ạ: Nếu chúng em muốn lấy bằng Kỹ sư thì có phải làm \"ĐỒ ÁN TỐT NGHIỆP CỬ NHÂN\" không? và nếu chúng em muốn học Cử nhân-Thạc sỹ thì có phải học \"KHỐI KIẾN THỨC KỸ SƯ\" không ạ? Em chân thành cảm ơn thầy (cô)!",
+    "entities": [
+      [
+        68,
+        72,
+        "MAJOR"
+      ],
+      [
+        76,
+        79,
+        "COHORT"
+      ]
+    ]
+  },
+  {
+    "text": "em là Hà Hữu Linh, sinh viên KHMT.02-K62, có một vài thắc mắc kính mong thầy cô giải đáp ạ. 1, Chương trình của chúng em là KSCQ, như vậy sau khi học hết kỳ 20201 thì chúng em chuyển sang học chương trình kỹ sư luôn đúng không ạ ? 2, Nếu chúng em học chương trình kỹ sư thì viện mình sẽ có kỹ sư Hệ thống thông tin, kỹ sư Công nghệ phần mềm, vậy kỹ sư Khoa học máy tính có nằm trong chương trình khóa bọn em không ạ ? (vì theo em, chương trình IT1 của K64 là không có kỹ sư KHMT) 3, Kỳ 20192 và 20201 chúng em có 2 module trong 4 module (em để ảnh ở dưới ) cần học hết, và thầy cô cho em hỏi rằng nếu chúng em học module 3 và module 4 xong muốn học thêm một số môn trong module 2, module 1 thì liệu có bị tính hệ số học phí (tức là tín chỉ ngoài chương trình ) không ạ ? 4, Nếu chúng em chọn tích hợp Cử nhân - Thạc sĩ, thì sau khi tốt nghiệp cử nhân (giả sử loại giỏi) thì có phải thi tuyển chương trình thạc sĩ không ạ? và nếu học chương trình thạc sĩ đó thì có phải học Full-Time không ạ ? Vì lý do đến 20/3 này chúng em hết hạn đăng ký học phần cho kỳ 20193 và 20201 nên em kính mong nhận được phản hồi sớm từ thầy (cô) ạ. Em chân thành",
+    "entities": [
+      [
+        37,
+        41,
+        "MAJOR"
+      ],
+      [
+        45,
+        48,
+        "COHORT"
+      ],
+      [
+        305,
+        323,
+        "MAJOR"
+      ],
+      [
+        331,
+        349,
+        "MAJOR"
+      ],
+      [
+        364,
+        381,
+        "MAJOR"
+      ],
+      [
+        452,
+        455,
+        "MAJOR_CODE"
+      ],
+      [
+        460,
+        463,
+        "COHORT"
+      ],
+      [
+        482,
+        486,
+        "MAJOR"
+      ]
+    ]
+  },
+  {
+    "text": "Vâng em đã rõ ạ,",
+    "entities": []
+  },
+  {
+    "text": "Em chào các thầy cô. Em là Hà Vũ Tiến Thành, sinh viên lớp CNTT 2.2 K59, chuyên ngành Công nghệ Phần Mềm. Kỳ này em có đăng ký đồ án tốt nghiệp kỹ sư. Em muốn hỏi là khi nào thì có kết quả phân công giảng viên hướng dẫn đồ án của bộ môn Công nghệ phần mềm để bọn em liên hệ với giảng viên ạ?",
+    "entities": [
+      [
+        59,
+        63,
+        "MAJOR"
+      ],
+      [
+        68,
+        71,
+        "COHORT"
+      ],
+      [
+        86,
+        104,
+        "MAJOR"
+      ],
+      [
+        241,
+        259,
+        "MAJOR"
+      ]
+    ]
+  },
+  {
+    "text": "Dear thầy cô, Em là Lê Đức Hải - 20225653 sinh viên lớp KHMT-05 Khóa K62 viện CNTT và truyền thông. Em có đăng kí môn Project 2 nhưng đến nay trên trang qldt.hust.edu.vn vẫn chưa hiện giáo viên hướng dẫn. Thầy cho em hỏi em có được học môn này vào kì tới không? Và làm sao để biết được giáo viên hướng dẫn của mình ạ ? Em cảm ơn thầy cô nhiều ạ.",
+    "entities": [
+      [
+        33,
+        41,
+        "STUDENT_ID"
+      ],
+      [
+        56,
+        60,
+        "MAJOR"
+      ],
+      [
+        69,
+        72,
+        "COHORT"
+      ],
+      [
+        78,
+        82,
+        "MAJOR"
+      ],
+      [
+        118,
+        127,
+        "SUBJECT"
+      ]
+    ]
+  },
+  {
+    "text": "Em là Nguyễn Nam Thắng, 20215653, lớp CNTT2.01 - K61 Em có quan tâm và tìm hiểu về chương trình đào tạo sau đại học theo đường dẫn https://ctt-daotao.hust.edu.vn/Upload/SDH/files/ChuongTrinhDaoTaoThacSi/2018/2018CNTT_%20DataScience.pdf Thầy cho em hỏi là em đang học chuyên ngành Khoa học máy tính thì có phải là đối tượng A1 không? Em đang năm 4 và có CPA trên 2.5 thì có được đăng kí học thêm chương trình Thạc sĩ vào đợt tuyển sinh sắp tới không?",
+    "entities": [
+      [
+        24,
+        32,
+        "STUDENT_ID"
+      ],
+      [
+        38,
+        42,
+        "MAJOR"
+      ],
+      [
+        49,
+        52,
+        "COHORT"
+      ],
+      [
+        282,
+        299,
+        "MAJOR"
+      ]
+    ]
+  },
+  {
+    "text": "Em không tìm thấy thông tin về việc học qua những tín chỉ gì thì được đăng ký vào chương trình thạc sĩ, chỉ thấy có yêu cầu là tốt nghiệp đại học, cô cho em hỏi: em đang năm 4, hết kì này là hoàn thành song hầu hết các tín chỉ. Chỉ còn 3 tín tự chọn tự do, 3 tín tự chọn kĩ sư, 1 môn lập trình hệ thống 3 tín và đồ án tốt nghiệp thì liệu có đăng kí được không ạ?",
+    "entities": [
+      [
+        286,
+        304,
+        "SUBJECT"
+      ]
+    ]
+  },
+  {
+    "text": "Cho e hỏi ngành cntt việt nhật đầu ra cần tiếng anh ko ạ. Và thời gian đào tạo bao lâu ạ",
+    "entities": [
+      [
+        16,
+        30,
+        "MAJOR"
+      ]
+    ]
+  },
+  {
+    "text": "Vậy à chỉ cần học tiếng nhật thôi là đủ à cô",
+    "entities": []
+  },
+  {
+    "text": "Kính gửi: viện CNTT và TT! Tên em là: Ngô Thị Huyền Diệu Mssv:20195653 Viện: CNTT và TT Nội dung: Trong phần minh chứng cho mục \" Tham gia đầy đủ 100% các hoạt động của lớp, viện, trường\" có chứa: Hoạt động \" Tham gia buổi sinh hoạt công dân cho K64\" em đã tham gia đầy đủ cả buổi, em đã đăng kí hoạt động rồi , nhưng đến giờ vẫn chưa được duyệt, do đó em mới chỉ tự khai hoạt động! Trước đó ngày 14/2 em đã gửi mail cho người phụ trách hoạt động( được ghi thông tin trong phần chi tiết hoạt động), nhưng đến hôm nay(17/2) em nhận được phản hồi, hướng dẫn em liên hệ với viện. Vì trong khi ngày 15/2 là hạn cuối qua rồi, nếu chỉ 2-3 điểm thì không sao, nhưng mục này tính 10 điểm, rất lớn. Vậy nên, em có thắc mắc: nếu đã vậy rồi thì em sẽ được duyệt phần này, hay là mất ạ? Trân trọng cảm ơn viện! Diệu",
+    "entities": [
+      [
+        15,
+        19,
+        "MAJOR"
+      ],
+      [
+        62,
+        70,
+        "STUDENT_ID"
+      ],
+      [
+        78,
+        82,
+        "MAJOR"
+      ],
+      [
+        247,
+        250,
+        "COHORT"
+      ]
+    ]
+  },
+  {
+    "text": "Em tên là Nguyễn Hữu Thanh - 20195653 - Chương trình học CN-CNTT-2013(CH) Thưa thầy, học kỳ 20192 này em có đăng ký học phần thực tập công nghiệp-IT4992, em có lên trên trang web của trường là https://qldt.hust.edu.vn/ nhưng em chưa tìm thấy thông tin gì về học phần IT4992 đó của em. Thầy có thể cho em xin thêm thông tin về học phần này không ạ. Thầy cho em hỏi là liệu em có thể tự đi tìm công ty nào đó để em thực tập để em hoàn thành được học phần IT4992 này không ạ!",
+    "entities": [
+      [
+        34,
+        42,
+        "STUDENT_ID"
+      ],
+      [
+        62,
+        78,
+        "MAJOR_CODE"
+      ],
+      [
+        130,
+        150,
+        "SUBJECT"
+      ],
+      [
+        151,
+        157,
+        "SUBJECT_CODE"
+      ],
+      [
+        273,
+        279,
+        "SUBJECT_CODE"
+      ],
+      [
+        462,
+        468,
+        "SUBJECT_CODE"
+      ]
+    ]
+  },
+  {
+    "text": "Chào Thầy (Cô) ! Hiện giờ em vẫn chưa nhận được thông tin về lịch thực tập học phần \" Thực tập công nghiệp \" IT4992 . Em vô cùng lo lắng Em mong thầy cô có thể phản hồi về trường hợp của em ạ. Em xin chân thành",
+    "entities": [
+      [
+        88,
+        108,
+        "SUBJECT"
+      ],
+      [
+        111,
+        117,
+        "SUBJECT_CODE"
+      ]
+    ]
+  },
+  {
+    "text": "Thầy, cô cho em hỏi là em muốn lên viện xin giấy xác nhận học phần tương đương để nộp lên phòng đào tạo chuyển điểm học phần thì tuần này văn phòng viện và trường đã làm việc chưa ạ hay tuần sau em mới nộp được ạ!",
+    "entities": []
+  },
+  {
+    "text": "Dạ vâng ạ! Khi nộp giấy xác nhận có cần đem theo giấy xin xác nhận học phần tương đương có xác nhận của viện em đã xin đầu kì không ạ?",
+    "entities": []
+  },
+  {
+    "text": "Vâng em cảm ơn cô! Cô cho em hỏi thêm là việc bảo lưu đó có ảnh hưởng gì đến điểm cpa và gpa không ạ?",
+    "entities": []
+  },
+  {
+    "text": "em là Lê Việt Hoàng, 20195653 Kì 20191 vừa rồi em có học môn Mạng máy tính mã lớp lý thuyết 111549. Vừa rồi thì trên hệ thống ctt-sis đã có điểm cuối kì của hầu hết sinh viên học mã lớp này. Nhưng em sau khi đợi vài ngày vẫn chưa có điểm cuối kì của mình trên hệ thống, do vậy em rất lo lắng về khả năng có sai sót trong quá trình chấm điểm hoặc lên điểm của mình. Vì vậy em mong thầy cô có thể kiểm tra lại và sớm cập nhật lại hệ thống được không ạ. Em xin cảm ơn thầy cô. Rất mong nhận được phản hồi của thầy cô ạ",
+    "entities": [
+      [
+        27,
+        35,
+        "STUDENT_ID"
+      ],
+      [
+        68,
+        81,
+        "SUBJECT"
+      ]
+    ]
+  },
+{"text": "em là Nguyễn Hữu Thanh, 20195653, sinh viên lớp CNCNTT-02-K58 Kì 20192 này em chưa đăng ký xét nhận đồ án tốt nghiệp, em định sáng sớm mai 24/2 em sẽ lên phòng đào tạo viết đơn xin đăng ký. Nhưng thưa thầy, em có xem qua danh sách những bạn được nhận đồ án tốt nghiệp thì em thấy có những bạn mà trường xét ghi chú là \"hết thời gian học tập\" .Em sợ mai em đến phòng đào tạo viết đơn đăng ký, thì khả năng cao em cũng sẽ bị nhà trường đề là \"hết thời gian học tập\" ! Thầy cho em hỏi nếu như em bị nhà trường đề như vậy thì em có cách nào để em được nhà trường đồng ý cho em nhận đồ án tốt nghiệp không ạ! Thầy giúp em với, thật lòng em không muốn mình bị ra khỏi trường đại học mà không có được tấm bằng của trường đại học Bách Khoa, em vô cùng hối hận, tiếc nuối quãng thời gian vừa qua thầy ạ! (tình trạng học của em bây giờ thì em còn nợ 1 môn 3 tín - môn đồ án 3: định hướng công nghệ, Toiec em đã qua, em đã đăng ký kỳ này học nốt môn đó kết hợp với thực tập công nghiệp) Thầy giúp em với, em tha thiết cảm ơn thầy :(", "entities": [[24, 32, "STUDENT_ID"], [48, 54, "MAJOR"], [58, 61, "COHORT"], [809, 838, "SUBJECT"], [902, 922, "SUBJECT"]]},
+{"text": "Em thưa thầy (cô) , Em là Nguyễn Hữu Thanh, 20195653, sinh viên lớp CNCNTT-02-K58 Em thưa thầy, em là sinh viên được thầy (cô) phòng đào tạo thông báo là đã quá hạn thời gian học tập tại trường, tình trạng học tập của em phải đợi nhà trường lập hội đồng xét kỉ luật xem có được gia hạn học tập hay không. Em xin thầy cô, thầy cô cho em hỏi hiện tại viện CNTT&TT đã có thông tin về danh sách các sinh viên được gia hạn học tập chưa ạ! Suốt thời gian qua em lo lắng sốt ruột quá, em xin thầy (cô) nếu có thông tin về danh sách sinh viên được gia hạn học tập, thầy (cô) cho em biết thông tin được không ạ! Em xin cảm ơn thầy (cô)", "entities": [[44, 52, "STUDENT_ID"], [68, 74, "MAJOR"], [78, 81, "COHORT"], [358, 362, "MAJOR"]]},
+{"text": "Em là Cao Thị My 20195653 lớp CNTT 1.2-K60 Kì này em có đăng kí nhận DATN, tuy nhiên vì em có 2 môn kì 20191 chưa nhậ điểm, 1 môn em đã học thay thế nhưng chưa đổi điểm nên số tín chỉ nợ của em đang vượt quá 8 tín. Em có kiểm tra thì thấy kết quả nhận đồ án của em bị false. Thầy cô cho em hỏi giờ em cần làm gì để khắc phục ạ. Em cảm ơn ạ", "entities": [[22, 30, "STUDENT_ID"], [35, 39, "MAJOR"], [44, 47, "COHORT"]]},
+{"text": "em là Vũ Đức Mạnh 20195653 em muốn hỏi là xem danh sách học phần tương đương của viện công nghệ thông tin và truyền thông ở đâu ạ. Em cảm ơn thầy cô!", "entities": [[21, 29, "STUDENT_ID"], [86, 105, "MAJOR"]]},
+{"text": "thầy cho em hỏi là em đăng kí tốt nghiệp nhưng hiện tại chưa đạt do chưa chuyển điểm thành công. Em đã gửi mail hỏi phòng đào tạo nhưng chưa được trả lời. Thầy cho em hỏi, nếu em không chuyển điểm kịp trước thời gian đăng ký xét tốt nghiệp thì em có thể làm mẫu đơn nào để thắc mắc và đăng ký xét tốt nghiệp sau thời hạn đăng ký là 6/3 tới ạ.", "entities": []},
+{"text": "Kỳ học 20191 vừa rồi, em có đăng ký học môn IT3680 - Thuật toán ứng dụng Samsung. Được biết là học môn này em sẽ được thay thế cho học phần IT3170. Vậy em cần viết đơn xin chuyển học phần tương đương và nộp tại đâu ạ? Bên cạnh đó, khi lên điểm trên hệ thống ctt-sis.hust.edu.vn thì môn IT3680 này em không được tính vào GPA cũng như CPA của kỳ 20191 ạ. Vậy nếu sau khi làm đơn chuyển học phần tương đương, học phần IT3680 của em có được tính vào CPA cũng như GPA không ạ? Nếu có thì sẽ được tính vào GPA của kỳ nào ạ? Em xin chân thành cảm ơn thầy cô!", "entities": [[50, 56, "SUBJECT_CODE"], [59, 86, "SUBJECT"], [146, 152, "SUBJECT_CODE"], [294, 300, "SUBJECT_CODE"], [406, 412, "SUBJECT_CODE"]]},
+{"text": "Em là sinh viên Viện mình, vừa rồi em có đăng kí thành công ĐATN Cử nhân. Tuy nhiên đến giờ em chưa thấy danh sách phân công ĐATN của kì 20192 của Viện mình. Thầy(cô) cho em hỏi là đã có danh sách phân công chưa ạ? Nếu có rồi em có thể xem thông tin danh sách ở đâu ạ! Em cảm ơn Thầy(cô)!", "entities": []},
+{"text": "Em kính chào các thầy cô ạ, em tên là Đỗ Văn Cường, bộ môn Kỹ Thuật Máy Tính K62, lớp KTMT.07, thầy cô cho em hỏi là em có đăng kí môn học Project II với mã học phần IT3930 của bộ môn Công Nghệ Phần Mềm, em đã đăng kí nhầm nên em muốn xin chuyển sang học phần IT3931 Project II của bộ môn Kỹ Thuật Máy Tính ạ, em xin chân thành", "entities": [[60, 77, "MAJOR"], [78, 81, "COHORT"], [88, 92, "MAJOR"], [144, 154, "SUBJECT"], [173, 179, "SUBJECT_CODE"], [191, 209, "MAJOR"], [271, 277, "SUBJECT_CODE"], [278, 288, "SUBJECT"], [300, 317, "MAJOR"]]},
+{"text": "Dạ em chào thầy cô! Em là Nguyễn Đức Long sinh viên lớp LTU14 - SIE. Mssv: 20195653 Thầy cho em hỏi hiện tại đã đang trong học kỳ mới nhưng em chưa nhận được giáo viên hướng dẫn trên QLDT. Em đã đủ điều kiện ĐATN rồi ạ. Thầy cô kiểm tra giúp em. Em cảm ơn ạ!", "entities": [[77, 85, "STUDENT_ID"]]},
+{"text": "Kính thưa thầy, cô Viện Công nghệ thông tin và Truyền thông. Em là Nguyễn Văn Thư 20195653 Lớp An toàn thông tin K58 ạ. Trong đợt xét nhận ĐATN vừa qua (từ 22/02 đến 28/02) em có xin đăng ký sai mã học phần ĐATN và làm đơn đăng ký lại mã học phần ĐATN. Đến nay thông tin học phần trên thời khóa biểu tạm thời của ctt-sis.hust.edu.vn và mã lớp trên kết quả xét nhận của sis.hust.edu.vn đã đổi nhưng trên lịch học của qldt.hust.edu.vn vẫn là mã học phần cũ và phần phân công đồ án cũng vậy ạ. Vậy nên em xin hỏi thầy, cô là em cần làm gì để được phân công lại theo mã học phần mới ạ. Em cảm ơn ạ.", "entities": [[24, 43, "MAJOR"], [85, 93, "STUDENT_ID"], [98, 115, "MAJOR"], [116, 119, "COHORT"]]},
+{"text": "Họ và tên : Phan Quốc Đạt Mã số sinh viên : 20195653 Lớp : CN - CNTT1 K60 Câu hỏi: Em xin chào thầy/cô tổ tư vấn học tập. Kỳ vừa rồi sau khi được lãnh đạo Viện đồng ý cho phép sử dụng học phần tương tương IT4815 (2 tín chỉ) thay cho IT4819 (3 tín chỉ) và phải học bù số tín chỉ còn thiếu là 1 tín chỉ , hiện tại em đã hoàn thành xong học phần thay thế IT4815 và cũng học thêm một học phần ngoài chương trình FL3570 có khối lương 2 tín chỉ (bù cho 1 tín chỉ còn thiếu). Vấn đề hiện tại của em đó chính là khi em đăng kí học phần 2 tín chỉ FL3570 làm học phần tự chọn tự do thì hệ thống không cho phép vì số tín chỉ tự do đã quá giới hạn cho phép là 9 tín chỉ (do kỳ trước em không kiếm được môn học nào có khối lượng 1 tín chỉ để học bù) . Em đang khá bối rối không biết xử lý tình huống này ra sao. Em rất mong nhận được tư vấn sớm từ thầy cô. Em xin chân thành cảm ơn.[cid:03a0beb0-a212-47bc-ad46-b76f7d01f82c] Phan Quốc Đạt Điện thoại: [SĐT] Địa chỉ email: [EMAIL]", "entities": [[50, 58, "STUDENT_ID"], [65, 76, "MAJOR"], [77, 80, "COHORT"], [166, 172, "SUBJECT_CODE"], [187, 193, "SUBJECT_CODE"], [265, 271, "SUBJECT_CODE"], [305, 311, "SUBJECT_CODE"], [396, 402, "SUBJECT_CODE"]]},
+{"text": "phân công đồ án của em đã được đổi mã học phần rồi ạ, nhưng không còn giảng viên hướng dẫn nữa ạ, thầy cho em hỏi thêm chút là em có thể vẫn được gvhd cũ hướng dẫn không hay sẽ do viện phân công ạ. Em cảm ơn ạ.", "entities": []},
+{"text": "Thưa các thầy cô, Em là Đào Minh Dũng, 20195653, sinh viên lớp Tài năng Khoa học và CNTT K63. Em viết email này xin được hỏi các thầy cô về chương trình đào tạo của lớp em ạ. Trong học kì 20201 sắp tới, em muốn đăng kí học cùng khóa trên em là K62 một số lớp, vì kì này cũng như kì trước em đều học như vậy rồi ạ. Tuy nhiên em không tìm được chương trình cụ thể và các học phần tiên quyết của từng môn trong chương trình của em, kì vừa rồi đăng kí em cũng có gặp phải 1 tình huống tương tự nhưng cũng đã được xử lý ạ. Em mong các thầy cô có thể cho em xin cô mô tả cụ thể các môn trong chương trình đào tạo của em để em có thể nắm rõ hơn các học phần điều kiện và sắp xếp học các môn kì tới ạ. Em xin cảm ơn các thầy cô, Đào Minh Dũng, Lớp Tài năng Khoa học và Công nghệ thông tin K63, Đại học Bách Khoa Hà Nội.", "entities": [[39, 47, "STUDENT_ID"], [63, 88, "MAJOR"], [89, 92, "COHORT"], [243, 246, "COHORT"], [723, 767, "MAJOR"], [768, 771, "COHORT"]]},
+{"text": "E chào Thầy/Cô Em là sinh viên bộ môn công nghệ phần mềm, Viện CNTT-TT. Thầy/Cô cho e hỏi là yêu cầu các môn tự chọn kỹ sư của bộ môn là 9 tín chỉ, nhưng kì này viện chỉ mở 8 tín chỉ tự chọn kỹ sư nhưng không có môn nào 1 tín cả. Vậy kì sau e có thể học thêm 2 tín chỉ là thành 10 tín được không ạ!", "entities": [[38, 56, "MAJOR"]]},
+{"text": "Em xin chào thầy, cô! Em là Hứa Hồng Hiển, 20195653, sinh viên hệ CN CNTT k61. Do học chậm hơn chương trình nên em có một số môn của chương trình CNCN chưa học như: IT4089 Nhập môn công nghệ phần mềm, IT4789 Lập trình .net, IT4819 Quản trị mạng, IT4408 Thiết kế và Lập trình Web. Các môn này trong các kỳ gần đây đều không mở. Vậy thầy cô có thể tư vấn cho em xem các môn trên có mã học phần tương đương không ạ? Nếu không có thì em có thể đăng ký các học phần thay thế ở bên chương trình kỹ sư được không ạ? (các học phần bên chương trình KS cùng tên nhưng có khác về số tín chỉ) Em xin cảm ơn thầy cô!", "entities": [[43, 51, "STUDENT_ID"], [67, 74, "MAJOR"], [75, 78, "COHORT"], [164, 170, "SUBJECT_CODE"], [171, 198, "SUBJECT"], [200, 206, "SUBJECT_CODE"], [207, 222, "SUBJECT"], [224, 230, "SUBJECT_CODE"], [231, 243, "SUBJECT"], [245, 251, "SUBJECT_CODE"], [252, 277, "SUBJECT"]]},
+{"text": "Em muôìn chuyêÒn ngaÌnh týÌ Công nghêò thông tin ICT sang Viêòt Nhâòt. Em muôìn hoÒi nãm sau em chuyêÒn sang Viêòt Nhâòt thiÌ em phaÒi hoòc thêm 5 nãm nýÞa k aò? Nêìu em coì chýìng chiÒ tiêìng Nhâòt thiÌ nãm sau e coì ðc hoòc cuÌng chýõng triÌnh vs K64 cuÒa e ðang hoòc hay phaÒi hoòc vs K65 aò? NhýÞng hoòc phâÌn em ðaÞ hoòc õÒ ICT r thiÌ em coì câÌn hoòc laòi vaÌo nãm sau k aò ( viì duò nhý Math I, kiêìn thýìc maìy tiình,.. õÒ 2 ngaÌnh ðêÌu coì maÞ hoòc phâÌn giôìng nhau aò). Caìc hoòc phâÌn cõ sõÒ ngaÌnh trong nãm nhâìt cuÒa Viêòt Nhâòt coì giôìng võìi ICT k aò?", "entities": [[28, 49, "MAJOR"], [55, 65, "MAJOR"], [109, 119, "MAJOR"], [241, 244, "COHORT"], [282, 285, "COHORT"], [382, 388, "SUBJECT"]]},
+{"text": "Em tên là Phan Thanh Tùng, 20195653, thầy cho em hỏi rằng là em đã học xong và nộp đơn chuyển đổi điểm môn An toàn và bảo mật thông tin, mã học phần IT4010 sang điểm môn Nhập Môn an toàn thông tin Mã học Phần IT4015 , mà sao bây giờ vẫn không đăng kí được các môn tiếp theo do chưa học môn Nhập môn an toàn và bảo mật thông tin ạ.", "entities": [[27, 35, "STUDENT_ID"], [107, 135, "SUBJECT"], [149, 155, "SUBJECT_CODE"], [170, 195, "SUBJECT"], [208, 214, "SUBJECT_CODE"]]},
+{"text": "Em muốn chuyển ngành từ Công nghệ thông tin ICT sang Việt Nhật. Em muốn hỏi năm sau em chuyển sang Việt Nhật thì em phải học thêm 5 năm nữa k ạ? Nếu em có chứng chỉ tiếng Nhật thì năm sau e có đc học cùng chương trình vs K64 của e đang học hay phải học vs K65 ạ? Những học phần em đã học ở ICT r thì em có cần học lại vào năm sau k ạ ( ví dụ như Math I, kiến thức máy tính,.. ở 2 ngành đều có mã học phần giống nhau ạ). Các học phần cơ sở ngành trong năm nhất của Việt Nhật có giống với ICT k ạ?", "entities": [[24, 47, "MAJOR"], [53, 62, "MAJOR"], [99, 108, "MAJOR"], [221, 224, "COHORT"], [257, 260, "COHORT"], [348, 354, "SUBJECT"], [460, 469, "MAJOR"]]},
+{"text": "Tên em là : Nguyễn Nam Thắng Lớp : CNTT2.01-K61 Mã số sinh viên : 20195653 Em hiện đang còn thiếu 3 tín tự chọn kỹ sư nữa để hoàn thành chương trình kỹ sư KHMT, nhưng do đổi mới chương trình từ K61 nên những lớp tự chọn kỹ sư của bọn em sẽ không mở nữa, em đã hỏi thầy Phạm Đăng Hải, thầy hướng dẫn là có thể học một trong hai môn IT3190 - Nhập môn học máy và khai phá dữ liệu hoặc IT4931 - Lưu trữ và xử lý dữ liệu lớn thay cho môn tự chọn kỹ sư của em nhưng mà phải viết đơn và lên văn phòng viện xin trong thời gian đăng kí học phần, thầy cũng có nói là lên ctt tìm mẫu đơn nhưng em đã tìm và không thấy đơn nào như vậy cả. Thầy có thể cho em xin mẫu đơn hoặc hướng dẫn em viết đơn này được không ạ. Trân trọng cảm ơn thầy ! Sinh viên Nguyễn Nam Thắng", "entities": [[35, 39, "MAJOR"], [43, 46, "COHORT"], [66, 74, "STUDENT_ID"], [155, 159, "MAJOR"], [194, 197, "COHORT"], [332, 338, "SUBJECT_CODE"], [341, 377, "SUBJECT"], [383, 389, "SUBJECT_CODE"], [392, 422, "SUBJECT"]]},
+{"text": "Thầy cho em hỏi, nếu chuyển từ môn IT4779 Xử lý dữ liệu lớn sang (2 tins) sang môn IT4931 - Lưu trữ và xử lý dữ liệu lớn (3 tín) thì trong kết quả sẽ tính là 2 hay 3 tín ạ, vì e cần 3 tín mới đủ hoàn thành song các môn tự chọn kỹ sư", "entities": [[37, 43, "SUBJECT_CODE"], [44, 61, "SUBJECT"], [85, 91, "SUBJECT_CODE"], [94, 124, "SUBJECT"]]},
+{"text": "Em là Pham Văn Thắng, sinh viên Việt Nhật K60, mã số sinh viên 20195653. Em gửi mail này mong thầy cô giải đáp cho em thắc mắc về việc Chuyển điểm tương đương. Mail em giải thích sẽ hơi dài nhưng mong thầy cô sẽ đọc hết và giúp đỡ em ạ. Thưa thầy cô, em được các anh chị khóa trên và các thầy cô trên Viện tư vấn thủ tục chuyển điểm tương đương từ trước đến này bao gồm : Đơn đăng kí học phần tương đương, học phần thay thế ( có xác nhận của Viện) và Đơn xin chuyển học phần tương đương gửi lên phòng Đào tạo. Vào kỳ học 20182, em có đăng kí học phần IT4062E để thay thế cho học phần IT4062 em bị trượt ở kì 20181; cùng với đó cũng trong kì 20182 đó, để có thể không bị trùng lịch học, em có đăng kí thêm học phần IT4682E để thay thế cho học phần IT4682 em phải học ở kì 20182. Vào kỳ học đó cũng là kỳ 2 của năm 4 rồi nên em muốn mình đăng kí 2 học phần thay thế này để có thể có thời gian tập trung vào Đồ án ở năm thứ 5, cũng như có thể hoàn thành các học phần nợ một cách sớm nhất. Em có làm các thủ tục như em đã biết ở trên để gửi lên phòng Đạo tạo. Em gửi 2 lần thì nhận được 2 phản hồi khác nhau: Lần thứ 1, ngày 11/09/2019, em gửi mail đính kèm cả đơn Đăng kí học phần tương đương, học phần thay thế và Đơn xin chuyển học phần tương đương. Em nhân được phản hồi từ cô Hương phòng Đào tạo rằng em cầm đơn lên gặp thầy Tùng ( phòng Đào tạo). Ngày 12/09/2019 em mang đơn lên gặp thầy Tùng, thầy có nói rằng tình trạng các bạn Việt Nhật học các học phần ICT diễn ra bừa bãi nên thầy không muốn tình trạng này diễn ra nữa. Sau đó thầy có bảo em để lại đơn và Phòng Đào tạo sẽ xem xét. Nhưng em đợi mãi mà không thấy cập nhật điểm, em gửi mail lên phòng Đào tạo hỏi thì không thấy ai trả lời. Em hỏi thầy cô và các anh chị khóa trước thì được nói việc chuyển điểm này dễ dàng, em cứ thử chờ một thời gian xem. Lần thứ 2, ngày 03/03/2020, em lại gửi mail đính kèm 2 đơn trên một lần nữa. Em nhận được phản hồi từ mail của thầy Tùng rằng học các học phần đuôi E phải qua các mức tiếng Anh nên thầy yêu cầu em phải gửi cho thầy chứng chỉ tiếng Anh tương đương với bên ICT. Em lúc này mới thực sự ngỡ ngàng vì giờ em mới biết quy định đó, trong buổi gặp lần trước thầy cũng không hề nói đến vấn đề này ạ; hơn nữa, lúc em đăng kí trên hệ thống dk-sis cũng không hề có thông báo rằng em phải qua các mức tiếng Anh tương đương bên ICT mới được đăng kí. Em có gửi lại mail cho thầy rằng em không hề biết được thông tin này, em mong thầy bỏ qua cho em và chuyển điểm giúp em. Thầy có trả lời em một lần nữa là cứ giả thiết là em không biết thì việc em học các học phần ngoài chương trình đào tạo là do em cố ý đăng ký, thầy sẽ hiểu như là em học để nâng cao kiến thức chứ không có ý định chuyển điểm tương đương. Thưa thầy cô, khi em đăng kí 2 học phần trên thì mục đích của em duy nhất là để hoàn thành đúng chương trình và có thể tập trung làm Đồ án mà không hề lo nghĩ về những môn bị nợ. Em cũng không dám đôi co với các thầy cô bên phòng Đào tạo về quy định nhưng em cũng rất cố gắng để học các học phần đó bằng vốn tiếng Anh kém với các bạn bên ICT, em cũng xin các thầy cô giảng dạy cả slide tiếng VIệt để có thể hiểu bài giảng hơn; điều đó chứng tỏ em cũng rất cầu tiến để hoàn thành học phần, vậy mà sau 2 lần gửi đơn thì phòng Đào tạo vẫn không chuyển điểm giúp em. Bây giờ em cũng không biết làm thế nào nữa, nếu phải học lại 2 học phần này thì chắc chắn em sẽ Tốt nghiệp muộn, và ảnh hưởng rất nhiều đến những dự định tương lại của em. Em mong các thầy cô sẽ đọc hết mail và tư vấn cho em. Em cảm ơn thầy cô nhiêu. Sinh Viên Phạm Văn Thắng ( Việt Nhật IS2-K60) P/s: Em có đính kèm cả đơn Đăng kí học phần tương đương, học phần thay thế và Đơn xin chuyển học phần tương đương ạ", "entities": [[38, 47, "MAJOR"], [48, 51, "COHORT"], [69, 77, "STUDENT_ID"], [456, 463, "SUBJECT_CODE"], [490, 496, "SUBJECT_CODE"], [623, 630, "SUBJECT_CODE"], [657, 663, "SUBJECT_CODE"], [1228, 1237, "MAJOR"], [1257, 1260, "MAJOR"], [1796, 1799, "MAJOR"], [1986, 1989, "MAJOR"], [2505, 2508, "MAJOR"], [2828, 2837, "MAJOR"], [2838, 2841, "MAJOR_CODE"], [2842, 2845, "COHORT"]]},
+{"text": "Em là Nguyễn Duy Ý, 20195653, học lớp Việt Nhật AS k60 Kì trước thì em có 2 môn không đăng kí được theo bên Việt Nhật, nên em muốn đăng kí và học sang ICT vì có mã học phần tương đương, để kịp tiến độ học vì bên em ít sinh viên nên mở ít lớp. Trước khi đăng kí em có hỏi giảng viên tư vấn học tập, và thầy Dũng viện phó, sau khi được đồng ý em mới đăng kí học. Nhưng bây giờ em làm đơn xin chuyển điểm học phần tương đương thì phía phòng đào tạo không cho em chuyển học phần tương đương ạ. Em là sinh viên năm cuối, hiện đang làm đồ án, mong nhà trường tạo điều kiện chuyển điểm để em ra trường đúng hạn ạ. Trước đây cũng có nhiều anh chị khóa trên ở Việt Nhật sang ICT học để kịp tiến độ, mong thầy cô xem xét giúp em ạ. Em xin chân thành cảm ơn Dưới đây là ảnh các tài liệu liên quan ạ.[cid:ab6437bb-0a5d-4a6b-bb47-0bbf06d08ca0][cid:4b3183f5-2f71-411e-83f0-4257ff2853d5][cid:e33da4a6-6254-4e9e-b737-b7de1278c741]", "entities": [[27, 35, "STUDENT_ID"], [45, 54, "MAJOR"], [55, 57, "MAJOR_CODE"], [58, 61, "COHORT"], [115, 124, "MAJOR"], [158, 161, "MAJOR"], [661, 670, "MAJOR"], [676, 679, "MAJOR"]]},
+{"text": "Em là Nguyễn Thị Phương Ngọc, 20195653, học lớp CNTT2.2 K60, theo định hướng Kỹ sư HTTT. Em đã hoàn thành 140 tín chỉ học từ năm trước, kỳ I vừa rồi do có việc bận nên em không đăng ký học môn nào (em có hỏi thầy cô bên tổ tư vấn học tập thì thầy cô trả lời là năm thứ 5 không bị giới hạn tín chỉ học), còn kỳ học này em đang làm đồ án tốt nghiệp, tất cả học phí cho đến hết kỳ trước cũng đã hoàn thành. Nhưng khi em đăng nhập vào trang https://ctt-daotao.hust.edu.vn của trường thì thấy em đang bị cảnh cáo học tập mức 2 mà không biết lý do. Vậy em mong thầy cô cho em biết lý do em bị cảnh cáo học tập và ảnh hưởng của nó đến kết quả học tập của em. Em cảm ơn thầy cô ạ.", "entities": [[36, 44, "STUDENT_ID"], [54, 58, "MAJOR"], [62, 65, "COHORT"], [89, 93, "MAJOR"]]},
+{"text": "Em là Vũ Đức Nhị, sinh viên lớp CTTN Công nghệ thông tin K62. Em thấy trong danh mục học phần có môn Thực tập công nghiệp (12 tín chỉ), nhưng trong chương trình đào tạo của em không có. Vậy nếu em đăng ký học môn đó có được tính và xét điểm không ạ? Và nếu thực tập ở một công ty mà không liên kết với nhà trường mà xin giấy chứng nhận thì có được xét để quy đổi điểm số không ạ? Sinh viên, Vũ Đức Nhị", "entities": [[37, 41, "MAJOR_CODE"], [42, 61, "MAJOR"], [62, 65, "COHORT"], [106, 126, "SUBJECT"]]},
+{"text": "Em cảm ơn thầy vì những thông tin của thầy ạ. Em cũng thấy trong chương trình đào tạo của em có môn Project III, nhưng em nghe thầy hướng dẫn Project I nói bọn em sẽ chỉ làm Project I và Project II, và môn Project III là của chương trình kĩ sư. Vậy thông tin này có chính xác không ạ? Sinh viên, Vũ Đức Nhị Chào em, Nếu trong CTĐT của em không học phần này thì em đăng kí sẽ bị tính là học ngoài chương trình. Các học phần thực tập này theo mình biết là của các CTĐT khước K62. Em thực tập ở ngoài thì phải theo chương trình thực tập của Viện đưa SV đi tới công ty (đã được Viện kiểm soát quá trình thực tập). Thân mến, MinhNB Thưa thầy/cô, Em là Vũ Đức Nhị, sinh viên lớp CTTN Công nghệ thông tin K62. Em thấy trong danh mục học phần có môn Thực tập công nghiệp (12 tín chỉ), nhưng trong chương trình đào tạo của em không có. Vậy nếu em đăng ký học môn đó có được tính và xét điểm không ạ? Và nếu thực tập ở một công ty mà không liên kết với nhà trường mà xin giấy chứng nhận thì có được xét để quy đổi điểm số không ạ? Sinh viên, Vũ Đức Nhị", "entities": [[100, 111, "SUBJECT"], [142, 151, "SUBJECT"], [174, 183, "SUBJECT"], [187, 197, "SUBJECT"], [206, 217, "SUBJECT"], [477, 480, "COHORT"], [629, 633, "MAJOR_CODE"], [634, 653, "MAJOR"], [654, 657, "COHORT"], [698, 718, "SUBJECT"]]},
+{"text": "Với tình hình dịch bệnh hiện tại, liệu thời gian bắt đầu của năm học sau có bị thay đổi không ạ? Em muốn xin tư vấn của thầy về một việc: Hiện tại, em đang nhận được offer cho internship tại Sea Labs (trực thuộc Sea Group). Nhưng thời gian hè hiện tại không đủ số lượng thời gian (10 - 12 tuần) để em có thể tham gia đầy đủ kỳ internship hè. Nên em muốn thầy tư vấn liệu em có nên bảo lưu học tập và thực hiện kỳ internship vào kỳ 20201, hay em nên theo chương trình học tập để theo đúng tiến độ ạ? Mong muốn của em sau khi ra trường là đi làm Software Engineering ạ. Em cảm ơn thầy! Sinh viên, Vũ Đức Nhị Chào em, Trong CTĐT của em bậc cử nhân sẽ có cả 3 đồ án (Project I, II và III) em nhé. Thân mến, Thưa thầy, Em cảm ơn thầy vì những thông tin của thầy ạ. Em cũng thấy trong chương trình đào tạo của em có môn Project III, nhưng em nghe thầy hướng dẫn Project I nói bọn em sẽ chỉ làm Project I và Project II, và môn Project III là của chương trình kĩ sư. Vậy thông tin này có chính xác không ạ? Sinh viên, Vũ Đức Nhị Chào em, Nếu trong CTĐT của em không học phần này thì em đăng kí sẽ bị tính là học ngoài chương trình. Các học phần thực tập này theo mình biết là của các CTĐT khước K62. Em thực tập ở ngoài thì phải theo chương trình thực tập của Viện đưa SV đi tới công ty (đã được Viện kiểm soát quá trình thực tập). Thân mến, MinhNB Thưa thầy/cô, Em là Vũ Đức Nhị, sinh viên lớp CTTN Công nghệ thông tin K62. Em thấy trong danh mục học phần có môn Thực tập công nghiệp (12 tín chỉ), nhưng trong chương trình đào tạo của em không có. Vậy nếu em đăng ký học môn đó có được tính và xét điểm không ạ? Và nếu thực tập ở một công ty mà không liên kết với nhà trường mà xin giấy chứng nhận thì có được xét để quy đổi điểm số không ạ? Sinh viên, Vũ Đức Nhị", "entities": [[641, 650, "SUBJECT"], [806, 817, "SUBJECT"], [848, 857, "SUBJECT"], [880, 889, "SUBJECT"], [893, 903, "SUBJECT"], [912, 923, "SUBJECT"], [1183, 1186, "COHORT"], [1335, 1339, "MAJOR_CODE"], [1340, 1359, "MAJOR"], [1360, 1363, "COHORT"], [1404, 1424, "SUBJECT"]]},
+{"text": "Chào thầy, Em là Hoàng Văn Hùng, mã sinh viên: 20195653, lớp CNTT 2.1 k59. Hiện giờ em cần thầy tư vấn cho em. Em đang bị cảnh cáo và em vẫn mong muốn được ra trường và lấy bằng. Hiện tại em còn nợ 6 môn và đồ án tốt nghiệp. Em muốn kì sau tức là 20201 em có thể làm đồ án tốt nghiệp, em thắc mắc là trong trường hợp kì hè môn học trong chương trình học của em không mở lớp, liệu em có thể đăng ký thay thế những môn học cùng tên học phần nhưng khác mã học phần ( ví dụ : môn trí tuệ nhân tạo có 3 mã học phần it 3160, 4042 và it 4040 ) và nếu được thì em phải làm thủ tục gì a. Trong yêu cầu xét tốt nghiệp là nợ không quá 8 TC nhưng theo tính toán thì em nợ 9 TC thì em có thể làm đơn hay thủ tục gì để được làm đồ án không ah. Cuối cùng thầy cho em xin số điện thoại để tiện trao đổi ạ, số điện thoại của em: [SĐT],", "entities": [[47, 55, "STUDENT_ID"], [61, 65, "MAJOR"], [70, 73, "COHORT"], [476, 492, "SUBJECT"], [510, 517, "SUBJECT_CODE"], [519, 523, "SUBJECT_CODE"], [527, 534, "SUBJECT_CODE"]]},
+{"text": "Tên em là: Đinh Thị Ngọc Mai Mã số sinh viên : 20195653 Em đã học môn nhập môn công nghệ phần mềm với mã HP mới là IT3180 kì 20191 Em đã hỏi và được thầy Nguyễn Mạnh Tuấn - phụ trách môn Nhập môn Công nghệ phần mềm - IT3180 kì 20191 xác nhận Mã học phần IT3180 là mã học phần trong chương trình đào tạo mới, so với học phần cũ với mã HP IT4080. Hiện tại trong kết quả học tập học phần IT3180 hiện đang không được tính. Em viết mail này để mong thầy cô tư vấn các bước để xin công nhận và chuyển điểm học phần tương đương cho môn Nhập môn công nghệ phần mềm - mã HP mới là IT3180 tương đương với mã HP là IT4080 để hoàn thành chương trình học và làm đồ án. Trân trọng cảm ơn các thầy, cô! Sinh viên Đinh Thị Ngọc Mai.", "entities": [[8, 27, "MAJOR"], [76, 84, "STUDENT_ID"], [99, 127, "SUBJECT"], [146, 152, "SUBJECT_CODE"], [218, 246, "SUBJECT"], [249, 255, "SUBJECT_CODE"], [287, 293, "SUBJECT_CODE"], [366, 372, "SUBJECT_CODE"], [420, 426, "SUBJECT_CODE"], [555, 583, "SUBJECT"], [601, 607, "SUBJECT_CODE"], [638, 644, "SUBJECT_CODE"]]},
+{"text": "Tên em là: Hoàng Đình Lực Mã số sinh viên: 20195653 Số điện thoại: [SĐT] Mail: [EMAIL] Em viết đơn này xin thầy cô tư vấn về việc cải thiện điểm để lấy bằng giỏi. Hiện CPA của em là 2.94 và kì 20192 này em có làm Đồ án tốt nghiệp và em nghĩ điểm môn này sẽ khả quan. Vậy em nên cải thiện môn gì, như thế nào và quan trọng là giờ em còn đăng kí được môn học kì 20192 không ạ. Trân trọng cám ơn thầy/cô! Sinh viên Hoàng Đình Lực", "entities": [[59, 67, "STUDENT_ID"]]},
+{"text": "Em là sv Lê Văn Linh, 20195653, hiện là sinh viên năm 3 ngành Khoa học máy tính. Hiện tại em có đăng kí học phần Tính toán tiến hoá IT4906 cho kì 20201 thì có điều kiện tiên quyết là học phần TTUD IT3170. Tuy nhiên kì này em đăng kí học lớp TTUD-SS thay thế cho IT3170 nên không đăng kí được. Vậy thầy cô cho em hỏi hiện tại em có thể đăng kí học phần tương đương chưa ạ, hay phải có điểm mới đăng kí được? Nếu không thì có cách xử lí nào khác không?", "entities": [[27, 35, "STUDENT_ID"], [67, 84, "MAJOR"], [118, 136, "SUBJECT"], [137, 143, "SUBJECT_CODE"], [197, 201, "SUBJECT"], [202, 208, "SUBJECT_CODE"], [248, 255, "SUBJECT"], [269, 275, "SUBJECT_CODE"]]}
+]

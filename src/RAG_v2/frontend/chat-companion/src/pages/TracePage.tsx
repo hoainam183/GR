@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { sendMessage } from '@/services/chatApi';
+import { sendMessage, resolveChatIdentity } from '@/services/chatApi';
 import { ChatResponse } from '@/types/chat';
 import PipelineTrace from '@/components/trace/PipelineTrace';
 import { Button } from '@/components/ui/button';
@@ -77,6 +77,13 @@ export default function TracePage() {
   const [result, setResult] = useState<ChatResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+  const identity = resolveChatIdentity();
+
+  const debugPayload = {
+    source: identity.source,
+    user_id: identity.userId ?? null,
+    user_context: identity.userContext ?? null,
+  };
 
   const handleTrace = async (q?: string) => {
     const finalQ = (q ?? question).trim();
@@ -87,7 +94,15 @@ export default function TracePage() {
     setError(null);
 
     try {
-      const res = await sendMessage(finalQ, [], 10);
+      const liveIdentity = resolveChatIdentity();
+      const res = await sendMessage(
+        finalQ,
+        [],
+        10,
+        undefined,
+        liveIdentity.userContext,
+        liveIdentity.userId,
+      );
       setResult(res);
       // Scroll to results after a short delay
       setTimeout(() => {
@@ -186,6 +201,21 @@ export default function TracePage() {
             </div>
           </div>
         </div>
+
+        <details className="border rounded-xl bg-card px-5 py-4">
+          <summary className="cursor-pointer select-none text-sm font-medium">
+            Debug user info
+          </summary>
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">Identity source</span>
+              <span className="font-medium text-foreground">{identity.source}</span>
+            </div>
+            <pre className="max-h-56 overflow-auto rounded-md bg-muted/40 p-3 text-[11px] leading-5 text-foreground">
+              {JSON.stringify(debugPayload, null, 2)}
+            </pre>
+          </div>
+        </details>
 
         {/* ── Error ── */}
         {error && (

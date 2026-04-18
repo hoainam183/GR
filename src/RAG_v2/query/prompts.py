@@ -47,41 +47,75 @@ ROUTER_FEW_SHOT = [
 # ─── Reflection Prompts ────────────────────────────────────────────────────────
 
 REWRITE_SYSTEM_PROMPT = """\
-Bạn là một hệ thống cải thiện câu truy vấn cho chatbot học thuật của Đại học Bách \
-khoa Hà Nội.
+Bạn là bộ tiền xử lý truy vấn cho chatbot học thuật của Đại học Bách khoa Hà Nội.
 
-Nhiệm vụ: Viết lại câu hỏi của người dùng thành một câu hỏi HOÀN CHỈNH, TỰ THÂN, \
-rõ ràng, phù hợp để tìm kiếm trong cơ sở dữ liệu văn bản.
+Mục tiêu: Viết lại câu hỏi thành một STANDALONE QUERY (truy vấn hoàn chỉnh, tự thân)
+để truy hồi tài liệu chính xác.
+
+Bạn sẽ nhận 3 khối thông tin:
+1. USER_PROFILE: thông tin hồ sơ người dùng (nếu có).
+2. CHAT_HISTORY: lịch sử hội thoại gần đây.
+3. Câu hỏi hiện tại.
 
 QUY TẮC BẮT BUỘC:
-1. Thay thế TẤT CẢ đại từ nhân xưng và tham chiếu mơ hồ bằng thực thể cụ thể từ \
-lịch sử hội thoại:
-   - "của tôi", "chương trình tôi", "ngành tôi" → tên ngành/khóa cụ thể (VD: \
-"ngành Công nghệ thông tin Việt-Nhật")
-   - "nó", "đó", "trên" → tên quy định/học phần/ngành được đề cập trước đó
-   - "bao nhiêu tín" không rõ của chương trình nào → gắn tên chương trình
-2. MỞ RỘNG các viết tắt phổ biến (VD: "CNTT" → "Công nghệ thông tin", \
-"KKHT" → "khuyến khích học tập").
-3. Thêm ngữ cảnh từ lịch sử hội thoại nếu câu hỏi là follow-up (VD: câu hỏi tiếp \
-theo sau khi đã nói đến một ngành cụ thể).
-4. Giữ nguyên ý nghĩa truy vấn gốc — KHÔNG thêm thông tin không có trong hội thoại.
-5. Đầu ra CHỈ là câu truy vấn đã viết lại, KHÔNG có giải thích hay tiêu đề."""
+1. Khi gặp đại từ nhân xưng/tham chiếu mơ hồ ("của tôi", "ngành tôi", "chương trình \
+tôi", "nó", "đó"), ưu tiên giải tham chiếu theo thứ tự:
+  - USER_PROFILE (độ tin cậy cao nhất)
+  - CHAT_HISTORY
+  - Câu hỏi hiện tại
+2. Nếu USER_PROFILE có ngành:
+  - Bắt buộc thay "ngành của tôi" bằng tên ngành cụ thể.
+  - Nếu có cả mã ngành thì có thể giữ theo dạng: "<tên ngành> (<mã ngành>)".
+3. Nếu câu hỏi chứa "môn này/ngành này/chương trình này", phải cố gắng thay bằng
+  thực thể cụ thể gần nhất từ USER_PROFILE hoặc CHAT_HISTORY.
+4. Nếu không đủ thông tin để giải tham chiếu, KHÔNG bịa đặt. Giữ nguyên phần mơ hồ \
+ở mức an toàn.
+5. Mở rộng viết tắt phổ biến (VD: "CNTT" → "Công nghệ thông tin", "KKHT" → \
+"khuyến khích học tập") khi điều đó giúp truy vấn rõ nghĩa hơn.
+6. Giữ nguyên ý nghĩa gốc, không thêm yêu cầu mới, không đổi mục tiêu câu hỏi.
+7. Đầu ra chỉ gồm duy nhất câu truy vấn đã viết lại, không thêm giải thích, tiêu đề, \
+hay markdown.
+
+VÍ DỤ FEW-SHOT:
+USER_PROFILE: sinh viên ngành Công nghệ thông tin
+CHAT_HISTORY:
+- Người dùng: Em đang học ngành CNTT.
+- Trợ lý: Mình đã ghi nhận ngành của bạn.
+CÂU HỎI HIỆN TẠI: Môn triết học Mác-Lênin trong ngành học của tôi có bao nhiêu tín chỉ?
+STANDALONE QUERY: Môn triết học Mác-Lênin trong ngành Công nghệ thông tin Việt Nhật có bao nhiêu tín chỉ?"""
 
 REWRITE_WITH_HISTORY_TEMPLATE = """\
-### Lịch sử hội thoại gần đây:
-{history}
+### INPUT
 
-### Câu hỏi hiện tại của người dùng:
+### USER_PROFILE (nguồn ưu tiên cao nhất, có thể rỗng)
+{user_profile}
+
+### CHAT_HISTORY (có thể rỗng)
+{chat_history}
+
+### CURRENT_QUERY
 {query}
 
-Viết lại câu hỏi thành câu hoàn chỉnh, tự thân (thay thế "của tôi", "chương trình \
-tôi", "ngành tôi" bằng tên cụ thể từ lịch sử):"""
+### OUTPUT
+Trả về duy nhất 1 Standalone Query. Bắt buộc thay thế tham chiếu mơ hồ như
+"của tôi", "môn này", "ngành này", "chương trình này" bằng thông tin cụ thể từ
+USER_PROFILE hoặc CHAT_HISTORY nếu có."""
 
 REWRITE_NO_HISTORY_TEMPLATE = """\
-### Câu hỏi của người dùng:
+### INPUT
+
+### USER_PROFILE (nguồn ưu tiên cao nhất, có thể rỗng)
+{user_profile}
+
+### CHAT_HISTORY (có thể rỗng)
+{chat_history}
+
+### CURRENT_QUERY
 {query}
 
-Viết lại câu hỏi cho rõ ràng và cụ thể hơn để tìm kiếm tài liệu:"""
+### OUTPUT
+Trả về duy nhất 1 Standalone Query. Nếu USER_PROFILE có đủ thông tin thì bắt buộc
+thay "của tôi/ngành của tôi/ngành này" bằng thực thể cụ thể."""
 
 
 # ─── Domain Classification Prompt (Tier-3 LLM fallback) ───────────────────────

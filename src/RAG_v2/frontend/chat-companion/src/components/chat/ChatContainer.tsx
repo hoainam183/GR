@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Message, UserContext } from '@/types/chat';
-import { sendMessage } from '@/services/chatApi';
+import { sendMessage, resolveChatIdentity } from '@/services/chatApi';
 import { getSession } from '@/services/sessionApi';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
@@ -13,6 +13,22 @@ interface ChatContainerProps {
   user?: UserPublic | null;
   sessionId?: string;
 }
+
+const buildUserContextFromUser = (
+  currentUser?: UserPublic | null,
+): UserContext | undefined => {
+  if (!currentUser) {
+    return undefined;
+  }
+
+  return {
+    student_id: currentUser.student_id || undefined,
+    cohort: currentUser.cohort || undefined,
+    major: currentUser.major || undefined,
+    major_code: currentUser.major_code || undefined,
+    full_name: currentUser.full_name || undefined,
+  };
+};
 
 const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -30,6 +46,16 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   const suppressNextHistoryLoad = useRef(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const explicitUserContext = buildUserContextFromUser(user);
+  const explicitUserId = user?.email ?? user?.username ?? undefined;
+  const resolvedIdentity = resolveChatIdentity(explicitUserContext, explicitUserId);
+
+  const debugPayload = {
+    source: resolvedIdentity.source,
+    user_id: resolvedIdentity.userId ?? null,
+    user_context: resolvedIdentity.userContext ?? null,
+    raw_user: user ?? null,
+  };
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -119,20 +145,14 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         role: m.role,
         content: m.content,
       }));
-
-      // Build user context from profile for query enrichment
-      const userContext: UserContext | undefined = user
-        ? {
-            student_id: user.student_id || undefined,
-            cohort: user.cohort || undefined,
-            major: user.major || undefined,
-            major_code: user.major_code || undefined,
-            full_name: user.full_name || undefined,
-          }
-        : undefined;
-
-      const userId = user?.email ?? user?.username ?? undefined;
-      const response = await sendMessage(content, historyForApi, 5, capturedSessionId, userContext, userId);
+      const response = await sendMessage(
+        content,
+        historyForApi,
+        5,
+        capturedSessionId,
+        explicitUserContext,
+        explicitUserId,
+      );
 
       // Component was unmounted (e.g. logout) — bail out entirely
       if (!isMountedRef.current) return;
@@ -156,8 +176,8 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       }
 
       // Refresh the sidebar conversation list
-      if (userId) {
-        queryClient.invalidateQueries({ queryKey: ['sessions', userId] });
+      if (resolvedIdentity.userId) {
+        queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
       }
 
       // Add assistant message with sources
@@ -253,6 +273,14 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       <div className="border-t border-border bg-background/80 backdrop-blur-sm p-4 md:p-6">
         <div className="mx-auto max-w-3xl">
           <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+          <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
+            <summary className="cursor-pointer select-none text-muted-foreground">
+              Debug user info
+            </summary>
+            <pre className="mt-2 max-h-56 overflow-auto rounded bg-background p-2 text-[11px] text-foreground">
+              {JSON.stringify(debugPayload, null, 2)}
+            </pre>
+          </details>
           <p className="mt-2 text-center text-xs text-muted-foreground">
             Press Enter to send, Shift + Enter for new line
           </p>

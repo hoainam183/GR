@@ -26,6 +26,7 @@ Usage::
 from __future__ import annotations
 
 import logging
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -51,6 +52,26 @@ class MultiCollectionSearch:
         rrf_k: RRF constant for the global-merge step (default 60).
         max_workers: Thread-pool size for parallel per-collection searches.
     """
+
+    _COURSE_CODE_RE = re.compile(
+        r"\b(?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?\b",
+        re.IGNORECASE,
+    )
+    _KEYWORD_BIAS_HINTS = (
+        "môn ",
+        "môn học",
+        "mon ",
+        "học phần",
+        "hoc phan",
+        "tín chỉ",
+        "tin chi",
+        "tiên quyết",
+        "tien quyet",
+        "song hành",
+        "song hanh",
+        "khối lượng",
+        "khoi luong",
+    )
 
     def __init__(
         self,
@@ -235,6 +256,17 @@ class MultiCollectionSearch:
         else:
             target_searchers = self.searchers
 
+        fusion_vector_weight, fusion_keyword_weight, fusion_reason = (
+            self._resolve_fusion_weights(query)
+        )
+        if fusion_reason != "default":
+            logger.info(
+                "Adaptive fusion weights: vector=%.2f keyword=%.2f (%s)",
+                fusion_vector_weight,
+                fusion_keyword_weight,
+                fusion_reason,
+            )
+
         all_vector: List[Dict[str, Any]] = []
         all_keyword: List[Dict[str, Any]] = []
 
@@ -323,14 +355,49 @@ class MultiCollectionSearch:
         all_keyword.sort(key=lambda x: x["score"], reverse=True)
         keyword_pool = self._dedup_pool(all_keyword, keyword_pool_k)
 
-        results = self._score_fusion(vector_pool, keyword_pool, top_k)
+        results = self._score_fusion(
+            vector_pool,
+            keyword_pool,
+            top_k,
+            vector_weight=fusion_vector_weight,
+            keyword_weight=fusion_keyword_weight,
+        )
 
         # Populate trace_out if provided
         if trace_out is not None:
             trace_out["filters"] = filter_traces
             trace_out["collection_counts"] = collection_counts
+            trace_out["fusion_weights"] = {
+                "vector": round(fusion_vector_weight, 4),
+                "keyword": round(fusion_keyword_weight, 4),
+                "reason": fusion_reason,
+            }
 
         return results
+
+    def _resolve_fusion_weights(
+        self,
+        query: str,
+    ) -> Tuple[float, float, str]:
+        """Pick effective vector/keyword weights for this query.
+
+        For course-centric questions (course code, "môn", "học phần", ...),
+        favour sparse/BM25 matching to better capture exact subject names.
+        """
+        query_text = (query or "").strip()
+        if not query_text:
+            return self.vector_weight, self.keyword_weight, "default"
+
+        lowered = query_text.lower()
+        is_course_like = bool(self._COURSE_CODE_RE.search(query_text)) or any(
+            hint in lowered for hint in self._KEYWORD_BIAS_HINTS
+        )
+        if not is_course_like:
+            return self.vector_weight, self.keyword_weight, "default"
+
+        vector_weight = min(self.vector_weight, 0.4)
+        keyword_weight = max(self.keyword_weight, 0.6)
+        return vector_weight, keyword_weight, "course_query_keyword_bias"
 
     # ------------------------------------------------------------------
     # Metadata pre-search helpers
@@ -364,30 +431,43 @@ class MultiCollectionSearch:
             return None, None, trace
 
         for i, es_query in enumerate(cf.metadata_es_queries):
-            ids = hybrid.es.metadata_filter_search(es_query)
+            raw_ids = hybrid.es.metadata_filter_search(es_query)
             logger.info(
                 "Metadata pre-search '%s': %d IDs with filter %s",
                 col_name,
-                len(ids),
+                len(raw_ids),
                 str(es_query)[:80],
             )
-            if ids:
+            if raw_ids:
+                chunk_ids = hybrid.es.resolve_chunk_ids_for_qdrant(raw_ids)
+                if not chunk_ids:
+                    logger.warning(
+                        "Metadata pre-search '%s': %d raw IDs but none map to "
+                        "Qdrant chunk IDs. Trying next fallback query.",
+                        col_name,
+                        len(raw_ids),
+                    )
+                    continue
                 qdrant_filter = qdrant_models.Filter(
-                    must=[qdrant_models.HasIdCondition(has_id=ids)]
+                    must=[qdrant_models.HasIdCondition(has_id=chunk_ids)]
                 )
                 # Describe the filter for the trace
                 es_str = str(es_query)
                 if "term" in es_str and "major_code" in es_str:
-                    fdesc = f"major_code filter (chain[{i}], {len(ids)} IDs)"
+                    fdesc = f"major_code filter (chain[{i}], {len(chunk_ids)} IDs)"
                 elif "match" in es_str and "major_name" in es_str:
-                    fdesc = f"major_name fuzzy filter (chain[{i}], {len(ids)} IDs)"
+                    fdesc = f"major_name fuzzy filter (chain[{i}], {len(chunk_ids)} IDs)"
                 elif "applicable_major" in es_str:
-                    fdesc = f"applicable_major filter (chain[{i}], {len(ids)} IDs)"
+                    fdesc = f"applicable_major filter (chain[{i}], {len(chunk_ids)} IDs)"
                 elif "date_str" in es_str or "wildcard" in es_str:
-                    fdesc = f"date filter (chain[{i}], {len(ids)} IDs)"
+                    fdesc = f"date filter (chain[{i}], {len(chunk_ids)} IDs)"
                 else:
-                    fdesc = f"chain[{i}] filter ({len(ids)} IDs)"
-                trace = {"applied": True, "matched_ids": len(ids), "filter_desc": fdesc}
+                    fdesc = f"chain[{i}] filter ({len(chunk_ids)} IDs)"
+                trace = {
+                    "applied": True,
+                    "matched_ids": len(chunk_ids),
+                    "filter_desc": fdesc,
+                }
                 return qdrant_filter, es_query, trace
 
         # All queries returned zero results → fallback: search entire collection
@@ -421,11 +501,13 @@ class MultiCollectionSearch:
         vector_pool: List[Dict[str, Any]],
         keyword_pool: List[Dict[str, Any]],
         top_k: int,
+        vector_weight: float,
+        keyword_weight: float,
     ) -> List[Dict[str, Any]]:
         """Combine vector and keyword pools via min-max normalised score weighting.
 
         Both score ranges are independently normalised to [0, 1] so that the
-        ``vector_weight`` / ``keyword_weight`` ratio directly controls the
+        provided ``vector_weight`` / ``keyword_weight`` ratio directly controls the
         semantic-vs-keyword trade-off.
         """
         # --- Normalisation bounds (pools are already sorted desc) ---
@@ -473,8 +555,8 @@ class MultiCollectionSearch:
 
         for entry in combined.values():
             entry["score"] = (
-                self.vector_weight * entry["norm_vector"]
-                + self.keyword_weight * entry["norm_keyword"]
+                vector_weight * entry["norm_vector"]
+                + keyword_weight * entry["norm_keyword"]
                 # Recency boost for kehoach: newer documents score slightly higher.
                 # Max +0.05, decays linearly over KEHOACH_RECENCY_DECAY_DAYS.
                 + kehoach_recency_bonus(entry)

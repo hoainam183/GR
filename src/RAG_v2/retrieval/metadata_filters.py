@@ -12,10 +12,9 @@ Architecture (pre-search flow):
      no filter (search the entire collection).
 
 Per-collection filter logic:
-  - ctdt    : major_code (exact) → major_name (match) → no filter.
-              Chunks with null major_code apply to all majors (always included).
-  - quydinh : applicable_major array → no filter.
-              Chunks with null applicable_major apply to all majors.
+    - ctdt    : major_code (exact) → major_name (match) → major_code OR null
+                            (generic chunks) → no filter.
+    - quydinh : applicable_major (exact) → applicable_major OR null → no filter.
   - kehoach : date filter only when query contains specific year / month.
               After retrieval a recency score bonus rewards newer documents.
   - stsv    : no metadata filter.
@@ -29,6 +28,7 @@ To add a new collection filter:
 from __future__ import annotations
 
 import re
+import unicodedata
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -110,22 +110,153 @@ MAJOR_CODE_TO_NAME: Dict[str, str] = {
 # Patterns are tried in order; the first match wins.
 # Add new programmes here — no other code needs to change.
 MAJOR_PATTERNS: List[Tuple[str, str]] = [
-    (r"\bIT-E10\b|khoa học dữ liệu|trí tuệ nhân tạo|\bDATA\b|\bAI\b", "IT-E10"),
-    (r"\bIT-E15\b|an toàn không gian số|cyber|bảo mật số", "IT-E15"),
-    (r"\bIT-E6\b|việt.{0,4}nhật|ICTVJ", "IT-E6"),
-    (r"\bIT-E7\b|toàn cầu|global ICT|ICTG", "IT-E7"),
-    (r"\bIT-EP\b|việt.?pháp|ICTFR", "IT-EP"),
-    (r"\bIT1\b|khoa học máy tính", "IT1"),
-    (r"\bIT2\b|kỹ thuật máy tính", "IT2"),
-    (r"\bMI1\b|\btoán.?tin\b|toán ứng dụng", "MI1"),
-    (r"\bMI2\b|hệ thống thông tin quản lý|\bMIS\b", "MI2"),
+    (r"\bIT[-\s]?E10\b|khoa học dữ liệu|trí tuệ nhân tạo|\bDATA\b|\bAI\b", "IT-E10"),
+    (r"\bIT[-\s]?E15\b|an toàn không gian số|cyber|bảo mật số", "IT-E15"),
+    (r"\bIT[-\s]?E6\b|việt.{0,4}nhật|ICTVJ", "IT-E6"),
+    (r"\bIT[-\s]?E7\b|toàn cầu|global ICT|ICTG", "IT-E7"),
+    (r"\bIT[-\s]?EP\b|việt.?pháp|ICTFR", "IT-EP"),
+    (r"\bIT[-\s]?1\b|khoa học máy tính", "IT1"),
+    (r"\bIT[-\s]?2\b|kỹ thuật máy tính", "IT2"),
+    (r"\bMI[-\s]?1\b|\btoán.?tin\b|toán ứng dụng", "MI1"),
+    (r"\bMI[-\s]?2\b|hệ thống thông tin quản lý|\bMIS\b", "MI2"),
 ]
+
+# Map canonical major_name -> accepted aliases from profile/user context.
+# Matching is case-insensitive and exact on alias entries.
+MAJOR_NAME_ALIAS_MAPPING: Dict[str, List[str]] = {
+    "Khoa học Dữ liệu và Trí tuệ Nhân tạo": [
+        "Khoa học Dữ liệu và Trí tuệ Nhân tạo",
+        "IT-E10",
+        "Data AI",
+    ],
+    "An toàn không gian số": [
+        "An toàn không gian số",
+        "IT-E15",
+        "An toàn thông tin",
+    ],
+    "Công nghệ thông tin Việt - Nhật": [
+        "Công nghệ thông tin Việt - Nhật",
+        "Công nghệ thông tin Việt Nhật",
+        "CNTT Việt Nhật",
+        "IT-E6",
+        "ICTVJ",
+    ],
+    "Công nghệ thông tin toàn cầu": [
+        "Công nghệ thông tin toàn cầu",
+        "CNTT toàn cầu",
+        "IT-E7",
+        "ICTG",
+    ],
+    "Công nghệ thông tin Việt Pháp": [
+        "Công nghệ thông tin Việt Pháp",
+        "CNTT Việt Pháp",
+        "IT-EP",
+        "ICTFR",
+    ],
+    "Khoa học máy tính": [
+        "Khoa học máy tính",
+        "KHMT",
+        "IT1",
+    ],
+    "Kỹ thuật máy tính": [
+        "Kỹ thuật máy tính",
+        "KTMT",
+        "IT2",
+    ],
+    "Toán - Tin": [
+        "Toán - Tin",
+        "Toán tin",
+        "MI1",
+    ],
+    "Hệ thống thông tin quản lý": [
+        "Hệ thống thông tin quản lý",
+        "HTTTQL",
+        "MI2",
+        "MIS",
+    ],
+}
+
+_UNKNOWN_MAJOR_VALUES = {
+    "",
+    "none",
+    "null",
+    "unknown",
+    "n/a",
+    "na",
+    "khong ro",
+}
+
+_DASH_TRANSLATION = str.maketrans(
+    {
+        "\u2010": "-",  # hyphen
+        "\u2011": "-",  # non-breaking hyphen
+        "\u2012": "-",  # figure dash
+        "\u2013": "-",  # en dash
+        "\u2014": "-",  # em dash
+        "\u2212": "-",  # minus sign
+    }
+)
+_MAJOR_CODE_SPACE_RE = re.compile(
+    r"\b(IT|MI)\s+(E10|E15|E6|E7|EP|1|2)\b",
+    re.IGNORECASE,
+)
+
+_MAJOR_NAME_TO_CODE: Dict[str, str] = {
+    major_name: major_code
+    for major_code, major_name in MAJOR_CODE_TO_NAME.items()
+}
+
+
+def _is_unknown_major(value: Optional[str]) -> bool:
+    """Return True when *value* is empty or a common unknown placeholder."""
+    if value is None:
+        return True
+    return value.strip().lower() in _UNKNOWN_MAJOR_VALUES
+
+
+def _normalise_major_text(value: str) -> str:
+    """Normalize major text so regex/alias matching is robust.
+
+    Handles Unicode dash variants (e.g. ``IT–E6``), extra spaces around
+    dashes, and compact forms like ``IT E6`` -> ``IT-E6``.
+    """
+    text = unicodedata.normalize("NFKC", value or "")
+    text = text.translate(_DASH_TRANSLATION)
+    text = re.sub(r"\s*-\s*", "-", text)
+    text = _MAJOR_CODE_SPACE_RE.sub(
+        lambda m: f"{m.group(1).upper()}-{m.group(2).upper()}",
+        text,
+    )
+    text = re.sub(r"\s{2,}", " ", text)
+    return text.strip()
+
+
+def canonicalize_major_name(user_major: str) -> str:
+    """Return canonical major name for *user_major* via alias mapping.
+
+    Matching is case-insensitive and exact on values in
+    ``MAJOR_NAME_ALIAS_MAPPING``. If no alias matches, return the original
+    input unchanged.
+    """
+    if _is_unknown_major(user_major):
+        return user_major
+
+    normalised_input = _normalise_major_text(user_major)
+    lowered_input = normalised_input.casefold()
+    for canonical_name, aliases in MAJOR_NAME_ALIAS_MAPPING.items():
+        for alias in aliases:
+            if lowered_input == _normalise_major_text(alias).casefold():
+                return canonical_name
+    return normalised_input
 
 
 def _extract_major_code(text: str) -> Optional[str]:
     """Return major_code matched from *text*, or ``None`` if no match."""
+    normalised_text = _normalise_major_text(text)
+    if _is_unknown_major(normalised_text):
+        return None
     for pattern, code in MAJOR_PATTERNS:
-        if re.search(pattern, text, re.IGNORECASE):
+        if re.search(pattern, normalised_text, re.IGNORECASE):
             return code
     return None
 
@@ -138,36 +269,178 @@ def _resolve_major_code(
 
     Priority:
       1. ``resolved_major`` (from user profile / conversation history):
-         try to interpret as a code first, else run regex on it.
+            try code -> canonical-name alias mapping -> regex.
       2. Regex detection on ``query`` itself.
+
+    Unknown placeholders (e.g. ``null``, ``unknown``) are treated as missing,
+    which naturally falls back to unfiltered global search.
     """
-    if resolved_major:
-        # If resolved_major is already a known code, use it directly.
-        if resolved_major in MAJOR_CODE_TO_NAME:
-            return resolved_major
-        # Otherwise treat it as a name/partial name and run pattern matching.
-        code = _extract_major_code(resolved_major)
+    if resolved_major and not _is_unknown_major(resolved_major):
+        normalized_major = canonicalize_major_name(resolved_major)
+
+        # If major is already a known code, use it directly.
+        if normalized_major in MAJOR_CODE_TO_NAME:
+            return normalized_major
+        normalized_code = _normalise_major_text(normalized_major).upper()
+        if normalized_code in MAJOR_CODE_TO_NAME:
+            return normalized_code
+
+        # If major is a known canonical name, resolve to major_code directly.
+        code_by_name = _MAJOR_NAME_TO_CODE.get(normalized_major)
+        if code_by_name:
+            return code_by_name
+        lowered_major = _normalise_major_text(normalized_major).casefold()
+        for major_name, major_code in _MAJOR_NAME_TO_CODE.items():
+            if _normalise_major_text(major_name).casefold() == lowered_major:
+                return major_code
+
+        # Otherwise treat it as a free-text name and run pattern matching.
+        code = _extract_major_code(normalized_major)
         if code:
             return code
     # Fall back to current query regex detection.
     return _extract_major_code(query)
 
 
-def _null_or_term(field: str, value: str) -> Dict[str, Any]:
-    """ES query: ``field == value`` OR field is absent (null → applies to all).
+def _build_major_labels(major_code: str) -> List[str]:
+    """Return all known labels/aliases for a major code (longest first)."""
+    labels: List[str] = [major_code]
+    major_name = MAJOR_CODE_TO_NAME.get(major_code)
+    if major_name:
+        labels.append(major_name)
+        labels.extend(MAJOR_NAME_ALIAS_MAPPING.get(major_name, []))
 
-    Uses ``field.keyword`` sub-field for exact-match term queries so that
-    values containing hyphens (e.g. ``IT-E6``) are not tokenised.
+    unique: List[str] = []
+    seen: set[str] = set()
+    for raw in labels:
+        if _is_unknown_major(raw):
+            continue
+        value = _normalise_major_text(raw)
+        if not value:
+            continue
+        key = value.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(value)
+
+    unique.sort(key=len, reverse=True)
+    return unique
+
+
+def strip_major_from_query_for_retrieval(
+    query: str,
+    resolved_major: Optional[str] = None,
+) -> str:
+    """Strip major-specific mentions once major filtering is already applied.
+
+    Retrieval works better when semantic/keyword search focuses on the course
+    intent (e.g. "môn mạng máy tính") while major constraints are handled by
+    metadata filtering (e.g. ``major_code=IT-E6``).
+
+    If stripping makes the query too short, the original query is returned.
+    """
+    raw_query = _normalise_major_text(query or "")
+    if not raw_query:
+        return raw_query
+
+    major_code = _resolve_major_code(raw_query, resolved_major)
+    if not major_code:
+        return raw_query
+
+    labels = _build_major_labels(major_code)
+    if not labels:
+        return raw_query
+
+    label_group = "|".join(re.escape(label) for label in labels)
+    cleaned = raw_query
+
+    # Remove full phrases first to avoid leaving connector fragments.
+    phrase_patterns = [
+        rf"\b(?:trong|thuộc|cho|của)\s+ngành\s+(?:{label_group})\b",
+        rf"\bngành\s+(?:{label_group})\b",
+        rf"\bchuyên\s+ngành\s+(?:{label_group})\b",
+        rf"\bchương\s+trình(?:\s+đào\s+tạo)?(?:\s+ngành)?\s+(?:{label_group})\b",
+        rf"\((?:{label_group})\)",
+        rf"\b(?:{label_group})\b",
+    ]
+    for pattern in phrase_patterns:
+        cleaned = re.sub(pattern, " ", cleaned, flags=re.IGNORECASE)
+
+    # Cleanup leftovers after label removal.
+    cleaned = re.sub(
+        r"\b(?:trong|thuộc|cho|của)\s+ngành\b",
+        " ",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r"\b(?:ngành|chuyên\s+ngành)\b",
+        " ",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" ,.;:-()[]")
+
+    # Keep the original query if stripping removed too much context.
+    if len(cleaned.split()) < 2:
+        return raw_query
+
+    return cleaned
+
+
+def _term_any_mapping(field: str, value: str) -> Dict[str, Any]:
+    """ES exact term query compatible with both field-mapping variants.
+
+    Supports:
+      - ``field`` is ``keyword``
+      - ``field`` is ``text`` with ``field.keyword`` subfield
     """
     return {
         "bool": {
             "should": [
+                {"term": {field: value}},
                 {"term": {f"{field}.keyword": value}},
-                {"bool": {"must_not": {"exists": {"field": field}}}},
             ],
             "minimum_should_match": 1,
         }
     }
+
+
+def _wildcard_any_mapping(field: str, pattern: str) -> Dict[str, Any]:
+    """ES wildcard query compatible with both field and field.keyword."""
+    return {
+        "bool": {
+            "should": [
+                {"wildcard": {field: pattern}},
+                {"wildcard": {f"{field}.keyword": pattern}},
+            ],
+            "minimum_should_match": 1,
+        }
+    }
+
+
+def _null_clause(field: str) -> Dict[str, Any]:
+    """ES clause matching documents where *field* is absent."""
+    return {"bool": {"must_not": {"exists": {"field": field}}}}
+
+
+def _null_or_term(field: str, value: str) -> Dict[str, Any]:
+    """ES query: exact term match OR field is absent."""
+    return {
+        "bool": {
+            "should": [
+                _term_any_mapping(field, value),
+                _null_clause(field),
+            ],
+            "minimum_should_match": 1,
+        }
+    }
+
+
+def _match_only(field: str, value: str) -> Dict[str, Any]:
+    """ES fuzzy match-only query (without null fallback)."""
+    return {"match": {field: {"query": value, "fuzziness": "AUTO"}}}
 
 
 def _null_or_match(field: str, value: str) -> Dict[str, Any]:
@@ -175,8 +448,8 @@ def _null_or_match(field: str, value: str) -> Dict[str, Any]:
     return {
         "bool": {
             "should": [
-                {"match": {field: {"query": value, "fuzziness": "AUTO"}}},
-                {"bool": {"must_not": {"exists": {"field": field}}}},
+                _match_only(field, value),
+                _null_clause(field),
             ],
             "minimum_should_match": 1,
         }
@@ -187,10 +460,13 @@ def _null_or_match(field: str, value: str) -> Dict[str, Any]:
 
 
 class CtdtFilterExtractor(BaseFilterExtractor):
-    """Filter *ctdt* by ``major_code`` (exact) → ``major_name`` (fuzzy) → all.
+    """Filter *ctdt* by major-specific queries first, then generic chunks.
 
-    Chunks with ``major_code = null`` apply to all majors and are always
-    included regardless of the detected major (handled by ``_null_or_term``).
+    Fallback order:
+      1. ``major_code`` exact.
+      2. ``major_name`` fuzzy match.
+      3. ``major_code`` exact OR ``major_code`` missing (generic chunks).
+      4. No filter (all chunks) when all above return zero hits.
     """
 
     def extract(
@@ -204,21 +480,26 @@ class CtdtFilterExtractor(BaseFilterExtractor):
 
         major_name = MAJOR_CODE_TO_NAME.get(major_code, "")
         queries: List[Dict[str, Any]] = [
-            # First try: exact major_code match (most precise)
-            _null_or_term("major_code", major_code),
+            # First try: exact major_code match only (most precise)
+            _term_any_mapping("major_code", major_code),
         ]
         if major_name:
-            # Fallback: fuzzy match on major_name (if code filter is too strict)
-            queries.append(_null_or_match("major_name", major_name))
+            # Fallback: fuzzy match on major_name (without null-expansion)
+            queries.append(_match_only("major_name", major_name))
+
+        # Late fallback: include generic chunks with missing major_code.
+        queries.append(_null_or_term("major_code", major_code))
 
         return CollectionFilter(metadata_es_queries=queries)
 
 
 class QuyDinhFilterExtractor(BaseFilterExtractor):
-    """Filter *quydinh* by ``applicable_major`` array → all.
+    """Filter *quydinh* by applicable_major-specific query first.
 
-    Chunks with ``applicable_major = null`` apply to all majors and are
-    always included (handled by ``_null_or_term``).
+    Fallback order:
+      1. ``applicable_major`` exact.
+      2. ``applicable_major`` exact OR missing.
+      3. No filter (all chunks) when both return zero hits.
     """
 
     def extract(
@@ -232,6 +513,7 @@ class QuyDinhFilterExtractor(BaseFilterExtractor):
 
         return CollectionFilter(
             metadata_es_queries=[
+                _term_any_mapping("applicable_major", major_code),
                 _null_or_term("applicable_major", major_code),
             ]
         )
@@ -286,14 +568,14 @@ class KeHoachFilterExtractor(BaseFilterExtractor):
             else:
                 month, year = int(m.group(3)), int(m.group(4))
             # date_str = "D/M/YYYY" → wildcard "*/M/YYYY"
-            return {"wildcard": {"date_str": f"*/{month}/{year}"}}
+            return _wildcard_any_mapping("date_str", f"*/{month}/{year}")
 
         # Year only: "năm 2025", "nam 2025", bare "2025"
         m2 = re.search(r"(?:n[aă]m\s*)?(20\d{2})\b", query, re.IGNORECASE)
         if m2:
             year = int(m2.group(1))
             # Matches any date_str ending with "/{year}"
-            return {"wildcard": {"date_str": f"*/{year}"}}
+            return _wildcard_any_mapping("date_str", f"*/{year}")
 
         return None
 

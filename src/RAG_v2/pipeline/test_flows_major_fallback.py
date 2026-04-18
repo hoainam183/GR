@@ -1,0 +1,218 @@
+"""Regression tests for major fallback behavior in pipeline.flows."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+from typing import Any, Dict
+from unittest.mock import MagicMock
+
+# Ensure src/RAG_v2 is importable in test context.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from pipeline.flows import rag_flow, rag_flow_stream
+
+
+def _make_doc() -> Dict[str, Any]:
+    return {
+        "id": "doc-1",
+        "text": "Nội dung tài liệu mẫu.",
+        "score": 0.9,
+        "metadata": {"title": "Tài liệu mẫu", "source": "sample.md"},
+        "collection": "ctdt",
+    }
+
+
+def _make_deps() -> Dict[str, Any]:
+    reflector = MagicMock()
+
+    bge = MagicMock()
+    bge.embed_query.return_value = [0.1] * 4
+
+    e5 = MagicMock()
+    e5.embed_query.return_value = [0.2] * 4
+
+    searcher = MagicMock()
+
+    def _search_side_effect(**kwargs: Any) -> list[Dict[str, Any]]:
+        trace = kwargs.get("trace_out")
+        if isinstance(trace, dict):
+            trace["filters"] = {
+                "ctdt": {
+                    "applied": True,
+                    "matched_ids": 1,
+                    "filter_desc": "major_code filter (chain[0], 1 IDs)",
+                }
+            }
+            trace["collection_counts"] = {
+                "ctdt": {"vector": 1, "keyword": 1}
+            }
+        return [_make_doc()]
+
+    searcher.search.side_effect = _search_side_effect
+
+    reranker = MagicMock()
+    reranker.rerank.return_value = [_make_doc()]
+
+    chat = MagicMock()
+    chat.model = "test-model"
+    chat.generate.return_value = "ok"
+    chat.generate_stream.return_value = iter(["ok"])
+
+    cfg = {
+        "top_k": 5,
+        "vector_top_k": 20,
+        "keyword_top_k": 20,
+        "vector_pool_k": 15,
+        "keyword_pool_k": 15,
+    }
+
+    return {
+        "reflector": reflector,
+        "bge": bge,
+        "e5": e5,
+        "searcher": searcher,
+        "reranker": reranker,
+        "chat": chat,
+        "cfg": cfg,
+    }
+
+
+def test_rag_flow_fallback_extracts_major_from_query_when_reflection_missing_entities() -> None:
+    deps = _make_deps()
+    question = "môn lập trình mạng của ngành IT-E6"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    result = rag_flow(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    search_kwargs = deps["searcher"].search.call_args.kwargs
+    assert search_kwargs["resolved_major"] == "IT-E6"
+    assert search_kwargs["query"] == "môn lập trình mạng"
+    deps["bge"].embed_query.assert_called_with("môn lập trình mạng")
+    deps["e5"].embed_query.assert_called_with("môn lập trình mạng")
+    assert deps["reranker"].rerank.call_args.kwargs["query"] == "môn lập trình mạng"
+
+    assert result["applied_filters"]["ctdt"]["applied"] is True
+
+
+def test_rag_flow_stream_fallback_extracts_major_from_user_context() -> None:
+    deps = _make_deps()
+    question = "môn lập trình mạng trong ngành của tôi"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    stream, _sources = rag_flow_stream(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        cfg=deps["cfg"],
+        user_context={
+            "major_code": "IT-E6",
+            "major": "Công nghệ thông tin Việt - Nhật",
+        },
+    )
+    list(stream)
+
+    search_kwargs = deps["searcher"].search.call_args.kwargs
+    assert search_kwargs["resolved_major"] == "IT-E6"
+    assert search_kwargs["query"] == "môn lập trình mạng của tôi"
+    deps["bge"].embed_query.assert_called_with("môn lập trình mạng của tôi")
+    deps["e5"].embed_query.assert_called_with("môn lập trình mạng của tôi")
+    assert (
+        deps["reranker"].rerank.call_args.kwargs["query"]
+        == "môn lập trình mạng của tôi"
+    )
+
+
+def test_rag_flow_fallback_uses_full_history_for_major_resolution() -> None:
+    deps = _make_deps()
+    question = "môn lập trình mạng trong ngành của tôi"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    history = [
+        {"role": "user", "content": "Em học ngành IT-E6."},
+        {"role": "assistant", "content": "Mình đã ghi nhận."},
+    ]
+    # Add enough turns so the first major mention falls outside trimmed history.
+    for i in range(10):
+        role = "user" if i % 2 == 0 else "assistant"
+        history.append({"role": role, "content": f"turn {i}"})
+
+    rag_flow(
+        question=question,
+        history=history,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    search_kwargs = deps["searcher"].search.call_args.kwargs
+    assert search_kwargs["resolved_major"] == "IT-E6"
+
+
+def test_rag_flow_stream_fallback_uses_full_history_for_major_resolution() -> None:
+    deps = _make_deps()
+    question = "môn lập trình mạng trong ngành của tôi"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    history = [
+        {"role": "user", "content": "Em học ngành IT-E6."},
+        {"role": "assistant", "content": "Mình đã ghi nhận."},
+    ]
+    for i in range(10):
+        role = "user" if i % 2 == 0 else "assistant"
+        history.append({"role": role, "content": f"turn {i}"})
+
+    stream, _sources = rag_flow_stream(
+        question=question,
+        history=history,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        cfg=deps["cfg"],
+    )
+    list(stream)
+
+    search_kwargs = deps["searcher"].search.call_args.kwargs
+    assert search_kwargs["resolved_major"] == "IT-E6"

@@ -28,12 +28,156 @@ DEFAULT_HISTORY_LIMIT = 5
 _MAX_RETRIES = 3
 _BASE_RETRY_DELAY = 2.0  # seconds
 
+_UNKNOWN_PROFILE_VALUES = {
+    "",
+    "none",
+    "null",
+    "unknown",
+    "n/a",
+    "na",
+    "khong ro",
+}
+
 # Personal pronouns/possessives that indicate the query needs profile enrichment
 _PERSONAL_REFS = re.compile(
-    r"\b(c(?:ủa|ủa tôi|húng tôi)|ng(?:ành|ành tôi)|ch(?:ương trình|ương trình tôi)"
-    r"|kh(?:óa|óa tôi)|t(?:ôi|ôi đang)|mình)\b",
+    r"\b(của tôi|ngành học của tôi|ngành của tôi|ngành tôi|ngành này|"
+    r"chương trình của tôi|chương trình này|môn này|môn đó|môn học này)\b",
     re.IGNORECASE,
 )
+
+
+def _merge_user_major_into_context(
+    user_context: Optional[Dict[str, Any]],
+    user_major: Optional[str],
+) -> Optional[Dict[str, Any]]:
+    """Return a copied context with ``user_major`` injected when missing."""
+    major = _clean_profile_value(user_major)
+    if not user_context and not major:
+        return None
+
+    merged = dict(user_context or {})
+    if major and not _clean_profile_value(merged.get("major")):
+        merged["major"] = major
+    return merged
+
+
+def _enforce_major_reference_rewrite(
+    rewritten_query: str,
+    profile: Optional[Dict[str, str]],
+) -> str:
+    """Resolve unresolved major references using trusted profile data.
+
+    If the LLM still returns references such as "ngành học của tôi" while a
+    concrete major exists in profile, this function replaces those fragments so
+    the final query remains standalone for retrieval.
+    """
+    if not rewritten_query or not profile:
+        return rewritten_query
+
+    major = profile.get("major")
+    if not major:
+        return rewritten_query
+
+    major_label = major
+    major_code = profile.get("major_code")
+    if major_code and major_code not in major_label:
+        major_label = f"{major_label} ({major_code})"
+
+    updated = rewritten_query
+    replacements = [
+        (r"\bngành học của tôi\b", f"ngành {major_label}"),
+        (r"\bngành của tôi\b", f"ngành {major_label}"),
+        (r"\bngành tôi\b", f"ngành {major_label}"),
+        (r"\bngành này\b", f"ngành {major_label}"),
+        (r"\bchương trình học của tôi\b", f"chương trình đào tạo ngành {major_label}"),
+        (r"\bchương trình của tôi\b", f"chương trình đào tạo ngành {major_label}"),
+        (r"\bchương trình này\b", f"chương trình đào tạo ngành {major_label}"),
+    ]
+    for pattern, replacement in replacements:
+        updated = re.sub(pattern, replacement, updated, flags=re.IGNORECASE)
+
+    if updated != rewritten_query:
+        logger.debug("Reflection fallback rewrite applied: %r -> %r", rewritten_query, updated)
+    return updated
+
+
+def _clean_profile_value(value: Any) -> Optional[str]:
+    """Normalize profile values and discard unknown placeholders."""
+    if value is None:
+        return None
+    cleaned = str(value).strip()
+    if not cleaned:
+        return None
+    if cleaned.lower() in _UNKNOWN_PROFILE_VALUES:
+        return None
+    return cleaned
+
+
+def _normalise_profile_context(
+    profile: Optional[Dict[str, Any]],
+) -> Dict[str, str]:
+    """Return a normalized profile dict with canonical keys.
+
+    Canonical keys used by the reflector:
+      - major
+      - major_code
+      - cohort
+      - student_id
+    """
+    if not profile:
+        return {}
+
+    major = _clean_profile_value(
+        profile.get("major")
+        or profile.get("major_name")
+        or profile.get("user_major")
+    )
+    major_code = _clean_profile_value(
+        profile.get("major_code")
+        or profile.get("user_major_code")
+    )
+    cohort = _clean_profile_value(
+        profile.get("cohort")
+        or profile.get("khoa")
+    )
+    student_id = _clean_profile_value(
+        profile.get("student_id")
+        or profile.get("user_id")
+    )
+
+    out: Dict[str, str] = {}
+    if major:
+        out["major"] = major
+    if major_code:
+        out["major_code"] = major_code
+    if cohort:
+        out["cohort"] = cohort
+    if student_id:
+        out["student_id"] = student_id
+    return out
+
+
+def _merge_profile_context(
+    user_context: Optional[Dict[str, Any]],
+    user_profile: Optional[Dict[str, Any] | str],
+) -> tuple[Dict[str, str], Optional[str]]:
+    """Merge profile inputs and return (profile_dict, profile_note_override).
+
+    Priority:
+      1. user_context
+      2. user_profile (dict) overrides user_context per-key
+      3. user_profile (str) is treated as explicit note for prompt injection
+    """
+    merged = _normalise_profile_context(user_context)
+
+    if isinstance(user_profile, dict):
+        merged.update(_normalise_profile_context(user_profile))
+
+    note_override: Optional[str] = None
+    if isinstance(user_profile, str):
+        note_override = _clean_profile_value(user_profile)
+
+    return merged, note_override
 
 
 def _extract_profile_note_from_context(
@@ -45,24 +189,25 @@ def _extract_profile_note_from_context(
         "sinh viên ngành Công nghệ thông tin Việt-Nhật (IT-E6), Khóa K65"
     or empty string when user_context is None / empty.
     """
-    if not user_context:
+    profile = _normalise_profile_context(user_context)
+    if not profile:
         return ""
 
     parts: List[str] = []
-    if user_context.get("major"):
-        major_note = str(user_context["major"])
-        if user_context.get("major_code"):
-            major_note += f" ({user_context['major_code']})"
+    if profile.get("major"):
+        major_note = profile["major"]
+        if profile.get("major_code"):
+            major_note += f" ({profile['major_code']})"
         parts.append(f"ngành {major_note}")
-    if user_context.get("cohort"):
-        parts.append(f"Khóa K{user_context['cohort']}")
-    if user_context.get("student_id"):
-        parts.append(f"Mã SV: {user_context['student_id']}")
+    if profile.get("cohort"):
+        parts.append(f"Khóa K{profile['cohort']}")
+    if profile.get("student_id"):
+        parts.append(f"Mã SV: {profile['student_id']}")
 
     return "sinh viên " + ", ".join(parts) if parts else ""
 
 
-
+def _extract_profile_note(history: List[Dict[str, str]]) -> str:
     """Scan conversation history for user-stated facts (major, year, GPA/CPA).
 
     Returns a short Vietnamese note like:
@@ -131,6 +276,115 @@ def _extract_profile_note_from_context(
         parts.append(f"CPA={profile['gpa']}")
 
     return "sinh vi\u00ean " + ", ".join(parts)
+
+
+# ─── Course-code pattern ─────────────────────────────────────────────────────
+_COURSE_CODE_RE = re.compile(
+    r"\b((?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?)\b",
+    re.IGNORECASE,
+)
+
+
+def _extract_entities(
+    query: str,
+    user_context: Optional[Dict[str, Any]] = None,
+    history: Optional[List[Dict[str, str]]] = None,
+) -> Dict[str, Optional[str]]:
+    """Extract structured entities from query + context (no LLM call).
+
+    Priority for each entity:
+            1. Explicit signals in current ``query`` — highest priority because the
+                 latest turn can override profile defaults (e.g. "ngành IT-E7").
+            2. ``user_context`` — authenticated login data.
+            3. Conversation ``history`` — user-stated facts in the session.
+
+    Returns a dict with keys (all values may be ``None``):
+      - ``major_code``    — e.g. "IT-E6"
+      - ``major_name``    — e.g. "Công nghệ thông tin Việt - Nhật"
+      - ``cohort``        — e.g. "65"
+      - ``year_of_study`` — e.g. "2"
+      - ``course_code``   — e.g. "IT4062E"
+    """
+    # Late import to avoid circular dependency (retrieval → reflection).
+    from retrieval.metadata_filters import (  # noqa: PLC0415
+        MAJOR_CODE_TO_NAME,
+        _extract_major_code,
+    )
+
+    entities: Dict[str, Optional[str]] = {
+        "major_code": None,
+        "major_name": None,
+        "cohort": None,
+        "year_of_study": None,
+        "course_code": None,
+    }
+
+    profile = _normalise_profile_context(user_context)
+
+    # ── major ─────────────────────────────────────────────────────────────────
+    # Priority 1: explicit major in the current query should override profile.
+    explicit_query_major = _extract_major_code(query)
+    if explicit_query_major:
+        entities["major_code"] = explicit_query_major
+        entities["major_name"] = MAJOR_CODE_TO_NAME.get(explicit_query_major)
+    elif profile:
+        # Priority 2: authenticated profile.
+        code = profile.get("major_code")
+        name = profile.get("major")
+        if code:
+            entities["major_code"] = str(code)
+            entities["major_name"] = MAJOR_CODE_TO_NAME.get(str(code), name)
+        elif name:
+            detected = _extract_major_code(str(name))
+            entities["major_code"] = detected
+            entities["major_name"] = str(name)
+
+    if not entities["major_code"] and history:
+        # Priority 3: user-stated session facts.
+        for msg in reversed(history):        # most-recent first
+            if msg.get("role") == "user":
+                text = msg.get("content", "")
+                code = _extract_major_code(text)
+                if code:
+                    entities["major_code"] = code
+                    entities["major_name"] = MAJOR_CODE_TO_NAME.get(code)
+                    break
+
+    # ── cohort ────────────────────────────────────────────────────────────────
+    _COHORT_RE = re.compile(r"\bk(\d{2,3})\b|kh\u00f3a\s*(\d{2,3})", re.IGNORECASE)
+    if profile.get("cohort"):
+        entities["cohort"] = profile["cohort"]
+    else:
+        sources = ([query] +
+                   [m.get("content", "") for m in (history or [])
+                    if m.get("role") == "user"])
+        for text in sources:
+            mo = _COHORT_RE.search(text)
+            if mo:
+                entities["cohort"] = next(g for g in mo.groups() if g)
+                break
+
+    # ── year_of_study ─────────────────────────────────────────────────────────
+    _YEAR_RE = re.compile(
+        r"(?:sinh\s*vi\u00ean\s*)?n\u0103m\s*th\u1ee9?\s*(\d)"
+        r"|n\u0103m\s+(\d)\b",
+        re.IGNORECASE,
+    )
+    sources = ([query] +
+               [m.get("content", "") for m in (history or [])
+                if m.get("role") == "user"])
+    for text in sources:
+        mo = _YEAR_RE.search(text)
+        if mo:
+            entities["year_of_study"] = next(g for g in mo.groups() if g)
+            break
+
+    # ── course_code ───────────────────────────────────────────────────────────
+    mo = _COURSE_CODE_RE.search(query)
+    if mo:
+        entities["course_code"] = mo.group(1).upper()
+
+    return entities
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -203,6 +457,8 @@ class QueryReflector:
         query: str,
         chat_history: Optional[List[Dict[str, str]]] = None,
         user_context: Optional[Dict[str, Any]] = None,
+        user_profile: Optional[Dict[str, Any] | str] = None,
+        user_major: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Rewrite *query* into a retrieval-optimised form.
 
@@ -214,11 +470,27 @@ class QueryReflector:
                 cohort, student_id).  When provided it takes priority over
                 profile facts extracted from history, ensuring that first-turn
                 queries like "ôn thi ngành của tôi" resolve correctly.
+            user_profile: Optional profile payload for prompt injection.
+                - dict: merged into ``user_context`` (overrides per-key)
+                - str: used directly as profile note in the prompt
+            user_major: Optional shorthand major name. Useful for callers that
+                only have one field (e.g. ``"Công nghệ thông tin"``).
 
         Returns:
             Dict with ``{"original": str, "rewritten": str}``.
         """
-        user_prompt = self._build_user_prompt(query, chat_history, user_context)
+        context_with_major = _merge_user_major_into_context(user_context, user_major)
+        merged_profile, profile_note_override = _merge_profile_context(
+            user_context=context_with_major,
+            user_profile=user_profile,
+        )
+
+        user_prompt = self._build_user_prompt(
+            query=query,
+            chat_history=chat_history,
+            user_context=merged_profile or None,
+            profile_note_override=profile_note_override,
+        )
 
         messages = [
             {"role": "system", "content": REWRITE_SYSTEM_PROMPT},
@@ -256,6 +528,14 @@ class QueryReflector:
         if not rewritten:
             rewritten = query
 
+        # Guardrail: if user profile has a trusted major but references remain
+        # unresolved, replace them deterministically.
+        if _PERSONAL_REFS.search(rewritten):
+            rewritten = _enforce_major_reference_rewrite(
+                rewritten_query=rewritten,
+                profile=merged_profile or None,
+            )
+
         logger.info(
             "Reflection: %r → %r (history_len=%d)",
             query[:60],
@@ -263,7 +543,39 @@ class QueryReflector:
             len(chat_history) if chat_history else 0,
         )
 
-        return {"original": query, "rewritten": rewritten, "prompt": user_prompt}
+        entities = _extract_entities(
+            query,
+            user_context=merged_profile or None,
+            history=chat_history,
+        )
+        logger.debug("Extracted entities: %s", entities)
+
+        return {
+            "original": query,
+            "rewritten": rewritten,
+            "prompt": user_prompt,
+            "entities": entities,
+        }
+
+    def extract_entities(
+        self,
+        query: str,
+        chat_history: Optional[List[Dict[str, str]]] = None,
+        user_context: Optional[Dict[str, Any]] = None,
+        user_profile: Optional[Dict[str, Any] | str] = None,
+        user_major: Optional[str] = None,
+    ) -> Dict[str, Optional[str]]:
+        """Public wrapper around :func:`_extract_entities` for external callers."""
+        context_with_major = _merge_user_major_into_context(user_context, user_major)
+        merged_profile, _ = _merge_profile_context(
+            user_context=context_with_major,
+            user_profile=user_profile,
+        )
+        return _extract_entities(
+            query,
+            user_context=merged_profile or None,
+            history=chat_history,
+        )
 
     # ------------------------------------------------------------------
     # Internal
@@ -274,6 +586,7 @@ class QueryReflector:
         query: str,
         chat_history: Optional[List[Dict[str, str]]] = None,
         user_context: Optional[Dict[str, Any]] = None,
+        profile_note_override: Optional[str] = None,
     ) -> str:
         """Format the user prompt, optionally including chat history.
 
@@ -281,10 +594,11 @@ class QueryReflector:
         or falls back to extracting it from chat history.  The note is prepended
         so even a first-turn query like "ngành của tôi" can be resolved.
         """
-        # Prefer authenticated profile (exact code+name) over history regex.
-        profile_note = _extract_profile_note_from_context(user_context)
+        # Prefer explicit note > authenticated profile > history regex.
+        profile_note = profile_note_override or _extract_profile_note_from_context(user_context)
         if not profile_note and chat_history:
             profile_note = _extract_profile_note(chat_history)
+        profile_block = profile_note or "(khong co)"
 
         if chat_history:
             recent = chat_history[-self.history_limit :]
@@ -293,15 +607,13 @@ class QueryReflector:
                 for msg in recent
                 if msg.get("content")
             )
-            if profile_note:
-                history_text = f"[Thông tin đã biết: {profile_note}]\n" + history_text
             return REWRITE_WITH_HISTORY_TEMPLATE.format(
-                history=history_text, query=query
-            )
-        # No history — still inject profile so the model can resolve pronouns.
-        if profile_note:
-            return REWRITE_WITH_HISTORY_TEMPLATE.format(
-                history=f"[Thông tin đã biết: {profile_note}]",
+                user_profile=profile_block,
+                chat_history=history_text or "(khong co)",
                 query=query,
             )
-        return REWRITE_NO_HISTORY_TEMPLATE.format(query=query)
+        return REWRITE_NO_HISTORY_TEMPLATE.format(
+            user_profile=profile_block,
+            chat_history="(khong co)",
+            query=query,
+        )

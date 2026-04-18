@@ -14,17 +14,13 @@ from llm.prompts import build_rag_messages
 from llm.self_eval import SelfEvaluator
 from reranking.base import BaseReranker
 from retrieval.collection_selector import CollectionSelector
+from retrieval.metadata_filters import strip_major_from_query_for_retrieval
 
 logger = logging.getLogger(__name__)
 
 _collection_selector = CollectionSelector()
 
-# Personal-pronoun pattern: indicates that reflection failed to resolve context
-_UNRESOLVED_PERSONAL_REF = re.compile(
-    r"\b(c(?:ủa tôi|ủa mình)|ng(?:ành tôi|ành mình)|ch(?:ương trình tôi|ương trình mình)"
-    r"|kh(?:óa tôi)|tôi đang|của tôi)\b",
-    re.IGNORECASE,
-)
+# Personal-pronoun pattern removed — entity extraction is now handled by QueryReflector._extract_entities
 
 # ── History budget ──────────────────────────────────────────────────────────────
 _DEFAULT_HISTORY_LIMIT = 8
@@ -73,6 +69,15 @@ def _log_timings(flow_name: str, timings_ms: Dict[str, float]) -> None:
         f"{stage}={duration:.1f}" for stage, duration in ordered
     )
     logger.info("%s timings (ms): %s", flow_name, summary)
+
+
+def _retrieval_candidate_k(top_k: int) -> int:
+    """Return candidate pool size before reranking.
+
+    Keep the previous proportional heuristic (4x final top_k) while enforcing
+    a minimum of 20 candidates for stronger reranker recall.
+    """
+    return max(top_k * 4, 20)
 
 
 def _format_context(
@@ -235,14 +240,7 @@ def _build_profile_note_from_user_context(
     user_context: Optional[Dict[str, Any]],
 ) -> str:
     """Build a compact profile note from the authenticated user's profile dict.
-
-    Returns a string like:
-        "Sinh viên: Nguyễn Hoài Nam | Mã SV: 20204242 | Ngành: CNTT Việt Nhật | Khoá: K65"
-    or empty string when user_context is None / empty.
-
-    This is injected into the search query and context so that user-specific
-    questions ("tôi học ngành gì?") resolve correctly even on the very first
-    turn — without waiting for the LLM to extract profile facts from history.
+    Used only inside the reflector prompt — NOT for post-reflection bracketing.
     """
     if not user_context:
         return ""
@@ -261,69 +259,6 @@ def _build_profile_note_from_user_context(
         parts.append(f"Khoá: {user_context['cohort']}")
 
     return " | ".join(parts) if parts else ""
-
-
-def _enrich_search_query(
-    search_query: str,
-    history: Optional[List[Dict[str, str]]],
-) -> str:
-    """Fallback enrichment: if reflection left personal pronouns unresolved,
-    append the user's profile note so retrieval targets the right programme.
-
-    This is a safety net for cases where the local reflection model (e.g.
-    LM Studio / Qwen) failed to expand "của tôi" → tên ngành cụ thể.
-
-    Example:
-        search_query = "chương trình của tôi có tổng cộng bao nhiêu tín"
-        → "chương trình của tôi có tổng cộng bao nhiêu tín [ngành Công nghệ
-            thông tin Việt-Nhật]"
-    """
-    if not _UNRESOLVED_PERSONAL_REF.search(search_query):
-        return search_query
-
-    profile = _extract_session_profile(history)
-    if not profile:
-        return search_query
-
-    # Extract just the key facts (strip the prefix "Thông tin sinh viên: " and trailing ".")
-    facts = profile.removeprefix("Thông tin sinh viên: ").rstrip(".")
-    enriched = f"{search_query} [{facts}]"
-    logger.info(
-        "Post-reflection enrichment: %r → %r",
-        search_query[:60],
-        enriched[:80],
-    )
-    return enriched
-
-
-def _resolve_major_for_filter(
-    user_context: Optional[Dict[str, Any]],
-    history: Optional[List[Dict[str, str]]],
-) -> Optional[str]:
-    """Resolve the major string for metadata pre-filtering.
-
-    Priority:
-      1. Most recent major mentioned in conversation history.
-      2. Authenticated user profile (``user_context['major']``).
-      3. ``None`` — the extractor will try regex on the current query.
-
-    The returned value may be a major code ('IT-E6') or a name string
-    ('Công nghệ thông tin Việt - Nhật').  The filter extractor handles both.
-    """
-    # Priority 1: scan history for explicit major mention (most recent wins)
-    profile = _extract_session_profile_dict(history)
-    history_major = profile.get("nganh")
-    if history_major:
-        return history_major
-
-    # Priority 2: use authenticated user profile — prefer code (exact) over name
-    if user_context:
-        if user_context.get("major_code"):
-            return str(user_context["major_code"])
-        if user_context.get("major"):
-            return str(user_context["major"])
-
-    return None
 
 
 def _build_collection_scores(
@@ -496,35 +431,55 @@ def rag_flow(
     trimmed = _trim_history(history)
     timings_ms["trim_history"] = _elapsed_ms(step_t0)
 
-    # 1. Reflection — rewrite query for better retrieval
+    # 1. Reflection — rewrite query + extract entities
     search_query = question
     reflection_prompt: Optional[str] = None
+    resolved_major: Optional[str] = None
     if reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
-            result = reflector.reflect(question, chat_history=trimmed, user_context=user_context)
-            search_query = result.get("rewritten", question)
-            reflection_prompt = result.get("prompt")
-            logger.info("Reflected query: %r", search_query[:80])
-        except Exception:
-            logger.warning(
-                "Reflection failed, using original query", exc_info=True
+            ref_result = reflector.reflect(
+                question,
+                chat_history=trimmed,
+                user_context=user_context,
+                user_profile=user_context,
             )
+            search_query = ref_result.get("rewritten", question)
+            reflection_prompt = ref_result.get("prompt")
+            entities = ref_result.get("entities") or {}
+            resolved_major = entities.get("major_code") or entities.get("major_name")
+            logger.info("Reflected query: %r | major: %s", search_query[:80], resolved_major)
+        except Exception:
+            logger.warning("Reflection failed, using original query", exc_info=True)
         timings_ms["reflection"] = _elapsed_ms(reflection_t0)
 
-    # 1b. Post-reflection enrichment:
-    #   Priority 1 — use authenticated user profile (always accurate, zero latency).
-    #   Priority 2 — fallback regex scan of history if no user_context given.
-    auth_profile_note = _build_profile_note_from_user_context(user_context)
-    if auth_profile_note:
-        # Prepend profile note as bracketed context for the search query so that
-        # retrieval targets the right programme from the very first turn.
-        if _UNRESOLVED_PERSONAL_REF.search(search_query):
-            search_query = f"{search_query} [{auth_profile_note}]"
-            logger.info("User-context enrichment applied: %r", search_query[:100])
-    else:
-        # Fallback: scan history for user-stated facts
-        search_query = _enrich_search_query(search_query, history)
+    # Deterministic fallback: always recover major for metadata filtering even if
+    # reflection fails or does not return entities.
+    if not resolved_major:
+        from query.reflection import _extract_entities  # noqa: PLC0415
+        fallback_entities = _extract_entities(
+            question,
+            user_context=user_context,
+            history=history,
+        )
+        resolved_major = (
+            fallback_entities.get("major_code")
+            or fallback_entities.get("major_name")
+        )
+        if resolved_major:
+            logger.info("Major fallback resolved: %s", resolved_major)
+
+    retrieval_query = strip_major_from_query_for_retrieval(
+        search_query,
+        resolved_major=resolved_major,
+    )
+    if retrieval_query != search_query:
+        logger.info(
+            "Retrieval query normalized: %r -> %r (major=%s)",
+            search_query[:80],
+            retrieval_query[:80],
+            resolved_major,
+        )
 
     # 2. Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
@@ -554,26 +509,28 @@ def rag_flow(
         routing_result=routing_result,
     )
 
+    top_k_value = cfg.get("top_k", 5)
+    raw_candidate_k = _retrieval_candidate_k(top_k_value)
+
     # 3. Embed
     embed_t0 = time.perf_counter()
-    bge_vec = bge_embedder.embed_query(search_query)
+    bge_vec = bge_embedder.embed_query(retrieval_query)
     timings_ms["embed_bge"] = _elapsed_ms(embed_t0)
 
     embed_t0 = time.perf_counter()
-    e5_vec = e5_embedder.embed_query(search_query)
+    e5_vec = e5_embedder.embed_query(retrieval_query)
     timings_ms["embed_e5"] = _elapsed_ms(embed_t0)
 
     # 4. Hybrid search with metadata pre-filtering
-    # Resolve major from conversation history + user profile before searching.
-    resolved_major = _resolve_major_for_filter(user_context, trimmed)
+    # resolved_major already set by reflection above.
 
     search_trace: Dict[str, Any] = {}
     search_t0 = time.perf_counter()
     raw_results = searcher.search(
-        query=search_query,
+        query=retrieval_query,
         bge_m3_query=bge_vec,
         e5_query=e5_vec,
-        top_k=cfg.get("top_k", 5) * 4,
+        top_k=raw_candidate_k,
         vector_top_k=cfg.get("vector_top_k", 20),
         keyword_top_k=cfg.get("keyword_top_k", 20),
         vector_pool_k=cfg.get("vector_pool_k", 15),
@@ -588,7 +545,9 @@ def rag_flow(
     # 5. Rerank
     rerank_t0 = time.perf_counter()
     reranked = reranker.rerank(
-        query=search_query, documents=raw_results, top_k=cfg.get("top_k", 5)
+        query=retrieval_query,
+        documents=raw_results,
+        top_k=top_k_value,
     )
     timings_ms["rerank"] = _elapsed_ms(rerank_t0)
     logger.info("Reranked to %d documents", len(reranked))
@@ -599,10 +558,7 @@ def rag_flow(
     #    Priority 2: fall back to regex scan of history.
     context_t0 = time.perf_counter()
     context = _format_context(reranked)
-    profile_note = (
-        auth_profile_note
-        or _extract_session_profile(history)
-    )
+    profile_note = _build_profile_note_from_user_context(user_context) or _extract_session_profile(history)
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
     timings_ms["format_context"] = _elapsed_ms(context_t0)
 
@@ -766,27 +722,50 @@ def rag_flow_stream(
 
     # Reflection
     search_query = question
+    resolved_major: Optional[str] = None
     if reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
-            result = reflector.reflect(question, chat_history=trimmed, user_context=user_context)
-            search_query = result.get("rewritten", question)
-        except Exception:
-            logger.warning(
-                "Reflection failed, using original query", exc_info=True
+            ref_result = reflector.reflect(
+                question,
+                chat_history=trimmed,
+                user_context=user_context,
+                user_profile=user_context,
             )
+            search_query = ref_result.get("rewritten", question)
+            entities = ref_result.get("entities") or {}
+            resolved_major = entities.get("major_code") or entities.get("major_name")
+        except Exception:
+            logger.warning("Reflection failed, using original query", exc_info=True)
         timings_ms["reflection"] = _elapsed_ms(reflection_t0)
 
-    # Post-reflection enrichment:
-    #   Priority 1 — authenticated user profile.
-    #   Priority 2 — fallback regex scan of history.
-    auth_profile_note = _build_profile_note_from_user_context(user_context)
-    if auth_profile_note:
-        if _UNRESOLVED_PERSONAL_REF.search(search_query):
-            search_query = f"{search_query} [{auth_profile_note}]"
-            logger.info("User-context enrichment applied: %r", search_query[:100])
-    else:
-        search_query = _enrich_search_query(search_query, history)
+    # Deterministic fallback: always recover major for metadata filtering even if
+    # reflection fails or does not return entities.
+    if not resolved_major:
+        from query.reflection import _extract_entities  # noqa: PLC0415
+        fallback_entities = _extract_entities(
+            question,
+            user_context=user_context,
+            history=history,
+        )
+        resolved_major = (
+            fallback_entities.get("major_code")
+            or fallback_entities.get("major_name")
+        )
+        if resolved_major:
+            logger.info("Major fallback resolved: %s", resolved_major)
+
+    retrieval_query = strip_major_from_query_for_retrieval(
+        search_query,
+        resolved_major=resolved_major,
+    )
+    if retrieval_query != search_query:
+        logger.info(
+            "Retrieval query normalized: %r -> %r (major=%s)",
+            search_query[:80],
+            retrieval_query[:80],
+            resolved_major,
+        )
 
     # Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
@@ -802,24 +781,27 @@ def rag_flow_stream(
         )
         timings_ms["collection_routing"] = _elapsed_ms(routing_t0)
 
+    top_k_value = cfg.get("top_k", 5)
+    raw_candidate_k = _retrieval_candidate_k(top_k_value)
+
     # Embed → Search → Rerank
     embed_t0 = time.perf_counter()
-    bge_vec = bge_embedder.embed_query(search_query)
+    bge_vec = bge_embedder.embed_query(retrieval_query)
     timings_ms["embed_bge"] = _elapsed_ms(embed_t0)
 
     embed_t0 = time.perf_counter()
-    e5_vec = e5_embedder.embed_query(search_query)
+    e5_vec = e5_embedder.embed_query(retrieval_query)
     timings_ms["embed_e5"] = _elapsed_ms(embed_t0)
 
     # Resolve major from conversation history + user profile before searching.
-    resolved_major = _resolve_major_for_filter(user_context, trimmed)
+    # resolved_major was set by the reflection step above.
 
     search_t0 = time.perf_counter()
     raw_results = searcher.search(
-        query=search_query,
+        query=retrieval_query,
         bge_m3_query=bge_vec,
         e5_query=e5_vec,
-        top_k=cfg.get("top_k", 5) * 4,
+        top_k=raw_candidate_k,
         vector_top_k=cfg.get("vector_top_k", 20),
         keyword_top_k=cfg.get("keyword_top_k", 20),
         vector_pool_k=cfg.get("vector_pool_k", 15),
@@ -831,13 +813,15 @@ def rag_flow_stream(
 
     rerank_t0 = time.perf_counter()
     reranked = reranker.rerank(
-        query=search_query, documents=raw_results, top_k=cfg.get("top_k", 5)
+        query=retrieval_query,
+        documents=raw_results,
+        top_k=top_k_value,
     )
     timings_ms["rerank"] = _elapsed_ms(rerank_t0)
 
     context_t0 = time.perf_counter()
     context = _format_context(reranked)
-    profile_note = auth_profile_note or _extract_session_profile(history)
+    profile_note = _build_profile_note_from_user_context(user_context) or _extract_session_profile(history)
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
     timings_ms["format_context"] = _elapsed_ms(context_t0)
     timings_ms["retrieval_total"] = round(

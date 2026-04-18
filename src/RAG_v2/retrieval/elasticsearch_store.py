@@ -266,6 +266,126 @@ class ElasticsearchStore:
             )
             return []
 
+    def resolve_chunk_ids_for_qdrant(
+        self,
+        ids: List[Any],
+        max_results: int = 10000,
+    ) -> List[str]:
+        """Resolve arbitrary metadata IDs to ES ``_id`` chunk IDs.
+
+        This guards against ID-level mismatch between metadata filtering and
+        vector search. In the normal path, *ids* already contains ES ``_id``
+        values and this method returns them unchanged. If not, it attempts a
+        second-stage mapping via payload fields (``chunk_id`` / ``doc_id``)
+        and returns the corresponding ES ``_id`` values for Qdrant filtering.
+
+        Args:
+            ids: Raw IDs produced by metadata filtering logic.
+            max_results: Upper bound for mapping search results.
+
+        Returns:
+            Deduplicated ES ``_id`` list that can be passed to
+            ``HasIdCondition`` in Qdrant.
+        """
+        if not ids:
+            return []
+
+        # Keep only non-empty scalar values and normalise to string once.
+        raw_ids: List[str] = []
+        for value in ids:
+            if value is None:
+                continue
+            s = str(value).strip()
+            if s:
+                raw_ids.append(s)
+
+        if not raw_ids:
+            return []
+
+        # 1) Fast path: treat input as ES _id (the expected chunk-level ID).
+        try:
+            resp = self.client.search(
+                index=self.index_name,
+                size=min(max_results, len(raw_ids)),
+                query={"ids": {"values": raw_ids}},
+                source=False,
+            )
+            matched_ids = [hit["_id"] for hit in resp["hits"]["hits"]]
+        except Exception:
+            logger.warning(
+                "resolve_chunk_ids_for_qdrant ids-query failed for index '%s'",
+                self.index_name,
+                exc_info=True,
+            )
+            matched_ids = []
+
+        if matched_ids:
+            if len(matched_ids) < len(raw_ids):
+                logger.info(
+                    "resolve_chunk_ids_for_qdrant[%s]: direct _id match %d/%d",
+                    self.index_name,
+                    len(matched_ids),
+                    len(raw_ids),
+                )
+            return list(dict.fromkeys(matched_ids))
+
+        # 2) Fallback path: input might be doc-level/chunk-label IDs.
+        #    Map those values to ES _id values via payload fields.
+        should_clauses: List[Dict[str, Any]] = [
+            {"terms": {"chunk_id": raw_ids}},
+            {"terms": {"chunk_id.keyword": raw_ids}},
+            {"terms": {"doc_id.keyword": raw_ids}},
+        ]
+
+        int_doc_ids: List[int] = []
+        for value in raw_ids:
+            try:
+                int_doc_ids.append(int(value))
+            except Exception:
+                continue
+        if int_doc_ids:
+            should_clauses.append({"terms": {"doc_id": int_doc_ids}})
+
+        try:
+            resp = self.client.search(
+                index=self.index_name,
+                size=max_results,
+                query={
+                    "bool": {
+                        "should": should_clauses,
+                        "minimum_should_match": 1,
+                    }
+                },
+                source=False,
+            )
+            mapped_ids = [hit["_id"] for hit in resp["hits"]["hits"]]
+        except Exception:
+            logger.warning(
+                "resolve_chunk_ids_for_qdrant fallback mapping failed for index '%s'",
+                self.index_name,
+                exc_info=True,
+            )
+            mapped_ids = []
+
+        if mapped_ids:
+            logger.warning(
+                "resolve_chunk_ids_for_qdrant[%s]: ID-level mismatch detected. "
+                "Mapped %d raw IDs -> %d chunk IDs.",
+                self.index_name,
+                len(raw_ids),
+                len(mapped_ids),
+            )
+            return list(dict.fromkeys(mapped_ids))
+
+        logger.warning(
+            "resolve_chunk_ids_for_qdrant[%s]: cannot map %d IDs to chunk-level _id. "
+            "sample=%s",
+            self.index_name,
+            len(raw_ids),
+            raw_ids[:5],
+        )
+        return []
+
     def keyword_search(
         self,
         query: str,
