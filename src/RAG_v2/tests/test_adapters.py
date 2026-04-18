@@ -1,0 +1,109 @@
+"""Tests for Week 1 tool adapters.
+
+Run unit-only checks:
+    pytest src/RAG_v2/tests/test_adapters.py -v -m "not integration"
+"""
+
+from __future__ import annotations
+
+import pytest
+
+from agent.tool_adapters import _clarify_question, execute_tool
+
+
+class TestExecuteToolRouter:
+    """Router-only behavior that does not require retrieval services."""
+
+    def test_unknown_tool_returns_error_string(self) -> None:
+        result = execute_tool("nonexistent_tool", {})
+        assert "[Loi he thong:" in result
+        assert "nonexistent_tool" in result
+
+    def test_wrong_args_returns_error_string(self) -> None:
+        # rag_search missing required "collection" arg
+        result = execute_tool("rag_search", {"query": "test"})
+        assert "[Loi:" in result
+        assert "Tham so" in result
+
+    def test_clarify_question_no_api_needed(self) -> None:
+        result = _clarify_question(
+            message="Ban muon hoi ve hoc bong nao?",
+            options=["Hoc bong KKHT", "Hoc bong tai tro", "Hoc bong toan phan"],
+        )
+        assert "[CLARIFY]" in result
+        assert "KKHT" in result
+        assert "1." in result
+
+
+class TestRagSearch:
+    """Integration checks requiring Qdrant/Elasticsearch + local models."""
+
+    @pytest.mark.integration
+    def test_rag_search_quy_dinh(self) -> None:
+        result = execute_tool(
+            "rag_search",
+            {
+                "query": "dieu kien tot nghiep",
+                "collection": "quy_dinh",
+            },
+        )
+        assert isinstance(result, str)
+        assert len(result) > 50
+        assert "Khong tim thay" not in result
+
+    @pytest.mark.integration
+    def test_rag_search_invalid_collection(self) -> None:
+        result = execute_tool(
+            "rag_search",
+            {
+                "query": "test",
+                "collection": "invalid_collection_xyz",
+            },
+        )
+        assert "[Loi:" in result
+
+    @pytest.mark.integration
+    def test_multi_rag_search_returns_multiple_sections(self) -> None:
+        result = execute_tool(
+            "multi_rag_search",
+            {
+                "queries": [
+                    {"query": "dieu kien tot nghiep", "collection": "quy_dinh"},
+                    {"query": "tin chi tich luy", "collection": "chuong_trinh"},
+                ]
+            },
+        )
+        assert "---" in result
+        assert "quy_dinh" in result
+        assert "chuong_trinh" in result
+
+    @pytest.mark.integration
+    def test_compare_cohorts_returns_both_cohorts(self) -> None:
+        result = execute_tool(
+            "compare_cohorts",
+            {
+                "topic": "hoc bong KKHT",
+                "cohort_a": "K65",
+                "cohort_b": "K70",
+                "collection": "quy_dinh",
+            },
+        )
+        assert "K65" in result
+        assert "K70" in result
+
+
+class TestWebSearch:
+    """Integration check for Tavily tool path."""
+
+    @pytest.mark.integration
+    def test_web_search_returns_content(self) -> None:
+        result = execute_tool(
+            "web_search",
+            {
+                "query": "Dai hoc Bach Khoa Ha Noi thong bao moi",
+            },
+        )
+        assert isinstance(result, str)
+        if "Tavily chua duoc cau hinh" in result:
+            pytest.skip("Tavily API key is not configured for this environment")
+        assert len(result) > 100

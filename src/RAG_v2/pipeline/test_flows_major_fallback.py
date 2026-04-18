@@ -216,3 +216,168 @@ def test_rag_flow_stream_fallback_uses_full_history_for_major_resolution() -> No
 
     search_kwargs = deps["searcher"].search.call_args.kwargs
     assert search_kwargs["resolved_major"] == "IT-E6"
+
+
+def test_rag_flow_fallback_extracts_cohort_from_user_context() -> None:
+    deps = _make_deps()
+    question = "quy định về ngoại ngữ"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    rag_flow(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+        user_context={
+            "cohort": "70",
+        },
+    )
+
+    search_kwargs = deps["searcher"].search.call_args.kwargs
+    assert search_kwargs["resolved_cohort"] == "70"
+
+
+def test_rag_flow_decomposes_compare_query_by_cohort() -> None:
+    deps = _make_deps()
+    question = "so sánh quy định về ngoại ngữ của K70 và K67"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    rag_flow(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    search_queries = [
+        call.kwargs["query"] for call in deps["searcher"].search.call_args_list
+    ]
+    assert any("cho K70" in q for q in search_queries)
+    assert any("cho K67" in q for q in search_queries)
+    assert deps["reranker"].rerank.call_args.kwargs["query"] == "quy định về ngoại ngữ"
+
+
+def test_rag_flow_decomposes_compare_query_by_major() -> None:
+    deps = _make_deps()
+    question = "môn lập trình mạng của ngành IT-E7 và IT-E6 có gì khác nhau"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    rag_flow(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    search_calls = deps["searcher"].search.call_args_list
+    search_queries = [call.kwargs["query"] for call in search_calls]
+    search_majors = [call.kwargs.get("resolved_major") for call in search_calls]
+
+    assert any("của ngành IT-E7" in q for q in search_queries)
+    assert any("của ngành IT-E6" in q for q in search_queries)
+    assert "IT-E7" in search_majors
+    assert "IT-E6" in search_majors
+    assert deps["reranker"].rerank.call_args.kwargs["query"] == "môn lập trình mạng"
+
+
+def test_rag_flow_retries_without_quydinh_metadata_filter() -> None:
+    deps = _make_deps()
+    question = "Quy định về đánh giá điểm rèn luyện sinh viên"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    def _search_side_effect(**kwargs: Any) -> list[Dict[str, Any]]:
+        disabled = kwargs.get("disable_metadata_filter_collections") or []
+        if "quydinh" in disabled:
+            return [_make_doc()]
+        return []
+
+    deps["searcher"].search.side_effect = _search_side_effect
+
+    rag_flow(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    assert deps["searcher"].search.call_count >= 2
+    assert any(
+        "quydinh" in (call.kwargs.get("disable_metadata_filter_collections") or [])
+        for call in deps["searcher"].search.call_args_list
+    )
+
+
+def test_rag_flow_does_not_prepend_profile_note_when_query_has_explicit_major_code() -> None:
+    deps = _make_deps()
+    question = "môn lập trình mạng của ngành IT-E7"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    rag_flow(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+        user_context={
+            "major_code": "IT-E6",
+            "major": "Công nghệ thông tin Việt - Nhật",
+            "cohort": "67",
+        },
+    )
+
+    llm_context = deps["chat"].generate.call_args.kwargs["context"]
+    assert "Ngành: Công nghệ thông tin Việt - Nhật [IT-E6]" not in llm_context

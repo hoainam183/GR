@@ -27,7 +27,9 @@ TRÍCH DẪN:
 
 HỘI THOẠI:
 - Dùng thông tin sinh viên đã cung cấp trong lịch sử (tên, khóa, ngành) để trả lời \
-chính xác hơn. Không hỏi lại những gì đã biết."""
+chính xác hơn. Không hỏi lại những gì đã biết.
+- Nếu Câu hỏi hiện tại nêu rõ mã ngành/khóa/mã môn cụ thể, ưu tiên thực thể trong
+    Câu hỏi hiện tại; KHÔNG trộn với thông tin mâu thuẫn từ lịch sử/hồ sơ."""
 
 RAG_USER_TEMPLATE = """\
 ### Tài liệu tham khảo:

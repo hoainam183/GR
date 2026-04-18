@@ -68,12 +68,16 @@ tôi", "nó", "đó"), ưu tiên giải tham chiếu theo thứ tự:
   - Nếu có cả mã ngành thì có thể giữ theo dạng: "<tên ngành> (<mã ngành>)".
 3. Nếu câu hỏi chứa "môn này/ngành này/chương trình này", phải cố gắng thay bằng
   thực thể cụ thể gần nhất từ USER_PROFILE hoặc CHAT_HISTORY.
-4. Nếu không đủ thông tin để giải tham chiếu, KHÔNG bịa đặt. Giữ nguyên phần mơ hồ \
+4. Nếu CURRENT_QUERY đã nêu rõ ngành/mã ngành cụ thể (ví dụ: IT-E7, IT-E6),
+  bắt buộc GIỮ NGUYÊN thực thể đó, KHÔNG thay bằng ngành từ USER_PROFILE/CHAT_HISTORY.
+5. Nếu CURRENT_QUERY có cả tên ngành và mã ngành nhưng mâu thuẫn, ưu tiên mã ngành
+  được nêu trong CURRENT_QUERY; không tạo tổ hợp tên ngành + mã ngành mâu thuẫn.
+6. Nếu không đủ thông tin để giải tham chiếu, KHÔNG bịa đặt. Giữ nguyên phần mơ hồ \
 ở mức an toàn.
-5. Mở rộng viết tắt phổ biến (VD: "CNTT" → "Công nghệ thông tin", "KKHT" → \
+7. Mở rộng viết tắt phổ biến (VD: "CNTT" → "Công nghệ thông tin", "KKHT" → \
 "khuyến khích học tập") khi điều đó giúp truy vấn rõ nghĩa hơn.
-6. Giữ nguyên ý nghĩa gốc, không thêm yêu cầu mới, không đổi mục tiêu câu hỏi.
-7. Đầu ra chỉ gồm duy nhất câu truy vấn đã viết lại, không thêm giải thích, tiêu đề, \
+8. Giữ nguyên ý nghĩa gốc, không thêm yêu cầu mới, không đổi mục tiêu câu hỏi.
+9. Đầu ra chỉ gồm duy nhất câu truy vấn đã viết lại, không thêm giải thích, tiêu đề, \
 hay markdown.
 
 VÍ DỤ FEW-SHOT:

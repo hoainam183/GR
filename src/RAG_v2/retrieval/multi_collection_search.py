@@ -186,6 +186,8 @@ class MultiCollectionSearch:
         score_threshold: Optional[float] = None,
         active_collections: Optional[List[str]] = None,
         resolved_major: Optional[str] = None,
+        resolved_cohort: Optional[str] = None,
+        disable_metadata_filter_collections: Optional[List[str]] = None,
         trace_out: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Search all collections and return a globally ranked list.
@@ -223,6 +225,10 @@ class MultiCollectionSearch:
             score_threshold: Optional minimum cosine similarity for Qdrant.
             active_collections: If provided, only search these collections.
                 Unregistered names are logged as warnings and skipped.
+            resolved_major: Optional resolved major for metadata pre-filters.
+            resolved_cohort: Optional resolved cohort for metadata pre-filters.
+            disable_metadata_filter_collections: Collection names for which
+                metadata pre-filtering is disabled for this call.
 
         Returns:
             List of result dicts sorted by global fused score (descending).
@@ -276,7 +282,18 @@ class MultiCollectionSearch:
             query=query,
             collections=active_col_names,
             resolved_major=resolved_major,
+            resolved_cohort=resolved_cohort,
         )
+
+        disabled_filter_cols = {
+            col_name.strip().lower()
+            for col_name in (disable_metadata_filter_collections or [])
+            if str(col_name).strip()
+        }
+        if disabled_filter_cols:
+            for col_name in active_col_names:
+                if col_name.lower() in disabled_filter_cols:
+                    col_filter_specs[col_name] = CollectionFilter()
 
         # Pre-search results: {collection_name: (qdrant_filter, es_filter)}
         resolved_filters: Dict[

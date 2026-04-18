@@ -2,9 +2,33 @@
 
 from retrieval.metadata_filters import (
     _resolve_major_code,
+    build_collection_filters,
+    build_major_comparison_subqueries_for_retrieval,
+    build_cohort_comparison_subqueries_for_retrieval,
     canonicalize_major_name,
+    extract_major_codes,
+    extract_cohort_codes,
     strip_major_from_query_for_retrieval,
+    strip_major_comparison_scaffold_for_retrieval,
+    strip_cohort_comparison_scaffold_for_retrieval,
+    QuyDinhFilterExtractor,
 )
+
+
+def _extract_term_values(node: object) -> set[str]:
+    """Collect all term values from a nested ES query object."""
+    out: set[str] = set()
+    if isinstance(node, dict):
+        term_clause = node.get("term")
+        if isinstance(term_clause, dict):
+            for value in term_clause.values():
+                out.add(str(value))
+        for value in node.values():
+            out.update(_extract_term_values(value))
+    elif isinstance(node, list):
+        for item in node:
+            out.update(_extract_term_values(item))
+    return out
 
 
 def test_canonicalize_major_name_match_alias_case_insensitive() -> None:
@@ -61,3 +85,102 @@ def test_strip_major_phrase_from_query_with_unicode_dash_code() -> None:
     """Unicode dash in major code should still be stripped from retrieval query."""
     query = "môn mạng máy tính trong ngành IT–E6"
     assert strip_major_from_query_for_retrieval(query) == "môn mạng máy tính"
+
+
+def test_extract_cohort_codes_dedups_and_normalises_mentions() -> None:
+    """Cohort extractor should return unique Kxx codes in mention order."""
+    query = "so sánh K70 với khóa 67 và k70"
+    assert extract_cohort_codes(query) == ["K70", "K67"]
+
+
+def test_extract_major_codes_dedups_and_preserves_order() -> None:
+    """Major extractor should keep first mention order and remove duplicates."""
+    query = "so sánh IT-E7 với IT E6 và IT-E7"
+    assert extract_major_codes(query) == ["IT-E7", "IT-E6"]
+
+
+def test_quydinh_filter_extractor_matches_applicable_major_array_values() -> None:
+    """QuyDinh filter should use cohort Kxx term queries for applicable_major arrays."""
+    extractor = QuyDinhFilterExtractor()
+    cf = extractor.extract("quy định ngoại ngữ của K70")
+
+    assert len(cf.metadata_es_queries) == 1
+    query = cf.metadata_es_queries[0]
+    assert query["bool"]["minimum_should_match"] == 1
+    strict_values = _extract_term_values(query)
+    assert "K70" in strict_values
+    assert any("must_not" in clause.get("bool", {}) for clause in query["bool"]["should"])
+
+
+def test_quydinh_filter_extractor_supports_multi_cohort_query() -> None:
+    """When query mentions many cohorts, strict filter should OR all cohorts."""
+    extractor = QuyDinhFilterExtractor()
+    cf = extractor.extract("so sánh quy định ngoại ngữ của K70 và K67")
+
+    strict = cf.metadata_es_queries[0]
+    strict_values = _extract_term_values(strict)
+    assert {"K70", "K67"}.issubset(strict_values)
+
+
+def test_quydinh_filter_explicit_cohort_overrides_profile_cohort_hint() -> None:
+    """Explicit Kxx in query must take priority over resolved_cohort hint."""
+    extractor = QuyDinhFilterExtractor()
+    cf = extractor.extract(
+        "quy định ngoại ngữ của K70",
+        resolved_cohort="67",
+    )
+
+    query = cf.metadata_es_queries[0]
+    values = _extract_term_values(query)
+    assert "K70" in values
+    assert "K67" not in values
+
+
+def test_quydinh_filter_extractor_uses_resolved_cohort_for_generic_query() -> None:
+    """Generic quydinh query should still get cohort filter from user/profile context."""
+    extractor = QuyDinhFilterExtractor()
+    cf = extractor.extract("quy định về ngoại ngữ", resolved_cohort="70")
+
+    strict = cf.metadata_es_queries[0]
+    strict_values = _extract_term_values(strict)
+    assert "K70" in strict_values
+
+
+def test_build_collection_filters_passes_resolved_cohort_to_quydinh() -> None:
+    """End-to-end builder should apply cohort-derived quydinh pre-filters."""
+    filters = build_collection_filters(
+        query="quy định học bổng",
+        collections=["quydinh"],
+        resolved_cohort="K67",
+    )
+    assert filters["quydinh"].is_empty is False
+
+
+def test_strip_cohort_comparison_scaffold_keeps_topic_only() -> None:
+    """Comparison scaffolding should be removed to keep topic-focused retrieval."""
+    query = "so sánh quy định về ngoại ngữ của K70 và K67"
+    assert strip_cohort_comparison_scaffold_for_retrieval(query) == "quy định về ngoại ngữ"
+
+
+def test_strip_major_comparison_scaffold_keeps_topic_only() -> None:
+    """Major-comparison scaffolding should be removed for topic rerank query."""
+    query = "môn lập trình mạng của ngành IT-E7 và IT-E6 có gì khác nhau"
+    assert strip_major_comparison_scaffold_for_retrieval(query) == "môn lập trình mạng"
+
+
+def test_build_cohort_comparison_subqueries_for_retrieval() -> None:
+    """Comparison query should be decomposed into one retrieval query per cohort."""
+    query = "so sánh quy định về ngoại ngữ của K70 và K67"
+    assert build_cohort_comparison_subqueries_for_retrieval(query) == [
+        "quy định về ngoại ngữ cho K70",
+        "quy định về ngoại ngữ cho K67",
+    ]
+
+
+def test_build_major_comparison_subqueries_for_retrieval() -> None:
+    """Major comparison query should be decomposed into one query per major."""
+    query = "môn lập trình mạng của ngành IT-E7 và IT-E6 có gì khác nhau"
+    assert build_major_comparison_subqueries_for_retrieval(query) == [
+        ("môn lập trình mạng của ngành IT-E7", "IT-E7"),
+        ("môn lập trình mạng của ngành IT-E6", "IT-E6"),
+    ]

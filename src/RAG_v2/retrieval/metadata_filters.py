@@ -14,7 +14,8 @@ Architecture (pre-search flow):
 Per-collection filter logic:
     - ctdt    : major_code (exact) → major_name (match) → major_code OR null
                             (generic chunks) → no filter.
-    - quydinh : applicable_major (exact) → applicable_major OR null → no filter.
+    - quydinh : applicable_major (cohort Kxx) OR missing (generic chunks)
+                → no filter.
   - kehoach : date filter only when query contains specific year / month.
               After retrieval a recency score bonus rewards newer documents.
   - stsv    : no metadata filter.
@@ -71,6 +72,8 @@ class BaseFilterExtractor(ABC):
         conversation history *before* this call (may be a code or a name).
         When provided it takes priority over regex-based extraction from
         ``query``.
+            - ``resolved_cohort``: optional cohort string resolved from user profile /
+                conversation history (e.g. ``"70"`` or ``"K70"``).
 
     Returns a :class:`CollectionFilter` whose ``metadata_es_queries`` list is
     the fallback chain tried in order by the pre-search step.
@@ -81,6 +84,7 @@ class BaseFilterExtractor(ABC):
         self,
         query: str,
         resolved_major: Optional[str] = None,
+        resolved_cohort: Optional[str] = None,
     ) -> CollectionFilter:
         """Extract the metadata filter fallback chain for this collection.
 
@@ -198,6 +202,35 @@ _DASH_TRANSLATION = str.maketrans(
 )
 _MAJOR_CODE_SPACE_RE = re.compile(
     r"\b(IT|MI)\s+(E10|E15|E6|E7|EP|1|2)\b",
+    re.IGNORECASE,
+)
+_COHORT_RE = re.compile(
+    r"\bk\s*(\d{2,3})\b|kh[oó]a\s*k?\s*(\d{2,3})",
+    re.IGNORECASE,
+)
+_COMPARE_HINT_RE = re.compile(
+    r"\b(?:so\s*s[aá]nh|kh[aá]c\s+nhau|kh[aá]c\s+g[iì]|đ[oố]i\s*chi[eế]u|"
+    r"doi\s*chieu|ph[aâ]n\s*bi[eệ]t|phan\s*biet)\b",
+    re.IGNORECASE,
+)
+_COHORT_MENTION_RE = re.compile(
+    r"\b(?:kh[oó]a\s*)?k\s*\d{2,3}\b",
+    re.IGNORECASE,
+)
+_MAJOR_CODE_MENTION_RE = re.compile(
+    r"\b(IT|MI)\s*-?\s*(E10|E15|E6|E7|EP|1|2)\b",
+    re.IGNORECASE,
+)
+_COMPARE_CONNECTOR_RE = re.compile(
+    r"\b(?:gi[uữ]a|v[aà]|v[oớ]i|voi)\b",
+    re.IGNORECASE,
+)
+_COMPARE_FILLER_RE = re.compile(
+    r"\bc[oó]\s*g[iì]\b",
+    re.IGNORECASE,
+)
+_TRAILING_FUNCTION_WORD_RE = re.compile(
+    r"\b(?:c[uủ]a|cho|trong|thu[oộ]c)\b$",
     re.IGNORECASE,
 )
 
@@ -328,6 +361,180 @@ def _build_major_labels(major_code: str) -> List[str]:
     return unique
 
 
+def _canonicalise_major_code_parts(prefix: str, suffix: str) -> str:
+    """Convert regex major parts to canonical major code (e.g. MI+1 -> MI1)."""
+    p = (prefix or "").upper()
+    s = (suffix or "").upper()
+    return f"{p}{s}" if s in {"1", "2"} else f"{p}-{s}"
+
+
+def extract_major_codes(text: str) -> List[str]:
+    """Extract unique explicit major codes in mention order from *text*."""
+    normalized = _normalise_major_text(text or "")
+    if not normalized:
+        return []
+
+    out: List[str] = []
+    seen: set[str] = set()
+    for match in _MAJOR_CODE_MENTION_RE.finditer(normalized):
+        code = _canonicalise_major_code_parts(match.group(1), match.group(2))
+        if code not in MAJOR_CODE_TO_NAME:
+            continue
+        key = code.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(code)
+    return out
+
+
+def _normalise_cohort_code(value: str) -> Optional[str]:
+    """Normalize cohort text to canonical ``Kxx`` form, else ``None``."""
+    normalized = _normalise_major_text(value or "")
+    if not normalized:
+        return None
+
+    if re.fullmatch(r"\d{2,3}", normalized):
+        return f"K{normalized}"
+
+    match = re.fullmatch(r"K\s*(\d{2,3})", normalized, re.IGNORECASE)
+    if match:
+        return f"K{match.group(1)}"
+
+    return None
+
+
+def extract_cohort_codes(text: str) -> List[str]:
+    """Extract unique cohort codes (``Kxx``) from *text* in mention order."""
+    normalized = _normalise_major_text(text or "")
+    if not normalized:
+        return []
+
+    out: List[str] = []
+    seen: set[str] = set()
+    for match in _COHORT_RE.finditer(normalized):
+        num = match.group(1) or match.group(2)
+        if not num:
+            continue
+        cohort = f"K{num}"
+        key = cohort.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(cohort)
+    return out
+
+
+def _extract_cohort_codes_from_hint(value: Optional[str]) -> List[str]:
+    """Extract cohort codes from one hint value (profile/history/query signal)."""
+    if value is None:
+        return []
+
+    raw = str(value).strip()
+    if not raw or _is_unknown_major(raw):
+        return []
+
+    codes = extract_cohort_codes(raw)
+    if codes:
+        return codes
+
+    maybe_cohort = _normalise_cohort_code(raw)
+    return [maybe_cohort] if maybe_cohort else []
+
+
+def strip_cohort_comparison_scaffold_for_retrieval(query: str) -> str:
+    """Remove compare scaffolding/cohort mentions to keep topic-focused query."""
+    raw_query = _normalise_major_text(query or "")
+    if not raw_query:
+        return raw_query
+
+    cleaned = _COMPARE_HINT_RE.sub(" ", raw_query)
+    cleaned = _COHORT_MENTION_RE.sub(" ", cleaned)
+    cleaned = _COMPARE_CONNECTOR_RE.sub(" ", cleaned)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" ,.;:-()[]")
+    cleaned = _TRAILING_FUNCTION_WORD_RE.sub("", cleaned).strip(" ,.;:-()[]")
+
+    if len(cleaned.split()) < 2:
+        return raw_query
+    return cleaned
+
+
+def build_cohort_comparison_subqueries_for_retrieval(
+    query: str,
+    *,
+    max_subqueries: int = 3,
+) -> List[str]:
+    """Build per-cohort retrieval subqueries for cohort-comparison questions.
+
+    Example:
+        "so sánh quy định ngoại ngữ của K70 và K67"
+        -> ["quy định ngoại ngữ cho K70", "quy định ngoại ngữ cho K67"]
+    """
+    raw_query = _normalise_major_text(query or "")
+    if not raw_query:
+        return []
+
+    cohorts = extract_cohort_codes(raw_query)
+    if len(cohorts) < 2 or not _COMPARE_HINT_RE.search(raw_query):
+        return []
+
+    topic_query = strip_cohort_comparison_scaffold_for_retrieval(raw_query)
+    return [f"{topic_query} cho {cohort}" for cohort in cohorts[:max_subqueries]]
+
+
+def strip_major_comparison_scaffold_for_retrieval(query: str) -> str:
+    """Remove compare scaffolding/major mentions to keep topic-focused query."""
+    raw_query = _normalise_major_text(query or "")
+    if not raw_query:
+        return raw_query
+
+    cleaned = _COMPARE_HINT_RE.sub(" ", raw_query)
+    cleaned = _COMPARE_FILLER_RE.sub(" ", cleaned)
+    cleaned = _MAJOR_CODE_MENTION_RE.sub(" ", cleaned)
+    cleaned = re.sub(
+        r"\b(?:ngành|chuyên\s+ngành|chương\s+trình(?:\s+đào\s+tạo)?)\b",
+        " ",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = _COMPARE_CONNECTOR_RE.sub(" ", cleaned)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" ,.;:-()[]")
+    cleaned = _TRAILING_FUNCTION_WORD_RE.sub("", cleaned).strip(" ,.;:-()[]")
+
+    if len(cleaned.split()) < 2:
+        return raw_query
+    return cleaned
+
+
+def build_major_comparison_subqueries_for_retrieval(
+    query: str,
+    *,
+    max_subqueries: int = 3,
+) -> List[Tuple[str, str]]:
+    """Build per-major retrieval subqueries for major-comparison questions.
+
+    Example:
+        "môn lập trình mạng của ngành IT-E7 và IT-E6 có gì khác nhau"
+        -> [
+             ("môn lập trình mạng của ngành IT-E7", "IT-E7"),
+             ("môn lập trình mạng của ngành IT-E6", "IT-E6"),
+           ]
+    """
+    raw_query = _normalise_major_text(query or "")
+    if not raw_query:
+        return []
+
+    major_codes = extract_major_codes(raw_query)
+    if len(major_codes) < 2 or not _COMPARE_HINT_RE.search(raw_query):
+        return []
+
+    topic_query = strip_major_comparison_scaffold_for_retrieval(raw_query)
+    return [
+        (f"{topic_query} của ngành {major_code}", major_code)
+        for major_code in major_codes[:max_subqueries]
+    ]
+
+
 def strip_major_from_query_for_retrieval(
     query: str,
     resolved_major: Optional[str] = None,
@@ -407,6 +614,21 @@ def _term_any_mapping(field: str, value: str) -> Dict[str, Any]:
     }
 
 
+def _term_any_mapping_multi(field: str, values: List[str]) -> Dict[str, Any]:
+    """ES exact-term query for one-of-many values, mapping-compatible."""
+    clauses: List[Dict[str, Any]] = []
+    for value in values:
+        clauses.append({"term": {field: value}})
+        clauses.append({"term": {f"{field}.keyword": value}})
+
+    return {
+        "bool": {
+            "should": clauses,
+            "minimum_should_match": 1,
+        }
+    }
+
+
 def _wildcard_any_mapping(field: str, pattern: str) -> Dict[str, Any]:
     """ES wildcard query compatible with both field and field.keyword."""
     return {
@@ -431,6 +653,19 @@ def _null_or_term(field: str, value: str) -> Dict[str, Any]:
         "bool": {
             "should": [
                 _term_any_mapping(field, value),
+                _null_clause(field),
+            ],
+            "minimum_should_match": 1,
+        }
+    }
+
+
+def _null_or_terms(field: str, values: List[str]) -> Dict[str, Any]:
+    """ES query: any exact term in *values* OR field is absent."""
+    return {
+        "bool": {
+            "should": [
+                _term_any_mapping_multi(field, values),
                 _null_clause(field),
             ],
             "minimum_should_match": 1,
@@ -473,6 +708,7 @@ class CtdtFilterExtractor(BaseFilterExtractor):
         self,
         query: str,
         resolved_major: Optional[str] = None,
+        resolved_cohort: Optional[str] = None,  # noqa: ARG002
     ) -> CollectionFilter:
         major_code = _resolve_major_code(query, resolved_major)
         if not major_code:
@@ -494,27 +730,35 @@ class CtdtFilterExtractor(BaseFilterExtractor):
 
 
 class QuyDinhFilterExtractor(BaseFilterExtractor):
-    """Filter *quydinh* by applicable_major-specific query first.
+    """Filter *quydinh* by cohort-specific ``applicable_major`` first.
+
+    ``applicable_major`` stores cohort codes as a list (e.g.
+    ``["K63", "K64"]``). Elasticsearch ``term`` queries naturally match
+    list-valued keyword fields when one element matches exactly.
 
     Fallback order:
-      1. ``applicable_major`` exact.
-      2. ``applicable_major`` exact OR missing.
-      3. No filter (all chunks) when both return zero hits.
+          1. ``applicable_major`` exact (one or more cohorts) OR missing.
+          2. No filter (all chunks) when no cohort signal is available.
     """
 
     def extract(
         self,
         query: str,
         resolved_major: Optional[str] = None,
+        resolved_cohort: Optional[str] = None,
     ) -> CollectionFilter:
-        major_code = _resolve_major_code(query, resolved_major)
-        if not major_code:
+        cohort_codes = extract_cohort_codes(query)
+        if not cohort_codes:
+            cohort_codes = _extract_cohort_codes_from_hint(resolved_cohort)
+        if not cohort_codes:
+            cohort_codes = _extract_cohort_codes_from_hint(resolved_major)
+
+        if not cohort_codes:
             return CollectionFilter()
 
         return CollectionFilter(
             metadata_es_queries=[
-                _term_any_mapping("applicable_major", major_code),
-                _null_or_term("applicable_major", major_code),
+                _null_or_terms("applicable_major", cohort_codes),
             ]
         )
 
@@ -536,6 +780,7 @@ class KeHoachFilterExtractor(BaseFilterExtractor):
         self,
         query: str,
         resolved_major: Optional[str] = None,  # noqa: ARG002
+        resolved_cohort: Optional[str] = None,  # noqa: ARG002
     ) -> CollectionFilter:
         date_query = self._build_date_query(query)
         if date_query is None:
@@ -626,6 +871,7 @@ def build_collection_filters(
     query: str,
     collections: List[str],
     resolved_major: Optional[str] = None,
+    resolved_cohort: Optional[str] = None,
 ) -> Dict[str, CollectionFilter]:
     """Build per-collection metadata filter chains (pre-search step).
 
@@ -639,6 +885,8 @@ def build_collection_filters(
         resolved_major: Major string resolved from user profile / conversation
             history.  When provided it takes priority over regex extraction from
             ``query``.
+        resolved_cohort: Cohort string resolved from user profile / conversation
+            history (e.g. ``"70"`` or ``"K70"``).
 
     Returns:
         ``{collection_name: CollectionFilter}`` — ``is_empty`` values mean no
@@ -648,7 +896,11 @@ def build_collection_filters(
     for col in collections:
         extractor = _COLLECTION_FILTER_REGISTRY.get(col)
         result[col] = (
-            extractor.extract(query=query, resolved_major=resolved_major)
+            extractor.extract(
+                query=query,
+                resolved_major=resolved_major,
+                resolved_cohort=resolved_cohort,
+            )
             if extractor is not None
             else CollectionFilter()
         )

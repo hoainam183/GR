@@ -14,7 +14,13 @@ from llm.prompts import build_rag_messages
 from llm.self_eval import SelfEvaluator
 from reranking.base import BaseReranker
 from retrieval.collection_selector import CollectionSelector
-from retrieval.metadata_filters import strip_major_from_query_for_retrieval
+from retrieval.metadata_filters import (
+    build_major_comparison_subqueries_for_retrieval,
+    build_cohort_comparison_subqueries_for_retrieval,
+    strip_cohort_comparison_scaffold_for_retrieval,
+    strip_major_comparison_scaffold_for_retrieval,
+    strip_major_from_query_for_retrieval,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +51,12 @@ _CTX_ERROR_MARKERS = (
     "tokens to keep",
     "prompt is too long",
     "context_length_exceeded",
+)
+
+_EXPLICIT_MAJOR_CODE_RE = re.compile(
+    r"\b(?:IT|MI)\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*"
+    r"(?:E10|E15|E6|E7|EP|1|2)\b",
+    re.IGNORECASE,
 )
 
 
@@ -78,6 +90,78 @@ def _retrieval_candidate_k(top_k: int) -> int:
     a minimum of 20 candidates for stronger reranker recall.
     """
     return max(top_k * 4, 20)
+
+
+def _safe_float(value: Any) -> float:
+    """Return *value* as float, or 0.0 when conversion fails."""
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _dedup_retrieval_candidates(
+    candidates: List[Dict[str, Any]],
+    *,
+    top_k: int,
+) -> List[Dict[str, Any]]:
+    """Deduplicate by ``id`` while keeping the highest-scoring candidate."""
+    best_by_id: Dict[str, Dict[str, Any]] = {}
+    for item in candidates:
+        doc_id = str(item.get("id", "") or "")
+        if not doc_id:
+            continue
+        prev = best_by_id.get(doc_id)
+        if prev is None or _safe_float(item.get("score")) > _safe_float(prev.get("score")):
+            best_by_id[doc_id] = item
+
+    ranked = sorted(
+        best_by_id.values(),
+        key=lambda row: _safe_float(row.get("score")),
+        reverse=True,
+    )
+    return ranked[:top_k]
+
+
+def _merge_search_trace(
+    aggregate_trace: Dict[str, Any],
+    trace_piece: Dict[str, Any],
+) -> None:
+    """Merge one search trace chunk into aggregate trace state."""
+    if not trace_piece:
+        return
+
+    incoming_filters = trace_piece.get("filters")
+    if isinstance(incoming_filters, dict):
+        merged_filters = aggregate_trace.setdefault("filters", {})
+        for collection, finfo in incoming_filters.items():
+            if not isinstance(finfo, dict):
+                continue
+            prev = merged_filters.get(collection)
+            if not isinstance(prev, dict):
+                merged_filters[collection] = finfo
+                continue
+
+            prev_applied = bool(prev.get("applied"))
+            new_applied = bool(finfo.get("applied"))
+            prev_hits = int(_safe_float(prev.get("matched_ids")))
+            new_hits = int(_safe_float(finfo.get("matched_ids")))
+            if (new_applied and not prev_applied) or new_hits > prev_hits:
+                merged_filters[collection] = finfo
+
+    incoming_counts = trace_piece.get("collection_counts")
+    if isinstance(incoming_counts, dict):
+        merged_counts = aggregate_trace.setdefault("collection_counts", {})
+        for collection, count_info in incoming_counts.items():
+            if not isinstance(count_info, dict):
+                continue
+            row = merged_counts.setdefault(collection, {"vector": 0, "keyword": 0})
+            row["vector"] = int(_safe_float(row.get("vector"))) + int(
+                _safe_float(count_info.get("vector"))
+            )
+            row["keyword"] = int(_safe_float(row.get("keyword"))) + int(
+                _safe_float(count_info.get("keyword"))
+            )
 
 
 def _format_context(
@@ -261,6 +345,11 @@ def _build_profile_note_from_user_context(
     return " | ".join(parts) if parts else ""
 
 
+def _should_prepend_profile_note(question: str) -> bool:
+    """Return False when question already provides an explicit major code."""
+    return _EXPLICIT_MAJOR_CODE_RE.search(question or "") is None
+
+
 def _build_collection_scores(
     *,
     all_collections: Optional[List[str]],
@@ -435,6 +524,7 @@ def rag_flow(
     search_query = question
     reflection_prompt: Optional[str] = None
     resolved_major: Optional[str] = None
+    resolved_cohort: Optional[str] = None
     if reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
@@ -448,26 +538,42 @@ def rag_flow(
             reflection_prompt = ref_result.get("prompt")
             entities = ref_result.get("entities") or {}
             resolved_major = entities.get("major_code") or entities.get("major_name")
-            logger.info("Reflected query: %r | major: %s", search_query[:80], resolved_major)
+            cohort_entity = entities.get("cohort")
+            if cohort_entity is not None:
+                resolved_cohort = str(cohort_entity).strip() or None
+            logger.info(
+                "Reflected query: %r | major: %s | cohort: %s",
+                search_query[:80],
+                resolved_major,
+                resolved_cohort,
+            )
         except Exception:
             logger.warning("Reflection failed, using original query", exc_info=True)
         timings_ms["reflection"] = _elapsed_ms(reflection_t0)
 
-    # Deterministic fallback: always recover major for metadata filtering even if
+    # Deterministic fallback: always recover major/cohort metadata even if
     # reflection fails or does not return entities.
-    if not resolved_major:
+    if not resolved_major or not resolved_cohort:
         from query.reflection import _extract_entities  # noqa: PLC0415
         fallback_entities = _extract_entities(
             question,
             user_context=user_context,
             history=history,
         )
-        resolved_major = (
-            fallback_entities.get("major_code")
-            or fallback_entities.get("major_name")
-        )
+        if not resolved_major:
+            resolved_major = (
+                fallback_entities.get("major_code")
+                or fallback_entities.get("major_name")
+            )
+        if not resolved_cohort:
+            cohort_entity = fallback_entities.get("cohort")
+            if cohort_entity is not None:
+                resolved_cohort = str(cohort_entity).strip() or None
+
         if resolved_major:
             logger.info("Major fallback resolved: %s", resolved_major)
+        if resolved_cohort:
+            logger.info("Cohort fallback resolved: %s", resolved_cohort)
 
     retrieval_query = strip_major_from_query_for_retrieval(
         search_query,
@@ -511,41 +617,193 @@ def rag_flow(
 
     top_k_value = cfg.get("top_k", 5)
     raw_candidate_k = _retrieval_candidate_k(top_k_value)
+    major_compare_plan = build_major_comparison_subqueries_for_retrieval(
+        search_query
+    )
+    compare_subqueries: List[str] = []
+    if not major_compare_plan:
+        compare_subqueries = build_cohort_comparison_subqueries_for_retrieval(
+            retrieval_query
+        )
 
-    # 3. Embed
-    embed_t0 = time.perf_counter()
-    bge_vec = bge_embedder.embed_query(retrieval_query)
-    timings_ms["embed_bge"] = _elapsed_ms(embed_t0)
+    if major_compare_plan:
+        logger.info(
+            "Major comparison retrieval decomposition: %s",
+            [q for q, _ in major_compare_plan],
+        )
+    if compare_subqueries:
+        logger.info(
+            "Comparison retrieval decomposition: %s",
+            compare_subqueries,
+        )
 
-    embed_t0 = time.perf_counter()
-    e5_vec = e5_embedder.embed_query(retrieval_query)
-    timings_ms["embed_e5"] = _elapsed_ms(embed_t0)
+    rerank_query = retrieval_query
+    if major_compare_plan:
+        stripped = strip_major_comparison_scaffold_for_retrieval(search_query)
+        if len(stripped.split()) >= 2:
+            rerank_query = stripped
+    elif compare_subqueries:
+        stripped = strip_cohort_comparison_scaffold_for_retrieval(retrieval_query)
+        if len(stripped.split()) >= 2:
+            rerank_query = stripped
 
-    # 4. Hybrid search with metadata pre-filtering
+    # 3. Embed + 4. Hybrid search with metadata pre-filtering
     # resolved_major already set by reflection above.
 
     search_trace: Dict[str, Any] = {}
-    search_t0 = time.perf_counter()
-    raw_results = searcher.search(
-        query=retrieval_query,
-        bge_m3_query=bge_vec,
-        e5_query=e5_vec,
+
+    def _search_once(
+        local_query: str,
+        local_active_collections: Optional[List[str]],
+        *,
+        local_resolved_major: Optional[str] = None,
+        use_outer_resolved_major: bool = True,
+        local_disable_metadata_filter_collections: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        embed_t0 = time.perf_counter()
+        bge_vec = bge_embedder.embed_query(local_query)
+        timings_ms["embed_bge"] = round(
+            timings_ms.get("embed_bge", 0.0) + _elapsed_ms(embed_t0),
+            2,
+        )
+
+        embed_t0 = time.perf_counter()
+        e5_vec = e5_embedder.embed_query(local_query)
+        timings_ms["embed_e5"] = round(
+            timings_ms.get("embed_e5", 0.0) + _elapsed_ms(embed_t0),
+            2,
+        )
+
+        trace_piece: Dict[str, Any] = {}
+        search_t0 = time.perf_counter()
+        effective_resolved_major = (
+            resolved_major if use_outer_resolved_major else local_resolved_major
+        )
+        result_rows = searcher.search(
+            query=local_query,
+            bge_m3_query=bge_vec,
+            e5_query=e5_vec,
+            top_k=raw_candidate_k,
+            vector_top_k=cfg.get("vector_top_k", 20),
+            keyword_top_k=cfg.get("keyword_top_k", 20),
+            vector_pool_k=cfg.get("vector_pool_k", 15),
+            keyword_pool_k=cfg.get("keyword_pool_k", 15),
+            active_collections=local_active_collections,
+            resolved_major=effective_resolved_major,
+            resolved_cohort=resolved_cohort,
+            disable_metadata_filter_collections=local_disable_metadata_filter_collections,
+            trace_out=trace_piece,
+        )
+        timings_ms["search"] = round(
+            timings_ms.get("search", 0.0) + _elapsed_ms(search_t0),
+            2,
+        )
+        _merge_search_trace(search_trace, trace_piece)
+        return result_rows
+
+    raw_results_buffer: List[Dict[str, Any]] = []
+    if major_compare_plan:
+        for subquery, subquery_major in major_compare_plan:
+            raw_results_buffer.extend(
+                _search_once(
+                    subquery,
+                    target_collections,
+                    local_resolved_major=subquery_major,
+                    use_outer_resolved_major=False,
+                )
+            )
+    else:
+        primary_queries = compare_subqueries or [retrieval_query]
+        for subquery in primary_queries:
+            raw_results_buffer.extend(
+                _search_once(subquery, target_collections)
+            )
+    raw_results = _dedup_retrieval_candidates(
+        raw_results_buffer,
         top_k=raw_candidate_k,
-        vector_top_k=cfg.get("vector_top_k", 20),
-        keyword_top_k=cfg.get("keyword_top_k", 20),
-        vector_pool_k=cfg.get("vector_pool_k", 15),
-        keyword_pool_k=cfg.get("keyword_pool_k", 15),
-        active_collections=target_collections,
-        resolved_major=resolved_major,
-        trace_out=search_trace,
     )
-    timings_ms["search"] = _elapsed_ms(search_t0)
+
+    if not raw_results and (compare_subqueries or major_compare_plan):
+        logger.info(
+            "Comparison subqueries returned no candidates; retrying original query."
+        )
+        fallback_compare_query = search_query if major_compare_plan else retrieval_query
+        raw_results = _dedup_retrieval_candidates(
+            _search_once(
+                fallback_compare_query,
+                target_collections,
+                use_outer_resolved_major=not major_compare_plan,
+            ),
+            top_k=raw_candidate_k,
+        )
+
+    if not raw_results:
+        logger.info(
+            "No candidates; retrying with quydinh metadata filter disabled."
+        )
+        raw_results = _dedup_retrieval_candidates(
+            _search_once(
+                retrieval_query,
+                target_collections,
+                local_disable_metadata_filter_collections=["quydinh"],
+            ),
+            top_k=raw_candidate_k,
+        )
+        if not raw_results and target_collections is not None:
+            raw_results = _dedup_retrieval_candidates(
+                _search_once(
+                    retrieval_query,
+                    None,
+                    local_disable_metadata_filter_collections=["quydinh"],
+                ),
+                top_k=raw_candidate_k,
+            )
+
+    if not raw_results and target_collections is not None:
+        logger.info(
+            "No candidates for routed collections; retrying all collections."
+        )
+        raw_results = _dedup_retrieval_candidates(
+            _search_once(retrieval_query, None),
+            top_k=raw_candidate_k,
+        )
+
+    if not raw_results and (compare_subqueries or major_compare_plan):
+        compare_source_query = search_query if major_compare_plan else retrieval_query
+        relaxed_query = (
+            strip_major_comparison_scaffold_for_retrieval(search_query)
+            if major_compare_plan
+            else strip_cohort_comparison_scaffold_for_retrieval(retrieval_query)
+        )
+        if relaxed_query != compare_source_query:
+            logger.info(
+                "No candidates; retrying relaxed comparison topic query: %r",
+                relaxed_query[:80],
+            )
+            raw_results = _dedup_retrieval_candidates(
+                _search_once(
+                    relaxed_query,
+                    target_collections,
+                    use_outer_resolved_major=not major_compare_plan,
+                ),
+                top_k=raw_candidate_k,
+            )
+            if not raw_results and target_collections is not None:
+                raw_results = _dedup_retrieval_candidates(
+                    _search_once(
+                        relaxed_query,
+                        None,
+                        use_outer_resolved_major=not major_compare_plan,
+                    ),
+                    top_k=raw_candidate_k,
+                )
+
     logger.info("Retrieved %d raw candidates", len(raw_results))
 
     # 5. Rerank
     rerank_t0 = time.perf_counter()
     reranked = reranker.rerank(
-        query=retrieval_query,
+        query=rerank_query,
         documents=raw_results,
         top_k=top_k_value,
     )
@@ -558,7 +816,12 @@ def rag_flow(
     #    Priority 2: fall back to regex scan of history.
     context_t0 = time.perf_counter()
     context = _format_context(reranked)
-    profile_note = _build_profile_note_from_user_context(user_context) or _extract_session_profile(history)
+    profile_note = ""
+    if _should_prepend_profile_note(question):
+        profile_note = (
+            _build_profile_note_from_user_context(user_context)
+            or _extract_session_profile(history)
+        )
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
     timings_ms["format_context"] = _elapsed_ms(context_t0)
 
@@ -723,6 +986,7 @@ def rag_flow_stream(
     # Reflection
     search_query = question
     resolved_major: Optional[str] = None
+    resolved_cohort: Optional[str] = None
     if reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
@@ -735,25 +999,36 @@ def rag_flow_stream(
             search_query = ref_result.get("rewritten", question)
             entities = ref_result.get("entities") or {}
             resolved_major = entities.get("major_code") or entities.get("major_name")
+            cohort_entity = entities.get("cohort")
+            if cohort_entity is not None:
+                resolved_cohort = str(cohort_entity).strip() or None
         except Exception:
             logger.warning("Reflection failed, using original query", exc_info=True)
         timings_ms["reflection"] = _elapsed_ms(reflection_t0)
 
-    # Deterministic fallback: always recover major for metadata filtering even if
+    # Deterministic fallback: always recover major/cohort metadata even if
     # reflection fails or does not return entities.
-    if not resolved_major:
+    if not resolved_major or not resolved_cohort:
         from query.reflection import _extract_entities  # noqa: PLC0415
         fallback_entities = _extract_entities(
             question,
             user_context=user_context,
             history=history,
         )
-        resolved_major = (
-            fallback_entities.get("major_code")
-            or fallback_entities.get("major_name")
-        )
+        if not resolved_major:
+            resolved_major = (
+                fallback_entities.get("major_code")
+                or fallback_entities.get("major_name")
+            )
+        if not resolved_cohort:
+            cohort_entity = fallback_entities.get("cohort")
+            if cohort_entity is not None:
+                resolved_cohort = str(cohort_entity).strip() or None
+
         if resolved_major:
             logger.info("Major fallback resolved: %s", resolved_major)
+        if resolved_cohort:
+            logger.info("Cohort fallback resolved: %s", resolved_cohort)
 
     retrieval_query = strip_major_from_query_for_retrieval(
         search_query,
@@ -783,37 +1058,179 @@ def rag_flow_stream(
 
     top_k_value = cfg.get("top_k", 5)
     raw_candidate_k = _retrieval_candidate_k(top_k_value)
+    major_compare_plan = build_major_comparison_subqueries_for_retrieval(
+        search_query
+    )
+    compare_subqueries: List[str] = []
+    if not major_compare_plan:
+        compare_subqueries = build_cohort_comparison_subqueries_for_retrieval(
+            retrieval_query
+        )
+
+    if major_compare_plan:
+        logger.info(
+            "Major comparison retrieval decomposition (stream): %s",
+            [q for q, _ in major_compare_plan],
+        )
+    if compare_subqueries:
+        logger.info(
+            "Comparison retrieval decomposition (stream): %s",
+            compare_subqueries,
+        )
+
+    rerank_query = retrieval_query
+    if major_compare_plan:
+        stripped = strip_major_comparison_scaffold_for_retrieval(search_query)
+        if len(stripped.split()) >= 2:
+            rerank_query = stripped
+    elif compare_subqueries:
+        stripped = strip_cohort_comparison_scaffold_for_retrieval(retrieval_query)
+        if len(stripped.split()) >= 2:
+            rerank_query = stripped
 
     # Embed → Search → Rerank
-    embed_t0 = time.perf_counter()
-    bge_vec = bge_embedder.embed_query(retrieval_query)
-    timings_ms["embed_bge"] = _elapsed_ms(embed_t0)
+    def _search_once(
+        local_query: str,
+        local_active_collections: Optional[List[str]],
+        *,
+        local_resolved_major: Optional[str] = None,
+        use_outer_resolved_major: bool = True,
+        local_disable_metadata_filter_collections: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        embed_t0 = time.perf_counter()
+        bge_vec = bge_embedder.embed_query(local_query)
+        timings_ms["embed_bge"] = round(
+            timings_ms.get("embed_bge", 0.0) + _elapsed_ms(embed_t0),
+            2,
+        )
 
-    embed_t0 = time.perf_counter()
-    e5_vec = e5_embedder.embed_query(retrieval_query)
-    timings_ms["embed_e5"] = _elapsed_ms(embed_t0)
+        embed_t0 = time.perf_counter()
+        e5_vec = e5_embedder.embed_query(local_query)
+        timings_ms["embed_e5"] = round(
+            timings_ms.get("embed_e5", 0.0) + _elapsed_ms(embed_t0),
+            2,
+        )
 
-    # Resolve major from conversation history + user profile before searching.
-    # resolved_major was set by the reflection step above.
+        search_t0 = time.perf_counter()
+        effective_resolved_major = (
+            resolved_major if use_outer_resolved_major else local_resolved_major
+        )
+        rows = searcher.search(
+            query=local_query,
+            bge_m3_query=bge_vec,
+            e5_query=e5_vec,
+            top_k=raw_candidate_k,
+            vector_top_k=cfg.get("vector_top_k", 20),
+            keyword_top_k=cfg.get("keyword_top_k", 20),
+            vector_pool_k=cfg.get("vector_pool_k", 15),
+            keyword_pool_k=cfg.get("keyword_pool_k", 15),
+            active_collections=local_active_collections,
+            resolved_major=effective_resolved_major,
+            resolved_cohort=resolved_cohort,
+            disable_metadata_filter_collections=local_disable_metadata_filter_collections,
+        )
+        timings_ms["search"] = round(
+            timings_ms.get("search", 0.0) + _elapsed_ms(search_t0),
+            2,
+        )
+        return rows
 
-    search_t0 = time.perf_counter()
-    raw_results = searcher.search(
-        query=retrieval_query,
-        bge_m3_query=bge_vec,
-        e5_query=e5_vec,
+    raw_results_buffer: List[Dict[str, Any]] = []
+    if major_compare_plan:
+        for subquery, subquery_major in major_compare_plan:
+            raw_results_buffer.extend(
+                _search_once(
+                    subquery,
+                    target_collections,
+                    local_resolved_major=subquery_major,
+                    use_outer_resolved_major=False,
+                )
+            )
+    else:
+        primary_queries = compare_subqueries or [retrieval_query]
+        for subquery in primary_queries:
+            raw_results_buffer.extend(
+                _search_once(subquery, target_collections)
+            )
+    raw_results = _dedup_retrieval_candidates(
+        raw_results_buffer,
         top_k=raw_candidate_k,
-        vector_top_k=cfg.get("vector_top_k", 20),
-        keyword_top_k=cfg.get("keyword_top_k", 20),
-        vector_pool_k=cfg.get("vector_pool_k", 15),
-        keyword_pool_k=cfg.get("keyword_pool_k", 15),
-        active_collections=target_collections,
-        resolved_major=resolved_major,
     )
-    timings_ms["search"] = _elapsed_ms(search_t0)
+
+    if not raw_results and (compare_subqueries or major_compare_plan):
+        logger.info(
+            "Comparison subqueries returned no candidates (stream); retrying original query."
+        )
+        fallback_compare_query = search_query if major_compare_plan else retrieval_query
+        raw_results = _dedup_retrieval_candidates(
+            _search_once(
+                fallback_compare_query,
+                target_collections,
+                use_outer_resolved_major=not major_compare_plan,
+            ),
+            top_k=raw_candidate_k,
+        )
+
+    if not raw_results:
+        logger.info(
+            "No candidates (stream); retrying with quydinh metadata filter disabled."
+        )
+        raw_results = _dedup_retrieval_candidates(
+            _search_once(
+                retrieval_query,
+                target_collections,
+                local_disable_metadata_filter_collections=["quydinh"],
+            ),
+            top_k=raw_candidate_k,
+        )
+        if not raw_results and target_collections is not None:
+            raw_results = _dedup_retrieval_candidates(
+                _search_once(
+                    retrieval_query,
+                    None,
+                    local_disable_metadata_filter_collections=["quydinh"],
+                ),
+                top_k=raw_candidate_k,
+            )
+
+    if not raw_results and target_collections is not None:
+        logger.info(
+            "No candidates for routed collections (stream); retrying all collections."
+        )
+        raw_results = _dedup_retrieval_candidates(
+            _search_once(retrieval_query, None),
+            top_k=raw_candidate_k,
+        )
+
+    if not raw_results and (compare_subqueries or major_compare_plan):
+        compare_source_query = search_query if major_compare_plan else retrieval_query
+        relaxed_query = (
+            strip_major_comparison_scaffold_for_retrieval(search_query)
+            if major_compare_plan
+            else strip_cohort_comparison_scaffold_for_retrieval(retrieval_query)
+        )
+        if relaxed_query != compare_source_query:
+            raw_results = _dedup_retrieval_candidates(
+                _search_once(
+                    relaxed_query,
+                    target_collections,
+                    use_outer_resolved_major=not major_compare_plan,
+                ),
+                top_k=raw_candidate_k,
+            )
+            if not raw_results and target_collections is not None:
+                raw_results = _dedup_retrieval_candidates(
+                    _search_once(
+                        relaxed_query,
+                        None,
+                        use_outer_resolved_major=not major_compare_plan,
+                    ),
+                    top_k=raw_candidate_k,
+                )
 
     rerank_t0 = time.perf_counter()
     reranked = reranker.rerank(
-        query=retrieval_query,
+        query=rerank_query,
         documents=raw_results,
         top_k=top_k_value,
     )
@@ -821,7 +1238,12 @@ def rag_flow_stream(
 
     context_t0 = time.perf_counter()
     context = _format_context(reranked)
-    profile_note = _build_profile_note_from_user_context(user_context) or _extract_session_profile(history)
+    profile_note = ""
+    if _should_prepend_profile_note(question):
+        profile_note = (
+            _build_profile_note_from_user_context(user_context)
+            or _extract_session_profile(history)
+        )
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
     timings_ms["format_context"] = _elapsed_ms(context_t0)
     timings_ms["retrieval_total"] = round(
