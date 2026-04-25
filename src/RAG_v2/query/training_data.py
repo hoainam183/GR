@@ -163,7 +163,7 @@ TRAINING_DATA: List[Tuple[str, str]] = [
     ("Điều kiện học song bằng", LABEL_CTDT),
     ("CTDT ngành vật liệu", LABEL_CTDT),
     ("Số tín chỉ tối thiểu mỗi kỳ", LABEL_CTDT),
-    ("Số tín chỉ tối đa được đăng ký mỗi kỳ", LABEL_CTDT),
+    ("Số tín chỉ tối đa được đăng ký mỗi kỳ", LABEL_QUYDINH),
     ("Ngành cơ điện tử có triển vọng không?", LABEL_CTDT),
     ("Năm nhất học những gì?", LABEL_CTDT),
     ("Chương trình SIE là chương trình gì?", LABEL_CTDT),
@@ -246,6 +246,35 @@ TRAINING_DATA: List[Tuple[str, str]] = [
     ),
     ("Quy định chuẩn ngoại ngữ từ K70", LABEL_QUYDINH),
     ("Quy định ngoại ngữ từ K68", LABEL_QUYDINH),
+    # ── ctdt — đồ án / ĐATN ────────────────────────────────────────────────
+    ("Đồ án tốt nghiệp ngành CNTT bao nhiêu tín chỉ?", LABEL_CTDT),
+    ("ĐATN ngành Điện tử viễn thông mấy tín chỉ?", LABEL_CTDT),
+    ("Chọn giảng viên hướng dẫn đồ án như thế nào?", LABEL_CTDT),
+    ("Đề tài đồ án tốt nghiệp lấy từ đâu?", LABEL_CTDT),
+    ("Quy trình đăng ký đề tài đồ án", LABEL_CTDT),
+    ("Đồ án chuyên ngành khác đồ án tốt nghiệp thế nào?", LABEL_CTDT),
+    ("Số tín chỉ đồ án 1 và đồ án 2 ngành Cơ điện tử", LABEL_CTDT),
+    ("Có thể thay đồ án tốt nghiệp bằng khoá luận không?", LABEL_CTDT),
+    ("Đồ án tốt nghiệp ở Bách Khoa thực hiện mấy học kỳ?", LABEL_CTDT),
+    ("Tiêu chí đánh giá đồ án tốt nghiệp", LABEL_CTDT),
+    ("Ngành KHMT có bảo vệ đồ án hay làm luận văn?", LABEL_CTDT),
+    ("Đồ án tốt nghiệp có thể làm theo nhóm không?", LABEL_CTDT),
+    ("Cấu trúc báo cáo đồ án tốt nghiệp gồm những phần gì?", LABEL_CTDT),
+    ("Đề cương đồ án tốt nghiệp cần có nội dung gì?", LABEL_CTDT),
+    ("Ngành tự động hóa có môn thực tập tốt nghiệp riêng không?", LABEL_CTDT),
+    # ── ctdt — học phần tương đương / thay thế ─────────────────────────────
+    ("Môn nào có thể thay thế cho Giải tích 1?", LABEL_CTDT),
+    ("Bảng học phần tương đương ngành CNTT", LABEL_CTDT),
+    ("Môn Đại số tuyến tính có học phần tương đương không?", LABEL_CTDT),
+    ("IT4062E tương đương với môn nào trong chương trình cũ?", LABEL_CTDT),
+    ("Tôi đã học Xác suất thống kê ở trường khác, có được miễn không?", LABEL_CTDT),
+    ("Học phần thay thế cho môn Vật lý 1 là gì?", LABEL_CTDT),
+    ("Danh sách các môn tương đương trong chương trình K68 và K66", LABEL_CTDT),
+    ("Môn tiếng Anh 1 có thể thay bằng môn nào?", LABEL_CTDT),
+    ("Chuyển ngành thì những môn đã học có được công nhận tương đương không?", LABEL_CTDT),
+    ("Quy trình xin công nhận học phần tương đương từ trường khác", LABEL_CTDT),
+    ("Có bảng tra học phần thay thế cho sinh viên K67 không?", LABEL_CTDT),
+    ("Môn Lập trình hướng đối tượng IT3100 tương đương môn nào mới?", LABEL_CTDT),
     # ── kehoach (lịch, thông báo, đăng ký) ─────────────────────────────────
     ("Lịch thi cuối kỳ khi nào?", LABEL_KEHOACH),
     ("Bao giờ đăng ký môn học kỳ tới?", LABEL_KEHOACH),
@@ -297,6 +326,33 @@ TRAINING_DATA: List[Tuple[str, str]] = [
     ("Lịch sinh hoạt tuần sinh viên mới", LABEL_KEHOACH),
     ("Lịch thi thể dục thể chất", LABEL_KEHOACH),
     ("Bao giờ đóng học phí kỳ hè?", LABEL_KEHOACH),
+    # ── kehoach — đăng ký học phần (chiếm 74.6% câu hỏi thực tế) ──────────
+    ("Khi nào hệ thống mở đăng ký học phần học kỳ 1?", LABEL_KEHOACH),
+    ("Đợt đăng ký tín chỉ học kỳ 20241 bắt đầu từ ngày nào?", LABEL_KEHOACH),
+    ("Hệ thống đăng ký tín chỉ mở lúc mấy giờ?", LABEL_KEHOACH),
+    ("Môn IT4062E kỳ này còn chỗ không?", LABEL_KEHOACH),
+    ("Còn bao nhiêu slot trống cho môn Giải tích 1?", LABEL_KEHOACH),
+    ("Kỳ này đã hết hạn đăng ký môn chưa?", LABEL_KEHOACH),
+    ("Khi nào đóng cổng đăng ký học phần học kỳ 2?", LABEL_KEHOACH),
+    ("Lịch các đợt đăng ký tín chỉ học kỳ này", LABEL_KEHOACH),
+    ("Đợt 2 đăng ký học phần kỳ 2 khi nào?", LABEL_KEHOACH),
+    ("Bao giờ có đợt đăng ký bổ sung môn học?", LABEL_KEHOACH),
+    ("Thời hạn rút môn học mà không bị điểm W?", LABEL_KEHOACH),
+    ("Deadline đăng ký học lại môn Vật lý 1?", LABEL_KEHOACH),
+    ("Lịch đăng ký học phần học kỳ hè 2025", LABEL_KEHOACH),
+    ("Khi nào sinh viên K68 được đăng ký tín chỉ?", LABEL_KEHOACH),
+    ("Đợt ưu tiên đăng ký môn cho sinh viên năm 4 là bao giờ?", LABEL_KEHOACH),
+    ("Thông báo lịch đăng ký học phần kỳ 20242", LABEL_KEHOACH),
+    ("Bao giờ mở hệ thống đăng ký tín chỉ đợt 1?", LABEL_KEHOACH),
+    ("Lịch các mốc đăng ký tín chỉ học kỳ 2 năm học 2024-2025", LABEL_KEHOACH),
+    ("Hạn cuối đăng ký môn học kỳ 1 2024-2025?", LABEL_KEHOACH),
+    ("Khi nào được phép rút môn mà không bị ảnh hưởng điểm?", LABEL_KEHOACH),
+    # ── kehoach — đồ án / ĐATN timeline ────────────────────────────────────
+    ("Hạn nộp đề cương đồ án tốt nghiệp kỳ này?", LABEL_KEHOACH),
+    ("Lịch bảo vệ đồ án tốt nghiệp đợt tháng 1", LABEL_KEHOACH),
+    ("Deadline nộp báo cáo đồ án tốt nghiệp học kỳ 1", LABEL_KEHOACH),
+    ("Khi nào đăng ký đề tài đồ án tốt nghiệp?", LABEL_KEHOACH),
+    ("Thời gian xét duyệt đề tài đồ án là bao lâu?", LABEL_KEHOACH),
     # ── stsv (sinh viên: thủ tục, KTX, bảo hiểm, thẻ SV) ──────────────────
     ("Thủ tục xin giấy xác nhận sinh viên", LABEL_STSV),
     ("Làm thẻ sinh viên ở đâu?", LABEL_STSV),
@@ -348,6 +404,29 @@ TRAINING_DATA: List[Tuple[str, str]] = [
     ("Thủ tục làm đơn xin việc có xác nhận trường", LABEL_STSV),
     ("Nơi in ấn tài liệu trong trường", LABEL_STSV),
     ("Cách liên hệ cố vấn học tập", LABEL_STSV),
+    # ── stsv — thực tập thủ tục ─────────────────────────────────────────────
+    ("Thủ tục xin giấy giới thiệu thực tập doanh nghiệp", LABEL_STSV),
+    ("Mẫu báo cáo thực tập lấy ở đâu?", LABEL_STSV),
+    ("Cần giấy tờ gì để đăng ký thực tập ngoài trường?", LABEL_STSV),
+    ("Xin xác nhận đang học để nộp cho công ty thực tập", LABEL_STSV),
+    ("Thủ tục nộp báo cáo thực tập cuối kỳ", LABEL_STSV),
+    # ── stsv — học phần tương đương thủ tục ─────────────────────────────────
+    ("Nộp đơn xin công nhận học phần tương đương ở đâu?", LABEL_STSV),
+    ("Thủ tục xin miễn học môn đã học ở trường khác", LABEL_STSV),
+    # ── quydinh — GPA / điểm số ─────────────────────────────────────────────
+    ("CPA tối thiểu để không bị cảnh báo học vụ là bao nhiêu?", LABEL_QUYDINH),
+    ("GPA bao nhiêu thì được xếp loại khá?", LABEL_QUYDINH),
+    ("Quy định cách tính điểm trung bình tích lũy CPA", LABEL_QUYDINH),
+    ("Điểm D có được tính vào CPA không?", LABEL_QUYDINH),
+    ("Bao nhiêu môn F thì bị cảnh báo học vụ?", LABEL_QUYDINH),
+    ("Quy định điểm thành phần và thi cuối kỳ tính tỉ lệ thế nào?", LABEL_QUYDINH),
+    ("CPA học kỳ và CPA tích lũy khác nhau thế nào?", LABEL_QUYDINH),
+    ("Điểm I (incomplete) xử lý thế nào theo quy chế?", LABEL_QUYDINH),
+    ("Thang điểm chữ A B C D F tương ứng với điểm số nào?", LABEL_QUYDINH),
+    ("Quy định về bảo vệ điểm khi môn bị hủy lớp", LABEL_QUYDINH),
+    # ── quydinh — thực tập ──────────────────────────────────────────────────
+    ("Điều kiện được đăng ký thực tập doanh nghiệp", LABEL_QUYDINH),
+    ("Sinh viên phải tích lũy bao nhiêu TC mới được đi thực tập?", LABEL_QUYDINH),
 ]
 
 
@@ -367,12 +446,10 @@ HARD_NEGATIVE_DATA: List[Tuple[str, str]] = [
     ("Bao giờ hết hạn đăng ký bảo hiểm?", LABEL_KEHOACH),  # WHEN → kehoach
     ("Mức đóng bảo hiểm y tế sinh viên năm nay", LABEL_QUYDINH),
     ("Thủ tục hủy bảo hiểm y tế", LABEL_STSV),
-    # credit limits: ctdt vs. quydinh
-    ("Số tín chỉ tối đa được đăng ký mỗi kỳ", LABEL_QUYDINH),  # rule → quydinh
+    # credit limits: quydinh (rule, not curriculum content)
     ("Khung chương trình yêu cầu bao nhiêu tín chỉ mỗi kỳ?", LABEL_CTDT),
     ("Quy định đăng ký tối thiểu bao nhiêu tín chỉ?", LABEL_QUYDINH),
     # graduation: ctdt vs. quydinh
-    ("Điều kiện làm đồ án tốt nghiệp là gì?", LABEL_CTDT),  # part of ctdt
     ("Quy định số tín chỉ tích lũy để làm đồ án", LABEL_QUYDINH),
     ("Môn nào là tiên quyết của đồ án tốt nghiệp?", LABEL_CTDT),
     # kehoach vs. stsv (registrations with both when/where angles)
@@ -392,6 +469,30 @@ HARD_NEGATIVE_DATA: List[Tuple[str, str]] = [
     ("Nộp ở đâu?", LABEL_STSV),
     ("Bao nhiêu tín chỉ?", LABEL_CTDT),
     ("Mức phí là bao nhiêu?", LABEL_QUYDINH),
+    # ── kehoach ↔ ctdt — ranh giới đăng ký học phần (chiếm 74.6%) ──────────
+    # WHEN về môn cụ thể → kehoach; WHAT về môn đó → ctdt
+    ("Khi nào mở đăng ký môn Giải tích 1?", LABEL_KEHOACH),
+    ("Giải tích 1 có bao nhiêu tín chỉ?", LABEL_CTDT),
+    ("Môn IT4062E dạy học kỳ nào?", LABEL_CTDT),    # thuộc CTDT (kế hoạch môn học)
+    ("Kỳ này còn lớp IT4062E không?", LABEL_KEHOACH),  # WHEN/status → kehoach
+    ("Môn Vật lý 1 mở lớp vào học kỳ nào trong năm?", LABEL_CTDT),
+    ("Đợt đăng ký môn Vật lý 1 kỳ này khi nào?", LABEL_KEHOACH),
+    ("Lập trình hướng đối tượng có mấy lớp học kỳ 2?", LABEL_KEHOACH),
+    ("Lập trình hướng đối tượng thuộc khối kiến thức nào?", LABEL_CTDT),
+    # ── kehoach ↔ ctdt — đồ án timeline vs. nội dung ───────────────────────
+    ("Deadline nộp đề cương đồ án tốt nghiệp kỳ này?", LABEL_KEHOACH),
+    ("Đề cương đồ án tốt nghiệp cần có những mục gì?", LABEL_CTDT),
+    ("Bao giờ đăng ký đề tài đồ án tốt nghiệp kỳ 1 2025?", LABEL_KEHOACH),
+    ("Quy trình chọn đề tài đồ án tốt nghiệp như thế nào?", LABEL_CTDT),
+    # ── kehoach ↔ ctdt — học phần tương đương timeline vs. nội dung ─────────
+    ("Hạn nộp đơn xin công nhận học phần tương đương học kỳ này?", LABEL_KEHOACH),
+    ("Học phần tương đương của Đại số tuyến tính là gì?", LABEL_CTDT),
+    # ── ctdt ↔ quydinh — thực tập ───────────────────────────────────────────
+    ("Ngành CNTT có môn thực tập trong chương trình không?", LABEL_CTDT),
+    ("Điều kiện tín chỉ để được đăng ký thực tập?", LABEL_QUYDINH),
+    # ── quydinh ↔ stsv — điểm số ────────────────────────────────────────────
+    ("Quy định xử lý khi bị điểm F môn bắt buộc?", LABEL_QUYDINH),
+    ("Xin phúc khảo điểm thi thì nộp đơn ở đâu?", LABEL_STSV),
 ]
 
 
@@ -475,6 +576,57 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     (
         "Lịch nhận bằng tốt nghiệp và cần mang giấy tờ gì?",
         [LABEL_KEHOACH, LABEL_STSV],
+    ),
+    # ctdt + quydinh — đồ án / ĐATN
+    (
+        "Điều kiện tín chỉ tích lũy để đăng ký đồ án tốt nghiệp ngành CNTT",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Đồ án tốt nghiệp bao nhiêu TC và quy định điểm tối thiểu để qua?",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Chương trình đào tạo kỹ sư tài năng có ĐATN riêng không và điều kiện xét?",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    # ctdt + kehoach — đồ án timeline
+    (
+        "Khi nào đăng ký đề tài đồ án tốt nghiệp và quy trình chọn GVHD?",
+        [LABEL_KEHOACH, LABEL_CTDT],
+    ),
+    (
+        "Lịch bảo vệ đồ án tốt nghiệp và số tín chỉ của môn đó",
+        [LABEL_KEHOACH, LABEL_CTDT],
+    ),
+    # ctdt + stsv — đồ án thủ tục
+    (
+        "Quy trình nộp báo cáo đồ án tốt nghiệp và mẫu báo cáo lấy ở đâu?",
+        [LABEL_CTDT, LABEL_STSV],
+    ),
+    # ctdt + quydinh — học phần tương đương
+    (
+        "Điều kiện để được công nhận học phần tương đương từ trường khác",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Bảng môn tương đương ngành CNTT và quy định nộp đơn xin miễn học",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    # ctdt + kehoach — thực tập
+    (
+        "Điều kiện đăng ký thực tập doanh nghiệp và hạn đăng ký kỳ này",
+        [LABEL_CTDT, LABEL_KEHOACH],
+    ),
+    # quydinh + kehoach — GPA / cảnh báo
+    (
+        "CPA bao nhiêu thì bị cảnh báo và thời hạn khắc phục?",
+        [LABEL_QUYDINH, LABEL_KEHOACH],
+    ),
+    # quydinh + stsv — điểm số
+    (
+        "Quy định phúc khảo bài thi và thủ tục nộp đơn phúc khảo",
+        [LABEL_QUYDINH, LABEL_STSV],
     ),
 ]
 

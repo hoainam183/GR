@@ -19,6 +19,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from dotenv import load_dotenv
 
+from agent.complexity_router import ComplexityRouter
+from agent.react_agent import ReActAgent
 from config.settings import Settings
 from embedding import BGEm3Embedder, E5MultilingualEmbedder
 from llm import BaseLLM, create_llm
@@ -232,6 +234,15 @@ class RAGPipeline:
         self._mongo_logger = mongo_logger
         self._route_cache: OrderedDict[str, tuple[float, Dict[str, Any]]] = OrderedDict()
         self._reflect_cache: OrderedDict[str, tuple[float, str]] = OrderedDict()
+
+        # Week 3 integration: smart router for RAG v2 vs LangGraph agent.
+        self.complexity_router = ComplexityRouter()
+        self.agent = ReActAgent(settings) if settings.agent_enabled else None
+        logger.info(
+            "Agent mode: %s",
+            "enabled (LangGraph)" if self.agent else "disabled",
+        )
+
         logger.info("RAG v2 Pipeline ready.")
 
     # ------------------------------------------------------------------
@@ -402,6 +413,188 @@ class RAGPipeline:
 
         return result
 
+    def query_agent(
+        self,
+        question: str,
+        history: Optional[List[Dict[str, str]]] = None,
+        top_k: Optional[int] = None,
+        session_id: Optional[str] = None,
+        user_context: Optional[Dict[str, Any]] = None,
+        *,
+        route_label: str = "complex",
+        require_agent: bool = False,
+    ) -> Dict[str, Any]:
+        """Force execution through the agent path.
+
+        When ``require_agent`` is False, failures gracefully fall back to
+        classic RAG v2 so requests still complete.
+        """
+        agent_t0 = time.perf_counter()
+
+        def _fallback_result(agent_error: str, tool_payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            result = self.query(
+                question=question,
+                history=history,
+                top_k=top_k,
+                session_id=session_id,
+                user_context=user_context,
+            )
+            result["mode"] = "rag_v2_fallback"
+            result["route"] = route_label
+            result["agent_error"] = agent_error
+
+            tool_info = tool_payload or {}
+            result["tools_used"] = list(tool_info.get("tools_used", []))
+            result["tool_calls"] = list(tool_info.get("tool_calls", []))
+            result["iterations"] = int(tool_info.get("iterations", 0) or 0)
+
+            result["agent_trace"] = {
+                "query": question,
+                "session_id": session_id or "",
+                "route": route_label,
+                "iterations": int(tool_info.get("iterations", 0) or 0),
+                "tool_calls": list(tool_info.get("tool_calls", [])),
+                "tool_names_sequence": list(tool_info.get("tools_used", [])),
+                "final_answer_length": 0,
+                "error": agent_error,
+                "latency_ms": _elapsed_ms(agent_t0),
+            }
+
+            existing_timings = (
+                result.get("timings_ms") if isinstance(result.get("timings_ms"), dict) else None
+            )
+            result["timings_ms"] = _merge_timings(
+                existing_timings,
+                {"agent_attempt_total": _elapsed_ms(agent_t0)},
+            )
+            return result
+
+        if self.agent is None:
+            if require_agent:
+                raise RuntimeError("Agent is required for this endpoint but is disabled")
+            logger.warning("Agent unavailable, falling back to RAG v2")
+            return _fallback_result("Agent is disabled")
+
+        try:
+            state = self.agent.run(
+                question,
+                session_id=session_id or "",
+                history=history,
+            )
+        except Exception as exc:
+            logger.warning(
+                "Agent execution crashed (%s), falling back to RAG v2",
+                exc,
+                exc_info=True,
+            )
+            return _fallback_result(str(exc))
+
+        agent_trace = state.to_log_dict()
+        agent_trace["latency_ms"] = _elapsed_ms(agent_t0)
+        tool_calls = [tr.to_dict() for tr in state.tool_results]
+
+        if (
+            hasattr(self, "_mongo_logger")
+            and self._mongo_logger
+            and hasattr(self._mongo_logger, "log_agent_trace")
+        ):
+            try:
+                self._mongo_logger.log_agent_trace(
+                    session_id or "",
+                    agent_trace,
+                )
+            except Exception:
+                logger.warning("Failed to persist agent trace", exc_info=True)
+
+        if state.error:
+            logger.warning(
+                "Agent failed (%s), falling back to RAG v2",
+                state.error,
+            )
+            return _fallback_result(
+                state.error,
+                {
+                    "tools_used": list(state.tool_call_history),
+                    "tool_calls": tool_calls,
+                    "iterations": state.iteration,
+                },
+            )
+
+        agent_latency_ms = _elapsed_ms(agent_t0)
+        return {
+            "question": question,
+            "answer": state.final_answer or "",
+            "mode": "agent",
+            "route": route_label,
+            "intent": route_label,
+            "model_name": str(getattr(self.agent, "model_name", "agent")),
+            "tools_used": list(state.tool_call_history),
+            "tool_calls": tool_calls,
+            "iterations": state.iteration,
+            "agent_trace": agent_trace,
+            "timings_ms": {
+                "agent_total": agent_latency_ms,
+                "pipeline_total": agent_latency_ms,
+            },
+        }
+
+    def query_v3(
+        self,
+        question: str,
+        history: Optional[List[Dict[str, str]]] = None,
+        top_k: Optional[int] = None,
+        session_id: Optional[str] = None,
+        user_context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Smart entrypoint for Week 3 integration.
+
+        Routing:
+            - chitchat -> lightweight local handler
+            - simple   -> keep using existing RAG v2 pipeline (query)
+            - complex  -> use LangGraph agent when enabled
+
+        Falls back to RAG v2 when agent is unavailable or fails.
+        """
+        route = self.complexity_router.route(question)
+
+        if route == "chitchat":
+            return {
+                "question": question,
+                "answer": self._handle_chitchat(question),
+                "mode": "chitchat",
+                "route": "chitchat",
+                "tools_used": [],
+                "tool_calls": [],
+                "iterations": 0,
+                "agent_trace": None,
+            }
+
+        if route == "simple" or self.agent is None:
+            result = self.query(
+                question=question,
+                history=history,
+                top_k=top_k,
+                session_id=session_id,
+                user_context=user_context,
+            )
+            result["mode"] = "rag_v2"
+            result["route"] = route
+            result.setdefault("tools_used", [])
+            result.setdefault("tool_calls", [])
+            result.setdefault("iterations", 0)
+            result.setdefault("agent_trace", None)
+            return result
+
+        return self.query_agent(
+            question=question,
+            history=history,
+            top_k=top_k,
+            session_id=session_id,
+            user_context=user_context,
+            route_label="complex",
+            require_agent=False,
+        )
+
     # ------------------------------------------------------------------
     # Tier-3: LLM domain classification fallback
     # ------------------------------------------------------------------
@@ -482,6 +675,19 @@ class RAGPipeline:
                 exc,
             )
             return current_routing
+
+    def _handle_chitchat(self, question: str) -> str:
+        """Simple chitchat replies without retrieval cost."""
+        q = question.strip().lower()
+
+        if any(token in q for token in ("cảm ơn", "thank", "thanks")):
+            return "Rất vui được hỗ trợ bạn. Nếu cần thêm thông tin học vụ, bạn cứ hỏi nhé."
+        if any(token in q for token in ("tạm biệt", "bye", "goodbye")):
+            return "Chào bạn, chúc bạn học tốt. Khi cần hỗ trợ học vụ, mình luôn sẵn sàng."
+        if any(token in q for token in ("xin chào", "hello", "hi", "chào", "ok", "oke", "okay")):
+            return "Xin chào! Tôi là trợ lý tư vấn học vụ ĐHBK. Bạn cần hỗ trợ gì?"
+
+        return "Mình đang sẵn sàng hỗ trợ các câu hỏi học vụ ĐHBK. Bạn muốn hỏi nội dung nào?"
 
     def query_stream(
         self,

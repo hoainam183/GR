@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "files": {
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/ITE6_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/batch_resume_test/qa_dataset_lmstudio_ITE6_fix_chunks_20260421_231455.json",
+      "qa_pairs": 1,
+      "processed_at": "2026-04-21T23:14:55.067642"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/CTDT-CNKT-TaiNang-2025.03.30_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/batch_resume_test/qa_dataset_lmstudio_CTDT-CNKT-TaiNang-2025.03.30_fix_chunks_20260421_231525.json",
+      "qa_pairs": 1,
+      "processed_at": "2026-04-21T23:15:25.070229"
+    }
+  },
+  "updated_at": "2026-04-21T23:15:25.070288"
+}

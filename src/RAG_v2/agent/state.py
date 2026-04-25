@@ -5,6 +5,10 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
+# Maximum number of tool results kept in context for the LLM.
+# Older results are still preserved in _log_tool_results for MongoDB logging.
+_CONTEXT_WINDOW_TOOL_LIMIT = 3
+
 
 @dataclass
 class ToolResult:
@@ -14,6 +18,7 @@ class ToolResult:
     args: dict[str, Any]
     result: str
     iteration: int
+    latency_ms: float = 0.0
     timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
 
     def to_dict(self) -> dict[str, Any]:
@@ -22,6 +27,7 @@ class ToolResult:
             "args": self.args,
             "result": self.result,
             "iteration": self.iteration,
+            "latency_ms": self.latency_ms,
             "timestamp": self.timestamp,
         }
 
@@ -32,7 +38,17 @@ class ToolResult:
 
 @dataclass
 class AgentState:
-    """Central agent state carried across ReAct iterations."""
+    """
+    Central agent state carried across ReAct iterations.
+
+    tool_results vs _log_tool_results
+    -----------------------------------
+    ``tool_results``     — latest _CONTEXT_WINDOW_TOOL_LIMIT results injected into
+                           LLM context via get_context_summary().  Kept small to
+                           avoid overwhelming Qwen 8B's context window.
+    ``_log_tool_results`` — complete, untruncated list used by to_log_dict() for
+                            MongoDB logging.  Never discards entries.
+    """
 
     query: str
     session_id: str = ""
@@ -44,7 +60,14 @@ class AgentState:
     final_answer: str | None = None
     route: str = "complex"  # simple | complex | chitchat
     error: str | None = None
-    _tool_call_signatures: set[str] = field(default_factory=set, init=False, repr=False)
+
+    # Private: full log preserved for MongoDB — never truncated
+    _log_tool_results: list[ToolResult] = field(
+        default_factory=list, init=False, repr=False
+    )
+    _tool_call_signatures: set[str] = field(
+        default_factory=set, init=False, repr=False
+    )
 
     def is_done(self) -> bool:
         return (
@@ -64,12 +87,13 @@ class AgentState:
         tool_name: str,
         args: dict[str, Any] | str,
         result: str | None = None,
+        latency_ms: float = 0.0,
     ) -> None:
         """Append tool output.
 
         Supports both signatures for backward compatibility:
         - add_tool_result(tool_name, args_dict, result)
-        - add_tool_result(tool_name, result)
+        - add_tool_result(tool_name, result_string)
         """
         if result is None:
             parsed_args: dict[str, Any] = {}
@@ -85,16 +109,22 @@ class AgentState:
             args=parsed_args,
             result=parsed_result,
             iteration=self.iteration,
+            latency_ms=latency_ms,
         )
+
+        # Full log — never truncated (used by to_log_dict / MongoDB)
+        self._log_tool_results.append(tr)
+
+        # Context window — limited to last N results (used by get_context_summary / LLM)
         self.tool_results.append(tr)
+        if len(self.tool_results) > _CONTEXT_WINDOW_TOOL_LIMIT:
+            self.tool_results = self.tool_results[-_CONTEXT_WINDOW_TOOL_LIMIT:]
+
         self.tool_call_history.append(tool_name)
         self._tool_call_signatures.add(self._build_call_signature(tool_name, parsed_args))
 
-        # Keep only the latest 3 tool results to avoid context bloat on small models.
-        if len(self.tool_results) > 3:
-            self.tool_results = self.tool_results[-3:]
-
     def get_context_summary(self) -> str:
+        """Return last N tool results formatted for LLM context injection."""
         if not self.tool_results:
             return "Chua co ket qua tim kiem."
         parts: list[str] = []
@@ -103,12 +133,14 @@ class AgentState:
         return "\n\n---\n\n".join(parts)
 
     def to_log_dict(self) -> dict[str, Any]:
+        """Serialise to MongoDB-ready dict.  Uses the complete untruncated log."""
+        all_results = self._log_tool_results or self.tool_results
         return {
             "query": self.query,
             "session_id": self.session_id,
             "route": self.route,
             "iterations": self.iteration,
-            "tool_calls": [tr.to_dict() for tr in self.tool_results],
+            "tool_calls": [tr.to_dict() for tr in all_results],
             "tool_names_sequence": self.tool_call_history,
             "final_answer_length": len(self.final_answer) if self.final_answer else 0,
             "error": self.error,
@@ -119,6 +151,5 @@ class AgentState:
         try:
             serialized_args = json.dumps(args, ensure_ascii=False, sort_keys=True)
         except TypeError:
-            # Fallback for non-JSON-serializable tool args.
             serialized_args = repr(args)
         return f"{tool_name}:{serialized_args}"

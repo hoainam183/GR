@@ -1,30 +1,70 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { sendMessage, resolveChatIdentity } from '@/services/chatApi';
-import { ChatResponse } from '@/types/chat';
+import { sendMessageV3, resolveChatIdentity } from '@/services/chatApi';
+import type { ChatV3Response } from '@/types/chat';
+import AgentTrace from '@/components/trace/AgentTrace';
 import PipelineTrace from '@/components/trace/PipelineTrace';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  Brain,
   GitBranch,
   ArrowLeft,
   Send,
   Loader2,
   Activity,
   Info,
+  Layers,
 } from 'lucide-react';
 
+type TraceMode = 'auto' | 'rag' | 'agent';
+
+const TRACE_MODES: Array<{ value: TraceMode; label: string; help: string }> = [
+  {
+    value: 'auto',
+    label: 'Auto',
+    help: 'Router tu dong chon rag/chitchat/agent',
+  },
+  {
+    value: 'rag',
+    label: 'Force RAG',
+    help: 'Bat buoc chay pipeline RAG v2',
+  },
+  {
+    value: 'agent',
+    label: 'Force Agent',
+    help: 'Bat buoc chay LangGraph agent',
+  },
+];
+
 /* ── Animated pipeline skeleton while loading ── */
-function LoadingSkeleton() {
-  const steps = [
-    'Routing query...',
-    'Reflecting query...',
-    'Selecting collections...',
-    'Embedding (BGE-M3 + E5)...',
-    'Hybrid retrieval (Qdrant + ES)...',
-    'Reranking (BGE-v2-m3)...',
-    'Generating answer (Gemini)...',
-  ];
+function LoadingSkeleton({ mode }: { mode: TraceMode }) {
+  const stepsByMode: Record<TraceMode, string[]> = {
+    auto: [
+      'Routing query (simple/chitchat/complex)...',
+      'If complex: agent plans next action...',
+      'Tool execution loop or RAG retrieval...',
+      'Synthesizing final answer...',
+    ],
+    rag: [
+      'Routing query...',
+      'Reflecting query...',
+      'Selecting collections...',
+      'Embedding (BGE-M3 + E5)...',
+      'Hybrid retrieval (Qdrant + ES)...',
+      'Reranking (BGE-v2-m3)...',
+      'Generating answer...',
+    ],
+    agent: [
+      'Agent receives question...',
+      'LLM decides tool call...',
+      'Executing tools via adapters...',
+      'Loop detection / max-iteration guard...',
+      'Synthesizing final answer...',
+    ],
+  };
+
+  const steps = stepsByMode[mode];
   const [activeIdx, setActiveIdx] = useState(0);
 
   React.useEffect(() => {
@@ -73,13 +113,15 @@ const EXAMPLES = [
 
 export default function TracePage() {
   const [question, setQuestion] = useState('');
+  const [mode, setMode] = useState<TraceMode>('auto');
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<ChatResponse | null>(null);
+  const [result, setResult] = useState<ChatV3Response | null>(null);
   const [error, setError] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const identity = resolveChatIdentity();
 
   const debugPayload = {
+    requested_mode: mode,
     source: identity.source,
     user_id: identity.userId ?? null,
     user_context: identity.userContext ?? null,
@@ -95,10 +137,11 @@ export default function TracePage() {
 
     try {
       const liveIdentity = resolveChatIdentity();
-      const res = await sendMessage(
+      const res = await sendMessageV3(
         finalQ,
         [],
         10,
+        mode,
         undefined,
         liveIdentity.userContext,
         liveIdentity.userId,
@@ -139,11 +182,11 @@ export default function TracePage() {
           <div className="h-4 w-px bg-border" />
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-primary" />
-            <h1 className="text-sm font-semibold">Pipeline Trace Debugger</h1>
+            <h1 className="text-sm font-semibold">Trace and Debug Console</h1>
           </div>
           <div className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
             <GitBranch className="w-3 h-3" />
-            RAG v2 — 8 layers
+            RAG v2 + Agent
           </div>
         </div>
       </div>
@@ -154,9 +197,36 @@ export default function TracePage() {
           <div className="space-y-1">
             <h2 className="text-base font-semibold">Query</h2>
             <p className="text-xs text-muted-foreground">
-              Send any question and watch it flow through each layer of the RAG pipeline in real
-              time.
+              Send a question to inspect routing, tools, and internals for both RAG pipeline and
+              LangGraph agent.
             </p>
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Execution Mode
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {TRACE_MODES.map((option) => {
+                const selected = mode === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setMode(option.value)}
+                    disabled={isLoading}
+                    className={`rounded-lg border px-3 py-1.5 text-left transition-colors ${
+                      selected
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-muted/20 text-muted-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    <p className="text-xs font-semibold">{option.label}</p>
+                    <p className="text-[11px]">{option.help}</p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="relative">
@@ -164,7 +234,7 @@ export default function TracePage() {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Nhập câu hỏi để trace qua RAG pipeline..."
+              placeholder="Nhap cau hoi de trace qua RAG/Agent..."
               className="min-h-[80px] resize-none pr-12 text-sm"
               disabled={isLoading}
             />
@@ -227,22 +297,59 @@ export default function TracePage() {
         {/* ── Loading skeleton ── */}
         {isLoading && (
           <div className="border rounded-xl bg-card p-5">
-            <p className="text-sm font-medium mb-2">Processing pipeline…</p>
-            <LoadingSkeleton />
+            <p className="text-sm font-medium mb-2">Processing request...</p>
+            <LoadingSkeleton mode={mode} />
           </div>
         )}
 
         {/* ── Trace result ── */}
         {result && !isLoading && (
           <div ref={resultRef} className="space-y-1">
-            <div className="flex items-center gap-2 pb-2">
+            <div className="flex items-center gap-2 pb-2 flex-wrap">
               <Activity className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-semibold">Pipeline Trace</h2>
+              <h2 className="text-sm font-semibold">Execution Trace</h2>
               <span className="text-xs text-muted-foreground ml-auto">
                 Click any card header to expand / collapse
               </span>
             </div>
-            <PipelineTrace response={result} question={result.question} />
+
+            <div className="border rounded-xl bg-card p-4 flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="sm" className="h-7 text-xs">
+                <Layers className="h-3.5 w-3.5" />
+                requested: {mode}
+              </Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs">
+                <Brain className="h-3.5 w-3.5" />
+                actual: {result.mode || 'unknown'}
+              </Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs">
+                <GitBranch className="h-3.5 w-3.5" />
+                route: {result.route || result.intent || 'n/a'}
+              </Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs">
+                iteration: {result.iterations ?? 0}
+              </Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs">
+                tools: {(result.tools_used ?? []).length}
+              </Button>
+            </div>
+
+            {(result.mode === 'agent' || result.mode === 'rag_v2_fallback' || !!result.agent_trace) && (
+              <AgentTrace response={result} question={result.question || question} />
+            )}
+
+            {result.mode !== 'agent' && (
+              <PipelineTrace response={result} question={result.question || question} />
+            )}
+
+            <details className="border rounded-xl bg-card px-5 py-4">
+              <summary className="cursor-pointer select-none text-sm font-medium">
+                Raw response payload
+              </summary>
+              <pre className="mt-3 max-h-[420px] overflow-auto rounded-md bg-muted/40 p-3 text-[11px] leading-5 text-foreground">
+                {JSON.stringify(result, null, 2)}
+              </pre>
+            </details>
           </div>
         )}
       </div>

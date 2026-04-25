@@ -12,13 +12,57 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
   const isUser = message.role === 'user';
   const [showSources, setShowSources] = useState(false);
   const hasSources = message.sources && message.sources.length > 0;
+
+  const modeLabel = message.mode;
+  const routeLabel = message.route;
+  const iterationCount = message.iterations ?? message.agentTrace?.iterations;
+  const toolsUsed =
+    message.toolsUsed ?? message.agentTrace?.tool_names_sequence ?? [];
+  const agentLatencyMs =
+    typeof message.agentTrace?.latency_ms === 'number'
+      ? message.agentTrace.latency_ms
+      : undefined;
+  const debugError =
+    message.agentError ?? message.error ?? message.agentTrace?.error ?? null;
+
+  const clarifyToolCall = (message.toolCalls ?? []).find(
+    (toolCall) => toolCall.tool === 'clarify_question'
+  );
+  const clarifyPrompt =
+    clarifyToolCall && typeof clarifyToolCall.args?.message === 'string'
+      ? clarifyToolCall.args.message
+      : null;
+  const clarifyOptions = Array.isArray(clarifyToolCall?.args?.options)
+    ? clarifyToolCall.args.options
+        .map((item) => String(item).trim())
+        .filter(Boolean)
+        .slice(0, 3)
+    : [];
+  const contentHasClarifyOptions =
+    clarifyOptions.length > 0 &&
+    clarifyOptions.every((option, index) => {
+      const ordinal = `${index + 1}.`;
+      return message.content.includes(option) || message.content.includes(ordinal);
+    });
+  const showClarifyFallback =
+    !isUser && clarifyOptions.length > 0 && !contentHasClarifyOptions;
+
   const timingEntries = Object.entries(message.timingsMs ?? {}).filter(
     ([, value]) => Number.isFinite(value)
   );
+
+  const routingEntries = Object.entries(message.routingProbabilities ?? {}).filter(
+    ([, value]) => Number.isFinite(value)
+  );
+
   const targetCollectionSet = new Set(message.targetCollections ?? []);
   const rankedCollectionScores = [...(message.collectionScores ?? [])].sort(
     (a, b) => b.score - a.score
   );
+
+  const filterEntries = message.appliedFilters ?? [];
+  const collectionResultEntries = message.collectionResults ?? [];
+
   const displayCollectionScores =
     rankedCollectionScores.length > 0
       ? rankedCollectionScores
@@ -26,9 +70,30 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           collection,
           score: Number.NaN,
         }));
+
+  const topRoutingEntries = [...routingEntries]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
+
   const topTimingEntries = [...timingEntries]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6);
+
+  const showInfoPanel =
+    !isUser &&
+    (
+      Boolean(modeLabel) ||
+      Boolean(routeLabel) ||
+      typeof iterationCount === 'number' ||
+      toolsUsed.length > 0 ||
+      displayCollectionScores.length > 0 ||
+      topRoutingEntries.length > 0 ||
+      filterEntries.length > 0 ||
+      collectionResultEntries.length > 0 ||
+      Boolean(message.reflectedQuestion) ||
+      topTimingEntries.length > 0 ||
+      Boolean(debugError)
+    );
 
   const formatTimingLabel = (stage: string) =>
     stage
@@ -37,6 +102,13 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
 
   const formatTimingSeconds = (milliseconds: number) =>
     `${(milliseconds / 1000).toFixed(2)}s`;
+
+  const formatLatency = (milliseconds: number) => {
+    if (milliseconds < 1000) {
+      return `${Math.round(milliseconds)}ms`;
+    }
+    return `${(milliseconds / 1000).toFixed(2)}s`;
+  };
 
   return (
     <div
@@ -93,8 +165,53 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         )}
       >
         {/* Info Area (Target Collections & Reflected Query) */}
-        {!isUser && (displayCollectionScores.length > 0 || message.reflectedQuestion || topTimingEntries.length > 0) && (
+        {showInfoPanel && (
           <div className="mb-3 space-y-1 text-[11px] text-muted-foreground bg-muted/30 p-2 rounded-md border border-border/50">
+            {(modeLabel || routeLabel || typeof iterationCount === 'number' || agentLatencyMs !== undefined) && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {modeLabel && (
+                  <span className="rounded-sm bg-emerald-500/10 px-1.5 text-emerald-700">
+                    Mode: {modeLabel}
+                  </span>
+                )}
+                {routeLabel && (
+                  <span className="rounded-sm bg-primary/10 px-1.5 text-primary">
+                    Route: {routeLabel}
+                  </span>
+                )}
+                {typeof iterationCount === 'number' && (
+                  <span className="rounded-sm bg-sky-500/10 px-1.5 text-sky-700">
+                    Iterations: {iterationCount}
+                  </span>
+                )}
+                {agentLatencyMs !== undefined && (
+                  <span className="rounded-sm bg-amber-500/10 px-1.5 text-amber-700">
+                    Agent Latency: {formatLatency(agentLatencyMs)}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {toolsUsed.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-semibold text-primary/70">Tools:</span>
+                {toolsUsed.map((toolName, index) => (
+                  <span
+                    key={`${toolName}-${index}`}
+                    className="rounded-sm bg-indigo-500/10 px-1.5 text-indigo-700"
+                  >
+                    #{index + 1} {toolName}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {debugError && (
+              <div className="rounded-sm border border-amber-500/30 bg-amber-500/10 px-1.5 py-1 text-amber-700">
+                Error: {debugError}
+              </div>
+            )}
+
             {displayCollectionScores.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="font-semibold text-primary/70">Collection Ranking:</span>
@@ -120,6 +237,58 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                 })}
               </div>
             )}
+
+            {topRoutingEntries.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-semibold text-primary/70">Routing Prob:</span>
+                {topRoutingEntries.map(([intent, prob]) => (
+                  <span
+                    key={intent}
+                    className="rounded-sm bg-cyan-500/10 px-1.5 text-cyan-700"
+                  >
+                    {intent}: {Number(prob).toFixed(3)}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {filterEntries.length > 0 && (
+              <div className="space-y-1">
+                <div className="font-semibold text-primary/70">Applied Filters:</div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {filterEntries.map((filter) => (
+                    <span
+                      key={filter.collection}
+                      className={cn(
+                        'rounded-sm px-1.5',
+                        filter.applied
+                          ? 'bg-emerald-500/10 text-emerald-700'
+                          : 'bg-muted text-muted-foreground'
+                      )}
+                    >
+                      {filter.collection}: {filter.matched_ids}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {collectionResultEntries.length > 0 && (
+              <div className="space-y-1">
+                <div className="font-semibold text-primary/70">Collection Hits:</div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {collectionResultEntries.map((entry) => (
+                    <span
+                      key={entry.collection}
+                      className="rounded-sm bg-fuchsia-500/10 px-1.5 text-fuchsia-700"
+                    >
+                      {entry.collection}: v{entry.vector_count} / k{entry.keyword_count}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {message.reflectedQuestion && (
               <div className="flex items-start gap-1.5">
                 <span className="font-semibold text-primary/70 shrink-0">Reflected:</span>
@@ -182,6 +351,20 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             {message.content}
           </ReactMarkdown>
         </div>
+
+        {showClarifyFallback && (
+          <div className="mt-3 rounded-md border border-primary/20 bg-primary/5 p-3 text-xs">
+            <div className="mb-1 font-semibold text-primary/80">
+              {clarifyPrompt ?? 'Vui lòng chọn một lựa chọn để tiếp tục:'}
+            </div>
+            <ol className="ml-4 list-decimal space-y-1 text-foreground">
+              {clarifyOptions.map((option, index) => (
+                <li key={`${option}-${index}`}>{option}</li>
+              ))}
+            </ol>
+          </div>
+        )}
+
         <span className="mt-1 block text-[10px] text-muted-foreground opacity-70">
           {message.timestamp.toLocaleTimeString([], {
             hour: '2-digit',

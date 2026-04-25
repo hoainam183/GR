@@ -1,0 +1,300 @@
+{
+  "version": 1,
+  "files": {
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/cokhi/chunks_recursive_parent_child/1.2. Kỹ thuật Cơ khí_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_1.2._Kỹ_thuật_Cơ_khí_fix_chunks_20260421_232339.json",
+      "qa_pairs": 29,
+      "processed_at": "2026-04-21T23:23:39.456667"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/cokhi/chunks_recursive_parent_child/2017.07.02-CTDT-KSCLC-Hang-khong_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_2017.07.02-CTDT-KSCLC-Hang-khong_fix_chunks_20260421_234547.json",
+      "qa_pairs": 119,
+      "processed_at": "2026-04-21T23:45:47.717417"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/cokhi/chunks_recursive_parent_child/4.3. Kỹ thuật Nhiệt_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_4.3._Kỹ_thuật_Nhiệt_fix_chunks_20260421_234917.json",
+      "qa_pairs": 28,
+      "processed_at": "2026-04-21T23:49:17.670062"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/cokhi/chunks_recursive_parent_child/CTDT_CDT_TN_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_CTDT_CDT_TN_fix_chunks_20260421_235310.json",
+      "qa_pairs": 22,
+      "processed_at": "2026-04-21T23:53:10.641472"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/cokhi/chunks_recursive_parent_child/CTĐT Cử nhân Kỹ thuật CĐT 2023_song ngữ_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_CTĐT_Cử_nhân_Kỹ_thuật_CĐT_2023_song_ngữ_fix_chunks_20260421_235905.json",
+      "qa_pairs": 41,
+      "processed_at": "2026-04-21T23:59:05.346972"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/cokhi/chunks_recursive_parent_child/CTĐT ME-NUT_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_CTĐT_ME-NUT_fix_chunks_20260422_090144.json",
+      "qa_pairs": 15,
+      "processed_at": "2026-04-22T09:01:44.904028"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/cokhi/chunks_recursive_parent_child/ME_GU_Giới thiệu CTwebsite 01_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ME_GU_Giới_thiệu_CTwebsite_01_fix_chunks_20260422_091031.json",
+      "qa_pairs": 55,
+      "processed_at": "2026-04-22T09:10:31.970428"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/cokhi/chunks_recursive_parent_child/Quyển CTĐT Cơ điện tử_LUH website 01.docx_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_Quyển_CTĐT_Cơ_điện_tử_LUH_website_01.docx_fix_chunks_20260422_091605.json",
+      "qa_pairs": 37,
+      "processed_at": "2026-04-22T09:16:05.353513"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/dien-dientu/chunks_recursive_parent_child/3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks_20260422_092229.json",
+      "qa_pairs": 31,
+      "processed_at": "2026-04-22T09:22:29.617675"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/dien-dientu/chunks_recursive_parent_child/ctdt-dien-1-ee1-program-final.137618.10284_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ctdt-dien-1-ee1-program-final.137618.10284_fix_chunks_20260422_102207.json",
+      "qa_pairs": 374,
+      "processed_at": "2026-04-22T10:22:07.827162"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/dien-dientu/chunks_recursive_parent_child/eee18_cttt_program_ee1_final_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_eee18_cttt_program_ee1_final_fix_chunks_20260422_104815.json",
+      "qa_pairs": 128,
+      "processed_at": "2026-04-22T10:48:15.676811"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/dien-dientu/chunks_recursive_parent_child/khung-ct-ee-ep-k68_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_khung-ct-ee-ep-k68_fix_chunks_20260422_105353.json",
+      "qa_pairs": 23,
+      "processed_at": "2026-04-22T10:53:53.026517"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/dien-dientu/chunks_recursive_parent_child/khung-ctdt-ee-e8_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_khung-ctdt-ee-e8_fix_chunks_20260422_105940.json",
+      "qa_pairs": 26,
+      "processed_at": "2026-04-22T10:59:40.940611"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/hoa/chunks_recursive_parent_child/Hoa_hoc_Chuong_trinh_cu_nhan_thac_si_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_Hoa_hoc_Chuong_trinh_cu_nhan_thac_si_fix_chunks_20260422_111056.json",
+      "qa_pairs": 61,
+      "processed_at": "2026-04-22T11:10:56.097569"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/hoa/chunks_recursive_parent_child/KTHH_Ky_su_180TC_2021_23_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_KTHH_Ky_su_180TC_2021_23_fix_chunks_20260422_112714.json",
+      "qa_pairs": 64,
+      "processed_at": "2026-04-22T11:27:14.929840"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/hoa/chunks_recursive_parent_child/KT_Moi_truong_Cu_nhan_Ky_su_Bac_7_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_KT_Moi_truong_Cu_nhan_Ky_su_Bac_7_fix_chunks_20260422_113246.json",
+      "qa_pairs": 25,
+      "processed_at": "2026-04-22T11:32:46.167150"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/hoa/chunks_recursive_parent_child/KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks_20260422_114531.json",
+      "qa_pairs": 47,
+      "processed_at": "2026-04-22T11:45:31.930401"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/hoa/chunks_recursive_parent_child/QLTNMT_Cu_nhan_Ky_su_Bac_7_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_QLTNMT_Cu_nhan_Ky_su_Bac_7_fix_chunks_20260422_115036.json",
+      "qa_pairs": 30,
+      "processed_at": "2026-04-22T11:50:36.654070"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/hoa/chunks_recursive_parent_child/kt_thuc_pham_cu_nhan_ky_su_bac_7_2020_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_kt_thuc_pham_cu_nhan_ky_su_bac_7_2020_fix_chunks_20260422_120153.json",
+      "qa_pairs": 61,
+      "processed_at": "2026-04-22T12:01:53.662823"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/hoa/chunks_recursive_parent_child/ky_thuat_hoa_duoc_ct_tien_tien_2020_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ky_thuat_hoa_duoc_ct_tien_tien_2020_fix_chunks_20260422_121926.json",
+      "qa_pairs": 112,
+      "processed_at": "2026-04-22T12:19:26.499040"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/hoa/chunks_recursive_parent_child/ky_thuat_thuc_pham_ct_tien_tien_2019_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ky_thuat_thuc_pham_ct_tien_tien_2019_fix_chunks_20260422_193025.json",
+      "qa_pairs": 35,
+      "processed_at": "2026-04-22T19:30:25.902530"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/CTDT-CN.KHMT-K70-V2025.03.28_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_CTDT-CN.KHMT-K70-V2025.03.28_fix_chunks_20260422_195219.json",
+      "qa_pairs": 200,
+      "processed_at": "2026-04-22T19:52:19.020092"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/CTDT-CNKT-TaiNang-2025.03.30_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_CTDT-CNKT-TaiNang-2025.03.30_fix_chunks_20260422_201352.json",
+      "qa_pairs": 162,
+      "processed_at": "2026-04-22T20:13:52.410382"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/IT2_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_IT2_fix_chunks_20260422_203432.json",
+      "qa_pairs": 203,
+      "processed_at": "2026-04-22T20:34:32.455654"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/ITE10_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ITE10_fix_chunks_20260422_203510.json",
+      "qa_pairs": 5,
+      "processed_at": "2026-04-22T20:35:10.814970"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/ITE15_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ITE15_fix_chunks_20260422_205809.json",
+      "qa_pairs": 192,
+      "processed_at": "2026-04-22T20:58:09.157326"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/ITE6_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ITE6_fix_chunks_20260422_212050.json",
+      "qa_pairs": 217,
+      "processed_at": "2026-04-22T21:20:50.372498"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/ITE7_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ITE7_fix_chunks_20260422_214208.json",
+      "qa_pairs": 184,
+      "processed_at": "2026-04-22T21:42:08.496363"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/soict/chunks_recursive_parent_child/ITEP_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ITEP_fix_chunks_20260422_214241.json",
+      "qa_pairs": 5,
+      "processed_at": "2026-04-22T21:42:41.878768"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/toan/chunks_recursive_parent_child/BSCS-Curriculum-2023-2024-updated_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_BSCS-Curriculum-2023-2024-updated_fix_chunks_20260422_214317.json",
+      "qa_pairs": 8,
+      "processed_at": "2026-04-22T21:43:17.026413"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/toan/chunks_recursive_parent_child/MI2_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_MI2_fix_chunks_20260422_214609.json",
+      "qa_pairs": 26,
+      "processed_at": "2026-04-22T21:46:09.614722"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/toan/chunks_recursive_parent_child/toantin_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_toantin_fix_chunks_20260422_215028.json",
+      "qa_pairs": 26,
+      "processed_at": "2026-04-22T21:50:28.514800"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/vatlieu/chunks_recursive_parent_child/20231123-Khung-chuong-trinh-dao-tao-KTVDT-CNNN-cu-nhan-upload_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_20231123-Khung-chuong-trinh-dao-tao-KTVDT-CNNN-cu-nhan-upload_fix_chunks_20260422_215055.json",
+      "qa_pairs": 5,
+      "processed_at": "2026-04-22T21:50:55.416331"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/vatlieu/chunks_recursive_parent_child/Khung CTĐT_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_Khung_CTĐT_fix_chunks_20260422_215711.json",
+      "qa_pairs": 33,
+      "processed_at": "2026-04-22T21:57:11.790911"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/vatlieu/chunks_recursive_parent_child/Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_Khung_chương_trình_đào_tạo_Công_nghệ_vật_liệu_polyme_và_compozit_fix_chunks_20260422_215947.json",
+      "qa_pairs": 16,
+      "processed_at": "2026-04-22T21:59:47.610917"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/vatlieu/chunks_recursive_parent_child/MSE3 - Khung CTTT KH-KTVL_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_MSE3_-_Khung_CTTT_KH-KTVL_fix_chunks_20260422_221601.json",
+      "qa_pairs": 159,
+      "processed_at": "2026-04-22T22:16:01.655517"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/vatlieu/chunks_recursive_parent_child/ctdt-cu-nhan-thac-si-kh-kt-in_song-ngu.03.03.2022_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ctdt-cu-nhan-thac-si-kh-kt-in_song-ngu.03.03.2022_fix_chunks_20260422_224309.json",
+      "qa_pairs": 277,
+      "processed_at": "2026-04-22T22:43:09.905184"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/ctdt/vatlieu/chunks_recursive_parent_child/mse-k65-khung-ct-cu-nhan-2023-10-19-upload-web_fix_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_mse-k65-khung-ct-cu-nhan-2023-10-19-upload-web_fix_chunks_20260422_224425.json",
+      "qa_pairs": 10,
+      "processed_at": "2026-04-22T22:44:25.985112"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/kehoach/chunks/kehoach_all_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_kehoach_all_chunks_20260422_234425.json",
+      "qa_pairs": 711,
+      "processed_at": "2026-04-22T23:44:25.927340"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_converted_chunks_20260422_234823.json",
+      "qa_pairs": 52,
+      "processed_at": "2026-04-22T23:48:23.320818"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/01_3 HD hoc chuyen tiep ky su 180 TC_Final_converted_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_01_3_HD_hoc_chuyen_tiep_ky_su_180_TC_Final_converted_chunks_20260422_235006.json",
+      "qa_pairs": 24,
+      "processed_at": "2026-04-22T23:50:06.737143"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/06_ Quy định ngoại ngữ từ K70_chính quy_final_converted_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_06__Quy_định_ngoại_ngữ_từ_K70_chính_quy_final_converted_chunks_20260423_000346.json",
+      "qa_pairs": 122,
+      "processed_at": "2026-04-23T00:03:46.013925"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/1. QĐ Học bổng KKHT 2023_converted_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_1._QĐ_Học_bổng_KKHT_2023_converted_chunks_20260423_000636.json",
+      "qa_pairs": 33,
+      "processed_at": "2026-04-23T00:06:36.077461"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/4. QĐ thi Olympic và ĐMST 2023_converted_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_4._QĐ_thi_Olympic_và_ĐMST_2023_converted_chunks_20260423_001044.json",
+      "qa_pairs": 52,
+      "processed_at": "2026-04-23T00:10:44.974989"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/5. Quy định QLSV nước ngoài 2023_converted_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_5._Quy_định_QLSV_nước_ngoài_2023_converted_chunks_20260423_001627.json",
+      "qa_pairs": 74,
+      "processed_at": "2026-04-23T00:16:27.748707"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/ELITECH_K62_K64_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_ELITECH_K62_K64_chunks_20260423_001731.json",
+      "qa_pairs": 18,
+      "processed_at": "2026-04-23T00:17:31.855272"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/Khung-DGRL-2020-2021_converted_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_Khung-DGRL-2020-2021_converted_chunks_20260423_001947.json",
+      "qa_pairs": 22,
+      "processed_at": "2026-04-23T00:19:47.386481"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/QCDT_2025_5445_QD-DHBK_converted_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_QCDT_2025_5445_QD-DHBK_converted_chunks_20260423_004249.json",
+      "qa_pairs": 254,
+      "processed_at": "2026-04-23T00:42:49.695795"
+    },
+    "/Users/nam.nguyen/GR/src/RAG_v2/data/quydinh/olmocr/chunks_recursive_parent_child_3/QD NN DHCQ-2020-2021-1501_converted_chunks.json": {
+      "status": "done",
+      "output_path": "outputs/qa_dataset_lmstudio_QD_NN_DHCQ-2020-2021-1501_converted_chunks_20260423_005542.json",
+      "qa_pairs": 130,
+      "processed_at": "2026-04-23T00:55:42.675997"
+    }
+  },
+  "updated_at": "2026-04-23T00:55:42.676073"
+}

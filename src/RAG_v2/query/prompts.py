@@ -5,43 +5,83 @@ from __future__ import annotations
 # ─── Router Prompt ──────────────────────────────────────────────────────────────
 
 ROUTER_SYSTEM_PROMPT = """\
-You are an intent classifier for a Vietnamese university chatbot.
-Classify the user message into exactly ONE of: rag, chitchat, tool_search.
+You are an intent and domain classifier for a Vietnamese university chatbot.
 
-Definitions:
+Step 1 — Classify the user message into exactly ONE intent:
 - **chitchat**: Greetings, small talk, thanks, goodbye, jokes, or questions
   unrelated to university policies/regulations/academics.
 - **rag**: Questions about university rules, academic policies, scholarships,
-  registration, grading, student regulations, curriculum, or any topic that
-  can be answered from the university's internal document knowledge base.
+  registration, grading, student regulations, curriculum, equivalent courses,
+  capstone projects, or any topic answered from the university's internal documents.
 - **tool_search**: Questions that require up-to-date or external information
-  not found in university documents (e.g. current weather, live news, web
-  lookup for non-university topics).
+  not found in university documents (e.g. current weather, live news, web lookup).
 
-Respond with a single JSON object: {"intent": "<rag|chitchat|tool_search>"}
-Do NOT include any other text."""
+Step 2 — When intent is "rag", predict 1–3 relevant domains from:
+- **ctdt**: curriculum, courses, credits, majors, syllabi, degree programmes,
+  equivalent/substitute courses, capstone project (đồ án) content.
+- **quydinh**: regulations, policies, conditions, grading rules, scholarship
+  criteria, academic standing rules (GPA/CPA thresholds).
+- **kehoach**: schedules, deadlines, course registration windows, exam timetables,
+  events, calendars. Use this when the question is WHEN/timing-focused.
+- **stsv**: student procedures, dormitory, insurance, student ID, forms, support.
+
+Key disambiguation rules:
+- "Khi nào mở đăng ký môn X?" → kehoach (WHEN). "Môn X học gì?" → ctdt (WHAT).
+- "Điều kiện đồ án?" → ctdt+quydinh. "Deadline nộp đồ án?" → kehoach.
+- "Học phần thay thế môn X là gì?" → ctdt. "Nộp đơn TĐ ở đâu?" → stsv.
+- Short follow-ups ("Còn slot không?", "Bao giờ?") → kehoach if timing-related.
+
+Respond ONLY with a single JSON object, no other text:
+{"intent": "<rag|chitchat|tool_search>", "domains": ["domain1", ...]}
+- For chitchat or tool_search: "domains" must be [].
+- For rag: list 1–3 most relevant domains."""
 
 ROUTER_FEW_SHOT = [
     {"role": "user", "content": "Xin chào!"},
-    {"role": "assistant", "content": '{"intent": "chitchat"}'},
+    {"role": "assistant", "content": '{"intent": "chitchat", "domains": []}'},
     {"role": "user", "content": "Điều kiện xét học bổng khuyến khích là gì?"},
-    {"role": "assistant", "content": '{"intent": "rag"}'},
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["quydinh"]}'},
     {"role": "user", "content": "Quy chế đào tạo mới có gì thay đổi?"},
-    {"role": "assistant", "content": '{"intent": "rag"}'},
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["quydinh", "ctdt"]}'},
     {"role": "user", "content": "Thời tiết hôm nay thế nào?"},
-    {"role": "assistant", "content": '{"intent": "tool_search"}'},
+    {"role": "assistant", "content": '{"intent": "tool_search", "domains": []}'},
     {"role": "user", "content": "Cảm ơn bạn nhiều nhé"},
-    {"role": "assistant", "content": '{"intent": "chitchat"}'},
-    {
-        "role": "user",
-        "content": "Sinh viên nước ngoài cần giấy tờ gì để nhập học?",
-    },
-    {"role": "assistant", "content": '{"intent": "rag"}'},
+    {"role": "assistant", "content": '{"intent": "chitchat", "domains": []}'},
+    {"role": "user", "content": "Sinh viên nước ngoài cần giấy tờ gì để nhập học?"},
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["stsv"]}'},
     {
         "role": "user",
         "content": "Tìm giúp mình thông tin mới nhất về học phí trên mạng",
     },
-    {"role": "assistant", "content": '{"intent": "tool_search"}'},
+    {"role": "assistant", "content": '{"intent": "tool_search", "domains": []}'},
+    # ── kehoach — registration timing (most common real query type) ──────────
+    {"role": "user", "content": "Khi nào mở đăng ký môn học kỳ 1?"},
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach"]}'},
+    {"role": "user", "content": "Môn IT4062E kỳ này còn slot không?"},
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach"]}'},
+    {"role": "user", "content": "Hạn cuối rút môn không bị điểm F là khi nào?"},
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach"]}'},
+    # ── ctdt — curriculum, ĐATN, học phần tương đương ───────────────────────
+    {"role": "user", "content": "Đồ án tốt nghiệp ngành CNTT bao nhiêu tín chỉ?"},
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["ctdt"]}'},
+    {"role": "user", "content": "Môn nào có thể thay thế cho Giải tích 1?"},
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["ctdt"]}'},
+    # ── multi-domain examples ────────────────────────────────────────────────
+    {
+        "role": "user",
+        "content": "Điều kiện TC tích lũy để làm đồ án và deadline đăng ký đề tài?",
+    },
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["ctdt", "quydinh", "kehoach"]}'},
+    {
+        "role": "user",
+        "content": "Lịch đăng ký tín chỉ kỳ 2 ngành Cơ điện tử",
+    },
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach", "ctdt"]}'},
+    {
+        "role": "user",
+        "content": "Điều kiện nhận học bổng và nộp hồ sơ ở đâu?",
+    },
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["quydinh", "stsv"]}'},
 ]
 
 # ─── Reflection Prompts ────────────────────────────────────────────────────────
@@ -81,12 +121,46 @@ tôi", "nó", "đó"), ưu tiên giải tham chiếu theo thứ tự:
 hay markdown.
 
 VÍ DỤ FEW-SHOT:
+---
+Ví dụ 1 — Giải tham chiếu ngành từ USER_PROFILE:
 USER_PROFILE: sinh viên ngành Công nghệ thông tin
 CHAT_HISTORY:
 - Người dùng: Em đang học ngành CNTT.
 - Trợ lý: Mình đã ghi nhận ngành của bạn.
 CÂU HỎI HIỆN TẠI: Môn triết học Mác-Lênin trong ngành học của tôi có bao nhiêu tín chỉ?
-STANDALONE QUERY: Môn triết học Mác-Lênin trong ngành Công nghệ thông tin Việt Nhật có bao nhiêu tín chỉ?"""
+STANDALONE QUERY: Môn triết học Mác-Lênin trong ngành Công nghệ thông tin có bao nhiêu tín chỉ?
+
+---
+Ví dụ 2 — Đồ án tốt nghiệp với profile ngành:
+USER_PROFILE: sinh viên ngành Kỹ thuật điện tử viễn thông (ET-E2), Khóa K67
+CHAT_HISTORY: (khong co)
+CÂU HỎI HIỆN TẠI: Điều kiện để đăng ký đồ án tốt nghiệp của ngành tôi là gì?
+STANDALONE QUERY: Điều kiện để đăng ký đồ án tốt nghiệp ngành Kỹ thuật điện tử viễn thông (ET-E2) là gì?
+
+---
+Ví dụ 3 — Học phần tương đương với mã môn từ CHAT_HISTORY:
+USER_PROFILE: (khong co)
+CHAT_HISTORY:
+- Người dùng: Tôi muốn hỏi về môn IT3100.
+- Trợ lý: Môn IT3100 là Lập trình hướng đối tượng.
+CÂU HỎI HIỆN TẠI: Môn này có học phần tương đương trong chương trình mới không?
+STANDALONE QUERY: Môn IT3100 Lập trình hướng đối tượng có học phần tương đương trong chương trình đào tạo mới không?
+
+---
+Ví dụ 4 — Follow-up về đăng ký học phần, giữ nguyên mã môn từ history:
+USER_PROFILE: sinh viên ngành Khoa học máy tính (IT-E6), Khóa K68
+CHAT_HISTORY:
+- Người dùng: IT4062E học kỳ này còn lớp không?
+- Trợ lý: Học kỳ 20241 hiện còn 2 lớp mở cho môn IT4062E.
+CÂU HỎI HIỆN TẠI: Khi nào đóng hạn đăng ký?
+STANDALONE QUERY: Hạn cuối đăng ký học phần IT4062E học kỳ 20241 là khi nào?
+
+---
+Ví dụ 5 — Câu hỏi không có tham chiếu mơ hồ, giữ nguyên:
+USER_PROFILE: (khong co)
+CHAT_HISTORY: (khong co)
+CÂU HỎI HIỆN TẠI: Quy định điểm F trong quy chế đào tạo 2025 là gì?
+STANDALONE QUERY: Quy định điểm F trong quy chế đào tạo đại học chính quy 2025 là gì?"""
 
 REWRITE_WITH_HISTORY_TEMPLATE = """\
 ### INPUT

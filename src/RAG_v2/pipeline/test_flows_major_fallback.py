@@ -148,6 +148,75 @@ def test_rag_flow_stream_fallback_extracts_major_from_user_context() -> None:
     )
 
 
+def test_rag_flow_keeps_major_terms_for_quydinh_only_routing() -> None:
+    deps = _make_deps()
+    question = "quy định đầu ra ngoại ngữ trong ngành Công nghệ thông tin Việt - Nhật (IT-E6)"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    rag_flow(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+        routing_result={
+            "domain": "quydinh",
+            "domains": ["quydinh"],
+            "confidence": 0.85,
+        },
+    )
+
+    search_kwargs = deps["searcher"].search.call_args.kwargs
+    assert search_kwargs["resolved_major"] == "IT-E6"
+    assert search_kwargs["query"] == question
+    deps["bge"].embed_query.assert_called_with(question)
+    deps["e5"].embed_query.assert_called_with(question)
+
+
+def test_rag_flow_stream_keeps_major_terms_for_quydinh_only_routing() -> None:
+    deps = _make_deps()
+    question = "quy định đầu ra ngoại ngữ trong ngành Công nghệ thông tin Việt - Nhật (IT-E6)"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    stream, _sources = rag_flow_stream(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        cfg=deps["cfg"],
+        routing_result={
+            "domain": "quydinh",
+            "domains": ["quydinh"],
+            "confidence": 0.85,
+        },
+    )
+    list(stream)
+
+    search_kwargs = deps["searcher"].search.call_args.kwargs
+    assert search_kwargs["resolved_major"] == "IT-E6"
+    assert search_kwargs["query"] == question
+    deps["bge"].embed_query.assert_called_with(question)
+    deps["e5"].embed_query.assert_called_with(question)
+
+
 def test_rag_flow_fallback_uses_full_history_for_major_resolution() -> None:
     deps = _make_deps()
     question = "môn lập trình mạng trong ngành của tôi"

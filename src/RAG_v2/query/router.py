@@ -25,11 +25,14 @@ logger = logging.getLogger(__name__)
 
 # ─── Constants ──────────────────────────────────────────────────────────────────
 VALID_INTENTS = {"chitchat", "rag", "tool_search"}
+VALID_DOMAINS = {"ctdt", "quydinh", "kehoach", "stsv"}
 DEFAULT_INTENT = "rag"
 DEFAULT_MODEL = "gpt-4o-mini"
 
-# Number of recent chat turns to prepend as context
-_CONTEXT_WINDOW = 2
+# Number of recent chat turns to prepend as context for the classifier / LLM.
+# Raised from 2 → 5: multi-turn registration queries often reference a course
+# mentioned 3–4 turns back (e.g. "Kỳ này còn slot không?" after "Môn IT4062E").
+_CONTEXT_WINDOW = 5
 
 
 def build_routing_input(
@@ -138,26 +141,33 @@ class QueryRouter:
         routing_input = build_routing_input(query, chat_history)
         result = self._classifier.predict(routing_input)
 
-        logger.info(
-            "Router(classifier): query=%r → intent=%s, domains=%s, conf=%.3f",
+        intent = result["intent"]
+        domains = result.get("domains", [result["domain"]] if result["domain"] else [])
+        confidence = result["confidence"]
+
+        # Production monitoring: log confidence so histogram can be built
+        # to detect distribution drift (alert if P(conf < 0.55) > 20%).
+        log_level = logging.WARNING if confidence < 0.55 else logging.INFO
+        logger.log(
+            log_level,
+            "Router(classifier): query=%r → intent=%s domains=%s conf=%.3f%s",
             query[:80],
-            result["intent"],
-            result.get("domains"),
-            result["confidence"],
+            intent,
+            domains,
+            confidence,
+            " [LOW_CONF]" if confidence < 0.55 else "",
         )
         return {
-            "intent": result["intent"],
+            "intent": intent,
             "domain": result["domain"],
-            "domains": result.get(
-                "domains", [result["domain"]] if result["domain"] else []
-            ),
-            "confidence": result["confidence"],
+            "domains": domains,
+            "confidence": confidence,
             "label": result["label"],
             "probabilities": result.get("probabilities", {}),
         }
 
     # ------------------------------------------------------------------
-    # LLM-based routing (original)
+    # LLM-based routing
     # ------------------------------------------------------------------
 
     def _route_llm(self, query: str) -> Dict[str, Any]:
@@ -167,23 +177,24 @@ class QueryRouter:
             model=self.model,
             messages=messages,
             temperature=self.temperature,
-            max_tokens=50,
+            max_tokens=100,  # raised from 50 to accommodate domains list
         )
 
         raw = response.choices[0].message.content.strip()
-        intent = self._parse_intent(raw)
+        intent, domains = self._parse_response(raw)
 
         logger.info(
-            "Router(llm): query=%r → intent=%s (raw=%r)",
+            "Router(llm): query=%r → intent=%s domains=%s (raw=%r)",
             query[:80],
             intent,
+            domains,
             raw,
         )
 
         return {
             "intent": intent,
-            "domain": None,
-            "domains": [],
+            "domain": domains[0] if domains else None,
+            "domains": domains,
             "confidence": None,
             "raw_response": raw,
         }
@@ -199,26 +210,33 @@ class QueryRouter:
         messages.append({"role": "user", "content": query})
         return messages
 
-    def _parse_intent(self, raw: str) -> str:
-        """Extract intent string from the LLM's JSON response.
+    def _parse_response(self, raw: str) -> tuple[str, List[str]]:
+        """Extract intent and domains from the LLM's JSON response.
 
-        Falls back to ``DEFAULT_INTENT`` ("rag") when parsing fails.
+        Returns:
+            (intent, domains) — falls back to (DEFAULT_INTENT, []) on failure.
         """
         try:
             data = json.loads(raw)
             intent = data.get("intent", DEFAULT_INTENT)
             if intent not in VALID_INTENTS:
                 logger.warning(
-                    "Unknown intent '%s', falling back to '%s'",
-                    intent,
-                    DEFAULT_INTENT,
+                    "Unknown intent %r, falling back to %r", intent, DEFAULT_INTENT
                 )
-                return DEFAULT_INTENT
-            return intent
+                intent = DEFAULT_INTENT
+
+            raw_domains: List[str] = data.get("domains", [])
+            domains = [d for d in raw_domains if d in VALID_DOMAINS]
+
+            if intent != "rag":
+                domains = []
+
+            return intent, domains
+
         except (json.JSONDecodeError, AttributeError):
             logger.warning(
-                "Failed to parse router response: %r, falling back to '%s'",
+                "Failed to parse router response: %r, falling back to %r",
                 raw,
                 DEFAULT_INTENT,
             )
-            return DEFAULT_INTENT
+            return DEFAULT_INTENT, []

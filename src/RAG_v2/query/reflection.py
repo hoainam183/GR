@@ -299,11 +299,13 @@ def _extract_entities(
             3. Conversation ``history`` — user-stated facts in the session.
 
     Returns a dict with keys (all values may be ``None``):
-      - ``major_code``    — e.g. "IT-E6"
-      - ``major_name``    — e.g. "Công nghệ thông tin Việt - Nhật"
-      - ``cohort``        — e.g. "65"
-      - ``year_of_study`` — e.g. "2"
-      - ``course_code``   — e.g. "IT4062E"
+      - ``major_code``      — e.g. "IT-E6"
+      - ``major_name``      — e.g. "Công nghệ thông tin Việt - Nhật"
+      - ``cohort``          — e.g. "65"
+      - ``year_of_study``   — e.g. "2"
+      - ``course_code``     — e.g. "IT4062E"
+      - ``semester``        — e.g. "1" or "2" or "he" (hè)
+      - ``academic_year``   — e.g. "20241" (semester code) or "2024-2025"
     """
     # Late import to avoid circular dependency (retrieval → reflection).
     from retrieval.metadata_filters import (  # noqa: PLC0415
@@ -317,6 +319,8 @@ def _extract_entities(
         "cohort": None,
         "year_of_study": None,
         "course_code": None,
+        "semester": None,
+        "academic_year": None,
     }
 
     profile = _normalise_profile_context(user_context)
@@ -380,9 +384,72 @@ def _extract_entities(
             break
 
     # ── course_code ───────────────────────────────────────────────────────────
-    mo = _COURSE_CODE_RE.search(query)
-    if mo:
-        entities["course_code"] = mo.group(1).upper()
+    # Priority: current query first, then history (most-recent user turn first).
+    # This ensures follow-up queries like "Còn slot không?" resolve correctly
+    # when the course was mentioned in a prior turn.
+    course_sources = [query] + [
+        m.get("content", "")
+        for m in reversed(history or [])
+        if m.get("role") == "user"
+    ]
+    for text in course_sources:
+        mo = _COURSE_CODE_RE.search(text)
+        if mo:
+            entities["course_code"] = mo.group(1).upper()
+            break
+
+    # ── semester ──────────────────────────────────────────────────────────────
+    # Captures:
+    #   - Semester codes like "20241", "20242", "20243" (hè)
+    #   - Vietnamese phrases: "học kỳ 1", "học kỳ 2", "học kỳ hè", "HK1", "HK2"
+    #   - English: "semester 1", "semester 2"
+    _SEMESTER_CODE_RE = re.compile(r"\b(20\d{2}[123])\b")
+    _SEMESTER_NAME_RE = re.compile(
+        r"(?:h\u1ecdc\s*k\u1ef3|hk|semester)\s*([12h\u00e8])",
+        re.IGNORECASE,
+    )
+    _HE_RE = re.compile(r"k\u1ef3\s*h\u00e8|h\u1ecdc\s*k\u1ef3\s*h\u00e8", re.IGNORECASE)
+
+    sem_sources = [query] + [
+        m.get("content", "")
+        for m in reversed(history or [])
+        if m.get("role") in ("user", "assistant")
+    ]
+    for text in sem_sources:
+        # Full semester code takes precedence (e.g. "20241")
+        mo = _SEMESTER_CODE_RE.search(text)
+        if mo:
+            code = mo.group(1)
+            entities["academic_year"] = code
+            # Last digit: 1→HK1, 2→HK2, 3→HKhè
+            sem_digit = code[-1]
+            entities["semester"] = "he" if sem_digit == "3" else sem_digit
+            break
+        # hè keyword
+        if _HE_RE.search(text):
+            entities["semester"] = "he"
+            break
+        # "học kỳ 1 / HK2 / semester 2"
+        mo = _SEMESTER_NAME_RE.search(text)
+        if mo:
+            val = mo.group(1).lower()
+            entities["semester"] = "he" if val in ("h", "è") else val
+            break
+
+    # ── academic_year (YYYY-YYYY format) ──────────────────────────────────────
+    # Only populate if not already set from semester code above.
+    if not entities["academic_year"]:
+        _AY_RE = re.compile(r"\b(20\d{2})\s*[-–]\s*(20\d{2})\b")
+        ay_sources = [query] + [
+            m.get("content", "")
+            for m in reversed(history or [])
+            if m.get("role") == "user"
+        ]
+        for text in ay_sources:
+            mo = _AY_RE.search(text)
+            if mo:
+                entities["academic_year"] = f"{mo.group(1)}-{mo.group(2)}"
+                break
 
     return entities
 

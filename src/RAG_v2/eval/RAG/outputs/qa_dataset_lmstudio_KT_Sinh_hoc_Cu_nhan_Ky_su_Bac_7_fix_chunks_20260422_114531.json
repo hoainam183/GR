@@ -1,0 +1,528 @@
+{
+  "total": 47,
+  "by_type": {
+    "factoid": 12,
+    "multi_hop": 14,
+    "procedural": 11,
+    "comparative": 10
+  },
+  "pairs": [
+    {
+      "question": "Chương trình Kỹ thuật Sinh học có bao nhiêu tín chỉ trong phần đào tạo Kỹ sư?",
+      "ground_truth": "48 tín chỉ",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC]\n\n# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC\n\n**Tên chương trình:** Kỹ thuật Sinh học  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Sinh học  \n**Mã ngành:** 7420202  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật Sinh học  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---"
+      ],
+      "source_chunk_id": "b6cfcf13-1227-4fce-9f16-a44c8d37cdfd",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC"
+    },
+    {
+      "question": "Thời gian đào tạo chương trình Kỹ thuật Sinh học là bao nhiêu năm?",
+      "ground_truth": "5,5 năm",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC]\n\n# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC\n\n**Tên chương trình:** Kỹ thuật Sinh học  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Sinh học  \n**Mã ngành:** 7420202  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật Sinh học  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---"
+      ],
+      "source_chunk_id": "b6cfcf13-1227-4fce-9f16-a44c8d37cdfd",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC"
+    },
+    {
+      "question": "Để hoàn thành chương trình cử nhân Kỹ thuật Sinh học, sinh viên cần hoàn thành bao nhiêu tín chỉ và trong đó khối kiến thức nào có số lượng tín chỉ lớn nhất?",
+      "ground_truth": "Sinh viên cần hoàn thành 132 tín chỉ. Khối kiến thức có số lượng tín chỉ lớn nhất là Giáo dục chuyên nghiệp với 110 tín chỉ.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo]\n\n## 1. Cấu trúc chung của chương trình đào tạo\n\n### 1.1. Cử nhân Kỹ thuật Sinh học\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **110** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm 02 đồ án kỹ thuật |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba |\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập tốt nghiệp. SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân |\n| **Tổng cộng** | **132 tín chỉ** | |\n\n### 1.2. Kỹ sư Kỹ thuật sinh học (bậc 7)\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm 01 Đồ án theo chuyên ngành (Đồ án thiết kế 1, 3TC) trong mỗi mô đun. Học phần Cơ sở lập dự án và thiết kế nhà máy (2TC) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm 01 Đồ án theo chuyên ngành (Đồ án 2, 2TC) trong mỗi mô đun |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "source_chunk_id": "1740e242-1f49-4787-aed0-ce1f97fec942",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình cử nhân Kỹ thuật Sinh học, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học một môn học trong chương trình cử nhân Kỹ thuật Sinh học là sinh viên đã hoàn thành môn học đó tại cấp học trước hoặc có chứng chỉ quốc tế tương đương.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo]\n\n## 1. Cấu trúc chung của chương trình đào tạo\n\n### 1.1. Cử nhân Kỹ thuật Sinh học\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **110** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm 02 đồ án kỹ thuật |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba |\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập tốt nghiệp. SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân |\n| **Tổng cộng** | **132 tín chỉ** | |\n\n### 1.2. Kỹ sư Kỹ thuật sinh học (bậc 7)\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm 01 Đồ án theo chuyên ngành (Đồ án thiết kế 1, 3TC) trong mỗi mô đun. Học phần Cơ sở lập dự án và thiết kế nhà máy (2TC) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm 01 Đồ án theo chuyên ngành (Đồ án 2, 2TC) trong mỗi mô đun |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "source_chunk_id": "1740e242-1f49-4787-aed0-ce1f97fec942",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo"
+    },
+    {
+      "question": "So sánh giữa khối kiến thức Giáo dục đại cương và Giáo dục chuyên nghiệp trong chương trình đào tạo cử nhân Kỹ thuật Sinh học?",
+      "ground_truth": "Khối kiến thức Giáo dục đại cương có tổng số tín chỉ là 51, bao gồm các môn Toán và khoa học cơ bản, Lý luận chính trị + Pháp luật đại cương, GDTC/GD QP-AN và Tiếng Anh. Trong khi đó, khối Giáo dục chuyên nghiệp có tổng số tín chỉ là 110 và bao gồm các môn Cơ sở và cốt lõi ngành, Kiến thức bổ trợ, Tự chọn theo mô đun, Thực tập kỹ thuật và Đồ án tốt nghiệp cử nhân.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo > 1.1. Cử nhân Kỹ thuật Sinh học]\n\n## 1. Cấu trúc chung của chương trình đào tạo\n### 1.1. Cử nhân Kỹ thuật Sinh học\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **110** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm 02 đồ án kỹ thuật |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba |\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập tốt nghiệp. SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân |"
+      ],
+      "source_chunk_id": "ab5575f6-41e7-42da-948b-2f2f034fc6a1",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo > 1.1. Cử nhân Kỹ thuật Sinh học"
+    },
+    {
+      "question": "So sánh giữa môn Technical Writing and Presentation và kỹ năng xã hội/khởi nghiệp trong khối kiến thức bổ trợ?",
+      "ground_truth": "Technical Writing and Presentation là một phần của môn Kiến thức bổ trợ với 3 tín chỉ, trong khi kỹ năng xã hội/khởi nghiệp là một phần bắt buộc khác của khối kiến thức bổ trợ với 6 tín chỉ. Cả hai đều là các môn học bắt buộc trong khối kiến thức bổ trợ.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo > 1.1. Cử nhân Kỹ thuật Sinh học]\n\n## 1. Cấu trúc chung của chương trình đào tạo\n### 1.1. Cử nhân Kỹ thuật Sinh học\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **110** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm 02 đồ án kỹ thuật |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba |\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập tốt nghiệp. SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân |"
+      ],
+      "source_chunk_id": "ab5575f6-41e7-42da-948b-2f2f034fc6a1",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo > 1.1. Cử nhân Kỹ thuật Sinh học"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình kỹ sư Kỹ thuật sinh học, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Đoạn văn không cung cấp thông tin về điều kiện được miễn học một môn học trong chương trình này.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo > 1.2. Kỹ sư Kỹ thuật sinh học (bậc 7)]\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Tổng cộng** | **132 tín chỉ** | |\n### 1.2. Kỹ sư Kỹ thuật sinh học (bậc 7)\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm 01 Đồ án theo chuyên ngành (Đồ án thiết kế 1, 3TC) trong mỗi mô đun. Học phần Cơ sở lập dự án và thiết kế nhà máy (2TC) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm 01 Đồ án theo chuyên ngành (Đồ án 2, 2TC) trong mỗi mô đun |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "source_chunk_id": "0ad04347-d427-4dd6-a62f-4c5a2495c642",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo > 1.2. Kỹ sư Kỹ thuật sinh học (bậc 7)"
+    },
+    {
+      "question": "Để hoàn thành chương trình kỹ sư Kỹ thuật sinh học (bậc 7), sinh viên cần hoàn thành ít nhất bao nhiêu tín chỉ và các học phần nào là bắt buộc?",
+      "ground_truth": "Sinh viên cần hoàn thành ít nhất 48 tín chỉ. Các học phần bắt buộc bao gồm Chuyên ngành cốt lõi (19 tín chỉ), Tự chọn kỹ sư (14 tín chỉ), Tự chọn mô đun (8 tín chỉ), Tự chọn chung (6 tín chỉ), Thực tập kỹ sư (6 tín chỉ) và Đồ án kỹ sư (9 tín chỉ).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo > 1.2. Kỹ sư Kỹ thuật sinh học (bậc 7)]\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Tổng cộng** | **132 tín chỉ** | |\n### 1.2. Kỹ sư Kỹ thuật sinh học (bậc 7)\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm 01 Đồ án theo chuyên ngành (Đồ án thiết kế 1, 3TC) trong mỗi mô đun. Học phần Cơ sở lập dự án và thiết kế nhà máy (2TC) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm 01 Đồ án theo chuyên ngành (Đồ án 2, 2TC) trong mỗi mô đun |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "source_chunk_id": "0ad04347-d427-4dd6-a62f-4c5a2495c642",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 1. Cấu trúc chung của chương trình đào tạo > 1.2. Kỹ sư Kỹ thuật sinh học (bậc 7)"
+    },
+    {
+      "question": "Học phần 'Kỹ thuật sinh học xử lý chất thải' có mã số là gì?",
+      "ground_truth": "BF4701",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn]\n\n## 2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Lý luận chính trị + Pháp luật đại cương (13 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác - Lênin | 3(2-1-0-6) | 1 |\n| 2 | SSH1121 | Kinh tế chính trị Mác - Lênin | 2(2-0-0-4) | 2 |\n| 3 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 4 |\n| 4 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 5 |\n| 5 | SSH1141 | Lịch sử Đảng Cộng sản Việt Nam | 2(2-0-0-4) | |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 2 |\n\n### Giáo dục thể chất (5 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 7 | PE1014 | Lý luận thể dục thể thao | 1(0-0-2-0) |\n| 8 | PE1024 | Bơi lội | 1(0-0-2-0) |\n| 9 | Tự chọn | Tự chọn thể dục 1 | 1(0-0-2-0) |\n| 10 | Tự chọn | Tự chọn thể dục 2 | 1(0-0-2-0) |\n| 11 | Tự chọn | Tự chọn thể dục 3 | 1(0-0-2-0) |\n\n### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-0-2-8) |\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 15 | FL1100 | Tiếng Anh I | 3(0-6-0-6) | 1 |\n| 16 | FL1101 | Tiếng Anh II | 3(0-6-0-6) | 2 |\n\n### Toán và Khoa học cơ bản (32 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 17 | MI1112 | Giải tích I | 3(2-2-0-6) | 1 |\n| 18 | MI1122 | Giải tích II | 3(2-2-0-6) | 2 |\n| 19 | MI1132 | Giải tích III | 3(2-2-0-6) | 4 |\n| 20 | MI1142 | Đại số | 3(2-2-0-6) | 1 |\n| 21 | MI3180 | Xác suất thống kê và qui hoạch thực nghiệm | 3(3-1-0-6) | 5 |\n| 22 | PH1111 | Vật lý đại cương I | 2(2-0-1-4) | 2 |\n| 23 | PH1121 | Vật lý đại cương II | 2(2-0-1-4) | 3 |\n| 24 | PH1131 | Vật lý đại cương III | 2(2-0-1-4) | 4 |\n| 25 | IT1140 | Tin học đại cương | 4(3-1-1-8) | 2 |\n| 26 | CH1018 | Hóa học | 2(2-1-0-4) | 1 |\n| 27 | CH3224 | Hoá hữu cơ | 2(2-1-0-4) | 3 |\n| 28 | CH3081 | Hóa lý | 2(2-1-0-4) | 4 |\n| 29 | CH3082 | Thí nghiệm hóa lý | 1(0-0-2-2) | 4 |\n\n### Cơ sở và cốt lõi ngành (48 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | CH3316 | Hoá phân tích | 2(2-1-0-4) | 3 |\n| 31 | CH3318 | Thí nghiệm hóa phân tích | 1(0-0-2-2) | 3 |\n| 32 | EE2012 | Kỹ thuật điện | 2(2-1-0-4) | 4 |\n| 33 | ME2015 | Đồ họa kỹ thuật cơ bản | 3(3-1-0-6) | 4 |\n| 34 | BF2701 | Nhập môn kỹ thuật sinh học | 2(1-1-1-4) | 3 |\n| 35 | BF3711 | Quá trình và thiết bị CNSH I | 2(1-1-1-4) | 4 |\n| 36 | BF3712 | Quá trình và thiết bị CNSH II | 3(2-1-1-6) | 5 |\n| 37 | BF3713 | Quá trình và thiết bị CNSH III | 2(2-1-0-4) | 6 |\n| 38 | BF4725 | Kỹ thuật đo lường và điều khiển tự động trong CNSH | 2(2-0-1-4) | 8 |\n| 39 | BF4726 | Quản lý chất lượng trong CNSH | 2(2-0-0-4) | 8 |\n| 40 | BF3714 | Đồ án quá trình và thiết bị CNSH | 1(0-2-0-2) | 6 |\n| 41 | BF2702 | Hóa sinh | 4(4-0-0-8) | 4 |\n| 42 | BF2703 | Thí nghiệm hóa sinh | 2(0-0-4-4) | 4 |\n| 43 | BF3701 | Vi sinh vật I | 3(3-0-0-6) | 5 |\n| 44 | BF3702 | Thí nghiệm vi sinh vật | 2(0-0-4-4) | 5 |\n| 45 | BF3703 | Sinh học tế bào | 2(2-0-1-4) | 5 |\n| 46 | BF3704 | Miễn dịch học | 2(2-0-0-4) | 6 |\n| 47 | BF3705 | Di truyền học và Sinh học phân tử | 3(2-2-0-6) | 6 |\n| 48 | BF3706 | Kỹ thuật gen | 2(2-0-1-4) | 6 |\n| 49 | BF3707 | Tin sinh học | 2(1-0-2-4) | 6 |\n| 50 | BF3708 | Phương pháp phân tích trong CNSH | 2(2-0-1-4) | 6 |\n| 51 | BF4727 | Đồ án chuyên ngành KTSH | 2(0-4-0-4) | 8 |\n\n### Kiến thức bổ trợ (9 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 52 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) |\n| 53 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) |\n| 54 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) |\n| 55 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) |\n| 56 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) |\n| 57 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) |\n| 58 | BF2020 | Technical Writing and Presentation | 3(2-2-0-6) |\n\n### Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ)\n\n#### Mô đun 1: Công nghệ sinh học Môi trường (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 59 | BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7 |\n| 60 | BF4702 | Độc tố học môi trường | 2(2-0-0-4) | 7 |\n| 61 | BF4703 | Vi sinh vật II - môi trường | 2(2-0-0-4) | 7 |\n| 62 | EV4241 | Quản lý môi trường | 2(2-0-0-4) | 7 |\n| 63 | BF4704 | TN Kỹ thuật sinh học xử lý chất thải | 2(0-0-4-4) | 7 |\n| 64 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 65 | BF4709 | Kỹ thuật thu hồi hoàn thiện sản phẩm | 2(2-0-0-4) | 7 |\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 66 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 67 | BF4706 | Kỹ thuật phân tích phân tử trong CNTP | 2(2-0-1-4) | 7 |\n| 68 | BF4707 | Vi sinh vật II - thực phẩm | 2(2-0-0-4) | 7 |\n| 69 | BF4511 | Enzym trong công nghệ thực phẩm | 2(2-0-0-4) | 7 |\n| 70 | BF4708 | Thí nghiệm kỹ thuật lên men | 2(0-0-4-4) | 7 |\n| 71 | BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7 |\n| 72 | BF4721 | Sinh vật biến đổi gen và ứng dụng | 2(2-0-0-4) | 7 |\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 73 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 74 | BF4709 | Kỹ thuật thu hồi hoàn thiện sản phẩm | 2(2-0-0-4) | 7 |\n| 75 | BF4711 | Vi sinh vật II - công nghiệp | 2(2-0-0-4) | 7 |\n| 76 | BF4712 | Enzyme học | 2(2-0-0-4) | 7 |\n| 77 | BF4708 | Thí nghiệm kỹ thuật lên men | 2(0-0-4-4) | 7 |\n| 78 | BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7 |\n| 79 | BF4718 | Kỹ thuật thu nhận hợp chất có hoạt tính sinh học từ thực vật | 2(2-1-0-4) | 7 |\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 80 | BF4713 | Công nghệ tế bào động vật | 3(2-2-0-6) | 7 |\n| 81 | BF4714 | Kỹ thuật phân tích và chẩn đoán phân tử | 2(2-0-1-4) | 7 |\n| 82 | BF4715 | Kỹ thuật nuôi cấy vi rút | 2(2-0-0-4) | 7 |\n| 83 | BF4716 | Công nghệ DNA tái tổ hợp | 2(2-0-0-4) | 7 |\n| 84 | BF4717 | TN Kỹ thuật DNA tái tổ hợp | 2(0-0-4-4) | 7 |\n| 85 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 86 | BF4709 | Kỹ thuật thu hồi hoàn thiện sản phẩm | 2(2-0-0-4) | 7 |\n\n### Thực tập kỹ thuật (2 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 87 | BF4781 | Thực tập kỹ thuật | 2(0-0-6-4) | 8 |\n\n### Đồ án tốt nghiệp Cử nhân (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 88 | BF4791 | Đồ án tốt nghiệp cử nhân KTSH | 6(0-0-12-12) | 8 |\n\n---"
+      ],
+      "source_chunk_id": "1a095c35-eba6-4865-a020-dcb89f00db32",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn"
+    },
+    {
+      "question": "Học sinh muốn được miễn học môn Giáo dục thể chất cần đáp ứng điều kiện gì?",
+      "ground_truth": "Học sinh muốn được miễn học môn Giáo dục thể chất cần đáp ứng điều kiện đã hoàn thành các môn học trong chương trình giáo dục thể chất theo quy định của nhà trường.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Giáo dục thể chất (5 tín chỉ)]\n\n## 2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Lý luận chính trị + Pháp luật đại cương (13 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác - Lênin | 3(2-1-0-6) | 1 |\n| 2 | SSH1121 | Kinh tế chính trị Mác - Lênin | 2(2-0-0-4) | 2 |\n| 3 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 4 |\n| 4 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 5 |\n| 5 | SSH1141 | Lịch sử Đảng Cộng sản Việt Nam | 2(2-0-0-4) | |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 2 |\n\n### Giáo dục thể chất (5 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 7 | PE1014 | Lý luận thể dục thể thao | 1(0-0-2-0) |\n| 8 | PE1024 | Bơi lội | 1(0-0-2-0) |\n| 9 | Tự chọn | Tự chọn thể dục 1 | 1(0-0-2-0) |\n| 10 | Tự chọn | Tự chọn thể dục 2 | 1(0-0-2-0) |\n| 11 | Tự chọn | Tự chọn thể dục 3 | 1(0-0-2-0) |"
+      ],
+      "source_chunk_id": "35bf12ae-3b51-4e9e-ab09-373c17759569",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Giáo dục thể chất (5 tín chỉ)"
+    },
+    {
+      "question": "So sánh giữa học phần 'Lý luận chính trị + Pháp luật đại cương' và học phần 'Giáo dục thể chất' trong chương trình giáo dục đại học Kỹ thuật sinh học theo số tín chỉ và hình thức học tập?",
+      "ground_truth": "Học phần 'Lý luận chính trị + Pháp luật đại cương' có tổng số tín chỉ là 13, bao gồm nhiều học phần với hình thức học tập đa dạng (giảng dạy lý thuyết và thực hành). Trong khi đó, học phần 'Giáo dục thể chất' có tổng số tín chỉ là 5 và chủ yếu tập trung vào các hoạt động thể dục thực hành với hình thức học tập mang tính ứng dụng cao.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Giáo dục thể chất (5 tín chỉ)]\n\n## 2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Lý luận chính trị + Pháp luật đại cương (13 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác - Lênin | 3(2-1-0-6) | 1 |\n| 2 | SSH1121 | Kinh tế chính trị Mác - Lênin | 2(2-0-0-4) | 2 |\n| 3 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 4 |\n| 4 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 5 |\n| 5 | SSH1141 | Lịch sử Đảng Cộng sản Việt Nam | 2(2-0-0-4) | |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 2 |\n\n### Giáo dục thể chất (5 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 7 | PE1014 | Lý luận thể dục thể thao | 1(0-0-2-0) |\n| 8 | PE1024 | Bơi lội | 1(0-0-2-0) |\n| 9 | Tự chọn | Tự chọn thể dục 1 | 1(0-0-2-0) |\n| 10 | Tự chọn | Tự chọn thể dục 2 | 1(0-0-2-0) |\n| 11 | Tự chọn | Tự chọn thể dục 3 | 1(0-0-2-0) |"
+      ],
+      "source_chunk_id": "35bf12ae-3b51-4e9e-ab09-373c17759569",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Giáo dục thể chất (5 tín chỉ)"
+    },
+    {
+      "question": "So sánh số lượng tín chỉ của học phần 'Tiếng Anh I' và 'Tiếng Anh II' trong chương trình kỹ thuật sinh học?",
+      "ground_truth": "'Tiếng Anh I' và 'Tiếng Anh II' đều có 3 tín chỉ.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tiếng Anh (6 tín chỉ)]\n\n### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-0-2-8) |\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 15 | FL1100 | Tiếng Anh I | 3(0-6-0-6) | 1 |\n| 16 | FL1101 | Tiếng Anh II | 3(0-6-0-6) | 2 |"
+      ],
+      "source_chunk_id": "36c79c7d-2671-49c4-9f45-d024bdf8b5b3",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tiếng Anh (6 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học môn Tiếng Anh, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên được miễn học môn Tiếng Anh nếu đã hoàn thành chương trình tiếng Anh tại cấp trung học phổ thông và đạt điểm tối thiểu 6.5 trong kỳ thi đánh giá năng lực tiếng Anh do nhà trường tổ chức.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tiếng Anh (6 tín chỉ)]\n\n### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-0-2-8) |\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 15 | FL1100 | Tiếng Anh I | 3(0-6-0-6) | 1 |\n| 16 | FL1101 | Tiếng Anh II | 3(0-6-0-6) | 2 |"
+      ],
+      "source_chunk_id": "36c79c7d-2671-49c4-9f45-d024bdf8b5b3",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tiếng Anh (6 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình Toán và Khoa học cơ bản, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học một môn học trong chương trình này là sinh viên đã hoàn thành môn học tương đương tại trường khác hoặc có chứng chỉ quốc tế được công nhận.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Toán và Khoa học cơ bản (32 tín chỉ)]\n\n### Toán và Khoa học cơ bản (32 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 17 | MI1112 | Giải tích I | 3(2-2-0-6) | 1 |\n| 18 | MI1122 | Giải tích II | 3(2-2-0-6) | 2 |\n| 19 | MI1132 | Giải tích III | 3(2-2-0-6) | 4 |\n| 20 | MI1142 | Đại số | 3(2-2-0-6) | 1 |\n| 21 | MI3180 | Xác suất thống kê và qui hoạch thực nghiệm | 3(3-1-0-6) | 5 |\n| 22 | PH1111 | Vật lý đại cương I | 2(2-0-1-4) | 2 |\n| 23 | PH1121 | Vật lý đại cương II | 2(2-0-1-4) | 3 |\n| 24 | PH1131 | Vật lý đại cương III | 2(2-0-1-4) | 4 |\n| 25 | IT1140 | Tin học đại cương | 4(3-1-1-8) | 2 |\n| 26 | CH1018 | Hóa học | 2(2-1-0-4) | 1 |\n| 27 | CH3224 | Hoá hữu cơ | 2(2-1-0-4) | 3 |\n| 28 | CH3081 | Hóa lý | 2(2-1-0-4) | 4 |\n| 29 | CH3082 | Thí nghiệm hóa lý | 1(0-0-2-2) | 4 |"
+      ],
+      "source_chunk_id": "775f08a9-d086-4660-a747-73160679f36e",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Toán và Khoa học cơ bản (32 tín chỉ)"
+    },
+    {
+      "question": "Sinh viên cần học những học phần nào trong kỳ 5 để đáp ứng yêu cầu về Toán và Khoa học cơ bản?",
+      "ground_truth": "Sinh viên cần học học phần Xác suất thống kê và qui hoạch thực nghiệm (Mã số: MI3180) trong kỳ 5 để đáp ứng yêu cầu về Toán và Khoa học cơ bản.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Toán và Khoa học cơ bản (32 tín chỉ)]\n\n### Toán và Khoa học cơ bản (32 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 17 | MI1112 | Giải tích I | 3(2-2-0-6) | 1 |\n| 18 | MI1122 | Giải tích II | 3(2-2-0-6) | 2 |\n| 19 | MI1132 | Giải tích III | 3(2-2-0-6) | 4 |\n| 20 | MI1142 | Đại số | 3(2-2-0-6) | 1 |\n| 21 | MI3180 | Xác suất thống kê và qui hoạch thực nghiệm | 3(3-1-0-6) | 5 |\n| 22 | PH1111 | Vật lý đại cương I | 2(2-0-1-4) | 2 |\n| 23 | PH1121 | Vật lý đại cương II | 2(2-0-1-4) | 3 |\n| 24 | PH1131 | Vật lý đại cương III | 2(2-0-1-4) | 4 |\n| 25 | IT1140 | Tin học đại cương | 4(3-1-1-8) | 2 |\n| 26 | CH1018 | Hóa học | 2(2-1-0-4) | 1 |\n| 27 | CH3224 | Hoá hữu cơ | 2(2-1-0-4) | 3 |\n| 28 | CH3081 | Hóa lý | 2(2-1-0-4) | 4 |\n| 29 | CH3082 | Thí nghiệm hóa lý | 1(0-0-2-2) | 4 |"
+      ],
+      "source_chunk_id": "775f08a9-d086-4660-a747-73160679f36e",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Toán và Khoa học cơ bản (32 tín chỉ)"
+    },
+    {
+      "question": "Sinh viên cần học những học phần nào để đủ điều kiện học học phần 'Quá trình và thiết bị CNSH III'?",
+      "ground_truth": "Sinh viên cần học các học phần 'Quá trình và thiết bị CNSH I' (mã BF3711) và 'Quá trình và thiết bị CNSH II' (mã BF3712) trước khi học 'Quá trình và thiết bị CNSH III' (mã BF3713).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Cơ sở và cốt lõi ngành (48 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (48 tín chỉ)\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | CH3316 | Hoá phân tích | 2(2-1-0-4) | 3 |\n| 31 | CH3318 | Thí nghiệm hóa phân tích | 1(0-0-2-2) | 3 |\n| 32 | EE2012 | Kỹ thuật điện | 2(2-1-0-4) | 4 |\n| 33 | ME2015 | Đồ họa kỹ thuật cơ bản | 3(3-1-0-6) | 4 |\n| 34 | BF2701 | Nhập môn kỹ thuật sinh học | 2(1-1-1-4) | 3 |\n| 35 | BF3711 | Quá trình và thiết bị CNSH I | 2(1-1-1-4) | 4 |\n| 36 | BF3712 | Quá trình và thiết bị CNSH II | 3(2-1-1-6) | 5 |\n| 37 | BF3713 | Quá trình và thiết bị CNSH III | 2(2-1-0-4) | 6 |\n| 38 | BF4725 | Kỹ thuật đo lường và điều khiển tự động trong CNSH | 2(2-0-1-4) | 8 |\n| 39 | BF4726 | Quản lý chất lượng trong CNSH | 2(2-0-0-4) | 8 |\n| 40 | BF3714 | Đồ án quá trình và thiết bị CNSH | 1(0-2-0-2) | 6 |\n| 41 | BF2702 | Hóa sinh | 4(4-0-0-8) | 4 |\n| 42 | BF2703 | Thí nghiệm hóa sinh | 2(0-0-4-4) | 4 |\n| 43 | BF3701 | Vi sinh vật I | 3(3-0-0-6) | 5 |\n| 44 | BF3702 | Thí nghiệm vi sinh vật | 2(0-0-4-4) | 5 |\n| 45 | BF3703 | Sinh học tế bào | 2(2-0-1-4) | 5 |"
+      ],
+      "source_chunk_id": "cd2526e4-c514-4b69-a8ce-616eb354625a",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Cơ sở và cốt lõi ngành (48 tín chỉ)"
+    },
+    {
+      "question": "Học phần 'Quá trình và thiết bị CNSH I' có mã số là gì?",
+      "ground_truth": "BF3711",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Cơ sở và cốt lõi ngành (48 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (48 tín chỉ)\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | CH3316 | Hoá phân tích | 2(2-1-0-4) | 3 |\n| 31 | CH3318 | Thí nghiệm hóa phân tích | 1(0-0-2-2) | 3 |\n| 32 | EE2012 | Kỹ thuật điện | 2(2-1-0-4) | 4 |\n| 33 | ME2015 | Đồ họa kỹ thuật cơ bản | 3(3-1-0-6) | 4 |\n| 34 | BF2701 | Nhập môn kỹ thuật sinh học | 2(1-1-1-4) | 3 |\n| 35 | BF3711 | Quá trình và thiết bị CNSH I | 2(1-1-1-4) | 4 |\n| 36 | BF3712 | Quá trình và thiết bị CNSH II | 3(2-1-1-6) | 5 |\n| 37 | BF3713 | Quá trình và thiết bị CNSH III | 2(2-1-0-4) | 6 |\n| 38 | BF4725 | Kỹ thuật đo lường và điều khiển tự động trong CNSH | 2(2-0-1-4) | 8 |\n| 39 | BF4726 | Quản lý chất lượng trong CNSH | 2(2-0-0-4) | 8 |\n| 40 | BF3714 | Đồ án quá trình và thiết bị CNSH | 1(0-2-0-2) | 6 |\n| 41 | BF2702 | Hóa sinh | 4(4-0-0-8) | 4 |\n| 42 | BF2703 | Thí nghiệm hóa sinh | 2(0-0-4-4) | 4 |\n| 43 | BF3701 | Vi sinh vật I | 3(3-0-0-6) | 5 |\n| 44 | BF3702 | Thí nghiệm vi sinh vật | 2(0-0-4-4) | 5 |\n| 45 | BF3703 | Sinh học tế bào | 2(2-0-1-4) | 5 |"
+      ],
+      "source_chunk_id": "cd2526e4-c514-4b69-a8ce-616eb354625a",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Cơ sở và cốt lõi ngành (48 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào trong chương trình cơ sở và cốt lõi ngành Kỹ thuật Sinh học có số tín chỉ cao nhất?",
+      "ground_truth": "Học phần Đồ án chuyên ngành KTSH có số tín chỉ cao nhất với 4 tín chỉ.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Cơ sở và cốt lõi ngành (48 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (48 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 46 | BF3704 | Miễn dịch học | 2(2-0-0-4) | 6 |\n| 47 | BF3705 | Di truyền học và Sinh học phân tử | 3(2-2-0-6) | 6 |\n| 48 | BF3706 | Kỹ thuật gen | 2(2-0-1-4) | 6 |\n| 49 | BF3707 | Tin sinh học | 2(1-0-2-4) | 6 |\n| 50 | BF3708 | Phương pháp phân tích trong CNSH | 2(2-0-1-4) | 6 |\n| 51 | BF4727 | Đồ án chuyên ngành KTSH | 2(0-4-0-4) | 8 |"
+      ],
+      "source_chunk_id": "92528709-4dcb-4ef1-87e3-cfd2c38160f8",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Cơ sở và cốt lõi ngành (48 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào trong chương trình cơ sở và cốt lõi ngành Kỹ thuật Sinh học được giảng dạy ở kỳ 8?",
+      "ground_truth": "Học phần Đồ án chuyên ngành KTSH được giảng dạy ở kỳ 8.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Cơ sở và cốt lõi ngành (48 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (48 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 46 | BF3704 | Miễn dịch học | 2(2-0-0-4) | 6 |\n| 47 | BF3705 | Di truyền học và Sinh học phân tử | 3(2-2-0-6) | 6 |\n| 48 | BF3706 | Kỹ thuật gen | 2(2-0-1-4) | 6 |\n| 49 | BF3707 | Tin sinh học | 2(1-0-2-4) | 6 |\n| 50 | BF3708 | Phương pháp phân tích trong CNSH | 2(2-0-1-4) | 6 |\n| 51 | BF4727 | Đồ án chuyên ngành KTSH | 2(0-4-0-4) | 8 |"
+      ],
+      "source_chunk_id": "92528709-4dcb-4ef1-87e3-cfd2c38160f8",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Cơ sở và cốt lõi ngành (48 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào có mã số BF2020 và bao nhiêu tín chỉ?",
+      "ground_truth": "BF2020 là học phần Technical Writing and Presentation với 3 tín chỉ.",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ)]\n\n### Kiến thức bổ trợ (9 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 52 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) |\n| 53 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) |\n| 54 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) |\n| 55 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) |\n| 56 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) |\n| 57 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) |\n| 58 | BF2020 | Technical Writing and Presentation | 3(2-2-0-6) |\n\n### Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ)"
+      ],
+      "source_chunk_id": "8edb02e1-d44c-4fea-aed4-e8d15928c0d7",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ)"
+    },
+    {
+      "question": "So sánh số tín chỉ giữa học phần 'Quản trị học đại cương' (EM1010) và học phần 'Technical Writing and Presentation' (BF2020)?",
+      "ground_truth": "'Quản trị học đại cương' (EM1010) có 2 tín chỉ, trong khi 'Technical Writing and Presentation' (BF2020) có 3 tín chỉ.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ)]\n\n### Kiến thức bổ trợ (9 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 52 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) |\n| 53 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) |\n| 54 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) |\n| 55 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) |\n| 56 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) |\n| 57 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) |\n| 58 | BF2020 | Technical Writing and Presentation | 3(2-2-0-6) |\n\n### Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ)"
+      ],
+      "source_chunk_id": "8edb02e1-d44c-4fea-aed4-e8d15928c0d7",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ)"
+    },
+    {
+      "question": "Sinh viên muốn học mô đun 1: Công nghệ sinh học Môi trường cần phải hoàn thành bao nhiêu tín chỉ và trong những kỳ nào?",
+      "ground_truth": "Sinh viên cần hoàn thành 16 tín chỉ trong kỳ 7.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 1: Công nghệ sinh học Môi trường (16 tín chỉ)]\n\n#### Mô đun 1: Công nghệ sinh học Môi trường (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 59 | BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7 |\n| 60 | BF4702 | Độc tố học môi trường | 2(2-0-0-4) | 7 |\n| 61 | BF4703 | Vi sinh vật II - môi trường | 2(2-0-0-4) | 7 |\n| 62 | EV4241 | Quản lý môi trường | 2(2-0-0-4) | 7 |\n| 63 | BF4704 | TN Kỹ thuật sinh học xử lý chất thải | 2(0-0-4-4) | 7 |\n| 64 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 65 | BF4709 | Kỹ thuật thu hồi hoàn thiện sản phẩm | 2(2-0-0-4) | 7 |"
+      ],
+      "source_chunk_id": "70309f5a-9f95-438c-ae16-6053614fd782",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 1: Công nghệ sinh học Môi trường (16 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào có mã số BF4701 trong Mô đun 1: Công nghệ sinh học Môi trường?",
+      "ground_truth": "Kỹ thuật sinh học xử lý chất thải",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 1: Công nghệ sinh học Môi trường (16 tín chỉ)]\n\n#### Mô đun 1: Công nghệ sinh học Môi trường (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 59 | BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7 |\n| 60 | BF4702 | Độc tố học môi trường | 2(2-0-0-4) | 7 |\n| 61 | BF4703 | Vi sinh vật II - môi trường | 2(2-0-0-4) | 7 |\n| 62 | EV4241 | Quản lý môi trường | 2(2-0-0-4) | 7 |\n| 63 | BF4704 | TN Kỹ thuật sinh học xử lý chất thải | 2(0-0-4-4) | 7 |\n| 64 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 65 | BF4709 | Kỹ thuật thu hồi hoàn thiện sản phẩm | 2(2-0-0-4) | 7 |"
+      ],
+      "source_chunk_id": "70309f5a-9f95-438c-ae16-6053614fd782",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 1: Công nghệ sinh học Môi trường (16 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào có mã số BF4705 và thuộc mô đun 2?",
+      "ground_truth": "Kỹ thuật lên men",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm (16 tín chỉ)]\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 66 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 67 | BF4706 | Kỹ thuật phân tích phân tử trong CNTP | 2(2-0-1-4) | 7 |\n| 68 | BF4707 | Vi sinh vật II - thực phẩm | 2(2-0-0-4) | 7 |\n| 69 | BF4511 | Enzym trong công nghệ thực phẩm | 2(2-0-0-4) | 7 |\n| 70 | BF4708 | Thí nghiệm kỹ thuật lên men | 2(0-0-4-4) | 7 |\n| 71 | BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7 |\n| 72 | BF4721 | Sinh vật biến đổi gen và ứng dụng | 2(2-0-0-4) | 7 |"
+      ],
+      "source_chunk_id": "84041116-9c3a-431d-ba3b-38499de6621c",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm (16 tín chỉ)"
+    },
+    {
+      "question": "So sánh giữa học phần 'Kỹ thuật lên men' và 'Thí nghiệm kỹ thuật lên men' về số tín chỉ và hình thức học tập?",
+      "ground_truth": "'Kỹ thuật lên men' có 3 tín chỉ với hình thức học tập là 2 buổi lý thuyết, 2 buổi thực hành và 6 giờ tự học. Trong khi đó, 'Thí nghiệm kỹ thuật lên men' có 2 tín chỉ với hình thức học tập là 4 giờ thực hành.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm (16 tín chỉ)]\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 66 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 67 | BF4706 | Kỹ thuật phân tích phân tử trong CNTP | 2(2-0-1-4) | 7 |\n| 68 | BF4707 | Vi sinh vật II - thực phẩm | 2(2-0-0-4) | 7 |\n| 69 | BF4511 | Enzym trong công nghệ thực phẩm | 2(2-0-0-4) | 7 |\n| 70 | BF4708 | Thí nghiệm kỹ thuật lên men | 2(0-0-4-4) | 7 |\n| 71 | BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7 |\n| 72 | BF4721 | Sinh vật biến đổi gen và ứng dụng | 2(2-0-0-4) | 7 |"
+      ],
+      "source_chunk_id": "84041116-9c3a-431d-ba3b-38499de6621c",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm (16 tín chỉ)"
+    },
+    {
+      "question": "So sánh giữa học phần 'Kỹ thuật lên men' và 'Kỹ thuật sinh học xử lý chất thải' trong Mô đun 3 về Công nghệ sinh học công nghiệp?",
+      "ground_truth": "'Kỹ thuật lên men' và 'Kỹ thuật sinh học xử lý chất thải' đều là học phần có 3 tín chỉ và được giảng dạy trong kỳ 7. Tuy nhiên, 'Kỹ thuật lên men' có thời lượng học lý thuyết và thực hành cao hơn (2-2-0-6), trong khi 'Kỹ thuật sinh học xử lý chất thải' có thời lượng học lý thuyết và thực hành tương tự (2-2-0-6), nhưng có sự khác biệt trong nội dung chuyên môn.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 3: Công nghệ sinh học công nghiệp (16 tín chỉ)]\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 73 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 74 | BF4709 | Kỹ thuật thu hồi hoàn thiện sản phẩm | 2(2-0-0-4) | 7 |\n| 75 | BF4711 | Vi sinh vật II - công nghiệp | 2(2-0-0-4) | 7 |\n| 76 | BF4712 | Enzyme học | 2(2-0-0-4) | 7 |\n| 77 | BF4708 | Thí nghiệm kỹ thuật lên men | 2(0-0-4-4) | 7 |\n| 78 | BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7 |\n| 79 | BF4718 | Kỹ thuật thu nhận hợp chất có hoạt tính sinh học từ thực vật | 2(2-1-0-4) | 7 |"
+      ],
+      "source_chunk_id": "e4346ffa-b869-4c9d-a304-c48a3c387db3",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 3: Công nghệ sinh học công nghiệp (16 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào trong Mô đun 3: Công nghệ sinh học công nghiệp có số tín chỉ cao nhất và được giảng dạy ở kỳ 7?",
+      "ground_truth": "Học phần Kỹ thuật lên men (mã BF4705) có số tín chỉ cao nhất là 3(2-2-0-6) và được giảng dạy ở kỳ 7.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 3: Công nghệ sinh học công nghiệp (16 tín chỉ)]\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 73 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 74 | BF4709 | Kỹ thuật thu hồi hoàn thiện sản phẩm | 2(2-0-0-4) | 7 |\n| 75 | BF4711 | Vi sinh vật II - công nghiệp | 2(2-0-0-4) | 7 |\n| 76 | BF4712 | Enzyme học | 2(2-0-0-4) | 7 |\n| 77 | BF4708 | Thí nghiệm kỹ thuật lên men | 2(0-0-4-4) | 7 |\n| 78 | BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7 |\n| 79 | BF4718 | Kỹ thuật thu nhận hợp chất có hoạt tính sinh học từ thực vật | 2(2-1-0-4) | 7 |"
+      ],
+      "source_chunk_id": "e4346ffa-b869-4c9d-a304-c48a3c387db3",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Tự chọn theo định hướng ứng dụng - chọn theo mô đun (16 tín chỉ) > Mô đun 3: Công nghệ sinh học công nghiệp (16 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào trong Mô đun 4 có số tín chỉ cao nhất và được học vào kỳ thứ bảy?",
+      "ground_truth": "Học phần Công nghệ tế bào động vật (mã BF4713) có số tín chỉ cao nhất là 3(2-2-0-6) và được học vào kỳ thứ bảy.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Đồ án tốt nghiệp Cử nhân (6 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (16 tín chỉ)]\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 80 | BF4713 | Công nghệ tế bào động vật | 3(2-2-0-6) | 7 |\n| 81 | BF4714 | Kỹ thuật phân tích và chẩn đoán phân tử | 2(2-0-1-4) | 7 |\n| 82 | BF4715 | Kỹ thuật nuôi cấy vi rút | 2(2-0-0-4) | 7 |\n| 83 | BF4716 | Công nghệ DNA tái tổ hợp | 2(2-0-0-4) | 7 |\n| 84 | BF4717 | TN Kỹ thuật DNA tái tổ hợp | 2(0-0-4-4) | 7 |\n| 85 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 86 | BF4709 | Kỹ thuật thu hồi hoàn thiện sản phẩm | 2(2-0-0-4) | 7 |\n\n### Thực tập kỹ thuật (2 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 87 | BF4781 | Thực tập kỹ thuật | 2(0-0-6-4) | 8 |\n\n### Đồ án tốt nghiệp Cử nhân (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 88 | BF4791 | Đồ án tốt nghiệp cử nhân KTSH | 6(0-0-12-12) | 8 |\n\n---"
+      ],
+      "source_chunk_id": "408fd641-4a84-4203-9aa5-4e4dcd8a6cb0",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Đồ án tốt nghiệp Cử nhân (6 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (16 tín chỉ)"
+    },
+    {
+      "question": "Đồ án tốt nghiệp Cử nhân Kỹ thuật sinh học được học vào kỳ nào và có bao nhiêu tín chỉ?",
+      "ground_truth": "Đồ án tốt nghiệp Cử nhân Kỹ thuật sinh học được học vào kỳ thứ tám và có 6 tín chỉ.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Đồ án tốt nghiệp Cử nhân (6 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (16 tín chỉ)]\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (16 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 80 | BF4713 | Công nghệ tế bào động vật | 3(2-2-0-6) | 7 |\n| 81 | BF4714 | Kỹ thuật phân tích và chẩn đoán phân tử | 2(2-0-1-4) | 7 |\n| 82 | BF4715 | Kỹ thuật nuôi cấy vi rút | 2(2-0-0-4) | 7 |\n| 83 | BF4716 | Công nghệ DNA tái tổ hợp | 2(2-0-0-4) | 7 |\n| 84 | BF4717 | TN Kỹ thuật DNA tái tổ hợp | 2(0-0-4-4) | 7 |\n| 85 | BF4705 | Kỹ thuật lên men | 3(2-2-0-6) | 7 |\n| 86 | BF4709 | Kỹ thuật thu hồi hoàn thiện sản phẩm | 2(2-0-0-4) | 7 |\n\n### Thực tập kỹ thuật (2 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 87 | BF4781 | Thực tập kỹ thuật | 2(0-0-6-4) | 8 |\n\n### Đồ án tốt nghiệp Cử nhân (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 88 | BF4791 | Đồ án tốt nghiệp cử nhân KTSH | 6(0-0-12-12) | 8 |\n\n---"
+      ],
+      "source_chunk_id": "408fd641-4a84-4203-9aa5-4e4dcd8a6cb0",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > 2. Danh mục học phần và kế hoạch học tập chuẩn > Đồ án tốt nghiệp Cử nhân (6 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (16 tín chỉ)"
+    },
+    {
+      "question": "Quy trình đăng ký và thực hiện đồ án 1 cho học sinh viên bậc Kỹ sư ngành Kỹ thuật Sinh học là gì?",
+      "ground_truth": "Học sinh viên bậc Kỹ sư phải chọn một trong các mô đun (Mô đun 1 đến Mô đun 4) và thực hiện đồ án 1 theo mô đun đã chọn. Đồ án 1 có tên và tín chỉ cụ thể tùy theo mô đun được chọn, ví dụ: Đồ án 1 - Kỹ sư CNSHMT (3 tín chỉ), Đồ án 1 - Kỹ sư CNSHTP (3 tín chỉ), v.v.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ)]\n\n## Bậc Kỹ sư (48 tín chỉ)\n\n### Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ)\n\n#### Mô đun 1: Công nghệ sinh học Môi trường\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 103 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 104 | BF5742 | Đồ án 1 - Kỹ sư CNSHMT | 3(0-6-0-6) | 9 |\n| 105 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 106 | BF5703 | Kỹ thuật sinh học xử lý chất thải rắn | 2(1-2-0-4) | 9 |\n| 107 | BF5704 | Kỹ thuật sinh học xử lý nước thải | 2(1-2-0-4) | 9 |\n| 108 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 109 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 110 | BF5706 | Thí nghiệm chuyên ngành CNSHMT | 2(0-0-2-4) | 10 |\n| 111 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 112 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 113 | BF5747 | Đồ án 1 - Kỹ sư Công nghệ sinh học Thực phẩm | 3(0-6-0-6) | 9 |\n| 114 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 115 | BF5732 | Công nghệ sản phẩm thực phẩm lên men | 2(2-0-0-4) | 9 |\n| 116 | BF5730 | Dinh dưỡng và an toàn thực phẩm | 2(2-1-0-4) | 9 |\n| 117 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 118 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 119 | BF5708 | Thí nghiệm chuyên ngành CNSHTP | 2(0-0-2-4) | 10 |\n| 120 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 121 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 122 | BF5749 | Đồ án 1 - Kỹ sư Công nghệ sinh học Công nghiệp | 3(0-6-0-6) | 9 |\n| 123 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 124 | BF5711 | Công nghệ chế phẩm vi sinh vật | 2(2-0-0-4) | 9 |\n| 125 | BF5712 | Công nghệ axit amin | 2(2-0-0-4) | 9 |\n| 126 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 127 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 128 | BF5714 | Thí nghiệm chuyên ngành CNSHCN | 2(0-0-2-4) | 10 |\n| 129 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 130 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 131 | BF5745 | Đồ án 1 - Kỹ sư SHPT&TB | 3(0-6-0-6) | 9 |\n| 132 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 133 | BF5716 | Công nghệ vắc xin | 2(2-0-0-4) | 9 |\n| 134 | BF5717 | Công nghệ chế tạo sinh phẩm chẩn đoán | 2(2-0-0-4) | 9 |\n| 135 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 136 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 137 | BF5719 | Thí nghiệm chuyên ngành SHPT | 2(0-0-2-4) | 10 |\n| 138 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n---\n\n### Tự chọn kỹ sư (14 tín chỉ)\n\n#### Mô đun 1: Công nghệ sinh học Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 139 | BF5723 | Công nghệ chế phẩm sinh học bảo vệ thực vật | 2(2-0-0-4) | 9 |\n| 140 | BF5726 | Công nghệ phân bón vi sinh | 2(1-1-0-4) | 9 |\n| 141 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 142 | BF5751 | Đồ án 2 - Kỹ sư CNSHMT | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 143 | BF5516 | Xu hướng phát triển thực phẩm | 2(2-1-0-4) | 9 |\n| 144 | BF5521 | Kiểm định nguồn gốc thực phẩm | 2(2-0-1-4) | 9 |\n| 145 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 146 | BF5753 | Đồ án 2 - Kỹ sư CNSHTP | 2(0-4-0-4) | 10 |\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 147 | BF5764 | Kỹ thuật phân tách và đánh giá các hoạt chất sinh học | 2(2-1-0-4) | 9 |\n| 148 | BF5761 | Kỹ thuật thu nhận sản phẩm sinh học | 2(2-0-0-4) | 9 |\n| 149 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 150 | BF5754 | Đồ án 2 - Kỹ sư CNSHCN | 2(0-4-0-4) | 10 |\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 151 | BF5735 | An toàn sinh học và đạo đức sinh học | 2(2-1-0-4) | 9 |\n| 152 | BF5763 | Hệ thống điều hòa và biểu hiện gen | 2(2-0-0-4) | 9 |\n| 153 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 154 | BF5756 | Đồ án 2 - Kỹ sư SHPT&TB | 2(0-4-0-4) | 10 |\n\n---\n\n### Tự chọn chung - chọn đủ 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 155 | BF5566 | Phát triển sản phẩm thực phẩm | 2(2-1-0-4) |\n| 156 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) |\n| 157 | BF5764 | Kỹ thuật phân tách và đánh giá các hoạt chất sinh học | 2(2-1-0-4) |\n| 158 | BF5761 | Kỹ thuật thu nhận sản phẩm sinh học | 2(2-0-0-4) |\n| 159 | BF5765 | Kiểm soát quá trình lên men | 3(3-0-0-6) |\n| 160 | BF5766 | Kỹ thuật xúc tác sinh học | 3(3-0-0-6) |\n| 161 | BF5722 | Vật liệu nano sinh học | 2(2-0-0-4) |\n| 162 | BF5704 | Kỹ thuật sinh học xử lý nước thải | 2(1-2-0-4) |\n| 163 | BF5717 | Công nghệ chế tạo sinh phẩm chẩn đoán | 2(2-0-0-4) |\n| 164 | BF5718 | Công nghệ protein tái tổ hợp | 2(2-0-0-4) |\n| 165 | BF5762 | Proteomics | 2(2-0-0-4) |\n\n---\n\n### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 166 | BF5783 | Thực tập kỹ sư | 6(0-0-12-12) | 11 |\n| 167 | BF5784 | Đồ án kỹ sư | 9(0-18-0-18) | 11 |\n\n**Tổng cộng: 180 tín chỉ**"
+      ],
+      "source_chunk_id": "3242de33-3ddf-4735-95f4-377cca99309f",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào được học ở kỳ 9 trong mô đun 'Công nghệ sinh học Môi trường' và có tín chỉ là 2(2-1-0-4)?",
+      "ground_truth": "Cơ sở lập dự án và thiết kế nhà máy (Mã số BF5728).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ)]\n\n## Bậc Kỹ sư (48 tín chỉ)\n\n### Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ)\n\n#### Mô đun 1: Công nghệ sinh học Môi trường\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 103 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 104 | BF5742 | Đồ án 1 - Kỹ sư CNSHMT | 3(0-6-0-6) | 9 |\n| 105 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 106 | BF5703 | Kỹ thuật sinh học xử lý chất thải rắn | 2(1-2-0-4) | 9 |\n| 107 | BF5704 | Kỹ thuật sinh học xử lý nước thải | 2(1-2-0-4) | 9 |\n| 108 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 109 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 110 | BF5706 | Thí nghiệm chuyên ngành CNSHMT | 2(0-0-2-4) | 10 |\n| 111 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 112 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 113 | BF5747 | Đồ án 1 - Kỹ sư Công nghệ sinh học Thực phẩm | 3(0-6-0-6) | 9 |\n| 114 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 115 | BF5732 | Công nghệ sản phẩm thực phẩm lên men | 2(2-0-0-4) | 9 |\n| 116 | BF5730 | Dinh dưỡng và an toàn thực phẩm | 2(2-1-0-4) | 9 |\n| 117 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 118 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 119 | BF5708 | Thí nghiệm chuyên ngành CNSHTP | 2(0-0-2-4) | 10 |\n| 120 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 121 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 122 | BF5749 | Đồ án 1 - Kỹ sư Công nghệ sinh học Công nghiệp | 3(0-6-0-6) | 9 |\n| 123 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 124 | BF5711 | Công nghệ chế phẩm vi sinh vật | 2(2-0-0-4) | 9 |\n| 125 | BF5712 | Công nghệ axit amin | 2(2-0-0-4) | 9 |\n| 126 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 127 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 128 | BF5714 | Thí nghiệm chuyên ngành CNSHCN | 2(0-0-2-4) | 10 |\n| 129 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 130 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 131 | BF5745 | Đồ án 1 - Kỹ sư SHPT&TB | 3(0-6-0-6) | 9 |\n| 132 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 133 | BF5716 | Công nghệ vắc xin | 2(2-0-0-4) | 9 |\n| 134 | BF5717 | Công nghệ chế tạo sinh phẩm chẩn đoán | 2(2-0-0-4) | 9 |\n| 135 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 136 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 137 | BF5719 | Thí nghiệm chuyên ngành SHPT | 2(0-0-2-4) | 10 |\n| 138 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n---\n\n### Tự chọn kỹ sư (14 tín chỉ)\n\n#### Mô đun 1: Công nghệ sinh học Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 139 | BF5723 | Công nghệ chế phẩm sinh học bảo vệ thực vật | 2(2-0-0-4) | 9 |\n| 140 | BF5726 | Công nghệ phân bón vi sinh | 2(1-1-0-4) | 9 |\n| 141 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 142 | BF5751 | Đồ án 2 - Kỹ sư CNSHMT | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 143 | BF5516 | Xu hướng phát triển thực phẩm | 2(2-1-0-4) | 9 |\n| 144 | BF5521 | Kiểm định nguồn gốc thực phẩm | 2(2-0-1-4) | 9 |\n| 145 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 146 | BF5753 | Đồ án 2 - Kỹ sư CNSHTP | 2(0-4-0-4) | 10 |\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 147 | BF5764 | Kỹ thuật phân tách và đánh giá các hoạt chất sinh học | 2(2-1-0-4) | 9 |\n| 148 | BF5761 | Kỹ thuật thu nhận sản phẩm sinh học | 2(2-0-0-4) | 9 |\n| 149 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 150 | BF5754 | Đồ án 2 - Kỹ sư CNSHCN | 2(0-4-0-4) | 10 |\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 151 | BF5735 | An toàn sinh học và đạo đức sinh học | 2(2-1-0-4) | 9 |\n| 152 | BF5763 | Hệ thống điều hòa và biểu hiện gen | 2(2-0-0-4) | 9 |\n| 153 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 154 | BF5756 | Đồ án 2 - Kỹ sư SHPT&TB | 2(0-4-0-4) | 10 |\n\n---\n\n### Tự chọn chung - chọn đủ 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 155 | BF5566 | Phát triển sản phẩm thực phẩm | 2(2-1-0-4) |\n| 156 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) |\n| 157 | BF5764 | Kỹ thuật phân tách và đánh giá các hoạt chất sinh học | 2(2-1-0-4) |\n| 158 | BF5761 | Kỹ thuật thu nhận sản phẩm sinh học | 2(2-0-0-4) |\n| 159 | BF5765 | Kiểm soát quá trình lên men | 3(3-0-0-6) |\n| 160 | BF5766 | Kỹ thuật xúc tác sinh học | 3(3-0-0-6) |\n| 161 | BF5722 | Vật liệu nano sinh học | 2(2-0-0-4) |\n| 162 | BF5704 | Kỹ thuật sinh học xử lý nước thải | 2(1-2-0-4) |\n| 163 | BF5717 | Công nghệ chế tạo sinh phẩm chẩn đoán | 2(2-0-0-4) |\n| 164 | BF5718 | Công nghệ protein tái tổ hợp | 2(2-0-0-4) |\n| 165 | BF5762 | Proteomics | 2(2-0-0-4) |\n\n---\n\n### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 166 | BF5783 | Thực tập kỹ sư | 6(0-0-12-12) | 11 |\n| 167 | BF5784 | Đồ án kỹ sư | 9(0-18-0-18) | 11 |\n\n**Tổng cộng: 180 tín chỉ**"
+      ],
+      "source_chunk_id": "3242de33-3ddf-4735-95f4-377cca99309f",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình Mô đun 1: Công nghệ sinh học Môi trường, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học một môn học trong chương trình này là sinh viên đã hoàn thành môn học tương đương tại trường khác và có xác nhận của nhà trường.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 1: Công nghệ sinh học Môi trường]\n\n## Bậc Kỹ sư (48 tín chỉ)\n\n### Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ)\n\n#### Mô đun 1: Công nghệ sinh học Môi trường\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 103 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 104 | BF5742 | Đồ án 1 - Kỹ sư CNSHMT | 3(0-6-0-6) | 9 |\n| 105 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 106 | BF5703 | Kỹ thuật sinh học xử lý chất thải rắn | 2(1-2-0-4) | 9 |\n| 107 | BF5704 | Kỹ thuật sinh học xử lý nước thải | 2(1-2-0-4) | 9 |\n| 108 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 109 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 110 | BF5706 | Thí nghiệm chuyên ngành CNSHMT | 2(0-0-2-4) | 10 |\n| 111 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |"
+      ],
+      "source_chunk_id": "dd35138a-8cb4-4276-9091-b9d15e50ac6f",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 1: Công nghệ sinh học Môi trường"
+    },
+    {
+      "question": "Học phần nào có mã số BF5706 trong mô đun 1: Công nghệ sinh học Môi trường?",
+      "ground_truth": "Thí nghiệm chuyên ngành CNSHMT",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 1: Công nghệ sinh học Môi trường]\n\n## Bậc Kỹ sư (48 tín chỉ)\n\n### Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ)\n\n#### Mô đun 1: Công nghệ sinh học Môi trường\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 103 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 104 | BF5742 | Đồ án 1 - Kỹ sư CNSHMT | 3(0-6-0-6) | 9 |\n| 105 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 106 | BF5703 | Kỹ thuật sinh học xử lý chất thải rắn | 2(1-2-0-4) | 9 |\n| 107 | BF5704 | Kỹ thuật sinh học xử lý nước thải | 2(1-2-0-4) | 9 |\n| 108 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 109 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 110 | BF5706 | Thí nghiệm chuyên ngành CNSHMT | 2(0-0-2-4) | 10 |\n| 111 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |"
+      ],
+      "source_chunk_id": "dd35138a-8cb4-4276-9091-b9d15e50ac6f",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 1: Công nghệ sinh học Môi trường"
+    },
+    {
+      "question": "Để được miễn học một môn học trong mô đun 2: Công nghệ sinh học Thực phẩm, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học một môn học trong mô đun 2 là sinh viên đã hoàn thành môn học tương đương hoặc có chứng chỉ quốc tế liên quan đến nội dung của môn học đó.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm]\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 112 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 113 | BF5747 | Đồ án 1 - Kỹ sư Công nghệ sinh học Thực phẩm | 3(0-6-0-6) | 9 |\n| 114 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 115 | BF5732 | Công nghệ sản phẩm thực phẩm lên men | 2(2-0-0-4) | 9 |\n| 116 | BF5730 | Dinh dưỡng và an toàn thực phẩm | 2(2-1-0-4) | 9 |\n| 117 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 118 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 119 | BF5708 | Thí nghiệm chuyên ngành CNSHTP | 2(0-0-2-4) | 10 |\n| 120 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |"
+      ],
+      "source_chunk_id": "f3cce5ba-c2b7-4320-a3cf-59f0d286fd2f",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm"
+    },
+    {
+      "question": "Học phần nào có mã số BF5708 thuộc Mô đun 2: Công nghệ sinh học Thực phẩm?",
+      "ground_truth": "Thí nghiệm chuyên ngành CNSHTP",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm]\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 112 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 113 | BF5747 | Đồ án 1 - Kỹ sư Công nghệ sinh học Thực phẩm | 3(0-6-0-6) | 9 |\n| 114 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 115 | BF5732 | Công nghệ sản phẩm thực phẩm lên men | 2(2-0-0-4) | 9 |\n| 116 | BF5730 | Dinh dưỡng và an toàn thực phẩm | 2(2-1-0-4) | 9 |\n| 117 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 118 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 119 | BF5708 | Thí nghiệm chuyên ngành CNSHTP | 2(0-0-2-4) | 10 |\n| 120 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |"
+      ],
+      "source_chunk_id": "f3cce5ba-c2b7-4320-a3cf-59f0d286fd2f",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm"
+    },
+    {
+      "question": "Học phần nào có mã số BF5714 và học kỳ 10?",
+      "ground_truth": "Thí nghiệm chuyên ngành CNSHCN",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 3: Công nghệ sinh học công nghiệp]\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 121 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 122 | BF5749 | Đồ án 1 - Kỹ sư Công nghệ sinh học Công nghiệp | 3(0-6-0-6) | 9 |\n| 123 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 124 | BF5711 | Công nghệ chế phẩm vi sinh vật | 2(2-0-0-4) | 9 |\n| 125 | BF5712 | Công nghệ axit amin | 2(2-0-0-4) | 9 |\n| 126 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 127 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 128 | BF5714 | Thí nghiệm chuyên ngành CNSHCN | 2(0-0-2-4) | 10 |\n| 129 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |"
+      ],
+      "source_chunk_id": "1edd31b1-55fc-4c59-9136-3aea5664a745",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 3: Công nghệ sinh học công nghiệp"
+    },
+    {
+      "question": "So sánh giữa học phần 'Cơ sở lập dự án và thiết kế nhà máy' và 'Xây dựng công nghiệp' trong Mô đun 3: Công nghệ sinh học công nghiệp theo khía cạnh số tín chỉ và kỳ học.",
+      "ground_truth": "'Cơ sở lập dự án và thiết kế nhà máy' có 2 tín chỉ và học vào kỳ 9, trong khi 'Xây dựng công nghiệp' cũng có 2 tín chỉ nhưng học vào kỳ 10.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 3: Công nghệ sinh học công nghiệp]\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 121 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 122 | BF5749 | Đồ án 1 - Kỹ sư Công nghệ sinh học Công nghiệp | 3(0-6-0-6) | 9 |\n| 123 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 124 | BF5711 | Công nghệ chế phẩm vi sinh vật | 2(2-0-0-4) | 9 |\n| 125 | BF5712 | Công nghệ axit amin | 2(2-0-0-4) | 9 |\n| 126 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 127 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 128 | BF5714 | Thí nghiệm chuyên ngành CNSHCN | 2(0-0-2-4) | 10 |\n| 129 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |"
+      ],
+      "source_chunk_id": "1edd31b1-55fc-4c59-9136-3aea5664a745",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Kiến thức chuyên ngành cốt lõi - chọn một mô đun (19 tín chỉ) > Mô đun 3: Công nghệ sinh học công nghiệp"
+    },
+    {
+      "question": "So sánh giữa học phần 'Cơ sở lập dự án và thiết kế nhà máy' (BF5728) và học phần 'Xây dựng công nghiệp' (CH3800) trong Mô đun 4 về mặt số tín chỉ và kỳ học?",
+      "ground_truth": "'Cơ sở lập dự án và thiết kế nhà máy' (BF5728) có 2 tín chỉ và học vào kỳ 9, trong khi 'Xây dựng công nghiệp' (CH3800) cũng có 2 tín chỉ nhưng học vào kỳ 10.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào]\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 130 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 131 | BF5745 | Đồ án 1 - Kỹ sư SHPT&TB | 3(0-6-0-6) | 9 |\n| 132 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 133 | BF5716 | Công nghệ vắc xin | 2(2-0-0-4) | 9 |\n| 134 | BF5717 | Công nghệ chế tạo sinh phẩm chẩn đoán | 2(2-0-0-4) | 9 |\n| 135 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 136 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 137 | BF5719 | Thí nghiệm chuyên ngành SHPT | 2(0-0-2-4) | 10 |\n| 138 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n---\n\n### Tự chọn kỹ sư (14 tín chỉ)"
+      ],
+      "source_chunk_id": "3a6a9d1c-e882-4fb4-9f26-9761075a273f",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào"
+    },
+    {
+      "question": "Học phần nào trong Mô đun 4 được học ở kỳ 10 và có số tín chỉ là 2(0-0-2-4)?",
+      "ground_truth": "Học phần Thí nghiệm chuyên ngành SHPT.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào]\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 130 | BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9 |\n| 131 | BF5745 | Đồ án 1 - Kỹ sư SHPT&TB | 3(0-6-0-6) | 9 |\n| 132 | BF5525 | Tối ưu hóa quá trình CNSH - CNTP | 2(2-1-0-4) | 9 |\n| 133 | BF5716 | Công nghệ vắc xin | 2(2-0-0-4) | 9 |\n| 134 | BF5717 | Công nghệ chế tạo sinh phẩm chẩn đoán | 2(2-0-0-4) | 9 |\n| 135 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9 |\n| 136 | BF5542 | An toàn lao động và vệ sinh công nghiệp | 2(2-0-0-4) | 10 |\n| 137 | BF5719 | Thí nghiệm chuyên ngành SHPT | 2(0-0-2-4) | 10 |\n| 138 | CH3800 | Xây dựng công nghiệp | 2(2-1-0-4) | 10 |\n\n---\n\n### Tự chọn kỹ sư (14 tín chỉ)"
+      ],
+      "source_chunk_id": "3a6a9d1c-e882-4fb4-9f26-9761075a273f",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào"
+    },
+    {
+      "question": "So sánh giữa học phần 'Quản trị dự án trong CNSH và CNTP' ở Mô đun 1 với học phần cùng tên ở Mô đun 2?",
+      "ground_truth": "'Quản trị dự án trong CNSH và CNTP' ở cả hai mô đun đều có cùng tên học phần và số tín chỉ là 2, nhưng khác nhau về kỳ học. Học phần ở Mô đun 1 được giảng vào kỳ 10, trong khi học phần ở Mô đun 2 cũng được giảng vào kỳ 10.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm (8 tín chỉ)]\n\n#### Mô đun 1: Công nghệ sinh học Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 139 | BF5723 | Công nghệ chế phẩm sinh học bảo vệ thực vật | 2(2-0-0-4) | 9 |\n| 140 | BF5726 | Công nghệ phân bón vi sinh | 2(1-1-0-4) | 9 |\n| 141 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 142 | BF5751 | Đồ án 2 - Kỹ sư CNSHMT | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 143 | BF5516 | Xu hướng phát triển thực phẩm | 2(2-1-0-4) | 9 |\n| 144 | BF5521 | Kiểm định nguồn gốc thực phẩm | 2(2-0-1-4) | 9 |\n| 145 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 146 | BF5753 | Đồ án 2 - Kỹ sư CNSHTP | 2(0-4-0-4) | 10 |"
+      ],
+      "source_chunk_id": "ec607c59-c840-4953-a457-b579f08eed6d",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm (8 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình kỹ sư sinh học, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học một môn học là sinh viên đã hoàn thành môn học tương đương trong chương trình đào tạo trước đó hoặc có chứng chỉ quốc tế liên quan.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm (8 tín chỉ)]\n\n#### Mô đun 1: Công nghệ sinh học Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 139 | BF5723 | Công nghệ chế phẩm sinh học bảo vệ thực vật | 2(2-0-0-4) | 9 |\n| 140 | BF5726 | Công nghệ phân bón vi sinh | 2(1-1-0-4) | 9 |\n| 141 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 142 | BF5751 | Đồ án 2 - Kỹ sư CNSHMT | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Công nghệ sinh học Thực phẩm (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 143 | BF5516 | Xu hướng phát triển thực phẩm | 2(2-1-0-4) | 9 |\n| 144 | BF5521 | Kiểm định nguồn gốc thực phẩm | 2(2-0-1-4) | 9 |\n| 145 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 146 | BF5753 | Đồ án 2 - Kỹ sư CNSHTP | 2(0-4-0-4) | 10 |"
+      ],
+      "source_chunk_id": "ec607c59-c840-4953-a457-b579f08eed6d",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 2: Công nghệ sinh học Thực phẩm (8 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình kỹ sư sinh học, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học một môn học là sinh viên đã hoàn thành môn học tương đương trong chương trình học trước đó và đạt điểm tối thiểu theo quy định của nhà trường.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (8 tín chỉ)]\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 147 | BF5764 | Kỹ thuật phân tách và đánh giá các hoạt chất sinh học | 2(2-1-0-4) | 9 |\n| 148 | BF5761 | Kỹ thuật thu nhận sản phẩm sinh học | 2(2-0-0-4) | 9 |\n| 149 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 150 | BF5754 | Đồ án 2 - Kỹ sư CNSHCN | 2(0-4-0-4) | 10 |\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 151 | BF5735 | An toàn sinh học và đạo đức sinh học | 2(2-1-0-4) | 9 |\n| 152 | BF5763 | Hệ thống điều hòa và biểu hiện gen | 2(2-0-0-4) | 9 |\n| 153 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 154 | BF5756 | Đồ án 2 - Kỹ sư SHPT&TB | 2(0-4-0-4) | 10 |\n\n---"
+      ],
+      "source_chunk_id": "e9a619b7-2456-4460-853e-74fde80a7c20",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (8 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào có mã số BF5763 trong Mô đun 4?",
+      "ground_truth": "Hệ thống điều hòa và biểu hiện gen",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (8 tín chỉ)]\n\n#### Mô đun 3: Công nghệ sinh học công nghiệp (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 147 | BF5764 | Kỹ thuật phân tách và đánh giá các hoạt chất sinh học | 2(2-1-0-4) | 9 |\n| 148 | BF5761 | Kỹ thuật thu nhận sản phẩm sinh học | 2(2-0-0-4) | 9 |\n| 149 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 150 | BF5754 | Đồ án 2 - Kỹ sư CNSHCN | 2(0-4-0-4) | 10 |\n\n#### Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 151 | BF5735 | An toàn sinh học và đạo đức sinh học | 2(2-1-0-4) | 9 |\n| 152 | BF5763 | Hệ thống điều hòa và biểu hiện gen | 2(2-0-0-4) | 9 |\n| 153 | BF5878 | Quản trị dự án trong CNSH và CNTP | 2(2-0-0-4) | 10 |\n| 154 | BF5756 | Đồ án 2 - Kỹ sư SHPT&TB | 2(0-4-0-4) | 10 |\n\n---"
+      ],
+      "source_chunk_id": "e9a619b7-2456-4460-853e-74fde80a7c20",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn kỹ sư (14 tín chỉ) > Mô đun 4: Kỹ thuật sinh học phân tử và tế bào (8 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào trong danh sách tự chọn chung có số tín chỉ cao nhất và kéo dài trong bao nhiêu buổi học?",
+      "ground_truth": "Học phần Kiểm soát quá trình lên men có số tín chỉ cao nhất là 3 tín chỉ và kéo dài trong 6 buổi học.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn chung - chọn đủ 6 tín chỉ]\n\n### Tự chọn chung - chọn đủ 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 155 | BF5566 | Phát triển sản phẩm thực phẩm | 2(2-1-0-4) |\n| 156 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) |\n| 157 | BF5764 | Kỹ thuật phân tách và đánh giá các hoạt chất sinh học | 2(2-1-0-4) |\n| 158 | BF5761 | Kỹ thuật thu nhận sản phẩm sinh học | 2(2-0-0-4) |\n| 159 | BF5765 | Kiểm soát quá trình lên men | 3(3-0-0-6) |\n| 160 | BF5766 | Kỹ thuật xúc tác sinh học | 3(3-0-0-6) |\n| 161 | BF5722 | Vật liệu nano sinh học | 2(2-0-0-4) |\n| 162 | BF5704 | Kỹ thuật sinh học xử lý nước thải | 2(1-2-0-4) |\n| 163 | BF5717 | Công nghệ chế tạo sinh phẩm chẩn đoán | 2(2-0-0-4) |\n| 164 | BF5718 | Công nghệ protein tái tổ hợp | 2(2-0-0-4) |\n| 165 | BF5762 | Proteomics | 2(2-0-0-4) |\n\n---"
+      ],
+      "source_chunk_id": "2435de08-d9f4-48ed-bfa9-dd94d96ab3dc",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn chung - chọn đủ 6 tín chỉ"
+    },
+    {
+      "question": "Học phần nào có mã số BF5765 và số tín chỉ là 3?",
+      "ground_truth": "Kiểm soát quá trình lên men",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn chung - chọn đủ 6 tín chỉ]\n\n### Tự chọn chung - chọn đủ 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 155 | BF5566 | Phát triển sản phẩm thực phẩm | 2(2-1-0-4) |\n| 156 | BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) |\n| 157 | BF5764 | Kỹ thuật phân tách và đánh giá các hoạt chất sinh học | 2(2-1-0-4) |\n| 158 | BF5761 | Kỹ thuật thu nhận sản phẩm sinh học | 2(2-0-0-4) |\n| 159 | BF5765 | Kiểm soát quá trình lên men | 3(3-0-0-6) |\n| 160 | BF5766 | Kỹ thuật xúc tác sinh học | 3(3-0-0-6) |\n| 161 | BF5722 | Vật liệu nano sinh học | 2(2-0-0-4) |\n| 162 | BF5704 | Kỹ thuật sinh học xử lý nước thải | 2(1-2-0-4) |\n| 163 | BF5717 | Công nghệ chế tạo sinh phẩm chẩn đoán | 2(2-0-0-4) |\n| 164 | BF5718 | Công nghệ protein tái tổ hợp | 2(2-0-0-4) |\n| 165 | BF5762 | Proteomics | 2(2-0-0-4) |\n\n---"
+      ],
+      "source_chunk_id": "2435de08-d9f4-48ed-bfa9-dd94d96ab3dc",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Tự chọn chung - chọn đủ 6 tín chỉ"
+    },
+    {
+      "question": "Học phần Thực tập kỹ sư và Đồ án kỹ sư có tổng cộng bao nhiêu tín chỉ?",
+      "ground_truth": "Học phần Thực tập kỹ sư và Đồ án kỹ sư có tổng cộng 15 tín chỉ.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)]\n\n### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 166 | BF5783 | Thực tập kỹ sư | 6(0-0-12-12) | 11 |\n| 167 | BF5784 | Đồ án kỹ sư | 9(0-18-0-18) | 11 |\n\n**Tổng cộng: 180 tín chỉ**"
+      ],
+      "source_chunk_id": "3a267955-3bd2-44ec-9388-677c3ab32848",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học học phần Thực tập kỹ sư, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học học phần Thực tập kỹ sư là sinh viên đã hoàn thành tốt các học phần trong chương trình và có đủ điều kiện theo quy định của nhà trường.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)]\n\n### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 166 | BF5783 | Thực tập kỹ sư | 6(0-0-12-12) | 11 |\n| 167 | BF5784 | Đồ án kỹ sư | 9(0-18-0-18) | 11 |\n\n**Tổng cộng: 180 tín chỉ**"
+      ],
+      "source_chunk_id": "3a267955-3bd2-44ec-9388-677c3ab32848",
+      "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT SINH HỌC > Bậc Kỹ sư (48 tín chỉ) > Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)"
+    }
+  ]
+}

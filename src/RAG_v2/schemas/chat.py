@@ -33,6 +33,7 @@ class ChatRequest(BaseModel):
     """Body for ``POST /chat`` and ``POST /chat/stream``."""
 
     question: str = Field(..., min_length=1, max_length=4096)
+    mode: str = Field(default="auto", pattern="^(auto|rag|agent)$")
     top_k: int = Field(default=5, ge=1, le=50)
     history: Optional[List[HistoryMessage]] = None
     session_id: Optional[str] = None
@@ -84,6 +85,31 @@ class CollectionResult(BaseModel):
     keyword_count: int = 0
 
 
+class AgentToolCall(BaseModel):
+    """One agent tool invocation record."""
+
+    tool: str
+    args: Dict[str, Any] = Field(default_factory=dict)
+    result: str
+    iteration: int = 0
+    latency_ms: Optional[float] = None
+    timestamp: Optional[str] = None
+
+
+class AgentTracePayload(BaseModel):
+    """Compact execution trace produced by the agent loop."""
+
+    query: Optional[str] = None
+    session_id: Optional[str] = None
+    route: Optional[str] = None
+    iterations: Optional[int] = None
+    tool_calls: Optional[List[AgentToolCall]] = None
+    tool_names_sequence: Optional[List[str]] = None
+    final_answer_length: Optional[int] = None
+    latency_ms: Optional[float] = None
+    error: Optional[str] = None
+
+
 class ChatResponse(BaseModel):
     """Response body for ``POST /chat``."""
 
@@ -104,6 +130,15 @@ class ChatResponse(BaseModel):
     llm_prompt: Optional[str] = None
     applied_filters: Optional[List[FilterInfo]] = None
     collection_results: Optional[List[CollectionResult]] = None
+    # Agent + route telemetry
+    mode: Optional[str] = None
+    route: Optional[str] = None
+    tools_used: Optional[List[str]] = None
+    tool_calls: Optional[List[AgentToolCall]] = None
+    iterations: Optional[int] = None
+    error: Optional[str] = None
+    agent_error: Optional[str] = None
+    agent_trace: Optional[AgentTracePayload] = None
 
 
 class HealthResponse(BaseModel):

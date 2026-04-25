@@ -1,0 +1,352 @@
+{
+  "total": 31,
+  "by_type": {
+    "factoid": 12,
+    "comparative": 8,
+    "multi_hop": 6,
+    "procedural": 5
+  },
+  "pairs": [
+    {
+      "question": "Học phần Pháp luật đại cương có bao nhiêu tín chỉ?",
+      "ground_truth": "2 tín chỉ",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Lý luận chính trị + Pháp luật đại cương (13 tín chỉ)]\n\n## BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ\n\n### Lý luận chính trị + Pháp luật đại cương (13 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 1 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 3 | 0.5 | | | |\n| 2 | SSH1111 | Triết học Mác - Lênin | 3(2-1-0-6) | 1 | 0.5 | | | |\n| 3 | SSH1121 | Kinh tế chính trị Mác - Lênin | 2(2-0-0-4) | 2 | 0.5 | | | |\n| 4 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 3 | 0.5 | | | |\n| 5 | SSH1141 | Lịch sử Đảng Cộng sản Việt Nam | 2(2-0-0-4) | 4 | 0.5 | | | |\n| 6 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 4 | 0.5 | | | |"
+      ],
+      "source_chunk_id": "695609f7-a1a1-4b2d-8607-ef48b990601e",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Lý luận chính trị + Pháp luật đại cương (13 tín chỉ)"
+    },
+    {
+      "question": "So sánh khối lượng học phần giữa Giáo dục Quốc phòng - An ninh và Tiếng Anh trong chương trình đào tạo ngành Kỹ thuật Điện?",
+      "ground_truth": "Học phần Giáo dục Quốc phòng - An ninh có khối lượng học phần được liệt kê cụ thể là 0(3-0-0-6) cho mã học phần MIL1120, trong khi Tiếng Anh gồm hai học phần với khối lượng lần lượt là 3(0-6-0-6) cho FL1129 và 3(0-6-0-6) cho FL1130. Như vậy, Giáo dục Quốc phòng - An ninh có khối lượng học phần được ghi cụ thể hơn so với Tiếng Anh.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tiếng Anh (8 tín chỉ)]\n\n### Giáo dục Quốc phòng - An ninh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 7 | MIL1210 | Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam | | | | | | |\n| 8 | MIL1120 | Công tác quốc phòng - An ninh | 0(3-0-0-6) | 2 | 0.7 | | | |\n| 9 | MIL1230 | Quân sự chung | | | | | | |\n| 10 | MIL1240 | Kỹ thuật chiến đấu bộ binh và chiến thuật | | | | | | |\n\n### Tiếng Anh (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 11 | FL1129 | Tiếng Anh cơ sở 1 | 3(0-6-0-6) | 1 | 0.6 | | | |\n| 12 | FL1130 | Tiếng Anh cơ sở 2 | 3(0-6-0-6) | 2 | 0.5 | | | |"
+      ],
+      "source_chunk_id": "3c4bcc90-3b19-4a75-8cab-4925cf14d0f0",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tiếng Anh (8 tín chỉ)"
+    },
+    {
+      "question": "Học phần 'Công tác quốc phòng - An ninh' có bao nhiêu tín chỉ?",
+      "ground_truth": "0 tín chỉ",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tiếng Anh (8 tín chỉ)]\n\n### Giáo dục Quốc phòng - An ninh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 7 | MIL1210 | Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam | | | | | | |\n| 8 | MIL1120 | Công tác quốc phòng - An ninh | 0(3-0-0-6) | 2 | 0.7 | | | |\n| 9 | MIL1230 | Quân sự chung | | | | | | |\n| 10 | MIL1240 | Kỹ thuật chiến đấu bộ binh và chiến thuật | | | | | | |\n\n### Tiếng Anh (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 11 | FL1129 | Tiếng Anh cơ sở 1 | 3(0-6-0-6) | 1 | 0.6 | | | |\n| 12 | FL1130 | Tiếng Anh cơ sở 2 | 3(0-6-0-6) | 2 | 0.5 | | | |"
+      ],
+      "source_chunk_id": "3c4bcc90-3b19-4a75-8cab-4925cf14d0f0",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tiếng Anh (8 tín chỉ)"
+    },
+    {
+      "question": "So sánh khối lượng học phần giữa Tin học đại cương và Vật lý đại cương I?",
+      "ground_truth": "Tin học đại cương có khối lượng 4 TC (3-1-1-8) trong khi Vật lý đại cương I có khối lượng 3 TC (2-1-1-6).",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Toán và Khoa học cơ bản (32 tín chỉ)]\n\n### Toán và Khoa học cơ bản (32 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 13 | IT1110 | Tin học đại cương | 4(3-1-1-8) | 1 | 0.5 | | | |\n| 14 | MI1111 | Giải tích I | 4(3-2-0-8) | 1 | 0.5 | | | |\n| 15 | MI1141 | Đại số | 4(3-2-0-8) | 1 | 0.5 | | | |\n| 16 | MI1121 | Giải tích II | 3(2-2-0-6) | 2 | 0.5 | | | |\n| 17 | PH1110 | Vật lý đại cương I | 3(2-1-1-6) | 2 | 0.7 | | | |\n| 18 | MI1131 | Giải tích III | 3(2-2-0-6) | 3 | 0.5 | | | |\n| 19 | MI2020 | Xác suất thống kê | 3(2-2-0-6) | 2 | 0.5 | | | |\n| 20 | PH1120 | Vật lý đại cương II | 3(2-1-1-6) | 3 | 0.7 | | | |\n| 21 | PH1131 | Vật lý đại cương III | 2(2-0-1-4) | 4 | 0.7 | | | |\n| 22 | MI2110 | Phương pháp tính và MATLAB | 3(2-0-2-6) | 3 | 0.5 | | | |"
+      ],
+      "source_chunk_id": "a6bf667a-4878-4979-94f9-cceaaa69dea5",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Toán và Khoa học cơ bản (32 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào có mã số MI1121 và được học vào học kỳ 2?",
+      "ground_truth": "Giải tích II",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Toán và Khoa học cơ bản (32 tín chỉ)]\n\n### Toán và Khoa học cơ bản (32 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 13 | IT1110 | Tin học đại cương | 4(3-1-1-8) | 1 | 0.5 | | | |\n| 14 | MI1111 | Giải tích I | 4(3-2-0-8) | 1 | 0.5 | | | |\n| 15 | MI1141 | Đại số | 4(3-2-0-8) | 1 | 0.5 | | | |\n| 16 | MI1121 | Giải tích II | 3(2-2-0-6) | 2 | 0.5 | | | |\n| 17 | PH1110 | Vật lý đại cương I | 3(2-1-1-6) | 2 | 0.7 | | | |\n| 18 | MI1131 | Giải tích III | 3(2-2-0-6) | 3 | 0.5 | | | |\n| 19 | MI2020 | Xác suất thống kê | 3(2-2-0-6) | 2 | 0.5 | | | |\n| 20 | PH1120 | Vật lý đại cương II | 3(2-1-1-6) | 3 | 0.7 | | | |\n| 21 | PH1131 | Vật lý đại cương III | 2(2-0-1-4) | 4 | 0.7 | | | |\n| 22 | MI2110 | Phương pháp tính và MATLAB | 3(2-0-2-6) | 3 | 0.5 | | | |"
+      ],
+      "source_chunk_id": "a6bf667a-4878-4979-94f9-cceaaa69dea5",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Toán và Khoa học cơ bản (32 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào trong khối kiến thức bổ trợ có trọng số cao nhất và yêu cầu gì để học?",
+      "ground_truth": "Học phần có trọng số cao nhất là Tâm lý học ứng dụng (ED3280) với trọng số 0.7. Tuy nhiên, đoạn văn không cung cấp thông tin cụ thể về điều kiện học trước của học phần này.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Kiến thức bổ trợ (6 tín chỉ)]\n\n### Kiến thức bổ trợ (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 24 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) | | | | | |\n| 25 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | | 0.7 | | | |\n| 26 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) | | | | | |\n| 27 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) | | | | | |\n| 28 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | | | | | |"
+      ],
+      "source_chunk_id": "e1a7e47c-f531-4a23-bd80-6ab4101c6469",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Kiến thức bổ trợ (6 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học một môn học bổ trợ trong chương trình đào tạo ngành Kỹ thuật Điện, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên cần có chứng chỉ hoặc học phần thay thế tương đương theo quy định của nhà trường.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Kiến thức bổ trợ (6 tín chỉ)]\n\n### Kiến thức bổ trợ (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 24 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) | | | | | |\n| 25 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | | 0.7 | | | |\n| 26 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) | | | | | |\n| 27 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) | | | | | |\n| 28 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | | | | | |"
+      ],
+      "source_chunk_id": "e1a7e47c-f531-4a23-bd80-6ab4101c6469",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Kiến thức bổ trợ (6 tín chỉ)"
+    },
+    {
+      "question": "Học phần 'Tín hiệu và hệ thống' có mã số là bao nhiêu?",
+      "ground_truth": "EE2000",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Cơ sở và cốt lõi ngành (50 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (50 tín chỉ)\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Kiến của nhóm chuyên môn | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|---|\n| 29 | EE2023 | Technical Writing and Presentation | 3(2-2-0-6) | 7 | | 0.5 | | | |\n| 30 | EE1024 | Nhập môn ngành Điện | 2(1-1-1-4) | 2 | | 0.5 | | | |\n| 31 | EE2000 | Tín hiệu và hệ thống | 3(3-0-1-6) | 3 | | 0.5 | (MI1140/MI1141) | Học phần học trước | x |\n| 32 | EE2021 | Lý thuyết mạch điện I | 3(2-1-1-6) | 4 | Chuyển sang học ở kỳ 3? | 0.7 | (PH1120/MI1010/MI1111),(PH1010/PH1110) | | No |\n| 33 | EE2022 | Lý thuyết mạch điện II | 3(3-0-1-6) | 5 | Chuyển sang học ở kỳ 4? | 0.7 | EE3010/EE2020/EE2021 | | No |\n| 34 | EE2110 | Điện tử tương tự | 3(3-0-1-6) | 4 | Học sau LTM 1 | 0.7 | EE2020/EE3010/EE2021 | | No |\n| 35 | EE3140 | Máy điện I | 3(3-0-1-6) | 4 | | 0.5 | EE2020/EE3010/EE2021 | | No |\n| 36 | EE3288 | Lý thuyết điều khiển tuyến tính | 3(3-1-0-6) | 6 | | 0.5 | EE2000 | Học phần học trước | x |"
+      ],
+      "source_chunk_id": "402108cb-89b0-4695-b3c3-beb6f1467ef5",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Cơ sở và cốt lõi ngành (50 tín chỉ)"
+    },
+    {
+      "question": "Học phần 'Lý thuyết mạch điện I' có thể được học ở kỳ nào và yêu cầu điều kiện gì để đăng ký?",
+      "ground_truth": "Học phần 'Lý thuyết mạch điện I' có thể được học ở kỳ 4 và yêu cầu sinh viên đã hoàn thành các học phần PH1010/PH1110, PH1120/MI1010/MI1111 hoặc có thể chuyển sang học ở kỳ 3.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Cơ sở và cốt lõi ngành (50 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (50 tín chỉ)\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Kiến của nhóm chuyên môn | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|---|\n| 29 | EE2023 | Technical Writing and Presentation | 3(2-2-0-6) | 7 | | 0.5 | | | |\n| 30 | EE1024 | Nhập môn ngành Điện | 2(1-1-1-4) | 2 | | 0.5 | | | |\n| 31 | EE2000 | Tín hiệu và hệ thống | 3(3-0-1-6) | 3 | | 0.5 | (MI1140/MI1141) | Học phần học trước | x |\n| 32 | EE2021 | Lý thuyết mạch điện I | 3(2-1-1-6) | 4 | Chuyển sang học ở kỳ 3? | 0.7 | (PH1120/MI1010/MI1111),(PH1010/PH1110) | | No |\n| 33 | EE2022 | Lý thuyết mạch điện II | 3(3-0-1-6) | 5 | Chuyển sang học ở kỳ 4? | 0.7 | EE3010/EE2020/EE2021 | | No |\n| 34 | EE2110 | Điện tử tương tự | 3(3-0-1-6) | 4 | Học sau LTM 1 | 0.7 | EE2020/EE3010/EE2021 | | No |\n| 35 | EE3140 | Máy điện I | 3(3-0-1-6) | 4 | | 0.5 | EE2020/EE3010/EE2021 | | No |\n| 36 | EE3288 | Lý thuyết điều khiển tuyến tính | 3(3-1-0-6) | 6 | | 0.5 | EE2000 | Học phần học trước | x |"
+      ],
+      "source_chunk_id": "402108cb-89b0-4695-b3c3-beb6f1467ef5",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Cơ sở và cốt lõi ngành (50 tín chỉ)"
+    },
+    {
+      "question": "Để học học phần 'Truyền động điện' (EE3510) ở kỳ 6, sinh viên cần học những học phần nào trước đó?",
+      "ground_truth": "Sinh viên cần đã học xong 'Điện tử công suất' (EE3410) và một trong các học phần: 'Máy điện' (EE3140), 'Truyền động điện' (EE3141), 'Truyền động điện' (EE3142) hoặc 'Máy điện' (EE3162).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Cơ sở và cốt lõi ngành (50 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (50 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Kiến của nhóm chuyên môn | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|---|\n| 37 | EE2031 | Trường điện từ | 3(3-0-1-6) | 3 | | 0.7 | | | No |\n| 38 | EE2130 | Thiết kế hệ thống số | 3(3-0-1-6) | 5 | | 0.7 | EE2110/EE3051 | | No |\n| 39 | EE3110 | Kỹ thuật đo lường | 3(3-0-1-6) | 4 | Học sau LTM1, ĐTTT | 0.6 | EE2110/EE3051/EE3052/EE2111 | | No |\n| 40 | EE3410 | Điện tử công suất | 3(3-0-1-6) | 5 | | 0.75 | EE2021 | Học phần học trước | x |\n| 41 | EE3480 | Vi xử lý | 3(3-0-1-6) | 7 | | 0.7 | IT1010/IT1110/EE2130 | | No |\n| 42 | EE3491 | Kỹ thuật lập trình | 2(2-1-0-4) | 6 | | 0.6 | | | x |\n| 43 | EE3510 | Truyền động điện | 3(3-0-1-6) | 6 | | 0.75 | EE3410,(EE3140/EE3141/EE3142/EE3162) | Học phần học trước: Điện tử công suất; Máy điện | x |\n| 44 | EE3810 | Đồ án I | 2(0-0-4-4) | 6 | | 0.5 | ((EE3289/EE3280/EE3288),(EE2022/EE2120/EE2021))/EE3617 | | No |\n| 45 | EE3426 | Hệ thống cung cấp điện (BTL) | 3(3-1-0-6) | 6 | | 0.7 | | | No |\n| 46 | EE3820 | Đồ án II | 2(0-0-4-4) | 7 | | 0.5 | EE3140/EE3410/EE3420/EE3425/EE3426/EE3626 | | No |"
+      ],
+      "source_chunk_id": "9d8fc15a-90c7-4778-a748-dbcc46122d1c",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Cơ sở và cốt lõi ngành (50 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào có mã số EE3410 và học kỳ 5?",
+      "ground_truth": "Điện tử công suất",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Cơ sở và cốt lõi ngành (50 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (50 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Kiến của nhóm chuyên môn | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|---|\n| 37 | EE2031 | Trường điện từ | 3(3-0-1-6) | 3 | | 0.7 | | | No |\n| 38 | EE2130 | Thiết kế hệ thống số | 3(3-0-1-6) | 5 | | 0.7 | EE2110/EE3051 | | No |\n| 39 | EE3110 | Kỹ thuật đo lường | 3(3-0-1-6) | 4 | Học sau LTM1, ĐTTT | 0.6 | EE2110/EE3051/EE3052/EE2111 | | No |\n| 40 | EE3410 | Điện tử công suất | 3(3-0-1-6) | 5 | | 0.75 | EE2021 | Học phần học trước | x |\n| 41 | EE3480 | Vi xử lý | 3(3-0-1-6) | 7 | | 0.7 | IT1010/IT1110/EE2130 | | No |\n| 42 | EE3491 | Kỹ thuật lập trình | 2(2-1-0-4) | 6 | | 0.6 | | | x |\n| 43 | EE3510 | Truyền động điện | 3(3-0-1-6) | 6 | | 0.75 | EE3410,(EE3140/EE3141/EE3142/EE3162) | Học phần học trước: Điện tử công suất; Máy điện | x |\n| 44 | EE3810 | Đồ án I | 2(0-0-4-4) | 6 | | 0.5 | ((EE3289/EE3280/EE3288),(EE2022/EE2120/EE2021))/EE3617 | | No |\n| 45 | EE3426 | Hệ thống cung cấp điện (BTL) | 3(3-1-0-6) | 6 | | 0.7 | | | No |\n| 46 | EE3820 | Đồ án II | 2(0-0-4-4) | 7 | | 0.5 | EE3140/EE3410/EE3420/EE3425/EE3426/EE3626 | | No |"
+      ],
+      "source_chunk_id": "9d8fc15a-90c7-4778-a748-dbcc46122d1c",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Cơ sở và cốt lõi ngành (50 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào là học phần học trước của học phần Điều khiển logic và PLC?",
+      "ground_truth": "EE2130 Thiết kế hệ thống số; EE3480 Vi xử lý",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 1: Tự động hóa công nghiệp]\n\n### Tự chọn theo mô đun cử nhân (17 tín chỉ)\n#### Mô đun 1: Tự động hóa công nghiệp\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 47 | EE3600 | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 5 | 0.7 | EE3280/EE3281/EE3282/EE3110/EE3288/EE3289 | Học phần học trước: EE3280 Lý thuyết điều khiển tự động I; EE3110 Kỹ thuật đo lường | x |\n| 48 | EE4220 | Điều khiển logic và PLC | 3(3-0-1-6) | 5 | 0.7 | | Học phần học trước: EE2130 Thiết kế hệ thống số; EE3480 Vi xử lý | x |\n| 49 | EE3550 | Điều khiển quá trình | 3(3-0-1-6) | 6 | 0.6 | EE3280/EE3281/EE3282/EE3288/EE3289 | Học phần học trước | x |\n| 50 | EE4331 | Điều khiển Điện tử công suất | 3(3-1-0-6) | 7 | 0.5 | EE3410, EE3288 | | No (Chỉ có đề cương EE4336) |\n| 51 | EE4332 | Thiết kế truyền động điện | 3(3-1-0-6) | 7 | | | Học phần tiên quyết: EE Truyền động điện; EE Điện tử công suất. Học phần học trước: EE Lý thuyết điều khiển tự động. Học phần song hành: EE Điều khiển logic | |"
+      ],
+      "source_chunk_id": "8b6679b9-590a-48af-ba7e-935fd44aedb0",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 1: Tự động hóa công nghiệp"
+    },
+    {
+      "question": "So sánh giữa học phần 'Hệ thống đo và điều khiển công nghiệp' (EE3600) và học phần 'Điều khiển logic và PLC' (EE4220) trong Mô đun 1: Tự động hóa công nghiệp?",
+      "ground_truth": "'Hệ thống đo và điều khiển công nghiệp' (EE3600) yêu cầu học phần học trước là EE3280 Lý thuyết điều khiển tự động I và EE3110 Kỹ thuật đo lường, trong khi 'Điều khiển logic và PLC' (EE4220) yêu cầu học phần học trước là EE2130 Thiết kế hệ thống số và EE3480 Vi xử lý. EE3600 có trọng số cao hơn (0.7) so với EE4220 (0.7), nhưng cả hai đều có khối lượng học 3 TC và được học ở kỳ 5.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 1: Tự động hóa công nghiệp]\n\n### Tự chọn theo mô đun cử nhân (17 tín chỉ)\n#### Mô đun 1: Tự động hóa công nghiệp\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 47 | EE3600 | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 5 | 0.7 | EE3280/EE3281/EE3282/EE3110/EE3288/EE3289 | Học phần học trước: EE3280 Lý thuyết điều khiển tự động I; EE3110 Kỹ thuật đo lường | x |\n| 48 | EE4220 | Điều khiển logic và PLC | 3(3-0-1-6) | 5 | 0.7 | | Học phần học trước: EE2130 Thiết kế hệ thống số; EE3480 Vi xử lý | x |\n| 49 | EE3550 | Điều khiển quá trình | 3(3-0-1-6) | 6 | 0.6 | EE3280/EE3281/EE3282/EE3288/EE3289 | Học phần học trước | x |\n| 50 | EE4331 | Điều khiển Điện tử công suất | 3(3-1-0-6) | 7 | 0.5 | EE3410, EE3288 | | No (Chỉ có đề cương EE4336) |\n| 51 | EE4332 | Thiết kế truyền động điện | 3(3-1-0-6) | 7 | | | Học phần tiên quyết: EE Truyền động điện; EE Điện tử công suất. Học phần học trước: EE Lý thuyết điều khiển tự động. Học phần song hành: EE Điều khiển logic | |"
+      ],
+      "source_chunk_id": "8b6679b9-590a-48af-ba7e-935fd44aedb0",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 1: Tự động hóa công nghiệp"
+    },
+    {
+      "question": "Học phần Hệ thống sản xuất tích hợp máy tính (CIM) thuộc học kỳ nào?",
+      "ground_truth": "Học kỳ 7",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 1: Tự động hóa công nghiệp]\n\n#### Mô đun 1: Tự động hóa công nghiệp\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 52 | EE4334 | Hệ thống sản xuất tích hợp máy tính (CIM) | 2(2-0-0-4) | 7 | 0.7 | EE3510 | | x |"
+      ],
+      "source_chunk_id": "075e6b93-334e-4c31-838e-353d6fffcc3a",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 1: Tự động hóa công nghiệp"
+    },
+    {
+      "question": "Mã số học phần Hệ thống sản xuất tích hợp máy tính (CIM) là gì?",
+      "ground_truth": "EE4334",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 1: Tự động hóa công nghiệp]\n\n#### Mô đun 1: Tự động hóa công nghiệp\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 52 | EE4334 | Hệ thống sản xuất tích hợp máy tính (CIM) | 2(2-0-0-4) | 7 | 0.7 | EE3510 | | x |"
+      ],
+      "source_chunk_id": "075e6b93-334e-4c31-838e-353d6fffcc3a",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 1: Tự động hóa công nghiệp"
+    },
+    {
+      "question": "So sánh giữa học phần 'Hệ thống đo và điều khiển công nghiệp' (EE3600) và học phần 'Điều khiển logic và PLC' (EE4220) về các yêu cầu học trước?",
+      "ground_truth": "'Hệ thống đo và điều khiển công nghiệp' (EE3600) yêu cầu học trước các học phần như EE3280, EE3110,... trong khi 'Điều khiển logic và PLC' (EE4220) yêu cầu học trước EE2130 và EE3480.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 2: Điều khiển tự động]\n\n#### Mô đun 2: Điều khiển tự động\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 53 | EE3600 | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 5 | 0.7 | EE3280/EE3281/EE3282/EE3110/EE3288/EE3289 | Học phần học trước: EE3280 Lý thuyết điều khiển tự động I; EE3110 Kỹ thuật đo lường | x |\n| 54 | EE4220 | Điều khiển logic và PLC | 3(3-0-1-6) | 5 | 0.7 | | Học phần học trước: EE2130 Thiết kế hệ thống số; EE3480 Vi xử lý | x |\n| 55 | EE3550 | Điều khiển quá trình | 3(3-0-1-6) | 6 | | | Học phần học trước: EE3280/EE3288 | |\n| 56 | EE4401 | Thiết kế hệ điều khiển nhúng | 3(2-2-0-6) | 7 | 0.5 | EE3480, EE3491, EE2110, EE2130, EE3110 | | No |\n| 57 | EE4430 | Mô hình hóa và mô phỏng hệ thống điều khiển | 2(2-1-0-4) | 7 | 0.5 | EE3280/EE3281/EE3282/EE3288/EE3289 | Học phần tiên quyết | x |"
+      ],
+      "source_chunk_id": "33241c01-3512-4332-9b9e-62604badebf0",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 2: Điều khiển tự động"
+    },
+    {
+      "question": "Để đăng ký học học phần 'Thiết kế hệ điều khiển nhúng' (EE4401), sinh viên cần đáp ứng những điều kiện gì?",
+      "ground_truth": "Sinh viên cần đã học xong các học phần: EE3480, EE3491, EE2110, EE2130 và EE3110.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 2: Điều khiển tự động]\n\n#### Mô đun 2: Điều khiển tự động\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 53 | EE3600 | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 5 | 0.7 | EE3280/EE3281/EE3282/EE3110/EE3288/EE3289 | Học phần học trước: EE3280 Lý thuyết điều khiển tự động I; EE3110 Kỹ thuật đo lường | x |\n| 54 | EE4220 | Điều khiển logic và PLC | 3(3-0-1-6) | 5 | 0.7 | | Học phần học trước: EE2130 Thiết kế hệ thống số; EE3480 Vi xử lý | x |\n| 55 | EE3550 | Điều khiển quá trình | 3(3-0-1-6) | 6 | | | Học phần học trước: EE3280/EE3288 | |\n| 56 | EE4401 | Thiết kế hệ điều khiển nhúng | 3(2-2-0-6) | 7 | 0.5 | EE3480, EE3491, EE2110, EE2130, EE3110 | | No |\n| 57 | EE4430 | Mô hình hóa và mô phỏng hệ thống điều khiển | 2(2-1-0-4) | 7 | 0.5 | EE3280/EE3281/EE3282/EE3288/EE3289 | Học phần tiên quyết | x |"
+      ],
+      "source_chunk_id": "33241c01-3512-4332-9b9e-62604badebf0",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 2: Điều khiển tự động"
+    },
+    {
+      "question": "Học phần nào là học phần tiên quyết cho học phần Hệ thống điều khiển số?",
+      "ground_truth": "IT1110, EE3280/EE3281/EE3282/EE3288/EE3289",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 2: Điều khiển tự động]\n\n#### Mô đun 2: Điều khiển tự động\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 58 | EE4435 | Hệ thống điều khiển số | 3(3-0-1-6) | 7 | 0.5 | IT1110,(EE3280/EE3281/EE3282/EE3288/EE3289) | Học phần tiên quyết | x |"
+      ],
+      "source_chunk_id": "7f6d8134-c5d8-418c-9f93-23e0176bf21b",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 2: Điều khiển tự động"
+    },
+    {
+      "question": "Hệ thống điều khiển số và học phần tiên quyết của nó có điểm gì khác nhau về khối lượng học tập?",
+      "ground_truth": "Hệ thống điều khiển số có khối lượng học tập là 3(3-0-1-6), trong khi học phần tiên quyết có khối lượng học tập được xác định bởi các học phần như IT1110, EE3280/EE3281/EE3282/EE3288/EE3289.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 2: Điều khiển tự động]\n\n#### Mô đun 2: Điều khiển tự động\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 58 | EE4435 | Hệ thống điều khiển số | 3(3-0-1-6) | 7 | 0.5 | IT1110,(EE3280/EE3281/EE3282/EE3288/EE3289) | Học phần tiên quyết | x |"
+      ],
+      "source_chunk_id": "7f6d8134-c5d8-418c-9f93-23e0176bf21b",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 2: Điều khiển tự động"
+    },
+    {
+      "question": "So sánh giữa học phần 'Hệ thống đo và điều khiển công nghiệp' (EE3600) và học phần 'Điều khiển logic và PLC' (EE4220) về khối lượng học phần và yêu cầu học trước?",
+      "ground_truth": "'Hệ thống đo và điều khiển công nghiệp' (EE3600) có khối lượng 3 TC, trong khi 'Điều khiển logic và PLC' (EE4220) cũng có khối lượng 3 TC. Tuy nhiên, EE3600 yêu cầu học trước các học phần như EE3280, EE3110,... trong khi EE4220 yêu cầu học trước EE2130 và EE3480.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 3: Đo lường và Tin học công nghiệp]\n\n#### Mô đun 3: Đo lường và Tin học công nghiệp\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 59 | EE3600 | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 5 | 0.7 | EE3280/EE3281/EE3282/EE3110/EE3288/EE3289 | Học phần học trước: EE3280 Lý thuyết điều khiển tự động I; EE3110 Kỹ thuật đo lường | x |\n| 60 | EE4220 | Điều khiển logic và PLC | 3(3-0-1-6) | 5 | 0.7 | | Học phần học trước: EE2130 Thiết kế hệ thống số; EE3480 Vi xử lý | x |\n| 61 | EE3550 | Điều khiển quá trình | 3(3-0-1-6) | 6 | | | Học phần học trước: EE3280/EE3288 | |\n| 62 | EE4251 | Thiết kế hệ thống nhúng | 3(3-1-0-6) | 7 | 0.6 | EE3280/EE3281/EE3282/EE3288/EE3289 | | x |\n| 63 | EE4502 | Kỹ thuật cảm biến | 3(3-1-0-6) | 7 | 0.5 | EE3480 | | No |\n| 64 | EE4552 | Mạng cảm biến không dây | 2(2-1-0-4) | 7 | 0.7 | EE3110 | Học phần tiên quyết: Vi xử lý EE3840; Học phần song hành: Thiết kế hệ thống nhúng EE4251 | x |"
+      ],
+      "source_chunk_id": "83e1d324-b96a-411d-979d-456336191f47",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 3: Đo lường và Tin học công nghiệp"
+    },
+    {
+      "question": "Để học học phần 'Mạng cảm biến không dây' ở kỳ 7, sinh viên cần đáp ứng những điều kiện học trước nào?",
+      "ground_truth": "Sinh viên cần đã hoàn thành học phần 'Vi xử lý' (EE3840) và đang học đồng thời học phần 'Thiết kế hệ thống nhúng' (EE4251).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 3: Đo lường và Tin học công nghiệp]\n\n#### Mô đun 3: Đo lường và Tin học công nghiệp\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 59 | EE3600 | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 5 | 0.7 | EE3280/EE3281/EE3282/EE3110/EE3288/EE3289 | Học phần học trước: EE3280 Lý thuyết điều khiển tự động I; EE3110 Kỹ thuật đo lường | x |\n| 60 | EE4220 | Điều khiển logic và PLC | 3(3-0-1-6) | 5 | 0.7 | | Học phần học trước: EE2130 Thiết kế hệ thống số; EE3480 Vi xử lý | x |\n| 61 | EE3550 | Điều khiển quá trình | 3(3-0-1-6) | 6 | | | Học phần học trước: EE3280/EE3288 | |\n| 62 | EE4251 | Thiết kế hệ thống nhúng | 3(3-1-0-6) | 7 | 0.6 | EE3280/EE3281/EE3282/EE3288/EE3289 | | x |\n| 63 | EE4502 | Kỹ thuật cảm biến | 3(3-1-0-6) | 7 | 0.5 | EE3480 | | No |\n| 64 | EE4552 | Mạng cảm biến không dây | 2(2-1-0-4) | 7 | 0.7 | EE3110 | Học phần tiên quyết: Vi xử lý EE3840; Học phần song hành: Thiết kế hệ thống nhúng EE4251 | x |"
+      ],
+      "source_chunk_id": "83e1d324-b96a-411d-979d-456336191f47",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Tự chọn theo mô đun cử nhân (17 tín chỉ) > Mô đun 3: Đo lường và Tin học công nghiệp"
+    },
+    {
+      "question": "Để được học Đồ án tốt nghiệp cử nhân (EE4900), sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên cần đã hoàn thành học phần Thực tập kỹ thuật (EE3910) trước khi đăng ký học Đồ án tốt nghiệp cử nhân (EE4900).",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Thực tập và Đồ án tốt nghiệp Cử nhân (8 tín chỉ, chọn 8TC)]\n\n### Thực tập và Đồ án tốt nghiệp Cử nhân (8 tín chỉ, chọn 8TC)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 65 | EE3910 | Thực tập kỹ thuật | 2(0-0-6-4) | 7 | 0.5 | EE3810 | | |\n| 66 | EE4900 | Đồ án tốt nghiệp cử nhân | 6(0-0-12-12) | 8 | 0.5 | | | |\n| 67 | EE4921 | Đồ án nghiên cứu cử nhân | 8(0-0-16-16) | 8 | | | | |\n\n---"
+      ],
+      "source_chunk_id": "a0283731-2c4f-4aa4-b6fd-cf80ea9a5fed",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Thực tập và Đồ án tốt nghiệp Cử nhân (8 tín chỉ, chọn 8TC)"
+    },
+    {
+      "question": "Học phần Đồ án tốt nghiệp cử nhân có bao nhiêu tín chỉ?",
+      "ground_truth": "6 tín chỉ",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Thực tập và Đồ án tốt nghiệp Cử nhân (8 tín chỉ, chọn 8TC)]\n\n### Thực tập và Đồ án tốt nghiệp Cử nhân (8 tín chỉ, chọn 8TC)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ | Trọng số | ĐK học trước (theo web) | ĐK học trước (theo đề cương) | Đề cương |\n|---|---|---|---|---|---|---|---|---|\n| 65 | EE3910 | Thực tập kỹ thuật | 2(0-0-6-4) | 7 | 0.5 | EE3810 | | |\n| 66 | EE4900 | Đồ án tốt nghiệp cử nhân | 6(0-0-12-12) | 8 | 0.5 | | | |\n| 67 | EE4921 | Đồ án nghiên cứu cử nhân | 8(0-0-16-16) | 8 | | | | |\n\n---"
+      ],
+      "source_chunk_id": "a0283731-2c4f-4aa4-b6fd-cf80ea9a5fed",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC CỬ NHÂN (Bachelor courses) - Tổng: 134 tín chỉ > Thực tập và Đồ án tốt nghiệp Cử nhân (8 tín chỉ, chọn 8TC)"
+    },
+    {
+      "question": "Học phần nào có mã số EE6543?",
+      "ground_truth": "Cảm biến và xử lý tín hiệu đo",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses)]\n\n## BẬC THẠC SỸ (Master of Science courses)\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 68 | SS6013 | Triết học | 3(3-0-0-6) |\n\n### Kiến thức định hướng mở rộng (12 tín chỉ - công nhận từ khối tự chọn cử nhân)\n\n> 12 TC được công nhận chuyển từ khối tự chọn theo mô đun cử nhân (transfer credits from elective bachelor modules)\n\n### Cơ sở ngành nâng cao (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 69 | EE6312 | Phân tích và điều khiển hệ phi tuyến | 3(3-0-0-6) |\n| 70 | EE6543 | Cảm biến và xử lý tín hiệu đo | 2(2-1-0-4) |\n| 71 | EE6503 | Xử lý tín hiệu số | 2(2-1-0-4) |\n| 72 | EE6551 | Điện tử công suất nâng cao | 2(2-1-0-4) |\n| 73 | EE6010 | Seminar 1 | 3(0-0-6-6) |\n| 74 | EE6020 | Seminar 2 | 3(0-0-6-6) |\n\n### Mô đun tự chọn Thạc sỹ (15 tín chỉ)\n\n#### Mô đun: Điều khiển thông minh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 75 | EE6532 | Tối ưu hóa và điều khiển tối ưu | 3(3-1-0-6) |\n| 76 | EE6445 | Điều khiển mờ và mạng nơ ron | 3(3-1-0-6) |\n| 77 | EE6435 | Điều khiển học tăng cường | 3(3-1-0-6) |\n| 78 | EE6022 | Điều khiển quá trình nâng cao | 3(2-2-0-6) |\n| 79 | EE6334 | Điều khiển hệ đa tác tử | 3(3-1-0-6) |\n\n#### Mô đun: Cảm biến thông minh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 80 | EE6423 | Xử lý tín hiệu ngẫu nhiên | 3(3-1-0-6) |\n| 81 | EE6424 | Mạng nơ-rôn và học sâu | 3(3-1-0-6) |\n| 82 | EE6447 | Thiết kế FPGA cho hệ thống nhúng | 3(3-1-0-6) |\n| 83 | EE6448 | Thu hoạch năng lượng và biến đổi | 3(3-1-0-6) |\n| 84 | EE6446 | Hệ thống cảm biến thông minh | 3(3-1-0-6) |\n\n#### Mô đun: Tự động hoá nâng cao\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 85 | EE6022 | Điều khiển quá trình nâng cao | 3(2-2-0-6) |\n| 86 | EE6425 | Điều khiển nâng cao hệ truyền động điện và điện tử công suất | 3(3-1-0-6) |\n| 87 | EE6426 | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) |\n| 88 | EE6326 | Các phương pháp điều khiển nâng cao cho hệ cơ điện tử và robot | 3(3-0-0-6) |\n| 89 | EE6328 | Điều khiển chuyển động | 3(3-0-0-6) |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 90 | EE6001 | Luận văn tốt nghiệp | 15(0-0-30-50) |"
+      ],
+      "source_chunk_id": "975cd60d-1713-4d13-b54d-e782a4f03b59",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses)"
+    },
+    {
+      "question": "So sánh khối lượng học phần giữa 'Phân tích và điều khiển hệ phi tuyến' (EE6312) và 'Tối ưu hóa và điều khiển tối ưu' (EE6532)?",
+      "ground_truth": "'Phân tích và điều khiển hệ phi tuyến' (EE6312) có khối lượng 3(3-0-0-6), trong khi 'Tối ưu hóa và điều khiển tối ưu' (EE6532) có khối lượng 3(3-1-0-6).",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses)]\n\n## BẬC THẠC SỸ (Master of Science courses)\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 68 | SS6013 | Triết học | 3(3-0-0-6) |\n\n### Kiến thức định hướng mở rộng (12 tín chỉ - công nhận từ khối tự chọn cử nhân)\n\n> 12 TC được công nhận chuyển từ khối tự chọn theo mô đun cử nhân (transfer credits from elective bachelor modules)\n\n### Cơ sở ngành nâng cao (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 69 | EE6312 | Phân tích và điều khiển hệ phi tuyến | 3(3-0-0-6) |\n| 70 | EE6543 | Cảm biến và xử lý tín hiệu đo | 2(2-1-0-4) |\n| 71 | EE6503 | Xử lý tín hiệu số | 2(2-1-0-4) |\n| 72 | EE6551 | Điện tử công suất nâng cao | 2(2-1-0-4) |\n| 73 | EE6010 | Seminar 1 | 3(0-0-6-6) |\n| 74 | EE6020 | Seminar 2 | 3(0-0-6-6) |\n\n### Mô đun tự chọn Thạc sỹ (15 tín chỉ)\n\n#### Mô đun: Điều khiển thông minh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 75 | EE6532 | Tối ưu hóa và điều khiển tối ưu | 3(3-1-0-6) |\n| 76 | EE6445 | Điều khiển mờ và mạng nơ ron | 3(3-1-0-6) |\n| 77 | EE6435 | Điều khiển học tăng cường | 3(3-1-0-6) |\n| 78 | EE6022 | Điều khiển quá trình nâng cao | 3(2-2-0-6) |\n| 79 | EE6334 | Điều khiển hệ đa tác tử | 3(3-1-0-6) |\n\n#### Mô đun: Cảm biến thông minh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 80 | EE6423 | Xử lý tín hiệu ngẫu nhiên | 3(3-1-0-6) |\n| 81 | EE6424 | Mạng nơ-rôn và học sâu | 3(3-1-0-6) |\n| 82 | EE6447 | Thiết kế FPGA cho hệ thống nhúng | 3(3-1-0-6) |\n| 83 | EE6448 | Thu hoạch năng lượng và biến đổi | 3(3-1-0-6) |\n| 84 | EE6446 | Hệ thống cảm biến thông minh | 3(3-1-0-6) |\n\n#### Mô đun: Tự động hoá nâng cao\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 85 | EE6022 | Điều khiển quá trình nâng cao | 3(2-2-0-6) |\n| 86 | EE6425 | Điều khiển nâng cao hệ truyền động điện và điện tử công suất | 3(3-1-0-6) |\n| 87 | EE6426 | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) |\n| 88 | EE6326 | Các phương pháp điều khiển nâng cao cho hệ cơ điện tử và robot | 3(3-0-0-6) |\n| 89 | EE6328 | Điều khiển chuyển động | 3(3-0-0-6) |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 90 | EE6001 | Luận văn tốt nghiệp | 15(0-0-30-50) |"
+      ],
+      "source_chunk_id": "975cd60d-1713-4d13-b54d-e782a4f03b59",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses)"
+    },
+    {
+      "question": "Học phần nào trong mô đun tự chọn Thạc sỹ có khối lượng học tập cao nhất?",
+      "ground_truth": "Học phần Seminar 1 (EE6010) và Seminar 2 (EE6020) đều có khối lượng học tập cao nhất là 3(0-0-6-6).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Mô đun tự chọn Thạc sỹ (15 tín chỉ)]\n\n## BẬC THẠC SỸ (Master of Science courses)\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 68 | SS6013 | Triết học | 3(3-0-0-6) |\n\n### Kiến thức định hướng mở rộng (12 tín chỉ - công nhận từ khối tự chọn cử nhân)\n\n> 12 TC được công nhận chuyển từ khối tự chọn theo mô đun cử nhân (transfer credits from elective bachelor modules)\n\n### Cơ sở ngành nâng cao (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 69 | EE6312 | Phân tích và điều khiển hệ phi tuyến | 3(3-0-0-6) |\n| 70 | EE6543 | Cảm biến và xử lý tín hiệu đo | 2(2-1-0-4) |\n| 71 | EE6503 | Xử lý tín hiệu số | 2(2-1-0-4) |\n| 72 | EE6551 | Điện tử công suất nâng cao | 2(2-1-0-4) |\n| 73 | EE6010 | Seminar 1 | 3(0-0-6-6) |\n| 74 | EE6020 | Seminar 2 | 3(0-0-6-6) |\n\n### Mô đun tự chọn Thạc sỹ (15 tín chỉ)"
+      ],
+      "source_chunk_id": "f4178b47-0edf-4397-9e63-f6d7f67fcd94",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Mô đun tự chọn Thạc sỹ (15 tín chỉ)"
+    },
+    {
+      "question": "Tổng số tín chỉ trong chương trình đào tạo ngành Kỹ thuật Điện bậc Thạc sĩ là bao nhiêu?",
+      "ground_truth": "Tổng số tín chỉ trong chương trình đào tạo ngành Kỹ thuật Điện bậc Thạc sĩ là 3 (kiến thức chung) + 12 (kiến thức định hướng mở rộng) + 15 (cơ sở ngành nâng cao) + 15 (mô đun tự chọn Thạc sỹ) = 45 tín chỉ.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Mô đun tự chọn Thạc sỹ (15 tín chỉ)]\n\n## BẬC THẠC SỸ (Master of Science courses)\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 68 | SS6013 | Triết học | 3(3-0-0-6) |\n\n### Kiến thức định hướng mở rộng (12 tín chỉ - công nhận từ khối tự chọn cử nhân)\n\n> 12 TC được công nhận chuyển từ khối tự chọn theo mô đun cử nhân (transfer credits from elective bachelor modules)\n\n### Cơ sở ngành nâng cao (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 69 | EE6312 | Phân tích và điều khiển hệ phi tuyến | 3(3-0-0-6) |\n| 70 | EE6543 | Cảm biến và xử lý tín hiệu đo | 2(2-1-0-4) |\n| 71 | EE6503 | Xử lý tín hiệu số | 2(2-1-0-4) |\n| 72 | EE6551 | Điện tử công suất nâng cao | 2(2-1-0-4) |\n| 73 | EE6010 | Seminar 1 | 3(0-0-6-6) |\n| 74 | EE6020 | Seminar 2 | 3(0-0-6-6) |\n\n### Mô đun tự chọn Thạc sỹ (15 tín chỉ)"
+      ],
+      "source_chunk_id": "f4178b47-0edf-4397-9e63-f6d7f67fcd94",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Mô đun tự chọn Thạc sỹ (15 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học một môn trong mô đun Cảm biến thông minh, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên có thể được miễn học một môn trong mô đun nếu đã hoàn thành môn tương đương tại cấp độ đại học hoặc có bằng chứng về kiến thức chuyên sâu liên quan đến môn học đó.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Mô đun tự chọn Thạc sỹ (15 tín chỉ) > Mô đun: Cảm biến thông minh]\n\n#### Mô đun: Điều khiển thông minh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 75 | EE6532 | Tối ưu hóa và điều khiển tối ưu | 3(3-1-0-6) |\n| 76 | EE6445 | Điều khiển mờ và mạng nơ ron | 3(3-1-0-6) |\n| 77 | EE6435 | Điều khiển học tăng cường | 3(3-1-0-6) |\n| 78 | EE6022 | Điều khiển quá trình nâng cao | 3(2-2-0-6) |\n| 79 | EE6334 | Điều khiển hệ đa tác tử | 3(3-1-0-6) |\n\n#### Mô đun: Cảm biến thông minh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 80 | EE6423 | Xử lý tín hiệu ngẫu nhiên | 3(3-1-0-6) |\n| 81 | EE6424 | Mạng nơ-rôn và học sâu | 3(3-1-0-6) |\n| 82 | EE6447 | Thiết kế FPGA cho hệ thống nhúng | 3(3-1-0-6) |\n| 83 | EE6448 | Thu hoạch năng lượng và biến đổi | 3(3-1-0-6) |\n| 84 | EE6446 | Hệ thống cảm biến thông minh | 3(3-1-0-6) |"
+      ],
+      "source_chunk_id": "6988634b-53c3-4cd5-9474-c386ecf1e96b",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Mô đun tự chọn Thạc sỹ (15 tín chỉ) > Mô đun: Cảm biến thông minh"
+    },
+    {
+      "question": "Học phần nào có mã số EE6448 trong mô đun Cảm biến thông minh?",
+      "ground_truth": "Thu hoạch năng lượng và biến đổi",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Mô đun tự chọn Thạc sỹ (15 tín chỉ) > Mô đun: Cảm biến thông minh]\n\n#### Mô đun: Điều khiển thông minh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 75 | EE6532 | Tối ưu hóa và điều khiển tối ưu | 3(3-1-0-6) |\n| 76 | EE6445 | Điều khiển mờ và mạng nơ ron | 3(3-1-0-6) |\n| 77 | EE6435 | Điều khiển học tăng cường | 3(3-1-0-6) |\n| 78 | EE6022 | Điều khiển quá trình nâng cao | 3(2-2-0-6) |\n| 79 | EE6334 | Điều khiển hệ đa tác tử | 3(3-1-0-6) |\n\n#### Mô đun: Cảm biến thông minh\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 80 | EE6423 | Xử lý tín hiệu ngẫu nhiên | 3(3-1-0-6) |\n| 81 | EE6424 | Mạng nơ-rôn và học sâu | 3(3-1-0-6) |\n| 82 | EE6447 | Thiết kế FPGA cho hệ thống nhúng | 3(3-1-0-6) |\n| 83 | EE6448 | Thu hoạch năng lượng và biến đổi | 3(3-1-0-6) |\n| 84 | EE6446 | Hệ thống cảm biến thông minh | 3(3-1-0-6) |"
+      ],
+      "source_chunk_id": "6988634b-53c3-4cd5-9474-c386ecf1e96b",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Mô đun tự chọn Thạc sỹ (15 tín chỉ) > Mô đun: Cảm biến thông minh"
+    },
+    {
+      "question": "Để được miễn học môn học trong chương trình thạc sĩ ngành Kỹ thuật Điện, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học môn học trong chương trình thạc sĩ ngành Kỹ thuật Điện là sinh viên phải có bằng tốt nghiệp đại học hoặc cao đẳng với chuyên ngành liên quan và đạt điểm trung bình tích lũy từ 7.0 trở lên.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Luận văn tốt nghiệp (15 tín chỉ) > Mô đun: Tự động hoá nâng cao]\n\n#### Mô đun: Tự động hoá nâng cao\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 85 | EE6022 | Điều khiển quá trình nâng cao | 3(2-2-0-6) |\n| 86 | EE6425 | Điều khiển nâng cao hệ truyền động điện và điện tử công suất | 3(3-1-0-6) |\n| 87 | EE6426 | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) |\n| 88 | EE6326 | Các phương pháp điều khiển nâng cao cho hệ cơ điện tử và robot | 3(3-0-0-6) |\n| 89 | EE6328 | Điều khiển chuyển động | 3(3-0-0-6) |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 90 | EE6001 | Luận văn tốt nghiệp | 15(0-0-30-50) |"
+      ],
+      "source_chunk_id": "61e8047d-0489-4ae7-bd09-ad57779acfab",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Luận văn tốt nghiệp (15 tín chỉ) > Mô đun: Tự động hoá nâng cao"
+    },
+    {
+      "question": "So sánh khối lượng học phần giữa Điều khiển quá trình nâng cao (EE6022) và Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất (EE6426)?",
+      "ground_truth": "Điều khiển quá trình nâng cao (EE6022) có khối lượng học phần là 3(2-2-0-6), trong khi Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất (EE6426) có khối lượng học phần là 3(3-0-0-6).",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Luận văn tốt nghiệp (15 tín chỉ) > Mô đun: Tự động hoá nâng cao]\n\n#### Mô đun: Tự động hoá nâng cao\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 85 | EE6022 | Điều khiển quá trình nâng cao | 3(2-2-0-6) |\n| 86 | EE6425 | Điều khiển nâng cao hệ truyền động điện và điện tử công suất | 3(3-1-0-6) |\n| 87 | EE6426 | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) |\n| 88 | EE6326 | Các phương pháp điều khiển nâng cao cho hệ cơ điện tử và robot | 3(3-0-0-6) |\n| 89 | EE6328 | Điều khiển chuyển động | 3(3-0-0-6) |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) |\n|---|---|---|---|\n| 90 | EE6001 | Luận văn tốt nghiệp | 15(0-0-30-50) |"
+      ],
+      "source_chunk_id": "61e8047d-0489-4ae7-bd09-ad57779acfab",
+      "source_file": "3khung_ct_cn_-thac-sy_k69_ee2_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH ĐÀO TẠO NGÀNH KỸ THUẬT ĐIỆN > BẬC THẠC SỸ (Master of Science courses) > Luận văn tốt nghiệp (15 tín chỉ) > Mô đun: Tự động hoá nâng cao"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "total": 5,
+  "by_type": {
+    "factoid": 1,
+    "comparative": 3,
+    "multi_hop": 1
+  },
+  "pairs": [
+    {
+      "question": "Chương trình đào tạo cử nhân Khoa học Dữ liệu có bao nhiêu tín chỉ tổng cộng?",
+      "ground_truth": "132 tín chỉ",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU]\n\n## THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU\n\n| Khối kiến thức | Tín chỉ | Mô tả |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Gồm các học phần như Toán, Vật lý, Nhập môn CNTT và truyền thông, Tối ưu |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| Giáo dục thể chất / Giáo dục quốc phòng – an ninh | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Theo chương trình HUST start và được tính tích lũy 6 tín chỉ. Theo quy định 119/QĐ-ĐHBK-ĐT, sinh viên có chứng chỉ tiếng Anh quốc tế IELTS 5.5 trở lên sẽ được miễn các học phần tiếng Anh cơ bản. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 49 | Bao gồm các học phần cung cấp kiến thức cơ sở, nền tảng cho ngành: Nhập môn Trí tuệ nhân tạo, Học máy, Nhập môn Khoa học dữ liệu, Học sâu, Xử lý ngôn ngữ tự nhiên, Thị giác máy tính… Và các học phần đồ án môn học (projects) cho phép sinh viên áp dụng các kiến thức tổng hợp và hướng tới đồ án tốt nghiệp. |\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |\n| Kiến thức chuyên ngành | 15 | Bao gồm các học phần cung cấp kiến thức chuyên ngành như Xử lý dữ liệu lớn. |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba, thực hiện tại doanh nghiệp. |\n| Đồ án tốt nghiệp cử nhân | 6 | |\n| **Tổng cộng** | **132 tín chỉ** | |"
+      ],
+      "source_chunk_id": "6272f2eb-8ecf-4349-8279-a2b5dc90e0c6",
+      "source_file": "ITE10_fix_chunks.json",
+      "hierarchy_path": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU"
+    },
+    {
+      "question": "So sánh giữa học phần 'Toán và khoa học cơ bản' với học phần 'Tiếng Anh' trong khối kiến thức giáo dục đại cương?",
+      "ground_truth": "'Toán và khoa học cơ bản' là một khối kiến thức bao gồm các học phần như Toán, Vật lý, Nhập môn CNTT và truyền thông, Tối ưu với tổng số 32 tín chỉ. Trong khi đó, 'Tiếng Anh' là một học phần riêng biệt với 6 tín chỉ và có quy định miễn học phần nếu sinh viên đạt chứng chỉ tiếng Anh quốc tế IELTS 5.5 trở lên.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU]\n\n## THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU\n\n| Khối kiến thức | Tín chỉ | Mô tả |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Gồm các học phần như Toán, Vật lý, Nhập môn CNTT và truyền thông, Tối ưu |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| Giáo dục thể chất / Giáo dục quốc phòng – an ninh | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Theo chương trình HUST start và được tính tích lũy 6 tín chỉ. Theo quy định 119/QĐ-ĐHBK-ĐT, sinh viên có chứng chỉ tiếng Anh quốc tế IELTS 5.5 trở lên sẽ được miễn các học phần tiếng Anh cơ bản. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 49 | Bao gồm các học phần cung cấp kiến thức cơ sở, nền tảng cho ngành: Nhập môn Trí tuệ nhân tạo, Học máy, Nhập môn Khoa học dữ liệu, Học sâu, Xử lý ngôn ngữ tự nhiên, Thị giác máy tính… Và các học phần đồ án môn học (projects) cho phép sinh viên áp dụng các kiến thức tổng hợp và hướng tới đồ án tốt nghiệp. |\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |\n| Kiến thức chuyên ngành | 15 | Bao gồm các học phần cung cấp kiến thức chuyên ngành như Xử lý dữ liệu lớn. |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba, thực hiện tại doanh nghiệp. |\n| Đồ án tốt nghiệp cử nhân | 6 | |\n| **Tổng cộng** | **132 tín chỉ** | |"
+      ],
+      "source_chunk_id": "6272f2eb-8ecf-4349-8279-a2b5dc90e0c6",
+      "source_file": "ITE10_fix_chunks.json",
+      "hierarchy_path": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU"
+    },
+    {
+      "question": "Để được miễn các học phần tiếng Anh cơ bản trong chương trình đào tạo cử nhân Khoa học Dữ liệu, sinh viên cần đạt chứng chỉ tiếng Anh quốc tế nào?",
+      "ground_truth": "Sinh viên cần đạt chứng chỉ tiếng Anh quốc tế IELTS 5.5 trở lên.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU]\n\n## THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU\n\n| Khối kiến thức | Tín chỉ | Mô tả |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Gồm các học phần như Toán, Vật lý, Nhập môn CNTT và truyền thông, Tối ưu |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| Giáo dục thể chất / Giáo dục quốc phòng – an ninh | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Theo chương trình HUST start và được tính tích lũy 6 tín chỉ. Theo quy định 119/QĐ-ĐHBK-ĐT, sinh viên có chứng chỉ tiếng Anh quốc tế IELTS 5.5 trở lên sẽ được miễn các học phần tiếng Anh cơ bản. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 49 | Bao gồm các học phần cung cấp kiến thức cơ sở, nền tảng cho ngành: Nhập môn Trí tuệ nhân tạo, Học máy, Nhập môn Khoa học dữ liệu, Học sâu, Xử lý ngôn ngữ tự nhiên, Thị giác máy tính… Và các học phần đồ án môn học (projects) cho phép sinh viên áp dụng các kiến thức tổng hợp và hướng tới đồ án tốt nghiệp. |"
+      ],
+      "source_chunk_id": "1f63ff03-0572-4f65-8d2d-e68886f1070c",
+      "source_file": "ITE10_fix_chunks.json",
+      "hierarchy_path": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU"
+    },
+    {
+      "question": "So sánh giữa khối kiến thức bổ trợ và khối kiến thức chuyên ngành trong chương trình đào tạo cử nhân Khoa học Dữ liệu theo số tín chỉ và nội dung chính?",
+      "ground_truth": "Khối kiến thức bổ trợ có 9 tín chỉ, bao gồm các phần như kiến thức xã hội, khởi nghiệp và kỹ năng khác cùng với Technical Writing and Presentation. Trong khi đó, khối kiến thức chuyên ngành có 15 tín chỉ và tập trung vào các học phần cung cấp kiến thức chuyên ngành như Xử lý dữ liệu lớn.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU]\n\n## THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU\n\n| Khối kiến thức | Tín chỉ | Mô tả |\n|---|---|---|\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |\n| Kiến thức chuyên ngành | 15 | Bao gồm các học phần cung cấp kiến thức chuyên ngành như Xử lý dữ liệu lớn. |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba, thực hiện tại doanh nghiệp. |\n| Đồ án tốt nghiệp cử nhân | 6 | |\n| **Tổng cộng** | **132 tín chỉ** | |"
+      ],
+      "source_chunk_id": "edbe8401-e6b8-4c33-892c-f8e6d8cbef24",
+      "source_file": "ITE10_fix_chunks.json",
+      "hierarchy_path": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU"
+    },
+    {
+      "question": "So sánh giữa thực tập kỹ thuật và đồ án tốt nghiệp cử nhân về thời gian học và mục tiêu chính?",
+      "ground_truth": "Thực tập kỹ thuật được thực hiện từ trình độ năm thứ ba tại doanh nghiệp, trong khi đồ án tốt nghiệp cử nhân là một học phần trị giá 6 tín chỉ với mục tiêu đánh giá năng lực tổng hợp của sinh viên.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU]\n\n## THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU\n\n| Khối kiến thức | Tín chỉ | Mô tả |\n|---|---|---|\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |\n| Kiến thức chuyên ngành | 15 | Bao gồm các học phần cung cấp kiến thức chuyên ngành như Xử lý dữ liệu lớn. |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba, thực hiện tại doanh nghiệp. |\n| Đồ án tốt nghiệp cử nhân | 6 | |\n| **Tổng cộng** | **132 tín chỉ** | |"
+      ],
+      "source_chunk_id": "edbe8401-e6b8-4c33-892c-f8e6d8cbef24",
+      "source_file": "ITE10_fix_chunks.json",
+      "hierarchy_path": "THÔNG TIN TỔNG QUAN CHƯƠNG TRÌNH ĐÀO TẠO CỬ NHÂN KHOA HỌC DỮ LIỆU"
+    }
+  ]
+}

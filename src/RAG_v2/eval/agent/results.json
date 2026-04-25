@@ -1,0 +1,403 @@
+{
+  "simple": [
+    {
+      "id": "S01",
+      "query": "Điều kiện xét học bổng KKHT là gì?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 0.3333333333333333,
+      "agent_keyword_score": 0.3333333333333333,
+      "rag_latency": 61.51,
+      "agent_latency": 28.44,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "S02",
+      "query": "Môn Toán cao cấp 1 có bao nhiêu tín chỉ?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 0.5,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 38.72,
+      "agent_latency": 34.77,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "S03",
+      "query": "Lịch thi kết thúc học phần học kỳ 1 khi nào?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 73.82,
+      "agent_latency": 62.74,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "S04",
+      "query": "Quy định số lần thi lại tối đa là bao nhiêu?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 0.5,
+      "rag_latency": 76.49,
+      "agent_latency": 63.53,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "S05",
+      "query": "Sinh viên bị cảnh báo học vụ trong trường hợp nào?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 0.5,
+      "rag_latency": 70.52,
+      "agent_latency": 63.78,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "S06",
+      "query": "Điểm rèn luyện được đánh giá theo thang điểm nào?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 74.96,
+      "agent_latency": 97.13,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "S07",
+      "query": "Môn Xử lý tín hiệu số có môn tiên quyết không?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 60.32,
+      "agent_latency": 50.98,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "S08",
+      "query": "Học phí học kỳ này nộp trước thời hạn nào?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 117.8,
+      "agent_latency": 96.07,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "S09",
+      "query": "Kỳ nghỉ Tết của trường bắt đầu từ ngày nào?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 0.0,
+      "rag_latency": 98.14,
+      "agent_latency": 170.71,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "S10",
+      "query": "Điều kiện miễn học phần giáo dục thể chất là gì?",
+      "expected_route": "simple",
+      "actual_route": "simple",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 77.73,
+      "agent_latency": 46.37,
+      "agent_iterations": 0,
+      "expected_tools": [],
+      "tools_used": [],
+      "tool_correct": null,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    }
+  ],
+  "complex": [
+    {
+      "id": "C01",
+      "query": "So sánh điều kiện nhận học bổng KKHT giữa K65 và K70",
+      "expected_route": "complex",
+      "actual_route": "complex",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 110.68,
+      "agent_latency": 95.05,
+      "agent_iterations": 2,
+      "expected_tools": [
+        "compare_cohorts"
+      ],
+      "tools_used": [
+        "compare_cohorts"
+      ],
+      "tool_correct": true,
+      "agent_mode": "agent",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "C02",
+      "query": "Tôi đã tích lũy đủ tín chỉ và không có môn F, tôi đủ điều kiện tốt nghiệp chưa?",
+      "expected_route": "complex",
+      "actual_route": "complex",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 82.98,
+      "agent_latency": 42.31,
+      "agent_iterations": 2,
+      "expected_tools": [
+        "multi_rag_search"
+      ],
+      "tools_used": [
+        "multi_rag_search"
+      ],
+      "tool_correct": true,
+      "agent_mode": "agent",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "C03",
+      "query": "Chương trình đào tạo K68 và K70 khác nhau những gì về môn bắt buộc?",
+      "expected_route": "complex",
+      "actual_route": "complex",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 120.44,
+      "agent_latency": 86.77,
+      "agent_iterations": 2,
+      "expected_tools": [
+        "compare_cohorts"
+      ],
+      "tools_used": [
+        "compare_cohorts"
+      ],
+      "tool_correct": true,
+      "agent_mode": "agent",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "C04",
+      "query": "K65 và K70 có khác nhau về chuẩn ngoại ngữ đầu ra không?",
+      "expected_route": "complex",
+      "actual_route": "complex",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 122.19,
+      "agent_latency": 59.11,
+      "agent_iterations": 2,
+      "expected_tools": [
+        "compare_cohorts"
+      ],
+      "tools_used": [
+        "compare_cohorts"
+      ],
+      "tool_correct": true,
+      "agent_mode": "agent",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "C05",
+      "query": "Tôi muốn biết vừa điều kiện tốt nghiệp vừa quy định thi lại hiện hành",
+      "expected_route": "complex",
+      "actual_route": "simple",
+      "route_match": false,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 113.05,
+      "agent_latency": 101.68,
+      "agent_iterations": 0,
+      "expected_tools": [
+        "multi_rag_search"
+      ],
+      "tools_used": [],
+      "tool_correct": false,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "C06",
+      "query": "So sánh quy định cảnh báo học vụ giữa K66 và K70",
+      "expected_route": "complex",
+      "actual_route": "complex",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 101.46,
+      "agent_latency": 51.78,
+      "agent_iterations": 2,
+      "expected_tools": [
+        "compare_cohorts"
+      ],
+      "tools_used": [
+        "compare_cohorts"
+      ],
+      "tool_correct": true,
+      "agent_mode": "agent",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "C07",
+      "query": "Em đang K70, đã đủ tín chỉ nhưng điểm rèn luyện thấp thì có ảnh hưởng xét tốt ng",
+      "expected_route": "complex",
+      "actual_route": "simple",
+      "route_match": false,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 104.29,
+      "agent_latency": 114.63,
+      "agent_iterations": 0,
+      "expected_tools": [
+        "multi_rag_search"
+      ],
+      "tools_used": [],
+      "tool_correct": false,
+      "agent_mode": "rag_v2",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "C08",
+      "query": "Chương trình K67 và K70 khác nhau thế nào về số tín chỉ tự chọn?",
+      "expected_route": "complex",
+      "actual_route": "complex",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 94.74,
+      "agent_latency": 68.37,
+      "agent_iterations": 2,
+      "expected_tools": [
+        "compare_cohorts"
+      ],
+      "tools_used": [
+        "compare_cohorts"
+      ],
+      "tool_correct": true,
+      "agent_mode": "agent",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "C09",
+      "query": "Tôi cần đối chiếu quy định học bổng và lịch học kỳ để biết có đủ điều kiện nhận ",
+      "expected_route": "complex",
+      "actual_route": "complex",
+      "route_match": true,
+      "rag_keyword_score": 0.6666666666666666,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 119.73,
+      "agent_latency": 57.81,
+      "agent_iterations": 2,
+      "expected_tools": [
+        "multi_rag_search"
+      ],
+      "tools_used": [
+        "multi_rag_search"
+      ],
+      "tool_correct": true,
+      "agent_mode": "agent",
+      "rag_error": null,
+      "agent_error": null
+    },
+    {
+      "id": "C10",
+      "query": "Học bổng",
+      "expected_route": "complex",
+      "actual_route": "complex",
+      "route_match": true,
+      "rag_keyword_score": 1.0,
+      "agent_keyword_score": 1.0,
+      "rag_latency": 135.18,
+      "agent_latency": 20.08,
+      "agent_iterations": 3,
+      "expected_tools": [
+        "clarify_question"
+      ],
+      "tools_used": [
+        "clarify_question",
+        "clarify_question"
+      ],
+      "tool_correct": true,
+      "agent_mode": "agent",
+      "rag_error": null,
+      "agent_error": null
+    }
+  ]
+}

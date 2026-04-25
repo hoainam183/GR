@@ -12,6 +12,18 @@ from reranking.base import BaseReranker, register_reranker
 
 logger = logging.getLogger(__name__)
 
+
+def _resolve_torch_device(device: Optional[str]) -> str:
+    """Resolve runtime device with CUDA first, then Apple MPS, then CPU."""
+    if device:
+        return device
+    if torch.cuda.is_available():
+        return "cuda"
+    mps_backend = getattr(torch.backends, "mps", None)
+    if mps_backend is not None and mps_backend.is_available():
+        return "mps"
+    return "cpu"
+
 # ─── Constants ──────────────────────────────────────────────────────────────────
 DEFAULT_MODEL = "BAAI/bge-reranker-v2-m3"
 DEFAULT_TOP_K = 5
@@ -47,8 +59,7 @@ class BGEReranker(BaseReranker):
         self.top_k = top_k
         self.score_threshold = score_threshold
 
-        if device is None:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = _resolve_torch_device(device)
         self.device = device
 
         if use_fp16 is None:

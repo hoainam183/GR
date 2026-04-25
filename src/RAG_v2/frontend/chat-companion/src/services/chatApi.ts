@@ -1,5 +1,11 @@
 import axios from 'axios';
-import type { ChatRequest, ChatResponse, UserContext } from '@/types/chat';
+import type {
+  ChatRequest,
+  ChatResponse,
+  ChatV3Response,
+  RetrievedDocument,
+  UserContext,
+} from '@/types/chat';
 
 type StoredUserShape = UserContext & {
   email?: string | null;
@@ -10,6 +16,16 @@ export interface ResolvedChatIdentity {
   userContext?: UserContext;
   userId?: string;
   source: 'explicit' | 'localStorage' | 'mixed' | 'none';
+}
+
+export interface ChatStreamHandlers {
+  onSessionId?: (sessionId: string) => void;
+  onToken?: (delta: string) => void;
+}
+
+export interface ChatStreamResult {
+  answer: string;
+  sessionId?: string;
 }
 
 // Backend API endpoint
@@ -122,6 +138,135 @@ export const resolveChatIdentity = (
   };
 };
 
+const mapSourceToRetrieved = (
+  source: Record<string, unknown>,
+  rank: number,
+): RetrievedDocument => ({
+  rank,
+  content: typeof source.text === 'string' ? source.text : '',
+  score:
+    typeof source.rerank_score === 'number'
+      ? source.rerank_score
+      : typeof source.score === 'number'
+      ? source.score
+      : 0,
+  hybrid_score: typeof source.score === 'number' ? source.score : undefined,
+  rerank_score:
+    typeof source.rerank_score === 'number' ? source.rerank_score : undefined,
+  vector_score:
+    typeof source.vector_score === 'number' ? source.vector_score : undefined,
+  keyword_score:
+    typeof source.keyword_score === 'number' ? source.keyword_score : undefined,
+  collection:
+    typeof source.collection === 'string' ? source.collection : undefined,
+  metadata:
+    source.metadata && typeof source.metadata === 'object'
+      ? (source.metadata as Record<string, unknown>)
+      : {},
+});
+
+const normalizeV3Response = (
+  payload: Record<string, unknown>,
+  fallbackSessionId?: string,
+): ChatV3Response => {
+  const retrievedDocs = Array.isArray(payload.retrieved_documents)
+    ? (payload.retrieved_documents as RetrievedDocument[])
+    : Array.isArray(payload.sources)
+    ? (payload.sources as Record<string, unknown>[]).map((source, index) =>
+        mapSourceToRetrieved(source, index + 1),
+      )
+    : [];
+
+  const toolsFromTrace =
+    payload.agent_trace &&
+    typeof payload.agent_trace === 'object' &&
+    Array.isArray((payload.agent_trace as Record<string, unknown>).tool_calls)
+      ? ((payload.agent_trace as Record<string, unknown>).tool_calls as ChatV3Response['tool_calls'])
+      : [];
+
+  const toolsUsedFromTrace =
+    payload.agent_trace &&
+    typeof payload.agent_trace === 'object' &&
+    Array.isArray((payload.agent_trace as Record<string, unknown>).tool_names_sequence)
+      ? ((payload.agent_trace as Record<string, unknown>).tool_names_sequence as string[])
+      : [];
+
+  return {
+    question: typeof payload.question === 'string' ? payload.question : '',
+    answer: typeof payload.answer === 'string' ? payload.answer : '',
+    retrieved_documents: retrievedDocs,
+    num_documents:
+      typeof payload.num_documents === 'number'
+        ? payload.num_documents
+        : typeof payload.num_sources === 'number'
+        ? payload.num_sources
+        : retrievedDocs.length,
+    model_name:
+      typeof payload.model_name === 'string'
+        ? payload.model_name
+        : typeof payload.mode === 'string'
+        ? payload.mode
+        : 'unknown',
+    intent:
+      typeof payload.intent === 'string'
+        ? payload.intent
+        : typeof payload.route === 'string'
+        ? payload.route
+        : 'rag',
+    target_collections: Array.isArray(payload.target_collections)
+      ? (payload.target_collections as string[])
+      : undefined,
+    collection_scores: Array.isArray(payload.collection_scores)
+      ? (payload.collection_scores as ChatResponse['collection_scores'])
+      : undefined,
+    reflected_question:
+      typeof payload.reflected_question === 'string'
+        ? payload.reflected_question
+        : undefined,
+    timings_ms:
+      payload.timings_ms && typeof payload.timings_ms === 'object'
+        ? (payload.timings_ms as Record<string, number>)
+        : undefined,
+    session_id:
+      cleanText(payload.session_id) || fallbackSessionId || '',
+    routing_probabilities:
+      payload.routing_probabilities && typeof payload.routing_probabilities === 'object'
+        ? (payload.routing_probabilities as Record<string, number>)
+        : undefined,
+    reflection_prompt:
+      typeof payload.reflection_prompt === 'string'
+        ? payload.reflection_prompt
+        : undefined,
+    llm_prompt:
+      typeof payload.llm_prompt === 'string' ? payload.llm_prompt : undefined,
+    applied_filters: Array.isArray(payload.applied_filters)
+      ? (payload.applied_filters as ChatResponse['applied_filters'])
+      : undefined,
+    collection_results: Array.isArray(payload.collection_results)
+      ? (payload.collection_results as ChatResponse['collection_results'])
+      : undefined,
+    mode: typeof payload.mode === 'string' ? payload.mode : undefined,
+    route: typeof payload.route === 'string' ? payload.route : undefined,
+    tools_used: Array.isArray(payload.tools_used)
+      ? (payload.tools_used as string[])
+      : toolsUsedFromTrace,
+    tool_calls: Array.isArray(payload.tool_calls)
+      ? (payload.tool_calls as ChatV3Response['tool_calls'])
+      : toolsFromTrace,
+    iterations:
+      typeof payload.iterations === 'number' ? payload.iterations : undefined,
+    error: typeof payload.error === 'string' ? payload.error : undefined,
+    agent_error:
+      typeof payload.agent_error === 'string'
+        ? payload.agent_error
+        : undefined,
+    agent_trace:
+      payload.agent_trace && typeof payload.agent_trace === 'object'
+        ? (payload.agent_trace as ChatV3Response['agent_trace'])
+        : undefined,
+  };
+};
+
 export const sendMessage = async (
   question: string,
   history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
@@ -135,6 +280,7 @@ export const sendMessage = async (
 
     const response = await apiClient.post<ChatResponse>('/chat', {
       question,
+      mode: 'agent',
       top_k: topK,
       history,
       session_id: sessionId,
@@ -149,6 +295,163 @@ export const sendMessage = async (
       throw new Error(
         error.response?.data?.detail || 
         'Failed to get response from the server. Please make sure the backend is running.'
+      );
+    }
+    throw error;
+  }
+};
+
+const parseSseDataLines = (rawEvent: string): string => {
+  const dataLines = rawEvent
+    .split('\n')
+    .filter((line) => line.startsWith('data:'))
+    .map((line) =>
+      line.startsWith('data: ') ? line.slice(6) : line.slice(5),
+    );
+  return dataLines.join('\n');
+};
+
+export const sendMessageStream = async (
+  question: string,
+  history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
+  topK: number = 5,
+  sessionId?: string,
+  userContext?: UserContext,
+  userId?: string,
+  handlers: ChatStreamHandlers = {},
+): Promise<ChatStreamResult> => {
+  const identity = resolveChatIdentity(userContext, userId);
+  const streamUrl = `${API_BASE_URL.replace(/\/+$/, '')}/chat/stream`;
+
+  const response = await fetch(streamUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      question,
+      top_k: topK,
+      history,
+      session_id: sessionId,
+      user_context: identity.userContext,
+      user_id: identity.userId,
+    } as ChatRequest),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || 'Failed to start streaming response.');
+  }
+
+  if (!response.body) {
+    throw new Error('Streaming is not supported by this browser response.');
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+
+  let buffer = '';
+  let answer = '';
+  let resolvedSessionId = sessionId;
+  let done = false;
+
+  while (!done) {
+    const { value, done: streamEnded } = await reader.read();
+    if (streamEnded) {
+      break;
+    }
+
+    buffer += decoder.decode(value, { stream: true });
+
+    let sepIndex = buffer.indexOf('\n\n');
+    while (sepIndex !== -1) {
+      const rawEvent = buffer.slice(0, sepIndex);
+      buffer = buffer.slice(sepIndex + 2);
+
+      const payload = parseSseDataLines(rawEvent);
+      if (!payload) {
+        sepIndex = buffer.indexOf('\n\n');
+        continue;
+      }
+
+      if (payload === '[DONE]') {
+        done = true;
+        break;
+      }
+
+      try {
+        const parsed = JSON.parse(payload) as Record<string, unknown>;
+        const type = typeof parsed.type === 'string' ? parsed.type : '';
+
+        if (type === 'session') {
+          const sid = cleanText(parsed.session_id);
+          if (sid) {
+            resolvedSessionId = sid;
+            handlers.onSessionId?.(sid);
+          }
+        } else if (type === 'token') {
+          const delta = typeof parsed.delta === 'string' ? parsed.delta : '';
+          if (delta) {
+            answer += delta;
+            handlers.onToken?.(delta);
+          }
+        } else if (type === 'done') {
+          done = true;
+          break;
+        } else if (typeof parsed.session_id === 'string') {
+          const sid = cleanText(parsed.session_id);
+          if (sid) {
+            resolvedSessionId = sid;
+            handlers.onSessionId?.(sid);
+          }
+        }
+      } catch {
+        answer += payload;
+        handlers.onToken?.(payload);
+      }
+
+      sepIndex = buffer.indexOf('\n\n');
+    }
+  }
+
+  return {
+    answer,
+    sessionId: resolvedSessionId,
+  };
+};
+
+export const sendMessageV3 = async (
+  question: string,
+  history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
+  topK: number = 5,
+  mode: 'auto' | 'rag' | 'agent' = 'auto',
+  sessionId?: string,
+  userContext?: UserContext,
+  userId?: string,
+): Promise<ChatV3Response> => {
+  try {
+    const identity = resolveChatIdentity(userContext, userId);
+
+    const response = await apiClient.post('/chat/v3', {
+      question,
+      mode,
+      top_k: topK,
+      history,
+      session_id: sessionId,
+      user_context: identity.userContext,
+      user_id: identity.userId,
+    } as ChatRequest);
+
+    return normalizeV3Response(
+      response.data as Record<string, unknown>,
+      sessionId,
+    );
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('API Error:', error.response?.data || error.message);
+      throw new Error(
+        error.response?.data?.detail ||
+          'Failed to get response from the server. Please make sure the backend is running.',
       );
     }
     throw error;

@@ -13,6 +13,18 @@ from embedding import BaseEmbedder
 logger = logging.getLogger(__name__)
 
 
+def _resolve_torch_device(device: Optional[str]) -> str:
+    """Resolve runtime device with CUDA first, then Apple MPS, then CPU."""
+    if device:
+        return device
+    if torch.cuda.is_available():
+        return "cuda"
+    mps_backend = getattr(torch.backends, "mps", None)
+    if mps_backend is not None and mps_backend.is_available():
+        return "mps"
+    return "cpu"
+
+
 class E5MultilingualEmbedder(BaseEmbedder):
     """Wrapper around intfloat/multilingual-e5-large.
 
@@ -38,8 +50,8 @@ class E5MultilingualEmbedder(BaseEmbedder):
         self.max_length = max_length
         self._dimension = 1024
 
-        if device is None:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = _resolve_torch_device(device)
+        dtype = torch.float16 if device == "cuda" else torch.float32
 
         logger.info(
             "Loading E5-multilingual model '%s' on %s", model_name, device
@@ -49,7 +61,7 @@ class E5MultilingualEmbedder(BaseEmbedder):
             device=device,
             model_kwargs={
                 "low_cpu_mem_usage": True,
-                "dtype": torch.float16,
+                "dtype": dtype,
             },
         )
         self._model.max_seq_length = max_length

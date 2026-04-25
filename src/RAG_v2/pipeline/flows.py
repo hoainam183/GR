@@ -92,6 +92,33 @@ def _retrieval_candidate_k(top_k: int) -> int:
     return max(top_k * 4, 20)
 
 
+def _should_strip_major_for_retrieval(
+    *,
+    resolved_major: Optional[str],
+    target_collections: Optional[List[str]],
+) -> bool:
+    """Return True when major phrases should be stripped from retrieval query.
+
+    Keeping major mentions is important when routing is confidently quydinh-only,
+    because quydinh does not use ``major_code`` metadata filters and therefore
+    relies on lexical/semantic major cues in the query text itself.
+    """
+    if not resolved_major:
+        return False
+
+    if target_collections is None:
+        return True
+
+    normalized_targets = {
+        str(col).strip().lower()
+        for col in target_collections
+        if str(col).strip()
+    }
+    if normalized_targets == {"quydinh"}:
+        return False
+    return True
+
+
 def _safe_float(value: Any) -> float:
     """Return *value* as float, or 0.0 when conversion fails."""
     try:
@@ -575,17 +602,7 @@ def rag_flow(
         if resolved_cohort:
             logger.info("Cohort fallback resolved: %s", resolved_cohort)
 
-    retrieval_query = strip_major_from_query_for_retrieval(
-        search_query,
-        resolved_major=resolved_major,
-    )
-    if retrieval_query != search_query:
-        logger.info(
-            "Retrieval query normalized: %r -> %r (major=%s)",
-            search_query[:80],
-            retrieval_query[:80],
-            resolved_major,
-        )
+    retrieval_query = search_query
 
     # 2. Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
@@ -608,6 +625,23 @@ def rag_flow(
             target_collections,
         )
         timings_ms["collection_routing"] = _elapsed_ms(routing_t0)
+
+    if _should_strip_major_for_retrieval(
+        resolved_major=resolved_major,
+        target_collections=target_collections,
+    ):
+        normalized_query = strip_major_from_query_for_retrieval(
+            search_query,
+            resolved_major=resolved_major,
+        )
+        if normalized_query != search_query:
+            logger.info(
+                "Retrieval query normalized: %r -> %r (major=%s)",
+                search_query[:80],
+                normalized_query[:80],
+                resolved_major,
+            )
+            retrieval_query = normalized_query
 
     collection_scores = _build_collection_scores(
         all_collections=cfg.get("collections"),
@@ -1030,17 +1064,7 @@ def rag_flow_stream(
         if resolved_cohort:
             logger.info("Cohort fallback resolved: %s", resolved_cohort)
 
-    retrieval_query = strip_major_from_query_for_retrieval(
-        search_query,
-        resolved_major=resolved_major,
-    )
-    if retrieval_query != search_query:
-        logger.info(
-            "Retrieval query normalized: %r -> %r (major=%s)",
-            search_query[:80],
-            retrieval_query[:80],
-            resolved_major,
-        )
+    retrieval_query = search_query
 
     # Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
@@ -1055,6 +1079,23 @@ def rag_flow_stream(
             domains=domains,
         )
         timings_ms["collection_routing"] = _elapsed_ms(routing_t0)
+
+    if _should_strip_major_for_retrieval(
+        resolved_major=resolved_major,
+        target_collections=target_collections,
+    ):
+        normalized_query = strip_major_from_query_for_retrieval(
+            search_query,
+            resolved_major=resolved_major,
+        )
+        if normalized_query != search_query:
+            logger.info(
+                "Retrieval query normalized: %r -> %r (major=%s)",
+                search_query[:80],
+                normalized_query[:80],
+                resolved_major,
+            )
+            retrieval_query = normalized_query
 
     top_k_value = cfg.get("top_k", 5)
     raw_candidate_k = _retrieval_candidate_k(top_k_value)

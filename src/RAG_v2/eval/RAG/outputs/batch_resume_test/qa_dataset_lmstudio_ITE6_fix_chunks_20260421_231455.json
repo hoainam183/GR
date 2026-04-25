@@ -1,0 +1,19 @@
+{
+  "total": 1,
+  "by_type": {
+    "multi_hop": 1
+  },
+  "pairs": [
+    {
+      "question": "Sinh viên cần học những học phần nào trước khi học môn IT4062 Thực hành lập trình mạng?",
+      "ground_truth": "Sinh viên cần học các học phần IT3210 và IT3080E trước khi học môn IT4062 Thực hành lập trình mạng.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2020 > 4. Mô tả tóm tắt học phần > 4.2 Khối kiến thức giáo dục chuyên nghiệp > A. Cơ sở cốt lõi ngành]\n\n#### A. Cơ sở cốt lõi ngành\n\n---\n\n**IT4062 Thực hành lập trình mạng**\n\n- Khối lượng: 2(0-4-0-4)\n- Học phần tiên quyết: Không\n- Học phần học trước: IT3210, IT3080E\n- Học phần song hành: Không\n- Tỷ lệ đánh giá: 50% Quá trình + 50% Thi\n\n**Mục tiêu:** Sau khi hoàn thành khóa học sinh viên có khả năng lập trình với thư viện socket để triển khai các mô-đun truyền/nhận dữ liệu trên tầng giao vận với các giao thức TCP/UDP. Ngoài ra môn học cũng cung cấp cho sinh viên các kỹ năng làm việc nhóm, thuyết trình để làm việc trong công ty sau này.\n\n**Nội dung:** Trong môn học Lập trình mạng, sinh viên sẽ được học các kỹ thuật lập trình truyền/nhận dữ liệu trên môi trường mạng ở lớp giao vận. Nội dung bao gồm các bài giảng ôn tập kiến thức về mạng máy tính và lập trình với ngôn ngữ C/C++ đã học trước đó, và các bài giảng về kỹ thuật lập trình mạng trên tầng giao vận với 2 giao thức chính là TCP và UDP. Sinh viên được hướng dẫn làm các bài tập lập trình để rèn luyện kỹ năng thực tế trên môi trường hệ điều hành Unix."
+      ],
+      "source_chunk_id": "d25b7da2-4e9e-4e06-adea-cea455eda03d",
+      "source_file": "ITE6_fix_chunks.json",
+      "hierarchy_path": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2020 > 4. Mô tả tóm tắt học phần > 4.2 Khối kiến thức giáo dục chuyên nghiệp > A. Cơ sở cốt lõi ngành"
+    }
+  ]
+}

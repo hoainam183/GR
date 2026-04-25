@@ -1,0 +1,583 @@
+{
+  "total": 52,
+  "by_type": {
+    "factoid": 14,
+    "multi_hop": 20,
+    "procedural": 7,
+    "comparative": 11
+  },
+  "pairs": [
+    {
+      "question": "Thông tư liên tịch số 18/2015/TTLT-BGDĐT-BLĐTBXH được ban hành ngày nào?",
+      "ground_truth": "ngày 08 tháng 9 năm 2015",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH]\n\n# THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH\n\n**Cơ quan ban hành:** Bộ Giáo dục và Đào tạo – Bộ Lao động, Thương binh và Xã hội  \n**Số hiệu:** 18/2015/TTLT-BGDĐT-BLĐTBXH  \n**Địa danh:** Hà Nội, ngày 08 tháng 9 năm 2015  \n**Nội dung:** Quy định tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học\n\n---"
+      ],
+      "source_chunk_id": "3f73b8e4-1634-46d7-a1a9-d1134a68a4fa",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH"
+    },
+    {
+      "question": "Theo Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH, môn học Giáo dục quốc phòng và an ninh được tổ chức như thế nào trong các cơ sở giáo dục đại học?",
+      "ground_truth": "Môn học Giáo dục quốc phòng và an ninh được tổ chức trong các cơ sở giáo dục đại học theo quy định của Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH, bao gồm cả việc dạy học và đánh giá kết quả học tập.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH]\n\n# THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH\n\n**Cơ quan ban hành:** Bộ Giáo dục và Đào tạo – Bộ Lao động, Thương binh và Xã hội  \n**Số hiệu:** 18/2015/TTLT-BGDĐT-BLĐTBXH  \n**Địa danh:** Hà Nội, ngày 08 tháng 9 năm 2015  \n**Nội dung:** Quy định tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học\n\n---"
+      ],
+      "source_chunk_id": "3f73b8e4-1634-46d7-a1a9-d1134a68a4fa",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH"
+    },
+    {
+      "question": "Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH được ban hành bởi những bộ nào?",
+      "ground_truth": "Bộ Giáo dục và Đào tạo, Bộ Lao động - Thương binh và Xã hội",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý]\n\n## Căn cứ pháp lý\n\n- Luật Giáo dục ngày 14 tháng 6 năm 2005; Luật sửa đổi, bổ sung một số điều của Luật Giáo dục ngày 25 tháng 11 năm 2009\n- Luật Giáo dục đại học ngày 18 tháng 6 năm 2012\n- Luật Giáo dục quốc phòng và an ninh ngày 19 tháng 6 năm 2013\n- Luật Giáo dục nghề nghiệp ngày 27 tháng 11 năm 2014\n- Nghị định số 32/2008/NĐ-CP ngày 19 tháng 3 năm 2008 của Chính phủ quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Bộ Giáo dục và Đào tạo\n- Nghị định số 106/2012/NĐ-CP ngày 20 tháng 12 năm 2012 của Chính phủ quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Bộ Lao động - Thương binh và Xã hội\n- Nghị định số 13/2014/NĐ-CP ngày 25 tháng 02 năm 2014 của Chính phủ quy định chi tiết và biện pháp thi hành Luật Giáo dục quốc phòng và an ninh\n\nBộ trưởng Bộ Giáo dục và Đào tạo, Bộ trưởng Bộ Lao động - Thương binh và Xã hội ban hành Thông tư liên tịch quy định tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học.\n\n---\n\n# Chương I: NHỮNG QUY ĐỊNH CHUNG"
+      ],
+      "source_chunk_id": "ecbbd2ff-bb01-487a-ac06-66653bfdc9e0",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý"
+    },
+    {
+      "question": "Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH được ban hành dựa trên cơ sở pháp lý nào và do những bộ phận nào chịu trách nhiệm ban hành?",
+      "ground_truth": "Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH được ban hành dựa trên cơ sở pháp lý gồm Luật Giáo dục, Luật Giáo dục đại học, Luật Giáo dục quốc phòng và an ninh, Luật Giáo dục nghề nghiệp và các nghị định liên quan. Thông tư này được ban hành bởi Bộ trưởng Bộ Giáo dục và Đào tạo cùng với Bộ trưởng Bộ Lao động - Thương binh và Xã hội.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý]\n\n## Căn cứ pháp lý\n\n- Luật Giáo dục ngày 14 tháng 6 năm 2005; Luật sửa đổi, bổ sung một số điều của Luật Giáo dục ngày 25 tháng 11 năm 2009\n- Luật Giáo dục đại học ngày 18 tháng 6 năm 2012\n- Luật Giáo dục quốc phòng và an ninh ngày 19 tháng 6 năm 2013\n- Luật Giáo dục nghề nghiệp ngày 27 tháng 11 năm 2014\n- Nghị định số 32/2008/NĐ-CP ngày 19 tháng 3 năm 2008 của Chính phủ quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Bộ Giáo dục và Đào tạo\n- Nghị định số 106/2012/NĐ-CP ngày 20 tháng 12 năm 2012 của Chính phủ quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Bộ Lao động - Thương binh và Xã hội\n- Nghị định số 13/2014/NĐ-CP ngày 25 tháng 02 năm 2014 của Chính phủ quy định chi tiết và biện pháp thi hành Luật Giáo dục quốc phòng và an ninh\n\nBộ trưởng Bộ Giáo dục và Đào tạo, Bộ trưởng Bộ Lao động - Thương binh và Xã hội ban hành Thông tư liên tịch quy định tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học.\n\n---\n\n# Chương I: NHỮNG QUY ĐỊNH CHUNG"
+      ],
+      "source_chunk_id": "ecbbd2ff-bb01-487a-ac06-66653bfdc9e0",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý"
+    },
+    {
+      "question": "Căn cứ pháp lý nào quy định chức năng, nhiệm vụ và cơ cấu tổ chức của Bộ Giáo dục và Đào tạo?",
+      "ground_truth": "Nghị định số 32/2008/NĐ-CP ngày 19 tháng 3 năm 2008 của Chính phủ.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý]\n\n## Căn cứ pháp lý\n\n- Luật Giáo dục ngày 14 tháng 6 năm 2005; Luật sửa đổi, bổ sung một số điều của Luật Giáo dục ngày 25 tháng 11 năm 2009\n- Luật Giáo dục đại học ngày 18 tháng 6 năm 2012\n- Luật Giáo dục quốc phòng và an ninh ngày 19 tháng 6 năm 2013\n- Luật Giáo dục nghề nghiệp ngày 27 tháng 11 năm 2014\n- Nghị định số 32/2008/NĐ-CP ngày 19 tháng 3 năm 2008 của Chính phủ quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Bộ Giáo dục và Đào tạo\n- Nghị định số 106/2012/NĐ-CP ngày 20 tháng 12 năm 2012 của Chính phủ quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Bộ Lao động - Thương binh và Xã hội\n- Nghị định số 13/2014/NĐ-CP ngày 25 tháng 02 năm 2014 của Chính phủ quy định chi tiết và biện pháp thi hành Luật Giáo dục quốc phòng và an ninh"
+      ],
+      "source_chunk_id": "e1a04340-9609-4beb-96aa-6bd4dda874f5",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý"
+    },
+    {
+      "question": "Nghị định nào quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Bộ Giáo dục và Đào tạo?",
+      "ground_truth": "Nghị định số 32/2008/NĐ-CP ngày 19 tháng 3 năm 2008",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý]\n\n## Căn cứ pháp lý\n\n- Luật Giáo dục ngày 14 tháng 6 năm 2005; Luật sửa đổi, bổ sung một số điều của Luật Giáo dục ngày 25 tháng 11 năm 2009\n- Luật Giáo dục đại học ngày 18 tháng 6 năm 2012\n- Luật Giáo dục quốc phòng và an ninh ngày 19 tháng 6 năm 2013\n- Luật Giáo dục nghề nghiệp ngày 27 tháng 11 năm 2014\n- Nghị định số 32/2008/NĐ-CP ngày 19 tháng 3 năm 2008 của Chính phủ quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Bộ Giáo dục và Đào tạo\n- Nghị định số 106/2012/NĐ-CP ngày 20 tháng 12 năm 2012 của Chính phủ quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Bộ Lao động - Thương binh và Xã hội\n- Nghị định số 13/2014/NĐ-CP ngày 25 tháng 02 năm 2014 của Chính phủ quy định chi tiết và biện pháp thi hành Luật Giáo dục quốc phòng và an ninh"
+      ],
+      "source_chunk_id": "e1a04340-9609-4beb-96aa-6bd4dda874f5",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý"
+    },
+    {
+      "question": "Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH quy định về việc tổ chức dạy học và đánh giá môn Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nào?",
+      "ground_truth": "Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH quy định về việc tổ chức dạy học và đánh giá môn Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nghề nghiệp và cơ sở giáo dục đại học.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý]\n\nBộ trưởng Bộ Giáo dục và Đào tạo, Bộ trưởng Bộ Lao động - Thương binh và Xã hội ban hành Thông tư liên tịch quy định tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học.\n---\n# Chương I: NHỮNG QUY ĐỊNH CHUNG"
+      ],
+      "source_chunk_id": "9f63fea1-0da0-4d4a-976b-fae795817bab",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý"
+    },
+    {
+      "question": "Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH quy định về môn học nào trong các cơ sở giáo dục nghề nghiệp và đại học?",
+      "ground_truth": "Giáo dục quốc phòng và an ninh",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý]\n\nBộ trưởng Bộ Giáo dục và Đào tạo, Bộ trưởng Bộ Lao động - Thương binh và Xã hội ban hành Thông tư liên tịch quy định tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học.\n---\n# Chương I: NHỮNG QUY ĐỊNH CHUNG"
+      ],
+      "source_chunk_id": "9f63fea1-0da0-4d4a-976b-fae795817bab",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "THÔNG TƯ LIÊN TỊCH 18/2015/TTLT-BGDĐT-BLĐTBXH > Căn cứ pháp lý"
+    },
+    {
+      "question": "Điều kiện nào để được miễn học môn Giáo dục quốc phòng và an ninh theo Thông tư liên tịch này?",
+      "ground_truth": "Thông tư liên tịch này không quy định cụ thể điều kiện miễn học môn Giáo dục quốc phòng và an ninh. Điều này có thể được quy định trong các văn bản hướng dẫn thi hành hoặc chính sách cụ thể của từng cơ sở giáo dục.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng]\n\n## Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng\n\n1. Thông tư liên tịch này quy định về tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh (GDQP&AN) trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học.\n\n2. Thông tư này áp dụng đối với các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, gồm: trường trung cấp, trường cao đẳng, trường đại học, học viện, đại học vùng, đại học Quốc gia, trung tâm GDQP&AN (sau đây gọi chung là cơ sở giáo dục); tổ chức, cá nhân có liên quan."
+      ],
+      "source_chunk_id": "a799248e-e1c4-4394-8f31-8891614d1974",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng"
+    },
+    {
+      "question": "Thông tư liên tịch này quy định về tổ chức dạy học môn Giáo dục quốc phòng và an ninh cho những đối tượng nào?",
+      "ground_truth": "Thông tư liên tịch này quy định về tổ chức dạy học môn Giáo dục quốc phòng và an ninh cho các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, bao gồm trường trung cấp, trường cao đẳng, trường đại học, học viện, đại học vùng, đại học Quốc gia và trung tâm GDQP&AN.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng]\n\n## Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng\n\n1. Thông tư liên tịch này quy định về tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh (GDQP&AN) trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học.\n\n2. Thông tư này áp dụng đối với các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, gồm: trường trung cấp, trường cao đẳng, trường đại học, học viện, đại học vùng, đại học Quốc gia, trung tâm GDQP&AN (sau đây gọi chung là cơ sở giáo dục); tổ chức, cá nhân có liên quan."
+      ],
+      "source_chunk_id": "a799248e-e1c4-4394-8f31-8891614d1974",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng"
+    },
+    {
+      "question": "Học sinh, sinh viên được miễn học môn GDQP&AN trong những điều kiện nào?",
+      "ground_truth": "Học sinh, sinh viên được miễn học môn GDQP&AN nếu đã hoàn thành nghĩa vụ quân sự hoặc có giấy xác nhận của cơ quan nhà nước có thẩm quyền về việc đã tham gia nghĩa vụ quân sự.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 2. Vị trí, mục tiêu môn học]\n\n## Điều 2. Vị trí, mục tiêu môn học\n\n1. GDQP&AN là nội dung cơ bản trong việc xây dựng nền quốc phòng toàn dân, an ninh nhân dân, là môn học chính khóa thuộc chương trình giáo dục của các cơ sở giáo dục.\n\n2. Môn học GDQP&AN trang bị cho học sinh, sinh viên những hiểu biết cơ bản về nền quốc phòng toàn dân, an ninh nhân dân, quan điểm của Đảng, chính sách, pháp luật của nhà nước về quốc phòng và an ninh; truyền thống chống ngoại xâm của dân tộc, lực lượng vũ trang nhân dân và nghệ thuật quân sự Việt Nam; xây dựng nền quốc phòng toàn dân, an ninh nhân dân, lực lượng vũ trang nhân dân; có kiến thức cơ bản, căn thiết về phòng thủ dân sự, kỹ năng quân sự; sẵn sàng thực hiện nghĩa vụ quân sự bảo vệ Tổ quốc."
+      ],
+      "source_chunk_id": "6067f60b-b058-41e0-aba5-68fae5f5eec2",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 2. Vị trí, mục tiêu môn học"
+    },
+    {
+      "question": "Môn học GDQP&AN thuộc chương trình giáo dục nào của các cơ sở giáo dục?",
+      "ground_truth": "Chương trình giáo dục của các cơ sở giáo dục",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 2. Vị trí, mục tiêu môn học]\n\n## Điều 2. Vị trí, mục tiêu môn học\n\n1. GDQP&AN là nội dung cơ bản trong việc xây dựng nền quốc phòng toàn dân, an ninh nhân dân, là môn học chính khóa thuộc chương trình giáo dục của các cơ sở giáo dục.\n\n2. Môn học GDQP&AN trang bị cho học sinh, sinh viên những hiểu biết cơ bản về nền quốc phòng toàn dân, an ninh nhân dân, quan điểm của Đảng, chính sách, pháp luật của nhà nước về quốc phòng và an ninh; truyền thống chống ngoại xâm của dân tộc, lực lượng vũ trang nhân dân và nghệ thuật quân sự Việt Nam; xây dựng nền quốc phòng toàn dân, an ninh nhân dân, lực lượng vũ trang nhân dân; có kiến thức cơ bản, căn thiết về phòng thủ dân sự, kỹ năng quân sự; sẵn sàng thực hiện nghĩa vụ quân sự bảo vệ Tổ quốc."
+      ],
+      "source_chunk_id": "6067f60b-b058-41e0-aba5-68fae5f5eec2",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 2. Vị trí, mục tiêu môn học"
+    },
+    {
+      "question": "Quy trình đăng ký học môn học GDQP&AN tại các cơ sở giáo dục được thực hiện như thế nào?",
+      "ground_truth": "Quy trình đăng ký học môn học GDQP&AN được thực hiện theo quy chế tổ chức đào tạo của từng trình độ và phải đảm bảo tính toàn diện, có trọng tâm, trọng điểm bằng các hình thức phù hợp.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN]\n\n## Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN\n\n1. Dạy, học môn học GDQP&AN phải bảo đảm tính toàn diện, có trọng tâm, trọng điểm bằng các hình thức phù hợp; kết hợp giữa lý luận và thực tiễn, giữa lý thuyết và thực hành; phù hợp với quy chế tổ chức đào tạo của từng trình độ; phải gắn liền với giáo dục ý thức tổ chức kỷ luật, tinh thần tập thể; dạy, học môn học GDQP&AN tại các cơ sở giáo dục phải gắn kết với giáo dục thực tế, kỹ năng thực hành và hoạt động ngoại khóa.\n\n2. Giáo viên, giảng viên dạy GDQP&AN khi giảng dạy tại giảng đường hoặc trên thao trường phải mang mặc trang phục GDQP&AN theo quy định; giáo viên, giảng viên là sĩ quan quân đội, công an biệt phái phải mang mặc theo Điều lệnh quân đội, công an nhân dân.\n\n3. Giáo viên, giảng viên, cán bộ quản lý, học sinh, sinh viên giảng dạy và học tập môn học GDQP&AN phải thực hiện đúng, đủ kế hoạch giảng dạy, học tập, nội quy, quy tắc về đảm bảo an toàn về người, vũ khí, trang thiết bị.\n\n---\n\n# Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC"
+      ],
+      "source_chunk_id": "23022a6e-600f-45cd-ae39-89bb768f1432",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN"
+    },
+    {
+      "question": "So sánh giữa hình thức dạy học môn GDQP&AN tại giảng đường và trên thao trường?",
+      "ground_truth": "Hình thức dạy học môn GDQP&AN tại giảng đường tập trung vào lý thuyết và quy định, trong khi hình thức trên thao trường chú trọng thực hành và yêu cầu giảng viên mặc trang phục GDQP&AN theo quy định.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN]\n\n## Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN\n\n1. Dạy, học môn học GDQP&AN phải bảo đảm tính toàn diện, có trọng tâm, trọng điểm bằng các hình thức phù hợp; kết hợp giữa lý luận và thực tiễn, giữa lý thuyết và thực hành; phù hợp với quy chế tổ chức đào tạo của từng trình độ; phải gắn liền với giáo dục ý thức tổ chức kỷ luật, tinh thần tập thể; dạy, học môn học GDQP&AN tại các cơ sở giáo dục phải gắn kết với giáo dục thực tế, kỹ năng thực hành và hoạt động ngoại khóa.\n\n2. Giáo viên, giảng viên dạy GDQP&AN khi giảng dạy tại giảng đường hoặc trên thao trường phải mang mặc trang phục GDQP&AN theo quy định; giáo viên, giảng viên là sĩ quan quân đội, công an biệt phái phải mang mặc theo Điều lệnh quân đội, công an nhân dân.\n\n3. Giáo viên, giảng viên, cán bộ quản lý, học sinh, sinh viên giảng dạy và học tập môn học GDQP&AN phải thực hiện đúng, đủ kế hoạch giảng dạy, học tập, nội quy, quy tắc về đảm bảo an toàn về người, vũ khí, trang thiết bị.\n\n---\n\n# Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC"
+      ],
+      "source_chunk_id": "23022a6e-600f-45cd-ae39-89bb768f1432",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN"
+    },
+    {
+      "question": "Giáo viên giảng dạy môn học GDQP&AN khi giảng trên thao trường phải mặc trang phục gì?",
+      "ground_truth": "Trang phục GDQP&AN theo quy định",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN]\n\n## Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN\n\n1. Dạy, học môn học GDQP&AN phải bảo đảm tính toàn diện, có trọng tâm, trọng điểm bằng các hình thức phù hợp; kết hợp giữa lý luận và thực tiễn, giữa lý thuyết và thực hành; phù hợp với quy chế tổ chức đào tạo của từng trình độ; phải gắn liền với giáo dục ý thức tổ chức kỷ luật, tinh thần tập thể; dạy, học môn học GDQP&AN tại các cơ sở giáo dục phải gắn kết với giáo dục thực tế, kỹ năng thực hành và hoạt động ngoại khóa.\n\n2. Giáo viên, giảng viên dạy GDQP&AN khi giảng dạy tại giảng đường hoặc trên thao trường phải mang mặc trang phục GDQP&AN theo quy định; giáo viên, giảng viên là sĩ quan quân đội, công an biệt phái phải mang mặc theo Điều lệnh quân đội, công an nhân dân.\n\n3. Giáo viên, giảng viên, cán bộ quản lý, học sinh, sinh viên giảng dạy và học tập môn học GDQP&AN phải thực hiện đúng, đủ kế hoạch giảng dạy, học tập, nội quy, quy tắc về đảm bảo an toàn về người, vũ khí, trang thiết bị.\n\n---\n\n# Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC"
+      ],
+      "source_chunk_id": "a741b46e-6921-4e8c-a77b-2b52171a5e90",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN"
+    },
+    {
+      "question": "Giáo viên giảng dạy môn học GDQP&AN cần thực hiện những yêu cầu gì để đảm bảo an toàn trong quá trình giảng dạy?",
+      "ground_truth": "Giáo viên phải thực hiện đúng, đủ kế hoạch giảng dạy, học tập, nội quy và quy tắc về đảm bảo an toàn về người, vũ khí, trang thiết bị.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN]\n\n## Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN\n\n1. Dạy, học môn học GDQP&AN phải bảo đảm tính toàn diện, có trọng tâm, trọng điểm bằng các hình thức phù hợp; kết hợp giữa lý luận và thực tiễn, giữa lý thuyết và thực hành; phù hợp với quy chế tổ chức đào tạo của từng trình độ; phải gắn liền với giáo dục ý thức tổ chức kỷ luật, tinh thần tập thể; dạy, học môn học GDQP&AN tại các cơ sở giáo dục phải gắn kết với giáo dục thực tế, kỹ năng thực hành và hoạt động ngoại khóa.\n\n2. Giáo viên, giảng viên dạy GDQP&AN khi giảng dạy tại giảng đường hoặc trên thao trường phải mang mặc trang phục GDQP&AN theo quy định; giáo viên, giảng viên là sĩ quan quân đội, công an biệt phái phải mang mặc theo Điều lệnh quân đội, công an nhân dân.\n\n3. Giáo viên, giảng viên, cán bộ quản lý, học sinh, sinh viên giảng dạy và học tập môn học GDQP&AN phải thực hiện đúng, đủ kế hoạch giảng dạy, học tập, nội quy, quy tắc về đảm bảo an toàn về người, vũ khí, trang thiết bị.\n\n---\n\n# Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC"
+      ],
+      "source_chunk_id": "a741b46e-6921-4e8c-a77b-2b52171a5e90",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương I: NHỮNG QUY ĐỊNH CHUNG > Điều 3. Nguyên tắc, yêu cầu dạy, học môn học GDQP&AN"
+    },
+    {
+      "question": "Những đối tượng nào được miễn học môn học GDQP&AN do đã hoàn thành nghĩa vụ quân sự hoặc công an nhân dân?",
+      "ground_truth": "Học sinh, sinh viên đã hoàn thành nghĩa vụ quân sự, công an nhân dân.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN]\n\n## Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN\n\n1. Đối tượng được miễn học môn học GDQP&AN:\n   a) Học sinh, sinh viên có giấy chứng nhận sĩ quan dự bị hoặc bằng tốt nghiệp do các trường quân đội, công an cấp;\n   b) Học sinh, sinh viên đã có chứng chỉ GDQP&AN tương ứng với trình độ đào tạo;\n   c) Học sinh, sinh viên là người nước ngoài.\n\n2. Đối tượng được miễn học, miễn thi học phần, nội dung trong chương trình GDQP&AN, gồm: học sinh, sinh viên có giấy xác nhận kết quả học tập các học phần, nội dung đó đạt từ 5 điểm trở lên theo thang điểm 10.\n\n3. Đối tượng được miễn học, các nội dung thực hành kỹ năng quân sự:\n   a) Học sinh, sinh viên là người khuyết tật, có giấy xác nhận khuyết tật theo quy định của pháp luật về người khuyết tật;\n   b) Học sinh, sinh viên không đủ sức khỏe về thể lực hoặc mắc những bệnh lý thuộc diện miễn làm nghĩa vụ quân sự theo quy định hiện hành;\n   c) Học sinh, sinh viên đã hoàn thành nghĩa vụ quân sự, công an nhân dân.\n\n4. Đối tượng được tạm hoãn học môn học GDQP&AN:\n   a) Học sinh, sinh viên vì lý do sức khỏe phải dừng học trong thời gian dài để điều trị, phải có giấy xác nhận của bệnh viện nơi học sinh, sinh viên điều trị;\n   b) Học sinh, sinh viên là nữ đang mang thai hoặc trong thời gian nghỉ chế độ thai sản theo quy định hiện hành.\n\n5. Giám đốc, hiệu trưởng các cơ sở giáo dục xem xét tạm hoãn học môn học GDQP&AN cho các đối tượng quy định tại điểm a, điểm b khoản 4 Điều này. Hết thời gian tạm hoãn, các cơ sở giáo dục bố trí cho học sinh, sinh viên vào học các lớp phù hợp để hoàn thành chương trình."
+      ],
+      "source_chunk_id": "ce16728e-bbaf-423a-936c-a0943ed14b22",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN"
+    },
+    {
+      "question": "Điều kiện nào để học sinh, sinh viên được miễn học môn học GDQP&AN?",
+      "ground_truth": "Học sinh, sinh viên có giấy chứng nhận sĩ quan dự bị hoặc bằng tốt nghiệp do các trường quân đội, công an cấp; đã có chứng chỉ GDQP&AN tương ứng với trình độ đào tạo; là người nước ngoài.",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN]\n\n## Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN\n\n1. Đối tượng được miễn học môn học GDQP&AN:\n   a) Học sinh, sinh viên có giấy chứng nhận sĩ quan dự bị hoặc bằng tốt nghiệp do các trường quân đội, công an cấp;\n   b) Học sinh, sinh viên đã có chứng chỉ GDQP&AN tương ứng với trình độ đào tạo;\n   c) Học sinh, sinh viên là người nước ngoài.\n\n2. Đối tượng được miễn học, miễn thi học phần, nội dung trong chương trình GDQP&AN, gồm: học sinh, sinh viên có giấy xác nhận kết quả học tập các học phần, nội dung đó đạt từ 5 điểm trở lên theo thang điểm 10.\n\n3. Đối tượng được miễn học, các nội dung thực hành kỹ năng quân sự:\n   a) Học sinh, sinh viên là người khuyết tật, có giấy xác nhận khuyết tật theo quy định của pháp luật về người khuyết tật;\n   b) Học sinh, sinh viên không đủ sức khỏe về thể lực hoặc mắc những bệnh lý thuộc diện miễn làm nghĩa vụ quân sự theo quy định hiện hành;\n   c) Học sinh, sinh viên đã hoàn thành nghĩa vụ quân sự, công an nhân dân.\n\n4. Đối tượng được tạm hoãn học môn học GDQP&AN:\n   a) Học sinh, sinh viên vì lý do sức khỏe phải dừng học trong thời gian dài để điều trị, phải có giấy xác nhận của bệnh viện nơi học sinh, sinh viên điều trị;\n   b) Học sinh, sinh viên là nữ đang mang thai hoặc trong thời gian nghỉ chế độ thai sản theo quy định hiện hành.\n\n5. Giám đốc, hiệu trưởng các cơ sở giáo dục xem xét tạm hoãn học môn học GDQP&AN cho các đối tượng quy định tại điểm a, điểm b khoản 4 Điều này. Hết thời gian tạm hoãn, các cơ sở giáo dục bố trí cho học sinh, sinh viên vào học các lớp phù hợp để hoàn thành chương trình."
+      ],
+      "source_chunk_id": "ce16728e-bbaf-423a-936c-a0943ed14b22",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN"
+    },
+    {
+      "question": "Những đối tượng nào được miễn học môn học GDQP&AN và có thể được miễn thi học phần trong chương trình này?",
+      "ground_truth": "Đối tượng được miễn học môn học GDQP&AN và có thể được miễn thi học phần bao gồm: học sinh, sinh viên có giấy xác nhận kết quả học tập các học phần, nội dung đó đạt từ 5 điểm trở lên theo thang điểm 10; học sinh, sinh viên là người khuyết tật có giấy xác nhận khuyết tật theo quy định; học sinh, sinh viên không đủ sức khỏe về thể lực hoặc mắc những bệnh lý thuộc diện miễn làm nghĩa vụ quân sự; và học sinh, sinh viên đã hoàn thành nghĩa vụ quân sự hoặc công an nhân dân.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN]\n\n## Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN\n\n1. Đối tượng được miễn học môn học GDQP&AN:\n   a) Học sinh, sinh viên có giấy chứng nhận sĩ quan dự bị hoặc bằng tốt nghiệp do các trường quân đội, công an cấp;\n   b) Học sinh, sinh viên đã có chứng chỉ GDQP&AN tương ứng với trình độ đào tạo;\n   c) Học sinh, sinh viên là người nước ngoài.\n\n2. Đối tượng được miễn học, miễn thi học phần, nội dung trong chương trình GDQP&AN, gồm: học sinh, sinh viên có giấy xác nhận kết quả học tập các học phần, nội dung đó đạt từ 5 điểm trở lên theo thang điểm 10.\n\n3. Đối tượng được miễn học, các nội dung thực hành kỹ năng quân sự:\n   a) Học sinh, sinh viên là người khuyết tật, có giấy xác nhận khuyết tật theo quy định của pháp luật về người khuyết tật;\n   b) Học sinh, sinh viên không đủ sức khỏe về thể lực hoặc mắc những bệnh lý thuộc diện miễn làm nghĩa vụ quân sự theo quy định hiện hành;\n   c) Học sinh, sinh viên đã hoàn thành nghĩa vụ quân sự, công an nhân dân."
+      ],
+      "source_chunk_id": "92110048-6ea4-4ec2-b875-a620da5100e8",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN"
+    },
+    {
+      "question": "Điều kiện để được miễn học môn học GDQP&AN theo Điều 4 là gì?",
+      "ground_truth": "Điều kiện để được miễn học môn học GDQP&AN bao gồm: học sinh, sinh viên có giấy chứng nhận sĩ quan dự bị hoặc bằng tốt nghiệp do các trường quân đội, công an cấp; đã có chứng chỉ GDQP&AN tương ứng với trình độ đào tạo; là người nước ngoài; hoặc có giấy xác nhận kết quả học tập các học phần đạt từ 5 điểm trở lên theo thang điểm 10.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN]\n\n## Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN\n\n1. Đối tượng được miễn học môn học GDQP&AN:\n   a) Học sinh, sinh viên có giấy chứng nhận sĩ quan dự bị hoặc bằng tốt nghiệp do các trường quân đội, công an cấp;\n   b) Học sinh, sinh viên đã có chứng chỉ GDQP&AN tương ứng với trình độ đào tạo;\n   c) Học sinh, sinh viên là người nước ngoài.\n\n2. Đối tượng được miễn học, miễn thi học phần, nội dung trong chương trình GDQP&AN, gồm: học sinh, sinh viên có giấy xác nhận kết quả học tập các học phần, nội dung đó đạt từ 5 điểm trở lên theo thang điểm 10.\n\n3. Đối tượng được miễn học, các nội dung thực hành kỹ năng quân sự:\n   a) Học sinh, sinh viên là người khuyết tật, có giấy xác nhận khuyết tật theo quy định của pháp luật về người khuyết tật;\n   b) Học sinh, sinh viên không đủ sức khỏe về thể lực hoặc mắc những bệnh lý thuộc diện miễn làm nghĩa vụ quân sự theo quy định hiện hành;\n   c) Học sinh, sinh viên đã hoàn thành nghĩa vụ quân sự, công an nhân dân."
+      ],
+      "source_chunk_id": "92110048-6ea4-4ec2-b875-a620da5100e8",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN"
+    },
+    {
+      "question": "Điều kiện nào để được tạm hoãn học môn học GDQP&AN do lý do sức khỏe?",
+      "ground_truth": "Học sinh, sinh viên phải có giấy xác nhận của bệnh viện nơi điều trị.",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN]\n\n## Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN\n\n4. Đối tượng được tạm hoãn học môn học GDQP&AN:\n   a) Học sinh, sinh viên vì lý do sức khỏe phải dừng học trong thời gian dài để điều trị, phải có giấy xác nhận của bệnh viện nơi học sinh, sinh viên điều trị;\n   b) Học sinh, sinh viên là nữ đang mang thai hoặc trong thời gian nghỉ chế độ thai sản theo quy định hiện hành.\n\n5. Giám đốc, hiệu trưởng các cơ sở giáo dục xem xét tạm hoãn học môn học GDQP&AN cho các đối tượng quy định tại điểm a, điểm b khoản 4 Điều này. Hết thời gian tạm hoãn, các cơ sở giáo dục bố trí cho học sinh, sinh viên vào học các lớp phù hợp để hoàn thành chương trình."
+      ],
+      "source_chunk_id": "c6324f83-ec81-406b-ad19-d1a229834aaa",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN"
+    },
+    {
+      "question": "So sánh hai trường hợp được tạm hoãn học môn GDQP&AN theo Điều 4, khoản 4 và khoản 5.",
+      "ground_truth": "Hai trường hợp được tạm hoãn học môn GDQP&AN là: (1) Học sinh, sinh viên vì lý do sức khỏe phải dừng học trong thời gian dài để điều trị (có giấy xác nhận của bệnh viện), và (2) Học sinh, sinh viên là nữ đang mang thai hoặc trong thời gian nghỉ chế độ thai sản. Điểm giống nhau là cả hai trường hợp đều được xem xét tạm hoãn học môn GDQP&AN. Điểm khác nhau là lý do được miễn/tạm hoãn và đối tượng áp dụng.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN]\n\n## Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN\n\n4. Đối tượng được tạm hoãn học môn học GDQP&AN:\n   a) Học sinh, sinh viên vì lý do sức khỏe phải dừng học trong thời gian dài để điều trị, phải có giấy xác nhận của bệnh viện nơi học sinh, sinh viên điều trị;\n   b) Học sinh, sinh viên là nữ đang mang thai hoặc trong thời gian nghỉ chế độ thai sản theo quy định hiện hành.\n\n5. Giám đốc, hiệu trưởng các cơ sở giáo dục xem xét tạm hoãn học môn học GDQP&AN cho các đối tượng quy định tại điểm a, điểm b khoản 4 Điều này. Hết thời gian tạm hoãn, các cơ sở giáo dục bố trí cho học sinh, sinh viên vào học các lớp phù hợp để hoàn thành chương trình."
+      ],
+      "source_chunk_id": "c6324f83-ec81-406b-ad19-d1a229834aaa",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 4. Đối tượng được miễn, tạm hoãn học môn học GDQP&AN"
+    },
+    {
+      "question": "Giáo viên và giảng viên GDQP&AN cần đáp ứng trình độ chuẩn nào theo quy định hiện hành?",
+      "ground_truth": "Giáo viên và giảng viên GDQP&AN cần đáp ứng trình độ chuẩn theo quy định tại khoản 1 và khoản 2 Điều 6 Nghị định số 13/2014/NĐ-CP.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 5. Giáo viên, giảng viên GDQP&AN]\n\n## Điều 5. Giáo viên, giảng viên GDQP&AN\n\n1. Giáo viên, giảng viên GDQP&AN bao gồm giáo viên, giảng viên có trình độ chuẩn theo quy định tại khoản 1 và khoản 2 Điều 6 Nghị định số 13/2014/NĐ-CP ngày 25 tháng 02 năm 2014 của Chính phủ quy định chi tiết và biện pháp thi hành Luật Giáo dục quốc phòng và an ninh.\n\n2. Các cơ sở giáo dục xây dựng kế hoạch đào tạo, bồi dưỡng, cập nhật kiến thức quốc phòng và an ninh, phương pháp dạy học bảo đảm trình độ chuẩn phù hợp với yêu cầu giảng dạy ở từng trình độ đào tạo."
+      ],
+      "source_chunk_id": "3e76c875-30e0-45af-9d25-fda520baafde",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 5. Giáo viên, giảng viên GDQP&AN"
+    },
+    {
+      "question": "Cơ sở giáo dục có trách nhiệm xây dựng kế hoạch gì để đảm bảo chất lượng giảng dạy GDQP&AN?",
+      "ground_truth": "Cơ sở giáo dục có trách nhiệm xây dựng kế hoạch đào tạo, bồi dưỡng, cập nhật kiến thức quốc phòng và an ninh, phương pháp dạy học bảo đảm trình độ chuẩn phù hợp với yêu cầu giảng dạy.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 5. Giáo viên, giảng viên GDQP&AN]\n\n## Điều 5. Giáo viên, giảng viên GDQP&AN\n\n1. Giáo viên, giảng viên GDQP&AN bao gồm giáo viên, giảng viên có trình độ chuẩn theo quy định tại khoản 1 và khoản 2 Điều 6 Nghị định số 13/2014/NĐ-CP ngày 25 tháng 02 năm 2014 của Chính phủ quy định chi tiết và biện pháp thi hành Luật Giáo dục quốc phòng và an ninh.\n\n2. Các cơ sở giáo dục xây dựng kế hoạch đào tạo, bồi dưỡng, cập nhật kiến thức quốc phòng và an ninh, phương pháp dạy học bảo đảm trình độ chuẩn phù hợp với yêu cầu giảng dạy ở từng trình độ đào tạo."
+      ],
+      "source_chunk_id": "3e76c875-30e0-45af-9d25-fda520baafde",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 5. Giáo viên, giảng viên GDQP&AN"
+    },
+    {
+      "question": "Giảng viên GDQP&AN là gì?",
+      "ground_truth": "Là sĩ quan quân đội biệt phái do cơ quan, đơn vị biệt phái sĩ quan và các trường quản lý theo quy định của Chính phủ về biệt phái sĩ quan quân đội, công an.",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 6. Quản lý giáo viên, giảng viên GDQP&AN]\n\n## Điều 6. Quản lý giáo viên, giảng viên GDQP&AN\n\nCác cơ sở giáo dục thực hiện quản lý đội ngũ giáo viên, giảng viên GDQP&AN như giáo viên, giảng viên môn học khác. Giảng viên GDQP&AN là sĩ quan quân đội biệt phái do cơ quan, đơn vị biệt phái sĩ quan và các trường quản lý theo quy định của Chính phủ về biệt phái sĩ quan quân đội, công an."
+      ],
+      "source_chunk_id": "96dd735d-29f5-49ac-a463-7b9d415dee8a",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 6. Quản lý giáo viên, giảng viên GDQP&AN"
+    },
+    {
+      "question": "Giảng viên GDQP&AN được quản lý như thế nào so với giáo viên, giảng viên môn học khác?",
+      "ground_truth": "Giảng viên GDQP&AN được quản lý tương tự như giáo viên, giảng viên môn học khác trong các cơ sở giáo dục. Tuy nhiên, họ là sĩ quan quân đội biệt phái và được quản lý theo quy định của Chính phủ về biệt phái sĩ quan quân đội, công an.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 6. Quản lý giáo viên, giảng viên GDQP&AN]\n\n## Điều 6. Quản lý giáo viên, giảng viên GDQP&AN\n\nCác cơ sở giáo dục thực hiện quản lý đội ngũ giáo viên, giảng viên GDQP&AN như giáo viên, giảng viên môn học khác. Giảng viên GDQP&AN là sĩ quan quân đội biệt phái do cơ quan, đơn vị biệt phái sĩ quan và các trường quản lý theo quy định của Chính phủ về biệt phái sĩ quan quân đội, công an."
+      ],
+      "source_chunk_id": "96dd735d-29f5-49ac-a463-7b9d415dee8a",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 6. Quản lý giáo viên, giảng viên GDQP&AN"
+    },
+    {
+      "question": "Để đảm bảo chất lượng dạy học môn GDQP&AN, các cơ sở giáo dục cần có những gì?",
+      "ground_truth": "Các cơ sở giáo dục cần có phòng học chuyên dùng, thao trường tổng hợp và đủ cơ sở vật chất, thiết bị dạy học GDQP&AN theo quy định hiện hành.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 7. Cơ sở vật chất, thiết bị dạy học]\n\n## Điều 7. Cơ sở vật chất, thiết bị dạy học\n\n1. Các cơ sở giáo dục có trung tâm, khoa hoặc bộ môn GDQP&AN thực hiện nhiệm vụ GDQP&AN phải có phòng học chuyên dùng, thao trường tổng hợp; có đủ cơ sở vật chất, thiết bị dạy học GDQP&AN theo quy định hiện hành về danh mục thiết bị dạy học tối thiểu môn học GDQP&AN.\n\n2. Quản lý, sử dụng và bảo quản vũ khí, trang thiết bị GDQP&AN thực hiện theo quy định hiện hành."
+      ],
+      "source_chunk_id": "3739723f-63d2-49f4-ab54-6edb1a08f6d9",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 7. Cơ sở vật chất, thiết bị dạy học"
+    },
+    {
+      "question": "So sánh giữa phòng học chuyên dùng và thao trường tổng hợp trong việc đáp ứng yêu cầu về cơ sở vật chất dạy học GDQP&AN?",
+      "ground_truth": "Phòng học chuyên dùng và thao trường tổng hợp đều là cơ sở vật chất cần thiết để thực hiện các hoạt động dạy học GDQP&AN. Tuy nhiên, phòng học chuyên dùng chủ yếu phục vụ cho các lớp lý thuyết và bài giảng, trong khi thao trường tổng hợp được sử dụng để thực hiện các hoạt động thực hành và huấn luyện kỹ năng chiến đấu.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 7. Cơ sở vật chất, thiết bị dạy học]\n\n## Điều 7. Cơ sở vật chất, thiết bị dạy học\n\n1. Các cơ sở giáo dục có trung tâm, khoa hoặc bộ môn GDQP&AN thực hiện nhiệm vụ GDQP&AN phải có phòng học chuyên dùng, thao trường tổng hợp; có đủ cơ sở vật chất, thiết bị dạy học GDQP&AN theo quy định hiện hành về danh mục thiết bị dạy học tối thiểu môn học GDQP&AN.\n\n2. Quản lý, sử dụng và bảo quản vũ khí, trang thiết bị GDQP&AN thực hiện theo quy định hiện hành."
+      ],
+      "source_chunk_id": "3739723f-63d2-49f4-ab54-6edb1a08f6d9",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 7. Cơ sở vật chất, thiết bị dạy học"
+    },
+    {
+      "question": "Số người tối đa trong một lớp học lý thuyết khi bố trí lớp ghép là bao nhiêu?",
+      "ground_truth": "Không quá 150 người",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 8. Quản lý môn học và tổ chức dạy, học]\n\n## Điều 8. Quản lý môn học và tổ chức dạy, học\n\n1. Các cơ sở giáo dục nghề nghiệp tổ chức dạy, học GDQP&AN theo kế hoạch đào tạo của cơ sở.\n\n2. Các cơ sở giáo dục đại học có khoa, bộ môn GDQP&AN tổ chức dạy, học tập trung theo kế hoạch đào tạo của cơ sở.\n\n3. Các trung tâm GDQP&AN tổ chức dạy, học tập trung theo kế hoạch đào tạo của trung tâm.\n\n4. Các cơ sở giáo dục tổ chức dạy, học thực hành kỹ thuật, chiến thuật, thuốc nổ và bắn đạn thật phải hợp đồng với cơ quan quân sự địa phương, đơn vị quân đội, công an để bảo đảm tuyệt đối an toàn về người, vũ khí, trang thiết bị.\n\n5. Lớp học lý thuyết nếu bố trí lớp ghép phải phù hợp với phương pháp dạy học và điều kiện cụ thể của các cơ sở giáo dục, nhưng không quá 150 người; lớp học thực hành không quá 40 người.\n\n---\n\n# Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN"
+      ],
+      "source_chunk_id": "83741e90-1bed-4381-89b9-49ae67bcc9b1",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 8. Quản lý môn học và tổ chức dạy, học"
+    },
+    {
+      "question": "Số người tối đa trong một lớp học thực hành là bao nhiêu?",
+      "ground_truth": "Không quá 40 người",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 8. Quản lý môn học và tổ chức dạy, học]\n\n## Điều 8. Quản lý môn học và tổ chức dạy, học\n\n1. Các cơ sở giáo dục nghề nghiệp tổ chức dạy, học GDQP&AN theo kế hoạch đào tạo của cơ sở.\n\n2. Các cơ sở giáo dục đại học có khoa, bộ môn GDQP&AN tổ chức dạy, học tập trung theo kế hoạch đào tạo của cơ sở.\n\n3. Các trung tâm GDQP&AN tổ chức dạy, học tập trung theo kế hoạch đào tạo của trung tâm.\n\n4. Các cơ sở giáo dục tổ chức dạy, học thực hành kỹ thuật, chiến thuật, thuốc nổ và bắn đạn thật phải hợp đồng với cơ quan quân sự địa phương, đơn vị quân đội, công an để bảo đảm tuyệt đối an toàn về người, vũ khí, trang thiết bị.\n\n5. Lớp học lý thuyết nếu bố trí lớp ghép phải phù hợp với phương pháp dạy học và điều kiện cụ thể của các cơ sở giáo dục, nhưng không quá 150 người; lớp học thực hành không quá 40 người.\n\n---\n\n# Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN"
+      ],
+      "source_chunk_id": "83741e90-1bed-4381-89b9-49ae67bcc9b1",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 8. Quản lý môn học và tổ chức dạy, học"
+    },
+    {
+      "question": "Số người tối đa trong một lớp học lý thuyết khi bố trí lớp ghép theo Điều 8 Chương II là bao nhiêu?",
+      "ground_truth": "150 người",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 8. Quản lý môn học và tổ chức dạy, học]\n\n## Điều 8. Quản lý môn học và tổ chức dạy, học\n\n1. Các cơ sở giáo dục nghề nghiệp tổ chức dạy, học GDQP&AN theo kế hoạch đào tạo của cơ sở.\n\n2. Các cơ sở giáo dục đại học có khoa, bộ môn GDQP&AN tổ chức dạy, học tập trung theo kế hoạch đào tạo của cơ sở.\n\n3. Các trung tâm GDQP&AN tổ chức dạy, học tập trung theo kế hoạch đào tạo của trung tâm.\n\n4. Các cơ sở giáo dục tổ chức dạy, học thực hành kỹ thuật, chiến thuật, thuốc nổ và bắn đạn thật phải hợp đồng với cơ quan quân sự địa phương, đơn vị quân đội, công an để bảo đảm tuyệt đối an toàn về người, vũ khí, trang thiết bị.\n\n5. Lớp học lý thuyết nếu bố trí lớp ghép phải phù hợp với phương pháp dạy học và điều kiện cụ thể của các cơ sở giáo dục, nhưng không quá 150 người; lớp học thực hành không quá 40 người.\n\n---\n\n# Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN"
+      ],
+      "source_chunk_id": "01cc4299-bc06-4759-83df-a3e9b5c355b9",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 8. Quản lý môn học và tổ chức dạy, học"
+    },
+    {
+      "question": "So sánh quy định về tổ chức dạy học lý thuyết và thực hành trong chương trình GDQP&AN theo Điều 8?",
+      "ground_truth": "Theo Điều 8, lớp học lý thuyết nếu bố trí ghép phải không quá 150 người và phù hợp với phương pháp dạy học, trong khi lớp học thực hành không quá 40 người. Điều này cho thấy quy định về số lượng học sinh trong lớp lý thuyết linh hoạt hơn so với lớp thực hành.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 8. Quản lý môn học và tổ chức dạy, học]\n\n## Điều 8. Quản lý môn học và tổ chức dạy, học\n\n1. Các cơ sở giáo dục nghề nghiệp tổ chức dạy, học GDQP&AN theo kế hoạch đào tạo của cơ sở.\n\n2. Các cơ sở giáo dục đại học có khoa, bộ môn GDQP&AN tổ chức dạy, học tập trung theo kế hoạch đào tạo của cơ sở.\n\n3. Các trung tâm GDQP&AN tổ chức dạy, học tập trung theo kế hoạch đào tạo của trung tâm.\n\n4. Các cơ sở giáo dục tổ chức dạy, học thực hành kỹ thuật, chiến thuật, thuốc nổ và bắn đạn thật phải hợp đồng với cơ quan quân sự địa phương, đơn vị quân đội, công an để bảo đảm tuyệt đối an toàn về người, vũ khí, trang thiết bị.\n\n5. Lớp học lý thuyết nếu bố trí lớp ghép phải phù hợp với phương pháp dạy học và điều kiện cụ thể của các cơ sở giáo dục, nhưng không quá 150 người; lớp học thực hành không quá 40 người.\n\n---\n\n# Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN"
+      ],
+      "source_chunk_id": "01cc4299-bc06-4759-83df-a3e9b5c355b9",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương II: QUẢN LÝ VÀ TỔ CHỨC DẠY, HỌC > Điều 8. Quản lý môn học và tổ chức dạy, học"
+    },
+    {
+      "question": "Theo Điều 9, đánh giá kết quả học tập GDQP&AN được thực hiện dựa trên quy định nào?",
+      "ground_truth": "Đánh giá kết quả học tập GDQP&AN được thực hiện dựa trên quy định hiện hành về quy chế đào tạo của từng trình độ đào tạo.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 9. Đánh giá kết quả học tập]\n\n## Điều 9. Đánh giá kết quả học tập\n\nĐánh giá kết quả học tập GDQP&AN đối với học sinh, sinh viên thực hiện theo quy định hiện hành về quy chế đào tạo của từng trình độ đào tạo."
+      ],
+      "source_chunk_id": "e82dfcdd-efef-4949-be49-8b96fb137007",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 9. Đánh giá kết quả học tập"
+    },
+    {
+      "question": "Điều 9 quy định rằng học sinh và sinh viên sẽ được đánh giá kết quả học tập môn GDQP&AN theo tiêu chí nào?",
+      "ground_truth": "Học sinh và sinh viên sẽ được đánh giá kết quả học tập môn GDQP&AN theo quy định hiện hành về quy chế đào tạo của từng trình độ đào tạo.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 9. Đánh giá kết quả học tập]\n\n## Điều 9. Đánh giá kết quả học tập\n\nĐánh giá kết quả học tập GDQP&AN đối với học sinh, sinh viên thực hiện theo quy định hiện hành về quy chế đào tạo của từng trình độ đào tạo."
+      ],
+      "source_chunk_id": "e82dfcdd-efef-4949-be49-8b96fb137007",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 9. Đánh giá kết quả học tập"
+    },
+    {
+      "question": "So sánh điều kiện cấp chứng chỉ GDQP&AN giữa sinh viên và thẩm quyền của các cơ sở giáo dục?",
+      "ground_truth": "Điều kiện cấp chứng chỉ GDQP&AN cho sinh viên là điểm trung bình chung môn học đạt từ 5 điểm trở lên (theo thang điểm 10), trong khi thẩm quyền cấp chứng chỉ thuộc về Giám đốc, hiệu trưởng các cơ sở giáo dục hoặc Giám đốc trung tâm GDQP&AN.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN]\n\n## Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN\n\n1. Sinh viên có điểm trung bình chung môn học đạt từ 5 điểm trở lên (theo thang điểm 10) được cấp chứng chỉ GDQP&AN.\n\n2. Thẩm quyền cấp chứng chỉ GDQP&AN:\n   a) Giám đốc, hiệu trưởng các cơ sở giáo dục được tổ chức dạy, học GDQP&AN thì có thẩm quyền cấp chứng chỉ GDQP&AN;\n   b) Giám đốc trung tâm GDQP&AN cấp chứng chỉ GDQP&AN theo quy định về liên kết GDQP&AN.\n\n3. Việc in, quản lý, cấp phát chứng chỉ GDQP&AN thực hiện theo quy định hiện hành do cơ quan có thẩm quyền quản lý nhà nước về giáo dục nghề nghiệp, giáo dục đại học ban hành.\n\n---\n\n# Chương IV: TỔ CHỨC THỰC HIỆN"
+      ],
+      "source_chunk_id": "bffd8bc9-ed00-4a54-898d-11a126d543e5",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN"
+    },
+    {
+      "question": "So sánh thẩm quyền cấp chứng chỉ GDQP&AN giữa Giám đốc cơ sở giáo dục và Giám đốc trung tâm GDQP&AN?",
+      "ground_truth": "Giám đốc cơ sở giáo dục có thẩm quyền cấp chứng chỉ GDQP&AN nếu họ là người tổ chức dạy học môn này, trong khi Giám đốc trung tâm GDQP&AN chỉ có thẩm quyền cấp chứng chỉ theo quy định về liên kết GDQP&AN.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN]\n\n## Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN\n\n1. Sinh viên có điểm trung bình chung môn học đạt từ 5 điểm trở lên (theo thang điểm 10) được cấp chứng chỉ GDQP&AN.\n\n2. Thẩm quyền cấp chứng chỉ GDQP&AN:\n   a) Giám đốc, hiệu trưởng các cơ sở giáo dục được tổ chức dạy, học GDQP&AN thì có thẩm quyền cấp chứng chỉ GDQP&AN;\n   b) Giám đốc trung tâm GDQP&AN cấp chứng chỉ GDQP&AN theo quy định về liên kết GDQP&AN.\n\n3. Việc in, quản lý, cấp phát chứng chỉ GDQP&AN thực hiện theo quy định hiện hành do cơ quan có thẩm quyền quản lý nhà nước về giáo dục nghề nghiệp, giáo dục đại học ban hành.\n\n---\n\n# Chương IV: TỔ CHỨC THỰC HIỆN"
+      ],
+      "source_chunk_id": "bffd8bc9-ed00-4a54-898d-11a126d543e5",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN"
+    },
+    {
+      "question": "Để được cấp chứng chỉ GDQP&AN, sinh viên cần đạt điểm trung bình chung môn học tối thiểu bao nhiêu và ai có thẩm quyền cấp chứng chỉ này?",
+      "ground_truth": "Sinh viên cần đạt điểm trung bình chung môn học tối thiểu 5 điểm theo thang điểm 10 và Giám đốc, hiệu trưởng các cơ sở giáo dục hoặc Giám đốc trung tâm GDQP&AN có thẩm quyền cấp chứng chỉ.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN]\n\n## Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN\n\n1. Sinh viên có điểm trung bình chung môn học đạt từ 5 điểm trở lên (theo thang điểm 10) được cấp chứng chỉ GDQP&AN.\n\n2. Thẩm quyền cấp chứng chỉ GDQP&AN:\n   a) Giám đốc, hiệu trưởng các cơ sở giáo dục được tổ chức dạy, học GDQP&AN thì có thẩm quyền cấp chứng chỉ GDQP&AN;\n   b) Giám đốc trung tâm GDQP&AN cấp chứng chỉ GDQP&AN theo quy định về liên kết GDQP&AN.\n\n3. Việc in, quản lý, cấp phát chứng chỉ GDQP&AN thực hiện theo quy định hiện hành do cơ quan có thẩm quyền quản lý nhà nước về giáo dục nghề nghiệp, giáo dục đại học ban hành.\n\n---\n\n# Chương IV: TỔ CHỨC THỰC HIỆN"
+      ],
+      "source_chunk_id": "172a3175-da48-41ee-ab28-eedd978fe7ea",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN"
+    },
+    {
+      "question": "So sánh giữa điều kiện cấp chứng chỉ GDQP&AN theo Điều 10 và quy định về thẩm quyền cấp chứng chỉ trong Chương III?",
+      "ground_truth": "Điều kiện cấp chứng chỉ GDQP&AN theo Điều 10 quy định sinh viên phải có điểm trung bình chung môn học đạt từ 5 điểm trở lên (theo thang điểm 10), trong khi thẩm quyền cấp chứng chỉ được quy định là Giám đốc, hiệu trưởng các cơ sở giáo dục hoặc Giám đốc trung tâm GDQP&AN.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN]\n\n## Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN\n\n1. Sinh viên có điểm trung bình chung môn học đạt từ 5 điểm trở lên (theo thang điểm 10) được cấp chứng chỉ GDQP&AN.\n\n2. Thẩm quyền cấp chứng chỉ GDQP&AN:\n   a) Giám đốc, hiệu trưởng các cơ sở giáo dục được tổ chức dạy, học GDQP&AN thì có thẩm quyền cấp chứng chỉ GDQP&AN;\n   b) Giám đốc trung tâm GDQP&AN cấp chứng chỉ GDQP&AN theo quy định về liên kết GDQP&AN.\n\n3. Việc in, quản lý, cấp phát chứng chỉ GDQP&AN thực hiện theo quy định hiện hành do cơ quan có thẩm quyền quản lý nhà nước về giáo dục nghề nghiệp, giáo dục đại học ban hành.\n\n---\n\n# Chương IV: TỔ CHỨC THỰC HIỆN"
+      ],
+      "source_chunk_id": "172a3175-da48-41ee-ab28-eedd978fe7ea",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương III: ĐÁNH GIÁ KẾT QUẢ HỌC TẬP VÀ CẤP CHỨNG CHỈ GDQP&AN > Điều 10. Điều kiện, thẩm quyền cấp chứng chỉ GDQP&AN"
+    },
+    {
+      "question": "Bộ Giáo dục và Đào tạo cần phối hợp với những cơ quan nào để tổ chức đào tạo, bồi dưỡng và tập huấn cho đội ngũ cán bộ quản lý, giáo viên, giảng viên GDQP&AN?",
+      "ground_truth": "Bộ Giáo dục và Đào tạo cần phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội để tổ chức đào tạo, bồi dưỡng và tập huấn cho đội ngũ cán bộ quản lý, giáo viên, giảng viên GDQP&AN.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương IV: TỔ CHỨC THỰC HIỆN > Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo]\n\n## Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo\n\n1. Chỉ đạo, quản lý và tổ chức thực hiện công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý.\n\n2. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội và các cơ quan liên quan tổ chức đào tạo, bồi dưỡng, tập huấn cho đội ngũ cán bộ quản lý, giáo viên, giảng viên GDQP&AN trong các cơ sở giáo dục.\n\n3. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội tổ chức thanh tra, kiểm tra công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý, các trung tâm GDQP&AN."
+      ],
+      "source_chunk_id": "b19dc9b6-73aa-43f6-9353-1396b2f07a59",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương IV: TỔ CHỨC THỰC HIỆN > Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo"
+    },
+    {
+      "question": "Bộ Giáo dục và Đào tạo có trách nhiệm gì trong việc thanh tra, kiểm tra công tác GDQP&AN tại các cơ sở giáo dục?",
+      "ground_truth": "Bộ Giáo dục và Đào tạo có trách nhiệm chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội tổ chức thanh tra, kiểm tra công tác GDQP&AN tại các cơ sở giáo dục thuộc thẩm quyền quản lý và các trung tâm GDQP&AN.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương IV: TỔ CHỨC THỰC HIỆN > Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo]\n\n## Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo\n\n1. Chỉ đạo, quản lý và tổ chức thực hiện công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý.\n\n2. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội và các cơ quan liên quan tổ chức đào tạo, bồi dưỡng, tập huấn cho đội ngũ cán bộ quản lý, giáo viên, giảng viên GDQP&AN trong các cơ sở giáo dục.\n\n3. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội tổ chức thanh tra, kiểm tra công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý, các trung tâm GDQP&AN."
+      ],
+      "source_chunk_id": "b19dc9b6-73aa-43f6-9353-1396b2f07a59",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương IV: TỔ CHỨC THỰC HIỆN > Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo"
+    },
+    {
+      "question": "Bộ Giáo dục và Đào tạo có trách nhiệm gì trong việc tổ chức đào tạo cho đội ngũ cán bộ quản lý, giáo viên, giảng viên GDQP&AN?",
+      "ground_truth": "Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội tổ chức đào tạo, bồi dưỡng, tập huấn.",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương IV: TỔ CHỨC THỰC HIỆN > Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo]\n\n## Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo\n\n1. Chỉ đạo, quản lý và tổ chức thực hiện công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý.\n\n2. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội và các cơ quan liên quan tổ chức đào tạo, bồi dưỡng, tập huấn cho đội ngũ cán bộ quản lý, giáo viên, giảng viên GDQP&AN trong các cơ sở giáo dục.\n\n3. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội tổ chức thanh tra, kiểm tra công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý, các trung tâm GDQP&AN."
+      ],
+      "source_chunk_id": "fab2532d-9e44-49a9-9786-f0f1a297f0bc",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương IV: TỔ CHỨC THỰC HIỆN > Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo"
+    },
+    {
+      "question": "So sánh trách nhiệm của Bộ Giáo dục và Đào tạo trong việc tổ chức đào tạo GDQP&AN với trách nhiệm của Bộ Quốc phòng và Bộ Công an trong lĩnh vực này.",
+      "ground_truth": "Bộ Giáo dục và Đào tạo chịu trách nhiệm chỉ đạo, quản lý và tổ chức thực hiện công tác GDQP&AN trong các cơ sở giáo dục, đồng thời phối hợp với Bộ Quốc phòng và Bộ Công an để tổ chức đào tạo, thanh tra, kiểm tra. Trong khi đó, Bộ Quốc phòng và Bộ Công an chủ yếu tham gia phối hợp trong các hoạt động đào tạo, tập huấn và thanh tra, kiểm tra theo vai trò chuyên môn của họ.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương IV: TỔ CHỨC THỰC HIỆN > Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo]\n\n## Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo\n\n1. Chỉ đạo, quản lý và tổ chức thực hiện công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý.\n\n2. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội và các cơ quan liên quan tổ chức đào tạo, bồi dưỡng, tập huấn cho đội ngũ cán bộ quản lý, giáo viên, giảng viên GDQP&AN trong các cơ sở giáo dục.\n\n3. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội tổ chức thanh tra, kiểm tra công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý, các trung tâm GDQP&AN."
+      ],
+      "source_chunk_id": "fab2532d-9e44-49a9-9786-f0f1a297f0bc",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương IV: TỔ CHỨC THỰC HIỆN > Điều 11. Trách nhiệm của Bộ Giáo dục và Đào tạo"
+    },
+    {
+      "question": "Quy trình thực hiện công tác GDQP&AN tại các cơ sở giáo dục do Bộ Lao động - Thương binh và Xã hội quản lý là gì?",
+      "ground_truth": "Bộ Lao động - Thương binh và Xã hội chỉ đạo, quản lý và tổ chức thực hiện công tác GDQP&AN tại các cơ sở giáo dục thuộc thẩm quyền quản lý.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Chương IV: TỔ CHỨC THỰC HIỆN > Điều 12. Trách nhiệm của Bộ Lao động - Thương binh và Xã hội]\n\n## Điều 12. Trách nhiệm của Bộ Lao động - Thương binh và Xã hội\n\n1. Chỉ đạo, quản lý và tổ chức thực hiện công tác GDQP&AN tại các cơ sở giáo dục thuộc thẩm quyền quản lý.\n\n2. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Giáo dục và Đào tạo tổ chức thanh tra, kiểm tra công tác GDQP&AN tại các cơ sở giáo dục thuộc thẩm quyền quản lý."
+      ],
+      "source_chunk_id": "15ebc838-1a3e-45af-a69d-c174bb5df250",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương IV: TỔ CHỨC THỰC HIỆN > Điều 12. Trách nhiệm của Bộ Lao động - Thương binh và Xã hội"
+    },
+    {
+      "question": "So sánh trách nhiệm của Bộ Lao động - Thương binh và Xã hội trong việc tổ chức thực hiện công tác GDQP&AN với trách nhiệm của Bộ Quốc phòng và Bộ Công an theo Điều 12.",
+      "ground_truth": "Bộ Lao động - Thương binh và Xã hội chịu trách nhiệm chỉ đạo, quản lý và tổ chức thực hiện công tác GDQP&AN tại các cơ sở giáo dục thuộc thẩm quyền quản lý. Trong khi đó, Bộ Quốc phòng và Bộ Công an được đề cập là các bên phối hợp với Bộ Lao động - Thương binh và Xã hội để thực hiện thanh tra, kiểm tra công tác GDQP&AN.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương IV: TỔ CHỨC THỰC HIỆN > Điều 12. Trách nhiệm của Bộ Lao động - Thương binh và Xã hội]\n\n## Điều 12. Trách nhiệm của Bộ Lao động - Thương binh và Xã hội\n\n1. Chỉ đạo, quản lý và tổ chức thực hiện công tác GDQP&AN tại các cơ sở giáo dục thuộc thẩm quyền quản lý.\n\n2. Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Giáo dục và Đào tạo tổ chức thanh tra, kiểm tra công tác GDQP&AN tại các cơ sở giáo dục thuộc thẩm quyền quản lý."
+      ],
+      "source_chunk_id": "15ebc838-1a3e-45af-a69d-c174bb5df250",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương IV: TỔ CHỨC THỰC HIỆN > Điều 12. Trách nhiệm của Bộ Lao động - Thương binh và Xã hội"
+    },
+    {
+      "question": "Quy trình tổ chức dạy học và đánh giá môn học GDQP&AN theo Điều 13 Chương IV như thế nào?",
+      "ground_truth": "Cơ sở giáo dục cần chủ động xây dựng kế hoạch tổ chức dạy, học và đánh giá kết quả môn học GDQP&AN. Đồng thời, phải thực hiện chế độ báo cáo theo quy định.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Chương IV: TỔ CHỨC THỰC HIỆN > Điều 13. Trách nhiệm của cơ sở giáo dục]\n\n## Điều 13. Trách nhiệm của cơ sở giáo dục\n\nChủ động xây dựng kế hoạch tổ chức dạy, học, đánh giá kết quả môn học GDQP&AN và thực hiện chế độ báo cáo theo quy định.\n\n---\n\n# Chương V: ĐIỀU KHOẢN THI HÀNH"
+      ],
+      "source_chunk_id": "b2ca2084-a062-442c-a459-e17029998145",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương IV: TỔ CHỨC THỰC HIỆN > Điều 13. Trách nhiệm của cơ sở giáo dục"
+    },
+    {
+      "question": "Cơ sở giáo dục có trách nhiệm gì trong việc tổ chức dạy học và đánh giá môn học GDQP&AN?",
+      "ground_truth": "Cơ sở giáo dục có trách nhiệm chủ động xây dựng kế hoạch tổ chức dạy, học và đánh giá kết quả môn học GDQP&AN.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương IV: TỔ CHỨC THỰC HIỆN > Điều 13. Trách nhiệm của cơ sở giáo dục]\n\n## Điều 13. Trách nhiệm của cơ sở giáo dục\n\nChủ động xây dựng kế hoạch tổ chức dạy, học, đánh giá kết quả môn học GDQP&AN và thực hiện chế độ báo cáo theo quy định.\n\n---\n\n# Chương V: ĐIỀU KHOẢN THI HÀNH"
+      ],
+      "source_chunk_id": "b2ca2084-a062-442c-a459-e17029998145",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương IV: TỔ CHỨC THỰC HIỆN > Điều 13. Trách nhiệm của cơ sở giáo dục"
+    },
+    {
+      "question": "So sánh hiệu lực thi hành của Thông tư liên tịch này với các quy định trước đó về môn học Giáo dục quốc phòng và an ninh?",
+      "ground_truth": "Thông tư liên tịch này có hiệu lực thi hành từ ngày 23 tháng 10 năm 2015, thay thế các quy định trước đó bao gồm Thông tư số 40/2012/TT-BGDĐT và Quyết định số 63/2008/QĐ-BLĐTBXH. Điều này cho thấy sự cập nhật và thay thế các quy định cũ để phù hợp với yêu cầu mới trong việc tổ chức dạy học và đánh giá môn học.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 14. Hiệu lực thi hành]\n\n## Điều 14. Hiệu lực thi hành\n\n1. Thông tư liên tịch này có hiệu lực thi hành kể từ ngày 23 tháng 10 năm 2015.\n\n2. Thông tư liên tịch này thay thế những quy định về tổ chức dạy, học và đánh giá kết quả học tập môn học GDQP&AN trong các trường trung cấp, trường cao đẳng, trường đại học, học viện, đại học vùng, đại học Quốc gia, trung tâm GDQP&AN ban hành kèm theo Thông tư số 40/2012/TT-BGDĐT ngày 19 tháng 11 năm 2012 của Bộ Giáo dục và Đào tạo ban hành Quy định tổ chức dạy, học và đánh giá kết quả môn học môn học Giáo dục quốc phòng - an ninh; Quyết định số 63/2008/QĐ-BLĐTBXH ngày 25 tháng 11 năm 2008 của Bộ Lao động - Thương binh và Xã hội ban hành Quy chế tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và - an ninh trong các cơ sở dạy nghề."
+      ],
+      "source_chunk_id": "4bb35a92-971c-49be-8d88-42a3962b2d6f",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 14. Hiệu lực thi hành"
+    },
+    {
+      "question": "Thông tư liên tịch này có hiệu lực thi hành từ khi nào và thay thế những quy định nào trước đó?",
+      "ground_truth": "Thông tư liên tịch này có hiệu lực thi hành kể từ ngày 23 tháng 10 năm 2015 và thay thế những quy định về tổ chức dạy, học và đánh giá kết quả học tập môn học GDQP&AN trong các trường trung cấp, cao đẳng, đại học và các cơ sở dạy nghề được ban hành kèm theo Thông tư số 40/2012/TT-BGDĐT và Quyết định số 63/2008/QĐ-BLĐTBXH.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 14. Hiệu lực thi hành]\n\n## Điều 14. Hiệu lực thi hành\n\n1. Thông tư liên tịch này có hiệu lực thi hành kể từ ngày 23 tháng 10 năm 2015.\n\n2. Thông tư liên tịch này thay thế những quy định về tổ chức dạy, học và đánh giá kết quả học tập môn học GDQP&AN trong các trường trung cấp, trường cao đẳng, trường đại học, học viện, đại học vùng, đại học Quốc gia, trung tâm GDQP&AN ban hành kèm theo Thông tư số 40/2012/TT-BGDĐT ngày 19 tháng 11 năm 2012 của Bộ Giáo dục và Đào tạo ban hành Quy định tổ chức dạy, học và đánh giá kết quả môn học môn học Giáo dục quốc phòng - an ninh; Quyết định số 63/2008/QĐ-BLĐTBXH ngày 25 tháng 11 năm 2008 của Bộ Lao động - Thương binh và Xã hội ban hành Quy chế tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và - an ninh trong các cơ sở dạy nghề."
+      ],
+      "source_chunk_id": "4bb35a92-971c-49be-8d88-42a3962b2d6f",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 14. Hiệu lực thi hành"
+    },
+    {
+      "question": "Những đơn vị nào có trách nhiệm thi hành Thông tư liên tịch theo Điều 15?",
+      "ground_truth": "Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ, Tổ chức Chính trị - Xã hội và chủ tịch Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trung ương, giám đốc, hiệu trưởng các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, các trung tâm GDQP&AN và các đơn vị có liên quan.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 15. Trách nhiệm thi hành]\n\n## Điều 15. Trách nhiệm thi hành\n\n1. Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ, Tổ chức Chính trị - Xã hội và chủ tịch Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trung ương, giám đốc, hiệu trưởng các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, các trung tâm GDQP&AN và các đơn vị có liên quan chịu trách nhiệm thi hành Thông tư liên tịch này.\n\n2. Trong quá trình tổ chức thực hiện, nếu có những vấn đề vướng mắc, cần phản ánh kịp thời về Bộ Giáo dục và Đào tạo, Bộ Lao động - Thương binh và Xã hội để xem xét, giải quyết.\n\n---\n\n**KT. BỘ TRƯỞNG BỘ GIÁO DỤC VÀ ĐÀO TẠO**  \n**THỨ TRƯỞNG**  \nBùi Văn Ga\n\n**KT. BỘ TRƯỞNG BỘ LAO ĐỘNG - THƯƠNG BINH VÀ XÃ HỘI**  \n**THỨ TRƯỞNG**  \nHuỳnh Văn Tí"
+      ],
+      "source_chunk_id": "0755237c-4846-4fdd-95eb-a8b3feeb6942",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 15. Trách nhiệm thi hành"
+    },
+    {
+      "question": "Trong trường hợp phát sinh vấn đề vướng mắc khi thực hiện Thông tư liên tịch, các đơn vị cần phản ánh về cơ quan nào để được xem xét giải quyết?",
+      "ground_truth": "Các đơn vị cần phản ánh kịp thời về Bộ Giáo dục và Đào tạo, Bộ Lao động - Thương binh và Xã hội.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 15. Trách nhiệm thi hành]\n\n## Điều 15. Trách nhiệm thi hành\n\n1. Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ, Tổ chức Chính trị - Xã hội và chủ tịch Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trung ương, giám đốc, hiệu trưởng các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, các trung tâm GDQP&AN và các đơn vị có liên quan chịu trách nhiệm thi hành Thông tư liên tịch này.\n\n2. Trong quá trình tổ chức thực hiện, nếu có những vấn đề vướng mắc, cần phản ánh kịp thời về Bộ Giáo dục và Đào tạo, Bộ Lao động - Thương binh và Xã hội để xem xét, giải quyết.\n\n---\n\n**KT. BỘ TRƯỞNG BỘ GIÁO DỤC VÀ ĐÀO TẠO**  \n**THỨ TRƯỞNG**  \nBùi Văn Ga\n\n**KT. BỘ TRƯỞNG BỘ LAO ĐỘNG - THƯƠNG BINH VÀ XÃ HỘI**  \n**THỨ TRƯỞNG**  \nHuỳnh Văn Tí"
+      ],
+      "source_chunk_id": "0755237c-4846-4fdd-95eb-a8b3feeb6942",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 15. Trách nhiệm thi hành"
+    },
+    {
+      "question": "Thông tư liên tịch này được các cơ quan nào chịu trách nhiệm thi hành?",
+      "ground_truth": "Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ, Tổ chức Chính trị - Xã hội và chủ tịch Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trung ương, giám đốc, hiệu trưởng các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, các trung tâm GDQP&AN và các đơn vị có liên quan.",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 15. Trách nhiệm thi hành]\n\n## Điều 15. Trách nhiệm thi hành\n\n1. Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ, Tổ chức Chính trị - Xã hội và chủ tịch Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trung ương, giám đốc, hiệu trưởng các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, các trung tâm GDQP&AN và các đơn vị có liên quan chịu trách nhiệm thi hành Thông tư liên tịch này.\n\n2. Trong quá trình tổ chức thực hiện, nếu có những vấn đề vướng mắc, cần phản ánh kịp thời về Bộ Giáo dục và Đào tạo, Bộ Lao động - Thương binh và Xã hội để xem xét, giải quyết.\n\n---\n\n**KT. BỘ TRƯỞNG BỘ GIÁO DỤC VÀ ĐÀO TẠO**  \n**THỨ TRƯỞNG**  \nBùi Văn Ga\n\n**KT. BỘ TRƯỞNG BỘ LAO ĐỘNG - THƯƠNG BINH VÀ XÃ HỘI**  \n**THỨ TRƯỞNG**  \nHuỳnh Văn Tí"
+      ],
+      "source_chunk_id": "8ae53462-99ea-4b40-8c2c-352ca7909560",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 15. Trách nhiệm thi hành"
+    },
+    {
+      "question": "Quy trình xử lý các vấn đề vướng mắc trong quá trình thực hiện Thông tư liên tịch này là gì?",
+      "ground_truth": "Trong quá trình tổ chức thực hiện, nếu có những vấn đề vướng mắc, cần phản ánh kịp thời về Bộ Giáo dục và Đào tạo, Bộ Lao động - Thương binh và Xã hội để xem xét, giải quyết.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 15. Trách nhiệm thi hành]\n\n## Điều 15. Trách nhiệm thi hành\n\n1. Các Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ, Tổ chức Chính trị - Xã hội và chủ tịch Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trung ương, giám đốc, hiệu trưởng các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, các trung tâm GDQP&AN và các đơn vị có liên quan chịu trách nhiệm thi hành Thông tư liên tịch này.\n\n2. Trong quá trình tổ chức thực hiện, nếu có những vấn đề vướng mắc, cần phản ánh kịp thời về Bộ Giáo dục và Đào tạo, Bộ Lao động - Thương binh và Xã hội để xem xét, giải quyết.\n\n---\n\n**KT. BỘ TRƯỞNG BỘ GIÁO DỤC VÀ ĐÀO TẠO**  \n**THỨ TRƯỞNG**  \nBùi Văn Ga\n\n**KT. BỘ TRƯỞNG BỘ LAO ĐỘNG - THƯƠNG BINH VÀ XÃ HỘI**  \n**THỨ TRƯỞNG**  \nHuỳnh Văn Tí"
+      ],
+      "source_chunk_id": "8ae53462-99ea-4b40-8c2c-352ca7909560",
+      "source_file": "01_1 2015 TT Lien tich_QD danh gia QP-AN_converted_chunks.json",
+      "hierarchy_path": "Chương V: ĐIỀU KHOẢN THI HÀNH > Điều 15. Trách nhiệm thi hành"
+    }
+  ]
+}

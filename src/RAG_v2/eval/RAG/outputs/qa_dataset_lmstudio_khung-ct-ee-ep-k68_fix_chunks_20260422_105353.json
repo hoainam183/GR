@@ -1,0 +1,264 @@
+{
+  "total": 23,
+  "by_type": {
+    "procedural": 4,
+    "multi_hop": 6,
+    "comparative": 7,
+    "factoid": 6
+  },
+  "pairs": [
+    {
+      "question": "Để được miễn học một môn học trong khối kiến thức đại cương, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên cần có chứng chỉ tiếng Anh IELTS đạt ít nhất 5.0 hoặc bằng cấp học thuật quốc tế tương đương.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG]\n\n## KHỐI KIẾN THỨC ĐẠI CƯƠNG\n\n### Lý luận chính trị\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác – Lênin | 3(2-1-0-6) | 1 |\n| 2 | SSH1121 | Kinh tế chính trị Mác – Lênin | 2(2-0-0-4) | 2 |\n| 3 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 3 |\n| 4 | SSH1141 | Lịch sử Đảng cộng sản Việt Nam | 2(2-0-0-4) | 4 |\n| 5 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 5 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 2 |\n| 7 | MIL1210 | Đường lối quốc phòng và an ninh của Đảng CSVN | – | – |\n| 8 | MIL1220 | Công tác quốc phòng và an ninh | – | – |\n| 9 | MIL1230 | Quân sự chung | – | – |\n| 10 | MIL1240 | Kỹ thuật chiến đấu bộ binh và chiến thuật | – | – |\n\n### Toán và khoa học cơ bản (29 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 11 | MI1016 | Giải tích I | 4(3-2-0-8) | 1 |\n| 12 | MI1036 | Đại số | 4(3-2-0-8) | 1 |\n| 13 | MI1026 | Giải tích II | 4(3-2-0-8) | 2 |\n| 14 | PH1016 | Vật lý đại cương I | 4(2-2-1-8) | 2 |\n| 15 | IT1016 | Tin học đại cương | 3(2-1-2-6) | 1 |\n| 16 | PH1026 | Vật lý đại cương II | 4(2-2-1-8) | 3 |\n| 17 | MI1046 | Phương trình vi phân và chuỗi | 3(2-2-0-6) | 3 |\n| 18 | MI2036 | Xác suất thống kê và tín hiệu ngẫu nhiên | 3(3-1-0-6) | 4 |\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 19 | FL1141 | Practical grammar for writing | 3(1-4-0-6) | – |\n| 20 | FL1142 | Communication skills I | 3(1-4-0-6) | – |\n| 21 | FL1143 | Working with texts 1 | 3(1-4-0-6) | – |\n| 22 | FL1144 | Listening | 3(2-2-0-6) | – |\n| 23 | FL1145 | Speaking | 2(1-3-0-4) | – |\n| 24 | FL1146 | Reading | 2(1-2-0-4) | – |\n| 25 | FL1147 | Writing | 3(2-2-0-6) | – |\n| 26 | FL1148 | Foundation Writing | 2(1-2-0-4) | – |\n| 27 | FL1149 | English communication skills 2 | 3(2-2-0-6) | – |\n| 28 | FL1150 | Working with text 2 | 2(1-2-0-4) | – |\n| 29 | FL1120 | IELTS listening 1 | 2(2-1-0-4) | – |\n| 30 | FL1121 | IELTS speaking 1 | 1(1-1-0-4) | – |\n| 31 | FL1122 | IELTS reading 1 | 1(1-1-0-4) | – |\n| 32 | FL1123 | IELTS writing 1 | 2(2-1-0-4) | – |\n| 33 | FL1124 | IELTS listening 2 | 2(2-1-0-4) | 1 |\n| 34 | FL1125 | IELTS speaking 2 | 1(1-1-0-4) | 1 |\n| 35 | FL1126 | IELTS reading 2 | 1(1-1-0-4) | 1 |\n| 36 | FL1127 | IELTS writing 2 | 2(2-1-0-4) | 1 |\n\n### Kiến thức bổ trợ – chọn 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 37 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | – |\n| 38 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) | 2 |\n| 39 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(1-1-0-4) | – |\n| 40 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) | 2 |\n| 41 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | 2 |\n| – | ME3124 | Thiết kế quảng bá sản phẩm | 2(1-2-0-4) | – |\n| 42 | ME3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) | – |\n\n---"
+      ],
+      "source_chunk_id": "a4ac528c-ddbe-4618-8cab-fb2b1d982cde",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG"
+    },
+    {
+      "question": "Học phần 'Tư tưởng Hồ Chí Minh' được giảng dạy ở kỳ nào và có bao nhiêu tín chỉ?",
+      "ground_truth": "Học phần 'Tư tưởng Hồ Chí Minh' được giảng dạy ở kỳ 5 và có 2 tín chỉ.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG]\n\n## KHỐI KIẾN THỨC ĐẠI CƯƠNG\n\n### Lý luận chính trị\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác – Lênin | 3(2-1-0-6) | 1 |\n| 2 | SSH1121 | Kinh tế chính trị Mác – Lênin | 2(2-0-0-4) | 2 |\n| 3 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 3 |\n| 4 | SSH1141 | Lịch sử Đảng cộng sản Việt Nam | 2(2-0-0-4) | 4 |\n| 5 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 5 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 2 |\n| 7 | MIL1210 | Đường lối quốc phòng và an ninh của Đảng CSVN | – | – |\n| 8 | MIL1220 | Công tác quốc phòng và an ninh | – | – |\n| 9 | MIL1230 | Quân sự chung | – | – |\n| 10 | MIL1240 | Kỹ thuật chiến đấu bộ binh và chiến thuật | – | – |\n\n### Toán và khoa học cơ bản (29 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 11 | MI1016 | Giải tích I | 4(3-2-0-8) | 1 |\n| 12 | MI1036 | Đại số | 4(3-2-0-8) | 1 |\n| 13 | MI1026 | Giải tích II | 4(3-2-0-8) | 2 |\n| 14 | PH1016 | Vật lý đại cương I | 4(2-2-1-8) | 2 |\n| 15 | IT1016 | Tin học đại cương | 3(2-1-2-6) | 1 |\n| 16 | PH1026 | Vật lý đại cương II | 4(2-2-1-8) | 3 |\n| 17 | MI1046 | Phương trình vi phân và chuỗi | 3(2-2-0-6) | 3 |\n| 18 | MI2036 | Xác suất thống kê và tín hiệu ngẫu nhiên | 3(3-1-0-6) | 4 |\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 19 | FL1141 | Practical grammar for writing | 3(1-4-0-6) | – |\n| 20 | FL1142 | Communication skills I | 3(1-4-0-6) | – |\n| 21 | FL1143 | Working with texts 1 | 3(1-4-0-6) | – |\n| 22 | FL1144 | Listening | 3(2-2-0-6) | – |\n| 23 | FL1145 | Speaking | 2(1-3-0-4) | – |\n| 24 | FL1146 | Reading | 2(1-2-0-4) | – |\n| 25 | FL1147 | Writing | 3(2-2-0-6) | – |\n| 26 | FL1148 | Foundation Writing | 2(1-2-0-4) | – |\n| 27 | FL1149 | English communication skills 2 | 3(2-2-0-6) | – |\n| 28 | FL1150 | Working with text 2 | 2(1-2-0-4) | – |\n| 29 | FL1120 | IELTS listening 1 | 2(2-1-0-4) | – |\n| 30 | FL1121 | IELTS speaking 1 | 1(1-1-0-4) | – |\n| 31 | FL1122 | IELTS reading 1 | 1(1-1-0-4) | – |\n| 32 | FL1123 | IELTS writing 1 | 2(2-1-0-4) | – |\n| 33 | FL1124 | IELTS listening 2 | 2(2-1-0-4) | 1 |\n| 34 | FL1125 | IELTS speaking 2 | 1(1-1-0-4) | 1 |\n| 35 | FL1126 | IELTS reading 2 | 1(1-1-0-4) | 1 |\n| 36 | FL1127 | IELTS writing 2 | 2(2-1-0-4) | 1 |\n\n### Kiến thức bổ trợ – chọn 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 37 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | – |\n| 38 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) | 2 |\n| 39 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(1-1-0-4) | – |\n| 40 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) | 2 |\n| 41 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | 2 |\n| – | ME3124 | Thiết kế quảng bá sản phẩm | 2(1-2-0-4) | – |\n| 42 | ME3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) | – |\n\n---"
+      ],
+      "source_chunk_id": "a4ac528c-ddbe-4618-8cab-fb2b1d982cde",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG"
+    },
+    {
+      "question": "So sánh giữa học phần 'Triết học Mác – Lênin' và 'Kinh tế chính trị Mác – Lênin' trong khối kiến thức đại cương về lý luận chính trị?",
+      "ground_truth": "'Triết học Mác – Lênin' và 'Kinh tế chính trị Mác – Lênin' đều là học phần trong khối kiến thức đại cương về lý luận chính trị. Tuy nhiên, 'Triết học Mác – Lênin' có số tín chỉ cao hơn (3 tín chỉ) so với 'Kinh tế chính trị Mác – Lênin' (2 tín chỉ), và được học ở kỳ 1 thay vì kỳ 2.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Lý luận chính trị]\n\n## KHỐI KIẾN THỨC ĐẠI CƯƠNG\n\n### Lý luận chính trị\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác – Lênin | 3(2-1-0-6) | 1 |\n| 2 | SSH1121 | Kinh tế chính trị Mác – Lênin | 2(2-0-0-4) | 2 |\n| 3 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 3 |\n| 4 | SSH1141 | Lịch sử Đảng cộng sản Việt Nam | 2(2-0-0-4) | 4 |\n| 5 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 5 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 2 |\n| 7 | MIL1210 | Đường lối quốc phòng và an ninh của Đảng CSVN | – | – |\n| 8 | MIL1220 | Công tác quốc phòng và an ninh | – | – |\n| 9 | MIL1230 | Quân sự chung | – | – |\n| 10 | MIL1240 | Kỹ thuật chiến đấu bộ binh và chiến thuật | – | – |"
+      ],
+      "source_chunk_id": "60d32460-e877-48f1-a069-2b702f9752a9",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Lý luận chính trị"
+    },
+    {
+      "question": "Học phần 'Triết học Mác – Lênin' có mã số là gì?",
+      "ground_truth": "SSH1111",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Lý luận chính trị]\n\n## KHỐI KIẾN THỨC ĐẠI CƯƠNG\n\n### Lý luận chính trị\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác – Lênin | 3(2-1-0-6) | 1 |\n| 2 | SSH1121 | Kinh tế chính trị Mác – Lênin | 2(2-0-0-4) | 2 |\n| 3 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 3 |\n| 4 | SSH1141 | Lịch sử Đảng cộng sản Việt Nam | 2(2-0-0-4) | 4 |\n| 5 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 5 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 2 |\n| 7 | MIL1210 | Đường lối quốc phòng và an ninh của Đảng CSVN | – | – |\n| 8 | MIL1220 | Công tác quốc phòng và an ninh | – | – |\n| 9 | MIL1230 | Quân sự chung | – | – |\n| 10 | MIL1240 | Kỹ thuật chiến đấu bộ binh và chiến thuật | – | – |"
+      ],
+      "source_chunk_id": "60d32460-e877-48f1-a069-2b702f9752a9",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Lý luận chính trị"
+    },
+    {
+      "question": "Sinh viên cần học những học phần nào trong kỳ 1 để đủ điều kiện học học phần Phương trình vi phân và chuỗi?",
+      "ground_truth": "Sinh viên cần học Giải tích I (MI1016) và Đại số (MI1036) trong kỳ 1 để đủ điều kiện học học phần Phương trình vi phân và chuỗi (MI1046).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Toán và khoa học cơ bản (29 tín chỉ)]\n\n### Toán và khoa học cơ bản (29 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 11 | MI1016 | Giải tích I | 4(3-2-0-8) | 1 |\n| 12 | MI1036 | Đại số | 4(3-2-0-8) | 1 |\n| 13 | MI1026 | Giải tích II | 4(3-2-0-8) | 2 |\n| 14 | PH1016 | Vật lý đại cương I | 4(2-2-1-8) | 2 |\n| 15 | IT1016 | Tin học đại cương | 3(2-1-2-6) | 1 |\n| 16 | PH1026 | Vật lý đại cương II | 4(2-2-1-8) | 3 |\n| 17 | MI1046 | Phương trình vi phân và chuỗi | 3(2-2-0-6) | 3 |\n| 18 | MI2036 | Xác suất thống kê và tín hiệu ngẫu nhiên | 3(3-1-0-6) | 4 |"
+      ],
+      "source_chunk_id": "2ad90539-76c0-42d6-bbd1-0bf403d3b869",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Toán và khoa học cơ bản (29 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào có mã số MI1016 và học kỳ 1?",
+      "ground_truth": "Giải tích I",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Toán và khoa học cơ bản (29 tín chỉ)]\n\n### Toán và khoa học cơ bản (29 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 11 | MI1016 | Giải tích I | 4(3-2-0-8) | 1 |\n| 12 | MI1036 | Đại số | 4(3-2-0-8) | 1 |\n| 13 | MI1026 | Giải tích II | 4(3-2-0-8) | 2 |\n| 14 | PH1016 | Vật lý đại cương I | 4(2-2-1-8) | 2 |\n| 15 | IT1016 | Tin học đại cương | 3(2-1-2-6) | 1 |\n| 16 | PH1026 | Vật lý đại cương II | 4(2-2-1-8) | 3 |\n| 17 | MI1046 | Phương trình vi phân và chuỗi | 3(2-2-0-6) | 3 |\n| 18 | MI2036 | Xác suất thống kê và tín hiệu ngẫu nhiên | 3(3-1-0-6) | 4 |"
+      ],
+      "source_chunk_id": "2ad90539-76c0-42d6-bbd1-0bf403d3b869",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Toán và khoa học cơ bản (29 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học môn Tiếng Anh, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Đoạn văn không cung cấp thông tin về điều kiện miễn học môn Tiếng Anh.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Tiếng Anh (6 tín chỉ)]\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 19 | FL1141 | Practical grammar for writing | 3(1-4-0-6) | – |\n| 20 | FL1142 | Communication skills I | 3(1-4-0-6) | – |\n| 21 | FL1143 | Working with texts 1 | 3(1-4-0-6) | – |\n| 22 | FL1144 | Listening | 3(2-2-0-6) | – |\n| 23 | FL1145 | Speaking | 2(1-3-0-4) | – |\n| 24 | FL1146 | Reading | 2(1-2-0-4) | – |\n| 25 | FL1147 | Writing | 3(2-2-0-6) | – |\n| 26 | FL1148 | Foundation Writing | 2(1-2-0-4) | – |\n| 27 | FL1149 | English communication skills 2 | 3(2-2-0-6) | – |\n| 28 | FL1150 | Working with text 2 | 2(1-2-0-4) | – |\n| 29 | FL1120 | IELTS listening 1 | 2(2-1-0-4) | – |\n| 30 | FL1121 | IELTS speaking 1 | 1(1-1-0-4) | – |\n| 31 | FL1122 | IELTS reading 1 | 1(1-1-0-4) | – |\n| 32 | FL1123 | IELTS writing 1 | 2(2-1-0-4) | – |\n| 33 | FL1124 | IELTS listening 2 | 2(2-1-0-4) | 1 |\n| 34 | FL1125 | IELTS speaking 2 | 1(1-1-0-4) | 1 |"
+      ],
+      "source_chunk_id": "87bd2b63-1752-4879-925d-0b589ddfbcfb",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Tiếng Anh (6 tín chỉ)"
+    },
+    {
+      "question": "Học phần 'Tâm lý học ứng dụng' có mã số là bao nhiêu?",
+      "ground_truth": "ED3280",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Kiến thức bổ trợ – chọn 6 tín chỉ]\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 35 | FL1126 | IELTS reading 2 | 1(1-1-0-4) | 1 |\n| 36 | FL1127 | IELTS writing 2 | 2(2-1-0-4) | 1 |\n\n### Kiến thức bổ trợ – chọn 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 37 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | – |\n| 38 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) | 2 |\n| 39 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(1-1-0-4) | – |\n| 40 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) | 2 |\n| 41 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | 2 |\n| – | ME3124 | Thiết kế quảng bá sản phẩm | 2(1-2-0-4) | – |\n| 42 | ME3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) | – |\n\n---"
+      ],
+      "source_chunk_id": "67fe8ba5-08ea-4b23-a9db-7bd0e626a62a",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Kiến thức bổ trợ – chọn 6 tín chỉ"
+    },
+    {
+      "question": "Học phần 'Quản trị học đại cương' được giảng dạy vào học kỳ nào?",
+      "ground_truth": "học kỳ 2",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Kiến thức bổ trợ – chọn 6 tín chỉ]\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 35 | FL1126 | IELTS reading 2 | 1(1-1-0-4) | 1 |\n| 36 | FL1127 | IELTS writing 2 | 2(2-1-0-4) | 1 |\n\n### Kiến thức bổ trợ – chọn 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 37 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | – |\n| 38 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) | 2 |\n| 39 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(1-1-0-4) | – |\n| 40 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) | 2 |\n| 41 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | 2 |\n| – | ME3124 | Thiết kế quảng bá sản phẩm | 2(1-2-0-4) | – |\n| 42 | ME3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) | – |\n\n---"
+      ],
+      "source_chunk_id": "67fe8ba5-08ea-4b23-a9db-7bd0e626a62a",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KHỐI KIẾN THỨC ĐẠI CƯƠNG > Kiến thức bổ trợ – chọn 6 tín chỉ"
+    },
+    {
+      "question": "So sánh giữa học phần 'Mạch tuyến tính 1' (EE3706E) và 'Mạch tuyến tính II' (EE3020E) về số tín chỉ và kỳ học.",
+      "ground_truth": "'Mạch tuyến tính 1' (EE3706E) có 4 tín chỉ và học vào kỳ 2, trong khi 'Mạch tuyến tính II' (EE3020E) có 3 tín chỉ và học vào kỳ 4.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH]\n\n## KIẾN THỨC CHUYÊN NGÀNH\n\n### Cơ sở và cốt lõi ngành (49 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 43 | EE1026E | Nhập môn Kỹ thuật điều khiển và tự động hóa | 2(1-1-1-4) | 1 | |\n| 44 | EE3706E | Mạch tuyến tính 1 | 4(3-1-1-8) | 2 | Mã mới; Trọng số: 0.7 |\n| 45 | EE2001E | Tín hiệu và hệ thống | 3(3-0-1-6) | 3 | |\n| 46 | EE2110E | Thiết kế điện tử | 3(3-0-1-6) | 3 | |\n| 47 | EE3140E | Máy điện | 3(3-0-1-6) | 4 | |\n| 48 | EE3020E | Mạch tuyến tính II | 3(3-1-0-6) | 4 | |\n| 49 | EE3030E | Nguyên lý trường điện từ | 3(3-0-1-6) | 4 | |\n| 50 | EE2023 | Technical Writing and Presentation | 3(2-2-0-6) | 4 | |\n| 51 | EE3288E | Lý thuyết điều khiển tuyến tính | 3(3-1-0-6) | 5 | |\n| 52 | EE2130E | Thiết kế hệ thống số | 3(3-0-1-6) | 4 | |\n| 53 | EE3110E | Kỹ thuật đo lường | 3(3-0-1-6) | 5 | |\n| 54 | EE3490E | Kỹ thuật lập trình | 3(2-2-0-6) | 4 | |\n| 55 | EE3480E | Vi xử lý và kiến trúc máy tính | 3(3-0-1-6) | 5 | |\n| 56 | EE3810E | Đồ án I | 2(0-0-4-4) | 5 | |\n| 57 | EE3410E | Điện tử công suất | 3(3-0-1-6) | 6 | |\n| 58 | EE3821E | Đồ án II | 2(0-0-4-8) | 6 | |\n| 59 | EE3423E | Hệ thống cung cấp điện | 3(3-1-0-6) | 5 | Chưa có mã; Tên cũ: Nhập môn hệ thống điện (Power supply systems) |\n\n### Chuyên ngành bắt buộc (21 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 60 | EE4221E | Điều khiển logic và PLC | 3(3-0-1-6) | 6 | Đề xuất đẩy lên Kỳ 6 |\n| 61 | EE4435E | Hệ thống điều khiển số | 3(3-1-0-6) | 7 | |\n| 62 | EE4430E | Mô hình hóa và mô phỏng hệ thống điều khiển | 3(3-0-0-6) | 6 | Đề xuất mở Kỳ 6 |\n| 63 | EE3550E | Điều khiển quá trình | 3(3-1-0-6) | 6 | |\n| 64 | EE3510E | Truyền động điện | 3(3-0-1-6) | 6 | |\n| 65 | EE3601E | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 7 | Mã mới |\n| 66 | EE4401E | Thiết kế hệ điều khiển nhúng (BTL) | 3(2-2-0-6) | 7 | |\n\n### Thực tập và đồ án – lựa chọn 8 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 67 | EE3910E | Thực tập kỹ thuật | 2(0-0-4-4) | 7 |\n| 68 | EE4900E | Đồ án tốt nghiệp Cử nhân | 6(0-0-12-12) | 8 |\n| 69 | EE4922E | Đồ án nghiên cứu Cử nhân (CTTT ĐKTĐH) | 8(0-0-16-32) | 8 |\n\n**Tổng bậc cử nhân: 132 tín chỉ**\n*(Phân bổ theo kỳ: 15 – 17 – 20 – 20 – 17 – 17 – 18 – 8)*\n\n---"
+      ],
+      "source_chunk_id": "b6962505-291b-4b6f-a01e-343568b25d61",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH"
+    },
+    {
+      "question": "Sinh viên cần học những học phần nào trong kỳ 5 để đáp ứng yêu cầu chuyên ngành?",
+      "ground_truth": "Trong kỳ 5, sinh viên cần học các học phần: Lý thuyết điều khiển tuyến tính (EE3288E), Kỹ thuật đo lường (EE3110E), và Kỹ thuật lập trình (EE3480E).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH]\n\n## KIẾN THỨC CHUYÊN NGÀNH\n\n### Cơ sở và cốt lõi ngành (49 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 43 | EE1026E | Nhập môn Kỹ thuật điều khiển và tự động hóa | 2(1-1-1-4) | 1 | |\n| 44 | EE3706E | Mạch tuyến tính 1 | 4(3-1-1-8) | 2 | Mã mới; Trọng số: 0.7 |\n| 45 | EE2001E | Tín hiệu và hệ thống | 3(3-0-1-6) | 3 | |\n| 46 | EE2110E | Thiết kế điện tử | 3(3-0-1-6) | 3 | |\n| 47 | EE3140E | Máy điện | 3(3-0-1-6) | 4 | |\n| 48 | EE3020E | Mạch tuyến tính II | 3(3-1-0-6) | 4 | |\n| 49 | EE3030E | Nguyên lý trường điện từ | 3(3-0-1-6) | 4 | |\n| 50 | EE2023 | Technical Writing and Presentation | 3(2-2-0-6) | 4 | |\n| 51 | EE3288E | Lý thuyết điều khiển tuyến tính | 3(3-1-0-6) | 5 | |\n| 52 | EE2130E | Thiết kế hệ thống số | 3(3-0-1-6) | 4 | |\n| 53 | EE3110E | Kỹ thuật đo lường | 3(3-0-1-6) | 5 | |\n| 54 | EE3490E | Kỹ thuật lập trình | 3(2-2-0-6) | 4 | |\n| 55 | EE3480E | Vi xử lý và kiến trúc máy tính | 3(3-0-1-6) | 5 | |\n| 56 | EE3810E | Đồ án I | 2(0-0-4-4) | 5 | |\n| 57 | EE3410E | Điện tử công suất | 3(3-0-1-6) | 6 | |\n| 58 | EE3821E | Đồ án II | 2(0-0-4-8) | 6 | |\n| 59 | EE3423E | Hệ thống cung cấp điện | 3(3-1-0-6) | 5 | Chưa có mã; Tên cũ: Nhập môn hệ thống điện (Power supply systems) |\n\n### Chuyên ngành bắt buộc (21 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 60 | EE4221E | Điều khiển logic và PLC | 3(3-0-1-6) | 6 | Đề xuất đẩy lên Kỳ 6 |\n| 61 | EE4435E | Hệ thống điều khiển số | 3(3-1-0-6) | 7 | |\n| 62 | EE4430E | Mô hình hóa và mô phỏng hệ thống điều khiển | 3(3-0-0-6) | 6 | Đề xuất mở Kỳ 6 |\n| 63 | EE3550E | Điều khiển quá trình | 3(3-1-0-6) | 6 | |\n| 64 | EE3510E | Truyền động điện | 3(3-0-1-6) | 6 | |\n| 65 | EE3601E | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 7 | Mã mới |\n| 66 | EE4401E | Thiết kế hệ điều khiển nhúng (BTL) | 3(2-2-0-6) | 7 | |\n\n### Thực tập và đồ án – lựa chọn 8 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 67 | EE3910E | Thực tập kỹ thuật | 2(0-0-4-4) | 7 |\n| 68 | EE4900E | Đồ án tốt nghiệp Cử nhân | 6(0-0-12-12) | 8 |\n| 69 | EE4922E | Đồ án nghiên cứu Cử nhân (CTTT ĐKTĐH) | 8(0-0-16-32) | 8 |\n\n**Tổng bậc cử nhân: 132 tín chỉ**\n*(Phân bổ theo kỳ: 15 – 17 – 20 – 20 – 17 – 17 – 18 – 8)*\n\n---"
+      ],
+      "source_chunk_id": "b6962505-291b-4b6f-a01e-343568b25d61",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH"
+    },
+    {
+      "question": "So sánh giữa học phần 'Tín hiệu và hệ thống' (EE2001E) và 'Nguyên lý trường điện từ' (EE3030E) về số tín chỉ và kỳ học.",
+      "ground_truth": "'Tín hiệu và hệ thống' (EE2001E) có 3 tín chỉ và học vào kỳ 3, trong khi 'Nguyên lý trường điện từ' (EE3030E) có 3 tín chỉ nhưng học vào kỳ 4.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Cơ sở và cốt lõi ngành (49 tín chỉ)]\n\n## KIẾN THỨC CHUYÊN NGÀNH\n### Cơ sở và cốt lõi ngành (49 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 43 | EE1026E | Nhập môn Kỹ thuật điều khiển và tự động hóa | 2(1-1-1-4) | 1 | |\n| 44 | EE3706E | Mạch tuyến tính 1 | 4(3-1-1-8) | 2 | Mã mới; Trọng số: 0.7 |\n| 45 | EE2001E | Tín hiệu và hệ thống | 3(3-0-1-6) | 3 | |\n| 46 | EE2110E | Thiết kế điện tử | 3(3-0-1-6) | 3 | |\n| 47 | EE3140E | Máy điện | 3(3-0-1-6) | 4 | |\n| 48 | EE3020E | Mạch tuyến tính II | 3(3-1-0-6) | 4 | |\n| 49 | EE3030E | Nguyên lý trường điện từ | 3(3-0-1-6) | 4 | |\n| 50 | EE2023 | Technical Writing and Presentation | 3(2-2-0-6) | 4 | |\n| 51 | EE3288E | Lý thuyết điều khiển tuyến tính | 3(3-1-0-6) | 5 | |\n| 52 | EE2130E | Thiết kế hệ thống số | 3(3-0-1-6) | 4 | |\n| 53 | EE3110E | Kỹ thuật đo lường | 3(3-0-1-6) | 5 | |\n| 54 | EE3490E | Kỹ thuật lập trình | 3(2-2-0-6) | 4 | |\n| 55 | EE3480E | Vi xử lý và kiến trúc máy tính | 3(3-0-1-6) | 5 | |\n| 56 | EE3810E | Đồ án I | 2(0-0-4-4) | 5 | |\n| 57 | EE3410E | Điện tử công suất | 3(3-0-1-6) | 6 | |"
+      ],
+      "source_chunk_id": "b6c73ba9-4670-4dbd-a3f0-550f555dab3c",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Cơ sở và cốt lõi ngành (49 tín chỉ)"
+    },
+    {
+      "question": "Học phần 'Mạch tuyến tính 1' có mã số là gì?",
+      "ground_truth": "EE3706E",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Cơ sở và cốt lõi ngành (49 tín chỉ)]\n\n## KIẾN THỨC CHUYÊN NGÀNH\n### Cơ sở và cốt lõi ngành (49 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 43 | EE1026E | Nhập môn Kỹ thuật điều khiển và tự động hóa | 2(1-1-1-4) | 1 | |\n| 44 | EE3706E | Mạch tuyến tính 1 | 4(3-1-1-8) | 2 | Mã mới; Trọng số: 0.7 |\n| 45 | EE2001E | Tín hiệu và hệ thống | 3(3-0-1-6) | 3 | |\n| 46 | EE2110E | Thiết kế điện tử | 3(3-0-1-6) | 3 | |\n| 47 | EE3140E | Máy điện | 3(3-0-1-6) | 4 | |\n| 48 | EE3020E | Mạch tuyến tính II | 3(3-1-0-6) | 4 | |\n| 49 | EE3030E | Nguyên lý trường điện từ | 3(3-0-1-6) | 4 | |\n| 50 | EE2023 | Technical Writing and Presentation | 3(2-2-0-6) | 4 | |\n| 51 | EE3288E | Lý thuyết điều khiển tuyến tính | 3(3-1-0-6) | 5 | |\n| 52 | EE2130E | Thiết kế hệ thống số | 3(3-0-1-6) | 4 | |\n| 53 | EE3110E | Kỹ thuật đo lường | 3(3-0-1-6) | 5 | |\n| 54 | EE3490E | Kỹ thuật lập trình | 3(2-2-0-6) | 4 | |\n| 55 | EE3480E | Vi xử lý và kiến trúc máy tính | 3(3-0-1-6) | 5 | |\n| 56 | EE3810E | Đồ án I | 2(0-0-4-4) | 5 | |\n| 57 | EE3410E | Điện tử công suất | 3(3-0-1-6) | 6 | |"
+      ],
+      "source_chunk_id": "b6c73ba9-4670-4dbd-a3f0-550f555dab3c",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Cơ sở và cốt lõi ngành (49 tín chỉ)"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình đào tạo tiên tiến, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học một môn học là sinh viên đã hoàn thành môn học tương đương trong chương trình đào tạo trước đó hoặc có bằng cấp liên quan.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Cơ sở và cốt lõi ngành (49 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (49 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 58 | EE3821E | Đồ án II | 2(0-0-4-8) | 6 | |\n| 59 | EE3423E | Hệ thống cung cấp điện | 3(3-1-0-6) | 5 | Chưa có mã; Tên cũ: Nhập môn hệ thống điện (Power supply systems) |"
+      ],
+      "source_chunk_id": "b12fb21e-b20d-4901-a70a-2523e38451a5",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Cơ sở và cốt lõi ngành (49 tín chỉ)"
+    },
+    {
+      "question": "So sánh giữa học phần 'Đồ án II' và 'Hệ thống cung cấp điện' về số lượng tín chỉ và kỳ học?",
+      "ground_truth": "'Đồ án II' có 2 tín chỉ và được học vào kỳ 6, trong khi 'Hệ thống cung cấp điện' có 3 tín chỉ và được học vào kỳ 5.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Cơ sở và cốt lõi ngành (49 tín chỉ)]\n\n### Cơ sở và cốt lõi ngành (49 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 58 | EE3821E | Đồ án II | 2(0-0-4-8) | 6 | |\n| 59 | EE3423E | Hệ thống cung cấp điện | 3(3-1-0-6) | 5 | Chưa có mã; Tên cũ: Nhập môn hệ thống điện (Power supply systems) |"
+      ],
+      "source_chunk_id": "b12fb21e-b20d-4901-a70a-2523e38451a5",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Cơ sở và cốt lõi ngành (49 tín chỉ)"
+    },
+    {
+      "question": "Học phần nào có mã số EE4221E và được đề xuất đẩy lên kỳ 6?",
+      "ground_truth": "Điều khiển logic và PLC",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Thực tập và đồ án – lựa chọn 8 tín chỉ]\n\n### Chuyên ngành bắt buộc (21 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 60 | EE4221E | Điều khiển logic và PLC | 3(3-0-1-6) | 6 | Đề xuất đẩy lên Kỳ 6 |\n| 61 | EE4435E | Hệ thống điều khiển số | 3(3-1-0-6) | 7 | |\n| 62 | EE4430E | Mô hình hóa và mô phỏng hệ thống điều khiển | 3(3-0-0-6) | 6 | Đề xuất mở Kỳ 6 |\n| 63 | EE3550E | Điều khiển quá trình | 3(3-1-0-6) | 6 | |\n| 64 | EE3510E | Truyền động điện | 3(3-0-1-6) | 6 | |\n| 65 | EE3601E | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 7 | Mã mới |\n| 66 | EE4401E | Thiết kế hệ điều khiển nhúng (BTL) | 3(2-2-0-6) | 7 | |\n\n### Thực tập và đồ án – lựa chọn 8 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 67 | EE3910E | Thực tập kỹ thuật | 2(0-0-4-4) | 7 |\n| 68 | EE4900E | Đồ án tốt nghiệp Cử nhân | 6(0-0-12-12) | 8 |\n| 69 | EE4922E | Đồ án nghiên cứu Cử nhân (CTTT ĐKTĐH) | 8(0-0-16-32) | 8 |\n\n**Tổng bậc cử nhân: 132 tín chỉ**\n*(Phân bổ theo kỳ: 15 – 17 – 20 – 20 – 17 – 17 – 18 – 8)*\n\n---"
+      ],
+      "source_chunk_id": "7cbfa86a-0e45-4e55-8977-06ef34049881",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Thực tập và đồ án – lựa chọn 8 tín chỉ"
+    },
+    {
+      "question": "So sánh giữa học phần 'Điều khiển logic và PLC' (EE4221E) và 'Mô hình hóa và mô phỏng hệ thống điều khiển' (EE4430E) về số tín chỉ và kỳ học.",
+      "ground_truth": "'Điều khiển logic và PLC' (EE4221E) có 3 tín chỉ và học vào kỳ 6, trong khi 'Mô hình hóa và mô phỏng hệ thống điều khiển' (EE4430E) cũng có 3 tín chỉ nhưng học vào kỳ 6.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Thực tập và đồ án – lựa chọn 8 tín chỉ]\n\n### Chuyên ngành bắt buộc (21 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 60 | EE4221E | Điều khiển logic và PLC | 3(3-0-1-6) | 6 | Đề xuất đẩy lên Kỳ 6 |\n| 61 | EE4435E | Hệ thống điều khiển số | 3(3-1-0-6) | 7 | |\n| 62 | EE4430E | Mô hình hóa và mô phỏng hệ thống điều khiển | 3(3-0-0-6) | 6 | Đề xuất mở Kỳ 6 |\n| 63 | EE3550E | Điều khiển quá trình | 3(3-1-0-6) | 6 | |\n| 64 | EE3510E | Truyền động điện | 3(3-0-1-6) | 6 | |\n| 65 | EE3601E | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 7 | Mã mới |\n| 66 | EE4401E | Thiết kế hệ điều khiển nhúng (BTL) | 3(2-2-0-6) | 7 | |\n\n### Thực tập và đồ án – lựa chọn 8 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 67 | EE3910E | Thực tập kỹ thuật | 2(0-0-4-4) | 7 |\n| 68 | EE4900E | Đồ án tốt nghiệp Cử nhân | 6(0-0-12-12) | 8 |\n| 69 | EE4922E | Đồ án nghiên cứu Cử nhân (CTTT ĐKTĐH) | 8(0-0-16-32) | 8 |\n\n**Tổng bậc cử nhân: 132 tín chỉ**\n*(Phân bổ theo kỳ: 15 – 17 – 20 – 20 – 17 – 17 – 18 – 8)*\n\n---"
+      ],
+      "source_chunk_id": "7cbfa86a-0e45-4e55-8977-06ef34049881",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > KIẾN THỨC CHUYÊN NGÀNH > Thực tập và đồ án – lựa chọn 8 tín chỉ"
+    },
+    {
+      "question": "So sánh giữa học phần 'Đồ án đề xuất' và 'Bổ sung 6 TC từ khối tự chọn cử nhân' trong chương trình thạc sĩ?",
+      "ground_truth": "'Đồ án đề xuất' là một học phần bắt buộc dành cho sinh viên không tham gia chương trình tích hợp, có 6 tín chỉ và học trong kỳ không xác định. Trong khi đó, 'Bổ sung 6 TC từ khối tự chọn cử nhân' là một học phần công nhận tín chỉ từ các môn đã học ở bậc cử nhân, cũng có 6 tín chỉ nhưng được học trong kỳ 9.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ]\n\n## BẬC THẠC SĨ\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 70 | SS6013 | Triết học | 3(3-0-0-6) | 9 |\n\n### Kiến thức ngành mở rộng (12 tín chỉ – công nhận từ khối tự chọn cử nhân)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 71 | DX6000 | Đồ án đề xuất | 6(0-0-12-12) | – | Dành cho SV không học chương trình tích hợp |\n| 72 | EExxxx | Bổ sung 6 TC từ khối tự chọn cử nhân | 6 | 9 | |\n\n### Cơ sở ngành nâng cao – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 73 | EE6312E | Phân tích và điều khiển hệ phi tuyến | 3(3-1-0-6) | 9 |\n| 74 | EE6543E | Cảm biến và xử lý tín hiệu đo | 2(2-1-0-4) | 9 |\n| 75 | EE6503E | Xử lý tín hiệu số | 2(2-1-0-4) | 9 |\n| 76 | EE6551E | Điện tử công suất nâng cao | 2(2-1-0-4) | 9 |\n| 77 | EE6010E | Seminar 1 | 3(0-0-6-6) | 9 |\n| 78 | EE6020E | Seminar 2 | 3(0-0-6-6) | 10 |\n\n### Các môn định hướng nghiên cứu – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 79 | EE6532E | Tối ưu hóa và điều khiển tối ưu | 3(3-1-0-6) | 10 |\n| 80 | EE6022E | Điều khiển quá trình nâng cao | 3(2-2-0-6) | 10 |\n| 81 | EE6445E | Điều khiển mờ và mạng nơ ron | 3(3-1-0-6) | 10 |\n| 82 | EE6446E | Hệ thống cảm biến thông minh | 3(3-1-0-6) | 10 |\n| 83 | EE6426E | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) | 10 |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 84 | EE6001E | Luận văn tốt nghiệp | 15(0-0-30-50) | 11 |"
+      ],
+      "source_chunk_id": "9f6de682-e1c6-4c1c-882e-6a0a7bacd3bb",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ"
+    },
+    {
+      "question": "Để được miễn học một số môn trong chương trình thạc sĩ, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên cần công nhận từ khối tự chọn cử nhân để được miễn học một số môn trong chương trình thạc sĩ.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ]\n\n## BẬC THẠC SĨ\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 70 | SS6013 | Triết học | 3(3-0-0-6) | 9 |\n\n### Kiến thức ngành mở rộng (12 tín chỉ – công nhận từ khối tự chọn cử nhân)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 71 | DX6000 | Đồ án đề xuất | 6(0-0-12-12) | – | Dành cho SV không học chương trình tích hợp |\n| 72 | EExxxx | Bổ sung 6 TC từ khối tự chọn cử nhân | 6 | 9 | |\n\n### Cơ sở ngành nâng cao – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 73 | EE6312E | Phân tích và điều khiển hệ phi tuyến | 3(3-1-0-6) | 9 |\n| 74 | EE6543E | Cảm biến và xử lý tín hiệu đo | 2(2-1-0-4) | 9 |\n| 75 | EE6503E | Xử lý tín hiệu số | 2(2-1-0-4) | 9 |\n| 76 | EE6551E | Điện tử công suất nâng cao | 2(2-1-0-4) | 9 |\n| 77 | EE6010E | Seminar 1 | 3(0-0-6-6) | 9 |\n| 78 | EE6020E | Seminar 2 | 3(0-0-6-6) | 10 |\n\n### Các môn định hướng nghiên cứu – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 79 | EE6532E | Tối ưu hóa và điều khiển tối ưu | 3(3-1-0-6) | 10 |\n| 80 | EE6022E | Điều khiển quá trình nâng cao | 3(2-2-0-6) | 10 |\n| 81 | EE6445E | Điều khiển mờ và mạng nơ ron | 3(3-1-0-6) | 10 |\n| 82 | EE6446E | Hệ thống cảm biến thông minh | 3(3-1-0-6) | 10 |\n| 83 | EE6426E | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) | 10 |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 84 | EE6001E | Luận văn tốt nghiệp | 15(0-0-30-50) | 11 |"
+      ],
+      "source_chunk_id": "9f6de682-e1c6-4c1c-882e-6a0a7bacd3bb",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ"
+    },
+    {
+      "question": "Để hoàn thành mô đun Điều khiển & Tự động hóa trong chương trình thạc sĩ, sinh viên cần học bao nhiêu tín chỉ và các học phần nào?",
+      "ground_truth": "Sinh viên cần hoàn thành 15 tín chỉ gồm các học phần: Phân tích và điều khiển hệ phi tuyến (3 TC), Cảm biến và xử lý tín hiệu đo (2 TC), Xử lý tín hiệu số (2 TC), Điện tử công suất nâng cao (2 TC), Seminar 1 (3 TC) và Seminar 2 (3 TC).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ > Cơ sở ngành nâng cao – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)]\n\n## BẬC THẠC SĨ\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 70 | SS6013 | Triết học | 3(3-0-0-6) | 9 |\n\n### Kiến thức ngành mở rộng (12 tín chỉ – công nhận từ khối tự chọn cử nhân)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 71 | DX6000 | Đồ án đề xuất | 6(0-0-12-12) | – | Dành cho SV không học chương trình tích hợp |\n| 72 | EExxxx | Bổ sung 6 TC từ khối tự chọn cử nhân | 6 | 9 | |\n\n### Cơ sở ngành nâng cao – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 73 | EE6312E | Phân tích và điều khiển hệ phi tuyến | 3(3-1-0-6) | 9 |\n| 74 | EE6543E | Cảm biến và xử lý tín hiệu đo | 2(2-1-0-4) | 9 |\n| 75 | EE6503E | Xử lý tín hiệu số | 2(2-1-0-4) | 9 |\n| 76 | EE6551E | Điện tử công suất nâng cao | 2(2-1-0-4) | 9 |\n| 77 | EE6010E | Seminar 1 | 3(0-0-6-6) | 9 |\n| 78 | EE6020E | Seminar 2 | 3(0-0-6-6) | 10 |"
+      ],
+      "source_chunk_id": "b1317cee-76be-4d53-a7e1-96856fd93e08",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ > Cơ sở ngành nâng cao – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)"
+    },
+    {
+      "question": "So sánh giữa học phần 'Đồ án đề xuất' và 'Bổ sung 6 TC từ khối tự chọn cử nhân' trong chương trình thạc sĩ?",
+      "ground_truth": "'Đồ án đề xuất' là một học phần riêng biệt với 6 tín chỉ, dành cho sinh viên không tham gia chương trình tích hợp. Trong khi đó, 'Bổ sung 6 TC từ khối tự chọn cử nhân' là một nhóm học phần công nhận từ khối tự chọn cử nhân, cũng mang 6 tín chỉ nhưng không phải là học phần cụ thể nào.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ > Cơ sở ngành nâng cao – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)]\n\n## BẬC THẠC SĨ\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 70 | SS6013 | Triết học | 3(3-0-0-6) | 9 |\n\n### Kiến thức ngành mở rộng (12 tín chỉ – công nhận từ khối tự chọn cử nhân)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ | Ghi chú |\n|---|---|---|---|---|---|\n| 71 | DX6000 | Đồ án đề xuất | 6(0-0-12-12) | – | Dành cho SV không học chương trình tích hợp |\n| 72 | EExxxx | Bổ sung 6 TC từ khối tự chọn cử nhân | 6 | 9 | |\n\n### Cơ sở ngành nâng cao – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 73 | EE6312E | Phân tích và điều khiển hệ phi tuyến | 3(3-1-0-6) | 9 |\n| 74 | EE6543E | Cảm biến và xử lý tín hiệu đo | 2(2-1-0-4) | 9 |\n| 75 | EE6503E | Xử lý tín hiệu số | 2(2-1-0-4) | 9 |\n| 76 | EE6551E | Điện tử công suất nâng cao | 2(2-1-0-4) | 9 |\n| 77 | EE6010E | Seminar 1 | 3(0-0-6-6) | 9 |\n| 78 | EE6020E | Seminar 2 | 3(0-0-6-6) | 10 |"
+      ],
+      "source_chunk_id": "b1317cee-76be-4d53-a7e1-96856fd93e08",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ > Cơ sở ngành nâng cao – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)"
+    },
+    {
+      "question": "Sinh viên cần học những môn nào trong Mô đun Điều khiển & Tự động hóa trước khi thực hiện luận văn tốt nghiệp?",
+      "ground_truth": "Sinh viên cần học các môn: Tối ưu hóa và điều khiển tối ưu (EE6532E), Điều khiển quá trình nâng cao (EE6022E), Điều khiển mờ và mạng nơ ron (EE6445E), Hệ thống cảm biến thông minh (EE6446E), và Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất (EE6426E) trước khi thực hiện luận văn tốt nghiệp.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ > Luận văn tốt nghiệp (15 tín chỉ)]\n\n### Các môn định hướng nghiên cứu – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 79 | EE6532E | Tối ưu hóa và điều khiển tối ưu | 3(3-1-0-6) | 10 |\n| 80 | EE6022E | Điều khiển quá trình nâng cao | 3(2-2-0-6) | 10 |\n| 81 | EE6445E | Điều khiển mờ và mạng nơ ron | 3(3-1-0-6) | 10 |\n| 82 | EE6446E | Hệ thống cảm biến thông minh | 3(3-1-0-6) | 10 |\n| 83 | EE6426E | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) | 10 |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 84 | EE6001E | Luận văn tốt nghiệp | 15(0-0-30-50) | 11 |"
+      ],
+      "source_chunk_id": "792afea9-fd81-43c9-8e95-4192ab397e9f",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ > Luận văn tốt nghiệp (15 tín chỉ)"
+    },
+    {
+      "question": "Tổng số tín chỉ sinh viên cần hoàn thành trong Mô đun Điều khiển & Tự động hóa là bao nhiêu?",
+      "ground_truth": "Tổng số tín chỉ sinh viên cần hoàn thành trong Mô đun Điều khiển & Tự động hóa là 15 tín chỉ.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ > Luận văn tốt nghiệp (15 tín chỉ)]\n\n### Các môn định hướng nghiên cứu – Mô đun Điều khiển & Tự động hóa (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 79 | EE6532E | Tối ưu hóa và điều khiển tối ưu | 3(3-1-0-6) | 10 |\n| 80 | EE6022E | Điều khiển quá trình nâng cao | 3(2-2-0-6) | 10 |\n| 81 | EE6445E | Điều khiển mờ và mạng nơ ron | 3(3-1-0-6) | 10 |\n| 82 | EE6446E | Hệ thống cảm biến thông minh | 3(3-1-0-6) | 10 |\n| 83 | EE6426E | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) | 10 |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 84 | EE6001E | Luận văn tốt nghiệp | 15(0-0-30-50) | 11 |"
+      ],
+      "source_chunk_id": "792afea9-fd81-43c9-8e95-4192ab397e9f",
+      "source_file": "khung-ct-ee-ep-k68_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN > BẬC THẠC SĨ > Luận văn tốt nghiệp (15 tín chỉ)"
+    }
+  ]
+}

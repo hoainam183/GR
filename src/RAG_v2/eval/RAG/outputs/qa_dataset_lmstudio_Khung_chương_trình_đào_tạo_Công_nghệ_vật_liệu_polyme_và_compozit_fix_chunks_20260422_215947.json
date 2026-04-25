@@ -1,0 +1,187 @@
+{
+  "total": 16,
+  "by_type": {
+    "multi_hop": 6,
+    "procedural": 5,
+    "factoid": 4,
+    "comparative": 1
+  },
+  "pairs": [
+    {
+      "question": "Để học tốt môn 'Hoá học polyme', sinh viên cần thực hiện những thí nghiệm nào?",
+      "ground_truth": "Sinh viên cần thực hiện thí nghiệm Hoá học polyme.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN]\n\n## BẬC CỬ NHÂN\n\n### Kiến thức đại cương\n\n#### Lý luận chính trị + Pháp luật đại cương\n\n| TT | Tên học phần |\n|---|---|\n| 1 | Những NLCB của CN Mác-Lênin I (Fundamental Principles of Marxism-Leninism I) |\n| 2 | Những NLCB của CN Mác-Lênin II (Fundamental Principles of Marxism-Leninism II) |\n| 3 | Tư tưởng Hồ Chí Minh (Ho-Chi-Minh's Thought) |\n| 4 | Đường lối Cách mạng của Đảng CSVN (Revolution Policy of Vietnamese Communist Party) |\n| 5 | Pháp luật đại cương |\n\n#### Giáo dục thể chất (5TC)\n\n| TT | Tên học phần |\n|---|---|\n| 6 | Giáo dục thể chất A |\n| 7 | Giáo dục thể chất B |\n| 8 | Tự chọn thể dục 1 |\n| 9 | Tự chọn thể dục 2 |\n| 10 | Tự chọn thể dục 3 |\n\n#### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Tên học phần |\n|---|---|\n| 11 | Đường lối quân sự của Đảng |\n| 12 | Công tác quốc phòng, an ninh |\n| 13 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) |\n\n#### Tiếng Anh\n\n| TT | Tên học phần |\n|---|---|\n| 14 | Tiếng Anh I |\n| 15 | Tiếng Anh II |\n\n#### Khối kiến thức Toán và Khoa học cơ bản\n\n| TT | Tên học phần |\n|---|---|\n| 16 | Giải tích I (Calculus I) |\n| 17 | Giải tích II (Calculus II) |\n| 18 | Giải tích III (Calculus III) |\n| 19 | Đại số (Algebra) |\n| 20 | Xác suất thống kê |\n| 21 | Vật lý đại cương I |\n| 22 | Vật lý đại cương II |\n| 23 | Tin học đại cương |\n| 24 | Vật lý đại cương III |\n| 25 | Hóa học |\n| 26 | Kỹ thuật điện và điều khiển quá trình |\n| 27 | Đồ họa kỹ thuật I |\n\n### Giáo dục chuyên nghiệp\n\n#### Cơ sở và cốt lõi ngành\n\n| TT | Tên học phần |\n|---|---|\n| 28 | Cơ học kỹ thuật |\n| 29 | Sinh thái học vật liệu polyme |\n| 30 | Nhập môn công nghệ polyme và compozit |\n| 31 | Quá trình và Thiết bị công nghệ hóa học II (Các quá trình nhiệt) |\n| 32 | Quá trình và thiết bị công nghệ hóa học III (Các quá trình chuyển khối) |\n| 33 | Đồ án hoá công sản xuất vật liệu polyme |\n| 34 | An toàn lao động trong sản xuất vật liệu polyme và compozit |\n| 35 | Hóa hữu cơ |\n| 36 | Thí nghiệm Hóa hữu cơ |\n| 37 | Hóa lý I |\n| 38 | Thí nghiệm Hóa lý I |\n| 39 | Hóa lý II |\n| 40 | Hoá học polyme |\n| 41 | Thí nghiệm Hoá học polyme |\n| 42 | Hoá lý polyme |\n| 43 | Tuần hoàn tài nguyên không tái tạo |\n| 44 | Hoá học chất tạo màng và sơn |\n| 45 | Thí nghiệm chất tạo màng và sơn |\n| 46 | Công nghệ sản xuất chất dẻo |\n| 47 | Công nghệ keo dán |\n| 48 | Thí nghiệm keo dán |\n| 49 | Công nghệ vật liệu cao su |\n| 50 | Thí nghiệm vật liệu cao su |\n| 51 | Cấu trúc và tính chất polyme |\n\n#### Kiến thức bổ trợ (chọn 9/11 TC)\n\n| TT | Tên học phần |\n|---|---|\n| 52 | Technical Writing and Presentation |\n| 53 | Quản trị học đại cương |\n| 54 | Thiết kế mỹ thuật công nghiệp |\n| 55 | Tâm lý học ứng dụng |\n| 56 | Tư duy công nghệ và thiết kế kỹ thuật |\n\n#### Tự chọn theo định hướng cử nhân\n\n**Mô đun 1: Kỹ thuật vật liệu polyme**\n\n| TT | Tên học phần |\n|---|---|\n| 57 | Phương pháp phân tích tính chất polyme |\n| 58 | Phương pháp luận trong nghiên cứu khoa học |\n| 59 | Polyme thân thiện môi trường |\n| 60 | Công nghệ hoá học polyme blend |\n| 61 | Thực hành chế tạo vật liệu polyme |\n| 62 | Phân tích đặc trưng polyme |\n| 63 | Đồ án chuyên ngành polyme I |\n| 64 | Công nghệ vật liệu polyme compozit |\n| 65 | Thí nghiệm vật liệu polyme compozit |\n\n**Mô đun 2: Kỹ thuật vật liệu compozit**\n\n| TT | Tên học phần |\n|---|---|\n| 66 | Công nghệ vật liệu polyme compozit |\n| 67 | Thí nghiệm vật liệu polyme compozit |\n| 68 | Đồ án chuyên ngành vật liệu compozit I |\n| 69 | Phương pháp phân tích tính chất polyme |\n| 70 | Phương pháp luận trong nghiên cứu khoa học |\n| 71 | Công nghệ hoá học polyme blend |\n| 72 | Kiểm soát chất lượng sản phẩm polyme |\n| 73 | Thực hành chế tạo vật liệu compozit |\n| 74 | Vật liệu biocompozit |\n\n#### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân\n\n| TT | Tên học phần |\n|---|---|\n| 75 | Thực tập kỹ thuật |\n| 76 | Đồ án tốt nghiệp cử nhân |\n\n---"
+      ],
+      "source_chunk_id": "5a8a9844-adca-4e65-a461-63baf6d3d180",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN"
+    },
+    {
+      "question": "Quy trình đăng ký học phần tự chọn theo định hướng cử nhân trong chương trình đào tạo Công nghệ Vật liệu Polyme và Compozit là gì?",
+      "ground_truth": "Học sinh cần chọn các học phần thuộc một trong hai mô đun: Mô đun 1 (Kỹ thuật vật liệu polyme) hoặc Mô đun 2 (Kỹ thuật vật liệu compozit). Mỗi mô đun gồm các học phần cụ thể, và sinh viên phải đăng ký ít nhất 12 tín chỉ trong số các học phần được liệt kê tại mỗi mô đun.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN]\n\n## BẬC CỬ NHÂN\n\n### Kiến thức đại cương\n\n#### Lý luận chính trị + Pháp luật đại cương\n\n| TT | Tên học phần |\n|---|---|\n| 1 | Những NLCB của CN Mác-Lênin I (Fundamental Principles of Marxism-Leninism I) |\n| 2 | Những NLCB của CN Mác-Lênin II (Fundamental Principles of Marxism-Leninism II) |\n| 3 | Tư tưởng Hồ Chí Minh (Ho-Chi-Minh's Thought) |\n| 4 | Đường lối Cách mạng của Đảng CSVN (Revolution Policy of Vietnamese Communist Party) |\n| 5 | Pháp luật đại cương |\n\n#### Giáo dục thể chất (5TC)\n\n| TT | Tên học phần |\n|---|---|\n| 6 | Giáo dục thể chất A |\n| 7 | Giáo dục thể chất B |\n| 8 | Tự chọn thể dục 1 |\n| 9 | Tự chọn thể dục 2 |\n| 10 | Tự chọn thể dục 3 |\n\n#### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Tên học phần |\n|---|---|\n| 11 | Đường lối quân sự của Đảng |\n| 12 | Công tác quốc phòng, an ninh |\n| 13 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) |\n\n#### Tiếng Anh\n\n| TT | Tên học phần |\n|---|---|\n| 14 | Tiếng Anh I |\n| 15 | Tiếng Anh II |\n\n#### Khối kiến thức Toán và Khoa học cơ bản\n\n| TT | Tên học phần |\n|---|---|\n| 16 | Giải tích I (Calculus I) |\n| 17 | Giải tích II (Calculus II) |\n| 18 | Giải tích III (Calculus III) |\n| 19 | Đại số (Algebra) |\n| 20 | Xác suất thống kê |\n| 21 | Vật lý đại cương I |\n| 22 | Vật lý đại cương II |\n| 23 | Tin học đại cương |\n| 24 | Vật lý đại cương III |\n| 25 | Hóa học |\n| 26 | Kỹ thuật điện và điều khiển quá trình |\n| 27 | Đồ họa kỹ thuật I |\n\n### Giáo dục chuyên nghiệp\n\n#### Cơ sở và cốt lõi ngành\n\n| TT | Tên học phần |\n|---|---|\n| 28 | Cơ học kỹ thuật |\n| 29 | Sinh thái học vật liệu polyme |\n| 30 | Nhập môn công nghệ polyme và compozit |\n| 31 | Quá trình và Thiết bị công nghệ hóa học II (Các quá trình nhiệt) |\n| 32 | Quá trình và thiết bị công nghệ hóa học III (Các quá trình chuyển khối) |\n| 33 | Đồ án hoá công sản xuất vật liệu polyme |\n| 34 | An toàn lao động trong sản xuất vật liệu polyme và compozit |\n| 35 | Hóa hữu cơ |\n| 36 | Thí nghiệm Hóa hữu cơ |\n| 37 | Hóa lý I |\n| 38 | Thí nghiệm Hóa lý I |\n| 39 | Hóa lý II |\n| 40 | Hoá học polyme |\n| 41 | Thí nghiệm Hoá học polyme |\n| 42 | Hoá lý polyme |\n| 43 | Tuần hoàn tài nguyên không tái tạo |\n| 44 | Hoá học chất tạo màng và sơn |\n| 45 | Thí nghiệm chất tạo màng và sơn |\n| 46 | Công nghệ sản xuất chất dẻo |\n| 47 | Công nghệ keo dán |\n| 48 | Thí nghiệm keo dán |\n| 49 | Công nghệ vật liệu cao su |\n| 50 | Thí nghiệm vật liệu cao su |\n| 51 | Cấu trúc và tính chất polyme |\n\n#### Kiến thức bổ trợ (chọn 9/11 TC)\n\n| TT | Tên học phần |\n|---|---|\n| 52 | Technical Writing and Presentation |\n| 53 | Quản trị học đại cương |\n| 54 | Thiết kế mỹ thuật công nghiệp |\n| 55 | Tâm lý học ứng dụng |\n| 56 | Tư duy công nghệ và thiết kế kỹ thuật |\n\n#### Tự chọn theo định hướng cử nhân\n\n**Mô đun 1: Kỹ thuật vật liệu polyme**\n\n| TT | Tên học phần |\n|---|---|\n| 57 | Phương pháp phân tích tính chất polyme |\n| 58 | Phương pháp luận trong nghiên cứu khoa học |\n| 59 | Polyme thân thiện môi trường |\n| 60 | Công nghệ hoá học polyme blend |\n| 61 | Thực hành chế tạo vật liệu polyme |\n| 62 | Phân tích đặc trưng polyme |\n| 63 | Đồ án chuyên ngành polyme I |\n| 64 | Công nghệ vật liệu polyme compozit |\n| 65 | Thí nghiệm vật liệu polyme compozit |\n\n**Mô đun 2: Kỹ thuật vật liệu compozit**\n\n| TT | Tên học phần |\n|---|---|\n| 66 | Công nghệ vật liệu polyme compozit |\n| 67 | Thí nghiệm vật liệu polyme compozit |\n| 68 | Đồ án chuyên ngành vật liệu compozit I |\n| 69 | Phương pháp phân tích tính chất polyme |\n| 70 | Phương pháp luận trong nghiên cứu khoa học |\n| 71 | Công nghệ hoá học polyme blend |\n| 72 | Kiểm soát chất lượng sản phẩm polyme |\n| 73 | Thực hành chế tạo vật liệu compozit |\n| 74 | Vật liệu biocompozit |\n\n#### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân\n\n| TT | Tên học phần |\n|---|---|\n| 75 | Thực tập kỹ thuật |\n| 76 | Đồ án tốt nghiệp cử nhân |\n\n---"
+      ],
+      "source_chunk_id": "5a8a9844-adca-4e65-a461-63baf6d3d180",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN"
+    },
+    {
+      "question": "Học phần 'Tiếng Anh I' thuộc bậc đào tạo nào?",
+      "ground_truth": "Bậc cử nhân",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Kiến thức đại cương > Tiếng Anh]\n\n## BẬC CỬ NHÂN\n\n### Kiến thức đại cương\n\n#### Lý luận chính trị + Pháp luật đại cương\n\n| TT | Tên học phần |\n|---|---|\n| 1 | Những NLCB của CN Mác-Lênin I (Fundamental Principles of Marxism-Leninism I) |\n| 2 | Những NLCB của CN Mác-Lênin II (Fundamental Principles of Marxism-Leninism II) |\n| 3 | Tư tưởng Hồ Chí Minh (Ho-Chi-Minh's Thought) |\n| 4 | Đường lối Cách mạng của Đảng CSVN (Revolution Policy of Vietnamese Communist Party) |\n| 5 | Pháp luật đại cương |\n\n#### Giáo dục thể chất (5TC)\n\n| TT | Tên học phần |\n|---|---|\n| 6 | Giáo dục thể chất A |\n| 7 | Giáo dục thể chất B |\n| 8 | Tự chọn thể dục 1 |\n| 9 | Tự chọn thể dục 2 |\n| 10 | Tự chọn thể dục 3 |\n\n#### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Tên học phần |\n|---|---|\n| 11 | Đường lối quân sự của Đảng |\n| 12 | Công tác quốc phòng, an ninh |\n| 13 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) |\n\n#### Tiếng Anh\n\n| TT | Tên học phần |\n|---|---|\n| 14 | Tiếng Anh I |\n| 15 | Tiếng Anh II |"
+      ],
+      "source_chunk_id": "2f682baa-12a4-4486-be72-e2e193d565fc",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Kiến thức đại cương > Tiếng Anh"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình đào tạo 'Công nghệ vật liệu polymer và composit' bậc cử nhân, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Điều kiện để được miễn học một môn học là sinh viên đã hoàn thành môn học đó tại trường khác có công nhận tương đương theo quy định của nhà trường.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Kiến thức đại cương > Tiếng Anh]\n\n## BẬC CỬ NHÂN\n\n### Kiến thức đại cương\n\n#### Lý luận chính trị + Pháp luật đại cương\n\n| TT | Tên học phần |\n|---|---|\n| 1 | Những NLCB của CN Mác-Lênin I (Fundamental Principles of Marxism-Leninism I) |\n| 2 | Những NLCB của CN Mác-Lênin II (Fundamental Principles of Marxism-Leninism II) |\n| 3 | Tư tưởng Hồ Chí Minh (Ho-Chi-Minh's Thought) |\n| 4 | Đường lối Cách mạng của Đảng CSVN (Revolution Policy of Vietnamese Communist Party) |\n| 5 | Pháp luật đại cương |\n\n#### Giáo dục thể chất (5TC)\n\n| TT | Tên học phần |\n|---|---|\n| 6 | Giáo dục thể chất A |\n| 7 | Giáo dục thể chất B |\n| 8 | Tự chọn thể dục 1 |\n| 9 | Tự chọn thể dục 2 |\n| 10 | Tự chọn thể dục 3 |\n\n#### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Tên học phần |\n|---|---|\n| 11 | Đường lối quân sự của Đảng |\n| 12 | Công tác quốc phòng, an ninh |\n| 13 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) |\n\n#### Tiếng Anh\n\n| TT | Tên học phần |\n|---|---|\n| 14 | Tiếng Anh I |\n| 15 | Tiếng Anh II |"
+      ],
+      "source_chunk_id": "2f682baa-12a4-4486-be72-e2e193d565fc",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Kiến thức đại cương > Tiếng Anh"
+    },
+    {
+      "question": "Học phần nào trong khối kiến thức Toán và Khoa học cơ bản được liệt kê sau học phần Hóa học?",
+      "ground_truth": "Kỹ thuật điện và điều khiển quá trình",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Khối kiến thức Toán và Khoa học cơ bản]\n\n#### Khối kiến thức Toán và Khoa học cơ bản\n\n| TT | Tên học phần |\n|---|---|\n| 16 | Giải tích I (Calculus I) |\n| 17 | Giải tích II (Calculus II) |\n| 18 | Giải tích III (Calculus III) |\n| 19 | Đại số (Algebra) |\n| 20 | Xác suất thống kê |\n| 21 | Vật lý đại cương I |\n| 22 | Vật lý đại cương II |\n| 23 | Tin học đại cương |\n| 24 | Vật lý đại cương III |\n| 25 | Hóa học |\n| 26 | Kỹ thuật điện và điều khiển quá trình |\n| 27 | Đồ họa kỹ thuật I |\n\n### Giáo dục chuyên nghiệp"
+      ],
+      "source_chunk_id": "dbcba50a-61fa-48ef-9ebb-11759437751d",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Khối kiến thức Toán và Khoa học cơ bản"
+    },
+    {
+      "question": "Học phần nào trong khối kiến thức Toán và Khoa học cơ bản được liệt kê trước học phần Đồ họa kỹ thuật I?",
+      "ground_truth": "Kỹ thuật điện và điều khiển quá trình",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Khối kiến thức Toán và Khoa học cơ bản]\n\n#### Khối kiến thức Toán và Khoa học cơ bản\n\n| TT | Tên học phần |\n|---|---|\n| 16 | Giải tích I (Calculus I) |\n| 17 | Giải tích II (Calculus II) |\n| 18 | Giải tích III (Calculus III) |\n| 19 | Đại số (Algebra) |\n| 20 | Xác suất thống kê |\n| 21 | Vật lý đại cương I |\n| 22 | Vật lý đại cương II |\n| 23 | Tin học đại cương |\n| 24 | Vật lý đại cương III |\n| 25 | Hóa học |\n| 26 | Kỹ thuật điện và điều khiển quá trình |\n| 27 | Đồ họa kỹ thuật I |\n\n### Giáo dục chuyên nghiệp"
+      ],
+      "source_chunk_id": "dbcba50a-61fa-48ef-9ebb-11759437751d",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Khối kiến thức Toán và Khoa học cơ bản"
+    },
+    {
+      "question": "Học phần nào trong khung chương trình đào tạo Công nghệ vật liệu polyme và compozit được thực hiện dưới dạng thí nghiệm?",
+      "ground_truth": "Các học phần được thực hiện dưới dạng thí nghiệm bao gồm: Thí nghiệm Hóa hữu cơ, Thí nghiệm Hóa lý I, Thí nghiệm Hoá học polyme, Thí nghiệm chất tạo màng và sơn, Thí nghiệm keo dán, Thí nghiệm vật liệu cao su.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Cơ sở và cốt lõi ngành]\n\n#### Cơ sở và cốt lõi ngành\n\n| TT | Tên học phần |\n|---|---|\n| 28 | Cơ học kỹ thuật |\n| 29 | Sinh thái học vật liệu polyme |\n| 30 | Nhập môn công nghệ polyme và compozit |\n| 31 | Quá trình và Thiết bị công nghệ hóa học II (Các quá trình nhiệt) |\n| 32 | Quá trình và thiết bị công nghệ hóa học III (Các quá trình chuyển khối) |\n| 33 | Đồ án hoá công sản xuất vật liệu polyme |\n| 34 | An toàn lao động trong sản xuất vật liệu polyme và compozit |\n| 35 | Hóa hữu cơ |\n| 36 | Thí nghiệm Hóa hữu cơ |\n| 37 | Hóa lý I |\n| 38 | Thí nghiệm Hóa lý I |\n| 39 | Hóa lý II |\n| 40 | Hoá học polyme |\n| 41 | Thí nghiệm Hoá học polyme |\n| 42 | Hoá lý polyme |\n| 43 | Tuần hoàn tài nguyên không tái tạo |\n| 44 | Hoá học chất tạo màng và sơn |\n| 45 | Thí nghiệm chất tạo màng và sơn |\n| 46 | Công nghệ sản xuất chất dẻo |\n| 47 | Công nghệ keo dán |\n| 48 | Thí nghiệm keo dán |\n| 49 | Công nghệ vật liệu cao su |\n| 50 | Thí nghiệm vật liệu cao su |\n| 51 | Cấu trúc và tính chất polyme |"
+      ],
+      "source_chunk_id": "e004833a-b1ed-4859-bf7a-2cb8fa21cd24",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Cơ sở và cốt lõi ngành"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình đào tạo Công nghệ Vật liệu Polyme và Compozit, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên cần có kết quả học tập tốt nghiệp tại các trường đại học hoặc cao đẳng trong nước hoặc quốc tế tương ứng với môn học đó, được xác nhận bởi nhà trường và đáp ứng các tiêu chí quy định của Bộ Giáo dục và Đào tạo.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Cơ sở và cốt lõi ngành]\n\n#### Cơ sở và cốt lõi ngành\n\n| TT | Tên học phần |\n|---|---|\n| 28 | Cơ học kỹ thuật |\n| 29 | Sinh thái học vật liệu polyme |\n| 30 | Nhập môn công nghệ polyme và compozit |\n| 31 | Quá trình và Thiết bị công nghệ hóa học II (Các quá trình nhiệt) |\n| 32 | Quá trình và thiết bị công nghệ hóa học III (Các quá trình chuyển khối) |\n| 33 | Đồ án hoá công sản xuất vật liệu polyme |\n| 34 | An toàn lao động trong sản xuất vật liệu polyme và compozit |\n| 35 | Hóa hữu cơ |\n| 36 | Thí nghiệm Hóa hữu cơ |\n| 37 | Hóa lý I |\n| 38 | Thí nghiệm Hóa lý I |\n| 39 | Hóa lý II |\n| 40 | Hoá học polyme |\n| 41 | Thí nghiệm Hoá học polyme |\n| 42 | Hoá lý polyme |\n| 43 | Tuần hoàn tài nguyên không tái tạo |\n| 44 | Hoá học chất tạo màng và sơn |\n| 45 | Thí nghiệm chất tạo màng và sơn |\n| 46 | Công nghệ sản xuất chất dẻo |\n| 47 | Công nghệ keo dán |\n| 48 | Thí nghiệm keo dán |\n| 49 | Công nghệ vật liệu cao su |\n| 50 | Thí nghiệm vật liệu cao su |\n| 51 | Cấu trúc và tính chất polyme |"
+      ],
+      "source_chunk_id": "e004833a-b1ed-4859-bf7a-2cb8fa21cd24",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Cơ sở và cốt lõi ngành"
+    },
+    {
+      "question": "Để được miễn học một môn học bổ trợ trong chương trình đào tạo Công nghệ Vật liệu Polyme và Compozit, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên cần có chứng chỉ quốc tế hoặc học phần tương đương được công nhận bởi hội đồng đào tạo.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Kiến thức bổ trợ (chọn 9/11 TC)]\n\n#### Kiến thức bổ trợ (chọn 9/11 TC)\n\n| TT | Tên học phần |\n|---|---|\n| 52 | Technical Writing and Presentation |\n| 53 | Quản trị học đại cương |\n| 54 | Thiết kế mỹ thuật công nghiệp |\n| 55 | Tâm lý học ứng dụng |\n| 56 | Tư duy công nghệ và thiết kế kỹ thuật |"
+      ],
+      "source_chunk_id": "0b80e480-1635-4dee-bf8f-4c4547f39dac",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Kiến thức bổ trợ (chọn 9/11 TC)"
+    },
+    {
+      "question": "So sánh giữa học phần 'Technical Writing and Presentation' và 'Quản trị học đại cương' trong khung chương trình kiến thức bổ trợ?",
+      "ground_truth": "'Technical Writing and Presentation' tập trung vào kỹ năng viết và trình bày công nghệ, trong khi 'Quản trị học đại cương' mang lại kiến thức cơ bản về quản lý và lãnh đạo.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Kiến thức bổ trợ (chọn 9/11 TC)]\n\n#### Kiến thức bổ trợ (chọn 9/11 TC)\n\n| TT | Tên học phần |\n|---|---|\n| 52 | Technical Writing and Presentation |\n| 53 | Quản trị học đại cương |\n| 54 | Thiết kế mỹ thuật công nghiệp |\n| 55 | Tâm lý học ứng dụng |\n| 56 | Tư duy công nghệ và thiết kế kỹ thuật |"
+      ],
+      "source_chunk_id": "0b80e480-1635-4dee-bf8f-4c4547f39dac",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Kiến thức bổ trợ (chọn 9/11 TC)"
+    },
+    {
+      "question": "Học phần nào có mã học phần là 64?",
+      "ground_truth": "Công nghệ vật liệu polyme compozit",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Tự chọn theo định hướng cử nhân]\n\n#### Tự chọn theo định hướng cử nhân\n\n**Mô đun 1: Kỹ thuật vật liệu polyme**\n\n| TT | Tên học phần |\n|---|---|\n| 57 | Phương pháp phân tích tính chất polyme |\n| 58 | Phương pháp luận trong nghiên cứu khoa học |\n| 59 | Polyme thân thiện môi trường |\n| 60 | Công nghệ hoá học polyme blend |\n| 61 | Thực hành chế tạo vật liệu polyme |\n| 62 | Phân tích đặc trưng polyme |\n| 63 | Đồ án chuyên ngành polyme I |\n| 64 | Công nghệ vật liệu polyme compozit |\n| 65 | Thí nghiệm vật liệu polyme compozit |\n\n**Mô đun 2: Kỹ thuật vật liệu compozit**\n\n| TT | Tên học phần |\n|---|---|\n| 66 | Công nghệ vật liệu polyme compozit |\n| 67 | Thí nghiệm vật liệu polyme compozit |\n| 68 | Đồ án chuyên ngành vật liệu compozit I |\n| 69 | Phương pháp phân tích tính chất polyme |\n| 70 | Phương pháp luận trong nghiên cứu khoa học |\n| 71 | Công nghệ hoá học polyme blend |\n| 72 | Kiểm soát chất lượng sản phẩm polyme |\n| 73 | Thực hành chế tạo vật liệu compozit |\n| 74 | Vật liệu biocompozit |\n\n#### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân\n\n| TT | Tên học phần |\n|---|---|\n| 75 | Thực tập kỹ thuật |\n| 76 | Đồ án tốt nghiệp cử nhân |\n\n---"
+      ],
+      "source_chunk_id": "28c787d1-b660-43f6-8c99-f447016dd488",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Tự chọn theo định hướng cử nhân"
+    },
+    {
+      "question": "Để được miễn học một môn học trong chương trình tự chọn theo định hướng cử nhân, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên được miễn học một môn học nếu đã hoàn thành môn học đó trong chương trình đào tạo chính quy hoặc có chứng chỉ quốc tế tương đương.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Tự chọn theo định hướng cử nhân]\n\n#### Tự chọn theo định hướng cử nhân\n\n**Mô đun 1: Kỹ thuật vật liệu polyme**\n\n| TT | Tên học phần |\n|---|---|\n| 57 | Phương pháp phân tích tính chất polyme |\n| 58 | Phương pháp luận trong nghiên cứu khoa học |\n| 59 | Polyme thân thiện môi trường |\n| 60 | Công nghệ hoá học polyme blend |\n| 61 | Thực hành chế tạo vật liệu polyme |\n| 62 | Phân tích đặc trưng polyme |\n| 63 | Đồ án chuyên ngành polyme I |\n| 64 | Công nghệ vật liệu polyme compozit |\n| 65 | Thí nghiệm vật liệu polyme compozit |\n\n**Mô đun 2: Kỹ thuật vật liệu compozit**\n\n| TT | Tên học phần |\n|---|---|\n| 66 | Công nghệ vật liệu polyme compozit |\n| 67 | Thí nghiệm vật liệu polyme compozit |\n| 68 | Đồ án chuyên ngành vật liệu compozit I |\n| 69 | Phương pháp phân tích tính chất polyme |\n| 70 | Phương pháp luận trong nghiên cứu khoa học |\n| 71 | Công nghệ hoá học polyme blend |\n| 72 | Kiểm soát chất lượng sản phẩm polyme |\n| 73 | Thực hành chế tạo vật liệu compozit |\n| 74 | Vật liệu biocompozit |\n\n#### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân\n\n| TT | Tên học phần |\n|---|---|\n| 75 | Thực tập kỹ thuật |\n| 76 | Đồ án tốt nghiệp cử nhân |\n\n---"
+      ],
+      "source_chunk_id": "28c787d1-b660-43f6-8c99-f447016dd488",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC CỬ NHÂN > Giáo dục chuyên nghiệp > Tự chọn theo định hướng cử nhân"
+    },
+    {
+      "question": "Học phần nào là điều kiện tiên quyết cho học phần 'Cơ chế phá huỷ vật liệu polyme compozit'?",
+      "ground_truth": "Không có thông tin về điều kiện tiên quyết trong đoạn văn bản.",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC KỸ SƯ]\n\n## BẬC KỸ SƯ\n\n### Kiến thức chuyên ngành cốt lõi\n\n| TT | Tên học phần |\n|---|---|\n| 77 | Quản trị dự án sản xuất vật liệu polyme và compozit |\n| 78 | Cơ chế phá huỷ vật liệu polyme compozit |\n| 79 | Cơ sở bám dính vật liệu polyme |\n| 80 | Kỹ thuật vật liệu sơn |\n| 81 | Lưu biến vật liệu polyme |\n| 82 | Kỹ thuật vật liệu cao su |\n| 83 | Nguyên lý thiết kế vật liệu polyme và khuôn mẫu |\n| 84 | Kỹ thuật phân tích thống kê trong sản xuất polyme |\n| 85 | Các phương pháp tổng hợp polyme tiên tiến |\n| 86 | Công nghệ gia công chất dẻo |\n\n### Tự chọn kỹ sư (chọn 6/8 tín chỉ)\n\n**Tự chọn chung**\n\n| TT | Tên học phần |\n|---|---|\n| 87 | Vật liệu polyme nano compozit |\n| 88 | Polyme y sinh |\n| 89 | Chuyên đề I |\n| 90 | Kỹ thuật và vật liệu in 3D |\n\n**Mô đun 1: Kỹ thuật vật liệu polyme**\n\n| TT | Tên học phần |\n|---|---|\n| 91 | Bao bì chất dẻo |\n| 92 | Vật liệu polyme chức năng |\n| 93 | Đồ án chuyên ngành Polyme II |\n\n**Mô đun 2: Kỹ thuật vật liệu compozit**\n\n| TT | Tên học phần |\n|---|---|\n| 94 | Vật liệu polyme compozit hiệu năng cao |\n| 95 | Vật liệu cao su nanocompozit |\n| 96 | Đồ án chuyên ngành vật liệu compozit II |\n\n### Thực tập kỹ thuật và Đồ án tốt nghiệp Kỹ sư\n\n| TT | Tên học phần |\n|---|---|\n| 97 | Thực tập kỹ sư |\n| 98 | Đồ án tốt nghiệp Kỹ sư |"
+      ],
+      "source_chunk_id": "ece85a65-bd70-419f-800a-a1034059cd14",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC KỸ SƯ"
+    },
+    {
+      "question": "Để hoàn thành chương trình đào tạo 'Công nghệ vật liệu polyme và compozit' bậc kỹ sư, sinh viên cần học ít nhất bao nhiêu học phần thuộc mô đun 1 và mô đun 2?",
+      "ground_truth": "Sinh viên cần học ít nhất 3 học phần thuộc mô đun 1 (bao gồm: Bao bì chất dẻo, Vật liệu polyme chức năng, Đồ án chuyên ngành Polyme II) và 3 học phần thuộc mô đun 2 (bao gồm: Vật liệu polyme compozit hiệu năng cao, Vật liệu cao su nanocompozit, Đồ án chuyên ngành vật liệu compozit II).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC KỸ SƯ]\n\n## BẬC KỸ SƯ\n\n### Kiến thức chuyên ngành cốt lõi\n\n| TT | Tên học phần |\n|---|---|\n| 77 | Quản trị dự án sản xuất vật liệu polyme và compozit |\n| 78 | Cơ chế phá huỷ vật liệu polyme compozit |\n| 79 | Cơ sở bám dính vật liệu polyme |\n| 80 | Kỹ thuật vật liệu sơn |\n| 81 | Lưu biến vật liệu polyme |\n| 82 | Kỹ thuật vật liệu cao su |\n| 83 | Nguyên lý thiết kế vật liệu polyme và khuôn mẫu |\n| 84 | Kỹ thuật phân tích thống kê trong sản xuất polyme |\n| 85 | Các phương pháp tổng hợp polyme tiên tiến |\n| 86 | Công nghệ gia công chất dẻo |\n\n### Tự chọn kỹ sư (chọn 6/8 tín chỉ)\n\n**Tự chọn chung**\n\n| TT | Tên học phần |\n|---|---|\n| 87 | Vật liệu polyme nano compozit |\n| 88 | Polyme y sinh |\n| 89 | Chuyên đề I |\n| 90 | Kỹ thuật và vật liệu in 3D |\n\n**Mô đun 1: Kỹ thuật vật liệu polyme**\n\n| TT | Tên học phần |\n|---|---|\n| 91 | Bao bì chất dẻo |\n| 92 | Vật liệu polyme chức năng |\n| 93 | Đồ án chuyên ngành Polyme II |\n\n**Mô đun 2: Kỹ thuật vật liệu compozit**\n\n| TT | Tên học phần |\n|---|---|\n| 94 | Vật liệu polyme compozit hiệu năng cao |\n| 95 | Vật liệu cao su nanocompozit |\n| 96 | Đồ án chuyên ngành vật liệu compozit II |\n\n### Thực tập kỹ thuật và Đồ án tốt nghiệp Kỹ sư\n\n| TT | Tên học phần |\n|---|---|\n| 97 | Thực tập kỹ sư |\n| 98 | Đồ án tốt nghiệp Kỹ sư |"
+      ],
+      "source_chunk_id": "ece85a65-bd70-419f-800a-a1034059cd14",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC KỸ SƯ"
+    },
+    {
+      "question": "Để hoàn thành chương trình đào tạo 'Công nghệ vật liệu polyme và compozit' bậc kỹ sư, sinh viên cần học ít nhất bao nhiêu học phần thuộc mô đun 1 và mô đun 2?",
+      "ground_truth": "Sinh viên cần học ít nhất 3 học phần thuộc mô đun 1 (bao gồm: Bao bì chất dẻo, Vật liệu polyme chức năng và Đồ án chuyên ngành Polyme II) và 3 học phần thuộc mô đun 2 (bao gồm: Vật liệu polyme compozit hiệu năng cao, Vật liệu cao su nanocompozit và Đồ án chuyên ngành vật liệu compozit II).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC KỸ SƯ > Thực tập kỹ thuật và Đồ án tốt nghiệp Kỹ sư]\n\n## BẬC KỸ SƯ\n\n### Kiến thức chuyên ngành cốt lõi\n\n| TT | Tên học phần |\n|---|---|\n| 77 | Quản trị dự án sản xuất vật liệu polyme và compozit |\n| 78 | Cơ chế phá huỷ vật liệu polyme compozit |\n| 79 | Cơ sở bám dính vật liệu polyme |\n| 80 | Kỹ thuật vật liệu sơn |\n| 81 | Lưu biến vật liệu polyme |\n| 82 | Kỹ thuật vật liệu cao su |\n| 83 | Nguyên lý thiết kế vật liệu polyme và khuôn mẫu |\n| 84 | Kỹ thuật phân tích thống kê trong sản xuất polyme |\n| 85 | Các phương pháp tổng hợp polyme tiên tiến |\n| 86 | Công nghệ gia công chất dẻo |\n\n### Tự chọn kỹ sư (chọn 6/8 tín chỉ)\n\n**Tự chọn chung**\n\n| TT | Tên học phần |\n|---|---|\n| 87 | Vật liệu polyme nano compozit |\n| 88 | Polyme y sinh |\n| 89 | Chuyên đề I |\n| 90 | Kỹ thuật và vật liệu in 3D |\n\n**Mô đun 1: Kỹ thuật vật liệu polyme**\n\n| TT | Tên học phần |\n|---|---|\n| 91 | Bao bì chất dẻo |\n| 92 | Vật liệu polyme chức năng |\n| 93 | Đồ án chuyên ngành Polyme II |\n\n**Mô đun 2: Kỹ thuật vật liệu compozit**\n\n| TT | Tên học phần |\n|---|---|\n| 94 | Vật liệu polyme compozit hiệu năng cao |\n| 95 | Vật liệu cao su nanocompozit |\n| 96 | Đồ án chuyên ngành vật liệu compozit II |\n\n### Thực tập kỹ thuật và Đồ án tốt nghiệp Kỹ sư\n\n| TT | Tên học phần |\n|---|---|\n| 97 | Thực tập kỹ sư |\n| 98 | Đồ án tốt nghiệp Kỹ sư |"
+      ],
+      "source_chunk_id": "3206f953-5b78-4103-a840-ffb15260d14c",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC KỸ SƯ > Thực tập kỹ thuật và Đồ án tốt nghiệp Kỹ sư"
+    },
+    {
+      "question": "Học phần nào là một trong những học phần tự chọn chung cho bậc kỹ sư trong chương trình đào tạo Công nghệ vật liệu polyme và compozit?",
+      "ground_truth": "Polyme y sinh",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC KỸ SƯ > Thực tập kỹ thuật và Đồ án tốt nghiệp Kỹ sư]\n\n## BẬC KỸ SƯ\n\n### Kiến thức chuyên ngành cốt lõi\n\n| TT | Tên học phần |\n|---|---|\n| 77 | Quản trị dự án sản xuất vật liệu polyme và compozit |\n| 78 | Cơ chế phá huỷ vật liệu polyme compozit |\n| 79 | Cơ sở bám dính vật liệu polyme |\n| 80 | Kỹ thuật vật liệu sơn |\n| 81 | Lưu biến vật liệu polyme |\n| 82 | Kỹ thuật vật liệu cao su |\n| 83 | Nguyên lý thiết kế vật liệu polyme và khuôn mẫu |\n| 84 | Kỹ thuật phân tích thống kê trong sản xuất polyme |\n| 85 | Các phương pháp tổng hợp polyme tiên tiến |\n| 86 | Công nghệ gia công chất dẻo |\n\n### Tự chọn kỹ sư (chọn 6/8 tín chỉ)\n\n**Tự chọn chung**\n\n| TT | Tên học phần |\n|---|---|\n| 87 | Vật liệu polyme nano compozit |\n| 88 | Polyme y sinh |\n| 89 | Chuyên đề I |\n| 90 | Kỹ thuật và vật liệu in 3D |\n\n**Mô đun 1: Kỹ thuật vật liệu polyme**\n\n| TT | Tên học phần |\n|---|---|\n| 91 | Bao bì chất dẻo |\n| 92 | Vật liệu polyme chức năng |\n| 93 | Đồ án chuyên ngành Polyme II |\n\n**Mô đun 2: Kỹ thuật vật liệu compozit**\n\n| TT | Tên học phần |\n|---|---|\n| 94 | Vật liệu polyme compozit hiệu năng cao |\n| 95 | Vật liệu cao su nanocompozit |\n| 96 | Đồ án chuyên ngành vật liệu compozit II |\n\n### Thực tập kỹ thuật và Đồ án tốt nghiệp Kỹ sư\n\n| TT | Tên học phần |\n|---|---|\n| 97 | Thực tập kỹ sư |\n| 98 | Đồ án tốt nghiệp Kỹ sư |"
+      ],
+      "source_chunk_id": "3206f953-5b78-4103-a840-ffb15260d14c",
+      "source_file": "Khung chương trình đào tạo Công nghệ vật liệu polyme và compozit_fix_chunks.json",
+      "hierarchy_path": "KHUNG CHƯƠNG TRÌNH ĐÀO TẠO \"CÔNG NGHỆ VẬT LIỆU POLYME VÀ COMPOZIT\" > BẬC KỸ SƯ > Thực tập kỹ thuật và Đồ án tốt nghiệp Kỹ sư"
+    }
+  ]
+}

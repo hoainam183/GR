@@ -3,11 +3,23 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  modelName?: string;
   sources?: RetrievedDocument[];
   targetCollections?: string[];
   collectionScores?: CollectionScore[];
+  routingProbabilities?: Record<string, number>;
+  appliedFilters?: FilterInfo[];
+  collectionResults?: CollectionResult[];
   reflectedQuestion?: string;
   timingsMs?: Record<string, number>;
+  mode?: string;
+  route?: string;
+  toolsUsed?: string[];
+  toolCalls?: AgentToolCall[];
+  iterations?: number;
+  error?: string;
+  agentError?: string;
+  agentTrace?: AgentTracePayload | null;
 }
 
 export interface UserContext {
@@ -20,6 +32,7 @@ export interface UserContext {
 
 export interface ChatRequest {
   question: string;
+  mode?: 'auto' | 'rag' | 'agent';
   top_k?: number;
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
   session_id?: string;
@@ -75,6 +88,45 @@ export interface ChatResponse {
   llm_prompt?: string;
   applied_filters?: FilterInfo[];
   collection_results?: CollectionResult[];
+  mode?: string;
+  route?: string;
+  tools_used?: string[];
+  tool_calls?: AgentToolCall[];
+  iterations?: number;
+  error?: string | null;
+  agent_error?: string | null;
+  agent_trace?: AgentTracePayload | null;
+}
+
+export interface AgentToolCall {
+  tool: string;
+  args: Record<string, any>;
+  result: string;
+  iteration: number;
+  timestamp?: string;
+}
+
+export interface AgentTracePayload {
+  query?: string;
+  session_id?: string;
+  route?: string;
+  iterations?: number;
+  tool_calls?: AgentToolCall[];
+  tool_names_sequence?: string[];
+  final_answer_length?: number;
+  latency_ms?: number;
+  error?: string | null;
+}
+
+export interface ChatV3Response extends ChatResponse {
+  mode?: string;
+  route?: string;
+  tools_used?: string[];
+  tool_calls?: AgentToolCall[];
+  iterations?: number;
+  error?: string | null;
+  agent_error?: string | null;
+  agent_trace?: AgentTracePayload | null;
 }
 
 export interface Session {
@@ -91,6 +143,7 @@ export interface Turn {
   session_id: string;
   question: string;
   answer: string;
+  model_name?: string;
   intent?: string;
   reflected_question?: string | null;
   timestamp: string;
@@ -100,4 +153,15 @@ export interface Turn {
   sources?: RetrievedDocument[];
   collection_scores?: CollectionScore[];
   target_collections?: string[];
+  routing_probabilities?: Record<string, number>;
+  applied_filters?: FilterInfo[];
+  collection_results?: CollectionResult[];
+  mode?: string;
+  route?: string;
+  tools_used?: string[];
+  tool_calls?: AgentToolCall[];
+  iterations?: number;
+  error?: string | null;
+  agent_error?: string | null;
+  agent_trace?: AgentTracePayload | null;
 }

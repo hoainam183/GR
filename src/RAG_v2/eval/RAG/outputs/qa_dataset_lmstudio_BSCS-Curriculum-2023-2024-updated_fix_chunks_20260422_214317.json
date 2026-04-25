@@ -1,0 +1,98 @@
+{
+  "total": 8,
+  "by_type": {
+    "multi_hop": 4,
+    "comparative": 1,
+    "procedural": 3
+  },
+  "pairs": [
+    {
+      "question": "Để học môn ECO 2251, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên không cần điều kiện tiên quyết để học ECO 2251.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[General Studies]\n\nBSCS-Curriculum-2023-2024-updated## Computer Science Program at HUST Academic Catalog 2023-2024\n\n### General Studies\n\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 1 | TROY 1101 | University Orientation | 1 | — |\n| 2 | ENG 1101 | English Composition | 3 | Unconditional status |\n| 3 | ART 1133 | Visual Art | 2 | — |\n| 4 | HIS 1122 | World History to 1500 | 3 | — |\n| 5 | HIS 1123 | World History after 1500 | 3 | — |\n| 6 | MUS 1131 | Music Appreciation | 2 | — |\n| 7 | SPH 2241/COM 2241 | Fundamentals of Speech | 3 | — |\n| 8 | ENG 1102 | Composition and Modern English II | 3 | ENG 1101 with C |\n| 9 | ENG 2205/6 | World Literature II | 3 | ENG 1112 with C |\n| 10 | ECO 2251 | Macroeconomics | 3 | — |\n| 11 | ECO 2252 | Microeconomics | 3 | — |\n| 12 | PHY L 2520 | General Physics and Lab | 4 | None |\n| 13 | CHM/L 1142 | General Chemistry and Lab | 4 | None |\n| 14 | MTH 1125 | Calculus I | 4 | MTH 1114 with C |\n| 15 | MTH 1126 | Calculus II | 4 | MTH 1125 |"
+      ],
+      "source_chunk_id": "a61d694b-f583-412b-ae00-d9218c08d8d2",
+      "source_file": "BSCS-Curriculum-2023-2024-updated_fix_chunks.json",
+      "hierarchy_path": "General Studies"
+    },
+    {
+      "question": "Môn nào là tiên quyết cho môn MTH 1126 và sinh viên cần đạt điểm tối thiểu C ở môn nào?",
+      "ground_truth": "Môn MTH 1125 là tiên quyết cho môn MTH 1126 và sinh viên cần đạt điểm tối thiểu C ở môn MTH 1125.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[General Studies]\n\nBSCS-Curriculum-2023-2024-updated## Computer Science Program at HUST Academic Catalog 2023-2024\n\n### General Studies\n\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 1 | TROY 1101 | University Orientation | 1 | — |\n| 2 | ENG 1101 | English Composition | 3 | Unconditional status |\n| 3 | ART 1133 | Visual Art | 2 | — |\n| 4 | HIS 1122 | World History to 1500 | 3 | — |\n| 5 | HIS 1123 | World History after 1500 | 3 | — |\n| 6 | MUS 1131 | Music Appreciation | 2 | — |\n| 7 | SPH 2241/COM 2241 | Fundamentals of Speech | 3 | — |\n| 8 | ENG 1102 | Composition and Modern English II | 3 | ENG 1101 with C |\n| 9 | ENG 2205/6 | World Literature II | 3 | ENG 1112 with C |\n| 10 | ECO 2251 | Macroeconomics | 3 | — |\n| 11 | ECO 2252 | Microeconomics | 3 | — |\n| 12 | PHY L 2520 | General Physics and Lab | 4 | None |\n| 13 | CHM/L 1142 | General Chemistry and Lab | 4 | None |\n| 14 | MTH 1125 | Calculus I | 4 | MTH 1114 with C |\n| 15 | MTH 1126 | Calculus II | 4 | MTH 1125 |"
+      ],
+      "source_chunk_id": "a61d694b-f583-412b-ae00-d9218c08d8d2",
+      "source_file": "BSCS-Curriculum-2023-2024-updated_fix_chunks.json",
+      "hierarchy_path": "General Studies"
+    },
+    {
+      "question": "So sánh yêu cầu tiên quyết (pre-requisites) cho học phần CS 2250 và CS 3310.",
+      "ground_truth": "Học phần CS 2250 yêu cầu MTH 1112 với điểm C, trong khi CS 3310 yêu cầu MTH 1112 với điểm C và có thể là một số điều kiện khác không được nêu rõ trong đoạn văn.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[Required Major Courses]\n\n### Required Major Courses\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 16 | CS 2220 | Numerical Methods in Computing | 3 | MTH 1112 |\n| 17 | CS 2250 | Computer Science I | 3 | MTH 1112 with C |\n| 18 | CS 2255 | Computer Science II | 3 | CS 2250 |\n| 19 | CS 3310 | Foundations of Computer Science | 3 | MTH 1112 with C |\n| 20 | CS 3323 | Data Structures | 3 | CS 2255 and MTH 1125 |\n| 21 | CS 3329 | Analysis of Algorithms | 3 | CS 3323 |\n| 22 | CS 3332 | Software Engineering I | 3 | CS 3323 |\n| 23 | CS 3360 | Concepts of Object-Oriented Programming | 3 | CS 2255 |\n| 24 | CS 3365 | Introduction to Computer Organization and Architectures | 3 | CS 3310 |\n| 25 | CS 3370 | Nature of Programming Languages | 3 | CS 3323 |\n| 26 | CS 3372 | Formal Languages and the Theory of Computation | 3 | CS 3323 |\n| 27 | CS 4420 | Introduction to Database Systems | 3 | CS 3323 |\n| 28 | CS 4445 | Data Communication and Networking | 3 | CS 3323 |\n| 29 | CS 4448 | Operating Systems | 3 | CS 3323 |"
+      ],
+      "source_chunk_id": "d1934221-ebbc-405d-a2e2-ebc391c3e166",
+      "source_file": "BSCS-Curriculum-2023-2024-updated_fix_chunks.json",
+      "hierarchy_path": "Required Major Courses"
+    },
+    {
+      "question": "Để được miễn học môn CS 2250, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên cần có điểm C hoặc cao hơn trong môn MTH 1112.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Required Major Courses]\n\n### Required Major Courses\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 16 | CS 2220 | Numerical Methods in Computing | 3 | MTH 1112 |\n| 17 | CS 2250 | Computer Science I | 3 | MTH 1112 with C |\n| 18 | CS 2255 | Computer Science II | 3 | CS 2250 |\n| 19 | CS 3310 | Foundations of Computer Science | 3 | MTH 1112 with C |\n| 20 | CS 3323 | Data Structures | 3 | CS 2255 and MTH 1125 |\n| 21 | CS 3329 | Analysis of Algorithms | 3 | CS 3323 |\n| 22 | CS 3332 | Software Engineering I | 3 | CS 3323 |\n| 23 | CS 3360 | Concepts of Object-Oriented Programming | 3 | CS 2255 |\n| 24 | CS 3365 | Introduction to Computer Organization and Architectures | 3 | CS 3310 |\n| 25 | CS 3370 | Nature of Programming Languages | 3 | CS 3323 |\n| 26 | CS 3372 | Formal Languages and the Theory of Computation | 3 | CS 3323 |\n| 27 | CS 4420 | Introduction to Database Systems | 3 | CS 3323 |\n| 28 | CS 4445 | Data Communication and Networking | 3 | CS 3323 |\n| 29 | CS 4448 | Operating Systems | 3 | CS 3323 |"
+      ],
+      "source_chunk_id": "d1934221-ebbc-405d-a2e2-ebc391c3e166",
+      "source_file": "BSCS-Curriculum-2023-2024-updated_fix_chunks.json",
+      "hierarchy_path": "Required Major Courses"
+    },
+    {
+      "question": "Để được miễn học môn MTH 2210, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên cần đã hoàn thành môn MTH 1112 với điểm tối thiểu là C.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Required Major Courses]\n\n### Required Major Courses\n\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 30 | MTH 2210 | Applied Statistics | 3 | MTH 1112 with C |\n| 31 | MTH 2215 | Applied Discrete Mathematics | 3 | MTH 1112 with C |"
+      ],
+      "source_chunk_id": "e6ee8bda-bfd1-4208-a0e3-31a9b8df5d3d",
+      "source_file": "BSCS-Curriculum-2023-2024-updated_fix_chunks.json",
+      "hierarchy_path": "Required Major Courses"
+    },
+    {
+      "question": "Quy trình đăng ký học môn MTH 2215 yêu cầu sinh viên phải làm gì trước khi đăng ký?",
+      "ground_truth": "Sinh viên cần đã hoàn thành môn MTH 1112 với điểm tối thiểu là C trước khi đăng ký học môn MTH 2215.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[Required Major Courses]\n\n### Required Major Courses\n\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 30 | MTH 2210 | Applied Statistics | 3 | MTH 1112 with C |\n| 31 | MTH 2215 | Applied Discrete Mathematics | 3 | MTH 1112 with C |"
+      ],
+      "source_chunk_id": "e6ee8bda-bfd1-4208-a0e3-31a9b8df5d3d",
+      "source_file": "BSCS-Curriculum-2023-2024-updated_fix_chunks.json",
+      "hierarchy_path": "Required Major Courses"
+    },
+    {
+      "question": "Để học khóa học IS 2241, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên không cần điều kiện tiên quyết để học IS 2241.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Free Electives (Choose 7 courses)]\n\n### Major Electives (Choose 2 or 3 courses)\n\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 32 | CS 4447 | Systems Analysis and Design | 3 | CS 3323 |\n| 33 | CS 3331 | Fundamentals of Artificial Intelligence | 3 | CS 3323 |\n| 34 | CS 4451 | Computer Security | 3 | CS 3323 |\n| 35 | CS 4443 | Web Based Development | 3 | CS 3323 |\n| 36 | CS 4410 | Introduction to Machine Learning | 3 | CS 3323 |\n\n### Free Electives (Choose 7 courses)\n\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 37 | MTH 1112 | Pre-Calculus Algebra | 3 | — |\n| 38 | MTH 1114 | Pre-Algebra Trigonometry | 3 | MTH 1112 with C |\n| 39 | MGT 3300 | Principles of Management | 3 | None |\n| 40 | IS 2241 | Computer Concepts & Applications | 3 | None |\n| 41 | MGT 4471 | Leadership and Change | 3 | MGT 3330 |\n| 42 | MKT 3361 | Principles of Marketing | 3 | None |\n| 43 | MGT 4460 | Project Management | 3 | MGT 3330 |\n| 44 | BIO/L 1110 | Principles of Biology and Lab | 4 | None |\n| 45 | MGT 4440 | Building and Leading Effective Teams | 3 | MGT 3330 |\n| 46 | HRM 3375 | Human Resource Management | 3 | MGT 3330 |"
+      ],
+      "source_chunk_id": "18969525-9fe5-40e7-9b4e-8c272f72a1d6",
+      "source_file": "BSCS-Curriculum-2023-2024-updated_fix_chunks.json",
+      "hierarchy_path": "Free Electives (Choose 7 courses)"
+    },
+    {
+      "question": "Sinh viên muốn học MGT 4471 cần phải hoàn thành khóa học nào trước đó?",
+      "ground_truth": "Sinh viên cần đã hoàn thành khóa học MGT 3330 trước khi đăng ký học MGT 4471.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[Free Electives (Choose 7 courses)]\n\n### Major Electives (Choose 2 or 3 courses)\n\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 32 | CS 4447 | Systems Analysis and Design | 3 | CS 3323 |\n| 33 | CS 3331 | Fundamentals of Artificial Intelligence | 3 | CS 3323 |\n| 34 | CS 4451 | Computer Security | 3 | CS 3323 |\n| 35 | CS 4443 | Web Based Development | 3 | CS 3323 |\n| 36 | CS 4410 | Introduction to Machine Learning | 3 | CS 3323 |\n\n### Free Electives (Choose 7 courses)\n\n| No | Code | Course Title | Credits | Pre-requisites |\n|---|---|---|---|---|\n| 37 | MTH 1112 | Pre-Calculus Algebra | 3 | — |\n| 38 | MTH 1114 | Pre-Algebra Trigonometry | 3 | MTH 1112 with C |\n| 39 | MGT 3300 | Principles of Management | 3 | None |\n| 40 | IS 2241 | Computer Concepts & Applications | 3 | None |\n| 41 | MGT 4471 | Leadership and Change | 3 | MGT 3330 |\n| 42 | MKT 3361 | Principles of Marketing | 3 | None |\n| 43 | MGT 4460 | Project Management | 3 | MGT 3330 |\n| 44 | BIO/L 1110 | Principles of Biology and Lab | 4 | None |\n| 45 | MGT 4440 | Building and Leading Effective Teams | 3 | MGT 3330 |\n| 46 | HRM 3375 | Human Resource Management | 3 | MGT 3330 |"
+      ],
+      "source_chunk_id": "18969525-9fe5-40e7-9b4e-8c272f72a1d6",
+      "source_file": "BSCS-Curriculum-2023-2024-updated_fix_chunks.json",
+      "hierarchy_path": "Free Electives (Choose 7 courses)"
+    }
+  ]
+}

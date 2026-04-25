@@ -73,6 +73,12 @@ class Settings(BaseSettings):
 
     # --- LM Studio / Local ---
     lm_studio_base_url: str = "http://localhost:1234/v1"
+    lm_studio_url: str = "http://localhost:1234/v1"
+
+    # --- Agent (LangGraph) ---
+    agent_enabled: bool = True
+    agent_max_iterations: int = 4
+    agent_model: str = "qwen2.5-8b-instruct"
 
     # --- Ollama ---
     ollama_base_url: str = "http://localhost:11434"

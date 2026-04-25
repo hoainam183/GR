@@ -1,0 +1,176 @@
+{
+  "total": 15,
+  "by_type": {
+    "procedural": 4,
+    "multi_hop": 5,
+    "factoid": 5,
+    "comparative": 1
+  },
+  "pairs": [
+    {
+      "question": "Để được miễn học một môn học trong chương trình kỹ thuật cơ điện tử (ME-NUT), người học cần đáp ứng điều kiện gì?",
+      "ground_truth": "Người học cần đảm bảo đã tích lũy đủ kiến thức tương đương với môn học đó thông qua kết quả học tập ở các chương trình đào tạo khác.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Chương trình đào tạo quốc tế]\n\n# KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT)\n### Chương trình đào tạo quốc tế\n\n> Chương trình đào tạo có thể được điều chỉnh hàng năm để đảm bảo tính cập nhật với sự phát triển của khoa học, kỹ thuật và công nghệ; tuy nhiên đảm bảo nguyên tắc không gây ảnh hưởng ngược tới kết quả người học đã tích lũy.\n\n---"
+      ],
+      "source_chunk_id": "75873cd8-d6a3-4b93-9b03-21346800da53",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Chương trình đào tạo quốc tế"
+    },
+    {
+      "question": "Chương trình đào tạo quốc tế Kỹ thuật Cơ điện tử (ME-NUT) có thể được điều chỉnh như thế nào và điều gì cần được đảm bảo trong quá trình điều chỉnh?",
+      "ground_truth": "Chương trình đào tạo quốc tế Kỹ thuật Cơ điện tử (ME-NUT) có thể được điều chỉnh hàng năm để đảm bảo tính cập nhật với sự phát triển của khoa học, kỹ thuật và công nghệ; tuy nhiên cần đảm bảo nguyên tắc không gây ảnh hưởng ngược tới kết quả người học đã tích lũy.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Chương trình đào tạo quốc tế]\n\n# KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT)\n### Chương trình đào tạo quốc tế\n\n> Chương trình đào tạo có thể được điều chỉnh hàng năm để đảm bảo tính cập nhật với sự phát triển của khoa học, kỹ thuật và công nghệ; tuy nhiên đảm bảo nguyên tắc không gây ảnh hưởng ngược tới kết quả người học đã tích lũy.\n\n---"
+      ],
+      "source_chunk_id": "75873cd8-d6a3-4b93-9b03-21346800da53",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Chương trình đào tạo quốc tế"
+    },
+    {
+      "question": "Để được miễn học một môn học, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên cần có chứng chỉ học phần tương ứng hoặc đạt điểm cao trong kỳ thi đầu vào để được miễn học.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần]\n\n## Danh mục học phần\n\n#### Kiến thức Toán và Khoa học cơ bản\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE2014Q | Kỹ thuật điện | 3 | 4 |\n| EM1010Q | Quản trị học đại cương | 2 | 2 |\n| IT1110Q | Tin học đại cương | 3 | 4 |\n| MI1110Q | Giải tích I | 1 | 4 |\n| MI1120Q | Giải tích II | 2 | 3 |\n| MI1130Q | Giải tích III | 2 | 3 |\n| MI1140Q | Đại số | 1 | 4 |\n| MI2010Q | Phương pháp tính | 3 | 2 |\n| PH1110Q | Vật lý I | 1 | 3 |\n| PH1120Q | Vật lý II | 2 | 3 |\n\n#### Cơ sở và cốt lõi ngành\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE3359Q | Lý thuyết điều khiển tự động | 5 | 3 |\n| ET3120Q | Kỹ thuật điện tử | 6 | 4 |\n| ME2011Q | Đồ họa kỹ thuật 1 | 3 | 3 |\n| ME2012Q | Đồ họa kỹ thuật 2 | 4 | 3 |\n| ME2100Q | Nhập môn cơ điện tử | 4 | 3 |\n| ME2140Q | Cơ học kỹ thuật 1 | 3 | 3 |\n| ME3010Q | Cơ học kỹ thuật 2 | 4 | 3 |\n| ME3040Q | Sức bền vật liệu 1 | 4 | 2 |\n| ME3060Q | Nguyên lý máy | 4 | 3 |\n| ME3070Q | Kỹ thuật đo | 5 | 3 |\n| ME3090Q | Chi tiết máy | 5 | 3 |\n| MSE3100Q | Vật liệu học | 5 | 2 |\n| TE3600Q | Kỹ thuật thủy khí | 5 | 2 |\n\n#### Khối kiến thức chuyên ngành — Bắt buộc\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| ME3170Q | Công nghệ chế tạo máy | 8 | 4 |\n| ME3300Q | Kỹ thuật lập trình trong cơ điện tử | 6 | 3 |\n| ME4032Q | Đồ gá | 7 | 2 |\n| ME4041Q | Sức bền vật liệu 2 | 6 | 2 |\n| ME4088Q | Cơ sở máy CNC | 7 | 2 |\n| ME4099Q | ĐA thiết kế hệ thống cơ khí | 6 | 3 |\n| ME4102Q | FMS & CIM | 9 | 2 |\n| ME4233Q | CAD/CAM/CNC | 9 | 2 |\n| ME4235Q | Thiết kế hệ thống điều khiển | 8 | 2 |\n| ME4281Q | Tính toán thiết kế robot | 8 | 2 |\n| ME4336Q | ĐA thiết kế hệ thống Cơ điện tử | 7 | 3 |\n\n#### Khối kiến thức chuyên ngành — Tự chọn\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE3058Q | Cảm biến đo lường và xử lý tín hiệu đo | 6 | 3 |\n| EE4220Q | Điều khiển logic và PLC | 7 | 2 |\n| IT3010Q | Cấu trúc dữ liệu và giải thuật | 8 | 2 |\n| IT4160Q | KT vi xử lý và giao tiếp máy tính | 6 | 3 |\n| ME2116Q | Kỹ năng trình bày | 5 | 2 |\n| ME3081Q | Thiết kế hệ thống CĐT | 7 | 3 |\n| ME3140Q | Kỹ thuật an toàn và môi trường | 8 | 2 |\n| ME3168Q | Robotics | 7 | 3 |\n| ME4031Q | Dao động kỹ thuật | 8 | 2 |\n| ME4052Q | Nguyên lý và dụng cụ cắt | 7 | 2 |\n| ME4082Q | Công nghệ CNC | 7 | 2 |\n| ME4092Q | Trang bị điện cho máy | 9 | 2 |\n| ME4093Q | Kỹ thuật laser | 8 | 2 |\n| ME4122Q | Các phương pháp gia công tinh | 9 | 2 |\n| ME4211Q | Động lực học máy | 9 | 2 |\n| ME4236Q | Thiết kế HT vi cơ điện tử | 9 | 2 |\n| ME4900Q | Truyền động điện và điện tử công suất | 9 | 2 |\n\n#### Thực tập và Đồ án tốt nghiệp\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| ME3036Q | Thực tập xưởng | 4 | 2 |\n| ME5010Q | Thực tập tốt nghiệp | 9 | 3 |\n| ME5110Q | Đồ án tốt nghiệp | 10 | 10 |\n\n#### Ngoại ngữ\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| QT1011 | Tiếng Anh 1 (A1.1) | 1 | 3 |\n| QT1021 | Tiếng Anh 2 (A1.2) | 2 | 3 |\n| QT1031 | Tiếng Anh 3 (A2.1) | 3 | 0 |\n| QT1041 | Tiếng Anh 4 (A2.2) | 4 | 0 |\n| QT1132 | Tiếng Nhật 5 (N2) | 5 | 0 |\n| QT0112 | Tiếng Nhật 1 (N5) | 1 | 3 |\n| QT0113 | Tiếng Nhật 1 (N5) | 1 | 3 |\n| QT0122 | Tiếng Nhật 2 (N4) | 2 | 3 |\n| QT0123 | Tiếng Nhật 2 (N4) | 2 | 3 |\n| QT1112 | Tiếng Nhật 3 (N3) | 3 | 3 |\n| QT1113 | Tiếng Nhật 3 (N3) | 3 | 3 |\n| QT1122 | Tiếng Nhật 4 (N3) | 4 | 3 |\n| QT1123 | Tiếng Nhật 4 (N3) | 4 | 3 |\n\n#### Lý luận chính trị + Pháp luật đại cương\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EM1170Q | Pháp luật đại cương | 1 | 2 |\n| SSH1050Q | Tư tưởng Hồ Chí Minh | 3 | 2 |\n| SSH1110Q | Những NLCB của CN Mác-Lênin I | 1 | 2 |\n| SSH1111Q | Triết học Mác - Lênin | 1 | 3 |\n| SSH1120Q | Những NLCB của CN Mác-Lênin II | 2 | 3 |\n| SSH1121Q | Kinh tế chính trị Mác - Lênin | 2 | 2 |\n| SSH1130Q | Đường lối CM của Đảng CSVN | 4 | 3 |\n| SSH1131Q | Chủ nghĩa xã hội khoa học | 3 | 2 |\n| SSH1141Q | Lịch sử Đảng cộng sản Việt Nam | 4 | 2 |\n| SSH1151Q | Tư tưởng Hồ Chí Minh | 4 | 2 |\n\n#### Giáo dục thể chất\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| PE1010Q | Giáo dục thể chất A | 1 | 0 |\n| PE1014 | Lý luận TDTT | 1 | 0 |\n| PE1020Q | Giáo dục thể chất B | 2 | 0 |\n| PE1024 | Bơi lội | 2 | 0 |\n| PE1030Q | Giáo dục thể chất C | 3 | 0 |\n| PE2010Q | Giáo dục thể chất D | 4 | 0 |\n| PE2020Q | Giáo dục thể chất E | 5 | 0 |\n\n#### Giáo dục Quốc phòng - An ninh\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| MIL1210Q | Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam | 1 | 0 |\n| MIL1220Q | Công tác quốc phòng và an ninh | 2 | 0 |\n| MIL1230Q | Quân sự chung | 2 | 0 |\n| MIL1240Q | Kỹ thuật chiến đấu bộ binh và chiến thuật | 2 | 0 |"
+      ],
+      "source_chunk_id": "ff15cdda-6a54-48a0-a352-3e1daf959e47",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần"
+    },
+    {
+      "question": "Học phần 'Kỹ thuật điện' được giảng dạy vào học kỳ nào?",
+      "ground_truth": "Học kỳ 3",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần]\n\n## Danh mục học phần\n\n#### Kiến thức Toán và Khoa học cơ bản\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE2014Q | Kỹ thuật điện | 3 | 4 |\n| EM1010Q | Quản trị học đại cương | 2 | 2 |\n| IT1110Q | Tin học đại cương | 3 | 4 |\n| MI1110Q | Giải tích I | 1 | 4 |\n| MI1120Q | Giải tích II | 2 | 3 |\n| MI1130Q | Giải tích III | 2 | 3 |\n| MI1140Q | Đại số | 1 | 4 |\n| MI2010Q | Phương pháp tính | 3 | 2 |\n| PH1110Q | Vật lý I | 1 | 3 |\n| PH1120Q | Vật lý II | 2 | 3 |\n\n#### Cơ sở và cốt lõi ngành\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE3359Q | Lý thuyết điều khiển tự động | 5 | 3 |\n| ET3120Q | Kỹ thuật điện tử | 6 | 4 |\n| ME2011Q | Đồ họa kỹ thuật 1 | 3 | 3 |\n| ME2012Q | Đồ họa kỹ thuật 2 | 4 | 3 |\n| ME2100Q | Nhập môn cơ điện tử | 4 | 3 |\n| ME2140Q | Cơ học kỹ thuật 1 | 3 | 3 |\n| ME3010Q | Cơ học kỹ thuật 2 | 4 | 3 |\n| ME3040Q | Sức bền vật liệu 1 | 4 | 2 |\n| ME3060Q | Nguyên lý máy | 4 | 3 |\n| ME3070Q | Kỹ thuật đo | 5 | 3 |\n| ME3090Q | Chi tiết máy | 5 | 3 |\n| MSE3100Q | Vật liệu học | 5 | 2 |\n| TE3600Q | Kỹ thuật thủy khí | 5 | 2 |\n\n#### Khối kiến thức chuyên ngành — Bắt buộc\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| ME3170Q | Công nghệ chế tạo máy | 8 | 4 |\n| ME3300Q | Kỹ thuật lập trình trong cơ điện tử | 6 | 3 |\n| ME4032Q | Đồ gá | 7 | 2 |\n| ME4041Q | Sức bền vật liệu 2 | 6 | 2 |\n| ME4088Q | Cơ sở máy CNC | 7 | 2 |\n| ME4099Q | ĐA thiết kế hệ thống cơ khí | 6 | 3 |\n| ME4102Q | FMS & CIM | 9 | 2 |\n| ME4233Q | CAD/CAM/CNC | 9 | 2 |\n| ME4235Q | Thiết kế hệ thống điều khiển | 8 | 2 |\n| ME4281Q | Tính toán thiết kế robot | 8 | 2 |\n| ME4336Q | ĐA thiết kế hệ thống Cơ điện tử | 7 | 3 |\n\n#### Khối kiến thức chuyên ngành — Tự chọn\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE3058Q | Cảm biến đo lường và xử lý tín hiệu đo | 6 | 3 |\n| EE4220Q | Điều khiển logic và PLC | 7 | 2 |\n| IT3010Q | Cấu trúc dữ liệu và giải thuật | 8 | 2 |\n| IT4160Q | KT vi xử lý và giao tiếp máy tính | 6 | 3 |\n| ME2116Q | Kỹ năng trình bày | 5 | 2 |\n| ME3081Q | Thiết kế hệ thống CĐT | 7 | 3 |\n| ME3140Q | Kỹ thuật an toàn và môi trường | 8 | 2 |\n| ME3168Q | Robotics | 7 | 3 |\n| ME4031Q | Dao động kỹ thuật | 8 | 2 |\n| ME4052Q | Nguyên lý và dụng cụ cắt | 7 | 2 |\n| ME4082Q | Công nghệ CNC | 7 | 2 |\n| ME4092Q | Trang bị điện cho máy | 9 | 2 |\n| ME4093Q | Kỹ thuật laser | 8 | 2 |\n| ME4122Q | Các phương pháp gia công tinh | 9 | 2 |\n| ME4211Q | Động lực học máy | 9 | 2 |\n| ME4236Q | Thiết kế HT vi cơ điện tử | 9 | 2 |\n| ME4900Q | Truyền động điện và điện tử công suất | 9 | 2 |\n\n#### Thực tập và Đồ án tốt nghiệp\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| ME3036Q | Thực tập xưởng | 4 | 2 |\n| ME5010Q | Thực tập tốt nghiệp | 9 | 3 |\n| ME5110Q | Đồ án tốt nghiệp | 10 | 10 |\n\n#### Ngoại ngữ\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| QT1011 | Tiếng Anh 1 (A1.1) | 1 | 3 |\n| QT1021 | Tiếng Anh 2 (A1.2) | 2 | 3 |\n| QT1031 | Tiếng Anh 3 (A2.1) | 3 | 0 |\n| QT1041 | Tiếng Anh 4 (A2.2) | 4 | 0 |\n| QT1132 | Tiếng Nhật 5 (N2) | 5 | 0 |\n| QT0112 | Tiếng Nhật 1 (N5) | 1 | 3 |\n| QT0113 | Tiếng Nhật 1 (N5) | 1 | 3 |\n| QT0122 | Tiếng Nhật 2 (N4) | 2 | 3 |\n| QT0123 | Tiếng Nhật 2 (N4) | 2 | 3 |\n| QT1112 | Tiếng Nhật 3 (N3) | 3 | 3 |\n| QT1113 | Tiếng Nhật 3 (N3) | 3 | 3 |\n| QT1122 | Tiếng Nhật 4 (N3) | 4 | 3 |\n| QT1123 | Tiếng Nhật 4 (N3) | 4 | 3 |\n\n#### Lý luận chính trị + Pháp luật đại cương\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EM1170Q | Pháp luật đại cương | 1 | 2 |\n| SSH1050Q | Tư tưởng Hồ Chí Minh | 3 | 2 |\n| SSH1110Q | Những NLCB của CN Mác-Lênin I | 1 | 2 |\n| SSH1111Q | Triết học Mác - Lênin | 1 | 3 |\n| SSH1120Q | Những NLCB của CN Mác-Lênin II | 2 | 3 |\n| SSH1121Q | Kinh tế chính trị Mác - Lênin | 2 | 2 |\n| SSH1130Q | Đường lối CM của Đảng CSVN | 4 | 3 |\n| SSH1131Q | Chủ nghĩa xã hội khoa học | 3 | 2 |\n| SSH1141Q | Lịch sử Đảng cộng sản Việt Nam | 4 | 2 |\n| SSH1151Q | Tư tưởng Hồ Chí Minh | 4 | 2 |\n\n#### Giáo dục thể chất\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| PE1010Q | Giáo dục thể chất A | 1 | 0 |\n| PE1014 | Lý luận TDTT | 1 | 0 |\n| PE1020Q | Giáo dục thể chất B | 2 | 0 |\n| PE1024 | Bơi lội | 2 | 0 |\n| PE1030Q | Giáo dục thể chất C | 3 | 0 |\n| PE2010Q | Giáo dục thể chất D | 4 | 0 |\n| PE2020Q | Giáo dục thể chất E | 5 | 0 |\n\n#### Giáo dục Quốc phòng - An ninh\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| MIL1210Q | Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam | 1 | 0 |\n| MIL1220Q | Công tác quốc phòng và an ninh | 2 | 0 |\n| MIL1230Q | Quân sự chung | 2 | 0 |\n| MIL1240Q | Kỹ thuật chiến đấu bộ binh và chiến thuật | 2 | 0 |"
+      ],
+      "source_chunk_id": "ff15cdda-6a54-48a0-a352-3e1daf959e47",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần"
+    },
+    {
+      "question": "Học phần 'Giải tích I' được giảng dạy vào học kỳ nào?",
+      "ground_truth": "Học kỳ 1",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Kiến thức Toán và Khoa học cơ bản]\n\n## Danh mục học phần\n\n#### Kiến thức Toán và Khoa học cơ bản\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE2014Q | Kỹ thuật điện | 3 | 4 |\n| EM1010Q | Quản trị học đại cương | 2 | 2 |\n| IT1110Q | Tin học đại cương | 3 | 4 |\n| MI1110Q | Giải tích I | 1 | 4 |\n| MI1120Q | Giải tích II | 2 | 3 |\n| MI1130Q | Giải tích III | 2 | 3 |\n| MI1140Q | Đại số | 1 | 4 |\n| MI2010Q | Phương pháp tính | 3 | 2 |\n| PH1110Q | Vật lý I | 1 | 3 |\n| PH1120Q | Vật lý II | 2 | 3 |"
+      ],
+      "source_chunk_id": "8a336b56-a8e3-46ae-9fee-a47dfecaf303",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Kiến thức Toán và Khoa học cơ bản"
+    },
+    {
+      "question": "Học phần nào là tiền đề cho học phần Giải tích II và yêu cầu sinh viên phải học kỳ 2?",
+      "ground_truth": "Học phần Giải tích II có yêu cầu sinh viên phải học kỳ 2 và tiền đề là học phần Giải tích I.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Kiến thức Toán và Khoa học cơ bản]\n\n## Danh mục học phần\n\n#### Kiến thức Toán và Khoa học cơ bản\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE2014Q | Kỹ thuật điện | 3 | 4 |\n| EM1010Q | Quản trị học đại cương | 2 | 2 |\n| IT1110Q | Tin học đại cương | 3 | 4 |\n| MI1110Q | Giải tích I | 1 | 4 |\n| MI1120Q | Giải tích II | 2 | 3 |\n| MI1130Q | Giải tích III | 2 | 3 |\n| MI1140Q | Đại số | 1 | 4 |\n| MI2010Q | Phương pháp tính | 3 | 2 |\n| PH1110Q | Vật lý I | 1 | 3 |\n| PH1120Q | Vật lý II | 2 | 3 |"
+      ],
+      "source_chunk_id": "8a336b56-a8e3-46ae-9fee-a47dfecaf303",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Kiến thức Toán và Khoa học cơ bản"
+    },
+    {
+      "question": "Sinh viên cần học những học phần nào trước khi học học phần 'Kỹ thuật đo'?",
+      "ground_truth": "Sinh viên cần học các học phần 'Cơ học kỹ thuật 1' (ME2140Q), 'Sức bền vật liệu 1' (ME3040Q), và 'Nguyên lý máy' (ME3060Q) trước khi học 'Kỹ thuật đo' (ME3070Q).",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Cơ sở và cốt lõi ngành]\n\n#### Cơ sở và cốt lõi ngành\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE3359Q | Lý thuyết điều khiển tự động | 5 | 3 |\n| ET3120Q | Kỹ thuật điện tử | 6 | 4 |\n| ME2011Q | Đồ họa kỹ thuật 1 | 3 | 3 |\n| ME2012Q | Đồ họa kỹ thuật 2 | 4 | 3 |\n| ME2100Q | Nhập môn cơ điện tử | 4 | 3 |\n| ME2140Q | Cơ học kỹ thuật 1 | 3 | 3 |\n| ME3010Q | Cơ học kỹ thuật 2 | 4 | 3 |\n| ME3040Q | Sức bền vật liệu 1 | 4 | 2 |\n| ME3060Q | Nguyên lý máy | 4 | 3 |\n| ME3070Q | Kỹ thuật đo | 5 | 3 |\n| ME3090Q | Chi tiết máy | 5 | 3 |\n| MSE3100Q | Vật liệu học | 5 | 2 |\n| TE3600Q | Kỹ thuật thủy khí | 5 | 2 |"
+      ],
+      "source_chunk_id": "ff47dd0d-f983-46aa-8b9c-e31761c7337a",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Cơ sở và cốt lõi ngành"
+    },
+    {
+      "question": "So sánh giữa học phần 'Lý thuyết điều khiển tự động' và 'Kỹ thuật điện tử' về số tín chỉ và kỳ học?",
+      "ground_truth": "'Lý thuyết điều khiển tự động' (EE3359Q) có 3 tín chỉ và học vào kỳ 5, trong khi 'Kỹ thuật điện tử' (ET3120Q) có 4 tín chỉ và học vào kỳ 6.",
+      "question_type": "comparative",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Cơ sở và cốt lõi ngành]\n\n#### Cơ sở và cốt lõi ngành\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EE3359Q | Lý thuyết điều khiển tự động | 5 | 3 |\n| ET3120Q | Kỹ thuật điện tử | 6 | 4 |\n| ME2011Q | Đồ họa kỹ thuật 1 | 3 | 3 |\n| ME2012Q | Đồ họa kỹ thuật 2 | 4 | 3 |\n| ME2100Q | Nhập môn cơ điện tử | 4 | 3 |\n| ME2140Q | Cơ học kỹ thuật 1 | 3 | 3 |\n| ME3010Q | Cơ học kỹ thuật 2 | 4 | 3 |\n| ME3040Q | Sức bền vật liệu 1 | 4 | 2 |\n| ME3060Q | Nguyên lý máy | 4 | 3 |\n| ME3070Q | Kỹ thuật đo | 5 | 3 |\n| ME3090Q | Chi tiết máy | 5 | 3 |\n| MSE3100Q | Vật liệu học | 5 | 2 |\n| TE3600Q | Kỹ thuật thủy khí | 5 | 2 |"
+      ],
+      "source_chunk_id": "ff47dd0d-f983-46aa-8b9c-e31761c7337a",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Cơ sở và cốt lõi ngành"
+    },
+    {
+      "question": "Học phần nào có mã ME4099Q và học kỳ 6?",
+      "ground_truth": "Kỹ thuật lập trình trong cơ điện tử",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Khối kiến thức chuyên ngành — Bắt buộc]\n\n#### Khối kiến thức chuyên ngành — Bắt buộc\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| ME3170Q | Công nghệ chế tạo máy | 8 | 4 |\n| ME3300Q | Kỹ thuật lập trình trong cơ điện tử | 6 | 3 |\n| ME4032Q | Đồ gá | 7 | 2 |\n| ME4041Q | Sức bền vật liệu 2 | 6 | 2 |\n| ME4088Q | Cơ sở máy CNC | 7 | 2 |\n| ME4099Q | ĐA thiết kế hệ thống cơ khí | 6 | 3 |\n| ME4102Q | FMS & CIM | 9 | 2 |\n| ME4233Q | CAD/CAM/CNC | 9 | 2 |\n| ME4235Q | Thiết kế hệ thống điều khiển | 8 | 2 |\n| ME4281Q | Tính toán thiết kế robot | 8 | 2 |\n| ME4336Q | ĐA thiết kế hệ thống Cơ điện tử | 7 | 3 |"
+      ],
+      "source_chunk_id": "e2f89261-f720-4e8e-a675-f451bd47a384",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Khối kiến thức chuyên ngành — Bắt buộc"
+    },
+    {
+      "question": "Mã học phần của môn Tiếng Nhật 5 (N2) là gì?",
+      "ground_truth": "QT1132",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Ngoại ngữ]\n\n#### Thực tập và Đồ án tốt nghiệp\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| ME3036Q | Thực tập xưởng | 4 | 2 |\n| ME5010Q | Thực tập tốt nghiệp | 9 | 3 |\n| ME5110Q | Đồ án tốt nghiệp | 10 | 10 |\n\n#### Ngoại ngữ\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| QT1011 | Tiếng Anh 1 (A1.1) | 1 | 3 |\n| QT1021 | Tiếng Anh 2 (A1.2) | 2 | 3 |\n| QT1031 | Tiếng Anh 3 (A2.1) | 3 | 0 |\n| QT1041 | Tiếng Anh 4 (A2.2) | 4 | 0 |\n| QT1132 | Tiếng Nhật 5 (N2) | 5 | 0 |\n| QT0112 | Tiếng Nhật 1 (N5) | 1 | 3 |\n| QT0113 | Tiếng Nhật 1 (N5) | 1 | 3 |\n| QT0122 | Tiếng Nhật 2 (N4) | 2 | 3 |\n| QT0123 | Tiếng Nhật 2 (N4) | 2 | 3 |\n| QT1112 | Tiếng Nhật 3 (N3) | 3 | 3 |\n| QT1113 | Tiếng Nhật 3 (N3) | 3 | 3 |\n| QT1122 | Tiếng Nhật 4 (N3) | 4 | 3 |\n| QT1123 | Tiếng Nhật 4 (N3) | 4 | 3 |"
+      ],
+      "source_chunk_id": "b2ec0865-9f86-410f-b439-941b6821ff35",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Ngoại ngữ"
+    },
+    {
+      "question": "Sinh viên cần học những học phần tiếng Nhật nào để đạt trình độ N3 trước khi học kỳ 4?",
+      "ground_truth": "Sinh viên cần học các học phần tiếng Nhật 3 (N3) có mã QT1112 và QT1113 trước khi học kỳ 4.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Ngoại ngữ]\n\n#### Thực tập và Đồ án tốt nghiệp\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| ME3036Q | Thực tập xưởng | 4 | 2 |\n| ME5010Q | Thực tập tốt nghiệp | 9 | 3 |\n| ME5110Q | Đồ án tốt nghiệp | 10 | 10 |\n\n#### Ngoại ngữ\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| QT1011 | Tiếng Anh 1 (A1.1) | 1 | 3 |\n| QT1021 | Tiếng Anh 2 (A1.2) | 2 | 3 |\n| QT1031 | Tiếng Anh 3 (A2.1) | 3 | 0 |\n| QT1041 | Tiếng Anh 4 (A2.2) | 4 | 0 |\n| QT1132 | Tiếng Nhật 5 (N2) | 5 | 0 |\n| QT0112 | Tiếng Nhật 1 (N5) | 1 | 3 |\n| QT0113 | Tiếng Nhật 1 (N5) | 1 | 3 |\n| QT0122 | Tiếng Nhật 2 (N4) | 2 | 3 |\n| QT0123 | Tiếng Nhật 2 (N4) | 2 | 3 |\n| QT1112 | Tiếng Nhật 3 (N3) | 3 | 3 |\n| QT1113 | Tiếng Nhật 3 (N3) | 3 | 3 |\n| QT1122 | Tiếng Nhật 4 (N3) | 4 | 3 |\n| QT1123 | Tiếng Nhật 4 (N3) | 4 | 3 |"
+      ],
+      "source_chunk_id": "b2ec0865-9f86-410f-b439-941b6821ff35",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Ngoại ngữ"
+    },
+    {
+      "question": "Để được miễn học môn Giáo dục thể chất, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên được miễn học môn Giáo dục thể chất nếu đã hoàn thành các môn học liên quan đến Thể dục - Thể thao trong chương trình đào tạo.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Giáo dục thể chất]\n\n#### Lý luận chính trị + Pháp luật đại cương\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EM1170Q | Pháp luật đại cương | 1 | 2 |\n| SSH1050Q | Tư tưởng Hồ Chí Minh | 3 | 2 |\n| SSH1110Q | Những NLCB của CN Mác-Lênin I | 1 | 2 |\n| SSH1111Q | Triết học Mác - Lênin | 1 | 3 |\n| SSH1120Q | Những NLCB của CN Mác-Lênin II | 2 | 3 |\n| SSH1121Q | Kinh tế chính trị Mác - Lênin | 2 | 2 |\n| SSH1130Q | Đường lối CM của Đảng CSVN | 4 | 3 |\n| SSH1131Q | Chủ nghĩa xã hội khoa học | 3 | 2 |\n| SSH1141Q | Lịch sử Đảng cộng sản Việt Nam | 4 | 2 |\n| SSH1151Q | Tư tưởng Hồ Chí Minh | 4 | 2 |\n\n#### Giáo dục thể chất\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| PE1010Q | Giáo dục thể chất A | 1 | 0 |\n| PE1014 | Lý luận TDTT | 1 | 0 |\n| PE1020Q | Giáo dục thể chất B | 2 | 0 |\n| PE1024 | Bơi lội | 2 | 0 |\n| PE1030Q | Giáo dục thể chất C | 3 | 0 |\n| PE2010Q | Giáo dục thể chất D | 4 | 0 |\n| PE2020Q | Giáo dục thể chất E | 5 | 0 |"
+      ],
+      "source_chunk_id": "3e4ccd4c-95e3-45b3-89fe-57ca5b1d6ccb",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Giáo dục thể chất"
+    },
+    {
+      "question": "Học phần 'Giáo dục thể chất A' có mã học phần là gì?",
+      "ground_truth": "PE1010Q",
+      "question_type": "factoid",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Giáo dục thể chất]\n\n#### Lý luận chính trị + Pháp luật đại cương\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| EM1170Q | Pháp luật đại cương | 1 | 2 |\n| SSH1050Q | Tư tưởng Hồ Chí Minh | 3 | 2 |\n| SSH1110Q | Những NLCB của CN Mác-Lênin I | 1 | 2 |\n| SSH1111Q | Triết học Mác - Lênin | 1 | 3 |\n| SSH1120Q | Những NLCB của CN Mác-Lênin II | 2 | 3 |\n| SSH1121Q | Kinh tế chính trị Mác - Lênin | 2 | 2 |\n| SSH1130Q | Đường lối CM của Đảng CSVN | 4 | 3 |\n| SSH1131Q | Chủ nghĩa xã hội khoa học | 3 | 2 |\n| SSH1141Q | Lịch sử Đảng cộng sản Việt Nam | 4 | 2 |\n| SSH1151Q | Tư tưởng Hồ Chí Minh | 4 | 2 |\n\n#### Giáo dục thể chất\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| PE1010Q | Giáo dục thể chất A | 1 | 0 |\n| PE1014 | Lý luận TDTT | 1 | 0 |\n| PE1020Q | Giáo dục thể chất B | 2 | 0 |\n| PE1024 | Bơi lội | 2 | 0 |\n| PE1030Q | Giáo dục thể chất C | 3 | 0 |\n| PE2010Q | Giáo dục thể chất D | 4 | 0 |\n| PE2020Q | Giáo dục thể chất E | 5 | 0 |"
+      ],
+      "source_chunk_id": "3e4ccd4c-95e3-45b3-89fe-57ca5b1d6ccb",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Giáo dục thể chất"
+    },
+    {
+      "question": "Để được miễn học môn Giáo dục Quốc phòng - An ninh, sinh viên cần đáp ứng điều kiện gì?",
+      "ground_truth": "Sinh viên được miễn học môn Giáo dục Quốc phòng - An ninh nếu đã hoàn thành nghĩa vụ quân sự theo quy định của Nhà nước.",
+      "question_type": "procedural",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Giáo dục Quốc phòng - An ninh]\n\n#### Giáo dục Quốc phòng - An ninh\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| MIL1210Q | Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam | 1 | 0 |\n| MIL1220Q | Công tác quốc phòng và an ninh | 2 | 0 |\n| MIL1230Q | Quân sự chung | 2 | 0 |\n| MIL1240Q | Kỹ thuật chiến đấu bộ binh và chiến thuật | 2 | 0 |"
+      ],
+      "source_chunk_id": "a1b9a704-1041-46ed-90c9-5a3060c3b893",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Giáo dục Quốc phòng - An ninh"
+    },
+    {
+      "question": "Học phần 'Quân sự chung' và 'Kỹ thuật chiến đấu bộ binh và chiến thuật' được giảng dạy ở cùng một kỳ học không?",
+      "ground_truth": "Không, học phần 'Quân sự chung' và 'Kỹ thuật chiến đấu bộ binh và chiến thuật' đều được giảng dạy ở kỳ 2.",
+      "question_type": "multi_hop",
+      "reference_contexts": [
+        "[KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Giáo dục Quốc phòng - An ninh]\n\n#### Giáo dục Quốc phòng - An ninh\n\n| Mã học phần | Tên học phần | Kỳ | Tín chỉ |\n|---|---|---|---|\n| MIL1210Q | Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam | 1 | 0 |\n| MIL1220Q | Công tác quốc phòng và an ninh | 2 | 0 |\n| MIL1230Q | Quân sự chung | 2 | 0 |\n| MIL1240Q | Kỹ thuật chiến đấu bộ binh và chiến thuật | 2 | 0 |"
+      ],
+      "source_chunk_id": "a1b9a704-1041-46ed-90c9-5a3060c3b893",
+      "source_file": "CTĐT ME-NUT_fix_chunks.json",
+      "hierarchy_path": "KỸ THUẬT CƠ ĐIỆN TỬ (ME-NUT) > Danh mục học phần > Giáo dục Quốc phòng - An ninh"
+    }
+  ]
+}

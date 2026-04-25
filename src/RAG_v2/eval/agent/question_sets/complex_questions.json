@@ -1,0 +1,72 @@
+[
+  {
+    "id": "C01",
+    "query": "So sánh điều kiện nhận học bổng KKHT giữa K65 và K70",
+    "expected_keywords": ["K65", "K70", "học bổng"],
+    "expected_route": "complex",
+    "expected_tools": ["compare_cohorts"]
+  },
+  {
+    "id": "C02",
+    "query": "Tôi đã tích lũy đủ tín chỉ và không có môn F, tôi đủ điều kiện tốt nghiệp chưa?",
+    "expected_keywords": ["tốt nghiệp", "điều kiện"],
+    "expected_route": "complex",
+    "expected_tools": ["multi_rag_search"]
+  },
+  {
+    "id": "C03",
+    "query": "Chương trình đào tạo K68 và K70 khác nhau những gì về môn bắt buộc?",
+    "expected_keywords": ["K68", "K70", "môn bắt buộc"],
+    "expected_route": "complex",
+    "expected_tools": ["compare_cohorts"]
+  },
+  {
+    "id": "C04",
+    "query": "K65 và K70 có khác nhau về chuẩn ngoại ngữ đầu ra không?",
+    "expected_keywords": ["K65", "K70", "ngoại ngữ"],
+    "expected_route": "complex",
+    "expected_tools": ["compare_cohorts"]
+  },
+  {
+    "id": "C05",
+    "query": "Tôi muốn biết vừa điều kiện tốt nghiệp vừa quy định thi lại hiện hành",
+    "expected_keywords": ["tốt nghiệp", "thi lại"],
+    "expected_route": "complex",
+    "expected_tools": ["multi_rag_search"]
+  },
+  {
+    "id": "C06",
+    "query": "So sánh quy định cảnh báo học vụ giữa K66 và K70",
+    "expected_keywords": ["K66", "K70", "cảnh báo học vụ"],
+    "expected_route": "complex",
+    "expected_tools": ["compare_cohorts"]
+  },
+  {
+    "id": "C07",
+    "query": "Em đang K70, đã đủ tín chỉ nhưng điểm rèn luyện thấp thì có ảnh hưởng xét tốt nghiệp không?",
+    "expected_keywords": ["điểm rèn luyện", "tốt nghiệp"],
+    "expected_route": "complex",
+    "expected_tools": ["multi_rag_search"]
+  },
+  {
+    "id": "C08",
+    "query": "Chương trình K67 và K70 khác nhau thế nào về số tín chỉ tự chọn?",
+    "expected_keywords": ["K67", "K70", "tín chỉ"],
+    "expected_route": "complex",
+    "expected_tools": ["compare_cohorts"]
+  },
+  {
+    "id": "C09",
+    "query": "Tôi cần đối chiếu quy định học bổng và lịch học kỳ để biết có đủ điều kiện nhận học bổng không",
+    "expected_keywords": ["học bổng", "điều kiện", "học kỳ"],
+    "expected_route": "complex",
+    "expected_tools": ["multi_rag_search"]
+  },
+  {
+    "id": "C10",
+    "query": "Học bổng",
+    "expected_keywords": ["học bổng"],
+    "expected_route": "complex",
+    "expected_tools": ["clarify_question"]
+  }
+]

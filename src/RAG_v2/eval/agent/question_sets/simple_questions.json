@@ -1,0 +1,72 @@
+[
+  {
+    "id": "S01",
+    "query": "Điều kiện xét học bổng KKHT là gì?",
+    "expected_keywords": ["GPA", "học bổng", "tín chỉ"],
+    "expected_route": "simple",
+    "expected_tools": []
+  },
+  {
+    "id": "S02",
+    "query": "Môn Toán cao cấp 1 có bao nhiêu tín chỉ?",
+    "expected_keywords": ["tín chỉ", "toán"],
+    "expected_route": "simple",
+    "expected_tools": []
+  },
+  {
+    "id": "S03",
+    "query": "Lịch thi kết thúc học phần học kỳ 1 khi nào?",
+    "expected_keywords": ["lịch thi", "học kỳ"],
+    "expected_route": "simple",
+    "expected_tools": []
+  },
+  {
+    "id": "S04",
+    "query": "Quy định số lần thi lại tối đa là bao nhiêu?",
+    "expected_keywords": ["thi lại", "quy định"],
+    "expected_route": "simple",
+    "expected_tools": []
+  },
+  {
+    "id": "S05",
+    "query": "Sinh viên bị cảnh báo học vụ trong trường hợp nào?",
+    "expected_keywords": ["cảnh báo", "học vụ"],
+    "expected_route": "simple",
+    "expected_tools": []
+  },
+  {
+    "id": "S06",
+    "query": "Điểm rèn luyện được đánh giá theo thang điểm nào?",
+    "expected_keywords": ["điểm rèn luyện", "thang điểm"],
+    "expected_route": "simple",
+    "expected_tools": []
+  },
+  {
+    "id": "S07",
+    "query": "Môn Xử lý tín hiệu số có môn tiên quyết không?",
+    "expected_keywords": ["tiên quyết", "môn"],
+    "expected_route": "simple",
+    "expected_tools": []
+  },
+  {
+    "id": "S08",
+    "query": "Học phí học kỳ này nộp trước thời hạn nào?",
+    "expected_keywords": ["học phí", "thời hạn"],
+    "expected_route": "simple",
+    "expected_tools": []
+  },
+  {
+    "id": "S09",
+    "query": "Kỳ nghỉ Tết của trường bắt đầu từ ngày nào?",
+    "expected_keywords": ["nghỉ", "ngày"],
+    "expected_route": "simple",
+    "expected_tools": []
+  },
+  {
+    "id": "S10",
+    "query": "Điều kiện miễn học phần giáo dục thể chất là gì?",
+    "expected_keywords": ["miễn", "giáo dục thể chất"],
+    "expected_route": "simple",
+    "expected_tools": []
+  }
+]

@@ -6,10 +6,10 @@ from typing import Any
 
 
 COLLECTION_DESCRIPTIONS: dict[str, str] = {
-    "quy_dinh": "quy dinh hoc vu, hoc bong, mien giam hoc phi, ky luat, dieu kien tot nghiep",
+    "quy_dinh":     "quy dinh hoc vu, hoc bong, mien giam hoc phi, ky luat, dieu kien tot nghiep, ngoai ngu",
     "chuong_trinh": "chuong trinh dao tao, danh sach mon hoc, so tin chi, mon tien quyet, bat buoc va tu chon",
-    "ke_hoach": "lich thi, lich hoc ky, ke hoach nam hoc, tuan hoc, ngay nghi le",
-    "thong_bao": "thong bao moi, tin tuc nha truong, su kien sap dien ra",
+    "ke_hoach":     "lich dang ky hoc phan, lich thi, ke hoach hoc ky, ke hoach nam hoc, deadline",
+    "ho_tro_sv":    "bieu mau, giay to thu tuc, thue nha, tim viec thuc tap, ho tro sinh vien",
 }
 
 
@@ -84,23 +84,24 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "function": {
             "name": "compare_cohorts",
             "description": (
-                "So sanh quy dinh hoac chuong trinh dao tao giua hai khoa sinh vien. "
-                "Dung khi cau hoi de cap den 2 khoa khac nhau (K65, K66, K70...)."
+                "So sanh quy dinh / chinh sach giua 2 KHOA sinh vien (K65, K70, ...). "
+                "Chi dung cho ma khoa (Kxx). "
+                "Neu muon so sanh ma nganh, dung compare_programs."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "topic": {
                         "type": "string",
-                        "description": "Chu de can so sanh, vi du: hoc bong KKHT",
+                        "description": "Chu de can so sanh, vi du: hoc bong KKHT, dieu kien tot nghiep",
                     },
                     "cohort_a": {
                         "type": "string",
-                        "description": "Khoa thu nhat, vi du: K65",
+                        "description": "Ma khoa thu nhat, vi du: K65",
                     },
                     "cohort_b": {
                         "type": "string",
-                        "description": "Khoa thu hai, vi du: K70",
+                        "description": "Ma khoa thu hai, vi du: K70",
                     },
                     "collection": {
                         "type": "string",
@@ -109,6 +110,44 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
                     },
                 },
                 "required": ["topic", "cohort_a", "cohort_b", "collection"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "compare_programs",
+            "description": (
+                "So sanh chuong trinh dao tao / mon hoc giua 2 MA NGANH (IT-E6, IT-E7, IT1, ...). "
+                "Chi dung cho ma nganh. "
+                "Neu muon so sanh khoa sinh vien, dung compare_cohorts."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "topic": {
+                        "type": "string",
+                        "description": "Chu de can so sanh, vi du: mon bat buoc, cau truc chuong trinh",
+                    },
+                    "major_a": {
+                        "type": "string",
+                        "description": "Ma nganh thu nhat, vi du: IT-E7",
+                    },
+                    "major_b": {
+                        "type": "string",
+                        "description": "Ma nganh thu hai, vi du: IT-E6",
+                    },
+                    "collection": {
+                        "type": "string",
+                        "enum": ["quy_dinh", "chuong_trinh"],
+                        "description": "Thuong la chuong_trinh; dung quy_dinh khi so sanh quy dinh theo nganh",
+                    },
+                    "course_keyword": {
+                        "type": "string",
+                        "description": "(Khuyen dung khi so sanh 1 mon cu the) Ten hoac ma mon, vi du: Lap trinh mang, IT3100",
+                    },
+                },
+                "required": ["topic", "major_a", "major_b", "collection"],
             },
         },
     },

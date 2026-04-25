@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Message, UserContext } from '@/types/chat';
+import type { ChatResponse, Message, UserContext } from '@/types/chat';
 import { sendMessage, resolveChatIdentity } from '@/services/chatApi';
 import { getSession } from '@/services/sessionApi';
 import ChatMessage from './ChatMessage';
@@ -34,6 +34,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [lastResponsePayload, setLastResponsePayload] = useState<ChatResponse | null>(null);
   // activeSessionId tracks the current session; initialised from the URL param
   const [activeSessionId, setActiveSessionId] = useState<string | undefined>(sessionIdProp);
   // Ref mirror — always current even inside stale async closures
@@ -54,6 +55,21 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     source: resolvedIdentity.source,
     user_id: resolvedIdentity.userId ?? null,
     user_context: resolvedIdentity.userContext ?? null,
+    active_session_id: activeSessionId ?? null,
+    last_response: lastResponsePayload
+      ? {
+          mode: lastResponsePayload.mode ?? null,
+          route: lastResponsePayload.route ?? lastResponsePayload.intent ?? null,
+          model_name: lastResponsePayload.model_name ?? null,
+          iterations: lastResponsePayload.iterations ?? null,
+          tools_used: lastResponsePayload.tools_used ?? [],
+          timings_ms: lastResponsePayload.timings_ms ?? null,
+          routing_probabilities: lastResponsePayload.routing_probabilities ?? null,
+          agent_error: lastResponsePayload.agent_error ?? null,
+          error: lastResponsePayload.error ?? null,
+        }
+      : null,
+    last_response_raw: lastResponsePayload,
     raw_user: user ?? null,
   };
 
@@ -90,6 +106,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     // New session selected — reset chat state
     setMessages([]);
     setIsLoading(false);
+    setLastResponsePayload(null);
 
     if (!sessionIdProp) return;
 
@@ -108,11 +125,23 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             role: 'assistant' as const,
             content: t.answer,
             timestamp: new Date(t.timestamp),
+            modelName: t.model_name,
+            mode: t.mode,
+            route: t.route ?? t.intent,
+            toolsUsed: t.tools_used,
+            toolCalls: t.tool_calls,
+            iterations: t.iterations,
+            error: t.error ?? undefined,
+            agentError: t.agent_error ?? undefined,
+            agentTrace: t.agent_trace,
             reflectedQuestion: t.reflected_question ?? undefined,
             timingsMs: t.timings_ms,
             sources: t.sources,
             collectionScores: t.collection_scores,
             targetCollections: t.target_collections,
+            routingProbabilities: t.routing_probabilities,
+            appliedFilters: t.applied_filters,
+            collectionResults: t.collection_results,
           },
         ]);
         setMessages(loaded);
@@ -139,6 +168,8 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
+    let responseSessionId = capturedSessionId;
+
     try {
       // Build history from existing messages (last 6 turns)
       const historyForApi = messages.slice(-6).map((m) => ({
@@ -153,6 +184,8 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         explicitUserContext,
         explicitUserId,
       );
+      setLastResponsePayload(response);
+      responseSessionId = response.session_id || responseSessionId;
 
       // Component was unmounted (e.g. logout) — bail out entirely
       if (!isMountedRef.current) return;
@@ -168,11 +201,11 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       }
 
       // Update session state + URL if this is the first turn (new chat)
-      if (response.session_id && response.session_id !== capturedSessionId) {
+      if (responseSessionId && responseSessionId !== capturedSessionId) {
         // Suppress the history-reload effect that would otherwise clear messages
         suppressNextHistoryLoad.current = true;
-        setActiveSessionId(response.session_id);
-        navigate(`/chat/${response.session_id}`, { replace: true });
+        setActiveSessionId(responseSessionId);
+        navigate(`/chat/${responseSessionId}`, { replace: true });
       }
 
       // Refresh the sidebar conversation list
@@ -186,9 +219,21 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         role: 'assistant',
         content: response.answer,
         timestamp: new Date(),
+        modelName: response.model_name,
+        mode: response.mode,
+        route: response.route ?? response.intent,
+        toolsUsed: response.tools_used,
+        toolCalls: response.tool_calls,
+        iterations: response.iterations,
+        error: response.error ?? undefined,
+        agentError: response.agent_error ?? undefined,
+        agentTrace: response.agent_trace,
         sources: response.retrieved_documents,
         targetCollections: response.target_collections,
         collectionScores: response.collection_scores,
+        routingProbabilities: response.routing_probabilities,
+        appliedFilters: response.applied_filters,
+        collectionResults: response.collection_results,
         reflectedQuestion: response.reflected_question,
         timingsMs: response.timings_ms,
       };
@@ -211,7 +256,15 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     } finally {
       // Only clear the loading indicator for the session that set it.
       // If the user has switched sessions, their new session manages its own loading state.
-      if (isMountedRef.current && activeSessionIdRef.current === capturedSessionId) {
+      const shouldClearLoading =
+        activeSessionIdRef.current === capturedSessionId ||
+        (
+          capturedSessionId === undefined &&
+          responseSessionId !== undefined &&
+          activeSessionIdRef.current === responseSessionId
+        );
+
+      if (isMountedRef.current && shouldClearLoading) {
         setIsLoading(false);
       }
     }
@@ -275,7 +328,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
           <ChatInput onSend={handleSendMessage} disabled={isLoading} />
           <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
             <summary className="cursor-pointer select-none text-muted-foreground">
-              Debug user info
+              Debug runtime info
             </summary>
             <pre className="mt-2 max-h-56 overflow-auto rounded bg-background p-2 text-[11px] text-foreground">
               {JSON.stringify(debugPayload, null, 2)}

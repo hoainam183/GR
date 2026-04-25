@@ -1,0 +1,20 @@
+# Core
+ragas>=0.2.0
+datasets>=2.14.0
+
+# LangChain (cần cho RAGAS)
+langchain>=0.3.0
+langchain-core>=0.3.0
+
+# Backend: LMStudio (OpenAI-compatible)
+openai>=1.0.0
+langchain-openai>=0.2.0
+
+# Backend: Google Gemini
+google-generativeai>=0.8.0
+langchain-google-genai>=2.0.0
+
+# Utilities
+python-dotenv>=1.0.0     # đọc .env file
+tqdm>=4.66.0             # progress bar
+pandas>=2.0.0            # xử lý kết quả

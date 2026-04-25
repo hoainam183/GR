@@ -8,18 +8,71 @@ from threading import Lock
 from typing import Any
 
 from config.settings import Settings
+from retrieval.metadata_filters import (
+    extract_major_codes,
+    strip_major_comparison_scaffold_for_retrieval,
+    strip_major_from_query_for_retrieval,
+)
 
 logger = logging.getLogger(__name__)
 
-# Agent-facing collection names -> real retrieval collection names.
+# ─── Collection name mapping ──────────────────────────────────────────────────
+# Agent-facing collection names → real Qdrant collection names.
+
 COLLECTION_MAP: dict[str, str] = {
-    "quy_dinh": "quydinh",
-    "chuong_trinh": "ctdt",
-    "ke_hoach": "kehoach",
-    "thong_bao": "stsv",
+    "quy_dinh":     "quydinh",   # quy định học vụ, học bổng, kỷ luật, tốt nghiệp
+    "chuong_trinh": "ctdt",      # chương trình đào tạo, môn học, tín chỉ
+    "ke_hoach":     "kehoach",   # lịch đăng ký, lịch thi, deadline, kế hoạch học kỳ
+    "ho_tro_sv":    "stsv",      # hỗ trợ sinh viên: biểu mẫu, giấy tờ, thuê nhà, tìm việc
 }
 
-_COHORT_RE = re.compile(r"\bK\d{2}\b", re.IGNORECASE)
+# ─── Simple RAG search cache ─────────────────────────────────────────────────
+# In-memory FIFO cache keyed by (query, collection, top_k, cohort, major).
+# Avoids redundant Qdrant + reranker calls for frequently repeated queries.
+# Thread-safe: protected by _CACHE_LOCK.
+
+_RAG_CACHE: dict[tuple, str] = {}
+_RAG_CACHE_MAX = 256
+_CACHE_LOCK = Lock()
+
+
+def _cache_get(key: tuple) -> str | None:
+    with _CACHE_LOCK:
+        return _RAG_CACHE.get(key)
+
+
+def _cache_set(key: tuple, value: str) -> None:
+    with _CACHE_LOCK:
+        if len(_RAG_CACHE) >= _RAG_CACHE_MAX:
+            # FIFO eviction — remove the oldest entry
+            _RAG_CACHE.pop(next(iter(_RAG_CACHE)))
+        _RAG_CACHE[key] = value
+
+
+def cache_clear() -> None:
+    """Clear the RAG search cache.  Useful for testing and after data updates."""
+    with _CACHE_LOCK:
+        _RAG_CACHE.clear()
+    logger.info("[Cache] RAG search cache cleared")
+
+
+# ─── Lazy singleton runtime ───────────────────────────────────────────────────
+
+_COHORT_RE = re.compile(r"\bK\d{2,3}\b", re.IGNORECASE)
+_COHORT_TOKEN_RE = re.compile(r"^\s*K?(\d{2,3})\s*$", re.IGNORECASE)
+_DEFAULT_CLARIFY_OPTIONS = [
+    "So sanh giua 2 ma nganh cu the",
+    "So sanh giua 2 khoa cu the",
+    "Dat lai cau hoi kem day du ma nganh hoac ma khoa",
+]
+_COMPARE_CLARIFY_MESSAGE = (
+    "Ban muon so sanh mon nay giua hai ma nganh hay hai ma khoa nao?"
+)
+_COMPARE_CLARIFY_OPTIONS = [
+    "Nhap 2 ma nganh (A va B)",
+    "Nhap 2 ma khoa (A va B)",
+    "Nhap lai cau hoi theo mau: so sanh <mon> giua <A> va <B>",
+]
 
 
 @dataclass
@@ -73,12 +126,16 @@ def _get_runtime() -> _AdapterRuntime:
     return _RUNTIME
 
 
+# ─── Public dispatch ──────────────────────────────────────────────────────────
+
+
 def execute_tool(tool_name: str, args: dict[str, Any]) -> str:
     """Dispatch tool execution and always return a safe string response."""
     dispatch = {
         "rag_search": _rag_search,
         "multi_rag_search": _multi_rag_search,
         "compare_cohorts": _compare_cohorts,
+        "compare_programs": _compare_programs,
         "web_search": _web_search,
         "clarify_question": _clarify_question,
     }
@@ -92,9 +149,12 @@ def execute_tool(tool_name: str, args: dict[str, Any]) -> str:
     except TypeError as exc:
         logger.error("Tool %s wrong args %s: %s", tool_name, args, exc)
         return f"[Loi: Tham so khong dung cho tool {tool_name}: {exc}]"
-    except Exception as exc:  # pragma: no cover - defensive runtime protection
+    except Exception as exc:  # pragma: no cover
         logger.error("Tool %s failed: %s", tool_name, exc, exc_info=True)
         return f"[Loi khi tim kiem: {exc}]"
+
+
+# ─── Tool implementations ─────────────────────────────────────────────────────
 
 
 def _rag_search(
@@ -102,6 +162,7 @@ def _rag_search(
     collection: str,
     top_k: int | None = None,
     resolved_cohort: str | None = None,
+    resolved_major: str | None = None,
 ) -> str:
     if not query or not query.strip():
         return "[Loi: Query rong]"
@@ -112,13 +173,43 @@ def _rag_search(
 
     runtime = _get_runtime()
     effective_top_k = max(1, min(int(top_k or runtime.settings.top_k), 10))
+
+    raw_query = query.strip()
+    major_codes = extract_major_codes(raw_query)
+    effective_resolved_major = resolved_major
+    if not effective_resolved_major and len(major_codes) == 1:
+        effective_resolved_major = major_codes[0]
+
+    retrieval_query = raw_query
+    if effective_resolved_major or len(major_codes) <= 1:
+        retrieval_query = strip_major_from_query_for_retrieval(
+            raw_query,
+            resolved_major=effective_resolved_major,
+        )
+
+    cohort = (resolved_cohort or _extract_cohort(raw_query) or "").upper()
+
+    # ── Cache lookup ──────────────────────────────────────────────────────────
+    cache_key = (
+        retrieval_query.lower(),
+        collection,
+        effective_top_k,
+        cohort,
+        (effective_resolved_major or "").upper(),
+    )
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        logger.debug("[Cache] Hit: collection=%s query='%s'", collection, retrieval_query[:50])
+        return cached
+
+    # ── Execute search ────────────────────────────────────────────────────────
     raw_candidate_k = max(effective_top_k * 4, 20)
 
-    bge_vec = runtime.bge_embedder.embed_query(query)
-    e5_vec = runtime.e5_embedder.embed_query(query)
+    bge_vec = runtime.bge_embedder.embed_query(retrieval_query)
+    e5_vec = runtime.e5_embedder.embed_query(retrieval_query)
 
     search_kwargs: dict[str, Any] = {
-        "query": query,
+        "query": retrieval_query,
         "bge_m3_query": bge_vec,
         "e5_query": e5_vec,
         "top_k": raw_candidate_k,
@@ -128,8 +219,8 @@ def _rag_search(
         "keyword_pool_k": runtime.settings.keyword_pool_k,
         "active_collections": [qdrant_collection],
     }
-
-    cohort = (resolved_cohort or _extract_cohort(query) or "").upper()
+    if effective_resolved_major:
+        search_kwargs["resolved_major"] = effective_resolved_major
     if cohort:
         search_kwargs["resolved_cohort"] = cohort
 
@@ -137,14 +228,20 @@ def _rag_search(
 
     if runtime.reranker is not None:
         results = runtime.reranker.rerank(
-            query=query,
+            query=retrieval_query,
             documents=results,
             top_k=effective_top_k,
         )
     else:
         results = results[:effective_top_k]
 
-    return _format_search_results(results, collection)
+    formatted = _format_search_results(results, collection)
+
+    # ── Cache write (skip system errors) ─────────────────────────────────────
+    if not formatted.startswith("[Loi"):
+        _cache_set(cache_key, formatted)
+
+    return formatted
 
 
 def _multi_rag_search(queries: list[dict[str, Any]]) -> str:
@@ -161,6 +258,7 @@ def _multi_rag_search(queries: list[dict[str, Any]]) -> str:
             query=query_text,
             collection=collection,
             resolved_cohort=str(item.get("resolved_cohort", "") or "") or None,
+            resolved_major=str(item.get("resolved_major", "") or "") or None,
         )
         header = f"### Thong tin tu [{collection}] - '{query_text}'"
         parts.append(f"{header}\n{result}")
@@ -169,26 +267,131 @@ def _multi_rag_search(queries: list[dict[str, Any]]) -> str:
         return "Khong tim thay thong tin tu cac nguon duoc yeu cau."
     return "\n\n---\n\n".join(parts)
 
+def _topic_with_course_focus(topic: str, course_keyword: str | None) -> str:
+    raw_topic = str(topic or "").strip()
+    raw_course = str(course_keyword or "").strip()
 
-def _compare_cohorts(topic: str, cohort_a: str, cohort_b: str, collection: str) -> str:
-    query_a = f"{topic} {cohort_a}".strip()
-    query_b = f"{topic} {cohort_b}".strip()
+    if not raw_course:
+        return raw_topic
 
-    result_a = _rag_search(
-        query=query_a,
-        collection=collection,
-        resolved_cohort=cohort_a,
+    if not raw_topic:
+        return f"mon {raw_course}"
+
+    if raw_course.lower() in raw_topic.lower():
+        return raw_topic
+
+    return f"{raw_topic} (tap trung vao mon {raw_course})"
+
+
+def _extract_all_cohort_codes(value: str) -> list[str]:
+    return [match.group(0).upper() for match in _COHORT_RE.finditer(str(value or ""))]
+
+
+def _is_compare_clarification(message: str, options: list[str]) -> bool:
+    merged = " ".join([message, *options]).lower()
+    return (
+        "so sanh" in merged
+        or "so sánh" in merged
+        or "vs" in merged
+        or "khac nhau" in merged
     )
-    result_b = _rag_search(
-        query=query_b,
-        collection=collection,
-        resolved_cohort=cohort_b,
-    )
+
+
+def _normalise_compare_clarification(
+    message: str,
+    options: list[str],
+) -> tuple[str, list[str]]:
+    if not _is_compare_clarification(message, options):
+        return message, options
+
+    # Never suggest mixed major/cohort pairings for comparison clarification.
+    return _COMPARE_CLARIFY_MESSAGE, list(_COMPARE_CLARIFY_OPTIONS)
+
+
+def _compare_cohorts(
+    topic: str,
+    cohort_a: str,
+    cohort_b: str,
+    collection: str,
+) -> str:
+    """
+    So sánh quy định / chính sách giữa 2 **khóa** sinh viên (K65, K70, …).
+
+    Chỉ chấp nhận mã khóa (Kxx).  Nếu nhận mã ngành, trả về hướng dẫn
+    chuyển sang compare_programs.
+    """
+    label_a = str(cohort_a or "").strip()
+    label_b = str(cohort_b or "").strip()
+
+    # Guard: từ chối nếu user truyền mã ngành thay vì mã khóa
+    major_a = _extract_single_major_code(label_a)
+    major_b = _extract_single_major_code(label_b)
+    if major_a or major_b:
+        return (
+            f"'{label_a}' hoặc '{label_b}' trông giống mã ngành, không phải mã khóa (Kxx).\n"
+            "Vui lòng dùng tool compare_programs để so sánh giữa 2 mã ngành."
+        )
+
+    resolved_cohort_a = _normalise_cohort_token(label_a) or label_a
+    resolved_cohort_b = _normalise_cohort_token(label_b) or label_b
+
+    query_a = f"{topic} {resolved_cohort_a}".strip()
+    query_b = f"{topic} {resolved_cohort_b}".strip()
+
+    result_a = _rag_search(query=query_a, collection=collection, resolved_cohort=resolved_cohort_a)
+    result_b = _rag_search(query=query_b, collection=collection, resolved_cohort=resolved_cohort_b)
 
     return (
-        f"### {topic} - {cohort_a}\n{result_a}\n\n"
+        f"### {topic} — {resolved_cohort_a}\n{result_a}\n\n"
         f"---\n\n"
-        f"### {topic} - {cohort_b}\n{result_b}"
+        f"### {topic} — {resolved_cohort_b}\n{result_b}"
+    )
+
+
+def _compare_programs(
+    topic: str,
+    major_a: str,
+    major_b: str,
+    collection: str,
+    course_keyword: str | None = None,
+) -> str:
+    """
+    So sánh chương trình đào tạo / môn học giữa 2 **mã ngành** (IT-E6, IT-E7, …).
+
+    Chỉ chấp nhận mã ngành.  Nếu nhận mã khóa (Kxx), trả về hướng dẫn
+    chuyển sang compare_cohorts.
+    """
+    label_a = str(major_a or "").strip()
+    label_b = str(major_b or "").strip()
+
+    # Guard: từ chối nếu user truyền mã khóa thay vì mã ngành
+    cohort_a = _normalise_cohort_token(label_a)
+    cohort_b = _normalise_cohort_token(label_b)
+    if cohort_a or cohort_b:
+        return (
+            f"'{label_a}' hoặc '{label_b}' trông giống mã khóa (Kxx), không phải mã ngành.\n"
+            "Vui lòng dùng tool compare_cohorts để so sánh giữa 2 khóa."
+        )
+
+    resolved_major_a = _extract_single_major_code(label_a) or label_a
+    resolved_major_b = _extract_single_major_code(label_b) or label_b
+
+    focused_topic = _topic_with_course_focus(topic, course_keyword)
+    clean_topic = strip_major_comparison_scaffold_for_retrieval(focused_topic)
+    if not clean_topic.strip():
+        clean_topic = focused_topic or "chuong trinh dao tao"
+
+    query_a = f"{clean_topic} ngành {resolved_major_a}".strip()
+    query_b = f"{clean_topic} ngành {resolved_major_b}".strip()
+
+    result_a = _rag_search(query=query_a, collection=collection, resolved_major=resolved_major_a)
+    result_b = _rag_search(query=query_b, collection=collection, resolved_major=resolved_major_b)
+
+    header = focused_topic or topic
+    return (
+        f"### {header} — {resolved_major_a}\n{result_a}\n\n"
+        f"---\n\n"
+        f"### {header} — {resolved_major_b}\n{result_b}"
     )
 
 
@@ -205,9 +408,38 @@ def _web_search(query: str) -> str:
 
 
 def _clarify_question(message: str, options: list[str]) -> str:
-    clean_options = [str(option).strip() for option in options if str(option).strip()][:3]
-    options_text = "\n".join(f"{idx + 1}. {option}" for idx, option in enumerate(clean_options))
-    return f"[CLARIFY]\n{message}\n\n{options_text}"
+    clean_message = str(message or "").strip()
+    clean_options = [str(opt).strip() for opt in options if str(opt).strip()][:3]
+    clean_message, clean_options = _normalise_compare_clarification(
+        clean_message,
+        clean_options,
+    )
+
+    if len(clean_options) < 2:
+        for default_option in _DEFAULT_CLARIFY_OPTIONS:
+            if default_option not in clean_options:
+                clean_options.append(default_option)
+            if len(clean_options) >= 3:
+                break
+
+    # Remove options that accidentally mix major+cohort codes in one choice.
+    filtered_options: list[str] = []
+    for option in clean_options:
+        has_major = bool(extract_major_codes(option))
+        has_cohort = bool(_extract_all_cohort_codes(option))
+        if has_major and has_cohort:
+            continue
+        filtered_options.append(option)
+
+    clean_options = filtered_options[:3]
+    if len(clean_options) < 2:
+        clean_options = list(_COMPARE_CLARIFY_OPTIONS)
+
+    options_text = "\n".join(f"{i + 1}. {opt}" for i, opt in enumerate(clean_options))
+    return f"[CLARIFY]\n{clean_message}\n\n{options_text}"
+
+
+# ─── Formatting helpers ───────────────────────────────────────────────────────
 
 
 def _format_search_results(results: Any, collection: str) -> str:
@@ -293,8 +525,19 @@ def _format_web_results(results: Any) -> str:
     return "Khong tim thay thong tin tren web."
 
 
+# ─── Utility helpers ──────────────────────────────────────────────────────────
+
+
 def _extract_cohort(text: str) -> str | None:
     match = _COHORT_RE.search(text)
-    if match is None:
-        return None
-    return match.group(0).upper()
+    return match.group(0).upper() if match else None
+
+
+def _normalise_cohort_token(value: str) -> str | None:
+    match = _COHORT_TOKEN_RE.match(value)
+    return f"K{match.group(1)}" if match else None
+
+
+def _extract_single_major_code(value: str) -> str | None:
+    codes = extract_major_codes(value)
+    return codes[0] if codes else None

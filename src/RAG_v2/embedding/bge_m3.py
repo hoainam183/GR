@@ -14,6 +14,18 @@ from embedding import BaseEmbedder
 logger = logging.getLogger(__name__)
 
 
+def _resolve_torch_device(device: Optional[str]) -> str:
+    """Resolve runtime device with CUDA first, then Apple MPS, then CPU."""
+    if device:
+        return device
+    if torch.cuda.is_available():
+        return "cuda"
+    mps_backend = getattr(torch.backends, "mps", None)
+    if mps_backend is not None and mps_backend.is_available():
+        return "mps"
+    return "cpu"
+
+
 class BGEm3Embedder(BaseEmbedder):
     """Wrapper around BAAI/bge-m3 for dense and sparse embeddings.
 
@@ -38,11 +50,10 @@ class BGEm3Embedder(BaseEmbedder):
         self.max_length = max_length
         self._dimension = 1024
 
-        if device is None:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = _resolve_torch_device(device)
 
-        # FlagEmbedding will respect use_fp16 only on CUDA
-        if device == "cpu":
+        # FlagEmbedding fp16 acceleration is intended for CUDA only.
+        if device != "cuda":
             use_fp16 = False
 
         logger.info(
