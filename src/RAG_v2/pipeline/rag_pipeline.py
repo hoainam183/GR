@@ -22,16 +22,13 @@ from dotenv import load_dotenv
 from agent.complexity_router import ComplexityRouter
 from agent.react_agent import ReActAgent
 from config.settings import Settings
-from embedding import BGEm3Embedder, E5MultilingualEmbedder
 from llm import BaseLLM, create_llm
 from llm.self_eval import SelfEvaluator
 from query.prompts import DOMAIN_CLASSIFICATION_PROMPT
 from query.reflection import QueryReflector
 from query.router import QueryRouter
 from query.training_data import RAG_LABELS
-from reranking import create_reranker
-from retrieval import create_retriever
-from tools.tavily_search import TavilySearchTool
+from utils.tracing import RequestTrace
 
 # Confidence below this threshold triggers the Tier-3 LLM domain fallback.
 _LLM_FALLBACK_THRESHOLD: float = 0.55
@@ -168,8 +165,20 @@ class RAGPipeline:
 
         logger.info("Initialising RAG v2 Pipeline …")
 
-        # Query router (zero-cost local classifier)
-        self._router = QueryRouter(mode=cfg.get("router_mode", "classifier"))
+        # --- Unified retrieval service (embedders + searcher + reranker + tavily) ---
+        from retrieval.service import RetrievalService
+        self._retrieval_service = RetrievalService.from_settings(settings)
+
+        # Convenient aliases — these are references into the shared service.
+        self._bge = self._retrieval_service.bge_embedder
+        self._e5 = self._retrieval_service.e5_embedder
+        self._searcher = self._retrieval_service.searcher
+        self._reranker = self._retrieval_service.reranker
+        self._tavily = self._retrieval_service.tavily_tool
+
+        assert (
+            self._reranker is not None
+        ), "A reranker is required. Set RERANKER_PROVIDER in .env (e.g. bge)."
 
         # Query reflector (LLM-based rewrite)
         self._reflector: Optional[QueryReflector] = None
@@ -183,26 +192,11 @@ class RAGPipeline:
                     exc_info=True,
                 )
 
-        # Embedders (dual named-vector: BGE-M3 + E5 for hybrid search)
-        logger.info("Loading BGE-M3 embedder …")
-        self._bge = BGEm3Embedder()
-        logger.info("Loading E5-multilingual embedder …")
-        self._e5 = E5MultilingualEmbedder()
-
-        # Multi-collection hybrid search via factory
-        logger.info(
-            "Connecting to retrieval stores (collections=%s) …",
-            cfg["collections"],
+        # Query router (zero-cost local classifier)
+        self._router = QueryRouter(
+            mode=cfg.get("router_mode", "classifier"),
+            embedder=self._bge
         )
-        self._searcher = create_retriever(settings)
-
-        # Reranker via factory
-        logger.info("Loading reranker …")
-        _reranker = create_reranker(settings)
-        assert (
-            _reranker is not None
-        ), "A reranker is required. Set RERANKER_PROVIDER in .env (e.g. bge)."
-        self._reranker = _reranker
 
         # Chat model via factory
         self._chat: BaseLLM = create_llm(settings)
@@ -213,27 +207,18 @@ class RAGPipeline:
             self._self_eval = SelfEvaluator(llm=self._chat)
             logger.info("Self evaluator loaded.")
 
-        # Tavily web search fallback
-        self._tavily: Optional[TavilySearchTool] = None
-        if cfg.get("tavily_fallback_enabled", False):
-            tavily_key = os.environ.get("TAVILY_API_KEY", "").strip()
-            if tavily_key and tavily_key not in (
-                "",
-                "your-key-here",
-                "CHANGE_ME",
-            ):
-                self._tavily = TavilySearchTool(api_key=tavily_key)
-                logger.info("Tavily search tool loaded.")
-            else:
-                logger.warning(
-                    "Tavily fallback enabled but TAVILY_API_KEY is missing or "
-                    "invalid. Tavily fallback disabled."
-                )
-
         self._cfg = cfg
         self._mongo_logger = mongo_logger
         self._route_cache: OrderedDict[str, tuple[float, Dict[str, Any]]] = OrderedDict()
         self._reflect_cache: OrderedDict[str, tuple[float, str]] = OrderedDict()
+
+        # Removed set_retrieval_service since tool was removed
+
+        # Phase 2: Retrieval Quality & Data Intelligence
+        from retrieval.validity_filter import ValidityFilter
+        from retrieval.reference_resolver import ReferenceResolver
+        self._validity_filter = ValidityFilter()
+        self._reference_resolver = ReferenceResolver(self._retrieval_service)
 
         # Week 3 integration: smart router for RAG v2 vs LangGraph agent.
         self.complexity_router = ComplexityRouter()
@@ -331,22 +316,29 @@ class RAGPipeline:
             - ``num_sources`` — number of sources used
             - ``intent`` — routing decision (``"rag"`` | ``"chitchat"``)
             - ``model_name`` — chat model name
+            - ``request_trace`` — structured timing summary (``RequestTrace.summary()``)
         """
         effective_top_k = top_k or self._cfg["top_k"]
         pipeline_t0 = time.perf_counter()
         pipeline_timings: Dict[str, float] = {}
 
+        # ── RequestTrace — structured observability carrier ──────────────────
+        trace = RequestTrace(query=question)
+        trace.set_metadata("session_id", session_id or "")
+        trace.set_metadata("top_k", effective_top_k)
+
         # Auto-load history from MongoDB if session exists and no history given
         if session_id and not history and self._mongo_logger:
-            load_t0 = time.perf_counter()
-            history = self._mongo_logger.get_history(session_id)
-            pipeline_timings["history_load"] = _elapsed_ms(load_t0)
+            with trace.stage("history_load"):
+                history = self._mongo_logger.get_history(session_id)
+            pipeline_timings["history_load"] = trace.stages.get("history_load", 0.0)
 
         # 1. Route the query (context-aware — Tier 1, cached)
-        route_t0 = time.perf_counter()
-        routing = self._route_with_cache(question, history)
-        pipeline_timings["routing"] = _elapsed_ms(route_t0)
+        with trace.stage("routing"):
+            routing = self._route_with_cache(question, history)
+        pipeline_timings["routing"] = trace.stages.get("routing", 0.0)
         intent = routing.get("intent", "rag")
+        trace.set_metadata("intent", intent)
         logger.info("Routing decision: intent=%s", intent)
 
         # Tier-3: LLM domain fallback for low-confidence RAG routing
@@ -354,24 +346,29 @@ class RAGPipeline:
             intent == "rag"
             and (routing.get("confidence") or 1.0) < _LLM_FALLBACK_THRESHOLD
         ):
-            fallback_t0 = time.perf_counter()
-            routing = self._llm_domain_classify(question, history, routing)
-            pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(
-                fallback_t0
+            with trace.stage("tier3_domain_fallback"):
+                routing = self._llm_domain_classify(question, history, routing)
+            pipeline_timings["tier3_domain_fallback"] = trace.stages.get(
+                "tier3_domain_fallback", 0.0
             )
 
         if intent == "chitchat":
-            result = chitchat_flow(
-                question=question,
-                history=history,
-                chat_model=self._chat,
-            )
+            with trace.stage("chitchat_flow"):
+                result = chitchat_flow(
+                    question=question,
+                    history=history,
+                    chat_model=self._chat,
+                )
             timings_ms = _merge_timings(
                 pipeline_timings, result.get("timings_ms")
             )
             timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
             result["timings_ms"] = timings_ms
-            _log_timings("query(chitchat)", timings_ms)
+            trace.record_stage("pipeline_total", timings_ms["pipeline_total"])
+            trace.set_metadata("flow", "chitchat")
+            trace.log_summary("query(chitchat)")
+            result["request_trace"] = trace.summary()
+            result["correlation_id"] = trace.correlation_id
 
             # Chitchat turns are intentionally NOT logged to MongoDB to avoid
             # noise in history and unnecessary storage cost.
@@ -379,25 +376,38 @@ class RAGPipeline:
 
         # 2. RAG flow with reflection, self-eval, and Tavily fallback
         flow_cfg = {**self._cfg, "top_k": effective_top_k}
-        result = rag_flow(
-            question=question,
-            history=history,
-            reflector=self._reflector,
-            bge_embedder=self._bge,
-            e5_embedder=self._e5,
-            searcher=self._searcher,
-            reranker=self._reranker,
-            chat_model=self._chat,
-            self_evaluator=self._self_eval,
-            tavily_tool=self._tavily,
-            cfg=flow_cfg,
-            routing_result=routing,
-            user_context=user_context,
-        )
+        with trace.stage("rag_flow"):
+            result = rag_flow(
+                question=question,
+                history=history,
+                reflector=self._reflector,
+                bge_embedder=self._bge,
+                e5_embedder=self._e5,
+                searcher=self._searcher,
+                reranker=self._reranker,
+                chat_model=self._chat,
+                self_evaluator=self._self_eval,
+                tavily_tool=self._tavily,
+                cfg=flow_cfg,
+                routing_result=routing,
+                user_context=user_context,
+                validity_filter=self._validity_filter,
+                reference_resolver=self._reference_resolver,
+            )
         timings_ms = _merge_timings(pipeline_timings, result.get("timings_ms"))
         timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
         result["timings_ms"] = timings_ms
-        _log_timings("query(rag)", timings_ms)
+
+        # Sync flow-level timings into the trace
+        for stage, ms in timings_ms.items():
+            trace.record_stage(stage, ms)
+        trace.set_metadata("flow", "rag")
+        trace.set_metadata("model", str(getattr(self._chat, "model", "unknown")))
+        trace.set_metadata("domain", routing.get("domain", ""))
+        trace.log_summary("query(rag)")
+
+        result["request_trace"] = trace.summary()
+        result["correlation_id"] = trace.correlation_id
 
         # Log to MongoDB
         if session_id and self._mongo_logger:
@@ -555,7 +565,8 @@ class RAGPipeline:
 
         Falls back to RAG v2 when agent is unavailable or fails.
         """
-        route = self.complexity_router.route(question)
+        route_result = self.complexity_router.route(question)
+        route = route_result["tier"]
 
         if route == "chitchat":
             return {
@@ -563,6 +574,7 @@ class RAGPipeline:
                 "answer": self._handle_chitchat(question),
                 "mode": "chitchat",
                 "route": "chitchat",
+                "route_reason": route_result.get("reason", ""),
                 "tools_used": [],
                 "tool_calls": [],
                 "iterations": 0,
@@ -771,6 +783,8 @@ class RAGPipeline:
                 cfg=flow_cfg,
                 routing_result=routing,
                 user_context=user_context,
+                validity_filter=self._validity_filter,
+                reference_resolver=self._reference_resolver,
                 timings_ms_out=flow_timings,
             )
             self.last_sources = reranked

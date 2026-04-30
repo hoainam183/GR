@@ -13,6 +13,7 @@ from retrieval.metadata_filters import (
     strip_major_comparison_scaffold_for_retrieval,
     strip_major_from_query_for_retrieval,
 )
+from schemas.constants import CLARIFY_SENTINEL
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,31 @@ class _AdapterRuntime:
 _RUNTIME: _AdapterRuntime | None = None
 _RUNTIME_LOCK = Lock()
 
+# ─── API key validation ───────────────────────────────────────────────────────
+
+# Known placeholder patterns that indicate the key has NOT been configured.
+_INVALID_KEY_PREFIXES: tuple[str, ...] = ("your-", "CHANGE", "tvly-xxx")
+_INVALID_KEY_EXACT: frozenset[str] = frozenset({"", "tvly-xxx", "CHANGE_ME"})
+
+
+def _is_valid_api_key(key: str) -> bool:
+    """Return True only when *key* looks like a real, configured API key.
+
+    Rejects empty strings, whitespace-only strings, and well-known placeholder
+    values that appear in .env.example files.  Uses prefix matching so that
+    new placeholder variants (e.g. ``your-tavily-api-key-here``) are rejected
+    without having to maintain an ever-growing exact-match list.
+    """
+    stripped = key.strip()
+    if not stripped:
+        return False
+    if stripped in _INVALID_KEY_EXACT:
+        return False
+    if any(stripped.startswith(p) or stripped.lower().startswith(p.lower())
+           for p in _INVALID_KEY_PREFIXES):
+        return False
+    return True
+
 
 def _build_runtime() -> _AdapterRuntime:
     from embedding import BGEm3Embedder, E5MultilingualEmbedder
@@ -103,7 +129,7 @@ def _build_runtime() -> _AdapterRuntime:
 
     tavily_key = settings.tavily_api_key or os.environ.get("TAVILY_API_KEY", "")
     tavily_tool: TavilySearchTool | None = None
-    if tavily_key and tavily_key not in {"", "your-key-here", "CHANGE_ME", "tvly-xxx"}:
+    if _is_valid_api_key(tavily_key):
         tavily_tool = TavilySearchTool(api_key=tavily_key)
 
     return _AdapterRuntime(
@@ -114,6 +140,17 @@ def _build_runtime() -> _AdapterRuntime:
         reranker=reranker,
         tavily_tool=tavily_tool,
     )
+
+
+def set_runtime(runtime: _AdapterRuntime | None) -> None:
+    """Inject a pre-built (or mock) runtime.  Intended for tests only.
+
+    Pass ``None`` to reset to lazy-init mode so the next call to
+    ``_get_runtime()`` will rebuild from settings.
+    """
+    global _RUNTIME
+    with _RUNTIME_LOCK:
+        _RUNTIME = runtime
 
 
 def _get_runtime() -> _AdapterRuntime:
@@ -209,7 +246,9 @@ def _rag_search(
     e5_vec = runtime.e5_embedder.embed_query(retrieval_query)
 
     search_kwargs: dict[str, Any] = {
-        "query": retrieval_query,
+        # ES keyword search uses raw_query to preserve "kỳ", quoted phrases,
+        # and other signals stripped from retrieval_query for vector embedding.
+        "query": raw_query,
         "bge_m3_query": bge_vec,
         "e5_query": e5_vec,
         "top_k": raw_candidate_k,
@@ -226,7 +265,16 @@ def _rag_search(
 
     results = runtime.searcher.search(**search_kwargs)
 
-    if runtime.reranker is not None:
+    # Bypass reranker for curriculum tables because the reranker's semantic
+    # threshold tends to drop long tables when the query is very short.
+    # Check against raw_query (before major stripping) so we don't miss
+    # "kỳ" keywords that may have been stripped alongside major codes.
+    skip_rerank = False
+    curriculum_kw_check = raw_query.lower()
+    if collection == "chuong_trinh" and any(w in curriculum_kw_check for w in ["kỳ", "kì", "ky ", "ky\"", "chẵn", "lẻ", "đăng ký", "dang ky"]):
+        skip_rerank = True
+
+    if runtime.reranker is not None and not skip_rerank:
         results = runtime.reranker.rerank(
             query=retrieval_query,
             documents=results,
@@ -436,7 +484,7 @@ def _clarify_question(message: str, options: list[str]) -> str:
         clean_options = list(_COMPARE_CLARIFY_OPTIONS)
 
     options_text = "\n".join(f"{i + 1}. {opt}" for i, opt in enumerate(clean_options))
-    return f"[CLARIFY]\n{clean_message}\n\n{options_text}"
+    return f"{CLARIFY_SENTINEL}\n{clean_message}\n\n{options_text}"
 
 
 # ─── Formatting helpers ───────────────────────────────────────────────────────

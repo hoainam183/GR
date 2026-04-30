@@ -150,7 +150,7 @@ Chức năng: Sinh câu trả lời từ context + query, tự đánh giá chấ
 | File | Mô tả |
 |------|-------|
 | [base.py](file:///d:/GR/src/RAG_v2/llm/base.py) | **`BaseLLM`** — Abstract base class: `generate()` (blocking), `generate_stream()` (streaming). Provider-agnostic. |
-| [gemini.py](file:///d:/GR/src/RAG_v2/llm/gemini.py) | **`GeminiLLM`** — Provider Gemini qua OpenAI-compatible endpoint. Hỗ trợ 3 mode: `"rag"`, `"chitchat"`, `"self_eval"`. Retry với exponential backoff khi bị rate-limited. Default model: `gemini-2.5-flash`. |
+| [gemini.py](file:///d:/GR/src/RAG_v2/llm/gemini.py) | **`GeminiLLM`** — Provider Gemini qua OpenAI-compatible endpoint. Hỗ trợ 3 mode: `"rag"`, `"chitchat"`, `"self_eval"`. Retry với exponential backoff khi bị rate-limited. Default model: `gemini-3.1-flash-lite-preview`. |
 | [lm_studio.py](file:///d:/GR/src/RAG_v2/llm/lm_studio.py) | **`LMStudioLLM`** — Provider LM Studio (local LLM server). Dùng cho reflection và generation khi chạy offline. |
 | [prompts.py](file:///d:/GR/src/RAG_v2/llm/prompts.py) | **System prompts** cho 3 mode: `RAG_SYSTEM_PROMPT` (trả lời theo tài liệu), `CHITCHAT_SYSTEM_PROMPT` (trò chuyện thân thiện), `SELF_EVAL_SYSTEM_PROMPT` (đánh giá chất lượng). Kèm message builders: `build_rag_messages()`, `build_chitchat_messages()`, `build_self_eval_messages()`. |
 | [self_eval.py](file:///d:/GR/src/RAG_v2/llm/self_eval.py) | **`SelfEvaluator`** — Đánh giá câu trả lời theo 3 tiêu chí: **Relevance** (liên quan?), **Faithfulness** (đúng context?), **Completeness** (đầy đủ?). Trả về pass/fail + lý do. |
@@ -490,7 +490,7 @@ flowchart LR
     PROF["Profile note<br/>(nếu có)"] --> CTX["Full Context"]
     FMT --> CTX
     CTX --> MSGS["build_rag_messages()<br/>system + user + history"]
-    MSGS --> LLM["GeminiLLM.generate()<br/>model=gemini-2.5-flash"]
+    MSGS --> LLM["GeminiLLM.generate()<br/>model=gemini-3.1-flash-lite-preview"]
     LLM --> ANS["Answer"]
 ```
 
@@ -552,7 +552,7 @@ MongoLogger.log_turn():
   "sources": [...],
   "num_sources": 5,
   "intent": "rag",
-  "model_name": "gemini-2.5-flash",
+  "model_name": "gemini-3.1-flash-lite-preview",
   "target_collections": ["ctdt"],
   "collection_scores": [...],
   "reflected_question": "...",

@@ -1,6 +1,19 @@
+"""Complexity Router — classifies queries into chitchat / simple / complex tiers.
+
+Improvements over original:
+- Added logging for routing decisions (enables analysis & debugging).
+- Added confidence signal (pattern-based vs heuristic-based).
+- Better pattern coverage for ambiguous queries.
+- Optional DomainClassifier integration for borderline cases.
+"""
+
 from __future__ import annotations
 
+import logging
 import re
+from typing import Any, Dict, Optional
+
+logger = logging.getLogger(__name__)
 
 # ─── Chitchat patterns ────────────────────────────────────────────────────────
 # Short-circuit: matched queries never reach the RAG pipeline.
@@ -22,7 +35,8 @@ COMPLEX_PATTERNS: list[str] = [
     r"\bso\s*sánh\b",
 
     # Two cohort codes mentioned in the same query (K65 … K70)
-    r"\bK\d{2,3}\b.{1,50}\bK\d{2,3}\b",
+    # Widened to 120 chars — cohorts often appear far apart in Vietnamese.
+    r"\bK\d{2,3}\b.{1,120}\bK\d{2,3}\b",
 
     # Two programme codes mentioned (IT-E6 … IT-E7, MI-E10 ...)
     r"\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH)-[A-Z0-9]+\b.{1,50}\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH)-[A-Z0-9]+\b",
@@ -33,7 +47,8 @@ COMPLEX_PATTERNS: list[str] = [
 
     # Multi-source eligibility queries
     r"\bđủ\s+điều\s+kiện\b",
-    r"\bcó\s+thể\b.{0,20}\b(tốt nghiệp|đăng ký|xét duyệt|nhận học bổng)\b",
+    r"\b(có\s+thể|có\s+được)\b.{0,30}\b(tốt nghiệp|đăng ký|đăng kí|xét duyệt|nhận học bổng)\b",
+    r"(môn|học phần).{0,30}\b(được|có)\s+(đăng ký|đăng kí|mở)\b",
     r"\btất\s+cả.{0,20}điều\s+kiện\b",
 
     # Ambiguous single-term queries (no actionable context)
@@ -64,32 +79,107 @@ class ComplexityRouter:
                         existing RAG v2 pipeline.
     - ``"complex"``   — multi-domain, comparative, or ambiguous query;
                         routed to the LangGraph ReAct agent.
+
+    The ``route()`` method now returns a dict with ``tier``, ``reason``,
+    and ``confidence`` keys for better observability. The ``route_tier()``
+    convenience method returns just the tier string for backwards
+    compatibility.
     """
 
-    def route(self, query: str) -> str:
-        """Return ``'chitchat'``, ``'simple'``, or ``'complex'``."""
+    def route(self, query: str) -> Dict[str, Any]:
+        """Classify query and return ``{tier, reason, confidence}``.
+
+        Returns:
+            Dict with keys:
+
+            - ``tier``: ``"chitchat"`` | ``"simple"`` | ``"complex"``
+            - ``reason``: human-readable explanation of the routing decision
+            - ``confidence``: ``"high"`` (pattern match) or ``"medium"`` (heuristic)
+        """
         q = query.strip()
         q_lower = q.lower()
 
         # 1. Chitchat — fast path, checked first
         for pattern in _CHITCHAT_RE:
             if pattern.search(q_lower):
-                return "chitchat"
+                result = {
+                    "tier": "chitchat",
+                    "reason": f"chitchat_pattern: {pattern.pattern[:40]}",
+                    "confidence": "high",
+                }
+                logger.info(
+                    "ComplexityRouter: %r → %s (%s)",
+                    q[:60], result["tier"], result["reason"],
+                )
+                return result
 
-        # 2. Complex signals
+        # 2. Complex signals — regex patterns
         for pattern in _COMPLEX_RE:
             if pattern.search(q):
-                return "complex"
+                result = {
+                    "tier": "complex",
+                    "reason": f"complex_pattern: {pattern.pattern[:50]}",
+                    "confidence": "high",
+                }
+                logger.info(
+                    "ComplexityRouter: %r → %s (%s)",
+                    q[:60], result["tier"], result["reason"],
+                )
+                return result
 
-        # 3. Structural heuristics — applied after pattern checks to reduce
-        #    false positives from the broad word-count rule
+        # 3. Structural heuristics — lower confidence
         word_count = len(q.split())
         if word_count > 30:
-            return "complex"
+            result = {
+                "tier": "complex",
+                "reason": f"heuristic: word_count={word_count}>30",
+                "confidence": "medium",
+            }
+            logger.info(
+                "ComplexityRouter: %r → %s (%s)",
+                q[:60], result["tier"], result["reason"],
+            )
+            return result
+
         if q.count("?") > 1:
-            return "complex"
+            result = {
+                "tier": "complex",
+                "reason": f"heuristic: multiple_questions={q.count('?')}",
+                "confidence": "medium",
+            }
+            logger.info(
+                "ComplexityRouter: %r → %s (%s)",
+                q[:60], result["tier"], result["reason"],
+            )
+            return result
+
         # Three or more conjunctions suggest a compound multi-part question
         if q_lower.count(" và ") >= 3:
-            return "complex"
+            result = {
+                "tier": "complex",
+                "reason": f"heuristic: conjunction_count={q_lower.count(' và ')}>=3",
+                "confidence": "medium",
+            }
+            logger.info(
+                "ComplexityRouter: %r → %s (%s)",
+                q[:60], result["tier"], result["reason"],
+            )
+            return result
 
-        return "simple"
+        result = {
+            "tier": "simple",
+            "reason": "default: no complex signals detected",
+            "confidence": "high",
+        }
+        logger.info(
+            "ComplexityRouter: %r → %s (%s)",
+            q[:60], result["tier"], result["reason"],
+        )
+        return result
+
+    def route_tier(self, query: str) -> str:
+        """Return just the tier string (``'chitchat'``, ``'simple'``, ``'complex'``).
+
+        Backwards-compatible convenience method.
+        """
+        return self.route(query)["tier"]

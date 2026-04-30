@@ -54,6 +54,12 @@ def build_routing_input(
     """
     if not chat_history:
         return query
+    
+    # Avoid context bleeding: if the query is a complete sentence (>= 6 words), 
+    # it likely contains its own context. Do not prepend history.
+    if len(query.split()) >= 6:
+        return query
+
     recent = chat_history[-_CONTEXT_WINDOW:]
     ctx = " | ".join(m["content"] for m in recent if m.get("content"))
     if not ctx:

@@ -53,7 +53,7 @@ Tạo `MongoLogger` class với 2 collections (`sessions` + `query_logs`), injec
   "intent": "rag|chitchat",
   "reflected_question": "...|null",
   "num_sources": 5,
-  "model_name": "gemini-2.5-flash",
+  "model_name": "gemini-3.1-flash-lite-preview",
   "latency_ms": 1234,
   "timestamp": ISODate
 }

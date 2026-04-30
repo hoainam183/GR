@@ -330,6 +330,7 @@ class MultiCollectionSearch:
                 query=query,
                 top_k=keyword_top_k,
                 filters=es_filter,
+                collection_name=name,
             )
             return name, vecs, kws
 

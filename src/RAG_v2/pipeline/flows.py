@@ -520,6 +520,8 @@ def rag_flow(
     cfg: Dict[str, Any],
     routing_result: Optional[Dict[str, Any]] = None,
     user_context: Optional[Dict[str, Any]] = None,
+    validity_filter: Any | None = None,
+    reference_resolver: Any | None = None,
 ) -> Dict[str, Any]:
     """Full RAG flow: Reflect → Embed → Search → Rerank → Generate → SelfEval → (Tavily fallback).
 
@@ -844,6 +846,18 @@ def rag_flow(
     timings_ms["rerank"] = _elapsed_ms(rerank_t0)
     logger.info("Reranked to %d documents", len(reranked))
 
+    # 5.1 Document Validity Filtering
+    if validity_filter is not None:
+        valid_t0 = time.perf_counter()
+        reranked = validity_filter.filter(reranked)
+        timings_ms["validity_filter"] = _elapsed_ms(valid_t0)
+
+    # 5.2 Cross-Reference Resolution
+    if reference_resolver is not None:
+        resolve_t0 = time.perf_counter()
+        reranked = reference_resolver.resolve(reranked, query=retrieval_query)
+        timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
+
 
     # 6. Format context — inject profile so user facts survive trimming.
     #    Priority 1: use authenticated user_context (precise, always present).
@@ -1003,6 +1017,8 @@ def rag_flow_stream(
     cfg: Dict[str, Any],
     routing_result: Optional[Dict[str, Any]] = None,
     user_context: Optional[Dict[str, Any]] = None,
+    validity_filter: Any | None = None,
+    reference_resolver: Any | None = None,
     timings_ms_out: Optional[Dict[str, float]] = None,
 ) -> tuple[Generator[str, None, None], List[Dict[str, Any]]]:
     """Streaming RAG flow — retrieval runs first, then generation is streamed.
@@ -1276,6 +1292,19 @@ def rag_flow_stream(
         top_k=top_k_value,
     )
     timings_ms["rerank"] = _elapsed_ms(rerank_t0)
+    logger.info("Reranked to %d documents", len(reranked))
+
+    # 5.1 Document Validity Filtering
+    if validity_filter is not None:
+        valid_t0 = time.perf_counter()
+        reranked = validity_filter.filter(reranked)
+        timings_ms["validity_filter"] = _elapsed_ms(valid_t0)
+
+    # 5.2 Cross-Reference Resolution
+    if reference_resolver is not None:
+        resolve_t0 = time.perf_counter()
+        reranked = reference_resolver.resolve(reranked, query=retrieval_query)
+        timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
 
     context_t0 = time.perf_counter()
     context = _format_context(reranked)

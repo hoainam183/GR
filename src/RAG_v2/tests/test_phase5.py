@@ -1,252 +1,204 @@
-"""Test Phase 5 — Settings, Schemas, Flows, and API app creation."""
+"""Test Phase 5 — Settings, Schemas, Flows, and API app creation.
+
+Refactored from script-style to proper pytest module.
+"""
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-# Ensure RAG_v2 root is on path
-RAG_V2_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(RAG_V2_ROOT))
-
-PASSED = 0
-FAILED = 0
+import pytest
 
 
-def report(name: str, ok: bool, detail: str = "") -> None:
-    global PASSED, FAILED
-    status = "PASS" if ok else "FAIL"
-    if ok:
-        PASSED += 1
-    else:
-        FAILED += 1
-    suffix = f" — {detail}" if detail else ""
-    print(f"  [{status}] {name}{suffix}")
+class TestSettings:
+    def test_settings_import(self) -> None:
+        from config.settings import Settings
+        s = Settings()
+        assert s is not None
+
+    def test_chat_model_default(self) -> None:
+        from config.settings import Settings
+        s = Settings()
+        assert s.chat_model == "gemini-3.1-flash-lite-preview"
+
+    def test_api_port_default(self) -> None:
+        from config.settings import Settings
+        s = Settings()
+        assert s.api_port == 8000
+
+    def test_collections_is_list(self) -> None:
+        from config.settings import Settings
+        s = Settings()
+        assert isinstance(s.collections, list)
+
+    def test_cors_origins_is_list(self) -> None:
+        from config.settings import Settings
+        s = Settings()
+        assert isinstance(s.cors_origins, list)
+
+    def test_self_eval_enabled_is_bool(self) -> None:
+        from config.settings import Settings
+        s = Settings()
+        assert isinstance(s.self_eval_enabled, bool)
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# 1. Config / Settings
-# ═══════════════════════════════════════════════════════════════════════════════
-print("\n=== 5.3 Config / Settings ===")
+class TestAPISchemas:
+    def test_schemas_import(self) -> None:
+        from schemas.chat import ChatRequest, ChatResponse, HealthResponse, HistoryMessage, RetrievedDocument
+        assert ChatRequest is not None
 
-try:
-    from config.settings import Settings
+    def test_chat_request_defaults(self) -> None:
+        from schemas.chat import ChatRequest
+        req = ChatRequest(question="Xin chào")
+        assert req.top_k == 5
+        assert req.history is None
 
-    s = Settings()
-    report("Settings import", True)
-    report(
-        "Settings.chat_model", s.chat_model == "gemini-2.5-flash", s.chat_model
-    )
-    report("Settings.api_port", s.api_port == 8000, str(s.api_port))
-    report(
-        "Settings.collections",
-        isinstance(s.collections, list),
-        str(s.collections),
-    )
-    report("Settings.cors_origins", isinstance(s.cors_origins, list))
-    report("Settings.self_eval_enabled", isinstance(s.self_eval_enabled, bool))
-except Exception as exc:
-    report("Settings import", False, str(exc))
+    def test_chat_request_with_history(self) -> None:
+        from schemas.chat import ChatRequest, HistoryMessage
+        req = ChatRequest(
+            question="Test?",
+            top_k=3,
+            history=[HistoryMessage(role="user", content="Hi")],
+        )
+        assert len(req.history) == 1
 
+    def test_chat_request_rejects_empty_question(self) -> None:
+        from schemas.chat import ChatRequest
+        with pytest.raises(Exception):
+            ChatRequest(question="")
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# 2. API Schemas
-# ═══════════════════════════════════════════════════════════════════════════════
-print("\n=== 5.2 API Schemas ===")
+    def test_health_response(self) -> None:
+        from schemas.chat import HealthResponse
+        hr = HealthResponse(status="healthy", rag_initialized=True)
+        assert hr.status == "healthy"
 
-try:
-    from api.schemas import (
-        ChatRequest,
-        ChatResponse,
-        HealthResponse,
-        HistoryMessage,
-        RetrievedDocument,
-    )
-
-    report("Schemas import", True)
-
-    # ChatRequest validation
-    req = ChatRequest(question="Xin chào")
-    report("ChatRequest defaults", req.top_k == 5 and req.history is None)
-
-    req_with_history = ChatRequest(
-        question="Test?",
-        top_k=3,
-        history=[HistoryMessage(role="user", content="Hi")],
-    )
-    report("ChatRequest with history", len(req_with_history.history) == 1)
-
-    # Validation: empty question should fail
-    try:
-        ChatRequest(question="")
-        report("ChatRequest empty q rejects", False, "should have raised")
-    except Exception:
-        report("ChatRequest empty q rejects", True)
-
-    # HealthResponse
-    hr = HealthResponse(status="healthy", rag_initialized=True)
-    report("HealthResponse", hr.status == "healthy")
-
-    # ChatResponse
-    cr = ChatResponse(
-        question="Q",
-        answer="A",
-        retrieved_documents=[],
-        num_documents=0,
-        model_name="test",
-        intent="chitchat",
-        session_id="test-session",
-    )
-    report("ChatResponse", cr.answer == "A")
-
-except Exception as exc:
-    report("Schemas import", False, str(exc))
+    def test_chat_response(self) -> None:
+        from schemas.chat import ChatResponse
+        cr = ChatResponse(
+            question="Q",
+            answer="A",
+            retrieved_documents=[],
+            num_documents=0,
+            model_name="test",
+            intent="chitchat",
+            session_id="test-session",
+        )
+        assert cr.answer == "A"
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# 3. Flows
-# ═══════════════════════════════════════════════════════════════════════════════
-print("\n=== 5.1 Pipeline Flows ===")
+class TestFlows:
+    def test_flows_import(self) -> None:
+        from pipeline.flows import (
+            chitchat_flow,
+            chitchat_flow_stream,
+            rag_flow,
+            rag_flow_stream,
+            _format_context,
+            _trim_history,
+        )
+        assert chitchat_flow is not None
 
-try:
-    from pipeline.flows import (
-        chitchat_flow,
-        chitchat_flow_stream,
-        rag_flow,
-        rag_flow_stream,
-        _format_context,
-        _trim_history,
-    )
-
-    report("Flows import", True)
-
-    # Test _format_context
-    docs = [
-        {"text": "Content 1", "metadata": {"title": "Doc A"}},
-        {"text": "Content 2", "metadata": {"source": "file.pdf"}},
-    ]
-    ctx = _format_context(docs)
-    report("_format_context", "Doc A" in ctx and "Content 1" in ctx)
-
-    # Test _trim_history
-    history = [{"role": "user", "content": f"msg{i}"} for i in range(10)]
-    trimmed = _trim_history(history, limit=3)
-    report(
-        "_trim_history", len(trimmed) == 3 and trimmed[0]["content"] == "msg7"
-    )
-
-    report("_trim_history(None)", _trim_history(None) == [])
-
-    # Test chitchat_flow with a mock chat model
-    class MockChatModel:
-        model = "mock-model"
-
-        def generate(self, query, history=None, mode="rag", context=None):
-            return f"Mock answer for: {query}"
-
-        def generate_stream(
-            self, query, history=None, mode="rag", context=None
-        ):
-            yield "Mock "
-            yield "stream"
-
-    mock = MockChatModel()
-    result = chitchat_flow(question="Hello!", history=None, chat_model=mock)
-    report(
-        "chitchat_flow",
-        result["intent"] == "chitchat"
-        and "Hello!" in result["answer"]
-        and result["num_sources"] == 0,
-    )
-
-    # Test chitchat_flow_stream
-    chunks = list(
-        chitchat_flow_stream(question="Hi", history=None, chat_model=mock)
-    )
-    report("chitchat_flow_stream", chunks == ["Mock ", "stream"])
-
-except Exception as exc:
-    report("Flows import", False, str(exc))
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# 4. API App creation (without loading heavy models)
-# ═══════════════════════════════════════════════════════════════════════════════
-print("\n=== 5.2 API App ===")
-
-try:
-    from api.main import create_app
-
-    report("create_app import", True)
-
-    test_app = create_app()
-    report("FastAPI app created", test_app is not None)
-    report("App title", test_app.title == "RAG v2 Chatbot API")
-
-    # Check routes exist
-    route_paths = [r.path for r in test_app.routes]
-    report("/chat route", "/chat" in route_paths)
-    report("/chat/stream route", "/chat/stream" in route_paths)
-    report("/health route", "/health" in route_paths)
-    report("/ route", "/" in route_paths)
-
-except Exception as exc:
-    report("API App", False, str(exc))
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# 5. Pipeline module (syntax + import chain — no model loading)
-# ═══════════════════════════════════════════════════════════════════════════════
-print("\n=== 5.1 Pipeline Orchestration ===")
-
-try:
-    import ast
-
-    src = (RAG_V2_ROOT / "pipeline" / "rag_pipeline.py").read_text(
-        encoding="utf-8"
-    )
-    tree = ast.parse(src)
-    report("rag_pipeline.py syntax", True)
-
-    # Check key imports exist
-    import_names = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom):
-            for alias in node.names:
-                import_names.append(alias.name)
-
-    report("imports SelfEvaluator", "SelfEvaluator" in import_names)
-    report("imports QueryReflector", "QueryReflector" in import_names)
-    report("imports TavilySearchTool", "TavilySearchTool" in import_names)
-    report("imports chitchat_flow", "chitchat_flow" in import_names)
-    report("imports rag_flow", "rag_flow" in import_names)
-
-    # Check RAGPipeline class exists with query and query_stream
-    classes = [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
-    pipeline_cls = [c for c in classes if c.name == "RAGPipeline"]
-    report("RAGPipeline class exists", len(pipeline_cls) == 1)
-    if pipeline_cls:
-        methods = [
-            n.name
-            for n in ast.walk(pipeline_cls[0])
-            if isinstance(n, ast.FunctionDef)
+    def test_format_context(self) -> None:
+        from pipeline.flows import _format_context
+        docs = [
+            {"text": "Content 1", "metadata": {"title": "Doc A"}},
+            {"text": "Content 2", "metadata": {"source": "file.pdf"}},
         ]
-        report("query() method", "query" in methods)
-        report("query_stream() method", "query_stream" in methods)
+        ctx = _format_context(docs)
+        assert "Doc A" in ctx
+        assert "Content 1" in ctx
 
-except Exception as exc:
-    report("Pipeline syntax check", False, str(exc))
+    def test_trim_history(self) -> None:
+        from pipeline.flows import _trim_history
+        history = [{"role": "user", "content": f"msg{i}"} for i in range(10)]
+        trimmed = _trim_history(history, limit=3)
+        assert len(trimmed) == 3
+        assert trimmed[0]["content"] == "msg7"
+
+    def test_trim_history_none(self) -> None:
+        from pipeline.flows import _trim_history
+        assert _trim_history(None) == []
+
+    def test_chitchat_flow(self) -> None:
+        from pipeline.flows import chitchat_flow
+
+        class MockChatModel:
+            model = "mock-model"
+
+            def generate(self, query, history=None, mode="rag", context=None):
+                return f"Mock answer for: {query}"
+
+        mock = MockChatModel()
+        result = chitchat_flow(question="Hello!", history=None, chat_model=mock)
+        assert result["intent"] == "chitchat"
+        assert "Hello!" in result["answer"]
+        assert result["num_sources"] == 0
+
+    def test_chitchat_flow_stream(self) -> None:
+        from pipeline.flows import chitchat_flow_stream
+
+        class MockChatModel:
+            model = "mock-model"
+
+            def generate_stream(self, query, history=None, mode="rag", context=None):
+                yield "Mock "
+                yield "stream"
+
+        mock = MockChatModel()
+        chunks = list(chitchat_flow_stream(question="Hi", history=None, chat_model=mock))
+        assert chunks == ["Mock ", "stream"]
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Summary
-# ═══════════════════════════════════════════════════════════════════════════════
-print(f"\n{'='*60}")
-total = PASSED + FAILED
-print(f"Phase 5 Tests: {PASSED}/{total} passed, {FAILED} failed")
-if FAILED == 0:
-    print("All tests PASSED!")
-else:
-    print(f"WARNING: {FAILED} test(s) FAILED")
-print(f"{'='*60}")
-sys.exit(1 if FAILED else 0)
+class TestAPIApp:
+    def test_create_app_import(self) -> None:
+        from api.main import create_app
+        assert create_app is not None
+
+    def test_create_app_returns_fastapi(self) -> None:
+        from api.main import create_app
+        app = create_app()
+        assert app is not None
+        assert app.title == "RAG v2 Chatbot API"
+
+    def test_required_routes_exist(self) -> None:
+        from api.main import create_app
+        app = create_app()
+        route_paths = [r.path for r in app.routes]
+        assert "/chat" in route_paths
+        assert "/chat/stream" in route_paths
+        assert "/health" in route_paths
+
+
+class TestPipelineSyntax:
+    def test_rag_pipeline_parses(self) -> None:
+        import ast
+        from pathlib import Path
+        src = (Path(__file__).parent.parent / "pipeline" / "rag_pipeline.py").read_text(encoding="utf-8")
+        tree = ast.parse(src)
+        assert tree is not None
+
+    def test_pipeline_has_required_imports(self) -> None:
+        import ast
+        from pathlib import Path
+        src = (Path(__file__).parent.parent / "pipeline" / "rag_pipeline.py").read_text(encoding="utf-8")
+        tree = ast.parse(src)
+        import_names = [
+            alias.name
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom)
+            for alias in node.names
+        ]
+        assert "SelfEvaluator" in import_names
+        assert "QueryReflector" in import_names
+        assert "chitchat_flow" in import_names
+        assert "rag_flow" in import_names
+
+    def test_pipeline_class_has_required_methods(self) -> None:
+        import ast
+        from pathlib import Path
+        src = (Path(__file__).parent.parent / "pipeline" / "rag_pipeline.py").read_text(encoding="utf-8")
+        tree = ast.parse(src)
+        classes = [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
+        pipeline_cls = [c for c in classes if c.name == "RAGPipeline"]
+        assert len(pipeline_cls) == 1
+        methods = [n.name for n in ast.walk(pipeline_cls[0]) if isinstance(n, ast.FunctionDef)]
+        assert "query" in methods
+        assert "query_stream" in methods

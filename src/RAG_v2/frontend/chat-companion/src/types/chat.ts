@@ -20,6 +20,7 @@ export interface Message {
   error?: string;
   agentError?: string;
   agentTrace?: AgentTracePayload | null;
+  isStreaming?: boolean;
 }
 
 export interface UserContext {
@@ -49,7 +50,7 @@ export interface RetrievedDocument {
   vector_score?: number;   // raw Qdrant cosine score
   keyword_score?: number;  // raw BM25 score
   collection?: string;     // source collection name
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface CollectionScore {
@@ -100,7 +101,7 @@ export interface ChatResponse {
 
 export interface AgentToolCall {
   tool: string;
-  args: Record<string, any>;
+  args: Record<string, unknown>;
   result: string;
   iteration: number;
   timestamp?: string;

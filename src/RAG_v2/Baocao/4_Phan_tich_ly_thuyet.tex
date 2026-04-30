@@ -818,7 +818,7 @@ GeminiLLM là provider chính cho LLM, sử dụng Gemini 2.5 Flash qua OpenAI-c
 @register_llm("gemini")
 class GeminiLLM(BaseLLM):
     def __init__(self, api_key=None,
-                 model="gemini-2.5-flash",
+                 model="gemini-3.1-flash-lite-preview",
                  temperature=0.3, max_tokens=1024):
         self._client = OpenAI(
             api_key=resolved_key,
@@ -1181,7 +1181,7 @@ class MongoLogger:
     "question": "...",
     "answer": "...",
     "intent": "rag",
-    "model_name": "gemini-2.5-flash",
+    "model_name": "gemini-3.1-flash-lite-preview",
     "latency_ms": 1200,
     "timestamp": ISODate(...)
 }
@@ -1574,7 +1574,7 @@ class Settings(BaseSettings):
     collections: List[str] = ["stsv","quydinh","kehoach","ctdt"]
 
     # Chat Model
-    chat_model: str = "gemini-2.5-flash"
+    chat_model: str = "gemini-3.1-flash-lite-preview"
     chat_temperature: float = 0.3
     chat_max_tokens: int = 5120
 

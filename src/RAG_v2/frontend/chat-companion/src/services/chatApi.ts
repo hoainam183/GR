@@ -275,30 +275,17 @@ export const sendMessage = async (
   userContext?: UserContext,
   userId?: string,
 ): Promise<ChatResponse> => {
-  try {
-    const identity = resolveChatIdentity(userContext, userId);
-
-    const response = await apiClient.post<ChatResponse>('/chat', {
-      question,
-      mode: 'agent',
-      top_k: topK,
-      history,
-      session_id: sessionId,
-      user_context: identity.userContext,
-      user_id: identity.userId,
-    } as ChatRequest);
-    
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('API Error:', error.response?.data || error.message);
-      throw new Error(
-        error.response?.data?.detail || 
-        'Failed to get response from the server. Please make sure the backend is running.'
-      );
-    }
-    throw error;
-  }
+  // Delegate to v3 endpoint with 'auto' mode to use complexity routing
+  const v3Response = await sendMessageV3(
+    question,
+    history,
+    topK,
+    'auto',
+    sessionId,
+    userContext,
+    userId
+  );
+  return v3Response as unknown as ChatResponse;
 };
 
 const parseSseDataLines = (rawEvent: string): string => {

@@ -1,0 +1,145 @@
+{
+    "_description": "Golden dataset for automated evaluation of routing, retrieval, and agent quality.",
+    "_version": "1.0.0",
+    "_priority_order": "routing → retrieval → agent",
+    "test_cases": [
+        {
+            "id": "route_chitchat_01",
+            "category": "routing",
+            "query": "Xin chào",
+            "expected_route": "chitchat",
+            "description": "Basic greeting should route to chitchat"
+        },
+        {
+            "id": "route_chitchat_02",
+            "category": "routing",
+            "query": "Cảm ơn bạn nhiều",
+            "expected_route": "chitchat",
+            "description": "Thank you should route to chitchat"
+        },
+        {
+            "id": "route_simple_01",
+            "category": "routing",
+            "query": "Điều kiện xét học bổng KKHT là gì?",
+            "expected_route": "simple",
+            "description": "Single-domain policy question"
+        },
+        {
+            "id": "route_simple_02",
+            "category": "routing",
+            "query": "Môn Toán cao cấp 1 có bao nhiêu tín chỉ?",
+            "expected_route": "simple",
+            "description": "Single course credit question"
+        },
+        {
+            "id": "route_simple_03",
+            "category": "routing",
+            "query": "Lịch đăng ký học kỳ 2 năm 2025 khi nào?",
+            "expected_route": "simple",
+            "description": "Simple schedule question"
+        },
+        {
+            "id": "route_simple_04",
+            "category": "routing",
+            "query": "Quy định học bổng KKHT áp dụng cho K70 là gì?",
+            "expected_route": "simple",
+            "description": "Single cohort policy question"
+        },
+        {
+            "id": "route_complex_01",
+            "category": "routing",
+            "query": "So sánh yêu cầu tốt nghiệp giữa K67 và K70",
+            "expected_route": "complex",
+            "description": "Cross-cohort comparison"
+        },
+        {
+            "id": "route_complex_02",
+            "category": "routing",
+            "query": "K65 và K70 có quy định học bổng khác nhau không?",
+            "expected_route": "complex",
+            "description": "Two cohorts with difference keyword"
+        },
+        {
+            "id": "route_complex_03",
+            "category": "routing",
+            "query": "Tôi đủ điều kiện tốt nghiệp chưa?",
+            "expected_route": "complex",
+            "description": "Multi-source eligibility check"
+        },
+        {
+            "id": "route_complex_04",
+            "category": "routing",
+            "query": "So sánh chương trình IT-E6 và IT-E7",
+            "expected_route": "complex",
+            "description": "Program comparison"
+        },
+        {
+            "id": "route_complex_05",
+            "category": "routing",
+            "query": "học bổng",
+            "expected_route": "complex",
+            "description": "Ambiguous single-term query"
+        },
+        {
+            "id": "retrieval_01",
+            "category": "retrieval",
+            "query": "Điều kiện xét học bổng khuyến khích học tập",
+            "expected_collection": "quydinh",
+            "expected_keywords": ["học bổng", "khuyến khích"],
+            "description": "Should retrieve scholarship regulations"
+        },
+        {
+            "id": "retrieval_02",
+            "category": "retrieval",
+            "query": "Chương trình đào tạo ngành CNTT IT-E6",
+            "expected_collection": "ctdt",
+            "expected_keywords": ["IT-E6", "CNTT"],
+            "description": "Should retrieve CTDT for IT-E6 with major metadata filter"
+        },
+        {
+            "id": "retrieval_03",
+            "category": "retrieval",
+            "query": "Lịch đăng ký học phần học kỳ 1 năm 2025",
+            "expected_collection": "kehoach",
+            "expected_keywords": ["đăng ký", "học phần"],
+            "description": "Should retrieve schedule from kehoach"
+        },
+        {
+            "id": "retrieval_04",
+            "category": "retrieval",
+            "query": "Biểu mẫu xin nghỉ học tạm thời",
+            "expected_collection": "stsv",
+            "expected_keywords": ["biểu mẫu", "nghỉ học"],
+            "description": "Should retrieve student support forms"
+        },
+        {
+            "id": "retrieval_05",
+            "category": "retrieval",
+            "query": "Điều kiện tốt nghiệp đại học",
+            "expected_collection": "quydinh",
+            "expected_keywords": ["tốt nghiệp", "điều kiện"],
+            "description": "Should retrieve graduation requirements"
+        },
+        {
+            "id": "agent_tool_01",
+            "category": "agent",
+            "query": "So sánh điều kiện tốt nghiệp giữa K67 và K70",
+            "expected_tools": ["rag_search", "compare_cohorts"],
+            "description": "Should use comparison tool for cohort comparison"
+        },
+        {
+            "id": "agent_tool_02",
+            "category": "agent",
+            "query": "So sánh chương trình IT-E6 và IT-E7 về môn Toán",
+            "expected_tools": ["compare_programs"],
+            "description": "Should use compare_programs tool"
+        },
+        {
+            "id": "agent_tool_03",
+            "category": "agent",
+            "query": "Quy định học bổng KKHT áp dụng cho K70",
+            "expected_tools": ["rag_search"],
+            "description": "Single search should suffice"
+        }
+    ]
+}

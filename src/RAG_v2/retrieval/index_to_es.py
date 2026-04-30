@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import sys
 import os
+import re
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -47,6 +48,11 @@ ES_PORT = 9200
 
 # ============================================================
 
+# Regex patterns for metadata extraction during indexing
+COURSE_REGEX = re.compile(r'\*\*(?:([A-Z]{2,3}\d{4}[A-Za-z]?)\s+)(.*?)\*\*')
+SEM_REGEX = re.compile(r'(học kỳ\s*(?:[IVX]+|\d+)|\bhk\s*\d+|kỳ\s*\d+)', re.IGNORECASE)
+YEAR_REGEX = re.compile(r'(năm học\s*\d{4}\s*-\s*\d{4}|năm\s*\d{4}\s*-\s*\d{4}|\d{4}\s*-\s*\d{4})', re.IGNORECASE)
+
 
 # ---------------------------------------------------------------------------
 
@@ -59,7 +65,7 @@ def scroll_all_points(
     while True:
         results, next_offset = client.scroll(
             collection_name=collection,
-            limit=batch_size,
+            limit=batch_size, 
             offset=offset,
             with_payload=True,
             with_vectors=False,
@@ -117,6 +123,25 @@ def index_collection(
     for pt in scroll_all_points(qdrant, collection):
         payload = dict(pt.payload or {})
         text = payload.pop("text", "")
+        
+        # --- Metadata Extraction Logic ---
+        if collection == "ctdt":
+            match = COURSE_REGEX.search(text)
+            if match:
+                payload["course_code"] = match.group(1).strip()
+                payload["course_name"] = match.group(2).strip()
+        elif collection == "kehoach":
+            sem_match = SEM_REGEX.search(text)
+            year_match = YEAR_REGEX.search(text)
+            sem_parts = []
+            if sem_match:
+                sem_parts.append(sem_match.group(0).strip())
+            if year_match:
+                sem_parts.append(year_match.group(0).strip())
+            if sem_parts:
+                payload["semester"] = " ".join(sem_parts)
+        # ---------------------------------
+
         texts.append(text)
         metadatas.append(payload)
         ids.append(str(pt.id))

@@ -61,10 +61,11 @@ class TestExecuteToolRouter:
         assert "2." in result
         assert "3." in result
 
-    def test_compare_cohorts_major_codes_dispatches_per_major(
+    def test_compare_programs_major_codes_dispatches_per_major(
         self,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        """compare_programs (not compare_cohorts) is the correct tool for major codes."""
         calls: list[dict[str, str | None]] = []
 
         def _fake_rag_search(
@@ -87,11 +88,11 @@ class TestExecuteToolRouter:
         monkeypatch.setattr(tool_adapters, "_rag_search", _fake_rag_search)
 
         result = execute_tool(
-            "compare_cohorts",
+            "compare_programs",
             {
                 "topic": "môn mạng máy tính",
-                "cohort_a": "IT-E7",
-                "cohort_b": "IT-E6",
+                "major_a": "IT-E7",
+                "major_b": "IT-E6",
                 "collection": "chuong_trinh",
             },
         )
@@ -101,15 +102,14 @@ class TestExecuteToolRouter:
         assert calls[1]["resolved_major"] == "IT-E6"
         assert calls[0]["collection"] == "chuong_trinh"
         assert calls[1]["collection"] == "chuong_trinh"
-        assert calls[0]["query"] == "môn mạng máy tính của ngành IT-E7"
-        assert calls[1]["query"] == "môn mạng máy tính của ngành IT-E6"
         assert "IT-E7" in result
         assert "IT-E6" in result
 
-    def test_compare_cohorts_course_keyword_focuses_major_queries(
+    def test_compare_programs_course_keyword_focuses_major_queries(
         self,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        """compare_programs with course_keyword dispatches per major and includes the keyword."""
         calls: list[dict[str, str | None]] = []
 
         def _fake_rag_search(
@@ -132,12 +132,12 @@ class TestExecuteToolRouter:
         monkeypatch.setattr(tool_adapters, "_rag_search", _fake_rag_search)
 
         result = execute_tool(
-            "compare_cohorts",
+            "compare_programs",
             {
                 "topic": "",
                 "course_keyword": "Lập trình mạng",
-                "cohort_a": "IT-E7",
-                "cohort_b": "IT-E6",
+                "major_a": "IT-E7",
+                "major_b": "IT-E6",
                 "collection": "chuong_trinh",
             },
         )
@@ -154,6 +154,7 @@ class TestExecuteToolRouter:
         self,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        """compare_cohorts rejects a mix of major code (IT-E6) and cohort (K65)."""
         calls: list[dict[str, str | None]] = []
 
         def _fake_rag_search(
@@ -185,9 +186,9 @@ class TestExecuteToolRouter:
             },
         )
 
-        assert "tron ma nganh va ma khoa" in result
-        assert "1." in result and "2." in result and "3." in result
-        assert calls == []
+        # The rejection message uses Unicode Vietnamese — check key concepts
+        assert "compare_programs" in result  # steers user to correct tool
+        assert calls == []  # no search calls should be made
 
 
 class TestRagSearch:

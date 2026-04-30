@@ -53,27 +53,32 @@ async def lifespan(app: FastAPI):
                 database=settings.mongodb_database,
             )
             app.state.mongo_logger = mongo_logger
+            app.state.mongo_status = "ok"
         except Exception:
             logger.warning(
                 "MongoLogger init failed, logging disabled", exc_info=True
             )
             app.state.mongo_logger = None
+            app.state.mongo_status = "failed"  # visible to /health
     else:
         app.state.mongo_logger = None
+        app.state.mongo_status = "disabled"
 
     logger.info("Initialising RAG v2 Pipeline (models load once) …")
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     app.state.pipeline = await loop.run_in_executor(
         None,
         lambda: RAGPipeline(api_key=api_key, mongo_logger=mongo_logger),
     )
 
     # Create MongoDB indexes (idempotent — safe to call on every startup).
-    try:
-        await create_indexes()
-        logger.info("MongoDB indexes ensured.")
-    except Exception:
-        logger.warning("MongoDB index creation failed", exc_info=True)
+    if mongo_logger is not None:
+        try:
+            await create_indexes()
+            logger.info("MongoDB indexes ensured.")
+        except Exception:
+            logger.warning("MongoDB index creation failed", exc_info=True)
+            app.state.mongo_status = "degraded"  # indexes missing but connected
 
     logger.info("Backend ready!")
     yield
@@ -90,6 +95,7 @@ def create_app() -> FastAPI:
     from .routes.chat import router as chat_router
     from .routes.health import router as health_router
     from .routes.session import router as session_router
+    from .routes.metrics import router as metrics_router
     from routers.auth import router as auth_router
 
     app = FastAPI(
@@ -113,6 +119,7 @@ def create_app() -> FastAPI:
     app.include_router(chat_router)
     app.include_router(health_router)
     app.include_router(session_router)
+    app.include_router(metrics_router)
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
     @app.get("/")

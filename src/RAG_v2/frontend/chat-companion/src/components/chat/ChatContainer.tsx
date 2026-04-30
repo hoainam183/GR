@@ -2,11 +2,12 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ChatResponse, Message, UserContext } from '@/types/chat';
-import { sendMessage, resolveChatIdentity } from '@/services/chatApi';
+import { sendMessage, sendMessageStream, resolveChatIdentity } from '@/services/chatApi';
 import { getSession } from '@/services/sessionApi';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import TypingIndicator from './TypingIndicator';
+import { useSmartScroll } from '@/hooks/useSmartScroll';
 import type { UserPublic } from '@/services/authApi';
 
 interface ChatContainerProps {
@@ -32,7 +33,7 @@ const buildUserContextFromUser = (
 
 const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [chatPhase, setChatPhase] = useState<'idle' | 'thinking' | 'streaming'>('idle');
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [lastResponsePayload, setLastResponsePayload] = useState<ChatResponse | null>(null);
   // activeSessionId tracks the current session; initialised from the URL param
@@ -84,13 +85,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     return () => { isMountedRef.current = false; };
   }, []);
 
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading, scrollToBottom]);
+  const { showScrollButton, forceScrollToBottom, isNearBottom } = useSmartScroll(messagesEndRef, [messages, chatPhase]);
 
   // When the URL session param changes (user clicks sidebar item or New Chat),
   // reset state and optionally load history from the backend.
@@ -105,7 +100,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
 
     // New session selected — reset chat state
     setMessages([]);
-    setIsLoading(false);
+    setChatPhase('idle');
     setLastResponsePayload(null);
 
     if (!sessionIdProp) return;
@@ -166,9 +161,12 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
+    setChatPhase('thinking');
+    forceScrollToBottom();
 
     let responseSessionId = capturedSessionId;
+    let hasReceivedFirstToken = false;
+    const assistantMessageId = `assistant-${Date.now()}`;
 
     try {
       // Build history from existing messages (last 6 turns)
@@ -176,36 +174,59 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         role: m.role,
         content: m.content,
       }));
-      const response = await sendMessage(
+      
+      const response = await sendMessageStream(
         content,
         historyForApi,
         5,
         capturedSessionId,
         explicitUserContext,
         explicitUserId,
+        {
+          onSessionId: (sid) => {
+            responseSessionId = sid;
+            if (sid && sid !== capturedSessionId) {
+              suppressNextHistoryLoad.current = true;
+              setActiveSessionId(sid);
+              navigate(`/chat/${sid}`, { replace: true });
+            }
+          },
+          onToken: (delta) => {
+            if (!isMountedRef.current) return;
+            
+            if (!hasReceivedFirstToken) {
+              hasReceivedFirstToken = true;
+              setChatPhase('streaming');
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: assistantMessageId,
+                  role: 'assistant',
+                  content: delta,
+                  timestamp: new Date(),
+                  isStreaming: true,
+                }
+              ]);
+            } else {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantMessageId
+                    ? { ...m, content: m.content + delta }
+                    : m
+                )
+              );
+            }
+          }
+        }
       );
-      setLastResponsePayload(response);
-      responseSessionId = response.session_id || responseSessionId;
 
       // Component was unmounted (e.g. logout) — bail out entirely
       if (!isMountedRef.current) return;
 
       // User navigated to a different session while this request was in flight.
-      // The backend already persisted the turn; it will show on next refresh/visit.
-      // Do NOT touch the current session's UI.
       if (activeSessionIdRef.current !== capturedSessionId &&
-          // Exception: capturedSessionId was undefined (new chat) and the URL
-          // has not yet been updated — let the navigate below handle it.
           capturedSessionId !== undefined) {
         return;
-      }
-
-      // Update session state + URL if this is the first turn (new chat)
-      if (responseSessionId && responseSessionId !== capturedSessionId) {
-        // Suppress the history-reload effect that would otherwise clear messages
-        suppressNextHistoryLoad.current = true;
-        setActiveSessionId(responseSessionId);
-        navigate(`/chat/${responseSessionId}`, { replace: true });
       }
 
       // Refresh the sidebar conversation list
@@ -213,32 +234,15 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
       }
 
-      // Add assistant message with sources
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: response.answer,
-        timestamp: new Date(),
-        modelName: response.model_name,
-        mode: response.mode,
-        route: response.route ?? response.intent,
-        toolsUsed: response.tools_used,
-        toolCalls: response.tool_calls,
-        iterations: response.iterations,
-        error: response.error ?? undefined,
-        agentError: response.agent_error ?? undefined,
-        agentTrace: response.agent_trace,
-        sources: response.retrieved_documents,
-        targetCollections: response.target_collections,
-        collectionScores: response.collection_scores,
-        routingProbabilities: response.routing_probabilities,
-        appliedFilters: response.applied_filters,
-        collectionResults: response.collection_results,
-        reflectedQuestion: response.reflected_question,
-        timingsMs: response.timings_ms,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
+      // Finalize the assistant message
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantMessageId
+            ? { ...m, isStreaming: false }
+            : m
+        )
+      );
+      
     } catch (error) {
       // Only show error in the session that initiated the request
       if (isMountedRef.current && activeSessionIdRef.current === capturedSessionId) {
@@ -255,7 +259,6 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       }
     } finally {
       // Only clear the loading indicator for the session that set it.
-      // If the user has switched sessions, their new session manages its own loading state.
       const shouldClearLoading =
         activeSessionIdRef.current === capturedSessionId ||
         (
@@ -265,7 +268,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         );
 
       if (isMountedRef.current && shouldClearLoading) {
-        setIsLoading(false);
+        setChatPhase('idle');
       }
     }
   };
@@ -316,16 +319,34 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
-            {isLoading && <TypingIndicator />}
+            {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} />}
             <div ref={messagesEndRef} />
           </div>
         )}
       </div>
 
+      {/* Floating Scroll to Bottom Button */}
+      {showScrollButton && (
+        <button
+          onClick={forceScrollToBottom}
+          className="absolute bottom-32 left-1/2 -translate-x-1/2 rounded-full bg-background/80 p-2 text-foreground shadow-md backdrop-blur border border-border transition-all hover:bg-muted animate-in fade-in slide-in-from-bottom-4 z-10"
+          aria-label="Scroll to bottom"
+        >
+          <svg
+            className="h-5 w-5 text-primary"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </button>
+      )}
+
       {/* Input Area */}
-      <div className="border-t border-border bg-background/80 backdrop-blur-sm p-4 md:p-6">
+      <div className="border-t border-border bg-background/80 backdrop-blur-sm p-4 md:p-6 relative z-20">
         <div className="mx-auto max-w-3xl">
-          <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+          <ChatInput onSend={handleSendMessage} disabled={chatPhase !== 'idle'} />
           <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
             <summary className="cursor-pointer select-none text-muted-foreground">
               Debug runtime info

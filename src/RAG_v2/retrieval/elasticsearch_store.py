@@ -43,11 +43,14 @@ INDEX_SETTINGS = {
             "type_doc": {"type": "keyword"},
             "time_create": {"type": "keyword"},
             "section_context": {"type": "keyword"},
+            "section_h2": {"type": "text", "analyzer": "fallback_analyzer"},
+            "section_h3": {"type": "text", "analyzer": "fallback_analyzer"},
             "item_label": {"type": "keyword"},
             "chunk_index": {"type": "integer"},
             "total_chunks": {"type": "integer"},
             "chunk_size": {"type": "integer"},
             "has_links": {"type": "boolean"},
+            "has_table": {"type": "boolean"},
         }
     },
 }
@@ -154,17 +157,39 @@ class ElasticsearchStore:
                     "type_doc": {"type": "keyword"},
                     "time_create": {"type": "keyword"},
                     "section_context": {"type": "keyword"},
+                    # Curriculum section headings — used for keyword boosting on
+                    # "kỳ / đăng ký" queries to surface curriculum tables.
+                    "section_h2": {"type": "text", "analyzer": text_analyzer},
+                    "section_h3": {"type": "text", "analyzer": text_analyzer},
                     "item_label": {"type": "keyword"},
                     "chunk_index": {"type": "integer"},
                     "total_chunks": {"type": "integer"},
                     "chunk_size": {"type": "integer"},
                     "has_links": {"type": "boolean"},
+                    # Boolean flag — True when chunk contains an HTML/markdown table
+                    "has_table": {"type": "boolean"},
                     # Metadata filter fields — must be keyword for exact term queries
                     "major_code": {"type": "keyword"},
                     "applicable_major": {"type": "keyword"},
                     "date_str": {"type": "keyword"},
                     "document_type": {"type": "keyword"},
                     "major_name": {
+                        "type": "text",
+                        "analyzer": text_analyzer,
+                        "fields": {"keyword": {"type": "keyword"}},
+                    },
+                    # ctdt-specific boosting fields
+                    "course_code": {
+                        "type": "keyword",
+                    },
+                    "course_name": {
+                        "type": "text",
+                        "analyzer": text_analyzer,
+                        "fields": {"keyword": {"type": "keyword"}},
+                    },
+                    # kehoach-specific boosting field
+                    # Values: "Học kỳ I", "Học kỳ II", "năm học 2025-2026", …
+                    "semester": {
                         "type": "text",
                         "analyzer": text_analyzer,
                         "fields": {"keyword": {"type": "keyword"}},
@@ -386,11 +411,16 @@ class ElasticsearchStore:
         )
         return []
 
+    # ------------------------------------------------------------------
+    # Collection-specific keyword boosting
+    # ------------------------------------------------------------------
+
     def keyword_search(
         self,
         query: str,
         top_k: int = 20,
         filters: Optional[Dict[str, Any]] = None,
+        collection_name: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """BM25 keyword search.
 
@@ -399,6 +429,7 @@ class ElasticsearchStore:
             top_k: Number of results to return.
             filters: Optional Elasticsearch filter clauses
                      (e.g. ``{"term": {"type_doc": "QuyDinh"}}``).
+            collection_name: Ignored in this version.
 
         Returns:
             List of dicts sorted by BM25 score (descending):

@@ -4,12 +4,13 @@ import hashlib
 import json
 import logging
 import time
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 
+from schemas.constants import CLARIFY_SENTINEL
 from .graph_state import AgentGraphState
 from .lc_tools import LANGGRAPH_TOOLS, TOOL_MAP
 from .prompts import AGENT_SYSTEM_PROMPT, SYNTHESIS_PROMPT
@@ -44,6 +45,10 @@ class ReActAgent:
     START → agent ─┬→ tools → agent (loop)
                    ├→ synthesize → END
                    └→ extract_answer → END
+
+    The agent and synthesis LLMs can use different providers/models via
+    ``settings.agent_synthesis_provider`` and ``settings.agent_synthesis_model``.
+    When those are empty, the same LLM is used for both roles.
     """
 
     def __init__(self, settings: Any) -> None:
@@ -59,30 +64,83 @@ class ReActAgent:
             getattr(settings, "chat_model", "qwen2.5-8b-instruct"),
         )
         self.max_iterations: int = int(getattr(settings, "agent_max_iterations", 4))
+        self._tool_result_limit: int = int(getattr(settings, "agent_tool_result_limit", 3000))
 
-        # Agent LLM — bound with tools, low temperature for deterministic tool choice
+        # Agent LLM — bound with tools, deterministic temperature
+        agent_temperature = float(getattr(settings, "agent_temperature", 0.0))
+        agent_max_tokens = int(getattr(settings, "agent_max_tokens", 1200))
+        # LM Studio does not require a real API key; use a configurable placeholder.
+        lm_studio_api_key: str = getattr(settings, "lm_studio_api_key", "lm-studio") or "lm-studio"
+
         self._llm = ChatOpenAI(
             base_url=lm_studio_url,
-            api_key="lm-studio",
+            api_key=lm_studio_api_key,
             model=self.model_name,
-            temperature=0.1,
-            max_tokens=800,
-            timeout=30,
+            temperature=agent_temperature,
+            max_tokens=agent_max_tokens,
+            timeout=180,
         )
         self._llm_with_tools = self._llm.bind_tools(LANGGRAPH_TOOLS)
 
-        # Synthesis LLM — no tools, higher max_tokens for complete answers
-        self._synthesis_llm = ChatOpenAI(
-            base_url=lm_studio_url,
-            api_key="lm-studio",
-            model=self.model_name,
-            temperature=0.2,
-            max_tokens=1200,  # raised: synthesis must produce complete answers
-            timeout=30,
-        )
+        # Synthesis LLM — can use a different (stronger) provider/model
+        self._synthesis_llm = self._build_synthesis_llm(settings, lm_studio_url)
 
         self._graph = self._build_graph()
-        logger.info("[Agent] LangGraph graph compiled with %d tools", len(LANGGRAPH_TOOLS))
+        logger.info(
+            "[Agent] LangGraph graph compiled with %d tools (model=%s, synth=%s)",
+            len(LANGGRAPH_TOOLS),
+            self.model_name,
+            getattr(self._synthesis_llm, "model_name", self.model_name),
+        )
+
+    @staticmethod
+    def _build_synthesis_llm(settings: Any, default_base_url: str) -> ChatOpenAI:
+        """Build the synthesis LLM, optionally using a separate provider.
+
+        When ``settings.agent_synthesis_provider`` is set, the synthesis LLM
+        uses a different endpoint (e.g. Gemini for higher quality final answers)
+        while the agent tool-calling LLM stays on the local model.
+        """
+        synth_provider = getattr(settings, "agent_synthesis_provider", "") or ""
+        synth_model = getattr(settings, "agent_synthesis_model", "") or ""
+        synth_temp = float(getattr(settings, "agent_synthesis_temperature", 0.2))
+        synth_max_tokens = int(getattr(settings, "agent_synthesis_max_tokens", 2000))
+
+        if synth_provider == "gemini":
+            return ChatOpenAI(
+                base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+                api_key=getattr(settings, "google_api_key", ""),
+                model=synth_model or "gemini-3.1-flash-lite-preview",
+                temperature=synth_temp,
+                max_tokens=synth_max_tokens,
+                timeout=180,
+            )
+        elif synth_provider == "ollama":
+            ollama_url = getattr(settings, "ollama_base_url", "http://localhost:11434")
+            ollama_url = ollama_url if ollama_url.endswith("/v1") else f"{ollama_url}/v1"
+            # Ollama does not require a real API key.
+            ollama_api_key: str = getattr(settings, "ollama_api_key", "ollama") or "ollama"
+            return ChatOpenAI(
+                base_url=ollama_url,
+                api_key=ollama_api_key,
+                model=synth_model or getattr(settings, "agent_model", "qwen2.5-8b-instruct"),
+                temperature=synth_temp,
+                max_tokens=synth_max_tokens,
+                timeout=180,
+            )
+        else:
+            # Default: reuse the same LM Studio endpoint
+            lm_studio_api_key_synth: str = (
+                getattr(settings, "lm_studio_api_key", "lm-studio") or "lm-studio"
+            )
+            return ChatOpenAI(
+                base_url=default_base_url,
+                api_key=lm_studio_api_key_synth,
+                model=synth_model or getattr(settings, "agent_model", "qwen2.5-8b-instruct"),
+                temperature=synth_temp,
+                max_tokens=synth_max_tokens,
+                timeout=180,
+            )
 
     # ─── Public API ───────────────────────────────────────────────────────────
 
@@ -95,7 +153,7 @@ class ReActAgent:
         self,
         query: str,
         session_id: str = "",
-        history: Optional[list[dict[str, str]]] = None,
+        history: list[dict[str, str]] | None = None,
     ) -> AgentState:
         """
         Execute the LangGraph ReAct graph and return a fully populated
@@ -157,7 +215,7 @@ class ReActAgent:
         self,
         *,
         query: str,
-        history: Optional[list[dict[str, str]]],
+        history: list[dict[str, str]] | None,
     ) -> list[Any]:
         """Build the initial message list, optionally prepending recent history."""
         messages: list[Any] = [SystemMessage(content=AGENT_SYSTEM_PROMPT)]
@@ -238,7 +296,7 @@ class ReActAgent:
 
             tool_messages.append(
                 ToolMessage(
-                    content=str(result_str)[:2000],  # guard Qwen 8B context window
+                    content=str(result_str)[:self._tool_result_limit],
                     tool_call_id=str(tool_call.get("id") or ""),
                     name=tool_name,
                 )
@@ -261,7 +319,7 @@ class ReActAgent:
 
         for msg in reversed(state.get("messages", [])):
             if isinstance(msg, ToolMessage) and (msg.name or "") == "clarify_question":
-                return str(msg.content).replace("[CLARIFY]\n", "", 1)
+                return str(msg.content).replace(f"{CLARIFY_SENTINEL}\n", "", 1)
         return None
 
     def _synthesize_node(self, state: AgentGraphState) -> dict[str, Any]:
@@ -395,7 +453,12 @@ class ReActAgent:
 
     # ─── Graph construction ───────────────────────────────────────────────────
 
-    def _build_graph(self):
+    def _build_graph(self) -> Any:  # -> langgraph.graph.state.CompiledStateGraph
+        """Compile and return the LangGraph StateGraph.
+
+        Return type annotated as ``Any`` to avoid a hard dependency on the
+        LangGraph internal ``CompiledStateGraph`` type at import time.
+        """
         graph = StateGraph(AgentGraphState)
 
         graph.add_node("agent", self._agent_node)

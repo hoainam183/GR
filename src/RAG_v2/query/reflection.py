@@ -490,6 +490,7 @@ class QueryReflector:
 
         self.model = model or settings.reflection_model
         self.temperature = temperature if temperature is not None else settings.reflection_temperature
+        self.max_tokens: int = getattr(settings, "reflection_max_tokens", 256)
         self.history_limit = history_limit
         
         provider = settings.reflection_provider
@@ -572,7 +573,7 @@ class QueryReflector:
                     model=self.model,
                     messages=messages,
                     temperature=self.temperature,
-                    max_tokens=256,
+                    max_tokens=self.max_tokens,
                 )
                 break
             except RateLimitError as exc:

@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     located at the RAG_v2 root.  Any field can be overridden by setting the
     corresponding env var (case-insensitive).
 
+    Provider strategy (recommended):
+        - llm_provider = "gemini"      → chat answer generation (quality-critical)
+        - reflection_provider = "gemini" → query rewrite (quality-critical)
+        - agent_model = Qwen2.5 (local) → tool-calling only (low quality OK)
+        - agent_synthesis_provider = "gemini" → final agent answer (quality-critical)
+
     Parameters:
         google_api_key: Google API key for Gemini.
         openai_api_key: OpenAI API key (optional, not used by default pipeline).
@@ -33,7 +39,7 @@ class Settings(BaseSettings):
         mongodb_uri: MongoDB connection URI.
         mongodb_database: MongoDB database name.
         collections: Qdrant collection names to search.
-        chat_model: Gemini model identifier.
+        chat_model: Gemini model identifier for answer generation.
         chat_temperature: Sampling temperature for chat.
         chat_max_tokens: Max tokens for chat generation.
         top_k: Final number of documents after reranking.
@@ -53,9 +59,10 @@ class Settings(BaseSettings):
     """
 
     # --- Provider Selectors (change in .env, no code edits needed) ---
-    llm_provider: str = "lm_studio"  # gemini | openai | azure | ollama | lm_studio
+    # ✅ GEMINI: chat answer generation — quality-critical, needs strong model
+    llm_provider: str = "gemini"       # gemini | openai | azure | ollama | lm_studio
     embedding_provider: str = "ensemble"  # ensemble | bge_m3 | e5
-    reranker_provider: str = "bge"  # bge | cohere | none
+    reranker_provider: str = "bge"     # bge | cohere | none
 
     # --- API Keys ---
     google_api_key: str = ""
@@ -76,9 +83,20 @@ class Settings(BaseSettings):
     lm_studio_url: str = "http://localhost:1234/v1"
 
     # --- Agent (LangGraph) ---
+    # ✅ LM STUDIO / QWEN: tool-calling only — needs fast inference, low quality OK
     agent_enabled: bool = True
-    agent_max_iterations: int = 4
-    agent_model: str = "qwen2.5-8b-instruct"
+    agent_max_iterations: int = 3       # reduced from 4 → faster, less runaway
+    agent_model: str = "qwen2.5-7b-instruct"  # local Qwen for tool selection
+    agent_temperature: float = 0.0     # deterministic tool selection
+    agent_max_tokens: int = 1200       # enough for multi-tool reasoning
+    agent_tool_result_limit: int = 3000  # max chars per ToolMessage
+
+    # Agent synthesis — uses a STRONGER model for the final answer.
+    # ✅ GEMINI: synthesis is quality-critical (user-facing final answer)
+    agent_synthesis_provider: str = "gemini"   # "" | "gemini" | "lm_studio" | "ollama"
+    agent_synthesis_model: str = "gemini-3.1-flash-lite-preview"  # fast + quality
+    agent_synthesis_temperature: float = 0.2
+    agent_synthesis_max_tokens: int = 2000
 
     # --- Ollama ---
     ollama_base_url: str = "http://localhost:11434"
@@ -99,10 +117,11 @@ class Settings(BaseSettings):
     # --- Collections ---
     collections: List[str] = ["stsv", "quydinh", "kehoach", "ctdt"]
 
-    # --- Chat Model ---
-    chat_model: str = "gemini-2.5-flash"
+    # --- Chat Model (answer generation) ---
+    # ✅ GEMINI: main answer generation — most important quality point
+    chat_model: str = "gemini-3.1-flash-lite-preview"   # fast + quality
     chat_temperature: float = 0.3
-    chat_max_tokens: int = 1024 * 5
+    chat_max_tokens: int = 1024            # sufficient for academic Q&A answers
 
     # --- Retrieval ---
     top_k: int = 5
@@ -125,18 +144,19 @@ class Settings(BaseSettings):
     router_mode: str = "classifier"
 
     # --- Evaluation & Fallback ---
-    self_eval_enabled: bool = True
+    self_eval_enabled: bool = False     # disabled by default — adds ~2-5s per query
     # Reranker score threshold: skip self-eval when top chunk score >= this value.
     # Higher = self-eval triggers less often (faster). Lower = more quality checks.
     self_eval_min_top_score: float = 0.72
     tavily_fallback_enabled: bool = False
 
     # --- Reflection ---
+    # ✅ GEMINI: query rewriting — quality-critical for retrieval accuracy
     reflection_enabled: bool = True
-    reflection_provider: str = "lm_studio"
-    reflection_model: str = "qwen2.5"
-    reflection_temperature: float = 0.3
-    reflection_max_tokens: int = 512
+    reflection_provider: str = "gemini"      # gemini | lm_studio | ollama | openai
+    reflection_model: str = "gemini-3.1-flash-lite-preview"  # fast flash for rewrite task
+    reflection_temperature: float = 0.1      # low temp → more deterministic rewrite
+    reflection_max_tokens: int = 1024         # increased from 256 to prevent truncation
 
     # --- Collection-aware Routing (Phase 8) ---
     domain_routing_enabled: bool = True

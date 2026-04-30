@@ -1,0 +1,175 @@
+# Module: `pipeline` — Orchestration Layer (Bộ điều phối chính)
+
+## Tổng quan
+
+Module `pipeline` là **trái tim điều phối** của toàn bộ hệ thống RAG v2. Nó kết nối tất cả các module lại với nhau: routing → reflection → retrieval → reranking → generation → logging. Đây là module duy nhất có tầm nhìn end-to-end về toàn bộ request.
+
+---
+
+## Cấu trúc file
+
+```
+pipeline/
+├── rag_pipeline.py    # RAGPipeline class — orchestrator chính
+├── flows.py           # Các flow cụ thể: rag_flow, chitchat_flow (và streaming)
+├── mongo_logger.py    # Ghi log hội thoại vào MongoDB
+├── index_kehoach.py   # Script indexing dữ liệu kế hoạch học kỳ
+├── index_quydinh.py   # Script indexing dữ liệu quy định
+└── index_stsv.py      # Script indexing dữ liệu hỗ trợ sinh viên
+```
+
+---
+
+## Nhiệm vụ chi tiết
+
+### `rag_pipeline.py` — Class `RAGPipeline`
+
+**Constructor** (`__init__`):
+- Khởi tạo `RetrievalService` (embedder BGE-M3 + E5, searcher, reranker)
+- Khởi tạo `QueryReflector` (LLM-based query rewrite)
+- Khởi tạo `QueryRouter` (classifier-based routing)
+- Khởi tạo `ChatModel` (Gemini / LM Studio)
+- Khởi tạo `ComplexityRouter` + `ReActAgent` (LangGraph)
+- Khởi tạo `ValidityFilter` + `ReferenceResolver`
+- Thiết lập **route cache** (TTL=45s) và **reflect cache** (TTL=30s)
+
+**Method `query()` — Non-streaming RAG:**
+```
+1. history_load      (MongoDB, nếu có session_id và không có history)
+2. routing           (QueryRouter.route → intent + domain + confidence)
+3. tier3_domain_fallback (LLM classify nếu confidence < 0.55)
+4. chitchat_flow      (nếu intent == "chitchat")
+   hoặc rag_flow      (nếu intent == "rag")
+5. Merge timings + RequestTrace
+6. Log to MongoDB
+```
+
+**Method `query_stream()` — Streaming:**
+- Giống `query()` nhưng generation được stream token-by-token
+- Routing + retrieval + reranking vẫn chạy **synchronously** trước
+- Sau khi có context, gọi `chat_model.generate_stream()`
+
+**Method `query_agent()` — Force agent path:**
+- Bỏ qua QueryRouter, gọi thẳng `ReActAgent.run()`
+- Fallback về `query()` nếu agent fail hoặc disabled
+
+**Method `query_v3()` — Smart routing (Week 3):**
+```
+ComplexityRouter.route(question)
+    ├── "chitchat" → _handle_chitchat() (hardcoded reply, no LLM)
+    ├── "simple"   → query()  (RAG pipeline)
+    └── "complex"  → query_agent()  (LangGraph ReAct)
+```
+
+**Caching strategy:**
+- Route cache: tránh gọi lại classifier cho cùng query trong 45s
+- Reflect cache: tránh gọi lại LLM rewriter cho cùng query trong 30s
+
+---
+
+### `flows.py` — Các flow cụ thể
+
+#### `chitchat_flow()`
+```
+trim_history → chat_model.generate(mode="chitchat") → return answer
+```
+**Không có retrieval, không embedding, không reranking.**
+
+#### `rag_flow()` — Full RAG pipeline
+```
+Step 1: reflection    → QueryReflector.reflect() [LLM call - Gemini]
+Step 2: entity extraction → _extract_entities() [regex, no LLM]
+Step 3: collection routing → CollectionSelector.select()
+Step 4: query normalization → strip_major_from_query_for_retrieval()
+Step 5: embed → bge_embedder.embed_query() + e5_embedder.embed_query()
+Step 6: search → MultiCollectionSearch.search() [Qdrant + ES parallel]
+Step 7: dedup candidates
+Step 8: rerank → BGEReranker.rerank()
+Step 9: validity_filter → ValidityFilter.filter()
+Step 10: reference_resolver → ReferenceResolver.resolve()
+Step 11: format_context → _format_context() (budget-limited string)
+Step 12: generate → chat_model.generate(mode="rag") [LLM call - Gemini]
+Step 13: self_eval → SelfEvaluator.evaluate() [optional, LLM call]
+Step 14: tavily_fallback → nếu self_eval fail [optional]
+```
+
+#### `rag_flow_stream()`
+- Giống `rag_flow()` nhưng step 12 là `generate_stream()` → yield chunks
+- Retrieval steps 1-11 vẫn chạy synchronous
+
+---
+
+### `mongo_logger.py` — MongoDB Logging
+
+**Nhiệm vụ:**
+- `log_turn()`: ghi một lượt hội thoại (question, answer, sources, timings, latency)
+- `get_history()`: lấy lịch sử hội thoại cho session
+- `log_agent_trace()`: ghi toàn bộ trace của agent (tool calls, iterations)
+
+**Schema MongoDB:**
+```json
+{
+  "session_id": "...",
+  "question": "...",
+  "answer": "...",
+  "reflected_question": "...",
+  "sources": [...],
+  "latency_ms": 4500,
+  "timings_ms": {"reflection": 800, "search": 200, "rerank": 150, "generate": 3200},
+  "timestamp": "2026-04-26T..."
+}
+```
+
+---
+
+## Các flow quyết định routing
+
+```
+Incoming query
+    │
+    ▼
+ComplexityRouter (regex patterns)
+    ├── "chitchat"  ────────────► hardcoded reply (0ms LLM)
+    ├── "simple"    ──┐
+    └── "complex"  ──┘
+                      │
+                      ▼
+               QueryRouter (embedding classifier)
+                    │
+                    ├── intent="chitchat" ──► chitchat_flow() [LLM]
+                    └── intent="rag"
+                            │
+                            ▼
+                     confidence < 0.55?
+                    ├── YES → Tier-3 LLM domain classify [LLM]
+                    └── NO  → rag_flow() [LLM x2-3]
+```
+
+---
+
+## LLM involvement
+
+| Step | LLM | Điều kiện |
+|---|---|---|
+| Tier-3 domain fallback | Gemini (chat) | Khi classifier confidence < 0.55 |
+| Query reflection | Gemini (reflection model) | Luôn luôn (nếu enabled) |
+| Answer generation | Gemini (chat) | Luôn luôn |
+| Self-evaluation | Gemini (reuse chat) | Khi top_score < threshold |
+| Chitchat response | Gemini (chat) | intent == chitchat |
+
+---
+
+## Latency contribution (điển hình)
+
+| Stage | Thời gian điển hình |
+|---|---|
+| routing (cache miss) | 10-50ms |
+| reflection (LLM call) | **500-2000ms** ⚠️ |
+| embed BGE + E5 | 30-100ms |
+| search (Qdrant + ES parallel) | 50-300ms |
+| rerank (BGE cross-encoder) | **100-800ms** |
+| generate answer (LLM call) | **3000-15000ms** ⚠️ |
+| self_eval (optional, LLM) | 1000-5000ms (thường bị skip) |
+| **Total** | **4000-18000ms** |
+
+> ⚠️ **LLM calls là bottleneck chính** của toàn bộ pipeline.
