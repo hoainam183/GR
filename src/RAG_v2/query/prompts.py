@@ -108,17 +108,28 @@ tôi", "nó", "đó"), ưu tiên giải tham chiếu theo thứ tự:
   - Nếu có cả mã ngành thì có thể giữ theo dạng: "<tên ngành> (<mã ngành>)".
 3. Nếu câu hỏi chứa "môn này/ngành này/chương trình này", phải cố gắng thay bằng
   thực thể cụ thể gần nhất từ USER_PROFILE hoặc CHAT_HISTORY.
-4. Nếu CURRENT_QUERY đã nêu rõ ngành/mã ngành cụ thể (ví dụ: IT-E7, IT-E6),
-  bắt buộc GIỮ NGUYÊN thực thể đó, KHÔNG thay bằng ngành từ USER_PROFILE/CHAT_HISTORY.
+4. Nếu CURRENT_QUERY đã nêu rõ ngành/mã ngành cụ thể (ví dụ: IT-E7, IT-E6, ITE6, ITE7):
+  - Bắt buộc GIỮ NGUYÊN thực thể đó, KHÔNG thay bằng ngành từ USER_PROFILE/CHAT_HISTORY.
+  - TUYỆT ĐỐI KHÔNG tự ý suy diễn hoặc dịch các mã ngành (vd: ITE7, ITE6, IT1) thành tên gọi đầy đủ (vd: "Công nghệ thông tin") nếu không có căn cứ. Phải giữ nguyên mã ngành trong truy vấn.
 5. Nếu CURRENT_QUERY có cả tên ngành và mã ngành nhưng mâu thuẫn, ưu tiên mã ngành
   được nêu trong CURRENT_QUERY; không tạo tổ hợp tên ngành + mã ngành mâu thuẫn.
 6. Nếu không đủ thông tin để giải tham chiếu, KHÔNG bịa đặt. Giữ nguyên phần mơ hồ \
 ở mức an toàn.
-7. Mở rộng viết tắt phổ biến (VD: "CNTT" → "Công nghệ thông tin", "KKHT" → \
-"khuyến khích học tập") khi điều đó giúp truy vấn rõ nghĩa hơn.
+7. Chỉ mở rộng viết tắt KHI người dùng thực sự dùng dạng viết tắt trong câu hỏi \
+(VD: "CNTT" → "Công nghệ thông tin", "KKHT" → "khuyến khích học tập"). \
+KHÔNG coi từ/cụm từ thông thường là viết tắt (VD: "học bổng" KHÔNG PHẢI viết tắt \
+của "học bổng khuyến khích học tập"; "đồ án" KHÔNG PHẢI viết tắt của "đồ án tốt nghiệp"). \
+LƯU Ý: KHÔNG áp dụng quy tắc này cho mã ngành (như ITE6, ITE7).
 8. Giữ nguyên ý nghĩa gốc, không thêm yêu cầu mới, không đổi mục tiêu câu hỏi.
 9. Đầu ra chỉ gồm duy nhất câu truy vấn đã viết lại, không thêm giải thích, tiêu đề, \
 hay markdown.
+10. KHÔNG tự ý thu hẹp phạm vi câu hỏi. Nếu người dùng hỏi chung chung (VD: "học bổng", \
+"quy định"), KHÔNG gán loại cụ thể (VD: "học bổng khuyến khích học tập", "quy định \
+đào tạo chính quy"). Giữ phạm vi tổng quát như câu hỏi gốc.
+11. Chỉ inject thông tin ngành/khóa từ USER_PROFILE khi câu hỏi chứa đại từ sở hữu \
+hoặc tham chiếu cá nhân ("của tôi", "ngành tôi", "ngành này", "chương trình tôi"). \
+Nếu câu hỏi KHÔNG có tham chiếu cá nhân nào, KHÔNG thêm thông tin ngành/khóa vào \
+truy vấn, kể cả khi USER_PROFILE có sẵn.
 
 VÍ DỤ FEW-SHOT:
 ---
@@ -148,7 +159,7 @@ STANDALONE QUERY: Môn IT3100 Lập trình hướng đối tượng có học ph
 
 ---
 Ví dụ 4 — Follow-up về đăng ký học phần, giữ nguyên mã môn từ history:
-USER_PROFILE: sinh viên ngành Khoa học máy tính (IT-E6), Khóa K68
+USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt - Nhật (IT-E6), Khóa K68
 CHAT_HISTORY:
 - Người dùng: IT4062E học kỳ này còn lớp không?
 - Trợ lý: Học kỳ 20241 hiện còn 2 lớp mở cho môn IT4062E.
@@ -160,7 +171,14 @@ Ví dụ 5 — Câu hỏi không có tham chiếu mơ hồ, giữ nguyên:
 USER_PROFILE: (khong co)
 CHAT_HISTORY: (khong co)
 CÂU HỎI HIỆN TẠI: Quy định điểm F trong quy chế đào tạo 2025 là gì?
-STANDALONE QUERY: Quy định điểm F trong quy chế đào tạo đại học chính quy 2025 là gì?"""
+STANDALONE QUERY: Quy định điểm F trong quy chế đào tạo đại học chính quy 2025 là gì?
+
+---
+Ví dụ 6 — Câu hỏi tổng quát, KHÔNG thu hẹp phạm vi, KHÔNG inject profile:
+USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt - Nhật (IT-E6), Khóa K68
+CHAT_HISTORY: (khong co)
+CÂU HỎI HIỆN TẠI: Điều kiện đạt học bổng là gì?
+STANDALONE QUERY: Điều kiện đạt học bổng là gì?"""
 
 REWRITE_WITH_HISTORY_TEMPLATE = """\
 ### INPUT

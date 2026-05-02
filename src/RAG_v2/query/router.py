@@ -34,6 +34,13 @@ DEFAULT_MODEL = "gpt-4o-mini"
 # mentioned 3–4 turns back (e.g. "Kỳ này còn slot không?" after "Môn IT4062E").
 _CONTEXT_WINDOW = 5
 
+# ── Two-pass routing thresholds ──────────────────────────────────────────────
+# Pass 1 routes the raw query (no history). Pass 2 only fires when Pass 1
+# confidence is below this threshold AND the query is short enough to
+# plausibly be a follow-up that needs history context.
+_TWO_PASS_CONFIDENCE_THRESHOLD: float = 0.65
+_TWO_PASS_SHORT_QUERY_WORDS: int = 6
+
 
 def build_routing_input(
     query: str,
@@ -144,24 +151,57 @@ class QueryRouter:
         query: str,
         chat_history: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
-        routing_input = build_routing_input(query, chat_history)
-        result = self._classifier.predict(routing_input)
+        # ── Two-pass routing ─────────────────────────────────────────────
+        # Pass 1: route the raw query without history context.
+        # This avoids conversation-history bias for self-contained queries
+        # (e.g., "điều kiện đạt học bổng" should always hit quydinh,
+        # regardless of prior ctdt-heavy conversation).
+        raw_result = self._classifier.predict(query)
 
-        intent = result["intent"]
-        domains = result.get("domains", [result["domain"]] if result["domain"] else [])
-        confidence = result["confidence"]
+        raw_intent = raw_result["intent"]
+        raw_domains = raw_result.get(
+            "domains", [raw_result["domain"]] if raw_result["domain"] else []
+        )
+        raw_confidence = raw_result["confidence"]
+
+        # Pass 2: if raw confidence is low AND there is history context
+        # that could help, re-route with history prepended and keep
+        # whichever pass yields higher confidence.
+        result = raw_result
+        intent, domains, confidence = raw_intent, raw_domains, raw_confidence
+        used_history = False
+
+        if (
+            chat_history
+            and raw_confidence < _TWO_PASS_CONFIDENCE_THRESHOLD
+            and len(query.split()) < _TWO_PASS_SHORT_QUERY_WORDS
+        ):
+            ctx_input = build_routing_input(query, chat_history)
+            if ctx_input != query:  # history was actually prepended
+                ctx_result = self._classifier.predict(ctx_input)
+                ctx_confidence = ctx_result["confidence"]
+                if ctx_confidence > raw_confidence:
+                    result = ctx_result
+                    intent = ctx_result["intent"]
+                    domains = ctx_result.get(
+                        "domains",
+                        [ctx_result["domain"]] if ctx_result["domain"] else [],
+                    )
+                    confidence = ctx_confidence
+                    used_history = True
 
         # Production monitoring: log confidence so histogram can be built
         # to detect distribution drift (alert if P(conf < 0.55) > 20%).
         log_level = logging.WARNING if confidence < 0.55 else logging.INFO
         logger.log(
             log_level,
-            "Router(classifier): query=%r → intent=%s domains=%s conf=%.3f%s",
+            "Router(classifier): query=%r → intent=%s domains=%s conf=%.3f%s%s",
             query[:80],
             intent,
             domains,
             confidence,
             " [LOW_CONF]" if confidence < 0.55 else "",
+            " [history-boosted]" if used_history else "",
         )
         return {
             "intent": intent,

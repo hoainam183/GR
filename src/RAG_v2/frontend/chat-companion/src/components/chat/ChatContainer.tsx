@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ChatResponse, Message, UserContext } from '@/types/chat';
 import { sendMessage, sendMessageStream, resolveChatIdentity } from '@/services/chatApi';
+import type { ChatV3Response } from '@/types/chat';
 import { getSession } from '@/services/sessionApi';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
@@ -193,7 +194,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
           },
           onToken: (delta) => {
             if (!isMountedRef.current) return;
-            
+
             if (!hasReceivedFirstToken) {
               hasReceivedFirstToken = true;
               setChatPhase('streaming');
@@ -216,7 +217,37 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
                 )
               );
             }
-          }
+          },
+          onMetadata: (meta: Partial<ChatV3Response>) => {
+            if (!isMountedRef.current) return;
+            // Attach all log fields to the assistant message
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMessageId
+                  ? {
+                      ...m,
+                      mode: meta.mode,
+                      route: meta.route ?? meta.intent,
+                      modelName: meta.model_name,
+                      timingsMs: meta.timings_ms,
+                      reflectedQuestion: meta.reflected_question,
+                      targetCollections: meta.target_collections,
+                      collectionScores: meta.collection_scores,
+                      routingProbabilities: meta.routing_probabilities,
+                      appliedFilters: meta.applied_filters,
+                      collectionResults: meta.collection_results,
+                      toolsUsed: meta.tools_used,
+                      toolCalls: meta.tool_calls,
+                      iterations: meta.iterations,
+                      agentTrace: meta.agent_trace,
+                      sources: meta.retrieved_documents,
+                    }
+                  : m
+              )
+            );
+            // Update debug panel payload
+            setLastResponsePayload(meta as ChatResponse);
+          },
         }
       );
 

@@ -181,6 +181,13 @@ export default function TracePage() {
             Chat
           </Link>
           <div className="h-4 w-px bg-border" />
+          <Link
+            to="/retrieval"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Retrieval
+          </Link>
+          <div className="h-4 w-px bg-border" />
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-primary" />
             <h1 className="text-sm font-semibold">Trace and Debug Console</h1>

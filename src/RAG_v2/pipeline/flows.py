@@ -20,6 +20,7 @@ from retrieval.metadata_filters import (
     strip_cohort_comparison_scaffold_for_retrieval,
     strip_major_comparison_scaffold_for_retrieval,
     strip_major_from_query_for_retrieval,
+    expand_major_in_query_for_reranking,
 )
 
 logger = logging.getLogger(__name__)
@@ -838,6 +839,9 @@ def rag_flow(
 
     # 5. Rerank
     rerank_t0 = time.perf_counter()
+    
+    rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
+
     reranked = reranker.rerank(
         query=rerank_query,
         documents=raw_results,
@@ -1020,6 +1024,7 @@ def rag_flow_stream(
     validity_filter: Any | None = None,
     reference_resolver: Any | None = None,
     timings_ms_out: Optional[Dict[str, float]] = None,
+    metadata_out: Optional[Dict[str, Any]] = None,
 ) -> tuple[Generator[str, None, None], List[Dict[str, Any]]]:
     """Streaming RAG flow — retrieval runs first, then generation is streamed.
 
@@ -1113,6 +1118,15 @@ def rag_flow_stream(
             )
             retrieval_query = normalized_query
 
+    # ── Populate metadata_out early (pre-generation) so caller can read it ──────
+    # The search_trace dict is mutated later; we update metadata_out after rerank.
+    if metadata_out is not None:
+        metadata_out["reflected_question"] = search_query
+        metadata_out["target_collections"] = target_collections
+        metadata_out["routing_probabilities"] = (
+            routing_result.get("probabilities") if routing_result else None
+        )
+
     top_k_value = cfg.get("top_k", 5)
     raw_candidate_k = _retrieval_candidate_k(top_k_value)
     major_compare_plan = build_major_comparison_subqueries_for_retrieval(
@@ -1146,6 +1160,8 @@ def rag_flow_stream(
             rerank_query = stripped
 
     # Embed → Search → Rerank
+    search_trace: Dict[str, Any] = {}  # filters/counts not wired in stream path
+
     def _search_once(
         local_query: str,
         local_active_collections: Optional[List[str]],
@@ -1286,6 +1302,9 @@ def rag_flow_stream(
                 )
 
     rerank_t0 = time.perf_counter()
+    
+    rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
+
     reranked = reranker.rerank(
         query=rerank_query,
         documents=raw_results,
@@ -1324,6 +1343,17 @@ def rag_flow_stream(
         + timings_ms.get("format_context", 0.0),
         2,
     )
+
+    # ── Final metadata update (post-rerank, pre-stream) ──────────────────────────
+    if metadata_out is not None:
+        metadata_out["num_sources"] = len(reranked)
+        metadata_out["collection_scores"] = _build_collection_scores(
+            all_collections=cfg.get("collections"),
+            target_collections=target_collections,
+            routing_result=routing_result,
+        )
+        metadata_out["applied_filters"] = search_trace.get("filters")
+        metadata_out["collection_results"] = search_trace.get("collection_counts")
 
     generate_stream = chat_model.generate_stream(
         query=question, context=full_context, history=trimmed, mode="rag"

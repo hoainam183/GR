@@ -7,7 +7,9 @@ import {
   Clock,
   Route,
   Wrench,
+  Search,
 } from 'lucide-react';
+import { DocRow } from './DocRow';
 
 interface AgentTraceProps {
   response: ChatV3Response;
@@ -181,6 +183,25 @@ export default function AgentTrace({ response, question }: AgentTraceProps) {
           </p>
         )}
       </div>
+
+      {response.retrieved_documents && response.retrieved_documents.length > 0 && (
+        <div className="rounded-xl border bg-card p-4">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+            <Search className="h-4 w-4 text-primary" />
+            Retrieved Documents ({response.num_documents || response.retrieved_documents.length})
+          </div>
+          <div className="space-y-2">
+            {response.retrieved_documents.map((doc, index) => (
+              <DocRow
+                key={doc.rank ?? index}
+                doc={doc}
+                rank={index + 1}
+                showRerank={doc.rerank_score !== undefined}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <details className="rounded-xl border bg-card p-4">
         <summary className="cursor-pointer text-sm font-medium">Raw agent trace payload</summary>

@@ -37,3 +37,9 @@ class AgentGraphState(TypedDict):
     max_iterations: int
     final_answer: str | None
     error: str | None
+
+    # ─── Planner-Executor path (Phase 1 refactor) ─────────────────────────────
+    execution_path: str | None          # "planner" | "agent" — set before graph starts
+    sub_questions: list[str] | None     # Decomposed sub-questions from complex query
+    retrieval_plan: dict | None         # Planner output: {steps, needs_web, reasoning}
+    user_context: dict | None           # {student_id, cohort, major, major_code, full_name}

@@ -64,11 +64,14 @@ class ReActAgent:
             getattr(settings, "chat_model", "qwen2.5-8b-instruct"),
         )
         self.max_iterations: int = int(getattr(settings, "agent_max_iterations", 4))
-        self._tool_result_limit: int = int(getattr(settings, "agent_tool_result_limit", 3000))
+        self._tool_result_limit: int = int(getattr(settings, "agent_tool_result_limit", 1500))
+        # Approximate token budget before trimming kicks in.
+        # Qwen 3 8B loaded in LM Studio typically has 4096 ctx; reserve ~800 for generation.
+        self._context_token_budget: int = int(getattr(settings, "agent_context_token_budget", 3200))
 
         # Agent LLM — bound with tools, deterministic temperature
         agent_temperature = float(getattr(settings, "agent_temperature", 0.0))
-        agent_max_tokens = int(getattr(settings, "agent_max_tokens", 1200))
+        agent_max_tokens = int(getattr(settings, "agent_max_tokens", 800))
         # LM Studio does not require a real API key; use a configurable placeholder.
         lm_studio_api_key: str = getattr(settings, "lm_studio_api_key", "lm-studio") or "lm-studio"
 
@@ -221,7 +224,9 @@ class ReActAgent:
         messages: list[Any] = [SystemMessage(content=AGENT_SYSTEM_PROMPT)]
 
         if history:
-            for turn in history[-8:]:  # bounded to last 8 turns
+            # Bounded to last 4 turns (2 user+assistant pairs) to stay within
+            # Qwen 3 8B context budget. Each turn can be 200-400 tokens.
+            for turn in history[-4:]:
                 role = str(turn.get("role", "")).strip().lower()
                 content = str(turn.get("content", "")).strip()
                 if not content:
@@ -229,18 +234,80 @@ class ReActAgent:
                 if role == "user":
                     messages.append(HumanMessage(content=content))
                 elif role == "assistant":
-                    messages.append(AIMessage(content=content))
+                    # Truncate long assistant turns to avoid bloating context
+                    messages.append(AIMessage(content=content[:600]))
 
         messages.append(HumanMessage(content=query))
         return messages
+
+    @staticmethod
+    def _estimate_tokens(messages: list[Any]) -> int:
+        """Fast char-based token estimate (1 token ≈ 3.5 chars for Vietnamese/English mix)."""
+        total_chars = sum(len(str(getattr(m, "content", "") or "")) for m in messages)
+        return total_chars // 3
+
+    def _trim_messages_for_context(self, messages: list[Any]) -> list[Any]:
+        """
+        Trim the message list to stay within _context_token_budget.
+
+        Strategy (in order of priority):
+        1. Keep SystemMessage (index 0) always.
+        2. Keep the last HumanMessage (current query) always.
+        3. If still over budget, truncate ToolMessage content (oldest first).
+        4. If still over budget, drop oldest ToolMessage + paired AIMessage.
+        """
+        if self._estimate_tokens(messages) <= self._context_token_budget:
+            return messages
+
+        trimmed = list(messages)
+
+        # Step 3: shorten tool message content starting from oldest
+        MAX_TOOL_CHARS = 600
+        for i, msg in enumerate(trimmed):
+            if self._estimate_tokens(trimmed) <= self._context_token_budget:
+                break
+            if isinstance(msg, ToolMessage):
+                content = str(msg.content or "")
+                if len(content) > MAX_TOOL_CHARS:
+                    trimmed[i] = ToolMessage(
+                        content=content[:MAX_TOOL_CHARS] + "...[trunc]",
+                        tool_call_id=msg.tool_call_id,
+                        name=msg.name,
+                    )
+
+        # Step 4: drop oldest ToolMessage blocks (AIMessage + ToolMessages) to free space
+        while self._estimate_tokens(trimmed) > self._context_token_budget and len(trimmed) > 3:
+            # Find first ToolMessage and drop it with its preceding AIMessage
+            for i, msg in enumerate(trimmed):
+                if isinstance(msg, ToolMessage):
+                    # Also drop the AIMessage that triggered this tool call
+                    drop_from = max(1, i - 1)
+                    trimmed = trimmed[:drop_from] + trimmed[i + 1 :]
+                    break
+            else:
+                break  # no more ToolMessages to drop
+
+        est = self._estimate_tokens(trimmed)
+        logger.debug("[Agent] Context trimmed: ~%d tokens from %d messages", est, len(trimmed))
+        return trimmed
 
     def _agent_node(self, state: AgentGraphState) -> dict[str, Any]:
         """Call the model with bound tools to decide the next action."""
         new_iteration = state["iteration"] + 1
         logger.info("[Agent] Iteration %d/%d", new_iteration, state["max_iterations"])
 
+        messages = self._trim_messages_for_context(state["messages"])
+        if len(messages) < len(state["messages"]):
+            logger.info(
+                "[Agent] Trimmed %d → %d messages to fit context budget (~%d tokens)",
+                len(state["messages"]),
+                len(messages),
+                self._estimate_tokens(messages),
+            )
+
+        llm_t0 = time.perf_counter()
         try:
-            response = self._llm_with_tools.invoke(state["messages"])
+            response = self._llm_with_tools.invoke(messages)
         except Exception as exc:
             logger.error("[Agent] LLM call failed: %s", exc)
             return {
@@ -248,6 +315,12 @@ class ReActAgent:
                 "iteration": new_iteration,
                 "error": str(exc),
             }
+        llm_ms = (time.perf_counter() - llm_t0) * 1000
+        has_tool_calls = bool(getattr(response, "tool_calls", None))
+        logger.info(
+            "[Agent] LLM call completed in %.0fms (has_tool_calls=%s)",
+            llm_ms, has_tool_calls,
+        )
 
         return {
             "messages": [response],
@@ -437,18 +510,44 @@ class ReActAgent:
 
         return "tools"
 
-    def _after_tools(self, state: AgentGraphState) -> Literal["agent", "end"]:
-        """
-        Route immediately to answer extraction after clarify_question.
+    # ─── Terminal comparison tools ─────────────────────────────────────────
+    # compare_programs and compare_cohorts already perform full A-vs-B
+    # retrieval internally, so the agent has all the data it needs.  Routing
+    # back to _agent_node for another Qwen LLM call (~75 s) is wasteful;
+    # instead we short-circuit to synthesize (which uses the faster Gemini
+    # synthesis LLM).
+    _TERMINAL_TOOLS: frozenset[str] = frozenset({
+        "compare_programs",
+        "compare_cohorts",
+    })
 
-        clarify_question is a user-interaction stop point. Once triggered,
-        the agent should wait for the user's follow-up turn instead of
-        continuing with speculative tool calls in the same run.
+    def _after_tools(self, state: AgentGraphState) -> Literal["agent", "synthesize", "end"]:
+        """
+        Route after tool execution.
+
+        - clarify_question: stop immediately (wait for user follow-up)
+        - compare_programs / compare_cohorts: route to synthesize with
+          the faster synthesis LLM instead of burning another ~75 s on
+          a local Qwen iteration
+        - everything else: loop back to agent
         """
         history = state.get("tool_call_history", [])
-        if history and history[-1] == "clarify_question":
+        if not history:
+            return "agent"
+
+        last_tool = history[-1]
+
+        if last_tool == "clarify_question":
             logger.info("[Agent] Clarify requested — stop current run and wait for user input")
             return "end"
+
+        if last_tool in self._TERMINAL_TOOLS:
+            logger.info(
+                "[Agent] Terminal comparison tool '%s' — routing to Gemini synthesis (skip Qwen iter)",
+                last_tool,
+            )
+            return "synthesize"
+
         return "agent"
 
     # ─── Graph construction ───────────────────────────────────────────────────
@@ -481,6 +580,7 @@ class ReActAgent:
             self._after_tools,
             {
                 "agent": "agent",
+                "synthesize": "synthesize",
                 "end": "extract_answer",
             },
         )

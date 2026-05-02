@@ -200,10 +200,16 @@ _DASH_TRANSLATION = str.maketrans(
         "\u2212": "-",  # minus sign
     }
 )
-_MAJOR_CODE_SPACE_RE = re.compile(
-    r"\b(IT|MI)\s+(E10|E15|E6|E7|EP|1|2)\b",
+_MAJOR_CODE_FUZZY_RE = re.compile(
+    r"\b(IT|MI)\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*(E10|E15|E6|E7|EP|1|2)\b",
     re.IGNORECASE,
 )
+
+def _canonicalise_major_code_parts(prefix: str, suffix: str) -> str:
+    """Convert regex major parts to canonical major code (e.g. MI+1 -> MI1)."""
+    p = prefix.upper()
+    s = suffix.upper()
+    return f"{p}{s}" if s in {"1", "2"} else f"{p}-{s}"
 _COHORT_RE = re.compile(
     r"\bk\s*(\d{2,3})\b|kh[oó]a\s*k?\s*(\d{2,3})",
     re.IGNORECASE,
@@ -256,8 +262,8 @@ def _normalise_major_text(value: str) -> str:
     text = unicodedata.normalize("NFKC", value or "")
     text = text.translate(_DASH_TRANSLATION)
     text = re.sub(r"\s*-\s*", "-", text)
-    text = _MAJOR_CODE_SPACE_RE.sub(
-        lambda m: f"{m.group(1).upper()}-{m.group(2).upper()}",
+    text = _MAJOR_CODE_FUZZY_RE.sub(
+        lambda m: _canonicalise_major_code_parts(m.group(1), m.group(2)),
         text,
     )
     text = re.sub(r"\s{2,}", " ", text)
@@ -535,6 +541,17 @@ def build_major_comparison_subqueries_for_retrieval(
     ]
 
 
+_GENERIC_WORDS = {
+    "tôi", "mình", "em", "bạn", "chào", "xin",
+    "muốn", "cần", "hỏi", "biết", "tìm", "hiểu", "xem",
+    "thông", "tin", "chung", "chi", "tiết", "tổng", "quan", "giới", "thiệu",
+    "về", "của", "cho", "trong", "thuộc",
+    "là", "gì", "như", "thế", "nào", "ra", "sao", "ở", "đâu",
+    "có", "những", "cái", "các",
+    "vui", "lòng", "hãy",
+    "ngành", "chuyên", "học", "chương", "trình", "đào", "tạo"
+}
+
 def strip_major_from_query_for_retrieval(
     query: str,
     resolved_major: Optional[str] = None,
@@ -593,7 +610,65 @@ def strip_major_from_query_for_retrieval(
     if len(cleaned.split()) < 2:
         return raw_query
 
+    words = re.findall(r'\w+', cleaned.lower())
+    non_generic = [w for w in words if w not in _GENERIC_WORDS]
+    if len(non_generic) < 1:
+        return raw_query
+
     return cleaned
+
+
+def expand_major_in_query_for_reranking(
+    query: str,
+    resolved_major: Optional[str] = None,
+) -> str:
+    """Replace major codes with their full names to improve reranker scores.
+    
+    Cross-encoders (like BGE) are trained on general text and often assign
+    very low relevance scores to pairs where the query uses an internal code
+    (e.g., "IT1") but the document uses the full name ("Khoa học máy tính").
+    """
+    raw_query = _normalise_major_text(query or "")
+    if not raw_query:
+        return raw_query
+
+    major_code = _resolve_major_code(raw_query, resolved_major)
+    if not major_code:
+        return raw_query
+
+    major_name = MAJOR_CODE_TO_NAME.get(major_code)
+    if not major_name:
+        return raw_query
+
+    if major_name.lower() in raw_query.lower():
+        return raw_query
+
+    labels = _build_major_labels(major_code)
+    expanded = raw_query
+    
+    replaced = False
+    for label in labels:
+        if label.lower() in expanded.lower():
+            # Use regex to avoid replacing inside words, though codes usually stand alone.
+            pattern = re.compile(rf"\b{re.escape(label)}\b", re.IGNORECASE)
+            # If the boundary regex doesn't match because of weird spacing, 
+            # fall back to a direct replace
+            if pattern.search(expanded):
+                expanded = pattern.sub(major_name, expanded)
+                replaced = True
+                break
+            else:
+                # Direct string replace fallback (case-insensitive)
+                pattern = re.compile(re.escape(label), re.IGNORECASE)
+                expanded = pattern.sub(major_name, expanded)
+                replaced = True
+                break
+
+    # Do not append the major name if it was successfully stripped, 
+    # as appending it hurts reranking scores for specific syllabus chunks 
+    # that only contain course names without mentioning the major.
+
+    return expanded
 
 
 def _term_any_mapping(field: str, value: str) -> Dict[str, Any]:

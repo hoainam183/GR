@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from threading import Lock
 from typing import Any
@@ -35,6 +36,21 @@ COLLECTION_MAP: dict[str, str] = {
 _RAG_CACHE: dict[tuple, str] = {}
 _RAG_CACHE_MAX = 256
 _CACHE_LOCK = Lock()
+
+# BGE reranker tokenizer is not thread-safe ("Already borrowed" RuntimeError).
+# This lock serialises rerank() calls while still allowing parallel embedding + search.
+_RERANKER_LOCK = Lock()
+
+# ─── Global Agent Retrieved Documents ─────────────────────────────────────────
+# Collects all raw document chunks retrieved during an agentic run so they can
+# be exposed in the UI trace logs (since the agent only returns string blobs).
+AGENT_RETRIEVED_DOCS: list[dict[str, Any]] = []
+
+def clear_agent_docs() -> None:
+    AGENT_RETRIEVED_DOCS.clear()
+
+def get_agent_docs() -> list[dict[str, Any]]:
+    return list(AGENT_RETRIEVED_DOCS)
 
 
 def _cache_get(key: tuple) -> str | None:
@@ -143,7 +159,11 @@ def _build_runtime() -> _AdapterRuntime:
 
 
 def set_runtime(runtime: _AdapterRuntime | None) -> None:
-    """Inject a pre-built (or mock) runtime.  Intended for tests only.
+    """Inject a pre-built (or mock) runtime.
+
+    Used by ``RAGPipeline.__init__`` to share its already-loaded embedders,
+    searcher, and reranker with the agent tool adapters — eliminating the
+    ~17 s cold-start that occurs when models are loaded a second time.
 
     Pass ``None`` to reset to lazy-init mode so the next call to
     ``_get_runtime()`` will rebuild from settings.
@@ -151,6 +171,31 @@ def set_runtime(runtime: _AdapterRuntime | None) -> None:
     global _RUNTIME
     with _RUNTIME_LOCK:
         _RUNTIME = runtime
+
+
+def inject_from_retrieval_service(retrieval_service: Any) -> None:
+    """Inject a shared runtime from the pipeline's RetrievalService.
+
+    This avoids duplicating heavy model loading (BGE-M3, E5, reranker)
+    that would otherwise add ~17 s to the first agent tool call.
+    """
+    settings = Settings()
+    tavily_key = settings.tavily_api_key or os.environ.get("TAVILY_API_KEY", "")
+    tavily_tool = None
+    if _is_valid_api_key(tavily_key):
+        from tools.tavily_search import TavilySearchTool
+        tavily_tool = TavilySearchTool(api_key=tavily_key)
+
+    runtime = _AdapterRuntime(
+        settings=settings,
+        bge_embedder=retrieval_service.bge_embedder,
+        e5_embedder=retrieval_service.e5_embedder,
+        searcher=retrieval_service.searcher,
+        reranker=retrieval_service.reranker,
+        tavily_tool=retrieval_service.tavily_tool or tavily_tool,
+    )
+    set_runtime(runtime)
+    logger.info("[ToolAdapters] Runtime injected from RetrievalService (shared models)")
 
 
 def _get_runtime() -> _AdapterRuntime:
@@ -275,13 +320,20 @@ def _rag_search(
         skip_rerank = True
 
     if runtime.reranker is not None and not skip_rerank:
-        results = runtime.reranker.rerank(
-            query=retrieval_query,
-            documents=results,
-            top_k=effective_top_k,
-        )
+        with _RERANKER_LOCK:
+            results = runtime.reranker.rerank(
+                query=retrieval_query,
+                documents=results,
+                top_k=effective_top_k,
+            )
     else:
         results = results[:effective_top_k]
+
+    # Accumulate for UI diagnostic logging
+    AGENT_RETRIEVED_DOCS.extend(results)
+
+    if not results:
+        return "[Khong tim thay thong tin trong co so du lieu]"
 
     formatted = _format_search_results(results, collection)
 
@@ -386,8 +438,18 @@ def _compare_cohorts(
     query_a = f"{topic} {resolved_cohort_a}".strip()
     query_b = f"{topic} {resolved_cohort_b}".strip()
 
-    result_a = _rag_search(query=query_a, collection=collection, resolved_cohort=resolved_cohort_a)
-    result_b = _rag_search(query=query_b, collection=collection, resolved_cohort=resolved_cohort_b)
+    # Parallel search — halves latency for the two independent retrievals.
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        future_a = pool.submit(
+            _rag_search, query=query_a, collection=collection,
+            resolved_cohort=resolved_cohort_a,
+        )
+        future_b = pool.submit(
+            _rag_search, query=query_b, collection=collection,
+            resolved_cohort=resolved_cohort_b,
+        )
+        result_a = future_a.result(timeout=45)
+        result_b = future_b.result(timeout=45)
 
     return (
         f"### {topic} — {resolved_cohort_a}\n{result_a}\n\n"
@@ -432,8 +494,18 @@ def _compare_programs(
     query_a = f"{clean_topic} ngành {resolved_major_a}".strip()
     query_b = f"{clean_topic} ngành {resolved_major_b}".strip()
 
-    result_a = _rag_search(query=query_a, collection=collection, resolved_major=resolved_major_a)
-    result_b = _rag_search(query=query_b, collection=collection, resolved_major=resolved_major_b)
+    # Parallel search — halves latency for the two independent retrievals.
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        future_a = pool.submit(
+            _rag_search, query=query_a, collection=collection,
+            resolved_major=resolved_major_a,
+        )
+        future_b = pool.submit(
+            _rag_search, query=query_b, collection=collection,
+            resolved_major=resolved_major_b,
+        )
+        result_a = future_a.result(timeout=45)
+        result_b = future_b.result(timeout=45)
 
     header = focused_topic or topic
     return (
@@ -487,6 +559,44 @@ def _clarify_question(message: str, options: list[str]) -> str:
     return f"{CLARIFY_SENTINEL}\n{clean_message}\n\n{options_text}"
 
 
+# ─── Planner-Executor helpers (Phase 1 refactor) ─────────────────────────────
+
+
+def execute_retrieval_plan(steps: list[dict[str, Any]]) -> list[tuple[str, str]]:
+    """Execute a list of retrieval steps in parallel. No LLM involved.
+
+    Each step is a dict with keys: query, collection, major_hint, cohort_hint, label.
+    Returns [(label, result_string), ...] in the same order as input steps.
+
+    Thread-safe: _rag_search has its own cache + reranker lock.
+    """
+    if not steps:
+        return []
+
+    results: list[tuple[str, str] | None] = [None] * len(steps)
+
+    def _run(i: int, step: dict[str, Any]) -> None:
+        result = _rag_search(
+            query=step.get("query", ""),
+            collection=step.get("collection", ""),
+            resolved_cohort=step.get("cohort_hint"),
+            resolved_major=step.get("major_hint"),
+        )
+        label = step.get("label") or step.get("collection", f"step_{i}")
+        results[i] = (label, result)
+
+    worker_count = min(4, len(steps))
+    with ThreadPoolExecutor(max_workers=worker_count) as pool:
+        futures = [pool.submit(_run, i, step) for i, step in enumerate(steps)]
+        for f in futures:
+            try:
+                f.result(timeout=45)
+            except Exception as exc:
+                logger.error("[Executor] Step failed: %s", exc)
+
+    return [r for r in results if r is not None]
+
+
 # ─── Formatting helpers ───────────────────────────────────────────────────────
 
 
@@ -495,16 +605,15 @@ def _format_search_results(results: Any, collection: str) -> str:
         return f"Khong tim thay thong tin phu hop trong {collection}."
 
     chunks: list[str] = []
-    for index, item in enumerate(results[:4], 1):
+    # Keep top-3 results (down from 4) to reduce token usage per tool call.
+    for index, item in enumerate(results[:3], 1):
         content = ""
         source = ""
-        score = None
 
         if hasattr(item, "payload"):
             payload = getattr(item, "payload", {}) or {}
             content = str(payload.get("content") or payload.get("text") or "")
             source = str(payload.get("source") or payload.get("title") or "")
-            score = getattr(item, "score", None)
         elif isinstance(item, dict):
             metadata = item.get("metadata", {}) or {}
             content = str(item.get("text") or item.get("content") or "")
@@ -514,13 +623,13 @@ def _format_search_results(results: Any, collection: str) -> str:
                 or metadata.get("title")
                 or item.get("collection", "")
             )
-            score = item.get("rerank_score", item.get("score"))
         else:
             content = str(item)
 
         content = " ".join(content.split())
-        if len(content) > 700:
-            content = content[:700].rstrip() + "..."
+        # Reduced from 700 → 500 to lower per-call token cost
+        if len(content) > 500:
+            content = content[:500].rstrip() + "..."
 
         if not content:
             continue
@@ -528,11 +637,7 @@ def _format_search_results(results: Any, collection: str) -> str:
         chunk = f"[{index}] {content}"
         if source:
             chunk += f"\n    Nguon: {source}"
-        if score is not None:
-            try:
-                chunk += f"\n    Diem: {float(score):.4f}"
-            except (TypeError, ValueError):
-                pass
+        # Score omitted — not useful for LLM synthesis and wastes tokens
         chunks.append(chunk)
 
     if not chunks:
@@ -554,6 +659,12 @@ def _format_web_results(results: Any) -> str:
             items = [item for item in raw_items if isinstance(item, dict)]
     elif isinstance(results, list):
         items = [item for item in results if isinstance(item, dict)]
+
+    # Exclude keyword duplicates
+    all_results = list({doc.get("id"): doc for doc in items}.values())
+
+    # Accumulate for UI diagnostic logging
+    AGENT_RETRIEVED_DOCS.extend(all_results)
 
     chunks: list[str] = []
     for index, item in enumerate(items[:3], 1):

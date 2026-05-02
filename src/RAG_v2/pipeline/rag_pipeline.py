@@ -212,7 +212,11 @@ class RAGPipeline:
         self._route_cache: OrderedDict[str, tuple[float, Dict[str, Any]]] = OrderedDict()
         self._reflect_cache: OrderedDict[str, tuple[float, str]] = OrderedDict()
 
-        # Removed set_retrieval_service since tool was removed
+        # Inject pipeline's shared retrieval stack into agent tool adapters.
+        # This eliminates the ~17 s cold-start that occurs when the agent
+        # tools lazily build their own embedders / searcher / reranker.
+        from agent.tool_adapters import inject_from_retrieval_service
+        inject_from_retrieval_service(self._retrieval_service)
 
         # Phase 2: Retrieval Quality & Data Intelligence
         from retrieval.validity_filter import ValidityFilter
@@ -485,6 +489,9 @@ class RAGPipeline:
             logger.warning("Agent unavailable, falling back to RAG v2")
             return _fallback_result("Agent is disabled")
 
+        from agent.tool_adapters import clear_agent_docs, get_agent_docs
+        clear_agent_docs()
+
         try:
             state = self.agent.run(
                 question,
@@ -542,6 +549,7 @@ class RAGPipeline:
             "tool_calls": tool_calls,
             "iterations": state.iteration,
             "agent_trace": agent_trace,
+            "sources": get_agent_docs(),
             "timings_ms": {
                 "agent_total": agent_latency_ms,
                 "pipeline_total": agent_latency_ms,
@@ -711,13 +719,17 @@ class RAGPipeline:
     ) -> Generator[str, None, None]:
         """Stream the answer token-by-token.
 
-        Retrieval and reranking run synchronously first, then generation is
-        streamed.  The reranked sources are stored in ``self.last_sources``
-        after the first call so that the caller can retrieve them after the
-        stream is exhausted.
+        Routing:
+          - chitchat   → direct LLM stream (no retrieval)
+          - complex    → LangGraph agent (answer delivered as a single chunk)
+          - simple/rag → RAG v2 streaming pipeline
+
+        All metadata (mode, timings, reflected_question, etc.) is stored on
+        ``self.last_*`` attrs after the generator is exhausted, so the route
+        handler can read them to emit a ``metadata`` SSE event.
 
         Yields:
-            Text chunks as they arrive from the API.
+            Text chunks as they arrive from the LLM.
         """
         effective_top_k = top_k or self._cfg["top_k"]
         pipeline_t0 = time.perf_counter()
@@ -729,29 +741,34 @@ class RAGPipeline:
             history = self._mongo_logger.get_history(session_id)
             pipeline_timings["history_load"] = _elapsed_ms(load_t0)
 
-        route_t0 = time.perf_counter()
-        routing = self._route_with_cache(question, history)
-        pipeline_timings["routing"] = _elapsed_ms(route_t0)
-        intent = routing.get("intent", "rag")
+        # ── Tier-0: complexity routing (chitchat / simple / complex) ─────────
+        complexity_t0 = time.perf_counter()
+        complexity = self.complexity_router.route(question)
+        complexity_tier = complexity["tier"]
+        pipeline_timings["complexity_routing"] = _elapsed_ms(complexity_t0)
+        logger.info("ComplexityRouter: %r → %s", question[:60], complexity_tier)
 
-        # Tier-3: LLM domain fallback for low-confidence RAG routing
-        if (
-            intent == "rag"
-            and (routing.get("confidence") or 1.0) < _LLM_FALLBACK_THRESHOLD
-        ):
-            fallback_t0 = time.perf_counter()
-            routing = self._llm_domain_classify(question, history, routing)
-            pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(
-                fallback_t0
-            )
-
+        # Initialise last_* defaults
         self.last_sources: List[Dict[str, Any]] = []
-        self.last_intent: str = intent
+        self.last_intent: str = complexity_tier
         self.last_timings: Dict[str, float] = {}
+        self.last_mode: str = complexity_tier
+        self.last_reflected_question: Optional[str] = None
+        self.last_target_collections: Optional[List[str]] = None
+        self.last_collection_scores: Optional[List[Dict[str, Any]]] = None
+        self.last_routing_probabilities: Optional[Dict[str, Any]] = None
+        self.last_applied_filters: Optional[Any] = None
+        self.last_collection_results: Optional[Any] = None
+        self.last_agent_trace: Optional[Dict[str, Any]] = None
+        self.last_tools_used: List[str] = []
+        self.last_iterations: int = 0
 
         full_answer_chunks: List[str] = []
 
-        if intent == "chitchat":
+        # ── Chitchat branch ───────────────────────────────────────────────────
+        if complexity_tier == "chitchat":
+            self.last_mode = "chitchat"
+            self.last_intent = "chitchat"
             stream_t0 = time.perf_counter()
             first_token_ms: Optional[float] = None
             for chunk in chitchat_flow_stream(
@@ -764,13 +781,103 @@ class RAGPipeline:
                 full_answer_chunks.append(chunk)
                 yield chunk
 
-            pipeline_timings["stream_first_token"] = round(
-                first_token_ms or 0.0, 2
-            )
+            pipeline_timings["stream_first_token"] = round(first_token_ms or 0.0, 2)
             pipeline_timings["stream_generate"] = _elapsed_ms(stream_t0)
+
+        # ── Complex branch → agent ────────────────────────────────────────────
+        elif complexity_tier == "complex" and self.agent is not None:
+            self.last_mode = "agent"
+            self.last_intent = "complex"
+
+            # ── Step 0: Reflect the query using history before hitting the agent ──
+            # Elliptical follow-ups like "so sánh với ITE7" become fully standalone
+            # queries like "so sánh môn mạng máy tính giữa IT-E6 và IT-E7" so the
+            # local Qwen model has all context it needs to choose the right tool.
+            reflected_question = question
+            if self._reflector is not None:
+                reflect_t0 = time.perf_counter()
+                try:
+                    trimmed_for_reflect = history[-8:] if history else []
+                    ref_result = self._reflector.reflect(
+                        question,
+                        chat_history=trimmed_for_reflect,
+                        user_context=user_context,
+                        user_profile=user_context,
+                    )
+                    rewritten = ref_result.get("rewritten", "").strip()
+                    if rewritten and len(rewritten) > len(question):
+                        # Only use the rewritten query if it actually expanded the question
+                        reflected_question = rewritten
+                        logger.info(
+                            "[query_stream/agent] Reflected: %r -> %r",
+                            question[:60],
+                            reflected_question[:80],
+                        )
+                    else:
+                        logger.info(
+                            "[query_stream/agent] Reflection did not expand, keeping original"
+                        )
+                except Exception as ref_exc:
+                    logger.warning(
+                        "[query_stream/agent] Reflection failed (%s), using original",
+                        ref_exc,
+                    )
+                pipeline_timings["reflection"] = _elapsed_ms(reflect_t0)
+                self.last_reflected_question = reflected_question
+
+            agent_t0 = time.perf_counter()
+            try:
+                agent_result = self.query_agent(
+                    question=reflected_question,
+                    history=history,
+                    top_k=effective_top_k,
+                    session_id=session_id,
+                    user_context=user_context,
+                    route_label="complex",
+                    require_agent=False,
+                )
+                answer = agent_result.get("answer", "")
+                self.last_mode = str(agent_result.get("mode", "agent"))
+                self.last_agent_trace = agent_result.get("agent_trace")
+                self.last_tools_used = list(agent_result.get("tools_used") or [])
+                self.last_iterations = int(agent_result.get("iterations") or 0)
+                self.last_sources = agent_result.get("sources") or []
+                pipeline_timings["agent_total"] = _elapsed_ms(agent_t0)
+            except Exception as exc:
+                logger.warning("Agent failed in stream path (%s), falling back", exc)
+                answer = "Xin lỗi, có lỗi xảy ra khi xử lý câu hỏi. Vui lòng thử lại."
+
+            # Yield the full agent answer as a single chunk
+            if answer:
+                full_answer_chunks.append(answer)
+                yield answer
+
+        # ── Simple / RAG branch ───────────────────────────────────────────────
         else:
+            # Fall back to classic RAG v2 when complexity tier is simple or agent disabled
+            self.last_mode = "rag_v2"
+            if complexity_tier == "complex" and self.agent is None:
+                logger.info("Agent disabled, falling back to RAG v2 for complex query")
+                self.last_mode = "rag_v2_fallback"
+
+            route_t0 = time.perf_counter()
+            routing = self._route_with_cache(question, history)
+            pipeline_timings["routing"] = _elapsed_ms(route_t0)
+            intent = routing.get("intent", "rag")
+            self.last_intent = intent
+
+            # Tier-3: LLM domain fallback for low-confidence RAG routing
+            if (
+                intent == "rag"
+                and (routing.get("confidence") or 1.0) < _LLM_FALLBACK_THRESHOLD
+            ):
+                fallback_t0 = time.perf_counter()
+                routing = self._llm_domain_classify(question, history, routing)
+                pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(fallback_t0)
+
             flow_cfg = {**self._cfg, "top_k": effective_top_k}
             flow_timings: Dict[str, float] = {}
+            flow_metadata: Dict[str, Any] = {}
             stream, reranked = rag_flow_stream(
                 question=question,
                 history=history,
@@ -786,32 +893,47 @@ class RAGPipeline:
                 validity_filter=self._validity_filter,
                 reference_resolver=self._reference_resolver,
                 timings_ms_out=flow_timings,
+                metadata_out=flow_metadata,
             )
             self.last_sources = reranked
+            self.last_reflected_question = flow_metadata.get("reflected_question")
+            self.last_target_collections = flow_metadata.get("target_collections")
+            self.last_collection_scores = flow_metadata.get("collection_scores")
+            self.last_routing_probabilities = flow_metadata.get("routing_probabilities")
+            self.last_applied_filters = flow_metadata.get("applied_filters")
+            self.last_collection_results = flow_metadata.get("collection_results")
+
             for chunk in stream:
                 full_answer_chunks.append(chunk)
                 yield chunk
             pipeline_timings = _merge_timings(pipeline_timings, flow_timings)
+            # Update collection scores after stream finishes (timings may have changed)
+            if flow_metadata.get("collection_scores"):
+                self.last_collection_scores = flow_metadata.get("collection_scores")
 
         timings_ms = _merge_timings(pipeline_timings)
         timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
         self.last_timings = timings_ms
-        _log_timings(f"query_stream({intent})", timings_ms)
+        _log_timings(f"query_stream({complexity_tier})", timings_ms)
 
         # Log to MongoDB after stream finishes (skip chitchat to reduce noise/cost)
-        if session_id and self._mongo_logger and intent != "chitchat":
+        if session_id and self._mongo_logger and complexity_tier != "chitchat":
             latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
             result = {
                 "answer": "".join(full_answer_chunks),
-                "intent": intent,
+                "intent": self.last_intent,
+                "mode": self.last_mode,
                 "num_sources": len(self.last_sources),
                 "model_name": self._chat.model,
                 "timings_ms": timings_ms,
+                "tools_used": self.last_tools_used,
+                "iterations": self.last_iterations,
             }
             self._mongo_logger.log_turn(
                 session_id=session_id,
                 question=question,
                 result=result,
+                reflected_question=self.last_reflected_question,
                 latency_ms=latency_ms,
                 timings_ms=timings_ms,
             )

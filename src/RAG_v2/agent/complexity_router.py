@@ -5,6 +5,7 @@ Improvements over original:
 - Added confidence signal (pattern-based vs heuristic-based).
 - Better pattern coverage for ambiguous queries.
 - Optional DomainClassifier integration for borderline cases.
+- ``complex_subtype`` field for planner vs agent-loop routing.
 """
 
 from __future__ import annotations
@@ -29,43 +30,47 @@ CHITCHAT_PATTERNS: list[str] = [
 # ─── Complex patterns ─────────────────────────────────────────────────────────
 # Queries matching any of these need the full LangGraph ReAct agent.
 # Design principle: be SPECIFIC to avoid false positives on simple questions.
+#
+# Each pattern is tagged with a complex_subtype so the downstream planner can
+# decide whether to use the deterministic planner path or the agent loop.
 
-COMPLEX_PATTERNS: list[str] = [
+# Patterns → complex_subtype mapping.
+# Order matters: first match wins.
+_COMPLEX_PATTERN_SPECS: list[tuple[str, str]] = [
+    # ── comparison subtype ────────────────────────────────────────────────────
     # Explicit comparison keyword
-    r"\bso\s*sánh\b",
-
+    (r"\bso\s*sánh\b", "comparison"),
     # Two cohort codes mentioned in the same query (K65 … K70)
-    # Widened to 120 chars — cohorts often appear far apart in Vietnamese.
-    r"\bK\d{2,3}\b.{1,120}\bK\d{2,3}\b",
-
+    (r"\bK\d{2,3}\b.{1,120}\bK\d{2,3}\b", "comparison"),
     # Two programme codes mentioned (IT-E6 … IT-E7, MI-E10 ...)
-    r"\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH)-[A-Z0-9]+\b.{1,50}\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH)-[A-Z0-9]+\b",
-
+    (r"\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH)-[A-Z0-9]+\b.{1,50}\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH)-[A-Z0-9]+\b", "comparison"),
     # Difference / similarity ONLY when paired with cohort / programme context
-    r"(khác nhau|khác biệt|giống nhau).{0,40}(K\d{2}|khóa|ngành|chương trình|học kỳ|quy định)",
-    r"(K\d{2}|khóa|ngành|chương trình).{0,40}(khác nhau|khác biệt|giống nhau)",
+    (r"(khác nhau|khác biệt|giống nhau).{0,40}(K\d{2}|khóa|ngành|chương trình|học kỳ|quy định)", "comparison"),
+    (r"(K\d{2}|khóa|ngành|chương trình).{0,40}(khác nhau|khác biệt|giống nhau)", "comparison"),
 
-    # Multi-source eligibility queries
-    r"\bđủ\s+điều\s+kiện\b",
-    r"\b(có\s+thể|có\s+được)\b.{0,30}\b(tốt nghiệp|đăng ký|đăng kí|xét duyệt|nhận học bổng)\b",
-    r"(môn|học phần).{0,30}\b(được|có)\s+(đăng ký|đăng kí|mở)\b",
-    r"\btất\s+cả.{0,20}điều\s+kiện\b",
+    # ── multi_source subtype ──────────────────────────────────────────────────
+    (r"\bđủ\s+điều\s+kiện\b", "multi_source"),
+    (r"\b(có\s+thể|có\s+được)\b.{0,30}\b(tốt nghiệp|đăng ký|đăng kí|xét duyệt|nhận học bổng)\b", "multi_source"),
+    (r"(môn|học phần).{0,30}\b(được|có)\s+(đăng ký|đăng kí|mở)\b", "multi_source"),
+    (r"\btất\s+cả.{0,20}điều\s+kiện\b", "multi_source"),
 
-    # Ambiguous single-term queries (no actionable context)
-    r"^(học bổng|môn học|lịch|quy định|chương trình)\s*\??$",
-    r"^cho\s+tôi\s+biết\s+về\s+\w{1,15}\s*$",
-
-    # Multi-step questions with conjunctions
-    r"\bvà\b.{0,30}\b(cho biết|liệt kê|so sánh|giải thích)\b",
+    # ── general subtype (ambiguous / multi-step) ──────────────────────────────
+    (r"^(học bổng|môn học|lịch|quy định|chương trình)\s*\??$", "general"),
+    (r"^cho\s+tôi\s+biết\s+về\s+\w{1,15}\s*$", "general"),
+    (r"\bvà\b.{0,30}\b(cho biết|liệt kê|so sánh|giải thích)\b", "general"),
 ]
+
+# Build compiled caches from the specs
+COMPLEX_PATTERNS: list[str] = [pat for pat, _ in _COMPLEX_PATTERN_SPECS]
 
 # ─── Compiled caches ──────────────────────────────────────────────────────────
 
 _CHITCHAT_RE: list[re.Pattern] = [
     re.compile(p, re.IGNORECASE) for p in CHITCHAT_PATTERNS
 ]
-_COMPLEX_RE: list[re.Pattern] = [
-    re.compile(p, re.IGNORECASE) for p in COMPLEX_PATTERNS
+_COMPLEX_SPECS_RE: list[tuple[re.Pattern, str]] = [
+    (re.compile(pat, re.IGNORECASE), subtype)
+    for pat, subtype in _COMPLEX_PATTERN_SPECS
 ]
 
 
@@ -80,14 +85,21 @@ class ComplexityRouter:
     - ``"complex"``   — multi-domain, comparative, or ambiguous query;
                         routed to the LangGraph ReAct agent.
 
+    When tier is ``"complex"``, the result also contains a
+    ``complex_subtype`` field:
+
+    - ``"comparison"``   — explicit A-vs-B comparison → planner path
+    - ``"multi_source"`` — needs data from ≥2 collections → planner path
+    - ``"general"``      — ambiguous / multi-step → agent loop path
+
     The ``route()`` method now returns a dict with ``tier``, ``reason``,
-    and ``confidence`` keys for better observability. The ``route_tier()``
-    convenience method returns just the tier string for backwards
-    compatibility.
+    ``confidence``, and optionally ``complex_subtype`` keys for better
+    observability. The ``route_tier()`` convenience method returns just
+    the tier string for backwards compatibility.
     """
 
     def route(self, query: str) -> Dict[str, Any]:
-        """Classify query and return ``{tier, reason, confidence}``.
+        """Classify query and return ``{tier, reason, confidence[, complex_subtype]}``.
 
         Returns:
             Dict with keys:
@@ -95,6 +107,8 @@ class ComplexityRouter:
             - ``tier``: ``"chitchat"`` | ``"simple"`` | ``"complex"``
             - ``reason``: human-readable explanation of the routing decision
             - ``confidence``: ``"high"`` (pattern match) or ``"medium"`` (heuristic)
+            - ``complex_subtype`` (only when tier=complex):
+              ``"comparison"`` | ``"multi_source"`` | ``"general"``
         """
         q = query.strip()
         q_lower = q.lower()
@@ -113,27 +127,29 @@ class ComplexityRouter:
                 )
                 return result
 
-        # 2. Complex signals — regex patterns
-        for pattern in _COMPLEX_RE:
+        # 2. Complex signals — regex patterns with subtype tagging
+        for pattern, subtype in _COMPLEX_SPECS_RE:
             if pattern.search(q):
                 result = {
                     "tier": "complex",
                     "reason": f"complex_pattern: {pattern.pattern[:50]}",
                     "confidence": "high",
+                    "complex_subtype": subtype,
                 }
                 logger.info(
-                    "ComplexityRouter: %r → %s (%s)",
-                    q[:60], result["tier"], result["reason"],
+                    "ComplexityRouter: %r → %s/%s (%s)",
+                    q[:60], result["tier"], subtype, result["reason"],
                 )
                 return result
 
-        # 3. Structural heuristics — lower confidence
+        # 3. Structural heuristics — lower confidence, general subtype
         word_count = len(q.split())
         if word_count > 30:
             result = {
                 "tier": "complex",
                 "reason": f"heuristic: word_count={word_count}>30",
                 "confidence": "medium",
+                "complex_subtype": "general",
             }
             logger.info(
                 "ComplexityRouter: %r → %s (%s)",
@@ -146,6 +162,7 @@ class ComplexityRouter:
                 "tier": "complex",
                 "reason": f"heuristic: multiple_questions={q.count('?')}",
                 "confidence": "medium",
+                "complex_subtype": "general",
             }
             logger.info(
                 "ComplexityRouter: %r → %s (%s)",
@@ -159,6 +176,7 @@ class ComplexityRouter:
                 "tier": "complex",
                 "reason": f"heuristic: conjunction_count={q_lower.count(' và ')}>=3",
                 "confidence": "medium",
+                "complex_subtype": "general",
             }
             logger.info(
                 "ComplexityRouter: %r → %s (%s)",

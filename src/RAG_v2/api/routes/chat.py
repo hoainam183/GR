@@ -354,6 +354,46 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
         while True:
             chunk = await queue.get()
             if chunk is None:
+                # ── Emit metadata SSE event before done ──────────────────────
+                try:
+                    meta_payload: dict[str, Any] = {
+                        "type": "metadata",
+                        "mode": getattr(pipeline, "last_mode", "rag_v2"),
+                        "route": getattr(pipeline, "last_intent", "rag"),
+                        "intent": getattr(pipeline, "last_intent", "rag"),
+                        "num_sources": len(getattr(pipeline, "last_sources", [])),
+                        "retrieved_documents": getattr(pipeline, "last_sources", []),
+                        "timings_ms": getattr(pipeline, "last_timings", {}),
+                        "reflected_question": getattr(
+                            pipeline, "last_reflected_question", None
+                        ),
+                        "target_collections": getattr(
+                            pipeline, "last_target_collections", None
+                        ),
+                        "collection_scores": getattr(
+                            pipeline, "last_collection_scores", None
+                        ),
+                        "routing_probabilities": getattr(
+                            pipeline, "last_routing_probabilities", None
+                        ),
+                        "applied_filters": getattr(
+                            pipeline, "last_applied_filters", None
+                        ),
+                        "collection_results": getattr(
+                            pipeline, "last_collection_results", None
+                        ),
+                        "agent_trace": getattr(pipeline, "last_agent_trace", None),
+                        "tools_used": getattr(pipeline, "last_tools_used", []),
+                        "iterations": getattr(pipeline, "last_iterations", 0),
+                    }
+                    yield (
+                        "data: "
+                        + json.dumps(meta_payload, ensure_ascii=False)
+                        + "\n\n"
+                    )
+                except Exception as meta_err:
+                    logger.warning("Failed to emit metadata SSE event: %s", meta_err)
+                # ── Done event ───────────────────────────────────────────────
                 yield (
                     "data: "
                     + json.dumps({"type": "done"}, ensure_ascii=False)

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 if TYPE_CHECKING:
     from config.settings import Settings
 
-from openai import OpenAI, RateLimitError
+from openai import OpenAI, InternalServerError, RateLimitError
 
 from .prompts import (
     REWRITE_NO_HISTORY_TEMPLATE,
@@ -565,7 +565,7 @@ class QueryReflector:
             {"role": "user", "content": user_prompt},
         ]
 
-        # Retry with exponential backoff for rate-limit errors
+        # Retry with exponential backoff for rate-limit / 503 errors
         last_exc: Optional[Exception] = None
         for attempt in range(_MAX_RETRIES):
             try:
@@ -576,15 +576,19 @@ class QueryReflector:
                     max_tokens=self.max_tokens,
                 )
                 break
-            except RateLimitError as exc:
+            except (RateLimitError, InternalServerError) as exc:
+                # Retry on 429 Rate-Limit and 503 Service Unavailable
+                if isinstance(exc, InternalServerError) and exc.status_code != 503:
+                    raise
                 last_exc = exc
                 if attempt < _MAX_RETRIES - 1:
                     delay = _BASE_RETRY_DELAY * (2**attempt)
                     logger.warning(
-                        "Reflection rate-limited (attempt %d/%d), retrying in %.1fs",
+                        "Reflection transient error (attempt %d/%d), retrying in %.1fs: %s",
                         attempt + 1,
                         _MAX_RETRIES,
                         delay,
+                        exc,
                     )
                     time.sleep(delay)
         else:

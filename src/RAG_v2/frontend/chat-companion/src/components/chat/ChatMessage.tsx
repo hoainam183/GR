@@ -3,6 +3,7 @@ import type { Message } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { DocRow } from '../trace/DocRow';
 
 interface ChatMessageProps {
   message: Message;
@@ -404,29 +405,12 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         {showSources && hasSources && (
           <div className="mt-3 space-y-2 border-t border-border pt-3">
             {message.sources?.map((source, index) => (
-              <div
-                key={index}
-                className="rounded-lg bg-background/50 p-3 text-xs"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold text-primary">
-                    Nguồn {source.rank}
-                  </span>
-                  <span className="text-muted-foreground">
-                    Score: {source.score.toFixed(3)}
-                  </span>
-                </div>
-                <p className="text-muted-foreground line-clamp-3">
-                  {source.content}
-                </p>
-                {source.metadata && Object.keys(source.metadata).length > 0 && (
-                  <div className="mt-2 text-[10px] text-muted-foreground">
-                    {source.metadata.file_path && (
-                      <div>📄 {source.metadata.file_path}</div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <DocRow
+                key={source.rank ?? index + 1}
+                doc={source}
+                rank={source.rank ?? index + 1}
+                showRerank={source.rerank_score !== undefined}
+              />
             ))}
           </div>
         )}
