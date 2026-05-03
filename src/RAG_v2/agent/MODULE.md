@@ -35,8 +35,14 @@ agent/
 
 Đối với **`complex`**, router xác định thêm trường **`complex_subtype`**:
 - `comparison`: So sánh 2 mã khóa hoặc 2 mã ngành.
-- `multi_source`: Câu hỏi đa điều kiện (vd: "đủ điều kiện tốt nghiệp không").
+- `personal_check`: Query có chủ thể cá nhân (tôi/mình/em) kết hợp điều kiện (đủ/có thể/được không) → ReAct loop.
+- `multi_source`: Câu hỏi đa điều kiện không có context cá nhân.
 - `general`: Câu hỏi dài, phức tạp nhưng không khớp pattern rõ ràng.
+
+**Luu ý quan trọng (thứ tự pattern):**
+- `personal_check` được đặt TRƯỚC `multi_source` trong `_COMPLEX_PATTERN_SPECS`.
+- Word-count heuristic (>30 words): chỉ route `complex` nếu có connector đa chủ đề (”và/cũng/ngoài ra...”), không route nếu query dài nhưng single-topic.
+- `_MULTI_TOPIC_RE` được compile sẵn ở module-level, tránh re-compile mỗi lần gọi.
 
 ---
 
@@ -44,12 +50,19 @@ agent/
 
 **Kiến trúc graph mới (Dual-Path):**
 ```
-START ─[_route_complex]─┬─► decompose → planner ─[_after_planner]─┬─► executor → synthesize → END
+START ─[Ὗ_route_complex]─┬─► decompose → planner ─[Ὗ_after_planner]─┬─► executor → synthesize → END
                         │                                         └─► agent (fallback)
-                        └─► agent ─[_should_continue]─┬─► tools ─[_after_tools]─┬─► agent
+                        └─► agent ─[Ὗ_should_continue]─┬─► tools ─[Ὗ_after_tools]─┬─► agent
                                                       ├─► synthesize → END      ├─► synthesize → END
                                                       └─► extract_answer → END  └─► extract_answer → END
 ```
+
+**Cải tiến quan trọng:**
+- `_after_tools()`: Detect `[Loi...]` prefix → synthesize sớm. Nếu `[Khong tim thay...]`, retry (vòng lại `agent`).
+- `_agent_node()`: Quản lý Retry Defense-in-depth: nếu tool trả về trống, inject SystemMessage hint (giảm từ khóa, bỏ thông tin cá nhân). Nếu `empty_result_count >= 2`, abort và synthesize.
+- `_validate_plan()`: Kiểm tra chất lượng plan (>50% steps hợp lệ) trước khi execute. Reject nếu query rỗng hoặc collection không hợp lệ.
+- `_VALID_COLLECTIONS`: Frozenset các collection hợp lệ mà Planner được phép dùng.
+- Import `execute_retrieval_plan` và `web_search_for_executor` được đưa lên top-level.
 
 **Nodes:**
 - `decompose`: Tách câu hỏi phức tạp thành sub-questions (Gemini).
@@ -77,6 +90,15 @@ START ─[_route_complex]─┬─► decompose → planner ─[_after_planner]�
 **Executor (`execute_retrieval_plan`):**
 - Hàm nhận một list các steps (từ Planner) và chạy `_rag_search` song song qua `ThreadPoolExecutor`.
 
+**Query Sanitization:**
+- Hàm `strip_personal_identifiers`: Loại bỏ mã sinh viên (chuỗi 8 số) hoặc tiền tố "mã sv:" ra khỏi truy vấn RAG để không làm nhiễu không gian Semantic vector (BGE-M3).
+
+**Thread-safety — Per-request docs (quan trọng):**
+- `AGENT_RETRIEVED_DOCS` đã được thay thế bằng `_agent_docs_ctx: ContextVar` để mỗi request có danh sách riêng.
+- Gọi `init_agent_docs()` trong thread worker (trong `pipeline.query_agent()`) trước khi chạy agent.
+- Gọi `get_agent_docs()` sau agent.run() để lấy docs của request đó.
+- `web_search_for_executor()`: Public wrapper cho `_web_search`, được import top-level từ `react_agent.py`.
+
 ---
 
 ### `prompts.py` — Agent Prompts
@@ -90,7 +112,7 @@ START ─[_route_complex]─┬─► decompose → planner ─[_after_planner]�
 
 ### `state.py` & `graph_state.py`
 
-- `AgentGraphState` bổ sung: `execution_path`, `sub_questions`, `retrieval_plan`, `user_context`.
+- `AgentGraphState` bổ sung: `execution_path`, `sub_questions`, `retrieval_plan`, `user_context`, `empty_result_count` (cho retry logic).
 - `AgentState`: Output chuẩn để log vào DB.
 
 ---

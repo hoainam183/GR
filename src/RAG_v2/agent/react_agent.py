@@ -20,6 +20,7 @@ from .prompts import (
     SYNTHESIS_PROMPT,
 )
 from .state import AgentState, ToolResult
+from .tool_adapters import execute_retrieval_plan, web_search_for_executor
 
 logger = logging.getLogger(__name__)
 
@@ -195,6 +196,7 @@ class ReActAgent:
             "sub_questions": None,
             "retrieval_plan": None,
             "user_context": user_context,
+            "empty_result_count": 0,
         }
 
         logger.info("[Agent] Starting query: '%s...' (path=%s)", query[:80], execution_path)
@@ -325,6 +327,23 @@ class ReActAgent:
                 self._estimate_tokens(messages),
             )
 
+        # Retry logic for empty results
+        empty_count = state.get("empty_result_count", 0)
+        if messages and isinstance(messages[-1], ToolMessage):
+            if str(messages[-1].content or "").startswith("[Khong tim thay"):
+                empty_count += 1
+                if empty_count >= 2:
+                    logger.warning("[Agent] Empty result limit reached, forcing synthesize")
+                    return {"error": "Không tìm thấy thông tin phù hợp."}
+                
+                logger.info("[Agent] Empty result detected, injecting retry hint (count=%d)", empty_count)
+                hint = SystemMessage(
+                    content="Kết quả tìm kiếm trống. Hãy thử lại với câu truy vấn ngắn gọn hơn, "
+                            "chỉ giữ từ khóa cốt lõi, loại bỏ các thông tin cá nhân hoặc từ ngữ thừa."
+                )
+                # messages is a copy from _trim_messages_for_context or we can just append
+                messages = messages + [hint]
+
         llm_t0 = time.perf_counter()
         try:
             response = self._llm_with_tools.invoke(messages)
@@ -345,6 +364,7 @@ class ReActAgent:
         return {
             "messages": [response],
             "iteration": new_iteration,
+            "empty_result_count": empty_count,
         }
 
     def _tools_node(self, state: AgentGraphState) -> dict[str, Any]:
@@ -557,7 +577,7 @@ class ReActAgent:
         for msg in reversed(messages):
             if isinstance(msg, ToolMessage):
                 content = str(msg.content or "")
-                if content.startswith("[Loi") or content.startswith("[Khong tim thay"):
+                if content.startswith("[Loi"):
                     logger.warning(
                         "[Agent] Tool '%s' returned error — forcing early synthesize: %s",
                         last_tool, content[:80],
@@ -657,8 +677,6 @@ class ReActAgent:
 
     def _executor_node(self, state: AgentGraphState) -> dict[str, Any]:
         """Execute retrieval plan steps in parallel. No LLM involved."""
-        from .tool_adapters import execute_retrieval_plan, _web_search
-
         plan = state.get("retrieval_plan") or {}
         steps = plan.get("steps", [])
 
@@ -685,7 +703,7 @@ class ReActAgent:
         new_history = [f"planned_rag_search:{lbl}" for lbl, _ in labeled_results]
 
         if plan.get("needs_web"):
-            web_result = _web_search(query=state["query"])
+            web_result = web_search_for_executor(query=state["query"])
             tool_messages.append(ToolMessage(
                 content=web_result[:self._tool_result_limit],
                 tool_call_id="plan_web",
@@ -700,6 +718,41 @@ class ReActAgent:
 
     # ─── Planner-Executor routing ──────────────────────────────────────────────
 
+    # Tập hợp collection hợp lệ mà planner được phép dùng.
+    # Phải khớp với COLLECTION_MAP keys trong tool_adapters.py.
+    _VALID_COLLECTIONS: frozenset[str] = frozenset({
+        "quy_dinh", "chuong_trinh", "ke_hoach", "ho_tro_sv"
+    })
+
+    def _validate_plan(self, plan: dict[str, Any]) -> bool:
+        """Kiểm tra chất lượng retrieval plan trước khi execute.
+
+        Reject plan nếu hơn 50% steps có vấn đề:
+        - query rỗng hoặc whitespace
+        - collection không nằm trong _VALID_COLLECTIONS
+
+        Returns:
+            True nếu plan đủ chất lượng để execute.
+        """
+        steps = plan.get("steps", [])
+        if not steps:
+            return False
+
+        valid_steps = [
+            s for s in steps
+            if str(s.get("query", "")).strip()
+            and s.get("collection") in self._VALID_COLLECTIONS
+        ]
+        ratio = len(valid_steps) / len(steps)
+        if ratio < 0.5:
+            logger.warning(
+                "[Planner] Low quality plan: %d/%d valid steps (%.0f%%) — collections=%s",
+                len(valid_steps), len(steps), ratio * 100,
+                [s.get("collection") for s in steps],
+            )
+            return False
+        return True
+
     def _route_complex(self, state: AgentGraphState) -> str:
         """Entry routing: planner path (decompose) or agent loop."""
         if state.get("execution_path") == "planner":
@@ -709,11 +762,11 @@ class ReActAgent:
     def _after_planner(
         self, state: AgentGraphState
     ) -> Literal["executor", "agent"]:
-        """Route after planner: execute plan if valid, else fallback to agent loop."""
+        """Route after planner: execute plan if valid quality, else fallback to agent loop."""
         plan = state.get("retrieval_plan")
-        if plan and plan.get("steps"):
+        if plan and self._validate_plan(plan):
             return "executor"
-        logger.warning("[Planner] No valid plan — falling back to agent loop")
+        logger.warning("[Planner] No valid/quality plan — falling back to agent loop")
         return "agent"
 
     # ─── Graph construction ───────────────────────────────────────────────────

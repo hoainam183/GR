@@ -130,7 +130,10 @@ hay markdown.
 hoặc tham chiếu cá nhân ("của tôi", "ngành tôi", "ngành này", "chương trình tôi"). \
 Nếu câu hỏi KHÔNG có tham chiếu cá nhân nào, KHÔNG thêm thông tin ngành/khóa vào \
 truy vấn, kể cả khi USER_PROFILE có sẵn.
-
+12. TUYỆT ĐỐI KHÔNG mang "intent" (mục tiêu/ngữ cảnh hành động) từ CHAT_HISTORY sang CURRENT_QUERY. \
+CHAT_HISTORY chỉ được dùng để giải nghĩa đại từ. Nếu CURRENT_QUERY chuyển sang chủ đề mới \
+(VD: "môn ITSS"), KHÔNG ĐƯỢC ghép chủ đề cũ (VD: "điều kiện tốt nghiệp") vào.
+13. KHÔNG đưa mã sinh viên hoặc tên cá nhân vào Standalone Query.
 VÍ DỤ FEW-SHOT:
 ---
 Ví dụ 1 — Giải tham chiếu ngành từ USER_PROFILE:

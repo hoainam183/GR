@@ -162,6 +162,14 @@ class Settings(BaseSettings):
     domain_routing_enabled: bool = True
     domain_confidence_threshold: float = 0.65
 
+    # --- Auto Crawler ---
+    crawler_enabled: bool = True
+    crawler_schedule_hour: int = 2
+    crawler_schedule_minute: int = 0
+    crawler_delay: float = 1.0
+    crawler_retention_months: int = 6
+    crawler_tags: str = "ĐTĐH:%C4%90T%C4%90H"  # comma-sep "Name:encoded,..."
+
     # --- CORS ---
     cors_origins: List[str] = ["*"]
 

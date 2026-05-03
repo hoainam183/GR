@@ -81,7 +81,73 @@ async def lifespan(app: FastAPI):
             app.state.mongo_status = "degraded"  # indexes missing but connected
 
     logger.info("Backend ready!")
+    
+    # Warmup LLM to avoid cold-start latency on first request
+    async def warmup_llm():
+        from langchain_core.messages import HumanMessage
+        await asyncio.sleep(2)   # đợi server ready
+        try:
+            agent = getattr(app.state.pipeline, "agent", None)
+            if agent and hasattr(agent, "_llm"):
+                await loop.run_in_executor(None, lambda: agent._llm.invoke([HumanMessage(content="hello")]))
+                logger.info("[Warmup] LLM warmed up successfully")
+        except Exception as e:
+            logger.warning("[Warmup] Failed: %s", e)
+
+    asyncio.create_task(warmup_llm())
+
+    # ── Auto-Crawler Scheduler ──────────────────────────────────
+    scheduler = None
+    if settings.crawler_enabled:
+        try:
+            from apscheduler.schedulers.asyncio import AsyncIOScheduler
+            from pipeline.auto_crawler import AutoCrawlPipeline
+
+            # Try to reuse embedders from the RAG pipeline
+            bge, e5 = None, None
+            pipe = app.state.pipeline
+            if hasattr(pipe, "retrieval_service"):
+                rs = pipe.retrieval_service
+                bge = getattr(rs, "bge_embedder", None)
+                e5 = getattr(rs, "e5_embedder", None)
+
+            crawl_pipeline = AutoCrawlPipeline(
+                settings=settings, bge=bge, e5=e5,
+            )
+
+            def _run_crawl():
+                try:
+                    crawl_pipeline.run()
+                except Exception:
+                    logger.error("Auto-crawl job failed", exc_info=True)
+
+            scheduler = AsyncIOScheduler()
+            scheduler.add_job(
+                _run_crawl, "cron",
+                hour=settings.crawler_schedule_hour,
+                minute=settings.crawler_schedule_minute,
+                id="auto_crawl_kehoach",
+                replace_existing=True,
+            )
+            scheduler.start()
+            logger.info(
+                "Auto-crawl scheduler started — runs daily at %02d:%02d",
+                settings.crawler_schedule_hour,
+                settings.crawler_schedule_minute,
+            )
+        except ImportError:
+            logger.warning(
+                "apscheduler not installed — auto-crawl disabled. "
+                "Install with: pip install apscheduler"
+            )
+        except Exception:
+            logger.error("Failed to start auto-crawl scheduler", exc_info=True)
+
     yield
+
+    # Shutdown scheduler
+    if scheduler is not None:
+        scheduler.shutdown(wait=False)
     logger.info("Shutting down …")
 
 

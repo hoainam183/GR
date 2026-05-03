@@ -11,7 +11,15 @@ from .prompts import (
 )
 from .react_agent import ReActAgent
 from .state import AgentState, ToolResult
-from .tool_adapters import cache_clear, execute_retrieval_plan, execute_tool, set_runtime
+from .tool_adapters import (
+    cache_clear,
+    execute_retrieval_plan,
+    execute_tool,
+    get_agent_docs,
+    init_agent_docs,
+    set_runtime,
+    web_search_for_executor,
+)
 
 __all__ = [
     # State
@@ -26,6 +34,9 @@ __all__ = [
     "execute_retrieval_plan",
     "cache_clear",
     "set_runtime",
+    "web_search_for_executor",
+    "init_agent_docs",
+    "get_agent_docs",
     # Agent
     "ComplexityRouter",
     "ReActAgent",

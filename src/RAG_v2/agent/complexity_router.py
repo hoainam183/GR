@@ -49,6 +49,19 @@ _COMPLEX_PATTERN_SPECS: list[tuple[str, str]] = [
     (r"(K\d{2}|khóa|ngành|chương trình).{0,40}(khác nhau|khác biệt|giống nhau)", "comparison"),
 
     # ── multi_source subtype ──────────────────────────────────────────────────
+    # QUAN TRỌNG: personal_check phải nằm TRƯỚC multi_source vì first-match wins.
+    # Query "tôi có đủ điều kiện..." phải vào personal_check (ReAct), không vào
+    # multi_source (Planner) — vì Planner không thể trả lời "bạn CÓ đủ hay không"
+    # khi thiếu thông tin GPA/tín chỉ cá nhân của sinh viên.
+
+    # ── personal_check subtype ────────────────────────────────────────────────
+    # Detect query cần context cá nhân: "tôi/mình/em ... có thể/đủ/đạt/được không"
+    (
+        r"\b(tôi|mình|em)\b.{0,80}\b(có\s+thể|đủ\s+điều\s+kiện|đạt\s+điều\s+kiện|đạt\s+chuẩn|được\s+không|có\s+được)\b",
+        "personal_check",
+    ),
+
+    # ── multi_source subtype ──────────────────────────────────────────────────
     (r"\bđủ\s+điều\s+kiện\b", "multi_source"),
     (r"\b(có\s+thể|có\s+được)\b.{0,30}\b(tốt nghiệp|đăng ký|đăng kí|xét duyệt|nhận học bổng)\b", "multi_source"),
     (r"(môn|học phần).{0,30}\b(được|có)\s+(đăng ký|đăng kí|mở)\b", "multi_source"),
@@ -72,6 +85,12 @@ _COMPLEX_SPECS_RE: list[tuple[re.Pattern, str]] = [
     (re.compile(pat, re.IGNORECASE), subtype)
     for pat, subtype in _COMPLEX_PATTERN_SPECS
 ]
+# Detect query có nhiều chủ đề — dùng để tinh chỉnh word_count heuristic.
+# Nếu query dài nhưng chỉ 1 chủ đề (không có connector này) → giữ route simple.
+_MULTI_TOPIC_RE: re.Pattern = re.compile(
+    r"\b(cũng|ngoài ra|đồng thời|bên cạnh đó|kết hợp)\b",
+    re.IGNORECASE,
+)
 
 
 class ComplexityRouter:
@@ -145,17 +164,28 @@ class ComplexityRouter:
         # 3. Structural heuristics — lower confidence, general subtype
         word_count = len(q.split())
         if word_count > 30:
-            result = {
-                "tier": "complex",
-                "reason": f"heuristic: word_count={word_count}>30",
-                "confidence": "medium",
-                "complex_subtype": "general",
-            }
-            logger.info(
-                "ComplexityRouter: %r → %s (%s)",
-                q[:60], result["tier"], result["reason"],
-            )
-            return result
+            # Chỉ route complex nếu query dài VÀ có dấu hiệu nhiều chủ đề.
+            # Query dài về 1 chủ đề duy nhất (ví dụ: mô tả chi tiết 1 quy trình)
+            # không cần agent loop — simple RAG là đủ.
+            has_multiple_topics = bool(_MULTI_TOPIC_RE.search(q_lower))
+            if has_multiple_topics:
+                result = {
+                    "tier": "complex",
+                    "reason": f"heuristic: word_count={word_count}>30 + multi_topic_connector",
+                    "confidence": "medium",
+                    "complex_subtype": "general",
+                }
+                logger.info(
+                    "ComplexityRouter: %r → %s (%s)",
+                    q[:60], result["tier"], result["reason"],
+                )
+                return result
+            else:
+                # Query dài nhưng single-topic → giữ simple (RAG đơn giản là đủ)
+                logger.info(
+                    "ComplexityRouter: %r → simple (word_count=%d but single_topic)",
+                    q[:60], word_count,
+                )
 
         if q.count("?") > 1:
             result = {

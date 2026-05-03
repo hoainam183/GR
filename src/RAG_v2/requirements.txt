@@ -310,4 +310,4 @@ zope.interface==8.2
 zstandard==0.25.0
 langchain-openai==1.2.1
 langchain-protocol==0.0.12
-bcrypt==4.1.2
+bcrypt==4.1.2apscheduler>=3.10.0

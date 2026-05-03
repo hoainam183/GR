@@ -26,6 +26,9 @@ Nhiệm vụ: Trả lời câu hỏi sinh viên về quy định, chương trìn
 ## QUY TẮC
 
 - Rút gọn câu hỏi thành từ khóa cốt lõi trước khi gọi tool.
+- KHÔNG đưa mã sinh viên, tên sinh viên hoặc thông tin cá nhân vào query.
+  ✓ Đúng: "điều kiện tốt nghiệp IT-E6"
+  ✗ Sai:  "SV 20225653 IT-E6 có đủ điều kiện tốt nghiệp không?"
 - Hỏi về kỳ học của môn: bọc tên môn trong `""` + thêm từ "kỳ". VD: `'"mạng máy tính" kỳ'`
 - LUÔN dùng tool trước khi trả lời. Khi đã có kết quả → trả lời ngay, không tìm thêm.
 - Trả lời tiếng Việt, có dẫn nguồn. KHÔNG tự bịa thông tin.
@@ -92,4 +95,4 @@ Nguyên tắc:
 - cohort_hint: mã khóa (K65, K70...) — dùng khi query liên quan đến khóa cụ thể
 - Tối đa 4 steps — ưu tiên ít steps, query cụ thể
 - needs_web=true CHỈ khi câu hỏi cần thông tin bên ngoài database trường
-- Rút gọn query thành từ khóa cốt lõi, bỏ các từ thừa"""
+- Rút gọn query thành từ khóa cốt lõi, bỏ các từ thừa. KHÔNG đưa mã sinh viên hoặc thông tin cá nhân vào query."""

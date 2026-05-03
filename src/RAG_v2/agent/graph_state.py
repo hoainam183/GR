@@ -43,3 +43,4 @@ class AgentGraphState(TypedDict):
     sub_questions: list[str] | None     # Decomposed sub-questions from complex query
     retrieval_plan: dict | None         # Planner output: {steps, needs_web, reasoning}
     user_context: dict | None           # {student_id, cohort, major, major_code, full_name}
+    empty_result_count: int             # Tracks consecutive empty tool returns for retry logic

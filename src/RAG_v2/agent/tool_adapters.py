@@ -19,6 +19,21 @@ from schemas.constants import CLARIFY_SENTINEL
 
 logger = logging.getLogger(__name__)
 
+# ─── Personal Identifier stripping ──────────────────────────────────────────────
+_STUDENT_ID_RE = re.compile(r'\b\d{8}\b')
+_STUDENT_ID_PREFIX_RE = re.compile(
+    r'(mã\s*sv|mssv|sinh\s*viên\s*mã?)\s*:?\s*\d+',
+    re.IGNORECASE
+)
+
+def strip_personal_identifiers(query: str) -> str:
+    """Xóa mã sinh viên và các identifier cá nhân khỏi retrieval query."""
+    q = _STUDENT_ID_PREFIX_RE.sub('', query)
+    q = _STUDENT_ID_RE.sub('', q)
+    q = re.sub(r',\s*,', ',', q)
+    q = re.sub(r'\s{2,}', ' ', q).strip().strip(',').strip()
+    return q
+
 # ─── Collection name mapping ──────────────────────────────────────────────────
 # Agent-facing collection names → real Qdrant collection names.
 
@@ -286,7 +301,7 @@ def _rag_search(
     runtime = _get_runtime()
     effective_top_k = max(1, min(int(top_k or runtime.settings.top_k), 10))
 
-    raw_query = query.strip()
+    raw_query = strip_personal_identifiers(query.strip())
     major_codes = extract_major_codes(raw_query)
     effective_resolved_major = resolved_major
     if not effective_resolved_major and len(major_codes) == 1:
@@ -557,6 +572,15 @@ def _web_search(query: str) -> str:
     return _format_web_results(results)
 
 
+def web_search_for_executor(query: str) -> str:
+    """Public wrapper cho _web_search — dùng bởi react_agent._executor_node.
+
+    Tách riêng để react_agent có thể import ở top-level (thay vì runtime import
+    private function), đảm bảo encapsulation và dễ mock trong tests.
+    """
+    return _web_search(query=query)
+
+
 def _clarify_question(message: str, options: list[str]) -> str:
     clean_message = str(message or "").strip()
     clean_options = [str(opt).strip() for opt in options if str(opt).strip()][:3]
@@ -615,9 +639,12 @@ def execute_retrieval_plan(steps: list[dict[str, Any]]) -> list[tuple[str, str]]
         label = step.get("label") or step.get("collection", f"step_{i}")
         results[i] = (label, result)
 
+    import contextvars
+
     worker_count = min(4, len(steps))
+    ctx = contextvars.copy_context()
     with ThreadPoolExecutor(max_workers=worker_count) as pool:
-        futures = [pool.submit(_run, i, step) for i, step in enumerate(steps)]
+        futures = [pool.submit(ctx.run, _run, i, step) for i, step in enumerate(steps)]
         for f in futures:
             try:
                 f.result(timeout=45)

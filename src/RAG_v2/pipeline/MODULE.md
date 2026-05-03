@@ -13,6 +13,7 @@ pipeline/
 ├── rag_pipeline.py    # RAGPipeline class — orchestrator chính
 ├── flows.py           # Các flow cụ thể: rag_flow, chitchat_flow (và streaming)
 ├── mongo_logger.py    # Ghi log hội thoại vào MongoDB
+├── auto_crawler.py    # Auto daily crawl → clean → chunk → index (Qdrant+ES)
 ├── index_kehoach.py   # Script indexing dữ liệu kế hoạch học kỳ
 ├── index_quydinh.py   # Script indexing dữ liệu quy định
 └── index_stsv.py      # Script indexing dữ liệu hỗ trợ sinh viên
@@ -182,3 +183,32 @@ ComplexityRouter (regex patterns)
 | **Total** | **4000-18000ms** |
 
 > ⚠️ **LLM calls là bottleneck chính** của toàn bộ pipeline.
+
+---
+
+### `auto_crawler.py` — Auto Daily Crawl Pipeline
+
+**Nhiệm vụ:** Tự động crawl bài viết mới từ ctt.hust.edu.vn hàng ngày, làm sạch, chunk, embed và index vào Qdrant + Elasticsearch.
+
+**Classes:**
+- `KehoachCrawler` — incremental crawl (chỉ lấy bài mới, dựa trên baiviet_id)
+- `ChunkProcessor` — wrapper quanh `KeHoachChunker`
+- `DualIndexer` — embed BGE-M3 + E5, upsert Qdrant + ES
+- `RetentionManager` — xoá bài >N tháng khỏi JSON, chunks, Qdrant, ES
+- `AutoCrawlPipeline` — orchestrator: crawl → chunk → index → retention → notify
+
+**Pipeline flow:**
+```
+Crawl (incremental) → Save JSON → Chunk → Index (Qdrant+ES) → Retention → Notify
+```
+
+**Scheduling:** APScheduler cron job trong FastAPI lifespan (mặc định 02:00 hàng ngày).
+
+**Config** (trong `config/settings.py`):
+- `crawler_enabled` — bật/tắt scheduler
+- `crawler_schedule_hour/minute` — giờ chạy
+- `crawler_delay` — delay giữa HTTP requests
+- `crawler_retention_months` — xoá bài cũ hơn N tháng
+- `crawler_tags` — categories crawl (extensible, format `Name:encoded,...`)
+
+**CLI:** `python -m pipeline.auto_crawler` (standalone) hoặc `--dry` (dry-run).
