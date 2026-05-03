@@ -131,6 +131,9 @@ def _clarify_question(message: str, options: list[str]) -> str:
 
 
 # ─── LangChain StructuredTools ────────────────────────────────────────────────
+# Phase 3 cleanup: compare_cohorts, compare_programs, and multi_rag_search
+# removed from agent tool list — now handled by planner-executor path.
+# Adapter functions above are kept for backward compatibility / fallback.
 
 LANGGRAPH_TOOLS: list[StructuredTool] = [
     StructuredTool.from_function(
@@ -144,37 +147,6 @@ LANGGRAPH_TOOLS: list[StructuredTool] = [
             "- ho_tro_sv: biểu mẫu, giấy tờ thủ tục, thuê nhà, tìm việc thực tập, hỗ trợ sinh viên."
         ),
         args_schema=RagSearchInput,
-    ),
-    StructuredTool.from_function(
-        func=_multi_rag_search,
-        name="multi_rag_search",
-        description=(
-            "Tìm đồng thời nhiều collection cho câu hỏi cần thông tin từ ≥2 nguồn.\n"
-            "Ví dụ: 'Đủ điều kiện tốt nghiệp chưa?' → cần quy_dinh + chuong_trinh.\n"
-            "Ví dụ: 'Đồ án tốt nghiệp nộp khi nào, quy trình ra sao?' → quy_dinh + ke_hoach."
-        ),
-        args_schema=MultiRagSearchInput,
-    ),
-    StructuredTool.from_function(
-        func=_compare_cohorts,
-        name="compare_cohorts",
-        description=(
-            "So sánh quy định / chính sách giữa 2 KHÓA sinh viên (K65, K70, …).\n"
-            "Dùng khi câu hỏi đề cập 2 mã khóa (Kxx).\n"
-            "KHÔNG dùng cho mã ngành (IT-E6, IT-E7) — hãy dùng compare_programs thay thế."
-        ),
-        args_schema=CompareCohortsInput,
-    ),
-    StructuredTool.from_function(
-        func=_compare_programs,
-        name="compare_programs",
-        description=(
-            "So sánh chương trình đào tạo / môn học giữa 2 MÃ NGÀNH (IT-E6, IT-E7, IT1, …).\n"
-            "Dùng khi câu hỏi đề cập 2 mã ngành.\n"
-            "Nếu so sánh 1 môn học cụ thể, truyền thêm course_keyword (tên hoặc mã môn).\n"
-            "KHÔNG dùng cho mã khóa (K65, K70) — hãy dùng compare_cohorts thay thế."
-        ),
-        args_schema=CompareProgramsInput,
     ),
     StructuredTool.from_function(
         func=_web_search,

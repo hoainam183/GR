@@ -4,6 +4,7 @@ import logging
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextvars import ContextVar
 from dataclasses import dataclass
 from threading import Lock
 from typing import Any
@@ -41,16 +42,45 @@ _CACHE_LOCK = Lock()
 # This lock serialises rerank() calls while still allowing parallel embedding + search.
 _RERANKER_LOCK = Lock()
 
-# ─── Global Agent Retrieved Documents ─────────────────────────────────────────
-# Collects all raw document chunks retrieved during an agentic run so they can
-# be exposed in the UI trace logs (since the agent only returns string blobs).
-AGENT_RETRIEVED_DOCS: list[dict[str, Any]] = []
+# ─── Per-request Agent Retrieved Documents ────────────────────────────────────
+# Dùng ContextVar để mỗi request/thread có danh sách docs riêng biệt.
+# Tránh race condition khi nhiều user query đồng thời trên cùng server.
+#
+# Cách dùng đúng:
+#   1. Gọi init_agent_docs() trước agent.run() (trong thread worker)
+#   2. Gọi get_agent_docs() sau agent.run() để lấy kết quả
+_agent_docs_ctx: ContextVar[list[dict[str, Any]] | None] = ContextVar(
+    "agent_docs", default=None
+)
+
+
+def init_agent_docs() -> list[dict[str, Any]]:
+    """Khởi tạo danh sách docs cho request hiện tại.
+
+    Phải được gọi trong thread worker (sau anyio.to_thread.run_sync)
+    để ContextVar được set đúng trong context của thread đó.
+    """
+    docs: list[dict[str, Any]] = []
+    _agent_docs_ctx.set(docs)
+    return docs
+
 
 def clear_agent_docs() -> None:
-    AGENT_RETRIEVED_DOCS.clear()
+    """Reset context về empty list (backward compat với code cũ)."""
+    _agent_docs_ctx.set([])
+
 
 def get_agent_docs() -> list[dict[str, Any]]:
-    return list(AGENT_RETRIEVED_DOCS)
+    """Trả về danh sách docs của request hiện tại (thread-safe)."""
+    docs = _agent_docs_ctx.get(None)
+    return list(docs) if docs is not None else []
+
+
+def _append_agent_docs(items: list) -> None:
+    """Thêm items vào danh sách docs của request hiện tại."""
+    docs = _agent_docs_ctx.get(None)
+    if docs is not None:
+        docs.extend(items)
 
 
 def _cache_get(key: tuple) -> str | None:
@@ -329,8 +359,8 @@ def _rag_search(
     else:
         results = results[:effective_top_k]
 
-    # Accumulate for UI diagnostic logging
-    AGENT_RETRIEVED_DOCS.extend(results)
+    # Accumulate for UI diagnostic logging (per-request, thread-safe)
+    _append_agent_docs(results)
 
     if not results:
         return "[Khong tim thay thong tin trong co so du lieu]"
@@ -663,8 +693,8 @@ def _format_web_results(results: Any) -> str:
     # Exclude keyword duplicates
     all_results = list({doc.get("id"): doc for doc in items}.values())
 
-    # Accumulate for UI diagnostic logging
-    AGENT_RETRIEVED_DOCS.extend(all_results)
+    # Accumulate for UI diagnostic logging (per-request, thread-safe)
+    _append_agent_docs(all_results)
 
     chunks: list[str] = []
     for index, item in enumerate(items[:3], 1):

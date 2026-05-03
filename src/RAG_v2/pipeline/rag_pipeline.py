@@ -437,11 +437,16 @@ class RAGPipeline:
         *,
         route_label: str = "complex",
         require_agent: bool = False,
+        complexity_subtype: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Force execution through the agent path.
 
         When ``require_agent`` is False, failures gracefully fall back to
         classic RAG v2 so requests still complete.
+
+        Args:
+            complexity_subtype: Passed to ``agent.run()`` to choose planner
+                vs agent-loop path ("comparison", "multi_source", "general").
         """
         agent_t0 = time.perf_counter()
 
@@ -489,14 +494,16 @@ class RAGPipeline:
             logger.warning("Agent unavailable, falling back to RAG v2")
             return _fallback_result("Agent is disabled")
 
-        from agent.tool_adapters import clear_agent_docs, get_agent_docs
-        clear_agent_docs()
+        from agent.tool_adapters import init_agent_docs, get_agent_docs
+        init_agent_docs()  # Tạo context riêng cho request này (thread-safe)
 
         try:
             state = self.agent.run(
                 question,
                 session_id=session_id or "",
                 history=history,
+                complexity_subtype=complexity_subtype,
+                user_context=user_context,
             )
         except Exception as exc:
             logger.warning(
@@ -613,6 +620,7 @@ class RAGPipeline:
             user_context=user_context,
             route_label="complex",
             require_agent=False,
+            complexity_subtype=route_result.get("complex_subtype"),
         )
 
     # ------------------------------------------------------------------
@@ -835,6 +843,7 @@ class RAGPipeline:
                     user_context=user_context,
                     route_label="complex",
                     require_agent=False,
+                    complexity_subtype=complexity.get("complex_subtype"),
                 )
                 answer = agent_result.get("answer", "")
                 self.last_mode = str(agent_result.get("mode", "agent"))

@@ -13,7 +13,12 @@ from langgraph.graph import END, START, StateGraph
 from schemas.constants import CLARIFY_SENTINEL
 from .graph_state import AgentGraphState
 from .lc_tools import LANGGRAPH_TOOLS, TOOL_MAP
-from .prompts import AGENT_SYSTEM_PROMPT, SYNTHESIS_PROMPT
+from .prompts import (
+    AGENT_SYSTEM_PROMPT,
+    DECOMPOSE_SYSTEM_PROMPT,
+    PLANNER_SYSTEM_PROMPT,
+    SYNTHESIS_PROMPT,
+)
 from .state import AgentState, ToolResult
 
 logger = logging.getLogger(__name__)
@@ -157,14 +162,24 @@ class ReActAgent:
         query: str,
         session_id: str = "",
         history: list[dict[str, str]] | None = None,
+        complexity_subtype: str | None = None,
+        user_context: dict[str, Any] | None = None,
     ) -> AgentState:
         """
         Execute the LangGraph ReAct graph and return a fully populated
         AgentState ready for MongoDB logging and pipeline consumption.
 
-        The interface is identical to the previous custom ReAct implementation —
-        callers do not need to change.
+        Args:
+            complexity_subtype: "comparison" | "multi_source" → planner path;
+                                "general" | None → agent loop path.
+            user_context: Student info dict (cohort, major_code, etc.) for
+                          planner hint injection.
         """
+        # Determine execution path based on complexity subtype
+        execution_path = "agent"  # default: ReAct agent loop
+        if complexity_subtype in ("comparison", "multi_source"):
+            execution_path = "planner"
+
         initial_state: AgentGraphState = {
             "messages": self._build_initial_messages(query=query, history=history),
             "query": query,
@@ -175,9 +190,14 @@ class ReActAgent:
             "max_iterations": self.max_iterations,
             "final_answer": None,
             "error": None,
+            # Planner-Executor path fields
+            "execution_path": execution_path,
+            "sub_questions": None,
+            "retrieval_plan": None,
+            "user_context": user_context,
         }
 
-        logger.info("[Agent] Starting query: '%s...'", query[:80])
+        logger.info("[Agent] Starting query: '%s...' (path=%s)", query[:80], execution_path)
         run_start = time.perf_counter()
 
         try:
@@ -510,26 +530,17 @@ class ReActAgent:
 
         return "tools"
 
-    # ─── Terminal comparison tools ─────────────────────────────────────────
-    # compare_programs and compare_cohorts already perform full A-vs-B
-    # retrieval internally, so the agent has all the data it needs.  Routing
-    # back to _agent_node for another Qwen LLM call (~75 s) is wasteful;
-    # instead we short-circuit to synthesize (which uses the faster Gemini
-    # synthesis LLM).
-    _TERMINAL_TOOLS: frozenset[str] = frozenset({
-        "compare_programs",
-        "compare_cohorts",
-    })
-
     def _after_tools(self, state: AgentGraphState) -> Literal["agent", "synthesize", "end"]:
         """
         Route after tool execution.
 
         - clarify_question: stop immediately (wait for user follow-up)
-        - compare_programs / compare_cohorts: route to synthesize with
-          the faster synthesis LLM instead of burning another ~75 s on
-          a local Qwen iteration
+        - tool returned error ([Loi...] prefix): synthesize early to save LLM calls
         - everything else: loop back to agent
+
+        Note: compare_programs / compare_cohorts are no longer in the agent
+        tool list (Phase 3 cleanup) — comparisons are handled by the
+        planner-executor path.
         """
         history = state.get("tool_call_history", [])
         if not history:
@@ -541,13 +552,168 @@ class ReActAgent:
             logger.info("[Agent] Clarify requested — stop current run and wait for user input")
             return "end"
 
-        if last_tool in self._TERMINAL_TOOLS:
-            logger.info(
-                "[Agent] Terminal comparison tool '%s' — routing to Gemini synthesis (skip Qwen iter)",
-                last_tool,
-            )
-            return "synthesize"
+        # Nếu tool trả về lỗi → synthesize ngay, tránh tiêu tốn thêm LLM call
+        messages = state.get("messages", [])
+        for msg in reversed(messages):
+            if isinstance(msg, ToolMessage):
+                content = str(msg.content or "")
+                if content.startswith("[Loi") or content.startswith("[Khong tim thay"):
+                    logger.warning(
+                        "[Agent] Tool '%s' returned error — forcing early synthesize: %s",
+                        last_tool, content[:80],
+                    )
+                    return "synthesize"
+                break  # Chỉ check ToolMessage cuối cùng
 
+        return "agent"
+
+    # ─── Planner-Executor nodes (Phase 2 refactor) ─────────────────────────────
+
+    def _decompose_node(self, state: AgentGraphState) -> dict[str, Any]:
+        """Decompose a complex query into standalone sub-questions using Gemini."""
+        query = state["query"]
+
+        # Inject user_context into the prompt when available
+        user_ctx = state.get("user_context")
+        ctx_parts: list[str] = []
+        if user_ctx:
+            if user_ctx.get("cohort"):
+                ctx_parts.append(f"Khóa: {user_ctx['cohort']}")
+            if user_ctx.get("major_code"):
+                ctx_parts.append(f"Ngành: {user_ctx['major_code']}")
+        ctx_str = f"\nThông tin sinh viên: {', '.join(ctx_parts)}" if ctx_parts else ""
+        prompt = f"Query: {query}{ctx_str}"
+
+        t0 = time.perf_counter()
+        try:
+            response = self._synthesis_llm.invoke([
+                SystemMessage(content=DECOMPOSE_SYSTEM_PROMPT),
+                HumanMessage(content=prompt),
+            ])
+            raw = response.content.strip().strip("```json").strip("```").strip()
+            parsed = json.loads(raw)
+            sub_questions = parsed.get("sub_questions", [query])[:4]
+            if not sub_questions:
+                sub_questions = [query]
+            logger.info(
+                "[Decompose] %d sub-questions in %.0fms: %s",
+                len(sub_questions),
+                (time.perf_counter() - t0) * 1000,
+                parsed.get("reasoning", ""),
+            )
+        except Exception as exc:
+            logger.warning("[Decompose] Failed (%s), using original query", exc)
+            sub_questions = [query]
+
+        return {"sub_questions": sub_questions}
+
+    def _planner_node(self, state: AgentGraphState) -> dict[str, Any]:
+        """Generate a retrieval plan from sub-questions using Gemini.
+
+        Returns retrieval_plan dict on success, or None to trigger agent fallback.
+        Does NOT set 'error' to avoid triggering _should_continue's error path.
+        """
+        sub_questions = state.get("sub_questions") or [state["query"]]
+
+        # Inject user_context into the prompt
+        user_ctx = state.get("user_context")
+        ctx_parts: list[str] = []
+        if user_ctx:
+            if user_ctx.get("cohort"):
+                ctx_parts.append(f"Khóa sinh viên: {user_ctx['cohort']}")
+            if user_ctx.get("major_code"):
+                ctx_parts.append(f"Mã ngành: {user_ctx['major_code']}")
+        ctx_str = f"\nThông tin sinh viên: {', '.join(ctx_parts)}" if ctx_parts else ""
+
+        questions_str = "\n".join(f"- {q}" for q in sub_questions)
+        prompt = (
+            f"Câu hỏi gốc: {state['query']}\n\n"
+            f"Câu hỏi con:\n{questions_str}{ctx_str}"
+        )
+
+        t0 = time.perf_counter()
+        try:
+            response = self._synthesis_llm.invoke([
+                SystemMessage(content=PLANNER_SYSTEM_PROMPT),
+                HumanMessage(content=prompt),
+            ])
+            raw = response.content.strip().strip("```json").strip("```").strip()
+            plan = json.loads(raw)
+            steps = plan.get("steps", [])[:4]
+            plan["steps"] = steps
+            if not steps:
+                logger.warning("[Planner] Empty plan — will fallback to agent")
+                return {"retrieval_plan": None}
+            logger.info(
+                "[Planner] %d steps in %.0fms: %s",
+                len(steps),
+                (time.perf_counter() - t0) * 1000,
+                plan.get("reasoning", ""),
+            )
+            return {"retrieval_plan": plan}
+        except Exception as exc:
+            logger.error("[Planner] Failed (%s) — will fallback to agent", exc)
+            return {"retrieval_plan": None}
+
+    def _executor_node(self, state: AgentGraphState) -> dict[str, Any]:
+        """Execute retrieval plan steps in parallel. No LLM involved."""
+        from .tool_adapters import execute_retrieval_plan, _web_search
+
+        plan = state.get("retrieval_plan") or {}
+        steps = plan.get("steps", [])
+
+        if not steps:
+            return {"final_answer": "Xin lỗi, không thể tạo kế hoạch tìm kiếm."}
+
+        t0 = time.perf_counter()
+        labeled_results = execute_retrieval_plan(steps)
+        logger.info(
+            "[Executor] %d/%d steps completed in %.0fms",
+            len(labeled_results), len(steps),
+            (time.perf_counter() - t0) * 1000,
+        )
+
+        tool_messages: list[ToolMessage] = [
+            ToolMessage(
+                content=f"### {label}\n{result}"[:self._tool_result_limit],
+                tool_call_id=f"plan_{i}",
+                name="rag_search",
+            )
+            for i, (label, result) in enumerate(labeled_results)
+        ]
+
+        new_history = [f"planned_rag_search:{lbl}" for lbl, _ in labeled_results]
+
+        if plan.get("needs_web"):
+            web_result = _web_search(query=state["query"])
+            tool_messages.append(ToolMessage(
+                content=web_result[:self._tool_result_limit],
+                tool_call_id="plan_web",
+                name="web_search",
+            ))
+            new_history.append("planned_web_search")
+
+        return {
+            "messages": tool_messages,
+            "tool_call_history": new_history,
+        }
+
+    # ─── Planner-Executor routing ──────────────────────────────────────────────
+
+    def _route_complex(self, state: AgentGraphState) -> str:
+        """Entry routing: planner path (decompose) or agent loop."""
+        if state.get("execution_path") == "planner":
+            return "decompose"
+        return "agent"
+
+    def _after_planner(
+        self, state: AgentGraphState
+    ) -> Literal["executor", "agent"]:
+        """Route after planner: execute plan if valid, else fallback to agent loop."""
+        plan = state.get("retrieval_plan")
+        if plan and plan.get("steps"):
+            return "executor"
+        logger.warning("[Planner] No valid plan — falling back to agent loop")
         return "agent"
 
     # ─── Graph construction ───────────────────────────────────────────────────
@@ -555,35 +721,54 @@ class ReActAgent:
     def _build_graph(self) -> Any:  # -> langgraph.graph.state.CompiledStateGraph
         """Compile and return the LangGraph StateGraph.
 
-        Return type annotated as ``Any`` to avoid a hard dependency on the
-        LangGraph internal ``CompiledStateGraph`` type at import time.
+        Graph topology (Phase 2 refactor):
+
+        START ─[_route_complex]─┬─► decompose → planner ─[_after_planner]─┬─► executor → synthesize → END
+                                │                                         └─► agent (fallback)
+                                └─► agent ─[_should_continue]─┬─► tools ─[_after_tools]─┬─► agent
+                                                              ├─► synthesize → END      ├─► synthesize → END
+                                                              └─► extract_answer → END  └─► extract_answer → END
         """
         graph = StateGraph(AgentGraphState)
 
+        # ── Planner-Executor path nodes ───────────────────────────────────────
+        graph.add_node("decompose", self._decompose_node)
+        graph.add_node("planner", self._planner_node)
+        graph.add_node("executor", self._executor_node)
+
+        # ── Agent loop path nodes (unchanged) ─────────────────────────────────
         graph.add_node("agent", self._agent_node)
         graph.add_node("tools", self._tools_node)
+
+        # ── Shared terminal nodes ─────────────────────────────────────────────
         graph.add_node("synthesize", self._synthesize_node)
         graph.add_node("extract_answer", self._extract_answer_node)
 
-        graph.add_edge(START, "agent")
+        # ── Entry: route based on execution_path ──────────────────────────────
         graph.add_conditional_edges(
-            "agent",
-            self._should_continue,
-            {
-                "tools": "tools",
-                "synthesize": "synthesize",
-                "end": "extract_answer",
-            },
+            START, self._route_complex,
+            {"decompose": "decompose", "agent": "agent"},
+        )
+
+        # ── Planner path edges ────────────────────────────────────────────────
+        graph.add_edge("decompose", "planner")
+        graph.add_conditional_edges(
+            "planner", self._after_planner,
+            {"executor": "executor", "agent": "agent"},
+        )
+        graph.add_edge("executor", "synthesize")
+
+        # ── Agent loop edges (unchanged) ──────────────────────────────────────
+        graph.add_conditional_edges(
+            "agent", self._should_continue,
+            {"tools": "tools", "synthesize": "synthesize", "end": "extract_answer"},
         )
         graph.add_conditional_edges(
-            "tools",
-            self._after_tools,
-            {
-                "agent": "agent",
-                "synthesize": "synthesize",
-                "end": "extract_answer",
-            },
+            "tools", self._after_tools,
+            {"agent": "agent", "synthesize": "synthesize", "end": "extract_answer"},
         )
+
+        # ── Terminal edges ────────────────────────────────────────────────────
         graph.add_edge("synthesize", END)
         graph.add_edge("extract_answer", END)
 

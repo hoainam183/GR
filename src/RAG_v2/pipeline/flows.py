@@ -60,6 +60,15 @@ _EXPLICIT_MAJOR_CODE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Detect "list-all" queries: asking to enumerate multiple items.
+# Examples: "các học phần tiếng nhật", "tất cả môn bắt buộc", "danh sách học phần"
+_LIST_QUERY_RE = re.compile(
+    r"\b(?:các|tất\s+cả|danh\s*sách|liệt\s*kê|những|bao\s+gồm\s+những|toàn\s+bộ|hết)\b",
+    re.IGNORECASE,
+)
+_LIST_TOP_K_MULTIPLIER = 2   # double top_k for list queries
+_LIST_TOP_K_MAX = 12         # cap to avoid excessive reranking latency
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Helper
@@ -93,6 +102,27 @@ def _retrieval_candidate_k(top_k: int) -> int:
     return max(top_k * 4, 20)
 
 
+def _resolve_top_k(base_top_k: int, query: str) -> int:
+    """Return an effective top_k, scaled up for list/enumerate queries.
+
+    When the user asks to enumerate multiple items ("các học phần",
+    "tất cả môn", "danh sách", …) a single topic can span many chunks.
+    Doubling top_k (capped at _LIST_TOP_K_MAX) prevents truncating the
+    result set before the LLM sees all relevant items.
+    """
+    if _LIST_QUERY_RE.search(query or ""):
+        scaled = base_top_k * _LIST_TOP_K_MULTIPLIER
+        effective = min(scaled, _LIST_TOP_K_MAX)
+        if effective > base_top_k:
+            logger.info(
+                "List query detected — top_k scaled %d → %d",
+                base_top_k,
+                effective,
+            )
+        return effective
+    return base_top_k
+
+
 def _should_strip_major_for_retrieval(
     *,
     resolved_major: Optional[str],
@@ -100,9 +130,13 @@ def _should_strip_major_for_retrieval(
 ) -> bool:
     """Return True when major phrases should be stripped from retrieval query.
 
-    Keeping major mentions is important when routing is confidently quydinh-only,
+    Keeping major mentions is important when routing includes quydinh,
     because quydinh does not use ``major_code`` metadata filters and therefore
     relies on lexical/semantic major cues in the query text itself.
+
+    We protect major mentions whenever quydinh is *present* (not only when
+    it is the *sole* target), because multi-domain routing (e.g. quydinh +
+    ctdt) should still allow quydinh chunks to match via keyword signals.
     """
     if not resolved_major:
         return False
@@ -115,7 +149,7 @@ def _should_strip_major_for_retrieval(
         for col in target_collections
         if str(col).strip()
     }
-    if normalized_targets == {"quydinh"}:
+    if "quydinh" in normalized_targets:
         return False
     return True
 
@@ -652,7 +686,7 @@ def rag_flow(
         routing_result=routing_result,
     )
 
-    top_k_value = cfg.get("top_k", 5)
+    top_k_value = _resolve_top_k(cfg.get("top_k", 5), question)
     raw_candidate_k = _retrieval_candidate_k(top_k_value)
     major_compare_plan = build_major_comparison_subqueries_for_retrieval(
         search_query
@@ -867,7 +901,14 @@ def rag_flow(
     #    Priority 1: use authenticated user_context (precise, always present).
     #    Priority 2: fall back to regex scan of history.
     context_t0 = time.perf_counter()
-    context = _format_context(reranked)
+    # For list queries (top_k was scaled up), use a larger char budget so we
+    # don't truncate the extra docs before passing them to the LLM.
+    context_char_budget = (
+        _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET * _LIST_TOP_K_MULTIPLIER
+        if top_k_value > cfg.get("top_k", 5)
+        else _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET
+    )
+    context = _format_context(reranked, total_char_budget=context_char_budget)
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -1127,7 +1168,7 @@ def rag_flow_stream(
             routing_result.get("probabilities") if routing_result else None
         )
 
-    top_k_value = cfg.get("top_k", 5)
+    top_k_value = _resolve_top_k(cfg.get("top_k", 5), question)
     raw_candidate_k = _retrieval_candidate_k(top_k_value)
     major_compare_plan = build_major_comparison_subqueries_for_retrieval(
         search_query
@@ -1326,7 +1367,13 @@ def rag_flow_stream(
         timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
 
     context_t0 = time.perf_counter()
-    context = _format_context(reranked)
+    # For list queries (top_k was scaled up), use a larger char budget.
+    context_char_budget = (
+        _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET * _LIST_TOP_K_MULTIPLIER
+        if top_k_value > cfg.get("top_k", 5)
+        else _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET
+    )
+    context = _format_context(reranked, total_char_budget=context_char_budget)
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (

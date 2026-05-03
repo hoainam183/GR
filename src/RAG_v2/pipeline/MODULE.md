@@ -81,17 +81,26 @@ Step 1: reflection    → QueryReflector.reflect() [LLM call - Gemini]
 Step 2: entity extraction → _extract_entities() [regex, no LLM]
 Step 3: collection routing → CollectionSelector.select()
 Step 4: query normalization → strip_major_from_query_for_retrieval()
-Step 5: embed → bge_embedder.embed_query() + e5_embedder.embed_query()
-Step 6: search → MultiCollectionSearch.search() [Qdrant + ES parallel]
-Step 7: dedup candidates
-Step 8: rerank → BGEReranker.rerank()
-Step 9: validity_filter → ValidityFilter.filter()
-Step 10: reference_resolver → ReferenceResolver.resolve()
-Step 11: format_context → _format_context() (budget-limited string)
-Step 12: generate → chat_model.generate(mode="rag") [LLM call - Gemini]
-Step 13: self_eval → SelfEvaluator.evaluate() [optional, LLM call]
-Step 14: tavily_fallback → nếu self_eval fail [optional]
+Step 5: top_k resolution → _resolve_top_k() [list-query detection]
+         - Nếu query chứa "các", "tất cả", "danh sách"... → top_k x2 (max 12)
+         - Context char budget cũng tăng tương ứng (x2 = 16000)
+Step 6: embed → bge_embedder.embed_query() + e5_embedder.embed_query()
+Step 7: search → MultiCollectionSearch.search() [Qdrant + ES parallel]
+Step 8: dedup candidates
+Step 9: rerank → BGEReranker.rerank()
+Step 10: validity_filter → ValidityFilter.filter()
+Step 11: reference_resolver → ReferenceResolver.resolve()
+Step 12: format_context → _format_context() (budget-limited string)
+Step 13: generate → chat_model.generate(mode="rag") [LLM call - Gemini]
+Step 14: self_eval → SelfEvaluator.evaluate() [optional, LLM call]
+Step 15: tavily_fallback → nếu self_eval fail [optional]
 ```
+
+**List-query top_k scaling (thêm 2026-05-02):**
+- `_LIST_QUERY_RE`: regex detect query liệt kê (các/tất cả/danh sách/liệt kê/những...)
+- `_resolve_top_k(base, question)`: nếu match → `min(base * 2, 12)`, else → `base`
+- Cũng scale `context_char_budget` lên `_DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET * 2`
+- **Motivation**: "các học phần tiếng nhật của IT-E6" có 10 chunk riêng biệt, top_k=5 sẽ bỏ sót JP1120, JP2126, JP2132, JP2210, JP2220
 
 #### `rag_flow_stream()`
 - Giống `rag_flow()` nhưng step 12 là `generate_stream()` → yield chunks
