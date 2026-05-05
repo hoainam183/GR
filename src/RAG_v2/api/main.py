@@ -18,7 +18,7 @@ _RAG_V2_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_RAG_V2_ROOT))
 
 from pipeline.rag_pipeline import RAGPipeline  # noqa: E402
-from pipeline.mongo_logger import MongoLogger  # noqa: E402
+from models.mongo_logger import MongoLogger  # noqa: E402
 from config.settings import Settings  # noqa: E402
 from models.database import create_indexes  # noqa: E402
 
@@ -101,7 +101,7 @@ async def lifespan(app: FastAPI):
     if settings.crawler_enabled:
         try:
             from apscheduler.schedulers.asyncio import AsyncIOScheduler
-            from pipeline.auto_crawler import AutoCrawlPipeline
+            from scripts.auto_crawler import AutoCrawlPipeline
 
             # Try to reuse embedders from the RAG pipeline
             bge, e5 = None, None

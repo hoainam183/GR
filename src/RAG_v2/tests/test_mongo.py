@@ -35,7 +35,7 @@ requires_mongo = pytest.mark.skipif(
 @pytest.fixture(scope="module")
 def mongo_logger():
     """Shared MongoLogger instance for the test module."""
-    from pipeline.mongo_logger import MongoLogger
+    from models.mongo_logger import MongoLogger
 
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
     client.drop_database(TEST_DB)

@@ -92,7 +92,7 @@ class Evaluator:
 
         This test only requires the ComplexityRouter — no LLM or retrieval needed.
         """
-        from agent.complexity_router import ComplexityRouter
+        from query.complexity_router import ComplexityRouter
 
         router = ComplexityRouter()
         results: List[EvaluationResult] = []

@@ -1,6 +1,5 @@
 """Agent module — LangGraph-based Agentic RAG orchestration."""
 
-from .complexity_router import ComplexityRouter
 from .graph_state import AgentGraphState
 from .lc_tools import LANGGRAPH_TOOLS, TOOL_MAP
 from .prompts import (
@@ -38,7 +37,6 @@ __all__ = [
     "init_agent_docs",
     "get_agent_docs",
     # Agent
-    "ComplexityRouter",
     "ReActAgent",
     # Prompts
     "AGENT_SYSTEM_PROMPT",

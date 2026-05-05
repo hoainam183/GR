@@ -6,7 +6,7 @@ Run:
 
 from __future__ import annotations
 
-from agent.complexity_router import ComplexityRouter
+from query.complexity_router import ComplexityRouter
 
 router = ComplexityRouter()
 

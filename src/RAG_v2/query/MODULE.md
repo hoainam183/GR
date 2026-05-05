@@ -10,6 +10,7 @@ Module `query` chịu trách nhiệm **hiểu và chuẩn bị câu hỏi** củ
 
 ```
 query/
+├── complexity_router.py # ComplexityRouter — Tier-0 routing (chitchat/simple/complex)
 ├── router.py            # QueryRouter — phân loại intent + domain
 ├── domain_classifier.py # DomainClassifier — embedding-based ML classifier
 ├── reflection.py        # QueryReflector — LLM-based query rewrite
@@ -22,6 +23,25 @@ query/
 ---
 
 ## Nhiệm vụ chi tiết
+
+### `complexity_router.py` — `ComplexityRouter`
+
+**Nhiệm vụ:** Tier-0 routing — phân loại query trước khi chọn pipeline xử lý (di chuyển từ `agent/` sang đây vì không phụ thuộc agent logic).
+
+**Tier routing:** `chitchat` | `simple` | `complex`
+
+Đối với **`complex`**, router xác định thêm trường **`complex_subtype`**:
+- `comparison`: So sánh 2 mã khóa hoặc 2 mã ngành.
+- `personal_check`: Query có chủ thể cá nhân (tôi/mình/em) kết hợp điều kiện (đủ/có thể/được không).
+- `multi_source`: Câu hỏi đa điều kiện không có context cá nhân.
+- `general`: Câu hỏi dài, phức tạp nhưng không khớp pattern rõ ràng.
+
+**Lưu ý quan trọng (thứ tự pattern):**
+- `personal_check` được đặt TRƯỚC `multi_source` trong `_COMPLEX_PATTERN_SPECS`.
+- Word-count heuristic (>30 words): chỉ route `complex` nếu có connector đa chủ đề, không route nếu query dài nhưng single-topic.
+- `_MULTI_TOPIC_RE` được compile sẵn ở module-level, tránh re-compile mỗi lần gọi.
+
+---
 
 ### `router.py` — `QueryRouter`
 

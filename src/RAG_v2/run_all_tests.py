@@ -6,7 +6,7 @@ import inspect
 import pathlib
 
 # Imports from RAG_v2
-from agent.complexity_router import ComplexityRouter
+from query.complexity_router import ComplexityRouter
 from agent.tool_adapters import init_agent_docs, get_agent_docs, _append_agent_docs, execute_retrieval_plan
 from agent.react_agent import ReActAgent, _make_call_sig
 from langchain_core.messages import AIMessage, ToolMessage

@@ -11,13 +11,13 @@ Module `pipeline` là **trái tim điều phối** của toàn bộ hệ thống
 ```
 pipeline/
 ├── rag_pipeline.py    # RAGPipeline class — orchestrator chính
-├── flows.py           # Các flow cụ thể: rag_flow, chitchat_flow (và streaming)
-├── mongo_logger.py    # Ghi log hội thoại vào MongoDB
-├── auto_crawler.py    # Auto daily crawl → clean → chunk → index (Qdrant+ES)
-├── index_kehoach.py   # Script indexing dữ liệu kế hoạch học kỳ
-├── index_quydinh.py   # Script indexing dữ liệu quy định
-└── index_stsv.py      # Script indexing dữ liệu hỗ trợ sinh viên
+└── flows.py           # Các flow cụ thể: rag_flow, chitchat_flow (và streaming)
 ```
+
+> **Đã di chuyển:**
+> - `mongo_logger.py` → `models/mongo_logger.py`
+> - `auto_crawler.py` → `scripts/auto_crawler.py`
+> - `index_kehoach.py`, `index_quydinh.py`, `index_stsv.py` → `scripts/`
 
 ---
 

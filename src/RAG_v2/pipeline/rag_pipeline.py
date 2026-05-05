@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .mongo_logger import MongoLogger
+    from models.mongo_logger import MongoLogger
 
 # Ensure project root is on sys.path so sibling packages resolve correctly
 PROJECT_ROOT = Path(__file__).resolve().parent.parent  # …/RAG_v2
@@ -19,7 +19,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from dotenv import load_dotenv
 
-from agent.complexity_router import ComplexityRouter
+from query.complexity_router import ComplexityRouter
 from agent.react_agent import ReActAgent
 from config.settings import Settings
 from llm import BaseLLM, create_llm

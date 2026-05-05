@@ -20,9 +20,10 @@ retrieval/
 ├── collection_selector.py   # CollectionSelector — chọn collections từ domain
 ├── validity_filter.py       # ValidityFilter — lọc chunk không hợp lệ
 ├── reference_resolver.py    # ReferenceResolver — resolve cross-references
-├── base.py                  # BaseRetriever abstract class
-└── search_multi.py          # Utility search functions
+└── base.py                  # BaseRetriever abstract class
 ```
+
+> **Đã di chuyển:** `search_multi.py`, `index_to_es.py` → `scripts/`
 
 ---
 

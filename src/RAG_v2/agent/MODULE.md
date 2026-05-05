@@ -12,9 +12,8 @@ Module `agent` triển khai **Agentic RAG** sử dụng LangGraph framework. K�
 
 ```
 agent/
-├── __init__.py           # Export ReActAgent, ComplexityRouter
+├── __init__.py           # Export ReActAgent
 ├── react_agent.py        # ReActAgent — LangGraph graph orchestrator
-├── complexity_router.py  # ComplexityRouter — phân loại simple/complex/chitchat và subtype
 ├── tool_adapters.py      # Tool implementations & execute_retrieval_plan (parallel)
 ├── lc_tools.py           # LangChain tool wrappers (LANGGRAPH_TOOLS list)
 ├── prompts.py            # System prompts: AGENT, SYNTHESIS, DECOMPOSE, PLANNER
@@ -23,36 +22,19 @@ agent/
 └── tools.py              # Tool schema definitions
 ```
 
+> **Lưu ý:** `complexity_router.py` đã chuyển sang module `query/` (xem `query/MODULE.md`).
+
 ---
 
 ## Nhiệm vụ chi tiết
-
-### `complexity_router.py` — `ComplexityRouter`
-
-**Nhiệm vụ:** Phân loại query trước khi chọn pipeline xử lý.
-
-**Tier routing:** `chitchat` | `simple` | `complex`
-
-Đối với **`complex`**, router xác định thêm trường **`complex_subtype`**:
-- `comparison`: So sánh 2 mã khóa hoặc 2 mã ngành.
-- `personal_check`: Query có chủ thể cá nhân (tôi/mình/em) kết hợp điều kiện (đủ/có thể/được không) → ReAct loop.
-- `multi_source`: Câu hỏi đa điều kiện không có context cá nhân.
-- `general`: Câu hỏi dài, phức tạp nhưng không khớp pattern rõ ràng.
-
-**Luu ý quan trọng (thứ tự pattern):**
-- `personal_check` được đặt TRƯỚC `multi_source` trong `_COMPLEX_PATTERN_SPECS`.
-- Word-count heuristic (>30 words): chỉ route `complex` nếu có connector đa chủ đề (”và/cũng/ngoài ra...”), không route nếu query dài nhưng single-topic.
-- `_MULTI_TOPIC_RE` được compile sẵn ở module-level, tránh re-compile mỗi lần gọi.
-
----
 
 ### `react_agent.py` — `ReActAgent` (LangGraph)
 
 **Kiến trúc graph mới (Dual-Path):**
 ```
-START ─[Ὗ_route_complex]─┬─► decompose → planner ─[Ὗ_after_planner]─┬─► executor → synthesize → END
+START ─[_route_complex]─┬─► decompose → planner ─[_after_planner]─┬─► executor → synthesize → END
                         │                                         └─► agent (fallback)
-                        └─► agent ─[Ὗ_should_continue]─┬─► tools ─[Ὗ_after_tools]─┬─► agent
+                        └─► agent ─[_should_continue]─┬─► tools ─[_after_tools]─┬─► agent
                                                       ├─► synthesize → END      ├─► synthesize → END
                                                       └─► extract_answer → END  └─► extract_answer → END
 ```
