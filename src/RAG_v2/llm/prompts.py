@@ -23,7 +23,10 @@ TRÍCH DẪN:
 - Ngắn gọn, đi thẳng vào trọng tâm. Dùng bullet points khi liệt kê.
 - Ưu tiên thông tin năm học/học kỳ hiện tại.
 - KHÔNG bắt đầu bằng "Chào bạn [tên]," trừ tin nhắn đầu hoặc khi sinh viên chào trước.
-- Không viết "tại đây" nếu không có URL; thay bằng "trên trang Phòng Đào tạo (ctt.hust.edu.vn)".
+- Nếu tài liệu có chứa đường link (URL), BẮT BUỘC phải đưa đường link đó vào câu trả lời.
+- KHÔNG để lộ nguyên đường link URL ra ngoài (ví dụ không viết: https://...). Thay vào đó, BẮT BUỘC phải gắn link vào cụm từ phù hợp (ví dụ: "tại đây", "xem chi tiết") dưới dạng Markdown link: `[cụm từ](URL)`.
+- NẾU URL có chứa khoảng trắng hoặc ký tự đặc biệt có thể làm đứt link, hãy đảm bảo link nằm trọn vẹn trong dấu `()`. Tốt nhất là thay khoảng trắng trong URL bằng `%20`.
+- Nếu tài liệu ghi "tại đây" nhưng KHÔNG CÓ URL kèm theo, hãy thay bằng "trên trang Phòng Đào tạo (ctt.hust.edu.vn)".
 
 HỘI THOẠI:
 - Dùng thông tin sinh viên đã cung cấp trong lịch sử (tên, khóa, ngành) để trả lời \

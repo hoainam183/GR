@@ -420,8 +420,9 @@ export const sendMessageStream = async (
           }
         }
       } catch {
-        answer += payload;
-        handlers.onToken?.(payload);
+        // Payload is not valid JSON — skip it silently.
+        // Do NOT append raw payload (could be a stray URL, error text, etc.).
+        console.warn('[stream] non-JSON SSE payload skipped:', payload);
       }
 
       sepIndex = buffer.indexOf('\n\n');

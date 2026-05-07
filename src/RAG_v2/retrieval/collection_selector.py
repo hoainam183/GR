@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 # ─── Domain → Collection mapping ────────────────────────────────────────────────
 DOMAIN_TO_COLLECTIONS: Dict[str, List[str]] = {
     "ctdt": ["ctdt"],
-    "quydinh": ["quydinh"],
+    "quydinh": ["quydinh", "stsv"],   # regulations ↔ student support overlap
     "kehoach": ["kehoach"],
-    "stsv": ["stsv"],
+    "stsv": ["stsv", "quydinh"],       # student support ↔ regulations overlap
 }
 
 ALL_COLLECTIONS: List[str] = ["stsv", "quydinh", "kehoach", "ctdt"]

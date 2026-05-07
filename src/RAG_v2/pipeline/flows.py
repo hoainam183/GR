@@ -99,7 +99,7 @@ def _retrieval_candidate_k(top_k: int) -> int:
     Keep the previous proportional heuristic (4x final top_k) while enforcing
     a minimum of 20 candidates for stronger reranker recall.
     """
-    return max(top_k * 4, 20)
+    return max(top_k * 4, 40)
 
 
 def _resolve_top_k(base_top_k: int, query: str) -> int:

@@ -26,23 +26,32 @@ scripts/
 
 ### `auto_crawler.py` — `AutoCrawlPipeline`
 
-**Nhiệm vụ:** Tự động crawl bài viết mới từ ctt.hust.edu.vn hàng ngày, làm sạch, chunk, embed và index vào Qdrant + Elasticsearch.
+**Nhiệm vụ:** Tự động crawl bài viết mới từ ctt.hust.edu.vn hàng ngày, làm sạch, chunk, embed và index vào Qdrant + Elasticsearch. Hỗ trợ 2 pipelines:
+- **kehoach**: `DisplayListBaiViet` + `DisplayListKeHoach` → collection `kehoach` (retention 6 tháng)
+- **quydinh**: `DisplayQuyChe` → collection `quydinh` (retention 8 năm)
 
 **Classes:**
-- `KehoachCrawler` — incremental crawl (chỉ lấy bài mới, dựa trên baiviet_id)
-- `ChunkProcessor` — wrapper quanh `KeHoachChunker`
+- `GenericCrawler` — incremental crawl, tham số hóa `list_path`, `id_param` ("baiviet"/"kehoach"), `output_file`
+- `ChunkProcessor` — wrapper quanh `KeHoachChunker`, tham số hóa `source_label`, `chunks_file`
 - `DualIndexer` — embed BGE-M3 + E5, upsert Qdrant + ES
-- `RetentionManager` — xoá bài >N tháng khỏi JSON, chunks, Qdrant, ES
-- `AutoCrawlPipeline` — orchestrator: crawl → chunk → index → retention → notify
+- `RetentionManager` — xoá bài >N tháng, tham số hóa `output_file`, `chunks_file`
+- `AutoCrawlPipeline` — orchestrator: `run_kehoach()`, `run_quydinh()`, `run()`
 
 **Pipeline flow:**
 ```
-Crawl (incremental) → Save JSON → Chunk → Index (Qdrant+ES) → Retention → Notify
+Crawl (incremental, multi-source) → Save JSON → Chunk → Index (Qdrant+ES) → Retention → Notify
 ```
 
 **Scheduling:** APScheduler cron job trong FastAPI lifespan (mặc định 02:00 hàng ngày).
 
-**CLI:** `python -m scripts.auto_crawler` (standalone) hoặc `--dry` (dry-run).
+**CLI:**
+```bash
+python -m scripts.auto_crawler                        # chạy cả 2 pipelines
+python -m scripts.auto_crawler --pipeline kehoach     # chỉ kehoach
+python -m scripts.auto_crawler --pipeline quydinh     # chỉ quydinh
+python -m scripts.auto_crawler --dry                  # dry-run
+python -m scripts.auto_crawler --module crawl --pipeline quydinh  # chỉ crawl quydinh
+```
 
 ---
 

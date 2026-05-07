@@ -129,6 +129,9 @@ def run_test_case(
     resolved_cohort: Optional[str] = None,
     top_k: int = 5,
     rerank: bool = True,
+    vector_k: int = 20,
+    keyword_k: int = 20,
+    pool_k: int = 15,
 ) -> None:
     """Chạy một test case và in kết quả chi tiết."""
     print()
@@ -152,10 +155,10 @@ def run_test_case(
         bge_m3_query=bge_vec,
         e5_query=e5_vec,
         top_k=raw_top_k,
-        vector_top_k=getattr(settings, "vector_top_k", 20),
-        keyword_top_k=getattr(settings, "keyword_top_k", 20),
-        vector_pool_k=getattr(settings, "vector_pool_k", 15),
-        keyword_pool_k=getattr(settings, "keyword_pool_k", 15),
+        vector_top_k=vector_k,
+        keyword_top_k=keyword_k,
+        vector_pool_k=pool_k,
+        keyword_pool_k=pool_k,
         active_collections=collections,
         resolved_major=resolved_major,
         resolved_cohort=resolved_cohort,
@@ -214,10 +217,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--cohort", type=str, default=None, help="resolved_cohort (vd: K67)")
     p.add_argument("--top_k", type=int, default=5, help="Số docs hiển thị (mặc định: 5)")
     p.add_argument("--no-rerank", action="store_true", help="Tắt reranking")
-    p.add_argument(
-        "--case", nargs="+", default=None,
-        help="Index của test case(s) cần chạy, hoặc 'all' để chạy tất cả (mặc định: all)",
-    )
+    p.add_argument("--vector_k", type=int, default=50)
+    p.add_argument("--keyword_k", type=int, default=50)
+    p.add_argument("--pool_k", type=int, default=40)
     return p
 
 
@@ -244,6 +246,9 @@ def main() -> None:
             resolved_cohort=args.cohort,
             top_k=args.top_k,
             rerank=not args.no_rerank,
+            vector_k=args.vector_k,
+            keyword_k=args.keyword_k,
+            pool_k=args.pool_k,
         )
         return
 

@@ -69,11 +69,17 @@ CONFIG = {
         },
         {
             "name": "quydinh",
-            # thu muc chua nhieu *_chunks.json
             "source": DATA / "quydinh" / "olmocr" / "chunks_recursive_parent_child_3",
             "source_type": "dir",
-            "id_field": "id",            # UUID field
-            "level_filter": "child",     # chi lay level == "child"
+            "id_field": "id",
+            "level_filter": "child",
+        },
+        {
+            "name": "quydinh",
+            "source": DATA / "quydinh" / "chunks" / "quydinh_all_chunks.json",
+            "source_type": "file",
+            "id_field": "chunk_id",
+            "level_filter": None,
         },
         {
             "name": "ctdt",

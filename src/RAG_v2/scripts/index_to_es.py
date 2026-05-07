@@ -35,7 +35,6 @@ COLLECTIONS = [
     ("quydinh", "quydinh"),
     ("kehoach", "kehoach"),
     ("ctdt", "ctdt"),
-    # ("ten_collection_moi", "ten_es_index_moi"),
 ]
 
 # Xóa docs cũ trong ES trước khi index lại không?

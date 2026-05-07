@@ -346,15 +346,14 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         )}
 
         <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert">
-          {message.isStreaming ? (
-            <div className="whitespace-pre-wrap">{message.content}</div>
-          ) : (
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={markdownComponents}
-            >
-              {message.content}
-            </ReactMarkdown>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={markdownComponents}
+          >
+            {message.content}
+          </ReactMarkdown>
+          {message.isStreaming && (
+            <span className="inline-block w-1.5 h-3.5 bg-current opacity-70 animate-pulse rounded-sm align-middle ml-0.5" />
           )}
         </div>
 

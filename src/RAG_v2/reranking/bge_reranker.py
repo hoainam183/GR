@@ -53,11 +53,13 @@ class BGEReranker(BaseReranker):
         batch_size: int = 32,
         top_k: int = DEFAULT_TOP_K,
         score_threshold: float = 0.0,
+        table_score_threshold: float = -3.0,
     ) -> None:
         self.model_name = model_name
         self.batch_size = batch_size
         self.top_k = top_k
         self.score_threshold = score_threshold
+        self.table_score_threshold = table_score_threshold
 
         device = _resolve_torch_device(device)
         self.device = device
@@ -83,6 +85,7 @@ class BGEReranker(BaseReranker):
         documents: List[Dict[str, Any]],
         top_k: Optional[int] = None,
         score_threshold: Optional[float] = None,
+        table_score_threshold: Optional[float] = None,
     ) -> List[Dict[str, Any]]:
         """Rerank *documents* against *query* and return the top-K.
 
@@ -105,6 +108,7 @@ class BGEReranker(BaseReranker):
 
         top_k = top_k or self.top_k
         threshold = score_threshold if score_threshold is not None else self.score_threshold
+        table_thresh = table_score_threshold if table_score_threshold is not None else getattr(self, "table_score_threshold", threshold)
 
         # Build (query, doc_text) pairs
         pairs = [[query, doc["text"]] for doc in documents]
@@ -123,24 +127,37 @@ class BGEReranker(BaseReranker):
             scored_docs.append(enriched)
 
         scored_docs.sort(key=lambda d: d["rerank_score"], reverse=True)
-        top_docs = scored_docs[:top_k]
 
-        # Apply score threshold
-        filtered = [d for d in top_docs if d["rerank_score"] >= threshold]
-        if len(filtered) < len(top_docs):
+        # Apply per-document score threshold BEFORE top_k truncation.
+        # This prevents table docs (with relaxed table_score_threshold) from
+        # being excluded when higher-ranked non-table docs (all failing the
+        # stricter default threshold) fill the top_k slots first.
+        filtered = []
+        for d in scored_docs:
+            has_table = d.get("metadata", {}).get("has_table", False)
+            doc_thresh = table_thresh if has_table else threshold
+            if d["rerank_score"] >= doc_thresh:
+                filtered.append(d)
+
+        # Now apply top_k on the threshold-passing documents
+        top_docs = filtered[:top_k]
+
+        if len(filtered) < len(scored_docs):
             logger.info(
-                "Score threshold %.2f dropped %d doc(s) → %d remaining",
+                "Score thresholds (default=%.2f, table=%.2f) dropped %d doc(s) → %d passing → top %d",
                 threshold,
-                len(top_docs) - len(filtered),
+                table_thresh,
+                len(scored_docs) - len(filtered),
                 len(filtered),
+                len(top_docs),
             )
 
         logger.info(
             "Reranked %d docs → top %d (best=%.4f, worst=%.4f)",
             len(documents),
-            len(filtered),
-            filtered[0]["rerank_score"] if filtered else 0.0,
-            filtered[-1]["rerank_score"] if filtered else 0.0,
+            len(top_docs),
+            top_docs[0]["rerank_score"] if top_docs else 0.0,
+            top_docs[-1]["rerank_score"] if top_docs else 0.0,
         )
 
-        return filtered
+        return top_docs

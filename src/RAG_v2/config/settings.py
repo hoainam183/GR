@@ -125,10 +125,10 @@ class Settings(BaseSettings):
 
     # --- Retrieval ---
     top_k: int = 5
-    vector_top_k: int = 20
-    keyword_top_k: int = 20
-    vector_pool_k: int = 15
-    keyword_pool_k: int = 15
+    vector_top_k: int = 50
+    keyword_top_k: int = 50
+    vector_pool_k: int = 40
+    keyword_pool_k: int = 40
     vector_weight: float = 0.8
     keyword_weight: float = 0.2
 
@@ -139,6 +139,7 @@ class Settings(BaseSettings):
     # dropped from the context. 0.0 is the natural decision boundary;
     # lower to -0.5 if you need more recall, raise to 0.5 for higher precision.
     reranker_score_threshold: float = 0.0
+    reranker_table_score_threshold: float = -5.0
 
     # --- Router ---
     router_mode: str = "classifier"

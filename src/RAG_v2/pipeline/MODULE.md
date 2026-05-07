@@ -186,29 +186,17 @@ ComplexityRouter (regex patterns)
 
 ---
 
-### `auto_crawler.py` — Auto Daily Crawl Pipeline
+### `auto_crawler.py` — Auto Daily Crawl Pipeline (đã di chuyển sang `scripts/`)
 
-**Nhiệm vụ:** Tự động crawl bài viết mới từ ctt.hust.edu.vn hàng ngày, làm sạch, chunk, embed và index vào Qdrant + Elasticsearch.
+**Nhiệm vụ:** Tự động crawl bài viết mới từ ctt.hust.edu.vn hàng ngày. Hỗ trợ 2 pipelines:
+- **kehoach**: `DisplayListBaiViet` + `DisplayListKeHoach` → collection `kehoach` (retention 6 tháng)
+- **quydinh**: `DisplayQuyChe` → collection `quydinh` (retention 8 năm)
 
 **Classes:**
-- `KehoachCrawler` — incremental crawl (chỉ lấy bài mới, dựa trên baiviet_id)
-- `ChunkProcessor` — wrapper quanh `KeHoachChunker`
+- `GenericCrawler` — incremental crawl, tham số hóa `list_path`, `id_param`, `output_file`
+- `ChunkProcessor` — wrapper quanh `KeHoachChunker`, tham số hóa `source_label`, `chunks_file`
 - `DualIndexer` — embed BGE-M3 + E5, upsert Qdrant + ES
-- `RetentionManager` — xoá bài >N tháng khỏi JSON, chunks, Qdrant, ES
-- `AutoCrawlPipeline` — orchestrator: crawl → chunk → index → retention → notify
+- `RetentionManager` — xoá bài >N tháng, tham số hóa `output_file`, `chunks_file`
+- `AutoCrawlPipeline` — orchestrator: `run_kehoach()`, `run_quydinh()`, `run()`
 
-**Pipeline flow:**
-```
-Crawl (incremental) → Save JSON → Chunk → Index (Qdrant+ES) → Retention → Notify
-```
-
-**Scheduling:** APScheduler cron job trong FastAPI lifespan (mặc định 02:00 hàng ngày).
-
-**Config** (trong `config/settings.py`):
-- `crawler_enabled` — bật/tắt scheduler
-- `crawler_schedule_hour/minute` — giờ chạy
-- `crawler_delay` — delay giữa HTTP requests
-- `crawler_retention_months` — xoá bài cũ hơn N tháng
-- `crawler_tags` — categories crawl (extensible, format `Name:encoded,...`)
-
-**CLI:** `python -m pipeline.auto_crawler` (standalone) hoặc `--dry` (dry-run).
+**CLI:** `python -m scripts.auto_crawler --pipeline kehoach|quydinh|all --module crawl|chunk|index|retention|all`

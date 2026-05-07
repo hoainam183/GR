@@ -51,7 +51,9 @@
       "child_count": 1,
       "effective_date": null,
       "expiry_date": null,
-      "applicable_cohort": null,
+      "applicable_cohort": [
+        "K62"
+      ],
       "applicable_major": null,
       "document_type": "curriculum"
     }
@@ -79,7 +81,9 @@
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,
-      "applicable_cohort": null,
+      "applicable_cohort": [
+        "K62"
+      ],
       "applicable_major": null,
       "document_type": "curriculum"
     }

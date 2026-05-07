@@ -139,10 +139,14 @@ results = qdrant.search(bge_m3_query=bge_vec, e5_query=e5_vec, top_k=20)
 
 **Nhiệm vụ:** Chọn tập collections cần search dựa trên domain + confidence.
 
+**Cross-domain mapping:** `quydinh` và `stsv` luôn đi cùng nhau vì nội dung chồng chéo
+(quy định ↔ thủ tục hỗ trợ sinh viên, VD: điểm rèn luyện, hiến máu, học bổng…).
+
 ```python
 # domain="ctdt", confidence=0.9 → ["ctdt"]
-# domain="ctdt", confidence=0.6 → ["ctdt", "quydinh"]  (mở rộng thêm)
-# domains=["ctdt","quydinh"] → ["ctdt", "quydinh"]
+# domain="quydinh", confidence=0.9 → ["quydinh", "stsv"]
+# domain="stsv", confidence=0.9 → ["stsv", "quydinh"]
+# domain="ctdt", confidence=0.4 → ["quydinh", "stsv", "ctdt"]  (fallback)
 ```
 
 ---

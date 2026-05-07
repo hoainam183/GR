@@ -210,3 +210,11 @@ Module `llm` chứa TẤT CẢ các LLM calls trong pipeline RAG thông thườn
 | Token budget quá lớn | Giảm `max_tokens` (default 1024) |
 | Self-eval add latency | Tăng `self_eval_min_top_score` để skip thường xuyên hơn |
 | Context quá dài | Giảm `_DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET` (hiện 8000 chars) |
+
+---
+
+## Recent Changes
+
+* 2026-05-06: Cập nhật `RAG_SYSTEM_PROMPT` trong `prompts.py` yêu cầu LLM ẩn nguyên bản các đường link chứa khoảng trắng (URL) vào trong văn bản theo chuẩn markdown (ví dụ `[tại đây](URL)`) và encode `%20` khoảng trắng để chống lỗi đứt link.
+* 2026-05-05: Cập nhật `RAG_SYSTEM_PROMPT` trong `prompts.py` để yêu cầu LLM giữ nguyên và đưa URL (nếu có) vào trong câu trả lời thay vì rút gọn các đường link như trước.
+

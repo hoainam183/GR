@@ -176,6 +176,10 @@ def create_app() -> FastAPI:
         allow_origins=[
             "http://localhost:5173",  # Vite dev server
             "http://localhost:8080",  # Docker / nginx frontend
+            "http://localhost:19006", # Expo web
+            "http://localhost:8081",  # Metro bundler
+            "http://10.0.2.2:8000",  # Android emulator
+            "http://192.168.*:*",     # LAN devices
         ],
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],

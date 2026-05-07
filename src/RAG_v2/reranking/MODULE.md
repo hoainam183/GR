@@ -45,10 +45,18 @@ Cross-encoder scores mỗi (query, doc) pair
   ↓
 Sort by score DESC
   ↓
-Return top_k (thường top 5)
+Filter by per-doc threshold (table vs non-table)
+  ↓
+Return top_k from survivors (thường top 5)
 ```
 
 **Score threshold:** Tài liệu có `rerank_score < threshold` bị bỏ (tránh hallucination từ tài liệu không liên quan).
+Đặc biệt đối với dữ liệu bảng (`has_table: true`), hệ thống hỗ trợ một ngưỡng riêng `reranker_table_score_threshold` (mặc định `-5.0`) vì mô hình cross-encoder thường chấm điểm logit âm cho các văn bản dạng bảng.
+
+**Quan trọng:** Threshold filtering xảy ra **TRƯỚC** top_k truncation. Nếu ngược lại (top_k trước, filter sau), các table docs với ngưỡng thấp hơn có thể bị loại bởi top_k cut khi các non-table docs chiếm hết slot mặc dù chúng cũng fail threshold.
+
+Hệ thống cũng tăng số lượng ứng viên truy xuất ban đầu (`vector_top_k` / `keyword_top_k` = 50) để đảm bảo các từ khoá hiếm trong bảng không bị loại bỏ sớm do nhiễu từ truy vấn viết lại.
+
 
 **Bypass reranker logic (trong `tool_adapters.py`):**
 ```python

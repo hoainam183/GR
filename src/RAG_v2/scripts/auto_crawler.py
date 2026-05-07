@@ -1,14 +1,20 @@
 """
-Auto-Crawler Pipeline — Daily Kehoach Sync
-===========================================
+Auto-Crawler Pipeline — Multi-Source Sync (KeHoach + QuyDinh)
+==============================================================
 Automated daily pipeline:  crawl → clean → chunk → embed → index (Qdrant + ES)
+
+Supports two pipelines:
+  - **kehoach**: DisplayListBaiViet + DisplayListKeHoach → collection ``kehoach``
+  - **quydinh**: DisplayQuyChe → collection ``quydinh`` (retention 8 years)
 
 Also handles **retention**: deletes articles older than N months from all stores.
 
 Usage standalone::
 
-    python -m pipeline.auto_crawler          # one-shot run
-    python -m pipeline.auto_crawler --dry    # dry-run (no indexing)
+    python3 -m scripts.auto_crawler                        # run all pipelines
+    python3 -m auto_crawler --pipeline kehoach     # kehoach only
+    python3 -m scripts.auto_crawler --pipeline quydinh     # quydinh only
+    python3 -m scripts.auto_crawler --dry                  # dry-run (no indexing)
 
 When the FastAPI server is running with ``crawler_enabled=true``, this pipeline
 is scheduled via APScheduler at the configured hour (default 02:00).
@@ -36,13 +42,28 @@ logger = logging.getLogger("auto_crawler")
 # ───────────────────────────────────────────────────────────────
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent  # …/RAG_v2
-DATA_DIR = PROJECT_ROOT / "data" / "kehoach"
-OUTPUT_FILE = DATA_DIR / "output_full.json"
-CHUNKS_DIR = DATA_DIR / "chunks"
-CHUNKS_FILE = CHUNKS_DIR / "kehoach_all_chunks.json"
 
+# ── KeHoach paths (separated) ─────────────────────────────────
+DATA_DIR = PROJECT_ROOT / "data" / "kehoach"
+CHUNKS_DIR = DATA_DIR / "chunks"
+
+BAIVIET_OUTPUT_FILE = DATA_DIR / "baiviet_output_full.json"
+BAIVIET_CHUNKS_FILE = CHUNKS_DIR / "baiviet_all_chunks.json"
+
+KEHOACH_LIST_OUTPUT_FILE = DATA_DIR / "kehoach_list_output_full.json"
+KEHOACH_LIST_CHUNKS_FILE = CHUNKS_DIR / "kehoach_list_all_chunks.json"
+
+# ── QuyDinh paths ─────────────────────────────────────────────
+QUYDINH_DATA_DIR = PROJECT_ROOT / "data" / "quydinh"
+QUYDINH_OUTPUT_FILE = QUYDINH_DATA_DIR / "output_full.json"
+QUYDINH_CHUNKS_DIR = QUYDINH_DATA_DIR / "chunks"
+QUYDINH_CHUNKS_FILE = QUYDINH_CHUNKS_DIR / "quydinh_all_chunks.json"
+
+# ── Web constants ─────────────────────────────────────────────
 BASE_URL = "https://ctt.hust.edu.vn"
-LIST_PATH = "/DisplayWeb/DisplayListBaiViet"
+LIST_PATH_BAIVIET = "/DisplayWeb/DisplayListBaiViet"
+LIST_PATH_KEHOACH = "/DisplayWeb/DisplayListKeHoach"
+LIST_PATH_QUYCHE = "/DisplayWeb/DisplayQuyChe"
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -92,21 +113,41 @@ def _save_json(data: list, path: Path) -> None:
 
 
 # ═══════════════════════════════════════════════════════════════
-# 1. KehoachCrawler — incremental web crawl
+# 1. GenericCrawler — incremental web crawl
 # ═══════════════════════════════════════════════════════════════
 
 
-class KehoachCrawler:
+class GenericCrawler:
     """Incrementally crawls new articles from ctt.hust.edu.vn.
 
-    Only fetches articles whose ``baiviet_id`` is NOT already present
-    in the local ``output_full.json``.  Stops scanning as soon as it
-    hits a known ID (articles are sorted newest-first on the website).
+    Parameterized to support multiple source pages:
+      - ``list_path``:  e.g. "/DisplayWeb/DisplayListKeHoach"
+      - ``id_param``:   URL query param for the article ID ("baiviet" or "kehoach")
+      - ``output_file``: path to the persistent JSON file for this source
+      - ``source_label``: label stored in metadata ("kehoach" or "quydinh")
+
+    Only fetches articles whose ID is NOT already present in the local
+    output file.  Stops scanning as soon as it hits a known ID (articles
+    are sorted newest-first on the website).
     """
 
-    def __init__(self, delay: float = 1.0, tags: Optional[Dict[str, str]] = None):
+    def __init__(
+        self,
+        list_path: str = LIST_PATH_BAIVIET,
+        id_param: str = "baiviet",
+        output_file: Path = BAIVIET_OUTPUT_FILE,
+        source_label: str = "kehoach",
+        delay: float = 1.0,
+        tags: Optional[Dict[str, str]] = None,
+        max_age_months: Optional[int] = None,
+    ):
+        self.list_path = list_path
+        self.id_param = id_param
+        self.output_file = output_file
+        self.source_label = source_label
         self.delay = delay
         self.tags = tags or {"ĐTĐH": "%C4%90T%C4%90H"}
+        self.max_age_months = max_age_months
         self._session = requests.Session()
         self._session.headers.update(HEADERS)
 
@@ -125,7 +166,7 @@ class KehoachCrawler:
     # ── List parsing ──────────────────────────────────────────
 
     def _build_list_url(self, tag_encoded: str, page: int = 1) -> str:
-        return f"{BASE_URL}{LIST_PATH}?tag={tag_encoded}&page={page}"
+        return f"{BASE_URL}{self.list_path}?tag={tag_encoded}&page={page}"
 
     def _parse_list_page(self, soup: BeautifulSoup, category: str) -> List[Dict]:
         articles: List[Dict] = []
@@ -145,20 +186,22 @@ class KehoachCrawler:
                 title_text = title_p.get_text(separator=" ").strip().strip('"').strip()
 
             href = a_tag["href"]
-            baiviet_id = None
+            article_id = None
             try:
                 params = parse_qs(urlparse(href).query)
-                baiviet_id = int(params["baiviet"][0])
+                # Support both "baiviet" and "kehoach" URL params
+                article_id = int(params[self.id_param][0])
             except (KeyError, ValueError, IndexError):
                 pass
 
             articles.append({
-                "baiviet_id": baiviet_id,
+                "baiviet_id": article_id,
                 "url": urljoin(BASE_URL, href),
                 "title": title_text,
                 "category": category,
                 "tag_in_title": tag_text,
                 "date_str": date_tag.get_text(strip=True) if date_tag else None,
+                "source_list_path": self.list_path,
             })
         return articles
 
@@ -252,15 +295,20 @@ class KehoachCrawler:
         return new_articles
 
     def _get_existing_ids(self) -> Set[int]:
-        data = _load_json(OUTPUT_FILE)
+        data = _load_json(self.output_file)
         return {a["baiviet_id"] for a in data if a.get("baiviet_id")}
 
     def _crawl_tag_incremental(
         self, tag_encoded: str, category: str, existing_ids: Set[int]
     ) -> List[Dict]:
-        """Crawl pages until we hit an already-known baiviet_id."""
+        """Crawl pages until we hit an already-known baiviet_id or exceed max_age_months."""
         page = 1
         new_arts: List[Dict] = []
+        
+        cutoff_date = None
+        if self.max_age_months:
+            cutoff_date = datetime.now() - timedelta(days=self.max_age_months * 30)
+            
         while True:
             url = self._build_list_url(tag_encoded, page)
             logger.info("[%s] Fetching page %d …", category, page)
@@ -273,15 +321,28 @@ class KehoachCrawler:
                 break
 
             found_existing = False
+            hit_cutoff = False
             for item in items:
                 bid = item.get("baiviet_id")
                 if bid and bid in existing_ids:
                     found_existing = True
                     break
+                    
+                # Check cutoff date
+                if cutoff_date:
+                    dt = _parse_vn_date(item.get("date_str", ""))
+                    if dt and dt < cutoff_date:
+                        hit_cutoff = True
+                        break
+
                 new_arts.append(item)
 
             if found_existing:
                 logger.info("[%s] Hit existing article — stopping.", category)
+                break
+                
+            if hit_cutoff:
+                logger.info("[%s] Hit article older than %d months — stopping.", category, self.max_age_months)
                 break
 
             page += 1
@@ -291,12 +352,12 @@ class KehoachCrawler:
         return new_arts
 
     def save_to_file(self, new_articles: List[Dict]) -> None:
-        """Prepend new articles to output_full.json."""
-        existing = _load_json(OUTPUT_FILE)
+        """Prepend new articles to the output file."""
+        existing = _load_json(self.output_file)
         merged = new_articles + existing
-        _save_json(merged, OUTPUT_FILE)
+        _save_json(merged, self.output_file)
         logger.info("Saved %d articles (total %d) to %s",
-                    len(new_articles), len(merged), OUTPUT_FILE)
+                    len(new_articles), len(merged), self.output_file)
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -305,19 +366,34 @@ class KehoachCrawler:
 
 
 class ChunkProcessor:
-    """Chunks articles using KeHoachChunker and saves/updates chunks file."""
+    """Chunks articles using KeHoachChunker and saves/updates chunks file.
 
-    def __init__(self):
+    Parameters
+    ----------
+    source_label : str
+        Value for ``metadata.source`` in each chunk ("kehoach" or "quydinh").
+    chunks_file : Path
+        Path to the aggregate chunks JSON file for this source.
+    """
+
+    def __init__(self, source_label: str = "kehoach", chunks_file: Path = BAIVIET_CHUNKS_FILE):
         import sys
         sys.path.insert(0, str(PROJECT_ROOT))
         from chunking.chunker.kehoach_chunker import KeHoachChunker
         self._chunker = KeHoachChunker()
+        self._source_label = source_label
+        self._chunks_file = chunks_file
 
     def chunk_articles(self, articles: List[Dict]) -> List[Dict]:
         all_chunks: List[Dict] = []
         for art in articles:
             try:
                 chunks = self._chunker.chunk_document(art)
+                # Override source label and preserve source_list_path
+                for c in chunks:
+                    c["metadata"]["source"] = self._source_label
+                    if "source_list_path" not in c["metadata"] and "source_list_path" in art:
+                        c["metadata"]["source_list_path"] = art["source_list_path"]
                 all_chunks.extend(chunks)
             except Exception as e:
                 logger.warning("Chunk failed for baiviet_id=%s: %s",
@@ -326,10 +402,11 @@ class ChunkProcessor:
         return all_chunks
 
     def save_chunks(self, new_chunks: List[Dict]) -> None:
-        existing = _load_json(CHUNKS_FILE)
+        existing = _load_json(self._chunks_file)
         merged = existing + new_chunks
-        _save_json(merged, CHUNKS_FILE)
-        logger.info("Saved %d new chunks (total %d).", len(new_chunks), len(merged))
+        _save_json(merged, self._chunks_file)
+        logger.info("Saved %d new chunks (total %d) to %s.",
+                    len(new_chunks), len(merged), self._chunks_file)
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -483,10 +560,27 @@ class DualIndexer:
 
 
 class RetentionManager:
-    """Removes articles older than ``months`` from JSON, chunks, and indexes."""
+    """Removes articles older than ``months`` from JSON, chunks, and indexes.
 
-    def __init__(self, months: int = 6):
+    Parameters
+    ----------
+    months : int
+        Retention period. Articles older than this are deleted.
+    output_file : Path
+        Path to the output_full.json for this source.
+    chunks_file : Path
+        Path to the chunks aggregate file for this source.
+    """
+
+    def __init__(
+        self,
+        months: int = 6,
+        output_file: Path = BAIVIET_OUTPUT_FILE,
+        chunks_file: Path = BAIVIET_CHUNKS_FILE,
+    ):
         self.months = months
+        self.output_file = output_file
+        self.chunks_file = chunks_file
 
     def cleanup(self, indexer: Optional[DualIndexer] = None) -> int:
         cutoff = datetime.now() - timedelta(days=self.months * 30)
@@ -494,7 +588,7 @@ class RetentionManager:
                      self.months)
 
         # 1. Find expired IDs from output_full.json
-        articles = _load_json(OUTPUT_FILE)
+        articles = _load_json(self.output_file)
         expired_ids: List[int] = []
         kept: List[Dict] = []
         for art in articles:
@@ -514,15 +608,15 @@ class RetentionManager:
                      len(expired_ids), cutoff.strftime("%Y-%m-%d"))
 
         # 2. Remove from JSON
-        _save_json(kept, OUTPUT_FILE)
+        _save_json(kept, self.output_file)
 
         # 3. Remove from chunks file
-        chunks = _load_json(CHUNKS_FILE)
+        chunks = _load_json(self.chunks_file)
         expired_set = set(expired_ids)
         new_chunks = [c for c in chunks
                       if c.get("metadata", {}).get("baiviet_id") not in expired_set]
         removed_chunks = len(chunks) - len(new_chunks)
-        _save_json(new_chunks, CHUNKS_FILE)
+        _save_json(new_chunks, self.chunks_file)
         logger.info("Removed %d chunks from file.", removed_chunks)
 
         # 4. Remove from Qdrant + ES
@@ -538,7 +632,15 @@ class RetentionManager:
 
 
 class AutoCrawlPipeline:
-    """End-to-end: crawl → clean → chunk → index → retention → notify."""
+    """End-to-end: crawl → clean → chunk → index → retention → notify.
+
+    Supports two independent pipelines:
+      - ``run_kehoach()``: BaiViet + ListKeHoach → collection ``kehoach``
+      - ``run_quydinh()``: QuyChe → collection ``quydinh`` (8-year retention)
+      - ``run()``: orchestrates both pipelines
+    """
+
+    QUYDINH_RETENTION_MONTHS = 96  # 8 years
 
     def __init__(self, settings=None, bge=None, e5=None):
         self._settings = settings
@@ -556,10 +658,102 @@ class AutoCrawlPipeline:
                 tags[name.strip()] = encoded.strip()
         return tags or {"ĐTĐH": "%C4%90T%C4%90H"}
 
+    # ── Pipeline: KeHoach (BaiViet) ───────────────────────────
+
+    def run_baiviet(self) -> Dict[str, Any]:
+        """Crawl BaiViet → collection kehoach."""
+        return self._run_single_pipeline(
+            pipeline_name="baiviet",
+            crawlers_config=[
+                {
+                    "list_path": LIST_PATH_BAIVIET,
+                    "id_param": "baiviet",
+                    "label": "BaiViet",
+                }
+            ],
+            output_file=BAIVIET_OUTPUT_FILE,
+            chunks_file=BAIVIET_CHUNKS_FILE,
+            collection="kehoach",
+            source_label="kehoach",
+            retention_months=(
+                self._settings.crawler_retention_months
+                if self._settings else 6
+            ),
+        )
+
+    # ── Pipeline: KeHoach (ListKeHoach) ────────────────────────
+
+    def run_kehoach_list(self) -> Dict[str, Any]:
+        """Crawl ListKeHoach → collection kehoach."""
+        return self._run_single_pipeline(
+            pipeline_name="kehoach_list",
+            crawlers_config=[
+                {
+                    "list_path": LIST_PATH_KEHOACH,
+                    "id_param": "kehoach",
+                    "label": "ListKeHoach",
+                }
+            ],
+            output_file=KEHOACH_LIST_OUTPUT_FILE,
+            chunks_file=KEHOACH_LIST_CHUNKS_FILE,
+            collection="kehoach",
+            source_label="kehoach",
+            retention_months=(
+                self._settings.crawler_retention_months
+                if self._settings else 6
+            ),
+        )
+
+    def run_kehoach(self) -> Dict[str, Any]:
+        """Backward compatibility: run both BaiViet and ListKeHoach."""
+        return {
+            "baiviet": self.run_baiviet(),
+            "kehoach_list": self.run_kehoach_list()
+        }
+
+    # ── Pipeline: QuyDinh ─────────────────────────────────────
+
+    def run_quydinh(self) -> Dict[str, Any]:
+        """Crawl QuyChe → collection quydinh (8-year retention)."""
+        return self._run_single_pipeline(
+            pipeline_name="quydinh",
+            crawlers_config=[
+                {
+                    "list_path": LIST_PATH_QUYCHE,
+                    "id_param": "baiviet",
+                    "label": "QuyChe",
+                },
+            ],
+            output_file=QUYDINH_OUTPUT_FILE,
+            chunks_file=QUYDINH_CHUNKS_FILE,
+            collection="quydinh",
+            source_label="quydinh",
+            retention_months=self.QUYDINH_RETENTION_MONTHS,
+        )
+
+    # ── Run all ───────────────────────────────────────────────
+
     def run(self) -> Dict[str, Any]:
-        """Execute the full pipeline. Returns a summary dict."""
+        """Execute both pipelines. Returns combined summary."""
+        kehoach = self.run_kehoach()
+        quydinh = self.run_quydinh()
+        return {"kehoach": kehoach, "quydinh": quydinh}
+
+    # ── Internal: generic single-pipeline runner ──────────────
+
+    def _run_single_pipeline(
+        self,
+        pipeline_name: str,
+        crawlers_config: List[Dict],
+        output_file: Path,
+        chunks_file: Path,
+        collection: str,
+        source_label: str,
+        retention_months: int,
+    ) -> Dict[str, Any]:
         start_time = datetime.now()
         summary: Dict[str, Any] = {
+            "pipeline": pipeline_name,
             "started_at": start_time.isoformat(),
             "status": "success",
             "new_articles": 0,
@@ -570,79 +764,104 @@ class AutoCrawlPipeline:
         }
 
         logger.info("=" * 60)
-        logger.info("AUTO-CRAWL PIPELINE STARTED at %s", start_time.isoformat())
+        logger.info("PIPELINE [%s] STARTED at %s", pipeline_name, start_time.isoformat())
         logger.info("=" * 60)
 
+        indexer = None
         try:
             delay = self._settings.crawler_delay if self._settings else 1.0
             tags = self._parse_tags()
 
-            # Step 1: Crawl
-            logger.info("─── STEP 1: Crawl ───")
-            crawler = KehoachCrawler(delay=delay, tags=tags)
-            new_articles = crawler.crawl_new()
-            summary["new_articles"] = len(new_articles)
+            # Step 1: Crawl from all configured sources
+            logger.info("─── STEP 1: Crawl [%s] ───", pipeline_name)
+            all_new_articles: List[Dict] = []
+            for cfg in crawlers_config:
+                crawler = GenericCrawler(
+                    list_path=cfg["list_path"],
+                    id_param=cfg["id_param"],
+                    output_file=output_file,
+                    source_label=source_label,
+                    delay=delay,
+                    tags=tags,
+                    max_age_months=retention_months,
+                )
+                logger.info("  Crawling from %s …", cfg["label"])
+                new_arts = crawler.crawl_new()
+                all_new_articles.extend(new_arts)
 
-            if new_articles:
-                # Save raw data
-                crawler.save_to_file(new_articles)
+            summary["new_articles"] = len(all_new_articles)
+
+            if all_new_articles:
+                # Save raw data (single output file per pipeline)
+                # Use a temporary GenericCrawler just for saving
+                saver = GenericCrawler(
+                    output_file=output_file,
+                    source_label=source_label,
+                )
+                saver.save_to_file(all_new_articles)
 
                 # Step 2: Chunk
-                logger.info("─── STEP 2: Chunk ───")
-                chunker = ChunkProcessor()
-                new_chunks = chunker.chunk_articles(new_articles)
+                logger.info("─── STEP 2: Chunk [%s] ───", pipeline_name)
+                chunker = ChunkProcessor(
+                    source_label=source_label,
+                    chunks_file=chunks_file,
+                )
+                new_chunks = chunker.chunk_articles(all_new_articles)
                 summary["new_chunks"] = len(new_chunks)
 
                 if new_chunks:
                     chunker.save_chunks(new_chunks)
 
                     # Step 3: Index
-                    logger.info("─── STEP 3: Index (Qdrant + ES) ───")
-                    indexer = self._make_indexer()
+                    logger.info("─── STEP 3: Index [%s] (Qdrant + ES) ───", pipeline_name)
+                    indexer = self._make_indexer(collection=collection)
                     indexed = indexer.index_chunks(new_chunks)
                     summary["indexed"] = indexed
 
             # Step 4: Retention
-            logger.info("─── STEP 4: Retention ───")
-            months = self._settings.crawler_retention_months if self._settings else 6
-            retention = RetentionManager(months=months)
-            indexer_for_del = self._make_indexer() if not new_articles else indexer
+            logger.info("─── STEP 4: Retention [%s] (%d months) ───",
+                        pipeline_name, retention_months)
+            retention = RetentionManager(
+                months=retention_months,
+                output_file=output_file,
+                chunks_file=chunks_file,
+            )
+            indexer_for_del = indexer or self._make_indexer(collection=collection)
             expired = retention.cleanup(indexer=indexer_for_del)
             summary["expired_removed"] = expired
 
         except Exception as e:
             summary["status"] = "error"
             summary["errors"].append(str(e))
-            logger.error("Pipeline FAILED: %s", e)
+            logger.error("Pipeline [%s] FAILED: %s", pipeline_name, e)
             logger.error(traceback.format_exc())
 
         elapsed = (datetime.now() - start_time).total_seconds()
         summary["elapsed_seconds"] = round(elapsed, 1)
 
-        # Notification log
         self._notify(summary)
-
         return summary
 
-    def _make_indexer(self) -> DualIndexer:
+    def _make_indexer(self, collection: str = "kehoach") -> DualIndexer:
         s = self._settings
         return DualIndexer(
             qdrant_host=s.qdrant_host if s else "localhost",
             qdrant_port=s.qdrant_port if s else 6333,
             es_host=s.elasticsearch_host if s else "localhost",
             es_port=s.elasticsearch_port if s else 9200,
-            collection="kehoach",
+            collection=collection,
             bge=self._bge,
             e5=self._e5,
         )
 
     @staticmethod
     def _notify(summary: Dict[str, Any]) -> None:
+        pipeline = summary.get("pipeline", "unknown")
         status = summary["status"]
         icon = "✅" if status == "success" else "❌"
         msg = (
             f"\n{'=' * 60}\n"
-            f"{icon} AUTO-CRAWL PIPELINE {status.upper()}\n"
+            f"{icon} PIPELINE [{pipeline}] {status.upper()}\n"
             f"  Started:  {summary.get('started_at', '?')}\n"
             f"  Elapsed:  {summary.get('elapsed_seconds', '?')}s\n"
             f"  New articles: {summary.get('new_articles', 0)}\n"
@@ -673,61 +892,155 @@ if __name__ == "__main__":
 
     from config.settings import Settings
 
-    parser = argparse.ArgumentParser(description="Auto-Crawler Pipeline for Kehoach")
+    parser = argparse.ArgumentParser(
+        description="Auto-Crawler Pipeline (KeHoach + QuyDinh)"
+    )
     parser.add_argument("--dry", action="store_true", help="Dry run (no saving/indexing)")
-    parser.add_argument("--module", choices=["crawl", "chunk", "index", "retention", "all"], 
-                        default="all", help="Run a specific module or the entire pipeline")
+    parser.add_argument(
+        "--pipeline", choices=["kehoach", "quydinh", "all"],
+        default="all", help="Which pipeline to run (default: all)",
+    )
+    parser.add_argument(
+        "--module", choices=["crawl", "chunk", "index", "retention", "all"],
+        default="all", help="Run a specific module or the entire pipeline",
+    )
     args = parser.parse_args()
 
     settings = Settings()
     pipeline = AutoCrawlPipeline(settings=settings)
 
+    # ── Resolve pipeline-specific paths ──
+    def _get_pipeline_config(name: str):
+        if name == "quydinh":
+            return {
+                "output_file": QUYDINH_OUTPUT_FILE,
+                "chunks_file": QUYDINH_CHUNKS_FILE,
+                "collection": "quydinh",
+                "source_label": "quydinh",
+                "retention_months": AutoCrawlPipeline.QUYDINH_RETENTION_MONTHS,
+                "crawlers": [
+                    {"list_path": LIST_PATH_QUYCHE, "id_param": "baiviet", "label": "QuyChe"},
+                ],
+            }
+        elif name == "baiviet":
+            return {
+                "output_file": BAIVIET_OUTPUT_FILE,
+                "chunks_file": BAIVIET_CHUNKS_FILE,
+                "collection": "kehoach",
+                "source_label": "kehoach",
+                "retention_months": settings.crawler_retention_months,
+                "crawlers": [
+                    {"list_path": LIST_PATH_BAIVIET, "id_param": "baiviet", "label": "BaiViet"},
+                ],
+            }
+        else:  # kehoach_list
+            return {
+                "output_file": KEHOACH_LIST_OUTPUT_FILE,
+                "chunks_file": KEHOACH_LIST_CHUNKS_FILE,
+                "collection": "kehoach",
+                "source_label": "kehoach",
+                "retention_months": settings.crawler_retention_months,
+                "crawlers": [
+                    {"list_path": LIST_PATH_KEHOACH, "id_param": "kehoach", "label": "ListKeHoach"},
+                ],
+            }
+
+    base_pipelines = (
+        ["kehoach", "quydinh"] if args.pipeline == "all"
+        else [args.pipeline]
+    )
+    
+    pipelines_to_run = []
+    for p in base_pipelines:
+        if p == "kehoach":
+            pipelines_to_run.extend(["baiviet", "kehoach_list"])
+        else:
+            pipelines_to_run.append(p)
+
     if args.module == "all":
         if args.dry:
-            logger.info("DRY RUN — skipping indexing")
-            crawler = KehoachCrawler(delay=settings.crawler_delay)
-            arts = crawler.crawl_new()
-            logger.info("Would process %d new articles.", len(arts))
+            for pname in pipelines_to_run:
+                cfg = _get_pipeline_config(pname)
+                logger.info("DRY RUN [%s] — crawl only, no indexing", pname)
+                for cr in cfg["crawlers"]:
+                    crawler = GenericCrawler(
+                        list_path=cr["list_path"],
+                        id_param=cr["id_param"],
+                        output_file=cfg["output_file"],
+                        source_label=cfg["source_label"],
+                        delay=settings.crawler_delay,
+                    )
+                    arts = crawler.crawl_new()
+                    logger.info("[%s/%s] Would process %d new articles.",
+                                pname, cr["label"], len(arts))
         else:
-            result = pipeline.run()
-            logger.info("Result: %s", json.dumps(result, ensure_ascii=False, indent=2))
-            
+            for pname in pipelines_to_run:
+                runner = getattr(pipeline, f"run_{pname}")
+                result = runner()
+                logger.info("Result [%s]: %s", pname,
+                            json.dumps(result, ensure_ascii=False, indent=2))
+
     elif args.module == "crawl":
-        logger.info("Running ONLY CRAWL module...")
-        crawler = KehoachCrawler(delay=settings.crawler_delay, tags=pipeline._parse_tags())
-        arts = crawler.crawl_new()
-        if not args.dry and arts:
-            crawler.save_to_file(arts)
-        logger.info("Crawl completed. Found %d new articles.", len(arts))
-        
+        for pname in pipelines_to_run:
+            cfg = _get_pipeline_config(pname)
+            logger.info("Running ONLY CRAWL module [%s]...", pname)
+            for cr in cfg["crawlers"]:
+                crawler = GenericCrawler(
+                    list_path=cr["list_path"],
+                    id_param=cr["id_param"],
+                    output_file=cfg["output_file"],
+                    source_label=cfg["source_label"],
+                    delay=settings.crawler_delay,
+                    tags=pipeline._parse_tags(),
+                    max_age_months=cfg["retention_months"],
+                )
+                arts = crawler.crawl_new()
+                if not args.dry and arts:
+                    crawler.save_to_file(arts)
+                logger.info("[%s/%s] Crawl completed. Found %d new articles.",
+                            pname, cr["label"], len(arts))
+
     elif args.module == "chunk":
-        logger.info("Running ONLY CHUNK module...")
-        # Chunk everything in output_full.json
-        arts = _load_json(OUTPUT_FILE)
-        chunker = ChunkProcessor()
-        chunks = chunker.chunk_articles(arts)
-        if not args.dry and chunks:
-            # Overwrite chunks file completely for consistency
-            _save_json(chunks, CHUNKS_FILE)
-        logger.info("Chunk completed. Produced %d chunks from %d articles.", len(chunks), len(arts))
-        
+        for pname in pipelines_to_run:
+            cfg = _get_pipeline_config(pname)
+            logger.info("Running ONLY CHUNK module [%s]...", pname)
+            arts = _load_json(cfg["output_file"])
+            chunker = ChunkProcessor(
+                source_label=cfg["source_label"],
+                chunks_file=cfg["chunks_file"],
+            )
+            chunks = chunker.chunk_articles(arts)
+            if not args.dry and chunks:
+                _save_json(chunks, cfg["chunks_file"])
+            logger.info("[%s] Chunk completed. Produced %d chunks from %d articles.",
+                        pname, len(chunks), len(arts))
+
     elif args.module == "index":
-        logger.info("Running ONLY INDEX module...")
-        chunks = _load_json(CHUNKS_FILE)
-        if not args.dry and chunks:
-            indexer = pipeline._make_indexer()
-            indexed = indexer.index_chunks(chunks)
-            logger.info("Index completed. Indexed %d new chunks.", indexed)
-        else:
-            logger.info("Index skipped (dry run or no chunks).")
-            
+        for pname in pipelines_to_run:
+            cfg = _get_pipeline_config(pname)
+            logger.info("Running ONLY INDEX module [%s]...", pname)
+            chunks = _load_json(cfg["chunks_file"])
+            if not args.dry and chunks:
+                indexer = pipeline._make_indexer(collection=cfg["collection"])
+                indexed = indexer.index_chunks(chunks)
+                logger.info("[%s] Index completed. Indexed %d new chunks.", pname, indexed)
+            else:
+                logger.info("[%s] Index skipped (dry run or no chunks).", pname)
+
     elif args.module == "retention":
-        logger.info("Running ONLY RETENTION module...")
-        months = settings.crawler_retention_months
-        retention = RetentionManager(months=months)
-        if not args.dry:
-            indexer = pipeline._make_indexer()
-            expired = retention.cleanup(indexer=indexer)
-            logger.info("Retention completed. Removed %d expired articles.", expired)
-        else:
-            logger.info("Retention skipped (dry run).")
+        for pname in pipelines_to_run:
+            cfg = _get_pipeline_config(pname)
+            logger.info("Running ONLY RETENTION module [%s] (%d months)...",
+                        pname, cfg["retention_months"])
+            retention = RetentionManager(
+                months=cfg["retention_months"],
+                output_file=cfg["output_file"],
+                chunks_file=cfg["chunks_file"],
+            )
+            if not args.dry:
+                indexer = pipeline._make_indexer(collection=cfg["collection"])
+                expired = retention.cleanup(indexer=indexer)
+                logger.info("[%s] Retention completed. Removed %d expired articles.",
+                            pname, expired)
+            else:
+                logger.info("[%s] Retention skipped (dry run).", pname)
