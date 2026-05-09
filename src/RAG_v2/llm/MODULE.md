@@ -206,7 +206,7 @@ Module `llm` chứa TẤT CẢ các LLM calls trong pipeline RAG thông thườn
 
 | Vấn đề | Giải pháp |
 |---|---|
-| Generation quá chậm | Dùng `gemini-2.0-flash` thay `gemini-3.1-flash-lite-preview` |
+| Generation quá chậm | Dùng `gemini-3.1-flash-lite-preview` thay `gemini-3.1-flash-lite-preview` |
 | Token budget quá lớn | Giảm `max_tokens` (default 1024) |
 | Self-eval add latency | Tăng `self_eval_min_top_score` để skip thường xuyên hơn |
 | Context quá dài | Giảm `_DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET` (hiện 8000 chars) |

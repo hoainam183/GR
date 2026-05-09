@@ -86,7 +86,7 @@ class ReActAgent:
             api_key=lm_studio_api_key,
             model=self.model_name,
             temperature=agent_temperature,
-            max_tokens=agent_max_tokens,
+            max_tokens=agent_max_tokens,  # type: ignore
             timeout=180,
         )
         self._llm_with_tools = self._llm.bind_tools(LANGGRAPH_TOOLS)
@@ -121,7 +121,7 @@ class ReActAgent:
                 api_key=getattr(settings, "google_api_key", ""),
                 model=synth_model or "gemini-3.1-flash-lite-preview",
                 temperature=synth_temp,
-                max_tokens=synth_max_tokens,
+                max_tokens=synth_max_tokens,  # type: ignore
                 timeout=180,
             )
         elif synth_provider == "ollama":
@@ -134,7 +134,7 @@ class ReActAgent:
                 api_key=ollama_api_key,
                 model=synth_model or getattr(settings, "agent_model", "qwen2.5-8b-instruct"),
                 temperature=synth_temp,
-                max_tokens=synth_max_tokens,
+                max_tokens=synth_max_tokens,  # type: ignore
                 timeout=180,
             )
         else:
@@ -147,7 +147,7 @@ class ReActAgent:
                 api_key=lm_studio_api_key_synth,
                 model=synth_model or getattr(settings, "agent_model", "qwen2.5-8b-instruct"),
                 temperature=synth_temp,
-                max_tokens=synth_max_tokens,
+                max_tokens=synth_max_tokens,  # type: ignore
                 timeout=180,
             )
 
@@ -249,8 +249,8 @@ class ReActAgent:
             # Bounded to last 4 turns (2 user+assistant pairs) to stay within
             # Qwen 3 8B context budget. Each turn can be 200-400 tokens.
             for turn in history[-4:]:
-                role = str(turn.get("role", "")).strip().lower()
-                content = str(turn.get("content", "")).strip()
+                role = turn.get("role", "").strip().lower()
+                content = turn.get("content", "").strip()
                 if not content:
                     continue
                 if role == "user":
@@ -388,7 +388,7 @@ class ReActAgent:
         new_sigs = list(state.get("tool_call_signatures", []))
 
         for tool_call in last_ai.tool_calls:
-            tool_name = str(tool_call.get("name") or "")
+            tool_name = tool_call.get("name") or ""
             tool_args = tool_call.get("args") if isinstance(tool_call.get("args"), dict) else {}
 
             logger.info("[Agent] → %s(%s)", tool_name, str(tool_args)[:120])
@@ -410,7 +410,7 @@ class ReActAgent:
             tool_messages.append(
                 ToolMessage(
                     content=str(result_str)[:self._tool_result_limit],
-                    tool_call_id=str(tool_call.get("id") or ""),
+                    tool_call_id=tool_call.get("id") or "",
                     name=tool_name,
                 )
             )
@@ -475,13 +475,15 @@ class ReActAgent:
                     )
                 ),
             ])
-            answer = response.content or "Tôi không tìm thấy thông tin về vấn đề này."
+            content = response.content
+            content_str = "".join([str(item) for item in content]) if isinstance(content, list) else (content or "")
+            answer = content_str or "Tôi không tìm thấy thông tin về vấn đề này."
         except Exception as exc:
             logger.error("[Agent] Synthesis LLM failed: %s", exc)
             # Hard fallback: surface first tool result verbatim
             answer = f"Thong tin tim duoc:\n{tool_contents[0][:500]}"
 
-        return {"final_answer": str(answer)}
+        return {"final_answer": answer}
 
     def _extract_answer_node(self, state: AgentGraphState) -> dict[str, Any]:
         """Extract a direct final answer when the model replies without tool calls."""
@@ -529,7 +531,7 @@ class ReActAgent:
         history = state.get("tool_call_history", [])
 
         for tc in last.tool_calls:
-            tool_name = str(tc.get("name") or "")
+            tool_name = tc.get("name") or ""
             tool_args = tc.get("args") if isinstance(tc.get("args"), dict) else {}
             sig = _make_call_sig(tool_name, tool_args)
 
@@ -610,7 +612,9 @@ class ReActAgent:
                 SystemMessage(content=DECOMPOSE_SYSTEM_PROMPT),
                 HumanMessage(content=prompt),
             ])
-            raw = response.content.strip().strip("```json").strip("```").strip()
+            content = response.content
+            content_str = "".join([str(item) for item in content]) if isinstance(content, list) else (content or "")
+            raw = content_str.strip().strip("```json").strip("```").strip()
             parsed = json.loads(raw)
             sub_questions = parsed.get("sub_questions", [query])[:4]
             if not sub_questions:
@@ -657,7 +661,9 @@ class ReActAgent:
                 SystemMessage(content=PLANNER_SYSTEM_PROMPT),
                 HumanMessage(content=prompt),
             ])
-            raw = response.content.strip().strip("```json").strip("```").strip()
+            content = response.content
+            content_str = "".join([str(item) for item in content]) if isinstance(content, list) else (content or "")
+            raw = content_str.strip().strip("```json").strip("```").strip()
             plan = json.loads(raw)
             steps = plan.get("steps", [])[:4]
             plan["steps"] = steps
@@ -782,7 +788,7 @@ class ReActAgent:
                                                               ├─► synthesize → END      ├─► synthesize → END
                                                               └─► extract_answer → END  └─► extract_answer → END
         """
-        graph = StateGraph(AgentGraphState)
+        graph = StateGraph(AgentGraphState)  # type: ignore
 
         # ── Planner-Executor path nodes ───────────────────────────────────────
         graph.add_node("decompose", self._decompose_node)
@@ -842,7 +848,7 @@ class ReActAgent:
         relying on in-graph tracking, so the log is always complete.
         """
         state = AgentState(query=query, session_id=session_id)
-        state.iteration = int(graph_result.get("iteration", 0) or 0)
+        state.iteration = graph_result.get("iteration") or 0
         state.tool_call_history = list(graph_result.get("tool_call_history", []))
         state.final_answer = graph_result.get("final_answer")
         state.error = graph_result.get("error")
@@ -854,7 +860,7 @@ class ReActAgent:
         for msg in messages:
             if isinstance(msg, AIMessage) and getattr(msg, "tool_calls", None):
                 for tc in msg.tool_calls:
-                    call_id = str(tc.get("id") or "")
+                    call_id = tc.get("id") or ""
                     call_meta[call_id] = {
                         "name": tc.get("name"),
                         "args": tc.get("args") if isinstance(tc.get("args"), dict) else {},
@@ -864,10 +870,10 @@ class ReActAgent:
         iter_counter = 0
         for msg in messages:
             if isinstance(msg, ToolMessage):
-                meta = call_meta.get(str(msg.tool_call_id or ""), {})
+                meta = call_meta.get(msg.tool_call_id or "", {})
                 tr = ToolResult(
                     tool_name=str(meta.get("name") or msg.name or "unknown"),
-                    args=meta.get("args") if isinstance(meta.get("args"), dict) else {},
+                    args=meta.get("args") if isinstance(meta.get("args"), dict) else {},  # type: ignore
                     result=str(msg.content),
                     iteration=iter_counter,
                 )

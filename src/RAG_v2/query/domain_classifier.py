@@ -160,7 +160,7 @@ class DomainClassifier:
         intent_pred = self._intent_clf.predict(X_test)
         intent_accuracy = float(accuracy_score(intent_test, intent_pred))
         intent_report = classification_report(
-            intent_test, intent_pred, zero_division=0
+            intent_test, intent_pred, zero_division=0  # type: ignore
         )
         logger.info("Stage 1 intent accuracy=%.4f", intent_accuracy)
 
@@ -217,20 +217,24 @@ class DomainClassifier:
                 y_rag_test,
                 y_rag_pred,
                 target_names=list(self._mlb.classes_),
-                zero_division=0,
+                zero_division=0,  # type: ignore
             )
-            domain_report_dict = classification_report(
+            report_dict = classification_report(
                 y_rag_test,
                 y_rag_pred,
                 target_names=list(self._mlb.classes_),
                 output_dict=True,
-                zero_division=0,
+                zero_division=0,  # type: ignore
             )
+            assert isinstance(report_dict, dict)
+            domain_report_dict = report_dict
             domain_f1 = float(
                 domain_report_dict.get("samples avg", {}).get("f1-score", 0.0)
             )
             logger.info("Stage 2 domain samples-F1=%.4f", domain_f1)
 
+        assert isinstance(intent_report, str)
+        assert isinstance(domain_report, str)
         full_report = (
             "=== Stage 1: Intent (chitchat / rag / tool_search) ===\n"
             + intent_report
@@ -289,6 +293,7 @@ class DomainClassifier:
             }
 
         # ── Stage 2: domain (multi-label) ────────────────────────────────────
+        assert self._mlb is not None
         domain_classes: List[str] = list(self._mlb.classes_)
         domain_proba = self._domain_clf.predict_proba(vec)[0]
         prob_map = {

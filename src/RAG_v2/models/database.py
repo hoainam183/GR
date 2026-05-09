@@ -145,7 +145,7 @@ async def create_indexes() -> None:
                 logger.warning(
                     "Index on %s already exists with different options, skipping: %s",
                     collection.name,
-                    exc.details.get("errmsg", str(exc)),
+                    (exc.details or {}).get("errmsg", str(exc)) if hasattr(exc, 'details') else str(exc),
                 )
             else:
                 raise

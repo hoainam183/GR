@@ -10,6 +10,7 @@ import ChatInput from './ChatInput';
 import TypingIndicator from './TypingIndicator';
 import { useSmartScroll } from '@/hooks/useSmartScroll';
 import type { UserPublic } from '@/services/authApi';
+import { parseUtcDate } from '@/lib/utils';
 
 interface ChatContainerProps {
   user?: UserPublic | null;
@@ -114,13 +115,13 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             id: `user-${t.turn_id}`,
             role: 'user' as const,
             content: t.question,
-            timestamp: new Date(t.timestamp),
+            timestamp: parseUtcDate(t.timestamp),
           },
           {
             id: `assistant-${t.turn_id}`,
             role: 'assistant' as const,
             content: t.answer,
-            timestamp: new Date(t.timestamp),
+            timestamp: parseUtcDate(t.timestamp),
             modelName: t.model_name,
             mode: t.mode,
             route: t.route ?? t.intent,

@@ -14,7 +14,7 @@ from datetime import datetime
 def batch_process_pymupdf_documents(
     input_dir: str = "../output_pymupdf4llm",
     output_dir: str = "chunks_by_articles/pymupdf",
-    config: dict = None,
+    config: dict | None = None,
 ):
     """
     Batch process all PyMuPDF4LLM markdown files
@@ -76,7 +76,7 @@ def batch_process_pymupdf_documents(
 
             # Save chunks
             output_file = output_path / f"{md_file.stem}_chunks.json"
-            chunker.save_chunks(chunks, output_file)
+            chunker.save_chunks(chunks, str(output_file))
 
             # Record result
             result = {

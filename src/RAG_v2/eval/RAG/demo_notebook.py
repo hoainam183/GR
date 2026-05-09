@@ -6,7 +6,7 @@ Chạy: python demo_notebook.py
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent))
 
 
 # ─── BƯỚC 0: Cấu hình ────────────────────────────────────────────────────────
@@ -14,7 +14,7 @@ print("=" * 60)
 print("BƯỚC 0: Cấu hình")
 print("=" * 60)
 
-from config import EvalConfig, BackendType
+from .config import EvalConfig, BackendType
 
 cfg = EvalConfig()
 
@@ -42,7 +42,7 @@ print("\n" + "=" * 60)
 print("BƯỚC 1: Load Chunks")
 print("=" * 60)
 
-from chunk_loader import load_and_prepare_chunks
+from .chunk_loader import load_and_prepare_chunks
 
 chunks = load_and_prepare_chunks(cfg)
 
@@ -60,7 +60,7 @@ print("\n" + "=" * 60)
 print("BƯỚC 2: Khởi tạo LLM Client")
 print("=" * 60)
 
-from llm_client import create_llm_client
+from .llm_client import create_llm_client
 
 client = create_llm_client(cfg)
 
@@ -78,7 +78,7 @@ print("\n" + "=" * 60)
 print("BƯỚC 3: Sinh QA Dataset")
 print("=" * 60)
 
-from qa_generator import QAGenerator
+from .qa_generator import QAGenerator
 
 generator = QAGenerator(client, cfg)
 dataset = generator.generate(chunks)
@@ -102,7 +102,7 @@ print("\n" + "=" * 60)
 print("BƯỚC 4: Sinh Answers từ RAG")
 print("=" * 60)
 
-from evaluator import SimpleAnswerGenerator
+from .evaluator import SimpleAnswerGenerator
 
 answer_gen = SimpleAnswerGenerator(client)
 answers = answer_gen.generate_answers(dataset.pairs)
@@ -120,7 +120,7 @@ print("BƯỚC 5: RAGAS Evaluation")
 print("=" * 60)
 
 try:
-    from evaluator import RAGASEvaluator
+    from .evaluator import RAGASEvaluator
 
     evaluator = RAGASEvaluator(client, cfg)
     result = evaluator.evaluate(dataset, answers)

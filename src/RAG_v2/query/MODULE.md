@@ -112,7 +112,7 @@ Query → BGE-M3 embedding (1024-dim) → LogisticRegression → {intent, domain
 ```
 
 **LLM Provider:** Gemini (default), LM Studio, Ollama, hoặc OpenAI
-**Model default:** `gemini-2.0-flash`
+**Model default:** `gemini-3.1-flash-lite-preview`
 **Max tokens:** 256 (chỉ cần output ngắn)
 
 **Retry logic:** 3 lần với exponential backoff (2s, 4s) khi rate-limit.

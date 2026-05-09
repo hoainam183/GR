@@ -23,14 +23,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-# Thêm src vào path
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+# Thêm thư mục hiện tại vào path
+sys.path.insert(0, str(Path(__file__).parent))
 
-from config import EvalConfig, BackendType, DEFAULT_CONFIG
-from chunk_loader import load_and_prepare_chunks
-from llm_client import create_llm_client
-from qa_generator import QAGenerator, QADataset
-from evaluator import RAGASEvaluator, SimpleAnswerGenerator
+from .config import EvalConfig, BackendType, DEFAULT_CONFIG
+from .chunk_loader import load_and_prepare_chunks
+from .llm_client import create_llm_client
+from .qa_generator import QAGenerator, QADataset
+from .evaluator import RAGASEvaluator, SimpleAnswerGenerator
 
 
 def sanitize_filename_part(name: str, max_len: int = 120) -> str:
@@ -318,7 +318,7 @@ def load_qa_dataset(file_path: str) -> QADataset:
     with open(file_path, encoding="utf-8") as f:
         data = json.load(f)
 
-    from qa_generator import QAPair
+    from .qa_generator import QAPair
     pairs = []
     for item in data.get("pairs", []):
         pairs.append(QAPair(

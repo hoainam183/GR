@@ -186,9 +186,10 @@ class GenericCrawler:
                 title_text = title_p.get_text(separator=" ").strip().strip('"').strip()
 
             href = a_tag["href"]
+            href_str = href[0] if isinstance(href, list) else href
             article_id = None
             try:
-                params = parse_qs(urlparse(href).query)
+                params = parse_qs(urlparse(href_str).query)
                 # Support both "baiviet" and "kehoach" URL params
                 article_id = int(params[self.id_param][0])
             except (KeyError, ValueError, IndexError):
@@ -196,7 +197,7 @@ class GenericCrawler:
 
             articles.append({
                 "baiviet_id": article_id,
-                "url": urljoin(BASE_URL, href),
+                "url": urljoin(BASE_URL, href_str),
                 "title": title_text,
                 "category": category,
                 "tag_in_title": tag_text,

@@ -7,7 +7,7 @@ Provides endpoints to fetch system health, query volumes, and
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, Request
@@ -31,7 +31,7 @@ async def get_usage_metrics(
         )
 
     try:
-        cutoff = datetime.utcnow() - timedelta(days=days)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
         
         # Count total queries in timeframe
         total_queries = mongo_logger._query_logs.count_documents({

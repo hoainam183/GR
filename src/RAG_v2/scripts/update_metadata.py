@@ -234,7 +234,7 @@ def main(dry_run: bool = False) -> None:
         store = QdrantStore(
             host=cfg["qdrant_host"],
             port=cfg["qdrant_port"],
-            collection_name=col["name"],
+            collection_name=str(col["name"]),
         )
         update_collection(
             col=col,

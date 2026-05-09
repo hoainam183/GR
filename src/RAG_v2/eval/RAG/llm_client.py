@@ -11,9 +11,9 @@ import os
 import time
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Any, Optional
 
-from config import BackendType, EvalConfig, DEFAULT_CONFIG
+from .config import BackendType, EvalConfig, DEFAULT_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -62,12 +62,12 @@ class BaseLLMClient(ABC):
         ...
 
     @abstractmethod
-    def get_langchain_llm(self):
+    def get_langchain_llm(self) -> Any:
         """Trả về LangChain LLM object (dùng với RAGAS)."""
         ...
 
     @abstractmethod
-    def get_langchain_embeddings(self):
+    def get_langchain_embeddings(self) -> Any:
         """Trả về LangChain Embeddings object (dùng với RAGAS)."""
         ...
 
@@ -123,7 +123,8 @@ class LMStudioClient(BaseLLMClient):
             temperature=self.cfg.temperature,
             max_tokens=self.cfg.max_tokens,
         )
-        return resp.choices[0].message.content.strip()
+        content = resp.choices[0].message.content
+        return content.strip() if content is not None else ""
 
     def get_langchain_llm(self):
         try:
@@ -136,7 +137,7 @@ class LMStudioClient(BaseLLMClient):
             base_url=self.cfg.base_url,
             api_key="lm-studio",
             temperature=self.cfg.temperature,
-            max_tokens=self.cfg.max_tokens,
+            max_tokens=self.cfg.max_tokens,  # type: ignore
             timeout=self.cfg.timeout,
         )
 
@@ -149,7 +150,7 @@ class LMStudioClient(BaseLLMClient):
         return OpenAIEmbeddings(
             model="text-embedding-nomic-embed-text-v1.5",
             base_url=self.cfg.base_url,
-            api_key="lm-studio",
+            api_key="lm-studio",  # type: ignore
         )
 
 
@@ -184,11 +185,11 @@ class GeminiClient(BaseLLMClient):
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         import google.generativeai as genai
 
-        genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel(
+        genai.configure(api_key=self.api_key)  # type: ignore
+        model = genai.GenerativeModel(  # type: ignore
             model_name=self.cfg.model_name,
             system_instruction=system_prompt or "Bạn là trợ lý AI hữu ích.",
-            generation_config=genai.GenerationConfig(
+            generation_config=genai.GenerationConfig(  # type: ignore
                 temperature=self.cfg.temperature,
                 max_output_tokens=self.cfg.max_tokens,
             ),
@@ -218,7 +219,7 @@ class GeminiClient(BaseLLMClient):
 
         return GoogleGenerativeAIEmbeddings(
             model="models/text-embedding-004",
-            google_api_key=self.api_key,
+            google_api_key=self.api_key,  # type: ignore
         )
 
 

@@ -299,7 +299,7 @@ def _rag_search(
         return f"[Loi: Collection '{collection}' khong hop le]"
 
     runtime = _get_runtime()
-    effective_top_k = max(1, min(int(top_k or runtime.settings.top_k), 10))
+    effective_top_k = max(1, min(top_k if top_k is not None else runtime.settings.top_k, 10))
 
     raw_query = strip_personal_identifiers(query.strip())
     major_codes = extract_major_codes(raw_query)
@@ -413,8 +413,8 @@ def _multi_rag_search(queries: list[dict[str, Any]]) -> str:
     return "\n\n---\n\n".join(parts)
 
 def _topic_with_course_focus(topic: str, course_keyword: str | None) -> str:
-    raw_topic = str(topic or "").strip()
-    raw_course = str(course_keyword or "").strip()
+    raw_topic = (topic or "").strip()
+    raw_course = (course_keyword or "").strip()
 
     if not raw_course:
         return raw_topic
@@ -429,7 +429,7 @@ def _topic_with_course_focus(topic: str, course_keyword: str | None) -> str:
 
 
 def _extract_all_cohort_codes(value: str) -> list[str]:
-    return [match.group(0).upper() for match in _COHORT_RE.finditer(str(value or ""))]
+    return [match.group(0).upper() for match in _COHORT_RE.finditer(value or "")]
 
 
 def _is_compare_clarification(message: str, options: list[str]) -> bool:
@@ -465,8 +465,8 @@ def _compare_cohorts(
     Chỉ chấp nhận mã khóa (Kxx).  Nếu nhận mã ngành, trả về hướng dẫn
     chuyển sang compare_programs.
     """
-    label_a = str(cohort_a or "").strip()
-    label_b = str(cohort_b or "").strip()
+    label_a = (cohort_a or "").strip()
+    label_b = (cohort_b or "").strip()
 
     # Guard: từ chối nếu user truyền mã ngành thay vì mã khóa
     major_a = _extract_single_major_code(label_a)
@@ -516,8 +516,8 @@ def _compare_programs(
     Chỉ chấp nhận mã ngành.  Nếu nhận mã khóa (Kxx), trả về hướng dẫn
     chuyển sang compare_cohorts.
     """
-    label_a = str(major_a or "").strip()
-    label_b = str(major_b or "").strip()
+    label_a = (major_a or "").strip()
+    label_b = (major_b or "").strip()
 
     # Guard: từ chối nếu user truyền mã khóa thay vì mã ngành
     cohort_a = _normalise_cohort_token(label_a)
@@ -582,8 +582,8 @@ def web_search_for_executor(query: str) -> str:
 
 
 def _clarify_question(message: str, options: list[str]) -> str:
-    clean_message = str(message or "").strip()
-    clean_options = [str(opt).strip() for opt in options if str(opt).strip()][:3]
+    clean_message = (message or "").strip()
+    clean_options = [opt.strip() for opt in options if opt.strip()][:3]
     clean_message, clean_options = _normalise_compare_clarification(
         clean_message,
         clean_options,
