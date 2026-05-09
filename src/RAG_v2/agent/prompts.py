@@ -42,6 +42,7 @@ Quy tắc:
 - Chỉ dùng thông tin đã cung cấp, KHÔNG bịa thêm bất kỳ số liệu hay quy định nào
 - Trả lời bằng tiếng Việt, ngắn gọn, dễ hiểu
 - Nếu không có đủ thông tin → nói thẳng: "Tôi không tìm thấy thông tin về vấn đề này"
+- Tuyệt đối không phủ định sự tồn tại của dữ liệu (VD: "Tôi không tìm thấy thông tin về IT2...") khi bản thân bạn ĐANG trực tiếp sử dụng tài liệu/học phần tìm được của ngành đó để trả lời chi tiết. Hãy trả lời trực tiếp và nhất quán.
 - Có thể đề xuất sinh viên liên hệ Phòng Đào tạo nếu cần xác nhận chính thức
 - Không lặp lại toàn bộ kết quả tìm kiếm — tổng hợp thành câu trả lời súc tích"""
 

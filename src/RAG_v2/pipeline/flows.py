@@ -240,12 +240,23 @@ def _format_context(
     parts: List[str] = []
     used = 0
     for i, doc in enumerate(documents, 1):
-        meta = doc.get("metadata", {})
+        meta = doc.get("metadata", {}) or {}
         title = meta.get("title") or meta.get("source") or "Tài liệu không rõ nguồn"
+        
+        # Inject metadata into document header so the LLM is aware of the program/major context
+        meta_parts = []
+        if meta.get("major_code"):
+            meta_parts.append(f"Mã ngành: {meta['major_code']}")
+        if meta.get("major_name"):
+            meta_parts.append(f"Ngành: {meta['major_name']}")
+        if meta.get("applicable_cohort"):
+            meta_parts.append(f"Khóa: {meta['applicable_cohort']}")
+        meta_str = f" [{', '.join(meta_parts)}]" if meta_parts else ""
+        
         text = str(doc.get("text", "") or "").strip()
         if len(text) > per_doc_char_limit:
             text = text[:per_doc_char_limit] + "\u2026"  # ellipsis
-        chunk = f"--- Văn bản: {title}\n{text}"
+        chunk = f"--- Văn bản: {title}{meta_str}\n{text}"
         separator_cost = 7 if parts else 0  # len("\n\n---\n\n")
         if used + len(chunk) + separator_cost > total_char_budget:
             break

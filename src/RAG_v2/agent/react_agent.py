@@ -442,7 +442,10 @@ class ReActAgent:
 
         Uses a separate synthesis LLM (no tools, higher max_tokens).
         """
-        logger.warning("[Agent] Forced synthesis after %d iterations", state.get("iteration", 0))
+        if state.get("execution_path") == "planner":
+            logger.info("[Agent] Synthesizing planned retrieval results")
+        else:
+            logger.warning("[Agent] Forced synthesis after %d iterations", state.get("iteration", 0))
 
         # Special case: last tool was clarify_question → relay its output directly
         clarify_output = self._relay_last_clarify_output(state)
@@ -595,13 +598,20 @@ class ReActAgent:
         """Decompose a complex query into standalone sub-questions using Gemini."""
         query = state["query"]
 
-        # Inject user_context into the prompt when available
+        # Inject user_context into the prompt when available.
+        # EXCEPTION: for comparison queries (≥2 explicit major codes already in
+        # the query), do NOT inject the student's own major_code — it would bias
+        # the decomposer toward only that major, silently dropping the other.
         user_ctx = state.get("user_context")
         ctx_parts: list[str] = []
         if user_ctx:
             if user_ctx.get("cohort"):
                 ctx_parts.append(f"Khóa: {user_ctx['cohort']}")
-            if user_ctx.get("major_code"):
+            # Only inject major when the query doesn't already name ≥2 programmes or contain indirect comparison cues.
+            from retrieval.metadata_filters import extract_major_codes  # noqa: PLC0415
+            query_lower = query.lower()
+            has_comparison_keywords = any(kw in query_lower for kw in ["so sánh", "khác gì", "khác nhau", "với", "so sanh", "khac gi", "khac nhau"])
+            if user_ctx.get("major_code") and len(extract_major_codes(query)) < 2 and not has_comparison_keywords:
                 ctx_parts.append(f"Ngành: {user_ctx['major_code']}")
         ctx_str = f"\nThông tin sinh viên: {', '.join(ctx_parts)}" if ctx_parts else ""
         prompt = f"Query: {query}{ctx_str}"
@@ -639,13 +649,21 @@ class ReActAgent:
         """
         sub_questions = state.get("sub_questions") or [state["query"]]
 
-        # Inject user_context into the prompt
+        # Inject user_context into the prompt.
+        # EXCEPTION: for comparison queries (≥2 explicit major codes already in
+        # the query), do NOT inject the student's own major_code — it would bias
+        # the planner to only create a step for that one major, silently dropping
+        # the other side of the comparison.
         user_ctx = state.get("user_context")
         ctx_parts: list[str] = []
         if user_ctx:
             if user_ctx.get("cohort"):
                 ctx_parts.append(f"Khóa sinh viên: {user_ctx['cohort']}")
-            if user_ctx.get("major_code"):
+            # Only inject major when the query doesn't already name ≥2 programmes or contain indirect comparison cues.
+            from retrieval.metadata_filters import extract_major_codes  # noqa: PLC0415
+            query_lower = state["query"].lower()
+            has_comparison_keywords = any(kw in query_lower for kw in ["so sánh", "khác gì", "khác nhau", "với", "so sanh", "khac gi", "khac nhau"])
+            if user_ctx.get("major_code") and len(extract_major_codes(state["query"])) < 2 and not has_comparison_keywords:
                 ctx_parts.append(f"Mã ngành: {user_ctx['major_code']}")
         ctx_str = f"\nThông tin sinh viên: {', '.join(ctx_parts)}" if ctx_parts else ""
 

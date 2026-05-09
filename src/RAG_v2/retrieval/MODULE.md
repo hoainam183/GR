@@ -130,6 +130,7 @@ results = qdrant.search(bge_m3_query=bge_vec, e5_query=e5_vec, top_k=20)
 **Hàm quan trọng:**
 - `build_collection_filters()` — entry point chính
 - `_extract_major_code()` — regex extract major code từ query
+- `_build_date_query()` — trích xuất và lọc tài liệu theo ngày cho `kehoach` (tự động bỏ qua các dải năm học dạng "2025-2026" hay "2025/2026" để tránh pre-filter nhầm năm đăng ký).
 - `extract_major_codes()` — extract tất cả major codes
 - `strip_major_from_query_for_retrieval()` — loại major phrase khỏi query để tránh bias
 

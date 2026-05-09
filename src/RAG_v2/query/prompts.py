@@ -22,13 +22,14 @@ Step 2 — When intent is "rag", predict 1–3 relevant domains from:
 - **quydinh**: regulations, policies, conditions, grading rules, scholarship
   criteria, academic standing rules (GPA/CPA thresholds).
 - **kehoach**: schedules, deadlines, course registration windows, exam timetables,
-  events, calendars. Use this when the question is WHEN/timing-focused.
+  events, calendars, announcements, recipient lists (thông báo, danh sách nhận học bổng). Use this when the question is WHEN/timing-focused or about announcements/schedules.
 - **stsv**: student procedures, dormitory, insurance, student ID, forms, support.
 
 Key disambiguation rules:
 - "Khi nào mở đăng ký môn X?" → kehoach (WHEN). "Môn X học gì?" → ctdt (WHAT).
 - "Điều kiện đồ án?" → ctdt+quydinh. "Deadline nộp đồ án?" → kehoach.
 - "Học phần thay thế môn X là gì?" → ctdt. "Nộp đơn TĐ ở đâu?" → stsv.
+- "Điều kiện nhận học bổng là gì?" → quydinh. "Danh sách được nhận học bổng kì này?" → kehoach.
 - Short follow-ups ("Còn slot không?", "Bao giờ?") → kehoach if timing-related.
 
 Respond ONLY with a single JSON object, no other text:
@@ -82,6 +83,11 @@ ROUTER_FEW_SHOT = [
         "content": "Điều kiện nhận học bổng và nộp hồ sơ ở đâu?",
     },
     {"role": "assistant", "content": '{"intent": "rag", "domains": ["quydinh", "stsv"]}'},
+    {
+        "role": "user",
+        "content": "Danh sách sinh viên được nhận học bổng kỳ vừa rồi",
+    },
+    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach"]}'},
 ]
 
 # ─── Reflection Prompts ────────────────────────────────────────────────────────
@@ -104,8 +110,8 @@ tôi", "nó", "đó"), ưu tiên giải tham chiếu theo thứ tự:
   - CHAT_HISTORY
   - Câu hỏi hiện tại
 2. Nếu USER_PROFILE có ngành:
-  - Bắt buộc thay "ngành của tôi" bằng tên ngành cụ thể.
-  - Nếu có cả mã ngành thì có thể giữ theo dạng: "<tên ngành> (<mã ngành>)".
+  - Bắt buộc thay "ngành của tôi" bằng mã ngành (hoặc tên ngành nếu đã có sẵn trong từ nguồn tin cậy).
+  - Không tự ý bổ sung tên ngành đầy đủ nếu chỉ có mã ngành.
 3. Nếu câu hỏi chứa "môn này/ngành này/chương trình này", phải cố gắng thay bằng
   thực thể cụ thể gần nhất từ USER_PROFILE hoặc CHAT_HISTORY.
 4. Nếu CURRENT_QUERY đã nêu rõ ngành/mã ngành cụ thể (ví dụ: IT-E7, IT-E6, ITE6, ITE7):
@@ -181,7 +187,38 @@ Ví dụ 6 — Câu hỏi tổng quát, KHÔNG thu hẹp phạm vi, KHÔNG injec
 USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt - Nhật (IT-E6), Khóa K68
 CHAT_HISTORY: (khong co)
 CÂU HỎI HIỆN TẠI: Điều kiện đạt học bổng là gì?
-STANDALONE QUERY: Điều kiện đạt học bổng là gì?"""
+STANDALONE QUERY: Điều kiện đạt học bổng là gì?
+
+---
+Ví dụ 7 — Follow-up so sánh hai mã ngành: chỉ chuẩn hóa mã về dạng chuẩn, KHÔNG tự thêm tên đầy đủ:
+USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt - Nhật (IT-E6), Khóa K68
+CHAT_HISTORY:
+- Người dùng: Học phần IT3080 trong chương trình IT-E6 thì thế nào?
+- Trợ lý: Trong chương trình IT-E6, học phần IT3080 (Mạng máy tính) là học phần cơ sở 3 tín chỉ.
+CÂU HỎI HIỆN TẠI: so sánh với ITE7
+STANDALONE QUERY: So sánh học phần IT3080 trong chương trình IT-E6 và IT-E7
+
+---
+Ví dụ 8 — So sánh với thực thể mới, tuyệt đối không rò rỉ thực thể cũ đã lỗi thời ở các lượt chat đầu:
+USER_PROFILE: (khong co)
+CHAT_HISTORY:
+- Người dùng: so sánh IT1 với ITE6
+- Trợ lý: Không tìm thấy thông tin chi tiết so sánh IT1 và ITE6.
+- Người dùng: môn mạng máy tính IT1
+- Trợ lý: Mạng máy tính IT1 có mã IT3080, 3 tín chỉ.
+CÂU HỎI HIỆN TẠI: so sánh với IT2
+STANDALONE QUERY: So sánh học phần Mạng máy tính IT3080 giữa chương trình IT1 và chương trình IT2
+
+---
+Ví dụ 9 — Phân biệt rõ ngữ cảnh gần nhất cần kế thừa và thực thể cũ đã trôi qua:
+USER_PROFILE: (khong co)
+CHAT_HISTORY:
+- Người dùng: môn học ngành IT-E6 có những gì?
+- Trợ lý: Ngành IT-E6 gồm các môn lập trình, mạng máy tính.
+- Người dùng: môn mạng máy tính IT1 học những gì?
+- Trợ lý: Mạng máy tính IT1 có mã IT3080, học về kiến thức OSI, TCP/IP.
+CÂU HỎI HIỆN TẠI: so sánh môn đó với IT2
+STANDALONE QUERY: So sánh học phần Mạng máy tính IT3080 giữa chương trình IT1 và chương trình IT2"""
 
 REWRITE_WITH_HISTORY_TEMPLATE = """\
 ### INPUT

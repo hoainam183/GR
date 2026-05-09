@@ -875,11 +875,26 @@ class KeHoachFilterExtractor(BaseFilterExtractor):
         Returns ``None`` when no date signals found.
         Handles both accented (tháng/năm) and unaccented (thang/nam) forms.
         """
+        # Strip school-year patterns (e.g., "2025-2026", "2025/2026", "năm học 2025-2026")
+        # to avoid misinterpreting school years as specific calendar/posting years.
+        clean_query = re.sub(
+            r"n[aă]m\s*h[oọ]c\s*20\d{2}\s*[-\/]\s*(?:20)?\d{2}\b",
+            " ",
+            query,
+            flags=re.IGNORECASE,
+        )
+        clean_query = re.sub(
+            r"\b20\d{2}\s*[-\/]\s*(?:20)?\d{2}\b",
+            " ",
+            clean_query,
+            flags=re.IGNORECASE,
+        )
+
         # Month + year: "tháng 3 2026", "thang 3 nam 2026", "3/2026", "03/2026"
         m = re.search(
             r"th[aá]ng\s*(\d{1,2})(?:\s+n[aă]m\s*|\s*/\s*)(\d{4})"
             r"|(\d{1,2})\s*/\s*(20\d{2})",
-            query,
+            clean_query,
             re.IGNORECASE,
         )
         if m:
@@ -891,7 +906,7 @@ class KeHoachFilterExtractor(BaseFilterExtractor):
             return _wildcard_any_mapping("date_str", f"*/{month}/{year}")
 
         # Year only: "năm 2025", "nam 2025", bare "2025"
-        m2 = re.search(r"(?:n[aă]m\s*)?(20\d{2})\b", query, re.IGNORECASE)
+        m2 = re.search(r"(?:n[aă]m\s*)?(20\d{2})\b", clean_query, re.IGNORECASE)
         if m2:
             year = int(m2.group(1))
             # Matches any date_str ending with "/{year}"

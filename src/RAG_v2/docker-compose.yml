@@ -33,6 +33,17 @@ services:
     volumes:
       - ./volumes/mongodb:/data/db
 
+  redis:
+    image: redis/redis-stack-server:latest
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./volumes/redis:/data
+    environment:
+      # AOF + RDB persistence (both enabled for safety + fast restart)
+      - REDIS_ARGS=--appendonly yes --save 60 1000 --maxmemory 256mb --maxmemory-policy allkeys-lru
+
 # ─── Application ─────────────────────────────────────────────────────────────
 #   backend:
 #     build:

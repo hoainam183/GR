@@ -40,6 +40,7 @@ START ─[_route_complex]─┬─► decompose → planner ─[_after_planner]�
 ```
 
 **Cải tiến quan trọng:**
+- **Chống thiên lệch Planner (Anti-bias):** Nâng cấp logic tiêm mã ngành tại `_decompose_node()` và `_planner_node()`. Khi phát hiện từ khóa so sánh gián tiếp (`so sánh`, `khác gì`, `khác nhau`, `với`), hệ thống sẽ tuyệt đối không tự động tiêm `major_code` hiện tại từ `user_context` vào, tránh làm thiên lệch Planner.
 - `_after_tools()`: Detect `[Loi...]` prefix → synthesize sớm. Nếu `[Khong tim thay...]`, retry (vòng lại `agent`).
 - `_agent_node()`: Quản lý Retry Defense-in-depth: nếu tool trả về trống, inject SystemMessage hint (giảm từ khóa, bỏ thông tin cá nhân). Nếu `empty_result_count >= 2`, abort và synthesize.
 - `_validate_plan()`: Kiểm tra chất lượng plan (>50% steps hợp lệ) trước khi execute. Reject nếu query rỗng hoặc collection không hợp lệ.

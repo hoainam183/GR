@@ -81,9 +81,9 @@ Query → BGE-M3 embedding (1024-dim) → LogisticRegression → {intent, domain
 **Labels:**
 - `chitchat` — câu hỏi xã giao
 - `ctdt` — chương trình đào tạo, môn học
-- `quydinh` — quy định học vụ, học bổng, kỷ luật
-- `kehoach` — kế hoạch học kỳ, lịch thi, deadline
-- `stsv` — hỗ trợ sinh viên, biểu mẫu, giấy tờ
+- `quydinh` — quy định học vụ, tiêu chuẩn/điều kiện học bổng, kỷ luật
+- `kehoach` — kế hoạch học kỳ, lịch thi, deadline, thông báo, danh sách nhận học bổng/khen thưởng
+- `stsv` — hỗ trợ sinh viên, thủ tục/biểu mẫu nộp học bổng, KTX, bảo hiểm, giấy tờ
 
 **Confidence calibration:**
 - confidence < 0.55 → trigger Tier-3 LLM domain fallback
@@ -106,6 +106,7 @@ Query → BGE-M3 embedding (1024-dim) → LogisticRegression → {intent, domain
 ```
 1. Build profile note từ user_context (authenticated) hoặc history (regex)
 2. Gọi LLM với REWRITE_SYSTEM_PROMPT + REWRITE_WITH_HISTORY_TEMPLATE
+   - Đã siết chặt REWRITE_SYSTEM_PROMPT bằng Ví dụ 8 & 9 (Few-Shot) để huấn luyện mô hình tránh rò rỉ các thực thể cũ lỗi thời trong CHAT_HISTORY và nhận diện đúng ngữ cảnh so sánh hiện tại.
 3. Parse output → rewritten query
 4. Guardrail: nếu vẫn còn "ngành của tôi" → replace deterministically
 5. Extract entities: major_code, cohort, course_code, semester
@@ -129,7 +130,7 @@ Query → BGE-M3 embedding (1024-dim) → LogisticRegression → {intent, domain
 | `major_name` | Công nghệ thông tin Việt-Nhật | Tra từ MAJOR_CODE_TO_NAME |
 | `cohort` | K65, K70, Khóa 66 | Query > user_context > history |
 | `year_of_study` | năm 3, năm thứ 2 | Query > history |
-| `course_code` | IT4062E, MA1007 | Query > history |
+| `course_code` | IT4062E, MA1007 | Query > history (Dùng regex `_COURSE_CODE_RE` khớp IT/MI/EE/ET/ME/CH/PH/MA/TL/FL/PE/ED + 4 chữ số + ký tự chữ cái tùy chọn) |
 | `semester` | 20241, HK1, học kỳ hè | Query > history |
 | `academic_year` | 2024-2025, 20242 | Query > history |
 

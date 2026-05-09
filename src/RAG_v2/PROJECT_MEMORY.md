@@ -185,6 +185,10 @@ route: "simple"|"complex"|"chitchat"
 
 ### Tier 2 — QueryRouter (domain classifier, trong RAGPipeline)
 - Phân loại domain: `ctdt | quydinh | kehoach | stsv`
+- **Quy tắc phân biệt chủ đề học bổng**:
+  - `quydinh` dành cho quy chế, tiêu chí/điều kiện xét học bổng, GPA, điểm rèn luyện tối thiểu.
+  - `kehoach` dành cho thời gian nộp, hạn chót, thông báo, quyết định khen thưởng, danh sách sinh viên được nhận học bổng.
+  - `stsv` dành cho thủ tục xin giấy xác nhận, nộp đơn ở đâu, cách nhận qua tài khoản ngân hàng.
 - Output: `{intent, domain, domains, confidence, probabilities}`
 
 ### Tier 3 — LLM fallback (khi confidence < 0.55)
@@ -291,3 +295,14 @@ RERANKER_PROVIDER=bge
 - **Table Retrieval Failure (Recall & Rerank)**: Fixed an issue where specific keywords (e.g., "hiến máu") in table rows were missed due to low retrieval limits (20) and strict reranking (0.0). Increased retrieval limits (50 candidates) and lowered table rerank threshold to -5.0. Verified that correct chunks reach the LLM.
 - **LLM bỏ qua URL trong chunk (ĐÃ FIX)**: Prompt hệ thống trước đây dặn "Không viết 'tại đây' nếu không có URL", gây hiểu nhầm làm LLM ẩn luôn cả URL thực tế. Đã cập nhật `prompts.py` yêu cầu LLM BẮT BUỘC phải đưa URL vào câu trả lời nếu tài liệu có cung cấp.
 - **Static Analysis & Linter Errors (ĐÃ FIX)**: Hoàn tất sửa toàn bộ lỗi static analysis của Pyright (0 errors, 0 warnings) và các cảnh báo linter. Giải quyết triệt để lỗi ép kiểu TypedDict trong LangGraph, lỗi xử lý `response.content` dạng list của LangChain, xung đột namespace của gói `config` cục bộ trong `eval/RAG` bằng cách chuyển sang relative imports, thay thế cuộc gọi `datetime.utcnow()` đã bị deprecated bằng `datetime.now(timezone.utc)`, bổ sung các chốt chặn phòng vệ `assert is not None` và loại bỏ các kiểu ép thừa `str()` / `int()`.
+- **Lỗi NameError `_COURSE_CODE_RE` trong `reflection.py` (ĐÃ FIX)**: Khắc phục lỗi `NameError: name '_COURSE_CODE_RE' is not defined` xảy ra khi người dùng hỏi các câu hỏi như "môn mạng máy tính IT1". Đã định nghĩa hằng số regex `_COURSE_CODE_RE` ở cấp độ module trong `reflection.py` để trích xuất mã môn học chính xác và an toàn.
+- **Lỗi thiên lệch Planner & Rò rỉ lịch sử hội thoại (ĐÃ FIX)**: 
+  1. Khắc phục định kiến của Planner đối với câu hỏi so sánh gián tiếp (chứa các từ khóa `so sánh`, `khác gì`, `với`) bằng cách bỏ logic tự động tiêm `major_code` hiện tại từ `user_context` vào `_decompose_node` và `_planner_node` khi phát hiện các từ khóa này.
+  2. Bổ sung các ví dụ Few-Shot (Ví dụ 8 và 9) vào `REWRITE_SYSTEM_PROMPT` để ngăn mô hình rò rỉ hoặc ghép nhầm các thực thể cũ từ lịch sử xa vào ngữ cảnh hiện tại.
+  3. Cập nhật `SYNTHESIS_PROMPT` cấm mô hình đưa ra tuyên bố phủ định sự tồn tại của dữ liệu (ví dụ: "không tìm thấy thông tin cụ thể...") khi bản thân mô hình đang trực tiếp sử dụng dữ liệu vừa truy hồi thành công để trả lời câu hỏi.
+- **Lỗi thất thoát siêu dữ liệu ngành khi định dạng context (ĐÃ FIX)**: Khắc phục lỗi LLM trả về thông báo phủ nhận tồn tại của dữ liệu ngành (như IT2) do hàm `_format_context` (luồng RAG) và `_format_search_results` (luồng Agent) chỉ trích xuất `text` và `title` mà bỏ rơi siêu dữ liệu ngành trong `metadata`. Đã nâng cấp để tự động tiêm mã ngành (`major_code`), tên ngành (`major_name`), và khóa áp dụng (`applicable_cohort`) trực tiếp vào phần header/văn bản gửi cho LLM.
+- **Lỗi IndexError `no such group` khi parse Course Code (ĐÃ FIX)**: Sửa lỗi `IndexError: no such group` tại `_extract_entities` trong `reflection.py` bằng cách đổi `mo.group(1)` thành `mo.group(0)`. Do regex `_COURSE_CODE_RE` không định nghĩa bất kỳ capturing group nào nên không thể truy xuất group 1.
+- **Lỗi `cannot enter context: <Context object> is already entered` tại Parallel Executor (ĐÃ FIX)**: Sửa lỗi xung đột ngữ cảnh khi chạy song song các bước tìm kiếm (retrieval steps) trong `execute_retrieval_plan` (`agent/tool_adapters.py`). Do trước đây dùng một đối tượng `Context` chung (`ctx = copy_context()`) cho tất cả các luồng trong `ThreadPoolExecutor`, Python đã báo lỗi xung đột re-entrancy. Đã khắc phục bằng cách sử dụng `contextvars.copy_context().run` riêng cho từng task độc lập trong ThreadPool.
+- **Lỗi lọc sai `date_str` của `kehoach` khi truy vấn có dải năm học (ĐÃ FIX)**: Khắc phục lỗi `KeHoachFilterExtractor._build_date_query` nhận diện nhầm các dải năm học dạng `"2025-2026"` hoặc `"2025/2026"` thành năm đăng ký lịch học của tài liệu (lọc strict `*/2025`), dẫn đến loại bỏ sạch các văn bản đăng lịch học đăng vào 2026. Đã bổ sung logic bóc tách dải năm học ra khỏi câu query trước khi so khớp năm lịch thông thường.
+
+

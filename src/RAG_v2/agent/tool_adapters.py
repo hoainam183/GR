@@ -642,9 +642,11 @@ def execute_retrieval_plan(steps: list[dict[str, Any]]) -> list[tuple[str, str]]
     import contextvars
 
     worker_count = min(4, len(steps))
-    ctx = contextvars.copy_context()
     with ThreadPoolExecutor(max_workers=worker_count) as pool:
-        futures = [pool.submit(ctx.run, _run, i, step) for i, step in enumerate(steps)]
+        futures = [
+            pool.submit(contextvars.copy_context().run, _run, i, step)
+            for i, step in enumerate(steps)
+        ]
         for f in futures:
             try:
                 f.result(timeout=45)
@@ -666,11 +668,13 @@ def _format_search_results(results: Any, collection: str) -> str:
     for index, item in enumerate(results[:3], 1):
         content = ""
         source = ""
+        metadata = {}
 
         if hasattr(item, "payload"):
             payload = getattr(item, "payload", {}) or {}
             content = str(payload.get("content") or payload.get("text") or "")
             source = str(payload.get("source") or payload.get("title") or "")
+            metadata = payload
         elif isinstance(item, dict):
             metadata = item.get("metadata", {}) or {}
             content = str(item.get("text") or item.get("content") or "")
@@ -691,9 +695,17 @@ def _format_search_results(results: Any, collection: str) -> str:
         if not content:
             continue
 
+        # Inject major metadata into the source info so the LLM agent is aware of the program context
+        meta_parts = []
+        if metadata.get("major_code"):
+            meta_parts.append(f"Ma nganh: {metadata['major_code']}")
+        if metadata.get("major_name"):
+            meta_parts.append(f"Nganh: {metadata['major_name']}")
+        meta_str = f" ({', '.join(meta_parts)})" if meta_parts else ""
+
         chunk = f"[{index}] {content}"
         if source:
-            chunk += f"\n    Nguon: {source}"
+            chunk += f"\n    Nguon: {source}{meta_str}"
         # Score omitted — not useful for LLM synthesis and wastes tokens
         chunks.append(chunk)
 

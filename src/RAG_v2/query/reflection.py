@@ -21,6 +21,7 @@ from .prompts import (
 
 logger = logging.getLogger(__name__)
 
+
 # ─── Constants ──────────────────────────────────────────────────────────────────
 _GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 DEFAULT_MODEL = "gemini-3.1-flash-lite-preview"
@@ -44,6 +45,13 @@ _PERSONAL_REFS = re.compile(
     r"chương trình của tôi|chương trình này|môn này|môn đó|môn học này)\b",
     re.IGNORECASE,
 )
+
+# Course code regex (e.g. IT4062E, MI1110)
+_COURSE_CODE_RE = re.compile(
+    r"\b(?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?\b",
+    re.IGNORECASE,
+)
+
 
 
 def _merge_user_major_into_context(
@@ -278,13 +286,6 @@ def _extract_profile_note(history: List[Dict[str, str]]) -> str:
     return "sinh vi\u00ean " + ", ".join(parts)
 
 
-# ─── Course-code pattern ─────────────────────────────────────────────────────
-_COURSE_CODE_RE = re.compile(
-    r"\b((?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?)\b",
-    re.IGNORECASE,
-)
-
-
 def _extract_entities(
     query: str,
     user_context: Optional[Dict[str, Any]] = None,
@@ -395,7 +396,7 @@ def _extract_entities(
     for text in course_sources:
         mo = _COURSE_CODE_RE.search(text)
         if mo:
-            entities["course_code"] = mo.group(1).upper()
+            entities["course_code"] = mo.group(0).upper()
             break
 
     # ── semester ──────────────────────────────────────────────────────────────
@@ -600,7 +601,7 @@ class QueryReflector:
         if not rewritten:
             rewritten = query
 
-        # Guardrail: if user profile has a trusted major but references remain
+        # Guardrail 1: if user profile has a trusted major but references remain
         # unresolved, replace them deterministically.
         if _PERSONAL_REFS.search(rewritten):
             rewritten = _enforce_major_reference_rewrite(

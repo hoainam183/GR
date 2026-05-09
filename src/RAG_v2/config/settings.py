@@ -171,6 +171,19 @@ class Settings(BaseSettings):
     crawler_retention_months: int = 6
     crawler_tags: str = "ĐTĐH:%C4%90T%C4%90H"  # comma-sep "Name:encoded,..."
 
+    # --- Redis ---
+    redis_url: str = "redis://localhost:6379/0"
+    redis_enabled: bool = False           # Master switch for Redis
+    use_redis_session: bool = False       # Phase 1: session migration
+    use_redis_cache: bool = False         # Phase 2: LLM response cache
+    use_redis_history: bool = False       # Phase 2: conversation history cache
+
+    # --- Rate Limiting ---
+    rate_limit_enabled: bool = True
+    rate_limit_rpm: int = 20              # requests per minute
+    rate_limit_rpd: int = 200             # requests per day
+    rate_limit_alert_threshold: float = 0.8  # alert at 80% capacity
+
     # --- CORS ---
     cors_origins: List[str] = ["*"]
 
