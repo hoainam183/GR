@@ -101,10 +101,12 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
+    redis_session = getattr(request.app.state, "redis_session", None)
     session_id = resolve_session(
         session_id=body.session_id,
         user_id=body.user_id,
         mongo_logger=mongo_logger,
+        redis_session=redis_session,
     )
     history = parse_history(body.history)
     mode = (body.mode or RouteMode.AUTO).lower()
@@ -204,10 +206,12 @@ async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
+    redis_session = getattr(request.app.state, "redis_session", None)
     session_id = resolve_session(
         session_id=body.session_id,
         user_id=body.user_id,
         mongo_logger=mongo_logger,
+        redis_session=redis_session,
     )
     history = parse_history(body.history)
     mode = (body.mode or RouteMode.AUTO).lower()
@@ -311,10 +315,12 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
+    redis_session = getattr(request.app.state, "redis_session", None)
     session_id = resolve_session(
         session_id=body.session_id,
         user_id=body.user_id,
         mongo_logger=mongo_logger,
+        redis_session=redis_session,
     )
     history = parse_history(body.history)
     user_context_payload = (

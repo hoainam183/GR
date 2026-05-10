@@ -15,6 +15,10 @@ class BaseLLM(ABC):
     read from ``Settings`` directly — that is the factory's responsibility.
     """
 
+    #: The model identifier string (e.g. ``"gpt-4o-mini"``).
+    #: Concrete subclasses must set this in ``__init__``.
+    model: str = ""
+
     @abstractmethod
     def generate(
         self,

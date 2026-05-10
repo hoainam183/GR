@@ -52,7 +52,7 @@ _FRONTEND_BASE = "http://localhost:5173"
 
 
 @router.get("/login", summary="Start Microsoft OAuth flow")
-async def login() -> dict:
+async def login_oauth() -> dict:
     """Return the Microsoft authorization URL.
 
     The frontend should redirect the user to the returned URL.  Microsoft will
@@ -230,6 +230,11 @@ async def register(
     document = {k: v for k, v in _raw.items() if v is not None}
     result = await db[USERS_COLLECTION].insert_one(document)
     inserted = await db[USERS_COLLECTION].find_one({"_id": result.inserted_id})
+    if inserted is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve created user document.",
+        )
     return UserPublic.from_document(inserted)
 
 

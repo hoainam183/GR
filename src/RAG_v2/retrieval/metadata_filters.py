@@ -205,11 +205,6 @@ _MAJOR_CODE_FUZZY_RE = re.compile(
     re.IGNORECASE,
 )
 
-def _canonicalise_major_code_parts(prefix: str, suffix: str) -> str:
-    """Convert regex major parts to canonical major code (e.g. MI+1 -> MI1)."""
-    p = prefix.upper()
-    s = suffix.upper()
-    return f"{p}{s}" if s in {"1", "2"} else f"{p}-{s}"
 _COHORT_RE = re.compile(
     r"\bk\s*(\d{2,3})\b|kh[oó]a\s*k?\s*(\d{2,3})",
     re.IGNORECASE,

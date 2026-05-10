@@ -34,7 +34,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MultiLabelBinarizer, StandardScaler
 
 from .training_data import RAG_LABELS
 
@@ -148,9 +149,14 @@ class DomainClassifier:
 
         # ── Stage 1: Intent classifier (3-class, cv=5 calibrated) ────────────
         logger.info("Stage 1: training intent classifier (cv=5 calibration) …")
-        intent_base = LogisticRegression(
-            max_iter=1000, C=1.0, solver="lbfgs", random_state=random_state
-        )
+        # StandardScaler inside the pipeline prevents overflow/divide-by-zero
+        # in lbfgs matmul when embedding vectors have dimension=1024.
+        intent_base = Pipeline([
+            ("scaler", StandardScaler()),
+            ("lr", LogisticRegression(
+                max_iter=1000, C=0.5, solver="lbfgs", random_state=random_state
+            )),
+        ])
         # cv=5 avoids a separate validation split and provides stable calibration.
         self._intent_clf = CalibratedClassifierCV(
             intent_base, cv=5, method="sigmoid"
@@ -181,9 +187,12 @@ class DomainClassifier:
             len(X_rag_train),
         )
         self._domain_clf = OneVsRestClassifier(
-            LogisticRegression(
-                max_iter=1000, C=1.0, solver="lbfgs", random_state=random_state
-            )
+            Pipeline([
+                ("scaler", StandardScaler()),
+                ("lr", LogisticRegression(
+                    max_iter=1000, C=0.5, solver="lbfgs", random_state=random_state
+                )),
+            ])
         )
         self._domain_clf.fit(X_rag_train, y_rag_train)
 

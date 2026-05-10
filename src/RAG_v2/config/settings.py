@@ -156,7 +156,7 @@ class Settings(BaseSettings):
     reflection_enabled: bool = True
     reflection_provider: str = "gemini"      # gemini | lm_studio | ollama | openai
     reflection_model: str = "gemini-3.1-flash-lite-preview"  # fast flash for rewrite task
-    reflection_temperature: float = 0.1      # low temp → more deterministic rewrite
+    reflection_temperature: float = 0.0      # low temp → more deterministic rewrite
     reflection_max_tokens: int = 1024         # increased from 256 to prevent truncation
 
     # --- Collection-aware Routing (Phase 8) ---
@@ -174,6 +174,10 @@ class Settings(BaseSettings):
     # --- Redis ---
     redis_url: str = "redis://localhost:6379/0"
     redis_enabled: bool = False           # Master switch for Redis
+    redis_max_connections: int = 20
+    redis_socket_timeout: float = 5.0
+    redis_connect_timeout: float = 5.0
+    redis_health_check_interval: int = 30  # seconds between PING on idle conns
     use_redis_session: bool = False       # Phase 1: session migration
     use_redis_cache: bool = False         # Phase 2: LLM response cache
     use_redis_history: bool = False       # Phase 2: conversation history cache

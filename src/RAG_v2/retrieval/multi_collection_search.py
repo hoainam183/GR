@@ -467,7 +467,7 @@ class MultiCollectionSearch:
                     )
                     continue
                 qdrant_filter = qdrant_models.Filter(
-                    must=[qdrant_models.HasIdCondition(has_id=chunk_ids)]
+                    must=[qdrant_models.HasIdCondition(has_id=chunk_ids)]  # type: ignore[arg-type]
                 )
                 # Describe the filter for the trace
                 es_str = str(es_query)

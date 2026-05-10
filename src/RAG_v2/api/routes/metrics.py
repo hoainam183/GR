@@ -62,12 +62,26 @@ async def get_usage_metrics(
         latency_cursor = list(mongo_logger._query_logs.aggregate(pipeline))
         avg_latency = latency_cursor[0]["avg_latency"] if latency_cursor else 0.0
 
+        cache_stats = {"hits": 0, "misses": 0, "hit_rate": 0.0}
+        llm_cache = getattr(request.app.state, "llm_cache", None)
+        if llm_cache is not None:
+            stats = llm_cache.get_stats()
+            h = stats.get("hits", 0)
+            m = stats.get("misses", 0)
+            tot = h + m
+            cache_stats = {
+                "hits": h,
+                "misses": m,
+                "hit_rate": round(h / tot, 4) if tot > 0 else 0.0,
+            }
+
         return {
             "timeframe_days": days,
             "total_queries": total_queries,
             "avg_latency_ms": round(avg_latency, 2),
             "by_mode": modes,
             "by_intent": intents,
+            "cache_stats": cache_stats,
         }
         
     except Exception as exc:

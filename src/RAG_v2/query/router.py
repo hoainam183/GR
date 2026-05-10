@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import logging
+import unicodedata
 from typing import Any, Dict, List, Literal, Optional
 
 from .prompts import ROUTER_FEW_SHOT, ROUTER_SYSTEM_PROMPT
@@ -28,6 +29,21 @@ VALID_INTENTS = {"chitchat", "rag", "tool_search"}
 VALID_DOMAINS = {"ctdt", "quydinh", "kehoach", "stsv"}
 DEFAULT_INTENT = "rag"
 DEFAULT_MODEL = "gpt-4o-mini"
+
+def _normalize_query_for_classification(query: str) -> str:
+    """Light normalization applied before the embedding-based classifier.
+
+    - Strips leading/trailing whitespace.
+    - NFC Unicode normalization ensures consistent embeddings regardless of
+      whether characters are composed (e.g. \u1ecb) or decomposed (i + \u0323).
+
+    This makes the classifier more robust to common typos like dropped leading
+    characters (e.g. "ịch thi" → still classified correctly) because the
+    embedding space is cleaner, and pairs well with the relative-margin
+    Tier-3 guard (P3) which absorbs the remaining confidence drop.
+    """
+    return unicodedata.normalize("NFC", query.strip())
+
 
 # Number of recent chat turns to prepend as context for the classifier / LLM.
 # Raised from 2 → 5: multi-turn registration queries often reference a course
@@ -151,12 +167,14 @@ class QueryRouter:
         query: str,
         chat_history: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
+        assert self._classifier is not None, "_route_classifier called in llm mode"
         # ── Two-pass routing ─────────────────────────────────────────────
         # Pass 1: route the raw query without history context.
         # This avoids conversation-history bias for self-contained queries
         # (e.g., "điều kiện đạt học bổng" should always hit quydinh,
         # regardless of prior ctdt-heavy conversation).
-        raw_result = self._classifier.predict(query)
+        norm_query = _normalize_query_for_classification(query)
+        raw_result = self._classifier.predict(norm_query)
 
         raw_intent = raw_result["intent"]
         raw_domains = raw_result.get(
@@ -178,7 +196,7 @@ class QueryRouter:
         ):
             ctx_input = build_routing_input(query, chat_history)
             if ctx_input != query:  # history was actually prepended
-                ctx_result = self._classifier.predict(ctx_input)
+                ctx_result = self._classifier.predict(_normalize_query_for_classification(ctx_input))
                 ctx_confidence = ctx_result["confidence"]
                 if ctx_confidence > raw_confidence:
                     result = ctx_result
@@ -217,6 +235,7 @@ class QueryRouter:
     # ------------------------------------------------------------------
 
     def _route_llm(self, query: str) -> Dict[str, Any]:
+        assert self._client is not None, "_route_llm called in classifier mode"
         messages = self._build_messages(query)
 
         response = self._client.chat.completions.create(
@@ -226,7 +245,7 @@ class QueryRouter:
             max_tokens=100,  # raised from 50 to accommodate domains list
         )
 
-        raw = response.choices[0].message.content.strip()
+        raw = (response.choices[0].message.content or "").strip()
         intent, domains = self._parse_response(raw)
 
         logger.info(

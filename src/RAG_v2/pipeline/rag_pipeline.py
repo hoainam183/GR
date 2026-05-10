@@ -34,6 +34,41 @@ from utils.tracing import RequestTrace
 _LLM_FALLBACK_THRESHOLD: float = 0.55
 _VALID_DOMAINS = set(RAG_LABELS)
 
+# If the leading domain's probability margin over the 2nd domain exceeds this
+# value, Tier-3 is skipped even when absolute confidence < _LLM_FALLBACK_THRESHOLD.
+# Rationale: a dominant single domain (e.g. kehoach=0.531, ctdt=0.180, margin=0.351)
+# doesn't need an expensive LLM call to disambiguate.
+_TIER3_DOMINANT_DOMAIN_MARGIN: float = 0.25
+
+
+def _should_trigger_tier3(routing: Dict[str, Any]) -> bool:
+    """Return True when the Tier-3 LLM domain fallback should run.
+
+    Skips when one domain is already clearly dominant (probability margin over
+    the second-best domain exceeds ``_TIER3_DOMINANT_DOMAIN_MARGIN``), saving
+    ~12 s per query that would previously trigger an unnecessary LLM call.
+
+    Example: kehoach=0.531, ctdt=0.180 → margin=0.351 > 0.25 → skip Tier-3.
+    """
+    confidence = routing.get("confidence") or 1.0
+    if confidence >= _LLM_FALLBACK_THRESHOLD:
+        return False
+
+    probs: Dict[str, float] = routing.get("probabilities") or {}
+    if len(probs) >= 2:
+        sorted_vals = sorted(probs.values(), reverse=True)
+        margin = sorted_vals[0] - sorted_vals[1]
+        if margin >= _TIER3_DOMINANT_DOMAIN_MARGIN:
+            logger.debug(
+                "Skipping Tier-3: domain margin=%.3f ≥ threshold=%.3f "
+                "(top domain is clearly dominant)",
+                margin,
+                _TIER3_DOMINANT_DOMAIN_MARGIN,
+            )
+            return False
+
+    return True
+
 from .flows import (
     chitchat_flow,
     chitchat_flow_stream,
@@ -149,6 +184,7 @@ class RAGPipeline:
         config: Optional[Dict[str, Any]] = None,
         env_path: Optional[str] = None,
         mongo_logger: Optional[MongoLogger] = None,
+        llm_cache: Optional[Any] = None,
     ) -> None:
         if env_path:
             load_dotenv(dotenv_path=env_path)
@@ -209,6 +245,7 @@ class RAGPipeline:
 
         self._cfg = cfg
         self._mongo_logger = mongo_logger
+        self._llm_cache = llm_cache
         self._route_cache: OrderedDict[str, tuple[float, Dict[str, Any]]] = OrderedDict()
         self._reflect_cache: OrderedDict[str, tuple[float, str]] = OrderedDict()
 
@@ -345,11 +382,9 @@ class RAGPipeline:
         trace.set_metadata("intent", intent)
         logger.info("Routing decision: intent=%s", intent)
 
-        # Tier-3: LLM domain fallback for low-confidence RAG routing
-        if (
-            intent == "rag"
-            and (routing.get("confidence") or 1.0) < _LLM_FALLBACK_THRESHOLD
-        ):
+        # Tier-3: LLM domain fallback for low-confidence RAG routing.
+        # Skipped when one domain is already clearly dominant (see _should_trigger_tier3).
+        if intent == "rag" and _should_trigger_tier3(routing):
             with trace.stage("tier3_domain_fallback"):
                 routing = self._llm_domain_classify(question, history, routing)
             pipeline_timings["tier3_domain_fallback"] = trace.stages.get(
@@ -397,6 +432,7 @@ class RAGPipeline:
                 user_context=user_context,
                 validity_filter=self._validity_filter,
                 reference_resolver=self._reference_resolver,
+                llm_cache=self._llm_cache,
             )
         timings_ms = _merge_timings(pipeline_timings, result.get("timings_ms"))
         timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
@@ -875,11 +911,9 @@ class RAGPipeline:
             intent = routing.get("intent", "rag")
             self.last_intent = intent
 
-            # Tier-3: LLM domain fallback for low-confidence RAG routing
-            if (
-                intent == "rag"
-                and (routing.get("confidence") or 1.0) < _LLM_FALLBACK_THRESHOLD
-            ):
+            # Tier-3: LLM domain fallback for low-confidence RAG routing.
+            # Skipped when one domain is already clearly dominant (see _should_trigger_tier3).
+            if intent == "rag" and _should_trigger_tier3(routing):
                 fallback_t0 = time.perf_counter()
                 routing = self._llm_domain_classify(question, history, routing)
                 pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(fallback_t0)
@@ -903,6 +937,7 @@ class RAGPipeline:
                 reference_resolver=self._reference_resolver,
                 timings_ms_out=flow_timings,
                 metadata_out=flow_metadata,
+                llm_cache=self._llm_cache,
             )
             self.last_sources = reranked
             self.last_reflected_question = flow_metadata.get("reflected_question")

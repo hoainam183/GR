@@ -80,7 +80,7 @@ def _elapsed_ms(start: float) -> float:
     return round((time.perf_counter() - start) * 1000, 2)
 
 
-def _log_timings(flow_name: str, timings_ms: Dict[str, float]) -> None:
+def _log_timings(flow_name: str, timings_ms: Dict[str, Any]) -> None:
     """Log timing breakdown sorted by slowest stage first."""
     if not timings_ms:
         return
@@ -559,7 +559,7 @@ def rag_flow(
     bge_embedder: BaseEmbedder,
     e5_embedder: BaseEmbedder,
     searcher: Any,
-    reranker: BaseReranker,
+    reranker: Optional[BaseReranker],
     chat_model: BaseLLM,
     self_evaluator: Optional[SelfEvaluator],
     tavily_tool: Any | None,
@@ -568,6 +568,7 @@ def rag_flow(
     user_context: Optional[Dict[str, Any]] = None,
     validity_filter: Any | None = None,
     reference_resolver: Any | None = None,
+    llm_cache: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """Full RAG flow: Reflect → Embed → Search → Rerank → Generate → SelfEval → (Tavily fallback).
 
@@ -589,11 +590,40 @@ def rag_flow(
         Dict with ``answer``, ``sources``, ``intent``, etc.
     """
     flow_t0 = time.perf_counter()
-    timings_ms: Dict[str, float] = {}
+    timings_ms: Dict[str, Any] = {}
 
     step_t0 = time.perf_counter()
     trimmed = _trim_history(history)
     timings_ms["trim_history"] = _elapsed_ms(step_t0)
+
+    # ── Pre-retrieval query cache (P0) ───────────────────────────────────────
+    # Check before reflection + retrieval to save the full ~13-25 s pipeline
+    # cost for repeated identical queries.  Only fires when the cache backend
+    # exposes get_by_query (LLMResponseCache with Redis).
+    if llm_cache is not None and hasattr(llm_cache, "get_by_query"):
+        _qcached = llm_cache.get_by_query(question, chat_model.model)
+        if _qcached is not None:
+            timings_ms["query_cache"] = "HIT"
+            timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+            return {
+                "question": question,
+                "answer": _qcached["answer"],
+                "sources": _qcached["sources"],
+                "num_sources": len(_qcached["sources"]),
+                "intent": "rag",
+                "model_name": chat_model.model,
+                "timings_ms": timings_ms,
+                "cache_hit": True,
+                "query_cache_hit": True,
+                "target_collections": None,
+                "collection_scores": {},
+                "reflected_question": question,
+                "routing_probabilities": None,
+                "reflection_prompt": None,
+                "llm_prompt": "(query_cached)",
+                "applied_filters": None,
+                "collection_results": None,
+            }
 
     # 1. Reflection — rewrite query + extract entities
     search_query = question
@@ -886,7 +916,7 @@ def rag_flow(
     rerank_t0 = time.perf_counter()
     
     rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
-
+    assert reranker is not None, "reranker must be provided"
     reranked = reranker.rerank(
         query=rerank_query,
         documents=raw_results,
@@ -906,6 +936,37 @@ def rag_flow(
         resolve_t0 = time.perf_counter()
         reranked = reference_resolver.resolve(reranked, query=retrieval_query)
         timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
+
+    # ── LLM Response Cache Check (Phase 2) ─────────────────────────
+    if llm_cache is not None:
+        doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+        cached = llm_cache.get(question, doc_ids, chat_model.model)
+        if cached is not None:
+            logger.info("LLM cache HIT for query: %r", question[:80])
+            timings_ms["llm_cache"] = "HIT"
+            timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+            return {
+                "question": question,
+                "answer": cached["answer"],
+                "sources": cached["sources"],
+                "num_sources": len(cached["sources"]),
+                "intent": "rag",
+                "model_name": chat_model.model,
+                "target_collections": target_collections,
+                "collection_scores": _build_collection_scores(
+                    all_collections=cfg.get("collections"),
+                    target_collections=target_collections,
+                    routing_result=routing_result,
+                ),
+                "reflected_question": search_query,
+                "timings_ms": timings_ms,
+                "routing_probabilities": routing_probabilities,
+                "reflection_prompt": reflection_prompt,
+                "llm_prompt": "(cached)",
+                "applied_filters": search_trace.get("filters"),
+                "collection_results": search_trace.get("collection_counts"),
+                "cache_hit": True,
+            }
 
 
     # 6. Format context — inject profile so user facts survive trimming.
@@ -980,6 +1041,15 @@ def rag_flow(
         timings_ms["context_recovery"] = 1.0
     timings_ms["generate"] = _elapsed_ms(generate_t0)
 
+    # Cache newly generated response (Phase 2)
+    if llm_cache is not None:
+        doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+        llm_cache.put(question, doc_ids, chat_model.model, answer, reranked)
+
+    # Also populate the pre-retrieval query-only cache for future early hits.
+    if llm_cache is not None and hasattr(llm_cache, "put_by_query"):
+        llm_cache.put_by_query(question, chat_model.model, answer, reranked)
+
     # 8. Self-evaluation — only when retrieval confidence is low.
     # Saves 11-20s per query when retrieval already found a relevant chunk.
     top_score = 0.0
@@ -992,7 +1062,7 @@ def rag_flow(
         self_evaluator is not None
         and top_score < cfg.get("self_eval_min_top_score", _SELF_EVAL_SCORE_THRESHOLD)
     )
-    if run_self_eval:
+    if run_self_eval and self_evaluator is not None:
         self_eval_t0 = time.perf_counter()
         try:
             eval_context = _format_context(
@@ -1068,7 +1138,7 @@ def rag_flow_stream(
     bge_embedder: BaseEmbedder,
     e5_embedder: BaseEmbedder,
     searcher: Any,
-    reranker: BaseReranker,
+    reranker: Optional[BaseReranker],
     chat_model: BaseLLM,
     cfg: Dict[str, Any],
     routing_result: Optional[Dict[str, Any]] = None,
@@ -1077,6 +1147,7 @@ def rag_flow_stream(
     reference_resolver: Any | None = None,
     timings_ms_out: Optional[Dict[str, float]] = None,
     metadata_out: Optional[Dict[str, Any]] = None,
+    llm_cache: Optional[Any] = None,
 ) -> tuple[Generator[str, None, None], List[Dict[str, Any]]]:
     """Streaming RAG flow — retrieval runs first, then generation is streamed.
 
@@ -1084,11 +1155,28 @@ def rag_flow_stream(
         A tuple of (text_chunk_generator, reranked_sources).
     """
     flow_t0 = time.perf_counter()
-    timings_ms = timings_ms_out if timings_ms_out is not None else {}
+    timings_ms: Dict[str, Any] = timings_ms_out if timings_ms_out is not None else {}
 
     step_t0 = time.perf_counter()
     trimmed = _trim_history(history)
     timings_ms["trim_history"] = _elapsed_ms(step_t0)
+
+    # ── Pre-retrieval query cache (P0 — stream variant) ──────────────────────
+    if llm_cache is not None and hasattr(llm_cache, "get_by_query"):
+        _qcached = llm_cache.get_by_query(question, chat_model.model)
+        if _qcached is not None:
+            timings_ms["query_cache"] = "HIT"
+            timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+            if metadata_out is not None:
+                metadata_out["num_sources"] = len(_qcached["sources"])
+                metadata_out["collection_scores"] = {}
+                metadata_out["applied_filters"] = None
+                metadata_out["collection_results"] = None
+
+            def _cached_stream_early() -> Generator[str, None, None]:
+                yield _qcached["answer"]
+
+            return _cached_stream_early(), _qcached["sources"]
 
     # Reflection
     search_query = question
@@ -1356,7 +1444,7 @@ def rag_flow_stream(
     rerank_t0 = time.perf_counter()
     
     rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
-
+    assert reranker is not None, "reranker must be provided"
     reranked = reranker.rerank(
         query=rerank_query,
         documents=raw_results,
@@ -1413,6 +1501,23 @@ def rag_flow_stream(
         metadata_out["applied_filters"] = search_trace.get("filters")
         metadata_out["collection_results"] = search_trace.get("collection_counts")
 
+    # ── LLM Response Cache Check (Phase 2 - Stream) ─────────────────
+    if llm_cache is not None:
+        doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+        cached = llm_cache.get(question, doc_ids, chat_model.model)
+        if cached is not None:
+            logger.info("LLM cache HIT (stream) for query: %r", question[:80])
+            timings_ms["llm_cache"] = "HIT"
+
+            def _cached_stream() -> Generator[str, None, None]:
+                yield cached["answer"]
+                timings_ms["stream_first_token"] = 0.1
+                timings_ms["stream_generate"] = 0.1
+                timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+                _log_timings("rag_flow_stream_cached", timings_ms)
+
+            return _cached_stream(), cached["sources"]
+
     generate_stream = chat_model.generate_stream(
         query=question, context=full_context, history=trimmed, mode="rag"
     )
@@ -1420,11 +1525,13 @@ def rag_flow_stream(
         stream_t0 = time.perf_counter()
         first_token_ms: Optional[float] = None
         generated_chars = 0
+        full_cached_answer = []
 
         for chunk in generate_stream:
             if first_token_ms is None:
                 first_token_ms = _elapsed_ms(stream_t0)
             generated_chars += len(chunk)
+            full_cached_answer.append(chunk)
             yield chunk
 
         timings_ms["stream_first_token"] = round(first_token_ms or 0.0, 2)
@@ -1432,6 +1539,15 @@ def rag_flow_stream(
         timings_ms["flow_total"] = _elapsed_ms(flow_t0)
         logger.info("rag_flow_stream: streamed %d chars", generated_chars)
         _log_timings("rag_flow_stream", timings_ms)
+
+        # Cache newly generated stream response (Phase 2)
+        if llm_cache is not None:
+            doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+            llm_cache.put(question, doc_ids, chat_model.model, "".join(full_cached_answer), reranked)
+
+        # Also populate the pre-retrieval query-only cache.
+        if llm_cache is not None and hasattr(llm_cache, "put_by_query"):
+            llm_cache.put_by_query(question, chat_model.model, "".join(full_cached_answer), reranked)
 
     return _timed_stream(), reranked
 

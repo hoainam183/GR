@@ -23,10 +23,12 @@ async def health(request: Request) -> HealthResponse:
     if pipeline is None:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")
     mongo_status: str = getattr(request.app.state, "mongo_status", "unknown")
+    redis_status: str = getattr(request.app.state, "redis_status", "disabled")
     return HealthResponse(
         status="healthy",
         rag_initialized=True,
         mongo_status=mongo_status,
+        redis_status=redis_status,
     )
 
 

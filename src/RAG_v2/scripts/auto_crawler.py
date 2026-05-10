@@ -819,6 +819,23 @@ class AutoCrawlPipeline:
                     indexed = indexer.index_chunks(new_chunks)
                     summary["indexed"] = indexed
 
+                    # Invalidate LLM Cache (Phase 2) — tag-based
+                    if indexed > 0:
+                        try:
+                            from config.settings import Settings
+                            settings = Settings()
+                            if settings.redis_enabled and settings.use_redis_cache:
+                                from cache.redis_client import RedisManager
+                                from cache.llm_cache import LLMResponseCache
+                                rm = RedisManager.from_settings(settings)
+                                cache = LLMResponseCache(redis_client=rm.get_client())
+                                chunk_ids = [c["chunk_id"] for c in new_chunks if c.get("chunk_id")]
+                                invalidated = cache.invalidate_by_docs(chunk_ids)
+                                logger.info("Auto crawler: invalidated %d LLM cache entries for %d new chunks.",
+                                            invalidated, len(chunk_ids))
+                        except Exception:
+                            logger.warning("Failed to invalidate LLM cache during auto crawl", exc_info=True)
+
             # Step 4: Retention
             logger.info("─── STEP 4: Retention [%s] (%d months) ───",
                         pipeline_name, retention_months)

@@ -10,13 +10,15 @@ Module `api` là **lớp giao tiếp HTTP** giữa frontend/client và hệ th�
 
 ```
 api/
-├── main.py          # Khởi tạo FastAPI app, đăng ký router, CORS
+├── main.py          # Khởi tạo FastAPI app, đăng ký router, CORS, Redis và Middleware
 ├── schemas.py       # Pydantic schemas cho request/response
+├── middleware/
+│   └── rate_limit.py # Middleware giới hạn tần suất Sliding Window Rate Limiting (Redis)
 └── routes/
     ├── chat.py      # Endpoint xử lý câu hỏi chính (/chat, /stream)
-    ├── session.py   # Quản lý session lịch sử hội thoại
-    ├── metrics.py   # Endpoint thu thập metrics latency
-    └── health.py    # Health check endpoint
+    ├── session.py   # Quản lý session lịch sử hội thoại (Redis + MongoDB)
+    ├── metrics.py   # Endpoint thu thập metrics latency và cache stats
+    └── health.py    # Health check endpoint (bao gồm Redis status)
 ```
 
 ---
@@ -47,12 +49,12 @@ api/
 4. Format và trả về response (bao gồm `timings_ms`, `sources`, `agent_trace`)
 
 ### `routes/session.py`
-- `GET /session/{session_id}/history` — lấy lịch sử hội thoại từ MongoDB
-- `DELETE /session/{session_id}` — xóa session
+- `GET /session/{session_id}/history` — lấy lịch sử hội thoại từ Redis (fallback MongoDB)
+- `DELETE /session/{session_id}` — xóa session từ cả Redis và MongoDB
 
 ### `routes/metrics.py`
-- `GET /metrics` — trả về thống kê latency, số request, intent distribution
-- Data được tổng hợp từ MongoDB logs
+- `GET /metrics/usage` — trả về thống kê latency, số request, intent distribution và tỉ lệ hit/miss của LLM Cache
+- Data được tổng hợp từ MongoDB logs và Redis cache stats
 
 ### `routes/health.py`
 - `GET /health` — kiểm tra kết nối Qdrant, Elasticsearch, MongoDB

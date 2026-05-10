@@ -223,8 +223,7 @@ class ElasticsearchStore:
         n = len(texts)
         if metadatas is None:
             metadatas = [{}] * n
-        if ids is None:
-            ids = [None] * n
+        _ids: List[Optional[str]] = ids if ids is not None else [None] * n # type: ignore
 
         indexed = 0
         for start in range(0, n, batch_size):
@@ -233,8 +232,8 @@ class ElasticsearchStore:
             for i in range(start, end):
                 doc = {**metadatas[i], "text": texts[i]}
                 action = {"_index": self.index_name, "_source": doc}
-                if ids[i] is not None:
-                    action["_id"] = ids[i]
+                if _ids[i] is not None:
+                    action["_id"] = _ids[i]
                 actions.append(action)
 
             success, errors = helpers.bulk(
@@ -518,5 +517,8 @@ class ElasticsearchStore:
 
     def delete_index(self) -> None:
         """Drop the entire index (irreversible)."""
-        self.client.indices.delete(index=self.index_name, ignore=[404])
+        try:
+            self.client.indices.delete(index=self.index_name)
+        except Exception:  # noqa: BLE001
+            pass
         logger.info("Deleted index '%s'.", self.index_name)

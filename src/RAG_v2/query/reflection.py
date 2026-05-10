@@ -6,7 +6,7 @@ import logging
 import os
 import re
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 if TYPE_CHECKING:
     from config.settings import Settings
@@ -572,7 +572,7 @@ class QueryReflector:
             try:
                 response = self._client.chat.completions.create(
                     model=self.model,
-                    messages=messages,
+                    messages=cast(Any, messages),
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
                 )
@@ -595,7 +595,7 @@ class QueryReflector:
         else:
             raise last_exc  # type: ignore[misc]
 
-        rewritten = response.choices[0].message.content.strip()
+        rewritten = (response.choices[0].message.content or "").strip()
 
         # If the LLM returns empty or just whitespace, keep the original
         if not rewritten:
@@ -608,6 +608,25 @@ class QueryReflector:
                 rewritten_query=rewritten,
                 profile=merged_profile or None,
             )
+
+        # Guardrail 2: detect hallucinated major injection.
+        # If the original query has NO personal references and NO authenticated
+        # profile was provided, the LLM must not inject a specific major/cohort.
+        # When this happens (LLM ignores rule 11), revert to the original query
+        # to avoid biasing retrieval toward a hallucinated programme.
+        if not _PERSONAL_REFS.search(query) and not merged_profile:
+            try:
+                from retrieval.metadata_filters import _extract_major_code  # noqa: PLC0415
+                if _extract_major_code(rewritten) and not _extract_major_code(query):
+                    logger.warning(
+                        "Reflection hallucinated major in generic query — reverting. "
+                        "Original: %r  Hallucinated: %r",
+                        query[:80],
+                        rewritten[:80],
+                    )
+                    rewritten = query
+            except Exception:
+                pass  # Guard never breaks the pipeline
 
         logger.info(
             "Reflection: %r → %r (history_len=%d)",

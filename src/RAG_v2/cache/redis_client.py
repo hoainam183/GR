@@ -35,15 +35,21 @@ class RedisManager:
 
     _instance: Optional["RedisManager"] = None
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, settings: Optional[Settings] = None) -> None:
         self._url = url
+        max_conn = settings.redis_max_connections if settings else 20
+        sock_timeout = settings.redis_socket_timeout if settings else 5.0
+        conn_timeout = settings.redis_connect_timeout if settings else 5.0
+        health_interval = settings.redis_health_check_interval if settings else 30
+
         self._pool = redis.ConnectionPool.from_url(
             url,
             decode_responses=True,
-            max_connections=20,
-            socket_connect_timeout=5,
-            socket_timeout=5,
+            max_connections=max_conn,
+            socket_connect_timeout=conn_timeout,
+            socket_timeout=sock_timeout,
             retry_on_timeout=True,
+            health_check_interval=health_interval,
         )
         self._client = redis.Redis(connection_pool=self._pool)
         logger.info("RedisManager created for URL: %s", self._redact_url(url))
@@ -60,7 +66,7 @@ class RedisManager:
         """
         if cls._instance is not None:
             return cls._instance
-        instance = cls(url=settings.redis_url)
+        instance = cls(url=settings.redis_url, settings=settings)
         cls._instance = instance
         return instance
 
@@ -75,7 +81,7 @@ class RedisManager:
     def ping(self) -> bool:
         """Return ``True`` if the Redis server responds to PING."""
         try:
-            return self._client.ping()
+            return bool(self._client.ping())
         except redis.RedisError as exc:
             logger.warning("Redis ping failed: %s", exc)
             return False

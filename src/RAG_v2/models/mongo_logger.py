@@ -32,15 +32,16 @@ class MongoLogger:
         database: Database name.
     """
 
-    def __init__(self, uri: str, database: str) -> None:
+    def __init__(self, uri: str, database: str, history_cache: Optional[Any] = None) -> None:
         self._client: MongoClient = MongoClient(uri)
         self._db = self._client[database]
         self._sessions = self._db["sessions"]
         self._turns = self._db["turns"]
         self._query_logs = self._db["query_logs"]
         self._agent_traces = self._db["agent_traces"]
+        self.history_cache = history_cache
         self._ensure_indexes()
-        logger.info("MongoLogger connected to %s / %s", uri, database)
+        logger.info("MongoLogger connected to %s / %s (history_cache=%s)", uri, database, history_cache is not None)
 
     # ------------------------------------------------------------------
     # Public API — sessions
@@ -208,6 +209,11 @@ class MongoLogger:
 
         self._turns.insert_one(turn_doc)
 
+        # Update history cache (Phase 2)
+        if self.history_cache is not None:
+            self.history_cache.add_message(session_id, "user", question)
+            self.history_cache.add_message(session_id, "assistant", answer)
+
         # Flat analytics entry
         query_log_doc: Dict[str, Any] = {
             "session_id": session_id,
@@ -250,6 +256,12 @@ class MongoLogger:
         self, session_id: str, max_turns: int = 10
     ) -> List[Dict[str, str]]:
         """Return recent turns as ``[{"role": ..., "content": ...}]``."""
+        # Check history cache (Phase 2)
+        if self.history_cache is not None:
+            cached = self.history_cache.get_history(session_id)
+            if cached is not None:
+                return cached[:max_turns * 2]
+
         # Fetch the last N turns (sorted ascending so oldest is first)
         pipeline = [
             {"$match": {"session_id": session_id}},
@@ -263,6 +275,11 @@ class MongoLogger:
         for t in turns:
             history.append({"role": "user", "content": t["question"]})
             history.append({"role": "assistant", "content": t["answer"]})
+
+        # Warm history cache (Phase 2)
+        if self.history_cache is not None:
+            self.history_cache.warm_history(session_id, history)
+
         return history
 
     # ------------------------------------------------------------------

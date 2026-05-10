@@ -64,11 +64,82 @@ async def lifespan(app: FastAPI):
         app.state.mongo_logger = None
         app.state.mongo_status = "disabled"
 
+    # ── Redis ────────────────────────────────────────────────────────
+    redis_manager = None
+    app.state.redis_session = None
+    app.state.redis_status = "disabled"
+    app.state.rate_limiter = None
+
+    if settings.redis_enabled:
+        try:
+            from cache.redis_client import RedisManager
+            redis_manager = RedisManager.from_settings(settings)
+            if redis_manager.ping():
+                app.state.redis_status = "ok"
+                logger.info("Redis connected")
+
+                # Phase 1: Redis session store
+                if settings.use_redis_session:
+                    from cache.session_store import RedisSessionStore
+                    app.state.redis_session = RedisSessionStore(
+                        redis_client=redis_manager.get_client(),
+                        mongo_logger=mongo_logger,  # dual-write
+                    )
+                    logger.info("Redis session store enabled (dual-write)")
+
+                # Phase 1: Rate limiter
+                if settings.rate_limit_enabled:
+                    from cache.rate_limiter import SlidingWindowRateLimiter
+                    app.state.rate_limiter = SlidingWindowRateLimiter(
+                        redis_client=redis_manager.get_client(),
+                        rpm=settings.rate_limit_rpm,
+                        rpd=settings.rate_limit_rpd,
+                        alert_threshold=settings.rate_limit_alert_threshold,
+                    )
+                    logger.info(
+                        "Rate limiter enabled: %d rpm, %d rpd",
+                        settings.rate_limit_rpm,
+                        settings.rate_limit_rpd,
+                    )
+
+                # Phase 2: LLM response cache
+                app.state.llm_cache = None
+                if settings.use_redis_cache:
+                    from cache.llm_cache import LLMResponseCache
+                    app.state.llm_cache = LLMResponseCache(redis_client=redis_manager.get_client())
+                    logger.info("LLM response cache enabled")
+
+                # Phase 2: Conversation history cache
+                app.state.history_cache = None
+                if settings.use_redis_history:
+                    from cache.history_cache import ConversationHistoryCache
+                    history_cache = ConversationHistoryCache(redis_client=redis_manager.get_client())
+                    app.state.history_cache = history_cache
+                    if mongo_logger is not None:
+                        mongo_logger.history_cache = history_cache
+                    logger.info("Conversation history cache enabled")
+            else:
+                app.state.redis_status = "failed"
+                logger.warning("Redis ping failed — Redis features disabled")
+        except ImportError:
+            logger.warning("redis package not installed — Redis features disabled")
+            app.state.redis_status = "not_installed"
+        except Exception:
+            logger.warning("Redis init failed", exc_info=True)
+            app.state.redis_status = "failed"
+
+    app.state.settings = settings  # for middleware access
+
     logger.info("Initialising RAG v2 Pipeline (models load once) …")
     loop = asyncio.get_running_loop()
+    llm_cache = getattr(app.state, "llm_cache", None)
     app.state.pipeline = await loop.run_in_executor(
         None,
-        lambda: RAGPipeline(api_key=api_key, mongo_logger=mongo_logger),
+        lambda: RAGPipeline(
+            api_key=api_key,
+            mongo_logger=mongo_logger,
+            llm_cache=llm_cache,
+        ),
     )
 
     # Create MongoDB indexes (idempotent — safe to call on every startup).
@@ -107,7 +178,7 @@ async def lifespan(app: FastAPI):
             bge, e5 = None, None
             pipe = app.state.pipeline
             if hasattr(pipe, "retrieval_service"):
-                rs = pipe.retrieval_service
+                rs = getattr(pipe, "retrieval_service", None)
                 bge = getattr(rs, "bge_embedder", None)
                 e5 = getattr(rs, "e5_embedder", None)
 
@@ -148,6 +219,9 @@ async def lifespan(app: FastAPI):
     # Shutdown scheduler
     if scheduler is not None:
         scheduler.shutdown(wait=False)
+    # Shutdown Redis
+    if redis_manager is not None:
+        redis_manager.close()
     logger.info("Shutting down …")
 
 
@@ -193,6 +267,21 @@ def create_app() -> FastAPI:
     app.include_router(metrics_router)
     app.include_router(retrieval_router)
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
+
+    # Rate-limit middleware is registered as a startup callback because it
+    # needs the rate_limiter instance which is created during lifespan.
+    @app.on_event("startup")
+    async def _register_rate_limit_middleware():
+        limiter = getattr(app.state, "rate_limiter", None)
+        settings = getattr(app.state, "settings", None)
+        if limiter is not None and settings is not None:
+            from api.middleware.rate_limit import RateLimitMiddleware
+            app.add_middleware(
+                RateLimitMiddleware,
+                rate_limiter=limiter,
+                rpm=settings.rate_limit_rpm,
+                rpd=settings.rate_limit_rpd,
+            )
 
     @app.get("/")
     async def root():

@@ -300,7 +300,7 @@ class QdrantStore:
         if not ids:
             return
 
-        selector = models.PointIdsList(points=ids)
+        selector = models.PointIdsList(points=ids)  # type: ignore[arg-type]
         if overwrite:
             self.client.overwrite_payload(
                 collection_name=self.collection_name,
@@ -453,7 +453,7 @@ class QdrantStore:
     def count(self) -> int:
         """Return the number of points in the collection."""
         info = self.client.get_collection(self.collection_name)
-        return info.points_count
+        return info.points_count or 0
 
     def delete_collection(self) -> None:
         """Drop the entire collection (irreversible)."""

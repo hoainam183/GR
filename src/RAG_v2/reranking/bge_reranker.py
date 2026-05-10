@@ -111,10 +111,12 @@ class BGEReranker(BaseReranker):
         table_thresh = table_score_threshold if table_score_threshold is not None else getattr(self, "table_score_threshold", threshold)
 
         # Build (query, doc_text) pairs
-        pairs = [[query, doc["text"]] for doc in documents]
+        pairs = [(query, doc["text"]) for doc in documents]
 
         # Compute relevance scores
         scores = self._model.compute_score(pairs, batch_size=self.batch_size)
+        if scores is None:
+            scores = []
 
         # compute_score returns a single float when len(pairs) == 1
         if isinstance(scores, (int, float)):
