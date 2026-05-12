@@ -103,8 +103,25 @@ RAG_v2/
 ├── reranking/               # BGEReranker
 ├── tools/tavily_search.py   # TavilySearchTool (web fallback)
 ├── models/database.py       # MongoDB model + create_indexes()
-└── routers/auth.py          # JWT auth router
+├── auth/
+│   ├── jwt_handler.py       # JWT creation (includes role claim), verification, get_current_user
+│   ├── rbac.py              # require_admin, require_superadmin dependencies
+│   ├── microsoft.py         # Microsoft OAuth2 integration
+│   └── password.py          # bcrypt hash/verify
+└── routers/auth.py          # JWT auth router + POST /auth/admin/create
 ```
+
+---
+
+## 4a. Admin Role System (Phase 1)
+
+- **Roles**: `"student"` (default) | `"admin"` — stored in `UserDocument.role`
+- **Superadmin**: NOT a DB role — determined by `SUPERADMIN_USER_IDS` env var (comma-separated ObjectIds)
+- **JWT**: `role` claim included in token payload (`create_access_token(role=...)`)
+- **RBAC dependencies**: `require_admin` (403 if not admin), `require_superadmin` (403 if not in env var list)
+- **Admin creation**: `POST /auth/admin/create` — superadmin only, creates user with `role="admin"`
+- **Backward compat**: Existing users without `role` field default to `"student"` via Pydantic default
+- **Settings**: `superadmin_user_ids`, `upload_dir`, `max_upload_size_mb`, `max_upload_batch`
 
 ---
 

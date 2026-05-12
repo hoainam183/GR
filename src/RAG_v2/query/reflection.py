@@ -52,6 +52,59 @@ _COURSE_CODE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# ── PII & conversational noise stripping ────────────────────────────────────────
+# Student ID patterns: "mssv 20214987", "MSSV: 20214987", "mã sv 20214987"
+_MSSV_RE = re.compile(
+    r"\b(?:mssv|msv|mã\s+sinh\s+viên|ms\.?\s*sv|student\s*id)\s*[:\.\-]?\s*\d{6,12}\b",
+    re.IGNORECASE,
+)
+# Personal introduction: "Em là Phạm Nhật Anh", "Tôi là X Y Z"
+# Matches 1–5 capitalised Vietnamese name tokens after "là"
+_PERSONAL_INTRO_RE = re.compile(
+    r"\b(?:em|tôi|mình)\s+là\s+"
+    r"(?:[A-ZÀÁẠẢÃĂẮẰẶẲẴÂẤẦẬẨẪĐÈÉẸẺẼÊẾỀỆỂỄÌÍỊỈĨÒÓỌỎÕÔỐỒỘỔỖƠỚỜỢỞỠÙÚỤỦŨƯỨỪỰỬỮỲÝỴỶỸ]"
+    r"[a-zàáạảãăắằặẳẵâấầậẩẫđèéẹẻẽêếềệểễìíịỉĩòóọỏõôốồộổỗơớờợởỡùúụủũưứừựửữỳýỵỷỹ]{0,20}"
+    r"(?:\s+[A-ZÀÁẠẢÃĂẮẰẶẲẴÂẤẦẬẨẪĐÈÉẸẺẼÊẾỀỆỂỄÌÍỊỈĨÒÓỌỎÕÔỐỒỘỔỖƠỚỜỢỞỠÙÚỤỦŨƯỨỪỰỬỮỲÝỴỶỸ]"
+    r"[a-zàáạảãăắằặẳẵâấầậẩẫđèéẹẻẽêếềệểễìíịỉĩòóọỏõôốồộổỗơớờợởỡùúụủũưứừựửữỳýỵỷỹ]{0,20}){0,4})",
+    re.IGNORECASE,
+)
+# Thanks / closing: "em xin cảm ơn", "Cảm ơn ban cố vấn a"
+_THANKS_RE = re.compile(
+    r"(?:em|tôi|mình)?\s*(?:xin\s+)?cảm\s+ơn[^.!?]{0,80}[.!]?",
+    re.IGNORECASE,
+)
+# Addressee noise: "Ban cố vấn a.", "Kính gửi thầy cô"
+_ADDRESSEE_RE = re.compile(
+    r"\b(?:ban\s+cố\s+vấn|kính\s+gửi(?:\s+(?:thầy|cô|ban))?|ban\s+quản\s+lý)[^.!?]{0,30}[.!]?",
+    re.IGNORECASE,
+)
+
+
+def _strip_pii_and_noise(query: str) -> str:
+    """Remove PII and conversational noise from a query before reflection/retrieval.
+
+    Strips student IDs, personal name introductions, closing/thanks phrases, and
+    addressee fragments.  The core academic question is preserved.  If stripping
+    reduces the result to fewer than 3 words the original query is returned
+    unchanged to avoid destroying short queries.
+    """
+    cleaned = query
+    cleaned = _MSSV_RE.sub("", cleaned)
+    cleaned = _PERSONAL_INTRO_RE.sub("", cleaned)
+    cleaned = _THANKS_RE.sub("", cleaned)
+    cleaned = _ADDRESSEE_RE.sub("", cleaned)
+    # Normalise whitespace and stray leading punctuation
+    cleaned = re.sub(r"[ \t]+", " ", cleaned).strip(" \t\n\r\u2013\u2014\u002d.,–—")
+    # Guard: if too much was stripped, keep original
+    if len(cleaned.split()) < 3:
+        logger.debug(
+            "PII strip produced too-short result; keeping original: %r", query[:80]
+        )
+        return query
+    if cleaned != query:
+        logger.info("PII strip: %r → %r", query[:80], cleaned[:80])
+    return cleaned
+
 
 
 def _merge_user_major_into_context(
@@ -548,6 +601,12 @@ class QueryReflector:
         Returns:
             Dict with ``{"original": str, "rewritten": str}``.
         """
+        # Strip PII and conversational noise before any processing so that
+        # names, student IDs, and greetings never pollute the reflector LLM
+        # call or the retrieval query.
+        raw_query = query  # preserve for return value
+        query = _strip_pii_and_noise(query)
+
         context_with_major = _merge_user_major_into_context(user_context, user_major)
         merged_profile, profile_note_override = _merge_profile_context(
             user_context=context_with_major,
@@ -643,7 +702,8 @@ class QueryReflector:
         logger.debug("Extracted entities: %s", entities)
 
         return {
-            "original": query,
+            "original": raw_query,
+            "stripped": query,       # after PII removal, before LLM rewrite
             "rewritten": rewritten,
             "prompt": user_prompt,
             "entities": entities,

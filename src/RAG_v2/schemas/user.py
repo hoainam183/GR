@@ -106,6 +106,7 @@ class UserPublic(BaseModel):
     cohort: str
     major: str
     major_code: str = ""
+    role: str = "student"
     avatar_url: Optional[str] = None
     is_profile_complete: bool
     is_active: bool
@@ -150,3 +151,21 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserPublic
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AdminCreate — superadmin creates admin accounts
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class AdminCreateRequest(BaseModel):
+    """Request body for ``POST /auth/admin/create`` (superadmin only)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    username: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=8)
+    full_name: str = Field(..., min_length=1)
+    student_id: str = Field(default="admin")
+    cohort: str = Field(default="N/A")
+    major: str = Field(default="N/A")
+    major_code: str = Field(default="")

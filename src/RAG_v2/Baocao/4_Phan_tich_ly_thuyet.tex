@@ -339,13 +339,17 @@ def extract_effective_date(text, filename):
     # Priority 5: Năm trong filename
 \end{verbatim}
 
-\subsection{Xác định khóa áp dụng}
-Phát hiện khóa áp dụng từ filename và nội dung:
+\subsection{Xác định và chuẩn hóa khóa áp dụng}
+Phát hiện khóa áp dụng từ filename và nội dung, sau đó chuẩn hóa vào trường \texttt{applicable\_cohort} để phục vụ lọc metadata thống nhất:
 \begin{verbatim}
 def extract_applicable_cohort(text, filename):
-    # Tìm pattern K65, K68, K70, ... trong filename và content
-    # Trả về danh sách sorted: "K65, K68, K70"
+    # 1. Tìm pattern K65, K68, K70, ... trong filename và content
+    # 2. Chuẩn hóa về list string sorted: ["K65", "K68", "K70"]
+    # 3. Loại bỏ các khóa không tồn tại hoặc lỗi format
+    return sorted(list(set(cohorts)))
 \end{verbatim}
+
+\textbf{Quyết định thiết kế:} Chuyển đổi từ việc lưu rời rạc sang trường \texttt{applicable\_cohort} duy nhất giúp Query Router và Retrieval Filter có thể áp dụng logic lọc chính xác cho cả các tài liệu cũ và mới.
 
 \subsection{Xác định ngành đào tạo}
 Chiến lược nhiều tầng để xác định ngành:
@@ -1195,6 +1199,97 @@ class MongoLogger:
 \end{itemize}
 
 %% =====================================================================
+%% REDIS CACHING LAYER
+%% =====================================================================
+
+\section{Triển khai Tầng Caching Nâng cao với Redis}
+
+Tầng Caching sử dụng Redis để tối ưu hóa tốc độ phản hồi, giảm chi phí API LLM và bảo vệ hệ thống trước các truy vấn lặp lại.
+
+\subsection{Redis Manager Singleton}
+\textbf{File:} \texttt{cache/redis\_client.py} (116 dòng)
+
+Sử dụng Connection Pool để quản lý kết nối thread-safe, chia sẻ giữa Session Store, LLM Cache và Rate Limiter:
+\begin{verbatim}
+class RedisManager:
+    def __init__(self, url, settings):
+        self._pool = redis.ConnectionPool.from_url(
+            url, decode_responses=True, max_connections=20
+        )
+        self._client = redis.Redis(connection_pool=self._pool)
+\end{verbatim}
+
+\subsection{LLM Response Cache (Exact-match)}
+\textbf{File:} \texttt{cache/llm\_cache.py} (317 dòng)
+
+Cơ chế cache câu trả lời cuối cùng dựa trên dấu vân tay (fingerprint) của (query + doc\_ids + model):
+\begin{itemize}
+    \item \textbf{Fingerprinting}: Sử dụng SHA256 để tạo key duy nhất từ nội dung câu hỏi đã chuẩn hóa và danh sách ID tài liệu đã dùng để trả lời;
+    \item \textbf{Hai cấp độ cache}: 
+        \begin{itemize}
+            \item \textit{Pre-retrieval cache}: Check ngay khi nhận query (TTL 5 phút), tiết kiệm 100\% thời gian xử lý (~15-25s);
+            \item \textit{Post-retrieval cache}: Check sau khi có kết quả retrieval (TTL 1 giờ), đảm bảo tính chính xác theo tài liệu.
+        \end{itemize}
+    \item \textbf{FAQ Auto-promotion}: Tự động tăng TTL từ 1 giờ lên 24 giờ cho các câu hỏi có số lượt hit vượt ngưỡng (mặc định 5 lượt).
+\end{itemize}
+
+\subsection{Tag-based Cache Invalidation}
+Để giải quyết vấn đề dữ liệu cũ trong cache, hệ thống triển khai cơ chế vô hiệu hóa (invalidation) theo tài liệu:
+\begin{itemize}
+    \item Khi \texttt{put} vào cache, hệ thống ghi nhận reverse-index: \texttt{doc\_cache\_tag:\{doc\_id\} -> \{cache\_key\}};
+    \item Khi một tài liệu được cập nhật (crawled mới), hệ thống chỉ xóa các cache entry liên quan đến tài liệu đó thay vì xóa toàn bộ cache.
+\end{itemize}
+
+\subsection{Rate Limiting (Token Bucket)}
+\textbf{File:} \texttt{cache/rate\_limiter.py}
+
+Bảo vệ API LLM bằng thuật toán Token Bucket triển khai trên Redis (sử dụng Lua script để đảm bảo tính nguyên tử):
+\begin{itemize}
+    \item Giới hạn số request trên mỗi \texttt{user\_id} hoặc \texttt{ip} trong một khoảng thời gian;
+    \item Cấu hình linh hoạt qua \texttt{.env} (mặc định 10 requests/phút).
+\end{itemize}
+
+%% =====================================================================
+%% REACT AGENT SYSTEM
+%% =====================================================================
+
+\section{Hệ thống ReAct Agent (Nâng cấp Phase 2 \& 3)}
+
+Hệ thống Agent chuyển đổi từ pipeline tĩnh (Static RAG Flow) sang kiến trúc agentic linh hoạt sử dụng LangGraph, cho phép lập kế hoạch và xử lý các câu hỏi phức tạp.
+
+\subsection{Kiến trúc LangGraph}
+\textbf{File:} \texttt{agent/react_agent.py} (912 dòng)
+
+Agent được thiết kế dưới dạng một State Graph với các nodes chính:
+\begin{itemize}
+    \item \textbf{agent\_node}: Sử dụng LLM (Qwen-2.5-8B local) để quyết định gọi tool hay trả lời trực tiếp;
+    \item \textbf{tools\_node}: Thực thi các tools (rag\_search, web\_search, clarify\_question);
+    \item \textbf{decompose\_node}: Phân rã câu hỏi phức tạp thành các câu hỏi con standalone;
+    \item \textbf{planner\_node}: Tạo kế hoạch truy xuất (retrieval plan) song song;
+    \item \textbf{synthesize\_node}: Tổng hợp câu trả lời cuối cùng bằng mô hình mạnh hơn (Gemini 2.5 Flash).
+\end{itemize}
+
+\subsection{Quy trình Planner-Executor}
+Đối với các câu hỏi so sánh (ví dụ: "So sánh học bổng K65 và K68") hoặc đa nguồn, Agent kích hoạt luồng Planner-Executor:
+\begin{enumerate}
+    \item \textbf{Decomposition}: Tách thành "Học bổng K65" và "Học bổng K68";
+    \item \textbf{Planning}: Tạo kế hoạch gọi \texttt{rag_search} trên collection \texttt{quydinh} với filter tương ứng;
+    \item \textbf{Execution}: Chạy song song các bước tìm kiếm để tối ưu latency;
+    \item \textbf{Synthesis}: LLM nhận context từ tất cả các nguồn để viết câu trả lời so sánh đối chiếu.
+\end{enumerate}
+
+\subsection{Quản lý Context Window (Trimming)}
+Để hoạt động ổn định trên các mô hình có context window giới hạn (8k-32k tokens), Agent triển khai chiến lược \texttt{trim_messages}:
+\begin{itemize}
+    \item Luôn giữ System Message và User Query mới nhất;
+    \item Cắt tỉa (truncate) nội dung Tool kết quả cũ nếu vượt quá budget (mặc định 3200 tokens);
+    \item Loại bỏ các cặp (AI Message + Tool Message) cũ nhất khi cần thiết.
+\end{itemize}
+
+\subsection{Cơ chế Chống Lặp (Loop Prevention)}
+Sử dụng dấu vân tay của lời gọi tool (SHA256 của \texttt{name} + \texttt{args}) để phát hiện agent đang gọi đi gọi lại cùng một tool với cùng tham số, từ đó cưỡng bức chuyển sang bước tổng hợp để tránh treo hệ thống.
+
+%% =====================================================================
 %% PHASE 5: FastAPI Backend + Pipeline Integration
 %% =====================================================================
 
@@ -1611,8 +1706,6 @@ class Settings(BaseSettings):
     \item \textbf{Provider pattern}: Đổi LLM từ Gemini sang OpenAI chỉ cần set \texttt{LLM\_PROVIDER=openai} trong \texttt{.env}.
 \end{itemize}
 
-\subsection{Tổng kết API Endpoints}
-
 \begin{table}[H]
 \centering
 \begin{tabular}{|l|l|p{7cm}|}
@@ -1633,25 +1726,58 @@ GET & /session/\{id\} & Lấy chi tiết session (gồm tất cả turns) \\
 \caption{Danh sách API endpoints}
 \end{table}
 
+%% =====================================================================
+%% EVALUATION SYSTEM
+%% =====================================================================
+
+\section{Hệ thống Đánh giá (Evaluation Pipeline)}
+
+Để đảm bảo chất lượng hệ thống RAG, một quy trình đánh giá toàn diện đã được thiết lập, kết hợp giữa các chỉ số retrieval truyền thống và các chỉ số LLM-based hiện đại.
+
+\subsection{Chỉ số Đánh giá Retrieval}
+Sử dụng các chỉ số chuẩn để đo lường khả năng tìm kiếm đúng tài liệu:
+\begin{itemize}
+    \item \textbf{Hit Rate@K}: Tỉ lệ câu hỏi có ít nhất một tài liệu liên quan nằm trong top K kết quả trả về;
+    \item \textbf{MRR (Mean Reciprocal Rank)}: Đo lường vị trí của tài liệu đúng đầu tiên. MRR càng cao nghĩa là tài liệu đúng càng nằm ở top đầu;
+    \item \textbf{Precision@K và Recall@K}: Độ chính xác và độ bao phủ của tập kết quả.
+\end{itemize}
+
+\subsection{Chỉ số Ragas cho Generation}
+Sử dụng khung đánh giá Ragas để đo lường chất lượng câu trả lời của LLM:
+\begin{itemize}
+    \item \textbf{Faithfulness (Tính trung thực)}: Câu trả lời có hoàn toàn dựa trên context được cung cấp không? (phát hiện ảo giác - hallucination);
+    \item \textbf{Answer Relevance (Độ liên quan)}: Câu trả lời có giải quyết đúng vấn đề người dùng hỏi không?;
+    \item \textbf{Context Precision \& Recall}: Đo lường chất lượng của các đoạn văn bản được chọn làm context.
+\end{itemize}
+
+\subsection{Quy trình Đánh giá Offline}
+\textbf{File:} \texttt{evaluation/evaluate_phase3.py}
+
+Hệ thống chạy đánh giá tự động trên bộ dữ liệu kiểm thử (Golden Dataset):
+\begin{enumerate}
+    \item Đọc tập hợp các cặp (Câu hỏi, Tài liệu liên quan, Câu trả lời mong đợi);
+    \item Chạy pipeline RAG để lấy kết quả thực tế;
+    \item Sử dụng Gemini làm "Judge" để chấm điểm dựa trên các tiêu chí Ragas;
+    \item Xuất báo cáo tổng hợp (Summary Report) dưới dạng CSV để theo dõi sự cải thiện qua từng phiên bản code.
+\end{enumerate}
+
 \section{Kết luận chương}
 Chương này đã trình bày chi tiết quá trình triển khai toàn bộ hệ thống RAG v2 qua 8 module chính:
 
 \begin{itemize}
-    \item \textbf{Thu thập và xử lý dữ liệu}: 137 tài liệu từ 3 nguồn (16 PDF quy định, 38 PDF CTDT từ 6 khoa/viện, 83 JSON STSV); 4 loại chunker chuyên biệt tạo ra 2.752 chunks chất lượng cao; Metadata Enrichment tự động trích xuất thời điểm hiệu lực, khóa áp dụng;
+    \item \textbf{Thu thập và xử lý dữ liệu}: 137 tài liệu từ 3 nguồn; 4 loại chunker chuyên biệt tạo ra 2.752 chunks chất lượng cao; Metadata Enrichment tự động trích xuất thời điểm hiệu lực, khóa áp dụng chuẩn hóa (\texttt{applicable\_cohort});
     
-    \item \textbf{Embedding Layer}: Dual embedding với BGE-M3 (dense + sparse) và E5-Multilingual (1024 chiều), kiến trúc Clean Architecture với Factory Pattern cho phép đổi provider qua \texttt{.env};
+    \item \textbf{Kiến trúc Agent ReAct}: LangGraph-based agent với các luồng Planner-Executor xử lý so sánh đa nguồn; Cơ chế phân rã câu hỏi (Decomposition) và quản lý Context Window thông minh;
     
-    \item \textbf{Hybrid Retrieval}: Qdrant Vector Store (dual named vectors) + Elasticsearch BM25, kết hợp qua RRF fusion với cấu hình tối ưu v0.8/k0.2; Multi-Collection Search song song trên 4 collections; Collection Selector chọn collection theo domain confidence;
+    \item \textbf{Tầng Caching \& Performance}: Redis Caching 2 cấp độ (pre/post-retrieval) giúp tiết kiệm 70-90\% latency cho các câu hỏi lặp lại; Hệ thống Invalidation theo tag đảm bảo dữ liệu luôn mới;
     
-    \item \textbf{Reranking Layer}: Cross-encoder BAAI/bge-reranker-v2-m3 chấm điểm từng cặp (query, document), top-K selection với score threshold;
+    \item \textbf{Embedding \& Retrieval}: Dual embedding (BGE-M3 + E5); Hybrid Retrieval (Vector + Keyword) kết hợp qua RRF fusion; Multi-Collection Search song song;
     
-    \item \textbf{Query Router \& Reflection}: Router dual-mode (classifier zero-cost + LLM) phân loại 6 labels; Reflection viết lại query (giải tham chiếu, mở rộng viết tắt, profile extraction tự động);
+    \item \textbf{Reranking \& Generation}: Cross-encoder reranker tối ưu relevance; Gemini 2.5 Flash sinh câu trả lời có trích dẫn nguồn chi tiết;
     
-    \item \textbf{Chat Model \& Self Evaluation}: GeminiLLM (Gemini 2.5 Flash) với 3 mode (RAG, chitchat, self\_eval); SelfEvaluator đánh giá relevance, faithfulness, completeness;
+    \item \textbf{Hệ thống Đánh giá}: Quy trình đánh giá tự động với Ragas metrics, đo lường Faithfulness và Answer Relevance để kiểm soát chất lượng đầu ra;
     
-    \item \textbf{Tool Search và MongoDB Memory}: Tavily web search với rate limiting và exponential backoff làm fallback; MongoDB lưu trữ lịch sử chat, trạng thái phiên, và câu trả lời kèm provenance;
-    
-    \item \textbf{FastAPI Backend và Pipeline Integration}: RAGPipeline kết nối 8 tầng thành pipeline end-to-end; FastAPI server với SSE streaming, health check, và session management; Pydantic BaseSettings cho centralized configuration.
+    \item \textbf{Hạ tầng Backend}: FastAPI server hỗ trợ SSE streaming; MongoDB Memory lưu trữ lịch sử chat và provenance đầy đủ; Centralized configuration qua Pydantic BaseSettings.
 \end{itemize}
 
 Kết quả, hệ thống sẵn sàng nhận request từ frontend, xử lý qua toàn bộ pipeline (Router $\rightarrow$ Reflection $\rightarrow$ Embed $\rightarrow$ Search $\rightarrow$ Rerank $\rightarrow$ Generate $\rightarrow$ Self-Eval $\rightarrow$ Fallback), và trả kết quả streaming cho người dùng.

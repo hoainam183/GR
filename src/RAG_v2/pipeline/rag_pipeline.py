@@ -24,6 +24,7 @@ from agent.react_agent import ReActAgent
 from config.settings import Settings
 from llm import BaseLLM, create_llm
 from llm.self_eval import SelfEvaluator
+from query.decomposer import QueryDecomposer
 from query.prompts import DOMAIN_CLASSIFICATION_PROMPT
 from query.reflection import QueryReflector
 from query.router import QueryRouter
@@ -227,6 +228,17 @@ class RAGPipeline:
                     "Failed to load QueryReflector, skipping reflection",
                     exc_info=True,
                 )
+
+        # Query decomposer (multi-domain decomposition — same provider as reflector)
+        try:
+            self._decomposer = QueryDecomposer(settings=settings)
+            logger.info("Query decomposer loaded.")
+        except Exception:
+            self._decomposer = None
+            logger.warning(
+                "Failed to load QueryDecomposer, decomposition disabled",
+                exc_info=True,
+            )
 
         # Query router (zero-cost local classifier)
         self._router = QueryRouter(
@@ -610,14 +622,17 @@ class RAGPipeline:
         """Smart entrypoint for Week 3 integration.
 
         Routing:
-            - chitchat -> lightweight local handler
-            - simple   -> keep using existing RAG v2 pipeline (query)
-            - complex  -> use LangGraph agent when enabled
+            - chitchat      → lightweight local handler
+            - simple        → classic RAG v2 pipeline (query)
+            - complex/multi_source → query decomposition into per-domain sub-queries,
+                              then parallel RAG retrieval (no hallucination risk)
+            - complex/other → LangGraph agent when enabled (fallback to RAG)
 
         Falls back to RAG v2 when agent is unavailable or fails.
         """
         route_result = self.complexity_router.route(question)
         route = route_result["tier"]
+        subtype = route_result.get("complex_subtype", "")
 
         if route == "chitchat":
             return {
@@ -631,6 +646,35 @@ class RAGPipeline:
                 "iterations": 0,
                 "agent_trace": None,
             }
+
+        # ── Multi-source queries: decompose into per-domain sub-queries ────────
+        # This handles compound questions like Q1 (equivalent course + graduation
+        # requirements) without dispatching to the agent, which can hallucinate.
+        if route == "complex" and subtype == "multi_source" and self._decomposer is not None:
+            domain_subqueries = self._decomposer.decompose(question)
+            # Only use decomposition if we got ≥2 sub-queries (otherwise falls
+            # through to regular RAG below).
+            if len(domain_subqueries) >= 2:
+                logger.info(
+                    "query_v3: decomposed multi_source into %d sub-queries",
+                    len(domain_subqueries),
+                )
+                result = self._query_decomposed(
+                    question=question,
+                    domain_subqueries=domain_subqueries,
+                    history=history,
+                    top_k=top_k,
+                    session_id=session_id,
+                    user_context=user_context,
+                )
+                result["mode"] = "rag_v2_decomposed"
+                result["route"] = "multi_source"
+                result["route_reason"] = route_result.get("reason", "")
+                result.setdefault("tools_used", [])
+                result.setdefault("tool_calls", [])
+                result.setdefault("iterations", 0)
+                result.setdefault("agent_trace", None)
+                return result
 
         if route == "simple" or self.agent is None:
             result = self.query(
@@ -656,8 +700,88 @@ class RAGPipeline:
             user_context=user_context,
             route_label="complex",
             require_agent=False,
-            complexity_subtype=route_result.get("complex_subtype"),
+            complexity_subtype=subtype,
         )
+
+    # ------------------------------------------------------------------
+    # Decomposed multi-domain RAG
+    # ------------------------------------------------------------------
+
+    def _query_decomposed(
+        self,
+        question: str,
+        domain_subqueries: List[Dict[str, str]],
+        history: Optional[List[Dict[str, str]]] = None,
+        top_k: Optional[int] = None,
+        session_id: Optional[str] = None,
+        user_context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Run RAG with per-domain sub-queries and merged context.
+
+        Calls ``rag_flow`` passing ``domain_subqueries`` so each sub-query is
+        directed to its target collection.  The reflector, reranker, and LLM
+        generation steps use the original question for coherence.
+        """
+        pipeline_t0 = time.perf_counter()
+        effective_top_k = top_k or self._cfg["top_k"]
+        # Expand top_k proportionally when we have multiple sub-queries so
+        # each collection contributes enough candidates to the merged pool.
+        expanded_top_k = min(effective_top_k * len(domain_subqueries), 12)
+
+        # Collect multi-domain routing: union of all targeted collections
+        target_cols = list(
+            dict.fromkeys(
+                sq["collection"]
+                for sq in domain_subqueries
+                if sq.get("collection")
+            )
+        )
+        routing_result: Dict[str, Any] = {
+            "intent": "rag",
+            "domain": target_cols[0] if target_cols else None,
+            "domains": target_cols,
+            "confidence": 1.0,
+            "probabilities": {c: 1.0 / len(target_cols) for c in target_cols},
+        }
+
+        flow_cfg = {**self._cfg, "top_k": expanded_top_k}
+
+        result = rag_flow(
+            question=question,
+            history=history,
+            reflector=self._reflector,
+            bge_embedder=self._bge,
+            e5_embedder=self._e5,
+            searcher=self._searcher,
+            reranker=self._reranker,
+            chat_model=self._chat,
+            self_evaluator=self._self_eval,
+            tavily_tool=self._tavily,
+            cfg=flow_cfg,
+            routing_result=routing_result,
+            user_context=user_context,
+            validity_filter=self._validity_filter,
+            reference_resolver=self._reference_resolver,
+            llm_cache=self._llm_cache,
+            domain_subqueries=domain_subqueries,
+        )
+
+        timings_ms = dict(result.get("timings_ms") or {})
+        timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
+        result["timings_ms"] = timings_ms
+
+        if session_id and self._mongo_logger:
+            latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
+            self._mongo_logger.log_turn(
+                session_id=session_id,
+                question=question,
+                result=result,
+                reflected_question=result.get("reflected_question"),
+                latency_ms=latency_ms,
+                timings_ms=timings_ms,
+            )
+
+        return result
 
     # ------------------------------------------------------------------
     # Tier-3: LLM domain classification fallback

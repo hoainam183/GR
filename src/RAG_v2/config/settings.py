@@ -96,7 +96,7 @@ class Settings(BaseSettings):
     agent_synthesis_provider: str = "gemini"   # "" | "gemini" | "lm_studio" | "ollama"
     agent_synthesis_model: str = "gemini-3.1-flash-lite-preview"  # fast + quality
     agent_synthesis_temperature: float = 0.2
-    agent_synthesis_max_tokens: int = 2000
+    agent_synthesis_max_tokens: int = 2500     # increased from 2000 to prevent truncation
 
     # --- Ollama ---
     ollama_base_url: str = "http://localhost:11434"
@@ -121,7 +121,7 @@ class Settings(BaseSettings):
     # ✅ GEMINI: main answer generation — most important quality point
     chat_model: str = "gemini-3.1-flash-lite-preview"   # fast + quality
     chat_temperature: float = 0.3
-    chat_max_tokens: int = 1024            # sufficient for academic Q&A answers
+    chat_max_tokens: int = 1500            # increased from 1024 to prevent mid-sentence truncation
 
     # --- Retrieval ---
     top_k: int = 5
@@ -187,6 +187,12 @@ class Settings(BaseSettings):
     rate_limit_rpm: int = 20              # requests per minute
     rate_limit_rpd: int = 200             # requests per day
     rate_limit_alert_threshold: float = 0.8  # alert at 80% capacity
+
+    # --- Admin / Document Upload ---
+    superadmin_user_ids: str = ""       # comma-separated MongoDB ObjectIds
+    upload_dir: str = "uploads"
+    max_upload_size_mb: int = 50
+    max_upload_batch: int = 5
 
     # --- CORS ---
     cors_origins: List[str] = ["*"]

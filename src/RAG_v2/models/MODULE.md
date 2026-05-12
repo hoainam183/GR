@@ -60,9 +60,20 @@ models/
 
 ---
 
-### `user.py` — User Operations
+### `user.py` — User Document Model
 
-**Nhiệm vụ:** User-related database CRUD operations.
+**Nhiệm vụ:** Định nghĩa `UserDocument` model cho MongoDB `users` collection.
+
+- `PyObjectId`: Pydantic v2 annotation cho MongoDB ObjectId
+- `UserDocument`: Full MongoDB document model
+  - Identity: `id`, `microsoft_id`, `username`, `password_hash`
+  - Contact: `email`
+  - Profile: `full_name`, `student_id`, `cohort`, `major`, `major_code`, `avatar_url`
+  - **Role**: `role: str = "student"` — values: `"student"` | `"admin"` (Phase 1 Admin)
+  - Status: `is_profile_complete`, `is_active`
+  - Timestamps: `created_at`, `updated_at`, `last_login_at`
+
+> **Backward compatibility:** Existing users without a `role` field default to `"student"` via Pydantic default.
 
 ---
 

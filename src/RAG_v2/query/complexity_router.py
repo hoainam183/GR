@@ -54,6 +54,21 @@ _COMPLEX_PATTERN_SPECS: list[tuple[str, str]] = [
     # multi_source (Planner) — vì Planner không thể trả lời "bạn CÓ đủ hay không"
     # khi thiếu thông tin GPA/tín chỉ cá nhân của sinh viên.
 
+    # ── multi_source override — curriculum+regulation compound queries ─────────
+    # These queries combine an equivalence lookup (ctdt) WITH a graduation
+    # condition lookup (quydinh). They are better handled by decomposition than
+    # the agent, so they must appear BEFORE personal_check to win the first-match.
+    (
+        r"(?:tương\s+đương|chuyển\s+đổi|thay\s+thế).{0,60}"
+        r"(?:đồ\s+án|tốt\s+nghiệp|xét\s+(?:tốt\s+nghiệp|nhận)|thời\s+hạn)",
+        "multi_source",
+    ),
+    (
+        r"(?:đồ\s+án|tốt\s+nghiệp|xét\s+(?:tốt\s+nghiệp|nhận)).{0,60}"
+        r"(?:tương\s+đương|chuyển\s+đổi|thay\s+thế)",
+        "multi_source",
+    ),
+
     # ── personal_check subtype ────────────────────────────────────────────────
     # Detect query cần context cá nhân: "tôi/mình/em ... có thể/đủ/đạt/được không"
     (

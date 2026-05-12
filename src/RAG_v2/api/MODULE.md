@@ -1,99 +1,104 @@
-# Module: `api` — REST API Layer
+# Module: `api` — FastAPI REST & Streaming Layer
 
-## Tổng quan
+## 1. Tổng quan kiến trúc
 
-Module `api` là **lớp giao tiếp HTTP** giữa frontend/client và hệ thống RAG v2 backend. Được xây dựng bằng **FastAPI**, module này tiếp nhận các request từ người dùng, định tuyến đến pipeline xử lý phù hợp, và trả về response theo định dạng chuẩn (JSON hoặc SSE streaming).
+Module `api` đóng vai trò là tầng giao diện (interface) công khai của hệ thống RAG v2. Nó chịu trách nhiệm quản lý vòng đời ứng dụng (lifespan), điều phối các request HTTP, thực thi các chính sách bảo mật/giới hạn (rate limiting), và ánh xạ dữ liệu phức tạp từ backend sang định dạng phản hồi chuẩn cho người dùng.
+
+Được xây dựng trên nền tảng **FastAPI**, module này tận dụng tối đa sức mạnh của lập trình bất đồng bộ (`asyncio`) để xử lý hàng ngàn request đồng thời, đặc biệt là các luồng streaming dữ liệu thời gian thực.
 
 ---
 
-## Cấu trúc file
+## 2. Cấu trúc Module
 
 ```
 api/
-├── main.py          # Khởi tạo FastAPI app, đăng ký router, CORS, Redis và Middleware
-├── schemas.py       # Pydantic schemas cho request/response
+├── main.py              # App Factory & Lifespan — Khởi tạo hệ thống, singleton và startup tasks
+├── dependencies.py      # Logic Dependency — Xử lý session resolution và history parsing
+├── response_mapper.py   # Data Mapping — Ánh xạ từ AgentState/Pipeline Result sang Pydantic Response
+├── schemas.py           # Pydantic Schemas — Định nghĩa cấu trúc Request/Response (Local)
 ├── middleware/
-│   └── rate_limit.py # Middleware giới hạn tần suất Sliding Window Rate Limiting (Redis)
+│   └── rate_limit.py    # Rate Limiter — Giới hạn tần suất Sliding Window (Redis-backed)
 └── routes/
-    ├── chat.py      # Endpoint xử lý câu hỏi chính (/chat, /stream)
-    ├── session.py   # Quản lý session lịch sử hội thoại (Redis + MongoDB)
-    ├── metrics.py   # Endpoint thu thập metrics latency và cache stats
-    └── health.py    # Health check endpoint (bao gồm Redis status)
+    ├── chat.py          # Core Endpoints — /chat, /chat/v3, /chat/stream (SSE)
+    ├── health.py        # Monitoring — Health check cho tất cả backend services (Redis, Qdrant, ES...)
+    ├── metrics.py       # Analytics — Thu thập thông tin sử dụng, latency và cache stats
+    ├── session.py       # Session Management — Quản lý lịch sử hội thoại (List/Delete)
+    └── retrieval.py     # Diagnostic — Endpoint hỗ trợ debug kết quả tìm kiếm thô
 ```
 
 ---
 
-## Nhiệm vụ chi tiết
+## 3. Các thành phần và Cơ chế cốt lõi
 
-### `main.py`
-- Tạo FastAPI application instance
-- Cấu hình CORS middleware (cho phép frontend React/mobile gọi)
-- Đăng ký tất cả routers (`/chat`, `/session`, `/metrics`, `/health`)
-- Khởi tạo và inject `RAGPipeline` singleton vào app state
-- Xử lý startup/shutdown events (kết nối DB, warm-up embedder)
+### 3.1. Lifespan & Initialization (`main.py`)
+Hệ thống quản lý vòng đời một cách chặt chẽ để đảm bảo tài nguyên được khởi tạo đúng cách và giải phóng an toàn:
+- **Startup Sequence**: 
+    1. Load biến môi trường từ `.env`.
+    2. Khởi tạo **MongoLogger** & **RedisManager** (Singletons).
+    3. Khởi tạo **RAGPipeline** (tốn ~17s nếu load model mới, thường được chạy trong thread executor để không block).
+    4. Tự động tạo Index cho MongoDB (`create_indexes`).
+    5. **LLM Warmup**: Gửi một request "hello" giả tới local LLM để tránh độ trễ cho người dùng đầu tiên.
+    6. **Auto-Crawler Scheduler**: Khởi chạy lịch trình crawl dữ liệu `kehoach` hàng ngày (nếu enabled).
+- **Global State**: Tất cả các singletons (`pipeline`, `mongo_logger`, `redis_session`, `rate_limiter`) được lưu trữ trong `app.state` để truy cập nhanh từ các router và middleware.
 
-### `routes/chat.py` — Endpoint xử lý câu hỏi
-**Đây là route quan trọng nhất của hệ thống.**
+### 3.2. Smart Routing & Streaming (`routes/chat.py`)
+Hệ thống hỗ trợ 3 cơ chế xử lý câu hỏi linh hoạt:
+- **Non-streaming (`/chat`, `/chat/v3`)**: Nhận câu hỏi và trả về toàn bộ câu trả lời kèm metadata dưới dạng JSON.
+- **Streaming (`/chat/stream`)**: Sử dụng **Server-Sent Events (SSE)**.
+    - Phát các token (`type: token`) ngay khi LLM sinh ra.
+    - **Metadata Injection**: Sau khi stream xong, hệ thống gửi một event cuối cùng (`type: metadata`) chứa đầy đủ thông tin về nguồn trích dẫn, latency, và vết agent (trace) trước khi gửi event `done`.
+- **Modes**:
+    - `auto`: Tự động định tuyến (Chitchat -> Simple RAG -> Complex Agent).
+    - `rag`: Cưỡng bức dùng pipeline RAG truyền thống.
+    - `agent`: Cưỡng bức dùng LangGraph Agent.
 
-| Endpoint | Method | Mô tả |
-|---|---|---|
-| `/chat` | POST | Non-streaming: nhận question, trả về JSON đầy đủ |
-| `/chat/stream` | POST | Streaming: trả về SSE token-by-token |
-| `/chat/agent` | POST | Bắt buộc dùng agent LangGraph |
-| `/chat/v3` | POST | Smart routing: chitchat / simple RAG / complex agent |
+### 3.3. Response Mapping Logic (`response_mapper.py`)
+Để giữ cho `routes/chat.py` ngắn gọn và dễ bảo trì, toàn bộ logic chuyển đổi dữ liệu được tách ra `ChatResponseMapper`:
+- Chuẩn hóa các trường dữ liệu từ nhiều nguồn khác nhau (AgentState vs Standard RAG).
+- Xử lý các trường dữ liệu tùy chọn (`optional`), tính toán `rank` tự động cho văn bản trích dẫn.
+- Xây dựng cấu trúc `agent_trace` chi tiết (tool calls, iterations, latency per tool) để hiển thị trên UI Debugger.
 
-**Luồng xử lý trong `chat.py`:**
-1. Validate request body (Pydantic)
-2. Extract `session_id`, `user_context` từ JWT/header
-3. Gọi `pipeline.query()` hoặc `pipeline.query_stream()`
-4. Format và trả về response (bao gồm `timings_ms`, `sources`, `agent_trace`)
+### 3.4. Rate Limiting Middleware (`middleware/rate_limit.py`)
+Thực hiện giới hạn tần suất truy cập cho các endpoint tiêu tốn tài nguyên LLM:
+- **Sliding Window**: Sử dụng Redis Sorted Sets để quản lý số lượng request trong 1 phút và 1 ngày.
+- **Header Exposure**: Luôn trả về các header `X-RateLimit-Limit-*` và `X-RateLimit-Remaining-*`.
+- **Identification**: Nhận diện người dùng theo thứ tự ưu tiên: `user_id` (trong JSON body) > `X-Forwarded-For` (IP proxy) > `client_host` (IP trực tiếp).
 
-### `routes/session.py`
-- `GET /session/{session_id}/history` — lấy lịch sử hội thoại từ Redis (fallback MongoDB)
-- `DELETE /session/{session_id}` — xóa session từ cả Redis và MongoDB
-
-### `routes/metrics.py`
-- `GET /metrics/usage` — trả về thống kê latency, số request, intent distribution và tỉ lệ hit/miss của LLM Cache
-- Data được tổng hợp từ MongoDB logs và Redis cache stats
-
-### `routes/health.py`
-- `GET /health` — kiểm tra kết nối Qdrant, Elasticsearch, MongoDB
-
-### `schemas.py`
-- `ChatRequest`: `question`, `session_id`, `history`, `top_k`, `user_context`
-- `ChatResponse`: `answer`, `sources`, `intent`, `timings_ms`, `request_trace`
+### 3.5. Session & Dependency (`dependencies.py`)
+- **Session Resolution**: Tự động tạo mới hoặc khôi phục session. Hỗ trợ cơ chế **Dual-Write** (ghi đồng thời vào Redis để truy xuất nhanh và MongoDB để lưu trữ lâu dài).
+- **History Parsing**: Chuyển đổi danh sách tin nhắn từ Pydantic sang format dict mà pipeline backend yêu cầu.
 
 ---
 
-## Tương tác với các module khác
+## 4. Tương tác hệ thống
 
+```mermaid
+graph TD
+    Client[Client / Frontend] -- HTTP POST --> API[api/main.py]
+    API -- Middleware --> RL[middleware/rate_limit.py]
+    RL -- Validated --> Router[api/routes/chat.py]
+    
+    Router -- Dependencies --> Dep[api/dependencies.py]
+    Dep -- Session --> Redis[(Redis)]
+    
+    Router -- Invoke --> Pipeline[pipeline/rag_pipeline.py]
+    Pipeline -- Result --> Mapper[api/response_mapper.py]
+    
+    Mapper -- ChatResponse --> Client
+    
+    subgraph Startup
+        Life[Lifespan] --> Warm[LLM Warmup]
+        Life --> Crawl[Auto-Crawler]
+    end
 ```
-Client (HTTP)
-    │
-    ▼
-api/routes/chat.py
-    │
-    ├─► pipeline/rag_pipeline.py  (RAGPipeline.query / query_stream / query_v3)
-    │       │
-    │       ├─► query/router.py          (định tuyến intent)
-    │       ├─► pipeline/flows.py        (rag_flow / chitchat_flow)
-    │       └─► agent/react_agent.py     (LangGraph agent)
-    │
-    └─► pipeline/mongo_logger.py  (ghi log MongoDB)
-```
 
 ---
 
-## LLM involvement
+## 5. Hiệu năng và Giới hạn
 
-Module `api` **không gọi LLM trực tiếp**. Nó chỉ là lớp điều phối HTTP.
+- **Overhead**: Tầng API chỉ đóng góp **~3-8ms** vào tổng thời gian phản hồi (chủ yếu là serialization).
+- **Thread Safety**: Tất cả các cuộc gọi tới pipeline đồng bộ (heavy computation) đều được wrap trong `anyio.to_thread.run_sync` để tránh nghẽn Event Loop của FastAPI.
+- **Streaming**: Hỗ trợ back-pressure thông qua `asyncio.Queue` trong luồng phát SSE.
 
 ---
-
-## Latency contribution
-
-| Component | Ảnh hưởng |
-|---|---|
-| Request parsing | < 1ms |
-| Response serialization | ~2-5ms |
-| **Tổng overhead của API layer** | **~3-8ms** |
+*Cập nhật lần cuối: 2026-05-11 bởi Antigravity*

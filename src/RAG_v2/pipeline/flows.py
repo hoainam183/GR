@@ -569,6 +569,7 @@ def rag_flow(
     validity_filter: Any | None = None,
     reference_resolver: Any | None = None,
     llm_cache: Optional[Any] = None,
+    domain_subqueries: Optional[List[Dict[str, str]]] = None,
 ) -> Dict[str, Any]:
     """Full RAG flow: Reflect → Embed → Search → Rerank → Generate → SelfEval → (Tavily fallback).
 
@@ -814,7 +815,23 @@ def rag_flow(
         return result_rows
 
     raw_results_buffer: List[Dict[str, Any]] = []
-    if major_compare_plan:
+    if domain_subqueries:
+        # Decomposed multi-domain retrieval: each sub-query targets its own collection.
+        # Uses the reflected/stripped query for reranking (set above as rerank_query).
+        logger.info(
+            "Decomposed retrieval: %d sub-queries",
+            len(domain_subqueries),
+        )
+        for sq in domain_subqueries:
+            sq_query = sq.get("query", retrieval_query)
+            sq_collection = sq.get("collection", "")
+            sq_collections: Optional[List[str]] = (
+                [sq_collection] if sq_collection else target_collections
+            )
+            raw_results_buffer.extend(
+                _search_once(sq_query, sq_collections)
+            )
+    elif major_compare_plan:
         for subquery, subquery_major in major_compare_plan:
             raw_results_buffer.extend(
                 _search_once(
@@ -834,6 +851,16 @@ def rag_flow(
         raw_results_buffer,
         top_k=raw_candidate_k,
     )
+
+    if not raw_results and domain_subqueries:
+        # Fallback: retry with the reflected query against all relevant collections
+        logger.info(
+            "Decomposed sub-queries returned no candidates; retrying with reflected query."
+        )
+        raw_results = _dedup_retrieval_candidates(
+            _search_once(retrieval_query, target_collections),
+            top_k=raw_candidate_k,
+        )
 
     if not raw_results and (compare_subqueries or major_compare_plan):
         logger.info(

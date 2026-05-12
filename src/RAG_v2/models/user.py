@@ -86,6 +86,9 @@ class UserDocument(BaseModel):
     major_code: str = ""
     avatar_url: Optional[str] = Field(default=None)
 
+    # --- Role ---
+    role: str = Field(default="student", description="student | admin")
+
     # --- Status ---
     is_profile_complete: bool = False
     is_active: bool = True
