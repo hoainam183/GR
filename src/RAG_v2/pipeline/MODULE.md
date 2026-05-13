@@ -552,3 +552,4 @@ Admin có thể chạy chunking với nhiều strategy khác nhau — chunks đ�
 
 `delete_indexed_data(doc_id, collection)` — Xóa data từ Qdrant + ES theo `document_id` metadata. Safe khi document chưa được index.
 
+

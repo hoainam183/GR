@@ -199,7 +199,7 @@ Chia nhỏ câu hỏi đa-domain thành **per-collection sub-queries** độc l�
 
 #### Model & Provider
 
-- **Default model**: `gemini-3.1-flash-lite-preview`
+- **Default model**: `gemini-2.5-flash`
 - **Default provider**: `gemini` (OpenAI-compatible API endpoint)
 - Hỗ trợ: `gemini`, `lm_studio`, `ollama`, `openai`
 
@@ -241,7 +241,7 @@ Thành phần phức tạp nhất, thực hiện chuỗi xử lý: **PII Strippi
 
 #### Model & Provider
 
-- **Default model**: `gemini-3.1-flash-lite-preview`
+- **Default model**: `gemini-2.5-flash`
 - **Default provider**: `gemini`
 - Cấu hình qua `Settings` (`reflection_model`, `reflection_provider`, `reflection_temperature`, `reflection_max_tokens`)
 - Hỗ trợ: `gemini`, `lm_studio`, `ollama`, `openai`

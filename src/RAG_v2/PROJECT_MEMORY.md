@@ -1,239 +1,208 @@
-# PROJECT MEMORY — RAG v2 (HUST Academic Chatbot)
+# PROJECT MEMORY - RAG v2 (HUST Academic Chatbot)
 
-> Đọc file này trước khi sửa bất kỳ code nào. Cập nhật khi có thay đổi kiến trúc lớn.
-
----
-
-## 1. Stack & Công nghệ
-
-| Layer | Tech |
-|-------|------|
-| API | FastAPI (lifespan pattern, CORS cho localhost:5173 & 8080) |
-| Agent | LangGraph `StateGraph` + LangChain StructuredTool |
-| Vector store | Qdrant (dense search, BGE-M3 + E5 dual-embed) |
-| Keyword store | Elasticsearch (BM25, cùng index name với Qdrant collection) |
-| Reranker | BGE Reranker (cross-encoder) |
-| Chat LLM | Gemini (thường là `gemini-3.1-flash-lite-preview` qua `GOOGLE_API_KEY`) |
-| Agent LLM | LM Studio local (Qwen 2.5 8B) — chuyên xử lý tool-calling |
-| Synthesis LLM | Gemini (tổng hợp final answer để tăng tốc độ và chất lượng) |
-| DB logging | MongoDB (`MongoLogger`) — lưu lịch sử chat & agent trace |
-| Frontend | React + Vite (port 5173) |
+> Đây là memory cấp dự án. Đọc trước khi sửa code trong `src/RAG_v2`.
+> Snapshot gần nhất: 2026-05-13, đối chiếu từ source code hiện tại.
 
 ---
 
-## 2. Kiến trúc tổng quan
+## 0. Documentation Workflow
 
-```
-Request
-  │
-  ▼
-ComplexityRouter (regex) → chitchat / simple / complex
-  │
-  ├─► chitchat  → canned response (no LLM)
-  │
-  ├─► simple    → RAGPipeline.query()
-  │                  QueryRouter (classifier, tier1/2/3) → domain
-  │                  QueryReflector → rewritten query + entities
-  │                  MultiCollectionSearch (Qdrant + ES hybrid, parallel)
-  │                  BGEReranker
-  │                  Gemini generate / stream
-  │
-  └─► complex   → RAGPipeline.query_agent()
-                    ReActAgent (LangGraph)
-                      agent_node (Qwen tool-call)
-                      tools_node (execute tools)
-                      synthesize_node (Gemini final answer)
+- Trước khi sửa code trong module nào, đọc `MODULE.md` của module đó nếu có.
+- Sau khi sửa code và verify xong, cập nhật `MODULE.md` của module bị ảnh hưởng.
+- `MODULE.md` là source-of-truth cấp module; `PROJECT_MEMORY.md` là source-of-truth cấp kiến trúc, public contracts, data flow và behavior liên module.
+- Chỉ cập nhật file này khi thay đổi kiến trúc, API public, schema/contract, data flow, runtime behavior hoặc bug/caution cấp hệ thống.
+
+---
+
+## 1. Stack & Runtime
+
+| Layer | Tech / Source of truth |
+| --- | --- |
+| API | FastAPI, app factory/lifespan ở `api/main.py` |
+| Pipeline | `pipeline/rag_pipeline.py` là orchestrator chính |
+| Agent | LangGraph `StateGraph` + LangChain tools trong `agent/` |
+| Vector store | Qdrant, named vectors `bge_m3` + `e5` |
+| Keyword store | Elasticsearch, index name trùng với collection |
+| Embedding | BGE-M3 + E5 multilingual ensemble |
+| Reranker | BGE reranker cross-encoder |
+| LLM | Gemini qua `GOOGLE_API_KEY`, model đọc từ `.env`/`config/settings.py` |
+| Agent tool LLM | LM Studio local, model đọc từ `AGENT_MODEL` |
+| Agent synthesis | Gemini/LM Studio/Ollama tùy `AGENT_SYNTHESIS_PROVIDER`, default code là Gemini |
+| DB logging | MongoDB qua `models/mongo_logger.py` |
+| Cache/session/rate limit | Redis optional trong `cache/`, mặc định phụ thuộc `redis_enabled` |
+| Web | React + Vite trong `frontend/chat-companion`, dev port `8080` |
+| Mobile | Expo/React Native trong `mobile/`, shared TS package trong `packages/shared` |
+| Infra docker | Qdrant `6333`, Elasticsearch `9200`, MongoDB `27017`, Redis `6379` |
+
+**Entrypoint backend**: `api/main.py` -> `create_app()` -> lifespan khởi tạo Mongo/Redis/cache, `RAGPipeline`, index Mongo, optional crawler scheduler, sau đó include routers.
+
+---
+
+## 2. High-Level Architecture
+
+```text
+HTTP /chat, /chat/v3, /chat/stream
+  |
+  v
+RAGPipeline
+  |
+  +-- query_v3()
+  |     |
+  |     +-- ComplexityRouter (query/complexity_router.py)
+  |     |     +-- chitchat -> canned response
+  |     |     +-- simple   -> classic query()
+  |     |     +-- complex  -> decomposed RAG or agent
+  |
+  +-- classic RAG
+  |     QueryRouter -> QueryReflector -> CollectionSelector
+  |     -> metadata filters -> MultiCollectionSearch
+  |     -> BGE rerank -> validity filter -> reference resolver
+  |     -> LLM answer / stream
+  |
+  +-- agent path
+        ReActAgent
+          +-- planner-executor for comparison/multi-source
+          +-- ReAct tool loop for normal tool-calling
+          +-- synthesis LLM for final answer
 ```
 
-**Entry point**: `api/main.py` → `create_app()` → `RAGPipeline` khởi tạo 1 lần khi startup.
+Core rule: pipeline tạo `RetrievalService.from_settings(settings)` một lần, gán vào `self._retrieval_service`, rồi inject vào `agent.tool_adapters.inject_from_retrieval_service()` để tránh load lại embedder/searcher/reranker.
 
 ---
 
 ## 3. Module Map
 
-```
+```text
 RAG_v2/
 ├── api/
-│   ├── main.py              # FastAPI factory + lifespan
-│   ├── routes/chat.py       # POST /chat, POST /chat/stream
-│   ├── routes/session.py    # GET /sessions
-│   ├── routes/health.py     # GET /health
-│   └── routes/metrics.py    # GET /metrics
+│   ├── main.py                 # FastAPI app, lifespan, CORS, router include
+│   ├── dependencies.py         # resolve pipeline/session dependencies
+│   ├── response_mapper.py      # normalize pipeline output -> API shape
+│   └── routes/
+│       ├── chat.py             # /chat, /chat/v3, /api/chat/v3, /chat/stream
+│       ├── health.py           # /health, /api/admin/reload-validity
+│       ├── metrics.py          # /metrics/usage, /metrics/eval
+│       ├── retrieval.py        # /retrieval/search diagnostic endpoint
+│       ├── session.py          # /session, /session/{id}, /sessions
+│       └── upload.py           # /admin document pipeline endpoints
 │
 ├── pipeline/
-│   ├── rag_pipeline.py      # RAGPipeline class — orchestrator chính
-│   ├── flows.py             # chitchat_flow, rag_flow, rag_flow_stream
-│   └── mongo_logger.py      # MongoLogger — log turn & agent trace
+│   ├── rag_pipeline.py         # RAGPipeline orchestrator
+│   ├── flows.py                # chitchat_flow, rag_flow, rag_flow_stream
+│   └── document_pipeline.py    # admin upload convert/clean/chunk/index/rollback
 │
 ├── agent/
-│   ├── react_agent.py       # ReActAgent (LangGraph graph)
-│   ├── complexity_router.py # ComplexityRouter (regex → tier)
-│   ├── lc_tools.py          # LANGGRAPH_TOOLS list + TOOL_MAP dict
-│   ├── tool_adapters.py     # execute_tool() dispatcher
-│   ├── state.py             # AgentState dataclass + ToolResult
-│   └── graph_state.py       # AgentGraphState (TypedDict cho LangGraph)
+│   ├── react_agent.py          # LangGraph agent, planner/executor, synthesis
+│   ├── lc_tools.py             # LANGGRAPH_TOOLS, TOOL_MAP
+│   ├── tool_adapters.py        # execute_tool + retrieval adapter impl
+│   ├── state.py                # AgentState, ToolResult
+│   └── graph_state.py          # LangGraph state TypedDict
 │
 ├── retrieval/
-│   ├── service.py           # RetrievalService (singleton, inject vào tool_adapters)
-│   ├── multi_collection_search.py  # MultiCollectionSearch (parallel hybrid)
-│   ├── qdrant_store.py      # QdrantStore
-│   ├── elasticsearch_store.py      # ElasticsearchStore (keyword_search, metadata_filter_search)
-│   ├── hybrid_search.py     # HybridSearch (RRF fusion)
-│   ├── metadata_filters.py  # CollectionFilter + per-collection extractors
-│   ├── collection_selector.py      # domain → collections mapping
-│   ├── validity_filter.py   # lọc chunk không liên quan
+│   ├── service.py              # shared RetrievalService wrapper
+│   ├── multi_collection_search.py
+│   ├── qdrant_store.py
+│   ├── elasticsearch_store.py
+│   ├── metadata_filters.py
+│   ├── collection_selector.py
+│   ├── validity_filter.py
 │   └── reference_resolver.py
 │
 ├── query/
-│   ├── reflection.py        # QueryReflector — rewrite + entity extraction
-│   ├── router.py            # QueryRouter (classifier)
+│   ├── complexity_router.py    # Tier-0 chitchat/simple/complex
+│   ├── router.py               # domain classifier/router
+│   ├── reflection.py           # rewrite + entity extraction
 │   └── domain_classifier.py
 │
-├── llm/
-│   ├── gemini.py            # GeminiLLM (BaseLLM impl)
-│   ├── lm_studio.py         # LMStudioLLM
-│   └── self_eval.py         # SelfEvaluator
+├── models/
+│   ├── database.py             # Motor singleton + indexes
+│   ├── mongo_logger.py         # sessions, turns, query_logs, agent_traces
+│   ├── document.py             # DocumentRecord, DocumentChunk
+│   └── user.py                 # UserDocument
 │
-├── schemas/
-│   ├── chat.py              # Pydantic models cho request/response
-│   └── constants.py         # CLARIFY_SENTINEL
-│
-├── config/settings.py       # Settings (pydantic BaseSettings, đọc .env)
-├── embedding/               # BGEm3Embedder, E5MultilingualEmbedder
-├── reranking/               # BGEReranker
-├── tools/tavily_search.py   # TavilySearchTool (web fallback)
-├── models/database.py       # MongoDB model + create_indexes()
-├── auth/
-│   ├── jwt_handler.py       # JWT creation (includes role claim), verification, get_current_user
-│   ├── rbac.py              # require_admin, require_superadmin dependencies
-│   ├── microsoft.py         # Microsoft OAuth2 integration
-│   └── password.py          # bcrypt hash/verify
-└── routers/auth.py          # JWT auth router + POST /auth/admin/create
+├── auth/                       # JWT, Microsoft OAuth, password, RBAC
+├── routers/auth.py             # /auth router
+├── schemas/                    # Pydantic API contracts
+├── cache/                      # Redis manager, session/history/LLM cache, limiter
+├── embedding/                  # BGE-M3, E5 embedders
+├── reranking/                  # BGE reranker
+├── frontend/chat-companion/    # React web app
+├── mobile/                     # Expo app
+└── packages/shared/            # shared TS API/types/utils
 ```
 
 ---
 
-## 4a. Admin Role System (Phase 1)
+## 4. Runtime Query Flow
 
-- **Roles**: `"student"` (default) | `"admin"` — stored in `UserDocument.role`
-- **Superadmin**: NOT a DB role — determined by `SUPERADMIN_USER_IDS` env var (comma-separated ObjectIds)
-- **JWT**: `role` claim included in token payload (`create_access_token(role=...)`)
-- **RBAC dependencies**: `require_admin` (403 if not admin), `require_superadmin` (403 if not in env var list)
-- **Admin creation**: `POST /auth/admin/create` — superadmin only, creates user with `role="admin"`
-- **Backward compat**: Existing users without `role` field default to `"student"` via Pydantic default
-- **Settings**: `superadmin_user_ids`, `upload_dir`, `max_upload_size_mb`, `max_upload_batch`
+### 4.1 `query_v3()` smart entrypoint
 
----
+- Chạy `ComplexityRouter` trước mọi branch.
+- `chitchat`: trả canned response, không gọi LLM/retrieval.
+- `complex` + multi-source decomposition hợp lệ: chạy decomposed RAG và trả `mode=rag_v2_decomposed`.
+- `simple` hoặc `agent_enabled=false`: fallback về classic `query()` và trả `mode=rag_v2`.
+- Các complex còn lại: chạy `query_agent()`, nếu agent lỗi thì fallback classic RAG trừ khi caller yêu cầu `require_agent=True`.
 
-## 4. Collections (Qdrant/ES)
+### 4.2 Classic RAG flow
 
-| Internal name | Nội dung | Key metadata fields |
-|--------------|----------|---------------------|
-| `ctdt` | Chương trình đào tạo (môn học, tín chỉ) | `major_code`, `major_name` |
-| `quydinh` | Quy định học vụ, học bổng, tốt nghiệp | `applicable_major` (list `["K65","K70"]`) |
-| `kehoach` | Kế hoạch học kỳ, lịch đăng ký | `date_str` (format `"D/M/YYYY"`) |
-| `stsv` | Hỗ trợ sinh viên, biểu mẫu, thủ tục | (không filter metadata) |
+- Load history từ Mongo/Redis cache nếu có `session_id`.
+- Route domain bằng `QueryRouter`, có route cache.
+- Tier-3 Gemini classification chỉ chạy khi confidence < `0.55` và margin top-vs-second < `0.25`.
+- Rewrite query bằng `QueryReflector`; nếu reflect fail dùng original query và deterministic entity fallback.
+- `CollectionSelector` map domain sang target collections; low confidence có fallback multi-collection.
+- Metadata prefilter qua `build_collection_filters()` -> ES metadata search -> Qdrant `HasIdCondition`.
+- Hybrid retrieval chạy Qdrant vector + ES keyword song song, merge cross-collection, rerank bằng BGE.
+- Sau retrieval: validity filter, reference resolver, context formatting kèm metadata header, LLM generation.
+- Optional: post-retrieval LLM cache, self-eval, Tavily fallback tùy settings.
+- `rag_flow_stream()` retrieval trước rồi stream token qua LLM; metadata SSE gửi cuối luồng.
 
-**Alias trong agent tools**: `chuong_trinh` → `ctdt`, `quy_dinh` → `quydinh`, `ke_hoach` → `kehoach`, `ho_tro_sv` → `stsv`
+### 4.3 Agent flow
 
----
-
-## 5. Data Schemas chính
-
-### ChatRequest (POST /chat body)
-```python
-question: str          # max 4096 chars
-mode: "auto"|"rag"|"agent"
-top_k: int = 5
-history: List[{role, content}]
-session_id: str | None
-user_context: UserContext | None  # {student_id, cohort, major, major_code, full_name}
-```
-
-### ChatResponse
-```python
-answer: str
-retrieved_documents: List[RetrievedDocument]  # {rank, content, score, collection, metadata}
-intent: str           # "rag" | "chitchat"
-mode: str             # "rag_v2" | "agent" | "chitchat"
-route: str            # "simple" | "complex" | "chitchat"
-tool_calls: List[AgentToolCall]
-agent_trace: AgentTracePayload
-timings_ms: Dict[str, float]
-session_id: str
-```
-
-### AgentState (internal)
-```python
-query: str
-session_id: str
-tool_results: List[ToolResult]   # truncated to last 3 (context window)
-_log_tool_results: List[ToolResult]  # full log cho MongoDB
-tool_call_history: List[str]
-iteration: int
-max_iterations: int = 4
-final_answer: str | None
-route: "simple"|"complex"|"chitchat"
-```
+- `query_agent()` gọi `ReActAgent.run()` và gom agent docs qua `ContextVar` để map vào API/UI trace.
+- `ReActAgent` có 2 path:
+  - Planner-executor cho comparison/multi-source: decompose, validate plan, execute retrieval steps song song, synthesize.
+  - ReAct loop cho query khác: local tool-calling LLM bind tools, execute, loop đến synthesis/clarify/error.
+- Planner/decomposer tránh auto-inject `user_context.major_code` vào comparison query để giảm bias.
+- Tool results được trim cho context, nhưng trace/log đầy đủ lưu qua Mongo.
 
 ---
 
-## 6. Agent Tools
+## 5. Collections & Retrieval Contracts
 
-| Tool name | Khi dùng | Tính chất |
-|-----------|----------|-----------|
-| `rag_search` | Tìm 1 collection cụ thể | Normal |
-| `multi_rag_search` | Tìm ≥2 collections cùng lúc | Normal |
-| `compare_cohorts` | So sánh 2 **khóa** (K65 vs K70) | **Terminal** (chuyển thẳng sang Synthesis) |
-| `compare_programs` | So sánh 2 **mã ngành** (IT-E6 vs IT-E7) | **Terminal** (chuyển thẳng sang Synthesis) |
-| `web_search` | Tavily fallback khi DB rỗng | Normal |
-| `clarify_question` | Hỏi lại user (max 1 lần/turn) | **Terminal** (dừng agent) |
+| Collection | Nội dung | Runtime metadata filter chính |
+| --- | --- | --- |
+| `ctdt` | Chương trình đào tạo, môn học, tín chỉ, học kỳ | `major_code`, `major_name` |
+| `quydinh` | Quy định học vụ, học bổng, tốt nghiệp | `applicable_cohort` |
+| `kehoach` | Kế hoạch học kỳ, lịch đăng ký, thông báo | `date_str` |
+| `stsv` | Hỗ trợ sinh viên, biểu mẫu, thủ tục | không prefilter metadata chính |
+| `test` | Collection hợp lệ cho upload/dev | tùy metadata upload |
 
-> **Lưu ý Terminal Tools**: Các tool như so sánh sẽ gọi RAG song song bên dưới (trả về full data). Thay vì tốn ~75s cho Qwen 8B duyệt lại, đồ thị LangGraph sẽ tự động ngắt loop (`_after_tools`) và chuyển thẳng sang `synthesize_node` (dùng Gemini) để sinh câu trả lời mượt mà, giảm latency.
+Agent collection aliases:
 
----
+| Agent key | Internal collection |
+| --- | --- |
+| `chuong_trinh` | `ctdt` |
+| `quy_dinh` | `quydinh` |
+| `ke_hoach` | `kehoach` |
+| `ho_tro_sv` | `stsv` |
 
-## 7. Routing Logic
+Retrieval facts:
 
-### Tier 1 — ComplexityRouter (regex, trước khi vào pipeline)
-- `chitchat` → greeting, cảm ơn, tạm biệt
-- `complex` → "so sánh", 2 mã khóa Kxx, 2 mã ngành, nhiều câu hỏi
-- `simple` → default
+- Qdrant store dùng named vectors `bge_m3` và `e5`, mỗi vector 1024 dim, cosine distance.
+- Qdrant search gọi cả hai vectors rồi fuse theo weight BGE/E5.
+- Elasticsearch `keyword_search()` hiện là `multi_match` trên `text^1.0`, `title^1.5`, `best_fields`, fuzziness `AUTO`, kèm optional filters.
+- `MultiCollectionSearch` prefix result id dạng `{collection}/{id}` khi merge global results.
+- Fusion dùng min-max normalize vector/keyword pool, rồi weighted sum.
+- Default code settings: `vector_weight=0.8`, `keyword_weight=0.2`.
+- Course-like queries (`môn`, `học phần`, mã học phần...) tăng keyword weight lên ít nhất `0.6`.
+- `kehoach_recency_bonus` có thể cộng điểm nhỏ cho tài liệu gần đây.
+- `ReferenceResolver` ưu tiên same-document Qdrant payload lookup theo `document_id` cho các tham chiếu kiểu `Điều/Khoản`, rồi insert chunks được resolve ngay sau chunk gốc; fallback semantic search bị post-filter cùng document/source.
 
-### Tier 2 — QueryRouter (domain classifier, trong RAGPipeline)
-- Phân loại domain: `ctdt | quydinh | kehoach | stsv`
-- **Quy tắc phân biệt chủ đề học bổng**:
-  - `quydinh` dành cho quy chế, tiêu chí/điều kiện xét học bổng, GPA, điểm rèn luyện tối thiểu.
-  - `kehoach` dành cho thời gian nộp, hạn chót, thông báo, quyết định khen thưởng, danh sách sinh viên được nhận học bổng.
-  - `stsv` dành cho thủ tục xin giấy xác nhận, nộp đơn ở đâu, cách nhận qua tài khoản ngân hàng.
-- Output: `{intent, domain, domains, confidence, probabilities}`
+Canonical major codes:
 
-### Tier 3 — LLM fallback (khi confidence < 0.55)
-- Gọi Gemini để classify domain, override kết quả classifier
-
----
-
-## 8. Metadata Filter Flow (Pre-search)
-
-```
-build_collection_filters(query, resolved_major, resolved_cohort)
-  → CollectionFilter per collection (ordered ES fallback chain)
-       ctdt    : major_code exact → major_name fuzzy → major_code OR null → no filter
-       quydinh : applicable_major (cohort) OR null → no filter
-       kehoach : date wildcard (nếu query có năm/tháng) → no filter
-       stsv    : no filter
-  → MultiCollectionSearch._resolve_filter_with_fallback()
-       → ES metadata_filter_search() → doc IDs
-       → Qdrant HasIdCondition (restrict vector search)
-```
-
----
-
-## 9. Major Codes (canonical)
-
-```
-IT-E6  = Việt-Nhật (ICTVJ, HEDSPI)
-IT-E7  = Toàn cầu (ICTG, Global ICT)
+```text
+IT-E6  = Việt-Nhật / ICTVJ / HEDSPI
+IT-E7  = Global ICT / ICTG
 IT-E10 = Data AI
 IT-E15 = An toàn không gian số
 IT-EP  = Việt-Pháp
@@ -243,83 +212,197 @@ MI1    = Toán-Tin
 MI2    = Hệ thống thông tin quản lý
 ```
 
-Cohort format: `K65`, `K70`, `K67` (số 2–3 chữ số, prefix `K`)
+Cohort format runtime: `K` + 2-3 chữ số, ví dụ `K65`, `K70`.
 
 ---
 
-## 10. Conventions & Naming Rules
+## 6. Public API Contracts
 
-- **File naming**: `snake_case.py` cho tất cả Python modules
-- **Class naming**: `PascalCase` (VD: `MultiCollectionSearch`, `ReActAgent`)
-- **Async**: Tất cả pipeline entry points là `async`. ES `keyword_search` vẫn sync (gọi trong `asyncio.gather` qua thread).
-- **Settings**: Dùng `config/settings.py` (pydantic BaseSettings). KHÔNG hardcode config.
-- **Injection**: `RetrievalService.from_settings(settings)` tạo 1 lần, inject vào cả `RAGPipeline` lẫn `tool_adapters`.
-- **Logging**: `logger = logging.getLogger(__name__)` ở top mỗi file.
-- **Fallback chain**: Mọi component đều có fallback (agent crash → RAG v2, filter rỗng → full search, reflection fail → original query).
-- **Context budget**: Lịch sử chat trim tới 8 turns / 2000 chars. Tool results trim tới 3 kết quả gần nhất (context window), nhưng log đầy đủ vào MongoDB.
-- **ID format trong search result**: `"{collection_name}/{doc_id}"` (VD: `"ctdt/abc123"`)
-- **Score fusion**: min-max normalize vector + keyword, rồi weighted sum: `score = vector_weight * norm_vec + keyword_weight * norm_kw`
-- **Adaptive fusion**: Query có "môn", "học phần", mã môn → tăng `keyword_weight` lên 0.6 (course_query_keyword_bias)
-- **CLARIFY_SENTINEL**: Token đặc biệt trong `schemas/constants.py` để detect clarify_question output
-- **Module Documentation**: Mỗi khi update code vào một module, BẮT BUỘC phải kiểm tra và cập nhật file `MODULE.md` trong module đó (nếu có) để phản ánh các thay đổi.
+### Chat
 
----
+- `POST /chat`: classic response mapper, mode `auto|rag|agent`.
+- `POST /chat/v3`: smart routing response shape cho UI trace/debug.
+- `POST /api/chat/v3`: alias của `/chat/v3`.
+- `POST /chat/stream`: SSE stream, gửi `session`, token chunks, `metadata`, `done`.
 
-## 11. Key ENV Variables
+`ChatRequest` fields chính:
 
-```env
-GOOGLE_API_KEY=...          # Gemini
-LM_STUDIO_BASE_URL=...      # Local agent LLM
-QDRANT_HOST / QDRANT_PORT
-ELASTICSEARCH_HOST / ELASTICSEARCH_PORT
-MONGODB_URI / MONGODB_DATABASE
-MONGODB_ENABLED=true
-AGENT_ENABLED=true
-AGENT_SYNTHESIS_PROVIDER=gemini
-TAVILY_API_KEY=...
-RERANKER_PROVIDER=bge
+```python
+question: str
+mode: "auto" | "rag" | "agent"
+top_k: int = 5
+history: list[ChatMessage]
+session_id: str | None
+user_context: UserContext | None
+user_id: str | None
 ```
 
+`ChatResponse`/v3 metadata có thể gồm:
+
+```python
+answer
+retrieved_documents
+target_collections
+collection_scores
+reflected_question
+applied_filters
+collection_results
+mode, route, tools, tool_calls, iterations
+agent_trace, agent_error
+timings_ms
+session_id
+routing_probabilities
+reflection_prompt
+llm_prompt
+```
+
+### Auth & RBAC
+
+- Auth router được include prefix `/auth`.
+- Routes: `GET /auth/login`, `GET /auth/callback`, `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `PATCH /auth/me`, `POST /auth/logout`, `POST /auth/admin/create`.
+- Microsoft OAuth chỉ chấp nhận email domain `@sis.hust.edu.vn`.
+- JWT có `sub`, `email`, `role`, `iat`, `exp`; role đọc lại từ DB khi login.
+- Role DB: `student` mặc định, `admin` cho admin.
+- Superadmin không phải DB role; xác định bằng `SUPERADMIN_USER_IDS`.
+- Upload/admin endpoints dùng `require_admin`; tạo admin dùng superadmin check.
+
+### Session, Metrics, Health, Retrieval
+
+- `POST /session`, `GET /session/{session_id}`, `GET /sessions?user_id=...`.
+- `GET /health`, `POST /api/admin/reload-validity`.
+- `GET /metrics/usage`, `GET /metrics/eval`.
+- `POST /retrieval/search` là diagnostic endpoint cho raw retrieval.
+
+### Admin Document Pipeline
+
+All `/admin/*` document endpoints yêu cầu admin role:
+
+- `POST /admin/documents`: upload document, validate collection/converter.
+- `GET /admin/documents`, `GET /admin/documents/{doc_id}`, `DELETE /admin/documents/{doc_id}`.
+- `POST /admin/documents/{doc_id}/convert`, `/clean`, `/chunk`, `/index`, `/pipeline`.
+- `POST /admin/documents/{doc_id}/rollback`.
+- Review endpoints: `/markdown`, `/cleaned`, `/chunks`, `/chunk-strategies`, `/chunks/select`.
+- Discovery endpoints: `GET /admin/converters`, `GET /admin/chunkers`.
+
+`DocumentPipeline` supports PyMuPDF4LLM/Docling conversion, clean, chunk, embed/index to Mongo/Qdrant/ES, delete indexed data by `document_id`, and rollback by status.
+
 ---
 
-## 12. Cạm bẫy thường gặp
+## 7. Agent Tools
 
-- **ITE6 ≠ IT-E6**: Input user hay viết compact, cần `_normalise_major_text()` trước khi so sánh.
-- **applicable_major** trong `quydinh` là list (`["K65","K70"]`) — ES `term` query match tự động.
-- Agent LLM (Qwen) chỉ dùng **LM Studio local** — không dùng Gemini để tool-call (quá chậm).
-- `tool_results` trong luồng Agent được cắt tỉa động (dynamic trimming) dựa trên token budget (`_context_token_budget=3200`), cắt bớt các content dài quá 600 chars và xoá dần history cũ. Log đầy đủ vẫn lưu qua `_log_tool_results` vào MongoDB.
-- `rag_flow_stream` (và `query_stream`) tạo ra các chunk kết quả. Metadata được sinh ra ở cuối luồng và gửi xuống frontend dưới dạng SSE event: `{"type": "metadata", ...}` qua `api/routes/chat.py`.
-- Mỗi ES index name = Qdrant collection name (cùng key trong `settings.collections`).
+`LANGGRAPH_TOOLS` in `agent/lc_tools.py` currently contains exactly:
 
+| Tool | Bound to LangGraph LLM | Purpose |
+| --- | --- | --- |
+| `rag_search` | yes | Search one logical collection |
+| `web_search` | yes | Tavily/web fallback |
+| `clarify_question` | yes | Ask user one clarification and stop turn |
+
+Important: `execute_tool()` in `agent/tool_adapters.py` still supports `multi_rag_search`, `compare_cohorts`, and `compare_programs` for backward compatibility, tests, and direct callers. These are not currently in `LANGGRAPH_TOOLS`, so the ReAct LLM is not schema-bound directly to them. Comparison/multi-source work is handled primarily by the planner-executor path.
+
+Tool adapter details:
+
+- `COLLECTION_MAP` maps agent keys to internal collection names.
+- `_rag_search` strips PII/student ids, maps major/cohort, uses raw query for ES and stripped query for vectors.
+- `_RAG_CACHE` is a small FIFO in-process cache.
+- Reranker access is protected by a lock because the tokenizer path is not thread-safe.
+- `execute_retrieval_plan()` runs steps in a thread pool with a fresh `contextvars.copy_context().run` per task.
 
 ---
 
-## 13. Mobile App (React Native)
-- Đang phát triển kiến trúc Mobile App dùng React Native / Expo.
-- Có monorepo structure share TypeScript types giữa Web và Mobile.
-- Dùng Server-Sent Events (SSE) tương thích với React Native để stream chat.
-- Xác thực bằng `expo-secure-store`.
+## 8. Web, Mobile, Shared Package
+
+### Web app
+
+- Located at `frontend/chat-companion`.
+- Stack: React 18, Vite, TanStack Query, axios, shadcn/Radix UI, markdown renderer.
+- Vite dev server config uses port `8080`.
+- API base URL defaults to `http://localhost:8000` unless `VITE_API_URL` is set.
+- Main routes include `/`, `/chat`, `/chat/:sessionId`, `/login`, `/register`, `/complete-profile`, `/trace`, `/retrieval`, `/admin`, `/admin/documents/:id`.
+- `ChatContainer` supports `/chat/stream`, session history, metadata/debug panel, and route/session invalidation.
+- Admin UI uses `services/adminApi.ts` for upload pipeline actions and polling.
+- `AdminGuard` currently checks `localStorage.user.role === "admin"`.
+
+### Mobile app
+
+- Located at `mobile`.
+- Stack: Expo, React Native, React Query, React Navigation, NativeWind, SecureStore, `react-native-sse`, `@rag/shared`.
+- API base URL is hard-coded in `mobile/src/utils/constants.ts` for LAN device testing.
+- Streaming uses `/chat/stream`.
+- Mobile API client attempts token refresh via `/auth/refresh`; backend currently has no matching refresh endpoint.
+
+### Shared package
+
+- Located at `packages/shared`.
+- Exports API client, auth/chat/session API helpers, shared types, stores, constants and normalization utilities.
+- Shared constants include `/chat/v3`, `/chat/stream`, `/auth/refresh`; ensure backend route exists before relying on refresh behavior.
 
 ---
 
-## 14. Known Bugs & Kiến trúc cần chú ý (Cập nhật liên tục)
-- **`query_agent` blocking async loop (ĐÃ FIX)**: Hàm `query_agent` chạy đồng bộ, nhưng tại FastAPI route (`api/routes/chat.py`) đã được wrap trong `anyio.to_thread.run_sync` và `loop.run_in_executor` để không block event loop.
-- **Mất `user_context` trong luồng Agent**: Hàm `query_agent` có nhận `user_context` nhưng KHÔNG truyền xuống `self.agent.run(...)` vì ReActAgent chưa support. Tuy nhiên, luồng reflection bên ngoài agent (trước khi vào LangGraph) VẪN CÓ `user_context`.
-- **`validity_filter` không được dùng trong Agent tool**: Hàm `_rag_search` trong `tool_adapters.py` chỉ gọi `searcher` và `reranker`, KHÔNG gọi `validity_filter` (bộ lọc này hiện chỉ hoạt động trong `rag_flow` cơ bản).
-- **Qwen 8B lờ đi negative constraints**: Các rule phức tạp ("KHÔNG dùng ke_hoach cho môn học kỳ mấy") dễ bị model size nhỏ lờ đi.
-- **Truy xuất Session API Coroutine Bug (ĐÃ FIX)**: Endpoint `/sessions` từng bị lỗi trả về coroutine thay vì list. Đã fix trong `MongoLogger.list_sessions()` bằng cách trả về đồng bộ.
-- **Reranker loại nhầm văn bản dạng bảng (ĐÃ FIX)**: Do BGE cross-encoder thường chấm điểm logit âm cho văn bản bảng biểu, các chunk có `has_table: true` sẽ được áp dụng ngưỡng riêng `table_score_threshold` (mặc định -3.0) thay vì `score_threshold` (0.0).
-- **Table Retrieval Failure (Recall & Rerank)**: Fixed an issue where specific keywords (e.g., "hiến máu") in table rows were missed due to low retrieval limits (20) and strict reranking (0.0). Increased retrieval limits (50 candidates) and lowered table rerank threshold to -5.0. Verified that correct chunks reach the LLM.
-- **LLM bỏ qua URL trong chunk (ĐÃ FIX)**: Prompt hệ thống trước đây dặn "Không viết 'tại đây' nếu không có URL", gây hiểu nhầm làm LLM ẩn luôn cả URL thực tế. Đã cập nhật `prompts.py` yêu cầu LLM BẮT BUỘC phải đưa URL vào câu trả lời nếu tài liệu có cung cấp.
-- **Static Analysis & Linter Errors (ĐÃ FIX)**: Hoàn tất sửa toàn bộ lỗi static analysis của Pyright (0 errors, 0 warnings) và các cảnh báo linter. Giải quyết triệt để lỗi ép kiểu TypedDict trong LangGraph, lỗi xử lý `response.content` dạng list của LangChain, xung đột namespace của gói `config` cục bộ trong `eval/RAG` bằng cách chuyển sang relative imports, thay thế cuộc gọi `datetime.utcnow()` đã bị deprecated bằng `datetime.now(timezone.utc)`, bổ sung các chốt chặn phòng vệ `assert is not None` và loại bỏ các kiểu ép thừa `str()` / `int()`.
-- **Lỗi NameError `_COURSE_CODE_RE` trong `reflection.py` (ĐÃ FIX)**: Khắc phục lỗi `NameError: name '_COURSE_CODE_RE' is not defined` xảy ra khi người dùng hỏi các câu hỏi như "môn mạng máy tính IT1". Đã định nghĩa hằng số regex `_COURSE_CODE_RE` ở cấp độ module trong `reflection.py` để trích xuất mã môn học chính xác và an toàn.
-- **Lỗi thiên lệch Planner & Rò rỉ lịch sử hội thoại (ĐÃ FIX)**: 
-  1. Khắc phục định kiến của Planner đối với câu hỏi so sánh gián tiếp (chứa các từ khóa `so sánh`, `khác gì`, `với`) bằng cách bỏ logic tự động tiêm `major_code` hiện tại từ `user_context` vào `_decompose_node` và `_planner_node` khi phát hiện các từ khóa này.
-  2. Bổ sung các ví dụ Few-Shot (Ví dụ 8 và 9) vào `REWRITE_SYSTEM_PROMPT` để ngăn mô hình rò rỉ hoặc ghép nhầm các thực thể cũ từ lịch sử xa vào ngữ cảnh hiện tại.
-  3. Cập nhật `SYNTHESIS_PROMPT` cấm mô hình đưa ra tuyên bố phủ định sự tồn tại của dữ liệu (ví dụ: "không tìm thấy thông tin cụ thể...") khi bản thân mô hình đang trực tiếp sử dụng dữ liệu vừa truy hồi thành công để trả lời câu hỏi.
-- **Lỗi thất thoát siêu dữ liệu ngành khi định dạng context (ĐÃ FIX)**: Khắc phục lỗi LLM trả về thông báo phủ nhận tồn tại của dữ liệu ngành (như IT2) do hàm `_format_context` (luồng RAG) và `_format_search_results` (luồng Agent) chỉ trích xuất `text` và `title` mà bỏ rơi siêu dữ liệu ngành trong `metadata`. Đã nâng cấp để tự động tiêm mã ngành (`major_code`), tên ngành (`major_name`), và khóa áp dụng (`applicable_cohort`) trực tiếp vào phần header/văn bản gửi cho LLM.
-- **Lỗi IndexError `no such group` khi parse Course Code (ĐÃ FIX)**: Sửa lỗi `IndexError: no such group` tại `_extract_entities` trong `reflection.py` bằng cách đổi `mo.group(1)` thành `mo.group(0)`. Do regex `_COURSE_CODE_RE` không định nghĩa bất kỳ capturing group nào nên không thể truy xuất group 1.
-- **Lỗi `cannot enter context: <Context object> is already entered` tại Parallel Executor (ĐÃ FIX)**: Sửa lỗi xung đột ngữ cảnh khi chạy song song các bước tìm kiếm (retrieval steps) trong `execute_retrieval_plan` (`agent/tool_adapters.py`). Do trước đây dùng một đối tượng `Context` chung (`ctx = copy_context()`) cho tất cả các luồng trong `ThreadPoolExecutor`, Python đã báo lỗi xung đột re-entrancy. Đã khắc phục bằng cách sử dụng `contextvars.copy_context().run` riêng cho từng task độc lập trong ThreadPool.
-- **Lỗi lọc sai `date_str` của `kehoach` khi truy vấn có dải năm học (ĐÃ FIX)**: Khắc phục lỗi `KeHoachFilterExtractor._build_date_query` nhận diện nhầm các dải năm học dạng `"2025-2026"` hoặc `"2025/2026"` thành năm đăng ký lịch học của tài liệu (lọc strict `*/2025`), dẫn đến loại bỏ sạch các văn bản đăng lịch học đăng vào 2026. Đã bổ sung logic bóc tách dải năm học ra khỏi câu query trước khi so khớp năm lịch thông thường.
+## 9. Settings & ENV
 
+Config source: `config/settings.py` using Pydantic BaseSettings and `src/RAG_v2/.env`.
 
+Key settings families:
+
+```env
+GOOGLE_API_KEY=...
+TAVILY_API_KEY=...
+LM_STUDIO_BASE_URL=...
+LLM_PROVIDER=gemini
+EMBEDDING_PROVIDER=ensemble
+RERANKER_PROVIDER=bge
+AGENT_ENABLED=true
+AGENT_MODEL=...
+AGENT_SYNTHESIS_PROVIDER=gemini
+CHAT_MODEL=...
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
+ELASTICSEARCH_HOST=localhost
+ELASTICSEARCH_PORT=9200
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DATABASE=rag_chatbot
+MONGODB_ENABLED=true
+REDIS_ENABLED=false
+RATE_LIMIT_ENABLED=true
+SUPERADMIN_USER_IDS=...
+UPLOAD_DIR=...
+```
+
+Do not hardcode provider/model/host values in code; use settings/env.
+
+---
+
+## 10. Conventions
+
+- Python file names: `snake_case.py`.
+- Classes: `PascalCase`.
+- Pipeline entrypoints are async, but many retrieval/store calls are sync and are moved to threads by callers where needed.
+- Loggers use `logger = logging.getLogger(__name__)`.
+- Search result ids after cross-collection merge use `{collection}/{doc_id}`.
+- Fallbacks are expected: agent error -> classic RAG, filter empty -> relaxed/no filter, reflection fail -> original query, retrieval empty -> broader search or web fallback when enabled.
+- Chat history context budget is trimmed before prompt construction.
+- `CLARIFY_SENTINEL` lives in `schemas/constants.py` and marks clarify-tool output.
+
+---
+
+## 11. Known Bugs & Cautions
+
+- `/retrieval/search` tries `pipeline.service`, while `RAGPipeline` exposes `self._retrieval_service`; this can force a cold `RetrievalService.from_settings()` load instead of reusing the warmed service.
+- Auto-crawler reuse in `api/main.py` also checks `pipe.retrieval_service`, but `RAGPipeline` currently has no public `retrieval_service` attribute.
+- `rag_flow_stream()` initializes stream metadata trace, but does not pass `trace_out` into `MultiCollectionSearch.search()`, so `applied_filters`/`collection_results` may be empty in stream metadata.
+- `DocumentPipeline.chunk()` writes a debug chunk dump to a hard-coded absolute path under `/Users/nam.nguyen/Documents/personal/GR/src/RAG_v2/data/quydinh/admin_upload`.
+- Mobile/shared clients reference `/auth/refresh`, but backend auth router does not implement a refresh-token endpoint.
+- `schemas/user.py::UserUpdate` lacks `major_code`, so `PATCH /auth/me` cannot update `major_code` even though chat `user_context` supports it.
+- Redis-backed cache/session/rate-limit behavior is inactive when `redis_enabled=false`, even if related feature flags/defaults are true.
+- OAuth redirect and dev ports are inconsistent: web Vite config uses `8080`, while auth callback redirect code uses `http://localhost:5173`.
+- Elasticsearch keyword search does not currently implement custom course-field boosting beyond `text^1.0`, `title^1.5`, fuzziness and filters. Keep course-query boosting documented at the hybrid fusion layer, not as ES query behavior.
+
+---
+
+## 12. Files Usually Ignored For Architecture Review
+
+- Tests unless verifying current behavior.
+- `node_modules`, `.venv`, caches, build outputs.
+- `volumes/`, upload folders, generated chunks, raw data artifacts.
+- Eval datasets/reports unless the change affects eval behavior or public metrics.
