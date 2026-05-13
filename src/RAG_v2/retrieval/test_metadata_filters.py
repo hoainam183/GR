@@ -184,3 +184,21 @@ def test_build_major_comparison_subqueries_for_retrieval() -> None:
         ("môn lập trình mạng của ngành IT-E7", "IT-E7"),
         ("môn lập trình mạng của ngành IT-E6", "IT-E6"),
     ]
+
+
+def test_kehoach_filter_extractor_bypasses_school_years() -> None:
+    """KeHoach filter extractor should bypass school years like 2025-2026 or 2025/2026."""
+    from retrieval.metadata_filters import KeHoachFilterExtractor
+    extractor = KeHoachFilterExtractor()
+    
+    # Queries containing school-year ranges should not trigger year-specific pre-filters.
+    cf1 = extractor.extract("kế hoạch học tập năm học 2025-2026")
+    assert cf1.is_empty is True
+    
+    cf2 = extractor.extract("đăng ký học phần kỳ hè 2025/2026 tuyển sinh")
+    assert cf2.is_empty is True
+
+    # But standard single-year queries should still correctly filter.
+    cf3 = extractor.extract("Kế hoạch đăng ký lớp năm 2025")
+    assert cf3.is_empty is False
+    assert "2025" in str(cf3.metadata_es_queries)

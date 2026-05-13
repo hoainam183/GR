@@ -1,0 +1,26 @@
+{
+    "_description": "Document lineage registry — tracks which documents supersede others.",
+    "_usage": "Used by retrieval/validity_filter.py to exclude outdated regulations from search results.",
+    "documents": [
+        {
+            "doc_id": "QD_5445_2025",
+            "title": "Quyết định 5445/QĐ-ĐHBK-ĐT về quy chế đào tạo 2025",
+            "source_file": "QD_5445_2025.pdf",
+            "effective_from": "2025-01-01",
+            "scope": ["quydinh"],
+            "replaces": ["QD_4600_2023"],
+            "status": "active"
+        },
+        {
+            "doc_id": "QD_4600_2023",
+            "title": "Quyết định 4600/QĐ-ĐHBK-ĐT về quy chế đào tạo 2023",
+            "source_file": "QD_4600_2023.pdf",
+            "effective_from": "2023-01-01",
+            "scope": ["quydinh"],
+            "replaces": [],
+            "status": "superseded",
+            "superseded_by": "QD_5445_2025"
+        }
+    ],
+    "_note": "Add new entries as regulations are updated. Mark old docs as 'superseded' and add superseded_by field."
+}

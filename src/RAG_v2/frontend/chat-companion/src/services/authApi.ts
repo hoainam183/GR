@@ -27,6 +27,7 @@ export interface UserPublic {
   cohort: string;
   major: string;
   major_code: string;
+  role?: string;
   is_profile_complete: boolean;
   is_active: boolean;
   created_at: string;

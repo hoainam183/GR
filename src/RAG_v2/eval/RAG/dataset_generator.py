@@ -99,6 +99,7 @@ def _generate_qa(judge, chunk_text: str, collection: str, metadata: Dict, n: int
         context=chunk_text[:2000],
         metadata_str=meta_str or "{}",
     )
+    raw = ""
     try:
         raw = judge.generate(prompt, max_tokens=900)
         # Strip markdown fence nếu có
@@ -107,7 +108,7 @@ def _generate_qa(judge, chunk_text: str, collection: str, metadata: Dict, n: int
             raw = parts[1].lstrip("json").strip() if len(parts) > 1 else raw
         return json.loads(raw).get("qa_pairs", [])
     except Exception as e:
-        logger.warning("Q&A generation failed: %s | raw[:100]=%s", e, raw[:100] if 'raw' in dir() else "")
+        logger.warning("Q&A generation failed: %s | raw[:100]=%s", e, raw[:100])
         return []
 
 

@@ -37,6 +37,8 @@ USERS_COLLECTION: str = "users"
 SESSIONS_COLLECTION: str = "sessions"
 TURNS_COLLECTION: str = "turns"
 QUERY_LOGS_COLLECTION: str = "query_logs"
+DOCUMENTS_COLLECTION: str = "documents"
+DOCUMENT_CHUNKS_COLLECTION: str = "document_chunks"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -145,7 +147,7 @@ async def create_indexes() -> None:
                 logger.warning(
                     "Index on %s already exists with different options, skipping: %s",
                     collection.name,
-                    exc.details.get("errmsg", str(exc)),
+                    (exc.details or {}).get("errmsg", str(exc)) if hasattr(exc, 'details') else str(exc),
                 )
             else:
                 raise
@@ -193,3 +195,26 @@ async def create_indexes() -> None:
     query_logs = db[QUERY_LOGS_COLLECTION]
     await safe_create(query_logs, [("session_id", ASCENDING)], name="session_id_asc")
     logger.info("Index ensured on collection '%s': session_id_asc", QUERY_LOGS_COLLECTION)
+
+    # ── documents collection ─────────────────────────────────────────────────
+    documents = db[DOCUMENTS_COLLECTION]
+    await safe_create(documents, [("uploaded_by", ASCENDING)], name="uploaded_by_asc")
+    await safe_create(documents, [("status", ASCENDING)], name="status_asc")
+    await safe_create(documents, [("collection", ASCENDING)], name="collection_asc")
+    logger.info(
+        "Indexes ensured on collection '%s': uploaded_by_asc, status_asc, collection_asc",
+        DOCUMENTS_COLLECTION,
+    )
+
+    # ── document_chunks collection ───────────────────────────────────────────
+    doc_chunks = db[DOCUMENT_CHUNKS_COLLECTION]
+    await safe_create(doc_chunks, [("document_id", ASCENDING)], name="document_id_asc")
+    await safe_create(
+        doc_chunks,
+        [("document_id", ASCENDING), ("chunk_index", ASCENDING)],
+        name="document_id_chunk_index",
+    )
+    logger.info(
+        "Indexes ensured on collection '%s': document_id_asc, document_id_chunk_index",
+        DOCUMENT_CHUNKS_COLLECTION,
+    )

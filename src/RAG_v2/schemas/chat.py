@@ -146,3 +146,5 @@ class HealthResponse(BaseModel):
 
     status: str
     rag_initialized: bool
+    mongo_status: str = "unknown"  # ok | degraded | failed | disabled | unknown
+    redis_status: str = "disabled"  # ok | failed | disabled | not_installed

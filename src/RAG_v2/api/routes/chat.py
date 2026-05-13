@@ -8,330 +8,25 @@ import logging
 import time
 from typing import Any
 
+import anyio
+import anyio.to_thread
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
+from api.dependencies import parse_history, resolve_session
+from api.response_mapper import ChatResponseMapper
 from schemas.chat import (
-    AgentToolCall,
-    AgentTracePayload,
     ChatRequest,
     ChatResponse,
-    CollectionResult,
-    FilterInfo,
-    RetrievedDocument,
 )
+from schemas.constants import AgentRoute, PipelineMode, RouteMode
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["chat"])
 
 
-def _safe_float(value: Any, default: float = 0.0) -> float:
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return default
-
-
-def _optional_float(value: Any) -> float | None:
-    if value is None:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _optional_int(value: Any) -> int | None:
-    if value is None:
-        return None
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _to_string_list(raw_value: Any) -> list[str] | None:
-    if not isinstance(raw_value, list):
-        return None
-    values = [str(item) for item in raw_value if item is not None]
-    return values or None
-
-
-def _to_tool_call_models(raw_calls: Any) -> list[AgentToolCall] | None:
-    if not isinstance(raw_calls, list):
-        return None
-
-    models: list[AgentToolCall] = []
-    for call in raw_calls:
-        if isinstance(call, AgentToolCall):
-            models.append(call)
-            continue
-        if not isinstance(call, dict):
-            continue
-
-        args = call.get("args")
-        if not isinstance(args, dict):
-            args = {}
-
-        models.append(
-            AgentToolCall(
-                tool=str(call.get("tool") or "unknown"),
-                args=args,
-                result=str(call.get("result") or ""),
-                iteration=int(call.get("iteration", 0) or 0),
-                latency_ms=_optional_float(call.get("latency_ms")),
-                timestamp=(
-                    str(call.get("timestamp"))
-                    if call.get("timestamp") is not None
-                    else None
-                ),
-            )
-        )
-
-    return models or None
-
-
-def _to_agent_trace_model(raw_trace: Any) -> AgentTracePayload | None:
-    if not isinstance(raw_trace, dict):
-        return None
-
-    tool_calls = _to_tool_call_models(raw_trace.get("tool_calls"))
-    return AgentTracePayload(
-        query=(str(raw_trace.get("query")) if raw_trace.get("query") is not None else None),
-        session_id=(
-            str(raw_trace.get("session_id"))
-            if raw_trace.get("session_id") is not None
-            else None
-        ),
-        route=(str(raw_trace.get("route")) if raw_trace.get("route") is not None else None),
-        iterations=_optional_int(raw_trace.get("iterations")),
-        tool_calls=tool_calls,
-        tool_names_sequence=_to_string_list(raw_trace.get("tool_names_sequence")),
-        final_answer_length=_optional_int(raw_trace.get("final_answer_length")),
-        latency_ms=_optional_float(raw_trace.get("latency_ms")),
-        error=(str(raw_trace.get("error")) if raw_trace.get("error") is not None else None),
-    )
-
-
-def _to_filter_models(raw_filters: Any) -> list[FilterInfo] | None:
-    if not raw_filters:
-        return None
-
-    if isinstance(raw_filters, dict):
-        models = [
-            FilterInfo(
-                collection=str(col),
-                applied=bool(info.get("applied")),
-                matched_ids=int(info.get("matched_ids", 0)),
-                filter_desc=info.get("filter_desc"),
-            )
-            for col, info in raw_filters.items()
-            if isinstance(info, dict)
-        ]
-        return models or None
-
-    if isinstance(raw_filters, list):
-        models: list[FilterInfo] = []
-        for item in raw_filters:
-            if isinstance(item, FilterInfo):
-                models.append(item)
-                continue
-            if isinstance(item, dict):
-                models.append(
-                    FilterInfo(
-                        collection=str(item.get("collection", "")),
-                        applied=bool(item.get("applied")),
-                        matched_ids=int(item.get("matched_ids", 0)),
-                        filter_desc=item.get("filter_desc"),
-                    )
-                )
-        return models or None
-
-    return None
-
-
-def _to_collection_result_models(raw_counts: Any) -> list[CollectionResult] | None:
-    if not raw_counts:
-        return None
-
-    if isinstance(raw_counts, dict):
-        models = [
-            CollectionResult(
-                collection=str(col),
-                vector_count=int(counts.get("vector", 0)),
-                keyword_count=int(counts.get("keyword", 0)),
-            )
-            for col, counts in raw_counts.items()
-            if isinstance(counts, dict)
-        ]
-        return models or None
-
-    if isinstance(raw_counts, list):
-        models: list[CollectionResult] = []
-        for item in raw_counts:
-            if isinstance(item, CollectionResult):
-                models.append(item)
-                continue
-            if isinstance(item, dict):
-                models.append(
-                    CollectionResult(
-                        collection=str(item.get("collection", "")),
-                        vector_count=int(item.get("vector_count", 0)),
-                        keyword_count=int(item.get("keyword_count", 0)),
-                    )
-                )
-        return models or None
-
-    return None
-
-
-def _to_chat_response(
-    result: dict[str, Any],
-    *,
-    fallback_question: str,
-    session_id: str,
-) -> ChatResponse:
-    normalized = _normalize_v3_result(result, session_id)
-
-    raw_docs = normalized.get("retrieved_documents")
-    if not isinstance(raw_docs, list):
-        raw_docs = _to_retrieved_documents(normalized.get("sources"))
-
-    retrieved_docs: list[RetrievedDocument] = []
-    for idx, doc in enumerate(raw_docs, 1):
-        if isinstance(doc, RetrievedDocument):
-            retrieved_docs.append(doc)
-            continue
-        if not isinstance(doc, dict):
-            continue
-
-        metadata = doc.get("metadata")
-        if not isinstance(metadata, dict):
-            metadata = {}
-
-        retrieved_docs.append(
-            RetrievedDocument(
-                rank=int(doc.get("rank", idx) or idx),
-                content=str(doc.get("content", "")),
-                score=_safe_float(doc.get("score", 0.0)),
-                hybrid_score=_optional_float(doc.get("hybrid_score")),
-                rerank_score=_optional_float(doc.get("rerank_score")),
-                vector_score=_optional_float(doc.get("vector_score")),
-                keyword_score=_optional_float(doc.get("keyword_score")),
-                collection=doc.get("collection"),
-                metadata=metadata,
-            )
-        )
-
-    num_documents = normalized.get("num_documents")
-    if num_documents is None:
-        num_documents = normalized.get("num_sources")
-    if num_documents is None:
-        num_documents = len(retrieved_docs)
-
-    mode = str(normalized.get("mode")) if normalized.get("mode") is not None else None
-    route = str(normalized.get("route")) if normalized.get("route") is not None else None
-    tools_used = _to_string_list(normalized.get("tools_used"))
-    tool_calls = _to_tool_call_models(normalized.get("tool_calls"))
-    agent_trace = _to_agent_trace_model(normalized.get("agent_trace"))
-
-    if tools_used is None and agent_trace and agent_trace.tool_names_sequence:
-        tools_used = list(agent_trace.tool_names_sequence)
-    if tool_calls is None and agent_trace and agent_trace.tool_calls:
-        tool_calls = list(agent_trace.tool_calls)
-
-    return ChatResponse(
-        question=str(normalized.get("question") or fallback_question),
-        answer=str(normalized.get("answer") or ""),
-        retrieved_documents=retrieved_docs,
-        num_documents=int(num_documents),
-        model_name=str(normalized.get("model_name") or normalized.get("mode") or "unknown"),
-        intent=str(normalized.get("intent") or normalized.get("route") or "rag"),
-        target_collections=normalized.get("target_collections"),
-        collection_scores=normalized.get("collection_scores"),
-        reflected_question=normalized.get("reflected_question"),
-        timings_ms=normalized.get("timings_ms"),
-        session_id=str(normalized.get("session_id") or session_id),
-        routing_probabilities=normalized.get("routing_probabilities"),
-        reflection_prompt=normalized.get("reflection_prompt"),
-        llm_prompt=normalized.get("llm_prompt"),
-        applied_filters=_to_filter_models(normalized.get("applied_filters")),
-        collection_results=_to_collection_result_models(normalized.get("collection_results")),
-        mode=mode,
-        route=route,
-        tools_used=tools_used,
-        tool_calls=tool_calls,
-        iterations=_optional_int(normalized.get("iterations")),
-        error=(str(normalized.get("error")) if normalized.get("error") is not None else None),
-        agent_error=(
-            str(normalized.get("agent_error"))
-            if normalized.get("agent_error") is not None
-            else None
-        ),
-        agent_trace=agent_trace,
-    )
-
-
-def _to_retrieved_documents(sources: Any) -> list[dict[str, Any]]:
-    """Convert pipeline ``sources`` payload into ChatResponse-compatible docs."""
-    if not isinstance(sources, list):
-        return []
-
-    converted: list[dict[str, Any]] = []
-    for idx, doc in enumerate(sources, 1):
-        if not isinstance(doc, dict):
-            continue
-        converted.append(
-            {
-                "rank": idx,
-                "content": doc.get("text", ""),
-                "score": doc.get("rerank_score", doc.get("score", 0.0)),
-                "hybrid_score": doc.get("score"),
-                "rerank_score": doc.get("rerank_score"),
-                "vector_score": doc.get("vector_score"),
-                "keyword_score": doc.get("keyword_score"),
-                "collection": doc.get("collection"),
-                "metadata": doc.get("metadata", {}),
-            }
-        )
-    return converted
-
-
-def _normalize_v3_result(result: dict[str, Any], session_id: str) -> dict[str, Any]:
-    """Ensure /chat/v3 returns a stable shape for UI trace/debug rendering."""
-    normalized = dict(result)
-    normalized.setdefault("session_id", session_id)
-
-    if "retrieved_documents" not in normalized:
-        normalized["retrieved_documents"] = _to_retrieved_documents(
-            normalized.get("sources")
-        )
-
-    normalized.setdefault(
-        "num_documents",
-        normalized.get("num_sources", len(normalized.get("retrieved_documents", []))),
-    )
-    normalized.setdefault("tools_used", [])
-    normalized.setdefault("tool_calls", [])
-    normalized.setdefault("iterations", 0)
-    normalized.setdefault("agent_trace", None)
-
-    if (
-        not normalized.get("tool_calls")
-        and isinstance(normalized.get("agent_trace"), dict)
-        and isinstance(normalized["agent_trace"].get("tool_calls"), list)
-    ):
-        normalized["tool_calls"] = normalized["agent_trace"]["tool_calls"]
-
-    if (
-        not normalized.get("tools_used")
-        and isinstance(normalized.get("agent_trace"), dict)
-        and isinstance(normalized["agent_trace"].get("tool_names_sequence"), list)
-    ):
-        normalized["tools_used"] = normalized["agent_trace"]["tool_names_sequence"]
-
-    return normalized
+# ─── Legacy turn logging helper ───────────────────────────────────────────────
 
 
 def _log_legacy_turn_for_agent_response(
@@ -350,14 +45,14 @@ def _log_legacy_turn_for_agent_response(
     """
     if not session_id:
         return
-    if not str(result.get("mode", "")).lower().startswith("agent"):
+    if not str(result.get("mode", "")).lower().startswith(PipelineMode.AGENT):
         return
     if not hasattr(mongo_logger, "log_turn"):
         return
 
     legacy_result = dict(result)
-    legacy_result.setdefault("intent", str(result.get("route") or "complex"))
-    legacy_result.setdefault("model_name", str(result.get("mode") or "agent"))
+    legacy_result.setdefault("intent", str(result.get("route") or AgentRoute.COMPLEX))
+    legacy_result.setdefault("model_name", str(result.get("mode") or PipelineMode.AGENT))
     if not isinstance(legacy_result.get("sources"), list):
         legacy_result["sources"] = []
     legacy_result.setdefault("num_sources", len(legacy_result["sources"]))
@@ -365,9 +60,10 @@ def _log_legacy_turn_for_agent_response(
     latency_ms = int((time.perf_counter() - request_started_at) * 1000)
     agent_trace = legacy_result.get("agent_trace")
     if isinstance(agent_trace, dict):
-        latency_ms = int(
-            _safe_float(agent_trace.get("latency_ms"), float(latency_ms))
-        )
+        try:
+            latency_ms = int(float(agent_trace.get("latency_ms") or latency_ms))
+        except (TypeError, ValueError):
+            pass
 
     try:
         mongo_logger.log_turn(
@@ -392,27 +88,29 @@ def _log_legacy_turn_for_agent_response(
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
-    """Process a question and return the full answer."""
+    """Process a question and return the full answer.
+
+    Routing:
+      - mode='agent': force LangGraph ReAct agent (slow, multi-step).
+      - mode='rag':   force classic RAG v2 pipeline.
+      - mode='auto' or absent: smart routing via complexity_router
+        (chitchat → canned reply, simple → RAG v2, complex → agent).
+    """
     pipeline = getattr(request.app.state, "pipeline", None)
     if pipeline is None:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
-
-    # Resolve session: create new if absent or stale
-    session_id = body.session_id
-    if mongo_logger is not None:
-        if session_id is None or mongo_logger.get_session(session_id) is None:
-            session_id = mongo_logger.new_session(user_id=body.user_id)
-
-    history = (
-        [{"role": m.role, "content": m.content} for m in body.history]
-        if body.history
-        else []
+    redis_session = getattr(request.app.state, "redis_session", None)
+    session_id = resolve_session(
+        session_id=body.session_id,
+        user_id=body.user_id,
+        mongo_logger=mongo_logger,
+        redis_session=redis_session,
     )
-    mode = (body.mode or "auto").lower()
-    if mode != "agent":
-        logger.info("/chat forces agent mode (requested=%s)", mode)
+    history = parse_history(body.history)
+    mode = (body.mode or RouteMode.AUTO).lower()
+    logger.info("/chat mode=%s question=%r", mode, body.question[:80])
 
     user_context_payload = (
         body.user_context.model_dump() if body.user_context else None
@@ -420,63 +118,50 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
     request_t0 = time.perf_counter()
 
     try:
-        loop = asyncio.get_event_loop()
-        if hasattr(pipeline, "query_agent"):
+        # ── Explicit agent mode ───────────────────────────────────────────────
+        if mode == RouteMode.AGENT:
             if getattr(pipeline, "agent", None) is None:
                 raise HTTPException(
                     status_code=503,
-                    detail="Agent is required for /chat but is disabled",
+                    detail="Agent is required for mode=agent but is disabled",
                 )
-            result = await loop.run_in_executor(
-                None,
+            result = await anyio.to_thread.run_sync(
                 lambda: pipeline.query_agent(
                     question=body.question,
                     history=history,
                     top_k=body.top_k,
                     session_id=session_id,
                     user_context=user_context_payload,
-                    route_label="agent_forced",
+                    route_label=AgentRoute.AGENT_FORCED,
                     require_agent=True,
                 ),
             )
-        else:
-            if getattr(pipeline, "agent", None) is None:
-                raise HTTPException(
-                    status_code=503,
-                    detail="Agent is required for /chat but is disabled",
-                )
-            state = await loop.run_in_executor(
-                None,
-                lambda: pipeline.agent.run(
-                    body.question,
-                    session_id=session_id or "",
+
+        # ── Explicit RAG mode ─────────────────────────────────────────────────
+        elif mode == RouteMode.RAG:
+            result = await anyio.to_thread.run_sync(
+                lambda: pipeline.query(
+                    question=body.question,
                     history=history,
+                    top_k=body.top_k,
+                    session_id=session_id,
+                    user_context=user_context_payload,
                 ),
             )
-            tool_calls = [tr.to_dict() for tr in state.tool_results]
-            agent_trace = state.to_log_dict()
-            agent_trace["latency_ms"] = round(
-                (time.perf_counter() - request_t0) * 1000,
-                2,
+            result.setdefault("mode", PipelineMode.RAG_V2)
+            result.setdefault("route", AgentRoute.SIMPLE)
+
+        # ── Auto / smart routing (default) ────────────────────────────────────
+        else:
+            result = await anyio.to_thread.run_sync(
+                lambda: pipeline.query_v3(
+                    question=body.question,
+                    history=history,
+                    top_k=body.top_k,
+                    session_id=session_id,
+                    user_context=user_context_payload,
+                ),
             )
-            result = {
-                "question": body.question,
-                "answer": state.final_answer or "",
-                "mode": "agent",
-                "route": "agent_forced",
-                "intent": "agent_forced",
-                "model_name": "agent",
-                "tools_used": list(state.tool_call_history),
-                "tool_calls": tool_calls,
-                "iterations": state.iteration,
-                "error": state.error,
-                "agent_error": state.error,
-                "agent_trace": agent_trace,
-                "timings_ms": {
-                    "agent_total": agent_trace["latency_ms"],
-                    "pipeline_total": agent_trace["latency_ms"],
-                },
-            }
 
         if mongo_logger is not None:
             _log_legacy_turn_for_agent_response(
@@ -487,7 +172,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
                 request_started_at=request_t0,
             )
 
-        return _to_chat_response(
+        return ChatResponseMapper.to_chat_response(
             result,
             fallback_question=body.question,
             session_id=session_id or "",
@@ -521,77 +206,50 @@ async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
-    session_id = body.session_id
-    if mongo_logger is not None:
-        if session_id is None or mongo_logger.get_session(session_id) is None:
-            session_id = mongo_logger.new_session(user_id=body.user_id)
-
-    history = (
-        [{"role": m.role, "content": m.content} for m in body.history]
-        if body.history
-        else []
+    redis_session = getattr(request.app.state, "redis_session", None)
+    session_id = resolve_session(
+        session_id=body.session_id,
+        user_id=body.user_id,
+        mongo_logger=mongo_logger,
+        redis_session=redis_session,
     )
-    mode = (body.mode or "auto").lower()
+    history = parse_history(body.history)
+    mode = (body.mode or RouteMode.AUTO).lower()
+    user_context_payload = (
+        body.user_context.model_dump() if body.user_context else None
+    )
 
     try:
-        loop = asyncio.get_event_loop()
-
-        if mode == "rag":
-            result = await loop.run_in_executor(
-                None,
+        if mode == RouteMode.RAG:
+            result = await anyio.to_thread.run_sync(
                 lambda: pipeline.query(
                     question=body.question,
                     history=history,
                     top_k=body.top_k,
                     session_id=session_id,
-                    user_context=(
-                        body.user_context.model_dump() if body.user_context else None
-                    ),
+                    user_context=user_context_payload,
                 ),
             )
-            result.setdefault("mode", "rag_v2")
-            result.setdefault("route", "simple")
+            result.setdefault("mode", PipelineMode.RAG_V2)
+            result.setdefault("route", AgentRoute.SIMPLE)
             result.setdefault("tools_used", [])
             result.setdefault("iterations", 0)
-            return _normalize_v3_result(result, session_id or "")
+            return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
-        if mode == "agent":
-            if hasattr(pipeline, "query_agent"):
-                result = await loop.run_in_executor(
-                    None,
-                    lambda: pipeline.query_agent(
-                        question=body.question,
-                        history=history,
-                        top_k=body.top_k,
-                        session_id=session_id,
-                        user_context=(
-                            body.user_context.model_dump()
-                            if body.user_context
-                            else None
-                        ),
-                        route_label="complex",
-                        require_agent=False,
-                    ),
-                )
-                return _normalize_v3_result(result, session_id or "")
-
+        if mode == RouteMode.AGENT:
             if getattr(pipeline, "agent", None) is None:
-                result = await loop.run_in_executor(
-                    None,
+                # Agent explicitly disabled — return RAG fallback with clear signal
+                result = await anyio.to_thread.run_sync(
                     lambda: pipeline.query(
                         question=body.question,
                         history=history,
                         top_k=body.top_k,
                         session_id=session_id,
-                        user_context=(
-                            body.user_context.model_dump()
-                            if body.user_context
-                            else None
-                        ),
+                        user_context=user_context_payload,
                     ),
                 )
-                result["mode"] = "rag_v2_fallback"
-                result["route"] = "complex"
+                result["mode"] = PipelineMode.RAG_V2_FALLBACK
+                result["route"] = AgentRoute.COMPLEX
                 result["tools_used"] = []
                 result["iterations"] = 0
                 result["agent_error"] = "Agent is disabled"
@@ -599,50 +257,39 @@ async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
                 result["agent_trace"] = {
                     "query": body.question,
                     "session_id": session_id or "",
-                    "route": "complex",
+                    "route": AgentRoute.COMPLEX,
                     "iterations": 0,
                     "tool_calls": [],
                     "tool_names_sequence": [],
                     "final_answer_length": 0,
                     "error": "Agent is disabled",
                 }
-                return _normalize_v3_result(result, session_id or "")
+                return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
-            state = await loop.run_in_executor(
-                None,
-                lambda: pipeline.agent.run(
-                    body.question,
-                    session_id=session_id or "",
+            result = await anyio.to_thread.run_sync(
+                lambda: pipeline.query_agent(
+                    question=body.question,
                     history=history,
+                    top_k=body.top_k,
+                    session_id=session_id,
+                    user_context=user_context_payload,
+                    route_label=AgentRoute.COMPLEX,
+                    require_agent=False,
                 ),
             )
-            tool_calls = [tr.to_dict() for tr in state.tool_results]
-            return _normalize_v3_result({
-                "question": body.question,
-                "answer": state.final_answer or "",
-                "mode": "agent",
-                "route": "complex",
-                "tools_used": list(state.tool_call_history),
-                "tool_calls": tool_calls,
-                "iterations": state.iteration,
-                "error": state.error,
-                "agent_error": state.error,
-                "agent_trace": state.to_log_dict(),
-            }, session_id or "")
+            return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
-        result = await loop.run_in_executor(
-            None,
+        # Auto mode
+        result = await anyio.to_thread.run_sync(
             lambda: pipeline.query_v3(
                 question=body.question,
                 history=history,
                 top_k=body.top_k,
                 session_id=session_id,
-                user_context=(
-                    body.user_context.model_dump() if body.user_context else None
-                ),
+                user_context=user_context_payload,
             ),
         )
-        return _normalize_v3_result(result, session_id or "")
+        return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
     except Exception as exc:
         logger.error("/chat/v3 error: %s", exc, exc_info=True)
@@ -668,17 +315,16 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
-
-    # Resolve session: create new if absent or stale
-    session_id = body.session_id
-    if mongo_logger is not None:
-        if session_id is None or mongo_logger.get_session(session_id) is None:
-            session_id = mongo_logger.new_session(user_id=body.user_id)
-
-    history = (
-        [{"role": m.role, "content": m.content} for m in body.history]
-        if body.history
-        else []
+    redis_session = getattr(request.app.state, "redis_session", None)
+    session_id = resolve_session(
+        session_id=body.session_id,
+        user_id=body.user_id,
+        mongo_logger=mongo_logger,
+        redis_session=redis_session,
+    )
+    history = parse_history(body.history)
+    user_context_payload = (
+        body.user_context.model_dump() if body.user_context else None
     )
 
     async def event_generator():
@@ -693,7 +339,7 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
                 + "\n\n"
             )
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()  # S-4: fixed from deprecated get_event_loop()
         queue: asyncio.Queue = asyncio.Queue()
 
         def _produce():
@@ -703,11 +349,7 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
                     history=history,
                     top_k=body.top_k,
                     session_id=session_id,
-                    user_context=(
-                        body.user_context.model_dump()
-                        if body.user_context
-                        else None
-                    ),
+                    user_context=user_context_payload,
                 ):
                     loop.call_soon_threadsafe(queue.put_nowait, chunk)
             finally:
@@ -718,6 +360,46 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
         while True:
             chunk = await queue.get()
             if chunk is None:
+                # ── Emit metadata SSE event before done ──────────────────────
+                try:
+                    meta_payload: dict[str, Any] = {
+                        "type": "metadata",
+                        "mode": getattr(pipeline, "last_mode", "rag_v2"),
+                        "route": getattr(pipeline, "last_intent", "rag"),
+                        "intent": getattr(pipeline, "last_intent", "rag"),
+                        "num_sources": len(getattr(pipeline, "last_sources", [])),
+                        "retrieved_documents": getattr(pipeline, "last_sources", []),
+                        "timings_ms": getattr(pipeline, "last_timings", {}),
+                        "reflected_question": getattr(
+                            pipeline, "last_reflected_question", None
+                        ),
+                        "target_collections": getattr(
+                            pipeline, "last_target_collections", None
+                        ),
+                        "collection_scores": getattr(
+                            pipeline, "last_collection_scores", None
+                        ),
+                        "routing_probabilities": getattr(
+                            pipeline, "last_routing_probabilities", None
+                        ),
+                        "applied_filters": getattr(
+                            pipeline, "last_applied_filters", None
+                        ),
+                        "collection_results": getattr(
+                            pipeline, "last_collection_results", None
+                        ),
+                        "agent_trace": getattr(pipeline, "last_agent_trace", None),
+                        "tools_used": getattr(pipeline, "last_tools_used", []),
+                        "iterations": getattr(pipeline, "last_iterations", 0),
+                    }
+                    yield (
+                        "data: "
+                        + json.dumps(meta_payload, ensure_ascii=False)
+                        + "\n\n"
+                    )
+                except Exception as meta_err:
+                    logger.warning("Failed to emit metadata SSE event: %s", meta_err)
+                # ── Done event ───────────────────────────────────────────────
                 yield (
                     "data: "
                     + json.dumps({"type": "done"}, ensure_ascii=False)

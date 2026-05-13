@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Annotated, TypedDict
+from typing import Annotated
+from typing_extensions import TypedDict
 
 from langgraph.graph.message import add_messages
 
@@ -37,3 +38,10 @@ class AgentGraphState(TypedDict):
     max_iterations: int
     final_answer: str | None
     error: str | None
+
+    # ─── Planner-Executor path (Phase 1 refactor) ─────────────────────────────
+    execution_path: str | None          # "planner" | "agent" — set before graph starts
+    sub_questions: list[str] | None     # Decomposed sub-questions from complex query
+    retrieval_plan: dict | None         # Planner output: {steps, needs_web, reasoning}
+    user_context: dict | None           # {student_id, cohort, major, major_code, full_name}
+    empty_result_count: int             # Tracks consecutive empty tool returns for retry logic

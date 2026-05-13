@@ -15,9 +15,9 @@ import random
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from config import EvalConfig, DEFAULT_CONFIG
-from chunk_loader import Chunk
-from llm_client import BaseLLMClient, create_llm_client
+from .config import EvalConfig, DEFAULT_CONFIG
+from .chunk_loader import Chunk
+from .llm_client import BaseLLMClient, create_llm_client
 
 
 # ─── Prompts ─────────────────────────────────────────────────────────────────
@@ -289,8 +289,8 @@ class QAGenerator:
 
 # ─── Quick test ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    from chunk_loader import load_and_prepare_chunks
-    from config import BackendType
+    from .chunk_loader import load_and_prepare_chunks
+    from .config import BackendType
 
     cfg = DEFAULT_CONFIG
     cfg.backend = BackendType.LMSTUDIO

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from pipeline.mongo_logger import MongoLogger
+from models.mongo_logger import MongoLogger
 
 
 class _FakeCursor:

@@ -68,7 +68,7 @@ def _make_pipeline(intent: str = "rag") -> Any:
 
         # Chat model
         mock_chat_inst = MagicMock()
-        mock_chat_inst.model = "gemini-2.5-flash"
+        mock_chat_inst.model = "gemini-3.1-flash-lite-preview"
         mock_chat_inst.generate.return_value = "Câu trả lời từ LLM."
         mock_chat_inst.generate_stream.return_value = iter(
             ["Câu ", "trả lời ", "streaming."]
@@ -104,7 +104,7 @@ class TestRAGPipelineQuery:
         assert result["intent"] == "rag"
         assert result["num_sources"] == 5
         assert len(result["sources"]) == 5
-        assert result["model_name"] == "gemini-2.5-flash"
+        assert result["model_name"] == "gemini-3.1-flash-lite-preview"
 
     def test_rag_calls_embed_and_search(self):
         pipeline = _make_pipeline(intent="rag")

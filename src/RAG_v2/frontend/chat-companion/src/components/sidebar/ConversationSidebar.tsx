@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/sidebar';
 import { getSessions } from '@/services/sessionApi';
 import type { Session } from '@/types/chat';
+import { parseUtcDate } from '@/lib/utils';
 
 interface ConversationSidebarProps {
   userId: string | null | undefined;
@@ -18,7 +19,7 @@ interface ConversationSidebarProps {
 }
 
 function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
+  const diff = Date.now() - parseUtcDate(iso).getTime();
   const minutes = Math.floor(diff / 60_000);
   if (minutes < 1) return 'just now';
   if (minutes < 60) return `${minutes}m ago`;
@@ -26,7 +27,7 @@ function relativeTime(iso: string): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
+  return parseUtcDate(iso).toLocaleDateString();
 }
 
 export function ConversationSidebar({ userId, onLogout }: ConversationSidebarProps) {

@@ -11,11 +11,11 @@ Tính các metrics:
 import json
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
-from config import EvalConfig, DEFAULT_CONFIG
-from qa_generator import QADataset, QAPair
-from llm_client import BaseLLMClient, create_llm_client
+from .config import EvalConfig, DEFAULT_CONFIG
+from .qa_generator import QADataset, QAPair
+from .llm_client import BaseLLMClient, create_llm_client
 
 
 @dataclass
@@ -84,7 +84,7 @@ class RAGASEvaluator:
                 "  pip install langchain langchain-openai"
             )
 
-    def _build_ragas_dataset(self, qa_dataset: QADataset, answers: list[str]) -> "datasets.Dataset":
+    def _build_ragas_dataset(self, qa_dataset: QADataset, answers: list[str]) -> "Any":
         """Chuyển QADataset sang format RAGAS Dataset."""
         from datasets import Dataset
 
@@ -170,7 +170,7 @@ class RAGASEvaluator:
 
         # Chạy evaluation
         print("\n  Đang chạy evaluation (có thể mất vài phút)...")
-        result_df = evaluate(
+        result_df: Any = evaluate(
             dataset=ragas_dataset,
             metrics=metrics,
             raise_exceptions=False,    # Tiếp tục dù có lỗi ở sample nào đó
@@ -234,7 +234,7 @@ TRẢ LỜI:"""
 
 if __name__ == "__main__":
     """Test nhanh với mock data."""
-    from qa_generator import QAPair, QADataset
+    from .qa_generator import QAPair, QADataset
 
     # Mock data
     mock_dataset = QADataset(pairs=[

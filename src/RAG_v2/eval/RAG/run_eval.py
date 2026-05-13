@@ -42,7 +42,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -153,7 +153,7 @@ def _ragas_score(
         "answer":      [generated_answer],
         "ground_truth":[ground_truth],
     })
-    result = evaluate(
+    result: Any = evaluate(
         dataset=ds,
         metrics=[context_precision, context_recall, faithfulness, answer_relevancy],
         llm=judge.get_ragas_llm(),
@@ -225,7 +225,7 @@ def run_evaluation(
             os.environ["LMSTUDIO_BASE_URL"] = lmstudio_url
         if lmstudio_model:
             os.environ["LMSTUDIO_MODEL"] = lmstudio_model
-        from eval.llm_judge import LLMJudgeFactory
+        from .llm_judge import LLMJudgeFactory
         judge = LLMJudgeFactory.create(llm_backend)
         logger.info("LLM judge: %s", judge.name)
 

@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     located at the RAG_v2 root.  Any field can be overridden by setting the
     corresponding env var (case-insensitive).
 
+    Provider strategy (recommended):
+        - llm_provider = "gemini"      → chat answer generation (quality-critical)
+        - reflection_provider = "gemini" → query rewrite (quality-critical)
+        - agent_model = Qwen2.5 (local) → tool-calling only (low quality OK)
+        - agent_synthesis_provider = "gemini" → final agent answer (quality-critical)
+
     Parameters:
         google_api_key: Google API key for Gemini.
         openai_api_key: OpenAI API key (optional, not used by default pipeline).
@@ -33,7 +39,7 @@ class Settings(BaseSettings):
         mongodb_uri: MongoDB connection URI.
         mongodb_database: MongoDB database name.
         collections: Qdrant collection names to search.
-        chat_model: Gemini model identifier.
+        chat_model: Gemini model identifier for answer generation.
         chat_temperature: Sampling temperature for chat.
         chat_max_tokens: Max tokens for chat generation.
         top_k: Final number of documents after reranking.
@@ -53,9 +59,10 @@ class Settings(BaseSettings):
     """
 
     # --- Provider Selectors (change in .env, no code edits needed) ---
-    llm_provider: str = "lm_studio"  # gemini | openai | azure | ollama | lm_studio
+    # ✅ GEMINI: chat answer generation — quality-critical, needs strong model
+    llm_provider: str = "gemini"       # gemini | openai | azure | ollama | lm_studio
     embedding_provider: str = "ensemble"  # ensemble | bge_m3 | e5
-    reranker_provider: str = "bge"  # bge | cohere | none
+    reranker_provider: str = "bge"     # bge | cohere | none
 
     # --- API Keys ---
     google_api_key: str = ""
@@ -76,9 +83,20 @@ class Settings(BaseSettings):
     lm_studio_url: str = "http://localhost:1234/v1"
 
     # --- Agent (LangGraph) ---
+    # ✅ LM STUDIO / QWEN: tool-calling only — needs fast inference, low quality OK
     agent_enabled: bool = True
-    agent_max_iterations: int = 4
-    agent_model: str = "qwen2.5-8b-instruct"
+    agent_max_iterations: int = 3       # reduced from 4 → faster, less runaway
+    agent_model: str = "qwen2.5-7b-instruct"  # local Qwen for tool selection
+    agent_temperature: float = 0.0     # deterministic tool selection
+    agent_max_tokens: int = 1200       # enough for multi-tool reasoning
+    agent_tool_result_limit: int = 3000  # max chars per ToolMessage
+
+    # Agent synthesis — uses a STRONGER model for the final answer.
+    # ✅ GEMINI: synthesis is quality-critical (user-facing final answer)
+    agent_synthesis_provider: str = "gemini"   # "" | "gemini" | "lm_studio" | "ollama"
+    agent_synthesis_model: str = "gemini-3.1-flash-lite-preview"  # fast + quality
+    agent_synthesis_temperature: float = 0.2
+    agent_synthesis_max_tokens: int = 2500     # increased from 2000 to prevent truncation
 
     # --- Ollama ---
     ollama_base_url: str = "http://localhost:11434"
@@ -99,17 +117,18 @@ class Settings(BaseSettings):
     # --- Collections ---
     collections: List[str] = ["stsv", "quydinh", "kehoach", "ctdt"]
 
-    # --- Chat Model ---
-    chat_model: str = "gemini-2.5-flash"
+    # --- Chat Model (answer generation) ---
+    # ✅ GEMINI: main answer generation — most important quality point
+    chat_model: str = "gemini-3.1-flash-lite-preview"   # fast + quality
     chat_temperature: float = 0.3
-    chat_max_tokens: int = 1024 * 5
+    chat_max_tokens: int = 1500            # increased from 1024 to prevent mid-sentence truncation
 
     # --- Retrieval ---
     top_k: int = 5
-    vector_top_k: int = 20
-    keyword_top_k: int = 20
-    vector_pool_k: int = 15
-    keyword_pool_k: int = 15
+    vector_top_k: int = 50
+    keyword_top_k: int = 50
+    vector_pool_k: int = 40
+    keyword_pool_k: int = 40
     vector_weight: float = 0.8
     keyword_weight: float = 0.2
 
@@ -120,27 +139,60 @@ class Settings(BaseSettings):
     # dropped from the context. 0.0 is the natural decision boundary;
     # lower to -0.5 if you need more recall, raise to 0.5 for higher precision.
     reranker_score_threshold: float = 0.0
+    reranker_table_score_threshold: float = -5.0
 
     # --- Router ---
     router_mode: str = "classifier"
 
     # --- Evaluation & Fallback ---
-    self_eval_enabled: bool = True
+    self_eval_enabled: bool = False     # disabled by default — adds ~2-5s per query
     # Reranker score threshold: skip self-eval when top chunk score >= this value.
     # Higher = self-eval triggers less often (faster). Lower = more quality checks.
     self_eval_min_top_score: float = 0.72
     tavily_fallback_enabled: bool = False
 
     # --- Reflection ---
+    # ✅ GEMINI: query rewriting — quality-critical for retrieval accuracy
     reflection_enabled: bool = True
-    reflection_provider: str = "lm_studio"
-    reflection_model: str = "qwen2.5"
-    reflection_temperature: float = 0.3
-    reflection_max_tokens: int = 512
+    reflection_provider: str = "gemini"      # gemini | lm_studio | ollama | openai
+    reflection_model: str = "gemini-3.1-flash-lite-preview"  # fast flash for rewrite task
+    reflection_temperature: float = 0.0      # low temp → more deterministic rewrite
+    reflection_max_tokens: int = 1024         # increased from 256 to prevent truncation
 
     # --- Collection-aware Routing (Phase 8) ---
     domain_routing_enabled: bool = True
     domain_confidence_threshold: float = 0.65
+
+    # --- Auto Crawler ---
+    crawler_enabled: bool = True
+    crawler_schedule_hour: int = 2
+    crawler_schedule_minute: int = 0
+    crawler_delay: float = 1.0
+    crawler_retention_months: int = 6
+    crawler_tags: str = "ĐTĐH:%C4%90T%C4%90H"  # comma-sep "Name:encoded,..."
+
+    # --- Redis ---
+    redis_url: str = "redis://localhost:6379/0"
+    redis_enabled: bool = False           # Master switch for Redis
+    redis_max_connections: int = 20
+    redis_socket_timeout: float = 5.0
+    redis_connect_timeout: float = 5.0
+    redis_health_check_interval: int = 30  # seconds between PING on idle conns
+    use_redis_session: bool = False       # Phase 1: session migration
+    use_redis_cache: bool = False         # Phase 2: LLM response cache
+    use_redis_history: bool = False       # Phase 2: conversation history cache
+
+    # --- Rate Limiting ---
+    rate_limit_enabled: bool = True
+    rate_limit_rpm: int = 20              # requests per minute
+    rate_limit_rpd: int = 200             # requests per day
+    rate_limit_alert_threshold: float = 0.8  # alert at 80% capacity
+
+    # --- Admin / Document Upload ---
+    superadmin_user_ids: str = ""       # comma-separated MongoDB ObjectIds
+    upload_dir: str = "uploads"
+    max_upload_size_mb: int = 50
+    max_upload_batch: int = 5
 
     # --- CORS ---
     cors_origins: List[str] = ["*"]

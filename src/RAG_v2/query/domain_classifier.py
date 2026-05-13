@@ -34,7 +34,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MultiLabelBinarizer, StandardScaler
 
 from .training_data import RAG_LABELS
 
@@ -148,9 +149,14 @@ class DomainClassifier:
 
         # ── Stage 1: Intent classifier (3-class, cv=5 calibrated) ────────────
         logger.info("Stage 1: training intent classifier (cv=5 calibration) …")
-        intent_base = LogisticRegression(
-            max_iter=1000, C=1.0, solver="lbfgs", random_state=random_state
-        )
+        # StandardScaler inside the pipeline prevents overflow/divide-by-zero
+        # in lbfgs matmul when embedding vectors have dimension=1024.
+        intent_base = Pipeline([
+            ("scaler", StandardScaler()),
+            ("lr", LogisticRegression(
+                max_iter=1000, C=0.5, solver="lbfgs", random_state=random_state
+            )),
+        ])
         # cv=5 avoids a separate validation split and provides stable calibration.
         self._intent_clf = CalibratedClassifierCV(
             intent_base, cv=5, method="sigmoid"
@@ -160,7 +166,7 @@ class DomainClassifier:
         intent_pred = self._intent_clf.predict(X_test)
         intent_accuracy = float(accuracy_score(intent_test, intent_pred))
         intent_report = classification_report(
-            intent_test, intent_pred, zero_division=0
+            intent_test, intent_pred, zero_division=0  # type: ignore
         )
         logger.info("Stage 1 intent accuracy=%.4f", intent_accuracy)
 
@@ -181,9 +187,12 @@ class DomainClassifier:
             len(X_rag_train),
         )
         self._domain_clf = OneVsRestClassifier(
-            LogisticRegression(
-                max_iter=1000, C=1.0, solver="lbfgs", random_state=random_state
-            )
+            Pipeline([
+                ("scaler", StandardScaler()),
+                ("lr", LogisticRegression(
+                    max_iter=1000, C=0.5, solver="lbfgs", random_state=random_state
+                )),
+            ])
         )
         self._domain_clf.fit(X_rag_train, y_rag_train)
 
@@ -217,20 +226,24 @@ class DomainClassifier:
                 y_rag_test,
                 y_rag_pred,
                 target_names=list(self._mlb.classes_),
-                zero_division=0,
+                zero_division=0,  # type: ignore
             )
-            domain_report_dict = classification_report(
+            report_dict = classification_report(
                 y_rag_test,
                 y_rag_pred,
                 target_names=list(self._mlb.classes_),
                 output_dict=True,
-                zero_division=0,
+                zero_division=0,  # type: ignore
             )
+            assert isinstance(report_dict, dict)
+            domain_report_dict = report_dict
             domain_f1 = float(
                 domain_report_dict.get("samples avg", {}).get("f1-score", 0.0)
             )
             logger.info("Stage 2 domain samples-F1=%.4f", domain_f1)
 
+        assert isinstance(intent_report, str)
+        assert isinstance(domain_report, str)
         full_report = (
             "=== Stage 1: Intent (chitchat / rag / tool_search) ===\n"
             + intent_report
@@ -289,6 +302,7 @@ class DomainClassifier:
             }
 
         # ── Stage 2: domain (multi-label) ────────────────────────────────────
+        assert self._mlb is not None
         domain_classes: List[str] = list(self._mlb.classes_)
         domain_proba = self._domain_clf.predict_proba(vec)[0]
         prob_map = {

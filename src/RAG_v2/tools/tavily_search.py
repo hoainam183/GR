@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from tavily import TavilyClient
 from tavily.errors import InvalidAPIKeyError
@@ -52,7 +52,7 @@ class TavilySearchTool:
         self,
         query: str,
         max_results: Optional[int] = None,
-        search_depth: str = "basic",
+        search_depth: Literal["advanced", "basic", "fast", "ultra-fast"] = "basic",
         include_answer: bool = True,
     ) -> Dict[str, Any]:
         """Execute a web search and return structured results.

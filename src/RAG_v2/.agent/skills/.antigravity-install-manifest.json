@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-04-29T14:07:38.922Z",
+  "entries": [
+    "api-endpoint-builder",
+    "bug-hunter",
+    "codebase-audit-pre-push",
+    "docs",
+    "gdb-cli",
+    "global-chat-agent-discovery",
+    "jq",
+    "performance-optimizer",
+    "python-pptx-generator",
+    "rayden-code",
+    "skill-check",
+    "technical-change-tracker",
+    "tmux"
+  ]
+}

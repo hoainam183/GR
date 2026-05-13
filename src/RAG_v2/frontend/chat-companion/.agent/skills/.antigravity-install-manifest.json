@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-04-29T14:04:32.659Z",
+  "entries": [
+    "api-endpoint-builder",
+    "astro",
+    "bug-hunter",
+    "codebase-audit-pre-push",
+    "design-taste-frontend",
+    "docs",
+    "frontend-api-integration-patterns",
+    "full-output-enforcement",
+    "gdb-cli",
+    "global-chat-agent-discovery",
+    "gpt-taste",
+    "high-end-visual-design",
+    "industrial-brutalist-ui",
+    "jq",
+    "minimalist-ui",
+    "performance-optimizer",
+    "python-pptx-generator",
+    "rayden-code",
+    "redesign-existing-projects",
+    "skill-check",
+    "stitch-design-taste",
+    "sveltekit",
+    "technical-change-tracker",
+    "tmux"
+  ]
+}

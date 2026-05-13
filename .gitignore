@@ -8,9 +8,21 @@ __pycache__/
 # VSCode settings
 .vscode/
 
-# Data files and outputs
+# GitHub
+.github/
+
+# Office and temporary docs
+*.xlsx
+*.docx
+pyright_report.txt
+
+# Data and outputs
 *.csv
 *.pdf
+outputs/
+training_data/
+olmocr/converted/
+olmocr/cleaned/
 
 # Environment and dependency lock
 uv.lock
@@ -20,6 +32,7 @@ uv.lock
 *.log
 *.tmp
 *.bak
+.pytest_cache/
 
 # Jupyter Notebook checkpoints (nếu có)
 .ipynb_checkpoints/
@@ -34,3 +47,15 @@ src/RAG_v2/volumes/
 .env
 *.joblibcc
 *.joblib
+
+.agent/
+
+# src/RAG_v2 specifics
+src/RAG_v2/node_modules/
+src/RAG_v2/scratch/
+src/RAG_v2/scratch.py
+src/RAG_v2/test_pipeline*.py
+src/RAG_v2/agent_implementation_plan
+src/RAG_v2/retrieval_test_result.json
+src/RAG_v2/Baocao/
+src/RAG_v2/.pytest_cache/

@@ -1,7 +1,13 @@
-const TypingIndicator = () => {
+interface TypingIndicatorProps {
+  phase?: 'thinking' | 'streaming';
+}
+
+const TypingIndicator = ({ phase = 'thinking' }: TypingIndicatorProps) => {
+  const isThinking = phase === 'thinking';
+
   return (
     <div className="flex items-start gap-3 animate-fade-in">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
+      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary ${isThinking ? 'animate-thinking-pulse' : ''}`}>
         <svg
           className="h-4 w-4 text-primary-foreground"
           fill="none"
@@ -16,11 +22,19 @@ const TypingIndicator = () => {
           />
         </svg>
       </div>
-      <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-chat-assistant px-4 py-3 shadow-sm border border-border">
-        <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground"></span>
-        <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground"></span>
-        <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground"></span>
-      </div>
+      
+      {isThinking ? (
+        <div className="flex flex-col gap-2 rounded-2xl rounded-tl-sm bg-chat-assistant px-4 py-3 shadow-sm border border-border w-48">
+          <div className="h-4 w-full skeleton-thinking"></div>
+          <div className="h-4 w-3/4 skeleton-thinking"></div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-chat-assistant px-4 py-3 shadow-sm border border-border">
+          <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground"></span>
+          <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground"></span>
+          <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground"></span>
+        </div>
+      )}
     </div>
   );
 };

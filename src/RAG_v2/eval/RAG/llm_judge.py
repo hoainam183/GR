@@ -107,8 +107,8 @@ class GeminiBackend(LLMJudgeBackend):
     def _get_genai_model(self):
         if self._genai_model is None:
             import google.generativeai as genai
-            genai.configure(api_key=self.api_key)
-            self._genai_model = genai.GenerativeModel(self.model)
+            genai.configure(api_key=self.api_key)  # type: ignore
+            self._genai_model = genai.GenerativeModel(self.model)  # type: ignore
         return self._genai_model
 
     def generate(self, prompt: str, max_tokens: int = 1024) -> str:
@@ -134,7 +134,7 @@ class GeminiBackend(LLMJudgeBackend):
             from ragas.embeddings import LangchainEmbeddingsWrapper
             lc_emb = GoogleGenerativeAIEmbeddings(
                 model="models/embedding-001",
-                google_api_key=self.api_key,
+                google_api_key=self.api_key,  # type: ignore
             )
             self._ragas_emb = LangchainEmbeddingsWrapper(lc_emb)
         return self._ragas_emb
@@ -210,7 +210,7 @@ class LMStudioBackend(LLMJudgeBackend):
             lc_llm = ChatOpenAI(
                 model=self.model,
                 base_url=self.base_url,
-                api_key=self.api_key,
+                api_key=self.api_key,  # type: ignore
                 temperature=self.temperature,
                 timeout=self.timeout,
             )
@@ -234,7 +234,7 @@ class LMStudioBackend(LLMJudgeBackend):
             emb = OpenAIEmbeddings(
                 model="text-embedding-ada-002",  # LM Studio map tới local model
                 base_url=self.base_url,
-                api_key=self.api_key,
+                api_key=self.api_key,  # type: ignore
                 timeout=self.timeout,
             )
             emb.embed_query("ping")  # test
@@ -302,6 +302,7 @@ class AutoBackend(LLMJudgeBackend):
         self._primary = candidates[0]
         self._fallback = candidates[1] if len(candidates) > 1 else None
         self._active = self._primary
+        assert self._primary is not None
         logger.info(
             "AutoBackend: primary=%s, fallback=%s",
             self._primary.name,
@@ -310,6 +311,7 @@ class AutoBackend(LLMJudgeBackend):
 
     @property
     def name(self) -> str:
+        assert self._active is not None
         return f"auto[active={self._active.name}]"
 
     def _is_rate_limit_error(self, exc: Exception) -> bool:
@@ -317,6 +319,7 @@ class AutoBackend(LLMJudgeBackend):
         return any(kw in msg for kw in ("429", "rate limit", "quota", "resource_exhausted"))
 
     def _try_switch_fallback(self) -> bool:
+        assert self._active is not None
         if self._fallback and self._active is not self._fallback:
             logger.warning(
                 "Rate limit trên %s — chuyển sang %s",
@@ -327,6 +330,7 @@ class AutoBackend(LLMJudgeBackend):
         return False
 
     def generate(self, prompt: str, max_tokens: int = 1024) -> str:
+        assert self._active is not None
         for attempt in range(2):
             try:
                 return self._active.generate(prompt, max_tokens)
@@ -338,9 +342,11 @@ class AutoBackend(LLMJudgeBackend):
         return ""
 
     def get_ragas_llm(self):
+        assert self._active is not None
         return self._active.get_ragas_llm()
 
     def get_ragas_embeddings(self):
+        assert self._active is not None
         return self._active.get_ragas_embeddings()
 
 

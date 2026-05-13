@@ -14,6 +14,11 @@ langchain-openai>=0.2.0
 google-generativeai>=0.8.0
 langchain-google-genai>=2.0.0
 
+# RAGASS: Clustering pipeline
+sentence-transformers>=2.7.0  # BGE-M3 local embedding cho cluster
+scikit-learn>=1.4.0            # KMeans clustering
+numpy>=1.26.0                  # vector ops
+
 # Utilities
 python-dotenv>=1.0.0     # đọc .env file
 tqdm>=4.66.0             # progress bar

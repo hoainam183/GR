@@ -1,5 +1,5 @@
 # pdf_to_markdown/converters/docling_converter.py
-from pdf_to_markdown.base.converter import BasePDFConverter
+from ..base.converter import BasePDFConverter
 from docling.document_converter import DocumentConverter
 from pathlib import Path
 from typing import Dict, Any

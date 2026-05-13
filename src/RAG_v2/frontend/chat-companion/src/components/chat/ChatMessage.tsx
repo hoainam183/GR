@@ -1,12 +1,44 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import type { Message } from '@/types/chat';
 import { cn } from '@/lib/utils';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { DocRow } from '../trace/DocRow';
 
 interface ChatMessageProps {
   message: Message;
 }
+
+const markdownComponents: Components = {
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>,
+  ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-1">{children}</ol>,
+  li: ({ children }) => <li className="ml-2">{children}</li>,
+  strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+  em: ({ children }) => <em className="italic">{children}</em>,
+  h1: ({ children }) => <h1 className="text-lg font-bold mb-2 mt-3 first:mt-0">{children}</h1>,
+  h2: ({ children }) => <h2 className="text-base font-bold mb-2 mt-3 first:mt-0">{children}</h2>,
+  h3: ({ children }) => <h3 className="text-sm font-bold mb-1 mt-2 first:mt-0">{children}</h3>,
+  code: ({ children, className }) => {
+    const isInline = !className;
+    return isInline ? (
+      <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>
+    ) : (
+      <code className={className}>{children}</code>
+    );
+  },
+  pre: ({ children }) => (
+    <pre className="bg-muted p-2 rounded my-2 overflow-x-auto text-xs">{children}</pre>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="border-l-4 border-primary pl-3 italic my-2">{children}</blockquote>
+  ),
+  a: ({ children, href }) => (
+    <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  ),
+};
 
 const ChatMessage = ({ message }: ChatMessageProps) => {
   const isUser = message.role === 'user';
@@ -316,40 +348,13 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            components={{
-              // Styling cho các elements
-              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-              ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>,
-              ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-1">{children}</ol>,
-              li: ({ children }) => <li className="ml-2">{children}</li>,
-              strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-              em: ({ children }) => <em className="italic">{children}</em>,
-              h1: ({ children }) => <h1 className="text-lg font-bold mb-2 mt-3 first:mt-0">{children}</h1>,
-              h2: ({ children }) => <h2 className="text-base font-bold mb-2 mt-3 first:mt-0">{children}</h2>,
-              h3: ({ children }) => <h3 className="text-sm font-bold mb-1 mt-2 first:mt-0">{children}</h3>,
-              code: ({ children, className }) => {
-                const isInline = !className;
-                return isInline ? (
-                  <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>
-                ) : (
-                  <code className={className}>{children}</code>
-                );
-              },
-              pre: ({ children }) => (
-                <pre className="bg-muted p-2 rounded my-2 overflow-x-auto text-xs">{children}</pre>
-              ),
-              blockquote: ({ children }) => (
-                <blockquote className="border-l-4 border-primary pl-3 italic my-2">{children}</blockquote>
-              ),
-              a: ({ children, href }) => (
-                <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
-                  {children}
-                </a>
-              ),
-            }}
+            components={markdownComponents}
           >
             {message.content}
           </ReactMarkdown>
+          {message.isStreaming && (
+            <span className="inline-block w-1.5 h-3.5 bg-current opacity-70 animate-pulse rounded-sm align-middle ml-0.5" />
+          )}
         </div>
 
         {showClarifyFallback && (
@@ -399,29 +404,12 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         {showSources && hasSources && (
           <div className="mt-3 space-y-2 border-t border-border pt-3">
             {message.sources?.map((source, index) => (
-              <div
-                key={index}
-                className="rounded-lg bg-background/50 p-3 text-xs"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold text-primary">
-                    Nguồn {source.rank}
-                  </span>
-                  <span className="text-muted-foreground">
-                    Score: {source.score.toFixed(3)}
-                  </span>
-                </div>
-                <p className="text-muted-foreground line-clamp-3">
-                  {source.content}
-                </p>
-                {source.metadata && Object.keys(source.metadata).length > 0 && (
-                  <div className="mt-2 text-[10px] text-muted-foreground">
-                    {source.metadata.file_path && (
-                      <div>📄 {source.metadata.file_path}</div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <DocRow
+                key={source.rank ?? index + 1}
+                doc={source}
+                rank={source.rank ?? index + 1}
+                showRerank={source.rerank_score !== undefined}
+              />
             ))}
           </div>
         )}
@@ -430,4 +418,4 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
   );
 };
 
-export default ChatMessage;
+export default React.memo(ChatMessage);

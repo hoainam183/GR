@@ -74,7 +74,7 @@ CONFIG: Dict[str, Any] = {
     # Seconds to wait between questions to respect API rate limits
     "delay_s": 2.0,
     # Gemini model for reference-comparison judge
-    "judge_model": "gemini-2.5-flash",
+    "judge_model": "gemini-3.1-flash-lite-preview",
     # RAGPipeline overrides  (merged into RAGPipeline.CONFIG)
     "pipeline_config": {
         "collections": ["stsv", "quydinh"],

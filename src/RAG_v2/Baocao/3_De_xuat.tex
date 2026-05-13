@@ -1,108 +1,117 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-\section{Mở đầu chương}
-Chương này trình bày tổng quan về giải pháp đề xuất: xây dựng hệ thống RAG Chatbot hỏi-đáp tài liệu quy chế đào tạo ĐHBK Hà Nội. Nội dung chương tập trung vào kiến trúc tổng thể 8 tầng của hệ thống, pipeline thu thập và xử lý đa nguồn dữ liệu, và thiết kế các chiến lược chunking chuyên biệt cho từng loại tài liệu.
+Chương này trình bày chi tiết về giải pháp đề xuất: xây dựng hệ thống Agentic RAG (Retrieval-Augmented Generation) thông minh hỗ trợ hỏi-đáp tài liệu quy chế đào tạo và thông tin học vụ tại Đại học Bách khoa Hà Nội. Nội dung chương tập trung vào kiến trúc đa tầng hiện đại, hệ thống điều hướng truy vấn thông minh (Multi-tier Routing), chiến lược truy hồi lai (Hybrid Retrieval) song song, và đặc biệt là cơ chế suy luận tác nhân (Agentic Reasoning) dựa trên mô hình Planner-Executor.
 
-Đây là phần công việc thuộc Phase 1 của dự án, bao gồm: thu thập dữ liệu, làm sạch dữ liệu, và xây dựng pipeline chunking -- tạo nền tảng cho toàn bộ hệ thống.
+Báo cáo bao gồm toàn bộ quá trình từ thu thập, xử lý dữ liệu (Phase 1) đến xây dựng pipeline truy hồi nâng cao và tích hợp tác nhân thông minh (Phase 2 & 3), tạo nên một hệ thống chatbot có khả năng hiểu sâu và trả lời chính xác các câu hỏi phức tạp.
 
 \section{Kiến trúc tổng thể hệ thống RAG v2}
 
-\subsection{Sơ đồ kiến trúc 8 tầng}
-Hệ thống được thiết kế theo kiến trúc 8 tầng, mỗi tầng đảm nhận chức năng chuyên biệt:
+\subsection{Sơ đồ kiến trúc đa tầng}
+Hệ thống được thiết kế theo kiến trúc phân tầng chuyên biệt, kết hợp giữa RAG truyền thống và Agentic RAG để tối ưu hóa giữa tốc độ phản hồi và khả năng suy luận phức tạp:
 
 \begin{verbatim}
-User Query
-    |
-    v
+       [ Người dùng đặt câu hỏi ]
+                   |
+                   v
 +-------------------------------------------+
-| 1. Query Router & Reflection              |
-|    - Phân loại: chitchat / RAG / tool      |
-|    - Rewrite, clarify, format query        |
-|    - Thêm context từ chat history          |
+| 1. Complexity Router (Tier-0)             |
+|    - Phân loại: Chitchat / Simple / Complex|
 +-------------------------------------------+
-    |
-    v (nếu RAG)
+       |           |            |
+       |           |            +----(Complex: Agentic Path)----> [ Planner-Executor ]
+       |           |                                                      |
+       |           +----(Simple: RAG Path)------> [ RAG Pipeline ]        |
+       |                                                 |                |
+       +----(Chitchat: Direct Path)--> [ LLM ]           |                |
+                                         |               |                |
+                                         v               v                v
++---------------------------------------------------------------------------+
+| 2. LLM Orchestration & Generation (Gemini 1.5 Flash / Qwen 2.5 8B)        |
+|    - Phân tích ngữ cảnh, lập kế hoạch, tổng hợp câu trả lời               |
++---------------------------------------------------------------------------+
+                   |
+                   v
 +-------------------------------------------+
-| 2. Embedding Layer                         |
-|    - BGE-M3 (dense + sparse + ColBERT)     |
-|    - E5-large (dense)                      |
-|    - Ensemble: weighted average            |
+| 3. Hybrid Retrieval & Knowledge Layer     |
+|    - Qdrant (Vector) + Elasticsearch (BM25)|
+|    - Metadata Pre-filtering (Major/Cohort) |
 +-------------------------------------------+
-    |
-    v
+                   |
+                   v
 +-------------------------------------------+
-| 3. Hybrid Retrieval                        |
-|    - Qdrant: Vector Search (dense)         |
-|    - Elasticsearch: BM25 (keyword)         |
-|    - RRF Fusion kết hợp kết quả            |
-+-------------------------------------------+
-    |
-    v
-+-------------------------------------------+
-| 4. Reranking Layer                         |
-|    - BAAI/bge-reranker-v2-m3               |
-|    - Dedup + Cross-encoder scoring         |
-|    - Top-K selection                       |
-+-------------------------------------------+
-    |
-    v
-+-------------------------------------------+
-| 5. Chat Model Layer                        |
-|    - Gemini 2.5 Flash                      |
-|    - RAG prompt + chitchat prompt          |
-|    - Streaming response                    |
-+-------------------------------------------+
-    |
-    v
-+-------------------------------------------+
-| 6. Self Evaluation                         |
-|    - Check relevance, hallucination        |
-|    - Check completeness                    |
-|    - Pass/Fail decision                    |
-+-------------------------------------------+
-    |
-    v (nếu Fail)
-+-------------------------------------------+
-| 7. Tool Search (Tavily)                    |
-|    - Web search fallback                   |
-|    - Re-generate với context mới           |
-+-------------------------------------------+
-    |
-    v
-+-------------------------------------------+
-| 8. MongoDB Memory                          |
-|    - Lưu chat history                      |
-|    - Quản lý conversation state            |
-|    - Track metadata (sources, scores)      |
+| 4. Infrastructure & Caching               |
+|    - Redis (Cache/Session) + MongoDB (Logs)|
 +-------------------------------------------+
 \end{verbatim}
 
-\subsection{Luồng xử lý tổng thể}
+\subsection{Ngôn ngữ và Công nghệ sử dụng}
 
-\subsubsection{Luồng Chit-chat}
-Khi Query Router phân loại câu hỏi là chit-chat (chào hỏi, hỏi thăm):
-\begin{verbatim}
-User --> QueryRouter --> "chitchat"
-  --> ChatModel (Gemini)
-  --> Final Answer
-  --> Lưu MongoDB
-\end{verbatim}
+Hệ thống RAG v2 được xây dựng trên một tập hợp các công nghệ hiện đại, đảm bảo tính ổn định và hiệu năng cao:
 
-\subsubsection{Luồng RAG (cần truy xuất tài liệu)}
-Khi câu hỏi cần dựa trên tài liệu quy chế:
-\begin{verbatim}
-User --> QueryRouter --> "rag"
-  --> QueryReflector (rewrite + add context)
-  --> EnsembleEmbedder (BGE-M3 + E5)
-  --> HybridSearch (Qdrant + Elasticsearch)
-  --> BGEReranker --> Top 5 Docs
-  --> ChatModel (generate answer)
-  --> SelfEvaluator (check quality)
-    |-- OK --> Final Answer --> Lưu MongoDB
-    |-- FAIL --> TavilySearch --> ChatModel
-                --> Final Answer --> Lưu MongoDB
-\end{verbatim}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Thành phần} & \textbf{Công nghệ sử dụng} \\
+\hline
+\textbf{API Framework} & FastAPI (Python), hỗ trợ Streaming SSE \\
+\hline
+\textbf{Agent Framework} & LangGraph (StateGraph) + LangChain \\
+\hline
+\textbf{Vector Store} & Qdrant (Hỗ trợ Dual-embedding BGE-M3 + E5) \\
+\hline
+\textbf{Keyword Store} & Elasticsearch (BM25, metadata filtering) \\
+\hline
+\textbf{Reranker} & BGE-Reranker-v2-m3 (Cross-encoder) \\
+\hline
+\textbf{LLM (Chính)} & Google Gemini 1.5 Flash (Tốc độ cao, context lớn) \\
+\hline
+\textbf{LLM (Tác nhân)} & Qwen 2.5 8B (Local via LM Studio) \\
+\hline
+\textbf{Cache \& State} & Redis (Session, LLM Cache, Rate Limiting) \\
+\hline
+\textbf{Database Logging} & MongoDB (Lưu lịch sử chat và Agent Trace) \\
+\hline
+\end{tabular}
+\caption{Stack công nghệ của hệ thống RAG v2}
+\end{table}
+
+\subsection{Luồng xử lý thông minh (Adaptive Flow)}
+Hệ thống sử dụng cơ chế Adaptive RAG để chọn luồng xử lý tối ưu dựa trên độ phức tạp của câu hỏi:
+
+\subsubsection{Luồng 1: Direct Path (Chit-chat / Greeting)}
+Dành cho các câu hỏi xã giao không cần dữ liệu. Complexity Router phát hiện từ khóa (chào, cảm ơn...) và bỏ qua hoàn toàn các bước tìm kiếm để giảm latency xuống mức tối thiểu (< 500ms).
+
+\subsubsection{Luồng 2: Simple RAG Path (Standard)}
+Dành cho các câu hỏi đơn lẻ, rõ ràng về một chủ đề (Ví dụ: "Học bổng KKHT cần bao nhiêu điểm?"). Pipeline thực hiện: Reflection -> Retrieval -> Rerank -> Generation trong một lượt duy nhất.
+
+\subsubsection{Luồng 3: Complex Agentic Path (Planner-Executor)}
+Dành cho các câu hỏi yêu cầu so sánh (K65 vs K70), tổng hợp từ nhiều nguồn, hoặc suy luận nhiều bước. Hệ thống khởi động LangGraph ReAct Agent:
+\begin{enumerate}
+    \item \textbf{Decompose}: Tách câu hỏi thành các câu hỏi con;
+    \item \textbf{Planner}: Lập kế hoạch truy hồi song song trên nhiều collections;
+    \item \textbf{Executor}: Thực thi truy hồi và rerank song song;
+    \item \textbf{Synthesize}: Tổng hợp kết quả bằng Gemini để đưa ra câu trả lời cuối cùng.
+\end{enumerate}
+
+\section{Hệ thống Routing và Hiểu truy vấn (Query Understanding)}
+
+\subsection{Hệ thống Routing đa tầng (Multi-tier Routing)}
+Để đảm bảo câu hỏi được đưa đến đúng "chuyên gia" xử lý, hệ thống triển khai 3 tầng routing:
+
+\begin{itemize}
+    \item \textbf{Tier 0 -- Complexity Router (Regex)}: Sử dụng các biểu thức chính quy (Regex) hiệu năng cao để phân loại nhanh câu hỏi vào 3 nhóm: \texttt{chitchat}, \texttt{simple}, hoặc \texttt{complex}. Tầng này giúp lọc bỏ các truy vấn đơn giản mà không tốn chi phí LLM.
+    \item \textbf{Tier 1 -- Query Router (ML Classifier)}: Đối với các câu hỏi \texttt{simple} và \texttt{complex}, hệ thống sử dụng một bộ phân loại học máy (Logistic Regression trên nền BGE-M3 embedding) để xác định \textbf{Intent} (RAG/Chitchat) và \textbf{Domain} dữ liệu (\texttt{ctdt}, \texttt{quydinh}, \texttt{kehoach}, \texttt{stsv}).
+    \item \textbf{Tier 2 -- LLM Fallback}: Khi bộ phân loại Tier 1 có độ tin cậy (confidence) thấp (< 0.55), hệ thống tự động gọi Gemini Flash để kiểm chứng và hiệu đính lại domain, đảm bảo không tìm nhầm kho dữ liệu.
+\end{itemize}
+
+\subsection{Query Reflection và Trích xuất thực thể}
+Trước khi tìm kiếm, câu hỏi trải qua bước "phản chiếu" (Reflection) để làm giàu ngữ cảnh:
+\begin{itemize}
+    \item \textbf{Rewriting}: Chuyển các đại từ ("ngành của em", "môn đó") thành các thực thể cụ thể dựa trên lịch sử hội thoại và \texttt{user\_context} (thông tin ngành, khóa của sinh viên đã đăng nhập).
+    \item \textbf{Entity Extraction}: Sử dụng Regex chuyên dụng để trích xuất: Mã ngành (IT-E6, IT1...), Khóa (K65, K67...), Mã môn học (IT4060...), Học kỳ (20241, 20242...).
+\end{itemize}
 
 \section{Pipeline thu thập và xử lý dữ liệu}
 
@@ -398,15 +407,76 @@ Pipeline có các tính năng:
     \item \textbf{Thống kê}: In thống kê chi tiết sau khi chunking (total chunks, by level, avg/min/max size).
 \end{itemize}
 
-\section{Kết luận chương}
-Chương này đã trình bày:
+\section{Hệ thống Truy hồi lai song song (Parallel Hybrid Retrieval)}
+
+\subsection{Cơ chế tìm kiếm đa nguồn song song}
+Để tối ưu hóa thời gian phản hồi, hệ thống thực hiện tìm kiếm đồng thời trên nhiều collection (\texttt{ctdt}, \texttt{quydinh}, \texttt{kehoach}, \texttt{stsv}) bằng \texttt{ThreadPoolExecutor}. Mỗi collection được tìm kiếm bằng cả hai phương thức:
 \begin{itemize}
-    \item \textbf{Kiến trúc 8 tầng}: Thiết kế tổng thể hệ thống RAG v2 với luồng xử lý rõ ràng cho cả trường hợp chitchat và RAG;
-    \item \textbf{Pipeline dữ liệu đa nguồn}: Thu thập và xử lý 3 nhóm dữ liệu (quy định PDF, CTDT PDF, STSV JSON) với pipeline chuyên biệt;
-    \item \textbf{Hệ thống chunking chuyên biệt}: 4 loại chunker cho 4 loại tài liệu, đảm bảo bảo toàn cấu trúc và metadata;
-    \item \textbf{Metadata enrichment}: Tự động trích xuất thông tin bổ sung cho CTDT.
+    \item \textbf{Dense Retrieval (Qdrant)}: Sử dụng cơ chế \textbf{Dual-embedding} kết hợp mô hình BGE-M3 (đa năng) và E5 (chuyên ngữ nghĩa dense) để bao phủ tối đa không gian vector;
+    \item \textbf{Keyword Retrieval (Elasticsearch)}: Sử dụng thuật toán BM25 để bắt các từ khóa chính xác (mã môn, tên riêng).
 \end{itemize}
 
-Chương tiếp theo sẽ trình bày chi tiết việc triển khai kỹ thuật các module này, bao gồm mã nguồn, thuật toán, và các quyết định thiết kế.
+\subsection{Metadata Pre-filtering (Lọc tiên quyết)}
+Hệ thống sử dụng các thực thể đã trích xuất để giới hạn không gian tìm kiếm, giúp tăng độ chính xác và giảm nhiễu:
+\begin{enumerate}
+    \item \textbf{ES Metadata Search}: Tìm các Document ID thỏa mãn điều kiện (Ví dụ: \texttt{major\_code="IT-E6"} và \texttt{applicable\_cohort="K65"});
+    \item \textbf{Qdrant Constraint}: Truyền danh sách IDs này vào Qdrant dưới dạng \texttt{HasIdCondition} để ép bộ lọc vector search chỉ tìm trong các tài liệu phù hợp.
+\end{enumerate}
+
+\subsection{Adaptive Score Fusion (Gộp điểm thích ứng)}
+Điểm số từ Vector search và Keyword search được chuẩn hóa (Min-Max Normalization) và gộp lại theo trọng số:
+\[ Score = w_{vector} \times Norm(Score_{vec}) + w_{keyword} \times Norm(Score_{kw}) \]
+Hệ thống tự động điều chỉnh trọng số: Nếu câu hỏi chứa mã môn học hoặc từ khóa "môn", "học phần", trọng số Keyword sẽ được tăng từ 0.3 lên 0.6 để ưu tiên khớp chính xác.
+
+\subsection{Reranking Layer và Xử lý dữ liệu bảng}
+Sau khi truy hồi, các ứng viên (Top 50) được đưa qua bộ reranker \texttt{bge-reranker-v2-m3} (Cross-encoder). Điểm đặc biệt của hệ thống là cơ chế lọc ngưỡng linh hoạt:
+\begin{itemize}
+    \item \textbf{Standard Threshold} (0.0): Loại bỏ các đoạn văn bản không liên quan;
+    \item \textbf{Table Threshold} (-5.0): Áp dụng ngưỡng thấp hơn cho các đoạn chứa bảng biểu (\texttt{has\_table: true}) vì mô hình Cross-encoder thường đánh giá thấp các cấu trúc bảng;
+    \item \textbf{Bypass Logic}: Tự động bỏ qua rerank cho các bảng chương trình đào tạo dài khi phát hiện truy vấn liệt kê học kỳ, tránh mất mát dữ liệu do model bias.
+\end{itemize}
+
+\section{Cơ chế Tác nhân thông minh (Agentic RAG)}
+
+\subsection{Kiến trúc Planner-Executor với LangGraph}
+Đối với các câu hỏi phức tạp, hệ thống chuyển sang luồng Tác nhân (Agent). Thay vì sử dụng vòng lặp ReAct truyền thống (thường chậm do phải gọi LLM nhiều lần), hệ thống sử dụng mô hình \textbf{Planner-Executor} được tối ưu:
+\begin{itemize}
+    \item \textbf{Planner (Gemini)}: Nhận câu hỏi phức tạp và lập kế hoạch dưới dạng danh sách các bước truy hồi (JSON plan);
+    \item \textbf{Executor (Parallel)}: Thực thi tất cả các bước trong kế hoạch một cách song song mà không cần LLM can thiệp vào từng bước;
+    \item \textbf{Synthesizer (Gemini)}: Tổng hợp toàn bộ dữ liệu thu thập được để đưa ra câu trả lời cuối cùng.
+\end{itemize}
+Cơ chế này giúp giảm thời gian xử lý các câu hỏi so sánh từ 60-80 giây xuống còn 10-15 giây.
+
+\section{Hạ tầng và Tối ưu hóa hệ thống}
+
+\subsection{Hệ thống Caching đa tầng với Redis}
+Hệ thống triển khai Redis để tối ưu hóa hiệu năng và chi phí:
+\begin{itemize}
+    \item \textbf{Session Store}: Lưu trữ thông tin phiên làm việc, hỗ trợ dual-write (ghi đồng thời xuống MongoDB và Redis);
+    \item \textbf{LLM Response Cache}: Lưu trữ câu trả lời của các câu hỏi phổ biến (FAQ) với TTL linh hoạt;
+    \item \textbf{Rate Limiter}: Giới hạn số lượng yêu cầu (20 RPM / 200 RPD) để bảo vệ hệ thống.
+\end{itemize}
+
+\subsection{MongoDB MongoLogger}
+Toàn bộ dữ liệu vận hành được lưu trữ vào MongoDB thông qua \texttt{MongoLogger} với cấu trúc 4 collection chính:
+\begin{itemize}
+    \item \textbf{users}: Quản lý thông tin định danh và context sinh viên;
+    \item \textbf{sessions}: Quản lý các phiên hội thoại và trạng thái tác nhân;
+    \item \textbf{turns}: Lưu trữ chi tiết từng lượt hỏi-đáp (câu hỏi, câu trả lời, nguồn trích dẫn, timings);
+    \item \textbf{query\_logs}: Lưu trữ chi tiết Agent Trace, bao gồm các tool calls và suy luận trung gian của tác nhân.
+\end{itemize}
+Dữ liệu này giúp phân tích hiệu năng từng bước (Reflection, Search, Rerank) và phục vụ việc tinh chỉnh (Fine-tuning) hệ thống trong tương lai.
+
+\section{Kết luận chương}
+Chương này đã trình bày chi tiết giải pháp đề xuất cho hệ thống RAG v2, bao gồm:
+\begin{itemize}
+    \item \textbf{Kiến trúc đa tầng hiện đại}: Kết hợp linh hoạt giữa RAG truyền thống và Agentic RAG;
+    \item \textbf{Hệ thống Routing và Hiểu truy vấn}: Tối ưu hóa việc phân loại và làm giàu ngữ cảnh câu hỏi;
+    \item \textbf{Pipeline dữ liệu và Chunking chuyên biệt}: Xây dựng nền tảng tri thức vững chắc từ đa nguồn dữ liệu;
+    \item \textbf{Cơ chế Truy hồi và Tác nhân nâng cao}: Tăng cường độ chính xác và khả năng xử lý các truy vấn phức tạp;
+    \item \textbf{Hạ tầng tối ưu}: Đảm bảo tính sẵn sàng và khả năng mở rộng của hệ thống qua Caching và Logging.
+\end{itemize}
+
+Chương tiếp theo sẽ đi sâu vào chi tiết cài đặt kỹ thuật, các thuật toán cụ thể và kết quả thực nghiệm của hệ thống.
 
 \end{document}

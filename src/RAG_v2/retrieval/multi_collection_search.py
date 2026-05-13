@@ -330,6 +330,7 @@ class MultiCollectionSearch:
                 query=query,
                 top_k=keyword_top_k,
                 filters=es_filter,
+                collection_name=name,
             )
             return name, vecs, kws
 
@@ -466,7 +467,7 @@ class MultiCollectionSearch:
                     )
                     continue
                 qdrant_filter = qdrant_models.Filter(
-                    must=[qdrant_models.HasIdCondition(has_id=chunk_ids)]
+                    must=[qdrant_models.HasIdCondition(has_id=chunk_ids)]  # type: ignore[arg-type]
                 )
                 # Describe the filter for the trace
                 es_str = str(es_query)

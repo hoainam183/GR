@@ -326,6 +326,11 @@ TRAINING_DATA: List[Tuple[str, str]] = [
     ("Lịch sinh hoạt tuần sinh viên mới", LABEL_KEHOACH),
     ("Lịch thi thể dục thể chất", LABEL_KEHOACH),
     ("Bao giờ đóng học phí kỳ hè?", LABEL_KEHOACH),
+    ("Danh sách sinh viên được nhận học bổng khuyến khích", LABEL_KEHOACH),
+    ("Thông báo danh sách nhận học bổng", LABEL_KEHOACH),
+    ("Danh sách được nhận học bổng", LABEL_KEHOACH),
+    ("Kết quả xét cấp học bổng học kỳ", LABEL_KEHOACH),
+    ("Quyết định khen thưởng và cấp học bổng khuyến khích học tập", LABEL_KEHOACH),
     # ── kehoach — đăng ký học phần (chiếm 74.6% câu hỏi thực tế) ──────────
     ("Khi nào hệ thống mở đăng ký học phần học kỳ 1?", LABEL_KEHOACH),
     ("Đợt đăng ký tín chỉ học kỳ 20241 bắt đầu từ ngày nào?", LABEL_KEHOACH),
@@ -434,13 +439,15 @@ TRAINING_DATA: List[Tuple[str, str]] = [
 # Queries that look like one domain but belong to another.  These help the
 # classifier learn sharper decision boundaries at the edges.
 HARD_NEGATIVE_DATA: List[Tuple[str, str]] = [
-    # scholarship: procedure vs. condition vs. deadline
+    # scholarship: procedure vs. condition vs. deadline vs. announcement/lists
     ("Học bổng kỳ này nộp đơn ở đâu?", LABEL_STSV),  # WHERE → procedure
     ("Điều kiện học bổng kỳ này là gì?", LABEL_QUYDINH),  # condition → quydinh
     ("Deadline nộp học bổng kỳ này?", LABEL_KEHOACH),  # deadline → kehoach
+    ("Danh sách được nhận học bổng", LABEL_KEHOACH),  # announcement/list → kehoach
     ("Mẫu đơn xin học bổng lấy ở đâu?", LABEL_STSV),
     ("Tiêu chí xét học bổng khuyến khích học tập", LABEL_QUYDINH),
     ("Thời hạn nộp hồ sơ học bổng học kỳ 2", LABEL_KEHOACH),
+    ("Quyết định cấp học bổng kỳ vừa rồi ở đâu", LABEL_KEHOACH),
     # insurance: procedure vs. deadline
     ("Đăng ký bảo hiểm y tế ở đâu?", LABEL_STSV),  # WHERE → stsv
     ("Bao giờ hết hạn đăng ký bảo hiểm?", LABEL_KEHOACH),  # WHEN → kehoach

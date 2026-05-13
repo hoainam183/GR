@@ -12,7 +12,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
 
-from config import EvalConfig, DEFAULT_CONFIG
+from .config import EvalConfig, DEFAULT_CONFIG
 
 
 @dataclass

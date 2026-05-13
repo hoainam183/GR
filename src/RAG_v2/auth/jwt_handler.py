@@ -55,18 +55,20 @@ def _jwt_settings() -> tuple[str, str, int]:
 # ─── Public API ───────────────────────────────────────────────────────────────
 
 
-def create_access_token(user_id: str, email: str) -> str:
+def create_access_token(user_id: str, email: str, role: str = "student") -> str:
     """Sign and return a JWT for the given user.
 
     The token payload contains:
     - ``sub``   — MongoDB ``_id`` as a plain string (used to look up the user).
     - ``email`` — HUST email address (informational, do not trust without DB check).
+    - ``role``  — User role (``student`` | ``admin``).
     - ``iat``   — issued-at timestamp (UTC).
     - ``exp``   — expiry timestamp (UTC, offset by JWT_EXPIRE_MINUTES).
 
     Args:
         user_id: String representation of the user's MongoDB ObjectId.
         email:   Validated HUST email address.
+        role:    User role, defaults to ``"student"``.
 
     Returns:
         Signed JWT string.
@@ -76,6 +78,7 @@ def create_access_token(user_id: str, email: str) -> str:
     payload = {
         "sub": user_id,
         "email": email,
+        "role": role,
         "iat": now,
         "exp": now + timedelta(minutes=expire_minutes),
     }

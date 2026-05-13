@@ -42,6 +42,7 @@ def create_reranker(settings: "Settings") -> Optional[BaseReranker]:  # type: ig
         model_name=settings.reranker_model,
         top_k=settings.reranker_top_k,
         score_threshold=settings.reranker_score_threshold,
+        table_score_threshold=settings.reranker_table_score_threshold,
     )
 
 

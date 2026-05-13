@@ -31,6 +31,7 @@ from auth.password import hash_password, verify_password
 from models.database import USERS_COLLECTION, get_database
 from models.user import UserDocument
 from schemas.user import (
+    AdminCreateRequest,
     TokenResponse,
     UserCreate,
     UserLoginRequest,
@@ -52,7 +53,7 @@ _FRONTEND_BASE = "http://localhost:5173"
 
 
 @router.get("/login", summary="Start Microsoft OAuth flow")
-async def login() -> dict:
+async def login_oauth() -> dict:
     """Return the Microsoft authorization URL.
 
     The frontend should redirect the user to the returned URL.  Microsoft will
@@ -173,7 +174,11 @@ async def callback(
         is_profile_complete = bool(existing_doc.get("is_profile_complete", False))
 
     # ── Step 6: Issue JWT ─────────────────────────────────────────────────────
-    jwt_token = create_access_token(user_id=user_id, email=hust_email)
+    # Fetch role from DB for existing users; new users default to "student".
+    user_role = "student"
+    if existing_doc is not None:
+        user_role = existing_doc.get("role", "student")
+    jwt_token = create_access_token(user_id=user_id, email=hust_email, role=user_role)
 
     # ── Step 7: Redirect to frontend ─────────────────────────────────────────
     if is_profile_complete:
@@ -230,6 +235,11 @@ async def register(
     document = {k: v for k, v in _raw.items() if v is not None}
     result = await db[USERS_COLLECTION].insert_one(document)
     inserted = await db[USERS_COLLECTION].find_one({"_id": result.inserted_id})
+    if inserted is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve created user document.",
+        )
     return UserPublic.from_document(inserted)
 
 
@@ -277,8 +287,9 @@ async def login(
     )
 
     user_id = str(doc["_id"])
+    user_role = doc.get("role", "student")
     # Use username as the email claim (informational; get_current_user only uses sub)
-    jwt_token = create_access_token(user_id=user_id, email=body.username)
+    jwt_token = create_access_token(user_id=user_id, email=body.username, role=user_role)
 
     return TokenResponse(
         access_token=jwt_token,
@@ -356,3 +367,72 @@ async def logout(
     Requires ``Authorization: Bearer <JWT>``.
     """
     return {"message": "Logged out successfully"}
+
+
+# ─── /auth/admin/create ───────────────────────────────────────────────────────
+
+
+@router.post(
+    "/admin/create",
+    response_model=UserPublic,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create an admin account (superadmin only)",
+)
+async def create_admin(
+    body: AdminCreateRequest,
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> UserPublic:
+    """Create a new admin account.
+
+    Only superadmin users (whose ObjectId is listed in the
+    ``SUPERADMIN_USER_IDS`` environment variable) may call this endpoint.
+
+    The created user will have ``role = "admin"`` and
+    ``is_profile_complete = True``.
+    """
+    import os
+
+    # ── Superadmin check ──────────────────────────────────────────────────────
+    superadmin_ids_raw = os.environ.get("SUPERADMIN_USER_IDS", "")
+    superadmin_ids = {
+        s.strip() for s in superadmin_ids_raw.split(",") if s.strip()
+    }
+    if str(current_user.id) not in superadmin_ids:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Superadmin privileges required",
+        )
+
+    # ── Uniqueness check ──────────────────────────────────────────────────────
+    existing = await db[USERS_COLLECTION].find_one({"username": body.username})
+    if existing is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Username '{body.username}' is already taken.",
+        )
+
+    now = datetime.now(timezone.utc)
+    document = {
+        "username": body.username,
+        "password_hash": hash_password(body.password),
+        "full_name": body.full_name,
+        "student_id": body.student_id,
+        "cohort": body.cohort,
+        "major": body.major,
+        "major_code": body.major_code,
+        "role": "admin",
+        "is_profile_complete": True,
+        "is_active": True,
+        "created_at": now,
+        "updated_at": now,
+        "last_login_at": now,
+    }
+    result = await db[USERS_COLLECTION].insert_one(document)
+    inserted = await db[USERS_COLLECTION].find_one({"_id": result.inserted_id})
+    if inserted is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve created admin document.",
+        )
+    return UserPublic.from_document(inserted)

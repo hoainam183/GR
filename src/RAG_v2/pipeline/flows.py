@@ -20,6 +20,7 @@ from retrieval.metadata_filters import (
     strip_cohort_comparison_scaffold_for_retrieval,
     strip_major_comparison_scaffold_for_retrieval,
     strip_major_from_query_for_retrieval,
+    expand_major_in_query_for_reranking,
 )
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,15 @@ _EXPLICIT_MAJOR_CODE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Detect "list-all" queries: asking to enumerate multiple items.
+# Examples: "các học phần tiếng nhật", "tất cả môn bắt buộc", "danh sách học phần"
+_LIST_QUERY_RE = re.compile(
+    r"\b(?:các|tất\s+cả|danh\s*sách|liệt\s*kê|những|bao\s+gồm\s+những|toàn\s+bộ|hết)\b",
+    re.IGNORECASE,
+)
+_LIST_TOP_K_MULTIPLIER = 2   # double top_k for list queries
+_LIST_TOP_K_MAX = 12         # cap to avoid excessive reranking latency
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Helper
@@ -70,7 +80,7 @@ def _elapsed_ms(start: float) -> float:
     return round((time.perf_counter() - start) * 1000, 2)
 
 
-def _log_timings(flow_name: str, timings_ms: Dict[str, float]) -> None:
+def _log_timings(flow_name: str, timings_ms: Dict[str, Any]) -> None:
     """Log timing breakdown sorted by slowest stage first."""
     if not timings_ms:
         return
@@ -89,7 +99,28 @@ def _retrieval_candidate_k(top_k: int) -> int:
     Keep the previous proportional heuristic (4x final top_k) while enforcing
     a minimum of 20 candidates for stronger reranker recall.
     """
-    return max(top_k * 4, 20)
+    return max(top_k * 4, 40)
+
+
+def _resolve_top_k(base_top_k: int, query: str) -> int:
+    """Return an effective top_k, scaled up for list/enumerate queries.
+
+    When the user asks to enumerate multiple items ("các học phần",
+    "tất cả môn", "danh sách", …) a single topic can span many chunks.
+    Doubling top_k (capped at _LIST_TOP_K_MAX) prevents truncating the
+    result set before the LLM sees all relevant items.
+    """
+    if _LIST_QUERY_RE.search(query or ""):
+        scaled = base_top_k * _LIST_TOP_K_MULTIPLIER
+        effective = min(scaled, _LIST_TOP_K_MAX)
+        if effective > base_top_k:
+            logger.info(
+                "List query detected — top_k scaled %d → %d",
+                base_top_k,
+                effective,
+            )
+        return effective
+    return base_top_k
 
 
 def _should_strip_major_for_retrieval(
@@ -99,9 +130,13 @@ def _should_strip_major_for_retrieval(
 ) -> bool:
     """Return True when major phrases should be stripped from retrieval query.
 
-    Keeping major mentions is important when routing is confidently quydinh-only,
+    Keeping major mentions is important when routing includes quydinh,
     because quydinh does not use ``major_code`` metadata filters and therefore
     relies on lexical/semantic major cues in the query text itself.
+
+    We protect major mentions whenever quydinh is *present* (not only when
+    it is the *sole* target), because multi-domain routing (e.g. quydinh +
+    ctdt) should still allow quydinh chunks to match via keyword signals.
     """
     if not resolved_major:
         return False
@@ -114,7 +149,7 @@ def _should_strip_major_for_retrieval(
         for col in target_collections
         if str(col).strip()
     }
-    if normalized_targets == {"quydinh"}:
+    if "quydinh" in normalized_targets:
         return False
     return True
 
@@ -205,12 +240,23 @@ def _format_context(
     parts: List[str] = []
     used = 0
     for i, doc in enumerate(documents, 1):
-        meta = doc.get("metadata", {})
+        meta = doc.get("metadata", {}) or {}
         title = meta.get("title") or meta.get("source") or "Tài liệu không rõ nguồn"
+        
+        # Inject metadata into document header so the LLM is aware of the program/major context
+        meta_parts = []
+        if meta.get("major_code"):
+            meta_parts.append(f"Mã ngành: {meta['major_code']}")
+        if meta.get("major_name"):
+            meta_parts.append(f"Ngành: {meta['major_name']}")
+        if meta.get("applicable_cohort"):
+            meta_parts.append(f"Khóa: {meta['applicable_cohort']}")
+        meta_str = f" [{', '.join(meta_parts)}]" if meta_parts else ""
+        
         text = str(doc.get("text", "") or "").strip()
         if len(text) > per_doc_char_limit:
             text = text[:per_doc_char_limit] + "\u2026"  # ellipsis
-        chunk = f"--- Văn bản: {title}\n{text}"
+        chunk = f"--- Văn bản: {title}{meta_str}\n{text}"
         separator_cost = 7 if parts else 0  # len("\n\n---\n\n")
         if used + len(chunk) + separator_cost > total_char_budget:
             break
@@ -513,13 +559,17 @@ def rag_flow(
     bge_embedder: BaseEmbedder,
     e5_embedder: BaseEmbedder,
     searcher: Any,
-    reranker: BaseReranker,
+    reranker: Optional[BaseReranker],
     chat_model: BaseLLM,
     self_evaluator: Optional[SelfEvaluator],
     tavily_tool: Any | None,
     cfg: Dict[str, Any],
     routing_result: Optional[Dict[str, Any]] = None,
     user_context: Optional[Dict[str, Any]] = None,
+    validity_filter: Any | None = None,
+    reference_resolver: Any | None = None,
+    llm_cache: Optional[Any] = None,
+    domain_subqueries: Optional[List[Dict[str, str]]] = None,
 ) -> Dict[str, Any]:
     """Full RAG flow: Reflect → Embed → Search → Rerank → Generate → SelfEval → (Tavily fallback).
 
@@ -541,11 +591,40 @@ def rag_flow(
         Dict with ``answer``, ``sources``, ``intent``, etc.
     """
     flow_t0 = time.perf_counter()
-    timings_ms: Dict[str, float] = {}
+    timings_ms: Dict[str, Any] = {}
 
     step_t0 = time.perf_counter()
     trimmed = _trim_history(history)
     timings_ms["trim_history"] = _elapsed_ms(step_t0)
+
+    # ── Pre-retrieval query cache (P0) ───────────────────────────────────────
+    # Check before reflection + retrieval to save the full ~13-25 s pipeline
+    # cost for repeated identical queries.  Only fires when the cache backend
+    # exposes get_by_query (LLMResponseCache with Redis).
+    if llm_cache is not None and hasattr(llm_cache, "get_by_query"):
+        _qcached = llm_cache.get_by_query(question, chat_model.model)
+        if _qcached is not None:
+            timings_ms["query_cache"] = "HIT"
+            timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+            return {
+                "question": question,
+                "answer": _qcached["answer"],
+                "sources": _qcached["sources"],
+                "num_sources": len(_qcached["sources"]),
+                "intent": "rag",
+                "model_name": chat_model.model,
+                "timings_ms": timings_ms,
+                "cache_hit": True,
+                "query_cache_hit": True,
+                "target_collections": None,
+                "collection_scores": {},
+                "reflected_question": question,
+                "routing_probabilities": None,
+                "reflection_prompt": None,
+                "llm_prompt": "(query_cached)",
+                "applied_filters": None,
+                "collection_results": None,
+            }
 
     # 1. Reflection — rewrite query + extract entities
     search_query = question
@@ -649,7 +728,7 @@ def rag_flow(
         routing_result=routing_result,
     )
 
-    top_k_value = cfg.get("top_k", 5)
+    top_k_value = _resolve_top_k(cfg.get("top_k", 5), question)
     raw_candidate_k = _retrieval_candidate_k(top_k_value)
     major_compare_plan = build_major_comparison_subqueries_for_retrieval(
         search_query
@@ -736,7 +815,23 @@ def rag_flow(
         return result_rows
 
     raw_results_buffer: List[Dict[str, Any]] = []
-    if major_compare_plan:
+    if domain_subqueries:
+        # Decomposed multi-domain retrieval: each sub-query targets its own collection.
+        # Uses the reflected/stripped query for reranking (set above as rerank_query).
+        logger.info(
+            "Decomposed retrieval: %d sub-queries",
+            len(domain_subqueries),
+        )
+        for sq in domain_subqueries:
+            sq_query = sq.get("query", retrieval_query)
+            sq_collection = sq.get("collection", "")
+            sq_collections: Optional[List[str]] = (
+                [sq_collection] if sq_collection else target_collections
+            )
+            raw_results_buffer.extend(
+                _search_once(sq_query, sq_collections)
+            )
+    elif major_compare_plan:
         for subquery, subquery_major in major_compare_plan:
             raw_results_buffer.extend(
                 _search_once(
@@ -756,6 +851,16 @@ def rag_flow(
         raw_results_buffer,
         top_k=raw_candidate_k,
     )
+
+    if not raw_results and domain_subqueries:
+        # Fallback: retry with the reflected query against all relevant collections
+        logger.info(
+            "Decomposed sub-queries returned no candidates; retrying with reflected query."
+        )
+        raw_results = _dedup_retrieval_candidates(
+            _search_once(retrieval_query, target_collections),
+            top_k=raw_candidate_k,
+        )
 
     if not raw_results and (compare_subqueries or major_compare_plan):
         logger.info(
@@ -836,6 +941,9 @@ def rag_flow(
 
     # 5. Rerank
     rerank_t0 = time.perf_counter()
+    
+    rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
+    assert reranker is not None, "reranker must be provided"
     reranked = reranker.rerank(
         query=rerank_query,
         documents=raw_results,
@@ -844,12 +952,62 @@ def rag_flow(
     timings_ms["rerank"] = _elapsed_ms(rerank_t0)
     logger.info("Reranked to %d documents", len(reranked))
 
+    # 5.1 Document Validity Filtering
+    if validity_filter is not None:
+        valid_t0 = time.perf_counter()
+        reranked = validity_filter.filter(reranked)
+        timings_ms["validity_filter"] = _elapsed_ms(valid_t0)
+
+    # 5.2 Cross-Reference Resolution
+    if reference_resolver is not None:
+        resolve_t0 = time.perf_counter()
+        reranked = reference_resolver.resolve(reranked, query=retrieval_query)
+        timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
+
+    # ── LLM Response Cache Check (Phase 2) ─────────────────────────
+    if llm_cache is not None:
+        doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+        cached = llm_cache.get(question, doc_ids, chat_model.model)
+        if cached is not None:
+            logger.info("LLM cache HIT for query: %r", question[:80])
+            timings_ms["llm_cache"] = "HIT"
+            timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+            return {
+                "question": question,
+                "answer": cached["answer"],
+                "sources": cached["sources"],
+                "num_sources": len(cached["sources"]),
+                "intent": "rag",
+                "model_name": chat_model.model,
+                "target_collections": target_collections,
+                "collection_scores": _build_collection_scores(
+                    all_collections=cfg.get("collections"),
+                    target_collections=target_collections,
+                    routing_result=routing_result,
+                ),
+                "reflected_question": search_query,
+                "timings_ms": timings_ms,
+                "routing_probabilities": routing_probabilities,
+                "reflection_prompt": reflection_prompt,
+                "llm_prompt": "(cached)",
+                "applied_filters": search_trace.get("filters"),
+                "collection_results": search_trace.get("collection_counts"),
+                "cache_hit": True,
+            }
+
 
     # 6. Format context — inject profile so user facts survive trimming.
     #    Priority 1: use authenticated user_context (precise, always present).
     #    Priority 2: fall back to regex scan of history.
     context_t0 = time.perf_counter()
-    context = _format_context(reranked)
+    # For list queries (top_k was scaled up), use a larger char budget so we
+    # don't truncate the extra docs before passing them to the LLM.
+    context_char_budget = (
+        _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET * _LIST_TOP_K_MULTIPLIER
+        if top_k_value > cfg.get("top_k", 5)
+        else _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET
+    )
+    context = _format_context(reranked, total_char_budget=context_char_budget)
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -910,6 +1068,15 @@ def rag_flow(
         timings_ms["context_recovery"] = 1.0
     timings_ms["generate"] = _elapsed_ms(generate_t0)
 
+    # Cache newly generated response (Phase 2)
+    if llm_cache is not None:
+        doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+        llm_cache.put(question, doc_ids, chat_model.model, answer, reranked)
+
+    # Also populate the pre-retrieval query-only cache for future early hits.
+    if llm_cache is not None and hasattr(llm_cache, "put_by_query"):
+        llm_cache.put_by_query(question, chat_model.model, answer, reranked)
+
     # 8. Self-evaluation — only when retrieval confidence is low.
     # Saves 11-20s per query when retrieval already found a relevant chunk.
     top_score = 0.0
@@ -922,7 +1089,7 @@ def rag_flow(
         self_evaluator is not None
         and top_score < cfg.get("self_eval_min_top_score", _SELF_EVAL_SCORE_THRESHOLD)
     )
-    if run_self_eval:
+    if run_self_eval and self_evaluator is not None:
         self_eval_t0 = time.perf_counter()
         try:
             eval_context = _format_context(
@@ -998,12 +1165,16 @@ def rag_flow_stream(
     bge_embedder: BaseEmbedder,
     e5_embedder: BaseEmbedder,
     searcher: Any,
-    reranker: BaseReranker,
+    reranker: Optional[BaseReranker],
     chat_model: BaseLLM,
     cfg: Dict[str, Any],
     routing_result: Optional[Dict[str, Any]] = None,
     user_context: Optional[Dict[str, Any]] = None,
+    validity_filter: Any | None = None,
+    reference_resolver: Any | None = None,
     timings_ms_out: Optional[Dict[str, float]] = None,
+    metadata_out: Optional[Dict[str, Any]] = None,
+    llm_cache: Optional[Any] = None,
 ) -> tuple[Generator[str, None, None], List[Dict[str, Any]]]:
     """Streaming RAG flow — retrieval runs first, then generation is streamed.
 
@@ -1011,11 +1182,28 @@ def rag_flow_stream(
         A tuple of (text_chunk_generator, reranked_sources).
     """
     flow_t0 = time.perf_counter()
-    timings_ms = timings_ms_out if timings_ms_out is not None else {}
+    timings_ms: Dict[str, Any] = timings_ms_out if timings_ms_out is not None else {}
 
     step_t0 = time.perf_counter()
     trimmed = _trim_history(history)
     timings_ms["trim_history"] = _elapsed_ms(step_t0)
+
+    # ── Pre-retrieval query cache (P0 — stream variant) ──────────────────────
+    if llm_cache is not None and hasattr(llm_cache, "get_by_query"):
+        _qcached = llm_cache.get_by_query(question, chat_model.model)
+        if _qcached is not None:
+            timings_ms["query_cache"] = "HIT"
+            timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+            if metadata_out is not None:
+                metadata_out["num_sources"] = len(_qcached["sources"])
+                metadata_out["collection_scores"] = {}
+                metadata_out["applied_filters"] = None
+                metadata_out["collection_results"] = None
+
+            def _cached_stream_early() -> Generator[str, None, None]:
+                yield _qcached["answer"]
+
+            return _cached_stream_early(), _qcached["sources"]
 
     # Reflection
     search_query = question
@@ -1097,7 +1285,16 @@ def rag_flow_stream(
             )
             retrieval_query = normalized_query
 
-    top_k_value = cfg.get("top_k", 5)
+    # ── Populate metadata_out early (pre-generation) so caller can read it ──────
+    # The search_trace dict is mutated later; we update metadata_out after rerank.
+    if metadata_out is not None:
+        metadata_out["reflected_question"] = search_query
+        metadata_out["target_collections"] = target_collections
+        metadata_out["routing_probabilities"] = (
+            routing_result.get("probabilities") if routing_result else None
+        )
+
+    top_k_value = _resolve_top_k(cfg.get("top_k", 5), question)
     raw_candidate_k = _retrieval_candidate_k(top_k_value)
     major_compare_plan = build_major_comparison_subqueries_for_retrieval(
         search_query
@@ -1130,6 +1327,8 @@ def rag_flow_stream(
             rerank_query = stripped
 
     # Embed → Search → Rerank
+    search_trace: Dict[str, Any] = {}  # filters/counts not wired in stream path
+
     def _search_once(
         local_query: str,
         local_active_collections: Optional[List[str]],
@@ -1270,15 +1469,37 @@ def rag_flow_stream(
                 )
 
     rerank_t0 = time.perf_counter()
+    
+    rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
+    assert reranker is not None, "reranker must be provided"
     reranked = reranker.rerank(
         query=rerank_query,
         documents=raw_results,
         top_k=top_k_value,
     )
     timings_ms["rerank"] = _elapsed_ms(rerank_t0)
+    logger.info("Reranked to %d documents", len(reranked))
+
+    # 5.1 Document Validity Filtering
+    if validity_filter is not None:
+        valid_t0 = time.perf_counter()
+        reranked = validity_filter.filter(reranked)
+        timings_ms["validity_filter"] = _elapsed_ms(valid_t0)
+
+    # 5.2 Cross-Reference Resolution
+    if reference_resolver is not None:
+        resolve_t0 = time.perf_counter()
+        reranked = reference_resolver.resolve(reranked, query=retrieval_query)
+        timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
 
     context_t0 = time.perf_counter()
-    context = _format_context(reranked)
+    # For list queries (top_k was scaled up), use a larger char budget.
+    context_char_budget = (
+        _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET * _LIST_TOP_K_MULTIPLIER
+        if top_k_value > cfg.get("top_k", 5)
+        else _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET
+    )
+    context = _format_context(reranked, total_char_budget=context_char_budget)
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -1296,6 +1517,34 @@ def rag_flow_stream(
         2,
     )
 
+    # ── Final metadata update (post-rerank, pre-stream) ──────────────────────────
+    if metadata_out is not None:
+        metadata_out["num_sources"] = len(reranked)
+        metadata_out["collection_scores"] = _build_collection_scores(
+            all_collections=cfg.get("collections"),
+            target_collections=target_collections,
+            routing_result=routing_result,
+        )
+        metadata_out["applied_filters"] = search_trace.get("filters")
+        metadata_out["collection_results"] = search_trace.get("collection_counts")
+
+    # ── LLM Response Cache Check (Phase 2 - Stream) ─────────────────
+    if llm_cache is not None:
+        doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+        cached = llm_cache.get(question, doc_ids, chat_model.model)
+        if cached is not None:
+            logger.info("LLM cache HIT (stream) for query: %r", question[:80])
+            timings_ms["llm_cache"] = "HIT"
+
+            def _cached_stream() -> Generator[str, None, None]:
+                yield cached["answer"]
+                timings_ms["stream_first_token"] = 0.1
+                timings_ms["stream_generate"] = 0.1
+                timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+                _log_timings("rag_flow_stream_cached", timings_ms)
+
+            return _cached_stream(), cached["sources"]
+
     generate_stream = chat_model.generate_stream(
         query=question, context=full_context, history=trimmed, mode="rag"
     )
@@ -1303,11 +1552,13 @@ def rag_flow_stream(
         stream_t0 = time.perf_counter()
         first_token_ms: Optional[float] = None
         generated_chars = 0
+        full_cached_answer = []
 
         for chunk in generate_stream:
             if first_token_ms is None:
                 first_token_ms = _elapsed_ms(stream_t0)
             generated_chars += len(chunk)
+            full_cached_answer.append(chunk)
             yield chunk
 
         timings_ms["stream_first_token"] = round(first_token_ms or 0.0, 2)
@@ -1315,6 +1566,15 @@ def rag_flow_stream(
         timings_ms["flow_total"] = _elapsed_ms(flow_t0)
         logger.info("rag_flow_stream: streamed %d chars", generated_chars)
         _log_timings("rag_flow_stream", timings_ms)
+
+        # Cache newly generated stream response (Phase 2)
+        if llm_cache is not None:
+            doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+            llm_cache.put(question, doc_ids, chat_model.model, "".join(full_cached_answer), reranked)
+
+        # Also populate the pre-retrieval query-only cache.
+        if llm_cache is not None and hasattr(llm_cache, "put_by_query"):
+            llm_cache.put_by_query(question, chat_model.model, "".join(full_cached_answer), reranked)
 
     return _timed_stream(), reranked
 

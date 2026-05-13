@@ -72,7 +72,7 @@ function LoadingSkeleton({ mode }: { mode: TraceMode }) {
       setActiveIdx((i) => Math.min(i + 1, steps.length - 1));
     }, 700);
     return () => clearInterval(id);
-  }, []);
+  }, [steps.length]);
 
   return (
     <div className="space-y-2 py-4">
@@ -151,9 +151,10 @@ export default function TracePage() {
       setTimeout(() => {
         resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { detail?: string } }, message?: string };
       setError(
-        e?.response?.data?.detail || e?.message || 'Request failed. Is the backend running?',
+        err?.response?.data?.detail || err?.message || 'Request failed. Is the backend running?',
       );
     } finally {
       setIsLoading(false);
@@ -178,6 +179,13 @@ export default function TracePage() {
           >
             <ArrowLeft className="w-4 h-4" />
             Chat
+          </Link>
+          <div className="h-4 w-px bg-border" />
+          <Link
+            to="/retrieval"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Retrieval
           </Link>
           <div className="h-4 w-px bg-border" />
           <div className="flex items-center gap-2">

@@ -21,11 +21,32 @@ export interface ResolvedChatIdentity {
 export interface ChatStreamHandlers {
   onSessionId?: (sessionId: string) => void;
   onToken?: (delta: string) => void;
+  onMetadata?: (meta: Partial<ChatV3Response>) => void;
+}
+
+export interface RetrievalSearchResponse {
+  query: string;
+  results: RetrievedDocument[];
+  total_found: number;
+  applied_filters: Array<{
+    collection: string;
+    applied: boolean;
+    matched_ids: number;
+    filter_desc?: string;
+  }>;
+  collection_results: Array<{
+    collection: string;
+    vector_count: number;
+    keyword_count: number;
+  }>;
+  fusion_weights: Record<string, any>;
+  latency_ms: number;
 }
 
 export interface ChatStreamResult {
   answer: string;
   sessionId?: string;
+  metadata?: Partial<ChatV3Response>;
 }
 
 // Backend API endpoint
@@ -275,30 +296,17 @@ export const sendMessage = async (
   userContext?: UserContext,
   userId?: string,
 ): Promise<ChatResponse> => {
-  try {
-    const identity = resolveChatIdentity(userContext, userId);
-
-    const response = await apiClient.post<ChatResponse>('/chat', {
-      question,
-      mode: 'agent',
-      top_k: topK,
-      history,
-      session_id: sessionId,
-      user_context: identity.userContext,
-      user_id: identity.userId,
-    } as ChatRequest);
-    
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('API Error:', error.response?.data || error.message);
-      throw new Error(
-        error.response?.data?.detail || 
-        'Failed to get response from the server. Please make sure the backend is running.'
-      );
-    }
-    throw error;
-  }
+  // Delegate to v3 endpoint with 'auto' mode to use complexity routing
+  const v3Response = await sendMessageV3(
+    question,
+    history,
+    topK,
+    'auto',
+    sessionId,
+    userContext,
+    userId
+  );
+  return v3Response as unknown as ChatResponse;
 };
 
 const parseSseDataLines = (rawEvent: string): string => {
@@ -353,6 +361,7 @@ export const sendMessageStream = async (
   let buffer = '';
   let answer = '';
   let resolvedSessionId = sessionId;
+  let resolvedMetadata: Partial<ChatV3Response> | undefined;
   let done = false;
 
   while (!done) {
@@ -395,6 +404,11 @@ export const sendMessageStream = async (
             answer += delta;
             handlers.onToken?.(delta);
           }
+        } else if (type === 'metadata') {
+          // Parse the metadata payload using the same normalizer as V3 responses
+          const meta = normalizeV3Response(parsed, resolvedSessionId);
+          resolvedMetadata = meta;
+          handlers.onMetadata?.(meta);
         } else if (type === 'done') {
           done = true;
           break;
@@ -406,8 +420,9 @@ export const sendMessageStream = async (
           }
         }
       } catch {
-        answer += payload;
-        handlers.onToken?.(payload);
+        // Payload is not valid JSON — skip it silently.
+        // Do NOT append raw payload (could be a stray URL, error text, etc.).
+        console.warn('[stream] non-JSON SSE payload skipped:', payload);
       }
 
       sepIndex = buffer.indexOf('\n\n');
@@ -417,6 +432,7 @@ export const sendMessageStream = async (
   return {
     answer,
     sessionId: resolvedSessionId,
+    metadata: resolvedMetadata,
   };
 };
 
@@ -466,5 +482,34 @@ export const checkHealth = async (): Promise<boolean> => {
   } catch (error) {
     console.error('Health check failed:', error);
     return false;
+  }
+};
+
+export const retrievalSearch = async (
+  query: string,
+  collections: string[] = ['ctdt'],
+  resolvedMajor?: string,
+  resolvedCohort?: string,
+  topK: number = 5,
+  rerank: boolean = true,
+): Promise<RetrievalSearchResponse> => {
+  try {
+    const response = await apiClient.post('/retrieval/search', {
+      query,
+      collections,
+      resolved_major: resolvedMajor,
+      resolved_cohort: resolvedCohort,
+      top_k: topK,
+      rerank,
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Retrieval API Error:', error.response?.data || error.message);
+      throw new Error(
+        error.response?.data?.detail || 'Failed to get retrieval results.',
+      );
+    }
+    throw error;
   }
 };

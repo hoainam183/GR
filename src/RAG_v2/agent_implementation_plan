@@ -180,7 +180,7 @@ User Query
 - Thêm settings cho agent:
   - `agent_enabled: bool = True`
   - `agent_max_iterations: int = 5`
-  - `agent_model: str = "gemini-2.5-flash"` (có thể dùng model khác cho agent)
+  - `agent_model: str = "gemini-3.1-flash-lite-preview"` (có thể dùng model khác cho agent)
   - `complexity_threshold: float = 0.6`
 
 ---
