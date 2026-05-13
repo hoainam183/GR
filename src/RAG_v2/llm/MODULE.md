@@ -25,7 +25,7 @@ llm/
 
 ### `gemini.py` — `GeminiLLM` (Provider mặc định)
 
-**Model mặc định:** `gemini-3.1-flash-lite-preview`
+**Model mặc định:** `gemini-2.5-flash`
 **Endpoint:** `https://generativelanguage.googleapis.com/v1beta/openai/`
 
 **3 chế độ generation:**
@@ -39,7 +39,7 @@ llm/
 **Non-streaming (`generate()`):**
 ```python
 response = gemini_client.chat.completions.create(
-    model="gemini-3.1-flash-lite-preview",
+    model="gemini-2.5-flash",
     messages=build_rag_messages(query, context, history),
     temperature=0.3,
     max_tokens=1024,
@@ -206,7 +206,7 @@ Module `llm` chứa TẤT CẢ các LLM calls trong pipeline RAG thông thườn
 
 | Vấn đề | Giải pháp |
 |---|---|
-| Generation quá chậm | Dùng `gemini-3.1-flash-lite-preview` thay `gemini-3.1-flash-lite-preview` |
+| Generation quá chậm | Dùng `gemini-2.5-flash` thay `gemini-2.5-flash` |
 | Token budget quá lớn | Giảm `max_tokens` (default 1024) |
 | Self-eval add latency | Tăng `self_eval_min_top_score` để skip thường xuyên hơn |
 | Context quá dài | Giảm `_DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET` (hiện 8000 chars) |

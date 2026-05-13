@@ -75,7 +75,7 @@ class TestLogTurnRag:
             "answer": "Câu trả lời RAG",
             "intent": "rag",
             "num_sources": 5,
-            "model_name": "gemini-3.1-flash-lite-preview",
+            "model_name": "gemini-2.5-flash",
         }
         turn_id = mongo_logger.log_turn(
             session_id=sid, question="Câu hỏi test?", result=result, latency_ms=1234
@@ -88,7 +88,7 @@ class TestLogTurnRag:
             "answer": "Câu trả lời RAG",
             "intent": "rag",
             "num_sources": 5,
-            "model_name": "gemini-3.1-flash-lite-preview",
+            "model_name": "gemini-2.5-flash",
         }
         mongo_logger.log_turn(
             session_id=sid, question="Câu hỏi test?", result=result, latency_ms=1234
@@ -99,7 +99,7 @@ class TestLogTurnRag:
         assert turn["intent"] == "rag"
         assert turn["latency_ms"] == 1234
         assert turn["num_sources"] == 5
-        assert turn["model_name"] == "gemini-3.1-flash-lite-preview"
+        assert turn["model_name"] == "gemini-2.5-flash"
 
     def test_session_title_auto_set_from_first_question(self, mongo_logger) -> None:
         sid = mongo_logger.new_session()
@@ -120,12 +120,12 @@ class TestLogTurnRag:
         mongo_logger.log_turn(
             session_id=sid,
             question="Test?",
-            result={"answer": "A", "intent": "rag", "num_sources": 0, "model_name": "gemini-3.1-flash-lite-preview"},
+            result={"answer": "A", "intent": "rag", "num_sources": 0, "model_name": "gemini-2.5-flash"},
             latency_ms=100,
         )
         ql = db["query_logs"].find_one({"session_id": sid})
         assert ql is not None
-        assert ql["model_name"] == "gemini-3.1-flash-lite-preview"
+        assert ql["model_name"] == "gemini-2.5-flash"
         client.close()
 
 
@@ -133,7 +133,7 @@ class TestLogTurnRag:
 class TestLogTurnChitchat:
     def test_chitchat_turn_fields(self, mongo_logger) -> None:
         sid = mongo_logger.new_session()
-        result = {"answer": "Xin chào!", "intent": "chitchat", "num_sources": 0, "model_name": "gemini-3.1-flash-lite-preview"}
+        result = {"answer": "Xin chào!", "intent": "chitchat", "num_sources": 0, "model_name": "gemini-2.5-flash"}
         turn_id = mongo_logger.log_turn(session_id=sid, question="Hello", result=result, latency_ms=100)
         assert turn_id == 1
         turns = mongo_logger.get_turns(sid)

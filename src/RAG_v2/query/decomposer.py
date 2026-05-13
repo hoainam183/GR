@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 # ─── Constants ──────────────────────────────────────────────────────────────────
 _GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
-DEFAULT_MODEL = "gemini-3.1-flash-lite-preview"
+DEFAULT_MODEL = "gemini-2.5-flash"
 VALID_COLLECTIONS = {"ctdt", "quydinh", "kehoach", "stsv"}
 
 _MAX_RETRIES = 2

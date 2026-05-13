@@ -25,7 +25,7 @@ class LMStudioConfig:
 
 @dataclass
 class GeminiConfig:
-    model_name: str = "gemini-3.1-flash-lite-preview"  # gemini-3.1-flash-lite-preview | gemini-3.1-flash-lite-preview-preview-04-17
+    model_name: str = "gemini-2.5-flash"  # gemini-2.5-flash | gemini-2.5-flash-preview-04-17
     temperature: float = 0.1
     max_tokens: int = 2048
     api_key: Optional[str] = None         # None → đọc từ GOOGLE_API_KEY env
