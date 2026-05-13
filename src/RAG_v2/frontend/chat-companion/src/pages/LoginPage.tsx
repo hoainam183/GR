@@ -73,7 +73,11 @@ const LoginPage = () => {
       const result = await loginUser({ username, password });
       localStorage.setItem("token", result.access_token);
       localStorage.setItem("user", JSON.stringify(result.user));
-      navigate("/chat");
+      if (result.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/chat");
+      }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setErrors({ api: err.response?.data?.detail ?? "Đăng nhập thất bại." });

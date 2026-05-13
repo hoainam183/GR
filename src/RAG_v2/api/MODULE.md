@@ -23,7 +23,8 @@ api/
     ├── health.py        # Monitoring — Health check cho tất cả backend services (Redis, Qdrant, ES...)
     ├── metrics.py       # Analytics — Thu thập thông tin sử dụng, latency và cache stats
     ├── session.py       # Session Management — Quản lý lịch sử hội thoại (List/Delete)
-    └── retrieval.py     # Diagnostic — Endpoint hỗ trợ debug kết quả tìm kiếm thô
+    ├── retrieval.py     # Diagnostic — Endpoint hỗ trợ debug kết quả tìm kiếm thô
+    └── upload.py        # Admin Document Upload — 15 endpoints for document pipeline management (Phase 2)
 ```
 
 ---

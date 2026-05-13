@@ -15,6 +15,7 @@ Dữ liệu được thu thập từ các nguồn chính thống của Đại h�
 
 ## 2. Chiến lược Chunking
 
+
 Tùy vào đặc thù cấu trúc của từng loại dữ liệu, các chiến lược chunking khác nhau được áp dụng:
 
 ### 2.1. Semantic/Section-based Chunking (Dùng cho `stsv`, `kehoach`, một phần `quydinh`)

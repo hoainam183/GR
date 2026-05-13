@@ -13,6 +13,7 @@ Module `pipeline` là **trái tim điều phối** của toàn bộ hệ thống
 ```
 pipeline/
 ├── rag_pipeline.py          # RAGPipeline class — Orchestrator chính
+├── document_pipeline.py     # DocumentPipeline — Admin upload processing pipeline (Phase 3)
 ├── flows.py                 # Logic thực thi cụ thể của từng flow
 ├── test_rag_pipeline.py     # Unit tests cho RAGPipeline
 ├── test_flows_major_fallback.py  # Tests cho fallback logic trong flows
@@ -490,3 +491,64 @@ Hàm `_settings_to_cfg()` convert `Settings` Pydantic object thành legacy dict 
 | `self_eval_enabled` | `self_eval_enabled` |
 | `self_eval_min_top_score` | `self_eval_min_top_score` |
 | `tavily_fallback_enabled` | `tavily_fallback_enabled` |
+
+---
+
+### 3. `document_pipeline.py` — Class `DocumentPipeline` (Phase 3)
+
+Orchestrator cho admin document upload pipeline. Quản lý toàn bộ vòng đời xử lý document: convert → clean → chunk → embed → index.
+
+#### Khởi tạo
+
+```python
+DocumentPipeline(
+    settings: Optional[Settings] = None,
+    storage: Optional[LocalStorage] = None,
+)
+```
+
+Heavy resources (embeddder BGE-M3, E5, Qdrant/ES stores) được **lazy-load** để tránh startup cost.
+
+#### Các bước pipeline
+
+| Bước | Method | Reused Module | Status Flow |
+|:---|:---|:---|:---|
+| Convert PDF → Markdown | `convert_pdf(doc_id, db, converter)` | `pymupdf4llm` hoặc `DoclingConverter` | converting → converted |
+| Clean markdown | `clean(doc_id, db)` | `document_loader/clean_markdown.py` | cleaning → cleaned |
+| Chunk | `chunk(doc_id, strategy, db)` | `chunking/chunker/*` | chunking → chunked |
+| Embed + Index | `embed_and_index(doc_id, db)` | `embedding/bge_m3.py`, `embedding/e5_multilingual.py`, `retrieval/qdrant_store.py`, `retrieval/elasticsearch_store.py` | embedding → indexed |
+| Full pipeline | `run_full_pipeline(doc_id, db, converter)` | Tất cả trên | uploaded → indexed |
+
+#### Converter selection
+
+| Converter | Module | Mô tả |
+|:---|:---|:---|
+| `pymupdf4llm` (default) | `pymupdf4llm` package | Chuyển đổi nhanh, tốt cho tài liệu đơn giản |
+| `docling` | `document_loader.pdf_to_markdown.converters.docling_converter` | IBM Docling — xử lý tốt bảng và cấu trúc phức tạp |
+
+Admin chọn converter từ UI trước khi chạy bước "Chuyển đổi PDF". Converter đã sử dụng được lưu vào field `converter` trong `DocumentRecord`.
+
+#### Chunking strategies
+
+| Strategy | Chunker Class | Input | Collection |
+|:---|:---|:---|:---|
+| `recursive` | `RecursiveChunker` | Markdown text | Tất cả |
+| `hierarchical` | `ArticleLevelLegalChunker` | Markdown text | ctdt, quydinh |
+| `olmocr` | `OlmOcrLegalChunker` | Markdown text (OLM OCR output) | quydinh |
+| `kehoach`, `stsv`, other | Fallback → `RecursiveChunker` | Markdown text (JSON chunkers không phù hợp cho PDF upload) | — |
+
+#### Side-by-side chunk comparison
+
+Admin có thể chạy chunking với nhiều strategy khác nhau — chunks được lưu song song trong `document_chunks` collection, phân biệt bằng `metadata.strategy`. API endpoints hỗ trợ:
+
+- `GET /admin/documents/{id}/chunk-strategies` — liệt kê các strategy đã chunk
+- `GET /admin/documents/{id}/chunks?strategy=X` — xem chunks theo strategy
+- `POST /admin/documents/{id}/chunks/select?strategy=X` — chọn strategy cuối cùng, xóa chunks của các strategy khác
+
+> [!IMPORTANT]
+> **Bug fix:** Method `chunk()` giờ validate rằng ít nhất 1 chunk hợp lệ được tạo ra trước khi set status "chunked". Nếu không có chunks (do empty content), status sẽ chuyển sang "failed" thay vì "chunked" với 0 chunks.
+
+#### Cleanup
+
+`delete_indexed_data(doc_id, collection)` — Xóa data từ Qdrant + ES theo `document_id` metadata. Safe khi document chưa được index.
+

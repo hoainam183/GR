@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-const COLLECTIONS = ['ctdt', 'quydinh', 'stsv', 'kehoach'];
+const COLLECTIONS = ['ctdt', 'quydinh', 'stsv', 'kehoach', 'test'];
 
 export default function RetrievalPage() {
   const [query, setQuery] = useState('');

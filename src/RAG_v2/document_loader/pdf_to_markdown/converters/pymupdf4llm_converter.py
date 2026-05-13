@@ -1,5 +1,5 @@
 # pdf_to_markdown/converters/pymupdf4llm_converter.py
-from pdf_to_markdown.base.converter import BasePDFConverter
+from ..base.converter import BasePDFConverter
 from pathlib import Path
 from typing import Dict, Any
 import pymupdf4llm

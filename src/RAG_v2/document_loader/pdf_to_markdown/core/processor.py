@@ -1,7 +1,7 @@
 # pdf_to_markdown/core/processor.py
 from pathlib import Path
 from typing import List, Dict, Any, Type
-from pdf_to_markdown.base.converter import BasePDFConverter
+from ..base.converter import BasePDFConverter
 
 
 class PDFProcessor:

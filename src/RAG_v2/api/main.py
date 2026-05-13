@@ -237,6 +237,7 @@ def create_app() -> FastAPI:
     from .routes.session import router as session_router
     from .routes.metrics import router as metrics_router
     from .routes.retrieval import router as retrieval_router
+    from .routes.upload import router as upload_router
     from routers.auth import router as auth_router
 
     app = FastAPI(
@@ -266,6 +267,7 @@ def create_app() -> FastAPI:
     app.include_router(session_router)
     app.include_router(metrics_router)
     app.include_router(retrieval_router)
+    app.include_router(upload_router)
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
     # Rate-limit middleware is registered as a startup callback because it

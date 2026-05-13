@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
@@ -11,8 +11,22 @@ import RegisterPage from "./pages/RegisterPage";
 import CompleteProfile from "./pages/CompleteProfile";
 import TracePage from "./pages/TracePage";
 import RetrievalPage from "./pages/RetrievalPage";
+import AdminPage from "./pages/AdminPage";
+import DocumentReview from "./pages/DocumentReview";
 
 const queryClient = new QueryClient();
+
+/** Guard: only render children if JWT user has role === "admin" */
+function AdminGuard({ children }: { children: React.ReactNode }) {
+  try {
+    const raw = localStorage.getItem("user");
+    if (raw) {
+      const user = JSON.parse(raw);
+      if (user.role === "admin") return <>{children}</>;
+    }
+  } catch { /* invalid JSON */ }
+  return <Navigate to="/chat" replace />;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,6 +43,8 @@ const App = () => (
           <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/trace" element={<TracePage />} />
           <Route path="/retrieval" element={<RetrievalPage />} />
+          <Route path="/admin" element={<AdminGuard><AdminPage /></AdminGuard>} />
+          <Route path="/admin/documents/:id" element={<AdminGuard><DocumentReview /></AdminGuard>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
