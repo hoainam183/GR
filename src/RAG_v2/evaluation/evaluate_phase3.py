@@ -90,7 +90,7 @@ CONFIG: Dict[str, Any] = {
     # Metric cutoff
     "k": 5,
     # Gemini
-    "gemini_model": "gemini-3.1-flash-lite-preview",
+    "gemini_model": "gemini-2.5-flash",
     "gemini_api_key": None,  # None → đọc GEMINI_API_KEY từ env
     # Pipeline switches
     "skip_generation": False,  # True → chỉ đánh giá retrieval, không generate

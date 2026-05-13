@@ -1,129 +1,265 @@
-# Module: `agent` — LangGraph Orchestration & Planner-Executor Layer
+# Module: `agent` — LangGraph Agentic RAG & Planner-Executor Layer
 
-## 1. Tổng quan kiến trúc (Dual-Path Orchestration)
+## 1. Tổng quan
 
-Module `agent` là tầng điều phối thông minh nhất trong hệ thống RAG v2, chịu trách nhiệm chuyển đổi từ một pipeline tìm kiếm tuyến tính sang một hệ thống có khả năng suy luận, lập kế hoạch và tự sửa lỗi.
+Module `agent` là tầng xử lý câu hỏi phức tạp của RAG v2. Nó dùng **LangGraph** để chọn giữa hai luồng:
 
-Kiến trúc dựa trên **LangGraph**, hỗ trợ hai luồng xử lý riêng biệt tối ưu cho các loại câu hỏi khác nhau:
+- **Planner-Executor path**: dành cho `complexity_subtype in ("comparison", "multi_source")`. Luồng này dùng synthesis LLM để tách câu hỏi, lập retrieval plan JSON, chạy các bước retrieval song song, rồi tổng hợp câu trả lời.
+- **ReAct Agent loop path**: dành cho `general` hoặc khi planner không tạo được plan đủ tốt. Luồng này dùng local/tool-calling LLM để gọi tool từng bước, có loop defense và graceful synthesis fallback.
 
-### 1.1. Planner-Executor Path (Tối ưu Hiệu suất & So sánh)
-- **Đối tượng**: Các câu hỏi phức tạp (So sánh mã ngành/mã khóa, đa nguồn dữ liệu).
-- **Cơ chế**: Sử dụng LLM cấu hình mạnh (ví dụ: **Gemini**) để phân tích câu hỏi (`decompose_node`) và lập kế hoạch tìm kiếm (`planner_node`), sau đó thực thi các bước tìm kiếm **song song** (`executor_node`).
-- **Ưu điểm**: Giảm latency từ ~60s xuống còn **8-15s** đối với các truy vấn phức tạp hoặc so sánh đa nguồn.
-
-### 1.2. ReAct Agent Loop Path (Linh hoạt & Dynamic)
-- **Đối tượng**: Các truy vấn tổng quát (General), mơ hồ (Ambiguous) hoặc các câu hỏi đơn giản cần công cụ.
-- **Cơ chế**: Vòng lặp ReAct (Reasoning + Acting) truyền thống sử dụng mô hình local như **Qwen 2.5 8B**.
-- **Ưu điểm**: Khả năng suy luận từng bước, tự sửa lỗi truy vấn, và hội thoại làm rõ thông tin (Clarification).
+Module này không tự expose HTTP API. Nó được gọi từ `pipeline.RAGPipeline.query_agent()` và trả về `AgentState` để pipeline map sang response, MongoDB trace và UI debug metadata.
 
 ---
 
-## 2. Cấu trúc Module
+## 2. Cấu trúc module hiện tại
 
 ```text
 agent/
-├── react_agent.py        # Core Orchestrator — Định nghĩa LangGraph graph & Nodes logic
-├── tool_adapters.py      # Execution Layer — Thực thi tool, Parallel Executor, Caching & Thread-safety
-├── lc_tools.py           # LangChain Wrappers — Định nghĩa StructuredTools cho Agent
-├── prompts.py            # System Prompts — Quản lý prompts cho Decompose, Planner, Agent & Synthesis
-├── graph_state.py        # Internal State — Định nghĩa AgentGraphState (TypedDict) cho LangGraph
-├── state.py              # External State — Định nghĩa AgentState (Dataclass) dùng để log MongoDB
-└── __init__.py           # Module Exports — Public APIs
+├── __init__.py          # Public exports của module agent
+├── graph_state.py       # AgentGraphState TypedDict cho LangGraph runtime
+├── lc_tools.py          # LangChain StructuredTool schemas + TOOL_MAP
+├── prompts.py           # Agent, synthesis, decompose, planner prompts
+├── react_agent.py       # ReActAgent, LangGraph nodes, routing, state conversion
+├── state.py             # AgentState + ToolResult dataclasses cho persistence/logging
+├── tool_adapters.py     # Tool dispatcher, retrieval/web adapters, cache, ContextVar docs
+└── MODULE.md            # Tài liệu module này
 ```
+
+Không có `complexity_router.py` trong module này. Complexity routing nằm ngoài module `agent` và truyền `complexity_subtype` vào `ReActAgent.run()`.
 
 ---
 
-## 3. Các thành phần chính và Logic chuyên sâu
+## 3. Public API và exports
 
-### 3.1. LangGraph Topology (Dual-Path Graph)
+`agent/__init__.py` export các symbol chính:
+
+- State: `AgentState`, `ToolResult`, `AgentGraphState`
+- Tool registry: `LANGGRAPH_TOOLS`, `TOOL_MAP`
+- Execution helpers: `execute_tool`, `execute_retrieval_plan`, `cache_clear`, `set_runtime`, `web_search_for_executor`
+- Per-request docs: `init_agent_docs`, `get_agent_docs`
+- Agent runtime: `ReActAgent`
+- Prompts: `AGENT_SYSTEM_PROMPT`, `SYNTHESIS_PROMPT`, `DECOMPOSE_SYSTEM_PROMPT`, `PLANNER_SYSTEM_PROMPT`
+
+`tool_adapters.inject_from_retrieval_service()` cũng là API quan trọng nhưng hiện không nằm trong `__all__`. `RAGPipeline.__init__` import trực tiếp function này để inject shared `RetrievalService`.
+
+---
+
+## 4. LangGraph topology
 
 ```mermaid
 graph TD
-    START((START)) --> Router{_route_complex}
-    
-    %% Path 1: Planner-Executor
-    Router -- "complex/comparison" --> Decompose[decompose_node]
-    Decompose --> Planner[planner_node]
-    Planner --> RouteAfterPlanner{_after_planner}
-    RouteAfterPlanner -- "Valid Plan" --> Executor[executor_node]
-    RouteAfterPlanner -- "Low Quality" --> Agent[agent_node]
-    Executor --> Synthesize[synthesize_node]
-    
-    %% Path 2: ReAct Loop
-    Router -- "general/fallback" --> Agent
-    Agent --> ShouldCont{_should_continue}
-    ShouldCont -- "Call Tool" --> Tools[tools_node]
-    ShouldCont -- "Direct Answer" --> Extract[extract_answer_node]
-    ShouldCont -- "Error/Max Iter/Loop" --> Synthesize
-    
+    START((START)) --> Route{_route_complex}
+
+    Route -- planner --> Decompose[decompose]
+    Decompose --> Planner[planner]
+    Planner --> AfterPlanner{_after_planner}
+    AfterPlanner -- valid plan --> Executor[executor]
+    AfterPlanner -- invalid/no plan --> Agent[agent]
+    Executor --> Synthesize[synthesize]
+
+    Route -- agent --> Agent
+    Agent --> Continue{_should_continue}
+    Continue -- tool_calls --> Tools[tools]
+    Continue -- direct answer --> Extract[extract_answer]
+    Continue -- error/max/loop --> Synthesize
+
     Tools --> AfterTools{_after_tools}
-    AfterTools -- "Loop back" --> Agent
-    AfterTools -- "Clarify/Error" --> Extract
-    
+    AfterTools -- continue --> Agent
+    AfterTools -- error --> Synthesize
+    AfterTools -- clarify --> Extract
+
     Synthesize --> END((END))
     Extract --> END
 ```
 
-### 3.2. Planner-Executor: Cơ chế Lập kế hoạch & Song song hóa
-- **Anti-bias Mechanism**: Trong node `decompose` và `planner`, hệ thống sẽ chặn không tự động tiêm `major_code` của sinh viên vào truy vấn nếu câu hỏi đã chứa ≥2 mã ngành hoặc có các từ khóa so sánh (`so sánh`, `khác gì`). Điều này tránh làm lệch (bias) luồng suy luận của LLM về một ngành duy nhất.
-- **Parallel Executor**: Lớp `execute_retrieval_plan` (trong `tool_adapters.py`) sử dụng `ThreadPoolExecutor` để chạy tối đa 4 bước tìm kiếm đồng thời, giúp thời gian phản hồi không tăng tuyến tính theo số lượng câu hỏi con.
-- **Plan Validation (`_validate_plan`)**: Kiểm tra chất lượng của JSON plan. Nếu <50% số bước (steps) hợp lệ (thiếu query hoặc sai collection), hệ thống sẽ fallback về luồng `agent` loop.
+### Entry routing
 
-### 3.3. ReAct Agent: Chiến thuật Phòng thủ & Context Trimming
-Do sử dụng mô hình Local (Qwen 8B) có budget ngữ cảnh hữu hạn (~3200 tokens), module áp dụng chiến thuật phòng thủ nghiêm ngặt:
-- **Context Trimming (`_trim_messages_for_context`)**: 
-  - Luôn giữ lại `SystemMessage` và câu hỏi `HumanMessage` cuối.
-  - Khi vượt budget, nội dung `ToolMessage` được rút gọn (cắt xuống 600 chars).
-  - Nếu vẫn đầy, tự động drop các cặp (AIMessage + ToolMessage) cũ nhất.
-- **Loop & Duplicate Detection**: Sử dụng mã băm MD5 8-char (`_make_call_sig`) cho tham số tool. 
-  - Chặn ngay lặp tool y hệt (cùng tên, cùng tham số). 
-  - Nếu lặp cùng tên tool nhưng khác tham số (trừ `rag_search` và `clarify_question`), ép ngưng loop và gọi `synthesize`.
-- **Retry Defense-in-depth**: Nếu tìm kiếm trả về trống `[Khong tim thay...]`, ở lần 1 sẽ inject một prompt nhắc Agent gỡ bỏ thông tin thừa. Lần 2 sẽ ép hội thoại kết thúc để tránh tốn LLM call.
+`ReActAgent.run()` sets `execution_path`:
 
-### 3.4. Quản lý State: Phân tách Runtime và Persistence
-- **`AgentGraphState` (Runtime)**: Là `TypedDict` có reducer `add_messages`. Chỉ tồn tại và dịch chuyển bên trong vòng lặp của LangGraph.
-- **`AgentState` (Persistence)**: Được mapping sau khi graph chạy xong để sử dụng trong Pipeline và MongoDB. Phân chia rõ ràng:
-  - `tool_results`: Giới hạn `_CONTEXT_WINDOW_TOOL_LIMIT` (3) để đưa vào context LLM.
-  - `_log_tool_results`: Chứa **toàn bộ** log không bị cắt xén, đảm bảo UI và MongoDB nhận được thông tin đầy đủ nhất.
+- `"planner"` when `complexity_subtype` is `"comparison"` or `"multi_source"`.
+- `"agent"` otherwise.
 
-### 3.5. Cơ sở hạ tầng Công cụ (Tool Adapters & Thread-Safety)
-- **Shared Runtime Injection (`set_runtime`)**: Pipeline tiêm trực tiếp các instance của `BGEm3Embedder`, `E5MultilingualEmbedder`, `Retriever` và `Reranker` vào Agent để tránh cold-start (~17s) mỗi lần chạy tool tìm kiếm.
-- **Thread-safe Per-request Docs (`_agent_docs_ctx`)**: Sử dụng biến `ContextVar` để lưu danh sách tài liệu tìm được. Đảm bảo ở môi trường FastAPI đa luồng (multi-thread), tài liệu trả về của user này không bị lẫn sang UI của user khác.
-- **RAG Cache**: In-memory FIFO cache (256 entries), băm theo `(query, collection, top_k, cohort, major)`, có lock an toàn.
-- **Skip Rerank Heuristic**: Trong `chuong_trinh`, nếu query chứa các từ như `kỳ`, `kì`, `đăng ký`, bước Reranking sẽ tự động bị bỏ qua do reranker thường chấm điểm thấp và làm rơi rụng các tài liệu dạng bảng biểu dài.
-- **PII Stripping (`strip_personal_identifiers`)**: Xóa mã sinh viên (chuỗi 8 số) hoặc tiền tố "mã sv:" khỏi query trước khi đưa vào embedding vector để tránh nhiễu.
+`_route_complex()` reads `execution_path` and starts at `decompose` or `agent`.
+
+### Planner path
+
+1. `_decompose_node()` calls `_synthesis_llm` with `DECOMPOSE_SYSTEM_PROMPT`.
+2. `_planner_node()` calls `_synthesis_llm` with `PLANNER_SYSTEM_PROMPT`.
+3. `_validate_plan()` accepts the plan only when at least 50% of steps have a non-empty `query` and valid `collection`.
+4. `_executor_node()` calls `execute_retrieval_plan()` and optional `web_search_for_executor()` if `needs_web=true`.
+5. `_synthesize_node()` writes the final Vietnamese answer from collected `ToolMessage` contents.
+
+### ReAct loop path
+
+1. `_agent_node()` calls local/tool-calling LLM bound to `LANGGRAPH_TOOLS`.
+2. `_should_continue()` routes to `tools`, `extract_answer`, or `synthesize`.
+3. `_tools_node()` invokes tools from `TOOL_MAP`.
+4. `_after_tools()` stops immediately for `clarify_question`, synthesizes on `[Loi...]`, otherwise loops back.
 
 ---
 
-## 4. LLM Roles (Phân vai mô hình)
+## 5. Tool system
 
-Hệ thống cung cấp cơ chế `agent_synthesis_provider` linh hoạt, cho phép tách vai trò:
+### Tools available to the LangGraph ReAct loop
 
-| Role | Mô hình cấu hình | Mục đích | Latency |
-|---|---|---|---|
-| **Orchestrator** | `agent_model` (VD: Qwen 8B Local) | Chạy ReAct loop, gọi tool. Cần tốc độ cao, deterministic. | Rất thấp |
-| **Reasoner / Synthesizer** | `agent_synthesis_model` (VD: Gemini Flash / Qwen lớn hơn) | Decompose query, lập plan, và viết câu trả lời tổng hợp (Synthesis) tự nhiên nhất. | Trung bình |
+`LANGGRAPH_TOOLS` currently contains exactly 3 StructuredTools:
 
----
-
-## 5. Quy tắc cập nhật Module (Maintenance Rules)
-
-1. **Bảo toàn `ContextVar`**: Bất kỳ logic nào cần thêm tài liệu hiển thị ra UI đều phải dùng `_append_agent_docs(items)` thay vì append global list.
-2. **Thêm Tool mới**:
-    - Khai báo schema chuẩn Pydantic tại `lc_tools.py`.
-    - Viết logic thuần tại `tool_adapters.py`, trả về string thuần tuý. Đừng ném Exception sập graph, hãy trả về chuỗi có format `[Loi: ...]`.
-    - Đăng ký map vào `execute_tool` và list `LANGGRAPH_TOOLS`.
-3. **Sửa Graph Routing**: Nếu thêm edge hoặc node mới vào `react_agent.py`, bắt buộc cập nhật lại sơ đồ Mermaid trong tài liệu này.
-
----
-
-## 6. Latency Benchmark (Tham khảo)
-
-| Kịch bản | Thời gian phản hồi | Ghi chú |
+| Tool | Input schema | Khi dùng |
 |---|---|---|
-| **Comparison (Planner)** | 8s - 15s | Lập kế hoạch (Gemini) + Song song RAG |
-| **General (Agent Loop)** | 30s - 60s | Phụ thuộc vào số vòng lặp (~15-20s/vòng local) |
-| **Simple Fallback** | 4s - 8s | Bỏ qua tool, trực tiếp synthesize |
+| `rag_search` | `RagSearchInput(query, collection)` | Tìm trong một collection nội bộ |
+| `web_search` | `WebSearchInput(query)` | Tavily fallback khi DB không đủ hoặc cần thông tin rất mới |
+| `clarify_question` | `ClarifyInput(message, options)` | Hỏi lại khi câu hỏi quá mơ hồ |
+
+Các collection agent-facing hợp lệ:
+
+| Agent name | Real collection | Nội dung |
+|---|---|---|
+| `quy_dinh` | `quydinh` | Quy định học vụ, học bổng, tốt nghiệp, kỷ luật, ngoại ngữ |
+| `chuong_trinh` | `ctdt` | Môn học, tín chỉ, chương trình đào tạo, tiên quyết |
+| `ke_hoach` | `kehoach` | Lịch đăng ký học phần, lịch thi, deadline, kế hoạch học kỳ |
+| `ho_tro_sv` | `stsv` | Biểu mẫu, giấy tờ, thủ tục, hỗ trợ sinh viên |
+
+### Adapter-only tools
+
+`execute_tool()` vẫn hỗ trợ `multi_rag_search`, `compare_cohorts`, và `compare_programs` để backward compatibility, tests và các caller trực tiếp. Tuy nhiên các tool này **không còn nằm trong `LANGGRAPH_TOOLS`**, nên local ReAct LLM không được schema-bind trực tiếp với chúng. So sánh/multi-source hiện được ưu tiên xử lý bằng Planner-Executor path.
+
+### Clarification sentinel
+
+`_clarify_question()` trả về chuỗi bắt đầu bằng `CLARIFY_SENTINEL` (`"[CLARIFY]"`). `ReActAgent._relay_last_clarify_output()` strip sentinel trước khi trả final answer, giúp API/UI nhận nội dung hỏi lại sạch.
 
 ---
-*Cập nhật lần cuối: 2026-05-11 bởi Antigravity*
+
+## 6. Runtime, retrieval và thread safety
+
+### Runtime injection
+
+`tool_adapters` có `_AdapterRuntime` gồm:
+
+- `settings`
+- `bge_embedder`
+- `e5_embedder`
+- `searcher`
+- `reranker`
+- `tavily_tool`
+
+Pipeline nên gọi `inject_from_retrieval_service(retrieval_service)` để chia sẻ model/searcher đã load sẵn từ `RetrievalService`, tránh cold-start lại BGE-M3, E5 và reranker. `set_runtime(runtime_or_none)` dùng chủ yếu cho tests hoặc reset về lazy-init.
+
+### Per-request retrieved docs
+
+`_agent_docs_ctx` là `ContextVar[list[dict] | None]` để gom tài liệu cho UI/debug theo từng request:
+
+1. Pipeline gọi `init_agent_docs()` trong worker thread trước `agent.run()`.
+2. `_rag_search()` và `_format_web_results()` gọi `_append_agent_docs(...)`.
+3. Pipeline gọi `get_agent_docs()` sau run để đưa vào `sources`.
+
+Không append vào global list khi thêm logic retrieval mới.
+
+### RAG cache và reranker lock
+
+- `_RAG_CACHE`: FIFO in-memory cache 256 entries, key theo `(retrieval_query, collection, top_k, cohort, major)`.
+- `_CACHE_LOCK`: bảo vệ cache.
+- `_RERANKER_LOCK`: serialize reranker calls vì tokenizer của BGE reranker không thread-safe.
+- `cache_clear()` dùng cho tests hoặc sau data update.
+
+### Query sanitization và metadata hints
+
+`strip_personal_identifiers()` loại mã sinh viên 8 chữ số và prefix kiểu `mã sv`, `mssv` khỏi query trước embedding. `_rag_search()` tự extract:
+
+- major code từ query nếu chỉ có một mã ngành.
+- cohort `Kxx` từ query hoặc `resolved_cohort`.
+
+Khi có `resolved_major`, vector query được strip major scaffold để giảm nhiễu nhưng ES keyword vẫn dùng `raw_query` để giữ tín hiệu exact phrase.
+
+---
+
+## 7. State model
+
+### `AgentGraphState`
+
+`AgentGraphState` là `TypedDict` dùng trong LangGraph runtime. Các field quan trọng:
+
+- `messages`: reducer `add_messages`, chứa system/user/AI/tool history.
+- `tool_call_history`: tên tool đã chạy.
+- `tool_call_signatures`: signature `toolname:arghash` để detect exact duplicate.
+- `iteration`, `max_iterations`, `final_answer`, `error`.
+- Planner fields: `execution_path`, `sub_questions`, `retrieval_plan`, `user_context`, `empty_result_count`.
+
+### `AgentState`
+
+`AgentState` là dataclass persistence/logging, được tạo ở `_to_agent_state()` sau graph run:
+
+- `tool_results`: kết quả tool gần nhất dùng cho context, giới hạn bởi `_CONTEXT_WINDOW_TOOL_LIMIT = 3` khi dùng `add_tool_result()`.
+- `_log_tool_results`: full log không cắt, dùng bởi `to_log_dict()` và MongoDB.
+- `tool_call_history`, `iteration`, `final_answer`, `route`, `error`.
+
+`_to_agent_state()` rebuild `ToolResult` từ `ToolMessage` trong graph history để log đầy đủ tool output thực tế.
+
+---
+
+## 8. LLM roles và cấu hình
+
+`ReActAgent` dùng `ChatOpenAI` compatible endpoints:
+
+| Role | Source setting | Mặc định hiện tại | Mục đích |
+|---|---|---|---|
+| Tool-calling agent | `agent_model`, `lm_studio_url/base_url` | `qwen2.5-7b-instruct` | Chọn và gọi `LANGGRAPH_TOOLS` |
+| Synthesis/planner/decomposer | `agent_synthesis_provider`, `agent_synthesis_model` | `gemini`, `gemini-2.5-flash` | Decompose, plan, synthesize final answer |
+
+Supported synthesis providers trong code: `gemini`, `ollama`, hoặc default LM Studio endpoint khi provider rỗng/khác.
+
+Các knobs chính trong `Settings`:
+
+- `agent_enabled`
+- `agent_max_iterations`
+- `agent_temperature`
+- `agent_max_tokens`
+- `agent_tool_result_limit`
+- `agent_synthesis_provider`
+- `agent_synthesis_model`
+- `agent_synthesis_temperature`
+- `agent_synthesis_max_tokens`
+
+Lưu ý: `agent_context_token_budget` được đọc bằng `getattr(settings, ..., 3200)` trong `ReActAgent`, nhưng chưa khai báo explicit trong `Settings`.
+
+---
+
+## 9. Safety và fallback behavior
+
+- `_trim_messages_for_context()` giữ system message và human query cuối; truncate `ToolMessage` xuống 600 chars nếu vượt budget; sau đó drop block tool cũ nếu vẫn quá dài.
+- `_make_call_sig()` dùng MD5 8-char từ args JSON để chặn exact duplicate tool call.
+- `_should_continue()` cho phép lặp `rag_search` và `clarify_question` với args khác, nhưng synthesize nếu tool khác bị gọi lại.
+- `_agent_node()` có retry hint khi tool trả `[Khong tim thay...]`; sau 2 empty results sẽ set `error` để ép synthesize.
+- `_after_tools()` synthesize sớm khi tool trả `[Loi...]`.
+- `_synthesize_node()` relay trực tiếp clarify output, nếu không có tool content thì trả fallback message khuyên liên hệ Phòng Đào tạo.
+- `execute_tool()` không ném exception ra graph; lỗi tool được convert thành string `[Loi...]`.
+
+---
+
+## 10. Test/check liên quan
+
+Các checks nhanh cho module:
+
+```bash
+./.venv/bin/python -m py_compile agent/*.py
+./.venv/bin/python -m pytest tests/test_adapters.py tests/test_constants.py -q -m "not integration"
+```
+
+Các test có integration hoặc phụ thuộc LLM/service:
+
+- `tests/test_agent_langgraph.py`: mock LangGraph/LLM behavior, có một số scenario legacy tool-call.
+- `tests/test_adapters.py -m integration`: cần Qdrant/Elasticsearch/local models/Tavily tùy case.
+- `tests/test_chat_route_mode.py`: kiểm tra API route mapping và legacy agent trace behavior.
+
+---
+
+## 11. Quy tắc maintenance
+
+1. Trước khi sửa code trong `agent/`, đọc file này và `AGENTS.md`.
+2. Khi thêm tool cho ReAct loop, cập nhật đồng thời schema trong `lc_tools.py`, adapter trong `tool_adapters.py`, `LANGGRAPH_TOOLS`, `TOOL_MAP`, prompts và tài liệu này.
+3. Khi chỉ thêm adapter callable cho caller trực tiếp, cập nhật `execute_tool()` dispatch và ghi rõ adapter đó có nằm trong `LANGGRAPH_TOOLS` hay không.
+4. Khi sửa graph node/edge trong `react_agent.py`, cập nhật Mermaid topology và phần routing.
+5. Khi thêm retrieval/web result phục vụ UI, dùng `_append_agent_docs()` qua ContextVar, không dùng global mutable list.
+6. Khi thay đổi planner JSON contract, cập nhật `PLANNER_SYSTEM_PROMPT`, `_validate_plan()`, `execute_retrieval_plan()` và test tương ứng.
+7. Nếu thay đổi behavior cấp pipeline/API hoặc public contract agent trace, cập nhật cả `PROJECT_MEMORY.md`.
+
+---

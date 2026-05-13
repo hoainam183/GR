@@ -423,24 +423,26 @@ Hỗ trợ cả interface cũ (`domain: str`) và mới (`domains: List[str]`). 
 **Nhiệm vụ:** Detect cross-references trong retrieved chunks và fetch các điều khoản được tham chiếu.
 
 **Regex patterns:**
-- `_ARTICLE_RE`: `"Điều 48"`, `"Điều 48 Khoản 2"`, `"theo quy định tại Điều 5"`
-- `_CLAUSE_FIRST_RE`: `"Khoản 3 Điều 15"`
-- `_SECTION_RE`: `"Mục X"`, `"Chương Y"`
+- `_ARTICLE_FIRST_RE`: `"Điều 48"`, `"Điều 48 khoản 2"`, `"Điều 5 khoản 1 và khoản 2"`
+- `_CLAUSE_FIRST_RE`: `"khoản 1 và khoản 2 Điều 5"`, `"khoản 3, khoản 4 Điều 5"`
 
 **`extract_references(text) -> List[Dict]`:**
 ```python
-# Returns: [{"article": int, "clause": int|None, "raw_match": str}]
+# Returns one item per article:
+# [{"article": int, "clause": int|None, "clauses": List[int], "raw_match": str}]
 ```
+Các mention trùng article được gộp lại, ví dụ `khoản 1 và khoản 2 Điều 5` chỉ resolve `Điều 5` một lần.
 
 **`ReferenceResolver.resolve(results, query) -> List[Dict]`:**
-1. Build set existing texts (dedup prefix 200 chars)
+1. Build set existing IDs (hỗ trợ cả raw UUID và `{collection}/{uuid}`) + text fallback.
 2. Per chunk: `extract_references(text)` → refs
 3. Per ref (max `max_refs_per_chunk=2`, total `max_total_refs=3`):
-   - Build `ref_query = "Điều {article} Khoản {clause}"`
-   - `service.search(query=ref_query, collections=[collection], top_k=2, rerank=True)`
-   - Verify: `"Điều {article}"` phải có trong ref_text
+   - Ưu tiên Qdrant payload scroll theo `document_id` trong cùng collection.
+   - Match article bằng heading thật (`section_h3` hoặc dòng `### Điều N`), không match câu chỉ nhắc tới Điều N.
+   - Trả về nhiều child chunks cùng article theo `chunk_index`; parent chunks chỉ dùng nếu không có child chunks.
+   - Fallback semantic search chỉ chạy khi metadata lookup không có kết quả; query fallback có source/filename và post-filter same `document_id` hoặc same source/filename.
    - Mark: `_cross_reference=True`, `_referenced_from`, `_reference`
-4. Append resolved refs vào cuối results
+4. Insert resolved refs ngay sau chunk gốc đã nhắc tới reference.
 
 Nếu `retrieval_service=None` → trả về kết quả gốc (no-op).
 
@@ -487,7 +489,7 @@ ValidityFilter.filter(results)
         │
         ▼
 ReferenceResolver.resolve(results, query)
-  → append cross-referenced chunks
+  → insert same-document cross-referenced chunks
         │
         ▼
 Final documents (top 5-10)
