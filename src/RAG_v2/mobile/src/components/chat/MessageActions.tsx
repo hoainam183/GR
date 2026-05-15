@@ -3,19 +3,30 @@
  */
 
 import React, { useState } from 'react';
-import { View, Pressable, Text, StyleSheet, Share } from 'react-native';
+import { View, Pressable, Text, StyleSheet, Share, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { RetrievedDocument } from '@rag/shared';
+import { createBookmark, submitFeedback } from '@rag/shared';
+import { apiClient } from '../../services/api';
 
 interface Props {
   content: string;
   sources?: RetrievedDocument[];
+  sessionId?: string;
+  turnId?: number;
   onShowSources?: (sources: RetrievedDocument[]) => void;
 }
 
-const MessageActions = ({ content, sources, onShowSources }: Props) => {
+const MessageActions = ({
+  content,
+  sources,
+  sessionId,
+  turnId,
+  onShowSources,
+}: Props) => {
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
   const [copied, setCopied] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -27,8 +38,40 @@ const MessageActions = ({ content, sources, onShowSources }: Props) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleFeedback = (type: 'up' | 'down') => {
+  const handleFeedback = async (type: 'up' | 'down') => {
+    if (!sessionId || !turnId) {
+      Alert.alert('Chưa thể gửi đánh giá', 'Vui lòng mở lại hội thoại sau khi câu trả lời được lưu.');
+      return;
+    }
     setFeedback((prev) => (prev === type ? null : type));
+    try {
+      await submitFeedback(apiClient, {
+        session_id: sessionId,
+        turn_id: turnId,
+        rating: type,
+        category: type === 'down' ? 'incomplete' : undefined,
+      });
+    } catch {
+      Alert.alert('Lỗi', 'Không thể gửi đánh giá. Vui lòng thử lại.');
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (!sessionId || !turnId) {
+      Alert.alert('Chưa thể lưu', 'Vui lòng thử lại sau khi câu trả lời được ghi vào lịch sử.');
+      return;
+    }
+    setBookmarked(true);
+    try {
+      await createBookmark(apiClient, {
+        session_id: sessionId,
+        turn_id: turnId,
+        folder: 'Chung',
+      });
+    } catch {
+      setBookmarked(false);
+      Alert.alert('Lỗi', 'Không thể lưu câu trả lời. Vui lòng thử lại.');
+    }
   };
 
   const handleSources = () => {
@@ -101,6 +144,22 @@ const MessageActions = ({ content, sources, onShowSources }: Props) => {
           name={copied ? 'checkmark' : 'copy-outline'}
           size={14}
           color={copied ? '#22c55e' : '#64748b'}
+        />
+      </Pressable>
+
+      {/* Bookmark */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.actionButton,
+          bookmarked && styles.actionActive,
+          pressed && styles.buttonPressed,
+        ]}
+        onPress={handleBookmark}
+      >
+        <Ionicons
+          name={bookmarked ? 'bookmark' : 'bookmark-outline'}
+          size={14}
+          color={bookmarked ? '#f59e0b' : '#64748b'}
         />
       </Pressable>
     </View>

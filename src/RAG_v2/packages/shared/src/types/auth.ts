@@ -14,6 +14,7 @@ export interface RegisterRequest {
 }
 
 export interface UserPublic {
+  id?: string;
   _id?: string;
   username?: string | null;
   email?: string | null;
@@ -39,3 +40,8 @@ export interface TokenResponse {
   token_type: string;
   user: UserPublic;
 }
+
+export const normalizeUser = (user: UserPublic): UserPublic => ({
+  ...user,
+  id: user.id ?? user._id,
+});

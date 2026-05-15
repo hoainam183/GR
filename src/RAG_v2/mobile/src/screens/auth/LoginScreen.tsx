@@ -88,24 +88,6 @@ const LoginScreen = ({ navigation }: Props) => {
             </Text>
           </View>
 
-          {/* Microsoft OAuth (placeholder) */}
-          <Pressable style={styles.oauthButton}>
-            <View style={styles.microsoftGrid}>
-              <View style={[styles.msBox, { backgroundColor: '#f25022' }]} />
-              <View style={[styles.msBox, { backgroundColor: '#7fba00' }]} />
-              <View style={[styles.msBox, { backgroundColor: '#00a4ef' }]} />
-              <View style={[styles.msBox, { backgroundColor: '#ffb900' }]} />
-            </View>
-            <Text style={styles.oauthText}>Continue with Microsoft</Text>
-          </Pressable>
-
-          {/* Divider */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
           {/* Error */}
           {errors.api && (
             <View style={styles.errorBox}>

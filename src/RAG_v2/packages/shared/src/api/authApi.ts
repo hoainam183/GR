@@ -9,6 +9,7 @@ import type {
   TokenResponse,
   UserPublic,
 } from '../types/auth';
+import { normalizeUser } from '../types/auth';
 import { API_PATHS } from '../utils/constants';
 
 /**
@@ -19,7 +20,7 @@ export const registerUser = async (
   data: RegisterRequest,
 ): Promise<UserPublic> => {
   const response = await client.post<UserPublic>(API_PATHS.AUTH_REGISTER, data);
-  return response.data;
+  return normalizeUser(response.data);
 };
 
 /**
@@ -30,7 +31,10 @@ export const loginUser = async (
   data: LoginRequest,
 ): Promise<TokenResponse> => {
   const response = await client.post<TokenResponse>(API_PATHS.AUTH_LOGIN, data);
-  return response.data;
+  return {
+    ...response.data,
+    user: normalizeUser(response.data.user),
+  };
 };
 
 /**
@@ -43,5 +47,5 @@ export const getMe = async (
   const response = await client.get<UserPublic>(API_PATHS.AUTH_ME, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data;
+  return normalizeUser(response.data);
 };

@@ -172,15 +172,21 @@ Shutdown:
 | `POST /chat/v3` | `api/routes/chat.py` | Smart routing endpoint for UI debug shape |
 | `POST /api/chat/v3` | `api/routes/chat.py` | Alias of `/chat/v3` |
 | `POST /chat/stream` | `api/routes/chat.py` | SSE streaming endpoint |
+| `GET /chat/suggest` | `api/routes/chat.py` | Mobile suggested questions |
 | `GET /health` | `api/routes/health.py` | Pipeline/Mongo/Redis health |
 | `POST /api/admin/reload-validity` | `api/routes/health.py` | Hot reload `ValidityFilter` registry |
 | `POST /retrieval/search` | `api/routes/retrieval.py` | Retrieval diagnostic endpoint |
 | `POST /session` | `api/routes/session.py` | Create chat session |
 | `GET /session/{id}` | `api/routes/session.py` | Session metadata + turns |
 | `GET /sessions?user_id=...` | `api/routes/session.py` | List sessions for user |
+| `GET /sessions/me` | `api/routes/session.py` | List sessions for authenticated user |
 | `GET /metrics/usage` | `api/routes/metrics.py` | Usage metrics from Mongo logs |
 | `GET /metrics/eval` | `api/routes/metrics.py` | Placeholder for eval metrics |
 | `/auth/*` | `routers/auth.py` | OAuth/manual auth/profile/admin account |
+| `/bookmarks*`, `/bookmark-folders*` | `api/routes/bookmark.py` | Mobile saved answers |
+| `POST /feedback` | `api/routes/feedback.py` | Mobile answer rating |
+| `/lookup/*` | `api/routes/lookup.py` | Mobile quick lookup over retrieval stores |
+| `/notifications*` | `api/routes/notification.py` | Mobile notification inbox/subscriptions |
 | `/admin/documents*` | `api/routes/upload.py` | Admin upload/review/chunk/index pipeline |
 
 ### 5.3 Chat request/response contract
@@ -197,9 +203,14 @@ user_context: UserContext | None
 user_id: str | None
 ```
 
+When a valid Bearer JWT is present, chat/session routes derive `user_id` and
+`user_context` from the authenticated DB user and ignore body-supplied identity
+fields. Body identity remains for legacy unauthenticated web/dev clients.
+
 `ChatResponse` includes:
 
 - answer and retrieved documents.
+- `session_id` and `turn_id` when a turn was persisted.
 - mode/route/intent.
 - target collections and collection scores.
 - reflected question.
@@ -222,6 +233,8 @@ user_id: str | None
 ```
 
 The pipeline writes metadata to `self.last_*` fields after `query_stream()` completes. The API route emits a final metadata event before `done`.
+Streaming metadata includes `turn_id` after MongoDB logging, enabling mobile
+bookmark/feedback actions for the freshly streamed answer.
 
 ---
 
@@ -610,6 +623,11 @@ Main collections:
 | `agent_traces` | LangGraph execution traces |
 | `documents` | admin uploaded document records |
 | `document_chunks` | chunk review/pipeline records |
+| `bookmarks` | mobile saved answer snapshots |
+| `bookmark_folders` | explicit mobile bookmark folders |
+| `feedback` | answer ratings/comments |
+| `notifications` | per-user mobile notification inbox |
+| `notification_subscriptions` | Expo push token/topic subscriptions |
 
 ### 10.2 Redis
 
@@ -633,6 +651,10 @@ Main Redis structures:
 | `doc_cache_tag:{did}` | Set | Reverse index for cache invalidation |
 | `rate:min:{id}` | ZSet | RPM sliding window |
 | `rate:day:{id}` | ZSet | RPD sliding window |
+
+`RedisSessionStore.sync_from_mongo(session_id)` refreshes session metadata after
+MongoLogger writes turns, so Redis-backed mobile session lists stay aligned with
+MongoDB `title`, `turn_count`, and `updated_at`.
 
 ### 10.3 Request tracing
 
@@ -825,13 +847,15 @@ Stack:
 - React Navigation.
 - Zustand stores from `@rag/shared`.
 - SecureStore for auth tokens.
+- MMKV for non-sensitive offline cache.
 - `react-native-sse` for streaming.
 
 Mobile API:
 
 - `mobile/src/services/api.ts` creates shared Axios client with token provider.
-- Response interceptor refreshes token on `401`.
-- `mobile/src/hooks/useStreamChat.ts` streams `/chat/stream` and handles `session`, `token`, `metadata`, `done`, `error`.
+- Response interceptor clears SecureStore/Zustand auth on `401`; mobile uses a single access token because backend has no refresh-token endpoint.
+- `mobile/src/hooks/useStreamChat.ts` streams `/chat/stream` and falls back to `/chat/v3` if SSE fails before the first token.
+- Main tabs: Chat, Lookup, Bookmarks, Notifications, Profile.
 
 ### 13.3 Shared package
 
@@ -840,9 +864,11 @@ Path: `packages/shared/`
 Contains:
 
 - TS API clients.
-- Types mirroring backend chat/auth/session contracts.
+- Types mirroring backend chat/auth/session/mobile feature contracts.
 - Zustand stores.
 - Normalize/sanitize helpers.
+
+Shared API helpers include chat, auth, session, bookmark, feedback, lookup, and notification clients. `UserPublic` is normalized with canonical `id` from backend `_id`.
 
 The mobile app imports this package as `@rag/shared`. The web app currently has its own local service/types in addition to shared equivalents.
 
@@ -1116,4 +1142,3 @@ Client asks question
   -> Mongo/Redis persist history/cache/telemetry
   -> API maps result to web/mobile trace-friendly response
 ```
-

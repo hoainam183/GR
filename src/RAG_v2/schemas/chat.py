@@ -124,6 +124,7 @@ class ChatResponse(BaseModel):
     reflected_question: Optional[str] = None
     timings_ms: Optional[Dict[str, float]] = None
     session_id: str
+    turn_id: Optional[int] = None
     # Extended trace fields
     routing_probabilities: Optional[Dict[str, float]] = None
     reflection_prompt: Optional[str] = None

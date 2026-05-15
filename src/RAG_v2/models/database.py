@@ -39,6 +39,11 @@ TURNS_COLLECTION: str = "turns"
 QUERY_LOGS_COLLECTION: str = "query_logs"
 DOCUMENTS_COLLECTION: str = "documents"
 DOCUMENT_CHUNKS_COLLECTION: str = "document_chunks"
+BOOKMARKS_COLLECTION: str = "bookmarks"
+BOOKMARK_FOLDERS_COLLECTION: str = "bookmark_folders"
+FEEDBACK_COLLECTION: str = "feedback"
+NOTIFICATIONS_COLLECTION: str = "notifications"
+NOTIFICATION_SUBSCRIPTIONS_COLLECTION: str = "notification_subscriptions"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -218,3 +223,57 @@ async def create_indexes() -> None:
         "Indexes ensured on collection '%s': document_id_asc, document_id_chunk_index",
         DOCUMENT_CHUNKS_COLLECTION,
     )
+
+    # ── mobile feature collections ──────────────────────────────────────────
+    bookmarks = db[BOOKMARKS_COLLECTION]
+    await safe_create(
+        bookmarks,
+        [("user_id", ASCENDING), ("folder", ASCENDING)],
+        name="user_id_folder",
+    )
+    await safe_create(
+        bookmarks,
+        [("user_id", ASCENDING), ("created_at", DESCENDING)],
+        name="user_id_created_at_desc",
+    )
+    await safe_create(
+        bookmarks,
+        [("user_id", ASCENDING), ("session_id", ASCENDING), ("turn_id", ASCENDING)],
+        unique=True,
+        name="user_session_turn_unique",
+    )
+
+    bookmark_folders = db[BOOKMARK_FOLDERS_COLLECTION]
+    await safe_create(
+        bookmark_folders,
+        [("user_id", ASCENDING), ("name", ASCENDING)],
+        unique=True,
+        name="user_folder_unique",
+    )
+
+    feedback = db[FEEDBACK_COLLECTION]
+    await safe_create(feedback, [("created_at", DESCENDING)], name="created_at_desc")
+    await safe_create(feedback, [("rating", ASCENDING)], name="rating_asc")
+    await safe_create(feedback, [("category", ASCENDING)], name="category_asc")
+    await safe_create(
+        feedback,
+        [("user_id", ASCENDING), ("session_id", ASCENDING), ("turn_id", ASCENDING)],
+        unique=True,
+        name="user_session_turn_unique",
+    )
+
+    notifications = db[NOTIFICATIONS_COLLECTION]
+    await safe_create(
+        notifications,
+        [("user_id", ASCENDING), ("read", ASCENDING), ("created_at", DESCENDING)],
+        name="user_read_created_at_desc",
+    )
+
+    subscriptions = db[NOTIFICATION_SUBSCRIPTIONS_COLLECTION]
+    await safe_create(
+        subscriptions,
+        [("user_id", ASCENDING), ("expo_push_token", ASCENDING)],
+        unique=True,
+        name="user_push_token_unique",
+    )
+    logger.info("Indexes ensured on mobile feature collections")

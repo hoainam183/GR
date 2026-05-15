@@ -6,15 +6,23 @@ import asyncio
 import json
 import logging
 import time
-from typing import Any
+from typing import Annotated, Any
 
 import anyio
 import anyio.to_thread
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 
-from api.dependencies import parse_history, resolve_session
+from api.dependencies import (
+    parse_history,
+    resolve_session,
+    sync_redis_session_from_mongo,
+    user_context_from_user,
+    user_id_from_user,
+)
 from api.response_mapper import ChatResponseMapper
+from auth.jwt_handler import get_optional_current_user
+from models.user import UserDocument
 from schemas.chat import (
     ChatRequest,
     ChatResponse,
@@ -87,7 +95,14 @@ def _log_legacy_turn_for_agent_response(
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(request: Request, body: ChatRequest) -> ChatResponse:
+async def chat(
+    request: Request,
+    body: ChatRequest,
+    current_user: Annotated[
+        UserDocument | None,
+        Depends(get_optional_current_user),
+    ] = None,
+) -> ChatResponse:
     """Process a question and return the full answer.
 
     Routing:
@@ -102,9 +117,10 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
     redis_session = getattr(request.app.state, "redis_session", None)
+    resolved_user_id = user_id_from_user(current_user) or body.user_id
     session_id = resolve_session(
         session_id=body.session_id,
-        user_id=body.user_id,
+        user_id=resolved_user_id,
         mongo_logger=mongo_logger,
         redis_session=redis_session,
     )
@@ -112,7 +128,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
     mode = (body.mode or RouteMode.AUTO).lower()
     logger.info("/chat mode=%s question=%r", mode, body.question[:80])
 
-    user_context_payload = (
+    user_context_payload = user_context_from_user(current_user) or (
         body.user_context.model_dump() if body.user_context else None
     )
     request_t0 = time.perf_counter()
@@ -171,6 +187,11 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
                 result=result,
                 request_started_at=request_t0,
             )
+        sync_redis_session_from_mongo(
+            redis_session=redis_session,
+            mongo_logger=mongo_logger,
+            session_id=session_id,
+        )
 
         return ChatResponseMapper.to_chat_response(
             result,
@@ -193,7 +214,14 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
 
 @router.post("/chat/v3")
 @router.post("/api/chat/v3")
-async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
+async def chat_v3(
+    request: Request,
+    body: ChatRequest,
+    current_user: Annotated[
+        UserDocument | None,
+        Depends(get_optional_current_user),
+    ] = None,
+) -> dict[str, Any]:
     """Week 3 endpoint with explicit mode control.
 
     Modes:
@@ -207,15 +235,16 @@ async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
     redis_session = getattr(request.app.state, "redis_session", None)
+    resolved_user_id = user_id_from_user(current_user) or body.user_id
     session_id = resolve_session(
         session_id=body.session_id,
-        user_id=body.user_id,
+        user_id=resolved_user_id,
         mongo_logger=mongo_logger,
         redis_session=redis_session,
     )
     history = parse_history(body.history)
     mode = (body.mode or RouteMode.AUTO).lower()
-    user_context_payload = (
+    user_context_payload = user_context_from_user(current_user) or (
         body.user_context.model_dump() if body.user_context else None
     )
 
@@ -234,6 +263,11 @@ async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
             result.setdefault("route", AgentRoute.SIMPLE)
             result.setdefault("tools_used", [])
             result.setdefault("iterations", 0)
+            sync_redis_session_from_mongo(
+                redis_session=redis_session,
+                mongo_logger=mongo_logger,
+                session_id=session_id,
+            )
             return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
         if mode == RouteMode.AGENT:
@@ -264,6 +298,11 @@ async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
                     "final_answer_length": 0,
                     "error": "Agent is disabled",
                 }
+                sync_redis_session_from_mongo(
+                    redis_session=redis_session,
+                    mongo_logger=mongo_logger,
+                    session_id=session_id,
+                )
                 return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
             result = await anyio.to_thread.run_sync(
@@ -277,6 +316,11 @@ async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
                     require_agent=False,
                 ),
             )
+            sync_redis_session_from_mongo(
+                redis_session=redis_session,
+                mongo_logger=mongo_logger,
+                session_id=session_id,
+            )
             return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
         # Auto mode
@@ -289,11 +333,60 @@ async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
                 user_context=user_context_payload,
             ),
         )
+        sync_redis_session_from_mongo(
+            redis_session=redis_session,
+            mongo_logger=mongo_logger,
+            session_id=session_id,
+        )
         return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
     except Exception as exc:
         logger.error("/chat/v3 error: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.get("/chat/suggest")
+async def suggest_questions(
+    current_user: Annotated[
+        UserDocument | None,
+        Depends(get_optional_current_user),
+    ] = None,
+    cohort: str | None = Query(default=None),
+    major: str | None = Query(default=None),
+) -> dict[str, Any]:
+    """Return lightweight suggested questions personalized by profile hints."""
+    resolved_cohort = cohort or (current_user.cohort if current_user else None)
+    resolved_major = major or (current_user.major if current_user else None)
+    base = [
+        ("Điều kiện xét học bổng kỳ này là gì?", "quydinh", 0.95),
+        ("Quy định chuẩn ngoại ngữ tốt nghiệp hiện tại?", "quydinh", 0.93),
+        ("Lịch đăng ký học phần kỳ tới khi nào?", "kehoach", 0.9),
+        ("Thủ tục xin xác nhận sinh viên thực hiện thế nào?", "stsv", 0.86),
+    ]
+    if resolved_major:
+        base.insert(
+            0,
+            (
+                f"Chương trình đào tạo ngành {resolved_major} gồm những học phần nào?",
+                "ctdt",
+                0.98,
+            ),
+        )
+    if resolved_cohort:
+        base.insert(
+            0,
+            (
+                f"Quy định tốt nghiệp áp dụng cho {resolved_cohort} là gì?",
+                "quydinh",
+                0.99,
+            ),
+        )
+    return {
+        "suggestions": [
+            {"question": question, "category": category, "popularity": popularity}
+            for question, category, popularity in base[:6]
+        ]
+    }
 
 
 # ------------------------------------------------------------------
@@ -302,7 +395,14 @@ async def chat_v3(request: Request, body: ChatRequest) -> dict[str, Any]:
 
 
 @router.post("/chat/stream")
-async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
+async def chat_stream(
+    request: Request,
+    body: ChatRequest,
+    current_user: Annotated[
+        UserDocument | None,
+        Depends(get_optional_current_user),
+    ] = None,
+) -> StreamingResponse:
     """Server-Sent Events streaming endpoint.
 
         Emits JSON payloads as SSE ``data`` frames:
@@ -316,14 +416,15 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
 
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
     redis_session = getattr(request.app.state, "redis_session", None)
+    resolved_user_id = user_id_from_user(current_user) or body.user_id
     session_id = resolve_session(
         session_id=body.session_id,
-        user_id=body.user_id,
+        user_id=resolved_user_id,
         mongo_logger=mongo_logger,
         redis_session=redis_session,
     )
     history = parse_history(body.history)
-    user_context_payload = (
+    user_context_payload = user_context_from_user(current_user) or (
         body.user_context.model_dump() if body.user_context else None
     )
 
@@ -360,6 +461,11 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
         while True:
             chunk = await queue.get()
             if chunk is None:
+                sync_redis_session_from_mongo(
+                    redis_session=redis_session,
+                    mongo_logger=mongo_logger,
+                    session_id=session_id,
+                )
                 # ── Emit metadata SSE event before done ──────────────────────
                 try:
                     meta_payload: dict[str, Any] = {
@@ -391,6 +497,7 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
                         "agent_trace": getattr(pipeline, "last_agent_trace", None),
                         "tools_used": getattr(pipeline, "last_tools_used", []),
                         "iterations": getattr(pipeline, "last_iterations", 0),
+                        "turn_id": getattr(pipeline, "last_turn_id", None),
                     }
                     yield (
                         "data: "

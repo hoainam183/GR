@@ -147,6 +147,8 @@ class TestRedisSessionStore:
         # Redis should have the session
         session = store.get_session(sid)
         assert session is not None
+        mock_mongo._sessions.insert_one.assert_called_once()
+        assert mock_mongo._sessions.insert_one.call_args.args[0]["session_id"] == sid
 
     def test_fallback_on_redis_miss_without_mongo(self, session_store):
         """When Redis misses and no MongoDB, return None."""
@@ -156,6 +158,25 @@ class TestRedisSessionStore:
     def test_list_sessions_empty_user(self, session_store):
         sessions = session_store.list_sessions(user_id="nobody")
         assert sessions == []
+
+    def test_sync_from_mongo_warms_updated_metadata(self, redis_client):
+        from cache.session_store import RedisSessionStore
+
+        mock_mongo = MagicMock()
+        mock_mongo.get_session.return_value = {
+            "session_id": "s1",
+            "user_id": "u1",
+            "title": "First question",
+            "created_at": "2026-05-15T00:00:00+00:00",
+            "updated_at": "2026-05-15T00:01:00+00:00",
+            "turn_count": 1,
+        }
+        store = RedisSessionStore(redis_client=redis_client, mongo_logger=mock_mongo)
+        store.sync_from_mongo("s1")
+
+        session = store.get_session("s1")
+        assert session["title"] == "First question"
+        assert session["turn_count"] == 1
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

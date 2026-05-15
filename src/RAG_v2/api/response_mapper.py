@@ -132,6 +132,7 @@ class ChatResponseMapper:
             reflected_question=normalized.get("reflected_question"),
             timings_ms=normalized.get("timings_ms"),
             session_id=str(normalized.get("session_id") or session_id),
+            turn_id=_optional_int(normalized.get("turn_id")),
             routing_probabilities=normalized.get("routing_probabilities"),
             reflection_prompt=normalized.get("reflection_prompt"),
             llm_prompt=normalized.get("llm_prompt"),

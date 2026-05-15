@@ -19,7 +19,11 @@ api/
 ├── middleware/
 │   └── rate_limit.py    # Rate Limiter — Giới hạn tần suất Sliding Window (Redis-backed)
 └── routes/
-    ├── chat.py          # Core Endpoints — /chat, /chat/v3, /chat/stream (SSE)
+    ├── chat.py          # Core Endpoints — /chat, /chat/v3, /chat/stream, /chat/suggest
+    ├── bookmark.py      # Mobile saved answers — /bookmarks, /bookmark-folders
+    ├── feedback.py      # Mobile answer ratings — /feedback
+    ├── lookup.py        # Mobile quick lookup — /lookup/ctdt, regulations, calendar, compare
+    ├── notification.py  # Mobile notifications — /notifications, subscriptions
     ├── health.py        # Monitoring — Health check cho tất cả backend services (Redis, Qdrant, ES...)
     ├── metrics.py       # Analytics — Thu thập thông tin sử dụng, latency và cache stats
     ├── session.py       # Session Management — Quản lý lịch sử hội thoại (List/Delete)
@@ -52,6 +56,12 @@ Hệ thống hỗ trợ 3 cơ chế xử lý câu hỏi linh hoạt:
     - `auto`: Tự động định tuyến (Chitchat -> Simple RAG -> Complex Agent).
     - `rag`: Cưỡng bức dùng pipeline RAG truyền thống.
     - `agent`: Cưỡng bức dùng LangGraph Agent.
+- **Mobile auth context**: Nếu request có `Authorization: Bearer`, `chat.py`
+  dùng profile từ JWT/DB để tạo `user_id` và `user_context`, ghi đè mọi
+  `user_id/user_context` trong body. Body legacy vẫn được giữ cho web/dev
+  clients không authenticated.
+- **Suggested questions**: `GET /chat/suggest` trả danh sách câu hỏi gợi ý nhẹ
+  theo `cohort/major` từ query params hoặc authenticated profile.
 
 ### 3.3. Response Mapping Logic (`response_mapper.py`)
 Để giữ cho `routes/chat.py` ngắn gọn và dễ bảo trì, toàn bộ logic chuyển đổi dữ liệu được tách ra `ChatResponseMapper`:
@@ -68,6 +78,20 @@ Thực hiện giới hạn tần suất truy cập cho các endpoint tiêu tốn
 ### 3.5. Session & Dependency (`dependencies.py`)
 - **Session Resolution**: Tự động tạo mới hoặc khôi phục session. Hỗ trợ cơ chế **Dual-Write** (ghi đồng thời vào Redis để truy xuất nhanh và MongoDB để lưu trữ lâu dài).
 - **History Parsing**: Chuyển đổi danh sách tin nhắn từ Pydantic sang format dict mà pipeline backend yêu cầu.
+- **Authenticated Identity Helpers**: `user_id_from_user()` và
+  `user_context_from_user()` chuẩn hóa cách các route mobile lấy identity từ
+  JWT. `sync_redis_session_from_mongo()` refresh Redis session metadata sau khi
+  pipeline ghi turn vào MongoDB.
+
+### 3.6. Mobile Feature Routes
+- `bookmark.py`: user-scoped saved answers. `POST /bookmarks` lấy snapshot từ
+  `turns`, `GET /bookmarks` phân trang, `DELETE /bookmarks/{id}`, và
+  `GET/POST /bookmark-folders`.
+- `feedback.py`: `POST /feedback` upsert một rating cho mỗi
+  `(user_id, session_id, turn_id)`.
+- `lookup.py`: thin lookup layer dùng `pipeline._retrieval_service` hiện có cho
+  CTĐT/quy định/lịch; `/lookup/compare` dùng `pipeline.query_v3()` để tổng hợp.
+- `notification.py`: lưu/đọc thông báo mobile và subscription Expo push token.
 
 ---
 
@@ -102,4 +126,4 @@ graph TD
 - **Streaming**: Hỗ trợ back-pressure thông qua `asyncio.Queue` trong luồng phát SSE.
 
 ---
-*Cập nhật lần cuối: 2026-05-11 bởi Antigravity*
+*Cập nhật lần cuối: 2026-05-15 bởi Codex*

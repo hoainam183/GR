@@ -42,6 +42,11 @@ Quản lý metadata phiên chat nhanh chóng qua Redis Hash và Sorted Sets:
 - **User Limits**: Giữ tối đa `100 sessions` gần nhất cho mỗi User để tối ưu bộ nhớ.
 - **Cold Cache Fallback / Warm-up**: Nếu không tìm thấy session trong Redis, hệ thống truy vấn MongoDB và nạp ngược lại Redis để các request tiếp theo truy xuất siêu nhanh.
 - **Zombie Cleanup**: Tự động dọn dẹp các session ID "mồ côi" trong `user_sessions` Sorted Set khi Hash chứa metadata đã bị Redis xóa do hết hạn (TTL 7 ngày).
+- **Mongo Sync After Turns**: `sync_from_mongo(session_id)` refresh Redis từ
+  MongoDB sau khi pipeline ghi turn qua `MongoLogger`, giữ `title`,
+  `updated_at`, và `turn_count` nhất quán cho mobile session list.
+- **Session ID Consistency**: `new_session()` dual-write trực tiếp cùng
+  `session_id` sang MongoDB thay vì tạo ID thứ hai rồi sửa lại.
 
 ### 3.4. Fast Context History (`history_cache.py`)
 Lưu trữ ngữ cảnh hội thoại ngắn hạn để tránh query MongoDB liên tục:
@@ -107,4 +112,4 @@ graph TD
 - **Fail-soft Architecture**: Nếu kết nối Redis bị gián đoạn, `rate_limiter` sẽ tự động cho phép request đi tiếp, `session_store` và `history_cache` sẽ tự động bypass và lấy dữ liệu trực tiếp từ MongoDB. Hệ thống log warning thay vì sụp đổ (crash).
 
 ---
-*Cập nhật lần cuối: 2026-05-11 bởi Antigravity*
+*Cập nhật lần cuối: 2026-05-15 bởi Codex*

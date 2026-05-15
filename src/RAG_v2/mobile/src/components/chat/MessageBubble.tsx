@@ -70,6 +70,8 @@ const MessageBubble = ({ message, onShowSources }: Props) => {
           <MessageActions
             content={message.content}
             sources={message.sources}
+            sessionId={message.sessionId}
+            turnId={message.turnId}
             onShowSources={onShowSources}
           />
         )}

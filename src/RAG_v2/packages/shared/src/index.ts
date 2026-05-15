@@ -26,6 +26,14 @@ export type {
   UserPublic,
   LoginRequest,
   TokenResponse,
+  Bookmark,
+  BookmarkFolder,
+  BookmarkCreateRequest,
+  FeedbackCreateRequest,
+  LookupDocument,
+  SuggestedQuestion,
+  NotificationItem,
+  NotificationSubscribeRequest,
 } from './types';
 
 // ─── API ─────────────────────────────────────────────────────────────────────
@@ -39,8 +47,23 @@ export {
   registerUser,
   getMe,
   getSessions,
+  getMySessions,
   getSession,
   createSession,
+  createBookmark,
+  listBookmarks,
+  deleteBookmark,
+  listBookmarkFolders,
+  createBookmarkFolder,
+  submitFeedback,
+  lookupCTDT,
+  lookupRegulations,
+  lookupCalendar,
+  lookupCompare,
+  getSuggestedQuestions,
+  listNotifications,
+  markNotificationRead,
+  subscribeNotifications,
 } from './api';
 export type { ApiClientConfig, ResolvedChatIdentity } from './api';
 

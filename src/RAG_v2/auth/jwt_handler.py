@@ -24,7 +24,7 @@ from typing import Annotated
 
 from bson import ObjectId
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer
 from jose import ExpiredSignatureError, JWTError, jwt
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -34,6 +34,7 @@ from models.user import UserDocument
 # ─── OAuth2 scheme — extracts Bearer token from the Authorization header ──────
 # tokenUrl is only used by OpenAPI docs; the real login flow is /auth/login.
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=True)
+optional_bearer_scheme = HTTPBearer(auto_error=False)
 
 
 # ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -171,4 +172,47 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    return user
+
+
+async def get_optional_current_user(
+    credentials: Annotated[
+        HTTPAuthorizationCredentials | None,
+        Depends(optional_bearer_scheme),
+    ],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> UserDocument | None:
+    """Resolve a Bearer JWT when present, otherwise return ``None``.
+
+    Missing credentials are allowed so legacy unauthenticated chat clients keep
+    working. Malformed or expired credentials still fail with ``401`` because a
+    client that sends an Authorization header is explicitly attempting auth.
+    """
+    if credentials is None:
+        return None
+
+    payload = verify_token(credentials.credentials)
+    user_id: str | None = payload.get("sub")
+    if not user_id or not ObjectId.is_valid(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token contains an invalid user identifier",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    doc = await db[USERS_COLLECTION].find_one({"_id": ObjectId(user_id)})
+    if doc is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User account not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = UserDocument.model_validate(doc)
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User account has been deactivated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return user

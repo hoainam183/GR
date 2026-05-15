@@ -238,6 +238,10 @@ def create_app() -> FastAPI:
     from .routes.metrics import router as metrics_router
     from .routes.retrieval import router as retrieval_router
     from .routes.upload import router as upload_router
+    from .routes.bookmark import router as bookmark_router
+    from .routes.feedback import router as feedback_router
+    from .routes.lookup import router as lookup_router
+    from .routes.notification import router as notification_router
     from routers.auth import router as auth_router
 
     app = FastAPI(
@@ -254,8 +258,11 @@ def create_app() -> FastAPI:
             "http://localhost:19006", # Expo web
             "http://localhost:8081",  # Metro bundler
             "http://10.0.2.2:8000",  # Android emulator
-            "http://192.168.*:*",     # LAN devices
         ],
+        allow_origin_regex=(
+            r"^http://(localhost|127\.0\.0\.1|10\.0\.2\.2|"
+            r"192\.168\.\d{1,3}\.\d{1,3})(:\d+)?$"
+        ),
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
@@ -268,6 +275,10 @@ def create_app() -> FastAPI:
     app.include_router(metrics_router)
     app.include_router(retrieval_router)
     app.include_router(upload_router)
+    app.include_router(bookmark_router)
+    app.include_router(feedback_router)
+    app.include_router(lookup_router)
+    app.include_router(notification_router)
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
     # Rate-limit middleware is registered as a startup callback because it

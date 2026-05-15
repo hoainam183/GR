@@ -20,3 +20,16 @@ export type {
   LoginRequest,
   TokenResponse,
 } from './auth';
+
+export { normalizeUser } from './auth';
+
+export type {
+  Bookmark,
+  BookmarkFolder,
+  BookmarkCreateRequest,
+  FeedbackCreateRequest,
+  LookupDocument,
+  SuggestedQuestion,
+  NotificationItem,
+  NotificationSubscribeRequest,
+} from './mobile';

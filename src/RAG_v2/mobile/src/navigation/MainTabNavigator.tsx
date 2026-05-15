@@ -8,9 +8,15 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import ChatStack from './ChatStack';
 import ProfileStack from './ProfileStack';
+import LookupStack from './LookupStack';
+import BookmarkStack from './BookmarkStack';
+import NotificationStack from './NotificationStack';
 
 export type MainTabParamList = {
   ChatTab: undefined;
+  LookupTab: undefined;
+  BookmarkTab: undefined;
+  NotificationTab: undefined;
   ProfileTab: undefined;
 };
 
@@ -55,6 +61,36 @@ const MainTabNavigator = () => (
             height: 56,
           },
         };
+      }}
+    />
+    <Tab.Screen
+      name="LookupTab"
+      component={LookupStack}
+      options={{
+        tabBarLabel: 'Tra cứu',
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="search-outline" size={size} color={color} />
+        ),
+      }}
+    />
+    <Tab.Screen
+      name="BookmarkTab"
+      component={BookmarkStack}
+      options={{
+        tabBarLabel: 'Đã lưu',
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="bookmark-outline" size={size} color={color} />
+        ),
+      }}
+    />
+    <Tab.Screen
+      name="NotificationTab"
+      component={NotificationStack}
+      options={{
+        tabBarLabel: 'Thông báo',
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="notifications-outline" size={size} color={color} />
+        ),
       }}
     />
     <Tab.Screen

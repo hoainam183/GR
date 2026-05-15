@@ -31,9 +31,18 @@ models/
 - `get_database()`: Trả về database instance
 
 **Collections:**
-- `users`, `sessions`, `turns`, `query_logs` — existing
-- `documents` — admin-uploaded document records (Phase 2)
-- `document_chunks` — processed text chunks (Phase 2)
+- `users`, `sessions`, `turns`, `query_logs` — auth/session/chat logs
+- `documents`, `document_chunks` — admin-uploaded document pipeline
+- `bookmarks`, `bookmark_folders` — mobile saved answers and explicit folders
+- `feedback` — answer rating/comment records scoped by user/session/turn
+- `notifications`, `notification_subscriptions` — mobile notification inbox and Expo push subscriptions
+
+`create_indexes()` also ensures mobile feature indexes:
+- `bookmarks`: `(user_id, folder)`, `(user_id, created_at desc)`, unique `(user_id, session_id, turn_id)`.
+- `bookmark_folders`: unique `(user_id, name)`.
+- `feedback`: `created_at`, `rating`, `category`, unique `(user_id, session_id, turn_id)`.
+- `notifications`: `(user_id, read, created_at desc)`.
+- `notification_subscriptions`: unique `(user_id, expo_push_token)`.
 
 ---
 

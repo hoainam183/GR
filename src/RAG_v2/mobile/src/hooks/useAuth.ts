@@ -14,6 +14,8 @@ import {
 } from '../services/secureStorage';
 import { useAuthStore } from '../stores/authStore';
 
+let hasBootstrappedAuth = false;
+
 export const useAuth = () => {
   const { isAuthenticated, user, setAuth, clearAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
@@ -21,6 +23,11 @@ export const useAuth = () => {
   // ─── Restore session on app launch ───────────────────────────────────────
   useEffect(() => {
     const restore = async () => {
+      if (hasBootstrappedAuth) {
+        setIsLoading(false);
+        return;
+      }
+      hasBootstrappedAuth = true;
       try {
         const token = await getToken();
         if (!token) {

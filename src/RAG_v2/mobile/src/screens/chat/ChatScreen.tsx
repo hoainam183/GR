@@ -17,18 +17,26 @@ import {
   StyleSheet,
   Text,
   Pressable,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useNetInfo } from '@react-native-community/netinfo';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { ChatStackParamList } from '../../navigation/ChatStack';
-import type { Message, ChatV3Response, RetrievedDocument } from '@rag/shared';
+import type {
+  ChatV3Response,
+  Message,
+  RetrievedDocument,
+  SuggestedQuestion,
+} from '@rag/shared';
+import { useQuery } from '@tanstack/react-query';
 import { useStreamChat } from '../../hooks/useStreamChat';
 import { useProfile } from '../../hooks/useProfile';
 import { useChatStore } from '../../stores/chatStore';
-import { useAuthStore } from '../../stores/authStore';
-import { getSession, resolveChatIdentity } from '@rag/shared';
+import { getSession, getSuggestedQuestions } from '@rag/shared';
 import { apiClient } from '../../services/api';
+import { CACHE_KEYS, getCache, setCache } from '../../services/offlineCache';
 import MessageBubble from '../../components/chat/MessageBubble';
 import ChatInput from '../../components/chat/ChatInput';
 import TypingIndicator from '../../components/chat/TypingIndicator';
@@ -53,9 +61,9 @@ const ChatScreen = ({ route, navigation }: Props) => {
     reset,
   } = useChatStore();
 
-  const user = useAuthStore((s) => s.user);
   const { displayName } = useProfile();
   const { startStream, stopStream } = useStreamChat();
+  const netInfo = useNetInfo();
   const flatListRef = useRef<FlatList>(null);
   const isMountedRef = useRef(true);
 
@@ -66,6 +74,16 @@ const ChatScreen = ({ route, navigation }: Props) => {
   // Session title derived from first user message
   const [sessionTitle, setSessionTitle] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
+  const { data: suggestions = [] } = useQuery({
+    queryKey: ['chat-suggestions'],
+    queryFn: async () => {
+      const result = await getSuggestedQuestions(apiClient);
+      setCache(CACHE_KEYS.suggestions, result);
+      return result;
+    },
+    initialData: () => getCache<SuggestedQuestion[]>(CACHE_KEYS.suggestions),
+    staleTime: 10 * 60 * 1000,
+  });
 
   // Track mount state
   useEffect(() => {
@@ -100,6 +118,8 @@ const ChatScreen = ({ route, navigation }: Props) => {
             role: 'assistant' as const,
             content: t.answer,
             timestamp: new Date(t.timestamp),
+            sessionId: sessionIdParam,
+            turnId: t.turn_id,
             modelName: t.model_name,
             mode: t.mode,
             route: t.route ?? t.intent,
@@ -138,6 +158,19 @@ const ChatScreen = ({ route, navigation }: Props) => {
   const handleSend = useCallback(
     async (content: string) => {
       const capturedSessionId = activeSessionId;
+      let currentSessionId = capturedSessionId;
+      const online =
+        netInfo.isConnected !== false && netInfo.isInternetReachable !== false;
+      if (!online) {
+        addMessage({
+          id: `offline-${Date.now()}`,
+          role: 'assistant',
+          content: 'Bạn cần kết nối Internet để gửi câu hỏi mới.',
+          timestamp: new Date(),
+          error: 'offline',
+        });
+        return;
+      }
 
       // Add user message
       const userMessage: Message = {
@@ -165,19 +198,6 @@ const ChatScreen = ({ route, navigation }: Props) => {
         content: m.content,
       }));
 
-      const identity = resolveChatIdentity(
-        user
-          ? {
-              student_id: user.student_id,
-              cohort: user.cohort,
-              major: user.major,
-              major_code: user.major_code,
-              full_name: user.full_name,
-            }
-          : undefined,
-        user?.email ?? user?.username ?? undefined,
-      );
-
       try {
         await startStream(
           {
@@ -185,12 +205,11 @@ const ChatScreen = ({ route, navigation }: Props) => {
             history: historyForApi,
             top_k: 5,
             session_id: capturedSessionId,
-            user_context: identity.userContext,
-            user_id: identity.userId,
           },
           {
             onSessionId: (sid) => {
               if (!isMountedRef.current) return;
+              currentSessionId = sid;
               setActiveSessionId(sid);
             },
 
@@ -205,6 +224,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
                   role: 'assistant',
                   content: delta,
                   timestamp: new Date(),
+                  sessionId: currentSessionId,
                   isStreaming: true,
                 });
               } else {
@@ -220,6 +240,8 @@ const ChatScreen = ({ route, navigation }: Props) => {
                 modelName: meta.model_name,
                 timingsMs: meta.timings_ms,
                 sources: meta.retrieved_documents,
+                sessionId: meta.session_id || currentSessionId,
+                turnId: meta.turn_id,
                 isStreaming: false,
               });
             },
@@ -262,9 +284,10 @@ const ChatScreen = ({ route, navigation }: Props) => {
     },
     [
       activeSessionId,
+      netInfo.isConnected,
+      netInfo.isInternetReachable,
       messages,
       sessionTitle,
-      user,
       startStream,
       addMessage,
       updateMessage,
@@ -291,11 +314,33 @@ const ChatScreen = ({ route, navigation }: Props) => {
     : 'Bắt đầu trò chuyện';
 
   const renderEmptyState = () => (
-    <EmptyState
-      icon="chatbubbles"
-      title={greeting}
-      subtitle="Tôi có thể tư vấn về quy chế học tập, học bổng và các quy định của BKHN."
-    />
+    <View style={styles.emptyWrap}>
+      <EmptyState
+        icon="chatbubbles"
+        title={greeting}
+        subtitle="Tôi có thể tư vấn về quy chế học tập, học bổng và các quy định của BKHN."
+      />
+      {suggestions.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.suggestionRow}
+        >
+          {suggestions.slice(0, 6).map((item) => (
+            <Pressable
+              key={item.question}
+              style={styles.suggestionChip}
+              onPress={() => handleSend(item.question)}
+              disabled={chatPhase !== 'idle'}
+            >
+              <Text style={styles.suggestionText} numberOfLines={2}>
+                {item.question}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
+    </View>
   );
 
   const headerTitle = sessionTitle ?? 'HUST Assistant';
@@ -355,7 +400,14 @@ const ChatScreen = ({ route, navigation }: Props) => {
         )}
 
         {/* Input */}
-        <ChatInput onSend={handleSend} disabled={chatPhase !== 'idle'} />
+        <ChatInput
+          onSend={handleSend}
+          disabled={
+            chatPhase !== 'idle' ||
+            netInfo.isConnected === false ||
+            netInfo.isInternetReachable === false
+          }
+        />
       </KeyboardAvoidingView>
 
       {/* Source Bottom Sheet */}
@@ -404,7 +456,31 @@ const styles = StyleSheet.create({
   messageList: {
     paddingVertical: 16,
   },
-
+  emptyWrap: {
+    flex: 1,
+  },
+  suggestionRow: {
+    paddingHorizontal: 16,
+    paddingBottom: 18,
+    gap: 10,
+  },
+  suggestionChip: {
+    width: 220,
+    minHeight: 54,
+    justifyContent: 'center',
+    backgroundColor: '#1e293b',
+    borderWidth: 1,
+    borderColor: '#334155',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  suggestionText: {
+    color: '#e2e8f0',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+  },
 });
 
 export default ChatScreen;

@@ -467,7 +467,7 @@ class RAGPipeline:
         # Log to MongoDB
         if session_id and self._mongo_logger:
             latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
-            self._mongo_logger.log_turn(
+            turn_id = self._mongo_logger.log_turn(
                 session_id=session_id,
                 question=question,
                 result=result,
@@ -475,6 +475,7 @@ class RAGPipeline:
                 latency_ms=latency_ms,
                 timings_ms=timings_ms,
             )
+            result["turn_id"] = turn_id
 
         return result
 
@@ -775,7 +776,7 @@ class RAGPipeline:
 
         if session_id and self._mongo_logger:
             latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
-            self._mongo_logger.log_turn(
+            turn_id = self._mongo_logger.log_turn(
                 session_id=session_id,
                 question=question,
                 result=result,
@@ -783,6 +784,7 @@ class RAGPipeline:
                 latency_ms=latency_ms,
                 timings_ms=timings_ms,
             )
+            result["turn_id"] = turn_id
 
         return result
 
@@ -1100,7 +1102,7 @@ class RAGPipeline:
                 "tools_used": self.last_tools_used,
                 "iterations": self.last_iterations,
             }
-            self._mongo_logger.log_turn(
+            turn_id = self._mongo_logger.log_turn(
                 session_id=session_id,
                 question=question,
                 result=result,
@@ -1108,3 +1110,6 @@ class RAGPipeline:
                 latency_ms=latency_ms,
                 timings_ms=timings_ms,
             )
+            self.last_turn_id = turn_id
+        else:
+            self.last_turn_id = None

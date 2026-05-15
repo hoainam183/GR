@@ -21,6 +21,18 @@ export const getSessions = async (
 };
 
 /**
+ * List sessions for the authenticated user — GET /sessions/me
+ */
+export const getMySessions = async (
+  client: AxiosInstance,
+): Promise<Session[]> => {
+  const response = await client.get<{ sessions: Session[]; count: number }>(
+    API_PATHS.SESSIONS_ME,
+  );
+  return response.data.sessions;
+};
+
+/**
  * Get a single session with its turns — GET /session/:id
  */
 export const getSession = async (
@@ -39,11 +51,11 @@ export const getSession = async (
  */
 export const createSession = async (
   client: AxiosInstance,
-  userId: string,
+  userId?: string,
 ): Promise<{ session_id: string }> => {
   const response = await client.post<{
     session_id: string;
     created_at: string;
-  }>(API_PATHS.SESSION, { user_id: userId });
+  }>(API_PATHS.SESSION, userId ? { user_id: userId } : {});
   return { session_id: response.data.session_id };
 };

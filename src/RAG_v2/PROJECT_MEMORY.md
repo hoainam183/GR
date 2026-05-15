@@ -224,6 +224,8 @@ Cohort format runtime: `K` + 2-3 chữ số, ví dụ `K65`, `K70`.
 - `POST /chat/v3`: smart routing response shape cho UI trace/debug.
 - `POST /api/chat/v3`: alias của `/chat/v3`.
 - `POST /chat/stream`: SSE stream, gửi `session`, token chunks, `metadata`, `done`.
+- `GET /chat/suggest`: suggested questions for mobile, based on query params or authenticated profile.
+- If `Authorization: Bearer` is present, chat routes derive `user_id` and `user_context` from the JWT-backed DB user and ignore spoofable body identity fields.
 
 `ChatRequest` fields chính:
 
@@ -251,6 +253,7 @@ mode, route, tools, tool_calls, iterations
 agent_trace, agent_error
 timings_ms
 session_id
+turn_id
 routing_probabilities
 reflection_prompt
 llm_prompt
@@ -260,6 +263,7 @@ llm_prompt
 
 - Auth router được include prefix `/auth`.
 - Routes: `GET /auth/login`, `GET /auth/callback`, `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `PATCH /auth/me`, `POST /auth/logout`, `POST /auth/admin/create`.
+- `PATCH /auth/me` supports `major_code` in addition to profile fields used by chat context.
 - Microsoft OAuth chỉ chấp nhận email domain `@sis.hust.edu.vn`.
 - JWT có `sub`, `email`, `role`, `iat`, `exp`; role đọc lại từ DB khi login.
 - Role DB: `student` mặc định, `admin` cho admin.
@@ -268,10 +272,15 @@ llm_prompt
 
 ### Session, Metrics, Health, Retrieval
 
-- `POST /session`, `GET /session/{session_id}`, `GET /sessions?user_id=...`.
+- `POST /session`, `GET /session/{session_id}`, `GET /sessions?user_id=...`, `GET /sessions/me`.
 - `GET /health`, `POST /api/admin/reload-validity`.
 - `GET /metrics/usage`, `GET /metrics/eval`.
 - `POST /retrieval/search` là diagnostic endpoint cho raw retrieval.
+- Mobile feature APIs:
+  - `POST/GET/DELETE /bookmarks`, `GET/POST /bookmark-folders`.
+  - `POST /feedback`.
+  - `GET /lookup/ctdt/{major_code}`, `/lookup/regulations`, `/lookup/calendar`, `/lookup/compare`.
+  - `GET /notifications`, `PUT /notifications/{id}/read`, `POST /notifications/subscribe`.
 
 ### Admin Document Pipeline
 
@@ -327,15 +336,16 @@ Tool adapter details:
 
 - Located at `mobile`.
 - Stack: Expo, React Native, React Query, React Navigation, NativeWind, SecureStore, `react-native-sse`, `@rag/shared`.
-- API base URL is hard-coded in `mobile/src/utils/constants.ts` for LAN device testing.
-- Streaming uses `/chat/stream`.
-- Mobile API client attempts token refresh via `/auth/refresh`; backend currently has no matching refresh endpoint.
+- API base URL uses `EXPO_PUBLIC_API_BASE_URL`, then emulator/simulator defaults.
+- Streaming uses `/chat/stream` with non-streaming `/chat/v3` fallback before the first token.
+- Auth uses a single JWT access token in SecureStore; `401` clears SecureStore and auth state.
+- Bottom tabs cover Chat, Lookup, Bookmarks, Notifications, and Profile. MMKV caches sessions, suggestions, and bookmarks for partial offline read access.
 
 ### Shared package
 
 - Located at `packages/shared`.
-- Exports API client, auth/chat/session API helpers, shared types, stores, constants and normalization utilities.
-- Shared constants include `/chat/v3`, `/chat/stream`, `/auth/refresh`; ensure backend route exists before relying on refresh behavior.
+- Exports API client, auth/chat/session/bookmark/feedback/lookup/notification helpers, shared types, stores, constants and normalization utilities.
+- `UserPublic` is normalized with canonical `id` from backend `_id`.
 
 ---
 
@@ -392,8 +402,6 @@ Do not hardcode provider/model/host values in code; use settings/env.
 - Auto-crawler reuse in `api/main.py` also checks `pipe.retrieval_service`, but `RAGPipeline` currently has no public `retrieval_service` attribute.
 - `rag_flow_stream()` initializes stream metadata trace, but does not pass `trace_out` into `MultiCollectionSearch.search()`, so `applied_filters`/`collection_results` may be empty in stream metadata.
 - `DocumentPipeline.chunk()` writes a debug chunk dump to a hard-coded absolute path under `/Users/nam.nguyen/Documents/personal/GR/src/RAG_v2/data/quydinh/admin_upload`.
-- Mobile/shared clients reference `/auth/refresh`, but backend auth router does not implement a refresh-token endpoint.
-- `schemas/user.py::UserUpdate` lacks `major_code`, so `PATCH /auth/me` cannot update `major_code` even though chat `user_context` supports it.
 - Redis-backed cache/session/rate-limit behavior is inactive when `redis_enabled=false`, even if related feature flags/defaults are true.
 - OAuth redirect and dev ports are inconsistent: web Vite config uses `8080`, while auth callback redirect code uses `http://localhost:5173`.
 - Elasticsearch keyword search does not currently implement custom course-field boosting beyond `text^1.0`, `title^1.5`, fuzziness and filters. Keep course-query boosting documented at the hybrid fusion layer, not as ES query behavior.

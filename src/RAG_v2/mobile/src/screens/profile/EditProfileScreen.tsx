@@ -79,6 +79,7 @@ const EditProfileScreen = () => {
       if (fullName.trim() !== user?.full_name) body.full_name = fullName.trim();
       if (cohort !== user?.cohort) body.cohort = cohort;
       if (major !== user?.major) body.major = major;
+      if (majorCode !== user?.major_code) body.major_code = majorCode;
 
       // Only send if there are changes
       if (Object.keys(body).length === 0) {

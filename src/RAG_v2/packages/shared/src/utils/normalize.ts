@@ -112,6 +112,12 @@ export const normalizeV3Response = (
         ? (payload.timings_ms as Record<string, number>)
         : undefined,
     session_id: cleanText(payload.session_id) || fallbackSessionId || '',
+    turn_id:
+      typeof payload.turn_id === 'number'
+        ? payload.turn_id
+        : typeof payload.turn_id === 'string'
+          ? Number(payload.turn_id)
+          : undefined,
     routing_probabilities:
       payload.routing_probabilities &&
       typeof payload.routing_probabilities === 'object'

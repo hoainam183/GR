@@ -61,14 +61,17 @@ const SourceBottomSheet = ({ sources, visible, onClose }: Props) => {
               (doc.metadata?.title as string) ??
               (doc.metadata?.source_url as string) ??
               `Nguồn #${doc.rank}`;
+            const score = doc.rerank_score ?? doc.score;
+            const scoreLabel =
+              score >= 0 && score <= 1
+                ? `${(score * 100).toFixed(1)}%`
+                : score.toFixed(2);
 
             return (
               <View key={idx} style={styles.sourceCard}>
                 <View style={styles.sourceHeader}>
                   <Text style={styles.rank}>#{doc.rank}</Text>
-                  <Text style={styles.score}>
-                    {(doc.score * 100).toFixed(1)}%
-                  </Text>
+                  <Text style={styles.score}>{scoreLabel}</Text>
                   {doc.collection && (
                     <View style={styles.collectionBadge}>
                       <Text style={styles.collectionText}>

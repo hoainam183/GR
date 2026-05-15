@@ -79,13 +79,15 @@ Luồng xử lý non-streaming chuẩn.
 3. **Tier-3 LLM Domain Fallback**: Gọi `_llm_domain_classify()` nếu `_should_trigger_tier3()` trả về `True`.
 4. Nếu intent = `chitchat` → gọi `chitchat_flow()`.
 5. Nếu intent = `rag` → gọi `rag_flow()` với đầy đủ các thành phần retrieval.
-6. Log kết quả vào MongoDB qua `mongo_logger.log_turn()`.
+6. Log kết quả vào MongoDB qua `mongo_logger.log_turn()` và gắn `turn_id`
+   vào result để API/mobile có thể bookmark/feedback đúng lượt trả lời.
 
 **Return Dict keys:**
 - `question`, `answer`, `sources`, `num_sources`, `intent`
 - `model_name`, `request_trace`, `correlation_id`
 - `reflected_question`, `target_collections`, `collection_scores`
 - `timings_ms` (breakdown chi tiết từng stage)
+- `turn_id` khi request có `session_id` và turn được ghi vào MongoDB
 
 ---
 
@@ -106,6 +108,7 @@ Luồng xử lý streaming, yield token-by-token.
 - `last_reflected_question`, `last_target_collections`, `last_collection_scores`
 - `last_routing_probabilities`, `last_applied_filters`, `last_collection_results`
 - `last_agent_trace`, `last_tools_used`, `last_iterations`
+- `last_turn_id` sau khi stream kết thúc và turn được ghi MongoDB
 
 **Lưu ý:** Chitchat turns **không** log vào MongoDB để tránh noise.
 
@@ -552,5 +555,4 @@ Admin có thể chạy chunking với nhiều strategy khác nhau — chunks đ�
 #### Cleanup
 
 `delete_indexed_data(doc_id, collection)` — Xóa data từ Qdrant + ES theo `document_id` metadata. Safe khi document chưa được index.
-
 

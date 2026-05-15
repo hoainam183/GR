@@ -18,9 +18,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { ChatStackParamList } from '../../navigation/ChatStack';
 import type { Session } from '@rag/shared';
-import { getSessions } from '@rag/shared';
+import { getMySessions } from '@rag/shared';
 import { apiClient } from '../../services/api';
-import { useAuthStore } from '../../stores/authStore';
+import { CACHE_KEYS, getCache, setCache } from '../../services/offlineCache';
 import { useChatStore } from '../../stores/chatStore';
 import EmptyState from '../../components/common/EmptyState';
 
@@ -58,24 +58,24 @@ const formatDate = (isoString: string): string => {
 };
 
 const SessionListScreen = ({ navigation }: Props) => {
-  const user = useAuthStore((s) => s.user);
   const resetChat = useChatStore((s) => s.reset);
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch sessions for the current user
-  const userId =
-    user?.email ?? user?.username ?? user?.student_id ?? '';
-
   const {
     data: sessions,
     isLoading,
     error,
     refetch,
   } = useQuery({
-    queryKey: ['sessions', userId],
-    queryFn: () => getSessions(apiClient, userId),
-    enabled: !!userId,
+    queryKey: ['sessions', 'me'],
+    queryFn: async () => {
+      const result = await getMySessions(apiClient);
+      setCache(CACHE_KEYS.sessions, result);
+      return result;
+    },
+    initialData: () => getCache<Session[]>(CACHE_KEYS.sessions),
     staleTime: 30_000, // 30 seconds
   });
 

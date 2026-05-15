@@ -71,6 +71,7 @@ class UserUpdate(BaseModel):
     student_id: Optional[str] = None
     cohort: Optional[str] = None
     major: Optional[str] = None
+    major_code: Optional[str] = None
     avatar_url: Optional[str] = None
     is_profile_complete: Optional[bool] = None
     is_active: Optional[bool] = None

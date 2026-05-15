@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
+from models.user import UserDocument
+
 
 def resolve_session(
     *,
@@ -64,3 +66,35 @@ def parse_history(
     if not history:
         return []
     return [{"role": m.role, "content": m.content} for m in history]
+
+
+def user_id_from_user(user: UserDocument | None) -> str | None:
+    """Return the canonical API/session user id for an authenticated user."""
+    return str(user.id) if user is not None and user.id is not None else None
+
+
+def user_context_from_user(user: UserDocument | None) -> dict[str, str] | None:
+    """Build the chat ``user_context`` payload from an authenticated profile."""
+    if user is None:
+        return None
+    return {
+        "student_id": user.student_id,
+        "cohort": user.cohort,
+        "major": user.major,
+        "major_code": user.major_code,
+        "full_name": user.full_name,
+    }
+
+
+def sync_redis_session_from_mongo(
+    *,
+    redis_session: Any,
+    mongo_logger: Any,
+    session_id: str | None,
+) -> None:
+    """Best-effort refresh of Redis session metadata from MongoDB."""
+    if redis_session is None or mongo_logger is None or not session_id:
+        return
+    sync = getattr(redis_session, "sync_from_mongo", None)
+    if callable(sync):
+        sync(session_id)

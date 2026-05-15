@@ -8,8 +8,9 @@ import EventSource from 'react-native-sse';
 import { useCallback, useRef } from 'react';
 import { getToken } from '../services/secureStorage';
 import { API_BASE_URL } from '../utils/constants';
-import type { ChatRequest, ChatV3Response, UserContext } from '@rag/shared';
-import { normalizeV3Response, cleanText } from '@rag/shared';
+import { apiClient } from '../services/api';
+import type { ChatRequest, ChatV3Response } from '@rag/shared';
+import { normalizeV3Response, cleanText, sendMessageV3 } from '@rag/shared';
 
 export interface StreamChatHandlers {
   onSessionId?: (sessionId: string) => void;
@@ -40,7 +41,36 @@ export const useStreamChat = () => {
       });
       esRef.current = es;
 
-      let buffer = '';
+      let receivedFirstToken = false;
+      let finished = false;
+
+      const fallbackToNonStreaming = async (message?: string) => {
+        if (finished || receivedFirstToken) return;
+        finished = true;
+        es.close();
+        try {
+          const response = await sendMessageV3(
+            apiClient,
+            request.question,
+            request.history ?? [],
+            request.top_k ?? 5,
+            request.mode ?? 'auto',
+            request.session_id,
+            request.user_context,
+            request.user_id,
+          );
+          if (response.session_id) handlers.onSessionId?.(response.session_id);
+          if (response.answer) handlers.onToken?.(response.answer);
+          handlers.onMetadata?.(response);
+          handlers.onDone?.();
+        } catch (error) {
+          handlers.onError?.(
+            error instanceof Error
+              ? error.message
+              : message || 'Connection lost',
+          );
+        }
+      };
 
       es.addEventListener('message', (event) => {
         if (!event.data) return;
@@ -56,13 +86,14 @@ export const useStreamChat = () => {
             const delta =
               typeof data.delta === 'string' ? data.delta : '';
             if (delta) {
-              buffer += delta;
+              receivedFirstToken = true;
               handlers.onToken?.(delta);
             }
           } else if (type === 'metadata') {
-            const meta = normalizeV3Response(data);
+            const meta = normalizeV3Response(data, request.session_id);
             handlers.onMetadata?.(meta);
           } else if (type === 'done') {
+            finished = true;
             handlers.onDone?.();
             es.close();
           } else if (type === 'error') {
@@ -75,15 +106,19 @@ export const useStreamChat = () => {
           }
         } catch {
           // Plain text token fallback
-          buffer += event.data;
+          receivedFirstToken = true;
           handlers.onToken?.(event.data);
         }
       });
 
       es.addEventListener('error', (event) => {
-        handlers.onError?.(
-          (event as { message?: string }).message || 'Connection lost',
-        );
+        const message = (event as { message?: string }).message || 'Connection lost';
+        if (!receivedFirstToken) {
+          void fallbackToNonStreaming(message);
+          return;
+        }
+        finished = true;
+        handlers.onError?.(message);
         es.close();
       });
     },

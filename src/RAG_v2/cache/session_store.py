@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, cast
 
 import redis
+from pymongo.errors import DuplicateKeyError
 
 logger = logging.getLogger(__name__)
 
@@ -89,35 +90,22 @@ class RedisSessionStore:
                 return self._mongo.new_session(user_id=user_id)
             raise
 
-        # Dual-write to MongoDB
+        # Dual-write to MongoDB using the same session_id. MongoDB remains the
+        # durable source of truth for turns and analytics.
         if self._mongo:
             try:
-                self._mongo.new_session.__func__(self._mongo, user_id=user_id)
-                # Re-use the same session_id — override MongoDB's generated one
-                self._mongo._sessions.update_one(
-                    {"session_id": {"$exists": True}},
-                    {"$set": {"session_id": session_id}},
-                    sort=[("created_at", -1)],
-                )
-                # Actually, simpler: insert directly with same ID
-                self._mongo._sessions.delete_one(
-                    {"session_id": {"$ne": session_id, "user_id": user_id}},
-                )
+                self._mongo._sessions.insert_one({
+                    "session_id": session_id,
+                    "user_id": user_id,
+                    "title": None,
+                    "created_at": now,
+                    "updated_at": now,
+                    "turn_count": 0,
+                })
+            except DuplicateKeyError:
+                logger.warning("MongoDB session_id collision during Redis dual-write")
             except Exception:
-                # Best-effort dual-write — don't break the request
                 logger.warning("Dual-write new_session to MongoDB failed", exc_info=True)
-                # Direct insert approach:
-                try:
-                    self._mongo._sessions.insert_one({
-                        "session_id": session_id,
-                        "user_id": user_id,
-                        "title": None,
-                        "created_at": now,
-                        "updated_at": now,
-                        "turn_count": 0,
-                    })
-                except Exception:
-                    logger.warning("Dual-write fallback insert also failed", exc_info=True)
 
         return session_id
 
@@ -237,6 +225,23 @@ class RedisSessionStore:
             pipe.execute()
         except redis.RedisError:
             logger.warning("Redis update_session_on_turn failed", exc_info=True)
+
+    def sync_from_mongo(self, session_id: str) -> None:
+        """Refresh Redis metadata for a session from MongoDB.
+
+        The RAG pipeline logs turns through ``MongoLogger``. Calling this after
+        a chat request keeps Redis list views consistent with MongoDB title,
+        updated_at, and turn_count without coupling MongoLogger to Redis.
+        """
+        if self._mongo is None:
+            return
+        try:
+            session = self._mongo.get_session(session_id)
+        except Exception:
+            logger.warning("Failed to read MongoDB session for Redis sync", exc_info=True)
+            return
+        if session:
+            self._warm_session(session_id, session)
 
     # ------------------------------------------------------------------
     # Internal helpers

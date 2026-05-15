@@ -4,9 +4,30 @@
 
 ---
 
+## 0. Trạng thái triển khai 2026-05-15
+
+- P0 đã chuyển sang single JWT access token trên mobile; không gọi
+  `/auth/refresh`. API client clear SecureStore/Zustand auth khi gặp `401`.
+- Chat/session backend derive `user_id` và `user_context` từ Bearer JWT khi có,
+  body identity chỉ còn là legacy fallback. Mobile chat gửi payload tối giản
+  kèm `session_id/history`.
+- `/sessions/me`, `turn_id` trong chat response/SSE metadata, và Redis
+  `sync_from_mongo()` hỗ trợ session list/bookmark/feedback ổn định.
+- P1 MVP đã có backend/mobile surface cho Bookmark, Feedback, Lookup,
+  Suggested Questions, Notifications. Lookup v1 là thin retrieval API, chưa là
+  relational CTĐT database.
+- P2 partial offline đã có MMKV cache cho sessions, suggestions, bookmarks và
+  chặn gửi câu hỏi mới khi offline. Push token registration bằng
+  `expo-notifications` chưa được cài dependency trong app; backend subscription
+  endpoint đã sẵn sàng nhận Expo push token.
+- Root workspace dùng npm/Turbo với `packageManager` trong `package.json`;
+  `npm run typecheck` chạy shared và mobile.
+
+---
+
 ## 1. Kiến trúc Monorepo (Code Sharing)
 
-### 1.1 Công cụ: Yarn Workspaces + Turborepo
+### 1.1 Công cụ: npm Workspaces + Turborepo
 
 ```
 RAG_v2/
@@ -19,13 +40,18 @@ RAG_v2/
 │       └── src/
 │           ├── types/
 │           │   ├── chat.ts          # Message, ChatRequest, ChatResponse, RetrievedDocument...
-│           │   ├── auth.ts          # UserContext, Session, LoginRequest...
+│           │   ├── auth.ts          # UserPublic, LoginRequest...
+│           │   ├── mobile.ts        # Bookmark, feedback, lookup, notification types
 │           │   └── index.ts
 │           ├── api/
 │           │   ├── client.ts        # createApiClient(baseURL, getToken) factory
 │           │   ├── chatApi.ts       # sendMessage, sendMessageV3 (platform-agnostic)
-│           │   ├── sessionApi.ts    # listSessions, getSession
-│           │   ├── authApi.ts       # login, register, refresh
+│           │   ├── sessionApi.ts    # getMySessions, getSession
+│           │   ├── authApi.ts       # login, register, getMe
+│           │   ├── bookmarkApi.ts   # bookmarks and folders
+│           │   ├── feedbackApi.ts   # answer ratings
+│           │   ├── lookupApi.ts     # CTĐT/regulations/calendar/compare
+│           │   ├── notificationApi.ts
 │           │   └── index.ts
 │           ├── utils/
 │           │   ├── sanitize.ts      # cleanText, sanitizeUserContext
@@ -51,6 +77,7 @@ RAG_v2/
 {
   "name": "rag-student-assistant",
   "private": true,
+  "packageManager": "npm@11.12.1",
   "workspaces": ["packages/*", "frontend/chat-companion", "mobile"],
   "devDependencies": {
     "turbo": "^2.5.0",
@@ -372,25 +399,19 @@ import * as SecureStore from 'expo-secure-store';
 
 const KEYS = {
   ACCESS_TOKEN: 'auth_access_token',
-  REFRESH_TOKEN: 'auth_refresh_token',
   USER_PROFILE: 'user_profile',
   SESSION_ID: 'current_session_id',
 } as const;
 
-export const setToken = async (access: string, refresh: string) => {
+export const setToken = async (access: string) => {
   await SecureStore.setItemAsync(KEYS.ACCESS_TOKEN, access);
-  await SecureStore.setItemAsync(KEYS.REFRESH_TOKEN, refresh);
 };
 
 export const getToken = async (): Promise<string | null> =>
   SecureStore.getItemAsync(KEYS.ACCESS_TOKEN);
 
-export const getRefreshToken = async (): Promise<string | null> =>
-  SecureStore.getItemAsync(KEYS.REFRESH_TOKEN);
-
 export const clearTokens = async () => {
   await SecureStore.deleteItemAsync(KEYS.ACCESS_TOKEN);
-  await SecureStore.deleteItemAsync(KEYS.REFRESH_TOKEN);
 };
 
 export const setUserProfile = async (profile: object) =>
@@ -440,7 +461,7 @@ export const authStore = createAuthStore();
 authStore.subscribe(async (state, prev) => {
   if (state.accessToken !== prev.accessToken) {
     if (state.accessToken) {
-      await setToken(state.accessToken, ''); // refresh handled separately
+      await setToken(state.accessToken);
     } else {
       await clearTokens();
     }
@@ -448,12 +469,13 @@ authStore.subscribe(async (state, prev) => {
 });
 ```
 
-### 4.4 Axios Interceptor với Auto-Refresh
+### 4.4 Axios Interceptor với Single Token Reset
 
 ```typescript
 // mobile/src/services/api.ts
 import { createApiClient } from '@rag/shared';
-import { getToken, getRefreshToken, setToken, clearTokens } from './secureStorage';
+import { getToken, clearAll } from './secureStorage';
+import { authStore } from '../stores/authStore';
 import { API_BASE_URL } from '../utils/constants';
 
 export const apiClient = createApiClient({
@@ -461,23 +483,14 @@ export const apiClient = createApiClient({
   getToken,
 });
 
-// 401 interceptor — auto refresh
+// 401 interceptor — reset local auth
 apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
     if (error.response?.status !== 401) throw error;
-    const refresh = await getRefreshToken();
-    if (!refresh) { clearTokens(); throw error; }
-
-    try {
-      const { data } = await apiClient.post('/auth/refresh', { refresh_token: refresh });
-      await setToken(data.access_token, data.refresh_token || refresh);
-      error.config.headers.Authorization = `Bearer ${data.access_token}`;
-      return apiClient.request(error.config);
-    } catch {
-      await clearTokens();
-      throw error;
-    }
+    authStore.getState().clearAuth();
+    await clearAll();
+    throw error;
   }
 );
 ```
@@ -606,7 +619,7 @@ mobile/
 
 | Quyết định | Lựa chọn | Lý do |
 |-----------|----------|-------|
-| Monorepo tool | Yarn Workspaces + Turborepo | Caching, parallel builds, workspace linking |
+| Monorepo tool | npm Workspaces + Turborepo | Caching, parallel builds, workspace linking |
 | Shared code scope | Types + API client + Zustand stores + Utils | Tối đa reuse, tối thiểu platform coupling |
 | SSE library | `react-native-sse` | Native impl, POST support, auto-reconnect |
 | Styling | NativeWind 4.x | Reuse Tailwind classes từ web |
@@ -619,6 +632,6 @@ mobile/
 | Rủi ro | Mitigation |
 |--------|-----------|
 | NativeWind không hỗ trợ 100% Tailwind classes | Dùng `StyleSheet` fallback cho edge cases |
-| `react-native-sse` timeout trên kết nối yếu | Implement heartbeat check + fallback sang `/chat` non-streaming |
+| `react-native-sse` timeout trên kết nối yếu | Fallback sang `/chat/v3` non-streaming trước token đầu tiên |
 | Monorepo Metro bundler resolution | Cấu hình `metro.config.js` với `watchFolders` trỏ tới `packages/shared` |
 | `expo-secure-store` giới hạn 2KB/value | Chỉ lưu token + profile nhỏ, cache lớn dùng MMKV |

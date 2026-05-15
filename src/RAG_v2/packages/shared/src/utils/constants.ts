@@ -13,7 +13,18 @@ export const API_PATHS = {
   AUTH_ME: '/auth/me',
   AUTH_REFRESH: '/auth/refresh',
   SESSIONS: '/sessions',
+  SESSIONS_ME: '/sessions/me',
   SESSION: '/session',
+  BOOKMARKS: '/bookmarks',
+  BOOKMARK_FOLDERS: '/bookmark-folders',
+  FEEDBACK: '/feedback',
+  LOOKUP_CTDT: '/lookup/ctdt',
+  LOOKUP_REGULATIONS: '/lookup/regulations',
+  LOOKUP_CALENDAR: '/lookup/calendar',
+  LOOKUP_COMPARE: '/lookup/compare',
+  CHAT_SUGGEST: '/chat/suggest',
+  NOTIFICATIONS: '/notifications',
+  NOTIFICATION_SUBSCRIBE: '/notifications/subscribe',
 } as const;
 
 /** Sentinel value used to signal clarification requests */
