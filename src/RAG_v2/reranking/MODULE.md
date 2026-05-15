@@ -15,6 +15,7 @@ reranking/
 └── bge_reranker.py # BGEReranker — BGE cross-encoder reranker
 ```
 
+
 ---
 
 ## Tại sao cần reranking?

@@ -203,7 +203,7 @@ Khi có `resolved_major`, vector query được strip major scaffold để giả
 | Role | Source setting | Mặc định hiện tại | Mục đích |
 |---|---|---|---|
 | Tool-calling agent | `agent_model`, `lm_studio_url/base_url` | `qwen2.5-7b-instruct` | Chọn và gọi `LANGGRAPH_TOOLS` |
-| Synthesis/planner/decomposer | `agent_synthesis_provider`, `agent_synthesis_model` | `gemini`, `gemini-2.5-flash` | Decompose, plan, synthesize final answer |
+| Synthesis/planner/decomposer | `agent_synthesis_provider`, `agent_synthesis_model` | `gemini`, `gemini-3.1-flash-lite-preview` | Decompose, plan, synthesize final answer |
 
 Supported synthesis providers trong code: `gemini`, `ollama`, hoặc default LM Studio endpoint khi provider rỗng/khác.
 

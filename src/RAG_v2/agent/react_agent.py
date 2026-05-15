@@ -119,7 +119,7 @@ class ReActAgent:
             return ChatOpenAI(
                 base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
                 api_key=getattr(settings, "google_api_key", ""),
-                model=synth_model or "gemini-2.5-flash",
+                model=synth_model or "gemini-3.1-flash-lite-preview",
                 temperature=synth_temp,
                 max_tokens=synth_max_tokens,  # type: ignore
                 timeout=180,

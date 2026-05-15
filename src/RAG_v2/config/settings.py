@@ -94,7 +94,7 @@ class Settings(BaseSettings):
     # Agent synthesis — uses a STRONGER model for the final answer.
     # ✅ GEMINI: synthesis is quality-critical (user-facing final answer)
     agent_synthesis_provider: str = "gemini"   # "" | "gemini" | "lm_studio" | "ollama"
-    agent_synthesis_model: str = "gemini-2.5-flash"  # fast + quality
+    agent_synthesis_model: str = "gemini-3.1-flash-lite-preview"  # fast + quality
     agent_synthesis_temperature: float = 0.2
     agent_synthesis_max_tokens: int = 2500     # increased from 2000 to prevent truncation
 
@@ -119,7 +119,7 @@ class Settings(BaseSettings):
 
     # --- Chat Model (answer generation) ---
     # ✅ GEMINI: main answer generation — most important quality point
-    chat_model: str = "gemini-2.5-flash"   # fast + quality
+    chat_model: str = "gemini-3.1-flash-lite-preview"   # fast + quality
     chat_temperature: float = 0.3
     chat_max_tokens: int = 1500            # increased from 1024 to prevent mid-sentence truncation
 
@@ -131,6 +131,11 @@ class Settings(BaseSettings):
     keyword_pool_k: int = 40
     vector_weight: float = 0.8
     keyword_weight: float = 0.2
+    context_doc_char_limit: int = 2000
+    context_total_char_budget: int = 12000
+    context_list_total_char_budget: int = 24000
+    agent_search_result_count: int = 4
+    agent_search_result_char_limit: int = 700
 
     # --- Reranker ---
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
@@ -155,7 +160,7 @@ class Settings(BaseSettings):
     # ✅ GEMINI: query rewriting — quality-critical for retrieval accuracy
     reflection_enabled: bool = True
     reflection_provider: str = "gemini"      # gemini | lm_studio | ollama | openai
-    reflection_model: str = "gemini-2.5-flash"  # fast flash for rewrite task
+    reflection_model: str = "gemini-3.1-flash-lite-preview"  # fast flash for rewrite task
     reflection_temperature: float = 0.0      # low temp → more deterministic rewrite
     reflection_max_tokens: int = 1024         # increased from 256 to prevent truncation
 

@@ -17,7 +17,7 @@ _ROOT = Path(__file__).resolve().parent
 load_dotenv(_ROOT / ".env")
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
-TEST_MODEL = "gemini-2.5-flash"
+TEST_MODEL = "gemini-3.1-flash-lite-preview"
 
 
 def check_key_present() -> bool:

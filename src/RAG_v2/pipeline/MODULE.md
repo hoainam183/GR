@@ -247,6 +247,7 @@ Streaming variant: `_trim_history()` → `chat_model.generate_stream(mode="chitc
 - `build_cohort_comparison_subqueries_for_retrieval()`: Tách query so sánh khóa học.
 - `expand_major_in_query_for_reranking()`: Mở rộng major name để reranker hiểu ngữ cảnh tốt hơn.
 
+
 **Bước 4 — Embed + Hybrid Search:**
 - BGE-M3 embed + E5 embed (song song trong từng `_search_once()` call).
 - `searcher.search()` với metadata pre-filtering (major_code, cohort).

@@ -60,6 +60,7 @@ class BGEReranker(BaseReranker):
         self.top_k = top_k
         self.score_threshold = score_threshold
         self.table_score_threshold = table_score_threshold
+        self.last_stats: Dict[str, Any] = {}
 
         device = _resolve_torch_device(device)
         self.device = device
@@ -135,14 +136,30 @@ class BGEReranker(BaseReranker):
         # being excluded when higher-ranked non-table docs (all failing the
         # stricter default threshold) fill the top_k slots first.
         filtered = []
+        threshold_dropped = 0
         for d in scored_docs:
             has_table = d.get("metadata", {}).get("has_table", False)
             doc_thresh = table_thresh if has_table else threshold
             if d["rerank_score"] >= doc_thresh:
                 filtered.append(d)
+            else:
+                threshold_dropped += 1
 
         # Now apply top_k on the threshold-passing documents
         top_docs = filtered[:top_k]
+        all_scores = [float(d["rerank_score"]) for d in scored_docs]
+        self.last_stats = {
+            "rerank_candidate_count": len(scored_docs),
+            "rerank_threshold_dropped_count": threshold_dropped,
+            "rerank_dropped_count": max(0, len(scored_docs) - len(top_docs)),
+            "rerank_passing_count": len(filtered),
+            "rerank_returned_count": len(top_docs),
+            "rerank_score_min": round(min(all_scores), 6) if all_scores else 0.0,
+            "rerank_score_max": round(max(all_scores), 6) if all_scores else 0.0,
+            "rerank_score_mean": (
+                round(sum(all_scores) / len(all_scores), 6) if all_scores else 0.0
+            ),
+        }
 
         if len(filtered) < len(scored_docs):
             logger.info(

@@ -19,6 +19,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from config.settings import Settings
 from models.database import DOCUMENTS_COLLECTION, DOCUMENT_CHUNKS_COLLECTION
+from utils.chunk_indexing import is_indexable_chunk
 from utils.storage import LocalStorage
 
 logger = logging.getLogger(__name__)
@@ -545,6 +546,18 @@ class DocumentPipeline:
 
             if not chunks:
                 raise ValueError("No chunks found in database")
+
+            indexable_chunks = [c for c in chunks if is_indexable_chunk(c)]
+            skipped_chunks = len(chunks) - len(indexable_chunks)
+            if skipped_chunks:
+                logger.info(
+                    "Skipping %d non-indexable parent/header chunk(s) for document %s.",
+                    skipped_chunks,
+                    doc_id,
+                )
+            chunks = indexable_chunks
+            if not chunks:
+                raise ValueError("No indexable chunks found in database")
 
             texts = [c["content"] for c in chunks]
             metadatas = [c.get("metadata", {}) for c in chunks]

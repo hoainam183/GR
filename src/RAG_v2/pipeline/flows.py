@@ -225,12 +225,20 @@ def _merge_search_trace(
                 _safe_float(count_info.get("keyword"))
             )
 
+    incoming_weights = trace_piece.get("fusion_weights")
+    if isinstance(incoming_weights, dict):
+        aggregate_trace.setdefault("fusion_weights", incoming_weights)
+        events = aggregate_trace.setdefault("fusion_weight_events", [])
+        if isinstance(events, list):
+            events.append(incoming_weights)
+
 
 def _format_context(
     documents: List[Dict[str, Any]],
     *,
     per_doc_char_limit: int = _DEFAULT_CONTEXT_DOC_CHAR_LIMIT,
     total_char_budget: int = _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET,
+    trace_out: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Convert retrieved documents into a token-budgeted context string.
 
@@ -239,6 +247,7 @@ def _format_context(
     """
     parts: List[str] = []
     used = 0
+    docs_used = 0
     for i, doc in enumerate(documents, 1):
         meta = doc.get("metadata", {}) or {}
         title = meta.get("title") or meta.get("source") or "Tài liệu không rõ nguồn"
@@ -261,8 +270,78 @@ def _format_context(
         if used + len(chunk) + separator_cost > total_char_budget:
             break
         parts.append(chunk)
+        docs_used += 1
         used += len(chunk) + separator_cost
-    return "\n\n---\n\n".join(parts)
+    context = "\n\n---\n\n".join(parts)
+    if trace_out is not None:
+        trace_out["context_chars"] = len(context)
+        trace_out["context_docs_used"] = docs_used
+        trace_out["context_docs_dropped"] = max(0, len(documents) - docs_used)
+        trace_out["context_doc_char_limit"] = per_doc_char_limit
+        trace_out["context_total_char_budget"] = total_char_budget
+    return context
+
+
+def _cfg_int(cfg: Dict[str, Any], key: str, default: int) -> int:
+    """Read an integer config value with a safe fallback."""
+    try:
+        return int(cfg.get(key, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _resolve_context_budget(
+    cfg: Dict[str, Any],
+    *,
+    top_k_value: int,
+) -> tuple[int, int]:
+    """Return (per_doc_limit, total_budget) for the current query."""
+    base_top_k = _cfg_int(cfg, "top_k", 5)
+    per_doc_limit = _cfg_int(
+        cfg, "context_doc_char_limit", _DEFAULT_CONTEXT_DOC_CHAR_LIMIT
+    )
+    base_budget = _cfg_int(
+        cfg, "context_total_char_budget", _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET
+    )
+    list_budget = _cfg_int(
+        cfg,
+        "context_list_total_char_budget",
+        base_budget * _LIST_TOP_K_MULTIPLIER,
+    )
+    total_budget = list_budget if top_k_value > base_top_k else base_budget
+    return per_doc_limit, total_budget
+
+
+def _build_rerank_trace(
+    *,
+    reranker: Optional[BaseReranker],
+    candidate_count: int,
+    reranked: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Build compact reranker observability fields."""
+    last_stats = getattr(reranker, "last_stats", None)
+    if isinstance(last_stats, dict):
+        return dict(last_stats)
+
+    scores = [
+        float(doc["rerank_score"])
+        for doc in reranked
+        if isinstance(doc, dict) and doc.get("rerank_score") is not None
+    ]
+    trace: Dict[str, Any] = {
+        "rerank_candidate_count": candidate_count,
+        "rerank_returned_count": len(reranked),
+        "rerank_dropped_count": max(0, candidate_count - len(reranked)),
+    }
+    if scores:
+        trace.update(
+            {
+                "rerank_score_min": round(min(scores), 6),
+                "rerank_score_max": round(max(scores), 6),
+                "rerank_score_mean": round(sum(scores) / len(scores), 6),
+            }
+        )
+    return trace
 
 
 def _trim_history(
@@ -950,6 +1029,11 @@ def rag_flow(
         top_k=top_k_value,
     )
     timings_ms["rerank"] = _elapsed_ms(rerank_t0)
+    rerank_trace = _build_rerank_trace(
+        reranker=reranker,
+        candidate_count=len(raw_results),
+        reranked=reranked,
+    )
     logger.info("Reranked to %d documents", len(reranked))
 
     # 5.1 Document Validity Filtering
@@ -1002,12 +1086,17 @@ def rag_flow(
     context_t0 = time.perf_counter()
     # For list queries (top_k was scaled up), use a larger char budget so we
     # don't truncate the extra docs before passing them to the LLM.
-    context_char_budget = (
-        _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET * _LIST_TOP_K_MULTIPLIER
-        if top_k_value > cfg.get("top_k", 5)
-        else _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET
+    context_doc_limit, context_char_budget = _resolve_context_budget(
+        cfg,
+        top_k_value=top_k_value,
     )
-    context = _format_context(reranked, total_char_budget=context_char_budget)
+    context_trace: Dict[str, Any] = {}
+    context = _format_context(
+        reranked,
+        per_doc_char_limit=context_doc_limit,
+        total_char_budget=context_char_budget,
+        trace_out=context_trace,
+    )
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -1015,6 +1104,7 @@ def rag_flow(
             or _extract_session_profile(history)
         )
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
+    context_trace["full_context_chars"] = len(full_context)
     timings_ms["format_context"] = _elapsed_ms(context_t0)
 
     # 7. Generate answer with context-length error recovery
@@ -1154,6 +1244,9 @@ def rag_flow(
         "llm_prompt": llm_prompt_str,
         "applied_filters": search_trace.get("filters"),
         "collection_results": search_trace.get("collection_counts"),
+        "fusion_weights": search_trace.get("fusion_weights"),
+        "context_trace": context_trace,
+        "rerank_trace": rerank_trace,
     }
 
 
@@ -1327,7 +1420,7 @@ def rag_flow_stream(
             rerank_query = stripped
 
     # Embed → Search → Rerank
-    search_trace: Dict[str, Any] = {}  # filters/counts not wired in stream path
+    search_trace: Dict[str, Any] = {}
 
     def _search_once(
         local_query: str,
@@ -1355,6 +1448,7 @@ def rag_flow_stream(
         effective_resolved_major = (
             resolved_major if use_outer_resolved_major else local_resolved_major
         )
+        trace_piece: Dict[str, Any] = {}
         rows = searcher.search(
             query=local_query,
             bge_m3_query=bge_vec,
@@ -1368,11 +1462,13 @@ def rag_flow_stream(
             resolved_major=effective_resolved_major,
             resolved_cohort=resolved_cohort,
             disable_metadata_filter_collections=local_disable_metadata_filter_collections,
+            trace_out=trace_piece,
         )
         timings_ms["search"] = round(
             timings_ms.get("search", 0.0) + _elapsed_ms(search_t0),
             2,
         )
+        _merge_search_trace(search_trace, trace_piece)
         return rows
 
     raw_results_buffer: List[Dict[str, Any]] = []
@@ -1478,6 +1574,11 @@ def rag_flow_stream(
         top_k=top_k_value,
     )
     timings_ms["rerank"] = _elapsed_ms(rerank_t0)
+    rerank_trace = _build_rerank_trace(
+        reranker=reranker,
+        candidate_count=len(raw_results),
+        reranked=reranked,
+    )
     logger.info("Reranked to %d documents", len(reranked))
 
     # 5.1 Document Validity Filtering
@@ -1494,12 +1595,17 @@ def rag_flow_stream(
 
     context_t0 = time.perf_counter()
     # For list queries (top_k was scaled up), use a larger char budget.
-    context_char_budget = (
-        _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET * _LIST_TOP_K_MULTIPLIER
-        if top_k_value > cfg.get("top_k", 5)
-        else _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET
+    context_doc_limit, context_char_budget = _resolve_context_budget(
+        cfg,
+        top_k_value=top_k_value,
     )
-    context = _format_context(reranked, total_char_budget=context_char_budget)
+    context_trace: Dict[str, Any] = {}
+    context = _format_context(
+        reranked,
+        per_doc_char_limit=context_doc_limit,
+        total_char_budget=context_char_budget,
+        trace_out=context_trace,
+    )
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -1507,6 +1613,7 @@ def rag_flow_stream(
             or _extract_session_profile(history)
         )
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
+    context_trace["full_context_chars"] = len(full_context)
     timings_ms["format_context"] = _elapsed_ms(context_t0)
     timings_ms["retrieval_total"] = round(
         timings_ms.get("embed_bge", 0.0)
@@ -1527,6 +1634,9 @@ def rag_flow_stream(
         )
         metadata_out["applied_filters"] = search_trace.get("filters")
         metadata_out["collection_results"] = search_trace.get("collection_counts")
+        metadata_out["fusion_weights"] = search_trace.get("fusion_weights")
+        metadata_out["context_trace"] = context_trace
+        metadata_out["rerank_trace"] = rerank_trace
 
     # ── LLM Response Cache Check (Phase 2 - Stream) ─────────────────
     if llm_cache is not None:

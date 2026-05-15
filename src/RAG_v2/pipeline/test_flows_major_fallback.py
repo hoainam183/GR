@@ -47,6 +47,11 @@ def _make_deps() -> Dict[str, Any]:
             trace["collection_counts"] = {
                 "ctdt": {"vector": 1, "keyword": 1}
             }
+            trace["fusion_weights"] = {
+                "vector": 0.8,
+                "keyword": 0.2,
+                "reason": "default",
+            }
         return [_make_doc()]
 
     searcher.search.side_effect = _search_side_effect
@@ -146,6 +151,94 @@ def test_rag_flow_stream_fallback_extracts_major_from_user_context() -> None:
         deps["reranker"].rerank.call_args.kwargs["query"]
         == "môn lập trình mạng của tôi"
     )
+
+
+def test_rag_flow_uses_configured_context_budget() -> None:
+    deps = _make_deps()
+    question = "điều kiện tốt nghiệp"
+    long_doc = {
+        **_make_doc(),
+        "text": "x" * 5000,
+    }
+    deps["reranker"].rerank.return_value = [long_doc]
+    deps["cfg"] = {
+        **deps["cfg"],
+        "context_doc_char_limit": 2000,
+        "context_total_char_budget": 12000,
+        "context_list_total_char_budget": 24000,
+    }
+
+    result = rag_flow(
+        question=question,
+        history=None,
+        reflector=None,
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    context = deps["chat"].generate.call_args.kwargs["context"]
+    assert "x" * 2000 in context
+    assert "x" * 2001 not in context
+    assert result["context_trace"]["context_doc_char_limit"] == 2000
+    assert result["context_trace"]["context_total_char_budget"] == 12000
+
+
+def test_rag_flow_list_query_uses_configured_list_context_budget() -> None:
+    deps = _make_deps()
+    question = "liệt kê các điều kiện tốt nghiệp"
+    deps["cfg"] = {
+        **deps["cfg"],
+        "context_doc_char_limit": 2000,
+        "context_total_char_budget": 12000,
+        "context_list_total_char_budget": 24000,
+    }
+
+    result = rag_flow(
+        question=question,
+        history=None,
+        reflector=None,
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    assert result["context_trace"]["context_total_char_budget"] == 24000
+
+
+def test_rag_flow_stream_exposes_search_trace_metadata() -> None:
+    deps = _make_deps()
+    metadata: Dict[str, Any] = {}
+
+    stream, _sources = rag_flow_stream(
+        question="điều kiện tốt nghiệp",
+        history=None,
+        reflector=None,
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        cfg=deps["cfg"],
+        metadata_out=metadata,
+    )
+    list(stream)
+
+    assert metadata["applied_filters"]["ctdt"]["applied"] is True
+    assert metadata["collection_results"]["ctdt"] == {"vector": 1, "keyword": 1}
+    assert metadata["fusion_weights"]["reason"] == "default"
+    assert metadata["context_trace"]["context_docs_used"] == 1
+    assert metadata["rerank_trace"]["rerank_candidate_count"] == 1
 
 
 def test_rag_flow_keeps_major_terms_for_quydinh_only_routing() -> None:

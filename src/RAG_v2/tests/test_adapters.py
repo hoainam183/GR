@@ -6,10 +6,16 @@ Run unit-only checks:
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
 from agent import tool_adapters
-from agent.tool_adapters import _clarify_question, execute_tool
+from agent.tool_adapters import (
+    _clarify_question,
+    _format_search_results,
+    execute_tool,
+)
 
 
 class TestExecuteToolRouter:
@@ -60,6 +66,26 @@ class TestExecuteToolRouter:
         assert "1." in result
         assert "2." in result
         assert "3." in result
+
+    def test_format_search_results_uses_agent_result_settings(self) -> None:
+        results = [
+            {
+                "text": f"noi dung {i} " + ("x" * 100),
+                "metadata": {"title": f"doc-{i}"},
+            }
+            for i in range(5)
+        ]
+        settings = SimpleNamespace(
+            agent_search_result_count=4,
+            agent_search_result_char_limit=30,
+            agent_tool_result_limit=3000,
+        )
+
+        formatted = _format_search_results(results, "chuong_trinh", settings)
+
+        assert "[4]" in formatted
+        assert "[5]" not in formatted
+        assert "x" * 31 not in formatted
 
     def test_compare_programs_major_codes_dispatches_per_major(
         self,

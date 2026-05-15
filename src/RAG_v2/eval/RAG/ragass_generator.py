@@ -70,7 +70,7 @@ CONFIG = {
 
     # ── LLM (Gemini) ──────────────────────────────────────────────────────────
     "llm_backend": "gemini",
-    "gemini_model": "gemini-2.5-flash",   # nhanh + rẻ hơn Flash 1.5
+    "gemini_model": "gemini-3.1-flash-lite-preview",   # nhanh + rẻ hơn Flash 1.5
     "gemini_api_key": os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or "",
     "llm_delay_seconds": 30,        # delay giữa các lần gọi LLM (tránh RPM limit)
     "llm_max_tokens": 1200,

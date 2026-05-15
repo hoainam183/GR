@@ -380,7 +380,7 @@ def _rag_search(
     if not results:
         return "[Khong tim thay thong tin trong co so du lieu]"
 
-    formatted = _format_search_results(results, collection)
+    formatted = _format_search_results(results, collection, runtime.settings)
 
     # ── Cache write (skip system errors) ─────────────────────────────────────
     if not formatted.startswith("[Loi"):
@@ -659,13 +659,20 @@ def execute_retrieval_plan(steps: list[dict[str, Any]]) -> list[tuple[str, str]]
 # ─── Formatting helpers ───────────────────────────────────────────────────────
 
 
-def _format_search_results(results: Any, collection: str) -> str:
+def _format_search_results(
+    results: Any,
+    collection: str,
+    settings: Settings | None = None,
+) -> str:
     if not results:
         return f"Khong tim thay thong tin phu hop trong {collection}."
 
     chunks: list[str] = []
-    # Keep top-3 results (down from 4) to reduce token usage per tool call.
-    for index, item in enumerate(results[:3], 1):
+    result_count = int(getattr(settings, "agent_search_result_count", 3) or 3)
+    char_limit = int(getattr(settings, "agent_search_result_char_limit", 500) or 500)
+    total_limit = int(getattr(settings, "agent_tool_result_limit", 0) or 0)
+
+    for index, item in enumerate(results[:result_count], 1):
         content = ""
         source = ""
         metadata = {}
@@ -688,9 +695,8 @@ def _format_search_results(results: Any, collection: str) -> str:
             content = str(item)
 
         content = " ".join(content.split())
-        # Reduced from 700 → 500 to lower per-call token cost
-        if len(content) > 500:
-            content = content[:500].rstrip() + "..."
+        if len(content) > char_limit:
+            content = content[:char_limit].rstrip() + "..."
 
         if not content:
             continue
@@ -711,7 +717,10 @@ def _format_search_results(results: Any, collection: str) -> str:
 
     if not chunks:
         return f"Khong tim thay thong tin phu hop trong {collection}."
-    return "\n\n".join(chunks)
+    formatted = "\n\n".join(chunks)
+    if total_limit > 0 and len(formatted) > total_limit:
+        return formatted[:total_limit].rstrip() + "..."
+    return formatted
 
 
 def _format_web_results(results: Any) -> str:

@@ -31,6 +31,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from embedding.bge_m3 import BGEm3Embedder
 from embedding.e5_multilingual import E5MultilingualEmbedder
 from retrieval.qdrant_store import QdrantStore
+from utils.chunk_indexing import is_indexable_chunk
 
 # ---------------------------------------------------------------------------
 logging.basicConfig(
@@ -62,7 +63,7 @@ CONFIG = {
 
 
 def load_chunks_from_dir(chunks_dir: Path) -> List[Dict[str, Any]]:
-    """Load and merge all *_chunks.json files in *chunks_dir*, filtering only child chunks."""
+    """Load and merge all *_chunks.json files in *chunks_dir* using the shared indexing policy."""
     json_files = sorted(chunks_dir.glob("*_chunks.json"))
     if not json_files:
         raise FileNotFoundError(f"No *_chunks.json files found in {chunks_dir}")
@@ -72,19 +73,16 @@ def load_chunks_from_dir(chunks_dir: Path) -> List[Dict[str, Any]]:
         logger.info("  Loading %s", path.name)
         with open(path, "r", encoding="utf-8") as f:
             chunks = json.load(f)
-        # Filter to only include child chunks (level == "child")
-        child_chunks = [
-            c for c in chunks if c.get("metadata", {}).get("level") == "child"
-        ]
-        all_chunks.extend(child_chunks)
+        indexable_chunks = [c for c in chunks if is_indexable_chunk(c)]
+        all_chunks.extend(indexable_chunks)
         logger.info(
-            "    -> %d child chunks (running total: %d)",
-            len(child_chunks),
+            "    -> %d indexable chunks (running total: %d)",
+            len(indexable_chunks),
             len(all_chunks),
         )
 
     logger.info(
-        "Total child chunks loaded: %d from %d files.",
+        "Total indexable chunks loaded: %d from %d files.",
         len(all_chunks),
         len(json_files),
     )

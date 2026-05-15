@@ -48,7 +48,7 @@ CONFIG = {
 
     # ── RAGAS LLM (Gemini) ────────────────────────────────────────────────────
     "gemini_api_key": os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or "",
-    "gemini_model":   "gemini-2.5-flash",
+    "gemini_model":   "gemini-3.1-flash-lite-preview",
 
     # ── RAGAS metrics ─────────────────────────────────────────────────────────
     # Focus: context_recall + context_precision
