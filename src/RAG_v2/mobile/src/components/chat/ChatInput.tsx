@@ -17,6 +17,8 @@ interface Props {
   onSend: (message: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  bottomInset?: number;
+  onFocus?: () => void;
 }
 
 const MAX_INPUT_HEIGHT = 120;
@@ -26,6 +28,8 @@ const ChatInput = ({
   onSend,
   disabled = false,
   placeholder = 'Hỏi gì đó...',
+  bottomInset = 0,
+  onFocus,
 }: Props) => {
   const [text, setText] = useState('');
   const [inputHeight, setInputHeight] = useState(MIN_INPUT_HEIGHT);
@@ -50,9 +54,10 @@ const ChatInput = ({
   };
 
   const canSend = text.trim().length > 0 && !disabled;
+  const containerPaddingBottom = Math.max(8, bottomInset);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: containerPaddingBottom }]}>
       <View style={styles.inputWrapper}>
         <TextInput
           ref={inputRef}
@@ -63,6 +68,7 @@ const ChatInput = ({
           placeholderTextColor="#64748b"
           multiline
           editable={!disabled}
+          onFocus={onFocus}
           onContentSizeChange={handleContentSizeChange}
           returnKeyType="default"
           blurOnSubmit={false}

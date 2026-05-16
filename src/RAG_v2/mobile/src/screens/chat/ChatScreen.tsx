@@ -13,6 +13,7 @@ import {
   View,
   FlatList,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
   StyleSheet,
   Text,
@@ -45,6 +46,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import EmptyState from '../../components/common/EmptyState';
 
 type Props = NativeStackScreenProps<ChatStackParamList, 'Chat'>;
+const HEADER_HEIGHT = 60;
 
 const ChatScreen = ({ route, navigation }: Props) => {
   const sessionIdParam = route.params?.sessionId;
@@ -70,10 +72,13 @@ const ChatScreen = ({ route, navigation }: Props) => {
   // State for sources bottom sheet
   const [selectedSources, setSelectedSources] = useState<RetrievedDocument[]>([]);
   const [sourcesVisible, setSourcesVisible] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   // Session title derived from first user message
   const [sessionTitle, setSessionTitle] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
+  const keyboardVerticalOffset =
+    Platform.OS === 'ios' ? insets.top + HEADER_HEIGHT : 0;
   const { data: suggestions = [] } = useQuery({
     queryKey: ['chat-suggestions'],
     queryFn: async () => {
@@ -93,6 +98,24 @@ const ChatScreen = ({ route, navigation }: Props) => {
       stopStream();
     };
   }, [stopStream]);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, () => {
+      setKeyboardVisible(true);
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   // Load session history when sessionId changes
   useEffect(() => {
@@ -320,9 +343,10 @@ const ChatScreen = ({ route, navigation }: Props) => {
         title={greeting}
         subtitle="Tôi có thể tư vấn về quy chế học tập, học bổng và các quy định của BKHN."
       />
-      {suggestions.length > 0 && (
+      {!keyboardVisible && suggestions.length > 0 && (
         <ScrollView
           horizontal
+          style={styles.suggestionScroll}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.suggestionRow}
         >
@@ -333,7 +357,11 @@ const ChatScreen = ({ route, navigation }: Props) => {
               onPress={() => handleSend(item.question)}
               disabled={chatPhase !== 'idle'}
             >
-              <Text style={styles.suggestionText} numberOfLines={2}>
+              <Text
+                style={styles.suggestionText}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
                 {item.question}
               </Text>
             </Pressable>
@@ -372,8 +400,8 @@ const ChatScreen = ({ route, navigation }: Props) => {
 
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 45 : 0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={keyboardVerticalOffset}
       >
         {/* Messages */}
         {messages.length === 0 ? (
@@ -402,6 +430,8 @@ const ChatScreen = ({ route, navigation }: Props) => {
         {/* Input */}
         <ChatInput
           onSend={handleSend}
+          onFocus={() => setKeyboardVisible(true)}
+          bottomInset={insets.bottom}
           disabled={
             chatPhase !== 'idle' ||
             netInfo.isConnected === false ||
@@ -459,26 +489,30 @@ const styles = StyleSheet.create({
   emptyWrap: {
     flex: 1,
   },
+  suggestionScroll: {
+    flexGrow: 0,
+    maxHeight: 50,
+  },
   suggestionRow: {
-    paddingHorizontal: 16,
-    paddingBottom: 18,
-    gap: 10,
+    paddingHorizontal: 12,
+    paddingTop: 2,
+    paddingBottom: 10,
+    gap: 8,
   },
   suggestionChip: {
-    width: 220,
-    minHeight: 54,
+    width: 156,
+    height: 38,
     justifyContent: 'center',
     backgroundColor: '#1e293b',
     borderWidth: 1,
     borderColor: '#334155',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    borderRadius: 19,
+    paddingHorizontal: 12,
   },
   suggestionText: {
     color: '#e2e8f0',
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 16,
     fontWeight: '500',
   },
 });

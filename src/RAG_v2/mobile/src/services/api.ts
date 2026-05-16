@@ -18,6 +18,11 @@ export const apiClient = createApiClient({
 apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
+    // Log network errors for easier debugging in Metro / JS Debugger
+    if (!error.response) {
+      console.error('[API] Network error — check EXPO_PUBLIC_API_BASE_URL and backend is running');
+      console.error('[API] URL attempted:', error.config?.baseURL, error.config?.url);
+    }
     if (error.response?.status !== 401) throw error;
     authStore.getState().clearAuth();
     await clearAll();
