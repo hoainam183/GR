@@ -44,6 +44,8 @@ BOOKMARK_FOLDERS_COLLECTION: str = "bookmark_folders"
 FEEDBACK_COLLECTION: str = "feedback"
 NOTIFICATIONS_COLLECTION: str = "notifications"
 NOTIFICATION_SUBSCRIPTIONS_COLLECTION: str = "notification_subscriptions"
+EVAL_RUNS_COLLECTION: str = "eval_runs"
+EVAL_CASE_RESULTS_COLLECTION: str = "eval_case_results"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -200,6 +202,17 @@ async def create_indexes() -> None:
     query_logs = db[QUERY_LOGS_COLLECTION]
     await safe_create(query_logs, [("session_id", ASCENDING)], name="session_id_asc")
     logger.info("Index ensured on collection '%s': session_id_asc", QUERY_LOGS_COLLECTION)
+
+    # ── eval collections ─────────────────────────────────────────────────────
+    eval_runs = db[EVAL_RUNS_COLLECTION]
+    await safe_create(eval_runs, [("eval_suite", ASCENDING), ("finished_at", DESCENDING)], name="suite_finished_desc")
+    await safe_create(eval_runs, [("status", ASCENDING)], name="status_asc")
+
+    eval_cases = db[EVAL_CASE_RESULTS_COLLECTION]
+    await safe_create(eval_cases, [("run_id", ASCENDING)], name="run_id_asc")
+    await safe_create(eval_cases, [("eval_suite", ASCENDING), ("passed", ASCENDING)], name="suite_passed")
+    await safe_create(eval_cases, [("case_id", ASCENDING)], name="case_id_asc")
+    logger.info("Indexes ensured on evaluation collections")
 
     # ── documents collection ─────────────────────────────────────────────────
     documents = db[DOCUMENTS_COLLECTION]

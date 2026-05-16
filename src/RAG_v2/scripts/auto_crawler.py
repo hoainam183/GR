@@ -835,6 +835,17 @@ class AutoCrawlPipeline:
                                             invalidated, len(chunk_ids))
                         except Exception:
                             logger.warning("Failed to invalidate LLM cache during auto crawl", exc_info=True)
+                        try:
+                            from evaluation.post_index import trigger_post_index_eval
+                            from config.settings import Settings as _EvalSettings
+
+                            trigger_post_index_eval(
+                                self._settings or _EvalSettings(),
+                                reason=f"auto_crawler_{pipeline_name}",
+                                collection=collection,
+                            )
+                        except Exception:
+                            logger.warning("Failed to trigger post-index eval during auto crawl", exc_info=True)
 
             # Step 4: Retention
             logger.info("─── STEP 4: Retention [%s] (%d months) ───",

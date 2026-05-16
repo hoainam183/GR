@@ -11,6 +11,7 @@ import RegisterPage from "./pages/RegisterPage";
 import CompleteProfile from "./pages/CompleteProfile";
 import TracePage from "./pages/TracePage";
 import RetrievalPage from "./pages/RetrievalPage";
+import EvalPage from "./pages/EvalPage";
 import AdminPage from "./pages/AdminPage";
 import DocumentReview from "./pages/DocumentReview";
 
@@ -41,8 +42,9 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
-          <Route path="/trace" element={<TracePage />} />
-          <Route path="/retrieval" element={<RetrievalPage />} />
+          <Route path="/trace" element={<AdminGuard><TracePage /></AdminGuard>} />
+          <Route path="/retrieval" element={<AdminGuard><RetrievalPage /></AdminGuard>} />
+          <Route path="/eval" element={<AdminGuard><EvalPage /></AdminGuard>} />
           <Route path="/admin" element={<AdminGuard><AdminPage /></AdminGuard>} />
           <Route path="/admin/documents/:id" element={<AdminGuard><DocumentReview /></AdminGuard>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

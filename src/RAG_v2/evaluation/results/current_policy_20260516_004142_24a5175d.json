@@ -1,0 +1,882 @@
+{
+  "run": {
+    "run_id": "20260516_004142_24a5175d",
+    "eval_suite": "current_policy",
+    "status": "warning",
+    "started_at": "2026-05-15T17:41:42.325149+00:00",
+    "finished_at": "2026-05-15T17:42:27.864939+00:00",
+    "trigger": "manual",
+    "summary": {
+      "total_cases": 5,
+      "passed_cases": 5,
+      "failed_cases": 0,
+      "collection_accuracy": 1.0,
+      "keyword_hit_rate": 1.0,
+      "ndcg_at_10": 0.0,
+      "mrr_at_10": 0.0,
+      "recall_at_50": 0.0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "ndcg_at_k": 0.0,
+      "mrr_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "raw_recall_at_50": 0.0,
+      "citation_accuracy": 1.0,
+      "freshness_pass_rate": 1.0,
+      "latency_p50_ms": 4770.94,
+      "latency_p95_ms": 7033.43,
+      "search_strategy_baseline": {
+        "raw_recall_at_50": 0.7642,
+        "reranked_ndcg_at_10": 0.4948,
+        "reranked_mrr_at_10": 0.7833
+      },
+      "baseline_warnings": [
+        "ndcg_at_10_below_baseline:0.0000<baseline:0.4948",
+        "mrr_at_10_below_baseline:0.0000<baseline:0.7833",
+        "recall_at_50_below_baseline:0.0000<baseline:0.7642"
+      ]
+    },
+    "artifacts": {
+      "json": "/Users/nam.nguyen/Documents/personal/GR/src/RAG_v2/evaluation/results/current_policy_20260516_004142_24a5175d.json",
+      "csv": "/Users/nam.nguyen/Documents/personal/GR/src/RAG_v2/evaluation/results/current_policy_20260516_004142_24a5175d.csv"
+    },
+    "config": {
+      "dataset": "/Users/nam.nguyen/Documents/personal/GR/src/RAG_v2/eval/golden_dataset.json",
+      "max_cases": 0,
+      "judge_enabled": false,
+      "trigger_document_id": null,
+      "trigger_collection": null
+    },
+    "errors": []
+  },
+  "cases": [
+    {
+      "eval_suite": "current_policy",
+      "case_id": "retrieval_01",
+      "question": "Điều kiện xét học bổng khuyến khích học tập",
+      "actual_answer": "",
+      "retrieved_source_ids": [
+        "b113b0c6-87ae-4612-8490-035963fd8760",
+        "0e118f53-1a1d-4eac-ab2a-01e685a9da52",
+        "40cf720c-5f99-5912-964f-4d61d155f594",
+        "e4703a27-fec6-4fec-9aa3-c213b44080f6",
+        "8b28d54d-37c0-5f00-aefa-11a64733307a",
+        "ba3b14f4-da5e-4a65-87f9-6f9ebe96a477",
+        "62144002-2ebd-471e-a2c3-a11778e281a4",
+        "78b900e8-6127-4772-bf62-f7f72a46ccfc",
+        "fa5fdc7c-4038-5ab1-be9f-eb8ef5911c06",
+        "a4b5fcf1-69a6-5305-9753-58591bb138f4"
+      ],
+      "sources": [
+        {
+          "id": "quydinh/b113b0c6-87ae-4612-8490-035963fd8760",
+          "collection": "quydinh",
+          "score": 3.415323257446289,
+          "text": "## Điều 2. Các quy định chung\n\n1. Học bổng khuyến khích học tập (KKHT) cấp cho các sinh viên được lựa chọn bởi Hội đồng xét cấp học bổng ĐHBK Hà Nội theo từng học kỳ chính của năm học, căn cứ vào thành tích học tập và rèn luyện của sinh viên trong học kỳ chính liền trước đó.\n\n2. Học bổng KKHT nhằm khuyến khích sinh viên nâng cao thành tích học tập và rèn luyện tại ĐHBK Hà Nội.\n\n3. Quỹ học bổng KKHT hình thành từ nguồn học phí và bằng 8% (tám phần trăm) học phí của học kỳ lấy điểm xét cấp học bổng.\n\n4. Học bổng KKHT có 3 mức:\n   a) Học bổng loại khá (loại C): Bằng tổng học phí của tất cả các học phần tính điểm trung bình học kỳ (GPA).\n   b) Học bổng loại giỏi (loại B): Bằng 1,2 lần mức học bổng loại khá.\n   c) Học bổng loại xuất sắc (loại A): Bằng 1,5 lần mức học bổng loại khá.\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUYẾT ĐỊNH VỀ VIỆC BAN HÀNH QUY ĐỊNH XÉT CẤP HỌC BỔNG KHUYẾN KHÍCH HỌC TẬP TẠI ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/0e118f53-1a1d-4eac-ab2a-01e685a9da52",
+          "collection": "quydinh",
+          "score": 2.7011590003967285,
+          "text": "## Điều 5. Nguyên tắc xét, cấp học bổng tài trợ\n\n**1.** Trường hợp cùng một loại học bổng nhưng số ứng viên có cùng tiêu chuẩn, tiêu chí xét học bổng nhiều hơn số suất học bổng thì tiếp tục xét đến các tiêu chí phụ liên quan khác như: hoàn cảnh gia đình, thành tích về học tập và rèn luyện trong quá trình học tập tại ĐHBK Hà Nội. Thứ tự và mức độ ưu tiên của các tiêu chí phụ đối với mỗi học bổng do Giám đốc ĐHBK Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.\n\n**2.** Ưu tiên xét, cấp học bổng cho sinh viên không/chưa được nhận học bổng hoặc các khoản hỗ trợ tài chính khác (miễn, giảm học phí; học bổng khuyến khích học tập, học bổng Trần Đại Nghĩa, học bổng tài trợ,...) trong cùng học kỳ.\n\n**3.** Ưu tiên xét cấp học bổng cho sinh viên thuộc các ngành/các đơn vị đào tạo có ít học bổng tài trợ.\n\n**4.** Không xét học bổng cho sinh viên đã được học bổng tài trợ khác bằng tiền mặt từ 10 triệu đồng trở lên trong cùng học kỳ.\n\n**5.** Việc xét, cấp học bổng phải đảm bảo công khai, minh bạch, công bằng, đúng đối tượng.\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUYẾT ĐỊNH"
+          }
+        },
+        {
+          "id": "quydinh/40cf720c-5f99-5912-964f-4d61d155f594",
+          "collection": "quydinh",
+          "score": 1.7553704977035522,
+          "text": "### Điều 6. Nguyên tắc xét, cấp Học bổng Trần Đại Nghĩa\n1. Học bổng Trần Đại Nghĩa được xét, cấp theo học kỳ đối với các trường hợp quy định tại khoản 1 và khoản 2 Điều 5; xét cấp thường xuyên đối với các trường hợp quy định tại khoản 3 và khoản 4 Điều 5.\n2. Không xét, cấp Học bổng Trần Đại Nghĩa cho những sinh viên không đăng ký học tập tại thời điểm xét, cấp học bổng.\n3. Không xét, cấp Học bổng Trần Đại Nghĩa cho những sinh viên đang trong thời gian bị kỷ luật từ mức cảnh cáo trở lên.\n4. Không xét, cấp Học bổng Trần Đại Nghĩa cho những sinh viên đã được nhận học bổng khuyến khích học tập hoặc học bổng tài trợ (trừ học bổng dưới dạng khóa học) trong học kỳ xét, cấp Học bổng Trần Đại Nghĩa.\n5. Không xét, cấp Học bổng Trần Đại Nghĩa cho sinh viên diện chế độ chính sách được miễn, giảm học phí theo quy định của Nhà nước thuộc các đối tượng quy định tại khoản 1 và khoản 2 Điều 5.",
+          "metadata": {
+            "source": "Quy định Học bổng Trần Đại Nghĩa 2025.pdf",
+            "filename": "Quy định Học bổng Trần Đại Nghĩa 2025.pdf",
+            "document_id": "6a034e61506cdfd33a4f9b0c",
+            "doc_title": "QUY ĐỊNH"
+          }
+        },
+        {
+          "id": "stsv/e4703a27-fec6-4fec-9aa3-c213b44080f6",
+          "collection": "stsv",
+          "score": 1.5182549953460693,
+          "text": "[Các Quy định và Biểu mẫu thường dùng | Sổ tay SV | I. Các Quy định thường dùng]\n8. Quy định về Học bổng Khuyến khích học tập:\n[Xem tại đây.](https://husteduvn-my.sharepoint.com/:b:/g/personal/khai_tranquang_hust_edu_vn1/ESCBPVQlzNFOlglsvRwxAZYBqxdZc6QR_f9Y2TuGC2IiSA?e=Pszv9k)\n\n9. Quy định về Học bổng Trần Đại Nghĩa:\n[Xem tại đây.](https://husteduvn-my.sharepoint.com/:w:/g/personal/khai_tranquang_hust_edu_vn1/ERczoBK8xr9PutLrx9PkEAABP7iFQRhguBqzkg1jQcFJWQ?e=6g8O5B)\n\n10. Quy định về việc miễn giảm học phí, hỗ trợ chi phí học tập và hỗ trợ học tập cho sinh viên diện chế độ chính sách:\n[Xem tại đây.](https://drive.google.com/file/d/1NZx3Vbr632AyoRY-989ZKaFzabWprBrd/view?usp=sharing)",
+          "metadata": {
+            "doc_id": 68,
+            "title": "Các Quy định và Biểu mẫu thường dùng"
+          }
+        },
+        {
+          "id": "quydinh/8b28d54d-37c0-5f00-aefa-11a64733307a",
+          "collection": "quydinh",
+          "score": 1.0875585079193115,
+          "text": "### Điều 5. Tiêu chuẩn được đăng ký xét Học bổng Trần Đại Nghĩa\n\n2. Sinh viên khác (từ học kỳ 2 trở đi) đạt đồng thời các điều kiện sau:\n   a) Đang trong thời gian học tập theo thiết kế chương trình đào tạo chuẩn;\n   b) Điểm học tập trung bình của học kỳ liền trước (GPA) ≥ 2,0;\n   c) Điểm rèn luyện của học kỳ liền trước ≥ 65.\n\n3. Sinh viên có hoàn cảnh kinh tế gia đình khó khăn do gặp các tai nạn, rủi ro đột xuất, gồm:\n   a) Sinh viên mắc bệnh hiểm nghèo;\n   b) Sinh viên gặp tai nạn ở mức độ nặng và phải điều trị dài ngày trong bệnh viện;\n   c) Gia đình sinh viên gặp thiên tai, dịch bệnh hoặc hỏa hoạn.\n\n4. Các trường hợp đặc biệt khác do Giám đốc Đại học quyết định.",
+          "metadata": {
+            "source": "Quy định Học bổng Trần Đại Nghĩa 2025.pdf",
+            "filename": "Quy định Học bổng Trần Đại Nghĩa 2025.pdf",
+            "document_id": "6a034e61506cdfd33a4f9b0c",
+            "doc_title": "QUY ĐỊNH"
+          }
+        },
+        {
+          "id": "quydinh/ba3b14f4-da5e-4a65-87f9-6f9ebe96a477",
+          "collection": "quydinh",
+          "score": 1.0358860492706299,
+          "text": "## Điều 4. Nguyên tắc xét cấp học bổng\n\n1. Sử dụng kết quả học tập và rèn luyện của học kỳ liền trước để xét cấp học bổng cho học kỳ sau.\n\n2. Học bổng được xét theo khóa, ngành đào tạo và theo thứ tự ưu tiên lần lượt từ loại A đến loại C, từ điểm GPA cao cho đến điểm GPA thấp cho đến khi hết quỹ học bổng. Trường hợp GPA bằng nhau thì sẽ ưu tiên sinh viên có điểm rèn luyện cao hơn.\n\n3. Không xét cấp học bổng đối với sinh viên thuộc một trong các trường hợp sau:\n   a) Chịu hình thức kỷ luật từ mức khiển trách trở lên tại thời điểm xét học bổng;\n   b) Đăng ký học ít hơn 15 tín chỉ (kể cả các học phần không tính điểm GPA) tại học kỳ lấy điểm xét, cấp học bổng, ngoại trừ học kỳ 1 năm học thứ nhất;\n   c) Đăng ký học ít hơn 6 tín chỉ (kể cả các học phần không tính điểm GPA) tại học kỳ cấp học bổng;\n   d) Học quá thời gian theo kế hoạch học tập chuẩn của chương trình đào tạo;\n   đ) Học chương trình đào tạo do trường đối tác nước ngoài cấp một văn bằng tốt nghiệp duy nhất.\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUYẾT ĐỊNH VỀ VIỆC BAN HÀNH QUY ĐỊNH XÉT CẤP HỌC BỔNG KHUYẾN KHÍCH HỌC TẬP TẠI ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/62144002-2ebd-471e-a2c3-a11778e281a4",
+          "collection": "quydinh",
+          "score": 0.9183602929115295,
+          "text": "## Điều 3. Tiêu chuẩn xét cấp học bổng\n\n1. Học bổng loại C: GPA ≥ 2,5 và điểm rèn luyện học kỳ ≥ 65 điểm.\n2. Học bổng loại B: GPA ≥ 3,2 và điểm rèn luyện học kỳ ≥ 80 điểm.\n3. Học bổng loại A: GPA ≥ 3,6 và điểm rèn luyện học kỳ ≥ 90 điểm.\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUYẾT ĐỊNH VỀ VIỆC BAN HÀNH QUY ĐỊNH XÉT CẤP HỌC BỔNG KHUYẾN KHÍCH HỌC TẬP TẠI ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/78b900e8-6127-4772-bf62-f7f72a46ccfc",
+          "collection": "quydinh",
+          "score": 0.7830578088760376,
+          "text": "## Điều 1\n\nBan hành kèm theo Quyết định này Quy định xét cấp học bổng khuyến khích học tập tại Đại học Bách khoa Hà Nội.",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUYẾT ĐỊNH VỀ VIỆC BAN HÀNH QUY ĐỊNH XÉT CẤP HỌC BỔNG KHUYẾN KHÍCH HỌC TẬP TẠI ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/fa5fdc7c-4038-5ab1-be9f-eb8ef5911c06",
+          "collection": "quydinh",
+          "score": 0.5374435782432556,
+          "text": "## Chương II: TIÊU CHUẨN, NGUYÊN TẮC VÀ HỒ SƠ ĐĂNG KÝ, XÉT CẤP HỌC BỔNG TRẦN ĐẠI NGHĨA\n\n### Điều 5. Tiêu chuẩn được đăng ký xét Học bổng Trần Đại Nghĩa\nSinh viên có hoàn cảnh kinh tế gia đình đặc biệt khó khăn (hộ nghèo, hộ cận nghèo hoặc hộ có hoàn cảnh kinh tế đặc biệt khó khăn khác), sinh viên gặp các tai nạn, rủi ro đột xuất thuộc các đối tượng sau được đăng ký xét Học bổng Trần Đại Nghĩa:\n\n1. Sinh viên mới trúng tuyển vào ĐHBK Hà Nội (đang trong thời gian học kỳ một năm thứ nhất) đạt một trong các điều kiện sau:\n   a) Là thành viên đội tuyển dự thi Olympic quốc tế hoặc đoạt giải nhất/ nhì/ ba kỳ thi học sinh giỏi cấp tỉnh trở lên các môn học thuộc tổ hợp xét tuyển vào ĐHBK Hà Nội đúng ngành học;\n   b) Đạt điểm cao trong kỳ thi tuyển, xét tuyển vào ĐHBK Hà Nội (căn cứ vào điểm chuẩn trúng tuyển hàng năm, Đại học sẽ công bố mức điểm đạt điều kiện xét học bổng).\n\n2. Sinh viên khác (từ học kỳ 2 trở đi) đạt đồng thời các điều kiện sau:\n   a) Đang trong thời gian học tập theo thiết kế chương trình đào tạo chuẩn;\n   b) Điểm học tập trung bình của học kỳ liền trước (GPA) ≥ 2,0;\n   c) Điểm rèn luyện của học kỳ liền trước ≥ 65.\n\n3. Sinh viên có hoàn cảnh kinh tế gia đình khó khăn do gặp",
+          "metadata": {
+            "source": "Quy định Học bổng Trần Đại Nghĩa 2025.pdf",
+            "filename": "Quy định Học bổng Trần Đại Nghĩa 2025.pdf",
+            "document_id": "6a034e61506cdfd33a4f9b0c",
+            "doc_title": "QUY ĐỊNH"
+          }
+        },
+        {
+          "id": "quydinh/a4b5fcf1-69a6-5305-9753-58591bb138f4",
+          "collection": "quydinh",
+          "score": 0.4343986213207245,
+          "text": "## Chương II: TIÊU CHUẨN, NGUYÊN TẮC VÀ HỒ SƠ ĐĂNG KÝ, XÉT CẤP HỌC BỔNG TRẦN ĐẠI NGHĨA\n\n### Điều 5. Tiêu chuẩn được đăng ký xét Học bổng Trần Đại Nghĩa\nSinh viên có hoàn cảnh kinh tế gia đình đặc biệt khó khăn (hộ nghèo, hộ cận nghèo hoặc hộ có hoàn cảnh kinh tế đặc biệt khó khăn khác), sinh viên gặp các tai nạn, rủi ro đột xuất thuộc các đối tượng sau được đăng ký xét Học bổng Trần Đại Nghĩa:\n\n1. Sinh viên mới trúng tuyển vào ĐHBK Hà Nội (đang trong thời gian học kỳ một năm thứ nhất) đạt một trong các điều kiện sau:\n   a) Là thành viên đội tuyển dự thi Olympic quốc tế hoặc đoạt giải nhất/ nhì/ ba kỳ thi học sinh giỏi cấp tỉnh trở lên các môn học thuộc tổ hợp xét tuyển vào ĐHBK Hà Nội đúng ngành học;\n   b) Đạt điểm cao trong kỳ thi tuyển, xét tuyển vào ĐHBK Hà Nội (căn cứ vào điểm chuẩn trúng tuyển hàng năm, Đại học sẽ công bố mức điểm đạt điều kiện xét học bổng).",
+          "metadata": {
+            "source": "Quy định Học bổng Trần Đại Nghĩa 2025.pdf",
+            "filename": "Quy định Học bổng Trần Đại Nghĩa 2025.pdf",
+            "document_id": "6a034e61506cdfd33a4f9b0c",
+            "doc_title": "QUY ĐỊNH"
+          }
+        }
+      ],
+      "timings_ms": {
+        "embed_bge_ms": 38.61,
+        "embed_e5_ms": 348.98,
+        "search_ms": 149.41,
+        "rerank_ms": 6496.37
+      },
+      "judge_scores": {},
+      "metrics": {
+        "recall_at_k": 0.0,
+        "raw_recall_at_50": 0.0,
+        "context_precision": 0.0,
+        "context_recall": 0.0,
+        "mrr_at_k": 0.0,
+        "ndcg_at_k": 0.0,
+        "latency_ms": 7033.43,
+        "collection_hit": 1.0,
+        "keyword_hit": 1.0,
+        "freshness_pass": 1.0,
+        "citation_accuracy": 1.0
+      },
+      "fail_reasons": [],
+      "passed": true,
+      "error": null,
+      "case": {
+        "eval_suite": "current_policy",
+        "case_id": "retrieval_01",
+        "question": "Điều kiện xét học bổng khuyến khích học tập",
+        "context": "",
+        "ground_truth_answer": "",
+        "timestamp": null,
+        "expected_source_ids": [],
+        "expected_collections": [
+          "quydinh"
+        ],
+        "valid_as_of": null,
+        "query_class": "retrieval",
+        "difficulty": "medium",
+        "metadata": {
+          "id": "retrieval_01",
+          "category": "retrieval",
+          "query": "Điều kiện xét học bổng khuyến khích học tập",
+          "expected_collection": "quydinh",
+          "expected_keywords": [
+            "học bổng",
+            "khuyến khích"
+          ],
+          "description": "Should retrieve scholarship regulations"
+        }
+      }
+    },
+    {
+      "eval_suite": "current_policy",
+      "case_id": "retrieval_02",
+      "question": "Chương trình đào tạo ngành CNTT IT-E6",
+      "actual_answer": "",
+      "retrieved_source_ids": [
+        "a3b83b7b-06b9-4faf-a59c-a0ed5ac841dc",
+        "6efb75c6-8aff-4841-b753-aa4ea33bd2df",
+        "b1721449-4322-4381-97ff-8975f3cd5364",
+        "c1a4519e-cdb0-4dad-be27-fbeb90a85e46",
+        "7bd9d9bb-b603-4003-96bb-2b6d55ca2ae2"
+      ],
+      "sources": [
+        {
+          "id": "ctdt/a3b83b7b-06b9-4faf-a59c-a0ed5ac841dc",
+          "collection": "ctdt",
+          "score": 0.634881854057312,
+          "text": "## 1. Mục tiêu chương trình đào tạo\n\n### 1.1 Mục tiêu chung\n\n- Đào tạo cử nhân trình độ cao có khả năng tham gia vào quá trình tạo ra tri thức, sản phẩm mới phục vụ xã hội và đất nước.\n- Đào tạo cử nhân trình độ cao có khả năng áp dụng thành thạo kiến thức cơ sở và chuyên môn, có kỹ năng thực hành nghề nghiệp, có khả năng sáng tạo để tham gia giải quyết vấn đề liên quan đến lĩnh vực CNTT, thích nghi với môi trường làm việc, có khả năng tự học để thích ứng với sự phát triển không ngừng của khoa học và công nghệ.\n- Đào tạo ra cử nhân trình độ cao có trình độ ngoại ngữ tiếng Anh và tiếng Nhật. Trong đó, khả năng tiếng Nhật tối thiểu đạt trình độ N3, là trình độ có thể giao tiếp đơn giản bằng tiếng Nhật. Với trình độ tiếng Nhật N3, sinh viên sẽ có cơ hội tiếp tục học sau đại học và làm việc tại Nhật Bản, hoặc làm việc tại các công ty Việt Nam cần sử dụng tiếng Nhật.",
+          "metadata": {
+            "source": "",
+            "doc_title": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2020",
+            "major_code": "IT-E6"
+          }
+        },
+        {
+          "id": "ctdt/6efb75c6-8aff-4841-b753-aa4ea33bd2df",
+          "collection": "ctdt",
+          "score": -1.992952823638916,
+          "text": "#### Cơ sở và cốt lõi ngành (53 tín chỉ)\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 42 | IT3362 | Kỹ năng ITSS 1 (học bằng tiếng Nhật) | 2(0-4-0-4) | 7 |\n| 43 | IT3382 | Kỹ năng ITSS 2 (học bằng tiếng Nhật) | 2(0-4-0-4) | 8 |\n| 44 | IT3210 | Ngôn ngữ lập trình C | 2(2-0-0-4) | 2 |\n| 45 | IT3220 | Thực hành ngôn ngữ lập trình C | 2(0-4-0-4) | 2 |\n| 46 | IT4593 | Nhập môn kỹ thuật truyền thông | 2(2-1-0-4) | 5 |\n| 47 | IT3011 | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 3 |\n| 48 | IT3230 | Lập trình C (cơ bản) | 2(0-4-0-4) | 3 |\n| 49 | IT3170 | Thuật toán ứng dụng | 2(2-0-1-4) | 5 |\n| 50 | IT4082 | Kỹ thuật phần mềm | 2(2-1-0-4) | 6 |\n| 51 | IT3070 | Nguyên lý hệ điều hành | 3(3-1-0-6) | 5 |\n| 52 | IT3080 | Mạng máy tính | 3(3-0-1-6) | 5 |\n| 53 | IT3292 | Cơ sở dữ liệu | 2(2-0-0-4) | 4 |\n| 54 | IT3290 | Thực hành cơ sở dữ liệu | 2(0-4-0-4) | 4 |\n| 55 | IT3160 | Nhập môn Trí tuệ nhân tạo | 3(3-1-0-6) | 6 |\n| 56 | IT3103 | Lập trình hướng đối tượng | 3(2-1-1-6) | 5 |",
+          "metadata": {
+            "source": "",
+            "doc_title": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2020",
+            "major_code": "IT-E6"
+          }
+        },
+        {
+          "id": "ctdt/b1721449-4322-4381-97ff-8975f3cd5364",
+          "collection": "ctdt",
+          "score": -2.146893262863159,
+          "text": "#### Cơ sở và cốt lõi ngành (53 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 57 | IT3283 | Kiến trúc máy tính | 2(2-1-0-4) | 4 |\n| 58 | IT3280 | Thực hành kiến trúc máy tính | 2(0-4-0-4) | 4 |\n| 59 | IT4015 | Nhập môn an toàn thông tin | 3(3-1-0-6) | 3 |\n| 60 | IT5021 | Nghiên cứu tốt nghiệp 1 | 2(0-0-4-4) | 6 |\n| 61 | IT5022 | Nghiên cứu tốt nghiệp 2 | 2(0-0-4-4) | 7 |\n| 62 | IT4549 | Phát triển phần mềm theo chuẩn ITSS | 3(3-1-0-6) | 6 |\n| 63 | IT4062 | Thực hành lập trình mạng | 2(0-4-0-4) | 7 |\n| 64 | IT3323 | Xây dựng chương trình dịch | 3(2-2-0-6) | 8 |",
+          "metadata": {
+            "source": "",
+            "doc_title": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2020",
+            "major_code": "IT-E6"
+          }
+        },
+        {
+          "id": "ctdt/c1a4519e-cdb0-4dad-be27-fbeb90a85e46",
+          "collection": "ctdt",
+          "score": -2.7330617904663086,
+          "text": "## 3. Nội dung chương trình\n\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **78** | |\n| Toán và khoa học cơ bản | 33 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | 15 | Giáo dục quốc phòng chỉ áp dụng cho sinh viên Việt Nam |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh TOEIC |\n| Tiếng Nhật | 7 | Ngoài 07 TC Tiếng Nhật tính CPA, còn có 16 TC Tiếng Nhật không tính CPA |\n| Tiếng Nhật chuyên ngành | 4 | |\n| **Giáo dục chuyên nghiệp** | **85** | |\n| Cơ sở và cốt lõi ngành | 53 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ (kỹ năng mềm) | 9 | Bắt buộc 7TC + Tự chọn 2TC |\n| Kiến thức chuyên ngành | 15 | |\n| Thực tập kỹ thuật và Đồ án TN cử nhân | 8 | Thực tập công nghiệp (2TC) + Đồ án TN cử nhân (6TC) |\n| **Tổng cộng** | **148** | |\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2020",
+            "major_code": "IT-E6"
+          }
+        },
+        {
+          "id": "ctdt/7bd9d9bb-b603-4003-96bb-2b6d55ca2ae2",
+          "collection": "ctdt",
+          "score": -2.8382251262664795,
+          "text": "#### Kiến thức bổ trợ xã hội (9 tín chỉ)\n\n**Bắt buộc:**\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 65 | IT2030 | Technical Writing and Presentation | 3(2-2-0-6) | 3 |\n\n**Tự chọn (chọn 6 tín chỉ):**\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 66 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) |\n| 67 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) |\n| 68 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) |\n| 69 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) |\n| 70 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) |\n| 71 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) |",
+          "metadata": {
+            "source": "",
+            "doc_title": "CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2020",
+            "major_code": "IT-E6"
+          }
+        }
+      ],
+      "timings_ms": {
+        "embed_bge_ms": 44.04,
+        "embed_e5_ms": 353.01,
+        "search_ms": 133.87,
+        "rerank_ms": 4339.69
+      },
+      "judge_scores": {},
+      "metrics": {
+        "recall_at_k": 0.0,
+        "raw_recall_at_50": 0.0,
+        "context_precision": 0.0,
+        "context_recall": 0.0,
+        "mrr_at_k": 0.0,
+        "ndcg_at_k": 0.0,
+        "latency_ms": 4870.66,
+        "collection_hit": 1.0,
+        "keyword_hit": 1.0,
+        "freshness_pass": 1.0,
+        "citation_accuracy": 1.0
+      },
+      "fail_reasons": [],
+      "passed": true,
+      "error": null,
+      "case": {
+        "eval_suite": "current_policy",
+        "case_id": "retrieval_02",
+        "question": "Chương trình đào tạo ngành CNTT IT-E6",
+        "context": "",
+        "ground_truth_answer": "",
+        "timestamp": null,
+        "expected_source_ids": [],
+        "expected_collections": [
+          "ctdt"
+        ],
+        "valid_as_of": null,
+        "query_class": "retrieval",
+        "difficulty": "medium",
+        "metadata": {
+          "id": "retrieval_02",
+          "category": "retrieval",
+          "query": "Chương trình đào tạo ngành CNTT IT-E6",
+          "expected_collection": "ctdt",
+          "expected_keywords": [
+            "IT-E6",
+            "CNTT"
+          ],
+          "description": "Should retrieve CTDT for IT-E6 with major metadata filter"
+        }
+      }
+    },
+    {
+      "eval_suite": "current_policy",
+      "case_id": "retrieval_03",
+      "question": "Lịch đăng ký học phần học kỳ 1 năm 2025",
+      "actual_answer": "",
+      "retrieved_source_ids": [
+        "97da2544-86a1-436c-8e2f-d464dba15663",
+        "f82fc24b-1cc0-4f65-966b-6c65f7dbbf71",
+        "bf4b9a73-6e6d-4fcd-bdde-c0e090d062fa",
+        "cbb7b664-3e22-4b2f-a413-23ea67cd2f6d",
+        "c6ade1c2-7f76-4d91-b418-8b53a64f55a8",
+        "3c664c5d-8000-4afb-8bfd-456c3bef2e5e",
+        "f41d5bee-9e72-4ade-b152-4c8ab4218593",
+        "3e93d330-05c5-41ce-9144-9ef4c01d3e7b",
+        "e662d3c7-5f40-422b-b094-b471085069b5",
+        "a322d3d8-c196-4f90-b364-7af1d199a361"
+      ],
+      "sources": [
+        {
+          "id": "kehoach/97da2544-86a1-436c-8e2f-d464dba15663",
+          "collection": "kehoach",
+          "score": 1.875443696975708,
+          "text": "[Lịch thi giữa kỳ - cuối kỳ học kỳ 1 năm 2025-2026 (20251 )]\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nDANH SÁCH LỚP THI GIỮA KỲ 20251 ĐỔI PHÒNG TỪ D6-407 SANG C1-302 XEM CHI TIẾT TẠI ĐÂY (Cập nhật ngày 10/11/2025) (https://ctt.hust.edu.vn/Upload/Nguy%E1%BB%85n%20Qu%E1%BB%91c%20%C4%90%E1%BA%A1t/files/DTDH_Lichthi/2025-2026/LTGK20251AB-Thay%20doi%20phong%20D6-407%20sang%20C1-_02.pdf)\nLỊCH THI GIỮA KỲ 20251-AB VÀ CUỐI KỲ 20251-A XEM CHI TIẾT TẠI ĐÂY (Cập nhật ngày 31/10/2025) (https://ctt.hust.edu.vn/Upload/Nguy%E1%BB%85n%20Qu%E1%BB%91c%20%C4%90%E1%BA%A1t/files/DTDH_Lichthi/2025-2026/LTGK20251AB-CK20251A-31102025.pdf)\nChú ý: Sinh viên theo dõi thường xuyên thông báo này để cập nhật lịch thi.",
+          "metadata": {
+            "source": "kehoach",
+            "title": "Lịch thi giữa kỳ - cuối kỳ học kỳ 1 năm 2025-2026 (20251 )",
+            "date_str": "26/12/2025"
+          }
+        },
+        {
+          "id": "kehoach/f82fc24b-1cc0-4f65-966b-6c65f7dbbf71",
+          "collection": "kehoach",
+          "score": 1.716401219367981,
+          "text": "[KẾ HOẠCH MỞ ĐĂNG KÝ LỚP KỲ 2 NĂM HỌC 2025-2026 (20252)]\n2.\nThời\ngian\nđăng\nký\nSinh\nviên\ncác\nkhóa\nK69\ntrở\nvề\ntrước\nchủ\nđộng\nđăng\nký\nlớp\ntừ\nngày\n30/12/2025. Sau\nkhi\nK70\nhoàn\ntất\nđăng\nký\n,\ncác\nlớp\ndành\ncho\nK70\nsẽ\nđược\nmở\ncho\ncác\nkhóa\ntừ\nK69\nvề\ntrước\nđăng\nký\nbổ\nsung (\nsẽ\nđược cập nhật trong thông báo).\na. Các\nđợt\nđăng\nký\nlớp\n-\nĐăng\nký\nchính\nthức\n:\ntừ\n16h00\nngày\n30/12/2025\nđến\n16h00\nngày\n12/01/2026\n-\nĐăng\nký\nđiều\nchỉnh\n:\ntừ\n09h00\nngày\n14/01/2026\nđến\n16h00\nngày\n26/01/2026\n-\nĐăng\nký\nthêm\n:\ntừ\n09h00\nngày\n28/01/2026\nđến\n16h00\nngày\n08/02/2026.\nb.\nPhân\nluồng\nđăng\nký\ntheo\nđợt\n-\nĐăng\nký\nchính\nthức\n:\ndành\ncho\nsinh\nviên\nđã\nđăng\nký\nhọc\nphần\ncho\nhọc\nkỳ\n2025.2 ở\ntuần\n3–4\ncủa\nhọc\nkỳ\ntrước\n(\nkỳ\n2025.1).\nĐỢT MỞ ĐĂNG KÝ LỚP CHÍNH THỨC\nCác chương trình Elitech\nCác chương trình IPE+SIE+KSCS\nChương trình chuẩn từ K67 trở về trước\nChương trình chuẩn từ K68 và K69\n16h 30/12/2025 - 16h 02/1/2026\n09h 04/1/2026 -16h 06/1/2026\n09h 07/1/2026 -16h 09/1/2026\n09h 10/1/2026 -16h 12/1/2026\nHệ\nthống\nsẽ\nđược\nbảo\ntrì\nhàng\nngày\ntừ\n00h00\nđến\n02h00\nsáng\nhàng\nngày\n. Sinh\nviên\nkhông\nvào\ntrang\nđăng\nký\ntrong",
+          "metadata": {
+            "source": "kehoach",
+            "title": "KẾ HOẠCH MỞ ĐĂNG KÝ LỚP KỲ 2 NĂM HỌC 2025-2026 (20252)",
+            "date_str": "29/12/2025"
+          }
+        },
+        {
+          "id": "kehoach/bf4b9a73-6e6d-4fcd-bdde-c0e090d062fa",
+          "collection": "kehoach",
+          "score": 1.3859398365020752,
+          "text": "[Thông báo về học phí kỳ 1 năm học 2025-2026 (20251) - Đợt 2]\nThời gian và cách đóng học phí:\na) Sẽ bắt đầu đóng học phí từ ngày\n10\n/\n12\n/202\n5\nđến hết ngày\n21\n/\n12\n/202\n5\n.\nb) Các em thực hiện đóng học phí bằng một trong các phương thức thanh toán theo hướng dẫn đi kèm phần số liệu học phí trong tài khoản sinh viên.\nc) Sinh viên không hoàn thành nghĩa vụ học phí khi hết Đợt 2 sẽ bị xem xét đình chỉ đăng ký học tập kỳ tới.\nTiếp nhận và hỗ trợ giải đáp các\nthắc mắc:\na) Hỗ trợ giải đáp các thắc mắc về cách đóng học phí: chuyên viên Nguyễn Thị Thùy Dương (Ban Đào tạo). Địa chỉ email:\nduong.nguyenthithuy@hust.edu.vn\nb) Hỗ trợ giải đáp các thắc mắc về số tiền học phí, định mức, số tín chỉ, dư nợ các kỳ trước…: chuyên viên Trần Lê Hùng (Ban Đào tạo). Địa chỉ email:\nhung.tranle@hust.edu.vn\nc) Các thắc mắc về miễn giảm chế độ chính sách: gửi tới Ban Công tác sinh viên qua địa chỉ email:\nngoc.ngoanh@hust.edu.vn\nhoặc liên hệ trực tiếp tại phòng C1-104 hoặc qua số điện thoại: 0243.869.3108",
+          "metadata": {
+            "source": "kehoach",
+            "title": "Thông báo về học phí kỳ 1 năm học 2025-2026 (20251) - Đợt 2",
+            "date_str": "8/12/2025"
+          }
+        },
+        {
+          "id": "kehoach/cbb7b664-3e22-4b2f-a413-23ea67cd2f6d",
+          "collection": "kehoach",
+          "score": 1.1190049648284912,
+          "text": "[THÔNG BÁO VỀ HỌC PHÍ KỲ I NĂM HỌC 2025-2026 (20251) - ĐỢT 2]\nThời gian và cách đóng học phí:\na) Sẽ bắt đầu đóng học phí từ ngày\n10\n/\n12\n/202\n5\nđến hết ngày\n21\n/\n12\n/202\n5\n.\nb) Các em thực hiện đóng học phí bằng một trong các phương thức thanh toán theo hướng dẫn đi kèm phần số liệu học phí trong tài khoản sinh viên.\nc) Sinh viên không hoàn thành nghĩa vụ học phí khi hết Đợt 2 sẽ bị xem xét đình chỉ đăng ký học tập kỳ tới.\nTiếp nhận và hỗ trợ giải đáp các\nthắc mắc:\na) Hỗ trợ giải đáp các thắc mắc về cách đóng học phí: chuyên viên Nguyễn Thị Thùy Dương (Ban Đào tạo). Địa chỉ email:\nduong.nguyenthithuy@hust.edu.vn\nb) Hỗ trợ giải đáp các thắc mắc về số tiền học phí, định mức, số tín chỉ, dư nợ các kỳ trước…: chuyên viên Trần Lê Hùng (Ban Đào tạo). Địa chỉ email:\nhung.tranle@hust.edu.vn\nc) Các thắc mắc về miễn giảm chế độ chính sách: gửi tới Ban Công tác sinh viên qua địa chỉ email:\nngoc.ngoanh@hust.edu.vn\nhoặc liên hệ trực tiếp tại phòng C1-104 hoặc qua số điện thoại: 0243.869.3108",
+          "metadata": {
+            "source": "kehoach",
+            "title": "THÔNG BÁO VỀ HỌC PHÍ KỲ I NĂM HỌC 2025-2026 (20251) - ĐỢT 2",
+            "date_str": "8/12/2025"
+          }
+        },
+        {
+          "id": "kehoach/c6ade1c2-7f76-4d91-b418-8b53a64f55a8",
+          "collection": "kehoach",
+          "score": 0.8369260430335999,
+          "text": "[LỊCH TIẾP NHẬN TRỞ LẠI HỌC TỪ HỌC KỲ 2 NĂM HỌC 2025-2026 (20252)]\nLịch tiếp nhận trở lại học từ kỳ 2 năm 2025-2026 (20252)\nBan Đào tạo  tiếp nhận sinh viên vào học tiếp từ kỳ 2 năm học 2025-2026 (20252) như sau:\nSinh viên đào tạo theo tín chỉ (học cùng 66,67,68,69,70):\n1/  Thời gian nhận hồ sơ:\nVào học tiếp từ kỳ 2 năm học 2025-2026 (20252): từ 01/12/2025 đến 25/12/2025\n-\nSV đăng ký lớp học trong đợt đăng ký điều chỉnh,\nonline\ntrên hệ thống đăng ký lớp.\n( không cần đăng ký học phần ).\n2/  Hồ sơ gồm :\n+ Đơn xin tiếp nhận trở lại học trong mục\nSổ tay sinh viên (Mục 24) : (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)\nhttp://ctt.hust.edu.vn (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)\n(\ntại đây (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)\n) (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)\n+",
+          "metadata": {
+            "source": "kehoach",
+            "title": "LỊCH TIẾP NHẬN TRỞ LẠI HỌC TỪ HỌC KỲ 2 NĂM HỌC 2025-2026 (20252)",
+            "date_str": "8/12/2025"
+          }
+        },
+        {
+          "id": "kehoach/3c664c5d-8000-4afb-8bfd-456c3bef2e5e",
+          "collection": "kehoach",
+          "score": 0.6119003295898438,
+          "text": "[Lịch thi giữa kỳ - cuối kỳ học kỳ 1 năm 2025-2026 (20251 )]\nLỊCH THI GIỮA KỲ - CUỐI KỲ HỌC KỲ 1 NĂM HỌC 2025-2026\nLỊCH THI CUỐI KỲ 20251-AB XEM CHI TIẾT TẠI ĐÂY (CẬP NHẬT NGÀY 07.01.2026) (https://ctt.hust.edu.vn/Upload/Nguyễn Quốc Đạt/files/DTDH_Lichthi/2025-2026/LTCK-ky%2020251-07012026.pdf)\nLỊCH THI CUỐI KỲ 20251-AB CHƯƠNG TRÌNH VIỆT NHẬT - ICT XEM CHI TIẾT TẠI ĐÂY (CẬP NHẬT 26.01.2026) (https://ctt.hust.edu.vn/Upload/Nguyễn Quốc Đạt/files/DTDH_Lichthi/2025-2026/LTCK-VN-ICT%20ky%2020251-26012026.pdf)\nLỊCH THI CUỐI KỲ 20251-AB MÔN TIN HỌC ĐẠI CƯƠNG XEM CHI TIẾT TẠI ĐÂY (CẬP NHẬT NGÀY 08.01.2026) (https://ctt.hust.edu.vn/Upload/Nguyễn Quốc Đạt/files/DTDH_Lichthi/2025-2026/LTCK-ky%2020251-Tin%20hoc%20dai%20cuong_08012026.pdf)\nLưu ý: Lịch thi tin đại cương sinh viên xem theo mã sinh viên, mọi thắc mắc sinh viên liên hệ với cô Nguyễn Thanh Nguyệt (email: nguyetnt@soict.hust.edu.vn)",
+          "metadata": {
+            "source": "kehoach",
+            "title": "Lịch thi giữa kỳ - cuối kỳ học kỳ 1 năm 2025-2026 (20251 )",
+            "date_str": "26/12/2025"
+          }
+        },
+        {
+          "id": "kehoach/f41d5bee-9e72-4ade-b152-4c8ab4218593",
+          "collection": "kehoach",
+          "score": 0.5250638723373413,
+          "text": "[Thông báo về học phí kỳ 1 năm học 2025-2026 (20251) - Đợt 2]\nTHÔNG BÁO\nVỀ HỌC PHÍ KỲ I NĂM HỌC 2025-2026 (20251)- ĐỢT 2\nHướng dẫn tra cứu học phí:\na) Sinh viên tra cứu học phí học kỳ 1 đợt 2 năm học 2025-2026 từ ngày\n10/12/2025\nbằng cách đăng nhập tài khoản trên Cổng thông tin sinh viên (ctt.hust.edu.vn), vào mục “Dịch vụ” và sau đó vào xem tại phần “Học phí – Công nợ”.\nb) Học phí của mỗi học kỳ được tính toán theo 02 đợt: Đợt 1 tính toán sơ bộ học phí cần đóng, sau đó Đợt 2 sẽ tính lại chính xác học phí của học kỳ. Do vậy sinh viên cần kiểm tra các mục sau:\n+ Tổng số học phí cần đóng Đợt 2 này đã đúng hay chưa.\n+ Các học phần đang tính học phí ngoài chương trình đào tạo (CTĐT) đã đúng hay chưa.\nĐịnh mức học phí với học phần trong và ngoài CTĐT là như nhau, tuy nhiên nếu chưa chính xác sẽ ảnh hưởng đến tiền học bổng khuyến khích học tập của kỳ sau.\nThời gian và cách đóng học phí:\na) Sẽ bắt đầu đóng học phí từ ngày\n10\n/\n12\n/202\n5\nđến hết ngày\n21\n/\n12\n/202\n5\n.",
+          "metadata": {
+            "source": "kehoach",
+            "title": "Thông báo về học phí kỳ 1 năm học 2025-2026 (20251) - Đợt 2",
+            "date_str": "8/12/2025"
+          }
+        },
+        {
+          "id": "kehoach/3e93d330-05c5-41ce-9144-9ef4c01d3e7b",
+          "collection": "kehoach",
+          "score": 0.508141040802002,
+          "text": "[THÔNG BÁO VỀ HỌC PHÍ KỲ I NĂM HỌC 2025-2026 (20251) - ĐỢT 2]\nTHÔNG BÁO\nVỀ HỌC PHÍ KỲ I NĂM HỌC 2025-2026 (20251)- ĐỢT 2\nHướng dẫn tra cứu học phí:\na) Sinh viên tra cứu học phí học kỳ 1 đợt 2 năm học 2025-2026 từ ngày\n10/12/2025\nbằng cách đăng nhập tài khoản trên Cổng thông tin sinh viên (ctt.hust.edu.vn), vào mục “Dịch vụ” và sau đó vào xem tại phần “Học phí – Công nợ”.\nb) Học phí của mỗi học kỳ được tính toán theo 02 đợt: Đợt 1 tính toán sơ bộ học phí cần đóng, sau đó Đợt 2 sẽ tính lại chính xác học phí của học kỳ. Do vậy sinh viên cần kiểm tra các mục sau:\n+ Tổng số học phí cần đóng Đợt 2 này đã đúng hay chưa.\n+ Các học phần đang tính học phí ngoài chương trình đào tạo (CTĐT) đã đúng hay chưa.\nĐịnh mức học phí với học phần trong và ngoài CTĐT là như nhau, tuy nhiên nếu chưa chính xác sẽ ảnh hưởng đến tiền học bổng khuyến khích học tập của kỳ sau.\nThời gian và cách đóng học phí:\na) Sẽ bắt đầu đóng học phí từ ngày\n10\n/\n12\n/202\n5\nđến hết ngày\n21\n/\n12\n/202\n5\n.",
+          "metadata": {
+            "source": "kehoach",
+            "title": "THÔNG BÁO VỀ HỌC PHÍ KỲ I NĂM HỌC 2025-2026 (20251) - ĐỢT 2",
+            "date_str": "8/12/2025"
+          }
+        },
+        {
+          "id": "kehoach/e662d3c7-5f40-422b-b094-b471085069b5",
+          "collection": "kehoach",
+          "score": 0.39547085762023926,
+          "text": "[KẾ HOẠCH MỞ ĐĂNG KÝ LỚP KỲ 2 NĂM HỌC 2025-2026 (20252)]\nđến\n14h00\nngày\n08/02/2026 (\nkế\nhoạch\ncó\nthể\nđiều\nchỉnh\n).\nc. Các\nmốc\nthời\ngian\nquan\ntrọng\n-\nHạn\nmở\nthêm\nlớp\n: 26/01/2026.\n- Thông\nbáo\nlớp\nít\nsinh\nviên\n: 30/01/2026.\n- Thông\nbáo\nlớp\nhủy\n/\ngiữ\nchính\nthức\n: 2/02/2026.\n-\nĐóng\nhệ\nthống\nđăng\nký\ntrực\ntuyến\n: 09/02/2026.\n-\nKết\nthúc\ntoàn\nbộ\nđăng\nký\n: 14/02/2026.\nSau\nkhi\nkết\nthúc\nđăng\nký\nchính\nthức\nvà\nđăng\nký\nđiều\nchỉnh\n,\nsinh\nviên\nkhông\nđược\nthay\nđổi\nmôn\nhọc\nđã\nđăng\nký\n.",
+          "metadata": {
+            "source": "kehoach",
+            "title": "KẾ HOẠCH MỞ ĐĂNG KÝ LỚP KỲ 2 NĂM HỌC 2025-2026 (20252)",
+            "date_str": "29/12/2025"
+          }
+        },
+        {
+          "id": "kehoach/a322d3d8-c196-4f90-b364-7af1d199a361",
+          "collection": "kehoach",
+          "score": 0.039096444845199585,
+          "text": "[KẾ HOẠCH MỞ ĐĂNG KÝ LỚP KỲ 2 NĂM HỌC 2025-2026 (20252)]\nthường\nxuyên\ntại\n:\nhttps://ctt.hust.edu.vn (https://ctt.hust.edu.vn)\n. Sinh\nviên\ncần\ntheo\ndõi\nthường\nxuyên\nđể\ncập\nnhật\ncác\nđiều\nchỉnh\n(\nnếu\ncó\n).\nTHỜI KHÓA BIỂU DỰ KIẾN KỲ 20252 XEM CHI TIẾT TẠI ĐÂY (Cập nhật thường xuyên) (https://husteduvn-my.sharepoint.com/:x:/g/personal/dat_nguyenquoc_hust_edu_vn/IQDvyvDhi9dsSqor7Wiv5BOeAWdJiOTE8jPSDOd-yjYqL8I?e=ixeMCz)\nđ. Lưu ý\nkhi\nđăng\nký\nhọc\nphần\n:\nSinh\nviên\ncần\nkiểm\ntra\nkỹ\nChương\ntrình\nđào\ntạo\n(CTĐT)\ntrong\ntài\nkhoản\nCTT\nđể\nđăng\nký\nđúng\nmã\nhọc\nphần\ntheo\nquy\nđịnh\n; Sinh\nviên\nchương\ntrình\nchuẩn\nkhông\nđăng\nký\nvào\ncác\nlớp\nmở\ncho\nchương\ntrình\nElitech\nvà\nchương\ntrình\nhợp\ntác\nquốc\ntế\n(SIE)\nvà\nngược\nlại\n.\ne.\nKhối\nlượng\ntín\nchỉ\nđăng\nký\n:\n- Sinh\nviên\nchương\ntrình\nchuẩn\n:\ntối\nđa\n24 TC,\ntối\nthiểu\n12 TC.\n- Sinh\nviên\nchương\ntrình\nElitech\n:\ntối\nđa\n28 TC,\ntối\nthiểu\n12 TC.\nĐối\nvới\nsinh\nviên\nbị\ncảnh\ncáo\nhọc\ntập\nmức\n3:\n-\nChương\ntrình\nchuẩn\n:\ntối\nđa\n14 TC,\ntối\nthiểu\n8 TC.\n-\nChương\ntrình\nElitech\n:\ntối\nđa\n18 TC,\ntối\nthiểu\n8 TC.\nSinh\nviên\ncần\nkiểm\ntra\nđiều\nkiện\nchuẩn\ntiếng\nAnh\ntheo\nquy\nđịnh",
+          "metadata": {
+            "source": "kehoach",
+            "title": "KẾ HOẠCH MỞ ĐĂNG KÝ LỚP KỲ 2 NĂM HỌC 2025-2026 (20252)",
+            "date_str": "29/12/2025"
+          }
+        }
+      ],
+      "timings_ms": {
+        "embed_bge_ms": 68.91,
+        "embed_e5_ms": 131.7,
+        "search_ms": 125.51,
+        "rerank_ms": 3242.27
+      },
+      "judge_scores": {},
+      "metrics": {
+        "recall_at_k": 0.0,
+        "raw_recall_at_50": 0.0,
+        "context_precision": 0.0,
+        "context_recall": 0.0,
+        "mrr_at_k": 0.0,
+        "ndcg_at_k": 0.0,
+        "latency_ms": 3568.46,
+        "collection_hit": 1.0,
+        "keyword_hit": 1.0,
+        "freshness_pass": 1.0,
+        "citation_accuracy": 1.0
+      },
+      "fail_reasons": [],
+      "passed": true,
+      "error": null,
+      "case": {
+        "eval_suite": "current_policy",
+        "case_id": "retrieval_03",
+        "question": "Lịch đăng ký học phần học kỳ 1 năm 2025",
+        "context": "",
+        "ground_truth_answer": "",
+        "timestamp": null,
+        "expected_source_ids": [],
+        "expected_collections": [
+          "kehoach"
+        ],
+        "valid_as_of": null,
+        "query_class": "retrieval",
+        "difficulty": "medium",
+        "metadata": {
+          "id": "retrieval_03",
+          "category": "retrieval",
+          "query": "Lịch đăng ký học phần học kỳ 1 năm 2025",
+          "expected_collection": "kehoach",
+          "expected_keywords": [
+            "đăng ký",
+            "học phần"
+          ],
+          "description": "Should retrieve schedule from kehoach"
+        }
+      }
+    },
+    {
+      "eval_suite": "current_policy",
+      "case_id": "retrieval_04",
+      "question": "Biểu mẫu xin nghỉ học tạm thời",
+      "actual_answer": "",
+      "retrieved_source_ids": [
+        "012a5f10-75fe-4a09-be65-67209ace7897",
+        "1a979efd-fcf1-4220-9273-ace27e538698",
+        "cf60a16d-a9b3-46e7-bf18-054050eb81c1",
+        "a0c59899-4f6e-411a-8533-81da285bc0f3",
+        "54e49ea6-ef32-44e6-8c7f-cb238bc20500",
+        "c7076fe8-78f7-44b5-90f5-83bf87b4f388",
+        "7fb3baf7-b7bc-4f70-9995-156c082d2bb1",
+        "c9332def-5384-40cf-acf0-a16a2692257a",
+        "8c06ab28-e0bc-4625-9882-cde12e8172a2",
+        "e900e691-9c04-4ec0-83cc-0e91f492fb33"
+      ],
+      "sources": [
+        {
+          "id": "quydinh/012a5f10-75fe-4a09-be65-67209ace7897",
+          "collection": "quydinh",
+          "score": 3.088963508605957,
+          "text": "[Biểu mẫu xin nghỉ, xin thôi học, xin tiếp nhận trở lại, chuyển trường]\nBIỂU MẪU XIN NGHỈ HỌC DÀI HẠN, XIN THÔI HỌC RÚT HỒ SƠ, XIN TIẾP NHẬN TRỞ LẠI HỌC, XIN CHUYỂN NGÀNH HỌC, XIN CHUYỂN HỆ ĐÀO TẠO\nBiểu mẫu xin chuyển hệ đào tạo sang hệ Vừa làm vừa học (mục 28) (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)\nBiểu mẫu đăng ký học chuyển tiếp lên chương trình đào tạo kỹ sư (mục 26) (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)\nBiểu mẫu xin nghỉ học dài hạn (mục 23) (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)\nBiểu mẫu xin thôi học rút hồ sơ (mục 22) (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)\nBiểu mẫu xin tiếp nhận trở lại học (mục 24) (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)",
+          "metadata": {
+            "source": "quydinh",
+            "title": "Biểu mẫu xin nghỉ, xin thôi học, xin tiếp nhận trở lại, chuyển trường",
+            "date_str": "28/12/2020"
+          }
+        },
+        {
+          "id": "stsv/1a979efd-fcf1-4220-9273-ace27e538698",
+          "collection": "stsv",
+          "score": 2.190135955810547,
+          "text": "[[Ban Đào tạo] Hướng dẫn thủ tục, biểu mẫu, thắc mắc về học tập, học phí. | Sổ tay SV | III. Hạng mục công việc và người phụ trách]\n23.\nXin nghỉ học dài hạn (bảo lưu)\n[Nghỉ học]\n[hue.nguyenkim@hust.edu.vn](mailto:hue.nguyenkim@hust.edu.vn)\nChuyên viên Nguyễn Kim Huệ (bàn 6, phòng 202A-C1)\nNếu xin nghỉ dài hạn vì lý do sức khỏe:\n+ Trong đơn cần có xác nhận của Trung tâm Y tế Bách khoa (địa chỉ tại số 5 Tạ Quang Bửu) và chụp ảnh các giấy tờ minh chứng của cơ sở y tế nơi điều trị hoặc khám bệnh để gửi kèm đơn.\n+ Sinh viên cần mang bệnh án và các giấy tờ khám bệnh khi tới xin xác nhận tại Trung tâm Y tế BK\n+ Hoặc đến khám trực tiếp tại Trung tâm Y tế BK để có thể kết luận về tình hình sức khỏe.\nTải đơn\n[tại đây](https://husteduvn.sharepoint.com/:w:/s/NguyenXuanTung_PDT/EVDUxHPtC3NPptlLvYd5yYYB_FjFWCrApxPOkpmQXCfITw?e=0NeFGR)\nLưu ý:\n1) SV cần hoàn thành công nợ học phí trước khi nộp đơn.\n2) Với SV các chương trình  với ĐH TROY cần liên hệ với cô Nguyễn Kiều Anh (tầng 3, phòng 315-C1) để tư vấn và xác nhận trước khi nộp đơn.",
+          "metadata": {
+            "doc_id": 69,
+            "title": "[Ban Đào tạo] Hướng dẫn thủ tục, biểu mẫu, thắc mắc về học tập, học phí."
+          }
+        },
+        {
+          "id": "quydinh/cf60a16d-a9b3-46e7-bf18-054050eb81c1",
+          "collection": "quydinh",
+          "score": 2.1101973056793213,
+          "text": "### Điều 25. Nghỉ học tạm thời, tự nguyện thôi học và buộc thôi học\n\n3. Đối với trường hợp xin nghỉ học tạm thời vì những lý do khác với lý do tại khoản 1 và khoản 2 Điều này thì thời gian nghỉ học tối đa cho phép là 02 học kỳ chính và được tính vào thời gian học tập. Học viên thuộc diện này sẽ bị xét buộc thôi học nếu nghỉ quá 02 học kỳ chính.\n\n4. Học viên phải nộp đơn đề nghị tiếp nhận trở lại học chậm nhất 1 tuần trước khi bắt đầu học kỳ mới. Đối với trường hợp được điều động vào lực lượng vũ trang hoặc đi làm nghĩa vụ quốc gia, quốc tế, học viên phải nộp kèm theo giấy xác nhận đã hoàn thành nhiệm vụ.\n\n5. Học viên xin nghỉ tạm thời trong thời gian thi kết thúc học phần theo Kế hoạch năm học thì chế độ nghỉ tạm thời có hiệu lực từ khi bắt đầu kỳ kế tiếp. Học viên có thể thực hiện thủ tục hoàn thi với các học phần chưa thi.",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/a0c59899-4f6e-411a-8533-81da285bc0f3",
+          "collection": "quydinh",
+          "score": 1.5365815162658691,
+          "text": "### Điều 16. Nghỉ học tạm thời và tự nguyện thôi học\n\n\n2. Điều kiện nghỉ học tạm thời, thời gian nghỉ học tối đa và việc tiếp nhận trở lại học được quy định như sau:\n\nd) Đối với trường hợp xin nghỉ học tạm thời vì những lý do khác với lý do tại điểm b và điểm c khoản 2 Điều này, sinh viên phải học ít nhất một học kỳ. Thời gian nghỉ học tối đa cho phép là 04 học kỳ chính và được tính vào thời gian học chậm tiến độ. Sinh viên thuộc diện này sẽ bị xét buộc thôi học nếu nghỉ quá 04 học kỳ chính.\n\n   đ) Sinh viên phải nộp đơn đề nghị tiếp nhận trở lại học chậm nhất 1 tuần trước khi bắt đầu học kỳ mới. Đối với trường hợp được điều động vào lực lượng vũ trang hoặc đi làm nghĩa vụ quốc tế, sinh viên phải nộp kèm theo giấy xác nhận đã hoàn thành nhiệm vụ.\n\n3. Sinh viên xin nghỉ tạm thời trong thời gian thi kết thúc học phần theo Kế hoạch năm học thì chế độ nghỉ tạm thời có hiệu lực từ khi bắt đầu kỳ kế tiếp. Sinh viên có thể thực hiện thủ tục hoàn thi với các học phần chưa thi.",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/54e49ea6-ef32-44e6-8c7f-cb238bc20500",
+          "collection": "quydinh",
+          "score": 1.4571223258972168,
+          "text": "### Điều 35. Nghỉ học tạm thời và bảo lưu kết quả học tập\n\n3. Đối với trường hợp xin nghỉ học tạm thời vì những lý do khác với lý do tại khoản 1 và khoản 2 Điều này, học viên phải học ít nhất một học kỳ tại ĐHBK Hà Nội, không thuộc các trường hợp bị xem xét buộc thôi học hoặc xem xét kỷ luật, mới được xem xét cho nghỉ học tạm thời. Thời gian nghỉ học tối đa là 12 tháng và được tính vào thời gian học tập.\n\n4. Học viên phải nộp đơn đề nghị trở lại học chậm nhất 01 tuần trước khi bắt đầu học kỳ mới. Đối với trường hợp được điều động vào lực lượng vũ trang hoặc đi làm nghĩa vụ quốc gia, quốc tế, học viên phải nộp kèm theo giấy xác nhận đã hoàn thành nhiệm vụ.\n\n5. Chế độ bảo lưu kết quả học tập khi nghỉ học tạm thời: Các học phần đăng ký học trong học kỳ đã đủ điểm đánh giá hoặc đủ điều kiện đánh giá sẽ được tính điểm học phần; kết quả sẽ được bảo lưu cùng với kết quả từ các học kỳ trước, kể cả các học phần đạt và không đạt.\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/c7076fe8-78f7-44b5-90f5-83bf87b4f388",
+          "collection": "quydinh",
+          "score": 1.1248345375061035,
+          "text": "### Điều 16. Nghỉ học tạm thời và tự nguyện thôi học\n\n1. Nghỉ học tạm thời là trường hợp việc nghỉ học có hiệu lực từ 01 học kỳ trở lên.\n\n2. Điều kiện nghỉ học tạm thời, thời gian nghỉ học tối đa và việc tiếp nhận trở lại học được quy định như sau:\n\n   a) Sinh viên được nghỉ học tạm thời nếu có quyết định cho phép nghỉ học tạm thời của Giám đốc ĐHBK Hà Nội.\n\n   b) Thời gian nghỉ học tạm thời do sinh viên bị ốm, thai sản hoặc tai nạn buộc phải điều trị thời gian dài không tính vào thời gian chậm tiến độ nếu tổng cộng không vượt quá 04 học kỳ chính; thời gian nghỉ trên 04 học kỳ được tính vào thời gian học chậm tiến độ.\n\n   c) Thời gian nghỉ học tạm thời do sinh viên được điều động vào lực lượng vũ trang (là thời gian được ghi trong quyết định của cấp có thẩm quyền) không tính vào thời gian học chậm tiến độ.",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "stsv/7fb3baf7-b7bc-4f70-9995-156c082d2bb1",
+          "collection": "stsv",
+          "score": 0.8484057188034058,
+          "text": "[Các Quy định và Biểu mẫu thường dùng | Sổ tay SV | II. Các biểu mẫu thường dùng]\n1. Biểu mẫu thủ tục hành chính xin xác nhận của Trường (giấy chứng nhận SV, giấy giới thiệu, giấy vay vốn ngân hàng, giấy làm thẻ xe buýt ....):\n[Xem tại đây.](https://ctt.hust.edu.vn/DisplayWeb/DisplayBaiViet?baiviet=38014)\n\n2. Biểu mẫu học tập:\n[Xem tại đây.](https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/huong-dan-gui-cau-hoi-toi-phong-dao-tao-cac-van-de-ve-hoc-tap-hoc-phi)\n\n3. Biểu mẫu đính chính thông tin bằng cấp:\n[Xem tại đây.](https://ctt.hust.edu.vn/DisplayWeb/DisplayBaiViet?baiviet=93)\n\n4. Biểu mẫu xin thôi học, nghỉ học dài hạn, chuyển ngành, chuyển hệ đào tạo, chuyển trường, trở lại học tập:\n[Xem tại đây.](https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/huong-dan-gui-cau-hoi-toi-phong-dao-tao-cac-van-de-ve-hoc-tap-hoc-phi)\n\n5. Mẫu Đồ án, khóa luận tốt nghiệp:\n[Xem tại đây.](https://ctt.hust.edu.vn/DisplayWeb/DisplayBaiViet?baiviet=35523)",
+          "metadata": {
+            "doc_id": 68,
+            "title": "Các Quy định và Biểu mẫu thường dùng"
+          }
+        },
+        {
+          "id": "stsv/c9332def-5384-40cf-acf0-a16a2692257a",
+          "collection": "stsv",
+          "score": 0.8224089741706848,
+          "text": "[Hướng dẫn giải đáp các thắc mắc về học tập, học phí, tài khoản sis,.. | Kit nhập học | III. Hạng mục công việc và người phụ trách]\n23.\nXin nghỉ học dài hạn (bảo lưu)\n[Nghỉ học]\n[hue.nguyenkim@hust.edu.vn](mailto:hue.nguyenkim@hust.edu.vn)\nChuyên viên Nguyễn Kim Huệ (bàn 6, phòng 202A-C1)\nNếu xin nghỉ dài hạn vì lý do sức khỏe:\n+ Trong đơn cần có xác nhận của Trung tâm Y tế Bách khoa (địa chỉ tại số 5 Tạ Quang Bửu) và chụp ảnh các giấy tờ minh chứng của cơ sở y tế nơi điều trị hoặc khám bệnh để gửi kèm đơn.\n+ Sinh viên cần mang bệnh án và các giấy tờ khám bệnh khi tới xin xác nhận tại Trung tâm Y tế BK\n+ Hoặc đến khám trực tiếp tại Trung tâm Y tế BK để có thể kết luận về tình hình sức khỏe.\nTải đơn\n[tại đây](https://husteduvn.sharepoint.com/:w:/s/NguyenXuanTung_PDT/EVDUxHPtC3NPptlLvYd5yYYB_FjFWCrApxPOkpmQXCfITw?e=0NeFGR)\nLưu ý:\n1) SV cần hoàn thành công nợ học phí trước khi nộp đơn.\n2) Với SV các chương trình  với ĐH TROY cần liên hệ với cô Nguyễn Kiều Anh để tư vấn và xác nhận trước khi nộp đơn.\n3) Sinh viên xem số QĐ cho phép nghỉ dài hạn bằng cách đăng nhập Cổng thông tin sinh viên ctt.hust.edu.vn và vào mục Hồ sơ SV.",
+          "metadata": {
+            "doc_id": 126,
+            "title": "Hướng dẫn giải đáp các thắc mắc về học tập, học phí, tài khoản sis,.."
+          }
+        },
+        {
+          "id": "quydinh/8c06ab28-e0bc-4625-9882-cde12e8172a2",
+          "collection": "quydinh",
+          "score": 0.803652286529541,
+          "text": "[Biểu mẫu xin nghỉ, xin thôi học, xin tiếp nhận trở lại, chuyển trường]\nBiểu mẫu xin chuyển trường (mục 25) (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)\nBiểu mẫu xin chuyển ngành đào tạo (mục 27) (https://sv-ctt.hust.edu.vn/#/so-tay-sv/69/phong-dao-tao-huong-dan-thu-tuc-bieu-mau-thac-mac-ve-hoc-tap-hoc-phi)",
+          "metadata": {
+            "source": "quydinh",
+            "title": "Biểu mẫu xin nghỉ, xin thôi học, xin tiếp nhận trở lại, chuyển trường",
+            "date_str": "28/12/2020"
+          }
+        },
+        {
+          "id": "stsv/e900e691-9c04-4ec0-83cc-0e91f492fb33",
+          "collection": "stsv",
+          "score": 0.40585362911224365,
+          "text": "[[Ban Đào tạo] Hướng dẫn thủ tục, biểu mẫu, thắc mắc về học tập, học phí. | Sổ tay SV | II. Yêu cầu]\n2. Trong trường hợp cần có đơn thì sinh viên có thể tải đơn theo mẫu trong từng mục tương ứng, sau đó in ra hoặc viết tay lại đơn đều được. Điền các thông tin trong đơn và cần có đủ các mục chữ ký. Lưu ý trong trường hợp không thể xin chữ ký của khoa/viện/trường thì mục đó có thể để trống và Ban Đào tạo sẽ liên hệ với các đơn vị đó sau để xác nhận.\nCách nộp đơn:\nSinh viên nộp đơn qua email bằng cách\nchụp ảnh cả đơn và thẻ sinh viên\nrồi gửi kèm theo email tới người tiếp nhận tương ứng theo bảng dưới đây.\nLưu ý:\nriêng\nĐơn xin thôi học rút hồ sơ bắt buộc phải nộp tại Ban Đào tạo\n(202A-C1) tương tự với một vài mẫu đơn khác theo hướng dẫn, không tiếp nhận online.",
+          "metadata": {
+            "doc_id": 69,
+            "title": "[Ban Đào tạo] Hướng dẫn thủ tục, biểu mẫu, thắc mắc về học tập, học phí."
+          }
+        }
+      ],
+      "timings_ms": {
+        "embed_bge_ms": 37.46,
+        "embed_e5_ms": 55.98,
+        "search_ms": 68.56,
+        "rerank_ms": 3905.64
+      },
+      "judge_scores": {},
+      "metrics": {
+        "recall_at_k": 0.0,
+        "raw_recall_at_50": 0.0,
+        "context_precision": 0.0,
+        "context_recall": 0.0,
+        "mrr_at_k": 0.0,
+        "ndcg_at_k": 0.0,
+        "latency_ms": 4067.69,
+        "collection_hit": 1.0,
+        "keyword_hit": 1.0,
+        "freshness_pass": 1.0,
+        "citation_accuracy": 1.0
+      },
+      "fail_reasons": [],
+      "passed": true,
+      "error": null,
+      "case": {
+        "eval_suite": "current_policy",
+        "case_id": "retrieval_04",
+        "question": "Biểu mẫu xin nghỉ học tạm thời",
+        "context": "",
+        "ground_truth_answer": "",
+        "timestamp": null,
+        "expected_source_ids": [],
+        "expected_collections": [
+          "stsv"
+        ],
+        "valid_as_of": null,
+        "query_class": "retrieval",
+        "difficulty": "medium",
+        "metadata": {
+          "id": "retrieval_04",
+          "category": "retrieval",
+          "query": "Biểu mẫu xin nghỉ học tạm thời",
+          "expected_collection": "stsv",
+          "expected_keywords": [
+            "biểu mẫu",
+            "nghỉ học"
+          ],
+          "description": "Should retrieve student support forms"
+        }
+      }
+    },
+    {
+      "eval_suite": "current_policy",
+      "case_id": "retrieval_05",
+      "question": "Điều kiện tốt nghiệp đại học",
+      "actual_answer": "",
+      "retrieved_source_ids": [
+        "9bfb1bf9-bb22-4695-9c9f-7c873c195a45",
+        "3b358d87-6808-4051-8982-42bf4e6bcd5a",
+        "63a1d67e-e336-4e8a-adc1-4836324248ee",
+        "30f010cb-9a0c-4808-8e59-a6b252a2e911",
+        "81e69ae8-11c3-474f-8f5f-bbfeae298a25",
+        "efb9bfae-a413-41bf-aeb4-7292d4dd1eed",
+        "bfb31d38-f59a-4f45-a183-4b787481cf32",
+        "d770e49f-7990-47e3-ac37-fa003e78a6da",
+        "131320f4-ddb2-4150-8c33-6e2bb266b41b",
+        "2cd42af2-9f12-41b8-adc2-e991853e7367"
+      ],
+      "sources": [
+        {
+          "id": "quydinh/9bfb1bf9-bb22-4695-9c9f-7c873c195a45",
+          "collection": "quydinh",
+          "score": 3.214718818664551,
+          "text": "### Điều 14. Đăng ký tốt nghiệp đại học\n\n\n3. Sinh viên có đủ các điều kiện sau đây thì được xét công nhận tốt nghiệp:\n\nd) Tại thời điểm xét tốt nghiệp không bị truy cứu trách nhiệm hình sự hoặc không đang trong thời gian bị kỷ luật ở mức đình chỉ học tập.\n\n4. Những sinh viên đủ điều kiện tốt nghiệp được Giám đốc ĐHBK Hà Nội ra quyết định công nhận tốt nghiệp và cấp bằng tốt nghiệp trong thời hạn 03 tháng tính từ thời điểm sinh viên đáp ứng đầy đủ điều kiện tốt nghiệp và hoàn thành các nghĩa vụ liên quan.\n\n5. Sinh viên đã hết thời gian học tập tối đa theo quy định tại khoản 3 Điều 3 của Quy chế này nhưng chưa đủ điều kiện tốt nghiệp do chưa hoàn thành các học phần Giáo dục quốc phòng-an ninh hoặc Giáo dục thể chất, trong thời hạn tối đa 03 năm kể từ khi hết thời hạn học tập được phép đăng ký học để hoàn thiện các học phần còn thiếu này và đề nghị xét công nhận tốt nghiệp.\n\n6. Sinh viên không tốt nghiệp được quyền đề nghị cấp chứng nhận với các học phần đã tích lũy trong CTĐT.\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/3b358d87-6808-4051-8982-42bf4e6bcd5a",
+          "collection": "quydinh",
+          "score": 2.5176851749420166,
+          "text": "### Điều 34. Điều kiện tốt nghiệp thạc sĩ và xếp hạng tốt nghiệp\n\n1. Học viên có đủ các điều kiện sau đây thì được xét công nhận tốt nghiệp:\n\n   a) Luận văn đạt yêu cầu.\n\n   b) Hoàn thành việc nộp quyển luận văn đã được chỉnh sửa theo kết luận của Hội đồng đánh giá luận văn. Công khai toàn văn quyển luận văn trên trang thông tin điện tử thuộc ĐHBK Hà Nội theo quy định trong thời gian ít nhất 30 ngày, trừ một số đề tài thuộc các lĩnh vực cần bảo mật thực hiện theo quy định của Nhà nước.\n\n   c) Đã nộp quyển luận văn tốt nghiệp cho thư viện Tạ Quang Bửu theo quy cách của bản luận văn do ĐHBK Hà Nội quy định, thời hạn nộp luận văn là 20 ngày kể từ ngày bảo vệ thành công luận văn.\n\n   d) Không bị truy cứu trách nhiệm hình sự và không trong thời gian bị kỷ luật, đình chỉ học tập.",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/63a1d67e-e336-4e8a-adc1-4836324248ee",
+          "collection": "quydinh",
+          "score": 1.9788198471069336,
+          "text": "### Điều 14. Đăng ký tốt nghiệp đại học\n\n1. ĐHBK Hà Nội xét tốt nghiệp theo 03 đợt trong năm, cụ thể là cuối mỗi học kỳ chính và cuối học kỳ hè. Sinh viên muốn được xét tốt nghiệp phải đăng ký theo các mốc thời gian quy định trong Khung kế hoạch năm học.\n\n2. Sinh viên có thể đăng ký học nhiều hơn yêu cầu của CTĐT, nhưng khi đăng ký tốt nghiệp chỉ chọn đủ hoặc không nhiều hơn 3 TC theo yêu cầu của chương trình. Các trường hợp ngoại lệ sẽ do Hội đồng xét tốt nghiệp quyết định và trình Giám đốc ĐHBK Hà Nội phê duyệt.\n\n3. Sinh viên có đủ các điều kiện sau đây thì được xét công nhận tốt nghiệp:\n\n   a) Đã hoàn thành đầy đủ các học phần theo yêu cầu của CTĐT trong thời gian quy định, bao gồm cả các học phần thuộc chương trình môn học Giáo dục thể chất và Giáo dục quốc phòng-an ninh.\n\n   b) Đạt chuẩn ngoại ngữ đầu ra.\n\n   c) Điểm trung bình tích lũy toàn khóa (tính theo các học phần đăng ký tốt nghiệp) đạt từ 2,0 trở lên.",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/30f010cb-9a0c-4808-8e59-a6b252a2e911",
+          "collection": "quydinh",
+          "score": 1.3339030742645264,
+          "text": "### Điều 34. Điều kiện tốt nghiệp thạc sĩ và xếp hạng tốt nghiệp\n\n2. Hạng tốt nghiệp thạc sĩ được xếp dựa trên điểm trung bình tích lũy toàn khóa tính cho toàn bộ các học phần đã học trong chương trình, kể cả luận văn thạc sĩ. Riêng các học phần được công nhận không đưa vào tính CPA để xếp hạng tốt nghiệp.\n\n| CPA | 2,0–2,49 | 2,5–3,19 | 3,2–3,59 | 3,6–4,0 |\n|---|---|---|---|---|\n| Xếp loại | Trung bình | Khá | Giỏi | Xuất sắc |\n\n3. Học viên đạt đủ điều kiện tốt nghiệp được Giám đốc ĐHBK Hà Nội ra quyết định công nhận tốt nghiệp và cấp bằng tốt nghiệp trong thời hạn 02 tháng tính từ thời điểm đáp ứng đầy đủ điều kiện tốt nghiệp và hoàn thành các nghĩa vụ liên quan.\n\n4. Học viên không tốt nghiệp được quyền đề nghị cấp chứng nhận với các học phần đã tích lũy trong CTĐT trong thời hạn 5 năm kể từ ngày khóa học kết thúc.\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        },
+        {
+          "id": "quydinh/81e69ae8-11c3-474f-8f5f-bbfeae298a25",
+          "collection": "quydinh",
+          "score": 0.8215141296386719,
+          "text": "### Bảng 4.2: Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Trình độ tiếng Anh yêu cầu |\n|---------------------|---------------------------|\n| Đến 63 TC | 1) Đạt các học phần Tiếng Anh cơ sở gồm: FL1105, FL1106, FL1107, FL1108<br>2) Hoặc đạt tối thiểu Bậc 2.2 |\n| Từ 64 ÷ 95 TC | Đạt tối thiểu Bậc 2.3 |\n| Từ 96 TC | Đạt tối thiểu Bậc 3.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | Đạt tối thiểu Bậc 3.2 |\n| Điều kiện khi xét tốt nghiệp | *(Không quy định riêng trong bảng)* |\n\nBậc trình độ dựa trên Khung năng lực ngoại ngữ 6 bậc của Việt Nam có trong Phụ lục 2 của quy định này.\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUYẾT ĐỊNH",
+            "applicable_cohort": [
+              "K68",
+              "K69"
+            ]
+          }
+        },
+        {
+          "id": "quydinh/efb9bfae-a413-41bf-aeb4-7292d4dd1eed",
+          "collection": "quydinh",
+          "score": 0.2764189839363098,
+          "text": "## Bảng 6.2. Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra (không áp dụng đối với chương trình hợp tác với Đại học TROY, Mỹ)\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ tối thiểu |\n|---|---|\n| Từ 32 TC | Yêu cầu đạt một trong các điều kiện sau: 1) IELTS **4.5** hoặc tương đương; hoặc 2) Đạt tất cả các học phần có số thứ tự từ 1÷7 trong Bảng 6.1 |\n| Từ 64 TC | Yêu cầu đạt một trong các điều kiện sau: 1) IELTS **5.5** hoặc tương đương; hoặc 2) Đạt tất cả các học phần có số thứ tự từ 1÷9 trong Bảng 6.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | IELTS **5.5** quốc tế |\n| Điều kiện khi xét tốt nghiệp | IELTS **5.5** quốc tế |",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY ĐỊNH PHÂN LOẠI TRÌNH ĐỘ ĐẦU VÀO, CHƯƠNG TRÌNH MÔN HỌC VÀ CHUẨN NGOẠI NGỮ YÊU CẦU ĐỐI VỚI SINH VIÊN ĐẠI HỌC HỆ CHÍNH QUY",
+            "applicable_cohort": [
+              "K65",
+              "K66",
+              "K67"
+            ]
+          }
+        },
+        {
+          "id": "quydinh/bfb31d38-f59a-4f45-a183-4b787481cf32",
+          "collection": "quydinh",
+          "score": 0.11985048651695251,
+          "text": "### Bảng 6.2: Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra (không áp dụng đối với chương trình hợp tác với Đại học TROY, Hoa Kỳ)\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ tối thiểu |\n|---------------------|------------------------------|\n| Từ 32 TC | Yêu cầu đạt một trong các điều kiện sau:<br>1) IELTS 4.5 hoặc tương đương<br>2) Hoặc đạt tất cả các học phần có số thứ tự từ 1÷7 trong Bảng 6.1 |\n| Từ 64 TC | Yêu cầu đạt một trong các điều kiện sau:<br>1) IELTS 5.5 hoặc tương đương<br>2) Hoặc đạt tất cả các học phần có số thứ tự từ 1÷9 trong Bảng 6.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng |\n| Điều kiện khi xét tốt nghiệp | IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng |",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUYẾT ĐỊNH",
+            "applicable_cohort": [
+              "K68",
+              "K69"
+            ]
+          }
+        },
+        {
+          "id": "quydinh/d770e49f-7990-47e3-ac37-fa003e78a6da",
+          "collection": "quydinh",
+          "score": -0.1899779736995697,
+          "text": "## TC1. Điểm về ý thức, thái độ học tập và nghiên cứu khoa học (tối đa 30 điểm)\n\n### Tiêu chí 1.1 – Kết quả học tập (tối đa 24 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |\n\n### Tiêu chí 1.2 – Trình độ ngoại ngữ (tối đa 6 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| Đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên | * | 2 |\n\n### Tiêu chí 1.3 – Tham gia các hoạt động học thuật (tối đa 9 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến NCKH, học thuật, chuyên môn | MC | 3 |\n| Tham gia khóa đào tạo kỹ năng nghề nghiệp, kỹ năng bổ trợ chuyên môn | MC | 6 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUYẾT ĐỊNH"
+          }
+        },
+        {
+          "id": "quydinh/131320f4-ddb2-4150-8c33-6e2bb266b41b",
+          "collection": "quydinh",
+          "score": -1.023611068725586,
+          "text": "### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**2. Trình độ ngoại ngữ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Đạt yêu cầu tiền đồ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |\n\n**3. Tham gia các hoạt động học thuật (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến nghiên cứu khoa học, học thuật, chuyên môn | MC | 3 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---",
+          "metadata": {
+            "source": "",
+            "doc_title": "KHUNG ĐÁNH GIÁ KẾT QUẢ RÈN LUYỆN SINH VIÊN NĂM HỌC 2020 - 2021"
+          }
+        },
+        {
+          "id": "quydinh/2cd42af2-9f12-41b8-adc2-e991853e7367",
+          "collection": "quydinh",
+          "score": -1.604109287261963,
+          "text": "### Điều 2. Ngành đào tạo, chương trình đào tạo\n\n| Chương trình | Người học | Thời gian | Khối lượng tối thiểu |\n|---|---|---|---|\n| Cử nhân | Tốt nghiệp THPT | 4 năm | 132 tín chỉ |\n| Kỹ sư | Tốt nghiệp cử nhân theo chương trình tích hợp | 1,5 năm | 48 tín chỉ |\n| Kỹ sư | Tốt nghiệp cử nhân | 2 năm | 60 tín chỉ |\n| Thạc sĩ | Tốt nghiệp cử nhân theo chương trình tích hợp | 1,5 năm | 48 tín chỉ |\n| Thạc sĩ | Tốt nghiệp cử nhân | 2 năm | 60 tín chỉ |\n| Tiến sĩ | Tốt nghiệp thạc sĩ | 3 năm | 106 tín chỉ |\n| Tiến sĩ | Tốt nghiệp đại học | 4 năm | 151 tín chỉ |",
+          "metadata": {
+            "source": "",
+            "doc_title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI"
+          }
+        }
+      ],
+      "timings_ms": {
+        "embed_bge_ms": 30.71,
+        "embed_e5_ms": 45.93,
+        "search_ms": 90.35,
+        "rerank_ms": 4603.64
+      },
+      "judge_scores": {},
+      "metrics": {
+        "recall_at_k": 0.0,
+        "raw_recall_at_50": 0.0,
+        "context_precision": 0.0,
+        "context_recall": 0.0,
+        "mrr_at_k": 0.0,
+        "ndcg_at_k": 0.0,
+        "latency_ms": 4770.94,
+        "collection_hit": 1.0,
+        "keyword_hit": 1.0,
+        "freshness_pass": 1.0,
+        "citation_accuracy": 1.0
+      },
+      "fail_reasons": [],
+      "passed": true,
+      "error": null,
+      "case": {
+        "eval_suite": "current_policy",
+        "case_id": "retrieval_05",
+        "question": "Điều kiện tốt nghiệp đại học",
+        "context": "",
+        "ground_truth_answer": "",
+        "timestamp": null,
+        "expected_source_ids": [],
+        "expected_collections": [
+          "quydinh"
+        ],
+        "valid_as_of": null,
+        "query_class": "retrieval",
+        "difficulty": "medium",
+        "metadata": {
+          "id": "retrieval_05",
+          "category": "retrieval",
+          "query": "Điều kiện tốt nghiệp đại học",
+          "expected_collection": "quydinh",
+          "expected_keywords": [
+            "tốt nghiệp",
+            "điều kiện"
+          ],
+          "description": "Should retrieve graduation requirements"
+        }
+      }
+    }
+  ]
+}

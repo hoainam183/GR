@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Optional
 
 from qdrant_client import models as qdrant_models
 
+from query.structured_query import parse_structured_query, text_contains_excluded_term
+
 from .elasticsearch_store import ElasticsearchStore
 from .qdrant_store import QdrantStore
 
@@ -60,6 +62,7 @@ class HybridSearch:
         hybrid_score_threshold: Optional[float] = None,
         qdrant_filters: Optional[qdrant_models.Filter] = None,
         es_filters: Optional[Dict[str, Any]] = None,
+        exclude_terms: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """Run hybrid retrieval and return fused results.
 
@@ -74,6 +77,7 @@ class HybridSearch:
             hybrid_score_threshold: Optional minimum RRF score to keep after fusion.
             qdrant_filters: Optional Qdrant filter conditions.
             es_filters: Optional Elasticsearch filter clauses.
+            exclude_terms: Optional explicit negation terms for BM25.
 
         Returns:
             List of dicts sorted by fused RRF score (descending):
@@ -90,11 +94,18 @@ class HybridSearch:
         )
 
         # Step 2 — Elasticsearch keyword search
+        structured = parse_structured_query(query)
+        effective_excludes = exclude_terms if exclude_terms is not None else structured.exclude_terms
         keyword_results = self.es.keyword_search(
             query=query,
             top_k=keyword_top_k,
             filters=es_filters,
+            exclude_terms=effective_excludes,
         )
+
+        if effective_excludes:
+            vector_results = self._filter_excluded(vector_results, effective_excludes)
+            keyword_results = self._filter_excluded(keyword_results, effective_excludes)
 
         # Step 3 — RRF fusion
         fused = self._rrf_fuse(vector_results, keyword_results)
@@ -105,6 +116,28 @@ class HybridSearch:
 
         # Step 5 — Return top-K
         return fused[:top_k]
+
+    @staticmethod
+    def _filter_excluded(
+        results: List[Dict[str, Any]],
+        exclude_terms: List[str],
+    ) -> List[Dict[str, Any]]:
+        """Drop candidates containing explicitly excluded terms."""
+        out: List[Dict[str, Any]] = []
+        for item in results:
+            metadata = item.get("metadata") or {}
+            haystack = " ".join(
+                [
+                    str(item.get("text", "") or ""),
+                    str(metadata.get("title", "") or ""),
+                    str(metadata.get("course_code", "") or ""),
+                    str(metadata.get("course_name", "") or ""),
+                ]
+            )
+            if text_contains_excluded_term(haystack, exclude_terms):
+                continue
+            out.append(item)
+        return out
 
     # ------------------------------------------------------------------
     # Score Filtering

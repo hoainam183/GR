@@ -156,6 +156,11 @@ class Settings(BaseSettings):
     self_eval_min_top_score: float = 0.72
     tavily_fallback_enabled: bool = False
 
+    # --- Offline Evaluation ---
+    post_index_eval_enabled: bool = True
+    post_index_eval_command: str = ""
+    post_index_eval_max_cases: int = 120
+
     # --- Reflection ---
     # ✅ GEMINI: query rewriting — quality-critical for retrieval accuracy
     reflection_enabled: bool = True

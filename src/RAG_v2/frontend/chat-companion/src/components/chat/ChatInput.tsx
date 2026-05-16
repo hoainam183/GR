@@ -45,7 +45,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type your message..."
+        placeholder="Nhập câu hỏi của bạn..."
         disabled={disabled}
         rows={1}
         className="max-h-[120px] min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
@@ -57,7 +57,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
         className="h-10 w-10 shrink-0 rounded-xl transition-all hover:scale-105 disabled:opacity-40"
       >
         <Send className="h-4 w-4" />
-        <span className="sr-only">Send message</span>
+        <span className="sr-only">Gửi tin nhắn</span>
       </Button>
     </form>
   );

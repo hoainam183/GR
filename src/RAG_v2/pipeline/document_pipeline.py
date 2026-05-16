@@ -605,6 +605,17 @@ class DocumentPipeline:
                 doc_id,
                 collection_name,
             )
+            try:
+                from evaluation.post_index import trigger_post_index_eval
+
+                trigger_post_index_eval(
+                    self._settings,
+                    reason="document_indexed",
+                    document_id=doc_id,
+                    collection=collection_name,
+                )
+            except Exception:
+                logger.warning("Post-index eval trigger failed", exc_info=True)
         except Exception as exc:
             logger.exception("Index failed for document %s", doc_id)
             await self._fail(db, doc_id, str(exc))

@@ -80,3 +80,5 @@ volumes/
 # Agent & Temp
 scratch/
 agent_implementation_plan
+volumes_backup.tar.gz
+volumes/

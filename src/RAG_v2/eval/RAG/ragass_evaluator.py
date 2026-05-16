@@ -12,11 +12,11 @@ Hỗ trợ 2 mode:
 
   Mode 2 — Full RAG Evaluation (kết nối RAG system thật):
     Thay thế retrieved_contexts bằng kết quả thật từ RAG system.
-    (TODO: implement kết nối với RAG pipeline)
 
 Chạy:
     python eval/RAG/ragass_evaluator.py                           # Mode 1 (default)
     python eval/RAG/ragass_evaluator.py --dataset outputs/ragass_dataset.jsonl
+    python eval/RAG/ragass_evaluator.py --mode full_rag            # Mode 2
 """
 
 from __future__ import annotations
@@ -61,7 +61,7 @@ CONFIG = {
 
     # ── Mode ──────────────────────────────────────────────────────────────────
     # "dataset_validation": dùng ground_truth_contexts làm retrieved_contexts
-    # "full_rag": gọi RAG system thật (chưa implement)
+    # "full_rag": gọi RAG system thật qua RAGPipeline.query_v3
     "eval_mode": "dataset_validation",
 }
 
@@ -80,6 +80,56 @@ class EvalSample:
     ground_truth_contexts: List[str]     # chunk IDs chuẩn
     question_type: str
     source: str
+
+
+def _run_full_rag(samples: List[EvalSample]) -> List[EvalSample]:
+    """Replace gold contexts/answers with outputs from the live RAG pipeline."""
+    import sys
+
+    project_root = Path(__file__).resolve().parent.parent.parent
+    sys.path.insert(0, str(project_root))
+    from pipeline.rag_pipeline import RAGPipeline
+
+    pipeline = RAGPipeline()
+    out: List[EvalSample] = []
+    for sample in samples:
+        try:
+            result = pipeline.query_v3(
+                question=sample.question,
+                history=[],
+                top_k=5,
+            )
+            sources = result.get("sources") or result.get("retrieved_documents") or []
+            contexts = [
+                str(src.get("text") or src.get("content") or "")
+                for src in sources
+                if isinstance(src, dict)
+            ]
+            out.append(
+                EvalSample(
+                    question=sample.question,
+                    answer=str(result.get("answer") or ""),
+                    contexts=contexts,
+                    ground_truth=sample.ground_truth,
+                    ground_truth_contexts=sample.ground_truth_contexts,
+                    question_type=sample.question_type,
+                    source=sample.source,
+                )
+            )
+        except Exception as exc:
+            logger.warning("Full RAG failed for question %r: %s", sample.question[:80], exc)
+            out.append(
+                EvalSample(
+                    question=sample.question,
+                    answer="",
+                    contexts=[],
+                    ground_truth=sample.ground_truth,
+                    ground_truth_contexts=sample.ground_truth_contexts,
+                    question_type=sample.question_type,
+                    source=sample.source,
+                )
+            )
+    return out
 
 
 @dataclass
@@ -334,6 +384,9 @@ def run(config: Dict = CONFIG) -> RAGASSEvalResult:
         raise ValueError("Dataset rỗng hoặc filter quá chặt — không có sample nào để evaluate.")
 
     logger.info("\n📂 Loaded %d samples", len(samples))
+    if config.get("eval_mode") == "full_rag":
+        logger.info("Running full RAG mode: replacing contexts/answers with live pipeline output...")
+        samples = _run_full_rag(samples)
 
     # 2. Init RAGAS LLM + Embeddings
     logger.info("Init Gemini LLM + Embeddings cho RAGAS...")
@@ -391,6 +444,12 @@ if __name__ == "__main__":
         choices=["single", "multi", "adversarial"],
         help="Chỉ evaluate các loại câu hỏi này",
     )
+    parser.add_argument(
+        "--mode",
+        default=None,
+        choices=["dataset_validation", "full_rag"],
+        help="dataset_validation dùng contexts chuẩn; full_rag gọi pipeline thật",
+    )
     args = parser.parse_args()
 
     cfg = dict(CONFIG)
@@ -398,5 +457,7 @@ if __name__ == "__main__":
         cfg["dataset_path"] = Path(args.dataset)
     if args.types:
         cfg["filter_question_types"] = args.types
+    if args.mode:
+        cfg["eval_mode"] = args.mode
 
     run(cfg)

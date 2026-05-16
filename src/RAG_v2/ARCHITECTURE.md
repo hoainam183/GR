@@ -905,6 +905,7 @@ There are also module-level/legacy tests at root and inside modules.
 | --- | --- |
 | `evaluation/evaluate_current_pipeline.py` | Measures production retrieval stack against golden dataset |
 | `evaluation/evaluate_retrieval.py` | Compares isolated BGE/E5/ES/hybrid retrieval methods |
+| `evaluation/search_strategy_benchmark.py` | LLM-judge retrieval benchmark for BM25/BGE/E5/hybrid/RRF/alpha strategies |
 | `eval/evaluator.py` | Routing/retrieval/agent evaluation against `eval/golden_dataset.json` |
 | `eval/RAG/*` | RAGAS-style QA generation/evaluation tooling |
 | `eval/agent/evaluate.py` | Agent-focused evaluation |

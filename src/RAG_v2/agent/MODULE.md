@@ -136,7 +136,7 @@ Các collection agent-facing hợp lệ:
 `tool_adapters` có `_AdapterRuntime` gồm:
 
 - `settings`
-- `bge_embedder`
+- `bge_embedder`9
 - `e5_embedder`
 - `searcher`
 - `reranker`

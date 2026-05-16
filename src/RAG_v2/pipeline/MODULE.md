@@ -266,6 +266,10 @@ Streaming variant: `_trim_history()` → `chat_model.generate_stream(mode="chitc
 **Bước 6 — Reranking:**
 - `reranker.rerank(query=rerank_query, documents, top_k)`.
 - `rerank_query` có thể khác `retrieval_query` (stripped comparison scaffold hoặc expanded major).
+- **Reranker Fallback:** Nếu tất cả candidates sau reranking có `rerank_score < 0.0` (query reflected drift làm cross-encoder cho điểm âm, hoặc chỉ còn table-docs vượt qua `table_score_threshold=-5.0`):
+  1. Retry rerank với `question` gốc (không qua reflection).
+  2. Nếu vẫn không có candidate dương: sử dụng raw top-k từ fusion score.
+  - Log vào `timings_ms["rerank_fallback"] = True` và `timings_ms["rerank_raw_fallback"] = True`.
 
 **Bước 7 — Validity Filter:**
 - `ValidityFilter.filter(reranked)` — loại bỏ tài liệu hết hiệu lực.

@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ChatResponse, Message, UserContext } from '@/types/chat';
-import { sendMessage, sendMessageStream, resolveChatIdentity } from '@/services/chatApi';
-import type { ChatV3Response } from '@/types/chat';
+import { sendMessageV3, resolveChatIdentity } from '@/services/chatApi';
 import { getSession } from '@/services/sessionApi';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
@@ -51,8 +50,9 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const explicitUserContext = buildUserContextFromUser(user);
-  const explicitUserId = user?.email ?? user?.username ?? undefined;
+  const explicitUserId = user?.email ?? user?.username ?? user?.student_id ?? undefined;
   const resolvedIdentity = resolveChatIdentity(explicitUserContext, explicitUserId);
+  const isAdmin = user?.role === 'admin';
 
   const debugPayload = {
     source: resolvedIdentity.source,
@@ -64,6 +64,11 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
           mode: lastResponsePayload.mode ?? null,
           route: lastResponsePayload.route ?? lastResponsePayload.intent ?? null,
           model_name: lastResponsePayload.model_name ?? null,
+          num_documents: lastResponsePayload.num_documents ?? null,
+          target_collections: lastResponsePayload.target_collections ?? [],
+          collection_scores: lastResponsePayload.collection_scores ?? [],
+          applied_filters: lastResponsePayload.applied_filters ?? null,
+          collection_results: lastResponsePayload.collection_results ?? null,
           iterations: lastResponsePayload.iterations ?? null,
           tools_used: lastResponsePayload.tools_used ?? [],
           timings_ms: lastResponsePayload.timings_ms ?? null,
@@ -87,7 +92,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     return () => { isMountedRef.current = false; };
   }, []);
 
-  const { showScrollButton, forceScrollToBottom, isNearBottom } = useSmartScroll(messagesEndRef, [messages, chatPhase]);
+  const { showScrollButton, forceScrollToBottom } = useSmartScroll(messagesEndRef, [messages, chatPhase]);
 
   // When the URL session param changes (user clicks sidebar item or New Chat),
   // reset state and optionally load history from the backend.
@@ -167,8 +172,6 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     forceScrollToBottom();
 
     let responseSessionId = capturedSessionId;
-    let hasReceivedFirstToken = false;
-    const assistantMessageId = `assistant-${Date.now()}`;
 
     try {
       // Build history from existing messages (last 6 turns)
@@ -176,84 +179,26 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         role: m.role,
         content: m.content,
       }));
-      
-      const response = await sendMessageStream(
+
+      const response = await sendMessageV3(
         content,
         historyForApi,
         5,
+        'auto',
         capturedSessionId,
         explicitUserContext,
         explicitUserId,
-        {
-          onSessionId: (sid) => {
-            responseSessionId = sid;
-            if (sid && sid !== capturedSessionId) {
-              suppressNextHistoryLoad.current = true;
-              setActiveSessionId(sid);
-              navigate(`/chat/${sid}`, { replace: true });
-            }
-          },
-          onToken: (delta) => {
-            if (!isMountedRef.current) return;
-
-            if (!hasReceivedFirstToken) {
-              hasReceivedFirstToken = true;
-              setChatPhase('streaming');
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: assistantMessageId,
-                  role: 'assistant',
-                  content: delta,
-                  timestamp: new Date(),
-                  isStreaming: true,
-                }
-              ]);
-            } else {
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantMessageId
-                    ? { ...m, content: m.content + delta }
-                    : m
-                )
-              );
-            }
-          },
-          onMetadata: (meta: Partial<ChatV3Response>) => {
-            if (!isMountedRef.current) return;
-            // Attach all log fields to the assistant message
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === assistantMessageId
-                  ? {
-                      ...m,
-                      mode: meta.mode,
-                      route: meta.route ?? meta.intent,
-                      modelName: meta.model_name,
-                      timingsMs: meta.timings_ms,
-                      reflectedQuestion: meta.reflected_question,
-                      targetCollections: meta.target_collections,
-                      collectionScores: meta.collection_scores,
-                      routingProbabilities: meta.routing_probabilities,
-                      appliedFilters: meta.applied_filters,
-                      collectionResults: meta.collection_results,
-                      toolsUsed: meta.tools_used,
-                      toolCalls: meta.tool_calls,
-                      iterations: meta.iterations,
-                      agentTrace: meta.agent_trace,
-                      sources: meta.retrieved_documents,
-                    }
-                  : m
-              )
-            );
-            // Update debug panel payload
-            setLastResponsePayload(meta as ChatResponse);
-          },
-        }
       );
 
       // Component was unmounted (e.g. logout) — bail out entirely
       if (!isMountedRef.current) return;
+
+      responseSessionId = response.session_id || capturedSessionId;
+      if (responseSessionId && responseSessionId !== capturedSessionId) {
+        suppressNextHistoryLoad.current = true;
+        setActiveSessionId(responseSessionId);
+        navigate(`/chat/${responseSessionId}`, { replace: true });
+      }
 
       // User navigated to a different session while this request was in flight.
       if (activeSessionIdRef.current !== capturedSessionId &&
@@ -261,20 +206,35 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         return;
       }
 
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: response.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
+        timestamp: new Date(),
+        mode: response.mode,
+        route: response.route ?? response.intent,
+        modelName: response.model_name,
+        timingsMs: response.timings_ms,
+        reflectedQuestion: response.reflected_question,
+        targetCollections: response.target_collections,
+        collectionScores: response.collection_scores,
+        routingProbabilities: response.routing_probabilities,
+        appliedFilters: response.applied_filters,
+        collectionResults: response.collection_results,
+        toolsUsed: response.tools_used,
+        toolCalls: response.tool_calls,
+        iterations: response.iterations,
+        agentTrace: response.agent_trace,
+        sources: response.retrieved_documents,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+      setLastResponsePayload(response as ChatResponse);
+
       // Refresh the sidebar conversation list
       if (resolvedIdentity.userId) {
         queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
       }
-
-      // Finalize the assistant message
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === assistantMessageId
-            ? { ...m, isStreaming: false }
-            : m
-        )
-      );
-      
     } catch (error) {
       // Only show error in the session that initiated the request
       if (isMountedRef.current && activeSessionIdRef.current === capturedSessionId) {
@@ -282,9 +242,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         const errorMessage: Message = {
           id: `error-${Date.now()}`,
           role: 'assistant',
-          content: error instanceof Error
-            ? error.message
-            : 'Sorry, I encountered an error. Please try again.',
+          content: 'Xin lỗi, hệ thống đang gặp sự cố. Vui lòng thử lại sau ít phút.',
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
@@ -310,7 +268,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   return (
     <div className="flex h-full flex-col">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin p-4 md:p-6">
+      <div className="flex-1 overflow-y-auto scrollbar-thin p-3 sm:p-4 md:p-6">
         {isLoadingHistory ? (
           <div className="flex h-full items-center justify-center">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -336,7 +294,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             <p className="max-w-sm text-sm text-muted-foreground">
               {user
                 ? `Tôi có thể tư vấn về quy chế học tập, học bổng và các quy định của BKHN.`
-                : 'Ask me anything! I\'m here to help with your questions.'}
+                : 'Hãy đặt câu hỏi để tôi có thể hỗ trợ bạn.'}
             </p>
             {user && (user.major || user.cohort) && (
               <p className="mt-1.5 text-xs text-muted-foreground/70">
@@ -347,9 +305,9 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             )}
           </div>
         ) : (
-          <div className="mx-auto max-w-3xl space-y-4">
+          <div className="mx-auto w-full max-w-3xl space-y-4">
             {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+              <ChatMessage key={message.id} message={message} showDebug={isAdmin} />
             ))}
             {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} />}
             <div ref={messagesEndRef} />
@@ -376,19 +334,21 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       )}
 
       {/* Input Area */}
-      <div className="border-t border-border bg-background/80 backdrop-blur-sm p-4 md:p-6 relative z-20">
-        <div className="mx-auto max-w-3xl">
+      <div className="relative z-20 shrink-0 border-t border-border bg-background/90 p-3 backdrop-blur-sm sm:p-4 md:p-6">
+        <div className="mx-auto w-full max-w-3xl">
           <ChatInput onSend={handleSendMessage} disabled={chatPhase !== 'idle'} />
-          <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
-            <summary className="cursor-pointer select-none text-muted-foreground">
-              Debug runtime info
-            </summary>
-            <pre className="mt-2 max-h-56 overflow-auto rounded bg-background p-2 text-[11px] text-foreground">
-              {JSON.stringify(debugPayload, null, 2)}
-            </pre>
-          </details>
+          {isAdmin && (
+            <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
+              <summary className="cursor-pointer select-none text-muted-foreground">
+                Debug runtime info
+              </summary>
+              <pre className="mt-2 max-h-56 overflow-auto rounded bg-background p-2 text-[11px] text-foreground">
+                {JSON.stringify(debugPayload, null, 2)}
+              </pre>
+            </details>
+          )}
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Press Enter to send, Shift + Enter for new line
+            Nhấn Enter để gửi, Shift + Enter để xuống dòng.
           </p>
         </div>
       </div>

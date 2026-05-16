@@ -1036,6 +1036,44 @@ def rag_flow(
     )
     logger.info("Reranked to %d documents", len(reranked))
 
+    # Fallback: if the cross-encoder threshold dropped all candidates but the
+    # vector/hybrid stage found good matches (e.g. the reflected query drifted
+    # from the original intent), retry with the original question.  This prevents
+    # an issue where reflection adds speculative terms that reduce cross-encoder
+    # scores below the threshold for otherwise topically-relevant documents.
+    # Also trigger when all surviving docs have negative scores (only table-docs
+    # passed through the relaxed table_score_threshold but no regular content matched).
+    _best_rerank_score = max(
+        (d.get("rerank_score", -999.0) for d in reranked), default=-999.0
+    ) if reranked else -999.0
+    _rerank_quality_ok = _best_rerank_score >= 0.0
+    if raw_results and not _rerank_quality_ok:
+        logger.info(
+            "Reranker gave no positive-score candidates (best=%.3f, n=%d). "
+            "Retrying rerank with original question.",
+            _best_rerank_score,
+            len(raw_results),
+        )
+        reranked = reranker.rerank(
+            query=question,
+            documents=raw_results,
+            top_k=top_k_value,
+        )
+        timings_ms["rerank_fallback"] = True
+        if not reranked or max(
+            (d.get("rerank_score", -999.0) for d in reranked), default=-999.0
+        ) < 0.0:
+            # Last resort: use raw top-k by fusion score without threshold.
+            logger.info(
+                "Reranker still no positive candidates after fallback. "
+                "Using top-%d raw candidates by fusion score.",
+                top_k_value,
+            )
+            reranked = sorted(
+                raw_results, key=lambda d: d.get("score", 0.0), reverse=True
+            )[:top_k_value]
+            timings_ms["rerank_raw_fallback"] = True
+
     # 5.1 Document Validity Filtering
     if validity_filter is not None:
         valid_t0 = time.perf_counter()
@@ -1580,6 +1618,36 @@ def rag_flow_stream(
         reranked=reranked,
     )
     logger.info("Reranked to %d documents", len(reranked))
+
+    # Fallback: same logic as rag_flow — trigger when all surviving reranked
+    # docs have negative scores (reflected query drift or only table-threshold
+    # docs survived).
+    _best_rerank_score_s = max(
+        (d.get("rerank_score", -999.0) for d in reranked), default=-999.0
+    ) if reranked else -999.0
+    if raw_results and _best_rerank_score_s < 0.0:
+        logger.info(
+            "Stream: reranker gave no positive-score candidates (best=%.3f). "
+            "Retrying with original question.",
+            _best_rerank_score_s,
+        )
+        reranked = reranker.rerank(
+            query=question,
+            documents=raw_results,
+            top_k=top_k_value,
+        )
+        timings_ms["rerank_fallback"] = True
+        if not reranked or max(
+            (d.get("rerank_score", -999.0) for d in reranked), default=-999.0
+        ) < 0.0:
+            logger.info(
+                "Stream: reranker still no positive candidates. Using raw fusion top-%d.",
+                top_k_value,
+            )
+            reranked = sorted(
+                raw_results, key=lambda d: d.get("score", 0.0), reverse=True
+            )[:top_k_value]
+            timings_ms["rerank_raw_fallback"] = True
 
     # 5.1 Document Validity Filtering
     if validity_filter is not None:

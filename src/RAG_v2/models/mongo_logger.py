@@ -39,6 +39,8 @@ class MongoLogger:
         self._turns = self._db["turns"]
         self._query_logs = self._db["query_logs"]
         self._agent_traces = self._db["agent_traces"]
+        self._eval_runs = self._db["eval_runs"]
+        self._eval_case_results = self._db["eval_case_results"]
         self.history_cache = history_cache
         self._ensure_indexes()
         logger.info("MongoLogger connected to %s / %s (history_cache=%s)", uri, database, history_cache is not None)
@@ -357,3 +359,10 @@ class MongoLogger:
         self._agent_traces.create_index("session_id")
         self._agent_traces.create_index([("created_at", DESCENDING)])
         self._agent_traces.create_index("tool_names_sequence")
+
+        # eval dashboard
+        self._eval_runs.create_index([("eval_suite", ASCENDING), ("finished_at", DESCENDING)])
+        self._eval_runs.create_index("status")
+        self._eval_case_results.create_index("run_id")
+        self._eval_case_results.create_index([("eval_suite", ASCENDING), ("passed", ASCENDING)])
+        self._eval_case_results.create_index("case_id")

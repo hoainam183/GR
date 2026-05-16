@@ -32,6 +32,11 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from qdrant_client import models as qdrant_models
 
+from query.structured_query import (
+    parse_structured_query,
+    text_contains_excluded_term,
+)
+
 from .elasticsearch_store import ElasticsearchStore
 from .hybrid_search import HybridSearch, rrf_score
 from .metadata_filters import (
@@ -189,6 +194,7 @@ class MultiCollectionSearch:
         resolved_cohort: Optional[str] = None,
         disable_metadata_filter_collections: Optional[List[str]] = None,
         trace_out: Optional[Dict[str, Any]] = None,
+        fusion_mode: str = "linear",
     ) -> List[Dict[str, Any]]:
         """Search all collections and return a globally ranked list.
 
@@ -229,6 +235,8 @@ class MultiCollectionSearch:
             resolved_cohort: Optional resolved cohort for metadata pre-filters.
             disable_metadata_filter_collections: Collection names for which
                 metadata pre-filtering is disabled for this call.
+            fusion_mode: ``"linear"`` for the existing min-max weighted fusion,
+                or ``"rrf"`` for rank-based global fusion.
 
         Returns:
             List of result dicts sorted by global fused score (descending).
@@ -261,6 +269,9 @@ class MultiCollectionSearch:
             )
         else:
             target_searchers = self.searchers
+
+        structured_query = parse_structured_query(query)
+        exclude_terms = structured_query.exclude_terms
 
         fusion_vector_weight, fusion_keyword_weight, fusion_reason = (
             self._resolve_fusion_weights(query)
@@ -331,17 +342,33 @@ class MultiCollectionSearch:
                 top_k=keyword_top_k,
                 filters=es_filter,
                 collection_name=name,
+                exclude_terms=exclude_terms,
             )
             return name, vecs, kws
 
-        collection_counts: Dict[str, Dict[str, int]] = {}
+        collection_counts: Dict[str, Dict[str, Any]] = {}
         with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
             futures = {
                 pool.submit(_fetch_one, name, hybrid): name
                 for name, hybrid in target_searchers
             }
             for fut in as_completed(futures):
-                name, vecs, kws = fut.result()
+                requested_name = futures[fut]
+                try:
+                    name, vecs, kws = fut.result()
+                except Exception as exc:
+                    logger.error(
+                        "Collection '%s' fetch failed: %s — continuing without it.",
+                        requested_name,
+                        exc,
+                        exc_info=True,
+                    )
+                    collection_counts[requested_name] = {
+                        "vector": 0,
+                        "keyword": 0,
+                        "error": str(exc),
+                    }
+                    continue
                 logger.info(
                     "Collection '%s': %d vector, %d keyword",
                     name,
@@ -366,6 +393,17 @@ class MultiCollectionSearch:
                         }
                     )
 
+        excluded_vector_count = 0
+        excluded_keyword_count = 0
+        if exclude_terms:
+            before = len(all_vector)
+            all_vector = self._filter_excluded_results(all_vector, exclude_terms)
+            excluded_vector_count = before - len(all_vector)
+
+            before = len(all_keyword)
+            all_keyword = self._filter_excluded_results(all_keyword, exclude_terms)
+            excluded_keyword_count = before - len(all_keyword)
+
         # Sort globally by raw score (desc), dedup by ID, take top pool_k
         all_vector.sort(key=lambda x: x["score"], reverse=True)
         vector_pool = self._dedup_pool(all_vector, vector_pool_k)
@@ -373,13 +411,25 @@ class MultiCollectionSearch:
         all_keyword.sort(key=lambda x: x["score"], reverse=True)
         keyword_pool = self._dedup_pool(all_keyword, keyword_pool_k)
 
-        results = self._score_fusion(
-            vector_pool,
-            keyword_pool,
-            top_k,
-            vector_weight=fusion_vector_weight,
-            keyword_weight=fusion_keyword_weight,
-        )
+        mode = (fusion_mode or "linear").strip().lower()
+        if mode == "rrf":
+            results = self._score_fusion_rrf(
+                vector_pool,
+                keyword_pool,
+                top_k,
+                vector_weight=fusion_vector_weight,
+                keyword_weight=fusion_keyword_weight,
+            )
+        elif mode == "linear":
+            results = self._score_fusion(
+                vector_pool,
+                keyword_pool,
+                top_k,
+                vector_weight=fusion_vector_weight,
+                keyword_weight=fusion_keyword_weight,
+            )
+        else:
+            raise ValueError("fusion_mode must be 'linear' or 'rrf'")
 
         # Populate trace_out if provided
         if trace_out is not None:
@@ -389,6 +439,12 @@ class MultiCollectionSearch:
                 "vector": round(fusion_vector_weight, 4),
                 "keyword": round(fusion_keyword_weight, 4),
                 "reason": fusion_reason,
+                "mode": mode,
+            }
+            trace_out["structured_query"] = structured_query.to_dict()
+            trace_out["excluded_counts"] = {
+                "vector": excluded_vector_count,
+                "keyword": excluded_keyword_count,
             }
 
         return results
@@ -514,6 +570,36 @@ class MultiCollectionSearch:
                 break
         return out
 
+    @staticmethod
+    def _filter_excluded_results(
+        results: List[Dict[str, Any]],
+        exclude_terms: List[str],
+    ) -> List[Dict[str, Any]]:
+        """Drop results whose text or metadata contains explicit excluded terms."""
+        if not exclude_terms:
+            return results
+
+        filtered: List[Dict[str, Any]] = []
+        for item in results:
+            metadata = item.get("metadata") or {}
+            haystack = " ".join(
+                [
+                    str(item.get("text", "") or ""),
+                    str(metadata.get("title", "") or ""),
+                    str(metadata.get("course_code", "") or ""),
+                    str(metadata.get("course_name", "") or ""),
+                ]
+            )
+            if text_contains_excluded_term(haystack, exclude_terms):
+                logger.debug(
+                    "Exclude filter: dropping %s due to terms=%s",
+                    item.get("id"),
+                    exclude_terms,
+                )
+                continue
+            filtered.append(item)
+        return filtered
+
     def _score_fusion(
         self,
         vector_pool: List[Dict[str, Any]],
@@ -593,6 +679,67 @@ class MultiCollectionSearch:
                 logger.debug(
                     "Dedup: dropping duplicate text from %s", item["id"]
                 )
+                continue
+            seen_texts.add(text_key)
+            deduped.append(item)
+
+        return deduped[:top_k]
+
+    def _score_fusion_rrf(
+        self,
+        vector_pool: List[Dict[str, Any]],
+        keyword_pool: List[Dict[str, Any]],
+        top_k: int,
+        vector_weight: float,
+        keyword_weight: float,
+    ) -> List[Dict[str, Any]]:
+        """Combine vector and keyword pools via rank-based RRF."""
+        combined: Dict[str, Dict[str, Any]] = {}
+
+        for rank_0, item in enumerate(vector_pool):
+            doc_id = item["id"]
+            combined[doc_id] = {
+                **item,
+                "vector_score": item["score"],
+                "keyword_score": 0.0,
+                "vector_rank": rank_0 + 1,
+                "keyword_rank": 0,
+                "vector_rrf": vector_weight * rrf_score(rank_0 + 1, self.rrf_k),
+                "keyword_rrf": 0.0,
+            }
+
+        for rank_0, item in enumerate(keyword_pool):
+            doc_id = item["id"]
+            keyword_rrf = keyword_weight * rrf_score(rank_0 + 1, self.rrf_k)
+            if doc_id in combined:
+                combined[doc_id]["keyword_score"] = item["score"]
+                combined[doc_id]["keyword_rank"] = rank_0 + 1
+                combined[doc_id]["keyword_rrf"] = keyword_rrf
+            else:
+                combined[doc_id] = {
+                    **item,
+                    "vector_score": 0.0,
+                    "keyword_score": item["score"],
+                    "vector_rank": 0,
+                    "keyword_rank": rank_0 + 1,
+                    "vector_rrf": 0.0,
+                    "keyword_rrf": keyword_rrf,
+                }
+
+        for entry in combined.values():
+            entry["score"] = (
+                entry["vector_rrf"]
+                + entry["keyword_rrf"]
+                + kehoach_recency_bonus(entry)
+            )
+
+        ranked = sorted(combined.values(), key=lambda x: x["score"], reverse=True)
+
+        seen_texts: set = set()
+        deduped: List[Dict[str, Any]] = []
+        for item in ranked:
+            text_key = item["text"].strip()
+            if text_key in seen_texts:
                 continue
             seen_texts.add(text_key)
             deduped.append(item)

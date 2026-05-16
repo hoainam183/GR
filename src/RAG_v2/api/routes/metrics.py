@@ -90,13 +90,33 @@ async def get_usage_metrics(
 
 
 @router.get("/metrics/eval")
-async def get_eval_metrics() -> Dict[str, Any]:
-    """Get the latest evaluation results.
-    
-    (In a real production system, this would read from MongoDB.
-    Here we return a placeholder indicating where CI/CD eval results would go).
-    """
-    return {
-        "status": "eval_metrics_available_via_cli",
-        "message": "Run `python -m eval.evaluator --all --report` to generate current metrics.",
-    }
+async def get_eval_metrics(
+    request: Request,
+    suite: str | None = None,
+    limit: int = 10,
+) -> Dict[str, Any]:
+    """Get latest batch evaluation metrics for the dashboard."""
+    try:
+        from evaluation.eval_store import (
+            load_eval_dashboard_sync,
+            load_latest_artifact_dashboard,
+        )
+
+        mongo_logger = getattr(request.app.state, "mongo_logger", None)
+        if mongo_logger is not None:
+            dashboard = load_eval_dashboard_sync(
+                mongo_logger._db,
+                suite=suite,
+                limit=max(1, min(limit, 50)),
+            )
+            dashboard["source"] = "mongodb"
+            return dashboard
+
+        from pathlib import Path
+        output_dir = Path(__file__).resolve().parent.parent.parent / "evaluation" / "results"
+        dashboard = load_latest_artifact_dashboard(output_dir, suite=suite)
+        dashboard["source"] = "artifacts"
+        return dashboard
+    except Exception as exc:
+        logger.error("Failed to fetch eval metrics: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal eval metrics error")

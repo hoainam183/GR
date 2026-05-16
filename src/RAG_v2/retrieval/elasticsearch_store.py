@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Optional
 
 from elasticsearch import Elasticsearch, helpers
 
+from query.structured_query import build_es_must_not_clauses
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_INDEX = "stsv"
@@ -420,6 +422,7 @@ class ElasticsearchStore:
         top_k: int = 20,
         filters: Optional[Dict[str, Any]] = None,
         collection_name: Optional[str] = None,
+        exclude_terms: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """BM25 keyword search.
 
@@ -429,6 +432,7 @@ class ElasticsearchStore:
             filters: Optional Elasticsearch filter clauses
                      (e.g. ``{"term": {"type_doc": "QuyDinh"}}``).
             collection_name: Ignored in this version.
+            exclude_terms: Explicit negation terms to place in ``must_not``.
 
         Returns:
             List of dicts sorted by BM25 score (descending):
@@ -449,14 +453,17 @@ class ElasticsearchStore:
         if filters:
             filter_clauses.append(filters)
 
+        must_not_clauses = build_es_must_not_clauses(exclude_terms or [])
+
+        bool_query: Dict[str, Any] = {"must": must_clause}
+        if filter_clauses:
+            bool_query["filter"] = filter_clauses
+        if must_not_clauses:
+            bool_query["must_not"] = must_not_clauses
+
         search_body: Dict[str, Any] = {
             "size": top_k,
-            "query": {
-                "bool": {
-                    "must": must_clause,
-                    **({"filter": filter_clauses} if filter_clauses else {}),
-                }
-            },
+            "query": {"bool": bool_query},
         }
 
         resp = self.client.search(
@@ -468,7 +475,7 @@ class ElasticsearchStore:
 
         results: List[Dict[str, Any]] = []
         for hit in hits:
-            source = hit["_source"]
+            source = dict(hit["_source"])
             text = source.pop("text", "")
             results.append(
                 {

@@ -1,12 +1,140 @@
 import React, { useState } from 'react';
-import type { Message } from '@/types/chat';
+import type { Message, RetrievedDocument } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Bot, ChevronDown, ChevronUp, FileText, User } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { DocRow } from '../trace/DocRow';
 
 interface ChatMessageProps {
   message: Message;
+  showDebug?: boolean;
+}
+
+const COLLECTION_LABELS: Record<string, string> = {
+  quydinh: 'Quy định',
+  ctdt: 'Chương trình đào tạo',
+  kehoach: 'Kế hoạch',
+  stsv: 'Công tác sinh viên',
+};
+
+const metadataText = (
+  metadata: Record<string, unknown> | undefined,
+  keys: string[],
+): string | undefined => {
+  if (!metadata) {
+    return undefined;
+  }
+
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+    if (Array.isArray(value) && value.length > 0) {
+      return value.map((item) => String(item)).join(', ');
+    }
+  }
+
+  return undefined;
+};
+
+const normalizeText = (value: string) => value.replace(/\s+/g, ' ').trim();
+
+const truncateText = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+  return `${value.slice(0, maxLength).trim()}...`;
+};
+
+const sourceText = (source: RetrievedDocument) => {
+  const rawText = (source as RetrievedDocument & { text?: unknown }).text;
+  return source.content || (typeof rawText === 'string' ? rawText : '');
+};
+
+const normalizeSourceForDisplay = (
+  source: RetrievedDocument,
+  index: number,
+): RetrievedDocument => ({
+  ...source,
+  rank: source.rank ?? index + 1,
+  content: sourceText(source),
+  collection:
+    source.collection ||
+    (typeof source.metadata?.collection === 'string'
+      ? source.metadata.collection
+      : undefined),
+  score:
+    typeof source.score === 'number'
+      ? source.score
+      : typeof source.rerank_score === 'number'
+      ? source.rerank_score
+      : 0,
+});
+
+function FriendlySourceCard({
+  source,
+  index,
+}: {
+  source: RetrievedDocument;
+  index: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const collection =
+    source.collection || metadataText(source.metadata, ['collection']) || '';
+  const collectionLabel = collection
+    ? COLLECTION_LABELS[collection] || collection
+    : 'Tài liệu tham khảo';
+  const title =
+    metadataText(source.metadata, [
+      'title',
+      'doc_title',
+      'document_title',
+      'source',
+      'file_name',
+      'filename',
+    ]) || `Nguồn ${index + 1}`;
+  const content = normalizeText(sourceText(source));
+  const excerpt = content
+    ? truncateText(content, open ? 900 : 260)
+    : 'Không có đoạn trích hiển thị.';
+
+  return (
+    <div className="rounded-lg border border-border bg-background/80 p-3">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="flex w-full items-start gap-3 text-left"
+      >
+        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <FileText className="h-3.5 w-3.5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-xs font-semibold text-foreground">
+            {title}
+          </span>
+          <span className="mt-1 flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="max-w-full truncate text-[10px] font-medium">
+              {collectionLabel}
+            </Badge>
+            <span className="text-[10px] text-muted-foreground">
+              Nguồn {index + 1}
+            </span>
+          </span>
+        </span>
+        {open ? (
+          <ChevronUp className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+        )}
+      </button>
+      <p className="mt-2 break-words text-xs leading-relaxed text-muted-foreground">
+        {excerpt}
+      </p>
+    </div>
+  );
 }
 
 const markdownComponents: Components = {
@@ -40,22 +168,10 @@ const markdownComponents: Components = {
   ),
 };
 
-const ChatMessage = ({ message }: ChatMessageProps) => {
+const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
   const isUser = message.role === 'user';
   const [showSources, setShowSources] = useState(false);
   const hasSources = message.sources && message.sources.length > 0;
-
-  const modeLabel = message.mode;
-  const routeLabel = message.route;
-  const iterationCount = message.iterations ?? message.agentTrace?.iterations;
-  const toolsUsed =
-    message.toolsUsed ?? message.agentTrace?.tool_names_sequence ?? [];
-  const agentLatencyMs =
-    typeof message.agentTrace?.latency_ms === 'number'
-      ? message.agentTrace.latency_ms
-      : undefined;
-  const debugError =
-    message.agentError ?? message.error ?? message.agentTrace?.error ?? null;
 
   const clarifyToolCall = (message.toolCalls ?? []).find(
     (toolCall) => toolCall.tool === 'clarify_question'
@@ -78,6 +194,18 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     });
   const showClarifyFallback =
     !isUser && clarifyOptions.length > 0 && !contentHasClarifyOptions;
+
+  const modeLabel = message.mode;
+  const routeLabel = message.route;
+  const iterationCount = message.iterations ?? message.agentTrace?.iterations;
+  const toolsUsed =
+    message.toolsUsed ?? message.agentTrace?.tool_names_sequence ?? [];
+  const agentLatencyMs =
+    typeof message.agentTrace?.latency_ms === 'number'
+      ? message.agentTrace.latency_ms
+      : undefined;
+  const debugError =
+    message.agentError ?? message.error ?? message.agentTrace?.error ?? null;
 
   const timingEntries = Object.entries(message.timingsMs ?? {}).filter(
     ([, value]) => Number.isFinite(value)
@@ -112,6 +240,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     .slice(0, 6);
 
   const showInfoPanel =
+    showDebug &&
     !isUser &&
     (
       Boolean(modeLabel) ||
@@ -145,7 +274,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
   return (
     <div
       className={cn(
-        'flex items-start gap-3 animate-fade-in',
+        'flex min-w-0 items-start gap-2 animate-fade-in sm:gap-3',
         isUser && 'flex-row-reverse'
       )}
     >
@@ -157,50 +286,25 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         )}
       >
         {isUser ? (
-          <svg
-            className="h-4 w-4 text-secondary-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
+          <User className="h-4 w-4 text-secondary-foreground" />
         ) : (
-          <svg
-            className="h-4 w-4 text-primary-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
-            />
-          </svg>
+          <Bot className="h-4 w-4 text-primary-foreground" />
         )}
       </div>
 
       {/* Message Bubble */}
       <div
         className={cn(
-          'max-w-[75%] rounded-2xl px-4 py-3 shadow-sm',
+          'min-w-0 max-w-[92%] rounded-2xl px-3 py-3 shadow-sm sm:max-w-[85%] sm:px-4 md:max-w-[75%]',
           isUser
             ? 'rounded-tr-sm bg-chat-user text-foreground'
             : 'rounded-tl-sm bg-chat-assistant border border-border text-foreground'
         )}
       >
-        {/* Info Area (Target Collections & Reflected Query) */}
         {showInfoPanel && (
-          <div className="mb-3 space-y-1 text-[11px] text-muted-foreground bg-muted/30 p-2 rounded-md border border-border/50">
+          <div className="mb-3 space-y-1 rounded-md border border-border/50 bg-muted/30 p-2 text-[11px] text-muted-foreground">
             {(modeLabel || routeLabel || typeof iterationCount === 'number' || agentLatencyMs !== undefined) && (
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex flex-wrap items-center gap-1.5">
                 {modeLabel && (
                   <span className="rounded-sm bg-emerald-500/10 px-1.5 text-emerald-700">
                     Mode: {modeLabel}
@@ -225,7 +329,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             )}
 
             {toolsUsed.length > 0 && (
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span className="font-semibold text-primary/70">Tools:</span>
                 {toolsUsed.map((toolName, index) => (
                   <span
@@ -245,7 +349,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             )}
 
             {displayCollectionScores.length > 0 && (
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span className="font-semibold text-primary/70">Collection Ranking:</span>
                 {displayCollectionScores.map(({ collection, score }) => {
                   const scoreText = Number.isFinite(score)
@@ -256,9 +360,9 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     <span
                       key={collection}
                       className={cn(
-                        'px-1.5 rounded-sm',
+                        'rounded-sm px-1.5',
                         isSelected
-                          ? 'bg-primary/20 text-primary font-semibold'
+                          ? 'bg-primary/20 font-semibold text-primary'
                           : 'bg-primary/10 text-primary'
                       )}
                     >
@@ -271,7 +375,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             )}
 
             {topRoutingEntries.length > 0 && (
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span className="font-semibold text-primary/70">Routing Prob:</span>
                 {topRoutingEntries.map(([intent, prob]) => (
                   <span
@@ -287,7 +391,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             {filterEntries.length > 0 && (
               <div className="space-y-1">
                 <div className="font-semibold text-primary/70">Applied Filters:</div>
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex flex-wrap items-center gap-1.5">
                   {filterEntries.map((filter) => (
                     <span
                       key={filter.collection}
@@ -308,7 +412,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             {collectionResultEntries.length > 0 && (
               <div className="space-y-1">
                 <div className="font-semibold text-primary/70">Collection Hits:</div>
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex flex-wrap items-center gap-1.5">
                   {collectionResultEntries.map((entry) => (
                     <span
                       key={entry.collection}
@@ -323,18 +427,19 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
 
             {message.reflectedQuestion && (
               <div className="flex items-start gap-1.5">
-                <span className="font-semibold text-primary/70 shrink-0">Reflected:</span>
-                <span className="italic break-words">"{message.reflectedQuestion}"</span>
+                <span className="shrink-0 font-semibold text-primary/70">Reflected:</span>
+                <span className="break-words italic">"{message.reflectedQuestion}"</span>
               </div>
             )}
+
             {topTimingEntries.length > 0 && (
               <div className="space-y-1">
                 <div className="font-semibold text-primary/70">Timing (s):</div>
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex flex-wrap items-center gap-1.5">
                   {topTimingEntries.map(([stage, value]) => (
                     <span
                       key={stage}
-                      className="bg-amber-500/10 text-amber-700 px-1.5 rounded-sm"
+                      className="rounded-sm bg-amber-500/10 px-1.5 text-amber-700"
                     >
                       {formatTimingLabel(stage)}: {formatTimingSeconds(value)}
                     </span>
@@ -345,7 +450,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           </div>
         )}
 
-        <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert">
+        <div className="prose prose-sm max-w-none break-words text-sm leading-relaxed dark:prose-invert">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={markdownComponents}
@@ -381,21 +486,9 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         {hasSources && (
           <button
             onClick={() => setShowSources(!showSources)}
-            className="mt-2 flex items-center gap-1 text-xs text-primary hover:underline"
+            className="mt-3 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
           >
-            <svg
-              className="h-3 w-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
+            <FileText className="h-3.5 w-3.5" />
             {showSources ? 'Ẩn' : 'Xem'} nguồn ({message.sources?.length})
           </button>
         )}
@@ -403,14 +496,25 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         {/* Sources Display */}
         {showSources && hasSources && (
           <div className="mt-3 space-y-2 border-t border-border pt-3">
-            {message.sources?.map((source, index) => (
-              <DocRow
-                key={source.rank ?? index + 1}
-                doc={source}
-                rank={source.rank ?? index + 1}
-                showRerank={source.rerank_score !== undefined}
-              />
-            ))}
+            {message.sources?.map((source, index) => {
+              const displaySource = normalizeSourceForDisplay(source, index);
+              return (
+              showDebug ? (
+                <DocRow
+                  key={source.rank ?? index + 1}
+                  doc={displaySource}
+                  rank={displaySource.rank ?? index + 1}
+                  showRerank={displaySource.rerank_score !== undefined}
+                />
+              ) : (
+                <FriendlySourceCard
+                  key={`${source.rank ?? index + 1}-${index}`}
+                  source={displaySource}
+                  index={index}
+                />
+              )
+              );
+            })}
           </div>
         )}
       </div>

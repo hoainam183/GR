@@ -21,12 +21,12 @@ interface ConversationSidebarProps {
 function relativeTime(iso: string): string {
   const diff = Date.now() - parseUtcDate(iso).getTime();
   const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return 'vừa xong';
+  if (minutes < 60) return `${minutes} phút trước`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return `${hours} giờ trước`;
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return `${days} ngày trước`;
   return parseUtcDate(iso).toLocaleDateString();
 }
 
@@ -58,7 +58,7 @@ export function ConversationSidebar({ userId, onLogout }: ConversationSidebarPro
           <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          New Chat
+          Cuộc trò chuyện mới
         </button>
       </SidebarHeader>
 
@@ -71,7 +71,9 @@ export function ConversationSidebar({ userId, onLogout }: ConversationSidebarPro
             ))}
           </div>
         ) : sessions.length === 0 ? (
-          <p className="px-3 py-4 text-center text-xs text-muted-foreground">No conversations yet</p>
+          <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+            Chưa có cuộc trò chuyện
+          </p>
         ) : (
           <SidebarMenu>
             {sessions.map((session: Session) => {
@@ -80,7 +82,7 @@ export function ConversationSidebar({ userId, onLogout }: ConversationSidebarPro
                 ? session.title.length > 40
                   ? session.title.slice(0, 40) + '…'
                   : session.title
-                : 'New conversation';
+                : 'Cuộc trò chuyện mới';
               return (
                 <SidebarMenuItem key={session.session_id}>
                   <SidebarMenuButton

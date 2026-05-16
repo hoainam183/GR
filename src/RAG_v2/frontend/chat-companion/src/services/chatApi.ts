@@ -43,6 +43,56 @@ export interface RetrievalSearchResponse {
   latency_ms: number;
 }
 
+export interface EvalRunSummary {
+  run_id: string;
+  eval_suite: 'historical_email' | 'current_policy';
+  status: string;
+  started_at?: string;
+  finished_at?: string;
+  trigger?: string;
+  summary: Record<string, any>;
+  artifacts?: Record<string, string>;
+  errors?: string[];
+}
+
+export interface EvalCaseFailure {
+  case_id: string;
+  eval_suite: string;
+  question: string;
+  fail_reasons?: string[];
+  metrics?: Record<string, number>;
+  judge_scores?: Record<string, number>;
+  error?: string;
+}
+
+export interface EvalBreakdownRow {
+  key: string;
+  total_cases: number;
+  passed_cases: number;
+  failed_cases: number;
+  pass_rate: number;
+}
+
+export interface EvalDashboardResponse {
+  status: string;
+  source: 'mongodb' | 'artifacts';
+  latest?: EvalRunSummary | null;
+  runs: EvalRunSummary[];
+  trends: Array<{
+    run_id: string;
+    eval_suite: string;
+    finished_at?: string;
+    status: string;
+    summary: Record<string, any>;
+  }>;
+  failing_cases: EvalCaseFailure[];
+  breakdown?: {
+    by_query_class?: EvalBreakdownRow[];
+    by_collection?: EvalBreakdownRow[];
+  };
+  stale_source_violations?: EvalCaseFailure[];
+}
+
 export interface ChatStreamResult {
   answer: string;
   sessionId?: string;
@@ -162,36 +212,60 @@ export const resolveChatIdentity = (
 const mapSourceToRetrieved = (
   source: Record<string, unknown>,
   rank: number,
-): RetrievedDocument => ({
-  rank,
-  content: typeof source.text === 'string' ? source.text : '',
-  score:
-    typeof source.rerank_score === 'number'
-      ? source.rerank_score
-      : typeof source.score === 'number'
-      ? source.score
-      : 0,
-  hybrid_score: typeof source.score === 'number' ? source.score : undefined,
-  rerank_score:
-    typeof source.rerank_score === 'number' ? source.rerank_score : undefined,
-  vector_score:
-    typeof source.vector_score === 'number' ? source.vector_score : undefined,
-  keyword_score:
-    typeof source.keyword_score === 'number' ? source.keyword_score : undefined,
-  collection:
-    typeof source.collection === 'string' ? source.collection : undefined,
-  metadata:
+): RetrievedDocument => {
+  const metadata =
     source.metadata && typeof source.metadata === 'object'
       ? (source.metadata as Record<string, unknown>)
-      : {},
-});
+      : {};
+  const content =
+    typeof source.content === 'string'
+      ? source.content
+      : typeof source.text === 'string'
+      ? source.text
+      : '';
+  const rerankScore =
+    typeof source.rerank_score === 'number' ? source.rerank_score : undefined;
+  const score =
+    rerankScore ??
+    (typeof source.score === 'number'
+      ? source.score
+      : typeof source.hybrid_score === 'number'
+      ? source.hybrid_score
+      : 0);
+
+  return {
+    rank: typeof source.rank === 'number' ? source.rank : rank,
+    content,
+    score,
+    hybrid_score:
+      typeof source.hybrid_score === 'number'
+        ? source.hybrid_score
+        : typeof source.score === 'number'
+        ? source.score
+        : undefined,
+    rerank_score: rerankScore,
+    vector_score:
+      typeof source.vector_score === 'number' ? source.vector_score : undefined,
+    keyword_score:
+      typeof source.keyword_score === 'number' ? source.keyword_score : undefined,
+    collection:
+      typeof source.collection === 'string'
+        ? source.collection
+        : typeof metadata.collection === 'string'
+        ? metadata.collection
+        : undefined,
+    metadata,
+  };
+};
 
 const normalizeV3Response = (
   payload: Record<string, unknown>,
   fallbackSessionId?: string,
 ): ChatV3Response => {
   const retrievedDocs = Array.isArray(payload.retrieved_documents)
-    ? (payload.retrieved_documents as RetrievedDocument[])
+    ? (payload.retrieved_documents as Record<string, unknown>[]).map((source, index) =>
+        mapSourceToRetrieved(source, index + 1),
+      )
     : Array.isArray(payload.sources)
     ? (payload.sources as Record<string, unknown>[]).map((source, index) =>
         mapSourceToRetrieved(source, index + 1),
@@ -508,6 +582,26 @@ export const retrievalSearch = async (
       console.error('Retrieval API Error:', error.response?.data || error.message);
       throw new Error(
         error.response?.data?.detail || 'Failed to get retrieval results.',
+      );
+    }
+    throw error;
+  }
+};
+
+export const getEvalDashboard = async (
+  suite?: 'historical_email' | 'current_policy',
+  limit: number = 10,
+): Promise<EvalDashboardResponse> => {
+  try {
+    const response = await apiClient.get('/metrics/eval', {
+      params: { suite, limit },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Eval metrics API Error:', error.response?.data || error.message);
+      throw new Error(
+        error.response?.data?.detail || 'Failed to load evaluation metrics.',
       );
     }
     throw error;

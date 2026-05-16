@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import ChatContainer from '@/components/chat/ChatContainer';
 import { ConversationSidebar } from '@/components/sidebar/ConversationSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -100,6 +100,7 @@ const Index = () => {
   const [searchParams] = useSearchParams();
   const { sessionId } = useParams<{ sessionId?: string }>();
   const [user, setUser] = useState<UserPublic | null>(null);
+  const isAdmin = user?.role === 'admin';
 
   // On mount: handle OAuth ?token= param OR read from localStorage
   useEffect(() => {
@@ -178,7 +179,7 @@ const Index = () => {
           <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm">
             <div className="flex h-14 items-center justify-between px-4 md:px-6">
               {/* Sidebar toggle + logo */}
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 {user && <SidebarTrigger className="mr-1" />}
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                   <svg
@@ -195,23 +196,27 @@ const Index = () => {
                     />
                   </svg>
                 </div>
-                <h1 className="text-lg font-semibold text-foreground">HUST Assistant</h1>
+                <h1 className="truncate text-base font-semibold text-foreground sm:text-lg">
+                  HUST Assistant
+                </h1>
               </div>
 
-              {/* Right side: status + trace link + user menu */}
-              <div className="flex items-center gap-3">
+              {/* Right side: status + user menu */}
+              <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                  Online
+                  <span className="hidden sm:inline">Đang hoạt động</span>
                 </span>
-                <Link
-                  to="/trace"
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border rounded-full px-3 py-1 hover:bg-muted transition-colors"
-                  title="Pipeline Trace Debugger"
-                >
-                  <Activity className="w-3.5 h-3.5" />
-                  Trace
-                </Link>
+                {isAdmin && (
+                  <Link
+                    to="/trace"
+                    className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    title="Pipeline Trace Debugger"
+                  >
+                    <Activity className="h-3.5 w-3.5" />
+                    Trace
+                  </Link>
+                )}
                 {user && <UserMenu user={user} onLogout={handleLogout} />}
               </div>
             </div>
