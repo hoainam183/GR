@@ -1,0 +1,353 @@
+# Fix Toàn Bộ Major Code Resolution — Thêm Tất Cả Mã Ngành Thiếu + Xử Lý Song Ngữ ME-GU
+
+## Mô tả vấn đề
+
+Khi query "ME-GU học ngoại ngữ chính là gì", hệ thống thất bại ở **3 điểm**:
+1. `_extract_major_code("ME-GU ...")` → `None` → không nhận diện được mã ngành
+2. Metadata filter không pre-filter `ctdt` collection theo `major_code=ME-GU`
+3. Retrieval tìm kiếm generic → kết quả không liên quan → chatbot nói "không tìm thấy"
+
+**Nguyên nhân gốc**: `MAJOR_PATTERNS`, `MAJOR_CODE_TO_NAME`, `MAJOR_NAME_ALIAS_MAPPING` và các regex phụ trợ **chỉ cover IT-\* và MI-\***. Trong khi vector store đã index **36 mã ngành** từ 6 khoa.
+
+**Dữ liệu đã index (đã xác nhận qua scan `data/ctdt/`):**
+
+| Khoa | Mã ngành đã index |
+|------|-------------------|
+| Cơ khí | `ME1`, `ME2`, `ME-GU`, `ME-LUH`, `ME-NUT`, `ME-E1`(alias `HE1`), `TE-EP`, `TX1` |
+| Điện–Điện tử | `EE1`, `EE2`, `EE-E8`, `EE-E18`, `EE-EP`, `EV1`, `EV2` |
+| SoICT | `IT1`, `IT2`, `IT-E6`, `IT-E7`, `IT-E10`, `IT-E15`, `IT-EP`, `TROY-IT` |
+| Toán–Tin | `MI1`, `MI2` |
+| Hóa & KHSS | `CH1`, `CH2`, `CH-E11`, `BF1`, `BF2`, `BF-E12` |
+| Vật liệu | `MS1`, `MS2`, `MS3`, `MS5`, `MS-E3` |
+
+> [!IMPORTANT]
+> Ngoài ra, các mã `HE1` (Kỹ thuật Nhiệt), `EV1/EV2` (Kỹ thuật Môi trường), `TX1` (Công nghệ Dệt may) chỉ xuất hiện trong stsv/quydinh data nhưng chưa có chunk riêng trong ctdt. Vẫn nên thêm vào `MAJOR_PATTERNS` để system nhận diện khi user hỏi.
+
+## Proposed Changes
+
+### File 1: [metadata_filters.py](file:///d:/GR/src/RAG_v2/retrieval/metadata_filters.py)
+
+> Đây là file trung tâm — mọi thay đổi chính nằm ở đây.
+
+---
+
+#### Change 1.1: Mở rộng `MAJOR_CODE_TO_NAME` (dòng ~101–111)
+
+Thêm tất cả mã ngành từ data đã index:
+
+```python
+MAJOR_CODE_TO_NAME: Dict[str, str] = {
+    # ── SoICT (Công nghệ Thông tin & Truyền thông) ──
+    "IT-E10": "Khoa học Dữ liệu và Trí tuệ Nhân tạo",
+    "IT-E15": "An toàn không gian số",
+    "IT-E6": "Công nghệ thông tin Việt - Nhật",
+    "IT-E7": "Công nghệ thông tin toàn cầu",
+    "IT-EP": "Công nghệ thông tin Việt Pháp",
+    "IT1": "Khoa học máy tính",
+    "IT2": "Kỹ thuật máy tính",
+    "TROY-IT": "Công nghệ thông tin (TROY)",
+    # ── Toán – Tin ──
+    "MI1": "Toán - Tin",
+    "MI2": "Hệ thống thông tin quản lý",
+    # ── Cơ khí ──
+    "ME1": "Kỹ thuật Cơ khí",
+    "ME2": "Kỹ thuật Cơ khí",
+    "ME-GU": "Kỹ thuật Cơ khí (HUST-Griffith)",
+    "ME-LUH": "Kỹ thuật Cơ điện tử (HUST-Leibniz Hannover)",
+    "ME-NUT": "Kỹ thuật Cơ điện tử (HUST-Nagaoka)",
+    "HE1": "Kỹ thuật Nhiệt",
+    "TE-EP": "Kỹ thuật Ô tô",
+    "TX1": "Công nghệ Dệt may",
+    # ── Điện – Điện tử ──
+    "EE1": "Kỹ thuật Điện",
+    "EE2": "Kỹ thuật Điện",
+    "EE-E8": "Kỹ thuật Điều khiển và Tự động hóa (KSCLC)",
+    "EE-E18": "Kỹ thuật Cơ điện tử (tiên tiến)",
+    "EE-EP": "Kỹ thuật Điều khiển và Tự động hóa (PFIEV)",
+    "EV1": "Kỹ thuật Môi trường",
+    "EV2": "Quản lý Tài nguyên và Môi trường",
+    # ── Hóa & Khoa học Sự sống ──
+    "CH1": "Kỹ thuật Hóa học",
+    "CH2": "Hóa học",
+    "CH-E11": "Kỹ thuật Hóa học (tiên tiến)",
+    "BF1": "Kỹ thuật Sinh học",
+    "BF2": "Kỹ thuật Thực phẩm",
+    "BF-E12": "Kỹ thuật Sinh học (tiên tiến)",
+    # ── Vật liệu ──
+    "MS1": "Kỹ thuật Vật liệu",
+    "MS2": "Kỹ thuật Vật liệu",
+    "MS3": "Vật liệu Polyme và Compozit",
+    "MS5": "Kỹ thuật Vật liệu",
+    "MS-E3": "Khoa học và Kỹ thuật Vật liệu (tiên tiến)",
+}
+```
+
+---
+
+#### Change 1.2: Mở rộng `MAJOR_PATTERNS` (dòng ~116–126)
+
+Thêm patterns cho tất cả ngành. **Thứ tự quan trọng**: pattern dài/cụ thể trước, pattern ngắn/generic sau.
+
+```python
+MAJOR_PATTERNS: List[Tuple[str, str]] = [
+    # ── SoICT ──
+    (r"\bIT[-\s]?E10\b|khoa học dữ liệu|trí tuệ nhân tạo|\bDATA\b|\bAI\b", "IT-E10"),
+    (r"\bIT[-\s]?E15\b|an toàn không gian số|cyber|bảo mật số", "IT-E15"),
+    (r"\bIT[-\s]?E6\b|việt.{0,4}nhật|ICTVJ", "IT-E6"),
+    (r"\bIT[-\s]?E7\b|toàn cầu|global ICT|ICTG", "IT-E7"),
+    (r"\bIT[-\s]?EP\b|việt.?pháp|ICTFR", "IT-EP"),
+    (r"\bTROY[-\s]?IT\b", "TROY-IT"),
+    (r"\bIT[-\s]?1\b|khoa học máy tính", "IT1"),
+    (r"\bIT[-\s]?2\b|kỹ thuật máy tính", "IT2"),
+    # ── Toán – Tin ──
+    (r"\bMI[-\s]?1\b|\btoán.?tin\b|toán ứng dụng", "MI1"),
+    (r"\bMI[-\s]?2\b|hệ thống thông tin quản lý|\bMIS\b", "MI2"),
+    # ── Cơ khí (cụ thể trước generic) ──
+    (r"\bME[-\s]?GU\b|Griffith", "ME-GU"),
+    (r"\bME[-\s]?LUH\b|Leibniz|Hannover", "ME-LUH"),
+    (r"\bME[-\s]?NUT\b|Nagaoka", "ME-NUT"),
+    (r"\bME[-\s]?E1\b", "ME-E1"),
+    (r"\bHE[-\s]?1\b|kỹ thuật nhiệt\b", "HE1"),
+    (r"\bTE[-\s]?EP\b", "TE-EP"),
+    (r"\bTX[-\s]?1\b|công nghệ dệt\b", "TX1"),
+    (r"\bME[-\s]?1\b", "ME1"),
+    (r"\bME[-\s]?2\b", "ME2"),
+    # ── Điện – Điện tử ──
+    (r"\bEE[-\s]?E18\b", "EE-E18"),
+    (r"\bEE[-\s]?E8\b|điều khiển.*tự động.*KSCLC", "EE-E8"),
+    (r"\bEE[-\s]?EP\b|điều khiển.*PFIEV", "EE-EP"),
+    (r"\bEE[-\s]?1\b|kỹ thuật điện\b", "EE1"),
+    (r"\bEE[-\s]?2\b", "EE2"),
+    (r"\bEV[-\s]?1\b|kỹ thuật môi trường\b", "EV1"),
+    (r"\bEV[-\s]?2\b|quản lý tài nguyên", "EV2"),
+    # ── Hóa & KHSS ──
+    (r"\bCH[-\s]?E11\b", "CH-E11"),
+    (r"\bCH[-\s]?1\b|kỹ thuật hóa học\b", "CH1"),
+    (r"\bCH[-\s]?2\b", "CH2"),
+    (r"\bBF[-\s]?E12\b", "BF-E12"),
+    (r"\bBF[-\s]?1\b|kỹ thuật sinh học\b", "BF1"),
+    (r"\bBF[-\s]?2\b|kỹ thuật thực phẩm\b", "BF2"),
+    # ── Vật liệu ──
+    (r"\bMS[-\s]?E3\b|khoa học.*kỹ thuật vật liệu", "MS-E3"),
+    (r"\bMS[-\s]?1\b|kỹ thuật vật liệu\b", "MS1"),
+    (r"\bMS[-\s]?2\b", "MS2"),
+    (r"\bMS[-\s]?3\b|polyme.*compozit", "MS3"),
+    (r"\bMS[-\s]?5\b", "MS5"),
+]
+```
+
+---
+
+#### Change 1.3: Mở rộng `MAJOR_NAME_ALIAS_MAPPING` (dòng ~130–181)
+
+Thêm aliases cho các ngành mới. **Chỉ thêm các ngành có tên phổ biến khác**:
+
+```python
+# Thêm sau entry "Hệ thống thông tin quản lý":
+
+"Kỹ thuật Cơ khí (HUST-Griffith)": [
+    "Kỹ thuật Cơ khí (HUST-Griffith)",
+    "ME-GU",
+    "Cơ khí Griffith",
+    "Mechanical Engineering Griffith",
+],
+"Kỹ thuật Cơ điện tử (HUST-Leibniz Hannover)": [
+    "Kỹ thuật Cơ điện tử (HUST-Leibniz Hannover)",
+    "ME-LUH",
+    "Cơ điện tử LUH",
+],
+"Kỹ thuật Cơ điện tử (HUST-Nagaoka)": [
+    "Kỹ thuật Cơ điện tử (HUST-Nagaoka)",
+    "ME-NUT",
+    "Cơ điện tử Nagaoka",
+],
+"Kỹ thuật Điện": [
+    "Kỹ thuật Điện",
+    "EE1", "EE2",
+],
+"Kỹ thuật Điều khiển và Tự động hóa (KSCLC)": [
+    "Kỹ thuật Điều khiển và Tự động hóa (KSCLC)",
+    "Điều khiển tự động hóa",
+    "EE-E8",
+],
+"Kỹ thuật Hóa học": [
+    "Kỹ thuật Hóa học",
+    "CH1",
+],
+"Kỹ thuật Vật liệu": [
+    "Kỹ thuật Vật liệu",
+    "MS1",
+],
+"Khoa học và Kỹ thuật Vật liệu (tiên tiến)": [
+    "Khoa học và Kỹ thuật Vật liệu (tiên tiến)",
+    "MS-E3",
+    "KHKTVL",
+],
+"Công nghệ thông tin (TROY)": [
+    "Công nghệ thông tin (TROY)",
+    "TROY-IT",
+],
+```
+
+---
+
+#### Change 1.4: Mở rộng `_MAJOR_CODE_FUZZY_RE` (dòng 203–206)
+
+Pattern hiện tại chỉ match `(IT|MI)`. Cần mở rộng cho tất cả prefix:
+
+```python
+_MAJOR_CODE_FUZZY_RE = re.compile(
+    r"\b(IT|MI|ME|EE|EV|CH|BF|MS|HE|TE|TX|TROY)"
+    r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*"
+    r"(E10|E15|E11|E12|E18|E8|E6|E7|E3|E1|EP|GU|LUH|NUT|IT|1|2|3|5)\b",
+    re.IGNORECASE,
+)
+```
+
+---
+
+#### Change 1.5: Mở rộng `_MAJOR_CODE_MENTION_RE` (dòng 221–224)
+
+```python
+_MAJOR_CODE_MENTION_RE = re.compile(
+    r"\b(IT|MI|ME|EE|EV|CH|BF|MS|HE|TE|TX|TROY)"
+    r"\s*-?\s*"
+    r"(E10|E15|E11|E12|E18|E8|E6|E7|E3|E1|EP|GU|LUH|NUT|IT|1|2|3|5)\b",
+    re.IGNORECASE,
+)
+```
+
+---
+
+#### Change 1.6: Cập nhật `_canonicalise_major_code_parts` (dòng 365–369)
+
+Hàm hiện tại chỉ xử lý suffix `{1, 2}` → không dash. Cần mở rộng cho `{1, 2, 3, 5}`:
+
+```python
+def _canonicalise_major_code_parts(prefix: str, suffix: str) -> str:
+    """Convert regex major parts to canonical major code."""
+    p = (prefix or "").upper()
+    s = (suffix or "").upper()
+    # Simple numeric suffixes: ME1, ME2, EE1, EE2, CH1, CH2, MS1, MS2, MS3, MS5
+    return f"{p}{s}" if s in {"1", "2", "3", "5"} else f"{p}-{s}"
+```
+
+---
+
+### File 2: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)
+
+#### Change 2.1: Mở rộng `_EXPLICIT_MAJOR_CODE_RE` (dòng 57–61)
+
+Pattern hiện tại chỉ match `(IT|MI)`. Cần mở rộng cho tất cả prefix:
+
+```python
+_EXPLICIT_MAJOR_CODE_RE = re.compile(
+    r"\b(?:IT|MI|ME|EE|EV|CH|BF|MS|HE|TE|TX|TROY)"
+    r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*"
+    r"(?:E10|E15|E11|E12|E18|E8|E6|E7|E3|E1|EP|GU|LUH|NUT|IT|1|2|3|5)\b",
+    re.IGNORECASE,
+)
+```
+
+---
+
+### File 3: [prompts.py](file:///d:/GR/src/RAG_v2/query/prompts.py) — Xử lý song ngữ
+
+#### Change 3.1: Cập nhật `REWRITE_SYSTEM_PROMPT` (dòng 95–221)
+
+Thêm rule mới để xử lý chương trình quốc tế có tài liệu tiếng Anh:
+
+```python
+# Thêm vào QUY TẮC BẮT BUỘC (sau rule 13, trước VÍ DỤ FEW-SHOT):
+
+14. Nếu câu hỏi liên quan đến chương trình hợp tác quốc tế (ME-GU, ME-LUH, ME-NUT, \
+EE-EP, IT-EP, MS-E3, CH-E11, v.v.), tài liệu gốc có thể bằng tiếng Anh. Khi viết \
+lại query, BỔ SUNG từ khóa tiếng Anh tương đương bên cạnh tiếng Việt nếu phù hợp \
+(VD: "ngoại ngữ" → "ngoại ngữ (foreign language/English requirements)", \
+"tín chỉ" → "tín chỉ (credits)"). Điều này giúp retrieval match cả tài liệu \
+tiếng Anh lẫn tiếng Việt.
+```
+
+Thêm ví dụ few-shot cho ME-GU:
+
+```python
+# Thêm vào VÍ DỤ FEW-SHOT (sau Ví dụ 9):
+
+---
+Ví dụ 10 — Chương trình quốc tế ME-GU, tài liệu tiếng Anh:
+USER_PROFILE: (khong co)
+CHAT_HISTORY: (khong co)
+CÂU HỎI HIỆN TẠI: ME-GU học ngoại ngữ chính là gì
+STANDALONE QUERY: Chương trình đào tạo ME-GU yêu cầu ngoại ngữ (foreign language/English requirements) chính là gì?
+```
+
+---
+
+### File 4: [prompts.py (RAG)](file:///d:/GR/src/RAG_v2/llm/prompts.py) — Xử lý song ngữ response
+
+#### Change 4.1: Cập nhật `RAG_SYSTEM_PROMPT` (dòng 9–35)
+
+Thêm rule xử lý tài liệu tiếng Anh:
+
+```python
+# Thêm vào phần NGUỒN THÔNG TIN (sau dòng 16):
+
+- Nếu tài liệu tham khảo bằng tiếng Anh (chương trình quốc tế), DỊCH nội dung \
+sang tiếng Việt khi trả lời, kèm thuật ngữ gốc trong ngoặc nếu cần.
+```
+
+---
+
+### File 5: [test_metadata_filters.py](file:///d:/GR/src/RAG_v2/retrieval/test_metadata_filters.py) — Test
+
+#### Change 5.1: Thêm test cases cho major codes mới
+
+```python
+def test_extract_major_code_me_gu():
+    """ME-GU must be recognized."""
+    from retrieval.metadata_filters import _extract_major_code
+    assert _extract_major_code("ME-GU học ngoại ngữ chính là gì") == "ME-GU"
+    assert _extract_major_code("chương trình ME GU") == "ME-GU"
+    assert _extract_major_code("Griffith") == "ME-GU"
+
+def test_extract_major_code_all_new_prefixes():
+    """All new major codes must be recognized."""
+    from retrieval.metadata_filters import _extract_major_code
+    assert _extract_major_code("EE-E8") == "EE-E8"
+    assert _extract_major_code("CH-E11") == "CH-E11"
+    assert _extract_major_code("MS-E3") == "MS-E3"
+    assert _extract_major_code("BF-E12") == "BF-E12"
+    assert _extract_major_code("EE1") == "EE1"
+    assert _extract_major_code("ME-LUH") == "ME-LUH"
+    assert _extract_major_code("TROY-IT") == "TROY-IT"
+```
+
+---
+
+## Tổng kết thay đổi
+
+| File | Thay đổi | Dòng ảnh hưởng |
+|------|----------|----------------|
+| `retrieval/metadata_filters.py` | 6 thay đổi: MAJOR_CODE_TO_NAME, MAJOR_PATTERNS, MAJOR_NAME_ALIAS_MAPPING, 2 regex, 1 hàm | ~101–370 |
+| `pipeline/flows.py` | 1 thay đổi: _EXPLICIT_MAJOR_CODE_RE | ~57–61 |
+| `query/prompts.py` | 2 thay đổi: thêm rule 14 + ví dụ 10 song ngữ | ~122, ~221 |
+| `llm/prompts.py` | 1 thay đổi: thêm rule dịch tài liệu EN | ~16 |
+| `retrieval/test_metadata_filters.py` | Thêm test cases | cuối file |
+
+> [!WARNING]
+> **Blast radius**: `MAJOR_CODE_TO_NAME` và `MAJOR_PATTERNS` được import bởi `query/reflection.py` (`_extract_entities`), `retrieval/metadata_filters.py` (tất cả filter extractors), và `pipeline/flows.py`. Thay đổi các dict/list này **không break API contract** vì chỉ thêm entries mới, không sửa/xóa entries cũ.
+
+> [!CAUTION]
+> `_MAJOR_CODE_FUZZY_RE` và `_MAJOR_CODE_MENTION_RE` được dùng bởi `_normalise_major_text()` và `extract_major_codes()`. Mở rộng regex phải cẩn thận để không tạo false positive (VD: prefix `ME` không match `MEETING`). Tất cả pattern đều dùng `\b` word boundary nên an toàn.
+
+## Verification Plan
+
+### Automated Tests
+```bash
+python -m pytest d:\GR\src\RAG_v2\retrieval\test_metadata_filters.py -v
+```
+
+### Manual Verification (trong browser)
+1. Query: `"ME-GU học ngoại ngữ chính là gì"` → phải trả về thông tin English requirements từ ME-GU curriculum
+2. Query: `"Chương trình EE-E8 có bao nhiêu tín chỉ"` → phải resolve major code EE-E8
+3. Query: `"MS-E3 là ngành gì"` → phải trả về Khoa học và Kỹ thuật Vật liệu

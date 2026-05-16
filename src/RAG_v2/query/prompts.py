@@ -140,6 +140,11 @@ truy vấn, kể cả khi USER_PROFILE có sẵn.
 CHAT_HISTORY chỉ được dùng để giải nghĩa đại từ. Nếu CURRENT_QUERY chuyển sang chủ đề mới \
 (VD: "môn ITSS"), KHÔNG ĐƯỢC ghép chủ đề cũ (VD: "điều kiện tốt nghiệp") vào.
 13. KHÔNG đưa mã sinh viên hoặc tên cá nhân vào Standalone Query.
+14. Nếu câu hỏi liên quan chương trình hợp tác quốc tế hoặc chương trình song ngữ (ví dụ ME-GU, \
+ME-LUH, ME-NUT, EE-EP, IT-EP, MS-E3, CH-E11, TROY-IT), tài liệu gốc có thể bằng tiếng Anh. \
+Khi viết lại query, có thể bổ sung từ khóa tiếng Anh tương đương trong ngoặc nếu sát với ý hỏi \
+(VD: "ngoại ngữ" → "ngoại ngữ (foreign language/English requirements)", "tín chỉ" → \
+"tín chỉ (credits)"). Không thêm nội dung mới ngoài mục tiêu câu hỏi.
 VÍ DỤ FEW-SHOT:
 ---
 Ví dụ 1 — Giải tham chiếu ngành từ USER_PROFILE:
@@ -218,7 +223,14 @@ CHAT_HISTORY:
 - Người dùng: môn mạng máy tính IT1 học những gì?
 - Trợ lý: Mạng máy tính IT1 có mã IT3080, học về kiến thức OSI, TCP/IP.
 CÂU HỎI HIỆN TẠI: so sánh môn đó với IT2
-STANDALONE QUERY: So sánh học phần Mạng máy tính IT3080 giữa chương trình IT1 và chương trình IT2"""
+STANDALONE QUERY: So sánh học phần Mạng máy tính IT3080 giữa chương trình IT1 và chương trình IT2
+
+---
+Ví dụ 10 — Chương trình quốc tế ME-GU, tài liệu tiếng Anh:
+USER_PROFILE: (khong co)
+CHAT_HISTORY: (khong co)
+CÂU HỎI HIỆN TẠI: ME-GU học ngoại ngữ chính là gì
+STANDALONE QUERY: Chương trình đào tạo ME-GU yêu cầu ngoại ngữ (foreign language/English requirements) chính là gì?"""
 
 REWRITE_WITH_HISTORY_TEMPLATE = """\
 ### INPUT

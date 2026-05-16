@@ -55,8 +55,9 @@ _CTX_ERROR_MARKERS = (
 )
 
 _EXPLICIT_MAJOR_CODE_RE = re.compile(
-    r"\b(?:IT|MI)\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*"
-    r"(?:E10|E15|E6|E7|EP|1|2)\b",
+    r"\b(?:IT|MI|ME|EE|EV|CH|BF|MS|HE|TE|TX|TROY)"
+    r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*"
+    r"(?:E18|E15|E12|E11|E10|E8|E7|E6|E3|E1|EP|GU|LUH|NUT|IT|1|2|3|5)\b",
     re.IGNORECASE,
 )
 

@@ -201,16 +201,23 @@ Retrieval facts:
 Canonical major codes:
 
 ```text
-IT-E6  = Việt-Nhật / ICTVJ / HEDSPI
-IT-E7  = Global ICT / ICTG
-IT-E10 = Data AI
-IT-E15 = An toàn không gian số
-IT-EP  = Việt-Pháp
-IT1    = Khoa học máy tính
-IT2    = Kỹ thuật máy tính
-MI1    = Toán-Tin
-MI2    = Hệ thống thông tin quản lý
+BF1, BF2, BF-E12
+CH1, CH2, CH-E11
+EE1, EE2, EE-E18, EE-E8, EE-EP
+EV1, EV2
+HE1
+IT1, IT2, IT-E6, IT-E7, IT-E10, IT-E15, IT-EP
+ME1, ME2, ME-GU, ME-LUH, ME-NUT
+MI1, MI2
+MS1, MS2, MS3, MS5, MS-E3
+TE-EP, TROY-IT, TX1
 ```
+
+Major-code normalization accepts dash, Unicode-dash, spaced, and compact variants
+such as `ME-GU`, `ME GU`, `ME–GU`, `MSE3`, `BFE12`, and `TROY IT`.
+For CTĐT international/song ngữ documents, query reflection may add English
+retrieval keywords and final RAG answers should translate English context into
+Vietnamese when answering.
 
 Cohort format runtime: `K` + 2-3 chữ số, ví dụ `K65`, `K70`.
 

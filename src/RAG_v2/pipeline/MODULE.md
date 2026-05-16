@@ -326,7 +326,7 @@ Tương tự `rag_flow` nhưng:
 | `_should_strip_major_for_retrieval(...)` | True khi cần strip major name từ query (khi không target quydinh) |
 | `_extract_session_profile(history)` | Scan history tìm ngành/năm/khóa/GPA người dùng đã khai |
 | `_build_profile_note_from_user_context(user_context)` | Format profile note từ authenticated user context |
-| `_should_prepend_profile_note(question)` | False nếu question đã có explicit major code |
+| `_should_prepend_profile_note(question)` | False nếu question đã có explicit major code trong toàn bộ CTĐT indexed (`IT-*`, `MI*`, `ME-*`, `EE-*`, `EV*`, `CH*`, `BF*`, `MS*`, `HE1`, `TE-EP`, `TX1`, `TROY-IT`) |
 | `_build_collection_scores(...)` | Build scored list của tất cả collections (dùng classifier probabilities) |
 | `_merge_search_trace(...)` | Merge trace từ nhiều `_search_once()` calls |
 | `_is_context_length_error(exc)` | Detect lỗi context overflow từ LLM providers |

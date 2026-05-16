@@ -314,7 +314,7 @@ Entities được extract:
 
 | Entity | Pattern / Source |
 |--------|-----------------|
-| `major_code` | `_extract_major_code()` từ `retrieval.metadata_filters` |
+| `major_code` | `_extract_major_code()` từ `retrieval.metadata_filters`; hỗ trợ toàn bộ major code đã index trong `ctdt`, gồm các nhóm `IT/MI/ME/EE/EV/CH/BF/MS/HE/TE/TX/TROY` |
 | `major_name` | Lookup từ `MAJOR_CODE_TO_NAME` map |
 | `cohort` | Regex: `\bk(\d{2,3})\b` hoặc `khóa\s*\d{2,3}` |
 | `year_of_study` | Regex: `năm thứ N`, `năm N` |
@@ -334,14 +334,17 @@ Entities được extract:
 
 #### Rewrite System Prompt (`REWRITE_SYSTEM_PROMPT`)
 
-13 quy tắc bắt buộc, nổi bật:
+14 quy tắc bắt buộc, nổi bật:
 - **Rule 1**: Resolve reference theo priority `USER_PROFILE > CHAT_HISTORY > query`
 - **Rule 4**: Giữ nguyên mã ngành trong CURRENT_QUERY, KHÔNG dịch `ITE6 → Công nghệ thông tin`
 - **Rule 11**: Chỉ inject profile khi có personal reference — KHÔNG inject khi query tổng quát
 - **Rule 12**: KHÔNG carry "intent" từ history sang query mới (tránh context pollution)
 - **Rule 13**: KHÔNG đưa MSSV/tên vào standalone query
+- **Rule 14**: Với chương trình quốc tế/song ngữ như `ME-GU`, `ME-LUH`, `ME-NUT`,
+  `EE-EP`, `IT-EP`, `MS-E3`, `CH-E11`, `TROY-IT`, có thể bổ sung keyword tiếng Anh
+  tương đương để retrieval match tài liệu tiếng Anh.
 
-Few-shot: 9 ví dụ minh họa các edge case (đại từ nhân xưng, mã ngành mâu thuẫn, follow-up so sánh, context drift...).
+Few-shot: 10 ví dụ minh họa các edge case (đại từ nhân xưng, mã ngành mâu thuẫn, follow-up so sánh, context drift, query song ngữ cho CTĐT quốc tế...).
 
 ---
 

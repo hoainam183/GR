@@ -300,23 +300,19 @@ class BaseFilterExtractor(ABC):
 
 #### Major code system
 
-**`MAJOR_CODE_TO_NAME`** (9 ngành):
-```
-IT-E10 → Khoa học Dữ liệu và Trí tuệ Nhân tạo
-IT-E15 → An toàn không gian số
-IT-E6  → Công nghệ thông tin Việt - Nhật
-IT-E7  → Công nghệ thông tin toàn cầu
-IT-EP  → Công nghệ thông tin Việt Pháp
-IT1    → Khoa học máy tính
-IT2    → Kỹ thuật máy tính
-MI1    → Toán - Tin
-MI2    → Hệ thống thông tin quản lý
-```
+**`MAJOR_CODE_TO_NAME`** covers all CTĐT major codes currently indexed in `data/ctdt`:
+`BF1`, `BF2`, `BF-E12`, `CH1`, `CH2`, `CH-E11`, `EE1`, `EE2`, `EE-E18`,
+`EE-E8`, `EE-EP`, `EV1`, `EV2`, `HE1`, `IT1`, `IT2`, `IT-E10`, `IT-E15`,
+`IT-E6`, `IT-E7`, `IT-EP`, `ME1`, `ME2`, `ME-GU`, `ME-LUH`, `ME-NUT`,
+`MI1`, `MI2`, `MS1`, `MS2`, `MS3`, `MS5`, `MS-E3`, `TE-EP`, `TROY-IT`, `TX1`.
 
-**`MAJOR_PATTERNS`**: List 9 regex tuples, thử theo thứ tự, first match wins.
+**`MAJOR_PATTERNS`** and the major-code regexes recognize dash, Unicode-dash,
+spaced, and compact forms such as `ME-GU`, `ME GU`, `ME–GU`, `MSE3`, `BFE12`,
+and `TROY IT`. Patterns are first-match-wins, so specific international or
+advanced programme codes must stay before generic Vietnamese names.
 
 **Hàm quan trọng:**
-- `_resolve_major_code(query, resolved_major)` — priority: resolved_major (code/name/alias) → regex trên query
+- `_resolve_major_code(query, resolved_major)` — priority: direct `resolved_major` code → resolved name/alias → regex trên query; duplicate canonical names keep the first code in `MAJOR_CODE_TO_NAME`
 - `_build_major_labels(major_code)` — trả về tất cả aliases (sort longest first)
 - `extract_major_codes(text)` — extract tất cả explicit major codes
 - `extract_cohort_codes(text)` — extract cohort codes dạng `Kxx`

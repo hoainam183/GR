@@ -99,6 +99,20 @@ class BaseFilterExtractor(ABC):
 # Map major_code → canonical major_name (used for name-based fallback queries).
 # Add new programmes here together with an entry in MAJOR_PATTERNS.
 MAJOR_CODE_TO_NAME: Dict[str, str] = {
+    "BF1": "Kỹ thuật Sinh học",
+    "BF2": "Kỹ thuật Thực phẩm",
+    "BF-E12": "Kỹ thuật thực phẩm",
+    "CH1": "Kỹ thuật Hóa học",
+    "CH2": "Hóa học",
+    "CH-E11": "Kỹ thuật Hóa dược",
+    "EE1": "Kỹ thuật điện",
+    "EE2": "Kỹ thuật Điều khiển - Tự động hóa",
+    "EE-E18": "Hệ thống điện và năng lượng tái tạo",
+    "EE-E8": "Kỹ thuật Điều khiển - Tự động hóa",
+    "EE-EP": "Tin học công nghiệp và Tự động hóa",
+    "EV1": "Kỹ thuật Môi trường",
+    "EV2": "Quản lý Tài nguyên và Môi trường",
+    "HE1": "Kỹ thuật Nhiệt",
     "IT-E10": "Khoa học Dữ liệu và Trí tuệ Nhân tạo",
     "IT-E15": "An toàn không gian số",
     "IT-E6": "Công nghệ thông tin Việt - Nhật",
@@ -106,23 +120,69 @@ MAJOR_CODE_TO_NAME: Dict[str, str] = {
     "IT-EP": "Công nghệ thông tin Việt Pháp",
     "IT1": "Khoa học máy tính",
     "IT2": "Kỹ thuật máy tính",
+    "ME1": "Kỹ thuật Cơ điện tử",
+    "ME2": "Kỹ thuật Cơ khí",
+    "ME-GU": "Cơ khí - Chế tạo máy - ĐH Griffith (Úc)",
+    "ME-LUH": "Cơ điện tử - ĐH Leibniz Hannover (Đức)",
+    "ME-NUT": "Cơ điện tử - ĐH Nagaoka (Nhật Bản)",
     "MI1": "Toán - Tin",
     "MI2": "Hệ thống thông tin quản lý",
+    "MS1": "Kỹ thuật Vật liệu",
+    "MS2": "Kỹ thuật vi điện tử và công nghệ Nano",
+    "MS3": "Công nghệ vật liệu polyme và compozit",
+    "MS5": "Kỹ thuật in",
+    "MS-E3": "Khoa học và Kỹ thuật Vật liệu",
+    "TE-EP": "Cơ khí hàng không",
+    "TROY-IT": "Khoa học máy tính - ĐH Troy (Hoa Kỳ)",
+    "TX1": "Công nghệ Dệt May",
 }
 
 # Major-code patterns: list of (regex_pattern, major_code) tuples.
 # Patterns are tried in order; the first match wins.
 # Add new programmes here — no other code needs to change.
 MAJOR_PATTERNS: List[Tuple[str, str]] = [
-    (r"\bIT[-\s]?E10\b|khoa học dữ liệu|trí tuệ nhân tạo|\bDATA\b|\bAI\b", "IT-E10"),
+    # SoICT
+    (r"\bIT[-\s]?E10\b|khoa học dữ liệu|trí tuệ nhân tạo|\bDATA\b|data\s+ai|artificial intelligence", "IT-E10"),
     (r"\bIT[-\s]?E15\b|an toàn không gian số|cyber|bảo mật số", "IT-E15"),
     (r"\bIT[-\s]?E6\b|việt.{0,4}nhật|ICTVJ", "IT-E6"),
     (r"\bIT[-\s]?E7\b|toàn cầu|global ICT|ICTG", "IT-E7"),
     (r"\bIT[-\s]?EP\b|việt.?pháp|ICTFR", "IT-EP"),
+    (r"\bTROY[-\s]?IT\b|\bTROY\b", "TROY-IT"),
     (r"\bIT[-\s]?1\b|khoa học máy tính", "IT1"),
     (r"\bIT[-\s]?2\b|kỹ thuật máy tính", "IT2"),
+    # Toán - Tin
     (r"\bMI[-\s]?1\b|\btoán.?tin\b|toán ứng dụng", "MI1"),
     (r"\bMI[-\s]?2\b|hệ thống thông tin quản lý|\bMIS\b", "MI2"),
+    # Cơ khí
+    (r"\bME[-\s]?GU\b|Griffith|mechanical machine engineering", "ME-GU"),
+    (r"\bME[-\s]?LUH\b|Leibniz|Hannover", "ME-LUH"),
+    (r"\bME[-\s]?NUT\b|Nagaoka", "ME-NUT"),
+    (r"\bTE[-\s]?EP\b|cơ khí hàng không|hàng không", "TE-EP"),
+    (r"\bHE[-\s]?1\b|kỹ thuật nhiệt\b", "HE1"),
+    (r"\bTX[-\s]?1\b|công nghệ dệt may|công nghệ dệt\b", "TX1"),
+    (r"\bME[-\s]?1\b|kỹ thuật cơ điện tử\b", "ME1"),
+    (r"\bME[-\s]?2\b|kỹ thuật cơ khí\b", "ME2"),
+    # Điện - Điện tử
+    (r"\bEE[-\s]?E18\b|hệ thống điện.*năng lượng tái tạo", "EE-E18"),
+    (r"\bEE[-\s]?E8\b|điều khiển.*tự động.*(?:KSCLC|chất lượng cao)", "EE-E8"),
+    (r"\bEE[-\s]?EP\b|tin học công nghiệp|điều khiển.*PFIEV", "EE-EP"),
+    (r"\bEE[-\s]?1\b|kỹ thuật điện\b", "EE1"),
+    (r"\bEE[-\s]?2\b|kỹ thuật điều khiển.*tự động hóa\b", "EE2"),
+    (r"\bEV[-\s]?1\b|kỹ thuật môi trường\b", "EV1"),
+    (r"\bEV[-\s]?2\b|quản lý tài nguyên", "EV2"),
+    # Hóa và Khoa học sự sống
+    (r"\bCH[-\s]?E11\b|hóa dược", "CH-E11"),
+    (r"\bBF[-\s]?E12\b|thực phẩm.*tiên tiến", "BF-E12"),
+    (r"\bCH[-\s]?1\b|kỹ thuật hóa học\b", "CH1"),
+    (r"\bCH[-\s]?2\b|hóa học\b", "CH2"),
+    (r"\bBF[-\s]?1\b|kỹ thuật sinh học\b", "BF1"),
+    (r"\bBF[-\s]?2\b|kỹ thuật thực phẩm\b", "BF2"),
+    # Vật liệu
+    (r"\bMS[-\s]?E3\b|khoa học.*kỹ thuật vật liệu", "MS-E3"),
+    (r"\bMS[-\s]?2\b|vi điện tử.*nano|công nghệ nano", "MS2"),
+    (r"\bMS[-\s]?3\b|polyme.*compozit", "MS3"),
+    (r"\bMS[-\s]?5\b|kỹ thuật in\b", "MS5"),
+    (r"\bMS[-\s]?1\b|kỹ thuật vật liệu\b", "MS1"),
 ]
 
 # Map canonical major_name -> accepted aliases from profile/user context.
@@ -178,6 +238,123 @@ MAJOR_NAME_ALIAS_MAPPING: Dict[str, List[str]] = {
         "MI2",
         "MIS",
     ],
+    "Kỹ thuật Sinh học": [
+        "Kỹ thuật Sinh học",
+        "BF1",
+    ],
+    "Kỹ thuật Thực phẩm": [
+        "Kỹ thuật Thực phẩm",
+        "BF2",
+    ],
+    "Kỹ thuật thực phẩm": [
+        "Kỹ thuật thực phẩm",
+        "Kỹ thuật thực phẩm tiên tiến",
+        "BF-E12",
+    ],
+    "Kỹ thuật Hóa học": [
+        "Kỹ thuật Hóa học",
+        "CH1",
+    ],
+    "Hóa học": [
+        "Hóa học",
+        "CH2",
+    ],
+    "Kỹ thuật Hóa dược": [
+        "Kỹ thuật Hóa dược",
+        "CH-E11",
+    ],
+    "Kỹ thuật điện": [
+        "Kỹ thuật điện",
+        "EE1",
+    ],
+    "Kỹ thuật Điều khiển - Tự động hóa": [
+        "Kỹ thuật Điều khiển - Tự động hóa",
+        "Kỹ thuật Điều khiển và Tự động hóa",
+        "EE2",
+        "EE-E8",
+    ],
+    "Hệ thống điện và năng lượng tái tạo": [
+        "Hệ thống điện và năng lượng tái tạo",
+        "EE-E18",
+    ],
+    "Tin học công nghiệp và Tự động hóa": [
+        "Tin học công nghiệp và Tự động hóa",
+        "EE-EP",
+        "PFIEV",
+    ],
+    "Kỹ thuật Môi trường": [
+        "Kỹ thuật Môi trường",
+        "EV1",
+    ],
+    "Quản lý Tài nguyên và Môi trường": [
+        "Quản lý Tài nguyên và Môi trường",
+        "EV2",
+    ],
+    "Kỹ thuật Nhiệt": [
+        "Kỹ thuật Nhiệt",
+        "HE1",
+    ],
+    "Kỹ thuật Cơ điện tử": [
+        "Kỹ thuật Cơ điện tử",
+        "ME1",
+    ],
+    "Kỹ thuật Cơ khí": [
+        "Kỹ thuật Cơ khí",
+        "ME2",
+    ],
+    "Cơ khí - Chế tạo máy - ĐH Griffith (Úc)": [
+        "Cơ khí - Chế tạo máy - ĐH Griffith (Úc)",
+        "Cơ khí Griffith",
+        "Mechanical Machine Engineering",
+        "ME-GU",
+    ],
+    "Cơ điện tử - ĐH Leibniz Hannover (Đức)": [
+        "Cơ điện tử - ĐH Leibniz Hannover (Đức)",
+        "Cơ điện tử LUH",
+        "Leibniz Hannover",
+        "ME-LUH",
+    ],
+    "Cơ điện tử - ĐH Nagaoka (Nhật Bản)": [
+        "Cơ điện tử - ĐH Nagaoka (Nhật Bản)",
+        "Cơ điện tử Nagaoka",
+        "ME-NUT",
+    ],
+    "Kỹ thuật Vật liệu": [
+        "Kỹ thuật Vật liệu",
+        "MS1",
+    ],
+    "Kỹ thuật vi điện tử và công nghệ Nano": [
+        "Kỹ thuật vi điện tử và công nghệ Nano",
+        "Vi điện tử và công nghệ Nano",
+        "MS2",
+    ],
+    "Công nghệ vật liệu polyme và compozit": [
+        "Công nghệ vật liệu polyme và compozit",
+        "Polyme và compozit",
+        "MS3",
+    ],
+    "Kỹ thuật in": [
+        "Kỹ thuật in",
+        "MS5",
+    ],
+    "Khoa học và Kỹ thuật Vật liệu": [
+        "Khoa học và Kỹ thuật Vật liệu",
+        "KHKTVL",
+        "MS-E3",
+    ],
+    "Cơ khí hàng không": [
+        "Cơ khí hàng không",
+        "TE-EP",
+    ],
+    "Khoa học máy tính - ĐH Troy (Hoa Kỳ)": [
+        "Khoa học máy tính - ĐH Troy (Hoa Kỳ)",
+        "TROY-IT",
+        "Troy",
+    ],
+    "Công nghệ Dệt May": [
+        "Công nghệ Dệt May",
+        "TX1",
+    ],
 }
 
 _UNKNOWN_MAJOR_VALUES = {
@@ -200,8 +377,11 @@ _DASH_TRANSLATION = str.maketrans(
         "\u2212": "-",  # minus sign
     }
 )
+_MAJOR_CODE_PREFIX_RE = r"IT|MI|ME|EE|EV|CH|BF|MS|HE|TE|TX|TROY"
+_MAJOR_CODE_SUFFIX_RE = r"E18|E15|E12|E11|E10|E8|E7|E6|E3|E1|EP|GU|LUH|NUT|IT|1|2|3|5"
+_MAJOR_CODE_SEPARATOR_RE = r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*"
 _MAJOR_CODE_FUZZY_RE = re.compile(
-    r"\b(IT|MI)\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*(E10|E15|E6|E7|EP|1|2)\b",
+    rf"\b({_MAJOR_CODE_PREFIX_RE}){_MAJOR_CODE_SEPARATOR_RE}({_MAJOR_CODE_SUFFIX_RE})\b",
     re.IGNORECASE,
 )
 
@@ -219,7 +399,7 @@ _COHORT_MENTION_RE = re.compile(
     re.IGNORECASE,
 )
 _MAJOR_CODE_MENTION_RE = re.compile(
-    r"\b(IT|MI)\s*-?\s*(E10|E15|E6|E7|EP|1|2)\b",
+    rf"\b({_MAJOR_CODE_PREFIX_RE}){_MAJOR_CODE_SEPARATOR_RE}({_MAJOR_CODE_SUFFIX_RE})\b",
     re.IGNORECASE,
 )
 _COMPARE_CONNECTOR_RE = re.compile(
@@ -235,10 +415,9 @@ _TRAILING_FUNCTION_WORD_RE = re.compile(
     re.IGNORECASE,
 )
 
-_MAJOR_NAME_TO_CODE: Dict[str, str] = {
-    major_name: major_code
-    for major_code, major_name in MAJOR_CODE_TO_NAME.items()
-}
+_MAJOR_NAME_TO_CODE: Dict[str, str] = {}
+for major_code, major_name in MAJOR_CODE_TO_NAME.items():
+    _MAJOR_NAME_TO_CODE.setdefault(major_name, major_code)
 
 
 def _is_unknown_major(value: Optional[str]) -> bool:
@@ -310,6 +489,10 @@ def _resolve_major_code(
     which naturally falls back to unfiltered global search.
     """
     if resolved_major and not _is_unknown_major(resolved_major):
+        direct_code = _normalise_major_text(resolved_major).upper()
+        if direct_code in MAJOR_CODE_TO_NAME:
+            return direct_code
+
         normalized_major = canonicalize_major_name(resolved_major)
 
         # If major is already a known code, use it directly.
@@ -366,7 +549,7 @@ def _canonicalise_major_code_parts(prefix: str, suffix: str) -> str:
     """Convert regex major parts to canonical major code (e.g. MI+1 -> MI1)."""
     p = (prefix or "").upper()
     s = (suffix or "").upper()
-    return f"{p}{s}" if s in {"1", "2"} else f"{p}-{s}"
+    return f"{p}{s}" if s in {"1", "2", "3", "5"} else f"{p}-{s}"
 
 
 def extract_major_codes(text: str) -> List[str]:

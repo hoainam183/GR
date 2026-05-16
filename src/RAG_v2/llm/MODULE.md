@@ -215,6 +215,7 @@ Module `llm` chứa TẤT CẢ các LLM calls trong pipeline RAG thông thườn
 
 ## Recent Changes
 
+* 2026-05-16: Cập nhật `RAG_SYSTEM_PROMPT` trong `prompts.py` để khi context tham khảo là tiếng Anh (thường gặp ở chương trình quốc tế/song ngữ), câu trả lời dịch phần cần thiết sang tiếng Việt và giữ thuật ngữ gốc trong ngoặc khi cần.
 * 2026-05-06: Cập nhật `RAG_SYSTEM_PROMPT` trong `prompts.py` yêu cầu LLM ẩn nguyên bản các đường link chứa khoảng trắng (URL) vào trong văn bản theo chuẩn markdown (ví dụ `[tại đây](URL)`) và encode `%20` khoảng trắng để chống lỗi đứt link.
 * 2026-05-05: Cập nhật `RAG_SYSTEM_PROMPT` trong `prompts.py` để yêu cầu LLM giữ nguyên và đưa URL (nếu có) vào trong câu trả lời thay vì rút gọn các đường link như trước.
 

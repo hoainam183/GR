@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 # Ensure src/RAG_v2 is importable in test context.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from pipeline.flows import rag_flow, rag_flow_stream
+from pipeline.flows import _should_prepend_profile_note, rag_flow, rag_flow_stream
 
 
 def _make_doc() -> Dict[str, Any]:
@@ -114,6 +114,41 @@ def test_rag_flow_fallback_extracts_major_from_query_when_reflection_missing_ent
     assert deps["reranker"].rerank.call_args.kwargs["query"] == "môn lập trình mạng"
 
     assert result["applied_filters"]["ctdt"]["applied"] is True
+
+
+def test_rag_flow_fallback_extracts_me_gu_major_from_query() -> None:
+    deps = _make_deps()
+    question = "ME-GU học ngoại ngữ chính là gì"
+    deps["reflector"].reflect.return_value = {
+        "original": question,
+        "rewritten": question,
+        "entities": {},
+    }
+
+    result = rag_flow(
+        question=question,
+        history=None,
+        reflector=deps["reflector"],
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    search_kwargs = deps["searcher"].search.call_args.kwargs
+    assert search_kwargs["resolved_major"] == "ME-GU"
+    assert search_kwargs["query"] == "học ngoại ngữ chính là gì"
+    assert result["applied_filters"]["ctdt"]["applied"] is True
+
+
+def test_should_prepend_profile_note_detects_new_major_codes() -> None:
+    assert _should_prepend_profile_note("ME-GU học ngoại ngữ chính là gì") is False
+    assert _should_prepend_profile_note("TROY IT là chương trình nào") is False
+    assert _should_prepend_profile_note("MS–E3 có bao nhiêu tín chỉ") is False
 
 
 def test_rag_flow_stream_fallback_extracts_major_from_user_context() -> None:

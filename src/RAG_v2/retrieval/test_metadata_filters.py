@@ -1,6 +1,8 @@
 """Unit tests for major-name middleware used by metadata filters."""
 
 from retrieval.metadata_filters import (
+    MAJOR_CODE_TO_NAME,
+    _extract_major_code,
     _resolve_major_code,
     build_collection_filters,
     build_major_comparison_subqueries_for_retrieval,
@@ -99,6 +101,56 @@ def test_extract_major_codes_dedups_and_preserves_order() -> None:
     assert extract_major_codes(query) == ["IT-E7", "IT-E6"]
 
 
+def test_extract_major_code_supports_all_indexed_ctdt_codes() -> None:
+    """Every indexed CTDT major code should be recognised explicitly."""
+    expected_codes = list(MAJOR_CODE_TO_NAME)
+    query = ", ".join(expected_codes)
+
+    assert extract_major_codes(query) == expected_codes
+    for code in expected_codes:
+        assert _resolve_major_code(code, None) == code
+
+
+def test_resolve_major_code_preserves_direct_code_for_duplicate_names() -> None:
+    """Direct codes should not be remapped through duplicate canonical names."""
+    assert _resolve_major_code("generic", "EE2") == "EE2"
+    assert _resolve_major_code("generic", "EE-E8") == "EE-E8"
+    assert _resolve_major_code("generic", "BF2") == "BF2"
+    assert _resolve_major_code("generic", "BF-E12") == "BF-E12"
+
+    duplicate_name = MAJOR_CODE_TO_NAME["EE2"]
+    assert duplicate_name == MAJOR_CODE_TO_NAME["EE-E8"]
+    assert _resolve_major_code("generic", duplicate_name) == "EE2"
+
+
+def test_extract_major_code_supports_new_dash_and_space_variants() -> None:
+    """New major families should support compact, spaced, and dash variants."""
+    cases = {
+        "ME-GU học ngoại ngữ chính là gì": "ME-GU",
+        "chương trình ME GU": "ME-GU",
+        "ME–LUH có bao nhiêu tín chỉ": "ME-LUH",
+        "MENUT học ở đâu": "ME-NUT",
+        "EEE18 là ngành gì": "EE-E18",
+        "BF E12 chương trình tiên tiến": "BF-E12",
+        "CHE11 học gì": "CH-E11",
+        "MSE3 có bao nhiêu tín chỉ": "MS-E3",
+        "TROY IT là chương trình nào": "TROY-IT",
+        "TE EP cơ khí hàng không": "TE-EP",
+        "HE1 kỹ thuật nhiệt": "HE1",
+        "TX1 công nghệ dệt may": "TX1",
+    }
+    for query, expected_code in cases.items():
+        assert _resolve_major_code(query, None) == expected_code
+
+
+def test_extract_major_code_avoids_common_false_positives() -> None:
+    """Short prefixes and Vietnamese words should not become major codes."""
+    assert _extract_major_code("ai là người phụ trách học bổng") is None
+    assert _extract_major_code("meeting về lịch đăng ký") is None
+    assert _extract_major_code("message của phòng đào tạo") is None
+    assert _extract_major_code("he asked about scholarship") is None
+
+
 def test_quydinh_filter_extractor_matches_applicable_major_array_values() -> None:
     """QuyDinh filter should use cohort Kxx term queries for applicable_major arrays."""
     extractor = QuyDinhFilterExtractor()
@@ -183,6 +235,15 @@ def test_build_major_comparison_subqueries_for_retrieval() -> None:
     assert build_major_comparison_subqueries_for_retrieval(query) == [
         ("môn lập trình mạng của ngành IT-E7", "IT-E7"),
         ("môn lập trình mạng của ngành IT-E6", "IT-E6"),
+    ]
+
+
+def test_build_major_comparison_subqueries_for_new_major_codes() -> None:
+    """Comparison decomposition should work for newly supported major codes."""
+    query = "so sánh ngoại ngữ của ME-GU và ME-LUH có gì khác nhau"
+    assert build_major_comparison_subqueries_for_retrieval(query) == [
+        ("ngoại ngữ của ngành ME-GU", "ME-GU"),
+        ("ngoại ngữ của ngành ME-LUH", "ME-LUH"),
     ]
 
 
