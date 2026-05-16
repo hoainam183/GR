@@ -88,7 +88,9 @@ class TestSimpleFlow:
         state = agent.run("Xin chào")
 
         assert state.final_answer is not None
+        assert "Xin ch" not in state.final_answer
         assert len(state.tool_call_history) == 0
+        assert mock_llm.invoke.call_count == 1
         mock_execute.assert_not_called()
 
     @patch("agent.lc_tools.execute_tool")
@@ -215,61 +217,199 @@ class TestSimpleFlow:
 
 
 class TestComplexFlow:
-    @patch("agent.lc_tools.execute_tool")
+    @patch("agent.react_agent.execute_retrieval_plan")
     @patch(PATCH_CHAT)
-    def test_compare_cohorts_flow(self, mock_chat_cls: MagicMock, mock_execute: MagicMock) -> None:
+    def test_compare_cohorts_flow(
+        self,
+        mock_chat_cls: MagicMock,
+        mock_execute_plan: MagicMock,
+    ) -> None:
         mock_llm = MagicMock()
         mock_chat_cls.return_value = mock_llm
         mock_llm.bind_tools.return_value = mock_llm
 
         mock_llm.invoke.side_effect = [
-            make_ai_with_tool(
-                "compare_cohorts",
-                {
-                    "topic": "học bổng KKHT",
-                    "cohort_a": "K65",
-                    "cohort_b": "K70",
-                    "collection": "quy_dinh",
-                },
-                call_id="tc_002",
+            make_ai_answer(
+                json.dumps(
+                    {
+                        "sub_questions": [
+                            "hoc bong KKHT K65",
+                            "hoc bong KKHT K70",
+                        ],
+                        "reasoning": "comparison",
+                    }
+                )
             ),
-            make_ai_answer("K65 yêu cầu GPA >= 3.2, K70 yêu cầu GPA >= 3.5."),
+            make_ai_answer(
+                json.dumps(
+                    {
+                        "steps": [
+                            {
+                                "query": "hoc bong KKHT",
+                                "collection": "quy_dinh",
+                                "major_hint": None,
+                                "cohort_hint": "K65",
+                                "label": "K65",
+                            },
+                            {
+                                "query": "hoc bong KKHT",
+                                "collection": "quy_dinh",
+                                "major_hint": None,
+                                "cohort_hint": "K70",
+                                "label": "K70",
+                            },
+                        ],
+                        "needs_web": False,
+                        "reasoning": "comparison",
+                    }
+                )
+            ),
+            make_ai_answer("K65 yeu cau GPA >= 3.2, K70 yeu cau GPA >= 3.5."),
         ]
-        mock_execute.return_value = "### K65\nGPA >= 3.2\n---\n### K70\nGPA >= 3.5"
+        mock_execute_plan.return_value = [
+            ("K65", "GPA >= 3.2"),
+            ("K70", "GPA >= 3.5"),
+        ]
 
         agent = ReActAgent(make_settings())
-        state = agent.run("So sánh học bổng KKHT giữa K65 và K70")
+        state = agent.run(
+            "So sanh hoc bong KKHT giua K65 va K70",
+            complexity_subtype="comparison",
+        )
 
-        assert "compare_cohorts" in state.tool_call_history
+        mock_execute_plan.assert_called_once()
+        assert state.tool_call_history == [
+            "planned_rag_search:K65",
+            "planned_rag_search:K70",
+        ]
+        assert len(state.tool_results) == 2
         assert state.final_answer is not None
         assert state.error is None
 
-    @patch("agent.lc_tools.execute_tool")
+    @patch("agent.react_agent.execute_retrieval_plan")
     @patch(PATCH_CHAT)
-    def test_multi_rag_search_flow(self, mock_chat_cls: MagicMock, mock_execute: MagicMock) -> None:
+    def test_multi_rag_search_flow(
+        self,
+        mock_chat_cls: MagicMock,
+        mock_execute_plan: MagicMock,
+    ) -> None:
         mock_llm = MagicMock()
         mock_chat_cls.return_value = mock_llm
         mock_llm.bind_tools.return_value = mock_llm
 
         mock_llm.invoke.side_effect = [
-            make_ai_with_tool(
-                "multi_rag_search",
-                {
-                    "queries": [
-                        {"query": "điều kiện tốt nghiệp", "collection": "quy_dinh"},
-                        {"query": "tín chỉ tích lũy", "collection": "chuong_trinh"},
-                    ]
-                },
-                call_id="tc_003",
+            make_ai_answer(
+                json.dumps(
+                    {
+                        "sub_questions": [
+                            "dieu kien tot nghiep",
+                            "tin chi tich luy",
+                        ],
+                        "reasoning": "multi_source",
+                    }
+                )
             ),
-            make_ai_answer("Bạn cần đủ 130 tín chỉ và không có môn F để tốt nghiệp."),
+            make_ai_answer(
+                json.dumps(
+                    {
+                        "steps": [
+                            {
+                                "query": "dieu kien tot nghiep",
+                                "collection": "quy_dinh",
+                                "major_hint": None,
+                                "cohort_hint": None,
+                                "label": "quy_dinh",
+                            },
+                            {
+                                "query": "tin chi tich luy",
+                                "collection": "chuong_trinh",
+                                "major_hint": None,
+                                "cohort_hint": None,
+                                "label": "chuong_trinh",
+                            },
+                        ],
+                        "needs_web": False,
+                        "reasoning": "multi_source",
+                    }
+                )
+            ),
+            make_ai_answer("Ban can du tin chi va dat dieu kien tot nghiep."),
         ]
-        mock_execute.return_value = "Điều kiện: >=130 tín chỉ, GPA >= 2.0, không nợ môn."
+        mock_execute_plan.return_value = [
+            ("quy_dinh", "GPA >= 2.0, khong no mon."),
+            ("chuong_trinh", "Can tich luy du tin chi theo CTDT."),
+        ]
 
         agent = ReActAgent(make_settings())
-        state = agent.run("Tôi đủ điều kiện tốt nghiệp chưa?")
+        state = agent.run(
+            "Toi du dieu kien tot nghiep chua?",
+            complexity_subtype="multi_source",
+        )
 
-        assert "multi_rag_search" in state.tool_call_history
+        mock_execute_plan.assert_called_once()
+        assert state.tool_call_history == [
+            "planned_rag_search:quy_dinh",
+            "planned_rag_search:chuong_trinh",
+        ]
+        assert len(state.tool_results) == 2
+        assert state.final_answer is not None
+
+    @patch("agent.react_agent.execute_retrieval_plan")
+    @patch("agent.lc_tools.execute_tool")
+    @patch(PATCH_CHAT)
+    def test_invalid_planner_plan_falls_back_to_agent_loop(
+        self,
+        mock_chat_cls: MagicMock,
+        mock_execute_tool: MagicMock,
+        mock_execute_plan: MagicMock,
+    ) -> None:
+        mock_llm = MagicMock()
+        mock_chat_cls.return_value = mock_llm
+        mock_llm.bind_tools.return_value = mock_llm
+
+        mock_llm.invoke.side_effect = [
+            make_ai_answer(
+                json.dumps(
+                    {
+                        "sub_questions": ["dieu kien tot nghiep"],
+                        "reasoning": "single aspect",
+                    }
+                )
+            ),
+            make_ai_answer(
+                json.dumps(
+                    {
+                        "steps": [
+                            {
+                                "query": "dieu kien tot nghiep",
+                                "collection": "khong_hop_le",
+                                "major_hint": None,
+                                "cohort_hint": None,
+                                "label": "bad",
+                            }
+                        ],
+                        "needs_web": False,
+                        "reasoning": "invalid collection",
+                    }
+                )
+            ),
+            make_ai_with_tool(
+                "rag_search",
+                {"query": "dieu kien tot nghiep", "collection": "quy_dinh"},
+            ),
+            make_ai_answer("Dieu kien tot nghiep duoc tim thay trong quy dinh."),
+        ]
+        mock_execute_tool.return_value = "GPA >= 2.0, khong no mon."
+
+        agent = ReActAgent(make_settings())
+        state = agent.run(
+            "Toi du dieu kien tot nghiep chua?",
+            complexity_subtype="multi_source",
+        )
+
+        mock_execute_plan.assert_not_called()
+        mock_execute_tool.assert_called_once()
+        assert state.tool_call_history == ["rag_search"]
         assert state.final_answer is not None
 
 

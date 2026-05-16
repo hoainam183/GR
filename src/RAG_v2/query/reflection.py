@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import time
+import unicodedata
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 if TYPE_CHECKING:
@@ -50,6 +51,21 @@ _PERSONAL_REFS = re.compile(
 _COURSE_CODE_RE = re.compile(
     r"\b(?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?\b",
     re.IGNORECASE,
+)
+
+_COMPARISON_FOLLOWUP_RE = re.compile(
+    r"^\s*(?:so\s*(?:sánh)?\s*(?:với|về)?|khác\s+(?:gì|nhau)|vs)\b",
+    re.IGNORECASE,
+)
+
+_TOPIC_HINTS: tuple[tuple[str, str], ...] = (
+    (r"\bhoc\s+phi\b", "học phí"),
+    (r"\bmuc\s+hoc\s+phi\b", "học phí"),
+    (r"\bngoai\s+ngu\b|\btieng\s+anh\b|\bforeign\s+language\b", "ngoại ngữ"),
+    (r"\btin\s+chi\b|\bcredits?\b", "tín chỉ"),
+    (r"\bhoc\s+bong\b", "học bổng"),
+    (r"\btot\s+nghiep\b", "điều kiện tốt nghiệp"),
+    (r"\bchuong\s+trinh\b", "chương trình đào tạo"),
 )
 
 # ── PII & conversational noise stripping ────────────────────────────────────────
@@ -160,6 +176,152 @@ def _enforce_major_reference_rewrite(
     if updated != rewritten_query:
         logger.debug("Reflection fallback rewrite applied: %r -> %r", rewritten_query, updated)
     return updated
+
+
+def _fold_vietnamese(text: str) -> str:
+    """Return lowercase, accent-insensitive text for lightweight matching."""
+    decomposed = unicodedata.normalize("NFD", text or "")
+    without_marks = "".join(
+        char for char in decomposed if unicodedata.category(char) != "Mn"
+    )
+    return without_marks.casefold()
+
+
+def _is_comparison_followup(query: str) -> bool:
+    """Detect short comparison follow-ups that need topic inheritance."""
+    raw = (query or "").strip()
+    if not raw or not _COMPARISON_FOLLOWUP_RE.search(raw):
+        return False
+
+    try:
+        from retrieval.metadata_filters import extract_major_codes  # noqa: PLC0415
+        explicit_major_count = len(extract_major_codes(raw))
+    except Exception:
+        explicit_major_count = 0
+
+    return (
+        len(raw.split()) <= 8
+        or explicit_major_count < 2
+        or bool(_PERSONAL_REFS.search(raw))
+    )
+
+
+def _extract_topic_hint(text: str) -> Optional[str]:
+    """Extract a compact academic topic from one query/history message."""
+    folded = _fold_vietnamese(text)
+    for pattern, label in _TOPIC_HINTS:
+        if re.search(pattern, folded):
+            return label
+    return None
+
+
+def _comparison_followup_topic(
+    query: str,
+    chat_history: Optional[List[Dict[str, str]]],
+) -> Optional[str]:
+    """Resolve the topic for a short comparison follow-up.
+
+    Current-query topic wins (e.g. "so về học phí").  Otherwise use the most
+    recent user message with a concrete academic topic, not assistant text, so a
+    bad previous answer cannot steer the next retrieval topic.
+    """
+    topic = _extract_topic_hint(query)
+    if topic:
+        return topic
+
+    for msg in reversed(chat_history or []):
+        if msg.get("role") != "user":
+            continue
+        topic = _extract_topic_hint(msg.get("content", ""))
+        if topic:
+            return topic
+    return None
+
+
+def _add_unique_major_code(codes: List[str], value: Optional[str]) -> None:
+    if not value:
+        return
+    code = str(value).strip().upper()
+    if code and code not in codes:
+        codes.append(code)
+
+
+def _comparison_followup_major_codes(
+    query: str,
+    chat_history: Optional[List[Dict[str, str]]],
+    profile: Optional[Dict[str, str]],
+) -> List[str]:
+    """Collect comparison sides from history/current query/profile."""
+    from retrieval.metadata_filters import extract_major_codes  # noqa: PLC0415
+
+    codes: List[str] = []
+    current_codes = extract_major_codes(query)
+    if len(current_codes) >= 2:
+        for code in current_codes:
+            _add_unique_major_code(codes, code)
+        return codes[:2]
+
+    # Previous concrete subject first: "ME-GU có học phí..." then "so với...".
+    for msg in reversed(chat_history or []):
+        if msg.get("role") != "user":
+            continue
+        for code in extract_major_codes(msg.get("content", "")):
+            _add_unique_major_code(codes, code)
+        if len(codes) >= 2:
+            return codes[:2]
+
+    # Current explicit comparison target: "so sánh với IT-E7".
+    for code in current_codes:
+        _add_unique_major_code(codes, code)
+    if len(codes) >= 2:
+        return codes[:2]
+
+    # Authenticated profile resolves "ngành của tôi" and short comparison
+    # follow-ups such as "so về học phí" after a previous comparison request.
+    if profile:
+        for profile_value in (profile.get("major_code"), profile.get("major")):
+            for code in extract_major_codes(str(profile_value or "")):
+                _add_unique_major_code(codes, code)
+        _add_unique_major_code(codes, profile.get("major_code"))
+    if len(codes) >= 2:
+        return codes[:2]
+
+    # Last resort: assistant text may contain the resolved pair from the prior
+    # answer.  Use it only after user/history/profile signals are insufficient.
+    for msg in reversed(chat_history or []):
+        if msg.get("role") != "assistant":
+            continue
+        for code in extract_major_codes(msg.get("content", "")):
+            _add_unique_major_code(codes, code)
+        if len(codes) >= 2:
+            return codes[:2]
+
+    return codes
+
+
+def _rewrite_comparison_followup(
+    query: str,
+    chat_history: Optional[List[Dict[str, str]]],
+    profile: Optional[Dict[str, str]],
+) -> Optional[str]:
+    """Build a deterministic standalone query for short comparison follow-ups."""
+    if not _is_comparison_followup(query):
+        return None
+
+    topic = _comparison_followup_topic(query, chat_history)
+    if not topic:
+        return None
+
+    try:
+        major_codes = _comparison_followup_major_codes(query, chat_history, profile)
+    except Exception:
+        logger.debug("Could not resolve comparison follow-up entities", exc_info=True)
+        return None
+
+    if len(major_codes) < 2:
+        return None
+
+    return f"So sánh {topic} giữa {major_codes[0]} và {major_codes[1]}"
 
 
 def _clean_profile_value(value: Any) -> Optional[str]:
@@ -659,6 +821,19 @@ class QueryReflector:
         # If the LLM returns empty or just whitespace, keep the original
         if not rewritten:
             rewritten = query
+
+        deterministic_followup = _rewrite_comparison_followup(
+            query=query,
+            chat_history=chat_history,
+            profile=merged_profile or None,
+        )
+        if deterministic_followup and deterministic_followup != rewritten:
+            logger.info(
+                "Deterministic comparison follow-up rewrite: %r -> %r",
+                rewritten[:80],
+                deterministic_followup[:80],
+            )
+            rewritten = deterministic_followup
 
         # Guardrail 1: if user profile has a trusted major but references remain
         # unresolved, replace them deterministically.

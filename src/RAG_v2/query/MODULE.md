@@ -276,6 +276,14 @@ Thành phần phức tạp nhất, thực hiện chuỗi xử lý: **PII Strippi
       nhưng LLM tự inject major code vào rewritten
       → Revert về query đã stripped (trước LLM)
 
+[6a] Guardrail 3 — Short comparison follow-up
+      Nếu CURRENT_QUERY là follow-up so sánh ngắn như "so với ngành của tôi"
+      hoặc "so về học phí", reflector deterministically rewrite thành
+      "So sánh <topic> giữa <major A> và <major B>".
+      Topic ưu tiên lấy từ CURRENT_QUERY, sau đó từ user turn gần nhất;
+      không lấy topic từ assistant answer để tránh khuếch đại câu trả lời sai.
+      Major pair ưu tiên CURRENT_QUERY nếu đã có 2 mã, sau đó history/current/profile.
+
 [7] _extract_entities(query, user_context, history)
       → Structured entity dict (không có LLM call)
 ```

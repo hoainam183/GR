@@ -195,6 +195,64 @@ class TestReflectionHallucinationGuard:
             f"Major from real profile should be kept: {rewritten}"
         )
 
+    def test_comparison_followup_preserves_recent_tuition_topic(self):
+        """Short comparison follow-up must inherit the latest user topic."""
+        reflector = self._make_reflector(
+            "So sánh ngoại ngữ giữa ME-GU và IT-E6"
+        )
+        profile = {"major": "Công nghệ thông tin Việt - Nhật", "major_code": "IT-E6"}
+        history = [
+            {"role": "user", "content": "ME-GU có học phí là bao nhiêu?"},
+            {"role": "assistant", "content": "Học phí ME-GU là ..."},
+        ]
+
+        result = reflector.reflect(
+            "so với ngành của tôi",
+            chat_history=history,
+            user_context=profile,
+        )
+
+        assert result["rewritten"] == "So sánh học phí giữa ME-GU và IT-E6"
+
+    def test_comparison_followup_current_topic_beats_bad_previous_answer(self):
+        """Current topic clarifications should not reuse a wrong assistant topic."""
+        reflector = self._make_reflector(
+            "So sánh ngoại ngữ giữa ME-GU và IT-E6"
+        )
+        profile = {"major": "Công nghệ thông tin Việt - Nhật", "major_code": "IT-E6"}
+        history = [
+            {"role": "user", "content": "ME-GU có học phí là bao nhiêu?"},
+            {"role": "assistant", "content": "Học phí ME-GU là ..."},
+            {"role": "user", "content": "so với ngành của tôi"},
+            {"role": "assistant", "content": "So sánh ngoại ngữ giữa ME-GU và IT-E6 ..."},
+        ]
+
+        result = reflector.reflect(
+            "so về học phí",
+            chat_history=history,
+            user_context=profile,
+        )
+
+        assert result["rewritten"] == "So sánh học phí giữa ME-GU và IT-E6"
+
+    def test_standalone_comparison_keeps_current_major_pair(self):
+        """A complete current comparison should not inherit stale history majors."""
+        reflector = self._make_reflector(
+            "So sánh học phí giữa ME-GU và IT-E6"
+        )
+        history = [
+            {"role": "user", "content": "So sánh học phí giữa IT1 và IT2"},
+            {"role": "assistant", "content": "IT1 và IT2 khác nhau ..."},
+        ]
+
+        result = reflector.reflect(
+            "So sánh học phí giữa ME-GU và IT-E6",
+            chat_history=history,
+            user_context={"major_code": "IT2"},
+        )
+
+        assert result["rewritten"] == "So sánh học phí giữa ME-GU và IT-E6"
+
     def test_no_revert_when_llm_improves_without_hallucination(self):
         """LLM expanding 'lịch thi HK 20252' → no major injected → keep it."""
         reflector = self._make_reflector(

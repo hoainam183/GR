@@ -149,6 +149,9 @@ RAG_v2/
 - Route domain bằng `QueryRouter`, có route cache.
 - Tier-3 Gemini classification chỉ chạy khi confidence < `0.55` và margin top-vs-second < `0.25`.
 - Rewrite query bằng `QueryReflector`; nếu reflect fail dùng original query và deterministic entity fallback.
+- `QueryReflector` có guard deterministic cho follow-up so sánh ngắn: các câu như
+  "so với ngành của tôi" hoặc "so về học phí" được rewrite thành query standalone
+  theo topic hiện tại/user turn gần nhất và cặp mã ngành từ current/history/profile.
 - `CollectionSelector` map domain sang target collections; low confidence có fallback multi-collection.
 - Metadata prefilter qua `build_collection_filters()` -> ES metadata search -> Qdrant `HasIdCondition`.
 - Hybrid retrieval chạy Qdrant vector + ES keyword song song, merge cross-collection, rerank bằng BGE.
@@ -160,8 +163,8 @@ RAG_v2/
 
 - `query_agent()` gọi `ReActAgent.run()` và gom agent docs qua `ContextVar` để map vào API/UI trace.
 - `ReActAgent` có 2 path:
-  - Planner-executor cho comparison/multi-source: decompose, validate plan, execute retrieval steps song song, synthesize.
-  - ReAct loop cho query khác: local tool-calling LLM bind tools, execute, loop đến synthesis/clarify/error.
+  - Planner-executor cho comparison/multi-source: decompose, require every plan step to have a valid query/collection, execute retrieval steps song song, synthesize.
+  - ReAct loop cho query khác: local tool-calling LLM bind tools, execute, loop đến synthesis/clarify/error; direct model answers are accepted only after at least one tool result.
 - Planner/decomposer tránh auto-inject `user_context.major_code` vào comparison query để giảm bias.
 - Tool results được trim cho context, nhưng trace/log đầy đủ lưu qua Mongo.
 

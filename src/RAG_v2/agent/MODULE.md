@@ -60,7 +60,8 @@ graph TD
     Route -- agent --> Agent
     Agent --> Continue{_should_continue}
     Continue -- tool_calls --> Tools[tools]
-    Continue -- direct answer --> Extract[extract_answer]
+    Continue -- answer after tool --> Extract[extract_answer]
+    Continue -- answer before tool --> Synthesize
     Continue -- error/max/loop --> Synthesize
 
     Tools --> AfterTools{_after_tools}
@@ -85,14 +86,14 @@ graph TD
 
 1. `_decompose_node()` calls `_synthesis_llm` with `DECOMPOSE_SYSTEM_PROMPT`.
 2. `_planner_node()` calls `_synthesis_llm` with `PLANNER_SYSTEM_PROMPT`.
-3. `_validate_plan()` accepts the plan only when at least 50% of steps have a non-empty `query` and valid `collection`.
-4. `_executor_node()` calls `execute_retrieval_plan()` and optional `web_search_for_executor()` if `needs_web=true`.
+3. `_validate_plan()` accepts the plan only when every step has a non-empty `query` and valid `collection`.
+4. `_executor_node()` filters to executable steps before calling `execute_retrieval_plan()` and optional `web_search_for_executor()` if `needs_web=true`.
 5. `_synthesize_node()` writes the final Vietnamese answer from collected `ToolMessage` contents.
 
 ### ReAct loop path
 
 1. `_agent_node()` calls local/tool-calling LLM bound to `LANGGRAPH_TOOLS`.
-2. `_should_continue()` routes to `tools`, `extract_answer`, or `synthesize`.
+2. `_should_continue()` routes to `tools`, `extract_answer`, or `synthesize`; direct model answers are accepted only after at least one tool result.
 3. `_tools_node()` invokes tools from `TOOL_MAP`.
 4. `_after_tools()` stops immediately for `clarify_question`, synthesizes on `[Loi...]`, otherwise loops back.
 
@@ -227,6 +228,7 @@ Lưu ý: `agent_context_token_budget` được đọc bằng `getattr(settings, 
 
 - `_trim_messages_for_context()` giữ system message và human query cuối; truncate `ToolMessage` xuống 600 chars nếu vượt budget; sau đó drop block tool cũ nếu vẫn quá dài.
 - `_make_call_sig()` dùng MD5 8-char từ args JSON để chặn exact duplicate tool call.
+- `_should_continue()` blocks direct answers before any tool result and routes to synthesis fallback instead, so agent-mode answers remain retrieval-grounded.
 - `_should_continue()` cho phép lặp `rag_search` và `clarify_question` với args khác, nhưng synthesize nếu tool khác bị gọi lại.
 - `_agent_node()` có retry hint khi tool trả `[Khong tim thay...]`; sau 2 empty results sẽ set `error` để ép synthesize.
 - `_after_tools()` synthesize sớm khi tool trả `[Loi...]`.

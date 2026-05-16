@@ -510,7 +510,9 @@ class ReActAgent:
         Decision tree
         -------------
         1. Error flag set          → synthesize  (graceful recovery)
-        2. Last message has no tool_calls → end  (direct answer)
+        2. Last message has no tool_calls:
+           - after at least one tool call → end
+           - before any tool call → synthesize grounded fallback
         3. Max iterations reached  → synthesize
         4. Exact duplicate call (same name + same args) → synthesize
         5. Same tool name repeated for tools other than rag_search/clarify_question → synthesize
@@ -522,8 +524,15 @@ class ReActAgent:
         messages = state.get("messages", [])
         last = messages[-1] if messages else None
 
-        # No tool calls → LLM gave a direct text answer
+        # No tool calls → LLM gave a text answer. Accept it only after the
+        # model has observed at least one tool result; otherwise this is an
+        # ungrounded answer in the agent path.
         if not isinstance(last, AIMessage) or not getattr(last, "tool_calls", None):
+            if not state.get("tool_call_history"):
+                logger.warning(
+                    "[Agent] Direct answer before tool use blocked; forcing grounded fallback"
+                )
+                return "synthesize"
             return "end"
 
         if state["iteration"] >= state["max_iterations"]:
@@ -702,7 +711,7 @@ class ReActAgent:
     def _executor_node(self, state: AgentGraphState) -> dict[str, Any]:
         """Execute retrieval plan steps in parallel. No LLM involved."""
         plan = state.get("retrieval_plan") or {}
-        steps = plan.get("steps", [])
+        steps = self._valid_plan_steps(plan.get("steps", []))
 
         if not steps:
             return {"final_answer": "Xin lỗi, không thể tạo kế hoạch tìm kiếm."}
@@ -748,10 +757,26 @@ class ReActAgent:
         "quy_dinh", "chuong_trinh", "ke_hoach", "ho_tro_sv"
     })
 
+    def _valid_plan_steps(self, steps: Any) -> list[dict[str, Any]]:
+        """Return planner steps that are safe to execute."""
+        if not isinstance(steps, list):
+            return []
+
+        valid_steps: list[dict[str, Any]] = []
+        for step in steps:
+            if not isinstance(step, dict):
+                continue
+            if not str(step.get("query", "")).strip():
+                continue
+            if step.get("collection") not in self._VALID_COLLECTIONS:
+                continue
+            valid_steps.append(step)
+        return valid_steps
+
     def _validate_plan(self, plan: dict[str, Any]) -> bool:
         """Kiểm tra chất lượng retrieval plan trước khi execute.
 
-        Reject plan nếu hơn 50% steps có vấn đề:
+        Reject plan nếu có bất kỳ step nào có vấn đề:
         - query rỗng hoặc whitespace
         - collection không nằm trong _VALID_COLLECTIONS
 
@@ -759,19 +784,17 @@ class ReActAgent:
             True nếu plan đủ chất lượng để execute.
         """
         steps = plan.get("steps", [])
+        if not isinstance(steps, list):
+            logger.warning("[Planner] Invalid plan: steps is not a list")
+            return False
         if not steps:
             return False
 
-        valid_steps = [
-            s for s in steps
-            if str(s.get("query", "")).strip()
-            and s.get("collection") in self._VALID_COLLECTIONS
-        ]
-        ratio = len(valid_steps) / len(steps)
-        if ratio < 0.5:
+        valid_steps = self._valid_plan_steps(steps)
+        if len(valid_steps) != len(steps):
             logger.warning(
-                "[Planner] Low quality plan: %d/%d valid steps (%.0f%%) — collections=%s",
-                len(valid_steps), len(steps), ratio * 100,
+                "[Planner] Invalid plan: %d/%d executable steps — collections=%s",
+                len(valid_steps), len(steps),
                 [s.get("collection") for s in steps],
             )
             return False
