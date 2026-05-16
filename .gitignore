@@ -11,6 +11,11 @@ __pycache__/
 # GitHub
 .github/
 
+# AI agent configuration files
+.claude/
+AGENTS.md
+CLAUDE.md
+
 # Office and temporary docs
 *.xlsx
 *.docx

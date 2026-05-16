@@ -340,6 +340,7 @@ Tool adapter details:
 - Streaming uses `/chat/stream` with non-streaming `/chat/v3` fallback before the first token.
 - Auth uses a single JWT access token in SecureStore; `401` clears SecureStore and auth state.
 - Bottom tabs cover Chat, Lookup, Bookmarks, Notifications, and Profile. MMKV caches sessions, suggestions, and bookmarks for partial offline read access.
+- In Expo Go, the mobile offline cache uses an in-memory fallback because `react-native-mmkv` requires NitroModules that are only available in a rebuilt native/dev-client app; native builds still use MMKV when available.
 
 ### Shared package
 
