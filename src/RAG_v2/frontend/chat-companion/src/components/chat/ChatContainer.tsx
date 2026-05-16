@@ -10,6 +10,14 @@ import TypingIndicator from './TypingIndicator';
 import { useSmartScroll } from '@/hooks/useSmartScroll';
 import type { UserPublic } from '@/services/authApi';
 import { parseUtcDate } from '@/lib/utils';
+import {
+  BookOpen,
+  Bot,
+  CalendarDays,
+  GraduationCap,
+  ScrollText,
+  type LucideIcon,
+} from 'lucide-react';
 
 interface ChatContainerProps {
   user?: UserPublic | null;
@@ -264,6 +272,28 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   };
 
   const greeting = user ? `Xin chào, ${user.full_name.split(' ').pop()}!` : 'Bắt đầu trò chuyện';
+  const suggestions: Array<{ icon: LucideIcon; label: string; query: string }> = [
+    {
+      icon: ScrollText,
+      label: 'Quy chế đào tạo',
+      query: 'Quy chế đào tạo tín chỉ mới nhất của BKHN là gì?',
+    },
+    {
+      icon: GraduationCap,
+      label: 'CTĐT ngành tôi',
+      query: `Chương trình đào tạo ngành ${user?.major || 'của tôi'} gồm những gì?`,
+    },
+    {
+      icon: BookOpen,
+      label: 'Chính sách học bổng',
+      query: 'Các loại học bổng hiện có tại BKHN?',
+    },
+    {
+      icon: CalendarDays,
+      label: 'Lịch học kỳ mới',
+      query: 'Lịch trình học kỳ mới nhất?',
+    },
+  ];
 
   return (
     <div className="flex h-full flex-col">
@@ -274,35 +304,31 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <svg
-                className="h-8 w-8 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                />
-              </svg>
+          <div className="flex h-full flex-col items-center justify-center px-4 text-center">
+            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+              <Bot className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-foreground">{greeting}</h3>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              {user
-                ? `Tôi có thể tư vấn về quy chế học tập, học bổng và các quy định của BKHN.`
-                : 'Hãy đặt câu hỏi để tôi có thể hỗ trợ bạn.'}
+            <h3 className="mb-1 text-xl font-semibold text-foreground">{greeting}</h3>
+            <p className="mb-8 max-w-md text-sm text-muted-foreground">
+              Tôi có thể tư vấn về quy chế, CTĐT, học bổng và các quy định của BKHN.
             </p>
-            {user && (user.major || user.cohort) && (
-              <p className="mt-1.5 text-xs text-muted-foreground/70">
-                {[user.major, user.cohort ? `Khoá ${user.cohort}` : null]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-            )}
+            <div className="grid w-full max-w-lg grid-cols-1 gap-3 sm:grid-cols-2">
+              {suggestions.map((suggestion) => {
+                const Icon = suggestion.icon;
+                return (
+                  <button
+                    key={suggestion.label}
+                    onClick={() => handleSendMessage(suggestion.query)}
+                    className="flex min-h-20 items-start gap-3 rounded-lg border border-border bg-card p-4 text-left transition-all hover:bg-secondary hover:shadow-sm"
+                  >
+                    <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                    <span className="text-sm font-medium leading-snug text-foreground">
+                      {suggestion.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ) : (
           <div className="mx-auto w-full max-w-3xl space-y-4">

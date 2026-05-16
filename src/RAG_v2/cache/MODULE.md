@@ -47,6 +47,13 @@ Quản lý metadata phiên chat nhanh chóng qua Redis Hash và Sorted Sets:
   `updated_at`, và `turn_count` nhất quán cho mobile session list.
 - **Session ID Consistency**: `new_session()` dual-write trực tiếp cùng
   `session_id` sang MongoDB thay vì tạo ID thứ hai rồi sửa lại.
+- **Session metadata edits**: `update_session_title(session_id, title)` updates
+  Redis only when the session hash exists, dual-writes to MongoDB, then refreshes
+  Redis from MongoDB. It does not change `updated_at`, so rename does not reorder
+  the session list.
+- **Session hard delete**: `delete_session(session_id, user_id=...)` removes the
+  Redis hash, the `history:{sid}` list, the owning `user_sessions:{uid}` member,
+  and delegates durable cleanup to `MongoLogger.delete_session()`.
 
 ### 3.4. Fast Context History (`history_cache.py`)
 Lưu trữ ngữ cảnh hội thoại ngắn hạn để tránh query MongoDB liên tục:

@@ -111,6 +111,11 @@ const apiClient = axios.create({
   },
 });
 
+const authHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 const cleanText = (value: unknown): string | undefined => {
   if (typeof value !== 'string') {
     return undefined;
@@ -409,6 +414,7 @@ export const sendMessageStream = async (
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders(),
     },
     body: JSON.stringify({
       question,
@@ -522,15 +528,19 @@ export const sendMessageV3 = async (
   try {
     const identity = resolveChatIdentity(userContext, userId);
 
-    const response = await apiClient.post('/chat/v3', {
-      question,
-      mode,
-      top_k: topK,
-      history,
-      session_id: sessionId,
-      user_context: identity.userContext,
-      user_id: identity.userId,
-    } as ChatRequest);
+    const response = await apiClient.post(
+      '/chat/v3',
+      {
+        question,
+        mode,
+        top_k: topK,
+        history,
+        session_id: sessionId,
+        user_context: identity.userContext,
+        user_id: identity.userId,
+      } as ChatRequest,
+      { headers: authHeaders() },
+    );
 
     return normalizeV3Response(
       response.data as Record<string, unknown>,

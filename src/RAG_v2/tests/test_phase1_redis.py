@@ -178,6 +178,25 @@ class TestRedisSessionStore:
         assert session["title"] == "First question"
         assert session["turn_count"] == 1
 
+    def test_delete_session_removes_metadata_and_history(self, session_store, redis_client):
+        sid = session_store.new_session(user_id="u1")
+        redis_client.lpush(f"history:{sid}", '{"role":"user","content":"hello"}')
+
+        assert session_store.delete_session(sid, user_id="u1") is True
+        assert redis_client.hgetall(f"session:{sid}") == {}
+        assert redis_client.exists(f"history:{sid}") == 0
+        assert redis_client.zscore("user_sessions:u1", sid) is None
+
+    def test_update_session_title_roundtrip(self, session_store):
+        sid = session_store.new_session(user_id="u1")
+
+        assert session_store.update_session_title(sid, "Renamed") is True
+        assert session_store.get_session(sid)["title"] == "Renamed"
+
+    def test_update_session_title_does_not_create_missing_hash(self, session_store, redis_client):
+        assert session_store.update_session_title("missing", "Renamed") is False
+        assert redis_client.hgetall("session:missing") == {}
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SlidingWindowRateLimiter tests

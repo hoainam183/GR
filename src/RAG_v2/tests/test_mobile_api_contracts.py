@@ -8,7 +8,7 @@ import pytest
 
 from api.dependencies import sync_redis_session_from_mongo
 from api.routes.chat import chat_v3
-from api.routes.session import list_my_sessions
+from api.routes.session import SessionUpdateRequest, delete_session, list_my_sessions, update_session
 from schemas.chat import ChatRequest, UserContext
 
 
@@ -44,6 +44,8 @@ class _FakeMongo:
     def __init__(self) -> None:
         self.sessions = {}
         self.list_calls = []
+        self.deleted = []
+        self.updated = []
 
     def new_session(self, user_id=None):
         sid = f"session-{len(self.sessions) + 1}"
@@ -56,6 +58,18 @@ class _FakeMongo:
     def list_sessions(self, user_id: str, limit: int = 50):
         self.list_calls.append((user_id, limit))
         return [{"session_id": "s1", "user_id": user_id, "turn_count": 0}]
+
+    def delete_session(self, session_id: str):
+        self.deleted.append(session_id)
+        return self.sessions.pop(session_id, None) is not None
+
+    def update_session_title(self, session_id: str, title: str):
+        self.updated.append((session_id, title))
+        session = self.sessions.get(session_id)
+        if not session:
+            return False
+        session["title"] = title
+        return True
 
 
 class _FakeRedisSession:
@@ -78,6 +92,8 @@ def _request(*, pipeline=None, mongo=None, redis=None):
 def _user(user_id: str = "auth-user"):
     return SimpleNamespace(
         id=user_id,
+        email=None,
+        username=None,
         student_id="20210001",
         cohort="K68",
         major="CNTT",
@@ -124,7 +140,39 @@ async def test_sessions_me_uses_authenticated_user_id():
 
     assert response["count"] == 1
     assert response["sessions"][0]["user_id"] == "user-123"
-    assert mongo.list_calls == [("user-123", 10)]
+    assert ("user-123", 10) in mongo.list_calls
+    assert ("20210001", 10) in mongo.list_calls
+
+
+@pytest.mark.anyio
+async def test_session_update_requires_owner_alias():
+    mongo = _FakeMongo()
+    mongo.sessions["s1"] = {"session_id": "s1", "user_id": "20210001", "title": "Old"}
+
+    response = await update_session(
+        _request(mongo=mongo),
+        "s1",
+        SessionUpdateRequest(title=" New title "),
+        current_user=_user("user-123"),
+    )
+
+    assert response == {"updated": True, "session_id": "s1", "title": "New title"}
+    assert mongo.sessions["s1"]["title"] == "New title"
+
+
+@pytest.mark.anyio
+async def test_session_delete_requires_owner_alias():
+    mongo = _FakeMongo()
+    mongo.sessions["s1"] = {"session_id": "s1", "user_id": "user-123"}
+
+    response = await delete_session(
+        _request(mongo=mongo),
+        "s1",
+        current_user=_user("user-123"),
+    )
+
+    assert response == {"deleted": True, "session_id": "s1"}
+    assert "s1" not in mongo.sessions
 
 
 def test_sync_redis_session_from_mongo_calls_store_sync():

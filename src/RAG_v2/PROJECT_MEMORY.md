@@ -283,6 +283,13 @@ llm_prompt
 ### Session, Metrics, Health, Retrieval
 
 - `POST /session`, `GET /session/{session_id}`, `GET /sessions?user_id=...`, `GET /sessions/me`.
+- `DELETE /session/{session_id}` and `PATCH /session/{session_id}` require JWT auth
+  and only operate on sessions owned by the current user. Ownership accepts the
+  canonical Mongo `_id` plus legacy aliases (`email`, `username`, `student_id`).
+  Delete removes session metadata, turns, query logs, agent traces, and Redis
+  history cache. Rename updates `title` without changing `updated_at`.
+- `GET /sessions/me` merges the same owner aliases and deduplicates by
+  `session_id`, newest first, so pre-auth-migration web sessions remain visible.
 - `GET /health`, `POST /api/admin/reload-validity`.
 - `GET /metrics/usage`, `GET /metrics/eval`.
 - `POST /retrieval/search` là diagnostic endpoint cho raw retrieval.
@@ -339,6 +346,10 @@ Tool adapter details:
 - API base URL defaults to `http://localhost:8000` unless `VITE_API_URL` is set.
 - Main routes include `/`, `/chat`, `/chat/:sessionId`, `/login`, `/register`, `/complete-profile`, `/trace`, `/retrieval`, `/admin`, `/admin/documents/:id`.
 - `ChatContainer` supports `/chat/stream`, session history, metadata/debug panel, and route/session invalidation.
+- Authenticated web chat/session requests attach the JWT from `localStorage.token`.
+  The conversation sidebar supports search, date grouping, inline rename, hard
+  delete, mobile sheet rendering, and desktop resizing persisted in
+  `localStorage` key `sidebar:size`.
 - Admin UI uses `services/adminApi.ts` for upload pipeline actions and polling.
 - `AdminGuard` currently checks `localStorage.user.role === "admin"`.
 

@@ -226,6 +226,47 @@ class RedisSessionStore:
         except redis.RedisError:
             logger.warning("Redis update_session_on_turn failed", exc_info=True)
 
+    def delete_session(self, session_id: str, user_id: Optional[str] = None) -> bool:
+        """Delete session metadata and cached history from Redis and MongoDB."""
+        key = f"session:{session_id}"
+        redis_deleted = False
+        try:
+            owner_id = user_id or self._r.hget(key, "user_id")
+            pipe = self._r.pipeline()
+            pipe.delete(key)
+            pipe.delete(f"history:{session_id}")
+            if owner_id:
+                pipe.zrem(f"user_sessions:{owner_id}", session_id)
+            results = pipe.execute()
+            redis_deleted = bool(results[0]) if results else False
+        except redis.RedisError:
+            logger.warning("Redis delete_session failed", exc_info=True)
+
+        if self._mongo:
+            return bool(self._mongo.delete_session(session_id)) or redis_deleted
+        return redis_deleted
+
+    def update_session_title(self, session_id: str, title: str) -> bool:
+        """Update a session title without creating partial Redis metadata."""
+        key = f"session:{session_id}"
+        redis_matched = False
+        try:
+            if self._r.exists(key):
+                pipe = self._r.pipeline()
+                pipe.hset(key, "title", title)
+                pipe.expire(key, _SESSION_TTL_SECONDS)
+                pipe.execute()
+                redis_matched = True
+        except redis.RedisError:
+            logger.warning("Redis update_session_title failed", exc_info=True)
+
+        if self._mongo:
+            updated = bool(self._mongo.update_session_title(session_id, title))
+            if updated:
+                self.sync_from_mongo(session_id)
+            return updated
+        return redis_matched
+
     def sync_from_mongo(self, session_id: str) -> None:
         """Refresh Redis metadata for a session from MongoDB.
 

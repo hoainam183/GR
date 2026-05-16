@@ -57,6 +57,10 @@ models/
 - `log_turn()`: Ghi một lượt hội thoại (question, answer, sources, timings, latency)
 - `get_history()`: Lấy lịch sử hội thoại cho session
 - `get_turns()`: Lấy danh sách turns
+- `delete_session()`: Hard-delete session metadata, turns, query logs, agent
+  traces, and cached Redis history when attached.
+- `update_session_title()`: Rename a session title without changing
+  `updated_at` recency ordering.
 - `log_agent_trace()`: Ghi toàn bộ trace của agent (tool calls, iterations)
 - `get_agent_stats()`: Thống kê agent performance
 

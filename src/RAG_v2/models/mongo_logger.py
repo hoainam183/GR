@@ -80,6 +80,29 @@ class MongoLogger:
         )
         return list(cursor)
 
+    def delete_session(self, session_id: str) -> bool:
+        """Delete a session and all data tied to it."""
+        result = self._sessions.delete_one({"session_id": session_id})
+        self._turns.delete_many({"session_id": session_id})
+        self._query_logs.delete_many({"session_id": session_id})
+        self._agent_traces.delete_many({"session_id": session_id})
+
+        if self.history_cache is not None:
+            try:
+                self.history_cache.delete_history(session_id)
+            except Exception:
+                logger.warning("Failed to delete cached history", exc_info=True)
+
+        return result.deleted_count > 0
+
+    def update_session_title(self, session_id: str, title: str) -> bool:
+        """Update a session title without changing its recency ordering."""
+        result = self._sessions.update_one(
+            {"session_id": session_id},
+            {"$set": {"title": title}},
+        )
+        return result.matched_count > 0
+
     # ------------------------------------------------------------------
     # Public API — turns
     # ------------------------------------------------------------------

@@ -9,7 +9,21 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const authHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const getSessions = async (userId: string): Promise<Session[]> => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    const response = await apiClient.get<{ sessions: Session[]; count: number }>(
+      '/sessions/me',
+      { headers: authHeaders() },
+    );
+    return response.data.sessions;
+  }
+
   const response = await apiClient.get<{ sessions: Session[]; count: number }>(
     '/sessions',
     { params: { user_id: userId } },
@@ -22,6 +36,7 @@ export const getSession = async (
 ): Promise<{ session: Session; turns: Turn[] }> => {
   const response = await apiClient.get<Session & { turns: Turn[] }>(
     `/session/${sessionId}`,
+    { headers: authHeaders() },
   );
   const { turns, ...session } = response.data;
   return { session: session as Session, turns: turns ?? [] };
@@ -33,6 +48,29 @@ export const createSession = async (
   const response = await apiClient.post<{ session_id: string; created_at: string }>(
     '/session',
     { user_id: userId },
+    { headers: authHeaders() },
   );
   return { session_id: response.data.session_id };
+};
+
+export const deleteSession = async (sessionId: string): Promise<void> => {
+  await apiClient.delete(`/session/${sessionId}`, {
+    headers: authHeaders(),
+  });
+};
+
+export const renameSession = async (
+  sessionId: string,
+  title: string,
+): Promise<{ updated: boolean; session_id: string; title: string }> => {
+  const response = await apiClient.patch<{
+    updated: boolean;
+    session_id: string;
+    title: string;
+  }>(
+    `/session/${sessionId}`,
+    { title },
+    { headers: authHeaders() },
+  );
+  return response.data;
 };

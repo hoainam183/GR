@@ -126,6 +126,26 @@
     background-color: hsl(var(--muted-foreground) / 0.3);
     border-radius: 3px;
   }
+
+  [data-panel-resize-handle-id] {
+    transition: background-color 0.15s ease;
+  }
+
+  [data-panel-resize-handle-id]:hover,
+  [data-panel-resize-handle-id][data-resize-handle-active] {
+    background-color: hsl(var(--primary) / 0.15);
+  }
+
+  .conversation-item .action-trigger {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .conversation-item:hover .action-trigger,
+  .conversation-item:focus-within .action-trigger,
+  .conversation-item .action-trigger[data-state="open"] {
+    opacity: 1;
+  }
 }
 
 @keyframes typing-dot {

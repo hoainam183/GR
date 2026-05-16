@@ -82,6 +82,14 @@ Thực hiện giới hạn tần suất truy cập cho các endpoint tiêu tốn
   `user_context_from_user()` chuẩn hóa cách các route mobile lấy identity từ
   JWT. `sync_redis_session_from_mongo()` refresh Redis session metadata sau khi
   pipeline ghi turn vào MongoDB.
+- **Authenticated session metadata actions**: `DELETE /session/{session_id}`
+  hard-deletes a user's own session, turns, query logs, agent traces, and Redis
+  history cache. `PATCH /session/{session_id}` renames a user's own session
+  without changing `updated_at` ordering. Both routes require JWT auth and
+  accept legacy owner aliases (`_id`, email, username, student id) for sessions
+  created before the canonical Mongo `_id` owner contract.
+- **Session list compatibility**: `GET /sessions/me` merges sessions across the
+  same owner aliases and deduplicates by `session_id`, newest first.
 
 ### 3.6. Mobile Feature Routes
 - `bookmark.py`: user-scoped saved answers. `POST /bookmarks` lấy snapshot từ
