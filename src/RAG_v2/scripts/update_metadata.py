@@ -1,17 +1,18 @@
 """
-Sync metadata tu chunk JSON files -> Qdrant (khong re-embed)
-=============================================================
+Sync metadata tu chunk JSON files -> Qdrant + Elasticsearch (khong re-embed)
+============================================================================
 Script doc cac file *_chunks.json da duoc chinh sua metadata, sau do
-overwrite payload trong Qdrant cho tung diem theo ID — vectors khong bi
-thay doi.
+cap nhat payload/source trong Qdrant va Elasticsearch theo ID. Vectors khong
+bi thay doi.
 
 Cau truc payload trong Qdrant: {**metadata, "text": content}
   -> overwrite_payload se thay toan bo payload (ca text lan metadata)
   -> merge mode (overwrite=False) chi cap nhat cac field metadata moi
 
 Cach dung (tu RAG_v2/):
-    python pipeline/update_metadata.py          # chay theo CONFIG
-    python pipeline/update_metadata.py --dry-run  # chi in ra khong update
+    python scripts/update_metadata.py
+    python scripts/update_metadata.py --target qdrant
+    python scripts/update_metadata.py --target elasticsearch --dry-run
 """
 
 from __future__ import annotations
@@ -20,13 +21,11 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent  # .../RAG_v2
 sys.path.insert(0, str(PROJECT_ROOT))
-
-from retrieval.qdrant_store import QdrantStore
 
 # ---------------------------------------------------------------------------
 logging.basicConfig(
@@ -35,6 +34,8 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("elastic_transport.transport").setLevel(logging.WARNING)
 
 DATA = PROJECT_ROOT / "data"
 
@@ -44,11 +45,16 @@ DATA = PROJECT_ROOT / "data"
 CONFIG = {
     "qdrant_host": "localhost",
     "qdrant_port": 6333,
+    "elasticsearch_host": "localhost",
+    "elasticsearch_port": 9200,
     "batch_size": 100,
 
     # overwrite=True  -> thay toan bo payload (metadata + text) bang du lieu moi tu chunk file
     # overwrite=False -> chi cap nhat/them cac field metadata, giu nguyen cac field cu con lai
-    "overwrite": True,
+    "overwrite": False,
+
+    # "both" | "qdrant" | "elasticsearch"
+    "target": "both",
 
     # Danh sach collection can update — comment dong nao khong can
     "collections": [
@@ -163,7 +169,7 @@ def build_pairs(
     id_field: str,
     overwrite: bool,
 ) -> List[Tuple[str, Dict[str, Any]]]:
-    """Build list of (point_id, payload_dict) for Qdrant update.
+    """Build list of (document_id, payload_dict) for metadata update.
 
     When overwrite=True:  payload = {**metadata, "text": content}
                           Full replace — text field preserved.
@@ -189,15 +195,24 @@ def build_pairs(
 # Core update
 # ---------------------------------------------------------------------------
 
+def normalize_target(target: Optional[str]) -> set[str]:
+    raw = target or str(CONFIG.get("target", "both"))
+    if raw == "both":
+        return {"qdrant", "elasticsearch"}
+    if raw in {"qdrant", "elasticsearch"}:
+        return {raw}
+    raise ValueError(f"Unknown target: {raw!r}")
+
+
 def update_collection(
     col: Dict[str, Any],
-    store: QdrantStore,
     batch_size: int,
     overwrite: bool,
+    targets: set[str],
     dry_run: bool = False,
 ) -> None:
     collection_name = col["name"]
-    logger.info("=== Collection: %s ===", collection_name)
+    logger.info("=== Collection: %s | targets=%s ===", collection_name, sorted(targets))
 
     chunks = load_chunks(col)
     if not chunks:
@@ -206,20 +221,45 @@ def update_collection(
 
     pairs = build_pairs(chunks, col["id_field"], overwrite)
     logger.info(
-        "  Updating %d point(s) in '%s' (overwrite=%s) ...",
+        "  Prepared %d document(s) for '%s' (overwrite=%s).",
         len(pairs), collection_name, overwrite,
     )
 
     if dry_run:
-        logger.info("  [DRY-RUN] Skipping actual Qdrant write.")
+        logger.info("  [DRY-RUN] Skipping actual writes.")
         if pairs:
             logger.info(
-                "  Sample — id=%s, payload_keys=%s",
+                "  Sample - id=%s, payload_keys=%s",
                 pairs[0][0], list(pairs[0][1].keys()),
             )
         return
 
-    store.update_metadata_batch(pairs, overwrite=overwrite, batch_size=batch_size)
+    if "qdrant" in targets:
+        from retrieval.qdrant_store import QdrantStore
+
+        qdrant_store = QdrantStore(
+            host=CONFIG["qdrant_host"],
+            port=CONFIG["qdrant_port"],
+            collection_name=str(collection_name),
+        )
+        logger.info("  Updating Qdrant collection '%s' ...", collection_name)
+        qdrant_store.update_metadata_batch(
+            pairs, overwrite=overwrite, batch_size=batch_size
+        )
+
+    if "elasticsearch" in targets:
+        from retrieval.elasticsearch_store import ElasticsearchStore
+
+        es_store = ElasticsearchStore(
+            host=CONFIG["elasticsearch_host"],
+            port=CONFIG["elasticsearch_port"],
+            index_name=str(collection_name),
+        )
+        logger.info("  Updating Elasticsearch index '%s' ...", collection_name)
+        es_store.update_metadata_batch(
+            pairs, overwrite=overwrite, batch_size=batch_size
+        )
+
     logger.info("  Done: '%s'.", collection_name)
 
 
@@ -227,36 +267,51 @@ def update_collection(
 # Main
 # ---------------------------------------------------------------------------
 
-def main(dry_run: bool = False) -> None:
+def main(
+    dry_run: bool = False,
+    target: Optional[str] = None,
+    collections: Optional[List[str]] = None,
+) -> None:
     cfg = CONFIG
+    targets = normalize_target(target)
+    selected = set(collections or [])
 
     for col in cfg["collections"]:
-        store = QdrantStore(
-            host=cfg["qdrant_host"],
-            port=cfg["qdrant_port"],
-            collection_name=str(col["name"]),
-        )
+        if selected and str(col["name"]) not in selected:
+            continue
         update_collection(
             col=col,
-            store=store,
             batch_size=cfg["batch_size"],
             overwrite=cfg["overwrite"],
+            targets=targets,
             dry_run=dry_run,
         )
 
-    logger.info("All collections updated.")
+    logger.info("All selected collections processed.")
 
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Sync chunk metadata -> Qdrant without re-embedding."
+        description="Sync chunk metadata -> Qdrant/Elasticsearch without re-embedding."
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print what would be updated without writing to Qdrant.",
+        help="Print what would be updated without writing to stores.",
+    )
+    parser.add_argument(
+        "--target",
+        choices=["both", "qdrant", "elasticsearch"],
+        default=None,
+        help="Store target to update. Default uses CONFIG['target'].",
+    )
+    parser.add_argument(
+        "--collection",
+        action="append",
+        dest="collections",
+        help="Only update this collection name. Can be passed multiple times.",
     )
     args = parser.parse_args()
-    main(dry_run=args.dry_run)
+    main(dry_run=args.dry_run, target=args.target, collections=args.collections)

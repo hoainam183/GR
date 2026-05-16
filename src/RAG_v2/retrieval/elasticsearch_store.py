@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from elasticsearch import Elasticsearch, helpers
 
@@ -250,6 +250,86 @@ class ElasticsearchStore:
             "Indexed %d/%d documents into '%s'.", indexed, n, self.index_name
         )
         return indexed
+
+    # ------------------------------------------------------------------
+    # Metadata update
+    # ------------------------------------------------------------------
+
+    def update_metadata_batch(
+        self,
+        id_metadata_pairs: List[Tuple[str, Dict[str, Any]]],
+        overwrite: bool = False,
+        batch_size: int = 500,
+    ) -> int:
+        """Update metadata/source fields for many Elasticsearch documents.
+
+        Args:
+            id_metadata_pairs: Iterable of ``(id, metadata_dict)`` tuples.
+            overwrite: If True, replace the full ``_source`` for each document.
+                       If False, merge the provided fields into existing docs.
+            batch_size: Number of bulk actions per request.
+
+        Returns:
+            Number of successful bulk actions reported by Elasticsearch.
+        """
+        total = len(id_metadata_pairs)
+        updated = 0
+
+        for start in range(0, total, batch_size):
+            batch = id_metadata_pairs[start : start + batch_size]
+            actions: List[Dict[str, Any]] = []
+
+            for doc_id, metadata in batch:
+                if overwrite:
+                    actions.append(
+                        {
+                            "_op_type": "index",
+                            "_index": self.index_name,
+                            "_id": str(doc_id),
+                            "_source": metadata,
+                        }
+                    )
+                else:
+                    actions.append(
+                        {
+                            "_op_type": "update",
+                            "_index": self.index_name,
+                            "_id": str(doc_id),
+                            "doc": metadata,
+                        }
+                    )
+
+            success, errors = helpers.bulk(
+                self.client,
+                actions,
+                raise_on_error=False,
+                raise_on_exception=False,
+            )
+            updated += success
+            if errors:
+                logger.warning(
+                    "Bulk metadata update errors in '%s': %d error(s). sample=%s",
+                    self.index_name,
+                    len(errors),
+                    errors[:1],
+                )
+
+            logger.info(
+                "update_metadata_batch: %d/%d docs processed in '%s'.",
+                min(start + len(batch), total),
+                total,
+                self.index_name,
+            )
+
+        self.client.indices.refresh(index=self.index_name)
+        logger.info(
+            "update_metadata_batch done: %d/%d doc(s) updated in '%s' (overwrite=%s).",
+            updated,
+            total,
+            self.index_name,
+            overwrite,
+        )
+        return updated
 
     # ------------------------------------------------------------------
     # Search
