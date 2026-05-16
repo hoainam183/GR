@@ -284,6 +284,13 @@ Thành phần phức tạp nhất, thực hiện chuỗi xử lý: **PII Strippi
       không lấy topic từ assistant answer để tránh khuếch đại câu trả lời sai.
       Major pair ưu tiên CURRENT_QUERY nếu đã có 2 mã, sau đó history/current/profile.
 
+[6b] Guardrail 4 — Major code expansion (NEW)
+      _expand_major_codes_in_query() chạy sau tất cả guardrail trên.
+      Mở rộng mã ngành bare thành "CODE (Full Name)" dùng MAJOR_CODE_TO_NAME dict.
+      Ví dụ: "IT1" → "IT1 (Khoa học máy tính)"
+      Mục đích: retrieval khớp tài liệu chỉ chứa tên đầy đủ, không chứa mã code.
+      Không LLM — hoàn toàn deterministic. Skip nếu code đã có "(...)" theo sau.
+
 [7] _extract_entities(query, user_context, history)
       → Structured entity dict (không có LLM call)
 ```

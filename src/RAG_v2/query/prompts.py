@@ -147,6 +147,9 @@ ME-LUH, ME-NUT, EE-EP, IT-EP, MS-E3, CH-E11, TROY-IT), tài liệu gốc có th�
 Khi viết lại query, có thể bổ sung từ khóa tiếng Anh tương đương trong ngoặc nếu sát với ý hỏi \
 (VD: "ngoại ngữ" → "ngoại ngữ (foreign language/English requirements)", "tín chỉ" → \
 "tín chỉ (credits)"). Không thêm nội dung mới ngoài mục tiêu câu hỏi.
+15. Nếu trong câu hỏi có URL (bắt đầu bằng https://, http://, hoặc www.), bắt buộc GIỮ NGUYÊN toàn bộ \
+URL đó y hệt, bao gồm cả phần giao thức (https://, http://). TUYỆT ĐỐI KHÔNG rút gọn, bỏ giao thức, \
+hay thay đổi bất kỳ phần nào của URL.
 VÍ DỤ FEW-SHOT:
 ---
 Ví dụ 1 — Giải tham chiếu ngành từ USER_PROFILE:

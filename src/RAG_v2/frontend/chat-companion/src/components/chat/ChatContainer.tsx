@@ -333,7 +333,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         ) : (
           <div className="mx-auto w-full max-w-3xl space-y-4">
             {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} showDebug={isAdmin} />
+              <ChatMessage key={message.id} message={message} showDebug={true} />
             ))}
             {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} />}
             <div ref={messagesEndRef} />
@@ -363,16 +363,14 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       <div className="relative z-20 shrink-0 border-t border-border bg-background/90 p-3 backdrop-blur-sm sm:p-4 md:p-6">
         <div className="mx-auto w-full max-w-3xl">
           <ChatInput onSend={handleSendMessage} disabled={chatPhase !== 'idle'} />
-          {isAdmin && (
-            <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
-              <summary className="cursor-pointer select-none text-muted-foreground">
-                Debug runtime info
-              </summary>
-              <pre className="mt-2 max-h-56 overflow-auto rounded bg-background p-2 text-[11px] text-foreground">
-                {JSON.stringify(debugPayload, null, 2)}
-              </pre>
-            </details>
-          )}
+          <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
+            <summary className="cursor-pointer select-none text-muted-foreground">
+              Debug runtime info
+            </summary>
+            <pre className="mt-2 max-h-56 overflow-auto rounded bg-background p-2 text-[11px] text-foreground">
+              {JSON.stringify(debugPayload, null, 2)}
+            </pre>
+          </details>
           <p className="mt-2 text-center text-xs text-muted-foreground">
             Nhấn Enter để gửi, Shift + Enter để xuống dòng.
           </p>
