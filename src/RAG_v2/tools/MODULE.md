@@ -123,8 +123,8 @@ rag_flow()
   └→ Generate answer
   └→ Self-eval check (CHỈ khi SELF_EVAL_ENABLED=true)
        └→ Kiểm tra top reranker score:
-            ├→ score ≥ 0.72 → SKIP self-eval (query đã tốt)
-            └→ score < 0.72 → RUN SelfEvaluator.evaluate()
+            ├→ score ≥ 100.0 → SKIP self-eval (very high raw-logit confidence)
+            └→ score < 100.0 → RUN SelfEvaluator.evaluate()
                  ├→ pass=True → Return answer gốc
                  └→ pass=False → TRIGGER Tavily fallback
                       └→ Tavily search (HUST_DOMAINS only, max 3, basic)
@@ -138,7 +138,7 @@ rag_flow()
 flowchart TD
     A["Generate answer<br/>(chat_model.generate)"] --> B{"self_eval_enabled<br/>AND self_evaluator exists?"}
     B -->|No| C["Return answer as-is"]
-    B -->|Yes| D{"top reranker<br/>score ≥ 0.72?"}
+    B -->|Yes| D{"top reranker<br/>score ≥ 100.0?"}
     D -->|"Yes — retrieval quality good"| E["Skip self-eval ✅<br/>timings: self_eval_skipped=1.0"]
     D -->|"No — quality uncertain"| F["SelfEvaluator.evaluate()<br/>(query, context, response)"]
     F --> G{"eval pass?"}
@@ -266,7 +266,7 @@ TAVILY_API_KEY=tvly-xxxxxxxxxxxxx           # Lấy từ app.tavily.com
 
 # ─── Self-eval + Tavily Fallback ──────────────────────────────────────────────
 SELF_EVAL_ENABLED=true                      # BẮT BUỘC để Tavily fallback hoạt động
-SELF_EVAL_MIN_TOP_SCORE=0.72                # Skip self-eval khi retrieval đã tốt
+SELF_EVAL_MIN_TOP_SCORE=100.0               # BGE raw-logit safe threshold
 TAVILY_FALLBACK_ENABLED=true                # Flag cho logging/metrics
 TAVILY_SEARCH_DEPTH=basic                   # basic (1 credit) | advanced (2 credits)
 TAVILY_MAX_RESULTS=3                        # Số kết quả mỗi lần search
@@ -278,7 +278,7 @@ TAVILY_MAX_RESULTS=3                        # Số kết quả mỗi lần searc
 |:---|:---|:---|
 | `tavily_api_key` | `""` | API key Tavily |
 | `self_eval_enabled` | `False` | Master switch cho self-eval → Tavily chain |
-| `self_eval_min_top_score` | `0.72` | Threshold skip self-eval khi retrieval tốt |
+| `self_eval_min_top_score` | `100.0` | BGE raw-logit threshold for skipping self-eval |
 | `tavily_fallback_enabled` | `False` | Flag bổ sung (logging/metrics, không gate logic) |
 | `tavily_search_depth` | `"basic"` | Độ sâu tìm kiếm Tavily |
 | `tavily_max_results` | `3` | Số kết quả mỗi search |
@@ -371,7 +371,7 @@ LLM involvement xảy ra ở caller:
 | Re-generate answer (Gemini) | 1,000–3,000ms |
 | **Tổng Tavily fallback** | **~2,000–5,000ms** |
 
-> Self-eval (`SelfEvaluator.evaluate()`) thêm ~2,000–5,000ms trước khi Tavily trigger. Tổng overhead worst case: ~4,000–10,000ms. Nhưng chỉ xảy ra khi top reranker score < 0.72 (~5-10% queries).
+> Self-eval (`SelfEvaluator.evaluate()`) thêm ~2,000–5,000ms trước khi Tavily trigger. Tổng overhead worst case: ~4,000–10,000ms. Với BGE raw-logit default `100.0`, bước này chạy cho các query non-stream khi self-eval/Tavily fallback được bật.
 
 ---
 
@@ -397,3 +397,16 @@ HUST_DOMAINS: list[str] = [
 ```
 
 Không cần thay đổi file nào khác — `HUST_DOMAINS` được import trực tiếp bởi `flows.py` và `tool_adapters.py`.
+
+---
+
+## Update 2026-05-17: Tavily optional import and domain normalization
+
+- `tools.tavily_search` no longer imports the `tavily` package at module import
+  time. `TavilySearchTool` loads it lazily in the constructor so tests and
+  constants such as `HUST_DOMAINS` can be imported without optional runtime deps.
+- `include_domains` and `exclude_domains` are normalized before API calls.
+  Full URLs such as `https://sv-ctt.hust.edu.vn/#/so-tay-sv` are reduced to
+  `sv-ctt.hust.edu.vn`, because Tavily domain filters accept domains, not paths.
+- `HUST_DOMAINS` includes `sv-ctt.hust.edu.vn` explicitly for student portal
+  SPA content.

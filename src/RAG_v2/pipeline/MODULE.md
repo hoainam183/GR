@@ -209,7 +209,7 @@ Chứa toàn bộ logic chi tiết của các luồng xử lý. Các flow functi
 | `_HISTORY_TOTAL_CHAR_BUDGET` | 2000 | Tổng ký tự history sau trimming |
 | `_DEFAULT_CONTEXT_DOC_CHAR_LIMIT` | 1500 | Ký tự tối đa mỗi chunk trong context |
 | `_DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET` | 8000 | Tổng ký tự context gửi cho LLM |
-| `_SELF_EVAL_SCORE_THRESHOLD` | 0.72 | Chạy self-eval khi top reranker score < này |
+| `_SELF_EVAL_SCORE_THRESHOLD` | 100.0 | Chạy self-eval khi top reranker score < này; BGE trả raw logits |
 | `_LIST_TOP_K_MULTIPLIER` | 2 | Nhân top_k cho list queries |
 | `_LIST_TOP_K_MAX` | 12 | Cap top_k cho list queries |
 
@@ -295,7 +295,7 @@ Streaming variant: `_trim_history()` → `chat_model.generate_stream(mode="chitc
 - Ghi vào `llm_cache.put_by_query()` (key = question + model, cho P0 hit lần sau).
 
 **Bước 13 — Self-Eval & Tavily Fallback:**
-- Chỉ chạy khi `top_score < 0.72` (threshold từ config).
+- Chỉ chạy khi `top_score < 100.0` theo default BGE raw-logit threshold từ config.
 - `SelfEvaluator.evaluate()` → nếu `pass=False` → `_tavily_fallback()`.
 - Tavily: tìm kiếm web (giới hạn `HUST_DOMAINS`, max 3 results) → regenerate với web context.
 
@@ -358,7 +358,7 @@ graph TD
     J --> K
     
     K --> L[Reflect → Search → Rerank → Generate]
-    L --> M{Self-Eval?<br/>top_score < 0.72}
+    L --> M{Self-Eval?<br/>top_score < 100.0}
     M -- Fail --> N[Tavily Web Fallback]
     M -- Pass --> O[Final Answer]
     N --> O
@@ -395,7 +395,7 @@ graph TD
 | **Hybrid Search** | Qdrant + ES | Luôn luôn | 100–400ms |
 | **Reranking** | BGE-Reranker (Cross-Encoder) | Luôn luôn | 200–800ms |
 | **Generation** | Gemini | Luôn luôn (nếu no cache) | 3–10s |
-| **Self-Eval** | Gemini | top_score < 0.72 | 1–2s |
+| **Self-Eval** | Gemini | top_score < 100.0 khi enabled | 1–2s |
 | **Tavily Fallback** | Gemini | Self-eval FAIL | 2–5s |
 | **Agent** | Qwen (local) + Gemini | complex queries | 15–60s |
 
@@ -559,4 +559,19 @@ Admin có thể chạy chunking với nhiều strategy khác nhau — chunks đ�
 #### Cleanup
 
 `delete_indexed_data(doc_id, collection)` — Xóa data từ Qdrant + ES theo `document_id` metadata. Safe khi document chưa được index.
+
+---
+
+## Update 2026-05-17: Self-eval and Tavily fallback gating
+
+- `RAGPipeline` builds `SelfEvaluator` when either `self_eval_enabled` or
+  `tavily_fallback_enabled` is true. Tavily fallback depends on self-eval to
+  decide that the generated answer failed.
+- `rag_flow()` still runs self-eval only when the top reranker score is below
+  `self_eval_min_top_score`, but the default threshold is now `100.0` because
+  local BGE reranker scores are raw logits, not normalized probabilities.
+- A failed self-eval calls Tavily only when `tavily_fallback_enabled=true`.
+  If the flag is false, `timings_ms["tavily_skipped"] = 1.0` is recorded.
+- `_tavily_fallback()` uses `tavily_max_results` and `tavily_search_depth`
+  from settings via `_settings_to_cfg()` instead of hardcoded search options.
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from .base import BaseEmbedder
 
@@ -47,10 +47,26 @@ def create_embedder(settings: "Settings") -> BaseEmbedder:  # type: ignore[name-
     )
 
 
-# Backwards-compatible concrete class exports.
-from .bge_m3 import BGEm3Embedder
-from embedding.e5_multilingual import E5MultilingualEmbedder
-from embedding.ensemble import EnsembleEmbedder
+if TYPE_CHECKING:
+    from .bge_m3 import BGEm3Embedder
+    from .e5_multilingual import E5MultilingualEmbedder
+    from .ensemble import EnsembleEmbedder
+
+
+def __getattr__(name: str) -> Any:
+    if name == "BGEm3Embedder":
+        from .bge_m3 import BGEm3Embedder
+
+        return BGEm3Embedder
+    if name == "E5MultilingualEmbedder":
+        from .e5_multilingual import E5MultilingualEmbedder
+
+        return E5MultilingualEmbedder
+    if name == "EnsembleEmbedder":
+        from .ensemble import EnsembleEmbedder
+
+        return EnsembleEmbedder
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     "BaseEmbedder",

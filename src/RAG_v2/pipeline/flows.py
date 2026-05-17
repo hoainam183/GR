@@ -39,7 +39,9 @@ _DEFAULT_CONTEXT_DOC_CHAR_LIMIT = 1500  # chars per retrieved chunk
 _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET = 8000  # total context chars sent to LLM
 
 # ── Self-eval ──────────────────────────────────────────────────────────────────
-_SELF_EVAL_SCORE_THRESHOLD = 0.72  # run self-eval only when top score < this
+# BGE reranker scores are raw logits, not probabilities. The high default avoids
+# skipping self-eval for logits like 5.25 that would dwarf a probability threshold.
+_SELF_EVAL_SCORE_THRESHOLD = 100.0  # run self-eval only when top score < this
 _SELF_EVAL_MAX_DOCS = 2
 _SELF_EVAL_DOC_CHAR_LIMIT = 600
 _SELF_EVAL_TOTAL_CHAR_BUDGET = 1800
@@ -1214,10 +1216,11 @@ def rag_flow(
             top_score = float(reranked[0].get("score", 0.0))
         except (TypeError, ValueError):
             top_score = 0.0
-    run_self_eval = (
-        self_evaluator is not None
-        and top_score < cfg.get("self_eval_min_top_score", _SELF_EVAL_SCORE_THRESHOLD)
+    self_eval_threshold = cfg.get(
+        "self_eval_min_top_score",
+        _SELF_EVAL_SCORE_THRESHOLD,
     )
+    run_self_eval = self_evaluator is not None and top_score < self_eval_threshold
     if run_self_eval and self_evaluator is not None:
         self_eval_t0 = time.perf_counter()
         try:
@@ -1231,18 +1234,35 @@ def rag_flow(
             )
             timings_ms["self_eval"] = _elapsed_ms(self_eval_t0)
             if not eval_result.get("pass", True):
-                logger.info(
-                    "Self-eval FAILED (%s), attempting Tavily fallback",
-                    eval_result.get("reason", "")[:60],
-                )
-                answer, fallback_timings = _tavily_fallback(
-                    question=question,
-                    answer=answer,
-                    tavily_tool=tavily_tool,
-                    chat_model=chat_model,
-                    history=trimmed,
-                )
-                timings_ms.update(fallback_timings)
+                if cfg.get("tavily_fallback_enabled", False):
+                    logger.info(
+                        "Self-eval FAILED (%s), attempting Tavily fallback",
+                        eval_result.get("reason", "")[:60],
+                    )
+                    try:
+                        tavily_max_results = int(
+                            cfg.get("tavily_max_results", 3) or 3
+                        )
+                    except (TypeError, ValueError):
+                        tavily_max_results = 3
+                    answer, fallback_timings = _tavily_fallback(
+                        question=question,
+                        answer=answer,
+                        tavily_tool=tavily_tool,
+                        chat_model=chat_model,
+                        history=trimmed,
+                        max_results=tavily_max_results,
+                        search_depth=str(
+                            cfg.get("tavily_search_depth", "basic") or "basic"
+                        ),
+                    )
+                    timings_ms.update(fallback_timings)
+                else:
+                    timings_ms["tavily_skipped"] = 1.0
+                    logger.info(
+                        "Self-eval FAILED (%s), Tavily fallback disabled",
+                        eval_result.get("reason", "")[:60],
+                    )
         except Exception:
             timings_ms["self_eval"] = _elapsed_ms(self_eval_t0)
             logger.warning(
@@ -1253,7 +1273,7 @@ def rag_flow(
         logger.debug(
             "Self-eval skipped: top_score=%.3f >= threshold=%.3f",
             top_score,
-            cfg.get("self_eval_min_top_score", _SELF_EVAL_SCORE_THRESHOLD),
+            self_eval_threshold,
         )
     timings_ms["retrieval_total"] = round(
         timings_ms.get("embed_bge", 0.0)
@@ -1770,6 +1790,8 @@ def _tavily_fallback(
     tavily_tool: Any | None,
     chat_model: BaseLLM,
     history: List[Dict[str, str]],
+    max_results: int = 3,
+    search_depth: str = "basic",
 ) -> tuple[str, Dict[str, float]]:
     """Use Tavily web search to re-generate the answer when self-eval fails."""
     fallback_t0 = time.perf_counter()
@@ -1786,7 +1808,8 @@ def _tavily_fallback(
         search_t0 = time.perf_counter()
         search_result = tavily_tool.search(
             question,
-            max_results=3,
+            max_results=max_results,
+            search_depth=search_depth,
             include_domains=HUST_DOMAINS,
         )
         timings_ms["tavily_search"] = _elapsed_ms(search_t0)

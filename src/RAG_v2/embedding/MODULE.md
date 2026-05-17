@@ -113,3 +113,13 @@ Module `embedding` **không sử dụng LLM** — chỉ dùng local neural model
 
 > ⚠️ Nếu chạy trên CPU (không có GPU), embedding có thể chiếm **200-800ms** mỗi request.
 > Cân nhắc dùng GPU inference hoặc cache embedding cho các query phổ biến.
+
+---
+
+## Update 2026-05-17: Lazy concrete exports
+
+`embedding.__init__` keeps backwards-compatible exports for `BGEm3Embedder`,
+`E5MultilingualEmbedder`, and `EnsembleEmbedder`, but resolves them lazily via
+`__getattr__`. Importing `embedding.base` or `create_embedder` no longer imports
+heavy optional ML dependencies such as `torch` unless a concrete embedder is
+actually requested.

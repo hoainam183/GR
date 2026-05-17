@@ -151,9 +151,9 @@ class Settings(BaseSettings):
 
     # --- Evaluation & Fallback ---
     self_eval_enabled: bool = False     # disabled by default — adds ~2-5s per query
-    # Reranker score threshold: skip self-eval when top chunk score >= this value.
-    # Higher = self-eval triggers less often (faster). Lower = more quality checks.
-    self_eval_min_top_score: float = 0.72
+    # BGE reranker returns raw logits, not probabilities. Keep this very high
+    # to avoid skipping self-eval just because a raw logit is greater than 0.72.
+    self_eval_min_top_score: float = 100.0
     tavily_fallback_enabled: bool = False
     tavily_search_depth: str = "basic"    # basic (1 credit) | advanced (2 credits)
     tavily_max_results: int = 3           # results per search

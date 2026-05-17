@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import importlib
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 
 from .base import BaseReranker, register_reranker, _REGISTRY
 
@@ -46,8 +46,16 @@ def create_reranker(settings: "Settings") -> Optional[BaseReranker]:  # type: ig
     )
 
 
-# Backwards-compatible concrete class export.
-from .bge_reranker import BGEReranker
+if TYPE_CHECKING:
+    from .bge_reranker import BGEReranker
+
+
+def __getattr__(name: str) -> Any:
+    if name == "BGEReranker":
+        from .bge_reranker import BGEReranker
+
+        return BGEReranker
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     "BaseReranker",

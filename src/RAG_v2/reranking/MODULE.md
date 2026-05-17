@@ -127,3 +127,12 @@ Module `reranking` **không sử dụng LLM** — sử dụng local cross-encode
 | `reranker_top_k` | 5 | Giảm → nhanh hơn, kém coverage hơn |
 | `reranker_score_threshold` | 0.3 | Tăng → loại nhiều doc hơn, giảm hallucination |
 | `raw_candidate_k` | top_k * 4 | Giảm → reranker nhanh hơn, ít candidates hơn |
+
+---
+
+## Update 2026-05-17: Lazy concrete export
+
+`reranking.__init__` keeps the backwards-compatible `BGEReranker` export, but
+resolves it lazily via `__getattr__`. Importing `reranking.base` or the factory
+no longer imports `torch` until the BGE reranker implementation is actually
+requested.

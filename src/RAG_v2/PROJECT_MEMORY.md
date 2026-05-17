@@ -157,6 +157,12 @@ RAG_v2/
 - Hybrid retrieval chạy Qdrant vector + ES keyword song song, merge cross-collection, rerank bằng BGE.
 - Sau retrieval: validity filter, reference resolver, context formatting kèm metadata header, LLM generation.
 - Optional: post-retrieval LLM cache, self-eval, Tavily fallback tùy settings.
+- Tavily fallback is controlled by `TAVILY_FALLBACK_ENABLED`; when enabled,
+  `RAGPipeline` initializes `SelfEvaluator` even if direct `SELF_EVAL_ENABLED`
+  is false, because self-eval is the quality gate for web fallback.
+- `SELF_EVAL_MIN_TOP_SCORE` defaults to `100.0` for local BGE raw-logit scores.
+  The old `0.72` probability-style threshold incorrectly skipped self-eval for
+  high raw logits such as `5.25`.
 - `rag_flow_stream()` retrieval trước rồi stream token qua LLM; metadata SSE gửi cuối luồng.
 
 ### 4.3 Agent flow

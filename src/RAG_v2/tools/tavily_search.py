@@ -6,9 +6,7 @@ import logging
 import os
 import time
 from typing import Any, Dict, List, Literal, Optional
-
-from tavily import TavilyClient
-from tavily.errors import InvalidAPIKeyError
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +29,7 @@ HUST_DOMAINS: list[str] = [
     "fami.hust.edu.vn",
     "sme.hust.edu.vn",
     "smse.hust.edu.vn",
-    "sv-ctt.hust.edu.vn"
+    "sv-ctt.hust.edu.vn",
 ]
 
 # Tier 2: nguồn giáo dục VN mở rộng — dùng thêm cho agent web_search
@@ -45,6 +43,44 @@ EDU_DOMAINS: list[str] = [
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+def _load_tavily_client() -> tuple[Any, type[BaseException]]:
+    try:
+        from tavily import TavilyClient
+        from tavily.errors import InvalidAPIKeyError
+    except ModuleNotFoundError as exc:
+        if exc.name == "tavily":
+            raise RuntimeError(
+                "tavily-python is required to use TavilySearchTool"
+            ) from exc
+        raise
+    return TavilyClient, InvalidAPIKeyError
+
+
+def _normalize_domain(domain: str) -> str:
+    value = domain.strip().lower()
+    if not value:
+        return ""
+    parsed = urlparse(value if "://" in value else f"//{value}")
+    host = (
+        parsed.hostname
+        or value.split("/", 1)[0].split("#", 1)[0].split("?", 1)[0]
+    )
+    return host.rstrip(".")
+
+
+def _normalize_domains(domains: Optional[List[str]]) -> Optional[List[str]]:
+    if domains is None:
+        return None
+    normalized: List[str] = []
+    seen: set[str] = set()
+    for domain in domains:
+        clean = _normalize_domain(domain)
+        if clean and clean not in seen:
+            normalized.append(clean)
+            seen.add(clean)
+    return normalized
+
+
 class TavilySearchTool:
     """Performs web searches via the Tavily API and formats results for LLM context.
 
@@ -64,12 +100,14 @@ class TavilySearchTool:
         default_include_domains: Optional[List[str]] = None,
     ) -> None:
         resolved_key = api_key or os.environ.get("TAVILY_API_KEY", "")
-        self._client = TavilyClient(api_key=resolved_key)
+        client_cls, invalid_key_error = _load_tavily_client()
+        self._client = client_cls(api_key=resolved_key)
+        self._invalid_key_error = invalid_key_error
         self.max_results = max_results
         self.max_retries = max_retries
         self.min_retry_delay = min_retry_delay
         self._last_call_time: float = 0.0
-        self.default_include_domains = default_include_domains
+        self.default_include_domains = _normalize_domains(default_include_domains)
 
     # ------------------------------------------------------------------
     # Public API
@@ -103,7 +141,12 @@ class TavilySearchTool:
             - ``context`` — pre-formatted string suitable for LLM prompts
         """
         effective_max = max_results or self.max_results
-        effective_include = include_domains if include_domains is not None else self.default_include_domains
+        effective_include = _normalize_domains(
+            include_domains
+            if include_domains is not None
+            else self.default_include_domains
+        )
+        effective_exclude = _normalize_domains(exclude_domains)
         logger.info(
             "Tavily search: query=%r (max=%d, domains=%s)",
             query[:80],
@@ -130,8 +173,8 @@ class TavilySearchTool:
                 }
                 if effective_include:
                     search_kwargs["include_domains"] = effective_include
-                if exclude_domains:
-                    search_kwargs["exclude_domains"] = exclude_domains
+                if effective_exclude:
+                    search_kwargs["exclude_domains"] = effective_exclude
                 response = self._client.search(**search_kwargs)
 
                 results = self._parse_results(response)
@@ -143,7 +186,7 @@ class TavilySearchTool:
                     "results": results,
                     "context": context,
                 }
-            except InvalidAPIKeyError:
+            except self._invalid_key_error:
                 # Auth errors won't be fixed by retrying — fail immediately
                 logger.error("Tavily API key is invalid or missing, aborting")
                 raise

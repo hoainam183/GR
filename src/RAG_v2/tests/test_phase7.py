@@ -105,10 +105,11 @@ class TestQueryReflection:
 
 
 class TestSelfEvaluationActivation:
-    def test_self_eval_enabled_default_true(self) -> None:
+    def test_self_eval_fields_and_bge_logit_threshold(self) -> None:
         from config.settings import Settings
         s = Settings()
-        assert s.self_eval_enabled is True
+        assert isinstance(s.self_eval_enabled, bool)
+        assert Settings.model_fields["self_eval_min_top_score"].default == 100.0
 
     def test_self_eval_prompts_in_vietnamese(self) -> None:
         from llm.prompts import SELF_EVAL_SYSTEM_PROMPT, SELF_EVAL_USER_TEMPLATE
@@ -170,6 +171,11 @@ class TestTavilyFallback:
     def test_self_eval_fail_triggers_tavily(self) -> None:
         from pipeline.flows import rag_flow
         mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        cfg.update({
+            "tavily_fallback_enabled": True,
+            "tavily_max_results": 2,
+            "tavily_search_depth": "advanced",
+        })
         mock_chat = MagicMock()
         mock_chat.model = "test-model"
         mock_chat.generate.side_effect = ["bad answer", "better answer from web"]
@@ -189,7 +195,63 @@ class TestTavilyFallback:
 
         assert mock_self_eval.evaluate.called
         assert mock_tavily.search.called
+        assert mock_tavily.search.call_args.kwargs["max_results"] == 2
+        assert mock_tavily.search.call_args.kwargs["search_depth"] == "advanced"
         assert result["answer"] == "better answer from web"
+
+    def test_self_eval_fail_respects_tavily_disabled(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        cfg["tavily_fallback_enabled"] = False
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate.return_value = "bad answer"
+
+        mock_self_eval = MagicMock()
+        mock_self_eval.evaluate.return_value = {"pass": False, "reason": "bad answer"}
+        mock_tavily = MagicMock()
+
+        result = rag_flow(
+            question="test", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=mock_self_eval,
+            tavily_tool=mock_tavily, cfg=cfg,
+        )
+
+        assert mock_self_eval.evaluate.called
+        assert not mock_tavily.search.called
+        assert result["answer"] == "bad answer"
+        assert result["timings_ms"]["tavily_skipped"] == 1.0
+
+    def test_bge_raw_logit_does_not_skip_self_eval_by_default(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        mock_reranker.rerank.return_value = [
+            {"text": "doc1", "score": 5.2517, "metadata": {"title": "Test"}}
+        ]
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate.return_value = "answer"
+        mock_self_eval = MagicMock()
+        mock_self_eval.evaluate.return_value = {"pass": True, "reason": "ok"}
+
+        rag_flow(
+            question="test", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=mock_self_eval,
+            tavily_tool=None, cfg=cfg,
+        )
+
+        assert mock_self_eval.evaluate.called
+
+    def test_tavily_domain_url_is_normalized_to_domain(self) -> None:
+        from tools.tavily_search import _normalize_domains
+
+        assert _normalize_domains(
+            ["https://sv-ctt.hust.edu.vn/#/so-tay-sv", "ctt.hust.edu.vn/path"]
+        ) == ["sv-ctt.hust.edu.vn", "ctt.hust.edu.vn"]
 
 
 class TestPayloadPopFix:
@@ -250,6 +312,20 @@ class TestConfigSync:
         assert "reflection_enabled" in cfg
         assert "self_eval_enabled" in cfg
         assert "tavily_fallback_enabled" in cfg
+        assert "tavily_search_depth" in cfg
+        assert "tavily_max_results" in cfg
         assert cfg["model"] == s.chat_model
         assert cfg["es_host"] == s.elasticsearch_host
         assert cfg["top_k"] == s.top_k
+
+    def test_tavily_fallback_requests_self_evaluator(self) -> None:
+        from pipeline.rag_pipeline import _should_enable_self_evaluator
+
+        assert _should_enable_self_evaluator({
+            "self_eval_enabled": False,
+            "tavily_fallback_enabled": True,
+        })
+        assert not _should_enable_self_evaluator({
+            "self_eval_enabled": False,
+            "tavily_fallback_enabled": False,
+        })

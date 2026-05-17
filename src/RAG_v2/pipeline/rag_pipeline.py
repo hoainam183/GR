@@ -159,10 +159,20 @@ def _settings_to_cfg(settings: Settings) -> Dict[str, Any]:
         "self_eval_enabled": settings.self_eval_enabled,
         "self_eval_min_top_score": settings.self_eval_min_top_score,
         "tavily_fallback_enabled": settings.tavily_fallback_enabled,
+        "tavily_search_depth": settings.tavily_search_depth,
+        "tavily_max_results": settings.tavily_max_results,
     }
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+def _should_enable_self_evaluator(cfg: Dict[str, Any]) -> bool:
+    """Return True when self-eval is needed directly or for Tavily fallback."""
+    return bool(
+        cfg.get("self_eval_enabled", False)
+        or cfg.get("tavily_fallback_enabled", False)
+    )
+
+
 class RAGPipeline:
     """End-to-end RAG v2 pipeline.
 
@@ -254,9 +264,14 @@ class RAGPipeline:
 
         # Self evaluator (reuses same LLM instance — no extra API client)
         self._self_eval: Optional[SelfEvaluator] = None
-        if cfg.get("self_eval_enabled", False):
+        if _should_enable_self_evaluator(cfg):
             self._self_eval = SelfEvaluator(llm=self._chat)
-            logger.info("Self evaluator loaded.")
+            if cfg.get("tavily_fallback_enabled", False) and not cfg.get(
+                "self_eval_enabled", False
+            ):
+                logger.info("Self evaluator loaded for Tavily fallback.")
+            else:
+                logger.info("Self evaluator loaded.")
 
         self._cfg = cfg
         self._mongo_logger = mongo_logger
