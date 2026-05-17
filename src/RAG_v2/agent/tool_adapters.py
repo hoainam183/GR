@@ -568,7 +568,13 @@ def _web_search(query: str) -> str:
     if runtime.tavily_tool is None:
         return "[Loi: Tavily chua duoc cau hinh API key]"
 
-    results = runtime.tavily_tool.search(query=query, max_results=3)
+    from tools.tavily_search import HUST_DOMAINS, EDU_DOMAINS
+
+    results = runtime.tavily_tool.search(
+        query=query,
+        max_results=3,
+        include_domains=HUST_DOMAINS + EDU_DOMAINS,
+    )
     return _format_web_results(results)
 
 

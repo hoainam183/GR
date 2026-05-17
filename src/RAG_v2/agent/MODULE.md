@@ -108,7 +108,7 @@ graph TD
 | Tool | Input schema | Khi dùng |
 |---|---|---|
 | `rag_search` | `RagSearchInput(query, collection)` | Tìm trong một collection nội bộ |
-| `web_search` | `WebSearchInput(query)` | Tavily fallback khi DB không đủ hoặc cần thông tin rất mới |
+| `web_search` | `WebSearchInput(query)` | Tavily fallback khi DB không đủ hoặc cần thông tin rất mới (giới hạn `HUST_DOMAINS + EDU_DOMAINS`) |
 | `clarify_question` | `ClarifyInput(message, options)` | Hỏi lại khi câu hỏi quá mơ hồ |
 
 Các collection agent-facing hợp lệ:

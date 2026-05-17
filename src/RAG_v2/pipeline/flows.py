@@ -1781,8 +1781,14 @@ def _tavily_fallback(
         return answer, timings_ms
 
     try:
+        from tools.tavily_search import HUST_DOMAINS
+
         search_t0 = time.perf_counter()
-        search_result = tavily_tool.search(question)
+        search_result = tavily_tool.search(
+            question,
+            max_results=3,
+            include_domains=HUST_DOMAINS,
+        )
         timings_ms["tavily_search"] = _elapsed_ms(search_t0)
 
         web_context = search_result.get("context", "")

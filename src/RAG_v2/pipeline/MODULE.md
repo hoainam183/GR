@@ -297,7 +297,7 @@ Streaming variant: `_trim_history()` → `chat_model.generate_stream(mode="chitc
 **Bước 13 — Self-Eval & Tavily Fallback:**
 - Chỉ chạy khi `top_score < 0.72` (threshold từ config).
 - `SelfEvaluator.evaluate()` → nếu `pass=False` → `_tavily_fallback()`.
-- Tavily: tìm kiếm web → regenerate với web context.
+- Tavily: tìm kiếm web (giới hạn `HUST_DOMAINS`, max 3 results) → regenerate với web context.
 
 ---
 
