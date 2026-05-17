@@ -1,384 +1,255 @@
-# Kích hoạt Tavily Web Search Fallback — Final Plan
+# Audit report — Module `tools` (Web Search Layer)
 
-## Bối cảnh
-
-Hệ thống RAG v2 đã có code Tavily hoàn chỉnh nhưng **chưa bật**:
-
-| Thành phần | File | Trạng thái |
-|:---|:---|:---|
-| `TavilySearchTool` wrapper | [tavily_search.py](file:///d:/GR/src/RAG_v2/tools/tavily_search.py) | ✅ Đã code (retry, rate-limit, format) |
-| `RetrievalService` khởi tạo Tavily | [service.py](file:///d:/GR/src/RAG_v2/retrieval/service.py#L93-L97) | ✅ Tự tạo nếu key hợp lệ |
-| `rag_flow` → self-eval → `_tavily_fallback` | [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py#L1209-L1257) | ✅ Code sẵn, gated bởi `self_evaluator is not None` + `tavily_tool is not None` |
-| Agent `web_search` tool | [lc_tools.py](file:///d:/GR/src/RAG_v2/agent/lc_tools.py#L151-L159) | ✅ Đã bind vào LangGraph |
-| Frontend trace hiển thị Tavily | [PipelineTrace.tsx](file:///d:/GR/src/RAG_v2/frontend/chat-companion/src/components/trace/PipelineTrace.tsx#L155) | ✅ Đã có UI |
-
-### Decisions (User confirmed)
-- **Self-eval**: Chỉ chạy khi **top reranker score < 0.72** (mặc định) — skip phần lớn queries đã tốt
-- **Streaming path**: Không bật Tavily cho `/chat/stream` — giữ nguyên UX streaming
-- **Include domains**: Dùng danh sách HUST cơ bản, sẽ bổ sung sau
-- **Budget**: Free tier 1,000 credits/tháng chấp nhận được
+**Ngày:** 2026-05-17  
+**Phạm vi:** `tools/tavily_search.py` · `pipeline/flows.py` · `agent/tool_adapters.py`  
+**Kết luận chung:** Module viết tốt về mặt engineering (resilience, error handling, lifecycle). Vấn đề tập trung ở routing logic và một số lỗ hổng kiến trúc ảnh hưởng trực tiếp đến chất lượng answer.
 
 ---
 
-## Proposed Changes
+## Tổng quan
 
-### TavilySearchTool — Domain filtering support
+| Mức độ | Số lượng | Tác động |
+|:---|:---:|:---|
+| P1 — Critical | 2 | Kiến trúc, ảnh hưởng toàn bộ user |
+| P2 — High | 3 | Logic & data quality |
+| P3 — Medium | 3 | Config, observability, UX |
+| **Tổng** | **8** | |
 
-#### [MODIFY] [tavily_search.py](file:///d:/GR/src/RAG_v2/tools/tavily_search.py)
+---
 
-Thêm domain filtering constants + `include_domains`/`exclude_domains` params.
+## P1 — Critical
 
-**Thêm constants domain sau `DEFAULT_MIN_INTERVAL` (line 19):**
+### 1. Self-eval fallback kích hoạt quá muộn
 
-```diff
- DEFAULT_MIN_INTERVAL = 1.0  # seconds between API calls
-+
-+# ─── Default Domain Whitelists ────────────────────────────────────────────────
-+# Tier 1: nguồn chính thức HUST — dùng cho self-eval fallback (scope hẹp)
-+HUST_DOMAINS: list[str] = [
-+    "hust.edu.vn",
-+    "sis.hust.edu.vn",
-+    "ctt.hust.edu.vn",
-+    "ctsv.hust.edu.vn",
-+    "soict.hust.edu.vn",
-+]
-+
-+# Tier 2: nguồn giáo dục VN mở rộng — dùng thêm cho agent web_search
-+EDU_DOMAINS: list[str] = [
-+    "moet.gov.vn",
-+    "vnexpress.net",
-+    "tuoitre.vn",
-+    "thanhnien.vn",
-+    "dantri.com.vn",
-+]
+**Vấn đề:**  
+Flow hiện tại yêu cầu LLM sinh answer trước, sau đó mới chạy self-eval, rồi mới gọi Tavily nếu thất bại. Đây là vấn đề hai mặt:
+
+- Nếu LLM hallucinate nhưng answer nghe có vẻ hợp lý, `SelfEvaluator` không catch được → Tavily không bao giờ được gọi, answer sai được trả về.
+- Worst-case latency: `self-eval (~2–5s)` + `Tavily API (~0.5–2s)` + `re-generate (~1–3s)` = **4–10 giây overhead** cộng thêm vào response time.
+
+```
+# Flow hiện tại (3 LLM calls worst-case)
+generate() → self_eval → [fail] → tavily_search → re-generate()
+
+# Flow đề xuất (pre-flight routing)
+classify_intent() → [time-sensitive?] → tavily_search → generate_with_context()
+                 → [conceptual?]     → vector_search → generate()
 ```
 
-**Cập nhật `__init__` — thêm `default_include_domains` (line 33–45):**
+**Cách fix:**  
+Thêm `_classify_time_sensitive(question: str) -> bool` dùng rule-based (regex match năm học như `202\d{2}`, từ khóa "lịch", "deadline", "thông báo", "hạn nộp"...) trước bước `generate()`. Không cần thêm LLM call. Self-eval giữ vai trò safety-net, không phải primary trigger.
 
-```diff
-     def __init__(
-         self,
-         api_key: Optional[str] = None,
-         max_results: int = DEFAULT_MAX_RESULTS,
-         max_retries: int = DEFAULT_MAX_RETRIES,
-         min_retry_delay: float = DEFAULT_MIN_RETRY_DELAY,
-+        default_include_domains: Optional[List[str]] = None,
-     ) -> None:
-         resolved_key = api_key or os.environ.get("TAVILY_API_KEY", "")
-         self._client = TavilyClient(api_key=resolved_key)
-         self.max_results = max_results
-         self.max_retries = max_retries
-         self.min_retry_delay = min_retry_delay
-         self._last_call_time: float = 0.0
-+        self.default_include_domains = default_include_domains
-```
+---
 
-**Cập nhật `search()` — thêm domain params (line 51–94):**
+### 2. Streaming path bỏ qua toàn bộ fallback
 
-```diff
-     def search(
-         self,
-         query: str,
-         max_results: Optional[int] = None,
-         search_depth: Literal["advanced", "basic", "fast", "ultra-fast"] = "basic",
-         include_answer: bool = True,
-+        include_domains: Optional[List[str]] = None,
-+        exclude_domains: Optional[List[str]] = None,
-     ) -> Dict[str, Any]:
-         """Execute a web search and return structured results.
+**Vấn đề:**  
+`/chat/stream` không chạy self-eval và Tavily fallback. Nếu frontend dùng streaming là chính, toàn bộ cơ chế này gần như vô hiệu với phần lớn user. Đây là gap chất lượng answer nghiêm trọng giữa streaming và non-streaming path.
 
-         Args:
-             query: Search query string.
-             max_results: Override the default result count.
-             search_depth: ``"basic"`` (fast) or ``"advanced"`` (deeper).
-             include_answer: Ask Tavily to generate a short answer.
-+            include_domains: Restrict results to these domains.
-+                Falls back to ``default_include_domains`` when *None*.
-+            exclude_domains: Exclude results from these domains.
+> Trích doc: *"Streaming path KHÔNG chạy self-eval/Tavily fallback — giữ UX streaming real-time."*
 
-         Returns:
-             Dict with keys:
-             - ``query`` — the original query
-             - ``answer`` — Tavily-generated short answer (if requested)
-             - ``results`` — list of result dicts (``title``, ``url``, ``content``)
-             - ``context`` — pre-formatted string suitable for LLM prompts
-         """
-         effective_max = max_results or self.max_results
-+        effective_include = include_domains if include_domains is not None else self.default_include_domains
-         logger.info(
--            "Tavily search: query=%r (max=%d)", query[:80], effective_max
-+            "Tavily search: query=%r (max=%d, domains=%s)",
-+            query[:80],
-+            effective_max,
-+            len(effective_include) if effective_include else "all",
-         )
+**Cách fix:**  
+Tách Tavily enrichment ra khỏi answer generation. Với streaming: pre-fetch Tavily context *trước* khi bắt đầu stream nếu intent classifier flag query là time-sensitive, inject context vào system prompt. User vẫn thấy UX streaming, nhưng answer đã được enriched với web context.
 
-         # ... (rate-limiting unchanged) ...
+```python
+# pipeline/flows.py — stream path
+async def rag_flow_stream(question, ...):
+    # Pre-flight: chạy trước khi stream bắt đầu
+    web_ctx = None
+    if self._classify_time_sensitive(question) and self._tavily:
+        web_ctx = await self._tavily_prefetch(question)
 
-                 self._last_call_time = time.monotonic()
-+                # Build kwargs — only pass domains when non-empty to avoid
-+                # Tavily API rejecting empty lists.
-+                search_kwargs: Dict[str, Any] = {
-+                    "query": query,
-+                    "max_results": effective_max,
-+                    "search_depth": search_depth,
-+                    "include_answer": include_answer,
-+                }
-+                if effective_include:
-+                    search_kwargs["include_domains"] = effective_include
-+                if exclude_domains:
-+                    search_kwargs["exclude_domains"] = exclude_domains
--                response = self._client.search(
--                    query=query,
--                    max_results=effective_max,
--                    search_depth=search_depth,
--                    include_answer=include_answer,
--                )
-+                response = self._client.search(**search_kwargs)
+    async for chunk in self._chat_model.stream(
+        question,
+        context=web_ctx or vector_context,
+        ...
+    ):
+        yield chunk
 ```
 
 ---
 
-### Self-eval Tavily fallback — pass HUST domains
+## P2 — High
 
-#### [MODIFY] [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)
+### 3. EDU_DOMAINS chứa báo tin tức phổ thông
 
-**Cập nhật `_tavily_fallback()` (line 1783–1785):**
+**Vấn đề:**  
+`vnexpress.net`, `tuoitre.vn`, `thanhnien.vn`, `dantri.com.vn` không phải nguồn authoritative cho thông tin HUST. Các trang này đăng tin giáo dục nhưng thường không chính xác về chi tiết (deadline cụ thể, điểm chuẩn, học phí theo năm). Khi agent dùng Tier 1+2, kết quả từ báo tin tức có thể override thông tin chính thống nếu Tavily rank chúng cao hơn.
 
-```diff
-+    from tools.tavily_search import HUST_DOMAINS
-+
-     try:
-         search_t0 = time.perf_counter()
--        search_result = tavily_tool.search(question)
-+        search_result = tavily_tool.search(
-+            question,
-+            max_results=3,
-+            include_domains=HUST_DOMAINS,
-+        )
-         timings_ms["tavily_search"] = _elapsed_ms(search_t0)
+**Cách fix:**  
+Tổ chức lại thành 3 tiers với mức độ tin cậy rõ ràng:
+
+```python
+# tools/tavily_search.py
+
+HUST_OFFICIAL: list[str] = [
+    "hust.edu.vn",
+    "sis.hust.edu.vn",
+    "ctt.hust.edu.vn",
+    "ctsv.hust.edu.vn",
+    "sv-ctt.hust.edu.vn",
+    "soict.hust.edu.vn",
+]
+
+HUST_EXTENDED: list[str] = [
+    "see.hust.edu.vn",
+    "sem.hust.edu.vn",
+    "fee.hust.edu.vn",
+    "fme.hust.edu.vn",
+    # Thêm subdomain viện/khoa khi cần
+]
+
+EDU_AUTHORITATIVE: list[str] = [
+    "moet.gov.vn",   # Bộ GD-ĐT — authoritative về chính sách
+    # Loại bỏ hoàn toàn các trang báo tin tức
+]
 ```
 
-> [!NOTE]
-> Dùng `HUST_DOMAINS` (Tier 1 only) cho self-eval fallback — scope hẹp để đảm bảo answer luôn liên quan HUST. Nếu không tìm thấy gì → giữ answer gốc (đã handle bởi `if not web_context`).
+Agent dùng `HUST_OFFICIAL + HUST_EXTENDED + EDU_AUTHORITATIVE`. Self-eval fallback dùng `HUST_OFFICIAL` only.
 
 ---
 
-### Agent web_search — pass HUST + EDU domains
+### 4. BGE threshold 100.0 là magic number chưa được calibrate
 
-#### [MODIFY] [tool_adapters.py](file:///d:/GR/src/RAG_v2/agent/tool_adapters.py)
+**Vấn đề:**  
+BGE raw logit scores không có upper bound cố định — chúng phụ thuộc vào query length, document length, và softmax temperature. Threshold `100.0` trong `SELF_EVAL_MIN_TOP_SCORE` có thể quá cao (self-eval luôn chạy, tốn LLM call) hoặc quá thấp (self-eval luôn bị skip, chất lượng không được kiểm soát). Hiện tại không có data để biết phần trăm query thực sự skip self-eval.
 
-**Cập nhật `_web_search()` (line 563–572):**
-
-```diff
- def _web_search(query: str) -> str:
-     if not query or not query.strip():
-         return "[Loi: Query web rong]"
-
-     runtime = _get_runtime()
-     if runtime.tavily_tool is None:
-         return "[Loi: Tavily chua duoc cau hinh API key]"
-
--    results = runtime.tavily_tool.search(query=query, max_results=3)
-+    from tools.tavily_search import HUST_DOMAINS, EDU_DOMAINS
-+
-+    results = runtime.tavily_tool.search(
-+        query=query,
-+        max_results=3,
-+        include_domains=HUST_DOMAINS + EDU_DOMAINS,
-+    )
-     return _format_web_results(results)
-```
-
-> [!NOTE]
-> Agent path dùng scope rộng hơn (`HUST_DOMAINS + EDU_DOMAINS`) vì câu hỏi phức tạp có thể cần thông tin từ Bộ GD-ĐT hoặc tin tức giáo dục.
+**Cách fix:**  
+1. Log distribution của `top_reranker_score` trong production trong 1–2 tuần.
+2. Vẽ histogram → chọn threshold tại percentile 85–90 (skip self-eval khi retrieval rõ ràng tốt).
+3. Expose metric `reranker_score_p50`, `reranker_score_p90` vào observability dashboard.
+4. Đặt threshold theo percentile thực tế thay vì hardcode giá trị tuyệt đối.
 
 ---
 
-### Settings — thêm Tavily config fields
+### 5. Không có query transformation trước khi gọi Tavily
 
-#### [MODIFY] [settings.py](file:///d:/GR/src/RAG_v2/config/settings.py)
+**Vấn đề:**  
+Raw conversational query được truyền thẳng vào Tavily. Query kiểu `"em muốn hỏi về lịch đăng ký học phần học kỳ này"` cho kết quả kém hơn nhiều so với `"lịch đăng ký học phần HUST 20261 tháng 5 2026"`.
 
-**Sau `tavily_fallback_enabled` (line 157), thêm:**
+**Cách fix:**  
 
-```diff
-     tavily_fallback_enabled: bool = False
-+    tavily_search_depth: str = "basic"    # basic (1 credit) | advanced (2 credits)
-+    tavily_max_results: int = 3           # results per search
-```
+```python
+# tools/tavily_search.py hoặc pipeline/flows.py
 
-**Cập nhật docstring (line 55):**
+def _build_search_query(question: str, semester_hint: str = "") -> str:
+    """Rule-based query rewrite — không tốn LLM call."""
+    query = question.strip("?!. ")
 
-```diff
-         tavily_fallback_enabled: Whether to use Tavily when self-eval fails.
-+        tavily_search_depth: Tavily search depth (basic=1 credit, advanced=2).
-+        tavily_max_results: Number of Tavily results per search.
-```
+    # Đảm bảo context HUST luôn có trong query
+    if "hust" not in query.lower() and "bách khoa" not in query.lower():
+        query = f"HUST {query}"
 
----
+    # Thêm semester nếu không có trong query gốc
+    if semester_hint and semester_hint not in query:
+        query = f"{query} {semester_hint}"
 
-### .env.example — document Tavily config
-
-#### [MODIFY] [.env.example](file:///d:/GR/src/RAG_v2/.env.example)
-
-**Cập nhật section Evaluation & Fallback (line 99–103):**
-
-```diff
- # ─── Evaluation & Fallback ─────────────────────────────────────────────────────
- # Keep self_eval OFF by default — adds ~2-5s per query (enable only for debugging)
- SELF_EVAL_ENABLED=false
- SELF_EVAL_MIN_TOP_SCORE=0.72
- TAVILY_FALLBACK_ENABLED=false
-+TAVILY_SEARCH_DEPTH=basic                  # basic (1 credit) | advanced (2 credits)
-+TAVILY_MAX_RESULTS=3                       # results per Tavily search
+    return query
 ```
 
 ---
 
-## Luồng hoạt động sau khi bật
+## P3 — Medium
 
-### Classic RAG flow (chỉ trigger khi retrieval quality thấp)
+### 6. `tavily_fallback_enabled` flag không gate logic thực sự
 
-```mermaid
-flowchart TD
-    A[Generate answer] --> B{self_eval_enabled?}
-    B -->|No| C[Return answer as-is]
-    B -->|Yes| D{"top reranker score ≥ 0.72?"}
-    D -->|"Yes (quality good)"| E["Skip self-eval ✅ — Return answer"]
-    D -->|"No (quality low)"| F["SelfEvaluator.evaluate()"]
-    F --> G{pass?}
-    G -->|Yes| C
-    G -->|No| H{tavily_tool available?}
-    H -->|No| C
-    H -->|Yes| I["Tavily search<br/>(HUST_DOMAINS only, basic, max 3)"]
-    I --> J{web_context found?}
-    J -->|No| C
-    J -->|Yes| K[Re-generate answer with web context]
-    K --> C
-```
+**Vấn đề:**  
+Khi operator set `TAVILY_FALLBACK_ENABLED=false`, họ kỳ vọng Tavily không chạy. Nhưng fallback vẫn trigger nếu `self_eval_enabled=true` và API key hợp lệ. Flag này hiện chỉ dùng cho logging/metrics, không được check trong `flows.py`. Đây là footgun khi team mở rộng.
 
-### Agent path (independent — chỉ cần key)
+**Cách fix:**  
 
-```mermaid
-flowchart TD
-    A[Agent ReAct loop] --> B{rag_search OK?}
-    B -->|Yes| C[Synthesize answer]
-    B -->|"No/insufficient"| D[Agent calls web_search tool]
-    D --> E["Tavily search<br/>(HUST + EDU domains, basic, max 3)"]
-    E --> F[Format results → ToolMessage]
-    F --> G[Agent continues reasoning]
-    G --> C
-```
-
-### Streaming path → Không thay đổi
-
-Streaming (`/chat/stream`) tiếp tục skip self-eval/Tavily — giữ UX streaming real-time.
-
----
-
-## Setup Guide (cho production)
-
-### Bước 1: Đăng ký Tavily API key
-
-1. Truy cập [app.tavily.com](https://app.tavily.com) → Sign up (miễn phí, không cần credit card)
-2. Free tier: **1,000 credits/tháng** (basic search = 1 credit)
-3. Copy API key (dạng `tvly-xxxxxxxxxx`)
-
-### Bước 2: Cập nhật `.env`
-
-```env
-# ─── Tavily API Key ───────────────────────────────────────────────────────────
-TAVILY_API_KEY=tvly-your-actual-key-here
-
-# ─── Bật Self-eval + Tavily fallback ──────────────────────────────────────────
-SELF_EVAL_ENABLED=true
-SELF_EVAL_MIN_TOP_SCORE=0.72
-TAVILY_FALLBACK_ENABLED=true
-TAVILY_SEARCH_DEPTH=basic
-TAVILY_MAX_RESULTS=3
-```
-
-> [!IMPORTANT]
-> `SELF_EVAL_ENABLED=true` là **bắt buộc** để Tavily fallback hoạt động trong classic RAG flow. Nếu chỉ set key mà không bật self-eval → Tavily chỉ hoạt động qua agent `web_search` tool.
-
-### Bước 3: Restart backend
-
-```bash
-# Ctrl+C stop → restart
-python -m uvicorn api.main:app --reload
-```
-
-Logs expected:
-```
-RetrievalService: Tavily web search tool loaded.
-Self evaluator loaded.
+```python
+# pipeline/flows.py — _tavily_fallback() caller
+if (
+    self._tavily is not None
+    and self._settings.tavily_fallback_enabled   # ← thêm check này
+    and self._settings.self_eval_enabled
+):
+    result = await self._tavily_fallback(question, context)
 ```
 
 ---
 
-## Chi phí estimate
+### 7. Không có result cache — Tavily credits tốn cho duplicate queries
 
-| Scenario | Credits/call | Frequency/tháng | Credits/tháng |
-|:---|:---|:---|:---|
-| Self-eval fallback (basic) | 1 | ~75–150 (5-10% of ~50/ngày × 30) | 75–150 |
-| Agent web_search (basic) | 1 | ~20–50 (complex queries only) | 20–50 |
-| **Total** | | | **~100–200** |
+**Vấn đề:**  
+Cùng câu hỏi hỏi lại nhiều lần (phổ biến với câu hỏi về lịch học, deadline) → mỗi lần gọi Tavily API tốn 1 credit + thêm latency.
 
-Free tier 1,000 credits → dư sức.
+**Cách fix:**  
 
----
+```python
+# tools/tavily_search.py
+from cachetools import TTLCache
 
-## Verification Plan
+_search_cache: TTLCache = TTLCache(maxsize=200, ttl=3600)  # Cache 1 giờ
 
-### Automated Tests
+def search(self, query: str, include_domains=None, **kwargs) -> dict:
+    cache_key = f"{query}|{sorted(include_domains or [])}"
+    if cache_key in _search_cache:
+        return _search_cache[cache_key]
 
-```bash
-# Chạy tests hiện có — phải PASS không regression
-pytest tests/test_phase7.py::TestTavilyFallback -v
-
-# Chạy toàn bộ test suite
-pytest tests/ -x --timeout=60
+    result = self._do_search(query, include_domains=include_domains, **kwargs)
+    _search_cache[cache_key] = result
+    return result
 ```
 
-### Manual Verification
-
-1. **Verify key loaded**: Check startup logs cho `Tavily web search tool loaded.` + `Self evaluator loaded.`
-
-2. **Test self-eval fallback**: Hỏi câu mà DB thiếu thông tin:
-   ```
-   POST /chat/v3
-   {"question": "lịch thi cuối kỳ 20261 khi nào?"}
-   ```
-   → Xem `timings_ms` có `tavily_search` + `tavily_generate` (nếu self-eval fail)
-   → Hoặc có `self_eval_skipped` = 1.0 (nếu retrieval đã tốt)
-
-3. **Test agent web_search**: Force agent mode:
-   ```
-   POST /chat/v3
-   {"question": "so sánh quy chế thi giữa ĐHBK và ĐH Quốc gia", "mode": "agent"}
-   ```
-   → Xem agent trace có `web_search` trong `tools_used`
-
-4. **Verify frontend trace**: Kiểm tra Pipeline Trace panel hiển thị Tavily timing khi fallback triggered
-
-5. **Domain filtering**: Kiểm tra logs:
-   ```
-   Tavily search: query='...' (max=3, domains=5)
-   ```
-   → `domains=5` xác nhận HUST_DOMAINS được truyền
+TTL 1 giờ phù hợp với thông tin lịch học (thay đổi theo ngày, không theo giây). Với free tier 1,000 credits/tháng, cache tiết kiệm đáng kể trong giờ cao điểm.
 
 ---
 
-## File Changes Summary
+### 8. Agent tool description quá vague
 
-| File | Action | Mô tả |
-|:---|:---|:---|
-| [tavily_search.py](file:///d:/GR/src/RAG_v2/tools/tavily_search.py) | MODIFY | Thêm `HUST_DOMAINS`, `EDU_DOMAINS` constants; thêm `default_include_domains`, `include_domains`, `exclude_domains` params |
-| [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py) | MODIFY | `_tavily_fallback()`: truyền `include_domains=HUST_DOMAINS`, `max_results=3` |
-| [tool_adapters.py](file:///d:/GR/src/RAG_v2/agent/tool_adapters.py) | MODIFY | `_web_search()`: truyền `include_domains=HUST_DOMAINS + EDU_DOMAINS` |
-| [settings.py](file:///d:/GR/src/RAG_v2/config/settings.py) | MODIFY | Thêm `tavily_search_depth`, `tavily_max_results` fields |
-| [.env.example](file:///d:/GR/src/RAG_v2/.env.example) | MODIFY | Document Tavily config options |
-| `.env` (local) | MODIFY | Set `TAVILY_API_KEY`, bật `SELF_EVAL_ENABLED` + `TAVILY_FALLBACK_ENABLED` |
+**Vấn đề:**  
+Description hiện tại không cung cấp đủ signal để agent biết *khi nào không nên* gọi `web_search`, dẫn đến over-calling hoặc under-calling tool.
 
-> [!NOTE]
-> **Quan trọng**: `tavily_fallback_enabled` hiện **không được check** trong `flows.py` — Tavily fallback chỉ gated bởi `self_evaluator is not None` + `tavily_tool is not None`. Flag `tavily_fallback_enabled` chỉ nằm trong cfg dict cho logging/metrics. Không cần sửa logic gating vì mặc định `self_eval_enabled=False` đã đủ ngăn Tavily trigger khi không muốn.
+**Description hiện tại:**
+```
+"Tìm thông tin mới nhất trên internet qua Tavily.
+Chỉ dùng khi database không có kết quả hoặc cần thông tin rất mới."
+```
+
+**Description đề xuất:**
+```python
+description=(
+    "Tìm thông tin HUST real-time từ web (hust.edu.vn và nguồn giáo dục chính thống). "
+    "Dùng khi query chứa: năm học cụ thể (20261, 20262...), deadline/thời hạn, "
+    "lịch thi/đăng ký học phần, thông báo mới nhất, hoặc khi rag_search trả về "
+    "score thấp hoặc không có kết quả liên quan. "
+    "KHÔNG dùng cho câu hỏi khái niệm, quy trình chung, hoặc thông tin "
+    "ổn định đã có trong database nội bộ."
+)
+```
+
+---
+
+## Những gì đang tốt — không cần thay đổi
+
+| Component | Đánh giá |
+|:---|:---|
+| Retry logic với exponential backoff | Tốt — 1s → 2s → 4s, tách biệt auth error vs transient error |
+| Shared instance qua `RetrievalService` | Tốt — không tạo instance thừa, lifecycle rõ ràng |
+| Key validation (reject placeholder) | Tốt — fail fast thay vì silent error |
+| Error handling graceful degrade | Tốt — mọi lỗi đều return answer gốc, không crash |
+| Observability timings | Tốt — `tavily_search`, `tavily_generate`, `tavily_total` đầy đủ |
+| Lazy import Tavily package | Tốt — không block startup nếu không cài |
+| Domain URL normalization | Tốt — strip path trước khi gửi API call |
+
+---
+
+## Thứ tự ưu tiên thực hiện
+
+```
+Tuần 1 (Critical):
+  [1] Thêm _classify_time_sensitive() — rule-based, không tốn LLM call
+  [2] Pre-fetch Tavily trước stream nếu query time-sensitive
+
+Tuần 2 (High):
+  [3] Tổ chức lại domain tiers, loại báo tin tức khỏi EDU_DOMAINS
+  [4] Thêm _build_search_query() rewrite function
+  [5] Log reranker score distribution → calibrate threshold
+
+Tuần 3 (Medium):
+  [6] Gate tavily_fallback_enabled flag trong flows.py
+  [7] Thêm TTL cache cho Tavily results
+  [8] Cập nhật agent tool description
+```

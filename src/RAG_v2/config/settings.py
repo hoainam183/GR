@@ -157,6 +157,8 @@ class Settings(BaseSettings):
     tavily_fallback_enabled: bool = False
     tavily_search_depth: str = "basic"    # basic (1 credit) | advanced (2 credits)
     tavily_max_results: int = 3           # results per search
+    web_fallback_dynamic_collections: List[str] = ["kehoach"]
+    web_fallback_on_no_info: bool = True
 
     # --- Offline Evaluation ---
     post_index_eval_enabled: bool = True

@@ -496,6 +496,7 @@ async def chat_stream(
                         ),
                         "agent_trace": getattr(pipeline, "last_agent_trace", None),
                         "tools_used": getattr(pipeline, "last_tools_used", []),
+                        "tool_calls": getattr(pipeline, "last_tool_calls", []),
                         "iterations": getattr(pipeline, "last_iterations", 0),
                         "turn_id": getattr(pipeline, "last_turn_id", None),
                     }

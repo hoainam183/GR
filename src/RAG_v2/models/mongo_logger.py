@@ -175,7 +175,7 @@ class MongoLogger:
                 {
                     "rank": i,
                     "content": doc.get("text", ""),
-                    "score": float(doc.get("rerank_score", doc.get("score", 0.0))),
+                    "score": float(doc.get("rerank_score") or doc.get("score") or 0.0),
                     "metadata": doc.get("metadata", {}),
                 }
                 for i, doc in enumerate(raw_sources, 1)

@@ -60,8 +60,11 @@ class SelfEvaluator:
         result = self._parse_evaluation(raw)
 
         logger.info(
-            "SelfEval: pass=%s, relevance=%s, faithfulness=%s, completeness=%s — %s",
+            "SelfEval: pass=%s, status=%s, web=%s, relevance=%s, "
+            "faithfulness=%s, completeness=%s — %s",
             result.get("pass"),
+            result.get("answer_status"),
+            result.get("should_web_search"),
             result.get("relevance"),
             result.get("faithfulness"),
             result.get("completeness"),
@@ -96,12 +99,31 @@ class SelfEvaluator:
         try:
             cleaned = self._strip_markdown_fences(raw)
             data = json.loads(cleaned)
+            passed = bool(data.get("pass", False))
+            answer_status = str(
+                data.get(
+                    "answer_status",
+                    "answered" if passed else "insufficient",
+                )
+                or ""
+            ).strip()
+            if answer_status not in {"answered", "insufficient", "stale_risk"}:
+                answer_status = "answered" if passed else "insufficient"
+            should_web_raw = data.get("should_web_search")
+            should_web_search = (
+                bool(should_web_raw)
+                if should_web_raw is not None
+                else not passed
+            )
             # Ensure required keys exist
             return {
-                "pass": bool(data.get("pass", False)),
+                "pass": passed,
                 "relevance": data.get("relevance", "bad"),
                 "faithfulness": data.get("faithfulness", "hallucinated"),
                 "completeness": data.get("completeness", "incomplete"),
+                "answer_status": answer_status,
+                "should_web_search": should_web_search,
+                "web_search_query": str(data.get("web_search_query", "") or ""),
                 "reason": data.get("reason", ""),
                 "raw_response": raw,
             }
@@ -115,6 +137,9 @@ class SelfEvaluator:
                 "relevance": "bad",
                 "faithfulness": "hallucinated",
                 "completeness": "incomplete",
+                "answer_status": "insufficient",
+                "should_web_search": True,
+                "web_search_query": "",
                 "reason": f"Failed to parse evaluation: {raw[:200]}",
                 "raw_response": raw,
             }

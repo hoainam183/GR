@@ -206,9 +206,99 @@ class TavilySearchTool:
         logger.error("Tavily search failed after %d attempts", self.max_retries)
         raise last_exc  # type: ignore[misc]
 
+    def extract(
+        self,
+        urls: List[str],
+        extract_depth: Literal["basic", "advanced"] = "basic",
+        query: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Fetch and extract content directly from specific URLs (bypass index).
+
+        Use this for dynamic pages (e.g. ``?kehoach=29237``) that web crawlers
+        may not have indexed.
+
+        Args:
+            urls: List of URLs to extract content from.
+            extract_depth: ``"basic"`` (fast) or ``"advanced"`` (deeper extraction).
+            query: Optional query hint to guide content extraction.
+
+        Returns:
+            Dict with keys:
+            - ``results`` — list of dicts (``url``, ``title``, ``content``)
+            - ``failed_results`` — list of dicts (``url``, ``error``)
+            - ``context`` — pre-formatted string suitable for LLM prompts
+        """
+        if not urls:
+            return {"results": [], "failed_results": [], "context": ""}
+
+        logger.info("Tavily extract: %d URL(s), depth=%s", len(urls), extract_depth)
+
+        # Rate limiting
+        now = time.monotonic()
+        elapsed = now - self._last_call_time
+        if elapsed < DEFAULT_MIN_INTERVAL:
+            time.sleep(DEFAULT_MIN_INTERVAL - elapsed)
+
+        last_exc: Optional[Exception] = None
+        for attempt in range(self.max_retries):
+            try:
+                self._last_call_time = time.monotonic()
+                extract_kwargs: Dict[str, Any] = {
+                    "urls": urls,
+                    "extract_depth": extract_depth,
+                }
+                if query:
+                    extract_kwargs["query"] = query
+                response = self._client.extract(**extract_kwargs)
+
+                results = self._parse_extract_results(response)
+                failed = [
+                    {"url": r.get("url", ""), "error": r.get("error", "")}
+                    for r in response.get("failed_results", [])
+                ]
+                context = self._format_context(results)
+                return {
+                    "results": results,
+                    "failed_results": failed,
+                    "context": context,
+                }
+            except self._invalid_key_error:
+                logger.error("Tavily API key is invalid or missing, aborting")
+                raise
+            except Exception as exc:
+                last_exc = exc
+                if attempt < self.max_retries - 1:
+                    delay = self.min_retry_delay * (2**attempt)
+                    logger.warning(
+                        "Tavily extract attempt %d/%d failed: %s. Retrying in %.1fs",
+                        attempt + 1,
+                        self.max_retries,
+                        exc,
+                        delay,
+                    )
+                    time.sleep(delay)
+
+        logger.error("Tavily extract failed after %d attempts", self.max_retries)
+        raise last_exc  # type: ignore[misc]
+
     # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _parse_extract_results(response: Dict[str, Any]) -> List[Dict[str, str]]:
+        """Extract structured results from the raw Tavily extract response."""
+        parsed: List[Dict[str, str]] = []
+        for item in response.get("results", []):
+            content = item.get("raw_content") or item.get("content", "")
+            parsed.append(
+                {
+                    "title": item.get("title", ""),
+                    "url": item.get("url", ""),
+                    "content": content,
+                }
+            )
+        return parsed
 
     @staticmethod
     def _parse_results(response: Dict[str, Any]) -> List[Dict[str, str]]:

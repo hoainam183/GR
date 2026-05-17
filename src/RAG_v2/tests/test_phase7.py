@@ -131,6 +131,8 @@ class TestSelfEvaluationActivation:
             '{"pass": true, "relevance": "good", "faithfulness": "grounded", "completeness": "complete", "reason": "OK"}'
         )
         assert result["pass"] is True
+        assert result["answer_status"] == "answered"
+        assert result["should_web_search"] is False
 
     def test_parse_eval_pass_false(self) -> None:
         from llm.self_eval import SelfEvaluator
@@ -141,6 +143,24 @@ class TestSelfEvaluationActivation:
             '{"pass": false, "relevance": "bad", "faithfulness": "hallucinated", "completeness": "incomplete", "reason": "bad"}'
         )
         assert result["pass"] is False
+        assert result["answer_status"] == "insufficient"
+        assert result["should_web_search"] is True
+
+    def test_parse_eval_structured_web_search_fields(self) -> None:
+        from llm.self_eval import SelfEvaluator
+        evaluator = SelfEvaluator.__new__(SelfEvaluator)
+        evaluator.model = "test"
+        evaluator.temperature = 0.0
+        result = evaluator._parse_evaluation(
+            '{"pass": true, "relevance": "good", "faithfulness": "grounded", '
+            '"completeness": "partial", "answer_status": "stale_risk", '
+            '"should_web_search": true, "web_search_query": "site:ctt.hust.edu.vn test", '
+            '"reason": "dynamic"}'
+        )
+        assert result["pass"] is True
+        assert result["answer_status"] == "stale_risk"
+        assert result["should_web_search"] is True
+        assert result["web_search_query"] == "site:ctt.hust.edu.vn test"
 
     def test_parse_invalid_json_returns_fail(self) -> None:
         from llm.self_eval import SelfEvaluator
@@ -149,6 +169,7 @@ class TestSelfEvaluationActivation:
         evaluator.temperature = 0.0
         result = evaluator._parse_evaluation("not json at all")
         assert result["pass"] is False
+        assert result["should_web_search"] is True
 
 
 class TestTavilyFallback:
@@ -198,6 +219,8 @@ class TestTavilyFallback:
         assert mock_tavily.search.call_args.kwargs["max_results"] == 2
         assert mock_tavily.search.call_args.kwargs["search_depth"] == "advanced"
         assert result["answer"] == "better answer from web"
+        assert result["tools_used"] == ["tavily_search"]
+        assert result["tool_calls"][0]["args"]["query"] == "test"
 
     def test_self_eval_fail_respects_tavily_disabled(self) -> None:
         from pipeline.flows import rag_flow
@@ -223,6 +246,213 @@ class TestTavilyFallback:
         assert not mock_tavily.search.called
         assert result["answer"] == "bad answer"
         assert result["timings_ms"]["tavily_skipped"] == 1.0
+
+    def test_no_info_answer_triggers_tavily_without_hardcoded_query(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        cfg.update({
+            "tavily_fallback_enabled": True,
+            "tavily_max_results": 2,
+            "tavily_search_depth": "basic",
+        })
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate.side_effect = [
+            "Tôi không tìm thấy thông tin này trong tài liệu hiện có.",
+            "answer from official web",
+        ]
+        mock_tavily = MagicMock()
+        mock_tavily.search.return_value = {
+            "context": "official web context",
+            "results": [
+                {
+                    "title": "Official notice",
+                    "url": "https://ctt.hust.edu.vn/test",
+                    "content": "official web context",
+                }
+            ],
+        }
+
+        result = rag_flow(
+            question="câu hỏi thông tin mới", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=None,
+            tavily_tool=mock_tavily, cfg=cfg,
+        )
+
+        assert mock_tavily.search.called
+        assert result["answer"] == "answer from official web"
+        assert result["timings_ms"]["web_fallback_used"] == 1.0
+        assert result["answer_quality_gate"]["reasons"] == ["answer_no_info"]
+        assert result["sources"][0]["collection"] == "web"
+        assert result["sources"][0]["metadata"]["provider"] == "tavily"
+
+    def test_answer_ok_does_not_call_tavily(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, mock_chat, cfg = _make_pipeline_mocks()
+        cfg["tavily_fallback_enabled"] = True
+        mock_chat.generate.return_value = "Đây là câu trả lời có căn cứ."
+        mock_self_eval = MagicMock()
+        mock_self_eval.evaluate.return_value = {
+            "pass": True,
+            "answer_status": "answered",
+            "should_web_search": False,
+            "reason": "ok",
+        }
+        mock_tavily = MagicMock()
+
+        result = rag_flow(
+            question="học phần X là gì", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=mock_self_eval,
+            tavily_tool=mock_tavily, cfg=cfg,
+        )
+
+        assert result["answer"] == "Đây là câu trả lời có căn cứ."
+        assert not mock_tavily.search.called
+        assert result["tools_used"] == []
+
+    def test_dynamic_collection_bypasses_query_cache(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, mock_chat, cfg = _make_pipeline_mocks()
+        cfg.update({
+            "tavily_fallback_enabled": False,
+            "collections": ["stsv", "quydinh", "kehoach", "ctdt"],
+        })
+        mock_cache = MagicMock()
+        mock_cache.get_by_query.return_value = {
+            "answer": "cached stale answer",
+            "sources": [],
+        }
+        routing_result = {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": ["kehoach"],
+            "confidence": 0.9,
+            "probabilities": {"kehoach": 0.9},
+        }
+
+        rag_flow(
+            question="kế hoạch học kỳ hè", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=None,
+            tavily_tool=None, cfg=cfg, routing_result=routing_result,
+            llm_cache=mock_cache,
+        )
+
+        assert not mock_cache.get_by_query.called
+        assert not mock_cache.get.called
+        assert not mock_cache.put_by_query.called
+
+    def test_dynamic_kehoach_query_calls_tavily_without_case_hardcode(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        cfg.update({
+            "tavily_fallback_enabled": True,
+            "collections": ["stsv", "quydinh", "kehoach", "ctdt"],
+        })
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate.side_effect = [
+            "Khóa K70 sẽ không mở đăng ký học kỳ hè 20253.",
+            "answer from ctt",
+        ]
+        mock_tavily = MagicMock()
+        mock_tavily.search.return_value = {
+            "context": "ctt official context",
+            "results": [
+                {
+                    "title": "Kế hoạch học GDPQ",
+                    "url": "https://ctt.hust.edu.vn/post",
+                    "content": "ctt official context",
+                }
+            ],
+        }
+        routing_result = {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": ["kehoach"],
+            "confidence": 0.9,
+            "probabilities": {"kehoach": 0.9},
+        }
+
+        result = rag_flow(
+            question="kế hoạch học GDPQ kì hè K70", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=None,
+            tavily_tool=mock_tavily, cfg=cfg, routing_result=routing_result,
+        )
+
+        assert mock_tavily.search.called
+        assert mock_tavily.search.call_args.args[0] == "kế hoạch học GDPQ kì hè K70"
+        assert "dynamic_query" in result["answer_quality_gate"]["reasons"]
+        assert result["answer"] == "answer from ctt"
+
+    def test_no_info_cached_answer_is_ignored(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, mock_chat, cfg = _make_pipeline_mocks()
+        mock_chat.generate.return_value = "fresh grounded answer"
+        mock_cache = MagicMock()
+        mock_cache.get_by_query.return_value = {
+            "answer": "Tôi không tìm thấy thông tin này trong tài liệu hiện có.",
+            "sources": [],
+        }
+        mock_cache.get.return_value = None
+
+        result = rag_flow(
+            question="học phần X là gì", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=None,
+            tavily_tool=None, cfg=cfg, llm_cache=mock_cache,
+        )
+
+        assert mock_cache.get_by_query.called
+        assert mock_searcher.search.called
+        assert result["answer"] == "fresh grounded answer"
+        assert result["timings_ms"]["query_cache_ignored_no_info"] == 1.0
+
+    def test_cache_stores_final_answer_after_tavily_fallback(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        cfg["tavily_fallback_enabled"] = True
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate.side_effect = [
+            "Tôi không tìm thấy thông tin này trong tài liệu hiện có.",
+            "final web answer",
+        ]
+        mock_tavily = MagicMock()
+        mock_tavily.search.return_value = {
+            "context": "web context",
+            "results": [
+                {
+                    "title": "Official source",
+                    "url": "https://ctt.hust.edu.vn/source",
+                    "content": "web context",
+                }
+            ],
+        }
+        mock_cache = MagicMock()
+        mock_cache.get_by_query.return_value = None
+        mock_cache.get.return_value = None
+
+        result = rag_flow(
+            question="câu hỏi mới", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=None,
+            tavily_tool=mock_tavily, cfg=cfg, llm_cache=mock_cache,
+        )
+
+        assert result["answer"] == "final web answer"
+        assert mock_cache.put.called
+        assert mock_cache.put.call_args.args[3] == "final web answer"
+        assert not mock_cache.put_by_query.called
 
     def test_bge_raw_logit_does_not_skip_self_eval_by_default(self) -> None:
         from pipeline.flows import rag_flow

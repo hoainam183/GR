@@ -103,6 +103,9 @@ Trả lời bằng một đối tượng JSON duy nhất:
   "relevance": "good" | "partial" | "bad",
   "faithfulness": "grounded" | "partially_grounded" | "hallucinated",
   "completeness": "complete" | "partial" | "incomplete",
+  "answer_status": "answered" | "insufficient" | "stale_risk",
+  "should_web_search": true/false,
+  "web_search_query": "<truy vấn ngắn gọn để tìm trên nguồn chính thức HUST nếu cần>",
   "reason": "<giải thích ngắn gọn bằng tiếng Việt>"
 }
 
@@ -111,6 +114,15 @@ Quy tắc:
 và completeness ít nhất là "partial".
 - Nghiêm ngặt về bịa đặt: nếu câu trả lời chứa thông tin không có trong ngữ cảnh, \
 đặt faithfulness là "hallucinated" và pass là false.
+- Nếu câu trả lời nói không tìm thấy thông tin, không có thông tin, chưa có thông tin, \
+hoặc không đủ cơ sở để trả lời, đặt "answer_status" là "insufficient" và \
+"should_web_search" là true.
+- Nếu câu hỏi hỏi về thông tin có thể thay đổi theo thời gian như lịch, kế hoạch, \
+thông báo, thời hạn, đăng ký học phần, kỳ học, học kỳ hè, nhưng ngữ cảnh không đủ \
+mới hoặc không đủ cụ thể, đặt "answer_status" là "stale_risk" và \
+"should_web_search" là true.
+- Nếu cần web search, đặt "web_search_query" là câu truy vấn độc lập, ngắn gọn, \
+giữ các thực thể quan trọng trong câu hỏi gốc. Nếu không cần, để chuỗi rỗng.
 - KHÔNG viết bất kỳ văn bản nào ngoài đối tượng JSON.
 - KHÔNG bọc JSON trong markdown code block (```). Trả về JSON thuần túy."""
 

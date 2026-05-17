@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import re
 import time
+import unicodedata
 from datetime import datetime
 from typing import Any, Dict, Generator, List, Optional
 
@@ -72,6 +73,26 @@ _LIST_QUERY_RE = re.compile(
 _LIST_TOP_K_MULTIPLIER = 2   # double top_k for list queries
 _LIST_TOP_K_MAX = 12         # cap to avoid excessive reranking latency
 
+_WEB_FALLBACK_DEFAULT_DYNAMIC_COLLECTIONS = ("kehoach",)
+_WEB_FALLBACK_NO_INFO_PATTERNS = (
+    "toi khong tim thay thong tin nay trong tai lieu hien co",
+    "khong tim thay thong tin",
+    "khong co thong tin",
+    "chua co thong tin",
+    "khong du co so",
+    "khong du thong tin",
+    "tai lieu hien co khong",
+    "chua tim thay",
+)
+_WEB_FALLBACK_DYNAMIC_QUERY_RE = re.compile(
+    r"\b(?:"
+    r"ke\s*hoach|thong\s*bao|lich\s*(?:thi|dang\s*ky|hoc)|"
+    r"han\s*(?:dang\s*ky|nop)|deadline|ky\s*he|ki\s*he|hoc\s*ky\s*he|"
+    r"nam\s*hoc\s*\d{4}\s*[-/]\s*\d{4}|20\d{2}3|20\d{2}1"
+    r")\b",
+    re.IGNORECASE,
+)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Helper
@@ -87,8 +108,15 @@ def _log_timings(flow_name: str, timings_ms: Dict[str, Any]) -> None:
     """Log timing breakdown sorted by slowest stage first."""
     if not timings_ms:
         return
+    numeric_timings = {
+        stage: duration
+        for stage, duration in timings_ms.items()
+        if isinstance(duration, (int, float))
+    }
+    if not numeric_timings:
+        return
     ordered = sorted(
-        timings_ms.items(), key=lambda item: item[1], reverse=True
+        numeric_timings.items(), key=lambda item: item[1], reverse=True
     )
     summary = ", ".join(
         f"{stage}={duration:.1f}" for stage, duration in ordered
@@ -163,6 +191,188 @@ def _safe_float(value: Any) -> float:
         return float(value)
     except (TypeError, ValueError):
         return 0.0
+
+
+def _cfg_bool(cfg: Dict[str, Any], key: str, default: bool) -> bool:
+    """Read a boolean config value with string/env compatibility."""
+    value = cfg.get(key, default)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return bool(value)
+
+
+def _cfg_str_list(
+    cfg: Dict[str, Any],
+    key: str,
+    default: tuple[str, ...],
+) -> List[str]:
+    """Read a list config value from a list/tuple/set or comma string."""
+    value = cfg.get(key, default)
+    if isinstance(value, str):
+        items = value.split(",")
+    elif isinstance(value, (list, tuple, set)):
+        items = list(value)
+    else:
+        items = list(default)
+    return [str(item).strip().lower() for item in items if str(item).strip()]
+
+
+def _fold_vietnamese(text: str) -> str:
+    """Lowercase and strip Vietnamese accents for robust text matching."""
+    decomposed = unicodedata.normalize("NFD", text or "")
+    without_marks = "".join(
+        ch for ch in decomposed if unicodedata.category(ch) != "Mn"
+    )
+    return without_marks.replace("đ", "d").replace("Đ", "d").lower()
+
+
+def _answer_has_no_info_signal(answer: str) -> bool:
+    """Detect local-RAG no-information answers without another LLM call."""
+    folded = _fold_vietnamese(answer)
+    return any(pattern in folded for pattern in _WEB_FALLBACK_NO_INFO_PATTERNS)
+
+
+def _selected_collections(
+    *,
+    target_collections: Optional[List[str]],
+    routing_result: Optional[Dict[str, Any]],
+) -> set[str]:
+    """Return collection names selected by routing/collection selection."""
+    selected = {
+        str(col).strip().lower()
+        for col in (target_collections or [])
+        if str(col).strip()
+    }
+    if routing_result:
+        domain = routing_result.get("domain")
+        if domain:
+            selected.add(str(domain).strip().lower())
+        domains = routing_result.get("domains") or []
+        for item in domains:
+            if str(item).strip():
+                selected.add(str(item).strip().lower())
+    return selected
+
+
+def _is_dynamic_web_query(
+    *,
+    question: str,
+    search_query: str,
+    target_collections: Optional[List[str]],
+    routing_result: Optional[Dict[str, Any]],
+    cfg: Dict[str, Any],
+) -> bool:
+    """Return True for queries whose answer may change faster than local index."""
+    dynamic_collections = set(
+        _cfg_str_list(
+            cfg,
+            "web_fallback_dynamic_collections",
+            _WEB_FALLBACK_DEFAULT_DYNAMIC_COLLECTIONS,
+        )
+    )
+    selected = _selected_collections(
+        target_collections=target_collections,
+        routing_result=routing_result,
+    )
+    if selected & dynamic_collections:
+        return True
+
+    folded = _fold_vietnamese(f"{question}\n{search_query}")
+    return bool(_WEB_FALLBACK_DYNAMIC_QUERY_RE.search(folded))
+
+
+def _should_bypass_query_cache(
+    *,
+    question: str,
+    search_query: str,
+    target_collections: Optional[List[str]],
+    routing_result: Optional[Dict[str, Any]],
+    cfg: Dict[str, Any],
+) -> bool:
+    """Avoid early cache hits for dynamic data that may need live refresh."""
+    return _is_dynamic_web_query(
+        question=question,
+        search_query=search_query,
+        target_collections=target_collections,
+        routing_result=routing_result,
+        cfg=cfg,
+    )
+
+
+def _build_answer_quality_gate(
+    *,
+    question: str,
+    search_query: str,
+    answer: str,
+    reranked: List[Dict[str, Any]],
+    target_collections: Optional[List[str]],
+    routing_result: Optional[Dict[str, Any]],
+    eval_result: Optional[Dict[str, Any]],
+    cfg: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Decide whether local RAG needs official web fallback."""
+    no_info = (
+        _cfg_bool(cfg, "web_fallback_on_no_info", True)
+        and _answer_has_no_info_signal(answer)
+    )
+    no_sources = len(reranked) == 0
+    dynamic_query = _is_dynamic_web_query(
+        question=question,
+        search_query=search_query,
+        target_collections=target_collections,
+        routing_result=routing_result,
+        cfg=cfg,
+    )
+    eval_failed = bool(eval_result is not None and not eval_result.get("pass", True))
+    eval_wants_web = bool(eval_result and eval_result.get("should_web_search"))
+
+    # Tavily chỉ trigger khi LLM trả lời "không tìm thấy" hoặc không có doc nào.
+    # dynamic_query, eval_failed, eval_wants_web KHÔNG tự mình trigger Tavily nữa.
+    reasons: List[str] = []
+    if no_info:
+        reasons.append("answer_no_info")
+    if no_sources:
+        reasons.append("no_sources")
+
+    # Tracked for answer_status / debugging purposes only (not Tavily triggers)
+    informational_notes: List[str] = []
+    if eval_failed:
+        informational_notes.append("self_eval_failed")
+    if eval_wants_web:
+        informational_notes.append("self_eval_requested_web")
+    if dynamic_query:
+        informational_notes.append("dynamic_query")
+
+    answer_status = "answered"
+    if no_info or no_sources:
+        answer_status = "insufficient"
+    elif dynamic_query:
+        answer_status = "stale_risk"
+    elif eval_result:
+        answer_status = str(eval_result.get("answer_status") or "answered")
+        if answer_status not in {"answered", "insufficient", "stale_risk"}:
+            answer_status = "answered"
+
+    should_web_search = bool(reasons)
+    web_query = ""
+    if eval_result:
+        web_query = str(eval_result.get("web_search_query") or "").strip()
+    if not web_query:
+        web_query = (search_query or question).strip()
+
+    return {
+        "answer_status": answer_status,
+        "should_web_search": should_web_search,
+        "web_search_query": web_query,
+        "reasons": reasons,
+        "informational_notes": informational_notes,
+        "no_info": no_info,
+        "no_sources": no_sources,
+        "dynamic_query": dynamic_query,
+        "self_eval_failed": eval_failed,
+    }
 
 
 def _dedup_retrieval_candidates(
@@ -345,6 +555,18 @@ def _build_rerank_trace(
             }
         )
     return trace
+
+
+def _best_explicit_rerank_score(
+    documents: List[Dict[str, Any]],
+) -> Optional[float]:
+    """Return max rerank_score, or None when docs do not expose that field."""
+    scores = [
+        _safe_float(doc.get("rerank_score"))
+        for doc in documents
+        if isinstance(doc, dict) and doc.get("rerank_score") is not None
+    ]
+    return max(scores) if scores else None
 
 
 def _trim_history(
@@ -678,35 +900,51 @@ def rag_flow(
     step_t0 = time.perf_counter()
     trimmed = _trim_history(history)
     timings_ms["trim_history"] = _elapsed_ms(step_t0)
+    bypass_query_cache = _should_bypass_query_cache(
+        question=question,
+        search_query=question,
+        target_collections=None,
+        routing_result=routing_result,
+        cfg=cfg,
+    )
+    if bypass_query_cache:
+        timings_ms["query_cache_bypassed"] = 1.0
 
     # ── Pre-retrieval query cache (P0) ───────────────────────────────────────
     # Check before reflection + retrieval to save the full ~13-25 s pipeline
     # cost for repeated identical queries.  Only fires when the cache backend
     # exposes get_by_query (LLMResponseCache with Redis).
-    if llm_cache is not None and hasattr(llm_cache, "get_by_query"):
+    if (
+        llm_cache is not None
+        and not bypass_query_cache
+        and hasattr(llm_cache, "get_by_query")
+    ):
         _qcached = llm_cache.get_by_query(question, chat_model.model)
         if _qcached is not None:
-            timings_ms["query_cache"] = "HIT"
-            timings_ms["flow_total"] = _elapsed_ms(flow_t0)
-            return {
-                "question": question,
-                "answer": _qcached["answer"],
-                "sources": _qcached["sources"],
-                "num_sources": len(_qcached["sources"]),
-                "intent": "rag",
-                "model_name": chat_model.model,
-                "timings_ms": timings_ms,
-                "cache_hit": True,
-                "query_cache_hit": True,
-                "target_collections": None,
-                "collection_scores": {},
-                "reflected_question": question,
-                "routing_probabilities": None,
-                "reflection_prompt": None,
-                "llm_prompt": "(query_cached)",
-                "applied_filters": None,
-                "collection_results": None,
-            }
+            if _answer_has_no_info_signal(str(_qcached.get("answer", ""))):
+                timings_ms["query_cache_ignored_no_info"] = 1.0
+            else:
+                timings_ms["query_cache_hit"] = 1.0
+                timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+                return {
+                    "question": question,
+                    "answer": _qcached["answer"],
+                    "sources": _qcached["sources"],
+                    "num_sources": len(_qcached["sources"]),
+                    "intent": "rag",
+                    "model_name": chat_model.model,
+                    "timings_ms": timings_ms,
+                    "cache_hit": True,
+                    "query_cache_hit": True,
+                    "target_collections": None,
+                    "collection_scores": {},
+                    "reflected_question": question,
+                    "routing_probabilities": None,
+                    "reflection_prompt": None,
+                    "llm_prompt": "(query_cached)",
+                    "applied_filters": None,
+                    "collection_results": None,
+                }
 
     # 1. Reflection — rewrite query + extract entities
     search_query = question
@@ -809,6 +1047,15 @@ def rag_flow(
         target_collections=target_collections,
         routing_result=routing_result,
     )
+    dynamic_web_query = _is_dynamic_web_query(
+        question=question,
+        search_query=search_query,
+        target_collections=target_collections,
+        routing_result=routing_result,
+        cfg=cfg,
+    )
+    if dynamic_web_query:
+        timings_ms["dynamic_web_query"] = 1.0
 
     top_k_value = _resolve_top_k(cfg.get("top_k", 5), question)
     raw_candidate_k = _retrieval_candidate_k(top_k_value)
@@ -1046,15 +1293,13 @@ def rag_flow(
     # scores below the threshold for otherwise topically-relevant documents.
     # Also trigger when all surviving docs have negative scores (only table-docs
     # passed through the relaxed table_score_threshold but no regular content matched).
-    _best_rerank_score = max(
-        (d.get("rerank_score", -999.0) for d in reranked), default=-999.0
-    ) if reranked else -999.0
-    _rerank_quality_ok = _best_rerank_score >= 0.0
+    _best_rerank_score = _best_explicit_rerank_score(reranked)
+    _rerank_quality_ok = _best_rerank_score is None or _best_rerank_score >= 0.0
     if raw_results and not _rerank_quality_ok:
         logger.info(
             "Reranker gave no positive-score candidates (best=%.3f, n=%d). "
             "Retrying rerank with original question.",
-            _best_rerank_score,
+            _best_rerank_score if _best_rerank_score is not None else -999.0,
             len(raw_results),
         )
         reranked = reranker.rerank(
@@ -1062,10 +1307,11 @@ def rag_flow(
             documents=raw_results,
             top_k=top_k_value,
         )
-        timings_ms["rerank_fallback"] = True
-        if not reranked or max(
-            (d.get("rerank_score", -999.0) for d in reranked), default=-999.0
-        ) < 0.0:
+        timings_ms["rerank_fallback"] = 1.0
+        retry_best_score = _best_explicit_rerank_score(reranked)
+        if not reranked or (
+            retry_best_score is not None and retry_best_score < 0.0
+        ):
             # Last resort: use raw top-k by fusion score without threshold.
             logger.info(
                 "Reranker still no positive candidates after fallback. "
@@ -1075,7 +1321,7 @@ def rag_flow(
             reranked = sorted(
                 raw_results, key=lambda d: d.get("score", 0.0), reverse=True
             )[:top_k_value]
-            timings_ms["rerank_raw_fallback"] = True
+            timings_ms["rerank_raw_fallback"] = 1.0
 
     # 5.1 Document Validity Filtering
     if validity_filter is not None:
@@ -1090,35 +1336,38 @@ def rag_flow(
         timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
 
     # ── LLM Response Cache Check (Phase 2) ─────────────────────────
-    if llm_cache is not None:
+    if llm_cache is not None and not dynamic_web_query:
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
         cached = llm_cache.get(question, doc_ids, chat_model.model)
         if cached is not None:
-            logger.info("LLM cache HIT for query: %r", question[:80])
-            timings_ms["llm_cache"] = "HIT"
-            timings_ms["flow_total"] = _elapsed_ms(flow_t0)
-            return {
-                "question": question,
-                "answer": cached["answer"],
-                "sources": cached["sources"],
-                "num_sources": len(cached["sources"]),
-                "intent": "rag",
-                "model_name": chat_model.model,
-                "target_collections": target_collections,
-                "collection_scores": _build_collection_scores(
-                    all_collections=cfg.get("collections"),
-                    target_collections=target_collections,
-                    routing_result=routing_result,
-                ),
-                "reflected_question": search_query,
-                "timings_ms": timings_ms,
-                "routing_probabilities": routing_probabilities,
-                "reflection_prompt": reflection_prompt,
-                "llm_prompt": "(cached)",
-                "applied_filters": search_trace.get("filters"),
-                "collection_results": search_trace.get("collection_counts"),
-                "cache_hit": True,
-            }
+            if _answer_has_no_info_signal(str(cached.get("answer", ""))):
+                timings_ms["llm_cache_ignored_no_info"] = 1.0
+            else:
+                logger.info("LLM cache HIT for query: %r", question[:80])
+                timings_ms["llm_cache_hit"] = 1.0
+                timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+                return {
+                    "question": question,
+                    "answer": cached["answer"],
+                    "sources": cached["sources"],
+                    "num_sources": len(cached["sources"]),
+                    "intent": "rag",
+                    "model_name": chat_model.model,
+                    "target_collections": target_collections,
+                    "collection_scores": _build_collection_scores(
+                        all_collections=cfg.get("collections"),
+                        target_collections=target_collections,
+                        routing_result=routing_result,
+                    ),
+                    "reflected_question": search_query,
+                    "timings_ms": timings_ms,
+                    "routing_probabilities": routing_probabilities,
+                    "reflection_prompt": reflection_prompt,
+                    "llm_prompt": "(cached)",
+                    "applied_filters": search_trace.get("filters"),
+                    "collection_results": search_trace.get("collection_counts"),
+                    "cache_hit": True,
+                }
 
 
     # 6. Format context — inject profile so user facts survive trimming.
@@ -1199,15 +1448,6 @@ def rag_flow(
         timings_ms["context_recovery"] = 1.0
     timings_ms["generate"] = _elapsed_ms(generate_t0)
 
-    # Cache newly generated response (Phase 2)
-    if llm_cache is not None:
-        doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
-        llm_cache.put(question, doc_ids, chat_model.model, answer, reranked)
-
-    # Also populate the pre-retrieval query-only cache for future early hits.
-    if llm_cache is not None and hasattr(llm_cache, "put_by_query"):
-        llm_cache.put_by_query(question, chat_model.model, answer, reranked)
-
     # 8. Self-evaluation — only when retrieval confidence is low.
     # Saves 11-20s per query when retrieval already found a relevant chunk.
     top_score = 0.0
@@ -1221,6 +1461,7 @@ def rag_flow(
         _SELF_EVAL_SCORE_THRESHOLD,
     )
     run_self_eval = self_evaluator is not None and top_score < self_eval_threshold
+    eval_result: Optional[Dict[str, Any]] = None
     if run_self_eval and self_evaluator is not None:
         self_eval_t0 = time.perf_counter()
         try:
@@ -1233,36 +1474,6 @@ def rag_flow(
                 query=question, context=eval_context, response=answer
             )
             timings_ms["self_eval"] = _elapsed_ms(self_eval_t0)
-            if not eval_result.get("pass", True):
-                if cfg.get("tavily_fallback_enabled", False):
-                    logger.info(
-                        "Self-eval FAILED (%s), attempting Tavily fallback",
-                        eval_result.get("reason", "")[:60],
-                    )
-                    try:
-                        tavily_max_results = int(
-                            cfg.get("tavily_max_results", 3) or 3
-                        )
-                    except (TypeError, ValueError):
-                        tavily_max_results = 3
-                    answer, fallback_timings = _tavily_fallback(
-                        question=question,
-                        answer=answer,
-                        tavily_tool=tavily_tool,
-                        chat_model=chat_model,
-                        history=trimmed,
-                        max_results=tavily_max_results,
-                        search_depth=str(
-                            cfg.get("tavily_search_depth", "basic") or "basic"
-                        ),
-                    )
-                    timings_ms.update(fallback_timings)
-                else:
-                    timings_ms["tavily_skipped"] = 1.0
-                    logger.info(
-                        "Self-eval FAILED (%s), Tavily fallback disabled",
-                        eval_result.get("reason", "")[:60],
-                    )
         except Exception:
             timings_ms["self_eval"] = _elapsed_ms(self_eval_t0)
             logger.warning(
@@ -1275,6 +1486,78 @@ def rag_flow(
             top_score,
             self_eval_threshold,
         )
+
+    gate_t0 = time.perf_counter()
+    answer_quality_gate = _build_answer_quality_gate(
+        question=question,
+        search_query=search_query,
+        answer=answer,
+        reranked=reranked,
+        target_collections=target_collections,
+        routing_result=routing_result,
+        eval_result=eval_result,
+        cfg=cfg,
+    )
+    timings_ms["answer_quality_gate"] = _elapsed_ms(gate_t0)
+    timings_ms[f"answer_status_{answer_quality_gate['answer_status']}"] = 1.0
+    if answer_quality_gate["should_web_search"]:
+        timings_ms["web_fallback_requested"] = 1.0
+        logger.info(
+            "AnswerQualityGate requested web fallback: status=%s reasons=%s",
+            answer_quality_gate["answer_status"],
+            answer_quality_gate["reasons"],
+        )
+
+    web_fallback_used = False
+    web_fallback_sources: List[Dict[str, Any]] = []
+    web_fallback_query = str(
+        answer_quality_gate.get("web_search_query") or search_query
+    )
+    if answer_quality_gate["should_web_search"]:
+        if cfg.get("tavily_fallback_enabled", False):
+            try:
+                tavily_max_results = int(cfg.get("tavily_max_results", 3) or 3)
+            except (TypeError, ValueError):
+                tavily_max_results = 3
+            fallback_result = _tavily_fallback_result(
+                question=question,
+                answer=answer,
+                tavily_tool=tavily_tool,
+                chat_model=chat_model,
+                history=trimmed,
+                max_results=tavily_max_results,
+                search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
+                search_query=web_fallback_query,
+            )
+            timings_ms.update(fallback_result["timings"])
+            if fallback_result["used"]:
+                answer = str(fallback_result["answer"])
+                web_fallback_used = True
+                timings_ms["web_fallback_used"] = 1.0
+                web_fallback_sources = list(fallback_result.get("sources") or [])
+                if web_fallback_sources:
+                    reranked = web_fallback_sources + reranked
+        else:
+            timings_ms["tavily_skipped"] = 1.0
+            logger.info("AnswerQualityGate requested web fallback, but Tavily is disabled")
+
+    cache_final_answer = (
+        not answer_quality_gate["should_web_search"]
+        or web_fallback_used
+    )
+    if llm_cache is not None and cache_final_answer:
+        doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+        llm_cache.put(question, doc_ids, chat_model.model, answer, reranked)
+
+    if (
+        llm_cache is not None
+        and hasattr(llm_cache, "put_by_query")
+        and cache_final_answer
+        and not web_fallback_used
+        and not dynamic_web_query
+        and not answer_quality_gate["should_web_search"]
+    ):
+        llm_cache.put_by_query(question, chat_model.model, answer, reranked)
     timings_ms["retrieval_total"] = round(
         timings_ms.get("embed_bge", 0.0)
         + timings_ms.get("embed_e5", 0.0)
@@ -1306,6 +1589,25 @@ def rag_flow(
         "fusion_weights": search_trace.get("fusion_weights"),
         "context_trace": context_trace,
         "rerank_trace": rerank_trace,
+        "answer_status": answer_quality_gate["answer_status"],
+        "answer_quality_gate": answer_quality_gate,
+        "tools_used": ["tavily_search"] if timings_ms.get("tavily_search") else [],
+        "tool_calls": (
+            [
+                {
+                    "tool": "tavily_search",
+                    "args": {
+                        "query": web_fallback_query,
+                        "include_domains": "HUST_DOMAINS",
+                    },
+                    "result": "used" if web_fallback_used else "searched",
+                    "iteration": 0,
+                    "latency_ms": timings_ms.get("tavily_search"),
+                }
+            ]
+            if timings_ms.get("tavily_search")
+            else []
+        ),
     }
 
 
@@ -1320,6 +1622,7 @@ def rag_flow_stream(
     reranker: Optional[BaseReranker],
     chat_model: BaseLLM,
     cfg: Dict[str, Any],
+    tavily_tool: Any | None = None,
     routing_result: Optional[Dict[str, Any]] = None,
     user_context: Optional[Dict[str, Any]] = None,
     validity_filter: Any | None = None,
@@ -1339,23 +1642,41 @@ def rag_flow_stream(
     step_t0 = time.perf_counter()
     trimmed = _trim_history(history)
     timings_ms["trim_history"] = _elapsed_ms(step_t0)
+    bypass_query_cache = _should_bypass_query_cache(
+        question=question,
+        search_query=question,
+        target_collections=None,
+        routing_result=routing_result,
+        cfg=cfg,
+    )
+    if bypass_query_cache:
+        timings_ms["query_cache_bypassed"] = 1.0
 
     # ── Pre-retrieval query cache (P0 — stream variant) ──────────────────────
-    if llm_cache is not None and hasattr(llm_cache, "get_by_query"):
+    if (
+        llm_cache is not None
+        and not bypass_query_cache
+        and hasattr(llm_cache, "get_by_query")
+    ):
         _qcached = llm_cache.get_by_query(question, chat_model.model)
         if _qcached is not None:
-            timings_ms["query_cache"] = "HIT"
-            timings_ms["flow_total"] = _elapsed_ms(flow_t0)
-            if metadata_out is not None:
-                metadata_out["num_sources"] = len(_qcached["sources"])
-                metadata_out["collection_scores"] = {}
-                metadata_out["applied_filters"] = None
-                metadata_out["collection_results"] = None
+            if _answer_has_no_info_signal(str(_qcached.get("answer", ""))):
+                timings_ms["query_cache_ignored_no_info"] = 1.0
+            else:
+                timings_ms["query_cache_hit"] = 1.0
+                timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+                if metadata_out is not None:
+                    metadata_out["num_sources"] = len(_qcached["sources"])
+                    metadata_out["collection_scores"] = {}
+                    metadata_out["applied_filters"] = None
+                    metadata_out["collection_results"] = None
+                    metadata_out["tools_used"] = []
+                    metadata_out["tool_calls"] = []
 
-            def _cached_stream_early() -> Generator[str, None, None]:
-                yield _qcached["answer"]
+                def _cached_stream_early() -> Generator[str, None, None]:
+                    yield _qcached["answer"]
 
-            return _cached_stream_early(), _qcached["sources"]
+                return _cached_stream_early(), _qcached["sources"]
 
     # Reflection
     search_query = question
@@ -1436,6 +1757,16 @@ def rag_flow_stream(
                 resolved_major,
             )
             retrieval_query = normalized_query
+
+    dynamic_web_query = _is_dynamic_web_query(
+        question=question,
+        search_query=search_query,
+        target_collections=target_collections,
+        routing_result=routing_result,
+        cfg=cfg,
+    )
+    if dynamic_web_query:
+        timings_ms["dynamic_web_query"] = 1.0
 
     # ── Populate metadata_out early (pre-generation) so caller can read it ──────
     # The search_trace dict is mutated later; we update metadata_out after rerank.
@@ -1643,10 +1974,12 @@ def rag_flow_stream(
     # Fallback: same logic as rag_flow — trigger when all surviving reranked
     # docs have negative scores (reflected query drift or only table-threshold
     # docs survived).
-    _best_rerank_score_s = max(
-        (d.get("rerank_score", -999.0) for d in reranked), default=-999.0
-    ) if reranked else -999.0
-    if raw_results and _best_rerank_score_s < 0.0:
+    _best_rerank_score_s = _best_explicit_rerank_score(reranked)
+    if (
+        raw_results
+        and _best_rerank_score_s is not None
+        and _best_rerank_score_s < 0.0
+    ):
         logger.info(
             "Stream: reranker gave no positive-score candidates (best=%.3f). "
             "Retrying with original question.",
@@ -1657,10 +1990,11 @@ def rag_flow_stream(
             documents=raw_results,
             top_k=top_k_value,
         )
-        timings_ms["rerank_fallback"] = True
-        if not reranked or max(
-            (d.get("rerank_score", -999.0) for d in reranked), default=-999.0
-        ) < 0.0:
+        timings_ms["rerank_fallback"] = 1.0
+        retry_best_score_s = _best_explicit_rerank_score(reranked)
+        if not reranked or (
+            retry_best_score_s is not None and retry_best_score_s < 0.0
+        ):
             logger.info(
                 "Stream: reranker still no positive candidates. Using raw fusion top-%d.",
                 top_k_value,
@@ -1668,7 +2002,7 @@ def rag_flow_stream(
             reranked = sorted(
                 raw_results, key=lambda d: d.get("score", 0.0), reverse=True
             )[:top_k_value]
-            timings_ms["rerank_raw_fallback"] = True
+            timings_ms["rerank_raw_fallback"] = 1.0
 
     # 5.1 Document Validity Filtering
     if validity_filter is not None:
@@ -1682,6 +2016,41 @@ def rag_flow_stream(
         reranked = reference_resolver.resolve(reranked, query=retrieval_query)
         timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
 
+    web_fallback_used = False
+    web_fallback_query = search_query or question
+    web_fallback_reasons: List[str] = []
+    if not reranked:
+        web_fallback_reasons.append("no_sources")
+    if dynamic_web_query:
+        web_fallback_reasons.append("dynamic_query")
+    if (
+        raw_results
+        and _best_rerank_score_s is not None
+        and _best_rerank_score_s < 0.0
+    ):
+        web_fallback_reasons.append("low_retrieval_confidence")
+
+    web_context_override = ""
+    if web_fallback_reasons:
+        timings_ms["web_fallback_requested"] = 1.0
+        if cfg.get("tavily_fallback_enabled", False):
+            search_info = _tavily_search_context(
+                query=web_fallback_query,
+                tavily_tool=tavily_tool,
+                max_results=_cfg_int(cfg, "tavily_max_results", 3),
+                search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
+            )
+            timings_ms.update(search_info["timings"])
+            web_sources = list(search_info.get("sources") or [])
+            if search_info.get("used"):
+                web_fallback_used = True
+                timings_ms["web_fallback_used"] = 1.0
+                web_context_override = str(search_info.get("context") or "")
+                if web_sources:
+                    reranked = web_sources + reranked
+        else:
+            timings_ms["tavily_skipped"] = 1.0
+
     context_t0 = time.perf_counter()
     # For list queries (top_k was scaled up), use a larger char budget.
     context_doc_limit, context_char_budget = _resolve_context_budget(
@@ -1689,12 +2058,24 @@ def rag_flow_stream(
         top_k_value=top_k_value,
     )
     context_trace: Dict[str, Any] = {}
+    context_documents = reranked
+    if web_context_override:
+        context_documents = [
+            doc for doc in reranked
+            if str(doc.get("collection") or "").lower() != "web"
+        ]
     context = _format_context(
-        reranked,
+        context_documents,
         per_doc_char_limit=context_doc_limit,
         total_char_budget=context_char_budget,
         trace_out=context_trace,
     )
+    if web_context_override:
+        context = (
+            f"{web_context_override}\n\n---\n\n{context}"
+            if context
+            else web_context_override
+        )
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -1726,23 +2107,58 @@ def rag_flow_stream(
         metadata_out["fusion_weights"] = search_trace.get("fusion_weights")
         metadata_out["context_trace"] = context_trace
         metadata_out["rerank_trace"] = rerank_trace
+        metadata_out["answer_quality_gate"] = {
+            "answer_status": "stale_risk" if dynamic_web_query else "answered",
+            "should_web_search": bool(web_fallback_reasons),
+            "web_search_query": web_fallback_query,
+            "reasons": web_fallback_reasons,
+            "dynamic_query": dynamic_web_query,
+            "no_sources": "no_sources" in web_fallback_reasons,
+        }
+        metadata_out["tools_used"] = (
+            ["tavily_search"] if timings_ms.get("tavily_search") else []
+        )
+        metadata_out["tool_calls"] = (
+            [
+                {
+                    "tool": "tavily_search",
+                    "args": {
+                        "query": web_fallback_query,
+                        "include_domains": "HUST_DOMAINS",
+                    },
+                    "result": "used" if web_fallback_used else "searched",
+                    "iteration": 0,
+                    "latency_ms": timings_ms.get("tavily_search"),
+                }
+            ]
+            if timings_ms.get("tavily_search")
+            else []
+        )
 
     # ── LLM Response Cache Check (Phase 2 - Stream) ─────────────────
-    if llm_cache is not None:
+    if (
+        llm_cache is not None
+        and not dynamic_web_query
+        and not web_fallback_used
+        and not web_fallback_reasons
+    ):
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
         cached = llm_cache.get(question, doc_ids, chat_model.model)
         if cached is not None:
-            logger.info("LLM cache HIT (stream) for query: %r", question[:80])
-            timings_ms["llm_cache"] = "HIT"
+            if _answer_has_no_info_signal(str(cached.get("answer", ""))):
+                timings_ms["llm_cache_ignored_no_info"] = 1.0
+            else:
+                logger.info("LLM cache HIT (stream) for query: %r", question[:80])
+                timings_ms["llm_cache_hit"] = 1.0
 
-            def _cached_stream() -> Generator[str, None, None]:
-                yield cached["answer"]
-                timings_ms["stream_first_token"] = 0.1
-                timings_ms["stream_generate"] = 0.1
-                timings_ms["flow_total"] = _elapsed_ms(flow_t0)
-                _log_timings("rag_flow_stream_cached", timings_ms)
+                def _cached_stream() -> Generator[str, None, None]:
+                    yield cached["answer"]
+                    timings_ms["stream_first_token"] = 0.1
+                    timings_ms["stream_generate"] = 0.1
+                    timings_ms["flow_total"] = _elapsed_ms(flow_t0)
+                    _log_timings("rag_flow_stream_cached", timings_ms)
 
-            return _cached_stream(), cached["sources"]
+                return _cached_stream(), cached["sources"]
 
     generate_stream = chat_model.generate_stream(
         query=question, context=full_context, history=trimmed, mode="rag"
@@ -1767,12 +2183,25 @@ def rag_flow_stream(
         _log_timings("rag_flow_stream", timings_ms)
 
         # Cache newly generated stream response (Phase 2)
-        if llm_cache is not None:
+        cache_stream_answer = not web_fallback_reasons or web_fallback_used
+        if llm_cache is not None and cache_stream_answer:
             doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
-            llm_cache.put(question, doc_ids, chat_model.model, "".join(full_cached_answer), reranked)
+            llm_cache.put(
+                question,
+                doc_ids,
+                chat_model.model,
+                "".join(full_cached_answer),
+                reranked,
+            )
 
         # Also populate the pre-retrieval query-only cache.
-        if llm_cache is not None and hasattr(llm_cache, "put_by_query"):
+        if (
+            llm_cache is not None
+            and hasattr(llm_cache, "put_by_query")
+            and not dynamic_web_query
+            and not web_fallback_used
+            and not web_fallback_reasons
+        ):
             llm_cache.put_by_query(question, chat_model.model, "".join(full_cached_answer), reranked)
 
     return _timed_stream(), reranked
@@ -1781,6 +2210,204 @@ def rag_flow_stream(
 # ═══════════════════════════════════════════════════════════════════════════════
 # Tavily Fallback
 # ═══════════════════════════════════════════════════════════════════════════════
+
+
+def _tavily_results_to_docs(search_result: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Convert Tavily results into source docs compatible with response mapping."""
+    docs: List[Dict[str, Any]] = []
+    for idx, item in enumerate(search_result.get("results", []) or [], 1):
+        if not isinstance(item, dict):
+            continue
+        url = str(item.get("url") or "")
+        title = str(item.get("title") or url or "Tavily result")
+        content = str(item.get("content") or "")
+        if not title and not content:
+            continue
+        docs.append(
+            {
+                "id": f"tavily:{url or idx}",
+                "text": content,
+                "score": round(1.0 / idx, 6),
+                "rerank_score": None,
+                "collection": "web",
+                "metadata": {
+                    "title": title,
+                    "source": url,
+                    "url": url,
+                    "provider": "tavily",
+                    "collection": "web",
+                },
+            }
+        )
+    return docs
+
+
+def _tavily_search_context(
+    *,
+    query: str,
+    tavily_tool: Any | None,
+    max_results: int = 3,
+    search_depth: str = "basic",
+    extract_urls: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """Search official HUST domains and return context, sources, timings.
+
+    If ``extract_urls`` is provided those URLs are fetched directly via the
+    Tavily Extract API (useful for dynamic pages like
+    ``ctt.hust.edu.vn/DisplayWeb/DisplayKehoach?kehoach=...`` that may not
+    appear in Tavily's search index).
+
+    When no explicit ``extract_urls`` are given the function runs a normal
+    search first.  If search returns empty context it then attempts to extract
+    content directly from the top URL(s) returned by the search results.
+    """
+    fallback_t0 = time.perf_counter()
+    timings_ms: Dict[str, float] = {}
+
+    if tavily_tool is None:
+        logger.info("No Tavily tool configured, skipping web search")
+        timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
+        return {
+            "context": "",
+            "timings": timings_ms,
+            "sources": [],
+            "used": False,
+        }
+
+    try:
+        from tools.tavily_search import HUST_DOMAINS
+
+        tavily_query = query.strip()
+        web_context = ""
+        tavily_sources: List[Dict[str, Any]] = []
+
+        # ── Path A: caller supplied specific URLs → extract directly ──────
+        if extract_urls:
+            extract_t0 = time.perf_counter()
+            extract_result = tavily_tool.extract(
+                urls=extract_urls,
+                extract_depth="advanced",
+                query=tavily_query or None,
+            )
+            timings_ms["tavily_extract"] = _elapsed_ms(extract_t0)
+            web_context = str(extract_result.get("context") or "")
+            tavily_sources = _tavily_results_to_docs(extract_result)
+            logger.info(
+                "Tavily extract: %d URL(s) → context_len=%d",
+                len(extract_urls),
+                len(web_context),
+            )
+
+        # ── Path B: normal keyword search ─────────────────────────────────
+        else:
+            search_t0 = time.perf_counter()
+            search_result = tavily_tool.search(
+                tavily_query,
+                max_results=max_results,
+                search_depth=search_depth,
+                include_domains=HUST_DOMAINS,
+            )
+            timings_ms["tavily_search"] = _elapsed_ms(search_t0)
+
+            web_context = str(search_result.get("context") or "")
+            tavily_sources = _tavily_results_to_docs(search_result)
+
+            # ── Path B2: search found URLs but empty content → extract top URL
+            if not web_context and search_result.get("results"):
+                top_url = str(search_result["results"][0].get("url", ""))
+                if top_url:
+                    logger.info(
+                        "Tavily search returned empty context, extracting top URL: %s",
+                        top_url,
+                    )
+                    extract_t0 = time.perf_counter()
+                    extract_result = tavily_tool.extract(
+                        urls=[top_url],
+                        extract_depth="advanced",
+                        query=tavily_query or None,
+                    )
+                    timings_ms["tavily_extract"] = _elapsed_ms(extract_t0)
+                    web_context = str(extract_result.get("context") or "")
+                    if extract_result.get("results"):
+                        tavily_sources = _tavily_results_to_docs(extract_result)
+
+        timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
+        return {
+            "context": web_context,
+            "timings": timings_ms,
+            "sources": tavily_sources,
+            "used": bool(web_context),
+        }
+    except Exception:
+        logger.warning("Tavily search/extract failed", exc_info=True)
+        timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
+        return {
+            "context": "",
+            "timings": timings_ms,
+            "sources": [],
+            "used": False,
+        }
+
+
+def _tavily_fallback_result(
+    *,
+    question: str,
+    answer: str,
+    tavily_tool: Any | None,
+    chat_model: BaseLLM,
+    history: List[Dict[str, str]],
+    max_results: int = 3,
+    search_depth: str = "basic",
+    search_query: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Use Tavily web search and return answer, timings, source docs, status."""
+    fallback_t0 = time.perf_counter()
+    search_info = _tavily_search_context(
+        query=(search_query or question).strip() or question,
+        tavily_tool=tavily_tool,
+        max_results=max_results,
+        search_depth=search_depth,
+    )
+    timings_ms: Dict[str, float] = dict(search_info["timings"])
+    web_context = str(search_info.get("context") or "")
+    tavily_sources = list(search_info.get("sources") or [])
+    if not web_context:
+        return {
+            "answer": answer,
+            "timings": timings_ms,
+            "sources": tavily_sources,
+            "used": False,
+        }
+
+    try:
+        regenerate_t0 = time.perf_counter()
+        new_answer = chat_model.generate(
+            query=question,
+            context=web_context,
+            history=history,
+            mode="rag",
+        )
+        timings_ms["tavily_generate"] = _elapsed_ms(regenerate_t0)
+        timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
+        logger.info("Tavily fallback generated %d chars", len(new_answer))
+        return {
+            "answer": new_answer,
+            "timings": timings_ms,
+            "sources": tavily_sources,
+            "used": True,
+        }
+    except Exception:
+        logger.warning(
+            "Tavily answer regeneration failed, returning original answer",
+            exc_info=True,
+        )
+        timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
+        return {
+            "answer": answer,
+            "timings": timings_ms,
+            "sources": tavily_sources,
+            "used": False,
+        }
 
 
 def _tavily_fallback(
@@ -1793,46 +2420,14 @@ def _tavily_fallback(
     max_results: int = 3,
     search_depth: str = "basic",
 ) -> tuple[str, Dict[str, float]]:
-    """Use Tavily web search to re-generate the answer when self-eval fails."""
-    fallback_t0 = time.perf_counter()
-    timings_ms: Dict[str, float] = {}
-
-    if tavily_tool is None:
-        logger.info("No Tavily tool configured, returning original answer")
-        timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
-        return answer, timings_ms
-
-    try:
-        from tools.tavily_search import HUST_DOMAINS
-
-        search_t0 = time.perf_counter()
-        search_result = tavily_tool.search(
-            question,
-            max_results=max_results,
-            search_depth=search_depth,
-            include_domains=HUST_DOMAINS,
-        )
-        timings_ms["tavily_search"] = _elapsed_ms(search_t0)
-
-        web_context = search_result.get("context", "")
-        if not web_context:
-            timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
-            return answer, timings_ms
-
-        regenerate_t0 = time.perf_counter()
-        new_answer = chat_model.generate(
-            query=question,
-            context=web_context,
-            history=history,
-            mode="rag",
-        )
-        timings_ms["tavily_generate"] = _elapsed_ms(regenerate_t0)
-        timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
-        logger.info("Tavily fallback generated %d chars", len(new_answer))
-        return new_answer, timings_ms
-    except Exception:
-        logger.warning(
-            "Tavily fallback failed, returning original answer", exc_info=True
-        )
-        timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
-        return answer, timings_ms
+    """Backward-compatible wrapper for Tavily fallback."""
+    result = _tavily_fallback_result(
+        question=question,
+        answer=answer,
+        tavily_tool=tavily_tool,
+        chat_model=chat_model,
+        history=history,
+        max_results=max_results,
+        search_depth=search_depth,
+    )
+    return str(result["answer"]), result["timings"]

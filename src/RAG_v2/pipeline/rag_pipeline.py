@@ -104,21 +104,28 @@ def _elapsed_ms(start: float) -> float:
     return round((time.perf_counter() - start) * 1000, 2)
 
 
-def _merge_timings(*timings: Optional[Dict[str, float]]) -> Dict[str, float]:
+def _merge_timings(*timings: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """Merge timing dictionaries while preserving insertion order."""
-    merged: Dict[str, float] = {}
+    merged: Dict[str, Any] = {}
     for timing in timings:
         if timing:
             merged.update(timing)
     return merged
 
 
-def _log_timings(label: str, timings_ms: Dict[str, float]) -> None:
+def _log_timings(label: str, timings_ms: Dict[str, Any]) -> None:
     """Log timing breakdown sorted by slowest stage first."""
     if not timings_ms:
         return
+    numeric_timings = {
+        stage: duration
+        for stage, duration in timings_ms.items()
+        if isinstance(duration, (int, float))
+    }
+    if not numeric_timings:
+        return
     ordered = sorted(
-        timings_ms.items(), key=lambda item: item[1], reverse=True
+        numeric_timings.items(), key=lambda item: item[1], reverse=True
     )
     summary = ", ".join(
         f"{stage}={duration:.1f}" for stage, duration in ordered
@@ -161,6 +168,8 @@ def _settings_to_cfg(settings: Settings) -> Dict[str, Any]:
         "tavily_fallback_enabled": settings.tavily_fallback_enabled,
         "tavily_search_depth": settings.tavily_search_depth,
         "tavily_max_results": settings.tavily_max_results,
+        "web_fallback_dynamic_collections": settings.web_fallback_dynamic_collections,
+        "web_fallback_on_no_info": settings.web_fallback_on_no_info,
     }
 
 
@@ -470,7 +479,8 @@ class RAGPipeline:
 
         # Sync flow-level timings into the trace
         for stage, ms in timings_ms.items():
-            trace.record_stage(stage, ms)
+            if isinstance(ms, (int, float)):
+                trace.record_stage(stage, ms)
         trace.set_metadata("flow", "rag")
         trace.set_metadata("model", str(getattr(self._chat, "model", "unknown")))
         trace.set_metadata("domain", routing.get("domain", ""))
@@ -949,6 +959,7 @@ class RAGPipeline:
         self.last_collection_results: Optional[Any] = None
         self.last_agent_trace: Optional[Dict[str, Any]] = None
         self.last_tools_used: List[str] = []
+        self.last_tool_calls: List[Dict[str, Any]] = []
         self.last_iterations: int = 0
 
         full_answer_chunks: List[str] = []
@@ -1029,6 +1040,7 @@ class RAGPipeline:
                 self.last_mode = str(agent_result.get("mode", "agent"))
                 self.last_agent_trace = agent_result.get("agent_trace")
                 self.last_tools_used = list(agent_result.get("tools_used") or [])
+                self.last_tool_calls = list(agent_result.get("tool_calls") or [])
                 self.last_iterations = int(agent_result.get("iterations") or 0)
                 self.last_sources = agent_result.get("sources") or []
                 pipeline_timings["agent_total"] = _elapsed_ms(agent_t0)
@@ -1075,6 +1087,7 @@ class RAGPipeline:
                 reranker=self._reranker,
                 chat_model=self._chat,
                 cfg=flow_cfg,
+                tavily_tool=self._tavily,
                 routing_result=routing,
                 user_context=user_context,
                 validity_filter=self._validity_filter,
@@ -1090,6 +1103,8 @@ class RAGPipeline:
             self.last_routing_probabilities = flow_metadata.get("routing_probabilities")
             self.last_applied_filters = flow_metadata.get("applied_filters")
             self.last_collection_results = flow_metadata.get("collection_results")
+            self.last_tools_used = list(flow_metadata.get("tools_used") or [])
+            self.last_tool_calls = list(flow_metadata.get("tool_calls") or [])
 
             for chunk in stream:
                 full_answer_chunks.append(chunk)
@@ -1115,6 +1130,7 @@ class RAGPipeline:
                 "model_name": self._chat.model,
                 "timings_ms": timings_ms,
                 "tools_used": self.last_tools_used,
+                "tool_calls": self.last_tool_calls,
                 "iterations": self.last_iterations,
             }
             turn_id = self._mongo_logger.log_turn(

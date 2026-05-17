@@ -295,8 +295,10 @@ Streaming variant: `_trim_history()` → `chat_model.generate_stream(mode="chitc
 - Ghi vào `llm_cache.put_by_query()` (key = question + model, cho P0 hit lần sau).
 
 **Bước 13 — Self-Eval & Tavily Fallback:**
-- Chỉ chạy khi `top_score < 100.0` theo default BGE raw-logit threshold từ config.
-- `SelfEvaluator.evaluate()` → nếu `pass=False` → `_tavily_fallback()`.
+- Self-eval chỉ chạy khi `top_score < self_eval_min_top_score` (default 100.0).
+- `_build_answer_quality_gate()` quyết định có dùng Tavily hay không.
+- **Tavily chỉ trigger khi** `answer_no_info` (LLM trả lời "không tìm thấy thông tin") **hoặc** `no_sources` (không có doc nào).
+- `dynamic_query`, `eval_failed`, `eval_wants_web` **KHÔNG** tự mình trigger Tavily; chỉ ghi vào `informational_notes` để debug.
 - Tavily: tìm kiếm web (giới hạn `HUST_DOMAINS`, max 3 results) → regenerate với web context.
 
 ---
@@ -574,4 +576,13 @@ Admin có thể chạy chunking với nhiều strategy khác nhau — chunks đ�
   If the flag is false, `timings_ms["tavily_skipped"] = 1.0` is recorded.
 - `_tavily_fallback()` uses `tavily_max_results` and `tavily_search_depth`
   from settings via `_settings_to_cfg()` instead of hardcoded search options.
+
+## Update 2026-05-17: Tavily trigger scope narrowed
+
+- `_build_answer_quality_gate()` now only adds `"answer_no_info"` và `"no_sources"`
+  vào `reasons` (điều khiển `should_web_search`).
+- `dynamic_query`, `eval_failed`, `eval_wants_web` được ghi vào `informational_notes`
+  để quan sát nhưng **không** tự mình trigger Tavily nữa.
+- Ngăn Tavily chạy khi RAG đã có kết quả tốt nhưng routing gán collection
+  dynamic (e.g. `kehoach` ở xác suất thấp như 0.115).
 
