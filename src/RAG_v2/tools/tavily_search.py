@@ -26,6 +26,12 @@ HUST_DOMAINS: list[str] = [
     "ctt.hust.edu.vn",
     "ctsv.hust.edu.vn",
     "soict.hust.edu.vn",
+    "seee.hust.edu.vn",
+    "scls.hust.edu.vn",
+    "fami.hust.edu.vn",
+    "sme.hust.edu.vn",
+    "smse.hust.edu.vn",
+    "sv-ctt.hust.edu.vn"
 ]
 
 # Tier 2: nguồn giáo dục VN mở rộng — dùng thêm cho agent web_search
