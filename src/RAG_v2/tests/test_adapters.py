@@ -14,7 +14,10 @@ from agent import tool_adapters
 from agent.tool_adapters import (
     _clarify_question,
     _format_search_results,
+    _format_web_results,
     execute_tool,
+    get_agent_docs,
+    init_agent_docs,
 )
 
 
@@ -276,6 +279,32 @@ class TestRagSearch:
 
 class TestWebSearch:
     """Integration check for Tavily tool path."""
+
+    def test_format_web_results_dedupes_by_url(self) -> None:
+        init_agent_docs()
+        result = _format_web_results({
+            "answer": "short",
+            "results": [
+                {
+                    "title": "A",
+                    "url": "https://ctt.hust.edu.vn/a",
+                    "content": "first",
+                },
+                {
+                    "title": "A duplicate",
+                    "url": "https://ctt.hust.edu.vn/a",
+                    "content": "duplicate",
+                },
+                {
+                    "title": "B",
+                    "url": "https://ctt.hust.edu.vn/b",
+                    "content": "second",
+                },
+            ],
+        })
+
+        assert result.count("URL:") == 2
+        assert len(get_agent_docs()) == 2
 
     @pytest.mark.integration
     def test_web_search_returns_content(self) -> None:

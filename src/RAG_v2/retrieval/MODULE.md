@@ -543,3 +543,13 @@ _COLLECTION_FILTER_REGISTRY["new_collection"] = NewCollectionFilterExtractor()
 ```
 
 Không cần thay đổi file nào khác.
+
+---
+
+## Update 2026-05-17: Tavily service initialization
+
+- `RetrievalService.from_settings()` uses the shared
+  `is_valid_tavily_api_key()` validator from `tools.tavily_search`, so startup
+  and agent fallback reject the same placeholder key values.
+- The shared `TavilySearchTool` receives settings-driven cache controls:
+  `tavily_cache_ttl_seconds` and `tavily_cache_maxsize`.

@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 import os
 import time
+from collections import OrderedDict
+from threading import RLock
 from typing import Any, Dict, List, Literal, Optional
 from urllib.parse import urlparse
 
@@ -15,34 +17,60 @@ DEFAULT_MAX_RESULTS = 5
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_MIN_RETRY_DELAY = 1.0
 DEFAULT_MIN_INTERVAL = 1.0  # seconds between API calls
+DEFAULT_CACHE_MAXSIZE = 200
+DEFAULT_CACHE_TTL_SECONDS = 3600
 
 # ─── Default Domain Whitelists ────────────────────────────────────────────────
 # Tier 1: nguồn chính thức HUST — dùng cho self-eval fallback (scope hẹp)
-HUST_DOMAINS: list[str] = [
+HUST_OFFICIAL_DOMAINS: list[str] = [
     "hust.edu.vn",
     "sis.hust.edu.vn",
     "ctt.hust.edu.vn",
     "ctsv.hust.edu.vn",
+    "sv-ctt.hust.edu.vn",
     "soict.hust.edu.vn",
+]
+
+HUST_EXTENDED_DOMAINS: list[str] = [
     "seee.hust.edu.vn",
     "scls.hust.edu.vn",
     "fami.hust.edu.vn",
     "sme.hust.edu.vn",
     "smse.hust.edu.vn",
-    "sv-ctt.hust.edu.vn",
+    "see.hust.edu.vn",
+    "sem.hust.edu.vn",
+    "fee.hust.edu.vn",
+    "fme.hust.edu.vn",
 ]
 
 # Tier 2: nguồn giáo dục VN mở rộng — dùng thêm cho agent web_search
-EDU_DOMAINS: list[str] = [
+EDU_AUTHORITATIVE_DOMAINS: list[str] = [
     "moet.gov.vn",
-    "vnexpress.net",
-    "tuoitre.vn",
-    "thanhnien.vn",
-    "dantri.com.vn",
 ]
+
+HUST_DOMAINS: list[str] = HUST_OFFICIAL_DOMAINS + HUST_EXTENDED_DOMAINS
+EDU_DOMAINS: list[str] = EDU_AUTHORITATIVE_DOMAINS
+
+_INVALID_TAVILY_KEY_EXACT = {
+    "",
+    "your-key-here",
+    "change_me",
+    "tvly-xxx",
+    "your-tavily-api-key-here",
+}
+_INVALID_TAVILY_KEY_PREFIXES = ("your-", "change_me", "changeme")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+def is_valid_tavily_api_key(key: Optional[str]) -> bool:
+    """Return True when *key* is non-empty and not a known placeholder."""
+    value = (key or "").strip()
+    lowered = value.lower()
+    if not value or lowered in _INVALID_TAVILY_KEY_EXACT:
+        return False
+    return not any(lowered.startswith(prefix) for prefix in _INVALID_TAVILY_KEY_PREFIXES)
+
+
 def _load_tavily_client() -> tuple[Any, type[BaseException]]:
     try:
         from tavily import TavilyClient
@@ -81,6 +109,34 @@ def _normalize_domains(domains: Optional[List[str]]) -> Optional[List[str]]:
     return normalized
 
 
+class _SimpleTTLCache:
+    """Small thread-external TTL cache backed by OrderedDict."""
+
+    def __init__(self, maxsize: int, ttl_seconds: int) -> None:
+        self.maxsize = max(1, int(maxsize))
+        self.ttl_seconds = max(1, int(ttl_seconds))
+        self._items: OrderedDict[Any, tuple[float, Dict[str, Any]]] = OrderedDict()
+
+    def get(self, key: Any) -> Optional[Dict[str, Any]]:
+        now = time.monotonic()
+        item = self._items.get(key)
+        if item is None:
+            return None
+        expires_at, value = item
+        if expires_at <= now:
+            self._items.pop(key, None)
+            return None
+        self._items.move_to_end(key)
+        return value
+
+    def __setitem__(self, key: Any, value: Dict[str, Any]) -> None:
+        now = time.monotonic()
+        self._items[key] = (now + self.ttl_seconds, value)
+        self._items.move_to_end(key)
+        while len(self._items) > self.maxsize:
+            self._items.popitem(last=False)
+
+
 class TavilySearchTool:
     """Performs web searches via the Tavily API and formats results for LLM context.
 
@@ -98,6 +154,8 @@ class TavilySearchTool:
         max_retries: int = DEFAULT_MAX_RETRIES,
         min_retry_delay: float = DEFAULT_MIN_RETRY_DELAY,
         default_include_domains: Optional[List[str]] = None,
+        cache_maxsize: int = DEFAULT_CACHE_MAXSIZE,
+        cache_ttl_seconds: int = DEFAULT_CACHE_TTL_SECONDS,
     ) -> None:
         resolved_key = api_key or os.environ.get("TAVILY_API_KEY", "")
         client_cls, invalid_key_error = _load_tavily_client()
@@ -108,6 +166,11 @@ class TavilySearchTool:
         self.min_retry_delay = min_retry_delay
         self._last_call_time: float = 0.0
         self.default_include_domains = _normalize_domains(default_include_domains)
+        self._cache_lock = RLock()
+        self._cache = _SimpleTTLCache(
+            maxsize=cache_maxsize,
+            ttl_seconds=cache_ttl_seconds,
+        )
 
     # ------------------------------------------------------------------
     # Public API
@@ -147,6 +210,21 @@ class TavilySearchTool:
             else self.default_include_domains
         )
         effective_exclude = _normalize_domains(exclude_domains)
+        cache_key = (
+            "search",
+            query.strip(),
+            effective_max,
+            search_depth,
+            include_answer,
+            tuple(effective_include or ()),
+            tuple(effective_exclude or ()),
+        )
+        with self._cache_lock:
+            cached = self._cache.get(cache_key)
+        if cached is not None:
+            logger.debug("Tavily search cache hit: query=%r", query[:80])
+            return dict(cached)
+
         logger.info(
             "Tavily search: query=%r (max=%d, domains=%s)",
             query[:80],
@@ -154,17 +232,11 @@ class TavilySearchTool:
             len(effective_include) if effective_include else "all",
         )
 
-        # Rate limiting — enforce minimum interval between calls
-        now = time.monotonic()
-        elapsed = now - self._last_call_time
-        if elapsed < DEFAULT_MIN_INTERVAL:
-            time.sleep(DEFAULT_MIN_INTERVAL - elapsed)
-
         # Retry with exponential backoff
         last_exc: Optional[Exception] = None
         for attempt in range(self.max_retries):
             try:
-                self._last_call_time = time.monotonic()
+                self._wait_for_rate_limit()
                 search_kwargs: Dict[str, Any] = {
                     "query": query,
                     "max_results": effective_max,
@@ -180,12 +252,15 @@ class TavilySearchTool:
                 results = self._parse_results(response)
                 context = self._format_context(results)
 
-                return {
+                parsed_response = {
                     "query": query,
                     "answer": response.get("answer", ""),
                     "results": results,
                     "context": context,
                 }
+                with self._cache_lock:
+                    self._cache[cache_key] = dict(parsed_response)
+                return parsed_response
             except self._invalid_key_error:
                 # Auth errors won't be fixed by retrying — fail immediately
                 logger.error("Tavily API key is invalid or missing, aborting")
@@ -233,16 +308,10 @@ class TavilySearchTool:
 
         logger.info("Tavily extract: %d URL(s), depth=%s", len(urls), extract_depth)
 
-        # Rate limiting
-        now = time.monotonic()
-        elapsed = now - self._last_call_time
-        if elapsed < DEFAULT_MIN_INTERVAL:
-            time.sleep(DEFAULT_MIN_INTERVAL - elapsed)
-
         last_exc: Optional[Exception] = None
         for attempt in range(self.max_retries):
             try:
-                self._last_call_time = time.monotonic()
+                self._wait_for_rate_limit()
                 extract_kwargs: Dict[str, Any] = {
                     "urls": urls,
                     "extract_depth": extract_depth,
@@ -284,6 +353,15 @@ class TavilySearchTool:
     # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
+
+    def _wait_for_rate_limit(self) -> None:
+        """Enforce a minimum interval between Tavily API calls for this instance."""
+        with self._cache_lock:
+            now = time.monotonic()
+            elapsed = now - self._last_call_time
+            if elapsed < DEFAULT_MIN_INTERVAL:
+                time.sleep(DEFAULT_MIN_INTERVAL - elapsed)
+            self._last_call_time = time.monotonic()
 
     @staticmethod
     def _parse_extract_results(response: Dict[str, Any]) -> List[Dict[str, str]]:

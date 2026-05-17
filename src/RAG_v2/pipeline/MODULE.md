@@ -296,10 +296,15 @@ Streaming variant: `_trim_history()` → `chat_model.generate_stream(mode="chitc
 
 **Bước 13 — Self-Eval & Tavily Fallback:**
 - Self-eval chỉ chạy khi `top_score < self_eval_min_top_score` (default 100.0).
-- `_build_answer_quality_gate()` quyết định có dùng Tavily hay không.
-- **Tavily chỉ trigger khi** `answer_no_info` (LLM trả lời "không tìm thấy thông tin") **hoặc** `no_sources` (không có doc nào).
-- `dynamic_query`, `eval_failed`, `eval_wants_web` **KHÔNG** tự mình trigger Tavily; chỉ ghi vào `informational_notes` để debug.
-- Tavily: tìm kiếm web (giới hạn `HUST_DOMAINS`, max 3 results) → regenerate với web context.
+- Pre-generation web enrichment runs before LLM generation for dynamic/time-sensitive
+  queries, no-source retrieval, or low retrieval confidence when enabled.
+- `_build_answer_quality_gate()` decides whether post-generation Tavily regeneration
+  is needed after self-eval.
+- Post-generation Tavily only triggers on explicit insufficiency: `answer_no_info`,
+  `no_sources`, or structured self-eval `should_web_search=true` with
+  `answer_status` of `insufficient`/`stale_risk`.
+- Tavily pipeline fallback searches official HUST domains and then regenerates with
+  web context when post-generation fallback is needed.
 
 ---
 
@@ -311,7 +316,8 @@ Tương tự `rag_flow` nhưng:
 - Retrieval chạy đồng bộ (blocking) → yield tokens sau khi đã có context.
 - Return `(generator, reranked_docs)` — caller đọc docs ngay để chuẩn bị metadata.
 - `timings_ms_out` và `metadata_out` là mutable dicts được cập nhật trong quá trình stream.
-- **Không có** Self-eval / Tavily fallback (để duy trì streaming semantics).
+- **Không có** post-generation Self-eval / Tavily regeneration (để duy trì
+  streaming semantics); streaming may still use pre-generation Tavily enrichment.
 - Cache write xảy ra **sau** khi generator được exhausted (bên trong `_timed_stream()`).
 
 ---
@@ -572,17 +578,35 @@ Admin có thể chạy chunking với nhiều strategy khác nhau — chunks đ�
 - `rag_flow()` still runs self-eval only when the top reranker score is below
   `self_eval_min_top_score`, but the default threshold is now `100.0` because
   local BGE reranker scores are raw logits, not normalized probabilities.
-- A failed self-eval calls Tavily only when `tavily_fallback_enabled=true`.
-  If the flag is false, `timings_ms["tavily_skipped"] = 1.0` is recorded.
+- A structured self-eval web request calls Tavily only when
+  `tavily_fallback_enabled=true`; a plain failed self-eval is diagnostic. If the
+  flag is false, `timings_ms["tavily_skipped"] = 1.0` is recorded.
 - `_tavily_fallback()` uses `tavily_max_results` and `tavily_search_depth`
   from settings via `_settings_to_cfg()` instead of hardcoded search options.
 
-## Update 2026-05-17: Tavily trigger scope narrowed
+## Update 2026-05-17: Tavily pre-generation web enrichment
 
-- `_build_answer_quality_gate()` now only adds `"answer_no_info"` và `"no_sources"`
-  vào `reasons` (điều khiển `should_web_search`).
-- `dynamic_query`, `eval_failed`, `eval_wants_web` được ghi vào `informational_notes`
-  để quan sát nhưng **không** tự mình trigger Tavily nữa.
-- Ngăn Tavily chạy khi RAG đã có kết quả tốt nhưng routing gán collection
-  dynamic (e.g. `kehoach` ở xác suất thấp như 0.115).
+- `rag_flow()` and `rag_flow_stream()` now share the same pre-generation web
+  decision helper for time-sensitive/dynamic queries, no-source retrieval, and
+  low retrieval confidence after rerank raw fallback.
+- Dynamic web queries are fetched before LLM generation when
+  `WEB_FALLBACK_ON_DYNAMIC=true`, so streaming and non-streaming answers can use
+  the same official web context without a second generation pass.
+- Post-generation Tavily regeneration is limited to explicit insufficiency:
+  answer text with no-info signal, no sources, or self-eval returning
+  `should_web_search=true` with `answer_status` of `insufficient` or
+  `stale_risk`. A plain `pass=false` self-eval result is diagnostic only.
+- Web fallback queries are built deterministically from the reflected query and
+  prepend `HUST` when the query lacks school context. Pipeline fallback uses
+  `HUST_OFFICIAL_DOMAINS` only.
+
+## Update 2026-05-17: Tavily post-generation trigger scope
+
+- `_build_answer_quality_gate()` now adds post-generation fallback reasons only
+  for `"answer_no_info"`, `"no_sources"`, or a structured self-eval web request
+  with `answer_status` of `insufficient`/`stale_risk`.
+- `dynamic_query` is handled by the pre-generation web decision path, while
+  plain `eval_failed` stays diagnostic in `informational_notes`.
+- This prevents a second Tavily regeneration when pre-generation enrichment
+  already supplied official web context.
 

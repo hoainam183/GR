@@ -301,6 +301,63 @@ def _should_bypass_query_cache(
     )
 
 
+def _build_web_search_query(question: str, search_query: str) -> str:
+    """Build a compact official-web query without another LLM call."""
+    query = (search_query or question or "").strip().strip(" ?!.")
+    if not query:
+        query = (question or "").strip()
+    folded = _fold_vietnamese(query)
+    has_hust_context = any(
+        token in folded
+        for token in ("hust", "bach khoa", "dai hoc bach khoa", "dhbk")
+    )
+    return query if has_hust_context else f"HUST {query}"
+
+
+def _build_pre_generation_web_decision(
+    *,
+    question: str,
+    search_query: str,
+    reranked: List[Dict[str, Any]],
+    target_collections: Optional[List[str]],
+    routing_result: Optional[Dict[str, Any]],
+    cfg: Dict[str, Any],
+    low_retrieval_confidence: bool = False,
+) -> Dict[str, Any]:
+    """Decide whether official web context should be fetched before generation."""
+    dynamic_query = _is_dynamic_web_query(
+        question=question,
+        search_query=search_query,
+        target_collections=target_collections,
+        routing_result=routing_result,
+        cfg=cfg,
+    )
+    no_sources = len(reranked) == 0
+    reasons: List[str] = []
+    if no_sources:
+        reasons.append("no_sources")
+    if dynamic_query and _cfg_bool(cfg, "web_fallback_on_dynamic", True):
+        reasons.append("dynamic_query")
+    if low_retrieval_confidence:
+        reasons.append("low_retrieval_confidence")
+
+    answer_status = "answered"
+    if no_sources:
+        answer_status = "insufficient"
+    elif dynamic_query:
+        answer_status = "stale_risk"
+
+    return {
+        "answer_status": answer_status,
+        "should_web_search": bool(reasons),
+        "web_search_query": _build_web_search_query(question, search_query),
+        "reasons": reasons,
+        "dynamic_query": dynamic_query,
+        "no_sources": no_sources,
+        "low_retrieval_confidence": low_retrieval_confidence,
+    }
+
+
 def _build_answer_quality_gate(
     *,
     question: str,
@@ -311,6 +368,7 @@ def _build_answer_quality_gate(
     routing_result: Optional[Dict[str, Any]],
     eval_result: Optional[Dict[str, Any]],
     cfg: Dict[str, Any],
+    pre_web_fallback_used: bool = False,
 ) -> Dict[str, Any]:
     """Decide whether local RAG needs official web fallback."""
     no_info = (
@@ -327,16 +385,21 @@ def _build_answer_quality_gate(
     )
     eval_failed = bool(eval_result is not None and not eval_result.get("pass", True))
     eval_wants_web = bool(eval_result and eval_result.get("should_web_search"))
+    eval_status = str(eval_result.get("answer_status") or "") if eval_result else ""
+    eval_web_request = eval_wants_web and eval_status in {"insufficient", "stale_risk"}
 
-    # Tavily chỉ trigger khi LLM trả lời "không tìm thấy" hoặc không có doc nào.
-    # dynamic_query, eval_failed, eval_wants_web KHÔNG tự mình trigger Tavily nữa.
+    # Post-generation Tavily only runs for explicit insufficiency signals.
+    # Dynamic queries are handled by the pre-generation web decision path.
     reasons: List[str] = []
     if no_info:
         reasons.append("answer_no_info")
     if no_sources:
         reasons.append("no_sources")
+    if eval_web_request:
+        reasons.append("self_eval_requested_web")
 
-    # Tracked for answer_status / debugging purposes only (not Tavily triggers)
+    # Tracked for answer_status / debugging. A structured self-eval web request
+    # only triggers fallback when paired with an insufficient/stale status above.
     informational_notes: List[str] = []
     if eval_failed:
         informational_notes.append("self_eval_failed")
@@ -344,6 +407,8 @@ def _build_answer_quality_gate(
         informational_notes.append("self_eval_requested_web")
     if dynamic_query:
         informational_notes.append("dynamic_query")
+    if pre_web_fallback_used:
+        informational_notes.append("pre_generation_web_used")
 
     answer_status = "answered"
     if no_info or no_sources:
@@ -355,12 +420,12 @@ def _build_answer_quality_gate(
         if answer_status not in {"answered", "insufficient", "stale_risk"}:
             answer_status = "answered"
 
-    should_web_search = bool(reasons)
+    should_web_search = bool(reasons) and not pre_web_fallback_used
     web_query = ""
     if eval_result:
         web_query = str(eval_result.get("web_search_query") or "").strip()
     if not web_query:
-        web_query = (search_query or question).strip()
+        web_query = _build_web_search_query(question, search_query)
 
     return {
         "answer_status": answer_status,
@@ -1336,7 +1401,43 @@ def rag_flow(
         timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
 
     # ── LLM Response Cache Check (Phase 2) ─────────────────────────
-    if llm_cache is not None and not dynamic_web_query:
+    web_fallback_used = False
+    pre_web_fallback_used = False
+    web_fallback_sources: List[Dict[str, Any]] = []
+    web_context_override = ""
+    pre_web_decision = _build_pre_generation_web_decision(
+        question=question,
+        search_query=search_query,
+        reranked=reranked,
+        target_collections=target_collections,
+        routing_result=routing_result,
+        cfg=cfg,
+        low_retrieval_confidence=bool(timings_ms.get("rerank_raw_fallback")),
+    )
+    web_fallback_query = str(pre_web_decision.get("web_search_query") or search_query)
+    pre_web_fallback_reasons = list(pre_web_decision.get("reasons") or [])
+    if pre_web_decision["should_web_search"]:
+        timings_ms["web_fallback_requested"] = 1.0
+        if cfg.get("tavily_fallback_enabled", False):
+            search_info = _tavily_search_context(
+                query=web_fallback_query,
+                tavily_tool=tavily_tool,
+                max_results=_cfg_int(cfg, "tavily_max_results", 3),
+                search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
+            )
+            timings_ms.update(search_info["timings"])
+            web_fallback_sources = list(search_info.get("sources") or [])
+            if search_info.get("used"):
+                web_fallback_used = True
+                pre_web_fallback_used = True
+                timings_ms["web_fallback_used"] = 1.0
+                web_context_override = str(search_info.get("context") or "")
+                if web_fallback_sources:
+                    reranked = web_fallback_sources + reranked
+        else:
+            timings_ms["tavily_skipped"] = 1.0
+
+    if llm_cache is not None and not dynamic_web_query and not pre_web_fallback_reasons:
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
         cached = llm_cache.get(question, doc_ids, chat_model.model)
         if cached is not None:
@@ -1381,12 +1482,24 @@ def rag_flow(
         top_k_value=top_k_value,
     )
     context_trace: Dict[str, Any] = {}
+    context_documents = reranked
+    if web_context_override:
+        context_documents = [
+            doc for doc in reranked
+            if str(doc.get("collection") or "").lower() != "web"
+        ]
     context = _format_context(
-        reranked,
+        context_documents,
         per_doc_char_limit=context_doc_limit,
         total_char_budget=context_char_budget,
         trace_out=context_trace,
     )
+    if web_context_override:
+        context = (
+            f"{web_context_override}\n\n---\n\n{context}"
+            if context
+            else web_context_override
+        )
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -1497,6 +1610,7 @@ def rag_flow(
         routing_result=routing_result,
         eval_result=eval_result,
         cfg=cfg,
+        pre_web_fallback_used=pre_web_fallback_used,
     )
     timings_ms["answer_quality_gate"] = _elapsed_ms(gate_t0)
     timings_ms[f"answer_status_{answer_quality_gate['answer_status']}"] = 1.0
@@ -1508,10 +1622,10 @@ def rag_flow(
             answer_quality_gate["reasons"],
         )
 
-    web_fallback_used = False
-    web_fallback_sources: List[Dict[str, Any]] = []
+    answer_quality_gate["pre_generation_reasons"] = pre_web_fallback_reasons
+    answer_quality_gate["pre_generation_web_used"] = pre_web_fallback_used
     web_fallback_query = str(
-        answer_quality_gate.get("web_search_query") or search_query
+        answer_quality_gate.get("web_search_query") or web_fallback_query or search_query
     )
     if answer_quality_gate["should_web_search"]:
         if cfg.get("tavily_fallback_enabled", False):
@@ -1598,7 +1712,7 @@ def rag_flow(
                     "tool": "tavily_search",
                     "args": {
                         "query": web_fallback_query,
-                        "include_domains": "HUST_DOMAINS",
+                        "include_domains": "HUST_OFFICIAL_DOMAINS",
                     },
                     "result": "used" if web_fallback_used else "searched",
                     "iteration": 0,
@@ -2017,18 +2131,17 @@ def rag_flow_stream(
         timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
 
     web_fallback_used = False
-    web_fallback_query = search_query or question
-    web_fallback_reasons: List[str] = []
-    if not reranked:
-        web_fallback_reasons.append("no_sources")
-    if dynamic_web_query:
-        web_fallback_reasons.append("dynamic_query")
-    if (
-        raw_results
-        and _best_rerank_score_s is not None
-        and _best_rerank_score_s < 0.0
-    ):
-        web_fallback_reasons.append("low_retrieval_confidence")
+    web_decision = _build_pre_generation_web_decision(
+        question=question,
+        search_query=search_query,
+        reranked=reranked,
+        target_collections=target_collections,
+        routing_result=routing_result,
+        cfg=cfg,
+        low_retrieval_confidence=bool(timings_ms.get("rerank_raw_fallback")),
+    )
+    web_fallback_query = str(web_decision.get("web_search_query") or search_query)
+    web_fallback_reasons: List[str] = list(web_decision.get("reasons") or [])
 
     web_context_override = ""
     if web_fallback_reasons:
@@ -2108,12 +2221,13 @@ def rag_flow_stream(
         metadata_out["context_trace"] = context_trace
         metadata_out["rerank_trace"] = rerank_trace
         metadata_out["answer_quality_gate"] = {
-            "answer_status": "stale_risk" if dynamic_web_query else "answered",
+            "answer_status": web_decision["answer_status"],
             "should_web_search": bool(web_fallback_reasons),
             "web_search_query": web_fallback_query,
             "reasons": web_fallback_reasons,
             "dynamic_query": dynamic_web_query,
             "no_sources": "no_sources" in web_fallback_reasons,
+            "low_retrieval_confidence": "low_retrieval_confidence" in web_fallback_reasons,
         }
         metadata_out["tools_used"] = (
             ["tavily_search"] if timings_ms.get("tavily_search") else []
@@ -2124,7 +2238,7 @@ def rag_flow_stream(
                     "tool": "tavily_search",
                     "args": {
                         "query": web_fallback_query,
-                        "include_domains": "HUST_DOMAINS",
+                        "include_domains": "HUST_OFFICIAL_DOMAINS",
                     },
                     "result": "used" if web_fallback_used else "searched",
                     "iteration": 0,
@@ -2275,7 +2389,7 @@ def _tavily_search_context(
         }
 
     try:
-        from tools.tavily_search import HUST_DOMAINS
+        from tools.tavily_search import HUST_OFFICIAL_DOMAINS
 
         tavily_query = query.strip()
         web_context = ""
@@ -2305,7 +2419,7 @@ def _tavily_search_context(
                 tavily_query,
                 max_results=max_results,
                 search_depth=search_depth,
-                include_domains=HUST_DOMAINS,
+                include_domains=HUST_OFFICIAL_DOMAINS,
             )
             timings_ms["tavily_search"] = _elapsed_ms(search_t0)
 

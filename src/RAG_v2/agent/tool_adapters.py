@@ -165,15 +165,9 @@ def _is_valid_api_key(key: str) -> bool:
     new placeholder variants (e.g. ``your-tavily-api-key-here``) are rejected
     without having to maintain an ever-growing exact-match list.
     """
-    stripped = key.strip()
-    if not stripped:
-        return False
-    if stripped in _INVALID_KEY_EXACT:
-        return False
-    if any(stripped.startswith(p) or stripped.lower().startswith(p.lower())
-           for p in _INVALID_KEY_PREFIXES):
-        return False
-    return True
+    from tools.tavily_search import is_valid_tavily_api_key
+
+    return is_valid_tavily_api_key(key)
 
 
 def _build_runtime() -> _AdapterRuntime:
@@ -191,7 +185,11 @@ def _build_runtime() -> _AdapterRuntime:
     tavily_key = settings.tavily_api_key or os.environ.get("TAVILY_API_KEY", "")
     tavily_tool: TavilySearchTool | None = None
     if _is_valid_api_key(tavily_key):
-        tavily_tool = TavilySearchTool(api_key=tavily_key)
+        tavily_tool = TavilySearchTool(
+            api_key=tavily_key,
+            cache_maxsize=settings.tavily_cache_maxsize,
+            cache_ttl_seconds=settings.tavily_cache_ttl_seconds,
+        )
 
     return _AdapterRuntime(
         settings=settings,
@@ -229,7 +227,11 @@ def inject_from_retrieval_service(retrieval_service: Any) -> None:
     tavily_tool = None
     if _is_valid_api_key(tavily_key):
         from tools.tavily_search import TavilySearchTool
-        tavily_tool = TavilySearchTool(api_key=tavily_key)
+        tavily_tool = TavilySearchTool(
+            api_key=tavily_key,
+            cache_maxsize=settings.tavily_cache_maxsize,
+            cache_ttl_seconds=settings.tavily_cache_ttl_seconds,
+        )
 
     runtime = _AdapterRuntime(
         settings=settings,
@@ -568,12 +570,21 @@ def _web_search(query: str) -> str:
     if runtime.tavily_tool is None:
         return "[Loi: Tavily chua duoc cau hinh API key]"
 
-    from tools.tavily_search import HUST_DOMAINS, EDU_DOMAINS
+    from tools.tavily_search import (
+        EDU_AUTHORITATIVE_DOMAINS,
+        HUST_EXTENDED_DOMAINS,
+        HUST_OFFICIAL_DOMAINS,
+    )
 
     results = runtime.tavily_tool.search(
         query=query,
-        max_results=3,
-        include_domains=HUST_DOMAINS + EDU_DOMAINS,
+        max_results=getattr(runtime.settings, "tavily_max_results", 3),
+        search_depth=getattr(runtime.settings, "tavily_search_depth", "basic"),
+        include_domains=(
+            HUST_OFFICIAL_DOMAINS
+            + HUST_EXTENDED_DOMAINS
+            + EDU_AUTHORITATIVE_DOMAINS
+        ),
     )
     return _format_web_results(results)
 
@@ -744,14 +755,22 @@ def _format_web_results(results: Any) -> str:
     elif isinstance(results, list):
         items = [item for item in results if isinstance(item, dict)]
 
-    # Exclude keyword duplicates
-    all_results = list({doc.get("id"): doc for doc in items}.values())
+    all_results: list[dict[str, Any]] = []
+    seen_keys: set[str] = set()
+    for item in items:
+        key = str(item.get("url") or item.get("id") or item.get("title") or "")
+        if not key:
+            key = str(len(all_results))
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        all_results.append(item)
 
     # Accumulate for UI diagnostic logging (per-request, thread-safe)
     _append_agent_docs(all_results)
 
     chunks: list[str] = []
-    for index, item in enumerate(items[:3], 1):
+    for index, item in enumerate(all_results[:3], 1):
         title = str(item.get("title", "")).strip() or f"Ket qua {index}"
         content = " ".join(str(item.get("content", "")).split())
         if len(content) > 500:

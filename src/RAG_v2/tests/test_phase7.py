@@ -189,7 +189,7 @@ class TestTavilyFallback:
         assert hasattr(tool, "min_retry_delay")
         assert hasattr(tool, "_last_call_time")
 
-    def test_self_eval_fail_triggers_tavily(self) -> None:
+    def test_self_eval_web_request_triggers_tavily(self) -> None:
         from pipeline.flows import rag_flow
         mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
         cfg.update({
@@ -202,7 +202,13 @@ class TestTavilyFallback:
         mock_chat.generate.side_effect = ["bad answer", "better answer from web"]
 
         mock_self_eval = MagicMock()
-        mock_self_eval.evaluate.return_value = {"pass": False, "reason": "bad answer"}
+        mock_self_eval.evaluate.return_value = {
+            "pass": False,
+            "answer_status": "insufficient",
+            "should_web_search": True,
+            "web_search_query": "HUST test",
+            "reason": "bad answer",
+        }
         mock_tavily = MagicMock()
         mock_tavily.search.return_value = {"context": "web context here"}
 
@@ -220,15 +226,45 @@ class TestTavilyFallback:
         assert mock_tavily.search.call_args.kwargs["search_depth"] == "advanced"
         assert result["answer"] == "better answer from web"
         assert result["tools_used"] == ["tavily_search"]
-        assert result["tool_calls"][0]["args"]["query"] == "test"
+        assert result["tool_calls"][0]["args"]["query"] == "HUST test"
 
-    def test_self_eval_fail_respects_tavily_disabled(self) -> None:
+    def test_self_eval_web_request_respects_tavily_disabled(self) -> None:
         from pipeline.flows import rag_flow
         mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
         cfg["tavily_fallback_enabled"] = False
         mock_chat = MagicMock()
         mock_chat.model = "test-model"
         mock_chat.generate.return_value = "bad answer"
+
+        mock_self_eval = MagicMock()
+        mock_self_eval.evaluate.return_value = {
+            "pass": False,
+            "answer_status": "insufficient",
+            "should_web_search": True,
+            "reason": "bad answer",
+        }
+        mock_tavily = MagicMock()
+
+        result = rag_flow(
+            question="test", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=mock_self_eval,
+            tavily_tool=mock_tavily, cfg=cfg,
+        )
+
+        assert mock_self_eval.evaluate.called
+        assert not mock_tavily.search.called
+        assert result["answer"] == "bad answer"
+        assert result["timings_ms"]["tavily_skipped"] == 1.0
+
+    def test_self_eval_fail_without_web_request_does_not_call_tavily(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        cfg["tavily_fallback_enabled"] = True
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate.return_value = "possibly incomplete answer"
 
         mock_self_eval = MagicMock()
         mock_self_eval.evaluate.return_value = {"pass": False, "reason": "bad answer"}
@@ -244,8 +280,10 @@ class TestTavilyFallback:
 
         assert mock_self_eval.evaluate.called
         assert not mock_tavily.search.called
-        assert result["answer"] == "bad answer"
-        assert result["timings_ms"]["tavily_skipped"] == 1.0
+        assert result["answer"] == "possibly incomplete answer"
+        assert result["answer_quality_gate"]["informational_notes"] == [
+            "self_eval_failed"
+        ]
 
     def test_no_info_answer_triggers_tavily_without_hardcoded_query(self) -> None:
         from pipeline.flows import rag_flow
@@ -388,9 +426,9 @@ class TestTavilyFallback:
         )
 
         assert mock_tavily.search.called
-        assert mock_tavily.search.call_args.args[0] == "kế hoạch học GDPQ kì hè K70"
-        assert "dynamic_query" in result["answer_quality_gate"]["reasons"]
-        assert result["answer"] == "answer from ctt"
+        assert mock_tavily.search.call_args.args[0] == "HUST kế hoạch học GDPQ kì hè K70"
+        assert "dynamic_query" in result["answer_quality_gate"]["pre_generation_reasons"]
+        assert result["answer"] == "Khóa K70 sẽ không mở đăng ký học kỳ hè 20253."
 
     def test_no_info_cached_answer_is_ignored(self) -> None:
         from pipeline.flows import rag_flow
@@ -483,6 +521,55 @@ class TestTavilyFallback:
             ["https://sv-ctt.hust.edu.vn/#/so-tay-sv", "ctt.hust.edu.vn/path"]
         ) == ["sv-ctt.hust.edu.vn", "ctt.hust.edu.vn"]
 
+    def test_tavily_domain_tiers_exclude_news_sites(self) -> None:
+        from tools.tavily_search import (
+            EDU_DOMAINS,
+            HUST_DOMAINS,
+            HUST_OFFICIAL_DOMAINS,
+        )
+
+        assert "ctt.hust.edu.vn" in HUST_OFFICIAL_DOMAINS
+        assert "sv-ctt.hust.edu.vn" in HUST_DOMAINS
+        assert EDU_DOMAINS == ["moet.gov.vn"]
+        assert "vnexpress.net" not in EDU_DOMAINS
+
+    def test_tavily_search_uses_cache_after_domain_normalization(self) -> None:
+        from threading import RLock
+        from tools.tavily_search import TavilySearchTool, _SimpleTTLCache
+
+        class InvalidKeyError(Exception):
+            pass
+
+        tool = TavilySearchTool.__new__(TavilySearchTool)
+        tool._client = MagicMock()
+        tool._client.search.return_value = {
+            "answer": "answer",
+            "results": [
+                {
+                    "title": "Title",
+                    "url": "https://ctt.hust.edu.vn/post",
+                    "content": "content",
+                }
+            ],
+        }
+        tool._invalid_key_error = InvalidKeyError
+        tool.max_results = 3
+        tool.max_retries = 1
+        tool.min_retry_delay = 0.0
+        tool._last_call_time = 0.0
+        tool.default_include_domains = None
+        tool._cache_lock = RLock()
+        tool._cache = _SimpleTTLCache(maxsize=10, ttl_seconds=60)
+
+        first = tool.search(
+            "test",
+            include_domains=["https://ctt.hust.edu.vn/path"],
+        )
+        second = tool.search("test", include_domains=["ctt.hust.edu.vn"])
+
+        assert first == second
+        assert tool._client.search.call_count == 1
+
 
 class TestPayloadPopFix:
     def test_fused_results_text_preserved(self) -> None:
@@ -544,6 +631,7 @@ class TestConfigSync:
         assert "tavily_fallback_enabled" in cfg
         assert "tavily_search_depth" in cfg
         assert "tavily_max_results" in cfg
+        assert "web_fallback_on_dynamic" in cfg
         assert cfg["model"] == s.chat_model
         assert cfg["es_host"] == s.elasticsearch_host
         assert cfg["top_k"] == s.top_k

@@ -410,3 +410,19 @@ Không cần thay đổi file nào khác — `HUST_DOMAINS` được import tr�
   `sv-ctt.hust.edu.vn`, because Tavily domain filters accept domains, not paths.
 - `HUST_DOMAINS` includes `sv-ctt.hust.edu.vn` explicitly for student portal
   SPA content.
+
+## Update 2026-05-17: Tavily authoritative domains and cache
+
+- Domain constants are tiered:
+  `HUST_OFFICIAL_DOMAINS`, `HUST_EXTENDED_DOMAINS`, and
+  `EDU_AUTHORITATIVE_DOMAINS`. Backward-compatible aliases remain:
+  `HUST_DOMAINS = HUST_OFFICIAL_DOMAINS + HUST_EXTENDED_DOMAINS` and
+  `EDU_DOMAINS = EDU_AUTHORITATIVE_DOMAINS`.
+- News domains were removed from the default education web scope. Agent web
+  search now uses HUST official/extended domains plus authoritative education
+  sources such as `moet.gov.vn`.
+- `TavilySearchTool.search()` has an instance-level TTL cache keyed by query,
+  max results, depth, answer flag, and normalized domain filters. Defaults:
+  `TAVILY_CACHE_TTL_SECONDS=3600`, `TAVILY_CACHE_MAXSIZE=200`.
+- `is_valid_tavily_api_key()` is the shared placeholder-key validator used by
+  `RetrievalService` and agent tool adapters.

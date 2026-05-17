@@ -169,6 +169,7 @@ def _settings_to_cfg(settings: Settings) -> Dict[str, Any]:
         "tavily_search_depth": settings.tavily_search_depth,
         "tavily_max_results": settings.tavily_max_results,
         "web_fallback_dynamic_collections": settings.web_fallback_dynamic_collections,
+        "web_fallback_on_dynamic": settings.web_fallback_on_dynamic,
         "web_fallback_on_no_info": settings.web_fallback_on_no_info,
     }
 

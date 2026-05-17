@@ -254,6 +254,21 @@ Các test có integration hoặc phụ thuộc LLM/service:
 
 ---
 
+## Update 2026-05-17: Agent Tavily web search scope
+
+- `web_search` tool description now explicitly tells the agent to use Tavily
+  for deadlines, schedules, registration windows, latest notices, concrete
+  semesters/school years, or when `rag_search` has no relevant result.
+- The agent web adapter uses settings-driven `tavily_max_results` and
+  `tavily_search_depth`.
+- Agent web search is limited to `HUST_OFFICIAL_DOMAINS`,
+  `HUST_EXTENDED_DOMAINS`, and `EDU_AUTHORITATIVE_DOMAINS`; news domains are no
+  longer included by default.
+- `_format_web_results()` deduplicates Tavily docs by URL before appending them
+  to per-request agent docs.
+
+---
+
 ## 11. Quy tắc maintenance
 
 1. Trước khi sửa code trong `agent/`, đọc file này và `AGENTS.md`.

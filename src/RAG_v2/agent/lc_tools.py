@@ -152,8 +152,12 @@ LANGGRAPH_TOOLS: list[StructuredTool] = [
         func=_web_search,
         name="web_search",
         description=(
-            "Tìm thông tin mới nhất trên internet qua Tavily. "
-            "Chỉ dùng khi database không có kết quả hoặc cần thông tin rất mới."
+            "Tìm thông tin HUST mới nhất từ web qua Tavily, giới hạn vào "
+            "hust.edu.vn và nguồn giáo dục chính thống. Dùng khi câu hỏi có "
+            "deadline, lịch thi, đăng ký học phần, thông báo mới, năm học/học kỳ "
+            "cụ thể, hoặc khi rag_search không có kết quả liên quan. Không dùng "
+            "cho câu hỏi khái niệm, quy trình ổn định, hoặc thông tin đã có trong "
+            "database nội bộ."
         ),
         args_schema=WebSearchInput,
     ),

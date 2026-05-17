@@ -160,6 +160,14 @@ RAG_v2/
 - Tavily fallback is controlled by `TAVILY_FALLBACK_ENABLED`; when enabled,
   `RAGPipeline` initializes `SelfEvaluator` even if direct `SELF_EVAL_ENABLED`
   is false, because self-eval is the quality gate for web fallback.
+- Tavily now has a pre-generation enrichment path shared by `rag_flow()` and
+  `rag_flow_stream()`: dynamic/time-sensitive queries, no-source retrieval, or
+  raw rerank fallback can fetch official web context before generation. This is
+  gated by `WEB_FALLBACK_ON_DYNAMIC` for dynamic queries.
+- Post-generation Tavily regeneration is only for explicit insufficiency:
+  no-info answer text, no sources, or self-eval returning
+  `should_web_search=true` with `answer_status` of `insufficient` or
+  `stale_risk`. Plain `pass=false` self-eval is diagnostic.
 - `SELF_EVAL_MIN_TOP_SCORE` defaults to `100.0` for local BGE raw-logit scores.
   The old `0.72` probability-style threshold incorrectly skipped self-eval for
   high raw logits such as `5.25`.
@@ -330,6 +338,10 @@ All `/admin/*` document endpoints yêu cầu admin role:
 | `web_search` | yes | Tavily/web fallback |
 | `clarify_question` | yes | Ask user one clarification and stop turn |
 
+`web_search` uses HUST official/extended domains plus authoritative education
+domains only; general news sites are not in the default Tavily scope. The tool
+uses `TAVILY_MAX_RESULTS` and `TAVILY_SEARCH_DEPTH` from settings.
+
 Important: `execute_tool()` in `agent/tool_adapters.py` still supports `multi_rag_search`, `compare_cohorts`, and `compare_programs` for backward compatibility, tests, and direct callers. These are not currently in `LANGGRAPH_TOOLS`, so the ReAct LLM is not schema-bound directly to them. Comparison/multi-source work is handled primarily by the planner-executor path.
 
 Tool adapter details:
@@ -386,6 +398,13 @@ Key settings families:
 ```env
 GOOGLE_API_KEY=...
 TAVILY_API_KEY=...
+TAVILY_FALLBACK_ENABLED=false
+TAVILY_SEARCH_DEPTH=basic
+TAVILY_MAX_RESULTS=3
+WEB_FALLBACK_ON_DYNAMIC=true
+WEB_FALLBACK_ON_NO_INFO=true
+TAVILY_CACHE_TTL_SECONDS=3600
+TAVILY_CACHE_MAXSIZE=200
 LM_STUDIO_BASE_URL=...
 LLM_PROVIDER=gemini
 EMBEDDING_PROVIDER=ensemble

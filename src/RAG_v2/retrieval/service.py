@@ -74,7 +74,7 @@ class RetrievalService:
         from embedding import BGEm3Embedder, E5MultilingualEmbedder
         from reranking import create_reranker
         from retrieval import create_retriever
-        from tools.tavily_search import TavilySearchTool
+        from tools.tavily_search import TavilySearchTool, is_valid_tavily_api_key
 
         logger.info("RetrievalService: loading BGE-M3 embedder …")
         bge = BGEm3Embedder()
@@ -92,8 +92,12 @@ class RetrievalService:
 
         tavily_key = settings.tavily_api_key or os.environ.get("TAVILY_API_KEY", "")
         tavily_tool: TavilySearchTool | None = None
-        if tavily_key and tavily_key not in {"", "your-key-here", "CHANGE_ME", "tvly-xxx"}:
-            tavily_tool = TavilySearchTool(api_key=tavily_key)
+        if is_valid_tavily_api_key(tavily_key):
+            tavily_tool = TavilySearchTool(
+                api_key=tavily_key,
+                cache_maxsize=settings.tavily_cache_maxsize,
+                cache_ttl_seconds=settings.tavily_cache_ttl_seconds,
+            )
             logger.info("RetrievalService: Tavily web search tool loaded.")
 
         service = cls(

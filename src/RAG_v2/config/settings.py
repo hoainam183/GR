@@ -158,7 +158,10 @@ class Settings(BaseSettings):
     tavily_search_depth: str = "basic"    # basic (1 credit) | advanced (2 credits)
     tavily_max_results: int = 3           # results per search
     web_fallback_dynamic_collections: List[str] = ["kehoach"]
+    web_fallback_on_dynamic: bool = True
     web_fallback_on_no_info: bool = True
+    tavily_cache_ttl_seconds: int = 3600
+    tavily_cache_maxsize: int = 200
 
     # --- Offline Evaluation ---
     post_index_eval_enabled: bool = True
