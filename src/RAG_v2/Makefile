@@ -5,7 +5,7 @@ setup:
 	.venv/bin/pip install -r requirements.txt
 
 backend:
-	.venv/bin/python backend/main.py
+	.venv/Scripts/python backend/main.py
 
 frontend:
 	cd frontend/chat-companion && npm run dev

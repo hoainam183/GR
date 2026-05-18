@@ -769,12 +769,16 @@ def _format_web_results(results: Any) -> str:
     # Accumulate for UI diagnostic logging (per-request, thread-safe)
     _append_agent_docs(all_results)
 
+    runtime = _get_runtime()
+    web_count = int(getattr(runtime.settings, "tavily_web_result_count", 3) or 3)
+    web_char_limit = int(getattr(runtime.settings, "tavily_web_content_char_limit", 1500) or 1500)
+
     chunks: list[str] = []
-    for index, item in enumerate(all_results[:3], 1):
+    for index, item in enumerate(all_results[:web_count], 1):
         title = str(item.get("title", "")).strip() or f"Ket qua {index}"
         content = " ".join(str(item.get("content", "")).split())
-        if len(content) > 500:
-            content = content[:500].rstrip() + "..."
+        if len(content) > web_char_limit:
+            content = content[:web_char_limit].rstrip() + "..."
         url = str(item.get("url", "")).strip()
         chunks.append(f"[{index}] {title}\n{content}\nURL: {url}")
 

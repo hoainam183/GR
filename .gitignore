@@ -32,6 +32,7 @@ olmocr/cleaned/
 # Environment and dependency lock
 uv.lock
 .python-version
+node_modules/
 
 # Temporary / cache / build files
 *.log

@@ -1495,11 +1495,16 @@ def rag_flow(
         trace_out=context_trace,
     )
     if web_context_override:
-        context = (
-            f"{web_context_override}\n\n---\n\n{context}"
-            if context
-            else web_context_override
-        )
+        if context:
+            context = (
+                f"## Nguồn Web (thông tin mới nhất từ trang chính thức HUST)\n"
+                f"{web_context_override}\n\n---\n\n"
+                f"## Nguồn Cơ Sở Dữ Liệu Nội Bộ (thông tin đã được kiểm duyệt)\n"
+                f"{context}\n\n"
+                f"Lưu ý: Nếu hai nguồn mâu thuẫn về thời gian/năm học, ưu tiên Nguồn Web."
+            )
+        else:
+            context = web_context_override
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -2184,11 +2189,16 @@ def rag_flow_stream(
         trace_out=context_trace,
     )
     if web_context_override:
-        context = (
-            f"{web_context_override}\n\n---\n\n{context}"
-            if context
-            else web_context_override
-        )
+        if context:
+            context = (
+                f"## Nguồn Web (thông tin mới nhất từ trang chính thức HUST)\n"
+                f"{web_context_override}\n\n---\n\n"
+                f"## Nguồn Cơ Sở Dữ Liệu Nội Bộ (thông tin đã được kiểm duyệt)\n"
+                f"{context}\n\n"
+                f"Lưu ý: Nếu hai nguồn mâu thuẫn về thời gian/năm học, ưu tiên Nguồn Web."
+            )
+        else:
+            context = web_context_override
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -2423,6 +2433,18 @@ def _tavily_search_context(
             )
             timings_ms["tavily_search"] = _elapsed_ms(search_t0)
 
+            raw_results = search_result.get("results") or []
+            timings_ms["web_results_raw_count"] = float(len(raw_results))
+            content_lengths = [
+                len(str(r.get("content", "")))
+                for r in raw_results
+                if isinstance(r, dict)
+            ]
+            if content_lengths:
+                timings_ms["web_avg_content_length"] = round(
+                    sum(content_lengths) / len(content_lengths), 1
+                )
+
             web_context = str(search_result.get("context") or "")
             tavily_sources = _tavily_results_to_docs(search_result)
 
@@ -2485,7 +2507,13 @@ def _tavily_fallback_result(
     timings_ms: Dict[str, float] = dict(search_info["timings"])
     web_context = str(search_info.get("context") or "")
     tavily_sources = list(search_info.get("sources") or [])
-    if not web_context:
+    # Early-exit: web context empty or too short → don't waste an LLM call
+    if not web_context or len(web_context.strip()) < 200:
+        if web_context:
+            logger.info(
+                "Tavily web context too short (%d chars), skipping re-generation",
+                len(web_context),
+            )
         return {
             "answer": answer,
             "timings": timings_ms,

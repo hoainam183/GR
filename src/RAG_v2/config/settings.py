@@ -89,7 +89,7 @@ class Settings(BaseSettings):
     agent_model: str = "qwen2.5-7b-instruct"  # local Qwen for tool selection
     agent_temperature: float = 0.0     # deterministic tool selection
     agent_max_tokens: int = 1200       # enough for multi-tool reasoning
-    agent_tool_result_limit: int = 3000  # max chars per ToolMessage
+    agent_tool_result_limit: int = 5000  # max chars per ToolMessage
 
     # Agent synthesis — uses a STRONGER model for the final answer.
     # ✅ GEMINI: synthesis is quality-critical (user-facing final answer)
@@ -135,7 +135,7 @@ class Settings(BaseSettings):
     context_total_char_budget: int = 12000
     context_list_total_char_budget: int = 24000
     agent_search_result_count: int = 4
-    agent_search_result_char_limit: int = 700
+    agent_search_result_char_limit: int = 1200
 
     # --- Reranker ---
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
@@ -156,7 +156,9 @@ class Settings(BaseSettings):
     self_eval_min_top_score: float = 100.0
     tavily_fallback_enabled: bool = False
     tavily_search_depth: str = "basic"    # basic (1 credit) | advanced (2 credits)
-    tavily_max_results: int = 3           # results per search
+    tavily_max_results: int = 5           # fetch pool size (filter xuống tavily_web_result_count)
+    tavily_web_content_char_limit: int = 1500  # per-result content char limit cho web results
+    tavily_web_result_count: int = 3      # số results giữ lại sau filter (≤ max_results)
     web_fallback_dynamic_collections: List[str] = ["kehoach"]
     web_fallback_on_dynamic: bool = True
     web_fallback_on_no_info: bool = True

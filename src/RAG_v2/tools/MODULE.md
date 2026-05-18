@@ -4,7 +4,7 @@
 
 Module `tools` cung cấp **web search fallback** qua Tavily API, bổ sung thông tin khi kho dữ liệu nội bộ (Qdrant + ES) không đủ để trả lời. Tavily được tích hợp ở **hai điểm** trong hệ thống:
 
-1. **Self-eval fallback** (classic RAG flow): Khi answer bị đánh giá chất lượng thấp, hệ thống tìm kiếm web HUST để bổ sung context rồi sinh lại answer.
+1. **RAG Flow fallback** (hai giai đoạn): Pre-generation (với dynamic query / no sources) và post-generation (khi answer không có thông tin / self-eval yêu cầu). Cả hai đều cần `TAVILY_FALLBACK_ENABLED=true`.
 2. **Agent `web_search` tool** (LangGraph ReAct): Agent tự chọn gọi web search khi `rag_search` không đủ thông tin.
 
 ---
@@ -112,51 +112,71 @@ result = tool.search(
 
 ## Điểm tích hợp trong hệ thống
 
-### 1. Self-eval Fallback (Classic RAG Flow)
+### 1. RAG Flow Fallback — Hai giai đoạn (Pre-generation + Post-generation)
 
-**File:** `pipeline/flows.py` → `_tavily_fallback()`
+**File:** `pipeline/flows.py`
 
-**Khi nào hoạt động:**
+Tavily **KHÔNG** chạy cho mọi query. Nó chỉ được kích hoạt theo hai giai đoạn độc lập, mỗi giai đoạn đều phụ thuộc vào điều kiện cụ thể. **Master gate chung: `TAVILY_FALLBACK_ENABLED=true` phải được bật.**
 
-```
-rag_flow()
-  └→ Generate answer
-  └→ Self-eval check (CHỈ khi SELF_EVAL_ENABLED=true)
-       └→ Kiểm tra top reranker score:
-            ├→ score ≥ 100.0 → SKIP self-eval (very high raw-logit confidence)
-            └→ score < 100.0 → RUN SelfEvaluator.evaluate()
-                 ├→ pass=True → Return answer gốc
-                 └→ pass=False → TRIGGER Tavily fallback
-                      └→ Tavily search (HUST_DOMAINS only, max 3, basic)
-                           ├→ web_context rỗng → Return answer gốc
-                           └→ web_context có data → Re-generate answer
-```
+#### Giai đoạn 1 — Pre-generation web search
 
-**Luồng chi tiết:**
+**Thời điểm:** Sau rerank, **trước** khi generate answer.
+
+**Điều kiện kích hoạt** (bất kỳ một trong các điều kiện sau):
+
+| Điều kiện | Nguồn phát hiện |
+|:---|:---|
+| `no_sources` | Reranker không trả về tài liệu nào |
+| `dynamic_query` | Query match `kehoach` collection **hoặc** chứa keywords: `ke hoach`, `thong bao`, `lich thi/dang ky/hoc`, `han dang ky/nop`, `deadline`, `ky he`, `nam hoc YYYY-YYYY` |
+| `low_retrieval_confidence` | Reranker phải dùng raw fusion score fallback (không tìm được doc nào có score dương) |
+
+**Hành vi:** Lấy web context **trước** khi sinh answer → prepend vào context → LLM dùng cả nội dung web + local docs.
+
+#### Giai đoạn 2 — Post-generation quality gate
+
+**Thời điểm:** Sau khi đã generate answer, **chỉ khi** giai đoạn 1 chưa dùng Tavily.
+
+**Điều kiện kích hoạt** (bất kỳ một trong các điều kiện sau):
+
+| Điều kiện | Nguồn phát hiện |
+|:---|:---|
+| `answer_no_info` | Answer text chứa cụm "không tìm thấy thông tin", "chưa có thông tin"… |
+| `no_sources` | Không có tài liệu nào từ retrieval |
+| `self_eval_requested_web` | `SelfEvaluator` trả về `should_web_search=True` **VÀ** `answer_status` là `"insufficient"` hoặc `"stale_risk"` |
+
+**Hành vi:** Tìm web context → re-generate answer mới từ web context → thay thế answer gốc.
+
+> **Lưu ý self-eval:** Self-eval **chỉ chạy** khi `self_evaluator is not None` (bật `SELF_EVAL_ENABLED`) **và** top reranker score < `self_eval_min_top_score` (default `100.0`). Self-eval fail đơn thuần **không đủ** để trigger Tavily — cần `should_web_search=True` kết hợp với status `insufficient/stale_risk`.
+
+**Luồng tổng thể:**
 
 ```mermaid
 flowchart TD
-    A["Generate answer<br/>(chat_model.generate)"] --> B{"self_eval_enabled<br/>AND self_evaluator exists?"}
-    B -->|No| C["Return answer as-is"]
-    B -->|Yes| D{"top reranker<br/>score ≥ 100.0?"}
-    D -->|"Yes — retrieval quality good"| E["Skip self-eval ✅<br/>timings: self_eval_skipped=1.0"]
-    D -->|"No — quality uncertain"| F["SelfEvaluator.evaluate()<br/>(query, context, response)"]
-    F --> G{"eval pass?"}
-    G -->|Yes| C
-    G -->|"No — answer insufficient"| H["_tavily_fallback()"]
-    H --> I["Tavily search<br/>query=question<br/>include_domains=HUST_DOMAINS<br/>max_results=3"]
-    I --> J{"web_context<br/>found?"}
-    J -->|No| C
-    J -->|Yes| K["chat_model.generate()<br/>context=web_context<br/>mode=rag"]
-    K --> L["Return NEW answer<br/>timings: tavily_search, tavily_generate"]
-    
-    style H fill:#f9f,stroke:#333
-    style I fill:#ff9,stroke:#333
+    A["After Rerank"] --> B["_build_pre_generation_web_decision()"]
+    B --> C{"should_web_search?\n(no_sources / dynamic_query\n/ low_confidence)"}
+    C -->|No| D["Generate answer\n(chat_model.generate)"]
+    C -->|"Yes AND tavily_fallback_enabled=true"| E["_tavily_search_context()\nHUST_OFFICIAL_DOMAINS only"]
+    E --> F{"web_context\nfound?"}
+    F -->|No| D
+    F -->|Yes| G["Prepend web_context\nvào context"]
+    G --> D
+
+    D --> H["_build_answer_quality_gate()\n(chỉ khi pre_web chưa dùng)"]
+    H --> I{"should_web_search?\n(no_info / no_sources\n/ self_eval_requested_web)"}
+    I -->|No| J["Return answer"]
+    I -->|"Yes AND tavily_fallback_enabled=true"| K["_tavily_fallback_result()"]
+    K --> L{"web_context\nfound?"}
+    L -->|No| J
+    L -->|Yes| M["Re-generate answer\nfrom web_context"]
+    M --> J
+
+    style E fill:#ff9,stroke:#333
+    style K fill:#f9f,stroke:#333
 ```
 
-**Domain scope:** `HUST_DOMAINS` only (Tier 1) — giữ kết quả hẹp, đảm bảo answer liên quan HUST.
+**Domain scope (cả hai giai đoạn):** `HUST_OFFICIAL_DOMAINS` only — giữ kết quả hẹp, đảm bảo answer liên quan HUST chính thức.
 
-**Streaming path:** `/chat/stream` **KHÔNG** chạy self-eval/Tavily fallback — giữ UX streaming real-time.
+**Streaming path:** `/chat/stream` **KHÔNG** chạy Tavily fallback — giữ UX streaming real-time.
 
 **Error handling:** Nếu Tavily search thất bại (network error, invalid key…) → log warning, return answer gốc (không crash).
 
@@ -251,7 +271,7 @@ RAGPipeline.__init__()
 ### Shared instance
 
 `TavilySearchTool` được tạo **một lần** trong `RetrievalService` và shared qua:
-- `RAGPipeline._tavily` → truyền vào `rag_flow()` → `_tavily_fallback()`
+- `RAGPipeline._tavily` → truyền vào `rag_flow()` → `_tavily_search_context()` (pre-gen) và `_tavily_fallback_result()` (post-gen)
 - `_AdapterRuntime.tavily_tool` → dùng bởi `_web_search()` trong agent
 
 Không cần tạo instance mới ở bất kỳ đâu.
@@ -264,12 +284,14 @@ Không cần tạo instance mới ở bất kỳ đâu.
 # ─── API Key ──────────────────────────────────────────────────────────────────
 TAVILY_API_KEY=tvly-xxxxxxxxxxxxx           # Lấy từ app.tavily.com
 
-# ─── Self-eval + Tavily Fallback ──────────────────────────────────────────────
-SELF_EVAL_ENABLED=true                      # BẮT BUỘC để Tavily fallback hoạt động
-SELF_EVAL_MIN_TOP_SCORE=100.0               # BGE raw-logit safe threshold
-TAVILY_FALLBACK_ENABLED=true                # Flag cho logging/metrics
+# ─── Tavily Fallback ──────────────────────────────────────────────────────────
+TAVILY_FALLBACK_ENABLED=true                # Master gate: BẮT BUỘC để Tavily hoạt động trong rag_flow
 TAVILY_SEARCH_DEPTH=basic                   # basic (1 credit) | advanced (2 credits)
 TAVILY_MAX_RESULTS=3                        # Số kết quả mỗi lần search
+
+# ─── Self-eval (tuỳ chọn — chỉ ảnh hưởng đến post-generation gate) ───────────
+SELF_EVAL_ENABLED=true                      # Bật SelfEvaluator để có thêm điều kiện trigger post-gen Tavily
+SELF_EVAL_MIN_TOP_SCORE=100.0               # BGE raw-logit threshold: self-eval chỉ chạy khi top_score < này
 ```
 
 **Settings mapping (config/settings.py):**
@@ -277,13 +299,13 @@ TAVILY_MAX_RESULTS=3                        # Số kết quả mỗi lần searc
 | Setting | Default | Mô tả |
 |:---|:---|:---|
 | `tavily_api_key` | `""` | API key Tavily |
-| `self_eval_enabled` | `False` | Master switch cho self-eval → Tavily chain |
-| `self_eval_min_top_score` | `100.0` | BGE raw-logit threshold for skipping self-eval |
-| `tavily_fallback_enabled` | `False` | Flag bổ sung (logging/metrics, không gate logic) |
+| `tavily_fallback_enabled` | `False` | **Master gate** cho cả pre-gen và post-gen Tavily trong `rag_flow` |
 | `tavily_search_depth` | `"basic"` | Độ sâu tìm kiếm Tavily |
 | `tavily_max_results` | `3` | Số kết quả mỗi search |
+| `self_eval_enabled` | `False` | Bật SelfEvaluator (chỉ thêm một điều kiện trigger vào post-gen gate) |
+| `self_eval_min_top_score` | `100.0` | BGE raw-logit threshold — self-eval chỉ chạy khi top score < này |
 
-> **Lưu ý:** `tavily_fallback_enabled` hiện **không** được check trong `flows.py` — Tavily fallback được gating thuần bởi `self_evaluator is not None` (từ `self_eval_enabled`) + `tavily_tool is not None` (từ API key hợp lệ). Flag này chủ yếu cho observability/metrics.
+> **Lưu ý:** `tavily_fallback_enabled` là **hard gate** — cả pre-generation và post-generation Tavily đều check `cfg.get("tavily_fallback_enabled", False)`. Nếu False, Tavily bị skip hoàn toàn trong `rag_flow` dù API key hợp lệ. `SELF_EVAL_ENABLED` chỉ ảnh hưởng đến giai đoạn post-generation (thêm điều kiện `self_eval_requested_web`), không phải điều kiện bắt buộc để Tavily hoạt động.
 
 ---
 
@@ -300,9 +322,10 @@ TAVILY_MAX_RESULTS=3                        # Số kết quả mỗi lần searc
 
 | Scenario | Credits/tháng |
 |:---|:---|
-| Self-eval fallback (~5-10% queries × ~50/ngày) | 75–150 |
+| Pre-gen web: dynamic queries (lịch thi, deadline…) ~30% queries × ~50/ngày | ~450 |
+| Post-gen web: answer no-info + self-eval fallback ~5% queries × ~50/ngày | ~75 |
 | Agent web_search (~20-50 complex queries) | 20–50 |
-| **Total** | **~100–200** |
+| **Total** | **~550–575** |
 
 ---
 
@@ -312,25 +335,32 @@ TAVILY_MAX_RESULTS=3                        # Số kết quả mỗi lần searc
 
 | Key | Xuất hiện khi | Ý nghĩa |
 |:---|:---|:---|
+| `dynamic_web_query` | `= 1.0` khi query là dynamic | Query match kehoach/deadline patterns |
+| `web_fallback_requested` | Pre-gen hoặc post-gen quyết định cần Tavily | Gate đã bật nhưng chưa biết Tavily có dùng không |
+| `web_fallback_used` | `= 1.0` khi Tavily thực sự trả về context | Tavily search thành công và context được dùng |
+| `tavily_skipped` | `= 1.0` khi `tavily_fallback_enabled=false` | Gate mở nhưng bị disable bởi config |
+| `tavily_search` | Tavily API search call chạy | Thời gian API call (ms) |
+| `tavily_extract` | Tavily extract (URL trực tiếp) chạy | Thời gian extract call (ms) |
+| `tavily_generate` | Post-gen: re-generate từ web context | Thời gian LLM sinh answer mới (ms) |
+| `tavily_total` | Tavily pipeline hoàn thành | Tổng thời gian fallback (ms) |
 | `self_eval` | Self-eval chạy | Thời gian evaluate (ms) |
 | `self_eval_skipped` | `= 1.0` khi skip | Top score ≥ threshold |
-| `tavily_search` | Tavily search chạy | Thời gian API call (ms) |
-| `tavily_generate` | Re-generate chạy | Thời gian LLM sinh answer mới (ms) |
-| `tavily_total` | Tavily pipeline chạy | Tổng thời gian fallback (ms) |
 
 ### Frontend
 
 `PipelineTrace.tsx` hiển thị Tavily section khi phát hiện `timings_ms['tavily_total']`:
 
-- **Self-eval passed** → hiển thị ✅ badge
-- **Self-eval skipped** → hiển thị "skipped" badge
-- **Self-eval failed → Tavily triggered** → hiển thị ⚡ badge + timing breakdown (`tavily_search`, `tavily_generate`)
+- **Pre-gen web used** → hiển thị web context được prepend trước generation
+- **Post-gen web used** → hiển thị ⚡ badge + timing breakdown (`tavily_search`, `tavily_generate`)
+- **Tavily skipped** → hiển thị "skipped" badge (config disabled)
+- **Self-eval skipped** → hiển thị "skipped" badge (top score ≥ threshold)
 
 ### Logs
 
 ```
-INFO  Self-eval FAILED (...), attempting Tavily fallback
+INFO  dynamic_web_query detected, pre-generation Tavily triggered
 INFO  Tavily search: query='...' (max=3, domains=5)
+INFO  AnswerQualityGate requested web fallback: status=insufficient reasons=[answer_no_info]
 INFO  Tavily fallback generated 842 chars
 ```
 
@@ -341,11 +371,12 @@ INFO  Tavily fallback generated 842 chars
 | Lỗi | Xử lý | Kết quả |
 |:---|:---|:---|
 | API key rỗng/placeholder | `tavily_tool = None` khi startup | Tavily silently disabled |
+| `tavily_fallback_enabled=false` | Skip trong cả pre-gen và post-gen gate | `tavily_skipped=1.0` timing |
 | `InvalidAPIKeyError` | Fail ngay, không retry | Exception propagate → answer gốc giữ nguyên |
 | Network timeout / 5xx | Retry 3 lần (1s → 2s → 4s) | Sau 3 lần → exception → answer gốc giữ nguyên |
 | Web context rỗng | Return answer gốc | Không re-generate |
 | Re-generate thất bại | Catch exception, log warning | Return answer gốc |
-| Self-eval thất bại | Catch exception, log warning | Return answer gốc |
+| Self-eval thất bại | Catch exception, log warning | Không trigger Tavily (eval_result=None) |
 | Agent `web_search` lỗi | Return error string `[Loi: ...]` | Agent nhận error → tiếp tục reasoning |
 
 **Nguyên tắc:** Tavily là **fallback bổ trợ**, mọi lỗi đều graceful degrade → answer gốc luôn được trả về.
@@ -371,7 +402,7 @@ LLM involvement xảy ra ở caller:
 | Re-generate answer (Gemini) | 1,000–3,000ms |
 | **Tổng Tavily fallback** | **~2,000–5,000ms** |
 
-> Self-eval (`SelfEvaluator.evaluate()`) thêm ~2,000–5,000ms trước khi Tavily trigger. Tổng overhead worst case: ~4,000–10,000ms. Với BGE raw-logit default `100.0`, bước này chạy cho các query non-stream khi self-eval/Tavily fallback được bật.
+> **Pre-generation Tavily** (dynamic query): overhead xảy ra **trước** LLM generate → tổng latency = Tavily + LLM. **Post-generation Tavily** (quality gate): overhead xảy ra **sau** LLM generate → tổng latency = LLM + Tavily + LLM (re-generate). Self-eval thêm ~2,000–5,000ms vào post-gen path nếu được bật.
 
 ---
 

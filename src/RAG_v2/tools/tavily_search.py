@@ -250,6 +250,13 @@ class TavilySearchTool:
                 response = self._client.search(**search_kwargs)
 
                 results = self._parse_results(response)
+                raw_count = len(results)
+                results = self.filter_results(results, min_content_length=100)
+                if raw_count != len(results):
+                    logger.info(
+                        "Tavily filter: %d → %d results",
+                        raw_count, len(results),
+                    )
                 context = self._format_context(results)
 
                 parsed_response = {
@@ -379,18 +386,62 @@ class TavilySearchTool:
         return parsed
 
     @staticmethod
-    def _parse_results(response: Dict[str, Any]) -> List[Dict[str, str]]:
+    def _parse_results(response: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Extract structured results from the raw Tavily response."""
-        parsed: List[Dict[str, str]] = []
+        parsed: List[Dict[str, Any]] = []
         for item in response.get("results", []):
             parsed.append(
                 {
                     "title": item.get("title", ""),
                     "url": item.get("url", ""),
                     "content": item.get("content", ""),
+                    "score": float(item.get("score", 0.0) or 0.0),
                 }
             )
         return parsed
+
+    @staticmethod
+    def filter_results(
+        results: List[Dict[str, Any]],
+        *,
+        min_content_length: int = 100,
+        min_score: float = 0.0,
+        query_year: int | None = None,
+    ) -> List[Dict[str, Any]]:
+        """Filter low-quality or stale web results.
+
+        Args:
+            results: Parsed result list from ``_parse_results()``.
+            min_content_length: Drop results with content shorter than this.
+            min_score: Drop results with Tavily relevance score below this.
+            query_year: If set, drop results mentioning only years older than
+                query_year - 1 (freshness filter).
+
+        Returns:
+            Filtered list (may be empty — callers must handle).
+        """
+        import re as _re
+
+        filtered: List[Dict[str, Any]] = []
+        for r in results:
+            content = r.get("content", "")
+
+            if len(content) < min_content_length:
+                continue
+
+            if float(r.get("score", 1.0) or 1.0) < min_score:
+                continue
+
+            if query_year:
+                years_in_content = _re.findall(r'\b(20\d{2})\b', content)
+                if years_in_content:
+                    max_year = max(int(y) for y in years_in_content)
+                    if max_year < query_year - 1:
+                        continue
+
+            filtered.append(r)
+
+        return filtered
 
     @staticmethod
     def _format_context(results: List[Dict[str, str]]) -> str:
