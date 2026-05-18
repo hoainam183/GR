@@ -372,6 +372,59 @@ class ElasticsearchStore:
             )
             return []
 
+    def get_latest_chunk_ids_by_date(self, max_n: int = 200) -> List[str]:
+        """Return chunk IDs for the *max_n* most-recent documents by ``date_str``.
+
+        Used by the **kehoach freshness path**: when a query contains
+        freshness-intent phrases ("mới nhất", "gần đây", …) but no explicit
+        calendar date, we pre-filter Qdrant to the newest posted documents so
+        that recency becomes a hard constraint rather than a tiny score bonus.
+
+        ``date_str`` is stored as ``"D/M/YYYY"`` (keyword field, not a date
+        field), so Elasticsearch cannot sort it natively.  This method fetches
+        up to 1 000 docs that have a ``date_str`` value, parses dates in Python,
+        sorts descending, and returns the ``_id`` strings of the top *max_n*.
+
+        Returns:
+            List of ``_id`` strings sorted by date descending (newest first).
+            Returns ``[]`` on any error so the caller can fall back gracefully.
+        """
+        try:
+            resp = self.client.search(
+                index=self.index_name,
+                size=1000,
+                query={"exists": {"field": "date_str"}},
+                source=["date_str"],
+            )
+        except Exception:
+            logger.warning(
+                "get_latest_chunk_ids_by_date: ES query failed for '%s'",
+                self.index_name,
+                exc_info=True,
+            )
+            return []
+
+        hits = resp.get("hits", {}).get("hits", [])
+        if not hits:
+            return []
+
+        # Parse D/M/YYYY and sort descending (newest first)
+        from datetime import datetime as _dt  # local import to avoid shadowing
+
+        dated: List[Tuple[Any, str]] = []
+        for hit in hits:
+            raw = (hit.get("_source") or {}).get("date_str", "")
+            try:
+                parts = str(raw).split("/")
+                d, m, y = int(parts[0]), int(parts[1]), int(parts[2])
+                dated.append((_dt(y, m, d), hit["_id"]))
+            except Exception:
+                # Malformed or missing date_str — skip this doc
+                continue
+
+        dated.sort(key=lambda x: x[0], reverse=True)
+        return [doc_id for _, doc_id in dated[:max_n]]
+
     def resolve_chunk_ids_for_qdrant(
         self,
         ids: List[Any],

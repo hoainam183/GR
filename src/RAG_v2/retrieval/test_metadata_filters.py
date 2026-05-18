@@ -263,3 +263,62 @@ def test_kehoach_filter_extractor_bypasses_school_years() -> None:
     cf3 = extractor.extract("Kế hoạch đăng ký lớp năm 2025")
     assert cf3.is_empty is False
     assert "2025" in str(cf3.metadata_es_queries)
+
+
+def test_kehoach_filter_freshness_intent_sets_sort_by_date_desc() -> None:
+    """Freshness-intent phrases should produce sort_by_date_desc=True with no ES query."""
+    from retrieval.metadata_filters import KeHoachFilterExtractor
+    extractor = KeHoachFilterExtractor()
+
+    for phrase in [
+        "học kỳ mới nhất",
+        "Lịch trình học kỳ mới nhất?",
+        "thông báo gần đây",
+        "kế hoạch hiện tại",
+        "kỳ này có gì mới",
+        "học kỳ mới bắt đầu khi nào",
+        "học kỳ tới cần đăng ký gì",
+        "thông báo mới từ phòng đào tạo",
+    ]:
+        cf = extractor.extract(phrase)
+        assert cf.sort_by_date_desc is True, f"Expected sort_by_date_desc for: {phrase!r}"
+        assert cf.is_empty is True, f"Expected no ES query for: {phrase!r}"
+
+
+def test_kehoach_filter_explicit_date_keeps_wildcard_priority() -> None:
+    """Explicit month/year filter takes priority — no sort_by_date_desc flag."""
+    from retrieval.metadata_filters import KeHoachFilterExtractor
+    extractor = KeHoachFilterExtractor()
+
+    cf1 = extractor.extract("kế hoạch tháng 3/2026")
+    assert cf1.sort_by_date_desc is False
+    assert cf1.is_empty is False
+    assert "2026" in str(cf1.metadata_es_queries)
+
+    cf2 = extractor.extract("kế hoạch năm 2025")
+    assert cf2.sort_by_date_desc is False
+    assert cf2.is_empty is False
+    assert "2025" in str(cf2.metadata_es_queries)
+
+
+def test_kehoach_filter_combined_freshness_and_explicit_date_explicit_wins() -> None:
+    """When both freshness intent and explicit date are present, explicit date wins."""
+    from retrieval.metadata_filters import KeHoachFilterExtractor
+    extractor = KeHoachFilterExtractor()
+
+    # "mới nhất" + explicit "tháng 4/2026" — explicit date should win
+    cf = extractor.extract("thông báo mới nhất tháng 4/2026")
+    assert cf.sort_by_date_desc is False
+    assert cf.is_empty is False
+    assert "4" in str(cf.metadata_es_queries)
+    assert "2026" in str(cf.metadata_es_queries)
+
+
+def test_kehoach_filter_school_year_does_not_trigger_freshness() -> None:
+    """School-year ranges without freshness keywords must produce empty filter."""
+    from retrieval.metadata_filters import KeHoachFilterExtractor
+    extractor = KeHoachFilterExtractor()
+
+    cf = extractor.extract("kế hoạch học tập năm học 2025-2026")
+    assert cf.is_empty is True
+    assert cf.sort_by_date_desc is False

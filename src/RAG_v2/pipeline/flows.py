@@ -538,6 +538,13 @@ def _format_context(
             meta_parts.append(f"Ngành: {meta['major_name']}")
         if meta.get("applicable_cohort"):
             meta_parts.append(f"Khóa: {meta['applicable_cohort']}")
+        # For kehoach docs: include posting date and URL so the LLM can cite
+        # the newest source and the user can verify freshness.
+        if doc.get("collection") == "kehoach":
+            if meta.get("date_str"):
+                meta_parts.append(f"Ngày đăng: {meta['date_str']}")
+            if meta.get("url"):
+                meta_parts.append(f"URL: {meta['url']}")
         meta_str = f" [{', '.join(meta_parts)}]" if meta_parts else ""
         
         text = str(doc.get("text", "") or "").strip()

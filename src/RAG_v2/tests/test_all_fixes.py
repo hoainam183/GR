@@ -181,19 +181,27 @@ class TestReflectionHallucinationGuard:
         rewritten = result["rewritten"]
         assert "IT-E6" in rewritten, f"Major should be kept when personal ref present: {rewritten}"
 
-    def test_profile_injection_allowed_when_profile_provided(self):
-        """Even without personal reference, if profile exists, guardrail stays quiet."""
+    def test_profile_injection_blocked_for_generic_query_without_personal_ref(self):
+        """Generic query with profile but no personal ref → guardrail still reverts.
+
+        After fix: the guard fires whenever the query has no personal reference
+        AND no explicit major code, regardless of whether a profile is present.
+        This prevents IT-E6-specific results for a query like "lịch thi giữa kì"
+        that should return results for ALL students.
+        """
         reflector = self._make_reflector(
             "Lịch thi giữa kỳ ngành Công nghệ thông tin Việt - Nhật (IT-E6) là gì?"
         )
-        # Profile IS provided
+        # Profile IS provided, but query is generic (no "ngành của tôi", etc.)
         profile = {"major": "Công nghệ thông tin Việt - Nhật", "major_code": "IT-E6"}
         result = reflector.reflect("lịch thi giữa kì", user_context=profile)
-        # When a real profile is provided, we trust it
+        # Guardrail should revert — generic query must not get IT-E6 filter
         rewritten = result["rewritten"]
-        assert "IT-E6" in rewritten, (
-            f"Major from real profile should be kept: {rewritten}"
+        assert "IT-E6" not in rewritten, (
+            f"Generic query should not have IT-E6 injected even with profile: {rewritten}"
         )
+        # Should fall back to original stripped query
+        assert rewritten == "lịch thi giữa kì"
 
     def test_comparison_followup_preserves_recent_tuition_topic(self):
         """Short comparison follow-up must inherit the latest user topic."""
@@ -360,3 +368,125 @@ class TestQueryOnlyCache:
         mock_reflector.reflect.assert_not_called()
         mock_bge.embed_query.assert_not_called()
         mock_searcher.search.assert_not_called()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# KeHoach Freshness — Guardrail 2 generic kehoach query + profile
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestKeHoachFreshnessGuardrail:
+    """Guardrail 2 must block IT-E6 injection for generic kehoach queries."""
+
+    def _make_reflector(self, llm_response: str):
+        from query.reflection import QueryReflector
+
+        mock_settings = MagicMock()
+        mock_settings.reflection_model = "stub"
+        mock_settings.reflection_temperature = 0.0
+        mock_settings.reflection_max_tokens = 256
+        mock_settings.reflection_provider = "gemini"
+        mock_settings.google_api_key = "fake"
+        mock_settings.lm_studio_base_url = ""
+        mock_settings.ollama_base_url = ""
+        mock_settings.openai_api_key = ""
+
+        reflector = QueryReflector(settings=mock_settings)
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = llm_response
+        reflector._client = MagicMock()
+        reflector._client.chat.completions.create.return_value = mock_response
+        return reflector
+
+    def test_latest_kehoach_query_with_profile_not_injected(self):
+        """'Lịch trình học kỳ mới nhất?' + IT-E6 profile → must NOT become IT-E6 specific."""
+        reflector = self._make_reflector(
+            "Lịch trình học kỳ mới nhất cho sinh viên ngành IT-E6 (Công nghệ thông tin Việt - Nhật) là gì?"
+        )
+        profile = {"major": "Công nghệ thông tin Việt - Nhật", "major_code": "IT-E6"}
+        result = reflector.reflect("Lịch trình học kỳ mới nhất?", user_context=profile)
+        rewritten = result["rewritten"]
+        assert "IT-E6" not in rewritten, (
+            f"Generic freshness query must not get IT-E6 injected: {rewritten}"
+        )
+
+    def test_latest_kehoach_personal_ref_still_allowed(self):
+        """'Kế hoạch mới nhất của ngành tôi' → personal ref present → IT-E6 kept."""
+        reflector = self._make_reflector(
+            "Kế hoạch mới nhất của ngành Công nghệ thông tin Việt - Nhật (IT-E6)"
+        )
+        profile = {"major": "Công nghệ thông tin Việt - Nhật", "major_code": "IT-E6"}
+        result = reflector.reflect("kế hoạch mới nhất của ngành tôi", user_context=profile)
+        rewritten = result["rewritten"]
+        # "ngành tôi" is a personal ref → IT-E6 injection is allowed
+        assert "IT-E6" in rewritten, (
+            f"Personal-ref query with profile should keep IT-E6: {rewritten}"
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ElasticsearchStore.get_latest_chunk_ids_by_date — pure unit test (no ES)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestGetLatestChunkIdsByDate:
+    """Unit test for ES date-sort helper — mocks the ES client."""
+
+    def _make_store(self, hits: List[Dict[str, Any]]):
+        """Return an ElasticsearchStore with a stubbed ES client."""
+        from retrieval.elasticsearch_store import ElasticsearchStore
+
+        store = object.__new__(ElasticsearchStore)  # bypass __init__
+        store.index_name = "kehoach"
+
+        mock_client = MagicMock()
+        mock_client.search.return_value = {"hits": {"hits": hits}}
+        store.client = mock_client
+        return store
+
+    def test_sorts_newest_first(self):
+        hits = [
+            {"_id": "id_old", "_source": {"date_str": "1/1/2024"}},
+            {"_id": "id_newest", "_source": {"date_str": "15/3/2026"}},
+            {"_id": "id_mid", "_source": {"date_str": "10/9/2025"}},
+        ]
+        store = self._make_store(hits)
+        result = store.get_latest_chunk_ids_by_date(max_n=10)
+        assert result == ["id_newest", "id_mid", "id_old"]
+
+    def test_returns_top_max_n(self):
+        hits = [
+            {"_id": f"id_{i}", "_source": {"date_str": f"{i}/1/2026"}}
+            for i in range(1, 6)
+        ]
+        store = self._make_store(hits)
+        result = store.get_latest_chunk_ids_by_date(max_n=3)
+        assert len(result) == 3
+
+    def test_skips_malformed_date_str(self):
+        hits = [
+            {"_id": "id_good", "_source": {"date_str": "5/6/2026"}},
+            {"_id": "id_bad", "_source": {"date_str": "not-a-date"}},
+            {"_id": "id_empty", "_source": {"date_str": ""}},
+        ]
+        store = self._make_store(hits)
+        result = store.get_latest_chunk_ids_by_date(max_n=10)
+        assert result == ["id_good"]
+
+    def test_returns_empty_on_no_hits(self):
+        store = self._make_store([])
+        result = store.get_latest_chunk_ids_by_date()
+        assert result == []
+
+    def test_returns_empty_on_es_exception(self):
+        from retrieval.elasticsearch_store import ElasticsearchStore
+
+        store = object.__new__(ElasticsearchStore)
+        store.index_name = "kehoach"
+        mock_client = MagicMock()
+        mock_client.search.side_effect = ConnectionError("ES down")
+        store.client = mock_client
+
+        result = store.get_latest_chunk_ids_by_date()
+        assert result == []
+

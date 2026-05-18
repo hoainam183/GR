@@ -501,6 +501,39 @@ class MultiCollectionSearch:
         """
         trace: Dict[str, Any] = {"applied": False, "matched_ids": 0, "filter_desc": None}
 
+        # Freshness path: no explicit ES filter, but user wants newest docs
+        if cf.sort_by_date_desc and cf.is_empty:
+            try:
+                latest_ids = hybrid.es.get_latest_chunk_ids_by_date(max_n=200)
+            except Exception:
+                logger.warning(
+                    "get_latest_chunk_ids_by_date failed for '%s' — no filter applied.",
+                    col_name,
+                    exc_info=True,
+                )
+                latest_ids = []
+
+            if latest_ids:
+                chunk_ids = hybrid.es.resolve_chunk_ids_for_qdrant(latest_ids)
+                if chunk_ids:
+                    qdrant_filter = qdrant_models.Filter(
+                        must=[qdrant_models.HasIdCondition(has_id=chunk_ids)]  # type: ignore[arg-type]
+                    )
+                    trace = {
+                        "applied": True,
+                        "matched_ids": len(chunk_ids),
+                        "filter_desc": f"freshness_sort ({len(chunk_ids)} latest IDs)",
+                    }
+                    # es_filter=None: ES keyword search stays unfiltered (BM25 on all)
+                    return qdrant_filter, None, trace
+
+            # No dated docs found → fall back to no filter
+            logger.info(
+                "Freshness pre-search '%s': no dated docs found — using no filter.",
+                col_name,
+            )
+            return None, None, trace
+
         if cf.is_empty:
             return None, None, trace
 

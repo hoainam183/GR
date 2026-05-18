@@ -48,9 +48,18 @@ class CollectionFilter:
     and are also reused as ES term filter in the hybrid keyword search.
 
     An empty list means no pre-filtering (search all documents).
+
+    ``sort_by_date_desc``: when True and ``metadata_es_queries`` is empty,
+    ``MultiCollectionSearch`` will fetch the most-recent chunk IDs from ES
+    (by ``date_str`` field) and use them as a hard ``HasIdCondition`` in
+    Qdrant instead of running a wildcard/term filter.  This implements the
+    "mới nhất" (latest) freshness mode for the ``kehoach`` collection.
+    Explicit date/month filters (populated ``metadata_es_queries``) take
+    priority and suppress this flag.
     """
 
     metadata_es_queries: List[Dict[str, Any]] = field(default_factory=list)
+    sort_by_date_desc: bool = False
 
     @property
     def is_empty(self) -> bool:
@@ -1021,13 +1030,25 @@ class KeHoachFilterExtractor(BaseFilterExtractor):
 
     ``date_str`` format in the store: ``"D/M/YYYY"`` (e.g. ``"11/3/2026"``).
 
-    Default (no date in query): no filter applied — all kehoach documents
-    are searched.  After retrieval, ``MultiCollectionSearch`` applies a
-    recency score bonus to reward newer documents.
-
-    When a specific year and / or month is detected in the query the extractor
-    builds an ES wildcard filter for that time period only.
+    Priority order:
+      1. Explicit month/year in query → ES wildcard filter (``metadata_es_queries``).
+      2. Freshness intent ("mới nhất", "gần đây", …) without explicit date →
+         ``sort_by_date_desc=True``; ``MultiCollectionSearch`` fetches the most-
+         recent chunk IDs from ES and uses them as a hard ``HasIdCondition``.
+      3. No signal → empty filter; recency bonus (+0.05) still applies.
     """
+
+    # Freshness-intent phrases meaning "give me the latest kehoach docs"
+    _FRESHNESS_RE = re.compile(
+        r"\b(?:m[oớ]i\s+nh[aấ]t|"
+        r"g[aầ]n\s+[dđ][aâ]y|hi[eệ]n\s+t[aạ]i|"
+        r"k[yỳ]\s+n[aà]y|h[oọ]c\s+k[yỳ]\s+m[oớ]i|"
+        r"h[oọ]c\s+k[yỳ]\s+t[oớ]i|"
+        r"th[oô]ng\s+b[aá]o\s+m[oớ]i|"
+        r"semester\s+m[oớ]i|"
+        r"latest|recent|current\s+semester)\b",
+        re.IGNORECASE,
+    )
 
     def extract(
         self,
@@ -1036,9 +1057,15 @@ class KeHoachFilterExtractor(BaseFilterExtractor):
         resolved_cohort: Optional[str] = None,  # noqa: ARG002
     ) -> CollectionFilter:
         date_query = self._build_date_query(query)
-        if date_query is None:
-            return CollectionFilter()
-        return CollectionFilter(metadata_es_queries=[date_query])
+        if date_query is not None:
+            # Explicit date filter takes priority — no freshness sort needed
+            return CollectionFilter(metadata_es_queries=[date_query])
+
+        if self._FRESHNESS_RE.search(query):
+            # No explicit date but user wants the latest docs
+            return CollectionFilter(sort_by_date_desc=True)
+
+        return CollectionFilter()
 
     # ------------------------------------------------------------------
     # Date parsing helpers

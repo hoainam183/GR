@@ -908,14 +908,17 @@ class QueryReflector:
             )
 
         # Guardrail 2: detect hallucinated major injection.
-        # If the original query has NO personal references and NO authenticated
-        # profile was provided, the LLM must not inject a specific major/cohort.
-        # When this happens (LLM ignores rule 11), revert to the original query
-        # to avoid biasing retrieval toward a hallucinated programme.
-        if not _PERSONAL_REFS.search(query) and not merged_profile:
+        # If the original query has NO personal references and NO explicit major
+        # code (regardless of whether a user profile is present), the LLM must
+        # not inject a specific major/cohort.  Profile injection is only valid
+        # when the user explicitly refers to their own programme (personal refs
+        # like "ngành của tôi").  Without such a reference, a generic query like
+        # "Lịch trình học kỳ mới nhất?" must NOT become IT-E6-specific even if
+        # the authenticated user belongs to IT-E6.
+        if not _PERSONAL_REFS.search(query):
             try:
                 from retrieval.metadata_filters import _extract_major_code  # noqa: PLC0415
-                if _extract_major_code(rewritten) and not _extract_major_code(query):
+                if not _extract_major_code(query) and _extract_major_code(rewritten):
                     logger.warning(
                         "Reflection hallucinated major in generic query — reverting. "
                         "Original: %r  Hallucinated: %r",
