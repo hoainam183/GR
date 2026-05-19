@@ -224,7 +224,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         content: response.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
         timestamp: new Date(),
         sessionId: responseSessionId,
-        turnId: (response as Record<string, unknown>).turn_id as number | undefined,
+        turnId: response.turn_id,
         mode: response.mode,
         route: response.route ?? response.intent,
         modelName: response.model_name,
@@ -302,7 +302,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   ];
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto scrollbar-thin p-3 sm:p-4 md:p-6">
         {isLoadingHistory ? (
@@ -318,14 +318,14 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             <p className="mb-8 max-w-md text-sm text-muted-foreground">
               Tôi có thể tư vấn về quy chế, CTĐT, học bổng và các quy định của BKHN.
             </p>
-            <div className="grid w-full max-w-lg grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid w-full max-w-lg grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-2">
               {suggestions.map((suggestion) => {
                 const Icon = suggestion.icon;
                 return (
                   <button
                     key={suggestion.label}
                     onClick={() => handleSendMessage(suggestion.query)}
-                    className="flex min-h-20 items-start gap-3 rounded-lg border border-border bg-card p-4 text-left transition-all hover:bg-secondary hover:shadow-sm"
+                    className="flex min-h-[72px] items-start gap-3 rounded-lg border border-border bg-card p-4 text-left transition-all hover:bg-secondary hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                     <span className="text-sm font-medium leading-snug text-foreground">

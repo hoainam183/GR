@@ -236,9 +236,10 @@ class RAGPipeline:
         self._reranker = self._retrieval_service.reranker
         self._tavily = self._retrieval_service.tavily_tool
 
-        assert (
-            self._reranker is not None
-        ), "A reranker is required. Set RERANKER_PROVIDER in .env (e.g. bge)."
+        if self._reranker is None:
+            logger.warning(
+                "Reranker unavailable; using raw hybrid search results."
+            )
 
         # Query reflector (LLM-based rewrite)
         self._reflector: Optional[QueryReflector] = None

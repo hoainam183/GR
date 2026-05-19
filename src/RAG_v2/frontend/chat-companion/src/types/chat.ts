@@ -85,6 +85,7 @@ export interface ChatResponse {
   reflected_question?: string;
   timings_ms?: Record<string, number>;
   session_id: string;
+  turn_id?: number;
   // Extended trace fields
   routing_probabilities?: Record<string, number>;
   reflection_prompt?: string;

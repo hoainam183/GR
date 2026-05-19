@@ -476,7 +476,7 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
           </div>
         )}
 
-        <span className="mt-1 block text-[10px] text-muted-foreground opacity-70">
+        <span className="mt-1 block text-xs text-muted-foreground opacity-70">
           {message.timestamp.toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',

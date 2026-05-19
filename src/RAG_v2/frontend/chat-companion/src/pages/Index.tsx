@@ -14,7 +14,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import { getMe, type UserPublic } from '@/services/authApi';
 import { getSessions } from '@/services/sessionApi';
-import { Activity, PanelLeft } from 'lucide-react';
+import { Activity, Moon, PanelLeft, Sun } from 'lucide-react';
 
 interface UserMenuProps {
   user: UserPublic;
@@ -34,8 +34,15 @@ const UserMenu = ({ user, onLogout }: UserMenuProps) => {
         setOpen(false);
       }
     };
+    const keyHandler = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('keydown', keyHandler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('keydown', keyHandler);
+    };
   }, []);
 
   const initials = user.full_name
@@ -49,8 +56,10 @@ const UserMenu = ({ user, onLogout }: UserMenuProps) => {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((value) => !value)}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground ring-2 ring-primary/30 transition hover:ring-4 focus:outline-none"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground ring-2 ring-primary/30 transition hover:ring-4 focus:outline-none focus-visible:ring-4 focus-visible:ring-ring"
         aria-label="User menu"
+        aria-expanded={open}
+        aria-haspopup="menu"
       >
         {initials}
       </button>
@@ -105,6 +114,22 @@ const Index = () => {
   const [user, setUser] = useState<UserPublic | null>(null);
   const isAdmin = user?.role === 'admin';
   const isMobile = useIsMobile();
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') return true;
+    if (saved === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const {
     panelRef,
@@ -258,6 +283,16 @@ const Index = () => {
               Trace
             </Link>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsDark((prev) => !prev)}
+            aria-label={isDark ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+            title={isDark ? 'Chế độ sáng' : 'Chế độ tối'}
+            className="h-8 w-8"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
           {user && <UserMenu user={user} onLogout={handleLogout} />}
         </div>
       </div>

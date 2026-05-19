@@ -83,6 +83,53 @@ def _make_deps() -> Dict[str, Any]:
     }
 
 
+def test_rag_flow_uses_raw_results_when_reranker_unavailable() -> None:
+    deps = _make_deps()
+
+    result = rag_flow(
+        question="hoc bong",
+        history=None,
+        reflector=None,
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=None,
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    assert result["sources"][0]["id"] == "doc-1"
+    assert result["timings_ms"]["rerank_skipped"] == 1.0
+    assert result["rerank_trace"]["rerank_skipped"] is True
+
+
+def test_rag_flow_stream_uses_raw_results_when_reranker_unavailable() -> None:
+    deps = _make_deps()
+    timings_ms: Dict[str, float] = {}
+    metadata: Dict[str, Any] = {}
+
+    stream, sources = rag_flow_stream(
+        question="hoc bong",
+        history=None,
+        reflector=None,
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=None,
+        chat_model=deps["chat"],
+        cfg=deps["cfg"],
+        timings_ms_out=timings_ms,
+        metadata_out=metadata,
+    )
+
+    assert sources[0]["id"] == "doc-1"
+    assert list(stream) == ["ok"]
+    assert timings_ms["rerank_skipped"] == 1.0
+    assert metadata["rerank_trace"]["rerank_skipped"] is True
+
+
 def test_rag_flow_fallback_extracts_major_from_query_when_reflection_missing_entities() -> None:
     deps = _make_deps()
     question = "môn lập trình mạng của ngành IT-E6"

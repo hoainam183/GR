@@ -200,6 +200,19 @@ export function ConversationSidebar({
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+      {/* Branding */}
+      <div className="flex shrink-0 items-center gap-2.5 border-b border-sidebar-border px-3 py-3">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary">
+          <svg className="h-3.5 w-3.5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-foreground leading-tight">HUST Assistant</p>
+          <p className="truncate text-[10px] text-muted-foreground leading-tight">Trợ lý học thuật BKHN</p>
+        </div>
+      </div>
+
       <div className="shrink-0 space-y-2 border-b border-sidebar-border px-3 py-3">
         <button
           onClick={handleNewChat}
@@ -294,7 +307,7 @@ export function ConversationSidebar({
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <button
-                                className="action-trigger flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-background hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-ring"
+                                className="action-trigger flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-background hover:text-foreground focus:opacity-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                                 aria-label="Tuỳ chọn cuộc trò chuyện"
                                 onClick={(event) => event.stopPropagation()}
                               >

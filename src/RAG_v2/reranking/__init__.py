@@ -3,14 +3,29 @@
 from __future__ import annotations
 
 import importlib
+import logging
 from typing import Any, Optional, TYPE_CHECKING
 
 from .base import BaseReranker, register_reranker, _REGISTRY
+
+logger = logging.getLogger(__name__)
 
 # Map provider name → dotted module path inside reranking/
 _PROVIDER_MODULES: dict[str, str] = {
     "bge": "reranking.bge_reranker",
 }
+
+
+def _is_model_memory_error(exc: OSError) -> bool:
+    """Return True for OS-level memory failures while loading model weights."""
+    message = str(exc).lower()
+    code = getattr(exc, "winerror", None) or getattr(exc, "errno", None)
+    return (
+        code == 1455
+        or "paging file is too small" in message
+        or "cannot allocate memory" in message
+        or "not enough memory" in message
+    )
 
 
 def create_reranker(settings: "Settings") -> Optional[BaseReranker]:  # type: ignore[name-defined]
@@ -38,12 +53,23 @@ def create_reranker(settings: "Settings") -> Optional[BaseReranker]:  # type: ig
             )
         importlib.import_module(module_path)  # triggers @register_reranker
     cls = _REGISTRY[provider]
-    return cls(
-        model_name=settings.reranker_model,
-        top_k=settings.reranker_top_k,
-        score_threshold=settings.reranker_score_threshold,
-        table_score_threshold=settings.reranker_table_score_threshold,
-    )
+    try:
+        return cls(
+            model_name=settings.reranker_model,
+            top_k=settings.reranker_top_k,
+            score_threshold=settings.reranker_score_threshold,
+            table_score_threshold=settings.reranker_table_score_threshold,
+        )
+    except OSError as exc:
+        if not _is_model_memory_error(exc):
+            raise
+        logger.warning(
+            "Reranker model '%s' could not be loaded due to OS memory "
+            "pressure (%s). Continuing without reranking.",
+            settings.reranker_model,
+            exc,
+        )
+        return None
 
 
 if TYPE_CHECKING:
