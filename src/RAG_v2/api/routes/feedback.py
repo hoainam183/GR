@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from auth.jwt_handler import get_current_user
@@ -19,6 +19,21 @@ from models.user import UserDocument
 from schemas.mobile import FeedbackCreate
 
 router = APIRouter(tags=["feedback"])
+
+
+def _serialize_feedback(doc: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": str(doc["_id"]),
+        "session_id": doc["session_id"],
+        "turn_id": doc["turn_id"],
+        "rating": doc.get("rating"),
+        "category": doc.get("category"),
+        "comment": doc.get("comment"),
+        "question": doc.get("question", ""),
+        "answer_snapshot": doc.get("answer_snapshot", ""),
+        "created_at": doc.get("created_at"),
+        "updated_at": doc.get("updated_at"),
+    }
 
 
 @router.post("/feedback", status_code=status.HTTP_201_CREATED)
@@ -65,4 +80,73 @@ async def create_feedback(
     )
     if doc is None:
         raise HTTPException(status_code=500, detail="Failed to create feedback")
-    return {"feedback_id": str(doc["_id"])}
+    return {"feedback_id": str(doc["_id"]), "feedback": _serialize_feedback(doc)}
+
+
+@router.get("/feedback")
+async def get_feedback(
+    session_id: Annotated[str, Query()],
+    turn_id: Annotated[int, Query(ge=1)],
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> dict[str, Any]:
+    """Retrieve feedback for a specific session/turn belonging to current user."""
+    user_id = str(current_user.id)
+    doc = await db[FEEDBACK_COLLECTION].find_one(
+        {"user_id": user_id, "session_id": session_id, "turn_id": turn_id}
+    )
+    if doc is None:
+        return {"feedback": None}
+    return {"feedback": _serialize_feedback(doc)}
+
+
+@router.get("/feedback/stats")
+async def get_feedback_stats(
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+    days: int = Query(default=30, ge=1, le=365),
+) -> dict[str, Any]:
+    """Return aggregated feedback stats (admin-only in future)."""
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    pipeline: list[dict[str, Any]] = [
+        {"$match": {"created_at": {"$gte": since}}},
+        {
+            "$facet": {
+                "totals": [
+                    {
+                        "$group": {
+                            "_id": None,
+                            "total": {"$sum": 1},
+                            "up": {
+                                "$sum": {"$cond": [{"$eq": ["$rating", "up"]}, 1, 0]}
+                            },
+                            "down": {
+                                "$sum": {"$cond": [{"$eq": ["$rating", "down"]}, 1, 0]}
+                            },
+                        }
+                    }
+                ],
+                "by_category": [
+                    {"$match": {"category": {"$ne": None}}},
+                    {"$group": {"_id": "$category", "count": {"$sum": 1}}},
+                ],
+            }
+        },
+    ]
+
+    results = await db[FEEDBACK_COLLECTION].aggregate(pipeline).to_list(length=1)
+    result = results[0] if results else {"totals": [], "by_category": []}
+
+    totals = result["totals"][0] if result["totals"] else {"total": 0, "up": 0, "down": 0}
+    by_category = {item["_id"]: item["count"] for item in result["by_category"]}
+
+    return {
+        "stats": {
+            "total": totals["total"],
+            "up": totals["up"],
+            "down": totals["down"],
+            "by_category": by_category,
+            "recent_days": days,
+        }
+    }

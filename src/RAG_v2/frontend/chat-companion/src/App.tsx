@@ -14,6 +14,8 @@ import RetrievalPage from "./pages/RetrievalPage";
 import EvalPage from "./pages/EvalPage";
 import AdminPage from "./pages/AdminPage";
 import DocumentReview from "./pages/DocumentReview";
+import BookmarksPage from "./pages/BookmarksPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,8 @@ const App = () => (
           <Route path="/eval" element={<AdminGuard><EvalPage /></AdminGuard>} />
           <Route path="/admin" element={<AdminGuard><AdminPage /></AdminGuard>} />
           <Route path="/admin/documents/:id" element={<AdminGuard><DocumentReview /></AdminGuard>} />
+          <Route path="/bookmarks" element={<BookmarksPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

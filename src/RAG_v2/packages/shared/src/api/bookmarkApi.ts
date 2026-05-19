@@ -3,6 +3,8 @@ import type {
   Bookmark,
   BookmarkCreateRequest,
   BookmarkFolder,
+  BookmarkUpdateRequest,
+  BookmarkFolderRenameRequest,
 } from '../types/mobile';
 import { API_PATHS } from '../utils/constants';
 
@@ -19,13 +21,27 @@ export const createBookmark = async (
 
 export const listBookmarks = async (
   client: AxiosInstance,
-  folder?: string,
-): Promise<Bookmark[]> => {
-  const response = await client.get<{ bookmarks: Bookmark[] }>(
-    API_PATHS.BOOKMARKS,
-    { params: folder ? { folder } : undefined },
+  params?: { folder?: string; q?: string; page?: number; limit?: number },
+): Promise<{ bookmarks: Bookmark[]; total: number; page: number; limit: number }> => {
+  const response = await client.get<{
+    bookmarks: Bookmark[];
+    total: number;
+    page: number;
+    limit: number;
+  }>(API_PATHS.BOOKMARKS, { params });
+  return response.data;
+};
+
+export const updateBookmark = async (
+  client: AxiosInstance,
+  bookmarkId: string,
+  data: BookmarkUpdateRequest,
+): Promise<Bookmark> => {
+  const response = await client.patch<{ bookmark: Bookmark }>(
+    `${API_PATHS.BOOKMARKS}/${bookmarkId}`,
+    data,
   );
-  return response.data.bookmarks;
+  return response.data.bookmark;
 };
 
 export const deleteBookmark = async (
@@ -53,4 +69,28 @@ export const createBookmarkFolder = async (
     { name },
   );
   return response.data.folder;
+};
+
+export const renameBookmarkFolder = async (
+  client: AxiosInstance,
+  currentName: string,
+  data: BookmarkFolderRenameRequest,
+): Promise<BookmarkFolder> => {
+  const response = await client.patch<{ folder: BookmarkFolder }>(
+    `${API_PATHS.BOOKMARK_FOLDERS}/${encodeURIComponent(currentName)}`,
+    data,
+  );
+  return response.data.folder;
+};
+
+export const deleteBookmarkFolder = async (
+  client: AxiosInstance,
+  name: string,
+  moveTo?: string,
+): Promise<{ status: string; moved_count: number }> => {
+  const response = await client.delete<{ status: string; moved_count: number }>(
+    `${API_PATHS.BOOKMARK_FOLDERS}/${encodeURIComponent(name)}`,
+    { params: moveTo ? { move_to: moveTo } : undefined },
+  );
+  return response.data;
 };

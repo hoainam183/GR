@@ -256,6 +256,13 @@ async def create_indexes() -> None:
         name="user_session_turn_unique",
     )
 
+    await safe_create(
+        bookmarks,
+        [("question", "text"), ("answer_preview", "text")],
+        name="question_answer_text",
+        default_language="none",
+    )
+
     bookmark_folders = db[BOOKMARK_FOLDERS_COLLECTION]
     await safe_create(
         bookmark_folders,
@@ -288,5 +295,11 @@ async def create_indexes() -> None:
         [("user_id", ASCENDING), ("expo_push_token", ASCENDING)],
         unique=True,
         name="user_push_token_unique",
+    )
+    # Topic-based query for notification targeting
+    await safe_create(
+        subscriptions,
+        [("topics", ASCENDING)],
+        name="topics_asc",
     )
     logger.info("Indexes ensured on mobile feature collections")

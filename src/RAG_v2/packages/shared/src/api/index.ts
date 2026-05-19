@@ -12,11 +12,14 @@ export { getSessions, getMySessions, getSession, createSession } from './session
 export {
   createBookmark,
   listBookmarks,
+  updateBookmark,
   deleteBookmark,
   listBookmarkFolders,
   createBookmarkFolder,
+  renameBookmarkFolder,
+  deleteBookmarkFolder,
 } from './bookmarkApi';
-export { submitFeedback } from './feedbackApi';
+export { submitFeedback, getFeedback, getFeedbackStats } from './feedbackApi';
 export {
   lookupCTDT,
   lookupRegulations,
@@ -26,6 +29,10 @@ export {
 } from './lookupApi';
 export {
   listNotifications,
+  getUnreadCount,
   markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotification,
   subscribeNotifications,
+  unsubscribeNotifications,
 } from './notificationApi';

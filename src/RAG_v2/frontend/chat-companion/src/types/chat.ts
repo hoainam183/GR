@@ -3,6 +3,8 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  sessionId?: string;
+  turnId?: number;
   modelName?: string;
   sources?: RetrievedDocument[];
   targetCollections?: string[];

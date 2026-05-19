@@ -6,6 +6,9 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
+import { getUnreadCount } from '@rag/shared';
+import { apiClient } from '../services/api';
 import ChatStack from './ChatStack';
 import ProfileStack from './ProfileStack';
 import LookupStack from './LookupStack';
@@ -22,7 +25,15 @@ export type MainTabParamList = {
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const MainTabNavigator = () => (
+const MainTabNavigator = () => {
+  const { data: unreadData } = useQuery({
+    queryKey: ['notifications-unread-count'],
+    queryFn: () => getUnreadCount(apiClient),
+    staleTime: 30_000,
+  });
+  const unreadCount = unreadData?.unread_count ?? 0;
+
+  return (
   <Tab.Navigator
     screenOptions={{
       headerShown: false,
@@ -91,6 +102,8 @@ const MainTabNavigator = () => (
         tabBarIcon: ({ color, size }) => (
           <Ionicons name="notifications-outline" size={size} color={color} />
         ),
+        tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+        tabBarBadgeStyle: { backgroundColor: '#ef4444', fontSize: 10 },
       }}
     />
     <Tab.Screen
@@ -116,6 +129,7 @@ const MainTabNavigator = () => (
       }}
     />
   </Tab.Navigator>
-);
+  );
+};
 
 export default MainTabNavigator;

@@ -15,8 +15,17 @@ class BookmarkCreate(BaseModel):
     note: Optional[str] = Field(default=None, max_length=1000)
 
 
+class BookmarkUpdate(BaseModel):
+    folder: Optional[str] = Field(default=None, min_length=1, max_length=80)
+    note: Optional[str] = Field(default=None, max_length=1000)
+
+
 class BookmarkFolderCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=80)
+
+
+class BookmarkFolderRename(BaseModel):
+    new_name: str = Field(..., min_length=1, max_length=80)
 
 
 class FeedbackCreate(BaseModel):
@@ -30,6 +39,11 @@ class FeedbackCreate(BaseModel):
 class NotificationSubscribe(BaseModel):
     topics: list[str] = Field(default_factory=list)
     expo_push_token: str = Field(..., min_length=1)
+
+
+class NotificationUnsubscribe(BaseModel):
+    expo_push_token: str = Field(..., min_length=1)
+    topics: list[str] = Field(default_factory=list)
 
 
 class LookupDocument(BaseModel):

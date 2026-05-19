@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -12,22 +13,61 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { NotificationItem } from '@rag/shared';
-import { listNotifications, markNotificationRead } from '@rag/shared';
+import {
+  listNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotification,
+  getUnreadCount,
+} from '@rag/shared';
 import { apiClient } from '../../services/api';
 import EmptyState from '../../components/common/EmptyState';
 
 const NotificationListScreen = () => {
   const queryClient = useQueryClient();
-  const { data = [], isLoading, isRefetching, refetch, error } = useQuery({
+
+  const { data, isLoading, isRefetching, refetch, error } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => listNotifications(apiClient),
     staleTime: 60_000,
   });
 
+  const notifications = data?.notifications ?? [];
+
+  const { data: unreadData } = useQuery({
+    queryKey: ['notifications-unread-count'],
+    queryFn: () => getUnreadCount(apiClient),
+    staleTime: 30_000,
+  });
+
+  const unreadCount = unreadData?.unread_count ?? 0;
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
+  };
+
   const markRead = useMutation({
     mutationFn: (id: string) => markNotificationRead(apiClient, id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+    onSuccess: invalidateAll,
   });
+
+  const markAllRead = useMutation({
+    mutationFn: () => markAllNotificationsRead(apiClient),
+    onSuccess: invalidateAll,
+  });
+
+  const deleteItem = useMutation({
+    mutationFn: (id: string) => deleteNotification(apiClient, id),
+    onSuccess: invalidateAll,
+  });
+
+  const handleLongPress = (item: NotificationItem) => {
+    Alert.alert('Xóa thông báo', `Bạn muốn xóa "${item.title}"?`, [
+      { text: 'Hủy', style: 'cancel' },
+      { text: 'Xóa', style: 'destructive', onPress: () => deleteItem.mutate(item.id) },
+    ]);
+  };
 
   const renderItem = useCallback(
     ({ item }: { item: NotificationItem }) => (
@@ -36,6 +76,7 @@ const NotificationListScreen = () => {
         onPress={() => {
           if (!item.read) markRead.mutate(item.id);
         }}
+        onLongPress={() => handleLongPress(item)}
       >
         <View style={styles.iconBox}>
           <Ionicons
@@ -53,16 +94,34 @@ const NotificationListScreen = () => {
         </View>
       </Pressable>
     ),
-    [markRead],
+    [markRead, deleteItem],
   );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Thông báo</Text>
-        <Pressable style={styles.headerAction} onPress={() => refetch()}>
-          <Ionicons name="refresh-outline" size={22} color="#94a3b8" />
-        </Pressable>
+        <View>
+          <Text style={styles.headerTitle}>Thông báo</Text>
+          {unreadCount > 0 && (
+            <Text style={styles.headerSubtitle}>
+              {unreadCount} chưa đọc
+            </Text>
+          )}
+        </View>
+        <View style={styles.headerActions}>
+          {unreadCount > 0 && (
+            <Pressable
+              style={styles.markAllButton}
+              onPress={() => markAllRead.mutate()}
+            >
+              <Ionicons name="checkmark-done-outline" size={18} color="#6366f1" />
+              <Text style={styles.markAllText}>Đọc tất cả</Text>
+            </Pressable>
+          )}
+          <Pressable style={styles.headerAction} onPress={() => refetch()}>
+            <Ionicons name="refresh-outline" size={22} color="#94a3b8" />
+          </Pressable>
+        </View>
       </View>
 
       {isLoading ? (
@@ -79,10 +138,10 @@ const NotificationListScreen = () => {
         />
       ) : (
         <FlatList
-          data={data}
+          data={notifications}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={data.length === 0 ? styles.empty : styles.list}
+          contentContainerStyle={notifications.length === 0 ? styles.empty : styles.list}
           ListEmptyComponent={
             <EmptyState
               icon="notifications-outline"
@@ -111,7 +170,19 @@ const styles = StyleSheet.create({
     borderBottomColor: '#1e293b',
   },
   headerTitle: { color: '#f8fafc', fontSize: 20, fontWeight: '700' },
+  headerSubtitle: { color: '#6366f1', fontSize: 12, fontWeight: '600', marginTop: 2 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   headerAction: { padding: 6 },
+  markAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  markAllText: { color: '#6366f1', fontSize: 12, fontWeight: '600' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   list: { padding: 16, gap: 10 },
   empty: { flexGrow: 1 },

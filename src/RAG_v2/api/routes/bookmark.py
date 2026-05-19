@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from typing import Annotated, Any
 
@@ -18,7 +19,12 @@ from models.database import (
     get_database,
 )
 from models.user import UserDocument
-from schemas.mobile import BookmarkCreate, BookmarkFolderCreate
+from schemas.mobile import (
+    BookmarkCreate,
+    BookmarkFolderCreate,
+    BookmarkFolderRename,
+    BookmarkUpdate,
+)
 
 router = APIRouter(tags=["bookmarks"])
 
@@ -110,6 +116,7 @@ async def list_bookmarks(
     current_user: Annotated[UserDocument, Depends(get_current_user)],
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
     folder: str | None = Query(default=None),
+    q: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
 ) -> dict[str, Any]:
@@ -117,6 +124,12 @@ async def list_bookmarks(
     query: dict[str, Any] = {"user_id": str(current_user.id)}
     if folder:
         query["folder"] = folder
+    if q:
+        pattern = re.compile(re.escape(q), re.IGNORECASE)
+        query["$or"] = [
+            {"question": {"$regex": pattern}},
+            {"answer_preview": {"$regex": pattern}},
+        ]
 
     skip = (page - 1) * limit
     total = await db[BOOKMARKS_COLLECTION].count_documents(query)
@@ -146,6 +159,35 @@ async def delete_bookmark(
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Bookmark not found")
     return {"status": "deleted"}
+
+
+@router.patch("/bookmarks/{bookmark_id}")
+async def update_bookmark(
+    bookmark_id: str,
+    body: BookmarkUpdate,
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> dict[str, Any]:
+    """Update folder and/or note of a bookmark owned by the current user."""
+    if not ObjectId.is_valid(bookmark_id):
+        raise HTTPException(status_code=404, detail="Bookmark not found")
+
+    user_id = str(current_user.id)
+    update_fields: dict[str, Any] = {"updated_at": datetime.now(timezone.utc)}
+    if body.folder is not None:
+        update_fields["folder"] = body.folder.strip() or "Chung"
+    if body.note is not None:
+        update_fields["note"] = body.note
+
+    result = await db[BOOKMARKS_COLLECTION].update_one(
+        {"_id": ObjectId(bookmark_id), "user_id": user_id},
+        {"$set": update_fields},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Bookmark not found")
+
+    doc = await db[BOOKMARKS_COLLECTION].find_one({"_id": ObjectId(bookmark_id)})
+    return {"bookmark": _serialize_bookmark(doc)}
 
 
 @router.get("/bookmark-folders")
@@ -195,3 +237,66 @@ async def create_bookmark_folder(
         upsert=True,
     )
     return {"folder": {"name": name, "count": 0}}
+
+
+@router.patch("/bookmark-folders/{name}")
+async def rename_bookmark_folder(
+    name: str,
+    body: BookmarkFolderRename,
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> dict[str, Any]:
+    """Rename a bookmark folder for the current user."""
+    if name == "Chung":
+        raise HTTPException(
+            status_code=422, detail="Cannot rename the default folder"
+        )
+
+    user_id = str(current_user.id)
+    new_name = body.new_name.strip()
+
+    # Update all bookmarks in the old folder
+    await db[BOOKMARKS_COLLECTION].update_many(
+        {"user_id": user_id, "folder": name},
+        {"$set": {"folder": new_name, "updated_at": datetime.now(timezone.utc)}},
+    )
+
+    # Update the folder entry
+    await db[BOOKMARK_FOLDERS_COLLECTION].update_one(
+        {"user_id": user_id, "name": name},
+        {"$set": {"name": new_name}},
+    )
+
+    count = await db[BOOKMARKS_COLLECTION].count_documents(
+        {"user_id": user_id, "folder": new_name}
+    )
+    return {"folder": {"name": new_name, "count": count}}
+
+
+@router.delete("/bookmark-folders/{name}")
+async def delete_bookmark_folder(
+    name: str,
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+    move_to: str = Query(default="Chung"),
+) -> dict[str, Any]:
+    """Delete a bookmark folder, moving its bookmarks to another folder."""
+    if name == "Chung":
+        raise HTTPException(
+            status_code=422, detail="Cannot delete the default folder"
+        )
+
+    user_id = str(current_user.id)
+
+    # Move bookmarks to the target folder
+    result = await db[BOOKMARKS_COLLECTION].update_many(
+        {"user_id": user_id, "folder": name},
+        {"$set": {"folder": move_to, "updated_at": datetime.now(timezone.utc)}},
+    )
+
+    # Delete the folder entry
+    await db[BOOKMARK_FOLDERS_COLLECTION].delete_one(
+        {"user_id": user_id, "name": name}
+    )
+
+    return {"status": "deleted", "moved_count": result.modified_count}

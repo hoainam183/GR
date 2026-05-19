@@ -16,7 +16,7 @@ from models.database import (
     get_database,
 )
 from models.user import UserDocument
-from schemas.mobile import NotificationSubscribe
+from schemas.mobile import NotificationSubscribe, NotificationUnsubscribe
 
 router = APIRouter(tags=["notifications"])
 
@@ -58,6 +58,32 @@ async def list_notifications(
     return {"notifications": notifications, "total": total, "page": page}
 
 
+@router.get("/notifications/unread-count")
+async def get_unread_count(
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> dict[str, int]:
+    """Return the count of unread notifications for the current user."""
+    count = await db[NOTIFICATIONS_COLLECTION].count_documents(
+        {"user_id": str(current_user.id), "read": False}
+    )
+    return {"unread_count": count}
+
+
+@router.put("/notifications/read-all")
+async def mark_all_read(
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> dict[str, Any]:
+    """Mark all unread notifications for the current user as read."""
+    now = datetime.now(timezone.utc)
+    result = await db[NOTIFICATIONS_COLLECTION].update_many(
+        {"user_id": str(current_user.id), "read": False},
+        {"$set": {"read": True, "read_at": now}},
+    )
+    return {"status": "ok", "updated_count": result.modified_count}
+
+
 @router.put("/notifications/{notification_id}/read")
 async def mark_notification_read(
     notification_id: str,
@@ -74,6 +100,23 @@ async def mark_notification_read(
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Notification not found")
     return {"status": "read"}
+
+
+@router.delete("/notifications/{notification_id}")
+async def delete_notification(
+    notification_id: str,
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> dict[str, str]:
+    """Delete a specific notification owned by the current user."""
+    if not ObjectId.is_valid(notification_id):
+        raise HTTPException(status_code=404, detail="Notification not found")
+    result = await db[NOTIFICATIONS_COLLECTION].delete_one(
+        {"_id": ObjectId(notification_id), "user_id": str(current_user.id)},
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return {"status": "deleted"}
 
 
 @router.post("/notifications/subscribe")
@@ -102,3 +145,30 @@ async def subscribe_notifications(
         upsert=True,
     )
     return {"subscribed_topics": topics}
+
+
+@router.post("/notifications/unsubscribe")
+async def unsubscribe_notifications(
+    body: NotificationUnsubscribe,
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> dict[str, Any]:
+    """Remove topics from a subscription or delete it entirely."""
+    user_id = str(current_user.id)
+    filter_doc = {"user_id": user_id, "expo_push_token": body.expo_push_token}
+
+    if not body.topics:
+        # No topics specified — delete entire subscription
+        await db[NOTIFICATION_SUBSCRIPTIONS_COLLECTION].delete_one(filter_doc)
+        return {"remaining_topics": []}
+
+    # Remove specified topics from the subscription
+    topics_to_remove = [t.strip() for t in body.topics if t.strip()]
+    await db[NOTIFICATION_SUBSCRIPTIONS_COLLECTION].update_one(
+        filter_doc,
+        {"$pull": {"topics": {"$in": topics_to_remove}}},
+    )
+    # Fetch updated document to return remaining topics
+    doc = await db[NOTIFICATION_SUBSCRIPTIONS_COLLECTION].find_one(filter_doc)
+    remaining = doc.get("topics", []) if doc else []
+    return {"remaining_topics": remaining}

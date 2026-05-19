@@ -37,6 +37,9 @@ def _serialize_doc(doc: dict[str, Any]) -> dict[str, Any]:
     return {
         "title": _doc_title(doc),
         "summary": text[:700],
+        "source": metadata.get("source") or metadata.get("file_name"),
+        "date": metadata.get("date_str") or metadata.get("date"),
+        "url": metadata.get("url"),
         "collection": doc.get("collection"),
         "score": float(doc.get("rerank_score", doc.get("score", 0.0)) or 0.0),
         "metadata": metadata,

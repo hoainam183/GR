@@ -26,6 +26,15 @@ export interface BookmarkCreateRequest {
   note?: string;
 }
 
+export interface BookmarkUpdateRequest {
+  folder?: string;
+  note?: string;
+}
+
+export interface BookmarkFolderRenameRequest {
+  new_name: string;
+}
+
 export interface FeedbackCreateRequest {
   session_id: string;
   turn_id: number;
@@ -34,9 +43,33 @@ export interface FeedbackCreateRequest {
   comment?: string;
 }
 
+export interface FeedbackResponse {
+  id: string;
+  session_id: string;
+  turn_id: number;
+  rating: 'up' | 'down' | null;
+  category?: 'wrong' | 'incomplete' | 'outdated' | null;
+  comment?: string | null;
+  question: string;
+  answer_snapshot: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface FeedbackStats {
+  total: number;
+  up: number;
+  down: number;
+  by_category: Record<string, number>;
+  recent_days: number;
+}
+
 export interface LookupDocument {
   title: string;
   summary: string;
+  source?: string | null;
+  date?: string | null;
+  url?: string | null;
   collection?: string | null;
   score: number;
   metadata: Record<string, unknown>;
@@ -61,4 +94,13 @@ export interface NotificationItem {
 export interface NotificationSubscribeRequest {
   topics: string[];
   expo_push_token: string;
+}
+
+export interface NotificationUnsubscribeRequest {
+  expo_push_token: string;
+  topics?: string[];
+}
+
+export interface NotificationUnreadCount {
+  unread_count: number;
 }

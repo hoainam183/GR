@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { Bot, ChevronDown, ChevronUp, FileText, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { DocRow } from '../trace/DocRow';
+import MessageActionsWeb from './MessageActionsWeb';
 
 interface ChatMessageProps {
   message: Message;
@@ -516,6 +517,15 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
               );
             })}
           </div>
+        )}
+
+        {/* Message Actions (assistant only) */}
+        {!isUser && message.sessionId && message.turnId && (
+          <MessageActionsWeb
+            sessionId={message.sessionId}
+            turnId={message.turnId}
+            content={message.content}
+          />
         )}
       </div>
     </div>
