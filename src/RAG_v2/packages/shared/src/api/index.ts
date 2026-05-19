@@ -12,6 +12,7 @@ export { getSessions, getMySessions, getSession, createSession } from './session
 export {
   createBookmark,
   listBookmarks,
+  getBookmarkByTurn,
   updateBookmark,
   deleteBookmark,
   listBookmarkFolders,
@@ -19,7 +20,7 @@ export {
   renameBookmarkFolder,
   deleteBookmarkFolder,
 } from './bookmarkApi';
-export { submitFeedback, getFeedback, getFeedbackStats } from './feedbackApi';
+export { submitFeedback, getFeedback, getFeedbackStats, listAllFeedback } from './feedbackApi';
 export {
   lookupCTDT,
   lookupRegulations,

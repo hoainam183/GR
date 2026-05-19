@@ -117,6 +117,8 @@ async def list_bookmarks(
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
     folder: str | None = Query(default=None),
     q: str | None = Query(default=None),
+    session_id: str | None = Query(default=None),
+    turn_id: int | None = Query(default=None, ge=1),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
 ) -> dict[str, Any]:
@@ -124,6 +126,10 @@ async def list_bookmarks(
     query: dict[str, Any] = {"user_id": str(current_user.id)}
     if folder:
         query["folder"] = folder
+    if session_id:
+        query["session_id"] = session_id
+    if turn_id is not None:
+        query["turn_id"] = turn_id
     if q:
         pattern = re.compile(re.escape(q), re.IGNORECASE)
         query["$or"] = [

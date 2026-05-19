@@ -21,7 +21,14 @@ export const createBookmark = async (
 
 export const listBookmarks = async (
   client: AxiosInstance,
-  params?: { folder?: string; q?: string; page?: number; limit?: number },
+  params?: {
+    folder?: string;
+    q?: string;
+    session_id?: string;
+    turn_id?: number;
+    page?: number;
+    limit?: number;
+  },
 ): Promise<{ bookmarks: Bookmark[]; total: number; page: number; limit: number }> => {
   const response = await client.get<{
     bookmarks: Bookmark[];
@@ -30,6 +37,15 @@ export const listBookmarks = async (
     limit: number;
   }>(API_PATHS.BOOKMARKS, { params });
   return response.data;
+};
+
+export const getBookmarkByTurn = async (
+  client: AxiosInstance,
+  sessionId: string,
+  turnId: number,
+): Promise<Bookmark | null> => {
+  const result = await listBookmarks(client, { session_id: sessionId, turn_id: turnId, limit: 1 });
+  return result.bookmarks[0] ?? null;
 };
 
 export const updateBookmark = async (

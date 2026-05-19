@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Navigate } from 'react-router-dom';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { createApiClient, listBookmarks, listBookmarkFolders, deleteBookmark } from '@rag/shared';
 import type { Bookmark, BookmarkFolder } from '@rag/shared';
 import { getStoredToken } from '@/services/authStorage';
 
 const BookmarksPage = () => {
   const isAuthenticated = Boolean(getStoredToken());
+  const navigate = useNavigate();
   const client = React.useMemo(
     () =>
       createApiClient({
@@ -45,11 +47,25 @@ const BookmarksPage = () => {
     },
   });
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    navigate('/login', { replace: true });
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-foreground mb-6">Đã lưu</h1>
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <button
+          type="button"
+          onClick={() => navigate('/chat')}
+          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          title="Quay lại chat"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <h1 className="text-2xl font-bold text-foreground">Đã lưu</h1>
+      </div>
 
       {/* Search + Filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
@@ -103,13 +119,22 @@ const BookmarksPage = () => {
                     </span>
                   </div>
                 </button>
-                <button
-                  onClick={() => deleteMut.mutate(bm.id)}
-                  className="shrink-0 p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                  title="Xóa"
-                >
-                  ✕
-                </button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => navigate(`/chat/${bm.session_id}`)}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    title="Xem cuộc trò chuyện gốc"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => deleteMut.mutate(bm.id)}
+                    className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                    title="Xóa"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
               {expandedId === bm.id && (
                 <div className="mt-3 pt-3 border-t border-border text-sm text-foreground whitespace-pre-wrap">

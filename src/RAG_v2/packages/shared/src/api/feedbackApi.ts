@@ -35,3 +35,22 @@ export const getFeedbackStats = async (
   );
   return response.data.stats;
 };
+
+export const listAllFeedback = async (
+  client: AxiosInstance,
+  params?: {
+    rating?: 'up' | 'down' | 'all';
+    category?: string;
+    days?: number;
+    page?: number;
+    limit?: number;
+  },
+): Promise<{ feedbacks: FeedbackResponse[]; total: number; page: number; limit: number }> => {
+  const response = await client.get<{
+    feedbacks: FeedbackResponse[];
+    total: number;
+    page: number;
+    limit: number;
+  }>(`${API_PATHS.FEEDBACK}/list`, { params });
+  return response.data;
+};

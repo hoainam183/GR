@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Bookmark,
   LogOut,
   MessageSquare,
   MoreHorizontal,
@@ -231,6 +232,17 @@ export function ConversationSidebar({
             className="h-8 w-full rounded-md border border-sidebar-border bg-background pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
+      </div>
+
+      <div className="shrink-0 space-y-1 border-b border-sidebar-border px-3 py-2">
+        <button
+          type="button"
+          onClick={() => navigate('/bookmarks')}
+          className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-xs text-muted-foreground transition hover:bg-sidebar-accent/70 hover:text-foreground"
+        >
+          <Bookmark className="h-4 w-4" />
+          Đã lưu
+        </button>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-thin px-2 py-2">

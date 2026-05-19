@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -98,6 +98,37 @@ async def get_feedback(
     if doc is None:
         return {"feedback": None}
     return {"feedback": _serialize_feedback(doc)}
+
+
+@router.get("/feedback/list")
+async def list_feedback(
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+    rating: Literal["up", "down", "all"] | None = Query(default=None),
+    category: str | None = Query(default=None),
+    days: int = Query(default=30, ge=1, le=365),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+) -> dict[str, Any]:
+    """Return paginated feedback records (admin)."""
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    query: dict[str, Any] = {"created_at": {"$gte": since}}
+    if rating and rating != "all":
+        query["rating"] = rating
+    if category:
+        query["category"] = category
+
+    skip = (page - 1) * limit
+    total = await db[FEEDBACK_COLLECTION].count_documents(query)
+    cursor = (
+        db[FEEDBACK_COLLECTION]
+        .find(query)
+        .sort("created_at", -1)
+        .skip(skip)
+        .limit(limit)
+    )
+    feedbacks = [_serialize_feedback(doc) async for doc in cursor]
+    return {"feedbacks": feedbacks, "total": total, "page": page, "limit": limit}
 
 
 @router.get("/feedback/stats")
