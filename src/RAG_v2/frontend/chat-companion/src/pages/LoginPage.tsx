@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { setStoredToken, setStoredUser } from "@/services/authStorage";
 import { loginUser } from "@/services/authApi";
 import axios from "axios";
 
@@ -71,8 +72,8 @@ const LoginPage = () => {
     setErrors({});
     try {
       const result = await loginUser({ username, password });
-      localStorage.setItem("token", result.access_token);
-      localStorage.setItem("user", JSON.stringify(result.user));
+      setStoredToken(result.access_token);
+      setStoredUser(result.user);
       if (result.user.role === "admin") {
         navigate("/admin");
       } else {

@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, RefObject } from 'react';
 
 export function useSmartScroll(
   messagesEndRef: RefObject<HTMLDivElement>,
-  dependencies: unknown[] = []
+  dependencies: unknown[] = [],
+  scrollContainerRef?: RefObject<HTMLElement>
 ) {
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -15,7 +16,7 @@ export function useSmartScroll(
         setShowScrollButton(!entry.isIntersecting);
       },
       {
-        root: null, // viewport
+        root: scrollContainerRef?.current ?? null,
         rootMargin: '100px', // Consider "near bottom" if within 100px of the end
         threshold: 0,
       }
@@ -31,21 +32,35 @@ export function useSmartScroll(
         observer.unobserve(target);
       }
     };
-  }, [messagesEndRef]);
+  }, [messagesEndRef, scrollContainerRef]);
+
+  const scrollToBottom = useCallback(
+    (behavior: ScrollBehavior) => {
+      const container = scrollContainerRef?.current;
+      if (container) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior,
+        });
+        return;
+      }
+
+      messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
+    },
+    [messagesEndRef, scrollContainerRef],
+  );
 
   // The auto-scroll function only triggers if user is already near bottom
   const smartScrollToBottom = useCallback(() => {
-    if (isNearBottom && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isNearBottom) {
+      scrollToBottom('smooth');
     }
-  }, [isNearBottom, messagesEndRef]);
+  }, [isNearBottom, scrollToBottom]);
 
   // A forced scroll for when user explicitly clicks down or sends a message
   const forceScrollToBottom = useCallback(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messagesEndRef]);
+    scrollToBottom('smooth');
+  }, [scrollToBottom]);
 
   // Auto scroll when dependencies change (like message array), but respect isNearBottom
   useEffect(() => {

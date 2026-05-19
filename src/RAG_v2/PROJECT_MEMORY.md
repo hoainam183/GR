@@ -362,9 +362,12 @@ Tool adapter details:
 - Stack: React 18, Vite, TanStack Query, axios, shadcn/Radix UI, markdown renderer.
 - Vite dev server config uses port `8080`.
 - API base URL defaults to `http://localhost:8000` unless `VITE_API_URL` is set.
+- Auth callback redirects use `FRONTEND_BASE_URL`, defaulting to `http://localhost:8080`.
 - Main routes include `/`, `/chat`, `/chat/:sessionId`, `/login`, `/register`, `/complete-profile`, `/trace`, `/retrieval`, `/admin`, `/admin/documents/:id`.
 - `ChatContainer` supports `/chat/stream`, session history, metadata/debug panel, and route/session invalidation.
 - Authenticated web chat/session requests attach the JWT from `localStorage.token`.
+  Web auth helpers also read legacy `localStorage.access_token` for compatibility,
+  but new login/OAuth writes should normalize back to `token`.
   The conversation sidebar supports search, date grouping, inline rename, hard
   delete, mobile sheet rendering, and desktop resizing persisted in
   `localStorage` key `sidebar:size`.
@@ -450,7 +453,6 @@ Do not hardcode provider/model/host values in code; use settings/env.
 - `rag_flow_stream()` initializes stream metadata trace, but does not pass `trace_out` into `MultiCollectionSearch.search()`, so `applied_filters`/`collection_results` may be empty in stream metadata.
 - `DocumentPipeline.chunk()` writes a debug chunk dump to a hard-coded absolute path under `/Users/nam.nguyen/Documents/personal/GR/src/RAG_v2/data/quydinh/admin_upload`.
 - Redis-backed cache/session/rate-limit behavior is inactive when `redis_enabled=false`, even if related feature flags/defaults are true.
-- OAuth redirect and dev ports are inconsistent: web Vite config uses `8080`, while auth callback redirect code uses `http://localhost:5173`.
 - Elasticsearch keyword search does not currently implement custom course-field boosting beyond `text^1.0`, `title^1.5`, fuzziness and filters. Keep course-query boosting documented at the hybrid fusion layer, not as ES query behavior.
 
 ---

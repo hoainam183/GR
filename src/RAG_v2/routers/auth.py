@@ -13,6 +13,7 @@ resolved via the :func:`~auth.jwt_handler.get_current_user` dependency.
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timezone
 from typing import Annotated
 
@@ -46,7 +47,7 @@ router = APIRouter()
 # Only @sis.hust.edu.vn addresses are allowed.
 _HUST_DOMAIN = "@sis.hust.edu.vn"
 # Frontend base URL — where the user is redirected after authentication.
-_FRONTEND_BASE = "http://localhost:5173"
+_FRONTEND_BASE = os.environ.get("FRONTEND_BASE_URL", "http://localhost:8080").rstrip("/")
 
 
 # ─── /auth/login ──────────────────────────────────────────────────────────────

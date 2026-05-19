@@ -52,6 +52,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   // Guards async callbacks after component unmount (e.g. logout)
   const isMountedRef = useRef(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   // Set to true before calling navigate() from within handleSendMessage so the
   // resulting sessionIdProp change does NOT clear messages or reload history.
   const suppressNextHistoryLoad = useRef(false);
@@ -100,7 +101,11 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     return () => { isMountedRef.current = false; };
   }, []);
 
-  const { showScrollButton, forceScrollToBottom } = useSmartScroll(messagesEndRef, [messages, chatPhase]);
+  const { showScrollButton, forceScrollToBottom } = useSmartScroll(
+    messagesEndRef,
+    [messages, chatPhase],
+    messagesContainerRef,
+  );
 
   // When the URL session param changes (user clicks sidebar item or New Chat),
   // reset state and optionally load history from the backend.
@@ -302,9 +307,12 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   ];
 
   return (
-    <div className="relative flex h-full flex-col">
+    <div className="relative flex h-full min-h-0 flex-col overscroll-none">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin p-3 sm:p-4 md:p-6">
+      <div
+        ref={messagesContainerRef}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-thin p-3 sm:p-4 md:p-6"
+      >
         {isLoadingHistory ? (
           <div className="flex h-full items-center justify-center">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -366,7 +374,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       )}
 
       {/* Input Area */}
-      <div className="relative z-20 shrink-0 border-t border-border bg-background/90 p-3 backdrop-blur-sm sm:p-4 md:p-6">
+      <div className="relative z-20 shrink-0 overscroll-contain border-t border-border bg-background/90 p-3 backdrop-blur-sm sm:p-4 md:p-6">
         <div className="mx-auto w-full max-w-3xl">
           <ChatInput onSend={handleSendMessage} disabled={chatPhase !== 'idle'} />
           <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">

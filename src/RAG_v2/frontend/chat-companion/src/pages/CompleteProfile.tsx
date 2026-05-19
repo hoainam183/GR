@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { setStoredToken, setStoredUser } from "@/services/authStorage";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -45,7 +46,7 @@ const CompleteProfile = () => {
       return;
     }
 
-    localStorage.setItem("token", urlToken);
+    setStoredToken(urlToken);
     setToken(urlToken);
 
     fetch(`${API_BASE_URL}/auth/me`, {
@@ -110,7 +111,7 @@ const CompleteProfile = () => {
 
       const updatedUser = await res.json().catch(() => null);
       if (updatedUser) {
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setStoredUser(updatedUser);
       }
 
       navigate("/chat");

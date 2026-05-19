@@ -10,28 +10,31 @@ import {
   deleteNotification,
 } from '@rag/shared';
 import type { NotificationItem } from '@rag/shared';
-
-const getClient = () => createApiClient({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-  getToken: async () => localStorage.getItem('access_token'),
-});
+import { getStoredToken } from '@/services/authStorage';
 
 const NotificationsPage = () => {
-  const token = localStorage.getItem('access_token');
-  if (!token) return <Navigate to="/login" replace />;
-
-  const client = getClient();
+  const isAuthenticated = Boolean(getStoredToken());
+  const client = React.useMemo(
+    () =>
+      createApiClient({
+        baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+        getToken: async () => getStoredToken(),
+      }),
+    [],
+  );
   const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => listNotifications(client),
+    enabled: isAuthenticated,
   });
   const notifications = data?.notifications ?? [];
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications-unread-count'],
     queryFn: () => getUnreadCount(client),
+    enabled: isAuthenticated,
   });
   const unreadCount = unreadData?.unread_count ?? 0;
 
@@ -52,6 +55,8 @@ const NotificationsPage = () => {
     mutationFn: (id: string) => deleteNotification(client, id),
     onSuccess: invalidate,
   });
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return (
     <div className="min-h-screen bg-background p-6 max-w-3xl mx-auto">

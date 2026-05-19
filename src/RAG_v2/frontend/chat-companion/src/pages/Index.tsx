@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ChatContainer from '@/components/chat/ChatContainer';
 import { ConversationSidebar } from '@/components/sidebar/ConversationSidebar';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,14 @@ import {
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
+import {
+  clearStoredAuth,
+  clearStoredUser,
+  getStoredToken,
+  getStoredUser,
+  setStoredToken,
+  setStoredUser,
+} from '@/services/authStorage';
 import { getMe, type UserPublic } from '@/services/authApi';
 import { getSessions } from '@/services/sessionApi';
 import { Activity, Moon, PanelLeft, Sun } from 'lucide-react';
@@ -96,6 +104,7 @@ const UserMenu = ({ user, onLogout }: UserMenuProps) => {
           </div>
 
           <button
+            type="button"
             onClick={onLogout}
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-destructive transition hover:bg-destructive/10"
           >
@@ -109,6 +118,7 @@ const UserMenu = ({ user, onLogout }: UserMenuProps) => {
 
 const Index = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const { sessionId } = useParams<{ sessionId?: string }>();
   const [user, setUser] = useState<UserPublic | null>(null);
@@ -161,26 +171,22 @@ const Index = () => {
     const bootstrapUser = async () => {
       const urlToken = searchParams.get('token');
       if (urlToken) {
-        localStorage.setItem('token', urlToken);
+        setStoredToken(urlToken);
         navigate('/chat', { replace: true });
       }
 
-      const storedToken = urlToken || localStorage.getItem('token');
+      const storedToken = urlToken || getStoredToken();
       if (!storedToken) {
         navigate('/login', { replace: true });
         return;
       }
 
-      const storedUser = localStorage.getItem('user');
+      const storedUser = getStoredUser<UserPublic>();
       if (storedUser) {
-        try {
-          if (!cancelled) {
-            setUser(JSON.parse(storedUser) as UserPublic);
-          }
-          return;
-        } catch {
-          localStorage.removeItem('user');
+        if (!cancelled) {
+          setUser(storedUser);
         }
+        return;
       }
 
       try {
@@ -189,13 +195,12 @@ const Index = () => {
           return;
         }
         setUser(profile);
-        localStorage.setItem('user', JSON.stringify(profile));
+        setStoredUser(profile);
       } catch {
         if (cancelled) {
           return;
         }
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        clearStoredAuth();
         navigate('/login', { replace: true });
       }
     };
@@ -223,8 +228,11 @@ const Index = () => {
   }, [isMobile, toggle]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    clearStoredAuth();
+    clearStoredUser();
+    setUser(null);
+    setMobileOpen(false);
+    queryClient.clear();
     navigate('/login', { replace: true });
   };
 
@@ -300,21 +308,21 @@ const Index = () => {
   );
 
   const main = (
-    <main className="flex h-full flex-1 flex-col overflow-hidden">
+    <main className="flex h-full min-h-0 flex-1 flex-col overflow-hidden overscroll-none">
       {header}
-      <div className="flex-1 overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-hidden">
         <ChatContainer user={user} sessionId={sessionId} />
       </div>
     </main>
   );
 
   if (!user) {
-    return <div className="flex h-screen w-full overflow-hidden bg-chat-container">{main}</div>;
+    return <div className="flex h-dvh w-full overflow-hidden overscroll-none bg-chat-container">{main}</div>;
   }
 
   if (isMobile) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-chat-container">
+      <div className="flex h-dvh w-full overflow-hidden overscroll-none bg-chat-container">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent side="left" className="w-[18rem] p-0 [&>button]:hidden">
             <SheetTitle className="sr-only">Cuộc trò chuyện</SheetTitle>
@@ -334,7 +342,7 @@ const Index = () => {
   const sidebarDefaultSize = getDefaultSize();
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-chat-container">
+    <div className="flex h-dvh w-full overflow-hidden overscroll-none bg-chat-container">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel
           ref={panelRef}

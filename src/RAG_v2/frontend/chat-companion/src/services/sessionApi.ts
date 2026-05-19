@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { Session, Turn } from '@/types/chat';
+import { getStoredToken } from '@/services/authStorage';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -10,12 +11,12 @@ const apiClient = axios.create({
 });
 
 const authHeaders = (): Record<string, string> => {
-  const token = localStorage.getItem('token');
+  const token = getStoredToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 export const getSessions = async (userId: string): Promise<Session[]> => {
-  const token = localStorage.getItem('token');
+  const token = getStoredToken();
   if (token) {
     const response = await apiClient.get<{ sessions: Session[]; count: number }>(
       '/sessions/me',

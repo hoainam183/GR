@@ -3,17 +3,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Navigate } from 'react-router-dom';
 import { createApiClient, listBookmarks, listBookmarkFolders, deleteBookmark } from '@rag/shared';
 import type { Bookmark, BookmarkFolder } from '@rag/shared';
-
-const getClient = () => createApiClient({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-  getToken: async () => localStorage.getItem('access_token'),
-});
+import { getStoredToken } from '@/services/authStorage';
 
 const BookmarksPage = () => {
-  const token = localStorage.getItem('access_token');
-  if (!token) return <Navigate to="/login" replace />;
-
-  const client = getClient();
+  const isAuthenticated = Boolean(getStoredToken());
+  const client = React.useMemo(
+    () =>
+      createApiClient({
+        baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+        getToken: async () => getStoredToken(),
+      }),
+    [],
+  );
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
@@ -22,6 +23,7 @@ const BookmarksPage = () => {
   const { data: foldersData } = useQuery({
     queryKey: ['bookmark-folders'],
     queryFn: () => listBookmarkFolders(client),
+    enabled: isAuthenticated,
   });
   const folders: BookmarkFolder[] = foldersData ?? [];
 
@@ -31,6 +33,7 @@ const BookmarksPage = () => {
       folder: activeFolder || undefined,
       q: search || undefined,
     }),
+    enabled: isAuthenticated,
   });
   const bookmarks = data?.bookmarks ?? [];
 
@@ -41,6 +44,8 @@ const BookmarksPage = () => {
       queryClient.invalidateQueries({ queryKey: ['bookmark-folders'] });
     },
   });
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return (
     <div className="min-h-screen bg-background p-6 max-w-4xl mx-auto">

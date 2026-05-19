@@ -233,7 +233,7 @@ export function ConversationSidebar({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-thin px-2 py-2">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-thin px-2 py-2">
         {isLoading ? (
           <div className="space-y-1 px-1 py-2">
             {[...Array(6)].map((_, index) => (
@@ -341,6 +341,7 @@ export function ConversationSidebar({
 
       <div className="shrink-0 border-t border-sidebar-border px-3 py-2">
         <button
+          type="button"
           onClick={onLogout}
           className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-xs text-destructive transition hover:bg-destructive/10"
         >

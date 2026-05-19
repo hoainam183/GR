@@ -16,18 +16,14 @@ import AdminPage from "./pages/AdminPage";
 import DocumentReview from "./pages/DocumentReview";
 import BookmarksPage from "./pages/BookmarksPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import { getStoredUser } from "@/services/authStorage";
 
 const queryClient = new QueryClient();
 
 /** Guard: only render children if JWT user has role === "admin" */
 function AdminGuard({ children }: { children: React.ReactNode }) {
-  try {
-    const raw = localStorage.getItem("user");
-    if (raw) {
-      const user = JSON.parse(raw);
-      if (user.role === "admin") return <>{children}</>;
-    }
-  } catch { /* invalid JSON */ }
+  const user = getStoredUser<{ role?: string }>();
+  if (user?.role === "admin") return <>{children}</>;
   return <Navigate to="/chat" replace />;
 }
 

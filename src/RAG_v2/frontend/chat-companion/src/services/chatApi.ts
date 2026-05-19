@@ -6,6 +6,7 @@ import type {
   RetrievedDocument,
   UserContext,
 } from '@/types/chat';
+import { getStoredToken, getStoredUser } from '@/services/authStorage';
 
 type StoredUserShape = UserContext & {
   email?: string | null;
@@ -39,7 +40,7 @@ export interface RetrievalSearchResponse {
     vector_count: number;
     keyword_count: number;
   }>;
-  fusion_weights: Record<string, any>;
+  fusion_weights: Record<string, unknown>;
   latency_ms: number;
 }
 
@@ -50,7 +51,7 @@ export interface EvalRunSummary {
   started_at?: string;
   finished_at?: string;
   trigger?: string;
-  summary: Record<string, any>;
+  summary: Record<string, unknown>;
   artifacts?: Record<string, string>;
   errors?: string[];
 }
@@ -83,7 +84,7 @@ export interface EvalDashboardResponse {
     eval_suite: string;
     finished_at?: string;
     status: string;
-    summary: Record<string, any>;
+    summary: Record<string, unknown>;
   }>;
   failing_cases: EvalCaseFailure[];
   breakdown?: {
@@ -112,7 +113,7 @@ const apiClient = axios.create({
 });
 
 const authHeaders = (): Record<string, string> => {
-  const token = localStorage.getItem('token');
+  const token = getStoredToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -148,19 +149,11 @@ const sanitizeUserContext = (
 };
 
 const readStoredUser = (): StoredUserShape | undefined => {
-  try {
-    const raw = localStorage.getItem('user');
-    if (!raw) {
-      return undefined;
-    }
-    const parsed = JSON.parse(raw) as StoredUserShape;
-    if (!parsed || typeof parsed !== 'object') {
-      return undefined;
-    }
-    return parsed;
-  } catch {
+  const parsed = getStoredUser<StoredUserShape>();
+  if (!parsed || typeof parsed !== 'object') {
     return undefined;
   }
+  return parsed;
 };
 
 const storedUserToContext = (
@@ -329,6 +322,8 @@ const normalizeV3Response = (
         : undefined,
     session_id:
       cleanText(payload.session_id) || fallbackSessionId || '',
+    turn_id:
+      typeof payload.turn_id === 'number' ? payload.turn_id : undefined,
     routing_probabilities:
       payload.routing_probabilities && typeof payload.routing_probabilities === 'object'
         ? (payload.routing_probabilities as Record<string, number>)
