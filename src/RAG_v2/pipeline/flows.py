@@ -414,12 +414,20 @@ def _build_pre_generation_web_decision(
     )
     freshness_query = has_freshness_intent(f"{question}\n{search_query}")
     no_sources = len(reranked) == 0
+    # If local retrieval already has high-confidence results, suppress the
+    # dynamic_query Tavily trigger to avoid generic web results overriding
+    # precise local curriculum/policy documents.
+    best_local_score = _best_explicit_rerank_score(reranked)
+    high_local_confidence = (
+        best_local_score is not None
+        and best_local_score >= _cfg_float(cfg, "web_bypass_min_local_score", 0.5)
+    )
     reasons: List[str] = []
     if no_sources:
         reasons.append("no_sources")
     if freshness_query:
         reasons.append("freshness_query")
-    if dynamic_query and _cfg_bool(cfg, "web_fallback_on_dynamic", True):
+    if dynamic_query and not high_local_confidence and _cfg_bool(cfg, "web_fallback_on_dynamic", True):
         reasons.append("dynamic_query")
     if low_retrieval_confidence:
         reasons.append("low_retrieval_confidence")
@@ -542,9 +550,10 @@ def _merge_local_and_web_context(local_context: str, web_context: str) -> str:
         f"{local_context}\n\n---\n\n"
         f"## web_live_context (Tavily / nguồn web chính thức)\n"
         f"{web_context}\n\n"
-        f"Lưu ý: So sánh ngày đăng/cập nhật hoặc học kỳ/năm học được nêu rõ "
-        f"trong từng nguồn. Nếu có mâu thuẫn, nêu rõ mâu thuẫn và ưu tiên "
-        f"nguồn có ngày rõ ràng mới hơn; không tự động bỏ qua nguồn nội bộ."
+        f"Lưu ý: Ưu tiên Nguồn Cơ Sở Dữ Liệu Nội Bộ cho các câu hỏi về quy chế, "
+        f"chương trình đào tạo và điều kiện tốt nghiệp — đây là nguồn chính xác "
+        f"và cụ thể nhất. Chỉ dùng web_live_context khi nguồn nội bộ không có "
+        f"thông tin hoặc cần xác nhận dữ liệu thời gian thực (lịch thi, thông báo mới)."
     )
 
 
@@ -679,6 +688,14 @@ def _cfg_int(cfg: Dict[str, Any], key: str, default: int) -> int:
     """Read an integer config value with a safe fallback."""
     try:
         return int(cfg.get(key, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _cfg_float(cfg: Dict[str, Any], key: str, default: float) -> float:
+    """Read a float config value with a safe fallback."""
+    try:
+        return float(cfg.get(key, default))
     except (TypeError, ValueError):
         return default
 

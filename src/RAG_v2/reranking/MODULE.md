@@ -52,7 +52,7 @@ Return top_k from survivors (thường top 5)
 ```
 
 **Score threshold:** Tài liệu có `rerank_score < threshold` bị bỏ (tránh hallucination từ tài liệu không liên quan).
-Đặc biệt đối với dữ liệu bảng (`has_table: true`), hệ thống hỗ trợ một ngưỡng riêng `reranker_table_score_threshold` (mặc định `-5.0`) vì mô hình cross-encoder thường chấm điểm logit âm cho các văn bản dạng bảng.
+Đặc biệt đối với dữ liệu bảng (`has_table: true`), hệ thống hỗ trợ một ngưỡng riêng `reranker_table_score_threshold` (mặc định `-1.0`) vì mô hình cross-encoder thường chấm điểm logit âm cho các văn bản dạng bảng. Ngưỡng `-1.0` giữ lại các bảng thực sự liên quan (score > -1.0) đồng thời loại bỏ các bảng từ chương trình sai/không liên quan thường score dưới -1.0.
 
 **Quan trọng:** Threshold filtering xảy ra **TRƯỚC** top_k truncation. Nếu ngược lại (top_k trước, filter sau), các table docs với ngưỡng thấp hơn có thể bị loại bởi top_k cut khi các non-table docs chiếm hết slot mặc dù chúng cũng fail threshold.
 
@@ -125,7 +125,8 @@ Module `reranking` **không sử dụng LLM** — sử dụng local cross-encode
 | Param | Default | Tác động |
 |---|---|---|
 | `reranker_top_k` | 5 | Giảm → nhanh hơn, kém coverage hơn |
-| `reranker_score_threshold` | 0.3 | Tăng → loại nhiều doc hơn, giảm hallucination |
+| `reranker_score_threshold` | 0.0 | Tăng → loại nhiều doc hơn, giảm hallucination |
+| `reranker_table_score_threshold` | -1.0 | Ngưỡng riêng cho table chunks (nới lỏng hơn regular threshold) |
 | `raw_candidate_k` | top_k * 4 | Giảm → reranker nhanh hơn, ít candidates hơn |
 
 ---

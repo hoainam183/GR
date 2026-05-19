@@ -18,7 +18,7 @@ def _settings() -> SimpleNamespace:
         reranker_model="BAAI/bge-reranker-v2-m3",
         reranker_top_k=5,
         reranker_score_threshold=0.0,
-        reranker_table_score_threshold=-5.0,
+        reranker_table_score_threshold=-1.0,
     )
 
 

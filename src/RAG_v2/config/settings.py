@@ -144,7 +144,12 @@ class Settings(BaseSettings):
     # dropped from the context. 0.0 is the natural decision boundary;
     # lower to -0.5 if you need more recall, raise to 0.5 for higher precision.
     reranker_score_threshold: float = 0.0
-    reranker_table_score_threshold: float = -5.0
+    # Table chunks use a relaxed threshold because cross-encoder typically gives
+    # lower raw logits for tabular text. -1.0 keeps clearly relevant tables
+    # (scores > -1.0) while dropping irrelevant/wrong-program tables that tend
+    # to score below -1.0 (previously -5.0 was too permissive, allowing
+    # wrong-program table docs to pollute LLM context).
+    reranker_table_score_threshold: float = -1.0
 
     # --- Router ---
     router_mode: str = "classifier"
