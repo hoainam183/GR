@@ -86,9 +86,11 @@ _WEB_FALLBACK_NO_INFO_PATTERNS = (
 )
 _WEB_FALLBACK_DYNAMIC_QUERY_RE = re.compile(
     r"\b(?:"
-    r"ke\s*hoach|thong\s*bao|lich\s*(?:thi|dang\s*ky|hoc)|"
+    r"ke\s*hoach|thong\s*bao|moi\s*nhat|latest|recent|hien\s*tai|"
+    r"lich\s*(?:thi|dang\s*ky|hoc)[^\n]{0,40}"
+    r"(?:moi\s*nhat|latest|recent|hien\s*tai|20\d{2}|hk|hoc\s*ky|ky\s*he|ki\s*he)|"
     r"han\s*(?:dang\s*ky|nop)|deadline|ky\s*he|ki\s*he|hoc\s*ky\s*he|"
-    r"nam\s*hoc\s*\d{4}\s*[-/]\s*\d{4}|20\d{2}3|20\d{2}1"
+    r"nam\s*hoc\s*\d{4}\s*[-/]\s*\d{4}|20\d{2}[123]"
     r")\b",
     re.IGNORECASE,
 )
@@ -311,7 +313,24 @@ def _build_web_search_query(question: str, search_query: str) -> str:
         token in folded
         for token in ("hust", "bach khoa", "dai hoc bach khoa", "dhbk")
     )
-    return query if has_hust_context else f"HUST {query}"
+    web_query = query if has_hust_context else f"HUST {query}"
+
+    extras: List[str] = []
+    if re.search(r"\b(?:ky|ki|hoc\s*ky)\s*he\b", folded):
+        year_match = re.search(r"\b(20\d{2})\b", folded)
+        if year_match:
+            end_year = int(year_match.group(1))
+            start_year = end_year - 1
+            extras.extend([f"{start_year}3", f"{start_year}-{end_year}"])
+
+    if any(token in folded for token in ("moi nhat", "latest", "recent", "hien tai")):
+        extras.append("CTT ĐHBKHN")
+
+    for extra in extras:
+        if extra and extra.lower() not in web_query.lower():
+            web_query = f"{web_query} {extra}"
+
+    return web_query
 
 
 def _build_pre_generation_web_decision(
@@ -2545,13 +2564,9 @@ def _tavily_fallback_result(
     timings_ms: Dict[str, float] = dict(search_info["timings"])
     web_context = str(search_info.get("context") or "")
     tavily_sources = list(search_info.get("sources") or [])
-    # Early-exit: web context empty or too short → don't waste an LLM call
-    if not web_context or len(web_context.strip()) < 200:
-        if web_context:
-            logger.info(
-                "Tavily web context too short (%d chars), skipping re-generation",
-                len(web_context),
-            )
+    # Early-exit only when web context is empty. Short official snippets are
+    # still useful for notices/deadlines and should be allowed to regenerate.
+    if not web_context:
         return {
             "answer": answer,
             "timings": timings_ms,

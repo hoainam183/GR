@@ -886,18 +886,21 @@ class QueryReflector:
         if not rewritten:
             rewritten = query
 
+        deterministic_followup_applied = False
         deterministic_followup = _rewrite_comparison_followup(
             query=query,
             chat_history=chat_history,
             profile=merged_profile or None,
         )
-        if deterministic_followup and deterministic_followup != rewritten:
-            logger.info(
-                "Deterministic comparison follow-up rewrite: %r -> %r",
-                rewritten[:80],
-                deterministic_followup[:80],
-            )
-            rewritten = deterministic_followup
+        if deterministic_followup:
+            deterministic_followup_applied = True
+            if deterministic_followup != rewritten:
+                logger.info(
+                    "Deterministic comparison follow-up rewrite: %r -> %r",
+                    rewritten[:80],
+                    deterministic_followup[:80],
+                )
+                rewritten = deterministic_followup
 
         # Guardrail 1: if user profile has a trusted major but references remain
         # unresolved, replace them deterministically.
@@ -915,7 +918,7 @@ class QueryReflector:
         # like "ngành của tôi").  Without such a reference, a generic query like
         # "Lịch trình học kỳ mới nhất?" must NOT become IT-E6-specific even if
         # the authenticated user belongs to IT-E6.
-        if not _PERSONAL_REFS.search(query):
+        if not deterministic_followup_applied and not _PERSONAL_REFS.search(query):
             try:
                 from retrieval.metadata_filters import _extract_major_code  # noqa: PLC0415
                 if not _extract_major_code(query) and _extract_major_code(rewritten):
@@ -933,7 +936,8 @@ class QueryReflector:
         # E.g. "IT1" → "IT1 (Khoa học máy tính)" so that vector/keyword
         # retrieval matches documents that only contain the full name.
         # Deterministic — uses MAJOR_CODE_TO_NAME dict, no LLM involved.
-        rewritten = _expand_major_codes_in_query(rewritten)
+        if not deterministic_followup_applied:
+            rewritten = _expand_major_codes_in_query(rewritten)
 
         logger.info(
             "Reflection: %r → %r (history_len=%d)",

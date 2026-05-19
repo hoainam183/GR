@@ -424,3 +424,8 @@ graph TD
 7. **Context Bleeding trong Routing**: `build_routing_input()` chỉ prepend history khi query < 6 từ. Query đủ dài (>= 6 từ) không prepend history để tránh bias từ domain cũ (ví dụ: sau nhiều lượt hỏi về `ctdt`, câu hỏi về `quydinh` vẫn được route đúng).
 
 8. **`profile_note_override`**: Khi `user_profile` là `str` (thay vì `dict`), string này được inject trực tiếp vào prompt thay vì merge vào profile dict. Dùng khi caller đã format sẵn profile note.
+
+## Update 2026-05-19: Comparison follow-up guardrail
+
+- Deterministic comparison follow-up rewrites such as `"so với ngành của tôi"` or `"so về học phí"` are treated as intentional entity resolution, not profile hallucination. The hallucination guard must not revert these rewrites just because the original short follow-up lacks explicit major codes.
+- Bare major-code expansion is skipped for deterministic comparison rewrites so the reflected query remains compact (`"So sánh học phí giữa ME-GU và IT-E6"`). Downstream reranking can still expand major labels where needed.

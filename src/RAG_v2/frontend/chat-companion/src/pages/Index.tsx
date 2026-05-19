@@ -22,7 +22,7 @@ import {
 } from '@/services/authStorage';
 import { getMe, type UserPublic } from '@/services/authApi';
 import { getSessions } from '@/services/sessionApi';
-import { Activity, Moon, PanelLeft, Sun } from 'lucide-react';
+import { Activity, Bookmark, Moon, PanelLeft, Sun } from 'lucide-react';
 
 interface UserMenuProps {
   user: UserPublic;
@@ -290,6 +290,18 @@ const Index = () => {
               <Activity className="h-3.5 w-3.5" />
               Trace
             </Link>
+          )}
+          {user && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/bookmarks')}
+              aria-label="Câu trả lời đã lưu"
+              title="Đã lưu"
+              className="h-8 w-8"
+            >
+              <Bookmark className="h-4 w-4" />
+            </Button>
           )}
           <Button
             variant="ghost"

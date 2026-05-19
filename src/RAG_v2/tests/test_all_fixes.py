@@ -371,6 +371,87 @@ class TestQueryOnlyCache:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# KeHoach latest/web-search routing regressions
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestKeHoachLatestQueryRegressions:
+    """Regression tests for latest/summer schedule conversations."""
+
+    def test_generic_exam_schedule_without_route_does_not_bypass_query_cache(self):
+        from pipeline.flows import _is_dynamic_web_query
+
+        assert _is_dynamic_web_query(
+            question="lịch thi giữa kì",
+            search_query="lịch thi giữa kì",
+            target_collections=None,
+            routing_result=None,
+            cfg={},
+        ) is False
+
+    def test_kehoach_route_still_marks_generic_schedule_dynamic(self):
+        from pipeline.flows import _is_dynamic_web_query
+
+        assert _is_dynamic_web_query(
+            question="lịch thi giữa kì",
+            search_query="lịch thi giữa kì",
+            target_collections=None,
+            routing_result={
+                "domain": "kehoach",
+                "domains": ["kehoach"],
+                "confidence": 0.8,
+            },
+            cfg={},
+        ) is True
+
+    def test_summer_2026_web_query_adds_hust_semester_code(self):
+        from pipeline.flows import _build_web_search_query
+
+        query = _build_web_search_query(
+            "lịch học tập kì hè 2026",
+            "lịch học tập kì hè 2026",
+        )
+        assert "HUST" in query
+        assert "20253" in query
+        assert "2025-2026" in query
+
+    def test_tavily_result_ranking_prefers_exact_semester_code(self):
+        from tools.tavily_search import TavilySearchTool
+
+        old_doc = {
+            "title": "kế hoạch đăng ký học tập kỳ hè năm học 2024-2025 (20243)",
+            "url": "https://ctt.hust.edu.vn/old",
+            "content": "Thông báo kỳ hè 20243 và kỳ 1 năm học 2025-2026.",
+            "score": 1.0,
+        }
+        newest_doc = {
+            "title": (
+                "Đăng ký kế hoạch học tập cho học kỳ hè năm học "
+                "2025-2026 (20253) và học kỳ 1 năm học 2026-2027"
+            ),
+            "url": "https://ctt.hust.edu.vn/new",
+            "content": "Kỳ hè 20253 áp dụng cho năm học 2025-2026.",
+            "score": 0.2,
+        }
+
+        ranked = sorted(
+            [old_doc, newest_doc],
+            key=lambda item: TavilySearchTool._rank_result_for_query(
+                "HUST lịch học tập kì hè 2026 20253 2025-2026",
+                item,
+            ),
+            reverse=True,
+        )
+        assert ranked[0]["url"] == "https://ctt.hust.edu.vn/new"
+
+    def test_prompt_disallows_plain_here_without_markdown_link(self):
+        from llm.prompts import RAG_SYSTEM_PROMPT
+
+        assert 'KHÔNG viết "tại đây"' in RAG_SYSTEM_PROMPT
+        assert "không tạo link giả" in RAG_SYSTEM_PROMPT
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # KeHoach Freshness — Guardrail 2 generic kehoach query + profile
 # ═══════════════════════════════════════════════════════════════════════════════
 

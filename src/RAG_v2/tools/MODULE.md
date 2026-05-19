@@ -98,6 +98,11 @@ result = tool.search(
 }
 ```
 
+**Result ordering:** Sau khi Tavily trả kết quả và filter nội dung quá ngắn,
+`TavilySearchTool.search()` re-rank nhẹ theo truy vấn. Các mã kỳ HUST như
+`20253`, năm học như `2025-2026`, và tín hiệu `"kỳ hè"` được ưu tiên để kết quả
+đúng kỳ thắng các thông báo cũ có relevance score cao hơn.
+
 #### Resilience
 
 | Cơ chế | Chi tiết |

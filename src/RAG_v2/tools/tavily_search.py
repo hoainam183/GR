@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import time
+import unicodedata
 from collections import OrderedDict
 from threading import RLock
 from typing import Any, Dict, List, Literal, Optional
@@ -252,6 +254,10 @@ class TavilySearchTool:
                 results = self._parse_results(response)
                 raw_count = len(results)
                 results = self.filter_results(results, min_content_length=100)
+                results.sort(
+                    key=lambda item: self._rank_result_for_query(query, item),
+                    reverse=True,
+                )
                 if raw_count != len(results):
                     logger.info(
                         "Tavily filter: %d → %d results",
@@ -442,6 +448,55 @@ class TavilySearchTool:
             filtered.append(r)
 
         return filtered
+
+    @staticmethod
+    def _fold_text(text: str) -> str:
+        decomposed = unicodedata.normalize("NFD", text or "")
+        without_marks = "".join(
+            char for char in decomposed if unicodedata.category(char) != "Mn"
+        )
+        return without_marks.casefold()
+
+    @classmethod
+    def _rank_result_for_query(cls, query: str, result: Dict[str, Any]) -> float:
+        """Return a deterministic freshness/relevance score for result ordering."""
+        folded_query = cls._fold_text(query)
+        folded_blob = cls._fold_text(
+            " ".join(
+                str(result.get(key, "") or "")
+                for key in ("title", "content", "url")
+            )
+        )
+
+        score = float(result.get("score", 0.0) or 0.0)
+        for semester_code in re.findall(r"\b20\d{2}[123]\b", folded_query):
+            if semester_code in folded_blob:
+                score += 5.0
+
+        for school_year in re.findall(r"\b20\d{2}\s*[-/]\s*20\d{2}\b", folded_query):
+            normalized = re.sub(r"\s+", "", school_year)
+            if normalized in folded_blob.replace(" ", ""):
+                score += 2.0
+
+        if re.search(r"\b(?:ky|ki|hoc\s*ky)\s*he\b", folded_query):
+            if re.search(r"\b20\d{2}3\b", folded_blob):
+                score += 1.0
+            if (
+                "20243" in folded_blob
+                and "20253" in folded_query
+                and "20253" not in folded_blob
+            ):
+                score -= 2.0
+
+        if any(
+            token in folded_query
+            for token in ("moi nhat", "latest", "recent", "hien tai")
+        ):
+            years = [int(year) for year in re.findall(r"\b(20\d{2})\b", folded_blob)]
+            if years:
+                score += min(max(years) - 2020, 10) / 10.0
+
+        return score
 
     @staticmethod
     def _format_context(results: List[Dict[str, str]]) -> str:

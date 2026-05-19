@@ -164,10 +164,18 @@ RAG_v2/
   `rag_flow_stream()`: dynamic/time-sensitive queries, no-source retrieval, or
   raw rerank fallback can fetch official web context before generation. This is
   gated by `WEB_FALLBACK_ON_DYNAMIC` for dynamic queries.
+- For `kehoach` freshness queries, dynamic detection is route-aware: routed
+  `kehoach` queries are dynamic, but generic schedule strings without a route
+  do not bypass the query-only cache by regex alone. Summer queries such as
+  `"kì hè 2026"` add HUST terms like `20253` and `2025-2026` to official web
+  search.
 - Post-generation Tavily regeneration is only for explicit insufficiency:
   no-info answer text, no sources, or self-eval returning
   `should_web_search=true` with `answer_status` of `insufficient` or
   `stale_risk`. Plain `pass=false` self-eval is diagnostic.
+- Post-generation Tavily fallback regenerates on any non-empty official web
+  context; short deadline/notice snippets must not be discarded solely because
+  they are under 200 characters.
 - `SELF_EVAL_MIN_TOP_SCORE` defaults to `100.0` for local BGE raw-logit scores.
   The old `0.72` probability-style threshold incorrectly skipped self-eval for
   high raw logits such as `5.25`.

@@ -610,3 +610,15 @@ Admin có thể chạy chunking với nhiều strategy khác nhau — chunks đ�
 - This prevents a second Tavily regeneration when pre-generation enrichment
   already supplied official web context.
 
+## Update 2026-05-19: KeHoach latest query handling
+
+- Dynamic web detection is narrower when no routing result is available: generic
+  phrases like `"lịch thi giữa kì"` no longer bypass the query-only cache by
+  regex alone, but a routed `kehoach` query is still dynamic.
+- `_build_web_search_query()` enriches summer-semester queries such as
+  `"kì hè 2026"` with the HUST semester code and school year (`20253`,
+  `2025-2026`) so official web search does not rank older `20243` notices first.
+- Tavily post-generation fallback now regenerates whenever official web context
+  is non-empty; short notices/deadline snippets are valid context and should not
+  be skipped solely for being under 200 characters.
+
