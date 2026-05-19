@@ -553,3 +553,14 @@ Không cần thay đổi file nào khác.
   and agent fallback reject the same placeholder key values.
 - The shared `TavilySearchTool` receives settings-driven cache controls:
   `tavily_cache_ttl_seconds` and `tavily_cache_maxsize`.
+
+## Update 2026-05-19: Low-confidence active-domain retention and term dates
+
+- `CollectionSelector.select()` no longer drops active domains when confidence
+  is below `0.55`; it prepends the active domain's mapped collections and then
+  appends fallback collections with de-duplication. A low-confidence
+  `kehoach` route therefore still searches `kehoach`.
+- `KeHoachFilterExtractor._build_date_query()` ignores academic semester tokens
+  such as `2025.2`, `20252`, and `2025-2` when building `date_str` wildcard
+  filters. With freshness intent and no real calendar posting date, retrieval
+  uses `sort_by_date_desc=True` instead.

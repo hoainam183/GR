@@ -89,18 +89,7 @@ class CollectionSelector:
             )
             return list(self.all_collections)
 
-        if confidence < self.confidence_threshold:
-            logger.info(
-                "CollectionSelector: domains=%s conf=%.3f < threshold=%.3f "
-                "→ fallback collections: %s",
-                active_domains,
-                confidence,
-                self.confidence_threshold,
-                self.fallback_collections,
-            )
-            return list(self.fallback_collections)
-
-        # Resolve each domain to its collection(s) and take the union
+        # Resolve each domain to its collection(s) and take the union.
         seen: set = set()
         target: List[str] = []
         for dom in active_domains:
@@ -114,6 +103,26 @@ class CollectionSelector:
                 if col not in seen:
                     seen.add(col)
                     target.append(col)
+
+        if confidence < self.confidence_threshold:
+            # Low confidence still carries useful signal: keep the active
+            # domain(s) first, then broaden with fallback collections.
+            broadened = list(target)
+            for col in self.fallback_collections:
+                if col not in seen:
+                    seen.add(col)
+                    broadened.append(col)
+            if not broadened:
+                broadened = list(self.fallback_collections)
+            logger.info(
+                "CollectionSelector: domains=%s conf=%.3f < threshold=%.3f "
+                "→ fallback collections: %s",
+                active_domains,
+                confidence,
+                self.confidence_threshold,
+                broadened,
+            )
+            return broadened
 
         if not target:
             logger.warning(

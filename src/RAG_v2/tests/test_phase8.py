@@ -62,8 +62,8 @@ class TestCollectionSelector:
     def test_high_confidence_maps_to_single_domain(self) -> None:
         from retrieval.collection_selector import CollectionSelector
         selector = CollectionSelector()
-        assert selector.select(domain="quydinh", confidence=0.90) == ["quydinh"]
-        assert selector.select(domain="stsv", confidence=0.80) == ["stsv"]
+        assert selector.select(domain="quydinh", confidence=0.90) == ["quydinh", "stsv"]
+        assert selector.select(domain="stsv", confidence=0.80) == ["stsv", "quydinh"]
         assert selector.select(domain="ctdt", confidence=0.75) == ["ctdt"]
         assert selector.select(domain="kehoach", confidence=0.70) == ["kehoach"]
 
@@ -89,13 +89,23 @@ class TestCollectionSelector:
         from retrieval.collection_selector import CollectionSelector
         custom = CollectionSelector(fallback_collections=["stsv", "ctdt"])
         result = custom.select(domain="quydinh", confidence=0.30)
-        assert set(result) == {"stsv", "ctdt"}
+        assert result == ["quydinh", "stsv", "ctdt"]
 
     def test_confidence_at_threshold_passes(self) -> None:
         from retrieval.collection_selector import CollectionSelector
         selector = CollectionSelector()
         result = selector.select(domain="quydinh", confidence=0.65)
-        assert result == ["quydinh"]
+        assert result == ["quydinh", "stsv"]
+
+    def test_low_confidence_preserves_active_domain_before_fallback(self) -> None:
+        from retrieval.collection_selector import CollectionSelector
+        selector = CollectionSelector()
+        result = selector.select(
+            domain="kehoach",
+            domains=["kehoach"],
+            confidence=0.524,
+        )
+        assert result == ["kehoach", "quydinh", "stsv", "ctdt"]
 
 
 class TestMultiCollectionSearchFiltering:
@@ -145,6 +155,44 @@ class TestMultiCollectionSearchFiltering:
         assert ctdt.qdrant.search.called
         assert not quydinh.qdrant.search.called
 
+    def test_freshness_query_filters_quydinh_vector_search_to_latest_ids(self) -> None:
+        from retrieval.multi_collection_search import MultiCollectionSearch
+
+        quydinh = _make_mock_hybrid("quydinh")
+        quydinh.es.get_latest_chunk_ids_by_date.return_value = ["doc-latest"]
+        quydinh.es.resolve_chunk_ids_for_qdrant.return_value = ["qdrant-latest"]
+
+        mcs = MultiCollectionSearch(searchers=[("quydinh", quydinh)])
+        results = mcs.search(
+            query="quy dinh moi nhat",
+            bge_m3_query=[0.1] * 10,
+            e5_query=[0.2] * 10,
+            top_k=10,
+            active_collections=["quydinh"],
+        )
+
+        assert results
+        quydinh.es.get_latest_chunk_ids_by_date.assert_called_once_with(max_n=200)
+        qdrant_filter = quydinh.qdrant.search.call_args.kwargs["filters"]
+        assert qdrant_filter is not None
+
+    def test_freshness_query_without_date_str_support_uses_normal_retrieval(self) -> None:
+        from retrieval.multi_collection_search import MultiCollectionSearch
+
+        stsv = _make_mock_hybrid("stsv")
+
+        mcs = MultiCollectionSearch(searchers=[("stsv", stsv)])
+        mcs.search(
+            query="thong tin moi nhat",
+            bge_m3_query=[0.1] * 10,
+            e5_query=[0.2] * 10,
+            top_k=10,
+            active_collections=["stsv"],
+        )
+
+        stsv.es.get_latest_chunk_ids_by_date.assert_not_called()
+        assert stsv.qdrant.search.call_args.kwargs["filters"] is None
+
     def test_unknown_collection_falls_back_to_all(self) -> None:
         from retrieval.multi_collection_search import MultiCollectionSearch
         searchers = [
@@ -187,7 +235,7 @@ class TestRagFlowRoutingIntegration:
         # First search call must use the resolved active_collections
         first_call_kwargs = mock_searcher.search.call_args_list[0].kwargs
         assert "active_collections" in first_call_kwargs
-        assert first_call_kwargs["active_collections"] == ["quydinh"]
+        assert first_call_kwargs["active_collections"] == ["quydinh", "stsv"]
 
     def test_result_contains_target_collections(self) -> None:
         from pipeline.flows import rag_flow
@@ -231,6 +279,33 @@ class TestRagFlowRoutingIntegration:
         active = first_call_kwargs.get("active_collections")
         assert set(active) == set(MULTI_DOMAIN_FALLBACK)
 
+    def test_low_confidence_latest_kehoach_route_locks_to_kehoach(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, mock_chat, cfg = _make_pipeline_mocks()
+        cfg["collections"] = ["stsv", "quydinh", "kehoach", "ctdt"]
+
+        rag_flow(
+            question="đăng kí học tập kì mới nhất", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker, chat_model=mock_chat,
+            self_evaluator=None, tavily_tool=None, cfg=cfg,
+            routing_result={
+                "intent": "rag",
+                "domain": "kehoach",
+                "domains": ["kehoach"],
+                "confidence": 0.524,
+                "probabilities": {
+                    "kehoach": 0.524,
+                    "quydinh": 0.169,
+                    "stsv": 0.092,
+                    "ctdt": 0.180,
+                },
+            },
+        )
+
+        first_call_kwargs = mock_searcher.search.call_args_list[0].kwargs
+        assert first_call_kwargs["active_collections"] == ["kehoach"]
+
     def test_stream_passes_active_collections(self) -> None:
         from pipeline.flows import rag_flow_stream
         mock_bge, mock_e5, mock_searcher, mock_reranker, mock_chat, cfg = _make_pipeline_mocks()
@@ -244,7 +319,36 @@ class TestRagFlowRoutingIntegration:
         )
         list(stream)
         first_call_kwargs = mock_searcher.search.call_args_list[0].kwargs
-        assert first_call_kwargs.get("active_collections") == ["stsv"]
+        assert first_call_kwargs.get("active_collections") == ["stsv", "quydinh"]
+
+    def test_stream_low_confidence_latest_kehoach_route_locks_to_kehoach(self) -> None:
+        from pipeline.flows import rag_flow_stream
+        mock_bge, mock_e5, mock_searcher, mock_reranker, mock_chat, cfg = _make_pipeline_mocks()
+        mock_chat.generate_stream.return_value = iter(["chunk1"])
+        cfg["collections"] = ["stsv", "quydinh", "kehoach", "ctdt"]
+
+        stream, _ = rag_flow_stream(
+            question="đăng kí học tập kì mới nhất", history=None,
+            reflector=None, bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker, chat_model=mock_chat,
+            cfg=cfg,
+            routing_result={
+                "intent": "rag",
+                "domain": "kehoach",
+                "domains": ["kehoach"],
+                "confidence": 0.524,
+                "probabilities": {
+                    "kehoach": 0.524,
+                    "quydinh": 0.169,
+                    "stsv": 0.092,
+                    "ctdt": 0.180,
+                },
+            },
+        )
+        list(stream)
+
+        first_call_kwargs = mock_searcher.search.call_args_list[0].kwargs
+        assert first_call_kwargs["active_collections"] == ["kehoach"]
 
 
 class TestSettingsPhase8:

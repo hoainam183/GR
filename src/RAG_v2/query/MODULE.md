@@ -429,3 +429,14 @@ graph TD
 
 - Deterministic comparison follow-up rewrites such as `"so với ngành của tôi"` or `"so về học phí"` are treated as intentional entity resolution, not profile hallucination. The hallucination guard must not revert these rewrites just because the original short follow-up lacks explicit major codes.
 - Bare major-code expansion is skipped for deterministic comparison rewrites so the reflected query remains compact (`"So sánh học phí giữa ME-GU và IT-E6"`). Downstream reranking can still expand major labels where needed.
+
+## Update 2026-05-19: Generic freshness profile bleed guardrail
+
+- `QueryReflector._build_user_prompt()` includes profile notes from
+  `user_context`, `user_profile`, or history only when the current query has a
+  profile-dependent signal such as `"ngành của tôi"`.
+- Guardrail 2 now treats injected major, cohort, or academic-term tokens as
+  scoped context bleed. For generic/latest queries without profile-dependent
+  wording, explicit major/cohort, or explicit semester/term, rewrites that add
+  values like `IT-E6`, `K67`, `2025.2`, `20252`, or `2025-2` are reverted to the
+  stripped current query.

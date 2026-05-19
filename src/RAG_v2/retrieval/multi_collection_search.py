@@ -522,7 +522,7 @@ class MultiCollectionSearch:
                     trace = {
                         "applied": True,
                         "matched_ids": len(chunk_ids),
-                        "filter_desc": f"freshness_sort ({len(chunk_ids)} latest IDs)",
+                        "filter_desc": f"freshness_sort_date_str ({len(chunk_ids)} latest IDs)",
                     }
                     # es_filter=None: ES keyword search stays unfiltered (BM25 on all)
                     return qdrant_filter, None, trace

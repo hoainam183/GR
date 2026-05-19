@@ -203,6 +203,37 @@ class TestReflectionHallucinationGuard:
         # Should fall back to original stripped query
         assert rewritten == "lịch thi giữa kì"
 
+    def test_generic_latest_followup_blocks_history_profile_scope(self):
+        """Generic latest follow-up must not inherit cohort/major/semester scope."""
+        reflector = self._make_reflector(
+            "Lịch đăng kí học tập mới nhất cho sinh viên ngành IT-E6 khóa K67 học kỳ 2025.2 (20252) là gì?"
+        )
+        profile = {
+            "major": "Công nghệ thông tin Việt - Nhật",
+            "major_code": "IT-E6",
+            "cohort": "67",
+        }
+        history = [
+            {"role": "user", "content": "Lịch trình học kỳ mới nhất?"},
+            {
+                "role": "assistant",
+                "content": "Kế hoạch cũ có nhắc tới K67 và học kỳ 2025.2.",
+            },
+        ]
+
+        result = reflector.reflect(
+            "lịch đăng kí học tập mới nhất",
+            chat_history=history,
+            user_context=profile,
+        )
+        rewritten = result["rewritten"]
+
+        assert rewritten == "lịch đăng kí học tập mới nhất"
+        assert "IT-E6" not in rewritten
+        assert "K67" not in rewritten
+        assert "2025.2" not in rewritten
+        assert "20252" not in rewritten
+
     def test_comparison_followup_preserves_recent_tuition_topic(self):
         """Short comparison follow-up must inherit the latest user topic."""
         reflector = self._make_reflector(
@@ -503,6 +534,18 @@ class TestKeHoachFreshnessGuardrail:
         assert "IT-E6" in rewritten, (
             f"Personal-ref query with profile should keep IT-E6: {rewritten}"
         )
+
+
+class TestProfileNotePrepend:
+    def test_generic_freshness_query_does_not_prepend_profile_note(self):
+        from pipeline.flows import _should_prepend_profile_note
+
+        assert _should_prepend_profile_note("đăng kí học tập kì mới nhất") is False
+
+    def test_personal_profile_query_still_prepends_profile_note(self):
+        from pipeline.flows import _should_prepend_profile_note
+
+        assert _should_prepend_profile_note("ngành của tôi là gì?") is True
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -153,9 +153,20 @@ RAG_v2/
   "so với ngành của tôi" hoặc "so về học phí" được rewrite thành query standalone
   theo topic hiện tại/user turn gần nhất và cặp mã ngành từ current/history/profile.
 - `CollectionSelector` map domain sang target collections; low confidence có fallback multi-collection.
+- Low-confidence collection selection preserves active-domain collections before
+  broad fallback. Freshness/dynamic queries whose routing top/only domain is
+  `kehoach` are locked to `["kehoach"]` in both streaming and non-streaming RAG
+  so latest registration/schedule queries do not lose plan notices to
+  regulation fallback.
 - Metadata prefilter qua `build_collection_filters()` -> ES metadata search -> Qdrant `HasIdCondition`.
 - Hybrid retrieval chạy Qdrant vector + ES keyword song song, merge cross-collection, rerank bằng BGE.
 - Sau retrieval: validity filter, reference resolver, context formatting kèm metadata header, LLM generation.
+- Profile notes from authenticated context are injected into reflection/generation
+  only when the current query has profile-dependent wording such as
+  `"ngành của tôi"`. Generic latest queries must not inherit major, cohort, or
+  academic-term scope from profile/history; reflection reverts rewrites that add
+  tokens such as `IT-E6`, `K67`, `2025.2`, `20252`, or `2025-2` without a current
+  explicit signal.
 - Optional: post-retrieval LLM cache, self-eval, Tavily fallback tùy settings.
 - Tavily fallback is controlled by `TAVILY_FALLBACK_ENABLED`; when enabled,
   `RAGPipeline` initializes `SelfEvaluator` even if direct `SELF_EVAL_ENABLED`
@@ -169,6 +180,10 @@ RAG_v2/
   do not bypass the query-only cache by regex alone. Summer queries such as
   `"kì hè 2026"` add HUST terms like `20253` and `2025-2026` to official web
   search.
+- `KeHoachFilterExtractor` treats academic term codes as semester scope, not
+  calendar posting dates. `2025.2`, `20252`, `2025-2`, and school-year ranges do
+  not create `date_str` wildcard filters; freshness queries without a real
+  posting date use latest-by-`date_str` sorting.
 - Post-generation Tavily regeneration is only for explicit insufficiency:
   no-info answer text, no sources, or self-eval returning
   `should_web_search=true` with `answer_status` of `insufficient` or

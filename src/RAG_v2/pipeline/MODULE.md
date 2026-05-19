@@ -622,3 +622,15 @@ Admin có thể chạy chunking với nhiều strategy khác nhau — chunks đ�
   is non-empty; short notices/deadline snippets are valid context and should not
   be skipped solely for being under 200 characters.
 
+## Update 2026-05-19: Latest registration routing and profile gating
+
+- `rag_flow()` and `rag_flow_stream()` lock the target collections to
+  `["kehoach"]` when the current query text has freshness/dynamic wording and
+  routing's top/only domain is `kehoach`, even if confidence is slightly below
+  the collection selector threshold. This prevents latest registration queries
+  from falling back to regulation-only sources.
+- `_should_prepend_profile_note()` now prepends authenticated profile context
+  only for profile-dependent wording such as `"ngành của tôi"`; generic
+  freshness queries do not receive full name, major, or cohort notes in the
+  generation prompt.
+

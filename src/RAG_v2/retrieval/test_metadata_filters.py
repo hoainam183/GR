@@ -285,6 +285,64 @@ def test_kehoach_filter_freshness_intent_sets_sort_by_date_desc() -> None:
         assert cf.is_empty is True, f"Expected no ES query for: {phrase!r}"
 
 
+def test_kehoach_filter_academic_terms_do_not_become_calendar_year_filters() -> None:
+    """Academic term tokens are not posting dates; freshness sorting should handle them."""
+    from retrieval.metadata_filters import KeHoachFilterExtractor
+    extractor = KeHoachFilterExtractor()
+
+    for phrase in [
+        "đăng kí học tập học kỳ 2025.2 mới nhất",
+        "đăng kí học tập học kỳ 20252 mới nhất",
+        "đăng kí học tập học kỳ 2025-2 mới nhất",
+    ]:
+        cf = extractor.extract(phrase)
+        assert cf.sort_by_date_desc is True, f"Expected latest sorting for: {phrase!r}"
+        assert cf.is_empty is True, f"Expected no wildcard date query for: {phrase!r}"
+
+
+def test_kehoach_filter_academic_term_without_freshness_is_not_calendar_date() -> None:
+    """Academic term tokens alone should not create a date_str wildcard."""
+    from retrieval.metadata_filters import KeHoachFilterExtractor
+    extractor = KeHoachFilterExtractor()
+
+    for phrase in [
+        "đăng kí học tập học kỳ 2025.2",
+        "đăng kí học tập học kỳ 20252",
+        "đăng kí học tập học kỳ 2025-2",
+    ]:
+        cf = extractor.extract(phrase)
+        assert cf.is_empty is True, f"Expected no date filter for: {phrase!r}"
+        assert cf.sort_by_date_desc is False
+
+
+def test_build_collection_filters_applies_freshness_to_date_str_collections() -> None:
+    """Generic freshness intent should use date_str sorting for supported collections."""
+    from retrieval.metadata_filters import build_collection_filters
+
+    filters = build_collection_filters(
+        "lich trinh hoc ky moi nhat",
+        ["kehoach", "quydinh", "ctdt", "stsv"],
+    )
+
+    assert filters["kehoach"].sort_by_date_desc is True
+    assert filters["quydinh"].sort_by_date_desc is True
+    assert filters["ctdt"].sort_by_date_desc is False
+    assert filters["stsv"].sort_by_date_desc is False
+
+
+def test_quydinh_cohort_filter_takes_priority_over_generic_freshness() -> None:
+    """Existing quydinh cohort filters should not be replaced by latest-doc filtering."""
+    from retrieval.metadata_filters import build_collection_filters
+
+    filters = build_collection_filters(
+        "quy dinh moi nhat cho K70",
+        ["quydinh"],
+    )
+
+    assert filters["quydinh"].sort_by_date_desc is False
+    assert filters["quydinh"].is_empty is False
+
+
 def test_kehoach_filter_explicit_date_keeps_wildcard_priority() -> None:
     """Explicit month/year filter takes priority — no sort_by_date_desc flag."""
     from retrieval.metadata_filters import KeHoachFilterExtractor

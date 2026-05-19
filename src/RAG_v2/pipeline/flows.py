@@ -18,6 +18,7 @@ from retrieval.collection_selector import CollectionSelector
 from retrieval.metadata_filters import (
     build_major_comparison_subqueries_for_retrieval,
     build_cohort_comparison_subqueries_for_retrieval,
+    has_freshness_intent,
     strip_cohort_comparison_scaffold_for_retrieval,
     strip_major_comparison_scaffold_for_retrieval,
     strip_major_from_query_for_retrieval,
@@ -61,6 +62,16 @@ _EXPLICIT_MAJOR_CODE_RE = re.compile(
     r"\b(?:IT|MI|ME|EE|EV|CH|BF|MS|HE|TE|TX|TROY)"
     r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*"
     r"(?:E18|E15|E12|E11|E10|E8|E7|E6|E3|E1|EP|GU|LUH|NUT|IT|1|2|3|5)\b",
+    re.IGNORECASE,
+)
+_PROFILE_DEPENDENT_QUERY_RE = re.compile(
+    r"\b(?:"
+    r"(?:nganh|chuong\s*trinh|khoa|nam\s*thu|cpa|gpa|"
+    r"ma\s*(?:sv|sinh\s*vien)|mssv|thong\s*tin)"
+    r"\s+(?:hoc\s+)?(?:cua\s+)?(?:toi|minh|em)|"
+    r"(?:toi|minh|em)\s+(?:hoc|dang\s+hoc|thuoc|la\s+sinh\s+vien)|"
+    r"(?:nganh|khoa)\s+(?:toi|minh|em)"
+    r")\b",
     re.IGNORECASE,
 )
 
@@ -285,6 +296,55 @@ def _is_dynamic_web_query(
     return bool(_WEB_FALLBACK_DYNAMIC_QUERY_RE.search(folded))
 
 
+def _has_textual_freshness_or_dynamic_intent(question: str, search_query: str) -> bool:
+    """Return True when the current text asks for fresh/dynamic information."""
+    combined = f"{question}\n{search_query}"
+    if has_freshness_intent(combined):
+        return True
+    return bool(_WEB_FALLBACK_DYNAMIC_QUERY_RE.search(_fold_vietnamese(combined)))
+
+
+def _routing_top_domain(routing_result: Optional[Dict[str, Any]]) -> Optional[str]:
+    """Return the highest-probability domain, falling back to primary domain."""
+    if not routing_result:
+        return None
+    probabilities = routing_result.get("probabilities") or {}
+    scored: List[tuple[str, float]] = []
+    if isinstance(probabilities, dict):
+        for domain, value in probabilities.items():
+            try:
+                scored.append((str(domain).strip().lower(), float(value)))
+            except (TypeError, ValueError):
+                continue
+    if scored:
+        return max(scored, key=lambda item: item[1])[0]
+    domain = routing_result.get("domain")
+    return str(domain).strip().lower() if domain else None
+
+
+def _should_lock_kehoach_route(
+    *,
+    question: str,
+    search_query: str,
+    routing_result: Optional[Dict[str, Any]],
+) -> bool:
+    """Keep freshness/dynamic kehoach queries on kehoach despite low confidence."""
+    if not _has_textual_freshness_or_dynamic_intent(question, search_query):
+        return False
+    if not routing_result:
+        return False
+
+    domain = str(routing_result.get("domain") or "").strip().lower()
+    domains = [
+        str(item).strip().lower()
+        for item in (routing_result.get("domains") or [])
+        if str(item).strip()
+    ]
+    top_domain = _routing_top_domain(routing_result)
+    only_kehoach = bool(domains) and set(domains) == {"kehoach"}
+    return only_kehoach or domain == "kehoach" or top_domain == "kehoach"
+
+
 def _should_bypass_query_cache(
     *,
     question: str,
@@ -294,7 +354,8 @@ def _should_bypass_query_cache(
     cfg: Dict[str, Any],
 ) -> bool:
     """Avoid early cache hits for dynamic data that may need live refresh."""
-    return _is_dynamic_web_query(
+    freshness_query = has_freshness_intent(f"{question}\n{search_query}")
+    return freshness_query or _is_dynamic_web_query(
         question=question,
         search_query=search_query,
         target_collections=target_collections,
@@ -351,10 +412,13 @@ def _build_pre_generation_web_decision(
         routing_result=routing_result,
         cfg=cfg,
     )
+    freshness_query = has_freshness_intent(f"{question}\n{search_query}")
     no_sources = len(reranked) == 0
     reasons: List[str] = []
     if no_sources:
         reasons.append("no_sources")
+    if freshness_query:
+        reasons.append("freshness_query")
     if dynamic_query and _cfg_bool(cfg, "web_fallback_on_dynamic", True):
         reasons.append("dynamic_query")
     if low_retrieval_confidence:
@@ -363,7 +427,7 @@ def _build_pre_generation_web_decision(
     answer_status = "answered"
     if no_sources:
         answer_status = "insufficient"
-    elif dynamic_query:
+    elif freshness_query or dynamic_query:
         answer_status = "stale_risk"
 
     return {
@@ -372,6 +436,7 @@ def _build_pre_generation_web_decision(
         "web_search_query": _build_web_search_query(question, search_query),
         "reasons": reasons,
         "dynamic_query": dynamic_query,
+        "freshness_query": freshness_query,
         "no_sources": no_sources,
         "low_retrieval_confidence": low_retrieval_confidence,
     }
@@ -402,6 +467,7 @@ def _build_answer_quality_gate(
         routing_result=routing_result,
         cfg=cfg,
     )
+    freshness_query = has_freshness_intent(f"{question}\n{search_query}")
     eval_failed = bool(eval_result is not None and not eval_result.get("pass", True))
     eval_wants_web = bool(eval_result and eval_result.get("should_web_search"))
     eval_status = str(eval_result.get("answer_status") or "") if eval_result else ""
@@ -426,13 +492,15 @@ def _build_answer_quality_gate(
         informational_notes.append("self_eval_requested_web")
     if dynamic_query:
         informational_notes.append("dynamic_query")
+    if freshness_query:
+        informational_notes.append("freshness_query")
     if pre_web_fallback_used:
         informational_notes.append("pre_generation_web_used")
 
     answer_status = "answered"
     if no_info or no_sources:
         answer_status = "insufficient"
-    elif dynamic_query:
+    elif freshness_query or dynamic_query:
         answer_status = "stale_risk"
     elif eval_result:
         answer_status = str(eval_result.get("answer_status") or "answered")
@@ -455,8 +523,29 @@ def _build_answer_quality_gate(
         "no_info": no_info,
         "no_sources": no_sources,
         "dynamic_query": dynamic_query,
+        "freshness_query": freshness_query,
         "self_eval_failed": eval_failed,
     }
+
+
+def _merge_local_and_web_context(local_context: str, web_context: str) -> str:
+    """Combine local RAG context with supplemental live web context deterministically."""
+    if not web_context:
+        return local_context
+    if not local_context:
+        return (
+            f"## web_live_context (Tavily / nguồn web chính thức)\n"
+            f"{web_context}"
+        )
+    return (
+        f"## Nguồn Cơ Sở Dữ Liệu Nội Bộ (ưu tiên date_str khi có)\n"
+        f"{local_context}\n\n---\n\n"
+        f"## web_live_context (Tavily / nguồn web chính thức)\n"
+        f"{web_context}\n\n"
+        f"Lưu ý: So sánh ngày đăng/cập nhật hoặc học kỳ/năm học được nêu rõ "
+        f"trong từng nguồn. Nếu có mâu thuẫn, nêu rõ mâu thuẫn và ưu tiên "
+        f"nguồn có ngày rõ ràng mới hơn; không tự động bỏ qua nguồn nội bộ."
+    )
 
 
 def _dedup_retrieval_candidates(
@@ -814,8 +903,10 @@ def _build_profile_note_from_user_context(
 
 
 def _should_prepend_profile_note(question: str) -> bool:
-    """Return False when question already provides an explicit major code."""
-    return _EXPLICIT_MAJOR_CODE_RE.search(question or "") is None
+    """Return True only when the question explicitly depends on user profile."""
+    if _EXPLICIT_MAJOR_CODE_RE.search(question or "") is not None:
+        return False
+    return bool(_PROFILE_DEPENDENT_QUERY_RE.search(_fold_vietnamese(question or "")))
 
 
 def _build_collection_scores(
@@ -1107,6 +1198,17 @@ def rag_flow(
             confidence=confidence,
             domains=domains,
         )
+        if _should_lock_kehoach_route(
+            question=question,
+            search_query=search_query,
+            routing_result=routing_result,
+        ):
+            target_collections = ["kehoach"]
+            timings_ms["kehoach_route_locked"] = 1.0
+            logger.info(
+                "KeHoach freshness route locked despite conf=%.3f",
+                confidence,
+            )
         routing_probabilities = routing_result.get("probabilities")
         logger.info(
             "Domains: %s (conf=%.3f) → searching collections: %s",
@@ -1457,6 +1559,8 @@ def rag_flow(
     )
     web_fallback_query = str(pre_web_decision.get("web_search_query") or search_query)
     pre_web_fallback_reasons = list(pre_web_decision.get("reasons") or [])
+    if pre_web_decision.get("freshness_query"):
+        timings_ms["freshness_query"] = 1.0
     if pre_web_decision["should_web_search"]:
         timings_ms["web_fallback_requested"] = 1.0
         if cfg.get("tavily_fallback_enabled", False):
@@ -1474,7 +1578,7 @@ def rag_flow(
                 timings_ms["web_fallback_used"] = 1.0
                 web_context_override = str(search_info.get("context") or "")
                 if web_fallback_sources:
-                    reranked = web_fallback_sources + reranked
+                    reranked = reranked + web_fallback_sources
         else:
             timings_ms["tavily_skipped"] = 1.0
 
@@ -1535,17 +1639,7 @@ def rag_flow(
         total_char_budget=context_char_budget,
         trace_out=context_trace,
     )
-    if web_context_override:
-        if context:
-            context = (
-                f"## Nguồn Web (thông tin mới nhất từ trang chính thức HUST)\n"
-                f"{web_context_override}\n\n---\n\n"
-                f"## Nguồn Cơ Sở Dữ Liệu Nội Bộ (thông tin đã được kiểm duyệt)\n"
-                f"{context}\n\n"
-                f"Lưu ý: Nếu hai nguồn mâu thuẫn về thời gian/năm học, ưu tiên Nguồn Web."
-            )
-        else:
-            context = web_context_override
+    context = _merge_local_and_web_context(context, web_context_override)
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -1670,6 +1764,9 @@ def rag_flow(
 
     answer_quality_gate["pre_generation_reasons"] = pre_web_fallback_reasons
     answer_quality_gate["pre_generation_web_used"] = pre_web_fallback_used
+    answer_quality_gate["pre_generation_freshness_query"] = bool(
+        pre_web_decision.get("freshness_query")
+    )
     web_fallback_query = str(
         answer_quality_gate.get("web_search_query") or web_fallback_query or search_query
     )
@@ -1899,6 +1996,13 @@ def rag_flow_stream(
             confidence=confidence,
             domains=domains,
         )
+        if _should_lock_kehoach_route(
+            question=question,
+            search_query=search_query,
+            routing_result=routing_result,
+        ):
+            target_collections = ["kehoach"]
+            timings_ms["kehoach_route_locked"] = 1.0
         timings_ms["collection_routing"] = _elapsed_ms(routing_t0)
 
     if _should_strip_major_for_retrieval(
@@ -2204,6 +2308,8 @@ def rag_flow_stream(
     )
     web_fallback_query = str(web_decision.get("web_search_query") or search_query)
     web_fallback_reasons: List[str] = list(web_decision.get("reasons") or [])
+    if web_decision.get("freshness_query"):
+        timings_ms["freshness_query"] = 1.0
 
     web_context_override = ""
     if web_fallback_reasons:
@@ -2222,7 +2328,7 @@ def rag_flow_stream(
                 timings_ms["web_fallback_used"] = 1.0
                 web_context_override = str(search_info.get("context") or "")
                 if web_sources:
-                    reranked = web_sources + reranked
+                    reranked = reranked + web_sources
         else:
             timings_ms["tavily_skipped"] = 1.0
 
@@ -2245,17 +2351,7 @@ def rag_flow_stream(
         total_char_budget=context_char_budget,
         trace_out=context_trace,
     )
-    if web_context_override:
-        if context:
-            context = (
-                f"## Nguồn Web (thông tin mới nhất từ trang chính thức HUST)\n"
-                f"{web_context_override}\n\n---\n\n"
-                f"## Nguồn Cơ Sở Dữ Liệu Nội Bộ (thông tin đã được kiểm duyệt)\n"
-                f"{context}\n\n"
-                f"Lưu ý: Nếu hai nguồn mâu thuẫn về thời gian/năm học, ưu tiên Nguồn Web."
-            )
-        else:
-            context = web_context_override
+    context = _merge_local_and_web_context(context, web_context_override)
     profile_note = ""
     if _should_prepend_profile_note(question):
         profile_note = (
@@ -2293,6 +2389,12 @@ def rag_flow_stream(
             "web_search_query": web_fallback_query,
             "reasons": web_fallback_reasons,
             "dynamic_query": dynamic_web_query,
+            "freshness_query": bool(web_decision.get("freshness_query")),
+            "pre_generation_reasons": web_fallback_reasons,
+            "pre_generation_web_used": web_fallback_used,
+            "pre_generation_freshness_query": bool(
+                web_decision.get("freshness_query")
+            ),
             "no_sources": "no_sources" in web_fallback_reasons,
             "low_retrieval_confidence": "low_retrieval_confidence" in web_fallback_reasons,
         }

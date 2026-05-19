@@ -52,6 +52,16 @@ _COURSE_CODE_RE = re.compile(
     r"\b(?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?\b",
     re.IGNORECASE,
 )
+_PROFILE_DEPENDENT_QUERY_RE = re.compile(
+    r"\b(?:"
+    r"(?:nganh|chuong\s*trinh|khoa|nam\s*thu|cpa|gpa|"
+    r"ma\s*(?:sv|sinh\s*vien)|mssv|thong\s*tin)"
+    r"\s+(?:hoc\s+)?(?:cua\s+)?(?:toi|minh|em)|"
+    r"(?:toi|minh|em)\s+(?:hoc|dang\s+hoc|thuoc|la\s+sinh\s+vien)|"
+    r"(?:nganh|khoa)\s+(?:toi|minh|em)"
+    r")\b",
+    re.IGNORECASE,
+)
 
 _COMPARISON_FOLLOWUP_RE = re.compile(
     r"^\s*(?:so\s*(?:sánh)?\s*(?:với|về)?|khác\s+(?:gì|nhau)|vs)\b",
@@ -184,7 +194,75 @@ def _fold_vietnamese(text: str) -> str:
     without_marks = "".join(
         char for char in decomposed if unicodedata.category(char) != "Mn"
     )
-    return without_marks.casefold()
+    return without_marks.replace("đ", "d").replace("Đ", "D").casefold()
+
+
+def _has_profile_dependent_signal(query: str) -> bool:
+    """Return True when the current query explicitly asks for profile context."""
+    if _PERSONAL_REFS.search(query or ""):
+        return True
+    return bool(_PROFILE_DEPENDENT_QUERY_RE.search(_fold_vietnamese(query or "")))
+
+
+def _extract_academic_scope_tokens(text: str) -> set[str]:
+    """Extract explicit semester/year tokens that should not bleed from history."""
+    folded = _fold_vietnamese(text or "")
+    tokens: set[str] = set()
+
+    for match in re.finditer(r"\b(20\d{2})\s*[-/]\s*((?:20)?\d{2})\b", folded):
+        start = match.group(1)
+        end = match.group(2)
+        if len(end) == 2:
+            end = f"{start[:2]}{end}"
+        tokens.add(f"year:{start}-{end}")
+
+    for match in re.finditer(r"\b(20\d{2})([123])\b", folded):
+        tokens.add(f"term:{match.group(1)}{match.group(2)}")
+
+    for match in re.finditer(r"\b(20\d{2})\s*[\._/-]\s*([123])\b", folded):
+        tokens.add(f"term:{match.group(1)}{match.group(2)}")
+
+    semester_re = re.compile(
+        r"\b(?:hoc\s*)?(?:ky|ki)\s*([123]|he|h)\b"
+        r"|\bhk\s*([123])\b"
+        r"|\bsemester\s*([123])\b",
+        re.IGNORECASE,
+    )
+    for match in semester_re.finditer(folded):
+        value = next((group for group in match.groups() if group), "")
+        if value:
+            tokens.add(f"semester:{'he' if value in {'h', 'he'} else value}")
+
+    return tokens
+
+
+def _detect_injected_scope(query: str, rewritten: str) -> Optional[str]:
+    """Return the scoped entity type introduced by rewrite, if any."""
+    try:
+        from retrieval.metadata_filters import (  # noqa: PLC0415
+            _extract_major_code,
+            extract_cohort_codes,
+        )
+    except Exception:
+        _extract_major_code = None  # type: ignore[assignment]
+        extract_cohort_codes = None  # type: ignore[assignment]
+
+    if _extract_major_code is not None:
+        if not _extract_major_code(query) and _extract_major_code(rewritten):
+            return "major"
+
+    if extract_cohort_codes is not None:
+        query_cohorts = set(extract_cohort_codes(query))
+        rewritten_cohorts = set(extract_cohort_codes(rewritten))
+        if rewritten_cohorts - query_cohorts:
+            return "cohort"
+
+    query_terms = _extract_academic_scope_tokens(query)
+    rewritten_terms = _extract_academic_scope_tokens(rewritten)
+    if rewritten_terms - query_terms:
+        return "academic_term"
+
+    return None
 
 
 def _is_comparison_followup(query: str) -> bool:
@@ -910,27 +988,22 @@ class QueryReflector:
                 profile=merged_profile or None,
             )
 
-        # Guardrail 2: detect hallucinated major injection.
-        # If the original query has NO personal references and NO explicit major
-        # code (regardless of whether a user profile is present), the LLM must
-        # not inject a specific major/cohort.  Profile injection is only valid
-        # when the user explicitly refers to their own programme (personal refs
-        # like "ngành của tôi").  Without such a reference, a generic query like
-        # "Lịch trình học kỳ mới nhất?" must NOT become IT-E6-specific even if
-        # the authenticated user belongs to IT-E6.
-        if not deterministic_followup_applied and not _PERSONAL_REFS.search(query):
-            try:
-                from retrieval.metadata_filters import _extract_major_code  # noqa: PLC0415
-                if not _extract_major_code(query) and _extract_major_code(rewritten):
-                    logger.warning(
-                        "Reflection hallucinated major in generic query — reverting. "
-                        "Original: %r  Hallucinated: %r",
-                        query[:80],
-                        rewritten[:80],
-                    )
-                    rewritten = query
-            except Exception:
-                pass  # Guard never breaks the pipeline
+        # Guardrail 2: generic/latest queries must not inherit scoped context.
+        # Profile/history injection is only valid when the user explicitly asks
+        # for their own programme/cohort/record. Without that signal, a query
+        # like "Lich dang ki hoc tap moi nhat?" must not become IT-E6/K67/20252
+        # specific because those facts appeared in profile or earlier turns.
+        if not deterministic_followup_applied and not _has_profile_dependent_signal(query):
+            injected_scope = _detect_injected_scope(query, rewritten)
+            if injected_scope:
+                logger.warning(
+                    "Reflection injected %s into generic query; reverting. "
+                    "Original: %r  Rewritten: %r",
+                    injected_scope,
+                    query[:80],
+                    rewritten[:80],
+                )
+                rewritten = query
 
         # Guardrail 3 — Expand bare major codes to include full names.
         # E.g. "IT1" → "IT1 (Khoa học máy tính)" so that vector/keyword
@@ -998,10 +1071,13 @@ class QueryReflector:
         or falls back to extracting it from chat history.  The note is prepended
         so even a first-turn query like "ngành của tôi" can be resolved.
         """
-        # Prefer explicit note > authenticated profile > history regex.
-        profile_note = profile_note_override or _extract_profile_note_from_context(user_context)
-        if not profile_note and chat_history:
-            profile_note = _extract_profile_note(chat_history)
+        # Prefer explicit note > authenticated profile > history regex, but
+        # only when the current query actually asks for personal context.
+        profile_note = ""
+        if _has_profile_dependent_signal(query):
+            profile_note = profile_note_override or _extract_profile_note_from_context(user_context)
+            if not profile_note and chat_history:
+                profile_note = _extract_profile_note(chat_history)
         profile_block = profile_note or "(khong co)"
 
         if chat_history:

@@ -430,6 +430,152 @@ class TestTavilyFallback:
         assert "dynamic_query" in result["answer_quality_gate"]["pre_generation_reasons"]
         assert result["answer"] == "Khóa K70 sẽ không mở đăng ký học kỳ hè 20253."
 
+    def test_freshness_query_keeps_local_sources_before_tavily_sources(self) -> None:
+        from pipeline.flows import rag_flow
+
+        mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        cfg.update({
+            "tavily_fallback_enabled": True,
+            "collections": ["stsv", "quydinh", "kehoach", "ctdt"],
+        })
+        local_doc = {
+            "id": "kehoach-latest",
+            "text": "Local latest semester schedule.",
+            "score": 0.95,
+            "collection": "kehoach",
+            "metadata": {
+                "title": "Local latest plan",
+                "date_str": "20/4/2026",
+                "source": "ctt-local",
+            },
+        }
+
+        def _search_side_effect(**kwargs):
+            trace = kwargs.get("trace_out")
+            if isinstance(trace, dict):
+                trace["filters"] = {
+                    "kehoach": {
+                        "applied": True,
+                        "matched_ids": 1,
+                        "filter_desc": "freshness_sort_date_str (1 latest IDs)",
+                    }
+                }
+                trace["collection_counts"] = {"kehoach": {"vector": 1, "keyword": 1}}
+            return [local_doc]
+
+        mock_searcher.search.side_effect = _search_side_effect
+        mock_reranker.rerank.return_value = [local_doc]
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate.return_value = "answer from local plus web context"
+        mock_tavily = MagicMock()
+        mock_tavily.search.return_value = {
+            "context": "web live context",
+            "results": [
+                {
+                    "title": "Web notice",
+                    "url": "https://ctt.hust.edu.vn/web",
+                    "content": "web live context",
+                }
+            ],
+        }
+        routing_result = {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": ["kehoach"],
+            "confidence": 0.9,
+            "probabilities": {"kehoach": 0.9},
+        }
+
+        result = rag_flow(
+            question="Lich trinh hoc ky moi nhat?", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=None,
+            tavily_tool=mock_tavily, cfg=cfg, routing_result=routing_result,
+        )
+
+        assert mock_searcher.search.call_args.kwargs["active_collections"] == ["kehoach"]
+        assert mock_tavily.search.called
+        assert result["sources"][0]["collection"] == "kehoach"
+        assert result["sources"][1]["collection"] == "web"
+        assert result["collection_results"] == {"kehoach": {"vector": 1, "keyword": 1}}
+        gate = result["answer_quality_gate"]
+        assert "freshness_query" in gate["pre_generation_reasons"]
+        assert gate["pre_generation_freshness_query"] is True
+        assert result["tools_used"] == ["tavily_search"]
+
+        context = mock_chat.generate.call_args.kwargs["context"]
+        assert context.index("Local latest semester schedule.") < context.index(
+            "web live context"
+        )
+        assert "web_live_context" in context
+
+    def test_freshness_stream_metadata_matches_non_stream_trace_shape(self) -> None:
+        from pipeline.flows import rag_flow_stream
+
+        mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        cfg.update({
+            "tavily_fallback_enabled": True,
+            "collections": ["stsv", "quydinh", "kehoach", "ctdt"],
+        })
+        local_doc = {
+            "id": "kehoach-latest",
+            "text": "Local latest semester schedule.",
+            "score": 0.95,
+            "collection": "kehoach",
+            "metadata": {"title": "Local latest plan", "date_str": "20/4/2026"},
+        }
+
+        def _search_side_effect(**kwargs):
+            trace = kwargs.get("trace_out")
+            if isinstance(trace, dict):
+                trace["filters"] = {"kehoach": {"applied": True, "matched_ids": 1}}
+                trace["collection_counts"] = {"kehoach": {"vector": 1, "keyword": 1}}
+            return [local_doc]
+
+        mock_searcher.search.side_effect = _search_side_effect
+        mock_reranker.rerank.return_value = [local_doc]
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate_stream.return_value = iter(["streamed answer"])
+        mock_tavily = MagicMock()
+        mock_tavily.search.return_value = {
+            "context": "web live context",
+            "results": [
+                {
+                    "title": "Web notice",
+                    "url": "https://ctt.hust.edu.vn/web",
+                    "content": "web live context",
+                }
+            ],
+        }
+        metadata = {}
+        routing_result = {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": ["kehoach"],
+            "confidence": 0.9,
+            "probabilities": {"kehoach": 0.9},
+        }
+
+        stream, sources = rag_flow_stream(
+            question="Lich trinh hoc ky moi nhat?", history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, tavily_tool=mock_tavily,
+            cfg=cfg, routing_result=routing_result, metadata_out=metadata,
+        )
+
+        assert list(stream) == ["streamed answer"]
+        assert sources[0]["collection"] == "kehoach"
+        assert sources[1]["collection"] == "web"
+        gate = metadata["answer_quality_gate"]
+        assert gate["freshness_query"] is True
+        assert gate["pre_generation_freshness_query"] is True
+        assert metadata["collection_results"] == {"kehoach": {"vector": 1, "keyword": 1}}
+        assert metadata["tools_used"] == ["tavily_search"]
+
     def test_no_info_cached_answer_is_ignored(self) -> None:
         from pipeline.flows import rag_flow
         mock_bge, mock_e5, mock_searcher, mock_reranker, mock_chat, cfg = _make_pipeline_mocks()

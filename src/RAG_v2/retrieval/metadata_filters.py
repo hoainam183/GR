@@ -53,7 +53,7 @@ class CollectionFilter:
     ``MultiCollectionSearch`` will fetch the most-recent chunk IDs from ES
     (by ``date_str`` field) and use them as a hard ``HasIdCondition`` in
     Qdrant instead of running a wildcard/term filter.  This implements the
-    "mới nhất" (latest) freshness mode for the ``kehoach`` collection.
+    "mới nhất" (latest) freshness mode for collections that index ``date_str``.
     Explicit date/month filters (populated ``metadata_es_queries``) take
     priority and suppress this flag.
     """
@@ -65,6 +65,29 @@ class CollectionFilter:
     def is_empty(self) -> bool:
         """True when no pre-filter queries are defined (search all)."""
         return not self.metadata_es_queries
+
+
+def _fold_vietnamese_text(value: str) -> str:
+    """Return a lowercase accent-insensitive form for lightweight intent matching."""
+    normalized = unicodedata.normalize("NFD", value or "")
+    without_marks = "".join(
+        ch for ch in normalized if unicodedata.category(ch) != "Mn"
+    )
+    return without_marks.replace("đ", "d").replace("Đ", "D").casefold()
+
+
+_FRESHNESS_INTENT_RE = re.compile(
+    r"\b(?:moi\s+nhat|gan\s+day|hien\s+tai|"
+    r"ky\s+nay|ki\s+nay|hoc\s+ky\s+moi|hoc\s+ki\s+moi|"
+    r"hoc\s+ky\s+toi|hoc\s+ki\s+toi|thong\s+bao\s+moi|"
+    r"latest|recent|newest|current\s+semester)\b",
+    re.IGNORECASE,
+)
+
+
+def has_freshness_intent(query: str) -> bool:
+    """Return True when a query asks for the latest/current information."""
+    return bool(_FRESHNESS_INTENT_RE.search(_fold_vietnamese_text(query or "")))
 
 
 # ─── Abstract base ───────────────────────────────────────────────────────────────
@@ -1038,18 +1061,6 @@ class KeHoachFilterExtractor(BaseFilterExtractor):
       3. No signal → empty filter; recency bonus (+0.05) still applies.
     """
 
-    # Freshness-intent phrases meaning "give me the latest kehoach docs"
-    _FRESHNESS_RE = re.compile(
-        r"\b(?:m[oớ]i\s+nh[aấ]t|"
-        r"g[aầ]n\s+[dđ][aâ]y|hi[eệ]n\s+t[aạ]i|"
-        r"k[yỳ]\s+n[aà]y|h[oọ]c\s+k[yỳ]\s+m[oớ]i|"
-        r"h[oọ]c\s+k[yỳ]\s+t[oớ]i|"
-        r"th[oô]ng\s+b[aá]o\s+m[oớ]i|"
-        r"semester\s+m[oớ]i|"
-        r"latest|recent|current\s+semester)\b",
-        re.IGNORECASE,
-    )
-
     def extract(
         self,
         query: str,
@@ -1061,7 +1072,7 @@ class KeHoachFilterExtractor(BaseFilterExtractor):
             # Explicit date filter takes priority — no freshness sort needed
             return CollectionFilter(metadata_es_queries=[date_query])
 
-        if self._FRESHNESS_RE.search(query):
+        if has_freshness_intent(query):
             # No explicit date but user wants the latest docs
             return CollectionFilter(sort_by_date_desc=True)
 
@@ -1090,6 +1101,12 @@ class KeHoachFilterExtractor(BaseFilterExtractor):
         )
         clean_query = re.sub(
             r"\b20\d{2}\s*[-\/]\s*(?:20)?\d{2}\b",
+            " ",
+            clean_query,
+            flags=re.IGNORECASE,
+        )
+        clean_query = re.sub(
+            r"\b20\d{2}\s*[\._\/-]\s*[123]\b|\b20\d{2}[123]\b",
             " ",
             clean_query,
             flags=re.IGNORECASE,
@@ -1161,6 +1178,8 @@ _COLLECTION_FILTER_REGISTRY: Dict[str, BaseFilterExtractor] = {
     # "stsv" intentionally omitted — no metadata filter defined
 }
 
+_DATE_STR_FRESHNESS_COLLECTIONS = {"kehoach", "quydinh"}
+
 
 def build_collection_filters(
     query: str,
@@ -1188,9 +1207,10 @@ def build_collection_filters(
         pre-filter for that collection.
     """
     result: Dict[str, CollectionFilter] = {}
+    freshness_intent = has_freshness_intent(query)
     for col in collections:
         extractor = _COLLECTION_FILTER_REGISTRY.get(col)
-        result[col] = (
+        cf = (
             extractor.extract(
                 query=query,
                 resolved_major=resolved_major,
@@ -1199,4 +1219,12 @@ def build_collection_filters(
             if extractor is not None
             else CollectionFilter()
         )
+        if (
+            freshness_intent
+            and col in _DATE_STR_FRESHNESS_COLLECTIONS
+            and cf.is_empty
+            and not cf.sort_by_date_desc
+        ):
+            cf = CollectionFilter(sort_by_date_desc=True)
+        result[col] = cf
     return result
