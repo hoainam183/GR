@@ -1,94 +1,96 @@
-# Module: `scripts` — Standalone CLI Tools & Data Pipelines
+# Module: `scripts`
 
-## Tổng quan
+Source-verified: 2026-05-20 from `scripts/*.py` and GitNexus ingestion/indexing flow queries.
 
-Module `scripts` chứa các **standalone CLI scripts** để quản lý data stores (indexing, crawling, migration). Các file này không tham gia vào runtime RAG query pipeline — chúng chỉ được chạy trực tiếp từ command line hoặc qua APScheduler.
+## Purpose
 
----
+`scripts` contains operational CLIs for crawling, indexing, metadata updates, model downloads, and utility search/index maintenance. These scripts are not the FastAPI runtime, but they define important ingestion and maintenance workflows.
 
-## Cấu trúc file
+## File Map
 
-```
+```text
 scripts/
-├── __init__.py          # Module init
-├── auto_crawler.py      # AutoCrawlPipeline — crawl → chunk → index → retention
-├── index_kehoach.py     # Indexing kế hoạch học kỳ → Qdrant
-├── index_quydinh.py     # Indexing quy định → Qdrant
-├── index_stsv.py        # Indexing hỗ trợ sinh viên → Qdrant
-├── index_to_es.py       # Indexing documents → Elasticsearch
-├── search_multi.py      # Utility search functions (standalone)
-└── update_metadata.py   # Cập nhật metadata cho existing documents
+  auto_crawler.py         Crawl -> chunk -> embed -> Qdrant/ES index -> retention.
+  index_kehoach.py        Standalone indexing for kehoach chunks.
+  index_quydinh.py        Standalone indexing for quydinh chunks.
+  index_stsv.py           Standalone indexing for stsv chunks.
+  index_to_es.py          Reindex Qdrant collection payloads into Elasticsearch.
+  update_data.py          Ingest one document, sync metadata, trigger validity reload.
+  update_metadata.py      Bulk metadata update across existing Qdrant points.
+  setup_mongo_indexes.py  Ensure Mongo indexes for agent traces/logging.
+  search_multi.py         Local multi-collection search utility.
+  download_models.py      Model download helper.
 ```
 
----
+## Auto Crawler
 
+`auto_crawler.py` is the largest script and contains:
 
-## Nhiệm vụ chi tiết
+- `GenericCrawler`
+- `ChunkProcessor`
+- `DualIndexer`
+- `RetentionManager`
+- `AutoCrawlPipeline`
 
-### `auto_crawler.py` — `AutoCrawlPipeline`
+Flow:
 
-**Nhiệm vụ:** Tự động crawl bài viết mới từ ctt.hust.edu.vn hàng ngày, làm sạch, chunk, embed và index vào Qdrant + Elasticsearch. Hỗ trợ 2 pipelines:
-- **kehoach**: `DisplayListBaiViet` + `DisplayListKeHoach` → collection `kehoach` (retention 6 tháng)
-- **quydinh**: `DisplayQuyChe` → collection `quydinh` (retention 8 năm)
-
-**Classes:**
-- `GenericCrawler` — incremental crawl, tham số hóa `list_path`, `id_param` ("baiviet"/"kehoach"), `output_file`
-- `ChunkProcessor` — wrapper quanh `KeHoachChunker`, tham số hóa `source_label`, `chunks_file`
-- `DualIndexer` — embed BGE-M3 + E5, upsert Qdrant + ES
-- `RetentionManager` — xoá bài >N tháng, tham số hóa `output_file`, `chunks_file`
-- `AutoCrawlPipeline` — orchestrator: `run_kehoach()`, `run_quydinh()`, `run()`
-
-**Pipeline flow:**
-```
-Crawl (incremental, multi-source) → Save JSON → Chunk → Index (Qdrant+ES) → Retention → Notify
+```text
+crawl official sources
+  -> save JSON
+  -> chunk content
+  -> embed with BGE/E5
+  -> index Qdrant + Elasticsearch
+  -> retention cleanup
 ```
 
-**Scheduling:** APScheduler cron job trong FastAPI lifespan (mặc định 02:00 hàng ngày).
+FastAPI lifespan may schedule this script daily when `crawler_enabled=True`.
 
-**CLI:**
+Supported crawler targets in source include:
+
+- `kehoach` through HUST display-list/detail pages.
+- `quydinh` through regulation display pages.
+
+## Index Scripts
+
+Standalone indexers generally:
+
+1. Load chunks from `data/.../chunks`.
+2. Filter already indexed chunks where implemented.
+3. Embed in batches.
+4. Upsert into Qdrant through `QdrantStore`.
+5. Index into Elasticsearch where the script supports dual indexing.
+
+GitNexus ingestion flows identify:
+
+- `index_kehoach.py:index_chunks() -> QdrantStore.index_documents()`
+- `index_quydinh.py:index_chunks() -> QdrantStore.index_documents()`
+- `index_stsv.py:index_chunks() -> QdrantStore.index_documents()`
+
+## Metadata Maintenance
+
+`update_metadata.py`:
+
+- loads chunks for a target collection
+- builds id/metadata pairs
+- normalizes target selection
+- updates Qdrant payload metadata by id or batch
+
+`update_data.py`:
+
+- ingests a document path into a target collection
+- syncs metadata
+- can trigger validity reload through API
+
+## Maintenance Notes
+
+- Scripts may assume local services at configured Qdrant/ES/Mongo hosts; verify `.env` before running destructive index operations.
+- Keep script metadata output aligned with `retrieval/metadata_filters.py`.
+- After crawling/indexing changes, run current policy eval or post-index eval.
+- Treat `delete_collection()` helpers as destructive and do not call them unless explicitly requested.
+
+## Useful Checks
+
 ```bash
-python -m scripts.auto_crawler                        # chạy cả 2 pipelines
-python -m scripts.auto_crawler --pipeline kehoach     # chỉ kehoach
-python -m scripts.auto_crawler --pipeline quydinh     # chỉ quydinh
-python -m scripts.auto_crawler --dry                  # dry-run
-python -m scripts.auto_crawler --module crawl --pipeline quydinh  # chỉ crawl quydinh
+python -m py_compile scripts/*.py
+python -m evaluation.two_layer_eval current --max-cases 20
 ```
-
----
-
-### `index_kehoach.py` / `index_quydinh.py` / `index_stsv.py`
-
-**Nhiệm vụ:** Scripts indexing dữ liệu vào Qdrant cho từng collection riêng.
-
-**Usage:**
-```bash
-python -m scripts.index_kehoach
-python -m scripts.index_quydinh
-python -m scripts.index_stsv
-```
-
----
-
-### `index_to_es.py`
-
-**Nhiệm vụ:** Indexing documents vào Elasticsearch cho keyword (BM25) search.
-
----
-
-### `update_metadata.py`
-
-**Nhiệm vụ:** Cập nhật metadata cho existing documents trong Qdrant/ES (migration utility).
-
----
-
-## Nguồn gốc
-
-| File | Vị trí cũ | Lý do di chuyển |
-|------|-----------|-----------------|
-| `auto_crawler.py` | `pipeline/` | Data pipeline, không phải query pipeline |
-| `index_kehoach.py` | `pipeline/` | Standalone CLI script |
-| `index_quydinh.py` | `pipeline/` | Standalone CLI script |
-| `index_stsv.py` | `pipeline/` | Standalone CLI script |
-| `update_metadata.py` | `pipeline/` | Standalone CLI script |
-| `index_to_es.py` | `retrieval/` | Standalone CLI script |
-| `search_multi.py` | `retrieval/` | Standalone utility script |

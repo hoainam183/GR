@@ -1,135 +1,117 @@
-# Module: `models` — Database & Persistence Layer
+# Module: `models`
 
-## Tổng quan
+Source-verified: 2026-05-20 from `models/*.py`, `api/main.py`, and auth/admin route usage.
 
-Module `models` chịu trách nhiệm **quản lý kết nối database** và **lưu trữ dữ liệu** cho hệ thống RAG v2. Bao gồm Motor client initialization, index management, user models, document models, và conversation logging.
+## Purpose
 
----
+`models` owns MongoDB access, durable chat logging, user and document Pydantic models, and admin upload document/chunk shapes. It is the persistence boundary for FastAPI routes and pipeline logging.
 
-## Cấu trúc file
+There are two MongoDB access styles:
 
-```
+- Async Motor access in `database.py` for FastAPI dependencies/routes.
+- Sync PyMongo-style logging in `mongo_logger.py` for sessions, turns, query logs, and agent traces.
+
+## File Map
+
+```text
 models/
-├── __init__.py          # Module init
-├── database.py          # Motor client initialization + MongoDB index management
-├── user.py              # User-related database operations
-├── document.py          # DocumentRecord model — admin upload pipeline tracking
-├── document_chunk.py    # DocumentChunk model — processed text chunks
-└── mongo_logger.py      # MongoLogger — ghi log hội thoại, traces, analytics vào MongoDB
+  database.py        Motor singleton, async DB dependency, index creation.
+  mongo_logger.py    Sync durable logging for sessions/turns/query logs/agent traces.
+  user.py            UserDocument and PyObjectId helpers.
+  document.py        DocumentRecord and AuditEntry for admin upload pipeline.
+  document_chunk.py  DocumentChunk review/indexing model.
 ```
 
----
+## Mongo Collections
 
-## Nhiệm vụ chi tiết
+Main collections used by this codebase:
 
-### `database.py` — Database Client & Indexes
+| Collection | Owner | Purpose |
+| --- | --- | --- |
+| `users` | `auth`, `routers/auth.py` | Accounts, role, profile, HUST metadata. |
+| `sessions` | `MongoLogger`, `api/routes/session.py` | Chat session metadata. |
+| `turns` | `MongoLogger` | User/assistant turns with sources/metadata. |
+| `query_logs` | `MongoLogger` | Flat analytics log per turn. |
+| `agent_traces` | `MongoLogger` | LangGraph/agent traces. |
+| `documents` | `DocumentPipeline`, upload routes | Admin-uploaded document records. |
+| `document_chunks` | `DocumentPipeline`, upload routes | Reviewable chunks before/after indexing. |
+| `bookmarks` | `api/routes/bookmark.py` | Mobile/web saved answer snapshots. |
+| `bookmark_folders` | `api/routes/bookmark.py` | User bookmark folders. |
+| `feedback` | `api/routes/feedback.py` | Answer ratings/comments. |
+| `notifications` | `api/routes/notification.py` | User notification inbox. |
+| `notification_subscriptions` | `api/routes/notification.py` | Push token/topic subscriptions. |
 
-**Nhiệm vụ:** Quản lý Motor (async MongoDB) client initialization và database index setup.
+## `database.py`
 
-- `get_motor_client()`: Singleton Motor client
-- `create_indexes()`: Tạo indexes cho sessions, turns, query_logs, agent_traces, documents, document_chunks
-- `get_database()`: Trả về database instance
+Responsibilities:
 
-**Collections:**
-- `users`, `sessions`, `turns`, `query_logs` — auth/session/chat logs
-- `documents`, `document_chunks` — admin-uploaded document pipeline
-- `bookmarks`, `bookmark_folders` — mobile saved answers and explicit folders
-- `feedback` — answer rating/comment records scoped by user/session/turn
-- `notifications`, `notification_subscriptions` — mobile notification inbox and Expo push subscriptions
+- Resolve Mongo URI/database from `Settings`.
+- Keep a process-wide Motor client singleton.
+- Provide `get_database()` FastAPI dependency.
+- Close the Motor client on shutdown.
+- Create indexes for users, sessions, turns, query logs, agent traces, mobile features, and document records.
+- Use safe index creation helpers so stale/conflicting indexes can be dropped and recreated where needed.
 
-`create_indexes()` also ensures mobile feature indexes:
-- `bookmarks`: `(user_id, folder)`, `(user_id, created_at desc)`, unique `(user_id, session_id, turn_id)`.
-- `bookmark_folders`: unique `(user_id, name)`.
-- `feedback`: `created_at`, `rating`, `category`, unique `(user_id, session_id, turn_id)`.
-- `notifications`: `(user_id, read, created_at desc)`.
-- `notification_subscriptions`: unique `(user_id, expo_push_token)`.
+Use this module for async route-level DB work.
 
----
+## `mongo_logger.py`
 
-### `mongo_logger.py` — `MongoLogger`
+Responsibilities:
 
-**Nhiệm vụ:** Ghi log hội thoại, agent traces, và analytics vào MongoDB.
+- `new_session(user_id=None)`
+- `get_session(session_id)`
+- `list_sessions(user_id, limit)`
+- `delete_session(session_id)`
+- `update_session_title(session_id, title)`
+- `log_turn(...)`
+- `get_turns(session_id)`
+- `get_history(session_id)`
+- `log_agent_trace(session_id, trace_dict)`
+- `get_agent_stats(limit)`
 
-> Di chuyển từ `pipeline/mongo_logger.py` sang đây vì bản chất là infrastructure/persistence, không phải pipeline orchestration.
+`log_turn()` writes session counters/metadata, turn documents, query logs, and can sync Redis history/session state when the cache layer is attached.
 
-**Methods chính:**
-- `new_session()`: Tạo session mới, trả về UUID
-- `log_turn()`: Ghi một lượt hội thoại (question, answer, sources, timings, latency)
-- `get_history()`: Lấy lịch sử hội thoại cho session
-- `get_turns()`: Lấy danh sách turns
-- `delete_session()`: Hard-delete session metadata, turns, query logs, agent
-  traces, and cached Redis history when attached.
-- `update_session_title()`: Rename a session title without changing
-  `updated_at` recency ordering.
-- `log_agent_trace()`: Ghi toàn bộ trace của agent (tool calls, iterations)
-- `get_agent_stats()`: Thống kê agent performance
+## User Model
 
-**Schema MongoDB:**
-```json
-{
-  "session_id": "...",
-  "question": "...",
-  "answer": "...",
-  "reflected_question": "...",
-  "sources": [...],
-  "latency_ms": 4500,
-  "timings_ms": {"reflection": 800, "search": 200, "rerank": 150, "generate": 3200},
-  "timestamp": "2026-04-26T..."
-}
+`UserDocument` contains authentication/profile fields used across auth, chat, and mobile:
+
+- `id`
+- `email`
+- `username`
+- `hashed_password`
+- `role`
+- `student_id`
+- `full_name`
+- `cohort`
+- `major`
+- `major_code`
+- timestamps
+
+`PyObjectId` supports Pydantic v1/v2 style validation.
+
+## Document Models
+
+`DocumentRecord` tracks admin upload lifecycle:
+
+```text
+uploaded -> converting -> converted -> cleaning -> cleaned
+-> chunking -> chunked -> embedding -> indexed
 ```
 
----
+It also stores collection, converter/chunker choices, file paths, chunk counts, indexed counts, audit entries, and error/status messages.
 
-### `user.py` — User Document Model
+`DocumentChunk` stores reviewable chunk content/metadata, selected state, strategy, and source document id.
 
-**Nhiệm vụ:** Định nghĩa `UserDocument` model cho MongoDB `users` collection.
+## Maintenance Notes
 
-- `PyObjectId`: Pydantic v2 annotation cho MongoDB ObjectId
-- `UserDocument`: Full MongoDB document model
-  - Identity: `id`, `microsoft_id`, `username`, `password_hash`
-  - Contact: `email`
-  - Profile: `full_name`, `student_id`, `cohort`, `major`, `major_code`, `avatar_url`
-  - **Role**: `role: str = "student"` — values: `"student"` | `"admin"` (Phase 1 Admin)
-  - Status: `is_profile_complete`, `is_active`
-  - Timestamps: `created_at`, `updated_at`, `last_login_at`
+- Keep Mongo index names and fields aligned with route query patterns.
+- Do not use `MongoLogger` for async FastAPI dependency reads unless the route already expects sync behavior.
+- For chat/session contract changes, update `cache/session_store.py`, `api/routes/session.py`, and shared frontend/mobile types.
+- For document status changes, update `schemas/document.py`, `api/routes/upload.py`, and `pipeline/document_pipeline.py`.
 
-> **Backward compatibility:** Existing users without a `role` field default to `"student"` via Pydantic default.
+## Useful Checks
 
----
-
-### `document.py` — Document Record Model (Phase 2)
-
-**Nhiệm vụ:** Định nghĩa `DocumentRecord` model cho MongoDB `documents` collection — tracking admin-uploaded documents qua pipeline.
-
-- `AuditEntry`: Embedded audit log entry (action, user_id, timestamp, details)
-- `DocumentRecord`: Full document record
-  - Identity: `id`, `filename`, `file_size`, `file_path`
-  - Classification: `collection` (ctdt | quydinh | kehoach | stsv)
-  - Pipeline status: `status` (uploaded → converting → converted → cleaning → cleaned → chunking → chunked → embedding → indexed | failed)
-  - Ownership: `uploaded_by`, `uploaded_at`
-  - Artifact paths: `markdown_path`, `cleaned_path`
-  - Chunks: `chunk_count`, `chunk_ids`, `chunking_strategy`
-  - Review flags: `markdown_reviewed`, `cleaned_reviewed`, `chunks_reviewed`
-  - Metadata: `metadata_overrides` (optional: major_code, cohort, date_str)
-  - Error: `error_message`
-  - Timestamps: `converted_at`, `cleaned_at`, `chunked_at`, `indexed_at`
-  - Audit: `audit_log` (append-only list of AuditEntry)
-
----
-
-### `document_chunk.py` — Document Chunk Model (Phase 2)
-
-**Nhiệm vụ:** Định nghĩa `DocumentChunk` model cho MongoDB `document_chunks` collection.
-
-- `DocumentChunk`: Single chunk of a processed document
-  - `document_id`: FK to documents collection
-  - `chunk_index`: Order within document
-  - `content`: Chunk text
-  - `metadata`: Chunk-level metadata (strategy, document_id, filename, collection)
-  - **NO embedding vectors** — those live in Qdrant/ES only
-
----
-
-## LLM involvement
-
-Module `models` **không sử dụng LLM** — chỉ quản lý database I/O.
+```bash
+python -m py_compile models/*.py
+python -m pytest tests/test_mongo.py tests/test_week4_mongo_logger.py tests/test_storage.py -q -m "not integration"
+```

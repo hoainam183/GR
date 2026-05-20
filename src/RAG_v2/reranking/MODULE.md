@@ -1,139 +1,70 @@
-# Module: `reranking` — Document Reranking Layer
+# Module: `reranking`
 
-## Tổng quan
+Source-verified: 2026-05-20 from `reranking/*.py`, `retrieval/service.py`, and tests.
 
-Module `reranking` chịu trách nhiệm **sắp xếp lại thứ tự** các tài liệu đã được retrieve từ giai đoạn hybrid search. Reranker sử dụng **cross-encoder model** để đánh giá mức độ liên quan của mỗi tài liệu với câu hỏi một cách chính xác hơn bi-encoder.
+## Purpose
 
----
+`reranking` reorders retrieved candidate documents with a cross-encoder. It is the second-stage relevance layer after vector/BM25 retrieval.
 
-## Cấu trúc file
+The production implementation is BGE reranker. A no-op fallback is available when reranking is disabled.
 
-```
+## File Map
+
+```text
 reranking/
-├── __init__.py     # Factory: create_reranker()
-├── base.py         # BaseReranker abstract class
-└── bge_reranker.py # BGEReranker — BGE cross-encoder reranker
+  __init__.py       Factory `create_reranker()` and lazy `BGEReranker` export.
+  base.py           BaseReranker abstract interface.
+  bge_reranker.py   BGEReranker cross-encoder implementation.
 ```
 
+## Public API
 
----
+`BaseReranker` defines:
 
-## Tại sao cần reranking?
-
-**Hai giai đoạn retrieval (Bi-encoder → Cross-encoder):**
-
-| Giai đoạn | Model | Ưu điểm | Nhược điểm |
-|---|---|---|---|
-| Retrieval (bi-encoder) | BGE-M3, E5 | Nhanh, xử lý batch | Kém chính xác hơn |
-| Reranking (cross-encoder) | BGE Reranker | Rất chính xác | Chậm hơn, không batch tốt |
-
-Hệ thống dùng `top_k * 4 = 20` candidates từ retrieval → reranker chọn lại top 5.
-
----
-
-## Nhiệm vụ chi tiết
-
-### `bge_reranker.py` — `BGEReranker`
-
-**Model:** `BAAI/bge-reranker-v2-m3` (hoặc config từ settings)
-**Loại:** Cross-encoder (xem query + document cùng lúc)
-
-**Hoạt động:**
-```
-Input: query + List[Document] (20 candidates)
-  ↓
-Cross-encoder scores mỗi (query, doc) pair
-  ↓
-Sort by score DESC
-  ↓
-Filter by per-doc threshold (table vs non-table)
-  ↓
-Return top_k from survivors (thường top 5)
-```
-
-**Score threshold:** Tài liệu có `rerank_score < threshold` bị bỏ (tránh hallucination từ tài liệu không liên quan).
-Đặc biệt đối với dữ liệu bảng (`has_table: true`), hệ thống hỗ trợ một ngưỡng riêng `reranker_table_score_threshold` (mặc định `-1.0`) vì mô hình cross-encoder thường chấm điểm logit âm cho các văn bản dạng bảng. Ngưỡng `-1.0` giữ lại các bảng thực sự liên quan (score > -1.0) đồng thời loại bỏ các bảng từ chương trình sai/không liên quan thường score dưới -1.0.
-
-**Quan trọng:** Threshold filtering xảy ra **TRƯỚC** top_k truncation. Nếu ngược lại (top_k trước, filter sau), các table docs với ngưỡng thấp hơn có thể bị loại bởi top_k cut khi các non-table docs chiếm hết slot mặc dù chúng cũng fail threshold.
-
-Hệ thống cũng tăng số lượng ứng viên truy xuất ban đầu (`vector_top_k` / `keyword_top_k` = 50) để đảm bảo các từ khoá hiếm trong bảng không bị loại bỏ sớm do nhiễu từ truy vấn viết lại.
-
-
-**Bypass reranker logic (trong `tool_adapters.py`):**
 ```python
-# Bỏ qua reranker cho curriculum table chunks (tránh mất dữ liệu bảng dài)
-if collection == "chuong_trinh" and any(w in query for w in ["kỳ", "kì", "chẵn", "lẻ"]):
-    skip_rerank = True
+rerank(query: str, documents: list[dict], top_k: int) -> list[dict]
 ```
 
----
+`create_reranker(settings)`:
 
-### `base.py` — `BaseReranker`
+- `settings.reranker_provider == "bge"` -> `BGEReranker`
+- falsey/none provider -> no-op reranker
 
-Abstract class định nghĩa interface:
-```python
-class BaseReranker:
-    def rerank(
-        self,
-        query: str,
-        documents: List[Dict[str, Any]],
-        top_k: int,
-    ) -> List[Dict[str, Any]]: ...
+`reranking.__init__` lazily resolves `BGEReranker` so importing the factory does not immediately import heavy ML dependencies.
+
+## BGEReranker Behavior
+
+`BGEReranker` scores `(query, document_text)` pairs and sorts descending.
+
+Important behavior:
+
+- Uses `settings.reranker_model`, default `BAAI/bge-reranker-v2-m3`.
+- Writes `rerank_score` into documents.
+- Applies score threshold before top-k truncation.
+- Supports separate table threshold through `reranker_table_score_threshold`.
+
+Thresholds:
+
+- `reranker_score_threshold`: regular chunks.
+- `reranker_table_score_threshold`: chunks with table metadata, default lower to preserve useful curriculum tables.
+
+## Integration Points
+
+- `retrieval/service.py`: optional reranker in full retrieval service.
+- `pipeline/flows.py`: reranks classic RAG candidates.
+- `agent/tool_adapters.py`: reranks agent `rag_search` results, guarded by `_RERANKER_LOCK`.
+- `evaluation/evaluate_current_pipeline.py`: evaluates reranked top-k quality.
+
+## Maintenance Notes
+
+- Keep threshold filtering before top-k truncation.
+- If changing document score fields, update API response mapper, frontend trace, and eval metrics.
+- Preserve lazy import behavior in `__init__.py`.
+- If making reranker concurrent, prove tokenizer/runtime thread safety first and update agent adapter lock behavior.
+
+## Useful Checks
+
+```bash
+python -m py_compile reranking/*.py
+python -m pytest tests/test_reranker_factory.py tests/test_reranker_thresholds.py -q -m "not integration"
 ```
-
----
-
-### `__init__.py` — `create_reranker()`
-
-Factory function tạo reranker từ settings:
-```python
-reranker = create_reranker(settings)
-# settings.reranker_provider = "bge" → BGEReranker
-# settings.reranker_provider = None  → NoOpReranker
-```
-
----
-
-## Kết nối với các module khác
-
-| Module | Cách dùng |
-|---|---|
-| `pipeline/flows.py` | `reranker.rerank(query, documents, top_k)` |
-| `retrieval/service.py` | `self.reranker.rerank(...)` trong `search()` |
-| `agent/tool_adapters.py` | `runtime.reranker.rerank(...)` trong `_rag_search()` |
-
----
-
-## LLM involvement
-
-Module `reranking` **không sử dụng LLM** — sử dụng local cross-encoder model (BERT-based).
-
----
-
-## Latency contribution
-
-| Cấu hình | Thời gian điển hình |
-|---|---|
-| BGE Reranker (GPU, 20 candidates) | 50-200ms |
-| BGE Reranker (CPU, 20 candidates) | **300-1500ms** ⚠️ |
-| NoOp Reranker | <1ms |
-
-> ⚠️ **Reranker trên CPU là điểm nghẽn đáng kể** — cân nhắc GPU inference hoặc giảm candidate pool size.
-
-## Tuning suggestions
-
-| Param | Default | Tác động |
-|---|---|---|
-| `reranker_top_k` | 5 | Giảm → nhanh hơn, kém coverage hơn |
-| `reranker_score_threshold` | 0.0 | Tăng → loại nhiều doc hơn, giảm hallucination |
-| `reranker_table_score_threshold` | -1.0 | Ngưỡng riêng cho table chunks (nới lỏng hơn regular threshold) |
-| `raw_candidate_k` | top_k * 4 | Giảm → reranker nhanh hơn, ít candidates hơn |
-
----
-
-## Update 2026-05-17: Lazy concrete export
-
-`reranking.__init__` keeps the backwards-compatible `BGEReranker` export, but
-resolves it lazily via `__getattr__`. Importing `reranking.base` or the factory
-no longer imports `torch` until the BGE reranker implementation is actually
-requested.

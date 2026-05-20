@@ -1,222 +1,114 @@
-# Module: `llm` — Language Model Layer
+# Module: `llm`
 
-## Tổng quan
+Source-verified: 2026-05-20 from `llm/*.py`, `config/settings.py`, and `pipeline/flows.py`.
 
-Module `llm` chịu trách nhiệm **tạo ra câu trả lời cuối cùng** từ context đã được retrieve. Đây là module **tốn thời gian nhất** trong toàn bộ pipeline do phụ thuộc vào API call đến Gemini hoặc local model LM Studio. Module cũng cung cấp khả năng **tự đánh giá** (self-evaluation) câu trả lời.
+## Purpose
 
----
+`llm` wraps chat model providers, prompt construction, streaming generation, and answer self-evaluation. It exposes a small `BaseLLM` contract so the pipeline can call generation without knowing provider-specific details.
 
-## Cấu trúc file
+The production default is Gemini through an OpenAI-compatible endpoint. LM Studio is supported as another OpenAI-compatible provider.
 
-```
+## File Map
+
+```text
 llm/
-├── __init__.py    # Factory registry: create_llm(), register_llm()
-├── base.py        # BaseLLM abstract class
-├── gemini.py      # GeminiLLM — Gemini via OpenAI-compatible endpoint
-├── lm_studio.py   # LMStudioLLM — Local LM Studio server
-├── prompts.py     # System prompts cho RAG, chitchat, self_eval modes
-├── self_eval.py   # SelfEvaluator — LLM-as-judge
-└── chat_model.py  # Alias/backward compatibility
+  __init__.py     Provider registry, lazy provider import, create_llm().
+  base.py         BaseLLM abstract interface.
+  gemini.py       GeminiLLM via Google Generative Language OpenAI-compatible API.
+  lm_studio.py    LMStudioLLM via local OpenAI-compatible endpoint.
+  chat_model.py   Backward-compatible ChatModel export shim.
+  prompts.py      RAG, chitchat, and self-eval prompt builders.
+  self_eval.py    SelfEvaluator JSON judge wrapper.
 ```
 
----
+## Public API
 
-## Nhiệm vụ chi tiết
-
-### `gemini.py` — `GeminiLLM` (Provider mặc định)
-
-**Model mặc định:** `gemini-3.1-flash-lite-preview`
-**Endpoint:** `https://generativelanguage.googleapis.com/v1beta/openai/`
-
-**3 chế độ generation:**
-
-| Mode | System Prompt | Dùng khi |
-|---|---|---|
-| `"rag"` | Trợ lý học vụ ĐHBK với context tài liệu | intent == "rag" |
-| `"chitchat"` | Trợ lý thân thiện, không có context | intent == "chitchat" |
-| `"self_eval"` | Judge: đánh giá relevance/faithfulness | SelfEvaluator |
-
-**Non-streaming (`generate()`):**
-```python
-response = gemini_client.chat.completions.create(
-    model="gemini-3.1-flash-lite-preview",
-    messages=build_rag_messages(query, context, history),
-    temperature=0.3,
-    max_tokens=1024,
-)
-```
-
-**Streaming (`generate_stream()`):**
-```python
-stream = gemini_client.chat.completions.create(..., stream=True)
-for chunk in stream:
-    yield chunk.choices[0].delta.content
-```
-
-**Retry logic:** 3 lần với exponential backoff (2s, 4s) khi rate-limit.
-
----
-
-### `lm_studio.py` — `LMStudioLLM`
-
-**Dùng khi:** Deploy local, không muốn dùng Gemini API.
-**Endpoint:** `http://127.0.0.1:1234/v1` (LM Studio local server)
-**Model:** Qwen2.5, Llama, hoặc bất kỳ model nào được load trong LM Studio.
-
-Cùng interface với `GeminiLLM` — swap seamlessly qua settings.
-
----
-
-### `prompts.py` — System Prompts
-
-**`build_rag_messages(query, context, history)`:**
-```
-[SYSTEM]
-Bạn là trợ lý tư vấn học vụ của Đại học Bách Khoa Hà Nội...
-Chỉ trả lời dựa trên thông tin được cung cấp...
-Nếu không có thông tin, hãy nói rõ...
-
-[USER: history turn 1]
-[ASSISTANT: history turn 1]
-...
-[USER]
-<context>
---- Văn bản: [source]
-[retrieved text]
-</context>
-
-Câu hỏi: {query}
-```
-
-**`build_chitchat_messages(query, history)`:**
-Prompt ngắn hơn, không có context section.
-
-**`build_self_eval_messages(query)`:**
-Prompt yêu cầu LLM output JSON với các key: `pass`, `relevance`, `faithfulness`, `completeness`, `reason`.
-
----
-
-### `self_eval.py` — `SelfEvaluator`
-
-**Nhiệm vụ:** Đánh giá chất lượng câu trả lời đã generate bằng cách dùng LLM làm "judge".
-
-**Khi nào kích hoạt?**
-```python
-run_self_eval = (
-    self_evaluator is not None
-    and top_reranker_score < 0.72  # threshold
-)
-```
-→ Chỉ chạy khi retrieval confidence thấp (top reranker score < 0.72).
-
-**Output:**
-```json
-{
-  "pass": false,
-  "relevance": "good",
-  "faithfulness": "partial",
-  "completeness": "incomplete",
-  "reason": "Câu trả lời thiếu thông tin về điều kiện GPA..."
-}
-```
-
-Nếu `pass=False` → trigger **Tavily web search fallback**.
-
----
-
-### `__init__.py` — LLM Factory
+`BaseLLM` defines:
 
 ```python
-@register_llm("gemini")
-class GeminiLLM(BaseLLM): ...
-
-@register_llm("lm_studio")
-class LMStudioLLM(BaseLLM): ...
-
-# Usage:
-llm = create_llm(settings)  # settings.llm_provider = "gemini"
+generate(query, context=None, history=None, mode="rag") -> str
+generate_stream(query, context=None, history=None, mode="rag") -> Generator[str, None, None]
 ```
 
----
+`create_llm(settings)`:
 
-## Luồng generation trong RAG
+- Reads `settings.llm_provider`.
+- Lazy-imports `llm.gemini` or `llm.lm_studio`.
+- Builds provider with `settings.llm_api_key or settings.google_api_key`, `settings.chat_model`, temperature, max tokens.
+- For `lm_studio`, passes `settings.lm_studio_base_url`.
 
+Known provider registry keys in code:
+
+- `gemini`
+- `lm_studio`
+
+## Provider Behavior
+
+`GeminiLLM`:
+
+- Uses `OpenAI(api_key=..., base_url="https://generativelanguage.googleapis.com/v1beta/openai/")`.
+- Retries `RateLimitError` up to 3 attempts with exponential backoff.
+- Supports both non-streaming and streaming chat completions.
+
+`LMStudioLLM`:
+
+- Uses a local OpenAI-compatible endpoint, default `http://localhost:1234/v1`.
+- Has one attempt by default.
+- Supports non-streaming and streaming.
+
+Both providers call `build_rag_messages()`, `build_chitchat_messages()`, or `build_self_eval_messages()` depending on `mode`.
+
+## Prompt Contracts
+
+`prompts.py` owns:
+
+- RAG grounding instructions.
+- Context/history formatting.
+- Chitchat prompt for non-retrieval responses.
+- Self-evaluation prompt.
+
+Important current prompt behavior:
+
+- RAG answers must be grounded in supplied context.
+- If source context contains URLs, answers should use Markdown links instead of plain "tai day" text.
+- If context is in English for international/bilingual CTDT programs, answer should translate needed content into Vietnamese and preserve technical terms when useful.
+- Prompt builders trim/format history before sending to the provider.
+
+## Self Evaluation
+
+`SelfEvaluator.evaluate(query, context, response)`:
+
+- Builds a self-eval prompt.
+- Calls the configured LLM with `mode="self_eval"`.
+- Parses JSON, stripping Markdown fences if needed.
+- Returns `pass`, `relevance`, `faithfulness`, `completeness`, `answer_status`, `should_web_search`, `web_search_query`, and `reason`.
+- On parse failure, returns a fail result with `should_web_search=True`.
+
+Pipeline/Tavily behavior depends on both `self_eval_enabled` and fallback settings; self-eval failure alone is diagnostic unless the caller gates on it.
+
+## Settings
+
+Main settings:
+
+- `llm_provider`
+- `google_api_key`
+- `llm_api_key`
+- `chat_model`
+- `chat_temperature`
+- `chat_max_tokens`
+- `lm_studio_base_url`
+- `self_eval_enabled`
+- `self_eval_min_top_score`
+
+## Maintenance Notes
+
+- Add new providers by updating `_PROVIDER_MODULES`, implementing `BaseLLM`, and registering with `@register_llm`.
+- Keep prompt contract updates synchronized with frontend/mobile rendering expectations and tests.
+- Do not place retrieval logic in this module; it receives already formatted context.
+
+## Useful Checks
+
+```bash
+python -m py_compile llm/*.py
+python -m pytest tests/test_phase7.py tests/test_phase8.py -q -m "not integration"
 ```
-reranked_documents + query + history
-    │
-    ▼
-_format_context()
-→ Tạo context string (budget-limited: 8000 chars tổng, 1500 chars/doc)
-
-    │
-    ▼
-build_rag_messages(query, context, history)
-→ Tạo message list cho API
-
-    │
-    ▼
-GeminiLLM.generate() OR generate_stream()
-→ API call đến Gemini
-
-    │
-    ▼
-answer: str  (hoặc Generator[str] cho streaming)
-
-    │
-    ├── if self_eval và top_score < 0.72:
-    │       SelfEvaluator.evaluate(query, context, answer)
-    │       if not pass:
-    │           TavilySearch → enhanced answer
-    │
-    ▼
-Final answer
-```
-
----
-
-## LLM involvement — **CỐT LÕI CỦA MODULE**
-
-Module `llm` chứa TẤT CẢ các LLM calls trong pipeline RAG thông thường:
-
-| Call | Latency điển hình | Tần suất |
-|---|---|---|
-| `generate(mode="rag")` — answer generation | **2000-15000ms** | Mỗi query |
-| `generate(mode="chitchat")` — chitchat | **500-3000ms** | Chitchat queries |
-| `generate(mode="self_eval")` — judge | **500-3000ms** | ~20-30% queries |
-| `generate(mode="chitchat")` — Tier-3 classify | **300-800ms** | ~5% queries |
-| `generate(mode="chitchat")` — Reflection | Xem module query | Mỗi RAG query |
-
----
-
-## Latency contribution
-
-| Component | Thời gian điển hình |
-|---|---|
-| `generate_stream()` TTFT (Gemini) | **1000-5000ms** ⚠️ |
-| `generate()` non-streaming (Gemini) | **2000-15000ms** ⚠️ |
-| `SelfEvaluator.evaluate()` | **500-3000ms** (thường skip) |
-| **Tổng module llm (non-streaming)** | **2000-15000ms** |
-| **Tổng module llm (streaming, TTFT)** | **~1000-5000ms** |
-
-> ⚠️ **Module `llm` là bottleneck CHÍNH của hệ thống** — chiếm 60-90% tổng latency.
-
----
-
-## Optimization suggestions
-
-| Vấn đề | Giải pháp |
-|---|---|
-| Generation quá chậm | Dùng `gemini-3.1-flash-lite-preview` thay `gemini-3.1-flash-lite-preview` |
-| Token budget quá lớn | Giảm `max_tokens` (default 1024) |
-| Self-eval add latency | Tăng `self_eval_min_top_score` để skip thường xuyên hơn |
-| Context quá dài | Giảm `_DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET` (hiện 8000 chars) |
-
----
-
-## Recent Changes
-
-* 2026-05-19: Siết `RAG_SYSTEM_PROMPT` để không bao giờ viết `"tại đây"` hoặc `"xem chi tiết tại đây"` dạng text trần. Khi context có URL phải dùng Markdown link; khi không có URL phải nêu tên nguồn/domain và không tạo link giả.
-* 2026-05-16: Cập nhật `RAG_SYSTEM_PROMPT` trong `prompts.py` để khi context tham khảo là tiếng Anh (thường gặp ở chương trình quốc tế/song ngữ), câu trả lời dịch phần cần thiết sang tiếng Việt và giữ thuật ngữ gốc trong ngoặc khi cần.
-* 2026-05-06: Cập nhật `RAG_SYSTEM_PROMPT` trong `prompts.py` yêu cầu LLM ẩn nguyên bản các đường link chứa khoảng trắng (URL) vào trong văn bản theo chuẩn markdown (ví dụ `[tại đây](URL)`) và encode `%20` khoảng trắng để chống lỗi đứt link.
-* 2026-05-05: Cập nhật `RAG_SYSTEM_PROMPT` trong `prompts.py` để yêu cầu LLM giữ nguyên và đưa URL (nếu có) vào trong câu trả lời thay vì rút gọn các đường link như trước.
-

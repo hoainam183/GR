@@ -1,137 +1,154 @@
-# Module: `api` — FastAPI REST & Streaming Layer
+# Module: `api`
 
-## 1. Tổng quan kiến trúc
+Source-verified: 2026-05-20 from `api/main.py`, `api/routes/*.py`, `api/response_mapper.py`, `api/dependencies.py`, and GitNexus route map.
 
-Module `api` đóng vai trò là tầng giao diện (interface) công khai của hệ thống RAG v2. Nó chịu trách nhiệm quản lý vòng đời ứng dụng (lifespan), điều phối các request HTTP, thực thi các chính sách bảo mật/giới hạn (rate limiting), và ánh xạ dữ liệu phức tạp từ backend sang định dạng phản hồi chuẩn cho người dùng.
+## Purpose
 
-Được xây dựng trên nền tảng **FastAPI**, module này tận dụng tối đa sức mạnh của lập trình bất đồng bộ (`asyncio`) để xử lý hàng ngàn request đồng thời, đặc biệt là các luồng streaming dữ liệu thời gian thực.
+`api` is the FastAPI interface layer. It owns app construction, lifespan startup/shutdown, public HTTP routes, streaming SSE, response normalization, request/session dependency helpers, and Redis-backed rate-limit middleware.
 
----
+It calls into `pipeline`, `models`, `cache`, `retrieval`, `auth`, and `schemas`, but it should not contain retrieval or generation logic itself.
 
-## 2. Cấu trúc Module
+## File Map
 
-```
+```text
 api/
-├── main.py              # App Factory & Lifespan — Khởi tạo hệ thống, singleton và startup tasks
-├── dependencies.py      # Logic Dependency — Xử lý session resolution và history parsing
-├── response_mapper.py   # Data Mapping — Ánh xạ từ AgentState/Pipeline Result sang Pydantic Response
-├── schemas.py           # Pydantic Schemas — Định nghĩa cấu trúc Request/Response (Local)
-├── middleware/
-│   └── rate_limit.py    # Rate Limiter — Giới hạn tần suất Sliding Window (Redis-backed)
-└── routes/
-    ├── chat.py          # Core Endpoints — /chat, /chat/v3, /chat/stream, /chat/suggest
-    ├── bookmark.py      # Mobile saved answers — /bookmarks, /bookmark-folders
-    ├── feedback.py      # Mobile answer ratings — /feedback
-    ├── lookup.py        # Mobile quick lookup — /lookup/ctdt, regulations, calendar, compare
-    ├── notification.py  # Mobile notifications — /notifications, subscriptions
-    ├── health.py        # Monitoring — Health check cho tất cả backend services (Redis, Qdrant, ES...)
-    ├── metrics.py       # Analytics — Thu thập thông tin sử dụng, latency và cache stats
-    ├── session.py       # Session Management — Quản lý lịch sử hội thoại (List/Delete)
-    ├── retrieval.py     # Diagnostic — Endpoint hỗ trợ debug kết quả tìm kiếm thô
-    └── upload.py        # Admin Document Upload — 15 endpoints for document pipeline management (Phase 2)
+  main.py                 FastAPI app factory, lifespan, CORS, router registration.
+  dependencies.py         Session/history/user-context helpers.
+  response_mapper.py      Pipeline/agent result -> ChatResponse/v3 shape.
+  schemas.py              Small legacy/local schemas.
+  middleware/rate_limit.py FastAPI middleware wrapper around SlidingWindowRateLimiter.
+  routes/
+    chat.py               /chat, /chat/v3, /api/chat/v3, /chat/stream, /chat/suggest
+    upload.py             /admin document pipeline endpoints.
+    retrieval.py          /retrieval/search diagnostic endpoint.
+    session.py            /session and intended /sessions helpers.
+    health.py             /health and validity reload.
+    metrics.py            /metrics/usage and /metrics/eval.
+    lookup.py             /lookup mobile quick lookup endpoints.
+    bookmark.py           /bookmarks and /bookmark-folders.
+    feedback.py           /feedback endpoints.
+    notification.py       /notifications user endpoints.
+    notification_admin.py /admin/notifications.
 ```
 
----
+Ignore `api/.agent/` if present locally; it is not part of the FastAPI runtime.
 
-## 3. Các thành phần và Cơ chế cốt lõi
+## App Lifecycle
 
-### 3.1. Lifespan & Initialization (`main.py`)
-Hệ thống quản lý vòng đời một cách chặt chẽ để đảm bảo tài nguyên được khởi tạo đúng cách và giải phóng an toàn:
-- **Startup Sequence**: 
-    1. Load biến môi trường từ `.env`.
-    2. Khởi tạo **MongoLogger** & **RedisManager** (Singletons).
-    3. Khởi tạo **RAGPipeline** (tốn ~17s nếu load model mới, thường được chạy trong thread executor để không block).
-    4. Tự động tạo Index cho MongoDB (`create_indexes`).
-    5. **LLM Warmup**: Gửi một request "hello" giả tới local LLM để tránh độ trễ cho người dùng đầu tiên.
-    6. **Auto-Crawler Scheduler**: Khởi chạy lịch trình crawl dữ liệu `kehoach` hàng ngày (nếu enabled).
-- **Global State**: Tất cả các singletons (`pipeline`, `mongo_logger`, `redis_session`, `rate_limiter`) được lưu trữ trong `app.state` để truy cập nhanh từ các router và middleware.
+Entrypoint:
 
-### 3.2. Smart Routing & Streaming (`routes/chat.py`)
-Hệ thống hỗ trợ 3 cơ chế xử lý câu hỏi linh hoạt:
-- **Non-streaming (`/chat`, `/chat/v3`)**: Nhận câu hỏi và trả về toàn bộ câu trả lời kèm metadata dưới dạng JSON.
-- **Streaming (`/chat/stream`)**: Sử dụng **Server-Sent Events (SSE)**.
-    - Phát các token (`type: token`) ngay khi LLM sinh ra.
-    - **Metadata Injection**: Sau khi stream xong, hệ thống gửi một event cuối cùng (`type: metadata`) chứa đầy đủ thông tin về nguồn trích dẫn, latency, và vết agent (trace) trước khi gửi event `done`.
-- **Modes**:
-    - `auto`: Tự động định tuyến (Chitchat -> Simple RAG -> Complex Agent).
-    - `rag`: Cưỡng bức dùng pipeline RAG truyền thống.
-    - `agent`: Cưỡng bức dùng LangGraph Agent.
-- **Mobile auth context**: Nếu request có `Authorization: Bearer`, `chat.py`
-  dùng profile từ JWT/DB để tạo `user_id` và `user_context`, ghi đè mọi
-  `user_id/user_context` trong body. Body legacy vẫn được giữ cho web/dev
-  clients không authenticated.
-- **Suggested questions**: `GET /chat/suggest` trả danh sách câu hỏi gợi ý nhẹ
-  theo `cohort/major` từ query params hoặc authenticated profile.
-
-### 3.3. Response Mapping Logic (`response_mapper.py`)
-Để giữ cho `routes/chat.py` ngắn gọn và dễ bảo trì, toàn bộ logic chuyển đổi dữ liệu được tách ra `ChatResponseMapper`:
-- Chuẩn hóa các trường dữ liệu từ nhiều nguồn khác nhau (AgentState vs Standard RAG).
-- Xử lý các trường dữ liệu tùy chọn (`optional`), tính toán `rank` tự động cho văn bản trích dẫn.
-- Xây dựng cấu trúc `agent_trace` chi tiết (tool calls, iterations, latency per tool) để hiển thị trên UI Debugger.
-
-### 3.4. Rate Limiting Middleware (`middleware/rate_limit.py`)
-Thực hiện giới hạn tần suất truy cập cho các endpoint tiêu tốn tài nguyên LLM:
-- **Sliding Window**: Sử dụng Redis Sorted Sets để quản lý số lượng request trong 1 phút và 1 ngày.
-- **Header Exposure**: Luôn trả về các header `X-RateLimit-Limit-*` và `X-RateLimit-Remaining-*`.
-- **Identification**: Nhận diện người dùng theo thứ tự ưu tiên: `user_id` (trong JSON body) > `X-Forwarded-For` (IP proxy) > `client_host` (IP trực tiếp).
-
-### 3.5. Session & Dependency (`dependencies.py`)
-- **Session Resolution**: Tự động tạo mới hoặc khôi phục session. Hỗ trợ cơ chế **Dual-Write** (ghi đồng thời vào Redis để truy xuất nhanh và MongoDB để lưu trữ lâu dài).
-- **History Parsing**: Chuyển đổi danh sách tin nhắn từ Pydantic sang format dict mà pipeline backend yêu cầu.
-- **Authenticated Identity Helpers**: `user_id_from_user()` và
-  `user_context_from_user()` chuẩn hóa cách các route mobile lấy identity từ
-  JWT. `sync_redis_session_from_mongo()` refresh Redis session metadata sau khi
-  pipeline ghi turn vào MongoDB.
-- **Authenticated session metadata actions**: `DELETE /session/{session_id}`
-  hard-deletes a user's own session, turns, query logs, agent traces, and Redis
-  history cache. `PATCH /session/{session_id}` renames a user's own session
-  without changing `updated_at` ordering. Both routes require JWT auth and
-  accept legacy owner aliases (`_id`, email, username, student id) for sessions
-  created before the canonical Mongo `_id` owner contract.
-- **Session list compatibility**: `GET /sessions/me` merges sessions across the
-  same owner aliases and deduplicates by `session_id`, newest first.
-
-### 3.6. Mobile Feature Routes
-- `bookmark.py`: user-scoped saved answers. `POST /bookmarks` lấy snapshot từ
-  `turns`, `GET /bookmarks` phân trang, `DELETE /bookmarks/{id}`, và
-  `GET/POST /bookmark-folders`.
-- `feedback.py`: `POST /feedback` upsert một rating cho mỗi
-  `(user_id, session_id, turn_id)`.
-- `lookup.py`: thin lookup layer dùng `pipeline._retrieval_service` hiện có cho
-  CTĐT/quy định/lịch; `/lookup/compare` dùng `pipeline.query_v3()` để tổng hợp.
-- `notification.py`: lưu/đọc thông báo mobile và subscription Expo push token.
-
----
-
-## 4. Tương tác hệ thống
-
-```mermaid
-graph TD
-    Client[Client / Frontend] -- HTTP POST --> API[api/main.py]
-    API -- Middleware --> RL[middleware/rate_limit.py]
-    RL -- Validated --> Router[api/routes/chat.py]
-    
-    Router -- Dependencies --> Dep[api/dependencies.py]
-    Dep -- Session --> Redis[(Redis)]
-    
-    Router -- Invoke --> Pipeline[pipeline/rag_pipeline.py]
-    Pipeline -- Result --> Mapper[api/response_mapper.py]
-    
-    Mapper -- ChatResponse --> Client
-    
-    subgraph Startup
-        Life[Lifespan] --> Warm[LLM Warmup]
-        Life --> Crawl[Auto-Crawler]
-    end
+```text
+backend/main.py -> api.main.app -> create_app() -> lifespan()
 ```
 
----
+Startup in `lifespan()`:
 
-## 5. Hiệu năng và Giới hạn
+1. Load `.env` from the RAG_v2 root.
+2. Build `Settings`.
+3. Initialize `MongoLogger` if `mongodb_enabled`.
+4. Initialize Redis manager, session store, LLM cache, history cache, and rate limiter if Redis flags are enabled.
+5. Store runtime singletons on `app.state`.
+6. Build one `RAGPipeline` in a thread executor.
+7. Create Mongo indexes through `models.database.create_indexes()`.
+8. Warm up the local agent LLM if available.
+9. Optionally schedule `scripts.auto_crawler` through APScheduler if `crawler_enabled`.
 
-- **Overhead**: Tầng API chỉ đóng góp **~3-8ms** vào tổng thời gian phản hồi (chủ yếu là serialization).
-- **Thread Safety**: Tất cả các cuộc gọi tới pipeline đồng bộ (heavy computation) đều được wrap trong `anyio.to_thread.run_sync` để tránh nghẽn Event Loop của FastAPI.
-- **Streaming**: Hỗ trợ back-pressure thông qua `asyncio.Queue` trong luồng phát SSE.
+Shutdown stops the scheduler and closes Redis resources when present.
 
----
-*Cập nhật lần cuối: 2026-05-15 bởi Codex*
+## Router Registration
+
+`create_app()` includes these routers:
+
+| Router file | Prefix in router/app | Public surface |
+| --- | --- | --- |
+| `chat.py` | none | `/chat`, `/chat/v3`, `/api/chat/v3`, `/chat/stream`, `/chat/suggest` |
+| `health.py` | none | `/health`, `/api/admin/reload-validity` |
+| `session.py` | `/session` | `/session`, `/session/{id}`, intended `/sessions`, `/sessions/me` |
+| `metrics.py` | none | `/metrics/usage`, `/metrics/eval` |
+| `retrieval.py` | `/retrieval` | `/retrieval/search` |
+| `upload.py` | `/admin` | `/admin/documents*`, `/admin/converters`, `/admin/chunkers` |
+| `bookmark.py` | none | `/bookmarks*`, `/bookmark-folders*` |
+| `feedback.py` | none | `/feedback*` |
+| `lookup.py` | `/lookup` | `/lookup/ctdt/{major_code}`, `/lookup/regulations`, `/lookup/calendar`, `/lookup/compare` |
+| `notification.py` | none | `/notifications*` |
+| `notification_admin.py` | `/admin/notifications` | admin notification creation |
+| `routers/auth.py` | app prefix `/auth` | `/auth/login`, `/auth/callback`, `/auth/register`, `/auth/login`, `/auth/me`, `/auth/logout`, `/auth/admin/create` |
+
+## Chat Routes
+
+`routes/chat.py` is the main runtime API.
+
+- `POST /chat` calls `RAGPipeline.query_v3()` and maps to `ChatResponse`.
+- `POST /chat/v3` and `POST /api/chat/v3` return a trace/debug-friendly shape.
+- `POST /chat/stream` emits SSE events.
+- `GET /chat/suggest` returns suggested questions for mobile/profile contexts.
+
+Authenticated requests:
+
+- If Bearer JWT is valid, routes derive `user_id` and `user_context` from the DB user.
+- Body-supplied identity fields remain for legacy unauthenticated clients but should not override authenticated identity.
+
+SSE event contract:
+
+```text
+{"type":"session","session_id":"..."}
+{"type":"token","delta":"..."}
+{"type":"metadata", ...}
+{"type":"done"}
+```
+
+Pipeline work is sync/heavy, so routes use `anyio.to_thread.run_sync()` or thread executors where needed to avoid blocking the event loop.
+
+## Response Mapping
+
+`response_mapper.py` normalizes heterogeneous pipeline outputs:
+
+- retrieved source docs -> `RetrievedDocument`
+- collection scores -> `CollectionScore`
+- filters and collection counts -> `FilterInfo`, `CollectionResult`
+- agent traces/tool calls -> `AgentTracePayload`
+- string/float/int parsing helpers for loosely shaped pipeline metadata
+
+When changing pipeline output fields, update mapper tests and frontend/mobile normalizers.
+
+## Admin Upload Routes
+
+`routes/upload.py` is admin-only and wraps `DocumentPipeline`.
+
+Main groups:
+
+- Upload/list/get/delete documents.
+- Convert PDF to Markdown.
+- Review/update Markdown.
+- Clean Markdown.
+- Review/update cleaned text.
+- Chunk with selected strategy.
+- Review/select/approve chunks.
+- Embed and index into Mongo/Qdrant/Elasticsearch.
+- Run full pipeline.
+- Roll back indexed/chunked/cleaned/converted states.
+- Discover converters/chunkers.
+
+All admin document routes depend on `auth.rbac.require_admin`.
+
+## Session Routes
+
+`routes/session.py` reads from Redis first, then Mongo. It preserves legacy owner aliases:
+
+- canonical Mongo `_id`
+- `email`
+- `username`
+- `student_id`
+
+Destructive actions require authenticated ownership. Delete removes durable session data through `MongoLogger.delete_session()` and Redis session/history when Redis is enabled.
+
+## Current Caution
+
+`routes/retrieval.py` tries `getattr(pipeline, "service", None)`. `RAGPipeline` currently stores the shared service as `_retrieval_service` and does not expose `service`. If this remains unchanged, `/retrieval/search` may cold-load a new `RetrievalService`, including heavy models. Prefer adding a read-only property or using `_retrieval_service` intentionally.
+
+## Useful Checks
+
+```bash
+python -m py_compile api/*.py api/routes/*.py api/middleware/*.py
+python -m pytest tests/test_chat_route_mode.py tests/test_response_mapper.py tests/test_upload_api.py tests/test_dependencies.py -q -m "not integration"
+```

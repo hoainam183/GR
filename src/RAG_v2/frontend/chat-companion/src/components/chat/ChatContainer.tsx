@@ -302,7 +302,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     {
       icon: CalendarDays,
       label: 'Lịch học kỳ mới',
-      query: 'Lịch trình học kỳ mới nhất?',
+      query: 'Lịch học kỳ mới nhất?',
     },
   ];
 
