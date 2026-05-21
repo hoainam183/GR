@@ -93,7 +93,7 @@ export default function UsersTab() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Role distribution */}
           {roleData.length > 0 && (
-            <div className="rounded-xl border border-border bg-card p-4">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-sm font-semibold mb-3">Phân bố vai trò</p>
               <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
@@ -117,7 +117,7 @@ export default function UsersTab() {
           )}
           {/* Registration trend */}
           {breakdown.registrations.length > 0 && (
-            <div className="rounded-xl border border-border bg-card p-4">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-sm font-semibold mb-3">Đăng ký mới (30 ngày)</p>
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={breakdown.registrations}>

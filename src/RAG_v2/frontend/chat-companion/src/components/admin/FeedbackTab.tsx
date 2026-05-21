@@ -126,23 +126,23 @@ export default function FeedbackTab() {
       {/* Stats cards */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-          <div className="rounded-xl border border-border bg-card p-4 text-center">
+          <div className="rounded-xl border border-border bg-card p-4 text-center shadow-sm">
             <p className="text-2xl font-bold text-foreground">{stats.total}</p>
             <p className="text-xs text-muted-foreground mt-1">Tổng đánh giá</p>
           </div>
-          <div className="rounded-xl border border-border bg-card p-4 text-center">
+          <div className="rounded-xl border border-border bg-card p-4 text-center shadow-sm">
             <p className="text-2xl font-bold text-emerald-600">{stats.up}</p>
             <p className="text-xs text-muted-foreground mt-1">👍 Hữu ích</p>
           </div>
-          <div className="rounded-xl border border-border bg-card p-4 text-center">
+          <div className="rounded-xl border border-border bg-card p-4 text-center shadow-sm">
             <p className="text-2xl font-bold text-red-500">{stats.down}</p>
             <p className="text-xs text-muted-foreground mt-1">👎 Chưa tốt</p>
           </div>
-          <div className="rounded-xl border border-border bg-card p-4 text-center">
+          <div className="rounded-xl border border-border bg-card p-4 text-center shadow-sm">
             <p className="text-2xl font-bold text-primary">{satisfactionRate}%</p>
             <p className="text-xs text-muted-foreground mt-1">Hài lòng</p>
           </div>
-          <div className="rounded-xl border border-border bg-card p-4 text-center">
+          <div className="rounded-xl border border-border bg-card p-4 text-center shadow-sm">
             <p className="text-2xl font-bold text-amber-500">{responseRate ?? 'N/A'}%</p>
             <p className="text-xs text-muted-foreground mt-1">Có comment</p>
           </div>
@@ -151,7 +151,7 @@ export default function FeedbackTab() {
 
       {/* Category breakdown */}
       {stats && Object.keys(stats.by_category).length > 0 && (
-        <div className="p-4 rounded-xl border border-border bg-card">
+        <div className="p-4 rounded-xl border border-border bg-card shadow-sm">
           <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <BarChart2 className="h-4 w-4" /> Phân loại lý do 👎
           </p>
@@ -168,7 +168,7 @@ export default function FeedbackTab() {
 
       {/* Disliked topics table */}
       {topicsData && topicsData.topics.length > 0 && (
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="text-sm font-semibold mb-3">Chủ đề bị đánh giá thấp</p>
           <div className="max-h-64 overflow-y-auto">
             <Table>
@@ -210,7 +210,7 @@ export default function FeedbackTab() {
             {feedbacks.map((fb) => (
               <div
                 key={fb.id}
-                className="rounded-xl border border-border bg-card p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                className="rounded-xl border border-border bg-card p-4 shadow-sm cursor-pointer hover:bg-accent/50 transition-colors"
                 onClick={() => setSelectedFeedback(fb)}
               >
                 <div className="flex items-start gap-3">

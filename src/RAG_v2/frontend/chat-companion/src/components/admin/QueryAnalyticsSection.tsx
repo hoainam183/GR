@@ -76,7 +76,7 @@ export default function QueryAnalyticsSection() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Query Volume */}
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="text-sm font-semibold mb-3">Lượng câu hỏi theo ngày</p>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={data.volume}>
@@ -90,7 +90,7 @@ export default function QueryAnalyticsSection() {
         </div>
 
         {/* Latency Trend */}
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="text-sm font-semibold mb-3">Độ trễ (ms)</p>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={data.latency}>
@@ -108,7 +108,7 @@ export default function QueryAnalyticsSection() {
         </div>
 
         {/* Route distribution */}
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="text-sm font-semibold mb-3">Phân bố theo route</p>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -131,7 +131,7 @@ export default function QueryAnalyticsSection() {
         </div>
 
         {/* Mode distribution */}
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="text-sm font-semibold mb-3">Phân bố theo mode</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={data.by_mode} layout="vertical">
@@ -147,7 +147,7 @@ export default function QueryAnalyticsSection() {
 
       {/* Top Questions */}
       {data.top_questions.length > 0 && (
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="text-sm font-semibold mb-3">Câu hỏi phổ biến</p>
           <div className="max-h-80 overflow-y-auto">
             <Table>

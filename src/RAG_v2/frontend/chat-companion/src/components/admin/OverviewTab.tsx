@@ -14,7 +14,7 @@ function StatCard({ label, value, icon: Icon, color }: {
   color: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center gap-3">
         <div className={`rounded-lg p-2.5 ${color}`}>
           <Icon className="h-5 w-5 text-white" />

@@ -97,6 +97,43 @@ export interface UserStatusResponse {
   is_active: boolean;
 }
 
+// ─── EP11: Config toggle ──────────────────────────────────
+export interface ConfigToggleResponse {
+  ok: boolean;
+  key: string;
+  value: boolean;
+}
+
+// ─── EP12: LLM config ─────────────────────────────────────
+export interface LLMConfig {
+  google_api_key: string;
+  tavily_api_key: string;
+  chat_model: string;
+  chat_temperature: number;
+  chat_max_tokens: number;
+  agent_enabled: boolean;
+  agent_model: string;
+  self_eval_enabled: boolean;
+  tavily_fallback_enabled: boolean;
+  reflection_enabled: boolean;
+  reflection_model: string;
+}
+
+export interface LLMConfigUpdateBody {
+  google_api_key?: string;
+  tavily_api_key?: string;
+  chat_model?: string;
+  chat_temperature?: number;
+  chat_max_tokens?: number;
+  agent_model?: string;
+  reflection_model?: string;
+}
+
+export interface LLMConfigUpdateResponse {
+  ok: boolean;
+  updated: Record<string, unknown>;
+}
+
 // ─── EP9: Crawler trigger ─────────────────────────────────
 export interface CrawlerTriggerResponse {
   ok: boolean;

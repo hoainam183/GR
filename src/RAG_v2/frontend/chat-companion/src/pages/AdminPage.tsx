@@ -100,7 +100,7 @@ export default function AdminPage() {
   const handleView = (id: string) => navigate(`/admin/documents/${id}`);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
+    <div className="mx-auto max-w-6xl px-4 py-6">
       <div className="mb-6 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate('/chat')}>
           <ArrowLeft className="h-5 w-5" />

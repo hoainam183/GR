@@ -77,6 +77,25 @@ class UserStatusBody(BaseModel):
     is_active: bool
 
 
+class ConfigToggleBody(BaseModel):
+    key: str
+    value: bool
+
+
+class LLMConfigBody(BaseModel):
+    google_api_key: str | None = None
+    chat_model: str | None = None
+    chat_temperature: float | None = None
+    chat_max_tokens: int | None = None
+    agent_enabled: bool | None = None
+    agent_model: str | None = None
+    self_eval_enabled: bool | None = None
+    tavily_fallback_enabled: bool | None = None
+    tavily_api_key: str | None = None
+    reflection_enabled: bool | None = None
+    reflection_model: str | None = None
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # EP1: Overview stats
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -686,3 +705,98 @@ async def get_crawler_status(
         "last_result": _last_manual_crawl,
         "cooldown_seconds": _CRAWL_COOLDOWN_SECONDS,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# EP11: Toggle system config
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Whitelist of boolean settings that admin can toggle at runtime
+_TOGGLEABLE_KEYS = {
+    "agent_enabled", "self_eval_enabled", "tavily_fallback_enabled",
+    "crawler_enabled", "reflection_enabled", "domain_routing_enabled",
+    "rate_limit_enabled",
+}
+
+
+@router.patch("/config")
+async def toggle_config(
+    request: Request,
+    body: ConfigToggleBody,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+):
+    """Toggle a boolean system configuration at runtime."""
+    if body.key not in _TOGGLEABLE_KEYS:
+        raise HTTPException(400, f"Key '{body.key}' is not toggleable. Allowed: {sorted(_TOGGLEABLE_KEYS)}")
+
+    settings = request.app.state.settings
+    if not hasattr(settings, body.key):
+        raise HTTPException(400, f"Unknown setting: {body.key}")
+
+    setattr(settings, body.key, body.value)
+    logger.info("Admin toggled %s = %s", body.key, body.value)
+
+    return {"ok": True, "key": body.key, "value": body.value}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# EP12: Get/Update LLM configuration
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@router.get("/config/llm")
+async def get_llm_config(
+    request: Request,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+):
+    """Return current LLM-related configuration (keys are masked)."""
+    settings = request.app.state.settings
+
+    def mask_key(key: str) -> str:
+        if not key:
+            return ""
+        if len(key) <= 8:
+            return "***"
+        return key[:4] + "***" + key[-4:]
+
+    return {
+        "google_api_key": mask_key(settings.google_api_key),
+        "tavily_api_key": mask_key(settings.tavily_api_key),
+        "chat_model": settings.chat_model,
+        "chat_temperature": settings.chat_temperature,
+        "chat_max_tokens": settings.chat_max_tokens,
+        "agent_enabled": settings.agent_enabled,
+        "agent_model": settings.agent_model,
+        "self_eval_enabled": settings.self_eval_enabled,
+        "tavily_fallback_enabled": settings.tavily_fallback_enabled,
+        "reflection_enabled": settings.reflection_enabled,
+        "reflection_model": settings.reflection_model,
+    }
+
+
+@router.put("/config/llm")
+async def update_llm_config(
+    request: Request,
+    body: LLMConfigBody,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+):
+    """Update LLM configuration at runtime (non-null fields only)."""
+    settings = request.app.state.settings
+    updated: dict[str, Any] = {}
+
+    for field_name, value in body.model_dump(exclude_none=True).items():
+        if hasattr(settings, field_name):
+            setattr(settings, field_name, value)
+            # Mask sensitive keys in response
+            if "key" in field_name:
+                display_val = value[:4] + "***" if len(value) > 4 else "***"
+            else:
+                display_val = value
+            updated[field_name] = display_val
+
+    if not updated:
+        raise HTTPException(400, "No fields to update")
+
+    logger.info("Admin updated LLM config: %s", list(updated.keys()))
+    return {"ok": True, "updated": updated}
+

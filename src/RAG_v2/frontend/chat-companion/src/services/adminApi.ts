@@ -222,6 +222,10 @@ import type {
   UserStatusResponse,
   CrawlerTriggerResponse,
   CrawlerStatus,
+  ConfigToggleResponse,
+  LLMConfig,
+  LLMConfigUpdateBody,
+  LLMConfigUpdateResponse,
 } from '@/types/adminStats';
 
 export async function getOverviewStats(): Promise<OverviewStats> {
@@ -307,5 +311,34 @@ export async function getCrawlerStatus(): Promise<CrawlerStatus> {
   const { data } = await adminClient.get<CrawlerStatus>('/admin/crawler/status', {
     headers: authHeaders(),
   });
+  return data;
+}
+
+// ──────────────────── Config toggle ────────────────────
+
+export async function toggleConfig(key: string, value: boolean): Promise<ConfigToggleResponse> {
+  const { data } = await adminClient.patch<ConfigToggleResponse>(
+    '/admin/config',
+    { key, value },
+    { headers: authHeaders() },
+  );
+  return data;
+}
+
+// ──────────────────── LLM config ────────────────────
+
+export async function getLLMConfig(): Promise<LLMConfig> {
+  const { data } = await adminClient.get<LLMConfig>('/admin/config/llm', {
+    headers: authHeaders(),
+  });
+  return data;
+}
+
+export async function updateLLMConfig(body: LLMConfigUpdateBody): Promise<LLMConfigUpdateResponse> {
+  const { data } = await adminClient.put<LLMConfigUpdateResponse>(
+    '/admin/config/llm',
+    body,
+    { headers: authHeaders() },
+  );
   return data;
 }

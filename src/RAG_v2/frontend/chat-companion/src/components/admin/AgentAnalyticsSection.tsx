@@ -66,19 +66,19 @@ export default function AgentAnalyticsSection() {
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-border bg-card p-4 text-center">
+        <div className="rounded-xl border border-border bg-card p-4 text-center shadow-sm">
           <p className="text-2xl font-bold text-foreground">{data.total_calls}</p>
           <p className="text-xs text-muted-foreground mt-1">Tổng lần gọi</p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4 text-center">
+        <div className="rounded-xl border border-border bg-card p-4 text-center shadow-sm">
           <p className="text-2xl font-bold text-foreground">{data.avg_iterations}</p>
           <p className="text-xs text-muted-foreground mt-1">Trung bình iterations</p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4 text-center">
+        <div className="rounded-xl border border-border bg-card p-4 text-center shadow-sm">
           <p className="text-2xl font-bold text-red-500">{data.error_rate}%</p>
           <p className="text-xs text-muted-foreground mt-1">Tỉ lệ lỗi</p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4 text-center">
+        <div className="rounded-xl border border-border bg-card p-4 text-center shadow-sm">
           <p className="text-2xl font-bold text-blue-500">{data.tavily_triggers}</p>
           <p className="text-xs text-muted-foreground mt-1">Tavily triggers</p>
         </div>
@@ -87,7 +87,7 @@ export default function AgentAnalyticsSection() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Tool Frequency */}
         {data.tool_frequency.length > 0 && (
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <p className="text-sm font-semibold mb-3">Tần suất tool</p>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={data.tool_frequency} layout="vertical">
@@ -103,7 +103,7 @@ export default function AgentAnalyticsSection() {
 
         {/* Daily Agent Usage */}
         {data.daily_usage.length > 0 && (
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <p className="text-sm font-semibold mb-3">Sử dụng agent theo ngày</p>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={data.daily_usage}>
