@@ -151,6 +151,17 @@ async def lifespan(app: FastAPI):
             logger.warning("MongoDB index creation failed", exc_info=True)
             app.state.mongo_status = "degraded"  # indexes missing but connected
 
+    # Check MongoDB version for admin stats feature gating
+    if mongo_logger is not None:
+        try:
+            from api.routes.admin_stats import check_mongo_version
+            from models.database import get_motor_client, _get_settings
+            _, db_name = _get_settings()
+            _db = get_motor_client()[db_name]
+            await check_mongo_version(_db)
+        except Exception:
+            logger.warning("MongoDB version check failed", exc_info=True)
+
     logger.info("Backend ready!")
     
     # Warmup LLM to avoid cold-start latency on first request
@@ -243,6 +254,7 @@ def create_app() -> FastAPI:
     from .routes.lookup import router as lookup_router
     from .routes.notification import router as notification_router
     from .routes.notification_admin import router as notification_admin_router
+    from .routes.admin_stats import router as admin_stats_router
     from routers.auth import router as auth_router
 
     app = FastAPI(
@@ -281,6 +293,7 @@ def create_app() -> FastAPI:
     app.include_router(lookup_router)
     app.include_router(notification_router)
     app.include_router(notification_admin_router)
+    app.include_router(admin_stats_router)
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
     # Rate-limit middleware is registered as a startup callback because it

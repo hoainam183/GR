@@ -208,3 +208,104 @@ export async function pollDocumentStatus(
   // Final attempt
   return getDocument(id);
 }
+
+// ──────────────────── Admin Stats API ────────────────────
+
+import type {
+  OverviewStats,
+  AdminUsersResponse,
+  UserBreakdown,
+  QueryAnalytics,
+  AgentAnalytics,
+  FeedbackTopics,
+  SystemStats,
+  UserStatusResponse,
+  CrawlerTriggerResponse,
+  CrawlerStatus,
+} from '@/types/adminStats';
+
+export async function getOverviewStats(): Promise<OverviewStats> {
+  const { data } = await adminClient.get<OverviewStats>('/admin/stats/overview', {
+    headers: authHeaders(),
+  });
+  return data;
+}
+
+export async function getAdminUsers(params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sort_by?: string;
+  order?: string;
+  days?: number;
+} = {}): Promise<AdminUsersResponse> {
+  const { data } = await adminClient.get<AdminUsersResponse>('/admin/stats/users', {
+    headers: authHeaders(),
+    params,
+  });
+  return data;
+}
+
+export async function getUserBreakdown(days = 30): Promise<UserBreakdown> {
+  const { data } = await adminClient.get<UserBreakdown>('/admin/stats/users/breakdown', {
+    headers: authHeaders(),
+    params: { days },
+  });
+  return data;
+}
+
+export async function getQueryAnalytics(days = 30, top_questions_limit = 15): Promise<QueryAnalytics> {
+  const { data } = await adminClient.get<QueryAnalytics>('/admin/stats/queries', {
+    headers: authHeaders(),
+    params: { days, top_questions_limit },
+  });
+  return data;
+}
+
+export async function getAgentAnalytics(days = 30): Promise<AgentAnalytics> {
+  const { data } = await adminClient.get<AgentAnalytics>('/admin/stats/agent', {
+    headers: authHeaders(),
+    params: { days },
+  });
+  return data;
+}
+
+export async function getFeedbackTopics(days = 30, limit = 20): Promise<FeedbackTopics> {
+  const { data } = await adminClient.get<FeedbackTopics>('/admin/stats/feedback/topics', {
+    headers: authHeaders(),
+    params: { days, limit },
+  });
+  return data;
+}
+
+export async function getSystemStats(): Promise<SystemStats> {
+  const { data } = await adminClient.get<SystemStats>('/admin/stats/system', {
+    headers: authHeaders(),
+  });
+  return data;
+}
+
+export async function toggleUserStatus(userId: string, isActive: boolean): Promise<UserStatusResponse> {
+  const { data } = await adminClient.patch<UserStatusResponse>(
+    `/admin/users/${userId}/status`,
+    { is_active: isActive },
+    { headers: authHeaders() },
+  );
+  return data;
+}
+
+export async function triggerCrawler(pipeline: string = 'all'): Promise<CrawlerTriggerResponse> {
+  const { data } = await adminClient.post<CrawlerTriggerResponse>(
+    '/admin/crawler/trigger',
+    null,
+    { headers: authHeaders(), params: { pipeline_target: pipeline } },
+  );
+  return data;
+}
+
+export async function getCrawlerStatus(): Promise<CrawlerStatus> {
+  const { data } = await adminClient.get<CrawlerStatus>('/admin/crawler/status', {
+    headers: authHeaders(),
+  });
+  return data;
+}
