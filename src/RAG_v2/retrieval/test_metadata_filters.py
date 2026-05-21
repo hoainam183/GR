@@ -380,3 +380,71 @@ def test_kehoach_filter_school_year_does_not_trigger_freshness() -> None:
     cf = extractor.extract("kế hoạch học tập năm học 2025-2026")
     assert cf.is_empty is True
     assert cf.sort_by_date_desc is False
+
+
+# ─── Freshness mode — ES ids filter propagation ──────────────────────────────
+
+
+def test_freshness_mode_es_ids_filter_applied() -> None:
+    """In freshness mode, _resolve_filter_with_fallback must pass an ES ids filter.
+
+    When sort_by_date_desc=True and get_latest_chunk_ids_by_date returns IDs,
+    the function should return BOTH a Qdrant HasIdCondition AND an ES ids filter
+    so that BM25 keyword search is constrained to the same latest docs.
+    This prevents older dated documents (e.g. 20252) from outranking newer ones
+    (e.g. 20253/20261) via keyword-score alone.
+    """
+    from unittest.mock import MagicMock
+    from retrieval.multi_collection_search import MultiCollectionSearch
+    from retrieval.metadata_filters import CollectionFilter
+
+    latest_ids = ["chunk_new_1", "chunk_new_2", "chunk_new_3"]
+
+    hybrid = MagicMock()
+    hybrid.es.get_latest_chunk_ids_by_date.return_value = latest_ids
+    hybrid.es.resolve_chunk_ids_for_qdrant.return_value = latest_ids
+
+    cf = CollectionFilter(sort_by_date_desc=True)
+
+    searcher = object.__new__(MultiCollectionSearch)
+    qdrant_filter, es_filter, trace = searcher._resolve_filter_with_fallback(
+        "kehoach", hybrid, cf
+    )
+
+    # Qdrant filter must be set
+    assert qdrant_filter is not None, "Qdrant HasIdCondition must be applied in freshness mode"
+
+    # ES ids filter must also be set (new behaviour — prevents unfiltered BM25)
+    assert es_filter is not None, (
+        "ES ids filter must be set in freshness mode to constrain BM25 to latest docs"
+    )
+    assert "ids" in es_filter, f"ES filter must use 'ids' query, got: {es_filter}"
+    assert set(es_filter["ids"]["values"]) == set(latest_ids), (
+        f"ES filter must cover exactly the latest chunk IDs, got: {es_filter['ids']['values']}"
+    )
+
+    # Trace must report the filter was applied
+    assert trace["applied"] is True
+    assert trace["matched_ids"] == len(latest_ids)
+
+
+def test_freshness_mode_no_ids_returns_no_filter() -> None:
+    """When get_latest_chunk_ids_by_date returns empty, no filter is applied."""
+    from unittest.mock import MagicMock
+    from retrieval.multi_collection_search import MultiCollectionSearch
+    from retrieval.metadata_filters import CollectionFilter
+
+    hybrid = MagicMock()
+    hybrid.es.get_latest_chunk_ids_by_date.return_value = []
+
+    cf = CollectionFilter(sort_by_date_desc=True)
+
+    searcher = object.__new__(MultiCollectionSearch)
+    qdrant_filter, es_filter, trace = searcher._resolve_filter_with_fallback(
+        "kehoach", hybrid, cf
+    )
+
+    assert qdrant_filter is None
+    assert es_filter is None
+    assert trace["applied"] is False
+

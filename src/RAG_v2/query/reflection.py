@@ -68,6 +68,21 @@ _COMPARISON_FOLLOWUP_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Freshness-intent signals (unaccented / folded form) — used to detect generic
+# freshness queries that should NOT inherit academic scope from history.
+_REFLECTION_FRESHNESS_ONLY_RE = re.compile(
+    r"\b(?:moi\s*nhat|gan\s*day|hien\s*tai|ky\s*nay|ki\s*nay|"
+    r"hoc\s*ky\s*moi|hoc\s*ki\s*moi|latest|recent|newest)\b",
+    re.IGNORECASE,
+)
+
+# Anaphora signals — references to something from prior context.
+# Presence means history IS needed to resolve the reference.
+_ANAPHORA_SIGNALS_RE = re.compile(
+    r"\b(?:đó|này|kia|ấy|vậy|còn|thêm|nữa)\b",
+    re.IGNORECASE,
+)
+
 _TOPIC_HINTS: tuple[tuple[str, str], ...] = (
     (r"\bhoc\s+phi\b", "học phí"),
     (r"\bmuc\s+hoc\s+phi\b", "học phí"),
@@ -917,9 +932,23 @@ class QueryReflector:
             user_profile=user_profile,
         )
 
+        # For generic freshness queries, skip history to prevent academic-scope
+        # bleeding (e.g. prior assistant response mentioning "2025.2" should not
+        # cause the LLM to inject that term into "lịch đăng kí kì học mới nhất").
+        effective_history = (
+            chat_history
+            if self._should_use_history_for_reflection(query, chat_history)
+            else None
+        )
+        if chat_history and effective_history is None:
+            logger.info(
+                "Reflection: history suppressed for generic freshness query %r",
+                query[:60],
+            )
+
         user_prompt = self._build_user_prompt(
             query=query,
-            chat_history=chat_history,
+            chat_history=effective_history,
             user_context=merged_profile or None,
             profile_note_override=profile_note_override,
         )
@@ -964,6 +993,12 @@ class QueryReflector:
         if not rewritten:
             rewritten = query
 
+        # Save the raw LLM candidate before any guardrails modify it.
+        # Exposed as trace-only field so callers can see what was rejected.
+        reflection_candidate: str = rewritten
+        reflection_guardrail_reverted: bool = False
+        reflection_rejected_scope: Optional[str] = None
+
         deterministic_followup_applied = False
         deterministic_followup = _rewrite_comparison_followup(
             query=query,
@@ -1004,6 +1039,8 @@ class QueryReflector:
                     rewritten[:80],
                 )
                 rewritten = query
+                reflection_guardrail_reverted = True
+                reflection_rejected_scope = injected_scope
 
         # Guardrail 3 — Expand bare major codes to include full names.
         # E.g. "IT1" → "IT1 (Khoa học máy tính)" so that vector/keyword
@@ -1032,6 +1069,11 @@ class QueryReflector:
             "rewritten": rewritten,
             "prompt": user_prompt,
             "entities": entities,
+            # Trace-only fields — expose LLM candidate and guardrail outcome
+            # for debugging without affecting retrieval behavior.
+            "reflection_candidate": reflection_candidate,
+            "reflection_guardrail_reverted": reflection_guardrail_reverted,
+            "reflection_rejected_scope": reflection_rejected_scope,
         }
 
     def extract_entities(
@@ -1057,6 +1099,47 @@ class QueryReflector:
     # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _should_use_history_for_reflection(
+        query: str,
+        chat_history: Optional[List[Dict[str, str]]],
+    ) -> bool:
+        """Return True when history context should be sent to the reflection LLM.
+
+        Generic freshness queries (mới nhất, hiện tại, gần đây …) without
+        personal-profile references, comparison signals, or anaphora should NOT
+        receive history.  This prevents academic-scope bleeding where a prior
+        assistant message (e.g. "kế hoạch 2025.2") causes the LLM to inject
+        stale semester/year tokens into an otherwise generic freshness query.
+
+        History IS used for:
+          - Queries with personal-profile references ("ngành của tôi", …)
+          - Short comparison follow-ups ("so sánh với", "khác gì", …)
+          - Queries with anaphoric references to prior context ("còn", "đó", …)
+
+        Examples that skip history:
+          "Lịch trình học kỳ mới nhất?"
+          "lịch đăng kí kì học mới nhất"
+        """
+        if not chat_history:
+            return False
+
+        if _has_profile_dependent_signal(query):
+            return True
+
+        if _is_comparison_followup(query):
+            return True
+
+        if _ANAPHORA_SIGNALS_RE.search(query):
+            return True
+
+        # Generic freshness query with no personal/anaphora/comparison signal:
+        # skip history to prevent scope bleeding from prior assistant context.
+        if _REFLECTION_FRESHNESS_ONLY_RE.search(_fold_vietnamese(query)):
+            return False
+
+        return True
 
     def _build_user_prompt(
         self,

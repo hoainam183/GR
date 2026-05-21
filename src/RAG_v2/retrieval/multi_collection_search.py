@@ -175,6 +175,34 @@ class MultiCollectionSearch:
         )
 
     # ------------------------------------------------------------------
+    # Metadata lookup (for sibling expansion)
+    # ------------------------------------------------------------------
+
+    def get_by_metadata(
+        self,
+        collection: str,
+        filters: Dict[str, Any],
+        limit: int = 1,
+    ) -> List[Dict[str, Any]]:
+        """Lookup points by payload filter in a specific collection.
+
+        Args:
+            collection: Target collection name.
+            filters: Dict of {key: value} for exact payload match.
+            limit: Max results.
+
+        Returns:
+            List of document dicts with collection field set.
+        """
+        for coll_name, hybrid in self.searchers:
+            if coll_name == collection:
+                return hybrid.qdrant_store.get_by_metadata(
+                    filters=filters, limit=limit
+                )
+        logger.warning("get_by_metadata: collection '%s' not found", collection)
+        return []
+
+    # ------------------------------------------------------------------
     # Public search API
     # ------------------------------------------------------------------
 
@@ -524,8 +552,10 @@ class MultiCollectionSearch:
                         "matched_ids": len(chunk_ids),
                         "filter_desc": f"freshness_sort_date_str ({len(chunk_ids)} latest IDs)",
                     }
-                    # es_filter=None: ES keyword search stays unfiltered (BM25 on all)
-                    return qdrant_filter, None, trace
+                    # Also constrain BM25 to the same latest IDs so older docs
+                    # (e.g. 20252) cannot outrank the latest ones via keyword score.
+                    es_ids_filter: Optional[Dict[str, Any]] = {"ids": {"values": chunk_ids}}
+                    return qdrant_filter, es_ids_filter, trace
 
             # No dated docs found → fall back to no filter
             logger.info(

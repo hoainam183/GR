@@ -413,6 +413,7 @@ class TavilySearchTool:
         min_content_length: int = 100,
         min_score: float = 0.0,
         query_year: int | None = None,
+        exclude_homepages: bool = True,
     ) -> List[Dict[str, Any]]:
         """Filter low-quality or stale web results.
 
@@ -422,6 +423,7 @@ class TavilySearchTool:
             min_score: Drop results with Tavily relevance score below this.
             query_year: If set, drop results mentioning only years older than
                 query_year - 1 (freshness filter).
+            exclude_homepages: If True, drop results pointing to site homepages.
 
         Returns:
             Filtered list (may be empty — callers must handle).
@@ -437,6 +439,15 @@ class TavilySearchTool:
 
             if float(r.get("score", 1.0) or 1.0) < min_score:
                 continue
+
+            # ── Homepage filter ──────────────────────────────
+            if exclude_homepages:
+                url = r.get("url", "")
+                parsed = urlparse(url)
+                path = (parsed.path or "").rstrip("/")
+                if path in ("", "/vi", "/en", "/index", "/index.html"):
+                    logger.debug("Filtered homepage: %s", url)
+                    continue
 
             if query_year:
                 years_in_content = _re.findall(r'\b(20\d{2})\b', content)

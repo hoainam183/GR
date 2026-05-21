@@ -212,6 +212,17 @@ class Settings(BaseSettings):
     rate_limit_rpd: int = 200             # requests per day
     rate_limit_alert_threshold: float = 0.8  # alert at 80% capacity
 
+    # --- Retrieval Improvement Flags (all default OFF for safe rollout) ---
+    web_query_enrichment_enabled: bool = False    # A1: academic year + homepage filter
+    score_cliff_enabled: bool = False             # B1: per-collection score cliff
+    per_collection_norm_enabled: bool = False     # B2: per-collection normalization
+    sibling_expansion_enabled: bool = False       # C1: sibling chunk expansion
+    freshness_tavily_check_enabled: bool = False  # C3: date_str freshness check
+    low_conf_pool_expand_enabled: bool = False    # C4: 2x candidate pool in Tier 3
+    sibling_budget_ratio: float = 0.30            # 30% of total budget for siblings
+    sibling_per_doc_limit: int = 800              # Per-sibling char limit
+    context_total_char_budget_with_expansion: int = 16000  # Expanded total when siblings
+
     # --- Admin / Document Upload ---
     superadmin_user_ids: str = ""       # comma-separated MongoDB ObjectIds
     upload_dir: str = "uploads"

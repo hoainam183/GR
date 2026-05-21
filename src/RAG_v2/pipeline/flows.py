@@ -86,6 +86,7 @@ _LIST_TOP_K_MAX = 12         # cap to avoid excessive reranking latency
 
 _WEB_FALLBACK_DEFAULT_DYNAMIC_COLLECTIONS = ("kehoach",)
 _WEB_FALLBACK_NO_INFO_PATTERNS = (
+    # ── Existing (8) ──────────────────────────────────────
     "toi khong tim thay thong tin nay trong tai lieu hien co",
     "khong tim thay thong tin",
     "khong co thong tin",
@@ -94,6 +95,18 @@ _WEB_FALLBACK_NO_INFO_PATTERNS = (
     "khong du thong tin",
     "tai lieu hien co khong",
     "chua tim thay",
+    # ── Rephrase variants (11) ────────────────────────────
+    "khong the xac nhan",
+    "chua duoc cap nhat",
+    "khong nam trong tai lieu",
+    "ngoai pham vi",
+    "khong co du lieu",
+    "chua co du lieu",
+    "khong the tra loi",
+    "chua the xac dinh",
+    "tai lieu khong de cap",
+    "thong tin con han che",
+    "can kiem tra them",
 )
 _WEB_FALLBACK_DYNAMIC_QUERY_RE = re.compile(
     r"\b(?:"
@@ -241,6 +254,185 @@ def _fold_vietnamese(text: str) -> str:
     return without_marks.replace("đ", "d").replace("Đ", "d").lower()
 
 
+def _is_date_within_days(date_str: str, days: int) -> bool:
+    """Check if date_str (dd/mm/yyyy) is within N days of now."""
+    try:
+        doc_date = datetime.strptime(date_str.strip(), "%d/%m/%Y")
+        return (datetime.now() - doc_date).days <= days
+    except (ValueError, TypeError, AttributeError):
+        return False
+
+
+# ── B1: Per-collection score cliff ────────────────────────────────────────────
+_CLIFF_MIN_GAP_BY_COLLECTION = {
+    "kehoach": 0.5,    # Tight clusters → smaller gap is significant
+    "ctdt":    2.0,    # Wide spreads → need larger gap
+    "quydinh": 1.5,    # Moderate spreads
+    "stsv":    1.5,    # Moderate
+}
+_CLIFF_MIN_GAP_DEFAULT = 1.5
+_CLIFF_MIN_KEEP_PER_COLL = 1
+_CLIFF_MIN_KEEP_TOTAL = 2
+
+
+def _apply_score_cliff_per_collection(
+    reranked: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Apply cliff detection per-collection, then merge results.
+
+    Documents must be sorted by rerank_score descending before calling.
+    """
+    if len(reranked) <= _CLIFF_MIN_KEEP_TOTAL:
+        return reranked
+
+    # Group by collection
+    by_collection: Dict[str, List[Dict[str, Any]]] = {}
+    for doc in reranked:
+        coll = doc.get("collection", "_unknown")
+        by_collection.setdefault(coll, []).append(doc)
+
+    kept: List[Dict[str, Any]] = []
+    for coll, docs in by_collection.items():
+        min_gap = _CLIFF_MIN_GAP_BY_COLLECTION.get(coll, _CLIFF_MIN_GAP_DEFAULT)
+        scores = [_safe_float(d.get("rerank_score", 0)) for d in docs]
+
+        if len(docs) <= _CLIFF_MIN_KEEP_PER_COLL or all(s <= 0 for s in scores):
+            kept.extend(docs)
+            continue
+
+        # Find cliff within this collection's docs (sorted desc by score)
+        best_cut = len(scores)
+        max_gap_val = 0.0
+        for i in range(_CLIFF_MIN_KEEP_PER_COLL, len(scores)):
+            gap = scores[i - 1] - scores[i]
+            if gap > max_gap_val and gap > min_gap:
+                max_gap_val = gap
+                best_cut = i
+
+        if best_cut < len(docs):
+            logger.info(
+                "Score cliff [%s] at pos %d (gap=%.2f, min_gap=%.1f), "
+                "keeping %d/%d docs",
+                coll, best_cut, max_gap_val, min_gap, best_cut, len(docs),
+            )
+        kept.extend(docs[:best_cut])
+
+    # Re-sort by rerank score (global order)
+    kept.sort(key=lambda d: _safe_float(d.get("rerank_score", 0)), reverse=True)
+
+    # Safety: keep at least _CLIFF_MIN_KEEP_TOTAL docs total
+    if len(kept) < _CLIFF_MIN_KEEP_TOTAL:
+        kept = reranked[:_CLIFF_MIN_KEEP_TOTAL]
+
+    return kept
+
+
+# ── C4: Routing confidence candidate pool increase ────────────────────────────
+
+def _resolve_candidate_pool(
+    cfg: Dict[str, Any],
+    top_k: int,
+    routing_confidence: float,
+) -> int:
+    """Increase candidate pool when routing is uncertain."""
+    base_pool = max(top_k * 4, 40)
+
+    if (
+        _cfg_bool(cfg, "low_conf_pool_expand_enabled", False)
+        and routing_confidence < 0.65
+    ):
+        expanded = base_pool * 2
+        logger.info(
+            "Low routing confidence (%.3f) → expanding candidate pool %d → %d",
+            routing_confidence, base_pool, expanded,
+        )
+        return expanded
+
+    return base_pool
+
+
+# ── C1: Sibling chunk expansion ──────────────────────────────────────────────
+
+def _expand_with_siblings_pre_rerank(
+    candidates: List[Dict[str, Any]],
+    searcher: Any,
+    *,
+    expand_top_n: int = 3,
+    window: int = 1,
+    max_expansion: int = 6,
+) -> List[Dict[str, Any]]:
+    """Expand top candidates with sibling chunks BEFORE reranking.
+
+    Only expands the top N candidates by fusion score. Siblings are looked up
+    by (source, chunk_index ± window) in the same collection.
+
+    Args:
+        candidates: Raw search results (pre-rerank).
+        searcher: MultiCollectionSearch instance with get_by_metadata().
+        expand_top_n: Only expand top N candidates.
+        window: ±N sibling offset (default ±1).
+        max_expansion: Max total siblings to add.
+
+    Returns:
+        Original candidates + new sibling chunks (deduped by ID).
+    """
+    sorted_candidates = sorted(
+        candidates, key=lambda d: d.get("score", 0.0), reverse=True
+    )
+
+    existing_ids = {str(d.get("id", "")) for d in candidates}
+    new_siblings: List[Dict[str, Any]] = []
+    added = 0
+
+    for doc in sorted_candidates[:expand_top_n]:
+        if added >= max_expansion:
+            break
+        meta = doc.get("metadata", {}) or {}
+        source = meta.get("source")
+        chunk_idx = meta.get("chunk_index")
+        collection = doc.get("collection")
+
+        if source is None or chunk_idx is None or collection is None:
+            continue
+
+        # Ensure chunk_index is int
+        try:
+            chunk_idx = int(chunk_idx)
+        except (TypeError, ValueError):
+            continue
+
+        for offset in range(-window, window + 1):
+            if offset == 0:
+                continue
+            if added >= max_expansion:
+                break
+            target_idx = chunk_idx + offset
+            if target_idx < 0:
+                continue
+            total = meta.get("total_chunks")
+            if total is not None and target_idx >= int(total):
+                continue
+
+            siblings = searcher.get_by_metadata(
+                collection=collection,
+                filters={"metadata.source": source, "metadata.chunk_index": target_idx},
+                limit=1,
+            )
+            for sib in siblings:
+                sib_id = str(sib.get("id", ""))
+                if sib_id and sib_id not in existing_ids:
+                    sib["_expansion_source"] = str(doc.get("id", ""))
+                    sib["score"] = doc.get("score", 0.0) * 0.5  # Lower initial score
+                    new_siblings.append(sib)
+                    existing_ids.add(sib_id)
+                    added += 1
+
+    if new_siblings:
+        logger.info("Sibling expansion: added %d chunks", len(new_siblings))
+
+    return candidates + new_siblings
+
+
 def _answer_has_no_info_signal(answer: str) -> bool:
     """Detect local-RAG no-information answers without another LLM call."""
     folded = _fold_vietnamese(answer)
@@ -384,8 +576,44 @@ def _build_web_search_query(question: str, search_query: str) -> str:
             start_year = end_year - 1
             extras.extend([f"{start_year}3", f"{start_year}-{end_year}"])
 
-    if any(token in folded for token in ("moi nhat", "latest", "recent", "hien tai")):
+    has_freshness = any(token in folded for token in ("moi nhat", "latest", "recent", "hien tai"))
+
+    # ── Academic year injection ──────────────────────────────
+    if has_freshness:
+        if not re.search(r"\b20\d{2}\b", folded):
+            now = datetime.now()
+            current_year = now.year
+            # HUST academic year: Aug → Jul
+            if now.month >= 8:
+                ay_start, ay_end = current_year, current_year + 1
+            else:
+                ay_start, ay_end = current_year - 1, current_year
+
+            # Transition period: "năm học mới/tới" in July+ → next AY
+            wants_next_year = any(kw in folded for kw in (
+                "nam hoc moi", "nam hoc toi",
+                "ky toi", "ki toi", "hoc ky toi",
+            ))
+            if wants_next_year and now.month >= 7:
+                ay_start, ay_end = current_year, current_year + 1
+
+            extras.append(f"năm học {ay_start}-{ay_end}")
         extras.append("CTT ĐHBKHN")
+
+    # For registration-specific freshness queries, add key HUST academic-planning
+    # terms so Tavily finds the official registration notice rather than generic pages.
+    has_registration = any(
+        token in folded
+        for token in ("dang ki", "dang ky", "ke hoach hoc", "lich dang", "lich trinh")
+    )
+    if has_registration and has_freshness:
+        if "dang ky ke hoach" not in folded and "ke hoach hoc tap" not in folded:
+            extras.append("đăng ký kế hoạch học tập")
+
+    # ── Content-type signal ──────────────────────────────────
+    if any(kw in folded for kw in ("lich", "ke hoach", "thong bao", "dang ky")):
+        if "thong bao" not in folded and "ke hoach" not in folded:
+            extras.append("thông báo kế hoạch")
 
     for extra in extras:
         if extra and extra.lower() not in web_query.lower():
@@ -425,7 +653,49 @@ def _build_pre_generation_web_decision(
     reasons: List[str] = []
     if no_sources:
         reasons.append("no_sources")
-    if freshness_query:
+    # freshness_query no longer unconditionally triggers Tavily: suppress when
+    # local kehoach evidence already exists with acceptable quality.  The
+    # freshness pre-filter (sort_by_date_desc) already fetched latest-dated IDs
+    # from ES, so those results are fresh by construction.  Tavily remains the
+    # fallback for: no sources, low/no reranker confidence, or explicit dynamic
+    # queries without local evidence.
+    local_kehoach_docs = [
+        d for d in reranked
+        if isinstance(d, dict) and d.get("collection") == "kehoach"
+    ]
+    freshness_acceptable_local = bool(local_kehoach_docs) and (
+        high_local_confidence or best_local_score is None
+    )
+
+    # ── C3: Freshness date_str validation ──────────────────────────
+    # If kehoach docs exist but none have date_str, we can't verify freshness
+    # → conservative: allow Tavily (don't suppress)
+    if freshness_acceptable_local and freshness_query and _cfg_bool(
+        cfg, "freshness_tavily_check_enabled", False
+    ):
+        dates = [
+            d.get("metadata", {}).get("date_str")
+            for d in local_kehoach_docs
+            if d.get("metadata", {}).get("date_str")
+        ]
+        if not dates:
+            freshness_acceptable_local = False
+            logger.info(
+                "Freshness override: %d kehoach docs but none have date_str, "
+                "allowing Tavily (conservative)",
+                len(local_kehoach_docs),
+            )
+        else:
+            has_recent = any(_is_date_within_days(ds, days=90) for ds in dates)
+            if not has_recent:
+                freshness_acceptable_local = False
+                logger.info(
+                    "Freshness override: kehoach dates %s all >90 days, "
+                    "allowing Tavily",
+                    dates,
+                )
+
+    if freshness_query and not freshness_acceptable_local:
         reasons.append("freshness_query")
     if dynamic_query and not high_local_confidence and _cfg_bool(cfg, "web_fallback_on_dynamic", True):
         reasons.append("dynamic_query")
@@ -628,17 +898,54 @@ def _merge_search_trace(
             events.append(incoming_weights)
 
 
+def _order_with_siblings(reranked: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Order docs: originals in rerank order first, then siblings grouped by parent.
+
+    This prevents the lost-in-the-middle effect where siblings at intermediate
+    positions compete with more relevant docs for LLM attention.
+    """
+    originals = []
+    sibling_map: Dict[str, List[Dict[str, Any]]] = {}
+
+    for doc in reranked:
+        expansion_source = doc.get("_expansion_source")
+        if expansion_source:
+            sibling_map.setdefault(expansion_source, []).append(doc)
+        else:
+            originals.append(doc)
+
+    # Siblings: grouped by parent, sorted by chunk_index within group
+    sibling_section: List[Dict[str, Any]] = []
+    for doc in originals:
+        doc_id = str(doc.get("id", ""))
+        siblings = sibling_map.pop(doc_id, [])
+        siblings.sort(
+            key=lambda s: s.get("metadata", {}).get("chunk_index", 0)
+        )
+        sibling_section.extend(siblings)
+
+    # Orphan siblings (parent cut by cliff)
+    for orphans in sibling_map.values():
+        sibling_section.extend(orphans)
+
+    return originals + sibling_section
+
+
 def _format_context(
     documents: List[Dict[str, Any]],
     *,
     per_doc_char_limit: int = _DEFAULT_CONTEXT_DOC_CHAR_LIMIT,
     total_char_budget: int = _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET,
+    sibling_per_doc_limit: int = 800,
     trace_out: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Convert retrieved documents into a token-budgeted context string.
 
     Limits per-document and total context size to prevent context-length
     errors and keep LLM latency predictable regardless of chunk sizes.
+
+    When sibling expansion is active, siblings (docs with _expansion_source)
+    get a separate, lower per-doc limit to preserve budget for primary docs.
     """
     parts: List[str] = []
     used = 0
@@ -665,8 +972,12 @@ def _format_context(
         meta_str = f" [{', '.join(meta_parts)}]" if meta_parts else ""
         
         text = str(doc.get("text", "") or "").strip()
-        if len(text) > per_doc_char_limit:
-            text = text[:per_doc_char_limit] + "\u2026"  # ellipsis
+        # Siblings get reduced per-doc limit (C2: 70/30 budget split)
+        effective_limit = (
+            sibling_per_doc_limit if doc.get("_expansion_source") else per_doc_char_limit
+        )
+        if len(text) > effective_limit:
+            text = text[:effective_limit] + "\u2026"  # ellipsis
         chunk = f"--- Văn bản: {title}{meta_str}\n{text}"
         separator_cost = 7 if parts else 0  # len("\n\n---\n\n")
         if used + len(chunk) + separator_cost > total_char_budget:
@@ -719,6 +1030,14 @@ def _resolve_context_budget(
         base_budget * _LIST_TOP_K_MULTIPLIER,
     )
     total_budget = list_budget if top_k_value > base_top_k else base_budget
+
+    # C2: Expand budget when sibling expansion is active
+    if _cfg_bool(cfg, "sibling_expansion_enabled", False):
+        expanded_budget = _cfg_int(
+            cfg, "context_total_char_budget_with_expansion", 16000
+        )
+        total_budget = max(total_budget, expanded_budget)
+
     return per_doc_limit, total_budget
 
 
@@ -1268,7 +1587,11 @@ def rag_flow(
         timings_ms["dynamic_web_query"] = 1.0
 
     top_k_value = _resolve_top_k(cfg.get("top_k", 5), question)
-    raw_candidate_k = _retrieval_candidate_k(top_k_value)
+    # C4: Expand candidate pool when routing confidence is low
+    routing_confidence = float(
+        routing_result.get("confidence", 1.0) if routing_result else 1.0
+    )
+    raw_candidate_k = _resolve_candidate_pool(cfg, top_k_value, routing_confidence)
     major_compare_plan = build_major_comparison_subqueries_for_retrieval(
         search_query
     )
@@ -1478,6 +1801,22 @@ def rag_flow(
 
     logger.info("Retrieved %d raw candidates", len(raw_results))
 
+    # 4.5 Sibling chunk expansion (C1) — BEFORE rerank
+    if _cfg_bool(cfg, "sibling_expansion_enabled", False) and raw_results:
+        expansion_t0 = time.perf_counter()
+        pre_expansion_count = len(raw_results)
+        raw_results = _expand_with_siblings_pre_rerank(
+            candidates=raw_results,
+            searcher=searcher,
+            expand_top_n=3,
+            window=1,
+            max_expansion=6,
+        )
+        timings_ms["sibling_expansion"] = _elapsed_ms(expansion_t0)
+        siblings_added = len(raw_results) - pre_expansion_count
+        timings_ms["sibling_expansion_hit"] = 1.0 if siblings_added > 0 else 0.0
+        timings_ms["sibling_expansion_count"] = float(siblings_added)
+
     # 5. Rerank
     rerank_t0 = time.perf_counter()
     
@@ -1559,6 +1898,14 @@ def rag_flow(
         resolve_t0 = time.perf_counter()
         reranked = reference_resolver.resolve(reranked, query=retrieval_query)
         timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
+
+    # 5.3 Per-collection Score Cliff (B1)
+    if _cfg_bool(cfg, "score_cliff_enabled", False):
+        pre_cliff_count = len(reranked)
+        reranked = _apply_score_cliff_per_collection(reranked)
+        cliff_dropped = pre_cliff_count - len(reranked)
+        timings_ms["cliff_triggered"] = 1.0 if cliff_dropped > 0 else 0.0
+        timings_ms["cliff_dropped_count"] = float(cliff_dropped)
 
     # ── LLM Response Cache Check (Phase 2) ─────────────────────────
     web_fallback_used = False
@@ -1650,10 +1997,14 @@ def rag_flow(
             doc for doc in reranked
             if str(doc.get("collection") or "").lower() != "web"
         ]
+    # C2: Reorder so siblings appear after their parents
+    if _cfg_bool(cfg, "sibling_expansion_enabled", False):
+        context_documents = _order_with_siblings(context_documents)
     context = _format_context(
         context_documents,
         per_doc_char_limit=context_doc_limit,
         total_char_budget=context_char_budget,
+        sibling_per_doc_limit=_cfg_int(cfg, "sibling_per_doc_limit", 800),
         trace_out=context_trace,
     )
     context = _merge_local_and_web_context(context, web_context_override)
@@ -2059,7 +2410,11 @@ def rag_flow_stream(
         )
 
     top_k_value = _resolve_top_k(cfg.get("top_k", 5), question)
-    raw_candidate_k = _retrieval_candidate_k(top_k_value)
+    # C4: Expand candidate pool when routing confidence is low
+    routing_confidence_stream = float(
+        routing_result.get("confidence", 1.0) if routing_result else 1.0
+    )
+    raw_candidate_k = _resolve_candidate_pool(cfg, top_k_value, routing_confidence_stream)
     major_compare_plan = build_major_comparison_subqueries_for_retrieval(
         search_query
     )
@@ -2235,6 +2590,22 @@ def rag_flow_stream(
                     top_k=raw_candidate_k,
                 )
 
+    # 4.5 Sibling chunk expansion (C1) — BEFORE rerank (streaming flow)
+    if _cfg_bool(cfg, "sibling_expansion_enabled", False) and raw_results:
+        expansion_t0 = time.perf_counter()
+        pre_expansion_count = len(raw_results)
+        raw_results = _expand_with_siblings_pre_rerank(
+            candidates=raw_results,
+            searcher=searcher,
+            expand_top_n=3,
+            window=1,
+            max_expansion=6,
+        )
+        timings_ms["sibling_expansion"] = _elapsed_ms(expansion_t0)
+        siblings_added = len(raw_results) - pre_expansion_count
+        timings_ms["sibling_expansion_hit"] = 1.0 if siblings_added > 0 else 0.0
+        timings_ms["sibling_expansion_count"] = float(siblings_added)
+
     rerank_t0 = time.perf_counter()
     
     rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
@@ -2313,6 +2684,14 @@ def rag_flow_stream(
         reranked = reference_resolver.resolve(reranked, query=retrieval_query)
         timings_ms["reference_resolver"] = _elapsed_ms(resolve_t0)
 
+    # 5.3 Per-collection Score Cliff (B1)
+    if _cfg_bool(cfg, "score_cliff_enabled", False):
+        pre_cliff_count = len(reranked)
+        reranked = _apply_score_cliff_per_collection(reranked)
+        cliff_dropped = pre_cliff_count - len(reranked)
+        timings_ms["cliff_triggered"] = 1.0 if cliff_dropped > 0 else 0.0
+        timings_ms["cliff_dropped_count"] = float(cliff_dropped)
+
     web_fallback_used = False
     web_decision = _build_pre_generation_web_decision(
         question=question,
@@ -2362,10 +2741,14 @@ def rag_flow_stream(
             doc for doc in reranked
             if str(doc.get("collection") or "").lower() != "web"
         ]
+    # C2: Reorder so siblings appear after their parents (streaming)
+    if _cfg_bool(cfg, "sibling_expansion_enabled", False):
+        context_documents = _order_with_siblings(context_documents)
     context = _format_context(
         context_documents,
         per_doc_char_limit=context_doc_limit,
         total_char_budget=context_char_budget,
+        sibling_per_doc_limit=_cfg_int(cfg, "sibling_per_doc_limit", 800),
         trace_out=context_trace,
     )
     context = _merge_local_and_web_context(context, web_context_override)

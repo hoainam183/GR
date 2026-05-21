@@ -2,404 +2,674 @@
 \begin{document}
 
 \section{Mở đầu chương}
-Chương này trình bày cơ sở lý thuyết và các kiến thức nền tảng phục vụ cho việc xây dựng hệ thống RAG (Retrieval-Augmented Generation) Chatbot hỏi-đáp tài liệu quy định đào tạo tại Đại học Bách Khoa Hà Nội. Nội dung chương bao gồm: phân tích bối cảnh và đặc điểm bài toán, khảo sát các nghiên cứu và hệ thống tương tự, và trình bày các kiến thức nền tảng cốt lõi: xử lý ngôn ngữ tự nhiên (NLP), mô hình ngôn ngữ lớn (LLM), kỹ thuật Retrieval-Augmented Generation, vector embedding, và các kỹ thuật xử lý văn bản.
 
-\section{Phân tích bài toán và bối cảnh ứng dụng}
+Chương này trình bày cơ sở lý thuyết phục vụ việc xây dựng trợ lý học vụ
+\textit{Retrieval-Augmented Generation} (RAG) trong đồ án. Khác với một chatbot
+chỉ sinh văn bản từ mô hình ngôn ngữ, hệ thống RAG phải kết hợp nhiều lớp kiến
+thức: xử lý tài liệu, chia đoạn và metadata, biểu diễn ngữ nghĩa, tìm kiếm từ
+khóa, hợp nhất kết quả truy hồi, xếp hạng lại, hiểu truy vấn hội thoại, sinh câu
+trả lời có căn cứ và đánh giá chất lượng.
 
-\subsection{Thực trạng tra cứu thông tin tại trường đại học}
-Tại các trường đại học có quy mô lớn như ĐHBK Hà Nội, hệ thống văn bản quy định đào tạo rất phong phú và phức tạp, bao gồm nhiều loại tài liệu khác nhau: quy chế đào tạo, quy định học bổng, quy định ngoại ngữ, chương trình đào tạo, sổ tay sinh viên, v.v. Sinh viên thường gặp khó khăn trong việc:
-\begin{itemize}
-    \item Tìm kiếm thông tin trong các văn bản PDF dài hàng chục trang với cấu trúc pháp lý phức tạp;
-    \item Hiểu đúng ngữ cảnh và phạm vi áp dụng của các điều khoản;
-    \item Xác định văn bản nào còn hiệu lực, áp dụng cho khóa nào;
-    \item Liên kết thông tin từ nhiều nguồn văn bản khác nhau (quy chế đào tạo, quy định ngoại ngữ, chương trình đào tạo).
-\end{itemize}
+Nội dung của chương được tổ chức theo các nền tảng đang được sử dụng trong hệ
+thống \texttt{RAG\_v2}: đặc thù dữ liệu học vụ; sự khác biệt giữa tìm kiếm truyền
+thống và RAG; mô hình ngôn ngữ lớn; embedding và vector database; BM25 và hybrid
+retrieval; metadata-aware retrieval; query routing, reflection và decomposition;
+reranking; chunking tài liệu; Agentic RAG; web fallback; truy vết và đánh giá.
+Các phần triển khai cụ thể của từng module sẽ được trình bày ở các chương sau.
 
-\subsection{Phân loại nguồn dữ liệu}
-Dữ liệu phục vụ hệ thống chatbot được phân thành 3 nhóm chính:
-\begin{enumerate}
-    \item \textbf{Văn bản quy định đào tạo (quydinh):} Các văn bản pháp lý chính thức của trường dưới dạng PDF, bao gồm quy chế đào tạo, quy định học bổng, quy định ngoại ngữ, quy định điểm rèn luyện, v.v. Đây là nguồn thông tin có cấu trúc phân cấp rõ ràng (Chương -- Điều -- Khoản -- Điểm).
-    \item \textbf{Chương trình đào tạo (ctdt):} Các tài liệu mô tả chương trình đào tạo theo ngành, bao gồm khung chương trình, danh mục học phần, tiến trình học tập. Dữ liệu này có cấu trúc dạng bảng và markdown heading.
-    \item \textbf{Thông tin sinh viên (stsv):} Dữ liệu từ Cổng thông tin sinh viên (\url{https://ctt-sv.hust.edu.vn}), dưới dạng JSON, bao gồm hướng dẫn thủ tục, thông báo, và các thông tin hỗ trợ sinh viên.
-\end{enumerate}
+\section{Bối cảnh bài toán hỏi đáp học vụ}
 
-\subsection{Mục tiêu và yêu cầu của hệ thống}
-Hệ thống cần giải quyết các yêu cầu sau:
-\begin{itemize}
-    \item Xử lý và trích xuất nội dung từ nhiều định dạng tài liệu (PDF, JSON, Markdown);
-    \item Chia nhỏ văn bản thành các chunks có ngữ nghĩa, bảo toàn cấu trúc và metadata;
-    \item Lưu trữ và tìm kiếm hiệu quả bằng kết hợp vector embedding và keyword search;
-    \item Sinh câu trả lời chính xác với trích dẫn nguồn cụ thể;
-    \item Hỗ trợ tiếng Việt với độ chính xác cao, xử lý được đặc thù ngôn ngữ.
-\end{itemize}
+\subsection{Đặc thù nguồn tri thức học vụ}
 
-\section{Các nghiên cứu và hệ thống liên quan}
+Nguồn tri thức học vụ có tính dị thể cao. Một câu hỏi của sinh viên có thể liên
+quan đến quy định ổn định trong nhiều năm, chương trình đào tạo của một ngành,
+kế hoạch theo học kỳ hoặc thủ tục hỗ trợ sinh viên. Vì vậy, dữ liệu không nên
+được xem là một tập văn bản đồng nhất. Trong hệ thống hiện tại, các nguồn tri
+thức chính được tổ chức theo bốn miền:
 
-\subsection{Sự phát triển của hệ thống hỏi-đáp}
-
-\subsubsection{Hệ thống hỏi-đáp truyền thống}
-Các hệ thống hỏi-đáp trước đây chủ yếu hoạt động theo nguyên tắc:
-\begin{itemize}
-    \item \textbf{Keyword matching}: Tìm kiếm dựa trên từ khóa chính xác, đơn giản nhưng thiếu khả năng hiểu ngữ nghĩa;
-    \item \textbf{TF-IDF}: Đánh giá độ quan trọng của từ trong tài liệu dựa trên tần suất xuất hiện, cải thiện hơn keyword matching;
-    \item \textbf{BM25}: Cải tiến TF-IDF cho information retrieval, bổ sung chuẩn hóa độ dài tài liệu và điều chỉnh độ bão hòa tần suất từ.
-\end{itemize}
-
-\subsubsection{Hệ thống RAG hiện đại}
-Ngày nay, các hệ thống RAG được phát triển dựa trên sự kết hợp giữa dense retrieval và large language models:
-\begin{itemize}
-    \item \textbf{Dense Retrieval}: Sử dụng neural embedding để tìm kiếm theo ngữ nghĩa, vượt qua giới hạn exact keyword matching;
-    \item \textbf{Large Language Models}: Các mô hình ngôn ngữ lớn như GPT, Gemini, LLaMA có khả năng sinh văn bản tự nhiên;
-    \item \textbf{Retrieval-Augmented Generation}: Kết hợp retrieval và generation, giảm hallucination bằng cách cung cấp context thực tế;
-    \item \textbf{Hybrid Search}: Kết hợp sparse retrieval (BM25) và dense retrieval (vector embedding) để tận dụng ưu điểm của cả hai.
-\end{itemize}
-
-\subsection{Điểm mới của đề tài}
-Khác với các hệ thống hiện có, đề tài này có các đóng góp đặc thù:
-\begin{itemize}
-    \item Xây dựng pipeline thu thập và xử lý đa nguồn dữ liệu (PDF pháp lý, tài liệu CTDT, dữ liệu web JSON);
-    \item Thiết kế 4 chiến lược chunking chuyên biệt cho từng loại tài liệu, bảo toàn cấu trúc và metadata;
-    \item Xử lý đặc thù văn bản pháp lý Việt Nam với cấu trúc Chương -- Điều -- Khoản -- Điểm;
-    \item Làm giàu metadata tự động (ngày ban hành, khóa áp dụng, ngành đào tạo, loại tài liệu);
-    \item Kiến trúc đa tầng (Multi-layered Architecture): Kết hợp Embedding -- Hybrid Retrieval -- Reranking -- Query Router \& Reflection -- Agentic Loop -- Self Evaluation -- Tool Search -- MongoDB Memory cho hệ thống sản xuất hoàn chỉnh.
-\end{itemize}
-
-\subsection{Hệ thống Agentic RAG và LangGraph}
-
-\subsubsection{Tại sao cần Agentic RAG?}
-Các hệ thống RAG truyền thống thường hoạt động theo pipeline tuyến tính (Retrieve $\rightarrow$ Augment $\rightarrow$ Generate). Tuy nhiên, với dữ liệu phức tạp tại ĐHBK Hà Nội, pipeline này gặp hạn chế khi xử lý các câu hỏi yêu cầu so sánh giữa các ngành, tổng hợp thông tin từ nhiều văn bản pháp lý khác nhau, hoặc các câu hỏi thiếu thông tin cần làm rõ. Agentic RAG giải quyết vấn đề này bằng cách sử dụng LLM như một "bộ não" điều khiển, có khả năng tự lập kế hoạch, gọi công cụ và tự sửa lỗi.
-
-\subsubsection{Kiến trúc đồ thị với LangGraph}
-Hệ thống sử dụng LangGraph để xây dựng một State Machine cho chatbot. Kiến trúc này cho phép quản lý trạng thái hội thoại phức tạp và định nghĩa các luồng xử lý phi tuyến tính:
-\begin{itemize}
-    \item \textbf{Planner-Executor Path}: Dành cho các câu hỏi phức tạp (so sánh, đa nguồn). Hệ thống sẽ tách câu hỏi gốc thành các câu hỏi con (Decompose), lập kế hoạch tìm kiếm song song (Planning) và thực thi (Executing).
-    \item \textbf{ReAct Loop Path}: Dành cho các câu hỏi thông thường, sử dụng vòng lặp suy luận (Reasoning) và hành động (Acting) để gọi các công cụ tìm kiếm phù hợp.
-    \item \textbf{Reflection Node}: Sau khi có kết quả, hệ thống tự đánh giá xem thông tin đã đủ để trả lời chưa, nếu chưa sẽ tiếp tục vòng lặp tìm kiếm.
-\end{itemize}
-
-\subsubsection{Chiến lược Đa mô hình (Multi-model Strategy)}
-Để tối ưu hóa giữa chi phí, tốc độ và chất lượng, hệ thống áp dụng chiến lược đa mô hình:
-\begin{itemize}
-    \item \textbf{Local LLM (Qwen 2.5 8B)}: Sử dụng cho các tác vụ suy luận nhanh, gọi công cụ trong vòng lặp ReAct, giúp giảm độ trễ và bảo mật dữ liệu.
-    \item \textbf{Cloud LLM (Gemini 2.5 Flash)}: Sử dụng cho các tác vụ cần khả năng hiểu ngữ cảnh lớn (1M+ tokens), lập kế hoạch phức tạp và tổng hợp câu trả lời cuối cùng với độ chính xác cao.
-\end{itemize}
-
-\section{Kiến thức nền tảng}
-
-\subsection{Retrieval-Augmented Generation (RAG)}
-
-\subsubsection{Tổng quan về RAG}
-RAG là kỹ thuật kết hợp retrieval (truy xuất thông tin) với generation (sinh văn bản) để tạo ra câu trả lời chính xác và có cơ sở. Pipeline RAG cơ bản gồm 3 giai đoạn:
-\begin{enumerate}
-    \item \textbf{Indexing}: Chia nhỏ tài liệu thành chunks, tạo embedding vector và lưu vào vector store. Đây là giai đoạn xử lý offline, quyết định chất lượng retrieval.
-    \item \textbf{Retrieval}: Nhận câu hỏi từ người dùng, tạo embedding và tìm kiếm các chunks có ngữ nghĩa liên quan nhất trong vector store.
-    \item \textbf{Generation}: Sử dụng LLM để sinh câu trả lời dựa trên context từ các chunks được truy xuất.
-\end{enumerate}
-
-\subsubsection{Ưu điểm của RAG}
-\begin{itemize}
-    \item Giảm hallucination của LLM bằng cách cung cấp context cụ thể từ tài liệu thực;
-    \item Cho phép cập nhật kiến thức mà không cần retrain mô hình, chỉ cần cập nhật vector store;
-    \item Có thể trích dẫn nguồn cho câu trả lời, tăng độ tin cậy;
-    \item Phù hợp với domain-specific knowledge, đặc biệt là dữ liệu nội bộ tổ chức.
-\end{itemize}
-
-\subsection{Vector Embedding}
-
-\subsubsection{Khái niệm}
-Vector embedding là kỹ thuật chuyển đổi text thành vector số trong không gian nhiều chiều, sao cho các văn bản có ngữ nghĩa tương tự sẽ có vector gần nhau. Khoảng cách giữa các vector (cosine similarity, inner product) phản ánh mức độ tương đồng ngữ nghĩa.
-
-\subsubsection{Mô hình BGE-M3}
-Mô hình \texttt{BAAI/bge-m3} là một trong hai mô hình embedding được sử dụng trong đề tài:
-\begin{itemize}
-    \item \textbf{Multi-Functionality}: Hỗ trợ đồng thời dense retrieval, sparse retrieval (lexical), và multi-vector retrieval (ColBERT);
-    \item \textbf{Multi-Linguality}: Hỗ trợ 100+ ngôn ngữ bao gồm tiếng Việt;
-    \item \textbf{Multi-Granularity}: Xử lý được input từ câu ngắn đến đoạn văn dài (lên đến 8192 tokens);
-    \item Dimension: 1024, state-of-the-art trên nhiều benchmark retrieval đa ngôn ngữ.
-\end{itemize}
-
-\subsubsection{Mô hình E5 Multilingual}
-Mô hình \texttt{intfloat/multilingual-e5-large} là mô hình embedding thứ hai:
-\begin{itemize}
-    \item Dimension: 1024;
-    \item Hỗ trợ 100+ ngôn ngữ bao gồm tiếng Việt;
-    \item Hiệu suất tốt cho semantic similarity và retrieval;
-    \item Sử dụng prefix ``query: '' và ``passage: '' để phân biệt input query và document.
-\end{itemize}
-
-\subsubsection{Ensemble Embedding}
-Đề tài sử dụng kỹ thuật ensemble kết hợp 2 mô hình embedding (BGE-M3 và E5-large) với weighted average để tạo ra vector embedding chất lượng cao hơn so với sử dụng đơn lẻ từng mô hình. Chiến lược này giúp khai thác điểm mạnh của mỗi mô hình: BGE-M3 mạnh về multi-granularity và sparse retrieval, E5 mạnh về semantic similarity.
-
-\subsection{Vector Store}
-
-\subsubsection{Qdrant}
-Qdrant là vector database hiệu năng cao được sử dụng trong đề tài cho dense retrieval:
-\begin{itemize}
-    \item Hỗ trợ lưu trữ nhiều vector fields trong cùng một collection (phù hợp cho ensemble embedding);
-    \item Hỗ trợ metadata filtering kết hợp với vector search;
-    \item Horizontal scaling cho production, hỗ trợ Docker deployment;
-    \item API REST và gRPC, tích hợp tốt với Python.
-\end{itemize}
-
-\subsubsection{Elasticsearch}
-Elasticsearch được sử dụng cho keyword search (BM25) trong hybrid retrieval:
-\begin{itemize}
-    \item Full-text search engine với BM25 scoring mạnh mẽ;
-    \item Custom analyzer cho tiếng Việt (lowercase, unicode folding);
-    \item Hỗ trợ Docker deployment, horizontal scaling;
-    \item Kết hợp với Qdrant tạo thành hybrid search pipeline.
-\end{itemize}
-
-\subsection{Định tuyến câu hỏi (Query Routing)}
-
-\subsubsection{Complexity Router}
-Hệ thống sử dụng bộ định tuyến độ phức tạp để phân loại câu hỏi ngay từ đầu vào, giúp tiết kiệm tài nguyên và tăng độ chính xác:
-\begin{itemize}
-    \item \textbf{Chitchat}: Các câu chào hỏi, cảm ơn được xử lý bằng phản hồi cố định hoặc mô hình nhỏ, không đi vào pipeline RAG.
-    \item \textbf{Simple}: Các câu hỏi đơn lẻ về một chủ đề (ví dụ: "Học bổng loại A cần bao nhiêu điểm?") được đưa vào pipeline RAG tuyến tính để có phản hồi nhanh.
-    \item \textbf{Complex}: Các câu hỏi yêu cầu so sánh (comparison), đa nguồn (multi-source), hoặc kiểm tra điều kiện cá nhân (personal-check) được đưa vào luồng Agentic RAG.
-\end{itemize}
-
-\subsubsection{Heuristics và Pattern Matching}
-Việc định tuyến dựa trên sự kết hợp giữa các biểu thức chính quy (Regex) mạnh mẽ để nhận diện mã ngành (IT-E6, MI1...), mã khóa (K65, K66...) và các thuật toán heuristic dựa trên độ dài câu hỏi, số lượng câu hỏi con trong một truy vấn.
-
-\subsection{Thuật toán BM25 (Best Matching 25)}
-
-\subsubsection{Tổng quan}
-BM25 là thuật toán xếp hạng tài liệu dựa trên từ khóa, được phát triển từ mô hình xác suất. BM25 là cải tiến của TF-IDF với các tham số điều chỉnh để xử lý tốt hơn độ dài tài liệu và tần suất từ.
-
-\subsubsection{Công thức BM25}
-Điểm BM25 cho một truy vấn $Q$ gồm các từ $q_1, q_2, ..., q_n$ với tài liệu $D$:
-
-\begin{equation}
-\text{BM25}(D, Q) = \sum_{i=1}^{n} \text{IDF}(q_i) \cdot \frac{f(q_i, D) \cdot (k_1 + 1)}{f(q_i, D) + k_1 \cdot (1 - b + b \cdot \frac{|D|}{avgdl})}
-\end{equation}
-
-Trong đó:
-\begin{itemize}
-    \item $f(q_i, D)$: Tần suất từ $q_i$ trong tài liệu $D$
-    \item $|D|$: Độ dài tài liệu $D$
-    \item $avgdl$: Độ dài trung bình của tất cả tài liệu
-    \item $k_1$: Tham số điều khiển độ bão hòa tần suất từ (thường 1.2--2.0)
-    \item $b$: Tham số chuẩn hóa độ dài tài liệu (0--1, thường 0.75)
-\end{itemize}
-
-\subsubsection{IDF trong BM25}
-\begin{equation}
-\text{IDF}(q_i) = \ln \left( \frac{N - n(q_i) + 0.5}{n(q_i) + 0.5} + 1 \right)
-\end{equation}
-
-Trong đó:
-\begin{itemize}
-    \item $N$: Tổng số tài liệu
-    \item $n(q_i)$: Số tài liệu chứa từ $q_i$
-\end{itemize}
-
-\subsubsection{Ưu điểm BM25 cho văn bản pháp lý}
-\begin{itemize}
-    \item Tìm kiếm chính xác từ khóa như mã điều khoản (``Điều 15''), con số cụ thể (``3.6 GPA'');
-    \item Xử lý tốt các truy vấn phủ định (``không được xét'', ``không đủ điều kiện'');
-    \item Không cần GPU, tốc độ nhanh, phù hợp triển khai sản xuất;
-    \item Hiệu quả với các thuật ngữ chuyên ngành ít xuất hiện (high IDF score).
-\end{itemize}
-
-\subsection{Hybrid Search và Reciprocal Rank Fusion}
-
-\subsubsection{Tại sao cần Hybrid Search?}
-Semantic search (dense retrieval) và BM25 (sparse retrieval) có điểm mạnh bổ sung cho nhau:
-
-\begin{itemize}
-    \item \textbf{Semantic Search}: Hiểu ngữ nghĩa, tìm được synonym và paraphrase, nhưng yếu với từ khóa cụ thể và thuật ngữ chuyên ngành;
-    \item \textbf{BM25}: Exact keyword matching, tốt với thuật ngữ chuyên ngành và truy vấn phủ định, nhưng yếu với synonym và paraphrase.
-\end{itemize}
-
-Hybrid search kết hợp cả hai phương pháp để tận dụng điểm mạnh và bù đắp điểm yếu lẫn nhau.
-
-\subsubsection{Reciprocal Rank Fusion (RRF)}
-RRF là phương pháp kết hợp kết quả từ nhiều hệ thống retrieval mà không cần normalize điểm số, rất phù hợp khi kết hợp các hệ thống có thang điểm khác nhau (cosine similarity vs BM25 score).
-
-\textbf{Công thức RRF:}
-\begin{equation}
-\text{RRF}(d) = \sum_{r \in R} \frac{1}{k + \text{rank}_r(d)}
-\end{equation}
-
-Trong đó:
-\begin{itemize}
-    \item $d$: Document cần tính điểm
-    \item $R$: Tập các hệ thống retrieval (semantic, BM25)
-    \item $\text{rank}_r(d)$: Hạng của document $d$ trong hệ thống $r$
-    \item $k$: Hằng số smoothing (thường 60), điều chỉnh mức độ ưu tiên cho các vị trí đầu
-\end{itemize}
-
-\subsection{Cross-encoder Reranking}
-
-\subsubsection{Khái niệm Cross-encoder}
-Cross-encoder là mô hình transformer xử lý đồng thời cặp (query, document) và cho ra điểm relevance trực tiếp. Khác với bi-encoder (embedding riêng query và document rồi tính similarity), cross-encoder cho phép attention hai chiều giữa query và document, cho độ chính xác cao hơn.
-
-\subsubsection{So sánh Bi-encoder và Cross-encoder}
 \begin{table}[h]
 \centering
-\begin{tabular}{|l|l|l|}
+\begin{tabular}{|l|p{4.2cm}|p{6.3cm}|}
 \hline
-\textbf{Đặc điểm} & \textbf{Bi-encoder} & \textbf{Cross-encoder} \\
+\textbf{Collection} & \textbf{Nội dung chính} & \textbf{Đặc điểm truy hồi} \\
 \hline
-Tốc độ & Nhanh (pre-compute embeddings) & Chậm (pair-wise scoring) \\
+\texttt{ctdt} & Chương trình đào tạo, học phần, tín chỉ, học phần tiên quyết &
+Phụ thuộc mạnh vào ngành, mã ngành và cấu trúc bảng học phần. \\
 \hline
-Độ chính xác & Trung bình & Cao \\
+\texttt{quydinh} & Quy chế, học bổng, tốt nghiệp, ngoại ngữ, phạm vi áp dụng &
+Cần chú ý khóa áp dụng, ngành áp dụng, hiệu lực văn bản và tham chiếu điều khoản. \\
 \hline
-Khả năng scale & Tốt (vector index) & Kém (O(n) scoring) \\
+\texttt{kehoach} & Kế hoạch, lịch, thông báo, thời hạn đăng ký &
+Có tính thời điểm; ngày đăng bài và yêu cầu ``mới nhất'' ảnh hưởng đến kết quả. \\
 \hline
-Use case & Initial retrieval (stage 1) & Reranking top-k (stage 2) \\
+\texttt{stsv} & Sổ tay, biểu mẫu, thủ tục và dịch vụ hỗ trợ sinh viên &
+Nội dung thường mang tính hướng dẫn, cấu trúc khác văn bản quy định. \\
 \hline
 \end{tabular}
-\caption{So sánh Bi-encoder và Cross-encoder}
+\caption{Các miền tri thức chính của trợ lý học vụ}
 \end{table}
 
-\subsubsection{Mô hình BAAI/bge-reranker-v2-m3}
-Đề tài sử dụng mô hình \texttt{BAAI/bge-reranker-v2-m3} cho reranking:
+Sự phân miền dữ liệu giúp giảm nhiễu khi tìm kiếm. Chẳng hạn, câu hỏi về học phần
+tiên quyết thường cần ưu tiên \texttt{ctdt}, trong khi câu hỏi về lịch đăng ký
+học tập gần nhất cần ưu tiên \texttt{kehoach}. Nếu chỉ gom tất cả tài liệu vào
+một kho chung, các đoạn văn có từ khóa giống nhau nhưng khác mục đích có thể cạnh
+tranh sai trong danh sách kết quả.
+
+\subsection{Đặc điểm truy vấn của sinh viên}
+
+Truy vấn học vụ thường có các đặc điểm sau:
+
 \begin{itemize}
-    \item Multilingual: Hỗ trợ 100+ ngôn ngữ bao gồm tiếng Việt;
-    \item State-of-the-art trên các benchmark reranking;
-    \item Context length: 512 tokens;
-    \item Đầu ra: Điểm relevance score cho cặp (query, document).
+    \item người dùng hỏi bằng tiếng Việt tự nhiên, không nhất thiết dùng đúng từ
+    khóa xuất hiện trong tài liệu;
+    \item nhiều truy vấn chứa thực thể có cấu trúc như mã ngành, mã học phần,
+    khóa sinh viên, học kỳ hoặc năm học;
+    \item câu hỏi nối tiếp có thể dùng đại từ hoặc cụm tham chiếu như ``môn đó'',
+    ``ngành của em'', ``so sánh với chương trình kia'';
+    \item một truy vấn có thể cần nhiều nguồn, ví dụ vừa hỏi chương trình học vừa
+    hỏi điều kiện áp dụng của quy định;
+    \item câu hỏi về kế hoạch hoặc thời hạn có thể yêu cầu dữ liệu mới hơn dữ liệu
+    đã lập chỉ mục.
 \end{itemize}
 
-\subsection{Large Language Models (LLM)}
+Các đặc điểm này tạo ra yêu cầu vừa truy hồi theo ngữ nghĩa, vừa giữ được các từ
+khóa chính xác, đồng thời khai thác metadata và lịch sử hội thoại một cách có
+kiểm soát.
 
-\subsubsection{Gemini 2.5 Flash}
-Mô hình LLM được sử dụng trong đề tài để sinh câu trả lời:
+\subsection{Yêu cầu đối với một hệ thống trả lời có căn cứ}
+
+Một trợ lý học vụ cần ưu tiên tính kiểm chứng thay vì chỉ sinh câu trả lời trôi
+chảy. Với miền tri thức này, một hệ thống hỏi đáp cần:
+
 \begin{itemize}
-    \item Phát triển bởi Google DeepMind;
-    \item Hỗ trợ tiếng Việt tốt, hiểu ngữ cảnh pháp lý;
-    \item Tốc độ inference nhanh, phù hợp cho chatbot real-time;
-    \item Context window lớn (1M+ tokens), xử lý được nhiều context passages;
-    \item API dễ tích hợp qua \texttt{google-generativeai} SDK.
+    \item truy hồi các đoạn tài liệu liên quan trước khi sinh câu trả lời;
+    \item giữ thông tin nguồn, collection và metadata của đoạn truy hồi;
+    \item phân biệt văn bản hiện hành với văn bản đã bị thay thế khi có lineage;
+    \item xử lý dẫn chiếu trong văn bản quy định như điều và khoản;
+    \item tránh đưa thông tin cá nhân hoặc phạm vi học kỳ cũ vào truy vấn chung
+    nếu câu hỏi hiện tại không yêu cầu;
+    \item có quy trình đánh giá riêng cho factual retrieval hiện hành và cho chất
+    lượng hội thoại lịch sử.
 \end{itemize}
 
-\subsection{Kỹ thuật xử lý Metadata đặc thù}
+\section{Từ tìm kiếm truyền thống đến Retrieval-Augmented Generation}
 
-\subsubsection{Lọc Metadata đa tầng (Fallback Chain)}
-Với đặc thù của ĐHBK Hà Nội, các quy định thường áp dụng cho các Khóa (Cohort) và Ngành (Major) cụ thể. Hệ thống triển khai cơ chế lọc metadata đa tầng trên Elasticsearch trước khi tìm kiếm vector:
+\subsection{Hỏi đáp dựa trên từ khóa}
+
+Các hệ thống tra cứu truyền thống thường bắt đầu từ keyword matching, TF--IDF
+hoặc BM25. Nhóm phương pháp này phù hợp với truy vấn chứa cụm từ chính xác, mã
+học phần, tên biểu mẫu hoặc số điều khoản. Tuy nhiên, nếu người dùng diễn đạt
+khác tài liệu, tìm kiếm từ khóa có thể bỏ sót đoạn văn phù hợp.
+
+Ví dụ, câu hỏi ``học phần nào phải học trước môn này'' có thể không chứa cụm từ
+``học phần tiên quyết'' xuất hiện trong tài liệu. Trong trường hợp đó, tìm kiếm
+ngữ nghĩa giúp thu hẹp khoảng cách diễn đạt giữa người dùng và văn bản.
+
+\subsection{Mô hình ngôn ngữ lớn và giới hạn của sinh văn bản thuần túy}
+
+Mô hình ngôn ngữ lớn (Large Language Model, LLM) có khả năng tổng hợp ngữ cảnh,
+diễn đạt câu trả lời tự nhiên và xử lý nhiều dạng câu hỏi. Tuy nhiên, nếu chỉ dựa
+vào tri thức tham số của mô hình, hệ thống có thể gặp các vấn đề:
+
+\begin{itemize}
+    \item thông tin học vụ có thể thay đổi theo văn bản hoặc theo học kỳ;
+    \item mô hình không biết trạng thái hiện tại của kho dữ liệu nội bộ;
+    \item câu trả lời khó kiểm chứng nếu không đi kèm nguồn;
+    \item mô hình có thể tạo nội dung nghe hợp lý nhưng không có căn cứ trong tài
+    liệu truy hồi.
+\end{itemize}
+
+Do đó, LLM trong đồ án đóng vai trò sinh và tổng hợp câu trả lời từ context đã
+được truy hồi, thay vì thay thế hoàn toàn kho tri thức.
+
+\subsection{Nguyên lý của RAG}
+
+RAG kết hợp hai quá trình:
+
 \begin{enumerate}
-    \item Tìm kiếm chính xác theo mã ngành/mã khóa được cung cấp.
-    \item Nếu không thấy, mở rộng tìm kiếm theo tên ngành (fuzzy match).
-    \item Nếu vẫn không thấy, tìm kiếm các văn bản dùng chung (generic) không gắn mã ngành/khóa cụ thể.
-    \item Nếu tất cả đều thất bại, hệ thống mới thực hiện tìm kiếm toàn cục.
+    \item \textbf{Retrieval:} chọn các đoạn dữ liệu có liên quan đến truy vấn từ
+    kho đã lập chỉ mục;
+    \item \textbf{Augmented Generation:} đưa các đoạn đó vào prompt để LLM sinh
+    câu trả lời có căn cứ.
 \end{enumerate}
 
-\subsubsection{Query Manipulation}
-Để tối ưu cho các mô hình embedding và reranker, query của người dùng được xử lý qua các bước:
+Một vòng đời RAG đầy đủ thường gồm ba pha:
+
 \begin{itemize}
-    \item \textbf{Query Stripping}: Loại bỏ các thông tin về ngành/khóa khỏi câu truy vấn text sau khi đã áp dụng metadata filter, giúp mô hình embedding tập trung vào nội dung chính (ví dụ: "Quy định ngoại ngữ của IT-E6" $\rightarrow$ "Quy định ngoại ngữ").
-    \item \textbf{Query Expansion}: Ngược lại, đối với mô hình Reranker (thường là Cross-encoder), các mã ngành viết tắt được mở rộng thành tên đầy đủ (IT1 $\rightarrow$ Khoa học máy tính) vì các mô hình này hiểu ngôn ngữ tự nhiên tốt hơn các mã ký hiệu nội bộ.
+    \item \textbf{Indexing:} chuyển đổi tài liệu, chia chunk, tạo embedding, lưu
+    vector và metadata vào các kho truy hồi;
+    \item \textbf{Retrieval:} hiểu truy vấn, chọn miền dữ liệu, áp dụng filter,
+    tìm candidate và xếp hạng candidate;
+    \item \textbf{Generation:} định dạng context, sinh câu trả lời, trả nguồn và
+    metadata cần thiết cho giao diện hoặc hệ thống đánh giá.
 \end{itemize}
 
-\subsection{Hệ thống Đánh giá Tự động (Self-Evaluation)}
-Để đảm bảo chất lượng phản hồi trong môi trường sản xuất, hệ thống tích hợp bộ đánh giá tự động dựa trên 3 chỉ số chính:
+RAG có ưu điểm là cập nhật tri thức bằng cách cập nhật kho dữ liệu thay vì phải
+huấn luyện lại LLM sau mỗi lần thay đổi văn bản. Tuy nhiên, RAG không tự bảo đảm
+đúng nếu bước chunking, routing hoặc retrieval đưa vào context sai. Vì vậy chất
+lượng truy hồi là điều kiện quan trọng của chất lượng câu trả lời.
+
+\section{Xử lý tài liệu và chunking}
+
+\subsection{Chuyển đổi tài liệu sang dạng có thể truy hồi}
+
+Tài liệu đầu vào của hệ thống có thể là PDF, Markdown, HTML đã làm sạch hoặc dữ
+liệu dạng JSON từ crawler. Với PDF, bước chuyển đổi sang text hoặc Markdown cần
+giữ càng nhiều cấu trúc càng tốt, đặc biệt là heading, bảng, danh sách và thứ bậc
+điều khoản.
+
+PDF tiếng Việt có thể phát sinh các vấn đề như font encoding không đồng nhất,
+header/footer lặp lại, bảng dài, cột nhiều vùng, scan hoặc ký tự rác do bước
+trích xuất. Vì vậy quá trình convert và clean ảnh hưởng trực tiếp đến chất lượng
+chunking và retrieval. Trong mã nguồn hiện tại, luồng admin upload dùng các
+converter như \texttt{pymupdf4llm} và \texttt{docling}; các pipeline ngoại tuyến
+và chunker pháp lý còn hỗ trợ những dữ liệu đầu ra kiểu OCR cho tài liệu quy
+định.
+
+\subsection{Khái niệm chunk}
+
+Chunk là đơn vị nội dung được lưu và truy hồi trong hệ thống RAG. Nếu chunk quá
+ngắn, nội dung mất ngữ cảnh; nếu chunk quá dài, đoạn văn chứa nhiều thông tin
+không liên quan và làm giảm độ chính xác khi đưa vào prompt. Vì vậy một chunk tốt
+cần cân bằng:
+
 \begin{itemize}
-    \item \textbf{Relevance (Độ liên quan)}: Đánh giá xem câu trả lời có thực sự giải quyết đúng vấn đề người dùng hỏi hay không.
-    \item \textbf{Faithfulness (Độ trung thực)}: Đảm bảo mọi thông tin trong câu trả lời đều có căn cứ từ ngữ cảnh được truy xuất, ngăn chặn hiện tượng ảo giác (hallucination).
-    \item \textbf{Completeness (Độ đầy đủ)}: Kiểm tra xem câu trả lời đã bao quát hết các ý chính trong tài liệu nguồn chưa.
+    \item phạm vi ngữ nghĩa đủ hoàn chỉnh;
+    \item kích thước phù hợp với embedding, reranker và ngân sách context;
+    \item metadata đủ để xác định nguồn, cấu trúc, collection và phạm vi áp dụng;
+    \item khả năng đứng độc lập khi được truy hồi.
 \end{itemize}
 
-\subsection{Xử lý PDF cho văn bản tiếng Việt}
+\subsection{Chiến lược chunking theo loại dữ liệu}
 
-\subsubsection{Thách thức với PDF tiếng Việt}
-Việc xử lý PDF tiếng Việt gặp nhiều thách thức đặc thù:
-\begin{itemize}
-    \item \textbf{Font encoding không chuẩn}: Nhiều văn bản PDF sử dụng font không embed đúng bảng mã Unicode, dẫn đến khi trích xuất text sẽ cho ra ký tự sai hoặc mojibake;
-    \item \textbf{Table extraction}: Bảng trong PDF phức tạp với rowspan/colspan, khó trích xuất chính xác;
-    \item \textbf{Layout phức tạp}: Header/footer, multi-column, watermark gây nhiễu;
-    \item \textbf{Scan PDF}: Một số tài liệu cũ chỉ có dạng scan, cần OCR.
-\end{itemize}
+Không có một chiến lược chia đoạn tối ưu cho mọi loại tài liệu. Hệ thống hiện
+tại sử dụng các nhóm chiến lược khác nhau:
 
-\subsubsection{Các công cụ xử lý PDF}
-Đề tài sử dụng và so sánh 3 công cụ chính:
-\begin{itemize}
-    \item \textbf{Docling}: Tốt cho structure detection (heading, table, list), nhận diện layout chính xác, có thể fail với PDF lỗi font;
-    \item \textbf{PyMuPDF4LLM}: Nhanh nhất, output markdown trực tiếp, sử dụng bold-based format, có thể fail với lỗi font encoding;
-    \item \textbf{olmOCR}: Vision-based OCR, không phụ thuộc font embedding nên xử lý được 100\% PDF, nhưng chậm và cần GPU.
-\end{itemize}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{4.0cm}|p{6.4cm}|}
+\hline
+\textbf{Chiến lược} & \textbf{Loại dữ liệu phù hợp} & \textbf{Ý tưởng chính} \\
+\hline
+Recursive & Markdown hoặc text tổng quát & Tách theo heading, đoạn, dòng và
+ranh giới nhỏ hơn khi cần. \\
+\hline
+Hierarchical/legal & Văn bản quy định có cấu trúc điều khoản & Bảo toàn cấu trúc
+chương, điều, khoản, điểm và hierarchy metadata. \\
+\hline
+\texttt{kehoach} & Kế hoạch và thông báo đã crawl & Tách theo nội dung bài viết,
+nguồn và ngày để phục vụ freshness retrieval. \\
+\hline
+\texttt{stsv} & Sổ tay và dữ liệu hỗ trợ sinh viên & Tách theo mục hướng dẫn,
+ngữ cảnh section và cấu trúc dữ liệu nguồn. \\
+\hline
+\end{tabular}
+\caption{Nhóm chiến lược chunking theo dữ liệu}
+\end{table}
 
-\subsection{Kỹ thuật làm rõ và mở rộng truy vấn (Query Reflection)}
-Trước khi đi vào pipeline tìm kiếm, câu hỏi của người dùng thường được xử lý qua tầng Reflection để đảm bảo tính tự chứa (self-contained) và đầy đủ ngữ cảnh:
-\begin{itemize}
-    \item \textbf{Query Rewriting}: Chuyển đổi các câu hỏi ngắn hoặc chứa đại từ (ví dụ: "Ngành này lấy bao nhiêu điểm?") thành câu hỏi đầy đủ dựa trên lịch sử hội thoại (ví dụ: "Ngành Công nghệ thông tin lấy bao nhiêu điểm?").
-    \item \textbf{Entity Extraction}: Tự động trích xuất các thực thể quan trọng như mã môn học (IT4062E), học kỳ (20241), hoặc số điểm GPA để hỗ trợ lọc metadata.
-    \item \textbf{Profile Injection}: Kết hợp thông tin từ profile sinh viên (ngành, khóa) vào câu hỏi nếu người dùng sử dụng các cụm từ như "ngành của tôi", "khóa của em".
-\end{itemize}
+\subsection{Chunking phân cấp cho văn bản quy định}
 
-\subsection{Giải quyết tham chiếu chéo (Reference Resolver)}
-Trong văn bản pháp lý, các điều khoản thường tham chiếu lẫn nhau (ví dụ: "theo quy định tại Điều 15..."). Nếu chỉ truy xuất chunk chứa câu hỏi, LLM có thể thiếu thông tin từ điều khoản được tham chiếu. Hệ thống triển khai bộ giải quyết tham chiếu chéo:
-\begin{itemize}
-    \item \textbf{Phát hiện tham chiếu}: Sử dụng Regex để nhận diện các mẫu "Điều X", "Khoản Y" trong các chunk đã truy xuất.
-    \item \textbf{Truy xuất bổ sung}: Tự động thực hiện thêm các lệnh tìm kiếm để lấy nội dung của các điều khoản được tham chiếu trong cùng văn bản và đưa vào context cho LLM.
-    \item \textbf{Bảo toàn tính toàn vẹn}: Đảm bảo LLM có đủ "dây chuyền" thông tin để đưa ra câu trả lời chính xác nhất theo đúng văn phong pháp lý.
-\end{itemize}
+Văn bản quy định thường có cấu trúc phân cấp tự nhiên:
 
-\subsection{Giám sát và Trình vết (Observability and Tracing)}
-Để đảm bảo hệ thống hoạt động ổn định và tối ưu hóa hiệu năng trong môi trường sản xuất, đề tài triển khai cơ chế trình vết (tracing) chi tiết:
-\begin{itemize}
-    \item \textbf{Structured Tracing}: Sử dụng \texttt{RequestTrace} để theo dõi thời gian thực thi của từng giai đoạn trong pipeline (embedding, retrieval, reranking, LLM generation).
-    \item \textbf{Correlation ID}: Mỗi yêu cầu từ người dùng được gắn một ID duy nhất để truy vết toàn bộ vòng đời của yêu cầu đó qua các dịch vụ khác nhau.
-    \item \textbf{Logging và Monitoring}: Các chỉ số về độ trễ (latency), tỷ lệ lỗi và kết quả đánh giá tự động được lưu trữ vào MongoDB để phục vụ việc phân tích và cải thiện hệ thống trong tương lai.
-\end{itemize}
-
-\section{Chunking cho hệ thống RAG}
-
-\subsection{Tại sao chunking quan trọng?}
-Chunking là bước quyết định chất lượng retrieval trong hệ thống RAG. Chunks quá nhỏ sẽ mất ngữ cảnh, chunks quá lớn sẽ chứa quá nhiều thông tin không liên quan. Chiến lược chunking cần cân bằng giữa:
-\begin{itemize}
-    \item \textbf{Kích thước phù hợp}: Đủ lớn để chứa ngữ cảnh hoàn chỉnh, đủ nhỏ để tập trung vào một ý;
-    \item \textbf{Bảo toàn cấu trúc}: Không tách giữa câu, giữa bảng, hoặc giữa các phần logic;
-    \item \textbf{Metadata đầy đủ}: Mỗi chunk cần mang theo metadata (nguồn, vị trí, cấu trúc) để hỗ trợ retrieval và trích dẫn.
-\end{itemize}
-
-\subsection{Cấu trúc Parent-Child Chunking}
-Đề tài áp dụng kiến trúc Parent-Child cho chunking văn bản pháp lý:
-\begin{itemize}
-    \item \textbf{Parent chunks}: Chứa toàn bộ nội dung một đơn vị ngữ nghĩa hoàn chỉnh (ví dụ: 1 Điều đầy đủ kèm context Chương), dùng để cung cấp ngữ cảnh đầy đủ cho LLM khi sinh câu trả lời;
-    \item \textbf{Child chunks}: Phần nhỏ hơn của parent (ví dụ: từng Khoản trong Điều), dùng cho retrieval với kích thước phù hợp embedding;
-    \item \textbf{Header chunks}: Phần đầu văn bản chứa thông tin ban hành, căn cứ pháp lý;
-    \item \textbf{Appendix chunks}: Phụ lục kèm theo văn bản.
-\end{itemize}
-
-\subsection{Đặc điểm văn bản pháp lý Việt Nam}
-Văn bản pháp lý Việt Nam có cấu trúc phân cấp rõ ràng:
 \begin{verbatim}
-CHƯƠNG I - QUY ĐỊNH CHUNG
-    Điều 1. Phạm vi điều chỉnh
-        1. Khoản 1...
-        2. Khoản 2...
-            a) Điểm a...
-            b) Điểm b...
-    Điều 2. Đối tượng áp dụng
+CHUONG I - QUY DINH CHUNG
+    Dieu 1. Pham vi dieu chinh
+        Khoan 1 ...
+        Khoan 2 ...
+            Diem a ...
+            Diem b ...
 \end{verbatim}
 
-Cấu trúc phân cấp này tạo cơ sở tự nhiên cho việc chunking: mỗi Điều là một parent chunk, mỗi Khoản hoặc nhóm Khoản là child chunk. Metadata bao gồm số Chương, tên Chương, số Điều, tên Điều, và số Khoản.
+Với cấu trúc này, phần cha có thể giữ ngữ cảnh rộng hơn, trong khi phần con phù
+hợp cho truy hồi chính xác hơn. Metadata hierarchy giúp hệ thống biết chunk thuộc
+điều nào, khoản nào và tài liệu nào. Trong luồng quản trị tài liệu hiện tại,
+parent hoặc header chunk vẫn có thể được lưu để review nhưng chính sách indexing
+có thể loại chúng khỏi tập truy hồi để tránh chiếm slot ngữ cảnh thay cho child
+chunk có nội dung trả lời trực tiếp.
 
-\subsection{RecursiveCharacterTextSplitter}
-Đối với tài liệu không có cấu trúc pháp lý rõ ràng (chương trình đào tạo, tài liệu hướng dẫn), đề tài sử dụng \texttt{RecursiveCharacterTextSplitter} từ LangChain với danh sách separators ưu tiên:
-\begin{enumerate}
-    \item H1, H2, H3, H4 headings;
-    \item Horizontal rule (section separator);
-    \item Paragraph break (double newline);
-    \item Line break, sentence boundary, word boundary;
-    \item Character fallback.
-\end{enumerate}
+\subsection{Metadata và lineage}
 
-Chiến lược này đảm bảo ưu tiên tách tại ranh giới ngữ nghĩa tự nhiên nhất trước khi dùng các ranh giới nhỏ hơn.
+Metadata là cầu nối giữa nội dung văn bản và truy vấn có cấu trúc. Các trường như
+\texttt{major\_code}, \texttt{major\_name}, \texttt{applicable\_cohort},
+\texttt{applicable\_major}, \texttt{document\_type}, \texttt{date\_str},
+\texttt{source} hoặc \texttt{document\_id} giúp hệ thống lọc và giải thích kết
+quả truy hồi.
 
-\section{Kết luận chương}
-Chương 2 đã trình bày tổng quan bối cảnh bài toán, các nghiên cứu liên quan và nền tảng công nghệ sử dụng trong đề tài. Đặc biệt, chương đã làm rõ:
+Bên cạnh metadata của từng chunk, lineage của văn bản giúp biểu diễn quan hệ văn
+bản mới thay thế văn bản cũ. Với miền quy định, đây là cơ sở để validity filtering
+giảm nguy cơ đưa văn bản hết hiệu lực vào context khi đã có thông tin thay thế.
+
+\section{Biểu diễn ngữ nghĩa bằng vector embedding}
+
+\subsection{Khái niệm vector embedding}
+
+Vector embedding ánh xạ văn bản sang một vector số trong không gian nhiều chiều.
+Các câu hoặc đoạn có nghĩa gần nhau thường có vector gần nhau theo một độ đo như
+cosine similarity. Với hai vector $u$ và $v$, cosine similarity được viết:
+
+\begin{equation}
+\operatorname{cos}(u,v) =
+\frac{u \cdot v}{\|u\| \|v\|}
+\end{equation}
+
+Trong dense retrieval, tài liệu được embed trước ở giai đoạn indexing; truy vấn
+được embed tại runtime rồi so khớp với vector tài liệu để tìm các candidate có
+ngữ nghĩa gần nhất.
+
+\subsection{BGE-M3 và E5 multilingual}
+
+Hệ thống sử dụng hai mô hình embedding đa ngôn ngữ:
+
 \begin{itemize}
-    \item \textbf{Kiến trúc Agentic RAG}: Pipeline sử dụng LangGraph để quản lý luồng xử lý phi tuyến tính, kết hợp chiến lược đa mô hình (Local LLM và Cloud LLM) và cơ chế tự suy luận (ReAct).
-    \item \textbf{Định tuyến và Xử lý Truy vấn}: Tầng Complexity Router phân loại câu hỏi và tầng Reflection giúp làm rõ câu hỏi dựa trên ngữ cảnh sinh viên và lịch sử hội thoại.
-    \item \textbf{Tối ưu hóa Retrieval}: Kỹ thuật lọc Metadata đa tầng, Query Expansion cho Reranker và bộ giải quyết tham chiếu chéo (Reference Resolver) cho văn bản pháp lý.
-    \item \textbf{Đánh giá tự động}: Hệ thống tự đánh giá dựa trên các chỉ số Relevance, Faithfulness và Completeness để đảm bảo chất lượng phản hồi.
-    \item \textbf{Xử lý PDF và Chunking}: Các thách thức và giải pháp với tiếng Việt, so sánh các công cụ trích xuất và chiến lược Parent-Child bảo toàn cấu trúc văn bản.
+    \item \textbf{BGE-M3:} cung cấp tín hiệu dense retrieval và đồng thời được
+    dùng làm đặc trưng embedding cho bộ phân loại miền truy vấn;
+    \item \textbf{E5 multilingual:} cung cấp tín hiệu dense retrieval thứ hai,
+    phù hợp cho văn bản và truy vấn đa ngôn ngữ.
 \end{itemize}
 
-Đây là cơ sở lý thuyết quan trọng để bước sang chương tiếp theo, nơi kiến trúc hệ thống RAG v2 sẽ được trình bày chi tiết.
+Hai mô hình trong runtime hiện tại tạo hai vector riêng có kích thước 1024 và
+được lưu thành named vectors \texttt{bge\_m3} và \texttt{e5} trong Qdrant. Điều
+này khác với cách gộp vector bằng trung bình trọng số. Mã nguồn vẫn có
+\texttt{EnsembleEmbedder} cho tương thích hoặc thí nghiệm, nhưng đường truy hồi
+chính sử dụng hai tín hiệu BGE và E5 riêng rồi hợp nhất ở tầng search.
+
+\subsection{Qdrant và vector store}
+
+Vector store cần hỗ trợ tìm kiếm gần đúng hoặc chính xác theo vector, lưu payload
+metadata và lọc theo điều kiện. Trong đồ án, Qdrant được dùng như kho vector theo
+collection. Mỗi miền tri thức có collection riêng, vector dùng cosine distance,
+và payload chứa text cùng metadata cần thiết cho bước hợp nhất kết quả.
+
+Tách vector store theo miền giúp routing và filtering rõ ràng hơn. Việc dùng named
+vectors cho phép một chunk mang đồng thời biểu diễn BGE-M3 và E5 mà không buộc hệ
+thống phải mất thông tin của từng tín hiệu.
+
+\section{Tìm kiếm từ khóa và BM25}
+
+\subsection{Vai trò của sparse retrieval}
+
+Dense retrieval mạnh ở ngữ nghĩa, nhưng các câu hỏi học vụ thường chứa token mà
+không nên làm mờ: mã môn, mã ngành, số điều khoản, tên biểu mẫu hoặc cụm thuật
+ngữ chính xác. Sparse retrieval giữ lợi thế trong những trường hợp đó vì xếp hạng
+dựa trên sự xuất hiện của từ khóa trong tài liệu.
+
+Elasticsearch trong hệ thống đảm nhiệm keyword search và metadata search. Ngoài
+việc trả kết quả BM25, Elasticsearch còn hỗ trợ bước tìm id theo metadata để áp
+điều kiện tương ứng cho vector search.
+
+\subsection{Công thức BM25}
+
+Với truy vấn $Q = \{q_1, q_2, ..., q_n\}$ và tài liệu $D$, điểm BM25 thường được
+biểu diễn:
+
+\begin{equation}
+\operatorname{BM25}(D,Q) =
+\sum_{i=1}^{n}
+\operatorname{IDF}(q_i)
+\frac{f(q_i,D)(k_1+1)}
+{f(q_i,D)+k_1\left(1-b+b\frac{|D|}{avgdl}\right)}
+\end{equation}
+
+Trong đó:
+
+\begin{itemize}
+    \item $f(q_i,D)$ là tần suất token $q_i$ trong tài liệu $D$;
+    \item $|D|$ là độ dài tài liệu;
+    \item $avgdl$ là độ dài tài liệu trung bình;
+    \item $k_1$ điều khiển độ bão hòa tần suất từ;
+    \item $b$ điều khiển mức chuẩn hóa theo độ dài tài liệu.
+\end{itemize}
+
+Một dạng IDF thường dùng là:
+
+\begin{equation}
+\operatorname{IDF}(q_i) =
+\ln\left(
+\frac{N-n(q_i)+0.5}{n(q_i)+0.5}+1
+\right)
+\end{equation}
+
+Trong đó $N$ là số tài liệu trong corpus và $n(q_i)$ là số tài liệu chứa token
+$q_i$.
+
+\section{Hybrid retrieval và hợp nhất kết quả}
+
+\subsection{Lý do kết hợp dense và keyword retrieval}
+
+Dense retrieval và BM25 bổ sung cho nhau:
+
+\begin{itemize}
+    \item dense retrieval tìm được đoạn diễn đạt khác từ khóa của người dùng;
+    \item keyword retrieval giữ tín hiệu chính xác của mã môn, tên riêng và số
+    điều khoản;
+    \item nếu chỉ dùng một trong hai, hệ thống dễ mất candidate quan trọng trước
+    khi reranker được áp dụng.
+\end{itemize}
+
+Vì vậy, hybrid retrieval tạo pool candidate từ cả vector search và keyword search
+rồi hợp nhất trước khi xếp hạng lại.
+
+\subsection{Score fusion trong tìm kiếm nhiều collection}
+
+Điểm vector và điểm BM25 không cùng thang đo. Một cách hợp nhất là chuẩn hóa từng
+pool về đoạn $[0,1]$ rồi cộng theo trọng số:
+
+\begin{equation}
+S(d) =
+w_v \cdot \widehat{S_v}(d)
++ w_k \cdot \widehat{S_k}(d)
++ B_{\text{recency}}(d)
+\end{equation}
+
+Trong đó $\widehat{S_v}$ là điểm vector đã chuẩn hóa, $\widehat{S_k}$ là điểm
+keyword đã chuẩn hóa, $w_v$ và $w_k$ là trọng số, còn
+$B_{\text{recency}}$ là phần cộng thêm khi collection có nhu cầu ưu tiên độ mới
+như \texttt{kehoach}. Theo cấu hình mặc định của tầng
+\texttt{MultiCollectionSearch}, vector signal được ưu tiên hơn keyword signal;
+với câu hỏi mang tính học phần hoặc mã môn, trọng số keyword có thể được tăng để
+giữ exact match.
+
+\subsection{Reciprocal Rank Fusion}
+
+Reciprocal Rank Fusion (RRF) là một kỹ thuật khác để hợp nhất danh sách xếp hạng
+khi không muốn phụ thuộc trực tiếp vào thang điểm gốc:
+
+\begin{equation}
+\operatorname{RRF}(d) =
+\sum_{r \in R}
+\frac{1}{k + \operatorname{rank}_r(d)}
+\end{equation}
+
+RRF hữu ích khi so sánh nhiều hệ thống retrieval có score khác nhau. Mã nguồn có
+hỗ trợ đường fusion theo RRF và một lớp hybrid search theo collection; tuy nhiên
+đường tìm kiếm nhiều collection hiện tại mặc định dùng weighted score fusion sau
+min--max normalization. Vì vậy trong đồ án, RRF là nền tảng liên quan còn score
+fusion là cơ chế cần hiểu khi phân tích runtime chính.
+
+\subsection{Deduplication và candidate pool}
+
+Khi truy hồi từ nhiều collection và nhiều store, cùng một đoạn hoặc các đoạn có
+nội dung trùng có thể xuất hiện nhiều lần. Deduplication theo id và theo text giúp
+không lãng phí ngân sách context. Candidate pool cũng thường lớn hơn số nguồn trả
+về cuối cùng để reranker có đủ lựa chọn trước khi cắt top-$k$.
+
+\section{Metadata-aware retrieval}
+
+\subsection{Lọc theo collection}
+
+Metadata filtering giúp giảm không gian tìm kiếm và tăng xác suất lấy đúng văn
+bản. Cơ chế filter phụ thuộc collection:
+
+\begin{itemize}
+    \item với \texttt{ctdt}, filter ưu tiên mã ngành hoặc tên ngành;
+    \item với \texttt{quydinh}, filter xem xét khóa và ngành áp dụng, đồng thời có
+    fallback sang văn bản dùng chung;
+    \item với \texttt{kehoach}, ngày đăng bài và yêu cầu freshness có vai trò
+    quan trọng;
+    \item với \texttt{stsv}, mặc định thường không cần prefilter theo ngành hoặc
+    khóa.
+\end{itemize}
+
+Một filter tốt không nên làm hệ thống trả rỗng quá sớm. Vì vậy các fallback chain
+từ filter chặt sang filter rộng hơn là cần thiết khi metadata không đầy đủ.
+
+\subsection{Phân biệt học kỳ và ngày đăng bài}
+
+Trong dữ liệu học vụ, token như \texttt{2025.2}, \texttt{20252} hoặc
+\texttt{2025-2} thường chỉ học kỳ hoặc scope học vụ, không đồng nghĩa với ngày
+đăng bài. Việc phân biệt học kỳ với posting date tránh áp nhầm bộ lọc ngày cho
+collection \texttt{kehoach}. Với câu hỏi ``mới nhất'' nhưng không chứa ngày cụ
+thể, chiến lược phù hợp là ưu tiên nguồn mới thay vì tự suy diễn một học kỳ cũ từ
+lịch sử hội thoại.
+
+\subsection{Validity filtering và reference resolution}
+
+Sau retrieval, hai dạng hậu xử lý có ý nghĩa đặc biệt với văn bản quy định:
+
+\begin{itemize}
+    \item \textbf{Validity filtering:} loại hoặc hạ ưu tiên tài liệu đã bị thay
+    thế khi registry lineage cung cấp thông tin đáng tin cậy;
+    \item \textbf{Reference resolution:} phát hiện dẫn chiếu như ``Điều 5'' hoặc
+    ``Khoản 1 Điều 5'' và bổ sung chunk liên quan trong cùng văn bản nếu context
+    ban đầu chưa đủ.
+\end{itemize}
+
+Validity filtering không nên biến câu trả lời thành rỗng khi registry không đủ
+thông tin; reference resolution cũng cần ràng buộc theo cùng tài liệu để tránh
+ghép điều khoản của văn bản khác.
+
+\section{Reranking bằng cross-encoder}
+
+\subsection{Bi-encoder và cross-encoder}
+
+Embedding retrieval thường hoạt động theo kiểu bi-encoder: query và document
+được biểu diễn riêng, sau đó so độ gần trong không gian vector. Cách này nhanh và
+phù hợp để tạo candidate pool lớn. Cross-encoder nhận đồng thời cặp
+$(query, document)$, cho phép mô hình đánh giá tương tác giữa hai chuỗi chi tiết
+hơn nhưng chi phí cao hơn.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{4.2cm}|p{4.2cm}|}
+\hline
+\textbf{Tiêu chí} & \textbf{Bi-encoder} & \textbf{Cross-encoder} \\
+\hline
+Đầu vào & Query và document encode tách rời & Cặp query--document encode cùng lúc \\
+\hline
+Mục đích & Tạo candidate nhanh & Xếp hạng lại candidate \\
+\hline
+Khả năng mở rộng & Tốt với vector index & Phù hợp cho tập candidate nhỏ hơn \\
+\hline
+Độ chi tiết so khớp & Phụ thuộc khoảng cách vector & Đánh giá relevance trực tiếp \\
+\hline
+\end{tabular}
+\caption{So sánh bi-encoder và cross-encoder}
+\end{table}
+
+\subsection{Vai trò của reranker trong RAG}
+
+Reranker là tầng relevance thứ hai sau hybrid retrieval. Trong hệ thống, BGE
+reranker sắp xếp candidate theo điểm liên quan và có thể áp ngưỡng điểm trước khi
+cắt top-$k$. Tài liệu bảng, đặc biệt trong chương trình đào tạo, có thể cần ngưỡng
+xử lý riêng vì bảng mang nhiều thông tin cấu trúc nhưng văn bản tuyến tính của nó
+không luôn được cross-encoder đánh giá giống đoạn prose thông thường.
+
+\section{Hiểu truy vấn và định tuyến}
+
+\subsection{Complexity routing}
+
+Không phải câu hỏi nào cũng cần cùng một luồng xử lý. Complexity routing phân
+truy vấn thành:
+
+\begin{itemize}
+    \item \texttt{chitchat}: hội thoại ngắn không cần truy hồi;
+    \item \texttt{simple}: câu hỏi đủ rõ để đi qua RAG tuyến tính;
+    \item \texttt{complex}: câu hỏi cần so sánh, nhiều nguồn, kiểm tra ngữ cảnh cá
+    nhân hoặc suy luận nhiều bước.
+\end{itemize}
+
+Với nhóm phức tạp, subtype như \texttt{comparison}, \texttt{multi\_source},
+\texttt{personal\_check} hoặc \texttt{general} giúp pipeline chọn nhánh phân rã
+truy vấn hoặc agent phù hợp.
+
+\subsection{Domain classification và collection selection}
+
+Sau complexity routing, hệ thống cần xác định ý định và miền dữ liệu. Bộ phân
+loại miền hiện tại có hai tầng:
+
+\begin{enumerate}
+    \item phân loại intent thành \texttt{chitchat}, \texttt{rag} hoặc
+    \texttt{tool\_search};
+    \item nếu intent là RAG, dự đoán một hoặc nhiều domain trong
+    \texttt{ctdt}, \texttt{quydinh}, \texttt{kehoach}, \texttt{stsv}.
+\end{enumerate}
+
+Về mặt lý thuyết, domain classification làm giảm nhiễu retrieval và giúp dành
+ngân sách candidate cho đúng collection. Trong code hiện tại, embedding BGE-M3
+được dùng làm đặc trưng cho classifier học máy; khi độ tin cậy yếu, pipeline có
+thể dùng tầng LLM fallback để hiệu chỉnh định tuyến. Với follow-up ngắn và độ tin
+cậy thấp, history có thể hỗ trợ route; với câu hỏi dài và tự chứa, history không
+nên làm lệch miền dữ liệu.
+
+\subsection{Query reflection}
+
+Query reflection là quá trình biến câu hỏi runtime thành truy vấn truy hồi rõ
+ràng hơn. Một reflector có thể:
+
+\begin{itemize}
+    \item loại bớt nhiễu hội thoại và thông tin định danh không cần cho retrieval;
+    \item viết lại câu hỏi thành dạng standalone khi có đại từ hoặc tham chiếu;
+    \item hợp nhất hồ sơ người dùng chỉ khi câu hỏi thực sự phụ thuộc vào hồ sơ;
+    \item trích xuất entity như mã ngành, khóa, mã học phần, học kỳ và năm học;
+    \item áp guardrail để tránh sinh thêm phạm vi ngành, khóa hoặc học kỳ không
+    được câu hỏi hiện tại yêu cầu.
+\end{itemize}
+
+Điểm quan trọng là reflection không đồng nghĩa với thêm càng nhiều context càng
+tốt. Với câu hỏi mới nhất hoặc câu hỏi chung, lịch sử hội thoại cũ có thể gây
+``context bleed'' và làm filter sai. Vì vậy reflection cần có cả khả năng mở rộng
+truy vấn và khả năng từ chối context không phù hợp.
+
+\subsection{Query decomposition}
+
+Một câu hỏi có thể bao gồm nhiều mục tiêu retrieval. Query decomposition tách câu
+hỏi như vậy thành một số sub-query gắn với collection thích hợp, sau đó hợp nhất
+ngữ cảnh trước khi generation. Cách làm này phù hợp với câu hỏi nhiều nguồn hoặc
+so sánh vì mỗi truy vấn con có thể tập trung vào một miền dữ liệu rõ ràng.
+
+\section{Agentic RAG và công cụ ngoại vi}
+
+\subsection{Khi nào RAG tuyến tính chưa đủ}
+
+Luồng RAG tuyến tính phù hợp khi một lượt retrieval và một lượt generation đủ để
+trả lời. Với câu hỏi cần so sánh, lập kế hoạch tìm kiếm nhiều bước, hoặc quyết
+định có cần hỏi lại người dùng hay không, hệ thống cần khả năng điều phối linh
+hoạt hơn.
+
+\subsection{Planner--executor và ReAct}
+
+Agentic RAG kết hợp LLM với trạng thái và công cụ. Trong hệ thống hiện tại có hai
+hướng xử lý chính:
+
+\begin{itemize}
+    \item \textbf{Planner--executor:} dùng cho comparison hoặc multi-source; agent
+    phân rã câu hỏi, tạo kế hoạch retrieval có cấu trúc, thực thi các bước tìm
+    kiếm và tổng hợp kết quả;
+    \item \textbf{ReAct tool loop:} dùng cho câu hỏi phức tạp tổng quát hoặc khi
+    planner fallback; LLM chọn công cụ, nhận kết quả, tiếp tục hoặc kết thúc.
+\end{itemize}
+
+Các công cụ LLM-visible quan trọng gồm \texttt{rag\_search},
+\texttt{web\_search} và \texttt{clarify\_question}. Việc giới hạn tool schema
+giúp hành vi agent dễ kiểm soát hơn so với việc cho mô hình gọi tùy ý mọi hàm
+trong hệ thống.
+
+\subsection{Web fallback có kiểm soát}
+
+Kho dữ liệu nội bộ phù hợp với quy định và tài liệu đã index, nhưng thông báo có
+tính thời điểm có thể cần thông tin mới. Web fallback là cơ chế mở rộng retrieval
+ra nguồn ngoài khi:
+
+\begin{itemize}
+    \item local retrieval không có nguồn hoặc có confidence thấp;
+    \item câu hỏi mang tín hiệu dynamic hoặc freshness;
+    \item self-evaluation hoặc agent xác định cần thêm nguồn web.
+\end{itemize}
+
+Trong hệ thống, web search là thành phần tùy chọn, dùng danh sách domain cho phép
+và ưu tiên nguồn HUST hoặc nguồn giáo dục có thẩm quyền. Đường streaming không
+thực hiện hậu kiểm web fallback giống non-streaming path để giữ semantics phát
+token theo thời gian thực.
+
+\section{Sinh câu trả lời và tự đánh giá}
+
+\subsection{Prompt grounding}
+
+Sau retrieval, context cần được định dạng cho LLM theo cách giữ được nội dung,
+nguồn và các metadata hữu ích. Prompt grounding yêu cầu mô hình trả lời dựa trên
+context được cung cấp và thừa nhận thiếu thông tin khi context không đủ. Đây là
+cơ chế quan trọng để giảm câu trả lời suy đoán.
+
+Lớp \texttt{llm} trong hệ thống trừu tượng hóa provider qua một interface chung
+cho generation thường và streaming. Nhờ đó pipeline không cần gắn chặt với một
+SDK cụ thể, trong khi cấu hình runtime vẫn có thể chọn provider phù hợp.
+
+\subsection{Self-evaluation}
+
+Self-evaluation là bước đánh giá phản hồi đã sinh bằng các chiều như:
+
+\begin{itemize}
+    \item \textbf{Relevance:} câu trả lời có giải quyết câu hỏi không;
+    \item \textbf{Faithfulness:} nội dung có bám vào context không;
+    \item \textbf{Completeness:} câu trả lời đã bao quát đủ ý cần thiết chưa.
+\end{itemize}
+
+Kết quả self-evaluation có thể hỗ trợ quyết định fallback hoặc đánh dấu answer
+status. Tuy nhiên, tự đánh giá bằng LLM không thay thế benchmark retrieval, test
+contract và kiểm tra hồi quy trên dữ liệu đã gắn nhãn.
+
+\section{Truy vết, lưu trữ và đánh giá}
+
+\subsection{Truy vết và khả năng quan sát}
+
+Một pipeline RAG có nhiều bước nên cần quan sát được thời gian và quyết định của
+từng bước. Trace metadata có thể ghi routing result, reflected question, filter
+đã áp dụng, số candidate theo collection, timings, tool calls và agent trace.
+Nhờ đó người phát triển phân biệt được lỗi do route sai, filter quá chặt, retrieval
+thiếu nguồn hay generation xử lý context chưa tốt.
+
+\subsection{Đánh giá retrieval}
+
+Đánh giá retrieval đo khả năng tìm đúng nguồn trước khi đánh giá câu trả lời cuối
+cùng. Các chỉ số thường gặp gồm:
+
+\begin{itemize}
+    \item \textbf{Recall@K:} trong top-$K$ có bao nhiêu nguồn liên quan được tìm
+    thấy;
+    \item \textbf{MRR@K:} vị trí nguồn đúng đầu tiên có cao không;
+    \item \textbf{NDCG@K:} xếp hạng có đặt nguồn quan trọng lên gần đầu không;
+    \item \textbf{Context precision/recall:} context đưa vào generation vừa đúng
+    vừa đủ đến mức nào.
+\end{itemize}
+
+Với dữ liệu có tính hiệu lực, cần bổ sung đánh giá freshness và citation/source
+accuracy để tránh chỉ tối ưu độ giống từ khóa.
+
+\subsection{Đánh giá hội thoại và đánh giá chính sách hiện hành}
+
+Không nên dùng cùng một bộ kiểm tra cho mọi mục tiêu. Hệ thống hiện tại tách hai
+lớp đánh giá:
+
+\begin{itemize}
+    \item \textbf{Current policy eval:} kiểm tra retrieval và nguồn factual theo
+    dữ liệu hiện đang index;
+    \item \textbf{Historical conversation eval:} kiểm tra hiểu follow-up, ngữ cảnh
+    cá nhân, chất lượng tư vấn và khả năng làm rõ trong hội thoại lịch sử.
+\end{itemize}
+
+Sự tách biệt này quan trọng vì câu trả lời theo email hoặc dữ liệu lịch sử có thể
+khác văn bản hiện hành. Một mismatch lịch sử không đồng nghĩa retrieval hiện tại
+sai nếu chính sách đã thay đổi.
+
+\section{Kết luận chương}
+
+Chương này đã hệ thống hóa các nền tảng lý thuyết cần thiết cho trợ lý học vụ
+RAG trong đồ án:
+
+\begin{itemize}
+    \item đặc thù dữ liệu đa miền và yêu cầu trả lời có căn cứ;
+    \item xử lý tài liệu, chunking, metadata và lineage;
+    \item dense retrieval với BGE-M3/E5, vector store Qdrant và sparse retrieval
+    với BM25 trên Elasticsearch;
+    \item hybrid retrieval, score fusion, metadata filtering, reranking, validity
+    filtering và reference resolution;
+    \item query routing, domain classification, reflection, entity extraction và
+    decomposition;
+    \item Agentic RAG, web fallback có kiểm soát, grounded generation,
+    self-evaluation, trace và đánh giá hồi quy.
+\end{itemize}
+
+Các cơ sở này là tiền đề để chương tiếp theo trình bày kiến trúc và phương pháp
+đề xuất của hệ thống \texttt{RAG\_v2} một cách cụ thể hơn.
 
 \end{document}

@@ -5,13 +5,77 @@
     \Large{\textbf{TÓM TẮT NỘI DUNG ĐỒ ÁN}}\\
 \end{center}
 \vspace{1cm}
-Đồ án tập trung vào việc nghiên cứu và xây dựng hệ thống RAG (Retrieval-Augmented Generation) Chatbot hỗ trợ sinh viên hỏi-đáp tự động về các quy định, quy chế đào tạo của Đại học Bách khoa Hà Nội. Mục tiêu chính là cung cấp một công cụ tra cứu thông minh, cho phép sinh viên đặt câu hỏi bằng ngôn ngữ tự nhiên và nhận được câu trả lời chính xác kèm theo trích dẫn nguồn cụ thể từ các văn bản quy chế.
 
-Hệ thống được xây dựng theo kiến trúc RAG hoàn chỉnh, bao gồm các thành phần chính: xử lý PDF đa phương thức (Docling, PyMuPDF4LLM, olmOCR), chunking văn bản pháp lý theo cấu trúc Điều-Khoản, embedding với mô hình E5 Multilingual (1024 chiều), lưu trữ vector sử dụng FAISS, và sinh câu trả lời bằng Gemini 2.5 Flash. Backend được phát triển với FastAPI và frontend sử dụng React 18 với TypeScript.
+Đồ án nghiên cứu và xây dựng hệ thống trợ lý học vụ dựa trên kiến trúc
+\textit{Retrieval-Augmented Generation} (RAG) cho sinh viên Đại học Bách khoa
+Hà Nội. Hệ thống hướng tới việc hỗ trợ tra cứu bằng ngôn ngữ tự nhiên trên các
+nguồn tri thức học vụ nội bộ, đồng thời giảm rủi ro trả lời thiếu căn cứ bằng
+cách gắn quá trình sinh câu trả lời với tài liệu đã truy hồi. Phạm vi tri thức
+chính được tổ chức thành các nhóm dữ liệu về chương trình đào tạo
+(\texttt{ctdt}), quy định học vụ (\texttt{quydinh}), kế hoạch và thông báo
+(\texttt{kehoach}), tài liệu hỗ trợ sinh viên (\texttt{stsv}); ngoài ra còn có
+vùng dữ liệu phục vụ kiểm thử và tải lên tài liệu mới.
 
-Dữ liệu đầu vào bao gồm 16 văn bản quy định đào tạo của ĐHBK Hà Nội, sau khi xử lý tạo ra 1,247 chunks được lưu trong vector store. Hệ thống đạt độ chính xác xử lý tiếng Việt 99.5\%+ và thời gian phản hồi 2-4 giây cho mỗi câu hỏi.
+Phiên bản hệ thống được hiện thực trong mã nguồn theo kiến trúc nhiều lớp. Lớp
+giao tiếp sử dụng FastAPI để cung cấp các API chat thường, chat có metadata theo
+dõi luồng xử lý, chat dạng streaming, tìm kiếm kiểm tra truy hồi, quản lý phiên
+hội thoại, xác thực người dùng, quản trị tài liệu, bookmark, feedback, lookup và
+notification. Lớp điều phối trung tâm là \texttt{RAGPipeline}: câu hỏi đầu vào
+được phân loại độ phức tạp để tách giữa hội thoại xã giao, câu hỏi RAG đơn giản
+và câu hỏi phức tạp. Với câu hỏi đơn giản, pipeline thực hiện luồng RAG cổ điển;
+với câu hỏi nhiều nguồn hoặc so sánh, hệ thống có thể phân rã thành các truy vấn
+con theo miền tri thức; với câu hỏi phức tạp khác, hệ thống dùng agent dựa trên
+LangGraph và vẫn có cơ chế quay về RAG khi agent không sẵn sàng hoặc xử lý lỗi.
 
-Đồ án là nền tảng quan trọng cho việc ứng dụng công nghệ RAG trong môi trường giáo dục, hỗ trợ sinh viên tra cứu thông tin quy chế một cách hiệu quả và chính xác.
+Trước khi truy hồi, lớp xử lý truy vấn kết hợp nhiều thành phần: bộ định tuyến
+độ phức tạp, bộ phân loại ý định và miền dữ liệu, bộ chọn collection, bộ phản
+chiếu truy vấn và bộ phân rã truy vấn. Câu hỏi có thể được viết lại thành truy
+vấn độc lập dựa trên lịch sử hội thoại và ngữ cảnh người dùng khi thật sự cần
+thiết; đồng thời hệ thống trích xuất các thực thể học vụ như mã ngành, khóa sinh
+viên, học kỳ hoặc mã học phần để tạo bộ lọc phù hợp. Mã nguồn cũng đặt các ràng
+buộc nhằm hạn chế việc ngữ cảnh hồ sơ hoặc lịch sử hội thoại bị chèn sai vào
+những câu hỏi chung, đặc biệt là các câu hỏi yêu cầu thông tin mới nhất.
+
+Khối truy hồi được thiết kế theo hướng lai để kết hợp tìm kiếm ngữ nghĩa và tìm
+kiếm từ khóa. Dịch vụ truy hồi dùng hai biểu diễn embedding BGE-M3 và E5
+multilingual cho vector search trên Qdrant, đồng thời dùng Elasticsearch cho
+keyword search và hỗ trợ lọc metadata. Kết quả từ nhiều collection được chuẩn
+hóa điểm, hợp nhất theo trọng số, loại trùng và xếp hạng lại bằng BGE reranker.
+Sau truy hồi, hệ thống còn áp dụng bộ lọc hiệu lực tài liệu để tránh dùng văn
+bản đã bị thay thế khi có thông tin lineage phù hợp, và bộ phân giải tham chiếu
+để bổ sung các đoạn liên quan đến các dẫn chiếu pháp lý như điều, khoản trong
+cùng văn bản. Đối với câu hỏi về kế hoạch, hạn đăng ký hoặc thông báo có tính
+thời điểm, pipeline có thể ưu tiên miền \texttt{kehoach}; khi dữ liệu nội bộ
+không đủ hoặc có nhu cầu thông tin mới, cơ chế Tavily web fallback được cấu hình
+để tìm kiếm có kiểm soát trên các nguồn chính thống.
+
+Đồ án không chỉ xử lý luồng hỏi đáp mà còn xây dựng vòng đời dữ liệu phục vụ RAG.
+Pipeline quản trị tài liệu nhận PDF từ admin, lưu tệp gốc, chuyển đổi sang
+Markdown, làm sạch nội dung, chia chunk, tạo embedding và lập chỉ mục đồng thời
+vào Qdrant và Elasticsearch. Trạng thái tài liệu được theo dõi theo từng bước
+từ tải lên đến indexed trong MongoDB; các chunk trung gian được lưu để phục vụ
+kiểm tra, phê duyệt và rollback. Bên cạnh luồng tải lên qua API, các script crawl
+và index ngoại tuyến hỗ trợ cập nhật kho dữ liệu miền học vụ, bảo trì metadata và
+quản lý dòng đời văn bản.
+
+Ở mức hệ thống, MongoDB lưu người dùng, phiên hội thoại, lượt hỏi đáp, trace của
+agent, tài liệu, chunk, bookmark, feedback và notification. Redis là thành phần
+tùy chọn cho session, history cache, response cache và rate limiting theo hướng
+fail-soft để backend vẫn hoạt động khi cache không khả dụng. Cơ chế xác thực hỗ
+trợ JWT, đăng nhập Microsoft OAuth và tài khoản thủ công; các thao tác quản trị
+tài liệu được bảo vệ bằng kiểm tra quyền. Phần giao diện gồm web app React/Vite,
+ứng dụng mobile Expo/React Native và package TypeScript dùng chung để đồng bộ
+API contract giữa các client.
+
+Để kiểm soát chất lượng, mã nguồn cung cấp lớp đánh giá ngoại tuyến và kiểm thử
+hồi quy. Bộ \texttt{evaluation} tách kiểm tra truy hồi theo chính sách hiện hành
+khỏi đánh giá hội thoại trên dữ liệu lịch sử, đồng thời hỗ trợ lưu artifact,
+dashboard metrics và benchmark chiến lược tìm kiếm. Các kiểm thử bao phủ routing,
+reflection, retrieval fusion, reference resolution, API contract, upload
+pipeline, agent và các luồng cache liên quan. Nhờ đó, nội dung đồ án không chỉ
+trình bày một chatbot sinh văn bản, mà mô tả đầy đủ một hệ thống RAG học vụ có
+khả năng nhập dữ liệu, truy hồi lai, suy luận theo độ phức tạp truy vấn, theo dõi
+nguồn trả lời, vận hành đa client và đánh giá chất lượng theo thời gian.
 
 \begin{flushright}
 Sinh viên thực hiện\\

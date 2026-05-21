@@ -1,89 +1,308 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-
 \section{Đặt vấn đề}
 \label{sec:dvd}
 
-Trong môi trường giáo dục đại học hiện nay, đặc biệt tại các trường có quy mô lớn và đào tạo chuyên sâu như \textbf{Trường Đại học Bách Khoa Hà Nội}, việc tra cứu thông tin về quy chế, quy định đào tạo là nhu cầu thiết yếu của sinh viên. Các câu hỏi thường gặp bao gồm:
+Trong môi trường đại học, sinh viên cần tra cứu thường xuyên các thông tin học
+vụ để ra quyết định đúng trong quá trình học tập. Tại Đại học Bách khoa Hà Nội,
+thông tin này không nằm trong một tài liệu duy nhất mà phân tán trên nhiều nhóm
+nguồn khác nhau: chương trình đào tạo theo ngành, quy định và quy chế học vụ,
+kế hoạch hoặc thông báo theo từng thời điểm, sổ tay và các hướng dẫn hỗ trợ sinh
+viên. Mỗi nhóm nguồn lại có cách tổ chức, mức độ cập nhật và phạm vi áp dụng
+khác nhau.
+
+Các câu hỏi thực tế của sinh viên thường không trùng nguyên văn với tiêu đề tài
+liệu. Một câu hỏi có thể chỉ cần một quy định cụ thể, nhưng cũng có thể cần kết
+hợp nhiều nguồn hoặc phụ thuộc vào ngữ cảnh như ngành đào tạo, khóa sinh viên,
+học kỳ và lịch sử hội thoại. Một số dạng câu hỏi điển hình gồm:
 
 \begin{itemize}
-    \item Điều kiện tốt nghiệp, yêu cầu ngoại ngữ;
-    \item Quy định về học bổng, miễn giảm học phí;
-    \item Thủ tục xin nghỉ học, bảo lưu, đăng ký môn học;
-    \item Quy chế thi cử, đánh giá kết quả học tập;
-    \item Hướng dẫn chuyển ngành, chuyển tiếp.
+    \item điều kiện tốt nghiệp, chuẩn ngoại ngữ, học bổng, điểm rèn luyện và các
+    quy định áp dụng cho một khóa sinh viên cụ thể;
+    \item danh mục học phần, số tín chỉ, học phần tiên quyết và lộ trình học
+    trong chương trình đào tạo của một ngành;
+    \item lịch đăng ký học tập, thông báo học vụ, kế hoạch theo học kỳ hoặc các
+    mốc thời gian cần thông tin mới;
+    \item biểu mẫu, thủ tục, dịch vụ hỗ trợ sinh viên, thông tin liên hệ và các
+    hướng dẫn hành chính;
+    \item câu hỏi so sánh hoặc tổng hợp, ví dụ đối chiếu giữa hai chương trình,
+    nhiều quy định hoặc nhiều nguồn dữ liệu.
 \end{itemize}
 
-Với hệ thống văn bản quy định phức tạp gồm hàng chục quyết định, thông tư và hướng dẫn, sinh viên thường gặp khó khăn trong việc tra cứu thông tin chính xác. Việc đọc và tìm kiếm thủ công trong các văn bản pháp lý dài không chỉ tốn thời gian mà còn dễ bỏ sót thông tin quan trọng.
+Việc tự tra cứu trong các tệp PDF dài, bảng chương trình đào tạo, bài viết thông
+báo và dữ liệu đã crawl từ cổng thông tin làm phát sinh nhiều khó khăn. Sinh viên
+có thể tìm được một đoạn chứa từ khóa nhưng chưa chắc đã xác định đúng phạm vi
+áp dụng của văn bản; có thể đọc thiếu điều khoản được dẫn chiếu; hoặc có thể
+nhầm giữa quy định ổn định và thông báo có tính thời điểm. Khi lượng dữ liệu
+tăng lên, tìm kiếm thủ công vừa tốn thời gian vừa khó bảo đảm tính nhất quán.
 
+Sự phát triển của mô hình ngôn ngữ lớn giúp xây dựng giao diện hỏi đáp tự nhiên,
+nhưng chỉ sinh câu trả lời từ tri thức tham số của mô hình là chưa đủ cho miền
+học vụ. Câu trả lời cần bám vào nguồn dữ liệu đang được quản lý, cần cung cấp
+ngữ cảnh truy hồi để người dùng kiểm chứng, và cần có cơ chế giảm rủi ro trả lời
+sai khi câu hỏi thiếu thông tin hoặc dữ liệu đã thay đổi. Đây là lý do đồ án lựa
+chọn hướng \textit{Retrieval-Augmented Generation} (RAG) và mở rộng bằng định
+tuyến truy vấn, lọc metadata, truy hồi lai, agent cho câu hỏi phức tạp và đánh
+giá hồi quy.
+
+\section{Bài toán và phạm vi của đồ án}
+\label{sec:phamvi}
+
+\subsection{Bài toán cần giải quyết}
+
+Đồ án đặt ra bài toán xây dựng một trợ lý học vụ có khả năng nhận câu hỏi tiếng
+Việt bằng ngôn ngữ tự nhiên, truy hồi ngữ cảnh phù hợp từ kho tri thức học vụ,
+sinh câu trả lời có căn cứ và phục vụ được cả các tình huống hội thoại đơn giản
+lẫn các câu hỏi cần tổng hợp nhiều nguồn. Bài toán không chỉ là tìm kiếm văn bản
+mà còn gồm các yêu cầu điều phối hệ thống:
+
+\begin{itemize}
+    \item hiểu câu hỏi hiện tại trong mối liên hệ với lịch sử hội thoại và hồ sơ
+    người dùng khi ngữ cảnh đó thực sự cần thiết;
+    \item chọn đúng miền tri thức thay vì tìm kiếm dàn trải trên toàn bộ dữ liệu;
+    \item kết hợp tìm kiếm ngữ nghĩa với tìm kiếm từ khóa để xử lý tốt cả câu hỏi
+    diễn đạt tự nhiên lẫn các mã ngành, mã học phần và cụm từ chính xác;
+    \item xử lý tài liệu đầu vào từ giai đoạn chuyển đổi, làm sạch, chia chunk,
+    tạo embedding và lập chỉ mục để dữ liệu mới có thể đi vào hệ thống;
+    \item lưu phiên hội thoại, metadata truy vết, phản hồi người dùng và kết quả
+    đánh giá để hỗ trợ vận hành và cải tiến hệ thống.
+\end{itemize}
+
+\subsection{Phạm vi dữ liệu}
+
+Theo tổ chức dữ liệu trong mã nguồn hiện tại, kho tri thức sản xuất của hệ thống
+được chia thành bốn collection chính:
+
+\begin{itemize}
+    \item \texttt{ctdt}: chương trình đào tạo, ngành học, học phần, số tín chỉ,
+    học phần tiên quyết và kế hoạch học tập;
+    \item \texttt{quydinh}: quy chế đào tạo, quy định học bổng, điều kiện tốt
+    nghiệp, quy định ngoại ngữ và các văn bản có phạm vi áp dụng theo khóa hoặc
+    ngành;
+    \item \texttt{kehoach}: kế hoạch, lịch đăng ký, thông báo và các nội dung
+    có yếu tố thời điểm;
+    \item \texttt{stsv}: sổ tay sinh viên, thủ tục, biểu mẫu, dịch vụ hỗ trợ và
+    thông tin hướng dẫn.
+\end{itemize}
+
+Ngoài các collection trên, hệ thống còn có collection phục vụ tải lên hoặc kiểm
+thử trong quá trình phát triển. Dữ liệu có thể đi vào hệ thống qua các pipeline
+ngoại tuyến như crawler và script indexing, hoặc qua luồng admin upload để xử lý
+tài liệu PDF mới trên giao diện quản trị.
+
+\subsection{Phạm vi chức năng}
+
+Phạm vi triển khai của đồ án bao gồm cả lõi RAG và các thành phần cần thiết để
+đưa lõi đó vào một hệ thống sử dụng được:
+
+\begin{itemize}
+    \item backend FastAPI cung cấp API chat thường, chat streaming, truy hồi
+    kiểm tra, health, metrics, session và các API phục vụ tính năng người dùng;
+    \item pipeline hỏi đáp thông minh với routing, reflection, retrieval,
+    reranking, generation, fallback và trace metadata;
+    \item agent LangGraph cho các câu hỏi phức tạp, câu hỏi so sánh hoặc yêu cầu
+    nhiều bước tìm kiếm;
+    \item pipeline quản trị tài liệu từ upload PDF đến chuyển đổi Markdown, làm
+    sạch, chunking, embedding, indexing và rollback;
+    \item lớp lưu trữ MongoDB, các tính năng Redis tùy chọn, xác thực JWT/OAuth
+    và kiểm soát quyền quản trị;
+    \item web app, mobile app và package TypeScript dùng chung cho các contract
+    API quan trọng;
+    \item công cụ đánh giá ngoại tuyến, benchmark retrieval và regression tests.
+\end{itemize}
+
+\subsection{Giới hạn của hệ thống}
+
+Trợ lý học vụ trong đồ án là công cụ hỗ trợ tra cứu và tổng hợp thông tin, không
+thay thế văn bản chính thức hoặc quyết định của đơn vị quản lý đào tạo. Chất
+lượng câu trả lời phụ thuộc vào dữ liệu đã được lập chỉ mục, metadata của tài
+liệu, cấu hình mô hình và khả năng truy hồi đúng ngữ cảnh. Với câu hỏi có tính
+thời điểm, hệ thống có thể sử dụng collection \texttt{kehoach} hoặc web search
+được cấu hình có kiểm soát, nhưng kết quả vẫn cần được đối chiếu với nguồn chính
+thống khi người dùng thực hiện các quyết định quan trọng.
 
 \section{Các giải pháp hiện tại và hạn chế}
 \label{sec:giaiphap}
 
-Hiện nay, việc tra cứu thông tin quy chế đào tạo của sinh viên chủ yếu dựa vào các phương thức sau:
+Trước khi có một hệ thống hỏi đáp dựa trên dữ liệu học vụ, sinh viên thường sử
+dụng các cách tiếp cận sau:
 
 \begin{itemize}
-    \item \textbf{Tra cứu thủ công:} Sinh viên tự tìm kiếm trong các văn bản PDF được đăng tải trên website trường, đòi hỏi thời gian và kỹ năng tìm kiếm;
-    
-    \item \textbf{Hỏi cán bộ phòng đào tạo:} Gửi email hoặc đến trực tiếp để được giải đáp, nhưng thường phải chờ đợi và số lượng nhân viên có hạn;
-    
-    \item \textbf{Hỏi đáp trên diễn đàn:} Thông tin có thể không chính xác hoặc lỗi thời do sinh viên trả lời thay vì nguồn chính thức;
-    
-    \item \textbf{Chatbot đơn giản:} Một số chatbot dựa trên từ khóa (rule-based) không có khả năng hiểu ngữ cảnh và trả lời linh hoạt.
+    \item \textbf{Tra cứu thủ công:} đọc PDF, tìm từ khóa trên website hoặc duyệt
+    các thư mục dữ liệu theo từng đơn vị ban hành;
+    \item \textbf{Hỏi cán bộ hoặc bộ phận hỗ trợ:} gửi email, gọi điện hoặc hỏi
+    trực tiếp để nhận giải đáp;
+    \item \textbf{Tham khảo cộng đồng:} hỏi bạn học, diễn đàn hoặc nhóm trao đổi
+    không chính thức;
+    \item \textbf{Tìm kiếm từ khóa hoặc chatbot đơn giản:} tìm câu trả lời theo
+    keyword hoặc tập câu hỏi định sẵn.
 \end{itemize}
 
-Các hạn chế chính của giải pháp hiện tại:
+Các cách tiếp cận này có giá trị trong từng tình huống, nhưng chưa giải quyết
+đồng thời yêu cầu mở rộng dữ liệu, hiểu ngữ cảnh, tổng hợp nhiều nguồn và kiểm
+chứng câu trả lời. Tìm kiếm từ khóa có thể bỏ sót các cách diễn đạt tương đương;
+tra cứu thủ công khó xử lý nhanh tài liệu dài và các điều khoản tham chiếu; câu
+trả lời từ cộng đồng có thể lỗi thời; còn chatbot không gắn với nguồn tri thức
+truy hồi dễ thiếu căn cứ khi gặp câu hỏi ngoài tập mẫu.
+
+\section{Mục tiêu và yêu cầu của hệ thống}
+\label{sec:muctieu}
+
+\subsection{Mục tiêu tổng quát}
+
+Mục tiêu của đồ án là xây dựng một hệ thống trợ lý học vụ RAG có khả năng trả lời
+câu hỏi tiếng Việt dựa trên dữ liệu học vụ được quản lý, đồng thời có kiến trúc
+đủ mở để cập nhật tài liệu, theo dõi chất lượng và phục vụ nhiều giao diện người
+dùng.
+
+\subsection{Mục tiêu cụ thể}
+
+\begin{enumerate}
+    \item \textbf{Tổ chức kho tri thức học vụ có thể truy hồi:} chuẩn hóa dữ liệu
+    thành các chunk có metadata, phân miền tri thức rõ ràng và hỗ trợ lập chỉ
+    mục cho cả vector search lẫn keyword search.
+
+    \item \textbf{Hiểu và định tuyến truy vấn:} phân biệt hội thoại xã giao, câu
+    hỏi RAG đơn giản và câu hỏi phức tạp; nhận diện miền dữ liệu, thực thể học vụ
+    và nhu cầu sử dụng ngữ cảnh hội thoại hoặc hồ sơ người dùng.
+
+    \item \textbf{Sinh câu trả lời có căn cứ:} xây dựng luồng truy hồi, reranking
+    và generation để câu trả lời dựa trên ngữ cảnh lấy từ dữ liệu; trả về nguồn,
+    collection và metadata truy vết khi API và giao diện cần hiển thị.
+
+    \item \textbf{Xử lý câu hỏi phức tạp:} hỗ trợ phân rã câu hỏi nhiều nguồn,
+    câu hỏi so sánh và agent tool-calling khi một lượt truy hồi tuyến tính không
+    đủ để tạo câu trả lời.
+
+    \item \textbf{Hỗ trợ vòng đời dữ liệu:} cho phép admin chuyển đổi tài liệu
+    mới từ PDF sang dạng có thể chunk, review và index vào hệ thống; đồng thời
+    duy trì các script cập nhật dữ liệu ngoại tuyến.
+
+    \item \textbf{Tăng khả năng vận hành:} lưu trữ session, turn, trace, feedback
+    và metric; bổ sung cache hoặc rate limit khi cấu hình hạ tầng cho phép.
+
+    \item \textbf{Đánh giá và kiểm thử:} xây dựng evaluation suite và regression
+    tests để phát hiện suy giảm về routing, retrieval, API contract, upload
+    pipeline và chất lượng hội thoại qua các lần thay đổi.
+\end{enumerate}
+
+\subsection{Yêu cầu chính}
+
+Từ các mục tiêu trên, hệ thống cần đáp ứng các yêu cầu sau:
+
 \begin{itemize}
-    \item Chưa tận dụng công nghệ AI và NLP hiện đại;
-    \item Không có khả năng trích dẫn nguồn cụ thể (Điều, Khoản);
-    \item Thông tin trả lời thiếu độ tin cậy và khó xác minh.
+    \item hỗ trợ câu hỏi tiếng Việt tự nhiên và không bắt buộc người dùng biết
+    cấu trúc lưu trữ của tài liệu;
+    \item xử lý được nhiều miền tri thức và giữ được metadata quan trọng như
+    ngành, khóa, nguồn, ngày hoặc loại tài liệu;
+    \item phối hợp dense retrieval, keyword retrieval và reranking để tăng khả
+    năng lấy đúng ngữ cảnh;
+    \item hạn chế chèn sai profile hoặc lịch sử hội thoại vào câu hỏi chung;
+    \item cung cấp chat non-streaming và streaming cho các client;
+    \item có cơ chế xác thực, phân quyền cho chức năng quản trị tài liệu;
+    \item có thể đánh giá ngoại tuyến và quan sát các bước xử lý quan trọng của
+    pipeline.
 \end{itemize}
 
+\section{Định hướng giải pháp}
+\label{sec:dinhhuong}
 
-\section{Mục tiêu và định hướng giải pháp}
-Trước nhu cầu cấp thiết về việc hỗ trợ sinh viên tra cứu quy chế đào tạo một cách hiệu quả, đồ án đề xuất xây dựng hệ thống RAG (Retrieval-Augmented Generation) Chatbot với các mục tiêu sau:
+Đồ án triển khai giải pháp theo hướng một hệ thống RAG nhiều lớp thay vì một mô
+hình sinh văn bản đơn lẻ. Luồng xử lý chính bắt đầu từ API, đi qua lớp điều phối
+\texttt{RAGPipeline}, sau đó chọn nhánh xử lý phù hợp:
 
 \begin{itemize}
-    \item \textbf{Hỏi-đáp bằng ngôn ngữ tự nhiên:} Sinh viên có thể đặt câu hỏi bằng tiếng Việt tự nhiên, không cần biết cấu trúc văn bản;
-    
-    \item \textbf{Trích dẫn nguồn chính xác:} Mỗi câu trả lời kèm theo Điều, Khoản cụ thể từ văn bản quy chế;
-
-    \item \textbf{Xử lý đa nguồn tài liệu:} Tổng hợp thông tin từ 16+ văn bản quy định đào tạo;
-
-    \item \textbf{Độ chính xác cao:} Đạt accuracy 99.5\%+ trong xử lý tiếng Việt.
+    \item câu chào hỏi hoặc trao đổi ngắn được xử lý bằng nhánh chitchat để tránh
+    truy hồi không cần thiết;
+    \item câu hỏi đơn giản đi qua luồng RAG cổ điển gồm rewrite truy vấn, chọn
+    collection, embedding, truy hồi, rerank và generation;
+    \item câu hỏi nhiều nguồn có thể được phân rã thành các sub-query theo miền
+    tri thức để truy hồi và tổng hợp có kiểm soát;
+    \item câu hỏi phức tạp khác được chuyển sang agent LangGraph, với công cụ RAG
+    search, web search có kiểm soát và cơ chế fallback về RAG khi cần.
 \end{itemize}
+
+Ở tầng retrieval, Qdrant lưu các vector BGE-M3 và E5 multilingual theo collection,
+trong khi Elasticsearch cung cấp keyword search và hỗ trợ lọc metadata. Kết quả
+được hợp nhất theo chiến lược multi-collection search, loại trùng, rerank và hậu
+xử lý bằng validity filter hoặc reference resolver khi phù hợp. Ở tầng dữ liệu,
+pipeline tài liệu quản lý các bước convert, clean, chunk, embed và index để cập
+nhật tri thức mà không cần huấn luyện lại mô hình ngôn ngữ.
+
+Giải pháp cũng được thiết kế để phục vụ sử dụng thực tế. Backend cung cấp contract
+cho web và mobile; MongoDB lưu dữ liệu bền vững cho người dùng, tài liệu và hội
+thoại; Redis được dùng tùy chọn cho cache, history, session hoặc rate limit; lớp
+evaluation tách kiểm tra truy hồi theo chính sách hiện hành khỏi đánh giá hội
+thoại lịch sử nhằm tránh kết luận sai khi văn bản đã thay đổi theo thời gian.
 
 \section{Đóng góp của đồ án}
 \label{sec:donggop}
 
-Đồ án có năm đóng góp chính như sau:
+Các đóng góp chính của đồ án được thể hiện ở cả dữ liệu, thuật toán điều phối và
+khả năng triển khai hệ thống:
 
 \begin{enumerate}
-    \item \textbf{Xây dựng pipeline xử lý PDF đa phương thức:} Kết hợp Docling, PyMuPDF4LLM và olmOCR để xử lý các văn bản PDF với font encoding phức tạp, đảm bảo độ chính xác 99.5\%+ cho tiếng Việt;
+    \item \textbf{Xây dựng kiến trúc trợ lý học vụ RAG theo miền dữ liệu.}
+    Hệ thống tổ chức tri thức thành các collection học vụ có ý nghĩa riêng,
+    kết hợp backend, pipeline hỏi đáp, lưu trữ, client và evaluation thay vì chỉ
+    dừng ở một thí nghiệm truy hồi đơn lẻ.
 
-    \item \textbf{Phát triển 4 chiến lược chunking chuyên biệt:} Thiết kế OlmOcrLegalChunker, RecursiveChunker, STSVChunker và ArticleLevelLegalChunker với khả năng nhận diện cấu trúc Chương-Điều-Khoản-Điểm, bảo toàn ngữ cảnh và metadata;
+    \item \textbf{Thiết kế luồng hiểu truy vấn và định tuyến thích ứng.}
+    Hệ thống sử dụng complexity routing, domain routing, reflection, entity
+    extraction, collection selection và decomposition để xử lý tốt hơn câu hỏi
+    có ngữ cảnh, câu hỏi nhiều nguồn và câu hỏi có metadata học vụ.
 
-    \item \textbf{Triển khai Hybrid Search với Dual Embedding:} Kết hợp BGE-M3 và E5-Multilingual lưu trên Qdrant Vector Database, kết hợp với Elasticsearch BM25 qua Reciprocal Rank Fusion đạt Hit@5 = 86.4\%;
+    \item \textbf{Triển khai truy hồi lai nhiều collection.}
+    Đồ án kết hợp dual embedding BGE-M3/E5 trên Qdrant với keyword search trên
+    Elasticsearch, metadata filtering, score fusion, reranking, validity
+    filtering và reference resolution để tăng khả năng tìm đúng ngữ cảnh.
 
-    \item \textbf{Xây dựng hệ thống RAG 8 tầng hoàn chỉnh:} Tích hợp Query Router, Query Reflection, Cross-encoder Reranking, Gemini 2.5 Flash, Self Evaluation, Tavily fallback và MongoDB Memory;
+    \item \textbf{Mở rộng RAG bằng agent và web fallback có kiểm soát.}
+    Với các truy vấn phức tạp, hệ thống có planner-executor hoặc ReAct path qua
+    LangGraph; với câu hỏi cần dữ liệu mới hoặc thiếu nguồn nội bộ, hệ thống có
+    thể dùng Tavily theo cấu hình và phạm vi nguồn cho phép.
 
-    \item \textbf{Đánh giá quy mô lớn:} Xây dựng framework đánh giá với 25 bộ dữ liệu, 2.390 câu hỏi, so sánh 6 phương pháp retrieval.
+    \item \textbf{Xây dựng vòng đời nhập và quản trị tài liệu.}
+    Luồng admin upload hỗ trợ lưu file, chuyển đổi PDF sang Markdown, làm sạch,
+    chunking, review, embedding, indexing và rollback; các pipeline ngoại tuyến
+    tiếp tục phục vụ crawler và bảo trì dữ liệu.
+
+    \item \textbf{Hoàn thiện bề mặt sản phẩm và khả năng vận hành.}
+    Hệ thống có FastAPI, web app React/Vite, mobile app Expo/React Native, xác
+    thực JWT/OAuth, session, bookmark, feedback, notification, trace và metric
+    cần thiết cho quá trình sử dụng và kiểm tra.
+
+    \item \textbf{Bổ sung evaluation và regression tooling.}
+    Đồ án cung cấp bộ đánh giá truy hồi hiện hành, đánh giá hội thoại lịch sử,
+    benchmark chiến lược tìm kiếm và các bài kiểm thử hồi quy cho những luồng
+    quan trọng của backend RAG.
 \end{enumerate}
 
-
 \section{Bố cục đồ án}
+\label{sec:bocuc}
 
-Phần còn lại của báo cáo đồ án tốt nghiệp này được tổ chức như sau.
+Phần còn lại của báo cáo được tổ chức như sau:
 
-Chương 2 trình bày cơ sở lý thuyết về hệ thống RAG, bao gồm kiến thức nền tảng về NLP, embedding (BGE-M3, E5-Multilingual), vector store (Qdrant), và các kỹ thuật chunking cho văn bản pháp lý. Chương này cũng khảo sát các nghiên cứu liên quan và phân tích các công nghệ sử dụng.
+\begin{itemize}
+    \item \textbf{Chương 2 -- Nền tảng lý thuyết:} trình bày bối cảnh bài toán,
+    RAG, embedding, vector store, hybrid search, reranking, query routing,
+    agentic RAG, chunking và các kỹ thuật liên quan.
 
-Chương 3 trình bày kiến trúc tổng thể của hệ thống RAG Chatbot với 8 tầng, mô tả chi tiết pipeline thu thập dữ liệu đa nguồn, các chiến lược chunking chuyên biệt, và luồng xử lý từ query đến response.
+    \item \textbf{Chương 3 -- Phương pháp đề xuất:} mô tả kiến trúc RAG v2, luồng
+    xử lý truy vấn, tổ chức dữ liệu, chunking, hybrid retrieval, agent và hạ tầng
+    được lựa chọn cho hệ thống.
 
-Chương 4 đi sâu vào việc cài đặt và triển khai toàn bộ các module: xử lý dữ liệu và chunking, Embedding Layer (BGE-M3, E5), Hybrid Retrieval (Qdrant + Elasticsearch + RRF), Reranking (BGE cross-encoder), Query Router \& Reflection, Chat Model (GeminiLLM) và Self Evaluation, Tavily fallback, MongoDB Memory, FastAPI Backend và Pipeline Integration.
+    \item \textbf{Chương 4 -- Triển khai mô hình:} đi vào chi tiết cài đặt các
+    pipeline xử lý dữ liệu, embedding, retrieval, reranking, query router,
+    generation, tool search, MongoDB, Redis, agent, FastAPI và evaluation.
 
-Chương 5 tập trung vào việc đánh giá hệ thống trên 2.390 câu hỏi từ 25 bộ dữ liệu, so sánh 6 phương pháp retrieval với các metrics Hit@K, Precision@K, Recall@K, MRR.
+    \item \textbf{Chương 5 -- Đánh giá thực nghiệm:} trình bày dữ liệu đánh giá,
+    các metric, các cấu hình retrieval được so sánh, kết quả thực nghiệm và phân
+    tích các trường hợp khó.
 
-Cuối cùng, chương 6 đưa ra kết luận và hướng phát triển của đồ án, tổng kết các đóng góp chính, nhìn nhận hạn chế và đề xuất các cải tiến bao gồm query caching, metadata-aware retrieval, và nâng cấp Agentic RAG.
+    \item \textbf{Chương 6 -- Kết luận:} tổng kết kết quả đạt được, hạn chế còn
+    tồn tại, bài học kinh nghiệm và các hướng mở rộng tiếp theo.
+\end{itemize}
 
 \end{document}

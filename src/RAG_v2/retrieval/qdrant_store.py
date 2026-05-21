@@ -278,6 +278,47 @@ class QdrantStore:
         )
         return results
 
+    def get_by_metadata(
+        self,
+        filters: Dict[str, Any],
+        limit: int = 1,
+    ) -> List[Dict[str, Any]]:
+        """Lookup points by payload filter (fast scroll, ~5ms).
+
+        Args:
+            filters: Dict of {key: value} — matched as exact payload conditions.
+            limit: Max number of points to return.
+
+        Returns:
+            List of dicts: ``{"id", "text", "metadata", "collection"}``.
+        """
+        if not filters:
+            return []
+
+        conditions = [
+            models.FieldCondition(key=k, match=models.MatchValue(value=v))
+            for k, v in filters.items()
+        ]
+        result, _ = self.client.scroll(
+            collection_name=self.collection_name,
+            scroll_filter=models.Filter(must=conditions),
+            limit=limit,
+            with_payload=True,
+            with_vectors=False,
+        )
+
+        docs: List[Dict[str, Any]] = []
+        for point in result:
+            payload = dict(point.payload or {})
+            text = payload.pop("text", "")
+            docs.append({
+                "id": str(point.id),
+                "text": text,
+                "metadata": payload,
+                "collection": self.collection_name,
+            })
+        return docs
+
     # ------------------------------------------------------------------
     # Metadata update
     # ------------------------------------------------------------------

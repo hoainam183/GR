@@ -614,3 +614,218 @@ class TestGetLatestChunkIdsByDate:
         result = store.get_latest_chunk_ids_by_date()
         assert result == []
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Latest Registration Follow-up Regression
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestLatestRegistrationFollowupRegression:
+    """Regression coverage for the 'Lịch trình học kỳ mới nhất?' → 'lịch đăng kí
+    kì học mới nhất' conversation where history caused academic_term injection."""
+
+    def _make_reflector(self, llm_response: str):
+        from query.reflection import QueryReflector
+
+        mock_settings = MagicMock()
+        mock_settings.reflection_model = "stub"
+        mock_settings.reflection_temperature = 0.0
+        mock_settings.reflection_max_tokens = 256
+        mock_settings.reflection_provider = "gemini"
+        mock_settings.google_api_key = "fake"
+        mock_settings.lm_studio_base_url = ""
+        mock_settings.ollama_base_url = ""
+        mock_settings.openai_api_key = ""
+
+        reflector = QueryReflector(settings=mock_settings)
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = llm_response
+        reflector._client = MagicMock()
+        reflector._client.chat.completions.create.return_value = mock_response
+        return reflector
+
+    # ── Reflection guardrail ────────────────────────────────────────────────
+
+    def test_academic_term_2025_2_injection_reverted(self):
+        """Exact regression: LLM injects 2025.2 → guardrail reverts to original."""
+        reflector = self._make_reflector(
+            "Lịch trình đăng ký học tập học kỳ 2 năm học 2025-2026 (2025.2) là gì?"
+        )
+        history = [
+            {"role": "user", "content": "Lịch trình học kỳ mới nhất?"},
+            {
+                "role": "assistant",
+                "content": "Kế hoạch học tập kỳ 2 năm học 2025-2026 (2025.2) đã được thông báo.",
+            },
+        ]
+        profile = {"major": "Công nghệ thông tin Việt - Nhật", "major_code": "IT-E6", "cohort": "67"}
+
+        result = reflector.reflect(
+            "lịch đăng kí kì học mới nhất",
+            chat_history=history,
+            user_context=profile,
+        )
+
+        assert result["rewritten"] == "lịch đăng kí kì học mới nhất", (
+            f"Generic freshness follow-up must not inherit 2025.2 from history: {result['rewritten']}"
+        )
+        assert "2025.2" not in result["rewritten"]
+        assert "20252" not in result["rewritten"]
+        assert "IT-E6" not in result["rewritten"]
+
+    def test_reflection_trace_exposes_candidate_and_revert_flag(self):
+        """Trace fields must be present in reflect() return value."""
+        reflector = self._make_reflector(
+            "Lịch trình đăng ký học tập học kỳ 2 năm học 2025-2026 (2025.2) là gì?"
+        )
+        history = [{"role": "user", "content": "Lịch trình học kỳ mới nhất?"}]
+
+        result = reflector.reflect(
+            "lịch đăng kí kì học mới nhất",
+            chat_history=history,
+            user_context=None,
+        )
+
+        assert "reflection_candidate" in result, "reflection_candidate must be in trace"
+        assert "reflection_guardrail_reverted" in result, "reflection_guardrail_reverted must be in trace"
+        assert "reflection_rejected_scope" in result, "reflection_rejected_scope must be in trace"
+        # The guardrail must have fired and reverted (2025.2 is an academic_term injection)
+        assert result["reflection_guardrail_reverted"] is True
+        assert result["reflection_rejected_scope"] == "academic_term"
+        # The candidate holds the raw (rejected) LLM output
+        assert "2025.2" in result["reflection_candidate"] or "20252" in result["reflection_candidate"]
+
+    def test_should_use_history_for_reflection_false_for_generic_freshness(self):
+        """_should_use_history_for_reflection must return False for generic freshness."""
+        from query.reflection import QueryReflector
+
+        mock_settings = MagicMock()
+        mock_settings.reflection_model = "stub"
+        mock_settings.reflection_temperature = 0.0
+        mock_settings.reflection_max_tokens = 256
+        mock_settings.reflection_provider = "gemini"
+        mock_settings.google_api_key = "fake"
+        mock_settings.lm_studio_base_url = ""
+        mock_settings.ollama_base_url = ""
+        mock_settings.openai_api_key = ""
+
+        reflector = QueryReflector(settings=mock_settings)
+        history = [{"role": "user", "content": "Lịch trình học kỳ mới nhất?"}]
+
+        assert reflector._should_use_history_for_reflection(
+            "lịch đăng kí kì học mới nhất", history
+        ) is False
+        assert reflector._should_use_history_for_reflection(
+            "Lịch trình học kỳ mới nhất?", history
+        ) is False
+
+    def test_should_use_history_true_for_personal_ref(self):
+        """_should_use_history_for_reflection must return True when personal ref present."""
+        from query.reflection import QueryReflector
+
+        mock_settings = MagicMock()
+        mock_settings.reflection_model = "stub"
+        mock_settings.reflection_temperature = 0.0
+        mock_settings.reflection_max_tokens = 256
+        mock_settings.reflection_provider = "gemini"
+        mock_settings.google_api_key = "fake"
+        mock_settings.lm_studio_base_url = ""
+        mock_settings.ollama_base_url = ""
+        mock_settings.openai_api_key = ""
+
+        reflector = QueryReflector(settings=mock_settings)
+        history = [{"role": "user", "content": "Ngành của tôi là IT-E6"}]
+
+        assert reflector._should_use_history_for_reflection(
+            "kế hoạch mới nhất của ngành tôi", history
+        ) is True
+
+    # ── Tavily suppression ──────────────────────────────────────────────────
+
+    def test_freshness_kehoach_high_confidence_suppresses_tavily(self):
+        """freshness_query must NOT trigger Tavily when good local kehoach docs exist."""
+        from pipeline.flows import _build_pre_generation_web_decision
+
+        kehoach_docs = [
+            {
+                "collection": "kehoach",
+                "text": "Đăng ký kế hoạch học tập 20253",
+                "rerank_score": 0.9,
+                "metadata": {"date_str": "1/3/2026"},
+            }
+        ]
+        result = _build_pre_generation_web_decision(
+            question="lịch đăng kí kì học mới nhất",
+            search_query="lịch đăng kí kì học mới nhất",
+            reranked=kehoach_docs,
+            target_collections=["kehoach"],
+            routing_result=None,
+            cfg={"web_bypass_min_local_score": 0.5},
+        )
+
+        assert result["should_web_search"] is False, (
+            f"Tavily must be suppressed when local kehoach docs are present with high confidence. "
+            f"reasons={result['reasons']}"
+        )
+        assert "freshness_query" not in result["reasons"]
+
+    def test_freshness_no_kehoach_docs_still_triggers_tavily(self):
+        """freshness_query MUST trigger Tavily when there are no local kehoach docs."""
+        from pipeline.flows import _build_pre_generation_web_decision
+
+        # Only stsv/non-kehoach docs — kehoach was not retrieved
+        non_kehoach_docs = [
+            {
+                "collection": "stsv",
+                "text": "some regulation",
+                "rerank_score": 0.9,
+                "metadata": {},
+            }
+        ]
+        result = _build_pre_generation_web_decision(
+            question="lịch đăng kí kì học mới nhất",
+            search_query="lịch đăng kí kì học mới nhất",
+            reranked=non_kehoach_docs,
+            target_collections=["kehoach"],
+            routing_result=None,
+            cfg={"web_bypass_min_local_score": 0.5},
+        )
+
+        assert result["should_web_search"] is True, (
+            "Tavily must fire when no local kehoach docs available for freshness query"
+        )
+        assert "freshness_query" in result["reasons"]
+
+    def test_freshness_no_sources_triggers_tavily(self):
+        """With zero retrieved docs, Tavily must always be triggered."""
+        from pipeline.flows import _build_pre_generation_web_decision
+
+        result = _build_pre_generation_web_decision(
+            question="lịch đăng kí kì học mới nhất",
+            search_query="lịch đăng kí kì học mới nhất",
+            reranked=[],
+            target_collections=["kehoach"],
+            routing_result=None,
+            cfg={},
+        )
+
+        assert result["should_web_search"] is True
+        assert "no_sources" in result["reasons"]
+
+    # ── Web query improvement ───────────────────────────────────────────────
+
+    def test_registration_freshness_web_query_adds_dang_ky(self):
+        """Registration + freshness query must include 'đăng ký kế hoạch học tập' term."""
+        from pipeline.flows import _build_web_search_query
+
+        query = _build_web_search_query(
+            "lịch đăng kí kì học mới nhất",
+            "lịch đăng kí kì học mới nhất",
+        )
+        assert "đăng ký kế hoạch học tập" in query, (
+            f"Web query must include registration term for Tavily precision: {query}"
+        )
+        assert "HUST" in query
+        assert "CTT" in query
+
+
