@@ -80,6 +80,12 @@ Token behavior:
 
 `PipelineTrace.tsx` expects pipeline metadata such as timings, filters, collection results, route/mode, Tavily details, and agent traces.
 
+## Admin UI Contract
+
+`AdminPage` owns a viewport-height shell with a fixed header/tab rail and a scrollable `main` region because the app root keeps overflow locked for chat. Keep admin tab content inside that scroll region; tab switches reset it to the top.
+
+`OverviewTab` uses compact metric cards plus a usage summary panel rather than a loose page-level stat grid.
+
 ## Maintenance Notes
 
 - Keep web response normalization aligned with `api/response_mapper.py` and `packages/shared/src/utils/normalize.ts`.

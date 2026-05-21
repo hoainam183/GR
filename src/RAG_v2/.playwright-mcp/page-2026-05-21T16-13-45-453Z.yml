@@ -1,0 +1,37 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e9]:
+        - paragraph [ref=e10]: HUST Assistant
+        - heading "Chào mừng trở lại" [level=1] [ref=e11]
+        - paragraph [ref=e12]: Đăng nhập vào tài khoản của bạn
+    - generic [ref=e13]:
+      - button "Continue with Microsoft" [ref=e14] [cursor=pointer]:
+        - img
+        - text: Continue with Microsoft
+      - button "Continue with Google" [ref=e15] [cursor=pointer]:
+        - img
+        - text: Continue with Google
+    - generic [ref=e18]: or
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]: Tên đăng nhập
+        - textbox "Tên đăng nhập" [ref=e23]:
+          - /placeholder: Nhập tên đăng nhập
+      - generic [ref=e24]:
+        - generic [ref=e25]: Mật khẩu
+        - generic [ref=e26]:
+          - textbox "Mật khẩu" [ref=e27]:
+            - /placeholder: ••••••••
+          - button "Show password" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+      - button "Đăng nhập" [ref=e32] [cursor=pointer]
+    - generic [ref=e33]:
+      - paragraph [ref=e34]:
+        - text: Chưa có tài khoản?
+        - button "Đăng ký" [ref=e35] [cursor=pointer]
+      - button "Trở về trang chủ" [ref=e36] [cursor=pointer]

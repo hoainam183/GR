@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -52,6 +52,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('__all__');
   const [collectionFilter, setCollectionFilter] = useState('__all__');
+  const scrollAreaRef = useRef<HTMLElement>(null);
   const limit = 20;
 
   const fetchDocuments = useCallback(async () => {
@@ -98,84 +99,121 @@ export default function AdminPage() {
   };
 
   const handleView = (id: string) => navigate(`/admin/documents/${id}`);
+  const handleTabChange = (tab: AdminTab) => {
+    setActiveTab(tab);
+    scrollAreaRef.current?.scrollTo({ top: 0 });
+  };
+  const activeTabInfo = TABS.find((tab) => tab.id === activeTab) ?? TABS[0];
+  const ActiveTabIcon = activeTabInfo.icon;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
-      <div className="mb-6 flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/chat')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-bold">Admin</h1>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-border overflow-x-auto">
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {activeTab === 'overview' && <OverviewTab />}
-
-      {activeTab === 'users' && <UsersTab />}
-
-      {activeTab === 'documents' && (
-        <>
-          <FileUploader onUploaded={handleUploaded} />
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Trạng thái" /></SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={collectionFilter} onValueChange={(v) => { setCollectionFilter(v); setPage(1); }}>
-              <SelectTrigger className="w-[140px]"><SelectValue placeholder="Collection" /></SelectTrigger>
-              <SelectContent>
-                {COLLECTION_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="sm" onClick={fetchDocuments}>Làm mới</Button>
+    <div className="flex h-dvh min-h-0 flex-col bg-background">
+      <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 md:px-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={() => navigate('/chat')}
+            title="Quay lại chat"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <ActiveTabIcon className="h-4 w-4 text-primary" />
           </div>
-          <div className="mt-4">
-            <DocumentList
-              documents={documents}
-              loading={loading}
-              total={total}
-              page={page}
-              limit={limit}
-              onPageChange={setPage}
-              onView={handleView}
-              onDelete={handleDelete}
-            />
+          <div className="min-w-0">
+            <h1 className="truncate text-base font-semibold text-foreground sm:text-lg">Admin</h1>
+            <p className="truncate text-xs text-muted-foreground">{activeTabInfo.label}</p>
           </div>
-        </>
-      )}
+        </div>
+      </header>
 
-      {activeTab === 'feedback' && <FeedbackTab />}
+      <nav className="shrink-0 border-b border-border bg-background" aria-label="Admin">
+        <div className="scrollbar-thin mx-auto max-w-6xl overflow-x-auto px-4 md:px-6">
+          <div className="flex min-w-max gap-1 py-2" role="tablist" aria-label="Admin sections">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  id={`admin-tab-${tab.id}`}
+                  type="button"
+                  role="tab"
+                  aria-controls="admin-tab-panel"
+                  aria-selected={isActive}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-lg border px-3 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'border-primary/30 bg-primary/10 text-primary'
+                      : 'border-transparent text-muted-foreground hover:bg-secondary hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
 
-      {activeTab === 'analytics' && <AnalyticsTab />}
+      <main ref={scrollAreaRef} className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div
+          id="admin-tab-panel"
+          role="tabpanel"
+          aria-labelledby={`admin-tab-${activeTab}`}
+          className="mx-auto max-w-6xl px-4 py-5 md:px-6 md:py-6"
+        >
+          {activeTab === 'overview' && <OverviewTab />}
 
-      {activeTab === 'system' && <SystemTab />}
+          {activeTab === 'users' && <UsersTab />}
+
+          {activeTab === 'documents' && (
+            <>
+              <FileUploader onUploaded={handleUploaded} />
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+                  <SelectTrigger className="w-[160px]"><SelectValue placeholder="Trạng thái" /></SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={collectionFilter} onValueChange={(v) => { setCollectionFilter(v); setPage(1); }}>
+                  <SelectTrigger className="w-[140px]"><SelectValue placeholder="Collection" /></SelectTrigger>
+                  <SelectContent>
+                    {COLLECTION_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="sm" onClick={fetchDocuments}>Làm mới</Button>
+              </div>
+              <div className="mt-4">
+                <DocumentList
+                  documents={documents}
+                  loading={loading}
+                  total={total}
+                  page={page}
+                  limit={limit}
+                  onPageChange={setPage}
+                  onView={handleView}
+                  onDelete={handleDelete}
+                />
+              </div>
+            </>
+          )}
+
+          {activeTab === 'feedback' && <FeedbackTab />}
+
+          {activeTab === 'analytics' && <AnalyticsTab />}
+
+          {activeTab === 'system' && <SystemTab />}
+        </div>
+      </main>
     </div>
   );
 }

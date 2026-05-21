@@ -772,5 +772,41 @@
       "total_chunks": 2,
       "source_list_path": "/DisplayWeb/DisplayListKeHoach"
     }
+  },
+  {
+    "chunk_id": "628ff697-7a0b-4d76-8956-5c70a699d2ae",
+    "content": "[KẾ HOẠCH HỌC GDQP CHO SINH VIÊN K70 KỲ HÈ 20253]\nTHÔNG BÁO\nV/v: Kế hoạch học GDQP cho sinh viên K70 kỳ hè 20253\nCăn cứ vào kế hoạch đào tạo năm học, Ban Đào tạo trân trọng thông báo đến các bạn sinh viên Khóa 70 (K70) kế hoạch học tập môn Giáo dục Quốc phòng và An ninh (GDQP-AN) trong kỳ hè 20253 cụ thể như sau:\nLớp SV\nThời gian học Quốc phòng An ninh\nVi điện tử & CN nano 05-K70\nTuần 46-48 (20/07/2026 - 07/08/2026)\nCTTT Phân tích KD 01-K70\nCTTT Phân tích KD 02-K70\nCTTT Phân tích KD 03-K70\nCTTT Logistics 01-K70\nCTTT Logistics 02-K70\nCTTT Logistics 03-K70\nCTTT Logistics 04-K70\nCTTT Cơ điện tử 01-K70\nCTTT Cơ điện tử 02-K70\nCTTT Cơ điện tử 03-K70\nCTTT Cơ điện tử 04-K70\nCTTT Cơ điện tử 05-K70\nCTTT ô tô 01-K70\nCTTT ô tô 02-K70\nCTTT ô tô 03-K70\nCTTT HT điện và NL tái tạo 01-K70\nCTTT HT điện và NL tái tạo 02-K70\nKỹ thuật hóa học 16-K70\nTuần 49-51 (10/08/2026 - 28/08/2026)\nCơ điện tử 07-K70\nCTTT KT Điều khiển-TĐH 01-K70\nCTTT KT Điều khiển-TĐH 02-K70\nCTTT KT Điều khiển-TĐH 03-K70\nCTTT KT Điều khiển-TĐH 04-K70\nCTTT TTS & KT đa phương tiện 01-K70",
+    "metadata": {
+      "baiviet_id": 29237,
+      "title": "KẾ HOẠCH HỌC GDQP CHO SINH VIÊN K70 KỲ HÈ 20253",
+      "category": "ĐTĐH",
+      "tag_in_title": "DTDH",
+      "date_str": "13/5/2026",
+      "url": "https://ctt.hust.edu.vn/DisplayWeb/DisplayKeHoach?kehoach=29237",
+      "source": "kehoach",
+      "section_label": null,
+      "chunk_index": 0,
+      "chunk_size": 1051,
+      "total_chunks": 2,
+      "source_list_path": "/DisplayWeb/DisplayListKeHoach"
+    }
+  },
+  {
+    "chunk_id": "308d6786-c486-453f-98a5-822dd6585a52",
+    "content": "[KẾ HOẠCH HỌC GDQP CHO SINH VIÊN K70 KỲ HÈ 20253]\nCTTT KT Điều khiển-TĐH 02-K70\nCTTT KT Điều khiển-TĐH 03-K70\nCTTT KT Điều khiển-TĐH 04-K70\nCTTT TTS & KT đa phương tiện 01-K70\nCTTT TTS & KT đa phương tiện 02-K70\nCTTT KT ĐTVT 01-K70\nCTTT KT ĐTVT 02-K70\nCTTT Y sinh 01-K70\nCTTT Thực phẩm 01-K70\nCTTT Thực phẩm 02-K70\nCTTT KT sinh học 01-K70\nCTTT Hóa dược 01-K70\nCTTT Hóa dược 02-K70\nCTTT Hóa dược 03-K70\nCTTT Vật liệu 01-K70\nCTTT Vật liệu 02-K70\nKỹ thuật điện 01-K70\nNăm học 2026-2027 (sẽ thông báo sau)\nKỹ thuật điện 02-K70\nKỹ thuật điện 03-K70\nKỹ thuật điện 04-K70\nKỹ thuật điện 05-K70\nKỹ thuật điện 06-K70\nVật liệu 01-K70\nVật liệu 03-K70\nVật liệu 05-K70\nLưu ý:\nĐề nghị các bạn sinh viên có tên lớp trong danh sách học Tuần 46-48 và Tuần 49-51 chủ động sắp xếp thời gian để tham gia khóa học đầy đủ và đúng hạn.\nSinh viên thường xuyên theo dõi các thông báo tiếp theo trên hệ thống quản lý đào tạo và email cá nhân để cập nhật địa điểm học và các yêu cầu cụ thể đối với môn học GDQP-AN.\nTrân trọng thông báo./.",
+    "metadata": {
+      "baiviet_id": 29237,
+      "title": "KẾ HOẠCH HỌC GDQP CHO SINH VIÊN K70 KỲ HÈ 20253",
+      "category": "ĐTĐH",
+      "tag_in_title": "DTDH",
+      "date_str": "13/5/2026",
+      "url": "https://ctt.hust.edu.vn/DisplayWeb/DisplayKeHoach?kehoach=29237",
+      "source": "kehoach",
+      "section_label": null,
+      "chunk_index": 1,
+      "chunk_size": 1010,
+      "total_chunks": 2,
+      "source_list_path": "/DisplayWeb/DisplayListKeHoach"
+    }
   }
 ]

@@ -1,0 +1,99 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications (F8)":
+      - list
+    - region "Notifications alt+T"
+    - generic [ref=e355]:
+      - banner [ref=e356]:
+        - generic [ref=e357]:
+          - button "Quay lại chat" [ref=e358] [cursor=pointer]:
+            - img
+          - img [ref=e600]
+          - generic [ref=e365]:
+            - heading "Admin" [level=1] [ref=e366]
+            - paragraph [ref=e367]: Tổng quan
+      - navigation "Admin" [ref=e368]:
+        - tablist "Admin sections" [ref=e370]:
+          - tab "Tổng quan" [active] [selected] [ref=e371] [cursor=pointer]:
+            - img [ref=e372]
+            - text: Tổng quan
+          - tab "Người dùng" [ref=e377] [cursor=pointer]:
+            - img [ref=e378]
+            - text: Người dùng
+          - tab "Tài liệu" [ref=e383] [cursor=pointer]:
+            - img [ref=e384]
+            - text: Tài liệu
+          - tab "Phân tích" [ref=e387] [cursor=pointer]:
+            - img [ref=e388]
+            - text: Phân tích
+          - tab "Feedback" [ref=e390] [cursor=pointer]:
+            - img [ref=e391]
+            - text: Feedback
+          - tab "Hệ thống" [ref=e393] [cursor=pointer]:
+            - img [ref=e394]
+            - text: Hệ thống
+      - main [ref=e397]:
+        - tabpanel "Tổng quan" [ref=e605]:
+          - generic [ref=e606]:
+            - region "Admin metrics" [ref=e607]:
+              - article [ref=e608]:
+                - generic [ref=e609]:
+                  - generic [ref=e610]:
+                    - paragraph [ref=e611]: Tổng người dùng
+                    - paragraph [ref=e612]: "7"
+                  - img [ref=e614]
+                - paragraph [ref=e619]: Tài khoản trong hệ thống
+              - article [ref=e620]:
+                - generic [ref=e621]:
+                  - generic [ref=e622]:
+                    - paragraph [ref=e623]: Phiên chat
+                    - paragraph [ref=e624]: "440"
+                  - img [ref=e626]
+                - paragraph [ref=e628]: Lượt hội thoại đã tạo
+              - article [ref=e629]:
+                - generic [ref=e630]:
+                  - generic [ref=e631]:
+                    - paragraph [ref=e632]: Câu hỏi
+                    - paragraph [ref=e633]: "947"
+                  - img [ref=e635]
+                - paragraph [ref=e637]: Truy vấn đã xử lý
+              - article [ref=e638]:
+                - generic [ref=e639]:
+                  - generic [ref=e640]:
+                    - paragraph [ref=e641]: Hoạt động 7 ngày
+                    - paragraph [ref=e642]: "2"
+                  - img [ref=e644]
+                - paragraph [ref=e648]: Người dùng quay lại gần đây
+              - article [ref=e649]:
+                - generic [ref=e650]:
+                  - generic [ref=e651]:
+                    - paragraph [ref=e652]: Feedback
+                    - paragraph [ref=e653]: "2"
+                  - img [ref=e655]
+                - paragraph [ref=e657]: Phản hồi cho câu trả lời
+              - article [ref=e658]:
+                - generic [ref=e659]:
+                  - generic [ref=e660]:
+                    - paragraph [ref=e661]: Hài lòng
+                    - paragraph [ref=e662]: 100%
+                  - img [ref=e664]
+                - paragraph [ref=e666]: Tỉ lệ feedback hữu ích
+            - complementary [ref=e667]:
+              - generic [ref=e668]:
+                - img [ref=e670]
+                - generic [ref=e672]:
+                  - heading "Nhịp sử dụng" [level=2] [ref=e673]
+                  - paragraph [ref=e674]: Tổng hợp từ các chỉ số chính.
+              - generic [ref=e675]:
+                - generic [ref=e676]:
+                  - term [ref=e677]: Người dùng active 7 ngày
+                  - definition [ref=e678]:
+                    - generic [ref=e679]: "2"
+                    - generic [ref=e680]: 29%
+                - generic [ref=e681]:
+                  - term [ref=e682]: Câu hỏi mỗi phiên
+                  - definition [ref=e683]: "2.2"
+                - generic [ref=e684]:
+                  - term [ref=e685]: Feedback hữu ích
+                  - definition [ref=e686]: 100%
+  - generic [ref=e247]: "0"

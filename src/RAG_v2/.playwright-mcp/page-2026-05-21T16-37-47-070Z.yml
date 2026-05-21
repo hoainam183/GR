@@ -1,0 +1,134 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications (F8)":
+      - list
+    - region "Notifications alt+T"
+    - generic [ref=e355]:
+      - banner [ref=e356]:
+        - generic [ref=e357]:
+          - button "Quay lại chat" [ref=e358] [cursor=pointer]:
+            - img
+          - img [ref=e480]
+          - generic [ref=e365]:
+            - heading "Admin" [level=1] [ref=e366]
+            - paragraph [ref=e367]: Hệ thống
+      - navigation "Admin" [ref=e368]:
+        - tablist "Admin sections" [ref=e370]:
+          - tab "Tổng quan" [ref=e371] [cursor=pointer]:
+            - img [ref=e372]
+            - text: Tổng quan
+          - tab "Người dùng" [ref=e377] [cursor=pointer]:
+            - img [ref=e378]
+            - text: Người dùng
+          - tab "Tài liệu" [ref=e383] [cursor=pointer]:
+            - img [ref=e384]
+            - text: Tài liệu
+          - tab "Phân tích" [ref=e387] [cursor=pointer]:
+            - img [ref=e388]
+            - text: Phân tích
+          - tab "Feedback" [ref=e390] [cursor=pointer]:
+            - img [ref=e391]
+            - text: Feedback
+          - tab "Hệ thống" [active] [selected] [ref=e393] [cursor=pointer]:
+            - img [ref=e394]
+            - text: Hệ thống
+      - main [ref=e397]:
+        - tabpanel "Hệ thống" [ref=e483]:
+          - generic [ref=e484]:
+            - generic [ref=e485]:
+              - paragraph [ref=e486]: Cấu hình hệ thống
+              - generic [ref=e487]:
+                - generic [ref=e488]:
+                  - generic [ref=e489] [cursor=pointer]: Agent Mode
+                  - switch "Agent Mode" [checked] [ref=e490] [cursor=pointer]
+                - generic [ref=e491]:
+                  - generic [ref=e492] [cursor=pointer]: Self Evaluation
+                  - switch "Self Evaluation" [checked] [ref=e493] [cursor=pointer]
+                - generic [ref=e494]:
+                  - generic [ref=e495] [cursor=pointer]: Tavily Fallback
+                  - switch "Tavily Fallback" [checked] [ref=e496] [cursor=pointer]
+                - generic [ref=e497]:
+                  - generic [ref=e498] [cursor=pointer]: Auto Crawler
+                  - switch "Auto Crawler" [checked] [ref=e499] [cursor=pointer]
+                - generic [ref=e500]:
+                  - generic [ref=e501] [cursor=pointer]: Redis Cache
+                  - switch "Redis Cache" [ref=e502] [cursor=pointer]
+                - generic [ref=e503]:
+                  - generic [ref=e504] [cursor=pointer]: MongoDB
+                  - switch "MongoDB" [checked] [ref=e505] [cursor=pointer]
+            - generic [ref=e506]:
+              - generic [ref=e507]:
+                - img [ref=e508]
+                - paragraph [ref=e511]: Cấu hình LLM
+              - generic [ref=e512]:
+                - generic [ref=e513]:
+                  - generic [ref=e514]:
+                    - img [ref=e515]
+                    - generic [ref=e519]: API Keys
+                  - generic [ref=e520]:
+                    - generic [ref=e521]:
+                      - text: Google API Key
+                      - textbox "Google API Key" [ref=e522]:
+                        - /placeholder: AIza***6zyU
+                    - generic [ref=e523]:
+                      - text: Tavily API Key
+                      - textbox "Tavily API Key" [ref=e524]:
+                        - /placeholder: tvly***5KqN
+                - generic [ref=e525]:
+                  - generic [ref=e526]:
+                    - img [ref=e527]
+                    - generic [ref=e530]: Models
+                  - generic [ref=e531]:
+                    - generic [ref=e532]:
+                      - text: Chat Model
+                      - textbox "Chat Model" [ref=e533]: gemini-3.1-flash-lite-preview
+                    - generic [ref=e534]:
+                      - text: Agent Model
+                      - textbox "Agent Model" [ref=e535]: qwen/qwen3-8b
+                    - generic [ref=e536]:
+                      - text: Reflection Model
+                      - textbox "Reflection Model" [ref=e537]: gemini-3.1-flash-lite-preview
+                  - generic [ref=e538]:
+                    - generic [ref=e539]:
+                      - text: Temperature
+                      - spinbutton "Temperature" [ref=e540]: "0.3"
+                    - generic [ref=e541]:
+                      - text: Max Tokens
+                      - spinbutton "Max Tokens" [ref=e542]: "2048"
+                - button "Lưu cấu hình" [ref=e543] [cursor=pointer]:
+                  - img
+                  - text: Lưu cấu hình
+            - generic [ref=e544]:
+              - paragraph [ref=e545]: Trạng thái dịch vụ
+              - generic [ref=e546]:
+                - generic [ref=e547]:
+                  - generic [ref=e548]: MongoDB
+                  - generic [ref=e549]: ok
+                - generic [ref=e550]:
+                  - generic [ref=e551]: Redis
+                  - generic [ref=e552]: disabled
+            - generic [ref=e553]:
+              - generic [ref=e554]:
+                - paragraph [ref=e555]: Tài liệu theo trạng thái
+                - img [ref=e558]:
+                  - generic [ref=e565]: indexed
+                  - generic [ref=e567]:
+                    - generic [ref=e569]: "0"
+                    - generic [ref=e571]: "1"
+                    - generic [ref=e573]: "2"
+                    - generic [ref=e575]: "3"
+                    - generic [ref=e577]: "4"
+              - generic [ref=e578]:
+                - paragraph [ref=e579]: Tài liệu theo collection
+                - img [ref=e582]
+            - generic [ref=e583]:
+              - paragraph [ref=e584]: Crawler
+              - generic [ref=e585]:
+                - combobox [ref=e586] [cursor=pointer]:
+                  - generic: Tất cả
+                  - img [ref=e587]
+                - button "Chạy Crawl" [ref=e589] [cursor=pointer]:
+                  - img
+                  - text: Chạy Crawl
+                - generic [ref=e590]: "Lịch tự động: 02:00 hàng ngày"
+  - generic [ref=e247]: "0"
