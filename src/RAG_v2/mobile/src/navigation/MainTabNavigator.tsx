@@ -14,6 +14,7 @@ import ProfileStack from './ProfileStack';
 import LookupStack from './LookupStack';
 import BookmarkStack from './BookmarkStack';
 import NotificationStack from './NotificationStack';
+import { useAppTheme } from '../theme/theme';
 
 export type MainTabParamList = {
   ChatTab: undefined;
@@ -26,6 +27,7 @@ export type MainTabParamList = {
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const MainTabNavigator = () => {
+  const { colors } = useAppTheme();
   const { data: unreadData } = useQuery({
     queryKey: ['notifications-unread-count'],
     queryFn: () => getUnreadCount(apiClient),
@@ -37,11 +39,11 @@ const MainTabNavigator = () => {
   <Tab.Navigator
     screenOptions={{
       headerShown: false,
-      tabBarActiveTintColor: '#6366f1',
-      tabBarInactiveTintColor: '#94a3b8',
+      tabBarActiveTintColor: colors.primary,
+      tabBarInactiveTintColor: colors.mutedForeground,
       tabBarStyle: {
-        backgroundColor: '#0f172a',
-        borderTopColor: '#1e293b',
+        backgroundColor: colors.tabBar,
+        borderTopColor: colors.border,
         borderTopWidth: 1,
         paddingBottom: 4,
         height: 56,
@@ -65,8 +67,8 @@ const MainTabNavigator = () => {
           ),
           tabBarStyle: {
             display,
-            backgroundColor: '#0f172a',
-            borderTopColor: '#1e293b',
+            backgroundColor: colors.tabBar,
+            borderTopColor: colors.border,
             borderTopWidth: 1,
             paddingBottom: 4,
             height: 56,
@@ -103,7 +105,11 @@ const MainTabNavigator = () => {
           <Ionicons name="notifications-outline" size={size} color={color} />
         ),
         tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
-        tabBarBadgeStyle: { backgroundColor: '#ef4444', fontSize: 10 },
+        tabBarBadgeStyle: {
+          backgroundColor: colors.destructive,
+          color: colors.primaryForeground,
+          fontSize: 10,
+        },
       }}
     />
     <Tab.Screen
@@ -119,8 +125,8 @@ const MainTabNavigator = () => {
           ),
           tabBarStyle: {
             display,
-            backgroundColor: '#0f172a',
-            borderTopColor: '#1e293b',
+            backgroundColor: colors.tabBar,
+            borderTopColor: colors.border,
             borderTopWidth: 1,
             paddingBottom: 4,
             height: 56,

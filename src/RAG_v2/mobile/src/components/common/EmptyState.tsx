@@ -5,6 +5,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 interface Props {
   icon?: keyof typeof Ionicons.glyphMap;
@@ -23,10 +24,12 @@ const EmptyState = ({
   onAction,
   style,
 }: Props) => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   return (
     <View style={[styles.container, style]}>
       <View style={styles.iconCircle}>
-        <Ionicons name={icon} size={40} color="#6366f1" />
+        <Ionicons name={icon} size={40} color={colors.primary} />
       </View>
       <Text style={styles.title}>{title}</Text>
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
@@ -46,7 +49,7 @@ const EmptyState = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -58,7 +61,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(99, 102, 241, 0.12)',
+    backgroundColor: colors.primarySoft,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
@@ -66,30 +69,30 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#f8fafc',
+    color: colors.foreground,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     textAlign: 'center',
     lineHeight: 22,
     maxWidth: 280,
   },
   button: {
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
     marginTop: 12,
   },
   buttonPressed: {
-    backgroundColor: '#334155',
+    backgroundColor: colors.secondary,
   },
   buttonText: {
-    color: '#e2e8f0',
+    color: colors.foreground,
     fontSize: 14,
     fontWeight: '600',
   },

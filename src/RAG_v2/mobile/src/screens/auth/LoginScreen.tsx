@@ -18,10 +18,13 @@ import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../navigation/AuthStack';
 import { useAuth } from '../../hooks/useAuth';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 const LoginScreen = ({ navigation }: Props) => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -79,7 +82,7 @@ const LoginScreen = ({ navigation }: Props) => {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconCircle}>
-              <Ionicons name="chatbubbles" size={24} color="#ffffff" />
+              <Ionicons name="chatbubbles" size={24} color={colors.primaryForeground} />
             </View>
             <Text style={styles.brand}>HUST Assistant</Text>
             <Text style={styles.title}>Chào mừng trở lại</Text>
@@ -106,7 +109,7 @@ const LoginScreen = ({ navigation }: Props) => {
               value={username}
               onChangeText={setUsername}
               placeholder="Nhập tên đăng nhập"
-              placeholderTextColor="#64748b"
+              placeholderTextColor={colors.mutedForeground}
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -128,7 +131,7 @@ const LoginScreen = ({ navigation }: Props) => {
                 value={password}
                 onChangeText={setPassword}
                 placeholder="••••••••"
-                placeholderTextColor="#64748b"
+                placeholderTextColor={colors.mutedForeground}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
               />
@@ -139,7 +142,7 @@ const LoginScreen = ({ navigation }: Props) => {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color="#94a3b8"
+                  color={colors.mutedForeground}
                 />
               </Pressable>
             </View>
@@ -155,7 +158,7 @@ const LoginScreen = ({ navigation }: Props) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#ffffff" />
+              <ActivityIndicator size="small" color={colors.primaryForeground} />
             ) : (
               <Text style={styles.submitText}>Đăng nhập</Text>
             )}
@@ -176,10 +179,10 @@ const LoginScreen = ({ navigation }: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -187,11 +190,11 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   card: {
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.card,
     borderRadius: 20,
     padding: 28,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
   },
   header: {
     alignItems: 'center',
@@ -201,7 +204,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 14,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -210,19 +213,19 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     letterSpacing: 2,
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     textTransform: 'uppercase',
     marginBottom: 4,
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#f8fafc',
+    color: colors.foreground,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: '#94a3b8',
+    color: colors.mutedForeground,
   },
   oauthButton: {
     flexDirection: 'row',
@@ -232,8 +235,8 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#334155',
-    backgroundColor: '#0f172a',
+    borderColor: colors.border,
+    backgroundColor: colors.secondary,
     marginBottom: 8,
   },
   microsoftGrid: {
@@ -248,7 +251,7 @@ const styles = StyleSheet.create({
     height: 8,
   },
   oauthText: {
-    color: '#e2e8f0',
+    color: colors.foreground,
     fontSize: 14,
     fontWeight: '500',
   },
@@ -261,43 +264,43 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#334155',
+    backgroundColor: colors.border,
   },
   dividerText: {
-    color: '#64748b',
+    color: colors.mutedForeground,
     fontSize: 12,
   },
   errorBox: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: colors.destructiveSoft,
     borderRadius: 8,
     padding: 10,
     marginBottom: 12,
   },
   errorText: {
-    color: '#ef4444',
+    color: colors.destructive,
     fontSize: 13,
   },
   field: {
     marginBottom: 16,
   },
   label: {
-    color: '#e2e8f0',
+    color: colors.foreground,
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 6,
   },
   input: {
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.input,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#f8fafc',
+    color: colors.foreground,
     fontSize: 15,
   },
   inputError: {
-    borderColor: '#ef4444',
+    borderColor: colors.destructive,
   },
   passwordWrapper: {
     position: 'relative',
@@ -313,12 +316,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   fieldError: {
-    color: '#ef4444',
+    color: colors.destructive,
     fontSize: 12,
     marginTop: 4,
   },
   submitButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
@@ -328,7 +331,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   submitText: {
-    color: '#ffffff',
+    color: colors.primaryForeground,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -338,11 +341,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   footerText: {
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     fontSize: 14,
   },
   footerLink: {
-    color: '#6366f1',
+    color: colors.primary,
     fontSize: 14,
     fontWeight: '600',
   },

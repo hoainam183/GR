@@ -23,6 +23,7 @@ import { apiClient } from '../../services/api';
 import { CACHE_KEYS, getCache, setCache } from '../../services/offlineCache';
 import { useChatStore } from '../../stores/chatStore';
 import EmptyState from '../../components/common/EmptyState';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<ChatStackParamList, 'SessionList'>;
 
@@ -58,6 +59,8 @@ const formatDate = (isoString: string): string => {
 };
 
 const SessionListScreen = ({ navigation }: Props) => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const resetChat = useChatStore((s) => s.reset);
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -109,7 +112,7 @@ const SessionListScreen = ({ navigation }: Props) => {
         onPress={() => handleOpenSession(item.session_id)}
       >
         <View style={styles.sessionIcon}>
-          <Ionicons name="chatbubble-outline" size={20} color="#6366f1" />
+          <Ionicons name="chatbubble-outline" size={20} color={colors.primary} />
         </View>
         <View style={styles.sessionContent}>
           <Text style={styles.sessionTitle} numberOfLines={2}>
@@ -126,7 +129,7 @@ const SessionListScreen = ({ navigation }: Props) => {
             )}
           </View>
         </View>
-        <Ionicons name="chevron-forward" size={18} color="#475569" />
+        <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
       </Pressable>
     ),
     [handleOpenSession],
@@ -165,14 +168,14 @@ const SessionListScreen = ({ navigation }: Props) => {
             queryClient.invalidateQueries({ queryKey: ['sessions'] })
           }
         >
-          <Ionicons name="refresh-outline" size={22} color="#94a3b8" />
+          <Ionicons name="refresh-outline" size={22} color={colors.mutedForeground} />
         </Pressable>
       </View>
 
       {/* Content */}
       {isLoading && !refreshing ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#6366f1" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.loadingText}>Đang tải...</Text>
         </View>
       ) : error ? (
@@ -192,8 +195,8 @@ const SessionListScreen = ({ navigation }: Props) => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor="#6366f1"
-              colors={['#6366f1']}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
             />
           }
           ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -208,16 +211,16 @@ const SessionListScreen = ({ navigation }: Props) => {
         ]}
         onPress={handleNewChat}
       >
-        <Ionicons name="add" size={28} color="#ffffff" />
+        <Ionicons name="add" size={28} color={colors.primaryForeground} />
       </Pressable>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -226,12 +229,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#f8fafc',
+    color: colors.foreground,
   },
   headerAction: {
     padding: 6,
@@ -243,7 +246,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   loadingText: {
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     fontSize: 14,
   },
   listContent: {
@@ -254,7 +257,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.border,
     marginHorizontal: 20,
   },
   // Session card
@@ -266,13 +269,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   sessionCardPressed: {
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.secondary,
   },
   sessionIcon: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: 'rgba(99, 102, 241, 0.12)',
+    backgroundColor: colors.primarySoft,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -283,7 +286,7 @@ const styles = StyleSheet.create({
   sessionTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#e2e8f0',
+    color: colors.foreground,
     lineHeight: 20,
   },
   sessionMeta: {
@@ -293,11 +296,11 @@ const styles = StyleSheet.create({
   },
   sessionTime: {
     fontSize: 12,
-    color: '#64748b',
+    color: colors.mutedForeground,
   },
   sessionTurns: {
     fontSize: 12,
-    color: '#475569',
+    color: colors.mutedForeground,
   },
 
   // FAB
@@ -308,17 +311,17 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
-    shadowColor: '#6366f1',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
   },
   fabPressed: {
-    backgroundColor: '#4f46e5',
+    backgroundColor: colors.primary,
     transform: [{ scale: 0.95 }],
   },
 });

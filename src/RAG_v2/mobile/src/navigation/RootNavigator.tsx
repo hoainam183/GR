@@ -8,32 +8,35 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import AuthStack from './AuthStack';
 import MainTabNavigator from './MainTabNavigator';
 import { useAuth } from '../hooks/useAuth';
+import { useAppTheme, type AppColors } from '../theme/theme';
 
 const RootNavigator = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const { colors, navigationTheme } = useAppTheme();
+  const styles = createStyles(colors);
 
   // Show loading spinner while restoring auth session
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navigationTheme}>
       {isAuthenticated ? <MainTabNavigator /> : <AuthStack />}
     </NavigationContainer>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.background,
   },
 });
 

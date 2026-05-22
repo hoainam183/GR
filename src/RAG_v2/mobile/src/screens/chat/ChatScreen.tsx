@@ -44,11 +44,14 @@ import TypingIndicator from '../../components/chat/TypingIndicator';
 import SourceBottomSheet from '../../components/chat/SourceBottomSheet';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import EmptyState from '../../components/common/EmptyState';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<ChatStackParamList, 'Chat'>;
 const HEADER_HEIGHT = 60;
 
 const ChatScreen = ({ route, navigation }: Props) => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const sessionIdParam = route.params?.sessionId;
   const {
     messages,
@@ -382,7 +385,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
           style={styles.headerBackButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="chevron-back" size={24} color="#94a3b8" />
+          <Ionicons name="chevron-back" size={24} color={colors.mutedForeground} />
         </Pressable>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {headerTitle}
@@ -394,7 +397,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
             navigation.replace('Chat', undefined);
           }}
         >
-          <Ionicons name="create-outline" size={22} color="#94a3b8" />
+          <Ionicons name="create-outline" size={22} color={colors.mutedForeground} />
         </Pressable>
       </View>
 
@@ -452,10 +455,10 @@ const ChatScreen = ({ route, navigation }: Props) => {
 
 
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.canvas,
   },
   flex: {
     flex: 1,
@@ -466,8 +469,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
-    backgroundColor: '#0f172a',
+    borderBottomColor: colors.border,
+    backgroundColor: colors.background,
     gap: 4,
   },
   headerBackButton: {
@@ -477,7 +480,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontWeight: '600',
-    color: '#f8fafc',
+    color: colors.foreground,
     textAlign: 'center',
   },
   headerAction: {
@@ -503,14 +506,14 @@ const styles = StyleSheet.create({
     width: 156,
     height: 38,
     justifyContent: 'center',
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     borderRadius: 19,
     paddingHorizontal: 12,
   },
   suggestionText: {
-    color: '#e2e8f0',
+    color: colors.foreground,
     fontSize: 12,
     lineHeight: 16,
     fontWeight: '500',

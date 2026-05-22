@@ -5,6 +5,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import MarkdownDisplay from './MarkdownDisplay';
+import { useAppTheme } from '../../theme/theme';
 
 interface Props {
   content: string;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const StreamingText = ({ content, isStreaming }: Props) => {
+  const { colors } = useAppTheme();
   const cursorOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -43,7 +45,10 @@ const StreamingText = ({ content, isStreaming }: Props) => {
       <MarkdownDisplay content={content} />
       {isStreaming && (
         <Animated.View
-          style={[styles.cursor, { opacity: cursorOpacity }]}
+          style={[
+            styles.cursor,
+            { opacity: cursorOpacity, backgroundColor: colors.primary },
+          ]}
         />
       )}
     </View>
@@ -54,7 +59,6 @@ const styles = StyleSheet.create({
   cursor: {
     width: 2,
     height: 18,
-    backgroundColor: '#6366f1',
     marginTop: -4,
     borderRadius: 1,
   },

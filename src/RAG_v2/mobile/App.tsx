@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ErrorBoundary from './src/components/common/ErrorBoundary';
 import RootNavigator from './src/navigation/RootNavigator';
 import NetworkBanner from './src/components/common/NetworkBanner';
+import { AppThemeProvider, useAppTheme } from './src/theme/theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,16 +21,26 @@ const queryClient = new QueryClient({
   },
 });
 
+const AppChrome = () => {
+  const { isDark } = useAppTheme();
+
+  return (
+    <ErrorBoundary>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <NetworkBanner />
+      <RootNavigator />
+    </ErrorBoundary>
+  );
+};
+
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <ErrorBoundary>
-            <StatusBar style="light" />
-            <NetworkBanner />
-            <RootNavigator />
-          </ErrorBoundary>
+          <AppThemeProvider>
+            <AppChrome />
+          </AppThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

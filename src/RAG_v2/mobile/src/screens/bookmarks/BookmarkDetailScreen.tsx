@@ -16,10 +16,13 @@ import type { BookmarkStackParamList } from '../../navigation/BookmarkStack';
 import { updateBookmark, deleteBookmark } from '@rag/shared';
 import { apiClient } from '../../services/api';
 import MarkdownDisplay from '../../components/chat/MarkdownDisplay';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<BookmarkStackParamList, 'BookmarkDetail'>;
 
 const BookmarkDetailScreen = ({ route, navigation }: Props) => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const { bookmark } = route.params;
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
@@ -56,15 +59,15 @@ const BookmarkDetailScreen = ({ route, navigation }: Props) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Pressable style={styles.headerBack} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#94a3b8" />
+          <Ionicons name="chevron-back" size={24} color={colors.mutedForeground} />
         </Pressable>
         <Text style={styles.headerTitle}>Chi tiết đã lưu</Text>
         <View style={styles.headerRight}>
           <Pressable style={styles.headerBtn} onPress={() => setEditing(!editing)}>
-            <Ionicons name={editing ? 'close' : 'create-outline'} size={20} color="#94a3b8" />
+            <Ionicons name={editing ? 'close' : 'create-outline'} size={20} color={colors.mutedForeground} />
           </Pressable>
           <Pressable style={styles.headerBtn} onPress={handleDelete}>
-            <Ionicons name="trash-outline" size={20} color="#ef4444" />
+            <Ionicons name="trash-outline" size={20} color={colors.destructive} />
           </Pressable>
         </View>
       </View>
@@ -79,7 +82,7 @@ const BookmarkDetailScreen = ({ route, navigation }: Props) => {
               value={folder}
               onChangeText={setFolder}
               placeholder="Tên thư mục"
-              placeholderTextColor="#64748b"
+              placeholderTextColor={colors.mutedForeground}
             />
             <Text style={[styles.label, { marginTop: 12 }]}>Ghi chú</Text>
             <TextInput
@@ -87,18 +90,18 @@ const BookmarkDetailScreen = ({ route, navigation }: Props) => {
               value={note}
               onChangeText={setNote}
               placeholder="Thêm ghi chú..."
-              placeholderTextColor="#64748b"
+              placeholderTextColor={colors.mutedForeground}
               multiline
             />
             <Pressable style={styles.saveButton} onPress={() => updateMutation.mutate()}>
-              <Ionicons name="checkmark" size={16} color="#fff" />
+              <Ionicons name="checkmark" size={16} color={colors.primaryForeground} />
               <Text style={styles.saveText}>Lưu thay đổi</Text>
             </Pressable>
           </View>
         ) : (
           <View style={styles.metaRow}>
             <View style={styles.folderBadge}>
-              <Ionicons name="folder-outline" size={12} color="#f59e0b" />
+              <Ionicons name="folder-outline" size={12} color={colors.warning} />
               <Text style={styles.folderText}>{bookmark.folder || 'Chung'}</Text>
             </View>
             {bookmark.note && (
@@ -147,20 +150,20 @@ const BookmarkDetailScreen = ({ route, navigation }: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
+const createStyles = (colors: AppColors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 4,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: colors.border,
   },
   headerBack: { padding: 8 },
   headerTitle: {
     flex: 1,
-    color: '#f8fafc',
+    color: colors.foreground,
     fontSize: 17,
     fontWeight: '600',
     textAlign: 'center',
@@ -173,33 +176,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    backgroundColor: colors.primarySoft,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
-  folderText: { color: '#f59e0b', fontSize: 12, fontWeight: '600' },
-  noteText: { color: '#94a3b8', fontSize: 13, fontStyle: 'italic' },
+  folderText: { color: colors.warning, fontSize: 12, fontWeight: '600' },
+  noteText: { color: colors.mutedForeground, fontSize: 13, fontStyle: 'italic' },
   section: {
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     borderRadius: 12,
     padding: 14,
   },
   label: {
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     fontSize: 12,
     fontWeight: '700',
     textTransform: 'uppercase',
     marginBottom: 8,
   },
-  question: { color: '#f8fafc', fontSize: 16, lineHeight: 23 },
+  question: { color: colors.foreground, fontSize: 16, lineHeight: 23 },
   input: {
-    backgroundColor: '#0f172a',
-    color: '#f8fafc',
+    backgroundColor: colors.input,
+    color: colors.foreground,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -211,31 +214,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingVertical: 10,
     marginTop: 12,
   },
-  saveText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  saveText: { color: colors.primaryForeground, fontSize: 14, fontWeight: '600' },
   sourceCard: {
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.cardMuted,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 10,
     marginBottom: 8,
   },
   sourceHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-  sourceRank: { color: '#6366f1', fontSize: 12, fontWeight: '700' },
+  sourceRank: { color: colors.primary, fontSize: 12, fontWeight: '700' },
   collectionBadge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    backgroundColor: colors.primarySoft,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
-  collectionText: { color: '#6366f1', fontSize: 10, fontWeight: '600' },
-  scoreText: { color: '#64748b', fontSize: 11 },
-  sourceContent: { color: '#cbd5e1', fontSize: 13, lineHeight: 19 },
+  collectionText: { color: colors.primary, fontSize: 10, fontWeight: '600' },
+  scoreText: { color: colors.mutedForeground, fontSize: 11 },
+  sourceContent: { color: colors.subtleForeground, fontSize: 13, lineHeight: 19 },
 });
 
 export default BookmarkDetailScreen;

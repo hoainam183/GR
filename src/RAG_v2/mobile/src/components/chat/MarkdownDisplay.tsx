@@ -5,37 +5,41 @@
 import React from 'react';
 import Markdown from 'react-native-markdown-display';
 import { StyleSheet } from 'react-native';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 interface Props {
   content: string;
 }
 
-const MarkdownDisplay = ({ content }: Props) => (
-  <Markdown style={markdownStyles}>{content}</Markdown>
-);
+const MarkdownDisplay = ({ content }: Props) => {
+  const { colors } = useAppTheme();
+  const markdownStyles = createMarkdownStyles(colors);
 
-const markdownStyles = StyleSheet.create({
+  return <Markdown style={markdownStyles}>{content}</Markdown>;
+};
+
+const createMarkdownStyles = (colors: AppColors) => StyleSheet.create({
   body: {
-    color: '#e2e8f0',
+    color: colors.foreground,
     fontSize: 15,
     lineHeight: 22,
   },
   heading1: {
-    color: '#f8fafc',
+    color: colors.foreground,
     fontSize: 22,
     fontWeight: '700',
     marginBottom: 8,
     marginTop: 16,
   },
   heading2: {
-    color: '#f8fafc',
+    color: colors.foreground,
     fontSize: 19,
     fontWeight: '700',
     marginBottom: 6,
     marginTop: 14,
   },
   heading3: {
-    color: '#f8fafc',
+    color: colors.foreground,
     fontSize: 17,
     fontWeight: '600',
     marginBottom: 4,
@@ -47,27 +51,27 @@ const markdownStyles = StyleSheet.create({
   },
   strong: {
     fontWeight: '700',
-    color: '#f8fafc',
+    color: colors.foreground,
   },
   em: {
     fontStyle: 'italic',
   },
   link: {
-    color: '#818cf8',
+    color: colors.primary,
     textDecorationLine: 'underline',
   },
   blockquote: {
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.secondary,
     borderLeftWidth: 3,
-    borderLeftColor: '#6366f1',
+    borderLeftColor: colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 8,
     marginVertical: 8,
     borderRadius: 4,
   },
   code_inline: {
-    backgroundColor: '#1e293b',
-    color: '#a5b4fc',
+    backgroundColor: colors.secondary,
+    color: colors.primary,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -75,8 +79,8 @@ const markdownStyles = StyleSheet.create({
     fontSize: 13,
   },
   code_block: {
-    backgroundColor: '#1e293b',
-    color: '#a5b4fc',
+    backgroundColor: colors.secondary,
+    color: colors.primary,
     padding: 12,
     borderRadius: 8,
     fontFamily: 'monospace',
@@ -85,8 +89,8 @@ const markdownStyles = StyleSheet.create({
     overflow: 'hidden',
   },
   fence: {
-    backgroundColor: '#1e293b',
-    color: '#a5b4fc',
+    backgroundColor: colors.secondary,
+    color: colors.primary,
     padding: 12,
     borderRadius: 8,
     fontFamily: 'monospace',
@@ -104,31 +108,31 @@ const markdownStyles = StyleSheet.create({
   },
   table: {
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     borderRadius: 6,
     marginVertical: 8,
   },
   thead: {
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.secondary,
   },
   th: {
     padding: 8,
     fontWeight: '600',
-    color: '#f8fafc',
+    color: colors.foreground,
     borderBottomWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
   },
   td: {
     padding: 8,
     borderBottomWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: colors.border,
   },
   tr: {
     borderBottomWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: colors.border,
   },
   hr: {
-    backgroundColor: '#334155',
+    backgroundColor: colors.border,
     height: 1,
     marginVertical: 16,
   },

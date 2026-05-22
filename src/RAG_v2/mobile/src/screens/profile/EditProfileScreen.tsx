@@ -26,6 +26,7 @@ import { setUserProfile } from '../../services/secureStorage';
 import { useAuthStore } from '../../stores/authStore';
 import { useProfile } from '../../hooks/useProfile';
 import { API_PATHS } from '@rag/shared';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Nav = NativeStackNavigationProp<ProfileStackParamList, 'EditProfile'>;
 
@@ -43,6 +44,8 @@ const MAJOR_OPTIONS = [
 ];
 
 const EditProfileScreen = () => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const navigation = useNavigation<Nav>();
   const { user } = useProfile();
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -116,7 +119,7 @@ const EditProfileScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.headerBack} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#94a3b8" />
+          <Ionicons name="chevron-back" size={24} color={colors.mutedForeground} />
         </Pressable>
         <Text style={styles.headerTitle}>Chỉnh sửa hồ sơ</Text>
         <View style={{ width: 40 }} />
@@ -157,7 +160,7 @@ const EditProfileScreen = () => {
                 value={fullName}
                 onChangeText={setFullName}
                 placeholder="Nguyễn Văn A"
-                placeholderTextColor="#64748b"
+                placeholderTextColor={colors.mutedForeground}
               />
             </View>
 
@@ -218,10 +221,10 @@ const EditProfileScreen = () => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#ffffff" />
+              <ActivityIndicator size="small" color={colors.primaryForeground} />
             ) : (
               <>
-                <Ionicons name="checkmark" size={20} color="#ffffff" />
+                <Ionicons name="checkmark" size={20} color={colors.primaryForeground} />
                 <Text style={styles.saveText}>Lưu thay đổi</Text>
               </>
             )}
@@ -234,10 +237,10 @@ const EditProfileScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -245,7 +248,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: colors.border,
   },
   headerBack: {
     padding: 8,
@@ -254,7 +257,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontWeight: '600',
-    color: '#f8fafc',
+    color: colors.foreground,
     textAlign: 'center',
   },
   scrollContent: {
@@ -262,17 +265,17 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   section: {
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     marginBottom: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -283,34 +286,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    borderBottomColor: colors.border,
   },
   readOnlyLabel: {
     fontSize: 14,
-    color: '#64748b',
+    color: colors.mutedForeground,
   },
   readOnlyValue: {
     fontSize: 14,
-    color: '#94a3b8',
+    color: colors.foreground,
     fontWeight: '500',
   },
   field: {
     marginBottom: 16,
   },
   label: {
-    color: '#e2e8f0',
+    color: colors.foreground,
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.input,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     paddingHorizontal: 14,
     paddingVertical: 11,
-    color: '#f8fafc',
+    color: colors.foreground,
     fontSize: 15,
   },
   chipGroup: {
@@ -323,27 +326,27 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#334155',
-    backgroundColor: '#0f172a',
+    borderColor: colors.border,
+    backgroundColor: colors.secondary,
   },
   chipActive: {
-    borderColor: '#6366f1',
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
   },
   chipText: {
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     fontSize: 13,
     fontWeight: '500',
   },
   chipTextActive: {
-    color: '#a5b4fc',
+    color: colors.primary,
   },
   saveButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
   },
@@ -351,7 +354,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   saveText: {
-    color: '#ffffff',
+    color: colors.primaryForeground,
     fontSize: 16,
     fontWeight: '600',
   },

@@ -1,9 +1,11 @@
 /**
- * Error boundary — catches React render crashes and shows a fallback UI.
+ * Error boundary - catches React render crashes and shows a themed fallback.
  */
 
 import React, { Component, type ReactNode } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 interface Props {
   children: ReactNode;
@@ -30,60 +32,79 @@ class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      return (
-        <View style={styles.container}>
-          <Text style={styles.emoji}>😵</Text>
-          <Text style={styles.title}>Đã xảy ra lỗi</Text>
-          <Text style={styles.message}>
-            {this.state.error?.message ?? 'Lỗi không xác định'}
-          </Text>
-          <Pressable style={styles.retryButton} onPress={this.handleRetry}>
-            <Text style={styles.retryText}>Thử lại</Text>
-          </Pressable>
-        </View>
-      );
+      return <ErrorFallback error={this.state.error} onRetry={this.handleRetry} />;
     }
 
     return this.props.children;
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0f172a',
-    padding: 32,
-  },
-  emoji: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#f8fafc',
-    marginBottom: 8,
-  },
-  message: {
-    fontSize: 13,
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 20,
-  },
-  retryButton: {
-    backgroundColor: '#6366f1',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 10,
-  },
-  retryText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-});
+const ErrorFallback = ({
+  error,
+  onRetry,
+}: {
+  error: Error | null;
+  onRetry: () => void;
+}) => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.iconCircle}>
+        <Ionicons name="alert-circle-outline" size={34} color={colors.destructive} />
+      </View>
+      <Text style={styles.title}>Đã xảy ra lỗi</Text>
+      <Text style={styles.message}>{error?.message ?? 'Lỗi không xác định'}</Text>
+      <Pressable style={styles.retryButton} onPress={onRetry}>
+        <Text style={styles.retryText}>Thử lại</Text>
+      </Pressable>
+    </View>
+  );
+};
+
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      padding: 32,
+    },
+    iconCircle: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.destructiveSoft,
+      marginBottom: 16,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.foreground,
+      marginBottom: 8,
+    },
+    message: {
+      fontSize: 13,
+      color: colors.mutedForeground,
+      textAlign: 'center',
+      marginBottom: 24,
+      lineHeight: 20,
+    },
+    retryButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 10,
+    },
+    retryText: {
+      color: colors.primaryForeground,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+  });
 
 export default ErrorBoundary;

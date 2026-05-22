@@ -6,11 +6,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: { DEFAULT: '#6366f1', foreground: '#ffffff' },
-        secondary: { DEFAULT: '#f1f5f9', foreground: '#334155' },
-        muted: { DEFAULT: '#f1f5f9', foreground: '#64748b' },
+        primary: { DEFAULT: '#3b82f6', foreground: '#ffffff' },
+        secondary: { DEFAULT: '#f3f4f6', foreground: '#161a1f' },
+        muted: { DEFAULT: '#f3f4f6', foreground: '#6b7280' },
         chat: {
-          user: '#ede9fe',
+          user: '#eff6ff',
           assistant: '#ffffff',
         },
       },

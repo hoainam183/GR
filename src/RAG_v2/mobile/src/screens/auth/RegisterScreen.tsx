@@ -21,6 +21,7 @@ import { registerUser, loginUser } from '@rag/shared';
 import { apiClient } from '../../services/api';
 import { setToken, setUserProfile } from '../../services/secureStorage';
 import { useAuthStore } from '../../stores/authStore';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
@@ -61,6 +62,8 @@ interface FormErrors {
 }
 
 const RegisterScreen = ({ navigation }: Props) => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const setAuth = useAuthStore((s) => s.setAuth);
   const [form, setForm] = useState<FormData>({
     username: '',
@@ -167,7 +170,7 @@ const RegisterScreen = ({ navigation }: Props) => {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconCircle}>
-              <Ionicons name="person-add" size={22} color="#ffffff" />
+              <Ionicons name="person-add" size={22} color={colors.primaryForeground} />
             </View>
             <Text style={styles.title}>Tạo tài khoản</Text>
             <Text style={styles.subtitle}>
@@ -178,7 +181,7 @@ const RegisterScreen = ({ navigation }: Props) => {
           {/* API Error */}
           {errors.api && (
             <View style={styles.errorBox}>
-              <Ionicons name="alert-circle" size={16} color="#ef4444" />
+              <Ionicons name="alert-circle" size={16} color={colors.destructive} />
               <Text style={styles.errorText}>{errors.api}</Text>
             </View>
           )}
@@ -191,7 +194,7 @@ const RegisterScreen = ({ navigation }: Props) => {
               value={form.username}
               onChangeText={(v) => updateField('username', v)}
               placeholder="Nhập tên đăng nhập"
-              placeholderTextColor="#64748b"
+              placeholderTextColor={colors.mutedForeground}
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -208,7 +211,7 @@ const RegisterScreen = ({ navigation }: Props) => {
               value={form.full_name}
               onChangeText={(v) => updateField('full_name', v)}
               placeholder="Nguyễn Văn A"
-              placeholderTextColor="#64748b"
+              placeholderTextColor={colors.mutedForeground}
             />
             {errors.full_name && (
               <Text style={styles.fieldError}>{errors.full_name}</Text>
@@ -223,7 +226,7 @@ const RegisterScreen = ({ navigation }: Props) => {
               value={form.student_id}
               onChangeText={(v) => updateField('student_id', v)}
               placeholder="20210001"
-              placeholderTextColor="#64748b"
+              placeholderTextColor={colors.mutedForeground}
               keyboardType="numeric"
             />
             {errors.student_id && (
@@ -244,7 +247,7 @@ const RegisterScreen = ({ navigation }: Props) => {
                 value={form.password}
                 onChangeText={(v) => updateField('password', v)}
                 placeholder="Tối thiểu 8 ký tự"
-                placeholderTextColor="#64748b"
+                placeholderTextColor={colors.mutedForeground}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
               />
@@ -255,7 +258,7 @@ const RegisterScreen = ({ navigation }: Props) => {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color="#94a3b8"
+                  color={colors.mutedForeground}
                 />
               </Pressable>
             </View>
@@ -275,7 +278,7 @@ const RegisterScreen = ({ navigation }: Props) => {
               value={form.confirmPassword}
               onChangeText={(v) => updateField('confirmPassword', v)}
               placeholder="Nhập lại mật khẩu"
-              placeholderTextColor="#64748b"
+              placeholderTextColor={colors.mutedForeground}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
             />
@@ -345,7 +348,7 @@ const RegisterScreen = ({ navigation }: Props) => {
 
           {/* Info banner */}
           <View style={styles.infoBanner}>
-            <Ionicons name="information-circle" size={16} color="#6366f1" />
+            <Ionicons name="information-circle" size={16} color={colors.primary} />
             <Text style={styles.infoText}>
               Thông tin khoá và ngành giúp hệ thống trả lời chính xác hơn cho bạn
             </Text>
@@ -358,7 +361,7 @@ const RegisterScreen = ({ navigation }: Props) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#ffffff" />
+              <ActivityIndicator size="small" color={colors.primaryForeground} />
             ) : (
               <Text style={styles.submitText}>Đăng ký</Text>
             )}
@@ -377,10 +380,10 @@ const RegisterScreen = ({ navigation }: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -388,11 +391,11 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   card: {
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.card,
     borderRadius: 20,
     padding: 24,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
   },
   header: {
     alignItems: 'center',
@@ -402,7 +405,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 14,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -410,24 +413,24 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#f8fafc',
+    color: colors.foreground,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: '#94a3b8',
+    color: colors.mutedForeground,
   },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: colors.destructiveSoft,
     borderRadius: 8,
     padding: 10,
     marginBottom: 12,
   },
   errorText: {
-    color: '#ef4444',
+    color: colors.destructive,
     fontSize: 13,
     flex: 1,
   },
@@ -435,23 +438,23 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   label: {
-    color: '#e2e8f0',
+    color: colors.foreground,
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 6,
   },
   input: {
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.input,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     paddingHorizontal: 14,
     paddingVertical: 11,
-    color: '#f8fafc',
+    color: colors.foreground,
     fontSize: 15,
   },
   inputError: {
-    borderColor: '#ef4444',
+    borderColor: colors.destructive,
   },
   passwordWrapper: {
     position: 'relative',
@@ -467,7 +470,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   fieldError: {
-    color: '#ef4444',
+    color: colors.destructive,
     fontSize: 12,
     marginTop: 4,
   },
@@ -481,43 +484,43 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#334155',
-    backgroundColor: '#0f172a',
+    borderColor: colors.border,
+    backgroundColor: colors.secondary,
   },
   chipLarge: {
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
   chipActive: {
-    borderColor: '#6366f1',
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
   },
   chipText: {
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     fontSize: 13,
     fontWeight: '500',
   },
   chipTextActive: {
-    color: '#a5b4fc',
+    color: colors.primary,
   },
   infoBanner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
-    backgroundColor: 'rgba(99, 102, 241, 0.08)',
+    backgroundColor: colors.primarySoft,
     borderRadius: 8,
     padding: 10,
     marginBottom: 16,
     marginTop: 4,
   },
   infoText: {
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     fontSize: 12,
     lineHeight: 18,
     flex: 1,
   },
   submitButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
@@ -527,7 +530,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   submitText: {
-    color: '#ffffff',
+    color: colors.primaryForeground,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -537,11 +540,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   footerText: {
-    color: '#94a3b8',
+    color: colors.mutedForeground,
     fontSize: 14,
   },
   footerLink: {
-    color: '#6366f1',
+    color: colors.primary,
     fontSize: 14,
     fontWeight: '600',
   },

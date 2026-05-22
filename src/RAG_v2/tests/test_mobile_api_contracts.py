@@ -5,11 +5,20 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import pytest
+from fastapi import HTTPException
 
 from api.dependencies import sync_redis_session_from_mongo
+from api.routes.bookmark import create_bookmark_folder, rename_bookmark_folder
 from api.routes.chat import chat_v3
+from api.routes.notification import subscribe_notifications, unsubscribe_notifications
 from api.routes.session import SessionUpdateRequest, delete_session, list_my_sessions, update_session
 from schemas.chat import ChatRequest, UserContext
+from schemas.mobile import (
+    BookmarkFolderCreate,
+    BookmarkFolderRename,
+    NotificationSubscribe,
+    NotificationUnsubscribe,
+)
 
 
 class _FakePipeline:
@@ -78,6 +87,27 @@ class _FakeRedisSession:
 
     def sync_from_mongo(self, session_id: str) -> None:
         self.synced.append(session_id)
+
+
+class _FakeAsyncCollection:
+    def __init__(self) -> None:
+        self.update_one_calls = []
+        self.delete_one_calls = []
+
+    async def update_one(self, query, update, *, upsert=False):
+        self.update_one_calls.append((query, update, upsert))
+        return SimpleNamespace()
+
+    async def delete_one(self, query):
+        self.delete_one_calls.append(query)
+        return SimpleNamespace(deleted_count=1)
+
+
+class _FakeAsyncDb(dict):
+    def __missing__(self, key):
+        value = _FakeAsyncCollection()
+        self[key] = value
+        return value
 
 
 def _request(*, pipeline=None, mongo=None, redis=None):
@@ -183,3 +213,60 @@ def test_sync_redis_session_from_mongo_calls_store_sync():
         session_id="session-1",
     )
     assert redis.synced == ["session-1"]
+
+
+@pytest.mark.anyio
+async def test_bookmark_folder_create_trims_and_persists_explicit_folder():
+    db = _FakeAsyncDb()
+
+    response = await create_bookmark_folder(
+        BookmarkFolderCreate(name="  Kế hoạch  "),
+        current_user=_user("user-folder"),
+        db=db,
+    )
+
+    assert response == {"folder": {"name": "Kế hoạch", "count": 0}}
+    query, update, upsert = db["bookmark_folders"].update_one_calls[0]
+    assert query == {"user_id": "user-folder", "name": "Kế hoạch"}
+    assert update["$setOnInsert"]["name"] == "Kế hoạch"
+    assert upsert is True
+
+
+@pytest.mark.anyio
+async def test_bookmark_default_folder_cannot_be_renamed():
+    with pytest.raises(HTTPException) as exc:
+        await rename_bookmark_folder(
+            "Chung",
+            BookmarkFolderRename(new_name="Khác"),
+            current_user=_user("user-folder"),
+            db=_FakeAsyncDb(),
+        )
+
+    assert exc.value.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_notification_broadcast_subscription_and_unsubscribe_contract():
+    db = _FakeAsyncDb()
+    token = "ExponentPushToken[test]"
+
+    subscribed = await subscribe_notifications(
+        NotificationSubscribe(topics=[], expo_push_token=token),
+        current_user=_user("user-push"),
+        db=db,
+    )
+    unsubscribed = await unsubscribe_notifications(
+        NotificationUnsubscribe(expo_push_token=token),
+        current_user=_user("user-push"),
+        db=db,
+    )
+
+    assert subscribed == {"subscribed_topics": []}
+    query, update, upsert = db["notification_subscriptions"].update_one_calls[0]
+    assert query == {"user_id": "user-push", "expo_push_token": token}
+    assert update["$set"]["topics"] == []
+    assert upsert is True
+    assert unsubscribed == {"remaining_topics": []}
+    assert db["notification_subscriptions"].delete_one_calls == [
+        {"user_id": "user-push", "expo_push_token": token}
+    ]

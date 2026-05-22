@@ -12,6 +12,7 @@ import {
   type TextInputContentSizeChangeEventData,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 interface Props {
   onSend: (message: string) => void;
@@ -31,6 +32,8 @@ const ChatInput = ({
   bottomInset = 0,
   onFocus,
 }: Props) => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const [text, setText] = useState('');
   const [inputHeight, setInputHeight] = useState(MIN_INPUT_HEIGHT);
   const inputRef = useRef<TextInput>(null);
@@ -65,7 +68,7 @@ const ChatInput = ({
           value={text}
           onChangeText={setText}
           placeholder={placeholder}
-          placeholderTextColor="#64748b"
+          placeholderTextColor={colors.mutedForeground}
           multiline
           editable={!disabled}
           onFocus={onFocus}
@@ -81,7 +84,7 @@ const ChatInput = ({
           <Ionicons
             name="send"
             size={20}
-            color={canSend ? '#ffffff' : '#64748b'}
+            color={canSend ? colors.primaryForeground : colors.mutedForeground}
           />
         </Pressable>
       </View>
@@ -89,18 +92,20 @@ const ChatInput = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.background,
     borderTopWidth: 1,
-    borderTopColor: '#1e293b',
+    borderTopColor: colors.border,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.input,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: 24,
     paddingLeft: 16,
     paddingRight: 4,
@@ -108,7 +113,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#f8fafc',
+    color: colors.foreground,
     fontSize: 15,
     lineHeight: 21,
     paddingTop: 10,
@@ -121,11 +126,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#334155',
+    backgroundColor: colors.secondary,
     marginBottom: 2,
   },
   sendButtonActive: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
   },
 });
 

@@ -21,6 +21,7 @@ import {
 } from '@rag/shared';
 import { apiClient } from '../../services/api';
 import { useProfile } from '../../hooks/useProfile';
+import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Mode = 'ctdt' | 'regulations' | 'calendar' | 'compare';
 
@@ -32,6 +33,8 @@ const MODES: Array<{ key: Mode; label: string; icon: keyof typeof Ionicons.glyph
 ];
 
 const LookupScreen = () => {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
   const { majorCode, user } = useProfile();
   const [mode, setMode] = useState<Mode>('ctdt');
   const [query, setQuery] = useState('');
@@ -103,18 +106,18 @@ const LookupScreen = () => {
       </View>
 
       <View style={styles.searchBox}>
-        <Ionicons name="search-outline" size={18} color="#64748b" />
+        <Ionicons name="search-outline" size={18} color={colors.mutedForeground} />
         <TextInput
           style={styles.input}
           value={query}
           onChangeText={setQuery}
           placeholder={placeholder}
-          placeholderTextColor="#64748b"
+          placeholderTextColor={colors.mutedForeground}
           returnKeyType="search"
           onSubmitEditing={() => refetch()}
         />
         <Pressable style={styles.searchButton} onPress={() => refetch()}>
-          <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+          <Ionicons name="arrow-forward" size={18} color={colors.primaryForeground} />
         </Pressable>
       </View>
 
@@ -134,7 +137,7 @@ const LookupScreen = () => {
               <Ionicons
                 name={item.icon}
                 size={16}
-                color={active ? '#ffffff' : '#94a3b8'}
+                color={active ? colors.primaryForeground : colors.mutedForeground}
               />
               <Text style={[styles.modeText, active && styles.modeTextActive]}>
                 {item.label}
@@ -146,7 +149,7 @@ const LookupScreen = () => {
 
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#6366f1" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -163,15 +166,15 @@ const LookupScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
+const createStyles = (colors: AppColors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: colors.border,
   },
-  headerTitle: { color: '#f8fafc', fontSize: 20, fontWeight: '700' },
+  headerTitle: { color: colors.foreground, fontSize: 20, fontWeight: '700' },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -179,17 +182,17 @@ const styles = StyleSheet.create({
     margin: 16,
     paddingLeft: 14,
     paddingRight: 6,
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.card,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
   },
-  input: { flex: 1, color: '#f8fafc', fontSize: 15, paddingVertical: 12 },
+  input: { flex: 1, color: colors.foreground, fontSize: 15, paddingVertical: 12 },
   searchButton: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -201,35 +204,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 9,
     borderRadius: 10,
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.secondary,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
   },
-  modeButtonActive: { backgroundColor: '#6366f1', borderColor: '#6366f1' },
-  modeText: { color: '#94a3b8', fontSize: 13, fontWeight: '600' },
-  modeTextActive: { color: '#ffffff' },
+  modeButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  modeText: { color: colors.mutedForeground, fontSize: 13, fontWeight: '600' },
+  modeTextActive: { color: colors.primaryForeground },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   results: { padding: 16, gap: 12 },
   resultCard: {
-    backgroundColor: '#1e293b',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
     borderRadius: 12,
     padding: 14,
   },
   resultHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  resultTitle: { flex: 1, color: '#f8fafc', fontSize: 15, fontWeight: '700' },
+  resultTitle: { flex: 1, color: colors.foreground, fontSize: 15, fontWeight: '700' },
   badge: {
-    color: '#a5b4fc',
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    color: colors.primary,
+    backgroundColor: colors.primarySoft,
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 6,
     fontSize: 11,
     overflow: 'hidden',
   },
-  summary: { color: '#cbd5e1', fontSize: 13, lineHeight: 19, marginTop: 8 },
-  emptyText: { color: '#64748b', textAlign: 'center', marginTop: 40 },
+  summary: { color: colors.subtleForeground, fontSize: 13, lineHeight: 19, marginTop: 8 },
+  emptyText: { color: colors.mutedForeground, textAlign: 'center', marginTop: 40 },
 });
 
 export default LookupScreen;

@@ -4,13 +4,15 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
+import { useAppTheme } from '../../theme/theme';
 
 interface Props {
   size?: number;
   color?: string;
 }
 
-const LoadingSpinner = ({ size = 40, color = '#6366f1' }: Props) => {
+const LoadingSpinner = ({ size = 40, color }: Props) => {
+  const { colors } = useAppTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -41,7 +43,7 @@ const LoadingSpinner = ({ size = 40, color = '#6366f1' }: Props) => {
             width: size,
             height: size,
             borderRadius: size / 2,
-            backgroundColor: color,
+            backgroundColor: color ?? colors.primary,
             opacity: 0.3,
             transform: [{ scale: scaleAnim }],
           },
