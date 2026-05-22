@@ -29,7 +29,13 @@ from pydantic import BaseModel
 from auth.rbac import require_admin
 from models.database import get_database
 from models.system_config import (
+    API_KEY_SETTING_FIELDS,
+    ApiKeyRegistryError,
+    activate_api_key,
+    create_api_key,
     filter_llm_config_updates,
+    get_api_key_record,
+    list_api_keys,
     merge_llm_config_into_settings,
     upsert_llm_config,
 )
@@ -99,6 +105,12 @@ class LLMConfigBody(BaseModel):
     tavily_api_key: str | None = None
     reflection_enabled: bool | None = None
     reflection_model: str | None = None
+
+
+class ApiKeyCreateBody(BaseModel):
+    provider: str
+    name: str
+    key: str
 
 
 _LLM_CACHE_INVALIDATION_FIELDS = {
@@ -786,6 +798,165 @@ async def get_llm_config(
     }
 
 
+async def _prepare_api_key_reload(
+    request: Request,
+    provider: str,
+    secret: str,
+):
+    field_name = API_KEY_SETTING_FIELDS.get(provider)
+    if not field_name:
+        raise HTTPException(400, "Unsupported API key provider")
+
+    settings = request.app.state.settings
+    candidate_settings = settings.model_copy(deep=True)
+    setattr(candidate_settings, field_name, secret)
+    pipeline = request.app.state.pipeline
+    loop = asyncio.get_running_loop()
+    try:
+        prepared_runtime = await loop.run_in_executor(
+            None,
+            pipeline.prepare_llm_config_reload,
+            candidate_settings,
+        )
+    except Exception as exc:
+        logger.warning("API key runtime prepare failed for %s", provider)
+        raise HTTPException(400, "Unable to prepare API key runtime") from exc
+    return candidate_settings, prepared_runtime
+
+
+def _commit_api_key_reload(
+    request: Request,
+    candidate_settings,
+    prepared_runtime,
+    provider: str,
+):
+    field_name = API_KEY_SETTING_FIELDS[provider]
+    rebuilt = request.app.state.pipeline.commit_llm_config_reload(
+        candidate_settings,
+        prepared_runtime,
+    )
+    setattr(request.app.state.settings, field_name, getattr(candidate_settings, field_name))
+    return rebuilt
+
+
+@router.get("/config/api-keys")
+async def get_api_keys(
+    request: Request,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+    db: AsyncIOMotorDatabase = Depends(get_database),
+):
+    """Return secret-free managed Google and Tavily key rows."""
+    keys = await list_api_keys(db)
+    managed_providers = {key["provider"] for key in keys}
+    settings = request.app.state.settings
+    fallback_providers = [
+        provider
+        for provider, field_name in API_KEY_SETTING_FIELDS.items()
+        if provider not in managed_providers and getattr(settings, field_name, "")
+    ]
+    return {"keys": keys, "fallback_providers": fallback_providers}
+
+
+@router.post("/config/api-keys")
+async def create_managed_api_key(
+    request: Request,
+    body: ApiKeyCreateBody,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+    db: AsyncIOMotorDatabase = Depends(get_database),
+):
+    """Create and activate a managed API key without exposing the secret."""
+    provider = body.provider.strip().lower()
+    name = body.name.strip()
+    secret = body.key.strip()
+    if provider not in API_KEY_SETTING_FIELDS:
+        raise HTTPException(400, "Unsupported API key provider")
+    if not name:
+        raise HTTPException(400, "API key name is required")
+    if len(name) > 120:
+        raise HTTPException(400, "API key name is too long")
+    if not secret:
+        raise HTTPException(400, "API key value is required")
+
+    candidate_settings, prepared_runtime = await _prepare_api_key_reload(
+        request,
+        provider,
+        secret,
+    )
+
+    try:
+        key = await create_api_key(db, provider, name, secret)
+    except ApiKeyRegistryError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except Exception as exc:
+        logger.error("Failed to persist %s API key", provider, exc_info=True)
+        raise HTTPException(503, "Failed to persist API key") from exc
+
+    try:
+        rebuilt = _commit_api_key_reload(
+            request,
+            candidate_settings,
+            prepared_runtime,
+            provider,
+        )
+    except Exception as exc:
+        logger.error("API key persisted but runtime reload failed", exc_info=True)
+        raise HTTPException(
+            500,
+            "API key persisted but runtime reload failed",
+        ) from exc
+
+    logger.info("Admin created and activated managed %s API key %s", provider, key["id"])
+    return {"ok": True, "key": key, "rebuilt": rebuilt}
+
+
+@router.post("/config/api-keys/{key_id}/activate")
+async def activate_managed_api_key(
+    request: Request,
+    key_id: str,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+    db: AsyncIOMotorDatabase = Depends(get_database),
+):
+    """Activate an existing managed API key and hot-swap runtime clients."""
+    record = await get_api_key_record(db, key_id)
+    if not record:
+        raise HTTPException(404, "API key not found")
+
+    provider = str(record.get("provider", ""))
+    secret = str(record.get("secret", "")).strip()
+    if not secret:
+        raise HTTPException(400, "API key secret is unavailable")
+
+    candidate_settings, prepared_runtime = await _prepare_api_key_reload(
+        request,
+        provider,
+        secret,
+    )
+    try:
+        key = await activate_api_key(db, key_id)
+    except ApiKeyRegistryError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except Exception as exc:
+        logger.error("Failed to activate managed %s API key", provider, exc_info=True)
+        raise HTTPException(503, "Failed to activate API key") from exc
+
+    try:
+        rebuilt = _commit_api_key_reload(
+            request,
+            candidate_settings,
+            prepared_runtime,
+            provider,
+        )
+    except Exception as exc:
+        logger.error("API key activation persisted but runtime reload failed", exc_info=True)
+        raise HTTPException(
+            500,
+            "API key activation persisted but runtime reload failed",
+        ) from exc
+
+    logger.info("Admin activated managed %s API key %s", provider, key["id"])
+    return {"ok": True, "key": key, "rebuilt": rebuilt}
+
+
 @router.put("/config/llm")
 async def update_llm_config(
     request: Request,
@@ -795,12 +966,20 @@ async def update_llm_config(
 ):
     """Persist and hot-reload admin-managed LLM configuration."""
     settings = request.app.state.settings
-    updates = filter_llm_config_updates(body.model_dump(exclude_none=True))
-    if not updates:
+    body_values = body.model_dump(exclude_none=True)
+    updates = filter_llm_config_updates(body_values)
+    api_key_inputs = {
+        provider: str(body_values[field_name]).strip()
+        for provider, field_name in API_KEY_SETTING_FIELDS.items()
+        if field_name in body_values and str(body_values[field_name]).strip()
+    }
+    if not updates and not api_key_inputs:
         raise HTTPException(400, "No fields to update")
 
     candidate_settings = settings.model_copy(deep=True)
     merge_llm_config_into_settings(candidate_settings, updates)
+    for provider, secret in api_key_inputs.items():
+        setattr(candidate_settings, API_KEY_SETTING_FIELDS[provider], secret)
     pipeline = request.app.state.pipeline
     loop = asyncio.get_running_loop()
 
@@ -814,8 +993,19 @@ async def update_llm_config(
         logger.warning("LLM config prepare failed: %s", exc, exc_info=True)
         raise HTTPException(400, "Unable to prepare LLM config reload") from exc
 
+    legacy_keys: dict[str, dict[str, Any]] = {}
     try:
-        await upsert_llm_config(db, updates)
+        if updates:
+            await upsert_llm_config(db, updates)
+        for provider, secret in api_key_inputs.items():
+            legacy_keys[provider] = await create_api_key(
+                db,
+                provider,
+                f"Admin {provider.title()} key",
+                secret,
+            )
+    except ApiKeyRegistryError as exc:
+        raise HTTPException(400, str(exc)) from exc
     except Exception as exc:
         logger.error("Failed to persist LLM config: %s", exc, exc_info=True)
         raise HTTPException(503, "Failed to persist LLM config") from exc
@@ -826,6 +1016,9 @@ async def update_llm_config(
             prepared_runtime,
         )
         merge_llm_config_into_settings(settings, updates)
+        for provider in api_key_inputs:
+            field_name = API_KEY_SETTING_FIELDS[provider]
+            setattr(settings, field_name, getattr(candidate_settings, field_name))
     except Exception as exc:
         logger.error("Pipeline LLM reload failed after persist: %s", exc, exc_info=True)
         raise HTTPException(
@@ -850,11 +1043,9 @@ async def update_llm_config(
 
     updated: dict[str, Any] = {}
     for field_name, value in updates.items():
-        if "key" in field_name:
-            raw = str(value)
-            updated[field_name] = raw[:4] + "***" if len(raw) > 4 else "***"
-        else:
-            updated[field_name] = value
+        updated[field_name] = value
+    for provider, key in legacy_keys.items():
+        updated[API_KEY_SETTING_FIELDS[provider]] = key["fingerprint"]
 
     logger.info(
         "Admin updated persisted LLM config: %s; rebuilt=%s",

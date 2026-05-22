@@ -134,6 +134,37 @@ export interface LLMConfigUpdateResponse {
   updated: Record<string, unknown>;
 }
 
+export type ApiKeyProvider = 'google' | 'tavily';
+export type ApiKeyStatus = 'active' | 'inactive';
+
+export interface ApiKeyRecord {
+  id: string;
+  provider: ApiKeyProvider;
+  name: string;
+  fingerprint: string;
+  status: ApiKeyStatus;
+  created_at: string;
+  updated_at: string;
+  activated_at: string | null;
+}
+
+export interface ApiKeyListResponse {
+  keys: ApiKeyRecord[];
+  fallback_providers: ApiKeyProvider[];
+}
+
+export interface CreateApiKeyBody {
+  provider: ApiKeyProvider;
+  name: string;
+  key: string;
+}
+
+export interface ApiKeyMutationResponse {
+  ok: boolean;
+  key: ApiKeyRecord;
+  rebuilt: Record<string, string>;
+}
+
 // ─── EP9: Crawler trigger ─────────────────────────────────
 export interface CrawlerTriggerResponse {
   ok: boolean;

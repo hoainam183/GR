@@ -12,8 +12,12 @@ from fastapi import HTTPException
 from config.settings import Settings
 from models.database import SYSTEM_CONFIG_COLLECTION
 from models.system_config import (
+    API_KEYS_FIELD,
     LLM_CONFIG_DOCUMENT_ID,
+    ApiKeyRegistryError,
+    create_api_key,
     filter_llm_config_updates,
+    list_api_keys,
     merge_llm_config_into_settings,
     upsert_llm_config,
 )
@@ -97,7 +101,7 @@ def _make_request(settings: Settings, pipeline: _FakePipeline, llm_cache=None):
     return SimpleNamespace(app=SimpleNamespace(state=state))
 
 
-def test_filter_and_merge_keep_only_current_llm_form_fields() -> None:
+def test_filter_and_merge_keep_model_fields_outside_api_key_registry() -> None:
     settings = _make_settings()
 
     filtered = filter_llm_config_updates(
@@ -123,14 +127,12 @@ async def test_upsert_llm_config_writes_fixed_document() -> None:
     stored = await upsert_llm_config(
         db,
         {
-            "google_api_key": "db-google",
             "chat_temperature": 0.15,
             "rate_limit_enabled": False,
         },
     )
 
     assert stored["_id"] == LLM_CONFIG_DOCUMENT_ID
-    assert stored["google_api_key"] == "db-google"
     assert stored["chat_temperature"] == 0.15
     assert "rate_limit_enabled" not in stored
     assert db.system_config.update_calls[0][2] is True
@@ -159,6 +161,163 @@ async def test_startup_loader_merges_db_overrides(monkeypatch) -> None:
     assert set(applied) == {"google_api_key", "chat_model"}
     assert settings.google_api_key == "db-google"
     assert settings.chat_model == "db-chat"
+    assert db.system_config.doc[API_KEYS_FIELD][0]["secret"] == "db-google"
+    assert db.system_config.doc[API_KEYS_FIELD][0]["status"] == "active"
+
+
+@pytest.mark.anyio
+async def test_legacy_google_and_tavily_keys_import_into_registry() -> None:
+    db = _FakeDB(
+        {
+            "_id": LLM_CONFIG_DOCUMENT_ID,
+            "google_api_key": "legacy-google",
+            "tavily_api_key": "legacy-tavily",
+        }
+    )
+
+    keys = await list_api_keys(db)
+
+    assert {key["provider"] for key in keys} == {"google", "tavily"}
+    assert all("secret" not in key for key in keys)
+    assert all(key["status"] == "active" for key in keys)
+    assert {
+        record["secret"]
+        for record in db.system_config.doc[API_KEYS_FIELD]
+    } == {"legacy-google", "legacy-tavily"}
+
+
+@pytest.mark.anyio
+async def test_create_api_key_keeps_previous_provider_key_inactive() -> None:
+    db = _FakeDB()
+    old_key = await create_api_key(db, "google", "Old key", "old-google-secret")
+
+    new_key = await create_api_key(db, "google", "New key", "new-google-secret")
+    keys = await list_api_keys(db)
+
+    assert old_key["status"] == "active"
+    assert new_key["status"] == "active"
+    assert [key["status"] for key in keys] == ["active", "inactive"]
+    assert keys[0]["name"] == "New key"
+    assert keys[1]["name"] == "Old key"
+    assert sum(key["status"] == "active" for key in keys) == 1
+
+
+@pytest.mark.anyio
+async def test_create_api_key_rejects_duplicate_provider_secret() -> None:
+    db = _FakeDB()
+    await create_api_key(db, "google", "Primary", "shared-google-secret")
+
+    with pytest.raises(ApiKeyRegistryError):
+        await create_api_key(db, "google", "Duplicate", "shared-google-secret")
+
+
+@pytest.mark.anyio
+async def test_api_key_listing_keeps_env_fallback_out_of_registry() -> None:
+    from api.routes.admin_stats import get_api_keys
+
+    db = _FakeDB()
+    listing = await get_api_keys(
+        _make_request(_make_settings(), _FakePipeline()),
+        None,  # type: ignore[arg-type]
+        db,
+    )
+
+    assert listing["keys"] == []
+    assert set(listing["fallback_providers"]) == {"google", "tavily"}
+    assert db.system_config.doc is None
+
+
+@pytest.mark.anyio
+async def test_admin_api_key_create_and_activate_return_no_secret() -> None:
+    from api.routes.admin_stats import (
+        ApiKeyCreateBody,
+        activate_managed_api_key,
+        create_managed_api_key,
+        get_api_keys,
+    )
+
+    settings = _make_settings()
+    pipeline = _FakePipeline()
+    db = _FakeDB()
+    first = await create_managed_api_key(
+        _make_request(settings, pipeline),
+        ApiKeyCreateBody(provider="tavily", name="Tavily A", key="tvly-first-secret"),
+        None,  # type: ignore[arg-type]
+        db,
+    )
+    second = await create_managed_api_key(
+        _make_request(settings, pipeline),
+        ApiKeyCreateBody(provider="tavily", name="Tavily B", key="tvly-second-secret"),
+        None,  # type: ignore[arg-type]
+        db,
+    )
+
+    listing = await get_api_keys(
+        _make_request(settings, pipeline),
+        None,  # type: ignore[arg-type]
+        db,
+    )
+    activated = await activate_managed_api_key(
+        _make_request(settings, pipeline),
+        first["key"]["id"],
+        None,  # type: ignore[arg-type]
+        db,
+    )
+
+    assert second["key"]["status"] == "active"
+    assert "secret" not in listing["keys"][0]
+    assert all("fingerprint" in key for key in listing["keys"])
+    assert activated["key"]["id"] == first["key"]["id"]
+    assert activated["key"]["status"] == "active"
+    assert settings.tavily_api_key == "tvly-first-secret"
+    assert [
+        record["status"]
+        for record in db.system_config.doc[API_KEYS_FIELD]
+        if record["provider"] == "tavily"
+    ] == ["active", "inactive"]
+
+
+@pytest.mark.anyio
+async def test_create_managed_api_key_prepare_failure_does_not_persist() -> None:
+    from api.routes.admin_stats import ApiKeyCreateBody, create_managed_api_key
+
+    settings = _make_settings()
+    pipeline = _FakePipeline(prepare_error=RuntimeError("prepare failed"))
+    db = _FakeDB()
+
+    with pytest.raises(HTTPException) as exc_info:
+        await create_managed_api_key(
+            _make_request(settings, pipeline),
+            ApiKeyCreateBody(provider="google", name="Google A", key="new-google"),
+            None,  # type: ignore[arg-type]
+            db,
+        )
+
+    assert exc_info.value.status_code == 400
+    assert db.system_config.update_calls == []
+    assert settings.google_api_key == "env-google"
+    assert pipeline.commit_calls == 0
+
+
+@pytest.mark.anyio
+async def test_create_managed_api_key_db_failure_does_not_commit_runtime() -> None:
+    from api.routes.admin_stats import ApiKeyCreateBody, create_managed_api_key
+
+    settings = _make_settings()
+    pipeline = _FakePipeline()
+    db = _FakeDB(fail_update=True)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await create_managed_api_key(
+            _make_request(settings, pipeline),
+            ApiKeyCreateBody(provider="google", name="Google A", key="new-google"),
+            None,  # type: ignore[arg-type]
+            db,
+        )
+
+    assert exc_info.value.status_code == 503
+    assert settings.google_api_key == "env-google"
+    assert pipeline.commit_calls == 0
 
 
 @pytest.mark.anyio
@@ -182,10 +341,11 @@ async def test_update_llm_config_persists_reloads_and_invalidates_chat_cache() -
     )
 
     assert response["ok"] is True
-    assert response["updated"]["google_api_key"] == "new-***"
+    assert response["updated"]["google_api_key"] == "new-***-key"
     assert response["rebuilt"]["chat_llm"] == "new-chat"
     assert response["llm_cache_invalidated"] == 3
     assert db.system_config.doc["chat_model"] == "new-chat"
+    assert db.system_config.doc[API_KEYS_FIELD][0]["secret"] == "new-google-key"
     assert settings.google_api_key == "new-google-key"
     assert settings.chat_model == "new-chat"
     assert pipeline.prepared_settings is not settings

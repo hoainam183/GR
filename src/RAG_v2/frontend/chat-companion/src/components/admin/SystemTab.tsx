@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,20 +8,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import EmptyState from './EmptyState';
 import { useAdminFetch } from '@/hooks/useAdminFetch';
 import {
   getSystemStats, triggerCrawler, getCrawlerStatus,
   toggleConfig, getLLMConfig, updateLLMConfig,
+  activateApiKey, createApiKey, getApiKeys,
 } from '@/services/adminApi';
 import type {
   SystemStats,
   CrawlerStatus,
   LLMConfig,
+  ApiKeyProvider,
+  ApiKeyRecord,
   CrawlerCollectionResult,
   CrawlerSavedChunkPreview,
 } from '@/types/adminStats';
-import { Settings, Loader2, PlayCircle, CheckCircle2, XCircle, Save, Key, Cpu, Database } from 'lucide-react';
+import { Settings, Loader2, PlayCircle, CheckCircle2, XCircle, Save, Key, Cpu, Database, Plus, RefreshCw } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -53,6 +58,23 @@ const AGENT_MODEL_OPTIONS: ModelOption[] = [
   { value: 'qwen2.5-7b-instruct', label: 'Qwen 2.5 7B Instruct' },
   ...GEMINI_MODEL_OPTIONS,
 ];
+
+const API_KEY_PROVIDER_LABELS: Record<ApiKeyProvider, string> = {
+  google: 'Google',
+  tavily: 'Tavily',
+};
+
+function formatApiKeyDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
 function modelOptionsWithCurrent(options: ModelOption[], value: string) {
   if (!value || options.some((option) => option.value === value)) return options;
@@ -152,6 +174,17 @@ export default function SystemTab() {
   const [llmForm, setLlmForm] = useState<Record<string, string>>({});
   const [llmLoading, setLlmLoading] = useState(false);
   const [llmSaving, setLlmSaving] = useState(false);
+  const [apiKeys, setApiKeys] = useState<ApiKeyRecord[]>([]);
+  const [fallbackProviders, setFallbackProviders] = useState<ApiKeyProvider[]>([]);
+  const [apiKeysLoading, setApiKeysLoading] = useState(false);
+  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
+  const [apiKeyCreating, setApiKeyCreating] = useState(false);
+  const [activatingApiKeyId, setActivatingApiKeyId] = useState<string | null>(null);
+  const [apiKeyForm, setApiKeyForm] = useState<{
+    provider: ApiKeyProvider;
+    name: string;
+    key: string;
+  }>({ provider: 'google', name: '', key: '' });
 
   // Crawler state
   const [crawlerStatus, setCrawlerStatus] = useState<CrawlerStatus | null>(null);
@@ -173,8 +206,6 @@ export default function SystemTab() {
       .then((cfg) => {
         setLlmConfig(cfg);
         setLlmForm({
-          google_api_key: '',
-          tavily_api_key: '',
           chat_model: cfg.chat_model,
           chat_temperature: String(cfg.chat_temperature),
           chat_max_tokens: String(cfg.chat_max_tokens),
@@ -185,6 +216,23 @@ export default function SystemTab() {
       .catch(() => toast.error('Không thể tải cấu hình LLM'))
       .finally(() => setLlmLoading(false));
   }, []);
+
+  const refreshApiKeys = useCallback(async () => {
+    setApiKeysLoading(true);
+    try {
+      const result = await getApiKeys();
+      setApiKeys(result.keys);
+      setFallbackProviders(result.fallback_providers);
+    } catch {
+      toast.error('Không thể tải danh sách API key');
+    } finally {
+      setApiKeysLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshApiKeys();
+  }, [refreshApiKeys]);
 
   // Fetch crawler status
   useEffect(() => {
@@ -227,8 +275,6 @@ export default function SystemTab() {
     setLlmSaving(true);
     try {
       const body: Record<string, unknown> = {};
-      if (llmForm.google_api_key) body.google_api_key = llmForm.google_api_key;
-      if (llmForm.tavily_api_key) body.tavily_api_key = llmForm.tavily_api_key;
       if (llmForm.chat_model && llmForm.chat_model !== llmConfig?.chat_model)
         body.chat_model = llmForm.chat_model;
       if (llmForm.agent_model && llmForm.agent_model !== llmConfig?.agent_model)
@@ -254,8 +300,6 @@ export default function SystemTab() {
       setLlmConfig(cfg);
       setLlmForm((prev) => ({
         ...prev,
-        google_api_key: '',
-        tavily_api_key: '',
         chat_model: cfg.chat_model,
         chat_temperature: String(cfg.chat_temperature),
         chat_max_tokens: String(cfg.chat_max_tokens),
@@ -266,6 +310,53 @@ export default function SystemTab() {
       toast.error('Không thể cập nhật cấu hình LLM');
     } finally {
       setLlmSaving(false);
+    }
+  };
+
+  const resetApiKeyForm = () => {
+    setApiKeyForm({ provider: 'google', name: '', key: '' });
+  };
+
+  const handleCreateApiKey = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!apiKeyForm.name.trim() || !apiKeyForm.key.trim()) {
+      toast.info('Tên hiển thị và giá trị key là bắt buộc');
+      return;
+    }
+
+    setApiKeyCreating(true);
+    try {
+      await createApiKey({
+        provider: apiKeyForm.provider,
+        name: apiKeyForm.name.trim(),
+        key: apiKeyForm.key.trim(),
+      });
+      toast.success('Đã thêm và kích hoạt API key mới');
+      setApiKeyDialogOpen(false);
+      resetApiKeyForm();
+      await refreshApiKeys();
+    } catch {
+      toast.error('Không thể thêm API key');
+    } finally {
+      setApiKeyCreating(false);
+    }
+  };
+
+  const handleActivateApiKey = async (key: ApiKeyRecord) => {
+    const confirmed = window.confirm(
+      `Kích hoạt ${key.name}? Key ${API_KEY_PROVIDER_LABELS[key.provider]} đang dùng sẽ chuyển sang inactive.`,
+    );
+    if (!confirmed) return;
+
+    setActivatingApiKeyId(key.id);
+    try {
+      await activateApiKey(key.id);
+      toast.success(`Đã kích hoạt ${key.name}`);
+      await refreshApiKeys();
+    } catch {
+      toast.error('Không thể kích hoạt API key');
+    } finally {
+      setActivatingApiKeyId(null);
     }
   };
 
@@ -364,51 +455,85 @@ export default function SystemTab() {
           <div className="space-y-5">
             {/* API Keys */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Key className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">API Keys</span>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Key className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">API Keys</span>
+                </div>
+                <Button size="sm" variant="outline" className="gap-2" onClick={() => setApiKeyDialogOpen(true)}>
+                  <Plus className="h-3.5 w-3.5" />
+                  Thêm API key
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Key đã lưu chỉ hiển thị ở dạng rút gọn vì lý do bảo mật.
+                Key mới active ngay. Key cùng provider trước đó vẫn được giữ lại để kích hoạt lại khi cần.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="google-key" className="text-xs">Google API Key</Label>
-                  <div className="flex min-h-6 flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <Badge variant={llmConfig?.google_api_key ? 'secondary' : 'outline'}>
-                      {llmConfig?.google_api_key ? 'Đã cấu hình' : 'Chưa cấu hình'}
-                    </Badge>
-                    {llmConfig?.google_api_key && (
-                      <span className="font-mono text-[11px]">{llmConfig.google_api_key}</span>
-                    )}
-                  </div>
-                  <Input
-                    id="google-key"
-                    type="password"
-                    placeholder="Nhập key mới để thay thế..."
-                    value={llmForm.google_api_key}
-                    onChange={(e) => setLlmForm((p) => ({ ...p, google_api_key: e.target.value }))}
-                  />
+              {fallbackProviders.length > 0 && (
+                <Alert>
+                  <AlertDescription>
+                    {fallbackProviders.map((provider) => API_KEY_PROVIDER_LABELS[provider]).join(', ')} đang dùng key fallback ngoài registry.
+                  </AlertDescription>
+                </Alert>
+              )}
+              {apiKeysLoading ? (
+                <Skeleton className="h-32 rounded-lg" />
+              ) : apiKeys.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
+                  Chưa có API key được quản lý trong admin.
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="tavily-key" className="text-xs">Tavily API Key</Label>
-                  <div className="flex min-h-6 flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <Badge variant={llmConfig?.tavily_api_key ? 'secondary' : 'outline'}>
-                      {llmConfig?.tavily_api_key ? 'Đã cấu hình' : 'Chưa cấu hình'}
-                    </Badge>
-                    {llmConfig?.tavily_api_key && (
-                      <span className="font-mono text-[11px]">{llmConfig.tavily_api_key}</span>
-                    )}
-                  </div>
-                  <Input
-                    id="tavily-key"
-                    type="password"
-                    placeholder="Nhập key mới để thay thế..."
-                    value={llmForm.tavily_api_key}
-                    onChange={(e) => setLlmForm((p) => ({ ...p, tavily_api_key: e.target.value }))}
-                  />
+              ) : (
+                <div className="overflow-x-auto rounded-lg border border-border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tên</TableHead>
+                        <TableHead>Provider</TableHead>
+                        <TableHead>Fingerprint</TableHead>
+                        <TableHead>Trạng thái</TableHead>
+                        <TableHead>Cập nhật</TableHead>
+                        <TableHead className="text-right">Thao tác</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {apiKeys.map((key) => (
+                        <TableRow key={key.id}>
+                          <TableCell className="min-w-[180px] font-medium">{key.name}</TableCell>
+                          <TableCell>{API_KEY_PROVIDER_LABELS[key.provider]}</TableCell>
+                          <TableCell className="font-mono text-xs">{key.fingerprint}</TableCell>
+                          <TableCell>
+                            <Badge variant={key.status === 'active' ? 'default' : 'secondary'}>
+                              {key.status === 'active' ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="min-w-[150px] text-xs text-muted-foreground">
+                            {formatApiKeyDate(key.updated_at)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {key.status === 'inactive' ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="gap-2"
+                                disabled={activatingApiKeyId === key.id}
+                                onClick={() => handleActivateApiKey(key)}
+                              >
+                                {activatingApiKeyId === key.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <RefreshCw className="h-3.5 w-3.5" />
+                                )}
+                                Kích hoạt
+                              </Button>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Đang dùng</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Model settings */}
@@ -474,6 +599,72 @@ export default function SystemTab() {
           </div>
         )}
       </div>
+
+      <Dialog
+        open={apiKeyDialogOpen}
+        onOpenChange={(open) => {
+          setApiKeyDialogOpen(open);
+          if (!open) resetApiKeyForm();
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Thêm API key</DialogTitle>
+            <DialogDescription>
+              Key mới sẽ active ngay. Key active hiện tại của provider này sẽ chuyển sang inactive.
+            </DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={handleCreateApiKey}>
+            <div className="space-y-1.5">
+              <Label htmlFor="api-key-provider" className="text-xs">Provider</Label>
+              <Select
+                value={apiKeyForm.provider}
+                onValueChange={(provider) => setApiKeyForm((prev) => ({
+                  ...prev,
+                  provider: provider as ApiKeyProvider,
+                }))}
+              >
+                <SelectTrigger id="api-key-provider">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="google">Google</SelectItem>
+                  <SelectItem value="tavily">Tavily</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="api-key-name" className="text-xs">Tên hiển thị</Label>
+              <Input
+                id="api-key-name"
+                value={apiKeyForm.name}
+                maxLength={120}
+                placeholder="Production key"
+                onChange={(event) => setApiKeyForm((prev) => ({ ...prev, name: event.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="api-key-secret" className="text-xs">API key</Label>
+              <Input
+                id="api-key-secret"
+                type="password"
+                value={apiKeyForm.key}
+                placeholder="Nhập key mới..."
+                onChange={(event) => setApiKeyForm((prev) => ({ ...prev, key: event.target.value }))}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setApiKeyDialogOpen(false)}>
+                Hủy
+              </Button>
+              <Button type="submit" disabled={apiKeyCreating} className="gap-2">
+                {apiKeyCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                Thêm key
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Service status */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">

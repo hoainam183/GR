@@ -226,6 +226,9 @@ import type {
   LLMConfig,
   LLMConfigUpdateBody,
   LLMConfigUpdateResponse,
+  ApiKeyListResponse,
+  ApiKeyMutationResponse,
+  CreateApiKeyBody,
 } from '@/types/adminStats';
 
 export async function getOverviewStats(): Promise<OverviewStats> {
@@ -338,6 +341,31 @@ export async function updateLLMConfig(body: LLMConfigUpdateBody): Promise<LLMCon
   const { data } = await adminClient.put<LLMConfigUpdateResponse>(
     '/admin/config/llm',
     body,
+    { headers: authHeaders() },
+  );
+  return data;
+}
+
+export async function getApiKeys(): Promise<ApiKeyListResponse> {
+  const { data } = await adminClient.get<ApiKeyListResponse>('/admin/config/api-keys', {
+    headers: authHeaders(),
+  });
+  return data;
+}
+
+export async function createApiKey(body: CreateApiKeyBody): Promise<ApiKeyMutationResponse> {
+  const { data } = await adminClient.post<ApiKeyMutationResponse>(
+    '/admin/config/api-keys',
+    body,
+    { headers: authHeaders() },
+  );
+  return data;
+}
+
+export async function activateApiKey(id: string): Promise<ApiKeyMutationResponse> {
+  const { data } = await adminClient.post<ApiKeyMutationResponse>(
+    `/admin/config/api-keys/${id}/activate`,
+    null,
     { headers: authHeaders() },
   );
   return data;
