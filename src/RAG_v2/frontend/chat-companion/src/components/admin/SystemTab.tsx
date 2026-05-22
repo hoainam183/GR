@@ -368,23 +368,42 @@ export default function SystemTab() {
                 <Key className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">API Keys</span>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Key đã lưu chỉ hiển thị ở dạng rút gọn vì lý do bảo mật.
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="google-key" className="text-xs">Google API Key</Label>
+                  <div className="flex min-h-6 flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant={llmConfig?.google_api_key ? 'secondary' : 'outline'}>
+                      {llmConfig?.google_api_key ? 'Đã cấu hình' : 'Chưa cấu hình'}
+                    </Badge>
+                    {llmConfig?.google_api_key && (
+                      <span className="font-mono text-[11px]">{llmConfig.google_api_key}</span>
+                    )}
+                  </div>
                   <Input
                     id="google-key"
                     type="password"
-                    placeholder={llmConfig?.google_api_key || 'Nhập key mới...'}
+                    placeholder="Nhập key mới để thay thế..."
                     value={llmForm.google_api_key}
                     onChange={(e) => setLlmForm((p) => ({ ...p, google_api_key: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="tavily-key" className="text-xs">Tavily API Key</Label>
+                  <div className="flex min-h-6 flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant={llmConfig?.tavily_api_key ? 'secondary' : 'outline'}>
+                      {llmConfig?.tavily_api_key ? 'Đã cấu hình' : 'Chưa cấu hình'}
+                    </Badge>
+                    {llmConfig?.tavily_api_key && (
+                      <span className="font-mono text-[11px]">{llmConfig.tavily_api_key}</span>
+                    )}
+                  </div>
                   <Input
                     id="tavily-key"
                     type="password"
-                    placeholder={llmConfig?.tavily_api_key || 'Nhập key mới...'}
+                    placeholder="Nhập key mới để thay thế..."
                     value={llmForm.tavily_api_key}
                     onChange={(e) => setLlmForm((p) => ({ ...p, tavily_api_key: e.target.value }))}
                   />
