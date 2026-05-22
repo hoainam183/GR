@@ -130,8 +130,10 @@ class RetrievalService:
         resolved_major: Optional[str] = None,
         resolved_cohort: Optional[str] = None,
         rerank: bool = True,
+        entities: Optional[Dict[str, Any]] = None,
+        use_multi_query: bool = False,
     ) -> List[Dict[str, Any]]:
-        """Run hybrid search with optional reranking.
+        """Run hybrid search with optional reranking and multi-query expansion.
 
         Args:
             query: Search query text.
@@ -140,6 +142,8 @@ class RetrievalService:
             resolved_major: Major code for metadata pre-filtering.
             resolved_cohort: Cohort code for metadata pre-filtering.
             rerank: Whether to apply reranking (default True).
+            entities: Extracted entities dict (for multi-query expansion).
+            use_multi_query: Whether to use multi-query expansion for better recall.
 
         Returns:
             List of result dicts with text, metadata, and scores.
@@ -148,6 +152,110 @@ class RetrievalService:
         raw_candidate_k = max(effective_top_k * 4, 20)
         active_collections = collections or self.settings.collections
 
+        # Multi-query expansion: search multiple query variants and merge
+        if use_multi_query and entities:
+            from retrieval.query_expander import MultiQueryExpander
+
+            expander = MultiQueryExpander(max_variants=3)
+            variants = expander.expand(query, entities)
+            if len(variants) > 1:
+                logger.info(
+                    "Multi-query expansion: %d variants for '%s'",
+                    len(variants),
+                    query[:60],
+                )
+                return self._search_multi_query(
+                    variants,
+                    effective_top_k=effective_top_k,
+                    raw_candidate_k=raw_candidate_k,
+                    active_collections=active_collections,
+                    resolved_major=resolved_major,
+                    resolved_cohort=resolved_cohort,
+                    rerank=rerank,
+                )
+
+        return self._search_single(
+            query,
+            effective_top_k=effective_top_k,
+            raw_candidate_k=raw_candidate_k,
+            active_collections=active_collections,
+            resolved_major=resolved_major,
+            resolved_cohort=resolved_cohort,
+            rerank=rerank,
+        )
+
+    def search_with_hyde(
+        self,
+        query: str,
+        llm: Any,
+        *,
+        collections: Optional[List[str]] = None,
+        top_k: Optional[int] = None,
+        resolved_major: Optional[str] = None,
+        resolved_cohort: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """HyDE fallback search: generate hypothesis → embed → search.
+
+        Use this when initial retrieval returns low-confidence results.
+
+        Args:
+            query: Original user query.
+            llm: LLM instance for hypothesis generation.
+            collections: Target collections.
+            top_k: Number of results.
+            resolved_major: Major for pre-filtering.
+            resolved_cohort: Cohort for pre-filtering.
+
+        Returns:
+            Results from HyDE-enhanced search (no reranking applied — caller
+            should rerank the merged pool).
+        """
+        from retrieval.hyde import HyDEExpander
+
+        effective_top_k = top_k or self.settings.top_k
+        raw_candidate_k = max(effective_top_k * 4, 20)
+        active_collections = collections or self.settings.collections
+
+        hyde = HyDEExpander(llm=llm, embedder=self.bge_embedder)
+        hyde_vec = hyde.generate_embedding(query)
+        # Also embed with E5 using the original query (HyDE only for BGE)
+        e5_vec = self.e5_embedder.embed_query(query)
+
+        search_kwargs: Dict[str, Any] = {
+            "query": query,
+            "bge_m3_query": hyde_vec,
+            "e5_query": e5_vec,
+            "top_k": raw_candidate_k,
+            "vector_top_k": self.settings.vector_top_k,
+            "keyword_top_k": self.settings.keyword_top_k,
+            "vector_pool_k": self.settings.vector_pool_k,
+            "keyword_pool_k": self.settings.keyword_pool_k,
+            "active_collections": active_collections,
+        }
+        if resolved_major:
+            search_kwargs["resolved_major"] = resolved_major
+        if resolved_cohort:
+            search_kwargs["resolved_cohort"] = resolved_cohort
+
+        results = self.searcher.search(**search_kwargs)
+        return results[:effective_top_k]
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _search_single(
+        self,
+        query: str,
+        *,
+        effective_top_k: int,
+        raw_candidate_k: int,
+        active_collections: List[str],
+        resolved_major: Optional[str],
+        resolved_cohort: Optional[str],
+        rerank: bool,
+    ) -> List[Dict[str, Any]]:
+        """Single-query search path."""
         bge_vec, e5_vec = self.embed_query(query)
 
         search_kwargs: Dict[str, Any] = {
@@ -178,6 +286,65 @@ class RetrievalService:
             results = results[:effective_top_k]
 
         return results
+
+    def _search_multi_query(
+        self,
+        variants: List[str],
+        *,
+        effective_top_k: int,
+        raw_candidate_k: int,
+        active_collections: List[str],
+        resolved_major: Optional[str],
+        resolved_cohort: Optional[str],
+        rerank: bool,
+    ) -> List[Dict[str, Any]]:
+        """Multi-query search: run each variant, merge, dedup, then rerank."""
+        all_results: List[Dict[str, Any]] = []
+        seen_ids: set = set()
+
+        # Distribute budget across variants
+        per_variant_k = max(raw_candidate_k // len(variants), 10)
+
+        for variant in variants:
+            bge_vec, e5_vec = self.embed_query(variant)
+
+            search_kwargs: Dict[str, Any] = {
+                "query": variant,
+                "bge_m3_query": bge_vec,
+                "e5_query": e5_vec,
+                "top_k": per_variant_k,
+                "vector_top_k": self.settings.vector_top_k,
+                "keyword_top_k": self.settings.keyword_top_k,
+                "vector_pool_k": self.settings.vector_pool_k,
+                "keyword_pool_k": self.settings.keyword_pool_k,
+                "active_collections": active_collections,
+            }
+            if resolved_major:
+                search_kwargs["resolved_major"] = resolved_major
+            if resolved_cohort:
+                search_kwargs["resolved_cohort"] = resolved_cohort
+
+            results = self.searcher.search(**search_kwargs)
+
+            for doc in results:
+                doc_id = doc.get("id", "")
+                if doc_id not in seen_ids:
+                    seen_ids.add(doc_id)
+                    all_results.append(doc)
+
+        # Rerank the merged pool with the original query (first variant)
+        if rerank and self.reranker is not None:
+            all_results = self.reranker.rerank(
+                query=variants[0],
+                documents=all_results,
+                top_k=effective_top_k,
+            )
+        else:
+            # Sort by score and truncate
+            all_results.sort(key=lambda x: x.get("score", 0), reverse=True)
+            all_results = all_results[:effective_top_k]
+
+        return all_results
 
     def web_search(self, query: str, max_results: int = 3) -> Any:
         """Run a Tavily web search.

@@ -1043,7 +1043,7 @@ class QuyDinhFilterExtractor(BaseFilterExtractor):
 
         return CollectionFilter(
             metadata_es_queries=[
-                _null_or_terms("applicable_cohort", cohort_codes),
+                _null_or_terms("applicable_major", cohort_codes),
             ]
         )
 

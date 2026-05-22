@@ -13,6 +13,8 @@ from .metadata_filters import (
     build_collection_filters,
 )
 from .multi_collection_search import MultiCollectionSearch
+from .query_expander import MultiQueryExpander
+from .hyde import HyDEExpander, should_use_hyde
 
 
 def create_retriever(settings: "Settings") -> MultiCollectionSearch:  # type: ignore[name-defined]
@@ -44,5 +46,8 @@ __all__ = [
     "CollectionFilter",
     "build_collection_filters",
     "MultiCollectionSearch",
+    "MultiQueryExpander",
+    "HyDEExpander",
+    "should_use_hyde",
     "create_retriever",
 ]

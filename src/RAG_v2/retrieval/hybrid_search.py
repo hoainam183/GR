@@ -66,6 +66,13 @@ class HybridSearch:
     ) -> List[Dict[str, Any]]:
         """Run hybrid retrieval and return fused results.
 
+        .. deprecated::
+            This method is NOT used by the main search flow.
+            ``MultiCollectionSearch._fetch_one()`` calls ``hybrid.qdrant.search()``
+            and ``hybrid.es.keyword_search()`` directly for finer control over
+            global pooling and fusion.  This method is retained for unit testing
+            and standalone debugging of single-collection hybrid search.
+
         Args:
             query: Raw user query string (used for BM25).
             bge_m3_query: Query vector from BGE-M3 embedder.

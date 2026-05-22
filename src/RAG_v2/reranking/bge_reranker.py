@@ -111,8 +111,8 @@ class BGEReranker(BaseReranker):
         threshold = score_threshold if score_threshold is not None else self.score_threshold
         table_thresh = table_score_threshold if table_score_threshold is not None else getattr(self, "table_score_threshold", threshold)
 
-        # Build (query, doc_text) pairs
-        pairs = [(query, doc["text"]) for doc in documents]
+        # Build (query, doc_text) pairs — prepend metadata for richer context
+        pairs = [(query, self._enrich_text_for_reranking(doc)) for doc in documents]
 
         # Compute relevance scores
         scores = self._model.compute_score(pairs, batch_size=self.batch_size)
@@ -180,3 +180,28 @@ class BGEReranker(BaseReranker):
         )
 
         return top_docs
+
+    # ------------------------------------------------------------------
+    # Metadata enrichment
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _enrich_text_for_reranking(doc: Dict[str, Any]) -> str:
+        """Prepend metadata context to document text for richer cross-encoder scoring.
+
+        Cross-encoders like BGE work best when both query and document share
+        explicit semantic cues.  Hierarchy paths, major names, and document
+        titles give the model structural context that raw chunk text alone
+        often lacks.
+        """
+        meta = doc.get("metadata") or {}
+        prefix_parts: List[str] = []
+        if meta.get("hierarchy_path"):
+            prefix_parts.append(meta["hierarchy_path"])
+        if meta.get("major_code"):
+            prefix_parts.append(f"Ngành: {meta['major_code']}")
+        if meta.get("title"):
+            prefix_parts.append(f"Tài liệu: {meta['title']}")
+        prefix = " | ".join(prefix_parts)
+        text = doc.get("text", "")
+        return f"{prefix}\n{text}" if prefix else text

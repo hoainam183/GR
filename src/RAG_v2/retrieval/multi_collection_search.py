@@ -681,14 +681,24 @@ class MultiCollectionSearch:
         if vector_pool:
             v_max = vector_pool[0]["score"]
             v_min = vector_pool[-1]["score"]
-            v_range = v_max - v_min if v_max != v_min else 1.0
+            if v_max != v_min:
+                v_range = v_max - v_min
+            else:
+                # Single-item or all-same-score pool: treat as max relevance (1.0)
+                v_range = 1.0
+                v_min = v_max - 1.0
         else:
             v_min = v_range = 1.0
 
         if keyword_pool:
             k_max = keyword_pool[0]["score"]
             k_min = keyword_pool[-1]["score"]
-            k_range = k_max - k_min if k_max != k_min else 1.0
+            if k_max != k_min:
+                k_range = k_max - k_min
+            else:
+                # Single-item or all-same-score pool: treat as max relevance (1.0)
+                k_range = 1.0
+                k_min = k_max - 1.0
         else:
             k_min = k_range = 1.0
 
