@@ -7,7 +7,9 @@ import os
 import sys
 import time
 from collections import OrderedDict
+from dataclasses import dataclass
 from pathlib import Path
+from threading import RLock
 from typing import Any, Dict, Generator, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -183,6 +185,33 @@ def _should_enable_self_evaluator(cfg: Dict[str, Any]) -> bool:
     )
 
 
+def _build_tavily_tool(settings: Settings) -> Any | None:
+    """Build the web-search client without rebuilding RetrievalService."""
+    from tools.tavily_search import TavilySearchTool, is_valid_tavily_api_key
+
+    api_key = settings.tavily_api_key or os.environ.get("TAVILY_API_KEY", "")
+    if not is_valid_tavily_api_key(api_key):
+        return None
+    return TavilySearchTool(
+        api_key=api_key,
+        cache_maxsize=settings.tavily_cache_maxsize,
+        cache_ttl_seconds=settings.tavily_cache_ttl_seconds,
+    )
+
+
+@dataclass(frozen=True)
+class _PreparedLLMRuntime:
+    """LLM-dependent pipeline components prepared before a hot swap."""
+
+    cfg: Dict[str, Any]
+    chat: BaseLLM
+    self_evaluator: Optional[SelfEvaluator]
+    reflector: Optional[QueryReflector]
+    decomposer: Optional[QueryDecomposer]
+    agent: Optional[ReActAgent]
+    tavily_tool: Any | None
+
+
 class RAGPipeline:
     """End-to-end RAG v2 pipeline.
 
@@ -287,6 +316,7 @@ class RAGPipeline:
         self._cfg = cfg
         self._mongo_logger = mongo_logger
         self._llm_cache = llm_cache
+        self._llm_runtime_lock = RLock()
         self._route_cache: OrderedDict[str, tuple[float, Dict[str, Any]]] = OrderedDict()
         self._reflect_cache: OrderedDict[str, tuple[float, str]] = OrderedDict()
 
@@ -311,6 +341,85 @@ class RAGPipeline:
         )
 
         logger.info("RAG v2 Pipeline ready.")
+
+    # ------------------------------------------------------------------
+    # Runtime LLM reload
+    # ------------------------------------------------------------------
+
+    def _llm_runtime_snapshot(self) -> _PreparedLLMRuntime:
+        """Capture one consistent set of hot-swappable LLM components."""
+        with self._llm_runtime_lock:
+            return _PreparedLLMRuntime(
+                cfg=dict(self._cfg),
+                chat=self._chat,
+                self_evaluator=self._self_eval,
+                reflector=self._reflector,
+                decomposer=self._decomposer,
+                agent=self.agent,
+                tavily_tool=self._tavily,
+            )
+
+    def prepare_llm_config_reload(self, settings: Settings) -> _PreparedLLMRuntime:
+        """Build replacement LLM clients before persistent config is committed."""
+        cfg = _settings_to_cfg(settings)
+        chat = create_llm(settings)
+        self_evaluator = (
+            SelfEvaluator(llm=chat)
+            if _should_enable_self_evaluator(cfg)
+            else None
+        )
+        reflector = (
+            QueryReflector(settings=settings)
+            if cfg.get("reflection_enabled", True)
+            else None
+        )
+        decomposer = QueryDecomposer(settings=settings)
+        agent = ReActAgent(settings) if settings.agent_enabled else None
+        tavily_tool = _build_tavily_tool(settings)
+        return _PreparedLLMRuntime(
+            cfg=cfg,
+            chat=chat,
+            self_evaluator=self_evaluator,
+            reflector=reflector,
+            decomposer=decomposer,
+            agent=agent,
+            tavily_tool=tavily_tool,
+        )
+
+    def commit_llm_config_reload(
+        self,
+        settings: Settings,
+        prepared: _PreparedLLMRuntime,
+    ) -> Dict[str, str]:
+        """Hot-swap prepared LLM clients and clear LLM-dependent caches."""
+        with self._llm_runtime_lock:
+            self._cfg = dict(prepared.cfg)
+            self._chat = prepared.chat
+            self._self_eval = prepared.self_evaluator
+            self._reflector = prepared.reflector
+            self._decomposer = prepared.decomposer
+            self.agent = prepared.agent
+            self._tavily = prepared.tavily_tool
+            self._retrieval_service.settings = settings
+            self._retrieval_service.tavily_tool = prepared.tavily_tool
+            self._route_cache.clear()
+            self._reflect_cache.clear()
+
+        from agent.tool_adapters import inject_from_retrieval_service
+
+        inject_from_retrieval_service(self._retrieval_service)
+        rebuilt = {
+            "chat_llm": settings.chat_model,
+            "reflector": settings.reflection_model if prepared.reflector else "disabled",
+            "decomposer": settings.reflection_model if prepared.decomposer else "disabled",
+            "agent": settings.agent_model if prepared.agent else "disabled",
+            "tavily": "reloaded" if prepared.tavily_tool else "disabled",
+            "caches": "cleared",
+        }
+        if prepared.self_evaluator is not None:
+            rebuilt["self_evaluator"] = "rebuilt"
+        logger.info("LLM config reloaded: %s", rebuilt)
+        return rebuilt
 
     # ------------------------------------------------------------------
     # Cache helpers
@@ -347,7 +456,8 @@ class RAGPipeline:
     ) -> str:
         """Reflect with a short-lived cache for similar queries."""
         import time as _time
-        if self._reflector is None:
+        reflector = self._llm_runtime_snapshot().reflector
+        if reflector is None:
             return question
         now = _time.time()
         key = _build_cache_key(question, history)
@@ -360,7 +470,7 @@ class RAGPipeline:
                 return rewritten
             del self._reflect_cache[key]
         try:
-            result = self._reflector.reflect(question, chat_history=history)
+            result = reflector.reflect(question, chat_history=history)
             rewritten = result.get("rewritten", question)
         except Exception:
             logger.warning("Reflection failed", exc_info=True)
@@ -400,7 +510,8 @@ class RAGPipeline:
             - ``model_name`` — chat model name
             - ``request_trace`` — structured timing summary (``RequestTrace.summary()``)
         """
-        effective_top_k = top_k or self._cfg["top_k"]
+        runtime = self._llm_runtime_snapshot()
+        effective_top_k = top_k or runtime.cfg["top_k"]
         pipeline_t0 = time.perf_counter()
         pipeline_timings: Dict[str, float] = {}
 
@@ -437,7 +548,7 @@ class RAGPipeline:
                 result = chitchat_flow(
                     question=question,
                     history=history,
-                    chat_model=self._chat,
+                    chat_model=runtime.chat,
                 )
             timings_ms = _merge_timings(
                 pipeline_timings, result.get("timings_ms")
@@ -455,19 +566,19 @@ class RAGPipeline:
             return result
 
         # 2. RAG flow with reflection, self-eval, and Tavily fallback
-        flow_cfg = {**self._cfg, "top_k": effective_top_k}
+        flow_cfg = {**runtime.cfg, "top_k": effective_top_k}
         with trace.stage("rag_flow"):
             result = rag_flow(
                 question=question,
                 history=history,
-                reflector=self._reflector,
+                reflector=runtime.reflector,
                 bge_embedder=self._bge,
                 e5_embedder=self._e5,
                 searcher=self._searcher,
                 reranker=self._reranker,
-                chat_model=self._chat,
-                self_evaluator=self._self_eval,
-                tavily_tool=self._tavily,
+                chat_model=runtime.chat,
+                self_evaluator=runtime.self_evaluator,
+                tavily_tool=runtime.tavily_tool,
                 cfg=flow_cfg,
                 routing_result=routing,
                 user_context=user_context,
@@ -484,7 +595,7 @@ class RAGPipeline:
             if isinstance(ms, (int, float)):
                 trace.record_stage(stage, ms)
         trace.set_metadata("flow", "rag")
-        trace.set_metadata("model", str(getattr(self._chat, "model", "unknown")))
+        trace.set_metadata("model", str(getattr(runtime.chat, "model", "unknown")))
         trace.set_metadata("domain", routing.get("domain", ""))
         trace.log_summary("query(rag)")
 
@@ -528,6 +639,7 @@ class RAGPipeline:
                 vs agent-loop path ("comparison", "multi_source", "general").
         """
         agent_t0 = time.perf_counter()
+        agent = self._llm_runtime_snapshot().agent
 
         def _fallback_result(agent_error: str, tool_payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
             result = self.query(
@@ -567,7 +679,7 @@ class RAGPipeline:
             )
             return result
 
-        if self.agent is None:
+        if agent is None:
             if require_agent:
                 raise RuntimeError("Agent is required for this endpoint but is disabled")
             logger.warning("Agent unavailable, falling back to RAG v2")
@@ -577,7 +689,7 @@ class RAGPipeline:
         init_agent_docs()  # Tạo context riêng cho request này (thread-safe)
 
         try:
-            state = self.agent.run(
+            state = agent.run(
                 question,
                 session_id=session_id or "",
                 history=history,
@@ -630,7 +742,7 @@ class RAGPipeline:
             "mode": "agent",
             "route": route_label,
             "intent": route_label,
-            "model_name": str(getattr(self.agent, "model_name", "agent")),
+            "model_name": str(getattr(agent, "model_name", "agent")),
             "tools_used": list(state.tool_call_history),
             "tool_calls": tool_calls,
             "iterations": state.iteration,
@@ -661,6 +773,7 @@ class RAGPipeline:
 
         Falls back to RAG v2 when agent is unavailable or fails.
         """
+        runtime = self._llm_runtime_snapshot()
         route_result = self.complexity_router.route(question)
         route = route_result["tier"]
         subtype = route_result.get("complex_subtype", "")
@@ -681,8 +794,8 @@ class RAGPipeline:
         # ── Multi-source queries: decompose into per-domain sub-queries ────────
         # This handles compound questions like Q1 (equivalent course + graduation
         # requirements) without dispatching to the agent, which can hallucinate.
-        if route == "complex" and subtype == "multi_source" and self._decomposer is not None:
-            domain_subqueries = self._decomposer.decompose(question)
+        if route == "complex" and subtype == "multi_source" and runtime.decomposer is not None:
+            domain_subqueries = runtime.decomposer.decompose(question)
             # Only use decomposition if we got ≥2 sub-queries (otherwise falls
             # through to regular RAG below).
             if len(domain_subqueries) >= 2:
@@ -707,7 +820,7 @@ class RAGPipeline:
                 result.setdefault("agent_trace", None)
                 return result
 
-        if route == "simple" or self.agent is None:
+        if route == "simple" or runtime.agent is None:
             result = self.query(
                 question=question,
                 history=history,
@@ -753,8 +866,9 @@ class RAGPipeline:
         directed to its target collection.  The reflector, reranker, and LLM
         generation steps use the original question for coherence.
         """
+        runtime = self._llm_runtime_snapshot()
         pipeline_t0 = time.perf_counter()
-        effective_top_k = top_k or self._cfg["top_k"]
+        effective_top_k = top_k or runtime.cfg["top_k"]
         # Expand top_k proportionally when we have multiple sub-queries so
         # each collection contributes enough candidates to the merged pool.
         expanded_top_k = min(effective_top_k * len(domain_subqueries), 12)
@@ -775,19 +889,19 @@ class RAGPipeline:
             "probabilities": {c: 1.0 / len(target_cols) for c in target_cols},
         }
 
-        flow_cfg = {**self._cfg, "top_k": expanded_top_k}
+        flow_cfg = {**runtime.cfg, "top_k": expanded_top_k}
 
         result = rag_flow(
             question=question,
             history=history,
-            reflector=self._reflector,
+            reflector=runtime.reflector,
             bge_embedder=self._bge,
             e5_embedder=self._e5,
             searcher=self._searcher,
             reranker=self._reranker,
-            chat_model=self._chat,
-            self_evaluator=self._self_eval,
-            tavily_tool=self._tavily,
+            chat_model=runtime.chat,
+            self_evaluator=runtime.self_evaluator,
+            tavily_tool=runtime.tavily_tool,
             cfg=flow_cfg,
             routing_result=routing_result,
             user_context=user_context,
@@ -839,6 +953,7 @@ class RAGPipeline:
             Updated routing dict with ``domains`` and ``domain`` overridden.
         """
         try:
+            chat = self._llm_runtime_snapshot().chat
             recent_ctx = ""
             if history:
                 recent = history[-2:]
@@ -850,7 +965,7 @@ class RAGPipeline:
                 query=question,
                 context=recent_ctx or "(none)",
             )
-            raw = self._chat.generate(query=prompt, mode="chitchat")
+            raw = chat.generate(query=prompt, mode="chitchat")
 
             import json as _json
 
@@ -931,7 +1046,8 @@ class RAGPipeline:
         Yields:
             Text chunks as they arrive from the LLM.
         """
-        effective_top_k = top_k or self._cfg["top_k"]
+        runtime = self._llm_runtime_snapshot()
+        effective_top_k = top_k or runtime.cfg["top_k"]
         pipeline_t0 = time.perf_counter()
         pipeline_timings: Dict[str, float] = {}
 
@@ -975,7 +1091,7 @@ class RAGPipeline:
             for chunk in chitchat_flow_stream(
                 question=question,
                 history=history,
-                chat_model=self._chat,
+                chat_model=runtime.chat,
             ):
                 if first_token_ms is None:
                     first_token_ms = _elapsed_ms(stream_t0)
@@ -986,7 +1102,7 @@ class RAGPipeline:
             pipeline_timings["stream_generate"] = _elapsed_ms(stream_t0)
 
         # ── Complex branch → agent ────────────────────────────────────────────
-        elif complexity_tier == "complex" and self.agent is not None:
+        elif complexity_tier == "complex" and runtime.agent is not None:
             self.last_mode = "agent"
             self.last_intent = "complex"
 
@@ -995,11 +1111,11 @@ class RAGPipeline:
             # queries like "so sánh môn mạng máy tính giữa IT-E6 và IT-E7" so the
             # local Qwen model has all context it needs to choose the right tool.
             reflected_question = question
-            if self._reflector is not None:
+            if runtime.reflector is not None:
                 reflect_t0 = time.perf_counter()
                 try:
                     trimmed_for_reflect = history[-8:] if history else []
-                    ref_result = self._reflector.reflect(
+                    ref_result = runtime.reflector.reflect(
                         question,
                         chat_history=trimmed_for_reflect,
                         user_context=user_context,
@@ -1059,7 +1175,7 @@ class RAGPipeline:
         else:
             # Fall back to classic RAG v2 when complexity tier is simple or agent disabled
             self.last_mode = "rag_v2"
-            if complexity_tier == "complex" and self.agent is None:
+            if complexity_tier == "complex" and runtime.agent is None:
                 logger.info("Agent disabled, falling back to RAG v2 for complex query")
                 self.last_mode = "rag_v2_fallback"
 
@@ -1076,20 +1192,20 @@ class RAGPipeline:
                 routing = self._llm_domain_classify(question, history, routing)
                 pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(fallback_t0)
 
-            flow_cfg = {**self._cfg, "top_k": effective_top_k}
+            flow_cfg = {**runtime.cfg, "top_k": effective_top_k}
             flow_timings: Dict[str, float] = {}
             flow_metadata: Dict[str, Any] = {}
             stream, reranked = rag_flow_stream(
                 question=question,
                 history=history,
-                reflector=self._reflector,
+                reflector=runtime.reflector,
                 bge_embedder=self._bge,
                 e5_embedder=self._e5,
                 searcher=self._searcher,
                 reranker=self._reranker,
-                chat_model=self._chat,
+                chat_model=runtime.chat,
                 cfg=flow_cfg,
-                tavily_tool=self._tavily,
+                tavily_tool=runtime.tavily_tool,
                 routing_result=routing,
                 user_context=user_context,
                 validity_filter=self._validity_filter,
@@ -1129,7 +1245,7 @@ class RAGPipeline:
                 "intent": self.last_intent,
                 "mode": self.last_mode,
                 "num_sources": len(self.last_sources),
-                "model_name": self._chat.model,
+                "model_name": runtime.chat.model,
                 "timings_ms": timings_ms,
                 "tools_used": self.last_tools_used,
                 "tool_calls": self.last_tool_calls,

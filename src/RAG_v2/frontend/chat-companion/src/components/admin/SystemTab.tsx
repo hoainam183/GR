@@ -14,8 +14,14 @@ import {
   getSystemStats, triggerCrawler, getCrawlerStatus,
   toggleConfig, getLLMConfig, updateLLMConfig,
 } from '@/services/adminApi';
-import type { SystemStats, CrawlerStatus, LLMConfig } from '@/types/adminStats';
-import { Settings, Loader2, PlayCircle, CheckCircle2, XCircle, Save, Key, Cpu } from 'lucide-react';
+import type {
+  SystemStats,
+  CrawlerStatus,
+  LLMConfig,
+  CrawlerCollectionResult,
+  CrawlerSavedChunkPreview,
+} from '@/types/adminStats';
+import { Settings, Loader2, PlayCircle, CheckCircle2, XCircle, Save, Key, Cpu, Database } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -33,6 +39,104 @@ const TOGGLE_LABELS: Record<string, string> = {
   reflection_enabled: 'Reflection',
   domain_routing_enabled: 'Domain Routing',
 };
+
+type ModelOption = { value: string; label: string };
+
+const GEMINI_MODEL_OPTIONS: ModelOption[] = [
+  { value: 'gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash Lite Preview' },
+  { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+  { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
+  { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+];
+
+const AGENT_MODEL_OPTIONS: ModelOption[] = [
+  { value: 'qwen2.5-7b-instruct', label: 'Qwen 2.5 7B Instruct' },
+  ...GEMINI_MODEL_OPTIONS,
+];
+
+function modelOptionsWithCurrent(options: ModelOption[], value: string) {
+  if (!value || options.some((option) => option.value === value)) return options;
+  return [{ value, label: `${value} (đang dùng)` }, ...options];
+}
+
+function ModelSelectField({
+  id,
+  label,
+  options,
+  value,
+  onValueChange,
+}: {
+  id: string;
+  label: string;
+  options: ModelOption[];
+  value: string;
+  onValueChange: (value: string) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id} className="text-xs">{label}</Label>
+      <Select value={value} onValueChange={onValueChange}>
+        <SelectTrigger id={id}>
+          <SelectValue placeholder="Chọn model" />
+        </SelectTrigger>
+        <SelectContent>
+          {modelOptionsWithCurrent(options, value).map((option) => (
+            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+function numberFromUnknown(value: unknown) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+function stringFromUnknown(value: unknown) {
+  return typeof value === 'string' ? value : '';
+}
+
+function toSavedChunkPreview(value: unknown): CrawlerSavedChunkPreview | null {
+  if (!value || typeof value !== 'object') return null;
+  const record = value as Record<string, unknown>;
+  return {
+    chunk_id: stringFromUnknown(record.chunk_id),
+    title: stringFromUnknown(record.title),
+    source: stringFromUnknown(record.source),
+    url: stringFromUnknown(record.url),
+    section_label: stringFromUnknown(record.section_label) || undefined,
+    content_preview: stringFromUnknown(record.content_preview),
+  };
+}
+
+function collectCrawlerCollectionResults(value: unknown): CrawlerCollectionResult[] {
+  if (Array.isArray(value)) {
+    return value.flatMap(collectCrawlerCollectionResults);
+  }
+  if (!value || typeof value !== 'object') return [];
+
+  const record = value as Record<string, unknown>;
+  const nested = Object.values(record).flatMap(collectCrawlerCollectionResults);
+  const collection = stringFromUnknown(record.collection);
+  const pipeline = stringFromUnknown(record.pipeline);
+  if (!collection || !pipeline) return nested;
+
+  const savedChunks = Array.isArray(record.saved_chunks)
+    ? record.saved_chunks.map(toSavedChunkPreview).filter((chunk): chunk is CrawlerSavedChunkPreview => Boolean(chunk))
+    : [];
+
+  return [{
+    collection,
+    pipeline,
+    status: stringFromUnknown(record.status) || 'unknown',
+    new_articles: numberFromUnknown(record.new_articles),
+    new_chunks: numberFromUnknown(record.new_chunks),
+    indexed: numberFromUnknown(record.indexed),
+    expired_removed: numberFromUnknown(record.expired_removed),
+    saved_chunks: savedChunks,
+  }, ...nested];
+}
 
 export default function SystemTab() {
   const { data, loading, error, refetch } = useAdminFetch<SystemStats>(
@@ -220,6 +324,7 @@ export default function SystemTab() {
 
   const docStatusData = Object.entries(data.documents_by_status).map(([status, count]) => ({ name: status, value: count }));
   const docCollData = Object.entries(data.documents_by_collection).map(([coll, count]) => ({ name: coll, value: count }));
+  const crawlCollectionResults = collectCrawlerCollectionResults(crawlerStatus?.last_result);
 
   return (
     <div className="space-y-6">
@@ -294,30 +399,27 @@ export default function SystemTab() {
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Models</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="chat-model" className="text-xs">Chat Model</Label>
-                  <Input
-                    id="chat-model"
-                    value={llmForm.chat_model}
-                    onChange={(e) => setLlmForm((p) => ({ ...p, chat_model: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="agent-model" className="text-xs">Agent Model</Label>
-                  <Input
-                    id="agent-model"
-                    value={llmForm.agent_model}
-                    onChange={(e) => setLlmForm((p) => ({ ...p, agent_model: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="reflection-model" className="text-xs">Reflection Model</Label>
-                  <Input
-                    id="reflection-model"
-                    value={llmForm.reflection_model}
-                    onChange={(e) => setLlmForm((p) => ({ ...p, reflection_model: e.target.value }))}
-                  />
-                </div>
+                <ModelSelectField
+                  id="chat-model"
+                  label="Chat Model"
+                  options={GEMINI_MODEL_OPTIONS}
+                  value={llmForm.chat_model}
+                  onValueChange={(chat_model) => setLlmForm((p) => ({ ...p, chat_model }))}
+                />
+                <ModelSelectField
+                  id="agent-model"
+                  label="Agent Model"
+                  options={AGENT_MODEL_OPTIONS}
+                  value={llmForm.agent_model}
+                  onValueChange={(agent_model) => setLlmForm((p) => ({ ...p, agent_model }))}
+                />
+                <ModelSelectField
+                  id="reflection-model"
+                  label="Reflection Model"
+                  options={GEMINI_MODEL_OPTIONS}
+                  value={llmForm.reflection_model}
+                  onValueChange={(reflection_model) => setLlmForm((p) => ({ ...p, reflection_model }))}
+                />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
@@ -477,6 +579,74 @@ export default function SystemTab() {
                 </span>
               )}
             </div>
+          </div>
+        )}
+
+        {crawlCollectionResults.length > 0 && !crawlerStatus?.is_running && (
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Database className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm font-semibold">Dữ liệu đã lưu vào collection</p>
+            </div>
+
+            {crawlCollectionResults.map((result) => (
+              <section
+                key={`${result.collection}-${result.pipeline}`}
+                className="rounded-lg border border-border bg-background p-4"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground">{result.collection}</p>
+                      <Badge variant={result.status === 'success' ? 'default' : 'destructive'}>
+                        {result.pipeline}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {result.new_articles} bài mới, {result.new_chunks} chunks tạo, {result.indexed} chunks đã index
+                    </p>
+                  </div>
+                  {result.expired_removed > 0 && (
+                    <Badge variant="secondary">{result.expired_removed} chunks hết hạn đã xóa</Badge>
+                  )}
+                </div>
+
+                {result.saved_chunks.length > 0 ? (
+                  <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg border border-border">
+                    {result.saved_chunks.map((chunk) => (
+                      <article key={chunk.chunk_id} className="bg-card px-4 py-3">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="break-words text-sm font-medium text-foreground">
+                              {chunk.title || 'Chunk mới'}
+                            </p>
+                            <p className="mt-1 break-all text-xs text-muted-foreground">
+                              {chunk.chunk_id}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {chunk.source && <Badge variant="outline">{chunk.source}</Badge>}
+                            {chunk.section_label && <Badge variant="secondary">Mục {chunk.section_label}</Badge>}
+                          </div>
+                        </div>
+                        {chunk.url && (
+                          <p className="mt-2 truncate text-xs text-primary" title={chunk.url}>{chunk.url}</p>
+                        )}
+                        {chunk.content_preview && (
+                          <p className="mt-2 break-words text-xs leading-5 text-muted-foreground">
+                            {chunk.content_preview}
+                          </p>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+                    Lần crawl này không index chunk mới cho collection này.
+                  </p>
+                )}
+              </section>
+            ))}
           </div>
         )}
       </div>

@@ -141,6 +141,26 @@ export interface CrawlerTriggerResponse {
   timeout_seconds: number;
 }
 
+export interface CrawlerSavedChunkPreview {
+  chunk_id: string;
+  title: string;
+  source: string;
+  url: string;
+  section_label?: string;
+  content_preview: string;
+}
+
+export interface CrawlerCollectionResult {
+  collection: string;
+  pipeline: string;
+  status: string;
+  new_articles: number;
+  new_chunks: number;
+  indexed: number;
+  expired_removed: number;
+  saved_chunks: CrawlerSavedChunkPreview[];
+}
+
 // ─── EP10: Crawler status ─────────────────────────────────
 export interface CrawlerStatus {
   is_running: boolean;

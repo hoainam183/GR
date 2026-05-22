@@ -25,7 +25,7 @@
 | Keyword store | Elasticsearch, index name trùng với collection |
 | Embedding | BGE-M3 + E5 multilingual ensemble |
 | Reranker | BGE reranker cross-encoder |
-| LLM | Gemini qua `GOOGLE_API_KEY`, model đọc từ `.env`/`config/settings.py` |
+| LLM | Gemini qua effective `Settings`; admin LLM overrides có thể persist trong Mongo `system_config` và override `.env` |
 | Agent tool LLM | LM Studio local, model đọc từ `AGENT_MODEL` |
 | Agent synthesis | Gemini/LM Studio/Ollama tùy `AGENT_SYNTHESIS_PROVIDER`, default code là Gemini |
 | DB logging | MongoDB qua `models/mongo_logger.py` |
@@ -34,7 +34,7 @@
 | Mobile | Expo/React Native trong `mobile/`, shared TS package trong `packages/shared` |
 | Infra docker | Qdrant `6333`, Elasticsearch `9200`, MongoDB `27017`, Redis `6379` |
 
-**Entrypoint backend**: `api/main.py` -> `create_app()` -> lifespan khởi tạo Mongo/Redis/cache, `RAGPipeline`, index Mongo, optional crawler scheduler, sau đó include routers.
+**Entrypoint backend**: `api/main.py` -> `create_app()` -> lifespan build `Settings`, merge persisted admin LLM overrides khi Mongo đọc được, khởi tạo Mongo/Redis/cache, tạo `RAGPipeline` với cùng effective settings, index Mongo, optional crawler scheduler, sau đó include routers.
 
 ---
 
@@ -66,7 +66,7 @@ RAGPipeline
           +-- synthesis LLM for final answer
 ```
 
-Core rule: pipeline tạo `RetrievalService.from_settings(settings)` một lần, gán vào `self._retrieval_service`, rồi inject vào `agent.tool_adapters.inject_from_retrieval_service()` để tránh load lại embedder/searcher/reranker.
+Core rule: pipeline tạo `RetrievalService.from_settings(settings)` một lần, gán vào `self._retrieval_service`, rồi inject vào `agent.tool_adapters.inject_from_retrieval_service()` để tránh load lại embedder/searcher/reranker. Admin LLM hot-reload chỉ swap chat/reflect/decompose/agent/Tavily clients và re-inject adapter runtime; nó không rebuild retrieval stack nặng.
 
 ---
 
@@ -117,6 +117,7 @@ RAG_v2/
 ├── models/
 │   ├── database.py             # Motor singleton + indexes
 │   ├── mongo_logger.py         # sessions, turns, query_logs, agent_traces
+│   ├── system_config.py         # Mongo overrides for admin LLM config
 │   ├── document.py             # DocumentRecord, DocumentChunk
 │   └── user.py                 # UserDocument
 │
@@ -396,6 +397,7 @@ Tool adapter details:
   `localStorage` key `sidebar:size`.
 - Admin UI uses `services/adminApi.ts` for upload pipeline actions and polling.
 - `AdminGuard` currently checks `localStorage.user.role === "admin"`.
+- Admin crawler status can surface nested `AutoCrawlPipeline` collection summaries from the last manual crawl. Each per-pipeline summary includes target collection counts and a bounded `saved_chunks` preview for newly indexed data; the web system tab renders those previews after a successful crawl.
 
 ### Mobile app
 
@@ -418,6 +420,14 @@ Tool adapter details:
 ## 9. Settings & ENV
 
 Config source: `config/settings.py` using Pydantic BaseSettings and `src/RAG_v2/.env`.
+
+Admin LLM form overrides are persisted as `system_config` document
+`_id="llm_config"` for Google/Tavily keys, chat model tuning, agent model, and
+reflection model. Non-empty DB values override `.env` at backend startup.
+`PUT /admin/config/llm` prepares replacement LLM clients before DB upsert,
+commits the runtime swap after persistence, and clears Redis LLM answers when
+chat generation model/temperature/token limit changes. Runtime toggle endpoint
+`PATCH /admin/config` is not part of this persisted LLM override contract.
 
 Key settings families:
 

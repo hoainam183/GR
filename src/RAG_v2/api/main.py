@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import os
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -32,17 +31,46 @@ logger = logging.getLogger(__name__)
 # ------------------------------------------------------------------
 
 
+async def _load_persisted_llm_config(settings: Settings) -> list[str]:
+    """Merge Mongo-backed LLM overrides into startup settings."""
+    if not settings.mongodb_enabled:
+        return []
+
+    from models.database import get_motor_client
+    from models.system_config import (
+        get_llm_config,
+        merge_llm_config_into_settings,
+    )
+
+    db = get_motor_client()[settings.mongodb_database]
+    db_config = await get_llm_config(db)
+    if not db_config:
+        return []
+    return merge_llm_config_into_settings(settings, db_config)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup / shutdown logic — loads the pipeline once."""
     env_path = _RAG_V2_ROOT / ".env"
     load_dotenv(dotenv_path=env_path)
 
-    api_key = os.getenv("GOOGLE_API_KEY")
-    if not api_key:
-        raise ValueError("GOOGLE_API_KEY not found in .env file")
-
     settings = Settings()
+    try:
+        applied_llm_fields = await _load_persisted_llm_config(settings)
+        if applied_llm_fields:
+            logger.info(
+                "Loaded persisted LLM config fields: %s",
+                applied_llm_fields,
+            )
+    except Exception:
+        logger.warning(
+            "Failed to load persisted LLM config, using environment defaults",
+            exc_info=True,
+        )
+
+    if not settings.google_api_key:
+        raise ValueError("GOOGLE_API_KEY not found in .env file or database")
 
     # MongoDB logger
     mongo_logger: MongoLogger | None = None
@@ -136,7 +164,7 @@ async def lifespan(app: FastAPI):
     app.state.pipeline = await loop.run_in_executor(
         None,
         lambda: RAGPipeline(
-            api_key=api_key,
+            settings=settings,
             mongo_logger=mongo_logger,
             llm_cache=llm_cache,
         ),

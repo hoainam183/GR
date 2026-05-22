@@ -82,9 +82,13 @@ Token behavior:
 
 ## Admin UI Contract
 
-`AdminPage` owns a viewport-height shell with a fixed header/tab rail and a scrollable `main` region because the app root keeps overflow locked for chat. Keep admin tab content inside that scroll region; tab switches reset it to the top.
+`AdminPage` owns a viewport-height shell with a desktop sidebar, compact mobile tab rail, and a scrollable `main` region because the app root keeps overflow locked for chat. Keep admin tab content inside that scroll region; tab switches reset it to the top.
 
-`OverviewTab` uses compact metric cards plus a usage summary panel rather than a loose page-level stat grid.
+`OverviewTab` uses compact metric cards, a usage band, and an operations summary panel rather than a loose page-level stat grid.
+
+`SystemTab` keeps LLM model fields as selects. The configured current model is injected as an option when it is outside the curated model list so admin saves do not accidentally discard runtime settings.
+
+Crawler status may include collection-level crawl summaries with bounded `saved_chunks` previews after a manual crawl. Render those previews from `last_result` recursively because the `all` target nests the `kehoach` and `quydinh` pipeline results.
 
 ## Maintenance Notes
 

@@ -755,12 +755,14 @@ class AutoCrawlPipeline:
         start_time = datetime.now()
         summary: Dict[str, Any] = {
             "pipeline": pipeline_name,
+            "collection": collection,
             "started_at": start_time.isoformat(),
             "status": "success",
             "new_articles": 0,
             "new_chunks": 0,
             "indexed": 0,
             "expired_removed": 0,
+            "saved_chunks": [],
             "errors": [],
         }
 
@@ -818,6 +820,8 @@ class AutoCrawlPipeline:
                     indexer = self._make_indexer(collection=collection)
                     indexed = indexer.index_chunks(new_chunks)
                     summary["indexed"] = indexed
+                    if indexed > 0:
+                        summary["saved_chunks"] = self._build_saved_chunk_preview(new_chunks)
 
                     # Invalidate LLM Cache (Phase 2) — tag-based
                     if indexed > 0:
@@ -870,6 +874,23 @@ class AutoCrawlPipeline:
 
         self._notify(summary)
         return summary
+
+    @staticmethod
+    def _build_saved_chunk_preview(chunks: List[Dict], limit: int = 5) -> List[Dict[str, Any]]:
+        previews: List[Dict[str, Any]] = []
+        for chunk in chunks[:limit]:
+            metadata = chunk.get("metadata") or {}
+            content = " ".join(str(chunk.get("content") or "").split())
+            section_label = metadata.get("section_label")
+            previews.append({
+                "chunk_id": str(chunk.get("chunk_id") or ""),
+                "title": str(metadata.get("title") or ""),
+                "source": str(metadata.get("source") or ""),
+                "url": str(metadata.get("url") or ""),
+                "section_label": str(section_label) if section_label is not None else "",
+                "content_preview": content[:280],
+            })
+        return previews
 
     def _make_indexer(self, collection: str = "kehoach") -> DualIndexer:
         s = self._settings

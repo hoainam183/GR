@@ -1,6 +1,6 @@
 # Module: `models`
 
-Source-verified: 2026-05-20 from `models/*.py`, `api/main.py`, and auth/admin route usage.
+Source-verified: 2026-05-22 from `models/*.py`, `api/main.py`, and auth/admin route usage.
 
 ## Purpose
 
@@ -20,6 +20,7 @@ models/
   user.py            UserDocument and PyObjectId helpers.
   document.py        DocumentRecord and AuditEntry for admin upload pipeline.
   document_chunk.py  DocumentChunk review/indexing model.
+  system_config.py   Single-document Mongo overrides for admin LLM config.
 ```
 
 ## Mongo Collections
@@ -40,6 +41,7 @@ Main collections used by this codebase:
 | `feedback` | `api/routes/feedback.py` | Answer ratings/comments. |
 | `notifications` | `api/routes/notification.py` | User notification inbox. |
 | `notification_subscriptions` | `api/routes/notification.py` | Push token/topic subscriptions. |
+| `system_config` | `models/system_config.py`, admin LLM config route | Fixed `_id=llm_config` overrides for the SystemTab LLM form. |
 
 ## `database.py`
 
@@ -53,6 +55,14 @@ Responsibilities:
 - Use safe index creation helpers so stale/conflicting indexes can be dropped and recreated where needed.
 
 Use this module for async route-level DB work.
+
+## `system_config.py`
+
+Admin LLM overrides are a single Mongo document at `system_config/llm_config`.
+The persistence boundary whitelists the current SystemTab fields only:
+Google/Tavily keys, chat model tuning, agent model, and reflection model.
+Startup merges non-empty DB values over `.env` settings; absent or empty DB
+values leave environment/default settings intact.
 
 ## `mongo_logger.py`
 

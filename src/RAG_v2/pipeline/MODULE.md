@@ -1,6 +1,6 @@
 # Module: `pipeline`
 
-Source-verified: 2026-05-20 from `pipeline/*.py`, `api/routes/chat.py`, `api/routes/upload.py`, and GitNexus context for `RAGPipeline` and `DocumentPipeline`.
+Source-verified: 2026-05-22 from `pipeline/*.py`, `api/routes/chat.py`, `api/routes/upload.py`, and GitNexus context for `RAGPipeline` and `DocumentPipeline`.
 
 ## Purpose
 
@@ -50,6 +50,20 @@ Agent tools receive that same instance through inject_from_retrieval_service().
 ```
 
 Current caution: the service is stored as `_retrieval_service`; there is no public `service`/`retrieval_service` property in source as of 2026-05-20.
+
+## Runtime LLM Reload
+
+Admin LLM config updates use `RAGPipeline.prepare_llm_config_reload()` before
+Mongo persistence and `commit_llm_config_reload()` after persistence succeeds.
+The prepared bundle replaces chat LLM, reflector, decomposer, optional
+self-evaluator, agent, and Tavily references under one runtime lock while the
+shared retrieval service keeps its existing embedders, searcher, and reranker.
+Chat/query entrypoints take an LLM runtime snapshot so in-flight calls keep a
+consistent set of hot-swappable clients.
+
+After a Tavily replacement the pipeline re-injects its shared retrieval service
+into agent tool adapters so agent web-search uses the refreshed tool without
+cold-loading retrieval models.
 
 ## Chat Entrypoints
 

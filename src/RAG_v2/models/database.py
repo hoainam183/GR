@@ -46,6 +46,7 @@ NOTIFICATIONS_COLLECTION: str = "notifications"
 NOTIFICATION_SUBSCRIPTIONS_COLLECTION: str = "notification_subscriptions"
 EVAL_RUNS_COLLECTION: str = "eval_runs"
 EVAL_CASE_RESULTS_COLLECTION: str = "eval_case_results"
+SYSTEM_CONFIG_COLLECTION: str = "system_config"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

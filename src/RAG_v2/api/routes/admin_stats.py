@@ -28,6 +28,11 @@ from pydantic import BaseModel
 
 from auth.rbac import require_admin
 from models.database import get_database
+from models.system_config import (
+    filter_llm_config_updates,
+    merge_llm_config_into_settings,
+    upsert_llm_config,
+)
 from models.user import UserDocument
 
 logger = logging.getLogger(__name__)
@@ -94,6 +99,13 @@ class LLMConfigBody(BaseModel):
     tavily_api_key: str | None = None
     reflection_enabled: bool | None = None
     reflection_model: str | None = None
+
+
+_LLM_CACHE_INVALIDATION_FIELDS = {
+    "chat_model",
+    "chat_temperature",
+    "chat_max_tokens",
+}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -779,24 +791,80 @@ async def update_llm_config(
     request: Request,
     body: LLMConfigBody,
     _user: Annotated[UserDocument, Depends(require_admin)],
+    db: AsyncIOMotorDatabase = Depends(get_database),
 ):
-    """Update LLM configuration at runtime (non-null fields only)."""
+    """Persist and hot-reload admin-managed LLM configuration."""
     settings = request.app.state.settings
-    updated: dict[str, Any] = {}
-
-    for field_name, value in body.model_dump(exclude_none=True).items():
-        if hasattr(settings, field_name):
-            setattr(settings, field_name, value)
-            # Mask sensitive keys in response
-            if "key" in field_name:
-                display_val = value[:4] + "***" if len(value) > 4 else "***"
-            else:
-                display_val = value
-            updated[field_name] = display_val
-
-    if not updated:
+    updates = filter_llm_config_updates(body.model_dump(exclude_none=True))
+    if not updates:
         raise HTTPException(400, "No fields to update")
 
-    logger.info("Admin updated LLM config: %s", list(updated.keys()))
-    return {"ok": True, "updated": updated}
+    candidate_settings = settings.model_copy(deep=True)
+    merge_llm_config_into_settings(candidate_settings, updates)
+    pipeline = request.app.state.pipeline
+    loop = asyncio.get_running_loop()
+
+    try:
+        prepared_runtime = await loop.run_in_executor(
+            None,
+            pipeline.prepare_llm_config_reload,
+            candidate_settings,
+        )
+    except Exception as exc:
+        logger.warning("LLM config prepare failed: %s", exc, exc_info=True)
+        raise HTTPException(400, "Unable to prepare LLM config reload") from exc
+
+    try:
+        await upsert_llm_config(db, updates)
+    except Exception as exc:
+        logger.error("Failed to persist LLM config: %s", exc, exc_info=True)
+        raise HTTPException(503, "Failed to persist LLM config") from exc
+
+    try:
+        rebuilt = pipeline.commit_llm_config_reload(
+            candidate_settings,
+            prepared_runtime,
+        )
+        merge_llm_config_into_settings(settings, updates)
+    except Exception as exc:
+        logger.error("Pipeline LLM reload failed after persist: %s", exc, exc_info=True)
+        raise HTTPException(
+            500,
+            "LLM config persisted but runtime reload failed",
+        ) from exc
+
+    invalidated_cache_keys = 0
+    llm_cache = getattr(request.app.state, "llm_cache", None)
+    if (
+        llm_cache is not None
+        and _LLM_CACHE_INVALIDATION_FIELDS.intersection(updates)
+        and hasattr(llm_cache, "invalidate_all")
+    ):
+        try:
+            invalidated_cache_keys = await loop.run_in_executor(
+                None,
+                llm_cache.invalidate_all,
+            )
+        except Exception:
+            logger.warning("Failed to invalidate LLM response cache", exc_info=True)
+
+    updated: dict[str, Any] = {}
+    for field_name, value in updates.items():
+        if "key" in field_name:
+            raw = str(value)
+            updated[field_name] = raw[:4] + "***" if len(raw) > 4 else "***"
+        else:
+            updated[field_name] = value
+
+    logger.info(
+        "Admin updated persisted LLM config: %s; rebuilt=%s",
+        list(updated.keys()),
+        rebuilt,
+    )
+    return {
+        "ok": True,
+        "updated": updated,
+        "rebuilt": rebuilt,
+        "llm_cache_invalidated": invalidated_cache_keys,
+    }
 

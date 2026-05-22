@@ -45,6 +45,8 @@ crawl official sources
 
 FastAPI lifespan may schedule this script daily when `crawler_enabled=True`.
 
+`AutoCrawlPipeline` per-pipeline summaries include the target `collection` and a bounded `saved_chunks` preview for newly indexed chunks. Admin crawler status uses this summary payload to show what was saved after a manual crawl without querying the vector stores directly.
+
 Supported crawler targets in source include:
 
 - `kehoach` through HUST display-list/detail pages.

@@ -1,6 +1,6 @@
 # Module: `api`
 
-Source-verified: 2026-05-20 from `api/main.py`, `api/routes/*.py`, `api/response_mapper.py`, `api/dependencies.py`, and GitNexus route map.
+Source-verified: 2026-05-22 from `api/main.py`, `api/routes/*.py`, `api/response_mapper.py`, `api/dependencies.py`, and GitNexus route map.
 
 ## Purpose
 
@@ -45,13 +45,14 @@ Startup in `lifespan()`:
 
 1. Load `.env` from the RAG_v2 root.
 2. Build `Settings`.
-3. Initialize `MongoLogger` if `mongodb_enabled`.
-4. Initialize Redis manager, session store, LLM cache, history cache, and rate limiter if Redis flags are enabled.
-5. Store runtime singletons on `app.state`.
-6. Build one `RAGPipeline` in a thread executor.
-7. Create Mongo indexes through `models.database.create_indexes()`.
-8. Warm up the local agent LLM if available.
-9. Optionally schedule `scripts.auto_crawler` through APScheduler if `crawler_enabled`.
+3. Merge persisted admin LLM overrides from Mongo `system_config` when available.
+4. Initialize `MongoLogger` if `mongodb_enabled`.
+5. Initialize Redis manager, session store, LLM cache, history cache, and rate limiter if Redis flags are enabled.
+6. Store runtime singletons on `app.state`.
+7. Build one `RAGPipeline` with the same effective `Settings` instance in a thread executor.
+8. Create Mongo indexes through `models.database.create_indexes()`.
+9. Warm up the local agent LLM if available.
+10. Optionally schedule `scripts.auto_crawler` through APScheduler if `crawler_enabled`.
 
 Shutdown stops the scheduler and closes Redis resources when present.
 
@@ -130,6 +131,12 @@ Main groups:
 - Discover converters/chunkers.
 
 All admin document routes depend on `auth.rbac.require_admin`.
+
+`routes/admin_stats.py` also owns the admin LLM config surface:
+
+- `GET /admin/config/llm` returns effective runtime LLM settings with keys masked.
+- `PUT /admin/config/llm` prepares a pipeline LLM reload, persists approved overrides in Mongo, then commits the prepared runtime and invalidates Redis LLM answers when chat generation tuning changes.
+- Runtime toggle endpoint `PATCH /admin/config` is separate; it does not share the persisted LLM override contract.
 
 ## Session Routes
 
