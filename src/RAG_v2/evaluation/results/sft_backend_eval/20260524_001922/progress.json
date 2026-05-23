@@ -1,0 +1,45 @@
+{
+  "run_id": "20260524_001922",
+  "samples_total": 1000,
+  "records_total": 16,
+  "status_counts": {
+    "failed": 16
+  },
+  "sample_statuses": {
+    "67bbfccc75f55bf3": "failed",
+    "470dfaa055494f6f": "failed",
+    "acef2b650a7b696d": "failed",
+    "02d3c2f5dc3c640e": "failed",
+    "771c866605fb7163": "failed",
+    "9cc1a348398ef074": "failed",
+    "38ecdae3e14a1968": "failed",
+    "0e19bcfa79ac7e95": "failed",
+    "d127f10ac6301d3b": "failed",
+    "ef8081110c32e971": "failed",
+    "98450415242c470d": "failed",
+    "fb9755802435f09a": "failed",
+    "34d88a2b5e542632": "failed",
+    "9b7fe33079ea232e": "failed",
+    "f58e826f9cfcf6f8": "failed",
+    "fd139b8762b64f9b": "failed"
+  },
+  "config": {
+    "dataset_path": "eval/data/sft_dataset (1).jsonl",
+    "backend_url": "http://localhost:8000/chat/v3",
+    "output_dir": "evaluation/results/sft_backend_eval",
+    "resume_dir": null,
+    "batch_size": 25,
+    "limit": 0,
+    "start_index": 0,
+    "top_k": 5,
+    "mode": "auto",
+    "timeout_s": 180,
+    "delay_s": 0.5,
+    "judge_backend": "none",
+    "retry_failed": false,
+    "lmstudio_base_url": "http://localhost:1234/v1",
+    "lmstudio_model": "qwen/qwen3-8b:2",
+    "gemini_model": "gemini-3.1-flash-lite-preview"
+  },
+  "updated_at": "2026-05-24T00:19:30"
+}

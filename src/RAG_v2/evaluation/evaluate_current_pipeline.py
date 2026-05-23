@@ -23,7 +23,11 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from config.settings import Settings
-from evaluation.eval_schemas import load_relevance_labels
+from evaluation.eval_schemas import (
+    load_json_or_jsonl,
+    load_relevance_labels,
+    normalize_current_policy_item,
+)
 from query.router import QueryRouter
 from retrieval.collection_selector import CollectionSelector
 from retrieval.service import RetrievalService
@@ -35,12 +39,28 @@ def _raw_id(value: Any) -> str:
 
 
 def _expected_ids(case: Dict[str, Any]) -> set[str]:
-    raw = case.get("expected_source_ids") or case.get("relevant_doc_ids") or []
+    raw = (
+        case.get("expected_source_ids")
+        or case.get("relevant_doc_ids")
+        or case.get("ground_truth_contexts")
+        or case.get("context_ids")
+        or []
+    )
     if isinstance(raw, str):
         raw = [part.strip() for part in raw.replace(";", ",").split(",")]
     if not isinstance(raw, list):
         return set()
     return {_raw_id(item) for item in raw if _raw_id(item)}
+
+
+def _listify(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [part.strip() for part in value.replace(";", ",").split(",") if part.strip()]
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return []
 
 
 def _retrieved_ids(results: Iterable[Dict[str, Any]]) -> List[str]:
@@ -178,14 +198,14 @@ def _percentile(values: List[float], pct: float) -> float:
 
 
 def _load_retrieval_cases(path: Path, max_cases: int = 0) -> List[Dict[str, Any]]:
-    with open(path, encoding="utf-8") as handle:
-        data = json.load(handle)
-    cases = data.get("test_cases", []) if isinstance(data, dict) else data
-    out = [
-        case
-        for case in cases
-        if isinstance(case, dict) and case.get("category") == "retrieval"
-    ]
+    cases = load_json_or_jsonl(path)
+    out: List[Dict[str, Any]] = []
+    for index, case in enumerate(cases):
+        normalized = normalize_current_policy_item(case, index=index)
+        if not normalized:
+            continue
+        if normalized.get("category") in {"retrieval", "current_policy", "rag", "generation"}:
+            out.append(normalized)
     return out[:max_cases] if max_cases else out
 
 
@@ -269,8 +289,11 @@ def evaluate(
     stage_latencies: Dict[str, List[float]] = {}
 
     for case in cases:
-        query = str(case.get("query", "")).strip()
+        query = str(case.get("query") or case.get("question") or "").strip()
         expected_collection = str(case.get("expected_collection", "") or "")
+        expected_collections = set(_listify(case.get("expected_collections")))
+        if expected_collection:
+            expected_collections.add(expected_collection)
         expected_keywords = case.get("expected_keywords") or []
         expected_ids = _expected_ids(case)
         case_labels = relevance_labels.get(str(case.get("id") or ""), {})
@@ -296,9 +319,7 @@ def evaluate(
         retrieved_ids = _retrieved_ids(results)
         raw_retrieved_ids = _retrieved_ids(raw_results)
         result_collections = _result_collections(results)
-        collection_hit = (
-            expected_collection in result_collections if expected_collection else False
-        )
+        collection_hit = bool(expected_collections & result_collections) if expected_collections else False
         keyword_hit = _keyword_hit(results, list(expected_keywords))
 
         if case_labels:
@@ -328,10 +349,14 @@ def evaluate(
             "routed": routed,
             "target_collections": collections,
             "expected_collection": expected_collection,
+            "expected_collections": sorted(expected_collections),
             "retrieved_collections": sorted(result_collections),
             "collection_hit": collection_hit,
             "keyword_hit": keyword_hit,
             "expected_source_ids": sorted(expected_ids),
+            "answerable": case.get("answerable"),
+            "expected_behavior": case.get("expected_behavior"),
+            "question_type": case.get("question_type"),
             "label_count": len(case_labels),
             "relevant_count": relevant_count,
             "rel2_count": rel2_count,

@@ -61,6 +61,47 @@ def test_load_current_policy_cases_from_golden_shape(tmp_path):
     assert cases[0].expected_source_ids == ["abc", "def"]
 
 
+def test_load_current_policy_cases_from_schema_v1_jsonl_and_legacy_sft(tmp_path):
+    from evaluation.eval_schemas import load_current_policy_cases
+
+    path = tmp_path / "schema_v1.jsonl"
+    rows = [
+        {
+            "id": "qcdt_2025_dieu2_khoan6_001",
+            "question": "Chương trình Cử nhân có thời gian đào tạo chuẩn là bao lâu?",
+            "ground_truth": "Thời gian đào tạo chuẩn đối với chương trình Cử nhân là 4 năm.",
+            "ground_truth_contexts": ["chunk-1"],
+            "ground_truth_context_texts": ["Cử nhân | 4 năm"],
+            "source": "quydinh",
+            "question_type": "single",
+            "answerable": True,
+            "expected_behavior": "answer_with_citation",
+            "atomic_facts": ["Cử nhân", "4 năm"],
+        },
+        {
+            "instruction": "Điều kiện tốt nghiệp là gì?",
+            "input": "legacy prompt context",
+            "output": "Sinh viên cần đủ tín chỉ và các điều kiện theo quy chế.",
+            "doc_type": "legacy_sft",
+        },
+    ]
+    path.write_text(
+        "\n".join(json.dumps(row, ensure_ascii=False) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+
+    cases = load_current_policy_cases(path)
+    assert len(cases) == 2
+    assert cases[0].case_id == "qcdt_2025_dieu2_khoan6_001"
+    assert cases[0].expected_collections == ["quydinh"]
+    assert cases[0].expected_source_ids == ["chunk-1"]
+    assert cases[0].metadata["ground_truth_contexts"] == ["quydinh/chunk-1"]
+    assert cases[0].metadata["answerable"] is True
+    assert cases[1].question == "Điều kiện tốt nghiệp là gì?"
+    assert cases[1].ground_truth_answer == "Sinh viên cần đủ tín chỉ và các điều kiện theo quy chế."
+    assert cases[1].metadata["legacy_input"] == "legacy prompt context"
+
+
 def test_parse_judge_scores_accepts_markdown_fence():
     from evaluation.eval_schemas import parse_judge_scores
 
@@ -138,6 +179,110 @@ def test_graded_retrieval_metrics_use_relevance_labels():
     assert _graded_ndcg_at_k(["a", "b"], labels, 10) == 1.0
     assert _graded_mrr_at_k(["x", "b", "a"], labels, 10) == 0.5
     assert _graded_recall_at_k(["x", "b", "a"], labels, 50) == 1.0
+
+
+def test_current_pipeline_loader_accepts_schema_v1_jsonl(tmp_path):
+    from evaluation.evaluate_current_pipeline import _expected_ids, _load_retrieval_cases
+
+    path = tmp_path / "rag_eval.jsonl"
+    path.write_text(
+        json.dumps(
+            {
+                "id": "case_1",
+                "question": "Cử nhân học bao lâu?",
+                "ground_truth": "4 năm.",
+                "ground_truth_contexts": ["chunk-1"],
+                "source": "quydinh",
+                "expected_keywords": ["Cử nhân", "4 năm"],
+                "question_type": "single",
+                "answerable": True,
+                "expected_behavior": "answer_with_citation",
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    cases = _load_retrieval_cases(path)
+    assert len(cases) == 1
+    assert cases[0]["query"] == "Cử nhân học bao lâu?"
+    assert cases[0]["expected_collection"] == "quydinh"
+    assert cases[0]["expected_source_ids"] == ["quydinh/chunk-1"]
+    assert _expected_ids(cases[0]) == {"chunk-1"}
+
+
+def test_deterministic_answer_checks_generation_and_refusal():
+    from evaluation.eval_schemas import EvalCase
+    from evaluation.two_layer_eval import _deterministic_answer_checks
+
+    answerable_case = EvalCase(
+        eval_suite="current_policy",
+        case_id="c1",
+        question="Cử nhân học bao lâu?",
+        metadata={
+            "answerable": True,
+            "atomic_facts": ["Cử nhân", "4 năm"],
+            "expected_citations": ["Quy chế đào tạo năm 2025 - Điều 2 - Khoản 6"],
+        },
+    )
+    metrics, reasons = _deterministic_answer_checks(
+        answerable_case,
+        "Theo Quy chế đào tạo năm 2025 - Điều 2 - Khoản 6, Cử nhân học 4 năm.",
+    )
+    assert reasons == []
+    assert metrics["atomic_fact_coverage"] == 1.0
+    assert metrics["citation_text_accuracy"] == 1.0
+
+    refusal_case = EvalCase(
+        eval_suite="current_policy",
+        case_id="c2",
+        question="Thông tin không có trong context?",
+        metadata={
+            "answerable": False,
+            "expected_behavior": "refuse_insufficient_context",
+        },
+    )
+    metrics, reasons = _deterministic_answer_checks(
+        refusal_case,
+        "Không có đủ thông tin trong ngữ cảnh được cung cấp để trả lời câu hỏi này.",
+    )
+    assert reasons == []
+    assert metrics["refusal_accuracy"] == 1.0
+
+
+def test_ragass_loader_accepts_schema_v1(tmp_path):
+    from eval.RAG.ragass_evaluator import load_dataset
+
+    path = tmp_path / "ragass.jsonl"
+    path.write_text(
+        json.dumps(
+            {
+                "id": "q1",
+                "question": "Cử nhân học bao lâu?",
+                "ground_truth": "4 năm.",
+                "ground_truth_contexts": ["quydinh/chunk-1"],
+                "ground_truth_context_texts": ["Cử nhân | 4 năm"],
+                "source": "quydinh",
+                "expected_collection": "quydinh",
+                "question_type": "single",
+                "answerable": True,
+                "expected_behavior": "answer_with_citation",
+                "atomic_facts": ["4 năm"],
+                "expected_citations": ["Quy chế - Điều 2"],
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    samples = load_dataset(path)
+    assert len(samples) == 1
+    assert samples[0].id == "q1"
+    assert samples[0].expected_collection == "quydinh"
+    assert samples[0].ground_truth_contexts == ["quydinh/chunk-1"]
+    assert samples[0].atomic_facts == ["4 năm"]
 
 
 def test_ground_truth_builder_generates_valid_draft(tmp_path):

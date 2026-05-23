@@ -150,6 +150,12 @@ def _compact_source(row: Dict[str, Any]) -> Dict[str, Any]:
                 "document_id",
                 "doc_id",
                 "doc_title",
+                "document_title",
+                "doc_type",
+                "chapter",
+                "article",
+                "clause",
+                "effective_date",
                 "title",
                 "major_code",
                 "applicable_cohort",
@@ -174,6 +180,127 @@ def _expected_hit(retrieved: List[str], expected: List[str]) -> bool:
     if not expected_set:
         return True
     return bool({raw_id(item) for item in retrieved} & expected_set)
+
+
+def _as_text_list(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [part.strip() for part in value.replace(";", ",").split(",") if part.strip()]
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return []
+
+
+def _bool_metadata(value: Any, default: bool = True) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "1", "yes", "y"}:
+            return True
+        if lowered in {"false", "0", "no", "n"}:
+            return False
+    return default
+
+
+def _answer_contains_all(answer: str, expected: List[str]) -> tuple[bool, List[str]]:
+    normalized_answer = " ".join(answer.lower().split())
+    missing = [
+        item for item in expected
+        if " ".join(item.lower().split()) not in normalized_answer
+    ]
+    return not missing, missing
+
+
+def _looks_like_refusal(answer: str) -> bool:
+    normalized = " ".join(answer.lower().split())
+    refusal_markers = (
+        "không có đủ thông tin",
+        "không đủ thông tin",
+        "chưa có đủ thông tin",
+        "không tìm thấy thông tin",
+        "không thể trả lời",
+        "không xác định được",
+        "cần thêm thông tin",
+        "insufficient information",
+        "not enough information",
+    )
+    return any(marker in normalized for marker in refusal_markers)
+
+
+def _case_expected_citations(case: EvalCase) -> List[str]:
+    metadata = case.metadata or {}
+    explicit = _as_text_list(metadata.get("expected_citations"))
+    if explicit:
+        return explicit
+
+    doc_label = metadata.get("doc_type") or metadata.get("document_title") or metadata.get("doc_title")
+    article = metadata.get("article")
+    clause = metadata.get("clause")
+    parts = [str(part).strip() for part in (doc_label, article) if str(part or "").strip()]
+    if clause:
+        parts.append(f"Khoản {clause}")
+    return [" - ".join(parts)] if parts else []
+
+
+def _citation_text_ok(answer: str, case: EvalCase) -> bool:
+    citations = _case_expected_citations(case)
+    if not citations:
+        return True
+    return _answer_contains_all(answer, citations)[0]
+
+
+def _deterministic_answer_checks(
+    case: EvalCase,
+    actual_answer: str,
+) -> tuple[Dict[str, float], List[str]]:
+    """Check schema-v1 answer/refusal/citation expectations without an LLM judge."""
+    if not actual_answer:
+        return {}, []
+
+    metadata = case.metadata or {}
+    metrics: Dict[str, float] = {}
+    fail_reasons: List[str] = []
+    answerable = _bool_metadata(metadata.get("answerable"), default=True)
+    expected_behavior = str(metadata.get("expected_behavior") or "").strip()
+
+    if not answerable or expected_behavior == "refuse_insufficient_context":
+        refused = _looks_like_refusal(actual_answer)
+        metrics["refusal_accuracy"] = 1.0 if refused else 0.0
+        if not refused:
+            fail_reasons.append("expected_refusal_not_found")
+
+        explicit_citations = _as_text_list(metadata.get("expected_citations"))
+        if explicit_citations and any(
+            citation.lower() in actual_answer.lower() for citation in explicit_citations
+        ):
+            fail_reasons.append("refusal_includes_citation")
+        return metrics, fail_reasons
+
+    atomic_facts = _as_text_list(metadata.get("atomic_facts"))
+    if atomic_facts:
+        ok, missing = _answer_contains_all(actual_answer, atomic_facts)
+        metrics["atomic_fact_coverage"] = (
+            (len(atomic_facts) - len(missing)) / len(atomic_facts)
+            if atomic_facts else 1.0
+        )
+        if not ok:
+            fail_reasons.append("missing_atomic_facts:" + ",".join(missing))
+
+    citations = _case_expected_citations(case)
+    if citations:
+        citation_ok = _citation_text_ok(actual_answer, case)
+        metrics["citation_text_accuracy"] = 1.0 if citation_ok else 0.0
+        if not citation_ok:
+            fail_reasons.append("expected_citation_missing")
+
+    return metrics, fail_reasons
+
+
+def _mean_metric_or_none(results: List[EvalCaseResult], key: str) -> Optional[float]:
+    values = [r.metrics.get(key) for r in results if r.metrics.get(key) is not None]
+    return mean_score(values) if values else None
 
 
 def run_historical_eval(
@@ -421,6 +548,13 @@ def run_current_policy_eval(
             scores, judge_reasons = judge.judge_current(case, actual_answer, judge_sources)
             fail_reasons.extend(judge_reasons)
 
+        deterministic_metrics, deterministic_reasons = _deterministic_answer_checks(
+            case,
+            actual_answer,
+        )
+        metrics.update(deterministic_metrics)
+        fail_reasons.extend(deterministic_reasons)
+
         results.append(
             EvalCaseResult(
                 eval_suite="current_policy",
@@ -457,6 +591,9 @@ def run_current_policy_eval(
         "recall_at_k": mean_score(r.metrics.get("recall_at_k") for r in results),
         "raw_recall_at_50": summary_src.get("raw_recall_at_50", baseline.get("raw_recall_at_50")),
         "citation_accuracy": mean_score(r.metrics.get("citation_accuracy") for r in results),
+        "citation_text_accuracy": _mean_metric_or_none(results, "citation_text_accuracy"),
+        "atomic_fact_coverage": _mean_metric_or_none(results, "atomic_fact_coverage"),
+        "refusal_accuracy": _mean_metric_or_none(results, "refusal_accuracy"),
         "freshness_pass_rate": mean_score(r.metrics.get("freshness_pass") for r in results),
         "latency_p50_ms": summary_src.get("latency_p50_ms", 0.0),
         "latency_p95_ms": summary_src.get("latency_p95_ms", 0.0),

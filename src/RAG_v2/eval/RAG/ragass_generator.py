@@ -22,6 +22,7 @@ import logging
 import os
 import random
 import re
+import hashlib
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -93,24 +94,164 @@ class RAGASSItem:
       - Dùng để tính context_recall (RAG có retrieve đủ chunks này không?)
       - Dùng để tính context_precision (RAG có retrieve chunks không liên quan không?)
     """
+    id: str
     question: str
     ground_truth: str                       # câu trả lời chuẩn
     ground_truth_contexts: List[str]        # list[chunk_id] — chunks cần thiết để trả lời
     ground_truth_context_texts: List[str]   # text tương ứng (để debug/inspect)
     question_type: str                      # "single" | "multi" | "adversarial"
     source: str                             # "stsv" | "quydinh"
+    expected_collection: str
+    answerable: bool
+    expected_behavior: str
+    difficulty: str = "medium"
+    answer_type: str = "factoid"
+    atomic_facts: List[str] = field(default_factory=list)
+    expected_keywords: List[str] = field(default_factory=list)
+    expected_citations: List[str] = field(default_factory=list)
+    doc_type: str = ""
+    document_title: str = ""
+    chapter: str = ""
+    article: str = ""
+    clause: str = ""
+    effective_date: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_ragas_dict(self) -> Dict:
         """Format cho RAGAS evaluate (contexts = ground_truth_context_texts)."""
         return {
+            "id": self.id,
             "question": self.question,
             "ground_truth": self.ground_truth,
             "contexts": self.ground_truth_context_texts,
             "ground_truth_contexts": self.ground_truth_contexts,
             "question_type": self.question_type,
             "source": self.source,
+            "expected_collection": self.expected_collection,
+            "answerable": self.answerable,
+            "expected_behavior": self.expected_behavior,
         }
+
+
+def _full_context_id(source: str, chunk_id: Any) -> str:
+    text = str(chunk_id or "").strip()
+    if not text:
+        return ""
+    if "/" in text:
+        return text
+    return f"{source}/{text}" if source else text
+
+
+def _stable_item_id(source: str, question_type: str, context_ids: List[str]) -> str:
+    raw = "|".join([source, question_type, *context_ids])
+    digest = hashlib.sha1(raw.encode("utf-8")).hexdigest()[:10]
+    return f"{source}_{question_type}_{digest}"
+
+
+def _metadata_value(metadata: Dict[str, Any], *keys: str) -> str:
+    for key in keys:
+        value = metadata.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip()
+    return ""
+
+
+def _extract_schema_metadata(chunks: List[Dict[str, Any]]) -> Dict[str, str]:
+    metadata = dict(chunks[0].get("metadata") or {}) if chunks else {}
+    document_title = _metadata_value(
+        metadata,
+        "document_title",
+        "doc_title",
+        "title",
+        "filename",
+        "source_file",
+    )
+    doc_type = _metadata_value(metadata, "doc_type", "document_type") or document_title
+    return {
+        "doc_type": doc_type,
+        "document_title": document_title,
+        "chapter": _metadata_value(metadata, "chapter", "chapter_title"),
+        "article": _metadata_value(metadata, "article", "article_title"),
+        "clause": _metadata_value(metadata, "clause", "clause_number", "khoan"),
+        "effective_date": _metadata_value(metadata, "effective_date", "date_str", "valid_as_of"),
+    }
+
+
+def _expected_citations(schema_meta: Dict[str, str]) -> List[str]:
+    parts = [
+        schema_meta.get("doc_type") or schema_meta.get("document_title"),
+        schema_meta.get("article"),
+    ]
+    citation_parts = [str(part).strip() for part in parts if str(part or "").strip()]
+    if schema_meta.get("clause"):
+        citation_parts.append(f"Khoản {schema_meta['clause']}")
+    return [" - ".join(citation_parts)] if citation_parts else []
+
+
+def _extract_atomic_facts(answer: str, limit: int = 5) -> List[str]:
+    text = " ".join(str(answer or "").split())
+    facts: List[str] = []
+    facts.extend(re.findall(r"https?://\S+", text))
+    facts.extend(re.findall(r"\b\d+(?:[.,]\d+)?\s*(?:năm|tháng|tuần|ngày|tín chỉ|TC|%)\b", text, re.IGNORECASE))
+    facts.extend(re.findall(r"\b[A-ZĐ]{2,}[A-ZĐ0-9-]*\b", text))
+
+    stopwords = {
+        "và", "của", "cho", "theo", "trong", "được", "không", "thông", "tin",
+        "sinh", "viên", "học", "này", "các", "một", "với", "cần", "tại",
+    }
+    for token in re.findall(r"\b[\wÀ-ỹ-]{4,}\b", text):
+        lowered = token.lower()
+        if lowered not in stopwords and token not in facts:
+            facts.append(token)
+        if len(facts) >= limit:
+            break
+
+    deduped: List[str] = []
+    for fact in facts:
+        if fact and fact not in deduped:
+            deduped.append(fact)
+    return deduped[:limit]
+
+
+def _make_item(
+    *,
+    question: str,
+    ground_truth: str,
+    chunks: List[Dict[str, Any]],
+    question_type: str,
+    source: str,
+    answer_type: str,
+    answerable: bool,
+    expected_behavior: str,
+    difficulty: str,
+    metadata: Dict[str, Any],
+) -> RAGASSItem:
+    context_ids = [
+        _full_context_id(str(chunk.get("source") or source), chunk["chunk_id"])
+        for chunk in chunks
+    ]
+    schema_meta = _extract_schema_metadata(chunks)
+    atomic_facts = _extract_atomic_facts(ground_truth)
+    bare_context_ids = [str(chunk["chunk_id"]) for chunk in chunks]
+    return RAGASSItem(
+        id=_stable_item_id(source, question_type, context_ids),
+        question=question,
+        ground_truth=ground_truth,
+        ground_truth_contexts=context_ids,
+        ground_truth_context_texts=[chunk["content"] for chunk in chunks],
+        question_type=question_type,
+        source=source,
+        expected_collection=source,
+        answerable=answerable,
+        expected_behavior=expected_behavior,
+        difficulty=difficulty,
+        answer_type=answer_type,
+        atomic_facts=atomic_facts,
+        expected_keywords=atomic_facts[:5],
+        expected_citations=_expected_citations(schema_meta),
+        metadata={**metadata, "bare_ground_truth_contexts": bare_context_ids},
+        **schema_meta,
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -293,13 +434,17 @@ def generate_single(llm: GeminiCaller, chunk: Dict, max_tokens: int) -> Optional
         parsed = _parse_json_response(raw)
         if not parsed or not parsed.get("question") or not parsed.get("answer"):
             return None
-        return RAGASSItem(
+        source = chunk.get("source", "unknown")
+        return _make_item(
             question=parsed["question"],
             ground_truth=parsed["answer"],
-            ground_truth_contexts=[chunk["chunk_id"]],
-            ground_truth_context_texts=[chunk["content"]],
+            chunks=[chunk],
             question_type="single",
-            source=chunk.get("source", "unknown"),
+            source=source,
+            answer_type=parsed.get("question_type", "factoid"),
+            answerable=True,
+            expected_behavior="answer_with_citation",
+            difficulty="easy",
             metadata={"chunk_id": chunk["chunk_id"], "q_type_detail": parsed.get("question_type", "factoid")},
         )
     except Exception as e:
@@ -327,13 +472,17 @@ def generate_multi(llm: GeminiCaller, group: List[Dict], max_tokens: int) -> Opt
             req_indices = list(range(len(group)))
 
         needed_chunks = [group[i] for i in req_indices]
-        return RAGASSItem(
+        source = group[0].get("source", "unknown")
+        return _make_item(
             question=parsed["question"],
             ground_truth=parsed["answer"],
-            ground_truth_contexts=[c["chunk_id"] for c in needed_chunks],
-            ground_truth_context_texts=[c["content"] for c in needed_chunks],
+            chunks=needed_chunks,
             question_type="multi",
-            source=group[0].get("source", "unknown"),
+            source=source,
+            answer_type="comparison" if "so sánh" in parsed["question"].lower() else "procedural",
+            answerable=True,
+            expected_behavior="answer_with_citation",
+            difficulty="hard" if len(needed_chunks) >= 3 else "medium",
             metadata={
                 "all_chunk_ids": [c["chunk_id"] for c in group],
                 "required_chunk_ids": [c["chunk_id"] for c in needed_chunks],
@@ -352,13 +501,17 @@ def generate_adversarial(llm: GeminiCaller, chunk: Dict, max_tokens: int) -> Opt
         parsed = _parse_json_response(raw)
         if not parsed or not parsed.get("question") or not parsed.get("answer"):
             return None
-        return RAGASSItem(
+        source = chunk.get("source", "unknown")
+        return _make_item(
             question=parsed["question"],
             ground_truth=parsed["answer"],
-            ground_truth_contexts=[chunk["chunk_id"]],   # chunk liên quan nhưng không đủ
-            ground_truth_context_texts=[chunk["content"]],
+            chunks=[chunk],   # chunk liên quan nhưng không đủ
             question_type="adversarial",
-            source=chunk.get("source", "unknown"),
+            source=source,
+            answer_type="refusal",
+            answerable=False,
+            expected_behavior="refuse_insufficient_context",
+            difficulty="hard",
             metadata={
                 "chunk_id": chunk["chunk_id"],
                 "why_unanswerable": parsed.get("why_unanswerable", ""),

@@ -73,6 +73,7 @@ CONFIG = {
 @dataclass
 class EvalSample:
     """Một sample cho RAGAS evaluate."""
+    id: str
     question: str
     answer: str                          # câu trả lời (ground_truth trong Mode 1)
     contexts: List[str]                  # retrieved contexts (text)
@@ -80,6 +81,11 @@ class EvalSample:
     ground_truth_contexts: List[str]     # chunk IDs chuẩn
     question_type: str
     source: str
+    expected_collection: str = ""
+    answerable: bool = True
+    expected_behavior: str = "answer_with_citation"
+    atomic_facts: List[str] = field(default_factory=list)
+    expected_citations: List[str] = field(default_factory=list)
 
 
 def _run_full_rag(samples: List[EvalSample]) -> List[EvalSample]:
@@ -107,6 +113,7 @@ def _run_full_rag(samples: List[EvalSample]) -> List[EvalSample]:
             ]
             out.append(
                 EvalSample(
+                    id=sample.id,
                     question=sample.question,
                     answer=str(result.get("answer") or ""),
                     contexts=contexts,
@@ -114,12 +121,18 @@ def _run_full_rag(samples: List[EvalSample]) -> List[EvalSample]:
                     ground_truth_contexts=sample.ground_truth_contexts,
                     question_type=sample.question_type,
                     source=sample.source,
+                    expected_collection=sample.expected_collection,
+                    answerable=sample.answerable,
+                    expected_behavior=sample.expected_behavior,
+                    atomic_facts=sample.atomic_facts,
+                    expected_citations=sample.expected_citations,
                 )
             )
         except Exception as exc:
             logger.warning("Full RAG failed for question %r: %s", sample.question[:80], exc)
             out.append(
                 EvalSample(
+                    id=sample.id,
                     question=sample.question,
                     answer="",
                     contexts=[],
@@ -127,6 +140,11 @@ def _run_full_rag(samples: List[EvalSample]) -> List[EvalSample]:
                     ground_truth_contexts=sample.ground_truth_contexts,
                     question_type=sample.question_type,
                     source=sample.source,
+                    expected_collection=sample.expected_collection,
+                    answerable=sample.answerable,
+                    expected_behavior=sample.expected_behavior,
+                    atomic_facts=sample.atomic_facts,
+                    expected_citations=sample.expected_citations,
                 )
             )
     return out
@@ -184,6 +202,16 @@ class RAGASSEvalResult:
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+def _as_list(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [part.strip() for part in value.replace(";", ",").split(",") if part.strip()]
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return []
+
+
 def load_dataset(
     dataset_path: Path,
     filter_types: Optional[List[str]] = None,
@@ -217,14 +245,38 @@ def load_dataset(
             if filter_types and qtype not in filter_types:
                 continue
 
+            source = str(item.get("source") or item.get("expected_collection") or "unknown")
+            expected_behavior = str(item.get("expected_behavior") or "").strip()
+            if not expected_behavior:
+                expected_behavior = (
+                    "refuse_insufficient_context"
+                    if qtype == "adversarial"
+                    else "answer_with_citation"
+                )
+            answerable = item.get("answerable")
+            if not isinstance(answerable, bool):
+                answerable = expected_behavior != "refuse_insufficient_context"
+            ground_truth = (
+                item.get("ground_truth")
+                or item.get("reference_answer")
+                or item.get("output")
+                or ""
+            )
+
             samples.append(EvalSample(
-                question=item.get("question", ""),
-                answer=item.get("ground_truth", ""),      # Mode 1: answer = ground_truth
-                contexts=item.get("ground_truth_context_texts", []),
-                ground_truth=item.get("ground_truth", ""),
-                ground_truth_contexts=item.get("ground_truth_contexts", []),
+                id=str(item.get("id") or f"sample_{lineno}"),
+                question=item.get("question") or item.get("query") or item.get("instruction") or "",
+                answer=ground_truth,      # Mode 1: answer = ground_truth
+                contexts=_as_list(item.get("ground_truth_context_texts") or item.get("contexts")),
+                ground_truth=ground_truth,
+                ground_truth_contexts=_as_list(item.get("ground_truth_contexts") or item.get("context_ids")),
                 question_type=qtype,
-                source=item.get("source", "unknown"),
+                source=source,
+                expected_collection=str(item.get("expected_collection") or source),
+                answerable=answerable,
+                expected_behavior=expected_behavior,
+                atomic_facts=_as_list(item.get("atomic_facts")),
+                expected_citations=_as_list(item.get("expected_citations")),
             ))
 
     logger.info(
@@ -329,8 +381,14 @@ def run_ragas_eval(
     # Thêm metadata từ samples
     for i, row in enumerate(per_sample):
         if i < len(samples):
+            row["id"] = samples[i].id
             row["question_type"] = samples[i].question_type
             row["source"] = samples[i].source
+            row["expected_collection"] = samples[i].expected_collection
+            row["answerable"] = samples[i].answerable
+            row["expected_behavior"] = samples[i].expected_behavior
+            row["atomic_facts"] = samples[i].atomic_facts
+            row["expected_citations"] = samples[i].expected_citations
 
     return aggregate, per_sample
 

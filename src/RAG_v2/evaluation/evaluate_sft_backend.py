@@ -1,0 +1,775 @@
+"""Evaluate local SFT questions through the running RAG backend.
+
+This runner intentionally keeps runtime settings in the CONFIG dictionary below
+instead of accepting CLI arguments. It is designed for long SFT runs where the
+backend or LLM provider may disconnect: each completed/failed sample is appended
+to a batch JSONL file, progress is written atomically, and later invocations can
+resume by setting CONFIG["resume_dir"] to an existing run directory.
+"""
+
+from __future__ import annotations
+
+import csv
+import hashlib
+import json
+import logging
+import math
+import os
+import re
+import statistics
+import sys
+import time
+import urllib.error
+import urllib.request
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Optional
+
+from dotenv import load_dotenv
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+load_dotenv(PROJECT_ROOT / ".env")
+
+logger = logging.getLogger(__name__)
+
+
+CONFIG: Dict[str, Any] = {
+    "dataset_path": "eval/data/sft_dataset (1).jsonl",
+    "backend_url": "http://localhost:8000/chat/v3",
+    "output_dir": "evaluation/results/sft_backend_eval",
+    "resume_dir": None,
+    "batch_size": 25,
+    "limit": 0,
+    "start_index": 0,
+    "top_k": 5,
+    "mode": "auto",
+    "timeout_s": 180,
+    "delay_s": 0.5,
+    "judge_backend": "none",  # "none" | "lmstudio" | "gemini"
+    "retry_failed": False,
+    "lmstudio_base_url": "http://localhost:1234/v1",
+    "lmstudio_model": "qwen/qwen3-8b:2",
+    "gemini_model": "gemini-3.1-flash-lite-preview",
+}
+
+
+_REF_COMPARE_SYSTEM = """\
+You are a strict evaluator comparing two Vietnamese-language answers to the same question.
+
+Return a single JSON object with exactly:
+{"match":"correct|partial|incorrect","reason":"one sentence"}
+
+Definitions:
+- correct: generated answer conveys all key facts from the reference and adds no incorrect information.
+- partial: generated answer captures some but not all key facts, or adds minor inaccuracies.
+- incorrect: generated answer is missing most key facts or contains significant inaccuracies.
+
+Respond with JSON only."""
+
+_REF_COMPARE_USER = """\
+Question:
+{question}
+
+Reference answer:
+{reference}
+
+Generated answer:
+{generated}
+
+Compare the two answers."""
+
+
+_STOPWORDS = {
+    "anh", "bao", "bạn", "bằng", "các", "cần", "cho", "của", "được", "học",
+    "hỏi", "không", "là", "mình", "một", "nào", "này", "như", "sinh",
+    "theo", "thì", "thông", "tin", "trong", "và", "với",
+}
+
+
+@dataclass
+class SFTSample:
+    index: int
+    sample_id: str
+    instruction: str
+    input: str
+    reference_answer: str
+    doc_type: str
+    metadata: Dict[str, str] = field(default_factory=dict)
+
+
+def _resolve_project_path(value: str | Path) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else PROJECT_ROOT / path
+
+
+def _now_iso() -> str:
+    return datetime.now().isoformat(timespec="seconds")
+
+
+def _sample_id(index: int, instruction: str, output: str, doc_type: str) -> str:
+    raw = f"{index}\n{instruction}\n{output}\n{doc_type}"
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def _json_default(value: Any) -> Any:
+    if isinstance(value, Path):
+        return str(value)
+    return str(value)
+
+
+def _atomic_write_json(path: Path, payload: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, default=_json_default),
+        encoding="utf-8",
+    )
+    tmp.replace(path)
+
+
+def _parse_legacy_input(input_text: str) -> Dict[str, str]:
+    text = input_text or ""
+
+    def field(label: str) -> str:
+        match = re.search(rf"^{re.escape(label)}:\s*(.+)$", text, re.MULTILINE)
+        return match.group(1).strip() if match else ""
+
+    context_block = ""
+    context_match = re.search(r"CONTEXT:\s*---\s*(.*?)\s*---\s*$", text, re.DOTALL)
+    if context_match:
+        context_block = context_match.group(1).strip()
+
+    content = context_block
+    content_match = re.search(r"Nội dung:\s*(.*)$", context_block, re.DOTALL)
+    if content_match:
+        content = content_match.group(1).strip()
+
+    return {
+        "document_title": field("Văn bản"),
+        "chapter": field("Chương"),
+        "article": field("Điều"),
+        "clause": field("Khoản"),
+        "effective_date": field("Ngày hiệu lực"),
+        "ground_truth_context_text": content,
+    }
+
+
+def load_sft_dataset(dataset_path: str | Path) -> List[SFTSample]:
+    path = _resolve_project_path(dataset_path)
+    samples: List[SFTSample] = []
+    with path.open(encoding="utf-8") as handle:
+        for line_index, line in enumerate(handle, start=1):
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            instruction = str(row.get("instruction") or "").strip()
+            reference = str(row.get("output") or "").strip()
+            doc_type = str(row.get("doc_type") or "").strip()
+            legacy_input = str(row.get("input") or "")
+            if not instruction:
+                continue
+            samples.append(
+                SFTSample(
+                    index=line_index,
+                    sample_id=_sample_id(line_index, instruction, reference, doc_type),
+                    instruction=instruction,
+                    input=legacy_input,
+                    reference_answer=reference,
+                    doc_type=doc_type,
+                    metadata=_parse_legacy_input(legacy_input),
+                )
+            )
+    return samples
+
+
+def _tokens(text: str) -> List[str]:
+    raw = re.findall(r"[\wÀ-ỹ-]+", (text or "").lower(), flags=re.UNICODE)
+    return [tok for tok in raw if len(tok) >= 4 and tok not in _STOPWORDS]
+
+
+def _keyword_coverage(reference: str, generated: str) -> float:
+    expected = sorted(set(_tokens(reference)))
+    if not expected:
+        return 0.0
+    haystack = set(_tokens(generated))
+    return round(len([tok for tok in expected if tok in haystack]) / len(expected), 4)
+
+
+def _extract_atomic_facts(text: str) -> List[str]:
+    normalized = " ".join((text or "").split())
+    facts: List[str] = []
+    facts.extend(re.findall(r"https?://\S+", normalized))
+    facts.extend(
+        re.findall(
+            r"\b\d+(?:[.,]\d+)?\s*(?:năm|học kỳ|tín chỉ|TC|giờ|ngày|tháng|%)\b",
+            normalized,
+            flags=re.IGNORECASE,
+        )
+    )
+    facts.extend(re.findall(r"\b[A-ZĐ]{2,}[A-ZĐ0-9-]*\b", normalized))
+
+    out: List[str] = []
+    for fact in facts:
+        if fact and fact not in out:
+            out.append(fact)
+    return out[:8]
+
+
+def _contains_text(haystack: str, needle: str) -> bool:
+    if not needle:
+        return False
+    return " ".join(needle.lower().split()) in " ".join(haystack.lower().split())
+
+
+def _atomic_fact_coverage(reference: str, generated: str) -> float:
+    facts = _extract_atomic_facts(reference)
+    if not facts:
+        return 0.0
+    hits = sum(1 for fact in facts if _contains_text(generated, fact))
+    return round(hits / len(facts), 4)
+
+
+def _as_source_list(response: Dict[str, Any]) -> List[Dict[str, Any]]:
+    raw_sources = (
+        response.get("retrieved_documents")
+        or response.get("sources")
+        or response.get("documents")
+        or []
+    )
+    return [item for item in raw_sources if isinstance(item, dict)]
+
+
+def _source_text(source: Dict[str, Any]) -> str:
+    metadata = source.get("metadata") if isinstance(source.get("metadata"), dict) else {}
+    text = str(source.get("content") or source.get("text") or "")
+    return "\n".join(
+        [
+            text,
+            json.dumps(metadata, ensure_ascii=False, default=_json_default),
+            str(source.get("collection") or ""),
+        ]
+    )
+
+
+def _source_id(source: Dict[str, Any]) -> str:
+    metadata = source.get("metadata") if isinstance(source.get("metadata"), dict) else {}
+    return str(
+        source.get("id")
+        or metadata.get("chunk_id")
+        or metadata.get("doc_id")
+        or metadata.get("document_id")
+        or ""
+    )
+
+
+def _source_title(source: Dict[str, Any]) -> str:
+    metadata = source.get("metadata") if isinstance(source.get("metadata"), dict) else {}
+    return str(
+        metadata.get("document_title")
+        or metadata.get("doc_title")
+        or metadata.get("title")
+        or metadata.get("source")
+        or ""
+    )
+
+
+def calculate_metrics(
+    sample: SFTSample,
+    generated_answer: str,
+    sources: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    source_haystack = "\n".join(_source_text(source) for source in sources)
+    metadata = sample.metadata
+    article = metadata.get("article", "")
+    clause = metadata.get("clause", "")
+    document_title = metadata.get("document_title") or sample.doc_type
+
+    citation_parts = [part for part in (sample.doc_type, article, f"Khoản {clause}" if clause else "") if part]
+    citation_text_hit = all(_contains_text(generated_answer, part) for part in citation_parts)
+
+    return {
+        "answer_nonempty": bool(generated_answer.strip()),
+        "num_sources": len(sources),
+        "reference_keyword_coverage": _keyword_coverage(
+            sample.reference_answer,
+            generated_answer,
+        ),
+        "atomic_fact_coverage": _atomic_fact_coverage(
+            sample.reference_answer,
+            generated_answer,
+        ),
+        "citation_text_hit": citation_text_hit if citation_parts else None,
+        "expected_doc_hit": _contains_text(source_haystack, document_title),
+        "expected_article_hit": _contains_text(source_haystack, article) if article else None,
+        "expected_clause_hit": _contains_text(source_haystack, clause) if clause else None,
+    }
+
+
+def _post_backend(
+    *,
+    backend_url: str,
+    question: str,
+    mode: str,
+    top_k: int,
+    timeout_s: float,
+) -> Dict[str, Any]:
+    payload = {
+        "question": question,
+        "mode": mode,
+        "top_k": top_k,
+        "history": [],
+        "session_id": None,
+    }
+    request = urllib.request.Request(
+        backend_url,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout_s) as response:
+            body = response.read().decode("utf-8")
+            return json.loads(body)
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"HTTP {exc.code}: {detail}") from exc
+
+
+def _parse_json_response(raw: str, fallback_match: str = "incorrect") -> Dict[str, str]:
+    cleaned = (raw or "").strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if lines:
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        cleaned = "\n".join(lines).strip()
+        if cleaned.startswith("json"):
+            cleaned = cleaned[4:].strip()
+    try:
+        payload = json.loads(cleaned)
+        return {
+            "match": str(payload.get("match") or fallback_match),
+            "reason": str(payload.get("reason") or ""),
+        }
+    except Exception:
+        return {"match": fallback_match, "reason": f"Parse error: {raw[:120]}"}
+
+
+def _compare_with_reference(
+    *,
+    judge_backend: str,
+    question: str,
+    reference: str,
+    generated: str,
+    config: Dict[str, Any],
+) -> Dict[str, str]:
+    if judge_backend == "none":
+        return {"match": "", "reason": ""}
+
+    from openai import OpenAI
+
+    if judge_backend == "lmstudio":
+        client = OpenAI(
+            api_key="lm-studio",
+            base_url=str(config.get("lmstudio_base_url")),
+        )
+        model = str(config.get("lmstudio_model"))
+    elif judge_backend == "gemini":
+        api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise RuntimeError("GOOGLE_API_KEY or GEMINI_API_KEY is required")
+        client = OpenAI(
+            api_key=api_key,
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        )
+        model = str(config.get("gemini_model"))
+    else:
+        raise ValueError(f"Unsupported judge_backend={judge_backend!r}")
+
+    user_msg = _REF_COMPARE_USER.format(
+        question=question,
+        reference=reference,
+        generated=generated,
+    )
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": _REF_COMPARE_SYSTEM},
+            {"role": "user", "content": user_msg},
+        ],
+        temperature=0.0,
+        max_tokens=256,
+    )
+    raw = response.choices[0].message.content or ""
+    return _parse_json_response(raw)
+
+
+def _batch_files(run_dir: Path) -> List[Path]:
+    return sorted((run_dir / "batches").glob("batch_*.jsonl"))
+
+
+def load_existing_records(run_dir: Path) -> Dict[str, Dict[str, Any]]:
+    records: Dict[str, Dict[str, Any]] = {}
+    for batch_file in _batch_files(run_dir):
+        with batch_file.open(encoding="utf-8") as handle:
+            for line in handle:
+                if not line.strip():
+                    continue
+                record = json.loads(line)
+                sample_id = str(record.get("sample_id") or "")
+                if sample_id:
+                    records[sample_id] = record
+    return records
+
+
+def should_skip_sample(
+    sample: SFTSample,
+    existing_records: Dict[str, Dict[str, Any]],
+    *,
+    retry_failed: bool,
+) -> bool:
+    existing = existing_records.get(sample.sample_id)
+    if not existing:
+        return False
+    if existing.get("status") == "completed":
+        return True
+    if existing.get("status") == "failed":
+        return not retry_failed
+    return False
+
+
+def _select_samples(samples: List[SFTSample], config: Dict[str, Any]) -> List[SFTSample]:
+    start_index = max(0, int(config.get("start_index") or 0))
+    limit = int(config.get("limit") or 0)
+    selected = samples[start_index:]
+    return selected[:limit] if limit > 0 else selected
+
+
+def _next_batch_number(run_dir: Path) -> int:
+    existing = _batch_files(run_dir)
+    if not existing:
+        return 1
+    numbers = []
+    for path in existing:
+        match = re.search(r"batch_(\d+)\.jsonl$", path.name)
+        if match:
+            numbers.append(int(match.group(1)))
+    return max(numbers or [0]) + 1
+
+
+def _append_jsonl(path: Path, record: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, ensure_ascii=False, default=_json_default) + "\n")
+
+
+def _percentile(values: List[float], pct: float) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    index = int(math.ceil((pct / 100.0) * len(ordered))) - 1
+    return ordered[max(0, min(index, len(ordered) - 1))]
+
+
+def build_summary(records: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
+    rows = list(records)
+    completed = [row for row in rows if row.get("status") == "completed"]
+    failed = [row for row in rows if row.get("status") == "failed"]
+    latencies = [
+        float(row.get("latency_ms") or 0.0)
+        for row in completed
+        if row.get("latency_ms") is not None
+    ]
+
+    def mean_metric(key: str) -> Optional[float]:
+        vals = [
+            float(row["metrics"][key])
+            for row in completed
+            if isinstance(row.get("metrics"), dict)
+            and isinstance(row["metrics"].get(key), (int, float))
+        ]
+        return round(statistics.mean(vals), 4) if vals else None
+
+    by_doc_type: Dict[str, Dict[str, Any]] = {}
+    for row in rows:
+        doc_type = str(row.get("doc_type") or "unknown")
+        entry = by_doc_type.setdefault(doc_type, {"total": 0, "completed": 0, "failed": 0})
+        entry["total"] += 1
+        if row.get("status") == "completed":
+            entry["completed"] += 1
+        elif row.get("status") == "failed":
+            entry["failed"] += 1
+
+    by_mode: Dict[str, int] = {}
+    for row in completed:
+        key = str(row.get("backend_mode") or row.get("route") or "unknown")
+        by_mode[key] = by_mode.get(key, 0) + 1
+
+    judge_counts: Dict[str, int] = {}
+    for row in completed:
+        match = str(row.get("judge_match") or "")
+        if match:
+            judge_counts[match] = judge_counts.get(match, 0) + 1
+
+    return {
+        "total_records": len(rows),
+        "completed": len(completed),
+        "failed": len(failed),
+        "error_rate": round(len(failed) / len(rows), 4) if rows else 0.0,
+        "latency_ms": {
+            "mean": round(statistics.mean(latencies), 2) if latencies else 0.0,
+            "p50": _percentile(latencies, 50),
+            "p95": _percentile(latencies, 95),
+            "max": max(latencies) if latencies else 0.0,
+        },
+        "metrics": {
+            "answer_nonempty_rate": mean_metric("answer_nonempty"),
+            "reference_keyword_coverage": mean_metric("reference_keyword_coverage"),
+            "atomic_fact_coverage": mean_metric("atomic_fact_coverage"),
+            "expected_doc_hit_rate": mean_metric("expected_doc_hit"),
+            "expected_article_hit_rate": mean_metric("expected_article_hit"),
+            "expected_clause_hit_rate": mean_metric("expected_clause_hit"),
+            "citation_text_hit_rate": mean_metric("citation_text_hit"),
+        },
+        "by_doc_type": by_doc_type,
+        "by_mode": by_mode,
+        "judge": judge_counts,
+        "updated_at": _now_iso(),
+    }
+
+
+def _write_progress(
+    *,
+    run_dir: Path,
+    run_id: str,
+    samples_total: int,
+    records: Dict[str, Dict[str, Any]],
+    config: Dict[str, Any],
+) -> None:
+    status_counts: Dict[str, int] = {}
+    sample_statuses: Dict[str, str] = {}
+    for sample_id, record in records.items():
+        status = str(record.get("status") or "unknown")
+        status_counts[status] = status_counts.get(status, 0) + 1
+        sample_statuses[sample_id] = status
+    _atomic_write_json(
+        run_dir / "progress.json",
+        {
+            "run_id": run_id,
+            "samples_total": samples_total,
+            "records_total": len(records),
+            "status_counts": status_counts,
+            "sample_statuses": sample_statuses,
+            "config": config,
+            "updated_at": _now_iso(),
+        },
+    )
+
+
+def _write_final_outputs(run_dir: Path, records: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    ordered = sorted(records.values(), key=lambda row: int(row.get("index") or 0))
+    results_jsonl = run_dir / "results.jsonl"
+    with results_jsonl.open("w", encoding="utf-8") as handle:
+        for record in ordered:
+            handle.write(json.dumps(record, ensure_ascii=False, default=_json_default) + "\n")
+
+    results_csv = run_dir / "results.csv"
+    fields = [
+        "sample_id", "index", "status", "question", "reference_answer",
+        "generated_answer", "doc_type", "document_title", "article", "clause",
+        "backend_mode", "route", "num_sources", "latency_ms", "error",
+        "reference_keyword_coverage", "atomic_fact_coverage", "citation_text_hit",
+        "expected_doc_hit", "expected_article_hit", "expected_clause_hit",
+        "judge_match", "judge_reason",
+    ]
+    with results_csv.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for record in ordered:
+            metrics = record.get("metrics") if isinstance(record.get("metrics"), dict) else {}
+            row = dict(record)
+            for key in (
+                "reference_keyword_coverage", "atomic_fact_coverage",
+                "citation_text_hit", "expected_doc_hit", "expected_article_hit",
+                "expected_clause_hit",
+            ):
+                row[key] = metrics.get(key)
+            writer.writerow({field: row.get(field, "") for field in fields})
+
+    summary = build_summary(ordered)
+    _atomic_write_json(run_dir / "summary.json", summary)
+    return summary
+
+
+def _prepare_run_dir(config: Dict[str, Any]) -> tuple[str, Path]:
+    if config.get("resume_dir"):
+        run_dir = _resolve_project_path(str(config["resume_dir"]))
+        run_dir.mkdir(parents=True, exist_ok=True)
+        run_id = run_dir.name
+        return run_id, run_dir
+
+    output_dir = _resolve_project_path(str(config["output_dir"]))
+    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_dir = output_dir / run_id
+    run_dir.mkdir(parents=True, exist_ok=False)
+    (run_dir / "batches").mkdir(parents=True, exist_ok=True)
+    return run_id, run_dir
+
+
+def _record_failure(sample: SFTSample, exc: Exception, latency_ms: float) -> Dict[str, Any]:
+    return {
+        "sample_id": sample.sample_id,
+        "index": sample.index,
+        "status": "failed",
+        "question": sample.instruction,
+        "reference_answer": sample.reference_answer,
+        "generated_answer": "",
+        "doc_type": sample.doc_type,
+        "document_title": sample.metadata.get("document_title", ""),
+        "article": sample.metadata.get("article", ""),
+        "clause": sample.metadata.get("clause", ""),
+        "latency_ms": latency_ms,
+        "error": str(exc),
+        "finished_at": _now_iso(),
+    }
+
+
+def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]:
+    started = time.perf_counter()
+    response = _post_backend(
+        backend_url=str(config["backend_url"]),
+        question=sample.instruction,
+        mode=str(config["mode"]),
+        top_k=int(config["top_k"]),
+        timeout_s=float(config["timeout_s"]),
+    )
+    latency_ms = round((time.perf_counter() - started) * 1000, 2)
+    generated = str(response.get("answer") or "")
+    sources = _as_source_list(response)
+    metrics = calculate_metrics(sample, generated, sources)
+
+    judge = _compare_with_reference(
+        judge_backend=str(config.get("judge_backend") or "none"),
+        question=sample.instruction,
+        reference=sample.reference_answer,
+        generated=generated,
+        config=config,
+    )
+
+    return {
+        "sample_id": sample.sample_id,
+        "index": sample.index,
+        "status": "completed",
+        "question": sample.instruction,
+        "reference_answer": sample.reference_answer,
+        "generated_answer": generated,
+        "doc_type": sample.doc_type,
+        "document_title": sample.metadata.get("document_title", ""),
+        "chapter": sample.metadata.get("chapter", ""),
+        "article": sample.metadata.get("article", ""),
+        "clause": sample.metadata.get("clause", ""),
+        "effective_date": sample.metadata.get("effective_date", ""),
+        "backend_mode": response.get("mode"),
+        "route": response.get("route") or response.get("intent"),
+        "num_sources": len(sources),
+        "source_ids": [_source_id(source) for source in sources],
+        "source_titles": [_source_title(source) for source in sources],
+        "source_texts_preview": [
+            str(source.get("content") or source.get("text") or "")[:800]
+            for source in sources
+        ],
+        "metrics": metrics,
+        "latency_ms": latency_ms,
+        "error": "",
+        "judge_match": judge.get("match", ""),
+        "judge_reason": judge.get("reason", ""),
+        "finished_at": _now_iso(),
+    }
+
+
+def run(config: Dict[str, Any] = CONFIG) -> Dict[str, Any]:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)-8s %(message)s",
+        datefmt="%H:%M:%S",
+    )
+    run_id, run_dir = _prepare_run_dir(config)
+    (run_dir / "batches").mkdir(parents=True, exist_ok=True)
+
+    samples = _select_samples(load_sft_dataset(str(config["dataset_path"])), config)
+    records = load_existing_records(run_dir)
+    batch_no = _next_batch_number(run_dir)
+    batch_path = run_dir / "batches" / f"batch_{batch_no:04d}.jsonl"
+    batch_written = 0
+
+    logger.info("Run directory: %s", run_dir)
+    logger.info("Loaded %d selected samples", len(samples))
+    logger.info("Existing records: %d", len(records))
+
+    for ordinal, sample in enumerate(samples, start=1):
+        if should_skip_sample(
+            sample,
+            records,
+            retry_failed=bool(config.get("retry_failed")),
+        ):
+            logger.info(
+                "[%d/%d] skip sample=%s status=%s",
+                ordinal,
+                len(samples),
+                sample.sample_id,
+                records[sample.sample_id].get("status"),
+            )
+            continue
+
+        logger.info("[%d/%d] Q: %s", ordinal, len(samples), sample.instruction[:90])
+        sample_t0 = time.perf_counter()
+        try:
+            record = evaluate_sample(sample, config)
+        except Exception as exc:
+            latency_ms = round((time.perf_counter() - sample_t0) * 1000, 2)
+            record = _record_failure(sample, exc, latency_ms)
+            logger.error("Sample failed: %s", exc)
+
+        _append_jsonl(batch_path, record)
+        records[sample.sample_id] = record
+        batch_written += 1
+
+        _write_progress(
+            run_dir=run_dir,
+            run_id=run_id,
+            samples_total=len(samples),
+            records=records,
+            config=config,
+        )
+
+        if batch_written >= int(config["batch_size"]):
+            _atomic_write_json(run_dir / "summary_partial.json", build_summary(records.values()))
+            batch_no += 1
+            batch_path = run_dir / "batches" / f"batch_{batch_no:04d}.jsonl"
+            batch_written = 0
+
+        delay = float(config.get("delay_s") or 0.0)
+        if delay > 0:
+            time.sleep(delay)
+
+    summary = _write_final_outputs(run_dir, records)
+    output_root = _resolve_project_path(str(config["output_dir"]))
+    output_root.mkdir(parents=True, exist_ok=True)
+    _atomic_write_json(
+        output_root / "latest.json",
+        {
+            "run_id": run_id,
+            "run_dir": str(run_dir),
+            "summary": summary,
+            "updated_at": _now_iso(),
+        },
+    )
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return summary
+
+
+if __name__ == "__main__":
+    run(CONFIG)

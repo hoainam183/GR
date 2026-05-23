@@ -181,42 +181,144 @@ def _listify(value: Any) -> List[str]:
     return []
 
 
+CURRENT_POLICY_CATEGORIES = {"retrieval", "current_policy", "rag", "generation"}
+
+
+def _bool_or_default(value: Any, default: bool) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "1", "yes", "y"}:
+            return True
+        if lowered in {"false", "0", "no", "n"}:
+            return False
+    return default
+
+
+def _collection_prefixed_id(value: Any, collection: Any = None) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    if "/" in text or not collection:
+        return text
+    return f"{collection}/{text}"
+
+
+def normalize_current_policy_item(
+    item: Dict[str, Any],
+    index: int = 0,
+) -> Optional[Dict[str, Any]]:
+    """Normalize legacy and schema-v1 rows into current-policy eval shape.
+
+    Schema v1 is JSONL-first and uses ``question``, ``ground_truth`` and
+    ``ground_truth_contexts``. Existing runners still consume ``query``,
+    ``ground_truth_answer`` and ``expected_source_ids``. This helper bridges the
+    two forms while preserving the original row fields for traceability.
+    """
+    if not isinstance(item, dict):
+        return None
+
+    category = str(item.get("category") or item.get("eval_suite") or "").strip()
+    if category and category not in CURRENT_POLICY_CATEGORIES:
+        return None
+
+    question = str(
+        item.get("query")
+        or item.get("question")
+        or item.get("instruction")
+        or ""
+    ).strip()
+    if not question:
+        return None
+
+    expected_collection = (
+        item.get("expected_collection")
+        or item.get("source")
+        or item.get("collection")
+    )
+    expected_collections = _listify(item.get("expected_collections"))
+    if expected_collection and str(expected_collection) not in expected_collections:
+        expected_collections.append(str(expected_collection))
+
+    raw_context_ids = (
+        item.get("expected_source_ids")
+        or item.get("relevant_doc_ids")
+        or item.get("ground_truth_contexts")
+        or item.get("context_ids")
+    )
+    expected_source_ids = [
+        _collection_prefixed_id(value, expected_collection)
+        for value in _listify(raw_context_ids)
+    ]
+    expected_source_ids = [value for value in expected_source_ids if value]
+
+    ground_truth_answer = str(
+        item.get("ground_truth_answer")
+        or item.get("expected_answer")
+        or item.get("answer")
+        or item.get("ground_truth")
+        or item.get("reference_answer")
+        or item.get("output")
+        or ""
+    )
+    qtype = str(item.get("question_type") or "").strip()
+    expected_behavior = str(item.get("expected_behavior") or "").strip()
+    if not expected_behavior:
+        expected_behavior = (
+            "refuse_insufficient_context"
+            if qtype == "adversarial"
+            else "answer_with_citation"
+        )
+    answerable = _bool_or_default(
+        item.get("answerable"),
+        default=expected_behavior != "refuse_insufficient_context" and qtype != "adversarial",
+    )
+
+    normalized = dict(item)
+    normalized["id"] = str(item.get("id") or f"current_{index + 1}")
+    normalized["category"] = category or "retrieval"
+    normalized["query"] = question
+    normalized["question"] = question
+    normalized["ground_truth"] = str(item.get("ground_truth") or ground_truth_answer)
+    normalized["ground_truth_answer"] = ground_truth_answer
+    normalized["reference_answer"] = str(item.get("reference_answer") or ground_truth_answer)
+    normalized["expected_source_ids"] = expected_source_ids
+    normalized["ground_truth_contexts"] = expected_source_ids
+    normalized["expected_collection"] = str(expected_collection or "")
+    normalized["expected_collections"] = expected_collections
+    normalized["source"] = str(item.get("source") or expected_collection or "")
+    normalized["answerable"] = answerable
+    normalized["expected_behavior"] = expected_behavior
+    normalized["difficulty"] = str(item.get("difficulty") or "medium")
+    normalized["query_class"] = str(item.get("query_class") or qtype or normalized["category"])
+    normalized["valid_as_of"] = item.get("valid_as_of") or item.get("effective_date")
+    if item.get("input") and not item.get("legacy_input"):
+        normalized["legacy_input"] = item.get("input")
+    return normalized
+
+
 def load_current_policy_cases(path: Path, limit: int = 0) -> List[EvalCase]:
     rows = load_json_or_jsonl(path)
     cases: List[EvalCase] = []
     for index, item in enumerate(rows):
-        if not isinstance(item, dict):
+        normalized = normalize_current_policy_item(item, index=index)
+        if not normalized:
             continue
-        category = str(item.get("category") or item.get("eval_suite") or "").strip()
-        if category and category not in {"retrieval", "current_policy", "rag", "generation"}:
-            continue
-        question = str(item.get("query") or item.get("question") or "").strip()
-        if not question:
-            continue
-        expected_collection = item.get("expected_collection")
-        expected_collections = _listify(item.get("expected_collections"))
-        if expected_collection and str(expected_collection) not in expected_collections:
-            expected_collections.append(str(expected_collection))
         cases.append(
             EvalCase(
                 eval_suite="current_policy",
-                case_id=str(item.get("id") or f"current_{index + 1}"),
-                question=question,
-                ground_truth_answer=str(
-                    item.get("ground_truth_answer")
-                    or item.get("expected_answer")
-                    or item.get("answer")
-                    or item.get("ground_truth")
-                    or ""
-                ),
-                expected_source_ids=[raw_id(x) for x in _listify(
-                    item.get("expected_source_ids") or item.get("relevant_doc_ids")
-                )],
-                expected_collections=expected_collections,
-                valid_as_of=item.get("valid_as_of"),
-                query_class=str(item.get("query_class") or category or "retrieval"),
-                difficulty=str(item.get("difficulty") or "medium"),
-                metadata=dict(item),
+                case_id=str(normalized["id"]),
+                question=str(normalized["question"]),
+                ground_truth_answer=str(normalized.get("ground_truth_answer") or ""),
+                expected_source_ids=[
+                    raw_id(x) for x in _listify(normalized.get("expected_source_ids"))
+                ],
+                expected_collections=_listify(normalized.get("expected_collections")),
+                valid_as_of=normalized.get("valid_as_of"),
+                query_class=str(normalized.get("query_class") or "retrieval"),
+                difficulty=str(normalized.get("difficulty") or "medium"),
+                metadata=normalized,
             )
         )
         if limit and len(cases) >= limit:
