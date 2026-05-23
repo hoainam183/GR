@@ -5,9 +5,102 @@ Requires:
   - pip install elasticsearch
 """
 
-from elasticsearch_store import ElasticsearchStore
+from __future__ import annotations
+
+import json
+
+try:
+    from .elasticsearch_store import ElasticsearchStore
+except ImportError:  # pragma: no cover - script execution from retrieval/
+    from elasticsearch_store import ElasticsearchStore
 
 TEST_INDEX = "test_university_docs"
+
+
+class _FakeESClient:
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.calls = []
+
+    def search(self, **kwargs):
+        self.calls.append(kwargs)
+        if self.responses:
+            return self.responses.pop(0)
+        return {"hits": {"hits": []}}
+
+
+def _make_store_with_client(client: _FakeESClient) -> ElasticsearchStore:
+    store = ElasticsearchStore.__new__(ElasticsearchStore)
+    store.index_name = "unit-test"
+    store.client = client
+    return store
+
+
+def test_keyword_search_exact_phrase_and_table_boost_without_fuzzy_main() -> None:
+    client = _FakeESClient(
+        [
+            {
+                "hits": {
+                    "hits": [
+                        {
+                            "_id": "df79f3f4-5445-4da1-aa34-c59a81784319",
+                            "_score": 42.0,
+                            "_source": {
+                                "text": "Tham gia hiến máu nhân đạo được 6 điểm.",
+                                "title": "Khung đánh giá điểm rèn luyện",
+                                "has_table": True,
+                            },
+                        }
+                    ]
+                }
+            }
+        ]
+    )
+    store = _make_store_with_client(client)
+
+    results = store.keyword_search("hiến máu được bao nhiêu điểm rèn luyện", top_k=5)
+
+    assert len(client.calls) == 1
+    first_query = json.dumps(client.calls[0]["query"], ensure_ascii=False)
+    assert '"fuzziness": "AUTO"' not in first_query
+    assert '"match_phrase"' in first_query
+    assert '"has_table"' in first_query
+    assert results[0]["id"] == "df79f3f4-5445-4da1-aa34-c59a81784319"
+    assert results[0]["metadata"]["_keyword_exact_phrase_hit"] is True
+    assert results[0]["metadata"]["_keyword_table_lookup_hit"] is True
+
+
+def test_keyword_search_uses_fuzzy_only_as_fallback() -> None:
+    client = _FakeESClient(
+        [
+            {"hits": {"hits": []}},
+            {
+                "hits": {
+                    "hits": [
+                        {
+                            "_id": "fallback",
+                            "_score": 3.0,
+                            "_source": {
+                                "text": "Điểm rèn luyện sinh viên",
+                                "title": "Quy định",
+                                "has_table": False,
+                            },
+                        }
+                    ]
+                }
+            },
+        ]
+    )
+    store = _make_store_with_client(client)
+
+    results = store.keyword_search("diem ren luyen", top_k=5)
+
+    assert len(client.calls) == 2
+    first_query = json.dumps(client.calls[0]["query"], ensure_ascii=False)
+    second_query = json.dumps(client.calls[1]["query"], ensure_ascii=False)
+    assert '"fuzziness": "AUTO"' not in first_query
+    assert '"fuzziness": "AUTO"' in second_query
+    assert results[0]["metadata"]["_keyword_search_mode"] == "fuzzy_fallback"
 
 
 def main() -> None:

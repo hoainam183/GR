@@ -34,6 +34,18 @@ class TestSimple:
         assert router.route_tier("Lịch thi học kỳ 1 khi nào?") == "simple"
 
 
+    def test_general_graduation_conditions_stays_simple(self) -> None:
+        result = router.route("điều kiện tốt nghiệp bao gồm những gì")
+        assert result["tier"] == "simple"
+        assert result["query_signals"]["eligibility_check"] is True
+
+    def test_exact_policy_lookup_stays_simple_with_signals(self) -> None:
+        result = router.route("hiến máu được bao nhiêu điểm rèn luyện")
+        assert result["tier"] == "simple"
+        assert result["query_signals"]["exact_policy_lookup"] is True
+        assert result["query_signals"]["table_lookup"] is True
+
+
 class TestComplex:
     def test_cohort_comparison(self) -> None:
         assert router.route_tier("So sánh học bổng giữa K65 và K70") == "complex"
@@ -59,6 +71,17 @@ class TestComplex:
 
     def test_major_followup_compare_query(self) -> None:
         assert router.route_tier("so sánh với IT-E7") == "complex"
+
+
+    def test_personal_graduation_check_suffix_pronoun(self) -> None:
+        result = router.route("điều kiện tốt nghiệp của tôi")
+        assert result["tier"] == "complex"
+        assert result["complex_subtype"] == "personal_check"
+
+    def test_graduation_program_rule_is_multi_source(self) -> None:
+        result = router.route("điều kiện tốt nghiệp ngành IT-E6 theo chương trình đào tạo")
+        assert result["tier"] == "complex"
+        assert result["complex_subtype"] == "multi_source"
 
 
 class TestRealUseCases:

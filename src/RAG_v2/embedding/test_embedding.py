@@ -9,6 +9,14 @@ import sys
 import time
 import numpy as np
 
+if "pytest" in sys.modules:
+    import pytest
+
+    pytest.skip(
+        "manual embedding model smoke script; run directly when model load is desired",
+        allow_module_level=True,
+    )
+
 # Ensure the parent directory is on the path so `embedding` can be imported
 sys.path.insert(
     0, str(__import__("pathlib").Path(__file__).resolve().parents[1])

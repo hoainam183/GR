@@ -9,7 +9,16 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-import fakeredis
+
+try:
+    import fakeredis
+except ImportError:  # pragma: no cover - optional test dependency
+    fakeredis = None
+
+pytestmark = pytest.mark.skipif(
+    fakeredis is None,
+    reason="fakeredis not installed (pip install fakeredis)",
+)
 
 from cache.llm_cache import LLMResponseCache
 from cache.history_cache import ConversationHistoryCache

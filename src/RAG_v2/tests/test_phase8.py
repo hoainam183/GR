@@ -67,6 +67,26 @@ class TestCollectionSelector:
         assert selector.select(domain="ctdt", confidence=0.75) == ["ctdt"]
         assert selector.select(domain="kehoach", confidence=0.70) == ["kehoach"]
 
+    def test_policy_support_query_expands_to_quydinh_and_stsv(self) -> None:
+        from retrieval.collection_selector import CollectionSelector
+        selector = CollectionSelector()
+        result = selector.select(
+            domain="stsv",
+            confidence=0.90,
+            query="tôi đã tham gia hiến máu nhưng chưa nhận được điểm rèn luyện",
+        )
+        assert result == ["quydinh", "stsv"]
+
+    def test_ctdt_course_credit_lookup_stays_focused(self) -> None:
+        from retrieval.collection_selector import CollectionSelector
+        selector = CollectionSelector()
+        result = selector.select(
+            domain="ctdt",
+            confidence=0.90,
+            query="môn xử lý tín hiệu số có mấy tín chỉ",
+        )
+        assert result == ["ctdt"]
+
     def test_low_confidence_returns_fallback(self) -> None:
         from retrieval.collection_selector import CollectionSelector, MULTI_DOMAIN_FALLBACK
         selector = CollectionSelector()
@@ -219,6 +239,71 @@ class TestMultiCollectionSearchFiltering:
         stores = mcs.qdrant_stores
         assert isinstance(stores, dict)
         assert len(stores) == 2
+
+    def test_exact_policy_query_expands_keyword_candidate_pool(self) -> None:
+        from retrieval.multi_collection_search import MultiCollectionSearch
+        trace = {}
+        quydinh = _make_mock_hybrid("quydinh")
+        mcs = MultiCollectionSearch(searchers=[("quydinh", quydinh)])
+
+        mcs.search(
+            query="hiến máu được bao nhiêu điểm rèn luyện",
+            bge_m3_query=[0.1] * 10,
+            e5_query=[0.2] * 10,
+            top_k=5,
+            keyword_top_k=20,
+            keyword_pool_k=15,
+            active_collections=["quydinh"],
+            trace_out=trace,
+        )
+
+        assert quydinh.es.keyword_search.call_args.kwargs["top_k"] == 120
+        assert trace["candidate_pool_sizes"]["keyword_pool_k"] == 80
+        assert trace["fusion_weights"]["reason"] == "exact_policy_keyword_bias"
+
+    def test_exact_phrase_hits_are_pinned_into_keyword_pool(self) -> None:
+        from retrieval.multi_collection_search import MultiCollectionSearch
+
+        high_noise = {"id": "quydinh/noise", "text": "noise", "score": 10.0, "metadata": {}}
+        exact_hit = {
+            "id": "quydinh/df79f3f4",
+            "text": "Tham gia hiến máu nhân đạo được 6 điểm",
+            "score": 1.0,
+            "metadata": {"_keyword_exact_phrase_hit": True},
+        }
+
+        pool, pinned_count = MultiCollectionSearch._pin_keyword_hits(
+            [high_noise, exact_hit],
+            [high_noise],
+            k=2,
+        )
+
+        assert pinned_count == 1
+        assert [item["id"] for item in pool] == ["quydinh/noise", "quydinh/df79f3f4"]
+
+    def test_procedural_support_keeps_stsv_evidence_in_final_results(self) -> None:
+        from retrieval.multi_collection_search import MultiCollectionSearch
+
+        results = [
+            {"id": f"quydinh/{idx}", "text": "regulation", "score": 1.0 - idx / 10}
+            for idx in range(5)
+        ]
+        stsv_hit = {
+            "id": "stsv/1177b82e-759b-42d6-aea8-c09ac514926f",
+            "text": "minh chứng chưa được xác nhận",
+            "score": 0.2,
+            "metadata": {"_keyword_exact_phrase_hit": True},
+        }
+
+        final = MultiCollectionSearch._ensure_collection_evidence(
+            results,
+            [stsv_hit],
+            top_k=5,
+            collection="stsv",
+        )
+
+        assert len(final) == 5
+        assert final[-1]["id"] == "stsv/1177b82e-759b-42d6-aea8-c09ac514926f"
 
 
 class TestRagFlowRoutingIntegration:

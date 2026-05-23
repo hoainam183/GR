@@ -7,11 +7,39 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from elasticsearch import Elasticsearch, helpers
 
+from query.signals import analyze_query_signals, extract_key_phrases, fold_vietnamese_text
 from query.structured_query import build_es_must_not_clauses
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_INDEX = "stsv"
+
+_KEYWORD_SEARCH_FIELDS = [
+    "text^2.0",
+    "title^1.8",
+    "doc_title^1.6",
+    "hierarchy_path^1.4",
+    "section_h2^1.3",
+    "section_h3^1.2",
+    "section_context^1.1",
+    "item_label^1.1",
+]
+
+_GENERIC_POLICY_PHRASES = {
+    "diem ren luyen",
+    "diem ren",
+    "ren luyen",
+    "tin chi",
+    "hoc phi",
+    "dieu kien",
+    "tot nghiep",
+    "hoc bong",
+    "quy dinh",
+}
+
+
+def _is_generic_policy_phrase(phrase: str) -> bool:
+    return fold_vietnamese_text(phrase) in _GENERIC_POLICY_PHRASES
 
 # Index mapping with Vietnamese-friendly analysis
 INDEX_SETTINGS = {
@@ -549,6 +577,76 @@ class ElasticsearchStore:
     # Collection-specific keyword boosting
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _source_contains_phrase(
+        text: str,
+        metadata: Dict[str, Any],
+        phrases: List[str],
+    ) -> bool:
+        haystack = " ".join(
+            [
+                text or "",
+                str(metadata.get("title", "") or ""),
+                str(metadata.get("doc_title", "") or ""),
+                str(metadata.get("hierarchy_path", "") or ""),
+                str(metadata.get("section_h2", "") or ""),
+                str(metadata.get("section_h3", "") or ""),
+                str(metadata.get("section_context", "") or ""),
+                str(metadata.get("item_label", "") or ""),
+            ]
+        )
+        folded_haystack = fold_vietnamese_text(haystack)
+        return any(fold_vietnamese_text(phrase) in folded_haystack for phrase in phrases)
+
+    @staticmethod
+    def _merge_keyword_results(
+        primary: List[Dict[str, Any]],
+        fallback: List[Dict[str, Any]],
+        top_k: int,
+    ) -> List[Dict[str, Any]]:
+        seen: set[str] = set()
+        merged: List[Dict[str, Any]] = []
+        for item in [*primary, *fallback]:
+            doc_id = str(item.get("id", ""))
+            if not doc_id or doc_id in seen:
+                continue
+            seen.add(doc_id)
+            merged.append(item)
+            if len(merged) >= top_k:
+                break
+        return merged
+
+    def _hits_to_keyword_results(
+        self,
+        hits: List[Dict[str, Any]],
+        phrases: List[str],
+        signals: Any,
+        mode: str,
+    ) -> List[Dict[str, Any]]:
+        results: List[Dict[str, Any]] = []
+        for hit in hits:
+            source = dict(hit["_source"])
+            text = source.pop("text", "")
+            phrase_hit = self._source_contains_phrase(text, source, phrases)
+            table_hit = bool(signals.table_lookup and source.get("has_table"))
+            score = float(hit["_score"] or 0.0)
+            if phrase_hit:
+                score *= 1.35
+            if table_hit:
+                score *= 1.2
+            source["_keyword_search_mode"] = mode
+            source["_keyword_exact_phrase_hit"] = phrase_hit
+            source["_keyword_table_lookup_hit"] = table_hit
+            results.append(
+                {
+                    "id": hit["_id"],
+                    "text": text,
+                    "metadata": source,
+                    "score": score,
+                }
+            )
+        return sorted(results, key=lambda item: item["score"], reverse=True)
+
     def keyword_search(
         self,
         query: str,
@@ -571,16 +669,49 @@ class ElasticsearchStore:
             List of dicts sorted by BM25 score (descending):
             ``{"id", "text", "metadata", "score"}``
         """
+        query_signals = analyze_query_signals(query)
+        key_phrases = extract_key_phrases(query)
+        pin_phrases = [
+            phrase for phrase in key_phrases if not _is_generic_policy_phrase(phrase)
+        ] or key_phrases
+
         must_clause: List[Dict[str, Any]] = [
             {
                 "multi_match": {
                     "query": query,
-                    "fields": ["text^1.0", "title^1.5"],
+                    "fields": _KEYWORD_SEARCH_FIELDS,
                     "type": "best_fields",
-                    "fuzziness": "AUTO",
+                    "operator": "or",
                 }
             }
         ]
+        should_clause: List[Dict[str, Any]] = []
+        for idx, phrase in enumerate(key_phrases):
+            if _is_generic_policy_phrase(phrase):
+                boost = 1.5
+            else:
+                boost = 10.0 if idx < 3 else 5.0
+            for field, field_boost in (
+                ("text", boost),
+                ("title", boost * 0.8),
+                ("doc_title", boost * 0.8),
+                ("hierarchy_path", boost * 0.6),
+                ("section_h2", boost * 0.6),
+                ("section_h3", boost * 0.5),
+            ):
+                should_clause.append(
+                    {
+                        "match_phrase": {
+                            field: {
+                                "query": phrase,
+                                "boost": round(field_boost, 3),
+                            }
+                        }
+                    }
+                )
+
+        if query_signals.table_lookup:
+            should_clause.append({"term": {"has_table": {"value": True, "boost": 2.5}}})
 
         filter_clauses: List[Dict[str, Any]] = []
         if filters:
@@ -589,36 +720,68 @@ class ElasticsearchStore:
         must_not_clauses = build_es_must_not_clauses(exclude_terms or [])
 
         bool_query: Dict[str, Any] = {"must": must_clause}
+        if should_clause:
+            bool_query["should"] = should_clause
         if filter_clauses:
             bool_query["filter"] = filter_clauses
         if must_not_clauses:
             bool_query["must_not"] = must_not_clauses
 
-        search_body: Dict[str, Any] = {
-            "size": top_k,
-            "query": {"bool": bool_query},
-        }
-
         resp = self.client.search(
             index=self.index_name,
-            size=search_body["size"],
-            query=search_body["query"],
+            size=top_k,
+            query={"bool": bool_query},
         )
         hits = resp["hits"]["hits"]
+        exact_results = self._hits_to_keyword_results(
+            hits,
+            phrases=pin_phrases,
+            signals=query_signals,
+            mode="exact_phrase",
+        )
 
-        results: List[Dict[str, Any]] = []
-        for hit in hits:
-            source = dict(hit["_source"])
-            text = source.pop("text", "")
-            results.append(
-                {
-                    "id": hit["_id"],
-                    "text": text,
-                    "metadata": source,
-                    "score": hit["_score"],
+        phrase_hit_count = sum(
+            1
+            for item in exact_results
+            if (item.get("metadata") or {}).get("_keyword_exact_phrase_hit")
+        )
+        exact_mode = query_signals.exact_policy_lookup or query_signals.table_lookup
+        should_fallback = (
+            (not exact_results)
+            or (not exact_mode and len(exact_results) < top_k)
+            or (exact_mode and phrase_hit_count == 0 and len(exact_results) < min(top_k, 5))
+        )
+        if not should_fallback:
+            return exact_results
+
+        fuzzy_must_clause: List[Dict[str, Any]] = [
+            {
+                "multi_match": {
+                    "query": query,
+                    "fields": _KEYWORD_SEARCH_FIELDS,
+                    "type": "best_fields",
+                    "fuzziness": "AUTO",
                 }
-            )
-        return results
+            }
+        ]
+        fuzzy_bool_query: Dict[str, Any] = {"must": fuzzy_must_clause}
+        if filter_clauses:
+            fuzzy_bool_query["filter"] = filter_clauses
+        if must_not_clauses:
+            fuzzy_bool_query["must_not"] = must_not_clauses
+
+        fuzzy_resp = self.client.search(
+            index=self.index_name,
+            size=top_k,
+            query={"bool": fuzzy_bool_query},
+        )
+        fuzzy_results = self._hits_to_keyword_results(
+            fuzzy_resp["hits"]["hits"],
+            phrases=pin_phrases,
+            signals=query_signals,
+            mode="fuzzy_fallback",
+        )
+        return self._merge_keyword_results(exact_results, fuzzy_results, top_k)
 
     # ------------------------------------------------------------------
     # Delete

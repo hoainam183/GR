@@ -1533,6 +1533,7 @@ def rag_flow(
             domain=domain,
             confidence=confidence,
             domains=domains,
+            query=search_query,
         )
         if _should_lock_kehoach_route(
             question=question,
@@ -2363,6 +2364,7 @@ def rag_flow_stream(
             domain=domain,
             confidence=confidence,
             domains=domains,
+            query=search_query,
         )
         if _should_lock_kehoach_route(
             question=question,

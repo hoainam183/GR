@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Dict
 from unittest.mock import MagicMock
 
@@ -625,3 +626,44 @@ def test_rag_flow_does_not_prepend_profile_note_when_query_has_explicit_major_co
 
     llm_context = deps["chat"].generate.call_args.kwargs["context"]
     assert "Ngành: Công nghệ thông tin Việt - Nhật [IT-E6]" not in llm_context
+
+
+def test_query_v3_clarifies_only_personal_graduation_check() -> None:
+    from pipeline.rag_pipeline import RAGPipeline
+    from query.complexity_router import ComplexityRouter
+
+    pipeline = RAGPipeline.__new__(RAGPipeline)
+    pipeline.complexity_router = ComplexityRouter()
+    pipeline._llm_runtime_snapshot = MagicMock(
+        return_value=SimpleNamespace(decomposer=None, agent=None)
+    )
+
+    result = RAGPipeline.query_v3(pipeline, "điều kiện tốt nghiệp của tôi")
+
+    assert result["mode"] == "clarify"
+    assert result["route"] == "personal_check"
+    assert "CPA/GPA" in result["answer"]
+    assert result["sources"] == []
+
+
+def test_query_v3_does_not_clarify_general_graduation_question() -> None:
+    from pipeline.rag_pipeline import RAGPipeline
+    from query.complexity_router import ComplexityRouter
+
+    pipeline = RAGPipeline.__new__(RAGPipeline)
+    pipeline.complexity_router = ComplexityRouter()
+    pipeline._llm_runtime_snapshot = MagicMock(
+        return_value=SimpleNamespace(decomposer=None, agent=None)
+    )
+    pipeline.query = MagicMock(
+        return_value={"question": "q", "answer": "general answer", "sources": []}
+    )
+
+    result = RAGPipeline.query_v3(
+        pipeline,
+        "điều kiện tốt nghiệp bao gồm những gì",
+    )
+
+    assert result["mode"] == "rag_v2"
+    assert result["answer"] == "general answer"
+    pipeline.query.assert_called_once()

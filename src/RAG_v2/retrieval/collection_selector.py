@@ -3,7 +3,15 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any, Dict, List, Optional, Union
+
+from query.signals import (
+    QuerySignals,
+    analyze_query_signals,
+    coerce_query_signals,
+    fold_vietnamese_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +29,63 @@ ALL_COLLECTIONS: List[str] = ["stsv", "quydinh", "kehoach", "ctdt"]
 MULTI_DOMAIN_FALLBACK: List[str] = ["quydinh", "stsv", "ctdt"]
 
 CONFIDENCE_THRESHOLD: float = 0.55  # Tier-1 calibration makes this meaningful
+
+
+def _dedup(values: List[str]) -> List[str]:
+    return list(dict.fromkeys(values))
+
+
+def _is_ctdt_course_lookup(query: str, collections: List[str]) -> bool:
+    """Return True for course/credit lookup that should stay in CTDT."""
+    if "ctdt" not in collections:
+        return False
+    folded = fold_vietnamese_text(query)
+    course_like = bool(
+        re.search(r"\b(mon|hoc phan|ma hoc phan|tin chi|tien quyet|song hanh)\b", folded)
+    )
+    rule_like = bool(
+        re.search(r"\b(tot nghiep|xet tot nghiep|dieu kien|quy dinh|diem ren luyen)\b", folded)
+    )
+    return course_like and not rule_like
+
+
+def augment_collections_for_query(
+    query: Optional[str],
+    collections: List[str],
+    query_signals: Optional[Union[QuerySignals, Dict[str, Any]]] = None,
+) -> List[str]:
+    """Expand target collections using generic query traits.
+
+    Policy/table lookups should not miss ``quydinh``. Procedural support
+    queries should include ``stsv``. CTDT course/credit lookups are kept focused
+    unless the query also has explicit rule/eligibility intent.
+    """
+    if not query:
+        return list(collections)
+
+    signals = (
+        coerce_query_signals(query_signals)
+        if query_signals is not None
+        else analyze_query_signals(query)
+    )
+    output = _dedup(list(collections))
+    ctdt_course_lookup = _is_ctdt_course_lookup(query, output)
+
+    needs_regulations = (
+        signals.eligibility_check
+        or signals.table_lookup
+        or signals.exact_policy_lookup
+    )
+    if needs_regulations and not ctdt_course_lookup:
+        output = _dedup(["quydinh", *output])
+
+    if signals.procedural_support:
+        output = _dedup([*output, "stsv"])
+
+    if signals.multi_domain and signals.eligibility_check:
+        output = _dedup([*output, "ctdt"])
+
+    return output
 
 
 class CollectionSelector:
@@ -54,6 +119,8 @@ class CollectionSelector:
         domain: Optional[Union[str, List[str]]] = None,
         confidence: float = 0.0,
         domains: Optional[List[str]] = None,
+        query: Optional[str] = None,
+        query_signals: Optional[Union[QuerySignals, Dict[str, Any]]] = None,
     ) -> List[str]:
         """Return the list of collections to search.
 
@@ -87,7 +154,11 @@ class CollectionSelector:
                 "CollectionSelector: no domain → searching all %d collections",
                 len(self.all_collections),
             )
-            return list(self.all_collections)
+            return augment_collections_for_query(
+                query,
+                list(self.all_collections),
+                query_signals=query_signals,
+            )
 
         # Resolve each domain to its collection(s) and take the union.
         seen: set = set()
@@ -122,7 +193,11 @@ class CollectionSelector:
                 self.confidence_threshold,
                 broadened,
             )
-            return broadened
+            return augment_collections_for_query(
+                query,
+                broadened,
+                query_signals=query_signals,
+            )
 
         if not target:
             logger.warning(
@@ -130,7 +205,11 @@ class CollectionSelector:
                 "→ searching all collections",
                 active_domains,
             )
-            return list(self.all_collections)
+            return augment_collections_for_query(
+                query,
+                list(self.all_collections),
+                query_signals=query_signals,
+            )
 
         logger.info(
             "CollectionSelector: domains=%s conf=%.3f → collections: %s",
@@ -138,4 +217,8 @@ class CollectionSelector:
             confidence,
             target,
         )
-        return target
+        return augment_collections_for_query(
+            query,
+            target,
+            query_signals=query_signals,
+        )

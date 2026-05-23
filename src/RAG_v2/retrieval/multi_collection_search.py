@@ -32,6 +32,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from qdrant_client import models as qdrant_models
 
+from query.signals import analyze_query_signals
 from query.structured_query import (
     parse_structured_query,
     text_contains_excluded_term,
@@ -300,10 +301,24 @@ class MultiCollectionSearch:
 
         structured_query = parse_structured_query(query)
         exclude_terms = structured_query.exclude_terms
+        query_signals = analyze_query_signals(query)
+        exact_policy_mode = bool(
+            query_signals.exact_policy_lookup or query_signals.table_lookup
+        )
+        effective_keyword_top_k = (
+            max(keyword_top_k, 120) if exact_policy_mode else keyword_top_k
+        )
+        effective_keyword_pool_k = (
+            max(keyword_pool_k, 80) if exact_policy_mode else keyword_pool_k
+        )
 
         fusion_vector_weight, fusion_keyword_weight, fusion_reason = (
             self._resolve_fusion_weights(query)
         )
+        if exact_policy_mode and fusion_reason == "default":
+            fusion_vector_weight = min(fusion_vector_weight, 0.1)
+            fusion_keyword_weight = max(fusion_keyword_weight, 0.75)
+            fusion_reason = "exact_policy_keyword_bias"
         if fusion_reason != "default":
             logger.info(
                 "Adaptive fusion weights: vector=%.2f keyword=%.2f (%s)",
@@ -367,7 +382,7 @@ class MultiCollectionSearch:
             )
             kws = hybrid.es.keyword_search(
                 query=query,
-                top_k=keyword_top_k,
+                top_k=effective_keyword_top_k,
                 filters=es_filter,
                 collection_name=name,
                 exclude_terms=exclude_terms,
@@ -437,7 +452,14 @@ class MultiCollectionSearch:
         vector_pool = self._dedup_pool(all_vector, vector_pool_k)
 
         all_keyword.sort(key=lambda x: x["score"], reverse=True)
-        keyword_pool = self._dedup_pool(all_keyword, keyword_pool_k)
+        keyword_pool = self._dedup_pool(all_keyword, effective_keyword_pool_k)
+        pinned_keyword_count = 0
+        if exact_policy_mode:
+            keyword_pool, pinned_keyword_count = self._pin_keyword_hits(
+                all_keyword,
+                keyword_pool,
+                effective_keyword_pool_k,
+            )
 
         mode = (fusion_mode or "linear").strip().lower()
         if mode == "rrf":
@@ -459,6 +481,14 @@ class MultiCollectionSearch:
         else:
             raise ValueError("fusion_mode must be 'linear' or 'rrf'")
 
+        if query_signals.procedural_support:
+            results = self._ensure_collection_evidence(
+                results,
+                keyword_pool,
+                top_k,
+                collection="stsv",
+            )
+
         # Populate trace_out if provided
         if trace_out is not None:
             trace_out["filters"] = filter_traces
@@ -470,6 +500,14 @@ class MultiCollectionSearch:
                 "mode": mode,
             }
             trace_out["structured_query"] = structured_query.to_dict()
+            trace_out["query_signals"] = query_signals.to_dict()
+            trace_out["candidate_pool_sizes"] = {
+                "vector": len(vector_pool),
+                "keyword": len(keyword_pool),
+                "keyword_top_k": effective_keyword_top_k,
+                "keyword_pool_k": effective_keyword_pool_k,
+            }
+            trace_out["pinned_keyword_hits"] = pinned_keyword_count
             trace_out["excluded_counts"] = {
                 "vector": excluded_vector_count,
                 "keyword": excluded_keyword_count,
@@ -632,6 +670,78 @@ class MultiCollectionSearch:
             if len(out) >= k:
                 break
         return out
+
+    @staticmethod
+    def _is_pinned_keyword_hit(item: Dict[str, Any]) -> bool:
+        metadata = item.get("metadata") or {}
+        return bool(
+            metadata.get("_keyword_exact_phrase_hit")
+            or metadata.get("_keyword_table_lookup_hit")
+        )
+
+    @classmethod
+    def _pin_keyword_hits(
+        cls,
+        all_keyword: List[Dict[str, Any]],
+        keyword_pool: List[Dict[str, Any]],
+        k: int,
+    ) -> Tuple[List[Dict[str, Any]], int]:
+        """Ensure exact phrase/table hits survive keyword pooling."""
+        pinned = [item for item in all_keyword if cls._is_pinned_keyword_hit(item)]
+        if not pinned:
+            return keyword_pool, 0
+
+        pool_ids = {item.get("id") for item in keyword_pool}
+        pinned_extra = [
+            item for item in pinned if item.get("id") and item.get("id") not in pool_ids
+        ]
+        if not pinned_extra:
+            return keyword_pool, len({item.get("id") for item in pinned if item.get("id")})
+
+        keep_count = max(0, k - len(pinned_extra))
+        out = [*keyword_pool[:keep_count], *pinned_extra[:k]]
+        return out[:k], len({item.get("id") for item in pinned if item.get("id")})
+
+    @classmethod
+    def _ensure_collection_evidence(
+        cls,
+        results: List[Dict[str, Any]],
+        keyword_pool: List[Dict[str, Any]],
+        top_k: int,
+        collection: str,
+    ) -> List[Dict[str, Any]]:
+        """Keep one support document from a required collection in final results."""
+        prefix = f"{collection}/"
+        if any(str(item.get("id", "")).startswith(prefix) for item in results):
+            return results
+
+        preferred = [
+            item
+            for item in keyword_pool
+            if str(item.get("id", "")).startswith(prefix)
+            and cls._is_pinned_keyword_hit(item)
+        ]
+        fallback = [
+            item for item in keyword_pool if str(item.get("id", "")).startswith(prefix)
+        ]
+        candidate = (preferred or fallback or [None])[0]
+        if candidate is None:
+            return results
+
+        if top_k <= 0:
+            return results
+        trimmed = results[: max(0, top_k - 1)]
+        candidate = dict(candidate)
+        candidate.setdefault("vector_score", 0.0)
+        candidate.setdefault("keyword_score", candidate.get("score", 0.0))
+        candidate.setdefault("norm_vector", 0.0)
+        candidate.setdefault("norm_keyword", 0.0)
+        if trimmed:
+            candidate["score"] = min(
+                float(candidate.get("score", 0.0)),
+                float(trimmed[-1].get("score", 0.0)),
+            )
+        return [*trimmed, candidate]
 
     @staticmethod
     def _filter_excluded_results(

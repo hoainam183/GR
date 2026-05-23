@@ -14,6 +14,8 @@ import logging
 import re
 from typing import Any, Dict, Optional
 
+from .signals import analyze_query_signals, fold_vietnamese_text
+
 logger = logging.getLogger(__name__)
 
 # ─── Chitchat patterns ────────────────────────────────────────────────────────
@@ -146,6 +148,9 @@ class ComplexityRouter:
         """
         q = query.strip()
         q_lower = q.lower()
+        q_folded = fold_vietnamese_text(q)
+        query_signals = analyze_query_signals(q)
+        query_signals_dict = query_signals.to_dict()
 
         # 1. Chitchat — fast path, checked first
         for pattern in _CHITCHAT_RE:
@@ -154,6 +159,7 @@ class ComplexityRouter:
                     "tier": "chitchat",
                     "reason": f"chitchat_pattern: {pattern.pattern[:40]}",
                     "confidence": "high",
+                    "query_signals": query_signals_dict,
                 }
                 logger.info(
                     "ComplexityRouter: %r → %s (%s)",
@@ -162,6 +168,45 @@ class ComplexityRouter:
                 return result
 
         # 2. Complex signals — regex patterns with subtype tagging
+        # 2. Signal-based overrides for broad/personal requests. These cover
+        # variants like "điều kiện tốt nghiệp của tôi", where the personal
+        # reference appears after the eligibility concept.
+        if query_signals.personal_reference and query_signals.eligibility_check:
+            result = {
+                "tier": "complex",
+                "reason": "signals: personal_reference + eligibility_check",
+                "confidence": "high",
+                "complex_subtype": "personal_check",
+                "query_signals": query_signals_dict,
+            }
+            logger.info(
+                "ComplexityRouter: %r → %s/%s (%s)",
+                q[:60], result["tier"], result["complex_subtype"], result["reason"],
+            )
+            return result
+
+        graduation_multi_source = bool(
+            re.search(r"\b(tot nghiep|xet tot nghiep|dieu kien)\b", q_folded)
+            and re.search(r"\b(nganh|chuong trinh|ctdt|quy dinh|tin chi|mon|hoc phan)\b", q_folded)
+        )
+        if (
+            query_signals.multi_domain
+            and query_signals.eligibility_check
+            and graduation_multi_source
+        ):
+            result = {
+                "tier": "complex",
+                "reason": "signals: eligibility query needs multiple domains",
+                "confidence": "high",
+                "complex_subtype": "multi_source",
+                "query_signals": query_signals_dict,
+            }
+            logger.info(
+                "ComplexityRouter: %r → %s/%s (%s)",
+                q[:60], result["tier"], result["complex_subtype"], result["reason"],
+            )
+            return result
+
         for pattern, subtype in _COMPLEX_SPECS_RE:
             if pattern.search(q):
                 result = {
@@ -169,6 +214,7 @@ class ComplexityRouter:
                     "reason": f"complex_pattern: {pattern.pattern[:50]}",
                     "confidence": "high",
                     "complex_subtype": subtype,
+                    "query_signals": query_signals_dict,
                 }
                 logger.info(
                     "ComplexityRouter: %r → %s/%s (%s)",
@@ -189,6 +235,7 @@ class ComplexityRouter:
                     "reason": f"heuristic: word_count={word_count}>30 + multi_topic_connector",
                     "confidence": "medium",
                     "complex_subtype": "general",
+                    "query_signals": query_signals_dict,
                 }
                 logger.info(
                     "ComplexityRouter: %r → %s (%s)",
@@ -208,6 +255,7 @@ class ComplexityRouter:
                 "reason": f"heuristic: multiple_questions={q.count('?')}",
                 "confidence": "medium",
                 "complex_subtype": "general",
+                "query_signals": query_signals_dict,
             }
             logger.info(
                 "ComplexityRouter: %r → %s (%s)",
@@ -222,6 +270,7 @@ class ComplexityRouter:
                 "reason": f"heuristic: conjunction_count={q_lower.count(' và ')}>=3",
                 "confidence": "medium",
                 "complex_subtype": "general",
+                "query_signals": query_signals_dict,
             }
             logger.info(
                 "ComplexityRouter: %r → %s (%s)",
@@ -233,6 +282,7 @@ class ComplexityRouter:
             "tier": "simple",
             "reason": "default: no complex signals detected",
             "confidence": "high",
+            "query_signals": query_signals_dict,
         }
         logger.info(
             "ComplexityRouter: %r → %s (%s)",
