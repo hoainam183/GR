@@ -632,6 +632,8 @@ class MultiCollectionSearch:
                     fdesc = f"major_code filter (chain[{i}], {len(chunk_ids)} IDs)"
                 elif "match" in es_str and "major_name" in es_str:
                     fdesc = f"major_name fuzzy filter (chain[{i}], {len(chunk_ids)} IDs)"
+                elif "applicable_cohort" in es_str:
+                    fdesc = f"applicable_cohort filter (chain[{i}], {len(chunk_ids)} IDs)"
                 elif "applicable_major" in es_str:
                     fdesc = f"applicable_major filter (chain[{i}], {len(chunk_ids)} IDs)"
                 elif "date_str" in es_str or "wildcard" in es_str:

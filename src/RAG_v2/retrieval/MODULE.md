@@ -115,7 +115,8 @@ This service is created once by `RAGPipeline` and injected into agent tools via 
   | `has_links` | boolean | Whether chunk contains links |
   | `has_table` | boolean | Whether chunk contains tables |
   | `major_code` | keyword | Major programme code (e.g. `IT-E10`) |
-  | `applicable_major` | keyword | Cohort applicability list (e.g. `["K63", "K64"]`) |
+  | `applicable_cohort` | keyword | Cohort applicability list (e.g. `["K63", "K64"]`) |
+  | `applicable_major` | keyword | Major applicability list (e.g. `["IT1", "IT2"]`) |
   | `date_str` | keyword | Posting date in `D/M/YYYY` format |
   | `document_type` | keyword | Document type label |
   | `major_name` | text + keyword | Full programme name |

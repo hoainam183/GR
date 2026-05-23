@@ -13,6 +13,7 @@ from embedding.base import BaseEmbedder
 from llm.base import BaseLLM
 from llm.prompts import build_rag_messages
 from llm.self_eval import SelfEvaluator
+from query.signals import analyze_query_signals, extract_key_phrases, fold_vietnamese_text
 from reranking.base import BaseReranker
 from retrieval.collection_selector import CollectionSelector
 from retrieval.metadata_filters import (
@@ -108,6 +109,18 @@ _WEB_FALLBACK_NO_INFO_PATTERNS = (
     "thong tin con han che",
     "can kiem tra them",
 )
+_GENERIC_POLICY_EVIDENCE_PHRASES = {
+    "diem ren luyen",
+    "diem ren",
+    "ren luyen",
+    "diem cong",
+    "tin chi",
+    "hoc phi",
+    "dieu kien",
+    "tot nghiep",
+    "hoc bong",
+    "quy dinh",
+}
 _WEB_FALLBACK_DYNAMIC_QUERY_RE = re.compile(
     r"\b(?:"
     r"ke\s*hoach|thong\s*bao|moi\s*nhat|latest|recent|hien\s*tai|"
@@ -750,6 +763,20 @@ def _build_answer_quality_gate(
     eval_wants_web = bool(eval_result and eval_result.get("should_web_search"))
     eval_status = str(eval_result.get("answer_status") or "") if eval_result else ""
     eval_web_request = eval_wants_web and eval_status in {"insufficient", "stale_risk"}
+    local_exact_policy_evidence = _has_local_exact_policy_evidence(
+        question=question,
+        search_query=search_query,
+        reranked=reranked,
+        cfg=cfg,
+    )
+    suppress_eval_web_request = bool(
+        eval_web_request
+        and local_exact_policy_evidence
+        and not no_info
+        and not no_sources
+        and not dynamic_query
+        and not freshness_query
+    )
 
     # Post-generation Tavily only runs for explicit insufficiency signals.
     # Dynamic queries are handled by the pre-generation web decision path.
@@ -758,7 +785,7 @@ def _build_answer_quality_gate(
         reasons.append("answer_no_info")
     if no_sources:
         reasons.append("no_sources")
-    if eval_web_request:
+    if eval_web_request and not suppress_eval_web_request:
         reasons.append("self_eval_requested_web")
 
     # Tracked for answer_status / debugging. A structured self-eval web request
@@ -768,6 +795,8 @@ def _build_answer_quality_gate(
         informational_notes.append("self_eval_failed")
     if eval_wants_web:
         informational_notes.append("self_eval_requested_web")
+    if suppress_eval_web_request:
+        informational_notes.append("self_eval_web_suppressed_local_exact_policy")
     if dynamic_query:
         informational_notes.append("dynamic_query")
     if freshness_query:
@@ -780,7 +809,7 @@ def _build_answer_quality_gate(
         answer_status = "insufficient"
     elif freshness_query or dynamic_query:
         answer_status = "stale_risk"
-    elif eval_result:
+    elif eval_result and not suppress_eval_web_request:
         answer_status = str(eval_result.get("answer_status") or "answered")
         if answer_status not in {"answered", "insufficient", "stale_risk"}:
             answer_status = "answered"
@@ -803,7 +832,96 @@ def _build_answer_quality_gate(
         "dynamic_query": dynamic_query,
         "freshness_query": freshness_query,
         "self_eval_failed": eval_failed,
+        "local_exact_policy_evidence": local_exact_policy_evidence,
     }
+
+
+def _has_local_exact_policy_evidence(
+    *,
+    question: str,
+    search_query: str,
+    reranked: List[Dict[str, Any]],
+    cfg: Dict[str, Any],
+) -> bool:
+    """Return True when local retrieved docs directly support exact policy answers.
+
+    This prevents a conservative self-eval miss from replacing strong local
+    table evidence with weaker web search snippets for questions like
+    "hiến máu được mấy điểm rèn luyện".
+    """
+    if not reranked:
+        return False
+
+    combined_query = f"{question}\n{search_query}"
+    signals = analyze_query_signals(combined_query)
+    if not (signals.exact_policy_lookup or signals.table_lookup):
+        return False
+
+    phrases = _dedup_text_values(
+        [
+            *extract_key_phrases(question),
+            *extract_key_phrases(search_query),
+        ]
+    )
+    specific_phrases = [
+        phrase
+        for phrase in phrases
+        if fold_vietnamese_text(phrase) not in _GENERIC_POLICY_EVIDENCE_PHRASES
+    ]
+    evidence_phrases = specific_phrases or phrases
+    if not evidence_phrases:
+        return False
+
+    min_score = _cfg_float(cfg, "web_bypass_min_local_score", 0.5)
+    for doc in reranked[:3]:
+        if not isinstance(doc, dict):
+            continue
+        metadata = doc.get("metadata") or {}
+        text = str(doc.get("text") or "")
+        score_value = doc.get("rerank_score", doc.get("score", 0.0))
+        try:
+            score = float(score_value or 0.0)
+        except (TypeError, ValueError):
+            score = 0.0
+        if score < min_score:
+            continue
+
+        has_table_or_keyword_hit = bool(
+            metadata.get("_keyword_exact_phrase_hit")
+            or metadata.get("_keyword_table_lookup_hit")
+            or metadata.get("has_table")
+            or "|" in text
+        )
+        if not has_table_or_keyword_hit:
+            continue
+
+        haystack = " ".join(
+            [
+                text,
+                str(metadata.get("title") or ""),
+                str(metadata.get("doc_title") or ""),
+                str(metadata.get("hierarchy_path") or ""),
+                str(metadata.get("section_h2") or ""),
+                str(metadata.get("section_h3") or ""),
+            ]
+        )
+        folded_haystack = fold_vietnamese_text(haystack)
+        if any(fold_vietnamese_text(phrase) in folded_haystack for phrase in evidence_phrases):
+            return True
+
+    return False
+
+
+def _dedup_text_values(values: List[str]) -> List[str]:
+    out: List[str] = []
+    seen: set[str] = set()
+    for value in values:
+        key = fold_vietnamese_text(value)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(value)
+    return out
 
 
 def _merge_local_and_web_context(local_context: str, web_context: str) -> str:
@@ -1926,6 +2044,11 @@ def rag_flow(
     pre_web_fallback_reasons = list(pre_web_decision.get("reasons") or [])
     if pre_web_decision.get("freshness_query"):
         timings_ms["freshness_query"] = 1.0
+        if (
+            pre_web_decision["should_web_search"]
+            and "freshness_query" not in pre_web_fallback_reasons
+        ):
+            pre_web_fallback_reasons.append("freshness_query")
     if pre_web_decision["should_web_search"]:
         timings_ms["web_fallback_requested"] = 1.0
         if cfg.get("tavily_fallback_enabled", False):

@@ -11,8 +11,10 @@ import json
 
 try:
     from .elasticsearch_store import ElasticsearchStore
+    from .elasticsearch_store import INDEX_SETTINGS
 except ImportError:  # pragma: no cover - script execution from retrieval/
     from elasticsearch_store import ElasticsearchStore
+    from elasticsearch_store import INDEX_SETTINGS
 
 TEST_INDEX = "test_university_docs"
 
@@ -34,6 +36,17 @@ def _make_store_with_client(client: _FakeESClient) -> ElasticsearchStore:
     store.index_name = "unit-test"
     store.client = client
     return store
+
+
+def test_index_mapping_declares_applicable_cohort_keyword() -> None:
+    settings = ElasticsearchStore._make_settings(use_icu=False)
+    properties = settings["mappings"]["properties"]
+
+    assert properties["applicable_cohort"]["type"] == "keyword"
+    assert (
+        INDEX_SETTINGS["mappings"]["properties"]["applicable_cohort"]["type"]
+        == "keyword"
+    )
 
 
 def test_keyword_search_exact_phrase_and_table_boost_without_fuzzy_main() -> None:

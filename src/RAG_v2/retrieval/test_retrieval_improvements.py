@@ -175,15 +175,15 @@ class TestQdrantDualVectorNormalization:
 
 
 # ===========================================================================
-# P0 Tests: applicable_major Fix
+# P0 Tests: applicable_cohort Fix
 # ===========================================================================
 
 
-class TestApplicableMajorFix:
+class TestApplicableCohortFix:
     """Verify QuyDinhFilterExtractor uses correct ES field name."""
 
-    def test_quydinh_filter_uses_applicable_major_field(self):
-        """QuyDinh extractor must output 'applicable_major', not 'applicable_cohort'."""
+    def test_quydinh_filter_uses_applicable_cohort_field(self):
+        """QuyDinh extractor must output 'applicable_cohort', not 'applicable_major'."""
         from retrieval.metadata_filters import QuyDinhFilterExtractor
 
         extractor = QuyDinhFilterExtractor()
@@ -192,11 +192,11 @@ class TestApplicableMajorFix:
         assert not cf.is_empty, "Should produce a filter for K70"
         es_query = cf.metadata_es_queries[0]
         query_str = str(es_query)
-        assert "applicable_major" in query_str, (
-            f"Expected 'applicable_major' in query but got: {query_str}"
+        assert "applicable_cohort" in query_str, (
+            f"Expected 'applicable_cohort' in query but got: {query_str}"
         )
-        assert "applicable_cohort" not in query_str, (
-            f"Bug: 'applicable_cohort' should not appear: {query_str}"
+        assert "applicable_major" not in query_str, (
+            f"Bug: 'applicable_major' should not appear: {query_str}"
         )
 
     def test_quydinh_no_cohort_returns_empty_filter(self):

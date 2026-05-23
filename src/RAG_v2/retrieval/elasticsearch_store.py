@@ -81,6 +81,11 @@ INDEX_SETTINGS = {
             "chunk_size": {"type": "integer"},
             "has_links": {"type": "boolean"},
             "has_table": {"type": "boolean"},
+            "major_code": {"type": "keyword"},
+            "applicable_cohort": {"type": "keyword"},
+            "applicable_major": {"type": "keyword"},
+            "date_str": {"type": "keyword"},
+            "document_type": {"type": "keyword"},
         }
     },
 }
@@ -200,6 +205,7 @@ class ElasticsearchStore:
                     "has_table": {"type": "boolean"},
                     # Metadata filter fields — must be keyword for exact term queries
                     "major_code": {"type": "keyword"},
+                    "applicable_cohort": {"type": "keyword"},
                     "applicable_major": {"type": "keyword"},
                     "date_str": {"type": "keyword"},
                     "document_type": {"type": "keyword"},
@@ -372,7 +378,7 @@ class ElasticsearchStore:
 
         Used as the **metadata pre-search step** before hybrid retrieval:
         run an ES query whose ``filter`` clause targets metadata fields
-        (major_code, date_str, applicable_major …), collect the matching
+        (major_code, date_str, applicable_cohort, applicable_major …), collect the matching
         doc IDs, then pass them to Qdrant as ``HasIdCondition`` so vector
         search is restricted to that pre-filtered subset.
 

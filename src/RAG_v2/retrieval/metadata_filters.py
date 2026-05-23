@@ -14,7 +14,7 @@ Architecture (pre-search flow):
 Per-collection filter logic:
     - ctdt    : major_code (exact) → major_name (match) → major_code OR null
                             (generic chunks) → no filter.
-    - quydinh : applicable_major (cohort Kxx) OR missing (generic chunks)
+    - quydinh : applicable_cohort (cohort Kxx) OR missing (generic chunks)
                 → no filter.
   - kehoach : date filter only when query contains specific year / month.
               After retrieval a recency score bonus rewards newer documents.
@@ -1015,14 +1015,14 @@ class CtdtFilterExtractor(BaseFilterExtractor):
 
 
 class QuyDinhFilterExtractor(BaseFilterExtractor):
-    """Filter *quydinh* by cohort-specific ``applicable_major`` first.
+    """Filter *quydinh* by cohort-specific ``applicable_cohort`` first.
 
-    ``applicable_major`` stores cohort codes as a list (e.g.
+    ``applicable_cohort`` stores cohort codes as a list (e.g.
     ``["K63", "K64"]``). Elasticsearch ``term`` queries naturally match
     list-valued keyword fields when one element matches exactly.
 
     Fallback order:
-          1. ``applicable_major`` exact (one or more cohorts) OR missing.
+          1. ``applicable_cohort`` exact (one or more cohorts) OR missing.
           2. No filter (all chunks) when no cohort signal is available.
     """
 
@@ -1043,7 +1043,7 @@ class QuyDinhFilterExtractor(BaseFilterExtractor):
 
         return CollectionFilter(
             metadata_es_queries=[
-                _null_or_terms("applicable_major", cohort_codes),
+                _null_or_terms("applicable_cohort", cohort_codes),
             ]
         )
 

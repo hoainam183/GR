@@ -159,7 +159,10 @@ def text_contains_excluded_term(text: str, exclude_terms: List[str]) -> bool:
     if not exclude_terms:
         return False
     haystack = strip_diacritics(text)
-    return any(term and term in haystack for term in exclude_terms)
+    return any(
+        (needle := strip_diacritics(term)) and needle in haystack
+        for term in exclude_terms
+    )
 
 
 def build_es_must_not_clauses(exclude_terms: List[str]) -> List[Dict[str, Any]]:

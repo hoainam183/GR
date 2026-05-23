@@ -228,6 +228,41 @@ class TestTavilyFallback:
         assert result["tools_used"] == ["tavily_search"]
         assert result["tool_calls"][0]["args"]["query"] == "HUST test"
 
+    def test_exact_policy_local_evidence_suppresses_self_eval_web_request(self) -> None:
+        from pipeline.flows import _build_answer_quality_gate
+
+        gate = _build_answer_quality_gate(
+            question="hiến máu được mấy điểm rèn luyện",
+            search_query="Hiến máu được cộng bao nhiêu điểm rèn luyện?",
+            answer="Hiến máu nhân đạo được cộng 6 điểm rèn luyện.",
+            reranked=[
+                {
+                    "text": (
+                        "| Hoạt động | Minh chứng | Điểm |\n"
+                        "| Tham gia hiến máu nhân đạo do Trường phát động | MC | 6 |"
+                    ),
+                    "score": 0.8069,
+                    "rerank_score": 0.8069,
+                    "collection": "quydinh",
+                    "metadata": {"has_table": True},
+                }
+            ],
+            target_collections=["quydinh", "stsv"],
+            routing_result={"domain": "quydinh"},
+            eval_result={
+                "pass": False,
+                "answer_status": "insufficient",
+                "should_web_search": True,
+                "web_search_query": "điểm rèn luyện hiến máu HUST",
+            },
+            cfg={"web_bypass_min_local_score": 0.5},
+        )
+
+        assert gate["should_web_search"] is False
+        assert gate["answer_status"] == "answered"
+        assert gate["local_exact_policy_evidence"] is True
+        assert "self_eval_web_suppressed_local_exact_policy" in gate["informational_notes"]
+
     def test_self_eval_web_request_respects_tavily_disabled(self) -> None:
         from pipeline.flows import rag_flow
         mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()

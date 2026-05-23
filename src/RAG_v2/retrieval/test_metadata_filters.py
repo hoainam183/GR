@@ -33,6 +33,26 @@ def _extract_term_values(node: object) -> set[str]:
     return out
 
 
+def _extract_query_fields(node: object) -> set[str]:
+    """Collect term/exists field names from a nested ES query object."""
+    out: set[str] = set()
+    if isinstance(node, dict):
+        term_clause = node.get("term")
+        if isinstance(term_clause, dict):
+            out.update(str(field) for field in term_clause)
+
+        exists_clause = node.get("exists")
+        if isinstance(exists_clause, dict) and exists_clause.get("field"):
+            out.add(str(exists_clause["field"]))
+
+        for value in node.values():
+            out.update(_extract_query_fields(value))
+    elif isinstance(node, list):
+        for item in node:
+            out.update(_extract_query_fields(item))
+    return out
+
+
 def test_canonicalize_major_name_match_alias_case_insensitive() -> None:
     """Alias from profile should resolve to canonical major name."""
     assert (
@@ -151,14 +171,18 @@ def test_extract_major_code_avoids_common_false_positives() -> None:
     assert _extract_major_code("he asked about scholarship") is None
 
 
-def test_quydinh_filter_extractor_matches_applicable_major_array_values() -> None:
-    """QuyDinh filter should use cohort Kxx term queries for applicable_major arrays."""
+def test_quydinh_filter_extractor_matches_applicable_cohort_array_values() -> None:
+    """QuyDinh filter should use cohort Kxx term queries for applicable_cohort arrays."""
     extractor = QuyDinhFilterExtractor()
     cf = extractor.extract("quy định ngoại ngữ của K70")
 
     assert len(cf.metadata_es_queries) == 1
     query = cf.metadata_es_queries[0]
     assert query["bool"]["minimum_should_match"] == 1
+    fields = _extract_query_fields(query)
+    assert "applicable_cohort" in fields
+    assert "applicable_cohort.keyword" in fields
+    assert not any(field.startswith("applicable_major") for field in fields)
     strict_values = _extract_term_values(query)
     assert "K70" in strict_values
     assert any("must_not" in clause.get("bool", {}) for clause in query["bool"]["should"])
@@ -196,6 +220,24 @@ def test_quydinh_filter_extractor_uses_resolved_cohort_for_generic_query() -> No
     strict = cf.metadata_es_queries[0]
     strict_values = _extract_term_values(strict)
     assert "K70" in strict_values
+
+
+def test_quydinh_filter_uses_applicable_cohort_for_blood_donation_with_profile() -> None:
+    """Generic discipline-score questions should not filter cohorts on applicable_major."""
+    extractor = QuyDinhFilterExtractor()
+    cf = extractor.extract(
+        "hiến máu được mấy điểm rèn luyện",
+        resolved_cohort="68",
+        resolved_major="IT1",
+    )
+
+    strict = cf.metadata_es_queries[0]
+    strict_values = _extract_term_values(strict)
+    fields = _extract_query_fields(strict)
+
+    assert "K68" in strict_values
+    assert "applicable_cohort" in fields
+    assert not any(field.startswith("applicable_major") for field in fields)
 
 
 def test_build_collection_filters_passes_resolved_cohort_to_quydinh() -> None:
@@ -448,3 +490,28 @@ def test_freshness_mode_no_ids_returns_no_filter() -> None:
     assert es_filter is None
     assert trace["applied"] is False
 
+
+def test_metadata_presearch_zero_ids_falls_back_to_no_filter() -> None:
+    """Zero ES metadata matches must not produce an empty Qdrant HasIdCondition."""
+    from unittest.mock import MagicMock
+    from retrieval.multi_collection_search import MultiCollectionSearch
+    from retrieval.metadata_filters import CollectionFilter
+
+    hybrid = MagicMock()
+    hybrid.es.metadata_filter_search.return_value = []
+
+    cf = CollectionFilter(
+        metadata_es_queries=[
+            {"term": {"applicable_cohort": "K68"}},
+        ]
+    )
+
+    searcher = object.__new__(MultiCollectionSearch)
+    qdrant_filter, es_filter, trace = searcher._resolve_filter_with_fallback(
+        "quydinh", hybrid, cf
+    )
+
+    assert qdrant_filter is None
+    assert es_filter is None
+    assert trace["applied"] is False
+    hybrid.es.resolve_chunk_ids_for_qdrant.assert_not_called()
