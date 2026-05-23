@@ -124,15 +124,22 @@ const LookupScreen = () => {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.modeScroller}
         contentContainerStyle={styles.modeRow}
+        keyboardShouldPersistTaps="handled"
       >
         {MODES.map((item) => {
           const active = item.key === mode;
           return (
             <Pressable
               key={item.key}
-              style={[styles.modeButton, active && styles.modeButtonActive]}
+              style={({ pressed }) => [
+                styles.modeButton,
+                active && styles.modeButtonActive,
+                pressed && styles.modeButtonPressed,
+              ]}
               onPress={() => setMode(item.key)}
+              hitSlop={4}
             >
               <Ionicons
                 name={item.icon}
@@ -156,7 +163,11 @@ const LookupScreen = () => {
           data={data}
           renderItem={renderItem}
           keyExtractor={(item, index) => `${item.title}-${index}`}
-          contentContainerStyle={styles.results}
+          contentContainerStyle={[
+            styles.results,
+            data.length === 0 && styles.resultsEmpty,
+          ]}
+          keyboardShouldPersistTaps="handled"
           ListEmptyComponent={
             <Text style={styles.emptyText}>Không có kết quả phù hợp.</Text>
           }
@@ -179,7 +190,9 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    margin: 16,
+    marginHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 12,
     paddingLeft: 14,
     paddingRight: 6,
     backgroundColor: colors.card,
@@ -189,35 +202,53 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   },
   input: { flex: 1, color: colors.foreground, fontSize: 15, paddingVertical: 12 },
   searchButton: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: 10,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modeRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
+  modeScroller: {
+    flexGrow: 0,
+    flexShrink: 0,
+    height: 56,
+  },
+  modeRow: {
+    paddingHorizontal: 16,
+    gap: 8,
+    paddingBottom: 10,
+    alignItems: 'center',
+  },
   modeButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 12,
-    paddingVertical: 9,
+    height: 40,
     borderRadius: 10,
     backgroundColor: colors.secondary,
     borderWidth: 1,
     borderColor: colors.border,
+    alignSelf: 'flex-start',
   },
   modeButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  modeButtonPressed: { opacity: 0.86 },
   modeText: { color: colors.mutedForeground, fontSize: 13, fontWeight: '600' },
   modeTextActive: { color: colors.primaryForeground },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  results: { padding: 16, gap: 12 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 24 },
+  results: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24,
+    gap: 12,
+  },
+  resultsEmpty: { flexGrow: 1, justifyContent: 'center' },
   resultCard: {
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 14,
   },
   resultHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
@@ -230,6 +261,7 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     borderRadius: 6,
     fontSize: 11,
     overflow: 'hidden',
+    flexShrink: 0,
   },
   summary: { color: colors.subtleForeground, fontSize: 13, lineHeight: 19, marginTop: 8 },
   emptyText: { color: colors.mutedForeground, textAlign: 'center', marginTop: 40 },
