@@ -267,3 +267,117 @@ def test_calculate_metrics_with_fake_backend_sources():
     assert metrics["expected_doc_hit"] is True
     assert metrics["expected_article_hit"] is True
     assert metrics["expected_clause_hit"] is True
+
+
+def test_load_incorrect_samples_reads_filtered_json_records(tmp_path):
+    from evaluation.rerun_incorrect_sft_backend import load_incorrect_samples
+
+    incorrect_path = tmp_path / "incorrect_results.json"
+    incorrect_path.write_text(
+        json.dumps(
+            [
+                {
+                    "sample_id": "incorrect-id",
+                    "index": 201,
+                    "question": "K70: Nếu tôi đạt Bậc 2.3 thì tôi thuộc nhóm mấy?",
+                    "reference_answer": "Bậc 2.3 thuộc Nhóm 5.",
+                    "doc_type": "Quyết định ngoại ngữ từ K70",
+                    "document_title": "Quyết định ngoại ngữ từ K70",
+                    "article": "Phụ lục III, Bảng 3.1",
+                    "clause": "Ghi chú",
+                    "judge_match": "incorrect",
+                },
+                {
+                    "sample_id": "partial-id",
+                    "index": 202,
+                    "question": "Đã đúng một phần?",
+                    "reference_answer": "ref",
+                    "doc_type": "doc",
+                    "judge_match": "partial",
+                },
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    samples = load_incorrect_samples(incorrect_path)
+
+    assert len(samples) == 1
+    assert samples[0].sample_id == "incorrect-id"
+    assert samples[0].index == 201
+    assert samples[0].instruction == "K70: Nếu tôi đạt Bậc 2.3 thì tôi thuộc nhóm mấy?"
+    assert samples[0].reference_answer == "Bậc 2.3 thuộc Nhóm 5."
+    assert samples[0].metadata["article"] == "Phụ lục III, Bảng 3.1"
+    assert samples[0].metadata["clause"] == "Ghi chú"
+
+
+def test_rerun_incorrect_runner_writes_results(tmp_path, monkeypatch):
+    from evaluation import evaluate_sft_backend as backend_eval
+    from evaluation import rerun_incorrect_sft_backend as runner
+
+    incorrect_path = tmp_path / "incorrect_results.json"
+    incorrect_path.write_text(
+        json.dumps(
+            [
+                {
+                    "sample_id": "incorrect-id",
+                    "index": 201,
+                    "question": "K70: Nếu tôi đạt Bậc 2.3 thì tôi thuộc nhóm mấy?",
+                    "reference_answer": "Bậc 2.3 thuộc Nhóm 5.",
+                    "doc_type": "Quyết định ngoại ngữ từ K70",
+                    "document_title": "Quyết định ngoại ngữ từ K70",
+                    "article": "Phụ lục III, Bảng 3.1",
+                    "clause": "Ghi chú",
+                    "judge_match": "incorrect",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    def fake_evaluate_sample(sample, config):
+        return {
+            "sample_id": sample.sample_id,
+            "index": sample.index,
+            "status": "completed",
+            "question": sample.instruction,
+            "reference_answer": sample.reference_answer,
+            "generated_answer": "Theo Bảng 3.1, Bậc 2.3 thuộc Nhóm 5.",
+            "doc_type": sample.doc_type,
+            "document_title": sample.metadata["document_title"],
+            "article": sample.metadata["article"],
+            "clause": sample.metadata["clause"],
+            "backend_mode": "rag_v2",
+            "route": "simple",
+            "num_sources": 1,
+            "metrics": {"answer_nonempty": True},
+            "latency_ms": 1.0,
+            "error": "",
+            "judge_match": "correct",
+            "judge_reason": "",
+        }
+
+    monkeypatch.setattr(backend_eval, "evaluate_sample", fake_evaluate_sample)
+
+    summary = runner.run(
+        {
+            "incorrect_results_path": str(incorrect_path),
+            "output_dir": str(tmp_path / "rerun"),
+            "timestamped_run_dir": False,
+            "batch_size": 1,
+            "batch_concurrency": 1,
+            "delay_s": 0,
+            "judge_backend": "none",
+        }
+    )
+
+    rows = [
+        json.loads(line)
+        for line in (tmp_path / "rerun" / "results.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert summary["total_records"] == 1
+    assert rows[0]["sample_id"] == "incorrect-id"
+    assert rows[0]["batch_index"] == 1
+    assert rows[0]["judge_match"] == "correct"

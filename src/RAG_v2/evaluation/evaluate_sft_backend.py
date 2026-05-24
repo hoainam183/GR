@@ -27,11 +27,18 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
-from dotenv import load_dotenv
+from dotenv import dotenv_values, load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+_SHELL_VITE_API_URL = os.environ.get("VITE_API_URL")
 load_dotenv(PROJECT_ROOT / ".env")
+_FRONTEND_ENV_PATH = PROJECT_ROOT / "frontend" / "chat-companion" / ".env"
+load_dotenv(_FRONTEND_ENV_PATH)
+if _SHELL_VITE_API_URL is None and _FRONTEND_ENV_PATH.exists():
+    _frontend_vite_api_url = dotenv_values(_FRONTEND_ENV_PATH).get("VITE_API_URL")
+    if _frontend_vite_api_url:
+        os.environ["VITE_API_URL"] = str(_frontend_vite_api_url)
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +72,12 @@ CONFIG: Dict[str, Any] = {
     "session_id": None,
     "user_context": None,
     "user_id": None,
+    "session_id_env": "EVAL_SESSION_ID",
+    "user_context_env": "EVAL_USER_CONTEXT_JSON",
+    "user_id_env": "EVAL_USER_ID",
     "send_null_optional_fields": False,
+    "record_request_payload": True,
+    "record_response_trace": True,
     "auth_token": "",
     "auth_token_env": "EVAL_AUTH_TOKEN",
     "judge_backend": "gemini",  # "none" | "lmstudio" | "gemini"
@@ -169,6 +181,41 @@ def _sanitize_user_context(raw_context: Any) -> Optional[Dict[str, str]]:
     return cleaned or None
 
 
+def _json_from_env(env_name: str | None) -> Any:
+    name = _clean_optional_text(env_name)
+    if not name:
+        return None
+    raw = _clean_optional_text(os.getenv(name))
+    if not raw:
+        return None
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        logger.warning("Ignoring invalid JSON in %s", name)
+        return None
+
+
+def _text_from_config_or_env(
+    config: Dict[str, Any],
+    key: str,
+    env_key: str,
+) -> Optional[str]:
+    configured = _clean_optional_text(config.get(key))
+    if configured:
+        return configured
+    env_name = _clean_optional_text(config.get(env_key))
+    return _clean_optional_text(os.getenv(env_name)) if env_name else None
+
+
+def _user_context_from_config_or_env(
+    config: Dict[str, Any],
+) -> Optional[Dict[str, str]]:
+    configured = _sanitize_user_context(config.get("user_context"))
+    if configured:
+        return configured
+    return _sanitize_user_context(_json_from_env(config.get("user_context_env")))
+
+
 def _normalise_history(raw_history: Any) -> List[Dict[str, str]]:
     if not isinstance(raw_history, list):
         return []
@@ -210,9 +257,13 @@ def _build_frontend_chat_payload(
     }
 
     optional_fields: Dict[str, Any] = {
-        "session_id": _clean_optional_text(config.get("session_id")),
-        "user_context": _sanitize_user_context(config.get("user_context")),
-        "user_id": _clean_optional_text(config.get("user_id")),
+        "session_id": _text_from_config_or_env(
+            config,
+            "session_id",
+            "session_id_env",
+        ),
+        "user_context": _user_context_from_config_or_env(config),
+        "user_id": _text_from_config_or_env(config, "user_id", "user_id_env"),
     }
     include_nulls = _config_bool(config, "send_null_optional_fields", False)
     for key, value in optional_fields.items():
@@ -418,7 +469,7 @@ def _post_backend(
     question: str,
     config: Dict[str, Any],
     timeout_s: float,
-) -> Dict[str, Any]:
+) -> tuple[Dict[str, Any], Dict[str, Any]]:
     payload = _build_frontend_chat_payload(question=question, config=config)
     request = urllib.request.Request(
         backend_url,
@@ -429,7 +480,7 @@ def _post_backend(
     try:
         with urllib.request.urlopen(request, timeout=timeout_s) as response:
             body = response.read().decode("utf-8")
-            return json.loads(body)
+            return json.loads(body), payload
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"HTTP {exc.code}: {detail}") from exc
@@ -736,7 +787,10 @@ def _write_final_outputs(run_dir: Path, records: Dict[str, Dict[str, Any]]) -> D
     fields = [
         "sample_id", "index", "batch_index", "status", "question", "reference_answer",
         "generated_answer", "doc_type", "document_title", "article", "clause",
-        "backend_mode", "route", "num_sources", "latency_ms", "error",
+        "request_mode", "request_top_k", "request_history_len", "request_session_id",
+        "response_session_id", "backend_mode", "route", "reflected_question",
+        "num_sources", "latency_ms", "cache_hit", "query_cache_hit", "agent_error",
+        "iterations", "error",
         "reference_keyword_coverage", "atomic_fact_coverage", "citation_text_hit",
         "expected_doc_hit", "expected_article_hit", "expected_clause_hit",
         "judge_match", "judge_reason",
@@ -803,7 +857,7 @@ def _record_failure(sample: SFTSample, exc: Exception, latency_ms: float) -> Dic
 
 def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]:
     started = time.perf_counter()
-    response = _post_backend(
+    response, request_payload = _post_backend(
         backend_url=str(config["backend_url"]),
         question=sample.instruction,
         config=config,
@@ -813,6 +867,28 @@ def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]
     generated = str(response.get("answer") or "")
     sources = _as_source_list(response)
     metrics = calculate_metrics(sample, generated, sources)
+    request_history = request_payload.get("history")
+    response_trace_keys = (
+        "reflected_question",
+        "target_collections",
+        "collection_scores",
+        "routing_probabilities",
+        "timings_ms",
+        "applied_filters",
+        "collection_results",
+        "cache_hit",
+        "query_cache_hit",
+        "agent_error",
+        "agent_trace",
+        "tools_used",
+        "tool_calls",
+        "iterations",
+    )
+    response_trace = {
+        key: response.get(key)
+        for key in response_trace_keys
+        if response.get(key) is not None
+    }
 
     judge = _compare_with_reference(
         judge_backend=str(config.get("judge_backend") or "none"),
@@ -835,8 +911,36 @@ def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]
         "article": sample.metadata.get("article", ""),
         "clause": sample.metadata.get("clause", ""),
         "effective_date": sample.metadata.get("effective_date", ""),
+        "request_mode": request_payload.get("mode"),
+        "request_top_k": request_payload.get("top_k"),
+        "request_history_len": (
+            len(request_history) if isinstance(request_history, list) else 0
+        ),
+        "request_session_id": request_payload.get("session_id", ""),
+        "request_user_id": request_payload.get("user_id", ""),
+        "request_user_context": request_payload.get("user_context"),
+        "request_payload": (
+            request_payload
+            if _config_bool(config, "record_request_payload", True)
+            else None
+        ),
+        "backend_url": str(config["backend_url"]),
+        "response_session_id": response.get("session_id", ""),
         "backend_mode": response.get("mode"),
         "route": response.get("route") or response.get("intent"),
+        "reflected_question": response.get("reflected_question"),
+        "target_collections": response.get("target_collections"),
+        "routing_probabilities": response.get("routing_probabilities"),
+        "timings_ms": response.get("timings_ms"),
+        "cache_hit": response.get("cache_hit", False),
+        "query_cache_hit": response.get("query_cache_hit", False),
+        "agent_error": response.get("agent_error", ""),
+        "iterations": response.get("iterations"),
+        "response_trace": (
+            response_trace
+            if _config_bool(config, "record_response_trace", True)
+            else None
+        ),
         "num_sources": len(sources),
         "source_ids": [_source_id(source) for source in sources],
         "source_titles": [_source_title(source) for source in sources],

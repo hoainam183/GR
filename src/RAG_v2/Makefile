@@ -5,7 +5,7 @@ setup:
 	.venv/bin/pip install -r requirements.txt
 
 backend:
-	.venv/Scripts/python backend/main.py
+	.venv/bin/python backend/main.py
 
 frontend:
 	cd frontend/chat-companion && npm run dev
@@ -29,3 +29,6 @@ retention-kehoach:
 
 autocrawl-all:
 	.venv/bin/python -m pipeline.auto_crawler --module all
+
+rerun-incorrect-sft:
+	.venv/bin/python evaluation/rerun_incorrect_sft_backend.py

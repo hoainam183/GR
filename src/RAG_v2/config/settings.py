@@ -120,7 +120,7 @@ class Settings(BaseSettings):
     # --- Chat Model (answer generation) ---
     # ✅ GEMINI: main answer generation — most important quality point
     chat_model: str = "gemini-3.1-flash-lite-preview"   # fast + quality
-    chat_temperature: float = 0.3
+    chat_temperature: float = 0.0
     chat_max_tokens: int = 1500            # increased from 1024 to prevent mid-sentence truncation
 
     # --- Retrieval ---
