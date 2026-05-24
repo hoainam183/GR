@@ -478,6 +478,19 @@ def test_load_incorrect_samples_reads_filtered_json_records(tmp_path):
     assert samples[0].metadata["clause"] == "Ghi chú"
 
 
+def test_rerun_incorrect_config_from_args_supports_identity_mode():
+    from evaluation import rerun_incorrect_sft_backend as runner
+
+    args = runner.build_parser().parse_args(
+        ["--identity-mode", "frontend_env", "--auth-token", "token"]
+    )
+
+    config = runner._config_from_args(args)
+
+    assert config["identity_mode"] == "frontend_env"
+    assert config["auth_token"] == "token"
+
+
 def test_rerun_incorrect_runner_writes_results(tmp_path, monkeypatch):
     from evaluation import evaluate_sft_backend as backend_eval
     from evaluation import rerun_incorrect_sft_backend as runner
@@ -504,6 +517,7 @@ def test_rerun_incorrect_runner_writes_results(tmp_path, monkeypatch):
     )
 
     def fake_evaluate_sample(sample, config):
+        assert config["identity_mode"] == "anonymous"
         return {
             "sample_id": sample.sample_id,
             "index": sample.index,

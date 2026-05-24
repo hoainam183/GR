@@ -30,6 +30,7 @@ CONFIG: Dict[str, Any] = {
     **backend_eval.CONFIG,
     "incorrect_results_path": "evaluation/results/sft_backend_eval/incorrect_results.json",
     "output_dir": "evaluation/results/sft_backend_eval/rerun_incorrect",
+    "identity_mode": "anonymous",
     "run_dir": None,
     "timestamped_run_dir": True,
     "merge_child_run_dirs": False,
@@ -154,6 +155,7 @@ def _config_from_args(args: argparse.Namespace) -> Dict[str, Any]:
         "timeout_s",
         "delay_s",
         "judge_backend",
+        "identity_mode",
         "auth_token",
     ):
         value = getattr(args, key)
@@ -272,6 +274,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeout-s", type=float, default=None)
     parser.add_argument("--delay-s", type=float, default=None)
     parser.add_argument("--judge-backend", choices=("none", "lmstudio", "gemini"), default=None)
+    parser.add_argument(
+        "--identity-mode",
+        choices=("anonymous", "frontend_env"),
+        default=None,
+        help='Request identity mode. Default: "anonymous"; use "frontend_env" for EVAL_* identity.',
+    )
     parser.add_argument("--auth-token", default=None)
     parser.add_argument(
         "--include-judge-match",

@@ -31,6 +31,7 @@ evaluation/
   evaluate_phase3.py                 Older phase eval.
   evaluate_hf_dataset.py             HuggingFace dataset eval utility.
   evaluate_sft_backend.py            Live /chat/v3 SFT runner with resumable JSONL artifacts.
+  rerun_incorrect_sft_backend.py     Rerun SFT backend records previously judged incorrect.
   results/                           JSON/CSV run artifacts.
   ground_truth_drafts/               Draft current-policy cases and seed labels.
 ```
@@ -109,13 +110,14 @@ Do not treat factual mismatch with old email ground truth as production failure 
 
 ## SFT Backend Eval
 
-`evaluate_sft_backend.py` defaults to `identity_mode: "anonymous"` so live
-backend runs mirror a new anonymous frontend session: no auth header, no
-client-supplied `session_id`, no `user_context`, no `user_id`, empty history,
-`mode: "auto"`, and `top_k: 5`. Use `identity_mode: "frontend_env"` only when a
-run intentionally needs the older env-driven identity behavior from
-`EVAL_SESSION_ID`, `EVAL_USER_CONTEXT_JSON`, `EVAL_USER_ID`, or
-`EVAL_AUTH_TOKEN`.
+`evaluate_sft_backend.py` and `rerun_incorrect_sft_backend.py` default to
+`identity_mode: "anonymous"` so live backend runs mirror a new anonymous
+frontend session: no auth header, no client-supplied `session_id`, no
+`user_context`, no `user_id`, empty history, `mode: "auto"`, and `top_k: 5`.
+Use `identity_mode: "frontend_env"` only when a run intentionally needs the
+older env-driven identity behavior from `EVAL_SESSION_ID`,
+`EVAL_USER_CONTEXT_JSON`, `EVAL_USER_ID`, or `EVAL_AUTH_TOKEN`. The rerun CLI
+also exposes this as `--identity-mode`.
 
 Each SFT backend record stores request identity diagnostics including
 `identity_mode`, whether an auth header was sent, optional request fields sent,

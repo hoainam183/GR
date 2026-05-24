@@ -41,7 +41,7 @@ Use `-m "not integration"` for fast local checks that should not require externa
 - When fixing chat/RAG behavior, add or replay saved conversation regression queries.
 - `test_sft_backend_eval.py` covers the live SFT backend runner's anonymous
   identity default, retained `frontend_env` behavior, resumable artifacts, and
-  request diagnostics.
+  request diagnostics, including the incorrect-record rerun CLI.
 - Keep mobile contract tests aligned with `packages/shared` and backend schemas.
 - Keep RAGPipeline admin reload tests aligned with the current hot-swap contract; route cache is cleared on reload, but reflection no longer has a separate pipeline cache.
 - Prefer focused tests for doc-only changes only when there is parser/link/script impact.
