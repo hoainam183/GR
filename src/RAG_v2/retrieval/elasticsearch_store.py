@@ -41,7 +41,8 @@ _GENERIC_POLICY_PHRASES = {
 def _is_generic_policy_phrase(phrase: str) -> bool:
     return fold_vietnamese_text(phrase) in _GENERIC_POLICY_PHRASES
 
-# Index mapping with Vietnamese-friendly analysis
+# Index mapping with Vietnamese-friendly analysis (legacy constant — new indices
+# are created via ``_make_settings()`` which includes synonyms and BM25 tuning).
 INDEX_SETTINGS = {
     "settings": {
         "number_of_shards": 1,
@@ -155,21 +156,83 @@ class ElasticsearchStore:
     @staticmethod
     def _make_settings(use_icu: bool) -> Dict[str, Any]:
         """Build index settings, optionally using ICU analysis."""
+        # Vietnamese synonym mappings for common abbreviations
+        vietnamese_synonyms = [
+            "CTDT,ctdt,chương trình đào tạo",
+            "STSV,stsv,sổ tay sinh viên",
+            "CNTT,cntt,công nghệ thông tin",
+            "SV,sv,sinh viên",
+            "GV,gv,giảng viên",
+            "ĐHQN,đhqn,đại học quy nhơn",
+            "QNU,qnu,đại học quy nhơn",
+            "HP,hp,học phần",
+            "TC,tc,tín chỉ",
+            "GPA,gpa,điểm trung bình tích lũy",
+            "NCKH,nckh,nghiên cứu khoa học",
+            "KLTN,kltn,khóa luận tốt nghiệp",
+            "ĐATN,đatn,đồ án tốt nghiệp",
+            "HK,hk,học kỳ",
+            "NH,nh,năm học",
+            "ĐRL,đrl,điểm rèn luyện",
+            "TBCTL,tbctl,trung bình chung tích lũy",
+            "TBC,tbc,trung bình chung",
+        ]
+
+        # Vietnamese stopwords (function words with low retrieval value)
+        vietnamese_stopwords = [
+            "và", "hoặc", "của", "trong", "là", "có", "được", "cho",
+            "với", "về", "từ", "theo", "đến", "các", "những", "một",
+            "này", "đó", "khi", "nếu", "thì", "để", "do", "bởi",
+            "vì", "như", "tại", "bằng", "qua", "trên", "dưới",
+        ]
+
         if use_icu:
+            filter_cfg = {
+                "vietnamese_synonym": {
+                    "type": "synonym",
+                    "synonyms": vietnamese_synonyms,
+                    "lenient": True,
+                },
+                "vietnamese_stop": {
+                    "type": "stop",
+                    "stopwords": vietnamese_stopwords,
+                },
+            }
             analyzer_cfg = {
                 "vietnamese_analyzer": {
                     "type": "custom",
                     "tokenizer": "icu_tokenizer",
-                    "filter": ["lowercase", "icu_folding"],
+                    "filter": [
+                        "lowercase",
+                        "icu_folding",
+                        "vietnamese_synonym",
+                        "vietnamese_stop",
+                    ],
                 }
             }
             text_analyzer = "vietnamese_analyzer"
         else:
+            filter_cfg = {
+                "vietnamese_synonym": {
+                    "type": "synonym",
+                    "synonyms": vietnamese_synonyms,
+                    "lenient": True,
+                },
+                "vietnamese_stop": {
+                    "type": "stop",
+                    "stopwords": vietnamese_stopwords,
+                },
+            }
             analyzer_cfg = {
                 "vietnamese_analyzer": {
                     "type": "custom",
                     "tokenizer": "standard",
-                    "filter": ["lowercase", "asciifolding"],
+                    "filter": [
+                        "lowercase",
+                        "asciifolding",
+                        "vietnamese_synonym",
+                        "vietnamese_stop",
+                    ],
                 }
             }
             text_analyzer = "vietnamese_analyzer"
@@ -178,15 +241,32 @@ class ElasticsearchStore:
             "settings": {
                 "number_of_shards": 1,
                 "number_of_replicas": 0,
-                "analysis": {"analyzer": analyzer_cfg},
+                "analysis": {
+                    "analyzer": analyzer_cfg,
+                    "filter": filter_cfg,
+                },
+                "index": {
+                    "similarity": {
+                        "custom_bm25": {
+                            "type": "BM25",
+                            "k1": 1.5,
+                            "b": 0.5,
+                        }
+                    }
+                },
             },
             "mappings": {
                 "properties": {
-                    "text": {"type": "text", "analyzer": text_analyzer},
+                    "text": {
+                        "type": "text",
+                        "analyzer": text_analyzer,
+                        "similarity": "custom_bm25",
+                    },
                     "doc_id": {"type": "integer"},
                     "title": {
                         "type": "text",
                         "analyzer": text_analyzer,
+                        "similarity": "custom_bm25",
                         "fields": {"keyword": {"type": "keyword"}},
                     },
                     "type_doc": {"type": "keyword"},
@@ -194,8 +274,8 @@ class ElasticsearchStore:
                     "section_context": {"type": "keyword"},
                     # Curriculum section headings — used for keyword boosting on
                     # "kỳ / đăng ký" queries to surface curriculum tables.
-                    "section_h2": {"type": "text", "analyzer": text_analyzer},
-                    "section_h3": {"type": "text", "analyzer": text_analyzer},
+                    "section_h2": {"type": "text", "analyzer": text_analyzer, "similarity": "custom_bm25"},
+                    "section_h3": {"type": "text", "analyzer": text_analyzer, "similarity": "custom_bm25"},
                     "item_label": {"type": "keyword"},
                     "chunk_index": {"type": "integer"},
                     "total_chunks": {"type": "integer"},
@@ -212,6 +292,7 @@ class ElasticsearchStore:
                     "major_name": {
                         "type": "text",
                         "analyzer": text_analyzer,
+                        "similarity": "custom_bm25",
                         "fields": {"keyword": {"type": "keyword"}},
                     },
                     # ctdt-specific boosting fields
@@ -221,6 +302,7 @@ class ElasticsearchStore:
                     "course_name": {
                         "type": "text",
                         "analyzer": text_analyzer,
+                        "similarity": "custom_bm25",
                         "fields": {"keyword": {"type": "keyword"}},
                     },
                     # kehoach-specific boosting field
@@ -228,6 +310,7 @@ class ElasticsearchStore:
                     "semester": {
                         "type": "text",
                         "analyzer": text_analyzer,
+                        "similarity": "custom_bm25",
                         "fields": {"keyword": {"type": "keyword"}},
                     },
                 }
@@ -681,6 +764,11 @@ class ElasticsearchStore:
             phrase for phrase in key_phrases if not _is_generic_policy_phrase(phrase)
         ] or key_phrases
 
+        # Vietnamese word segmentation: add segmented query variant for compound matching
+        from utils.vietnamese_segmenter import segment_query as _segment_query
+
+        segmented_query = _segment_query(query)
+
         must_clause: List[Dict[str, Any]] = [
             {
                 "multi_match": {
@@ -692,6 +780,20 @@ class ElasticsearchStore:
             }
         ]
         should_clause: List[Dict[str, Any]] = []
+
+        # Boost segmented compound word matches
+        if segmented_query != query:
+            should_clause.append(
+                {
+                    "multi_match": {
+                        "query": segmented_query,
+                        "fields": _KEYWORD_SEARCH_FIELDS,
+                        "type": "best_fields",
+                        "operator": "or",
+                        "boost": 1.5,
+                    }
+                }
+            )
         for idx, phrase in enumerate(key_phrases):
             if _is_generic_policy_phrase(phrase):
                 boost = 1.5
@@ -724,6 +826,8 @@ class ElasticsearchStore:
             filter_clauses.append(filters)
 
         must_not_clauses = build_es_must_not_clauses(exclude_terms or [])
+        # Exclude parent chunks from keyword search (search children only)
+        must_not_clauses.append({"term": {"level": "parent"}})
 
         bool_query: Dict[str, Any] = {"must": must_clause}
         if should_clause:

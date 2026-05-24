@@ -197,14 +197,14 @@ class Settings(BaseSettings):
 
     # --- Redis ---
     redis_url: str = "redis://localhost:6379/0"
-    redis_enabled: bool = False           # Master switch for Redis
+    redis_enabled: bool = True            # Master switch for Redis
     redis_max_connections: int = 20
     redis_socket_timeout: float = 5.0
     redis_connect_timeout: float = 5.0
     redis_health_check_interval: int = 30  # seconds between PING on idle conns
-    use_redis_session: bool = False       # Phase 1: session migration
-    use_redis_cache: bool = False         # Phase 2: LLM response cache
-    use_redis_history: bool = False       # Phase 2: conversation history cache
+    use_redis_session: bool = True        # Phase 1: session migration
+    use_redis_cache: bool = True          # Phase 2: LLM response cache
+    use_redis_history: bool = True        # Phase 2: conversation history cache
 
     # --- Rate Limiting ---
     rate_limit_enabled: bool = True
@@ -217,10 +217,12 @@ class Settings(BaseSettings):
     score_cliff_enabled: bool = False             # B1: per-collection score cliff
     per_collection_norm_enabled: bool = False     # B2: per-collection normalization
     sibling_expansion_enabled: bool = False       # C1: sibling chunk expansion
+    parent_context_enabled: bool = True           # C5: parent-child context expansion
     freshness_tavily_check_enabled: bool = False  # C3: date_str freshness check
     low_conf_pool_expand_enabled: bool = False    # C4: 2x candidate pool in Tier 3
     sibling_budget_ratio: float = 0.30            # 30% of total budget for siblings
     sibling_per_doc_limit: int = 800              # Per-sibling char limit
+    parent_max_chars: int = 3000                  # Max chars from parent content
     context_total_char_budget_with_expansion: int = 16000  # Expanded total when siblings
 
     # --- Admin / Document Upload ---

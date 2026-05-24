@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import logging
+from collections import OrderedDict
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -12,6 +14,43 @@ from FlagEmbedding import BGEM3FlagModel
 from embedding import BaseEmbedder
 
 logger = logging.getLogger(__name__)
+
+
+class _EmbeddingCache:
+    """Thread-safe LRU cache for embedding vectors.
+
+    Avoids recomputing embeddings for repeated queries. Uses an OrderedDict
+    for O(1) eviction of the least-recently-used entry.
+    """
+
+    def __init__(self, maxsize: int = 512) -> None:
+        self._maxsize = maxsize
+        self._cache: OrderedDict[str, List[float]] = OrderedDict()
+        self._hits = 0
+        self._misses = 0
+
+    def _key(self, text: str) -> str:
+        return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+    def get(self, text: str) -> Optional[List[float]]:
+        key = self._key(text)
+        if key in self._cache:
+            self._cache.move_to_end(key)
+            self._hits += 1
+            return self._cache[key]
+        self._misses += 1
+        return None
+
+    def put(self, text: str, vector: List[float]) -> None:
+        key = self._key(text)
+        self._cache[key] = vector
+        self._cache.move_to_end(key)
+        if len(self._cache) > self._maxsize:
+            self._cache.popitem(last=False)
+
+    @property
+    def stats(self) -> Dict[str, int]:
+        return {"hits": self._hits, "misses": self._misses, "size": len(self._cache)}
 
 
 def _resolve_torch_device(device: Optional[str]) -> str:
@@ -67,6 +106,7 @@ class BGEm3Embedder(BaseEmbedder):
             use_fp16=use_fp16,
             device=device,
         )
+        self._query_cache = _EmbeddingCache(maxsize=512)
 
     # ------------------------------------------------------------------
     # BaseEmbedder interface
@@ -81,7 +121,12 @@ class BGEm3Embedder(BaseEmbedder):
         return self._encode_dense(texts)
 
     def embed_query(self, text: str) -> List[float]:
-        return self._encode_dense([text])[0]
+        cached = self._query_cache.get(text)
+        if cached is not None:
+            return cached
+        vec = self._encode_dense([text])[0]
+        self._query_cache.put(text, vec)
+        return vec
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         return self._encode_dense(texts)

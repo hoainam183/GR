@@ -19,13 +19,88 @@ Usage::
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import os
+import time
+from collections import OrderedDict
 from typing import Any, Dict, List, Optional
 
 from config.settings import Settings
 
 logger = logging.getLogger(__name__)
+
+
+class _SearchResultCache:
+    """TTL-based LRU cache for search results.
+
+    Caches hybrid search results keyed by (query, collections, filters) to
+    avoid re-executing identical searches within a short window.
+    """
+
+    def __init__(self, maxsize: int = 128, ttl_seconds: float = 180.0) -> None:
+        self._maxsize = maxsize
+        self._ttl = ttl_seconds
+        self._cache: OrderedDict[str, tuple[float, List[Dict[str, Any]]]] = OrderedDict()
+        self._hits = 0
+        self._misses = 0
+
+    def _make_key(
+        self,
+        query: str,
+        collections: Optional[List[str]],
+        resolved_major: Optional[str],
+        resolved_cohort: Optional[str],
+    ) -> str:
+        raw = json.dumps(
+            {
+                "q": query,
+                "c": sorted(collections) if collections else None,
+                "m": resolved_major,
+                "co": resolved_cohort,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+    def get(
+        self,
+        query: str,
+        collections: Optional[List[str]],
+        resolved_major: Optional[str] = None,
+        resolved_cohort: Optional[str] = None,
+    ) -> Optional[List[Dict[str, Any]]]:
+        key = self._make_key(query, collections, resolved_major, resolved_cohort)
+        if key in self._cache:
+            ts, results = self._cache[key]
+            if time.time() - ts < self._ttl:
+                self._cache.move_to_end(key)
+                self._hits += 1
+                return results
+            # Expired
+            del self._cache[key]
+        self._misses += 1
+        return None
+
+    def put(
+        self,
+        query: str,
+        collections: Optional[List[str]],
+        results: List[Dict[str, Any]],
+        resolved_major: Optional[str] = None,
+        resolved_cohort: Optional[str] = None,
+    ) -> None:
+        key = self._make_key(query, collections, resolved_major, resolved_cohort)
+        self._cache[key] = (time.time(), results)
+        self._cache.move_to_end(key)
+        if len(self._cache) > self._maxsize:
+            self._cache.popitem(last=False)
+
+    @property
+    def stats(self) -> Dict[str, Any]:
+        return {"hits": self._hits, "misses": self._misses, "size": len(self._cache)}
 
 
 class RetrievalService:
@@ -59,6 +134,7 @@ class RetrievalService:
         self.searcher = searcher
         self.reranker = reranker
         self.tavily_tool = tavily_tool
+        self._search_cache = _SearchResultCache(maxsize=128, ttl_seconds=180.0)
 
     # ------------------------------------------------------------------
     # Factory
@@ -255,26 +331,38 @@ class RetrievalService:
         resolved_cohort: Optional[str],
         rerank: bool,
     ) -> List[Dict[str, Any]]:
-        """Single-query search path."""
-        bge_vec, e5_vec = self.embed_query(query)
+        """Single-query search path with result caching."""
+        # Check cache (pre-rerank results)
+        cached = self._search_cache.get(
+            query, active_collections, resolved_major, resolved_cohort
+        )
+        if cached is not None:
+            logger.debug("Search cache hit for query: %s", query[:60])
+            results = cached
+        else:
+            bge_vec, e5_vec = self.embed_query(query)
 
-        search_kwargs: Dict[str, Any] = {
-            "query": query,
-            "bge_m3_query": bge_vec,
-            "e5_query": e5_vec,
-            "top_k": raw_candidate_k,
-            "vector_top_k": self.settings.vector_top_k,
-            "keyword_top_k": self.settings.keyword_top_k,
-            "vector_pool_k": self.settings.vector_pool_k,
-            "keyword_pool_k": self.settings.keyword_pool_k,
-            "active_collections": active_collections,
-        }
-        if resolved_major:
-            search_kwargs["resolved_major"] = resolved_major
-        if resolved_cohort:
-            search_kwargs["resolved_cohort"] = resolved_cohort
+            search_kwargs: Dict[str, Any] = {
+                "query": query,
+                "bge_m3_query": bge_vec,
+                "e5_query": e5_vec,
+                "top_k": raw_candidate_k,
+                "vector_top_k": self.settings.vector_top_k,
+                "keyword_top_k": self.settings.keyword_top_k,
+                "vector_pool_k": self.settings.vector_pool_k,
+                "keyword_pool_k": self.settings.keyword_pool_k,
+                "active_collections": active_collections,
+            }
+            if resolved_major:
+                search_kwargs["resolved_major"] = resolved_major
+            if resolved_cohort:
+                search_kwargs["resolved_cohort"] = resolved_cohort
 
-        results = self.searcher.search(**search_kwargs)
+            results = self.searcher.search(**search_kwargs)
+            # Cache raw results before reranking
+            self._search_cache.put(
+                query, active_collections, results, resolved_major, resolved_cohort
+            )
 
         if rerank and self.reranker is not None:
             results = self.reranker.rerank(
@@ -284,6 +372,10 @@ class RetrievalService:
             )
         else:
             results = results[:effective_top_k]
+
+        # Parent-child context expansion: enrich child results with parent content
+        if self.settings.parent_context_enabled:
+            results = self._expand_parent_context(results, active_collections)
 
         return results
 
@@ -345,6 +437,63 @@ class RetrievalService:
             all_results = all_results[:effective_top_k]
 
         return all_results
+
+    def _expand_parent_context(
+        self,
+        results: List[Dict[str, Any]],
+        collections: List[str],
+    ) -> List[Dict[str, Any]]:
+        """Expand child results with parent chunk content.
+
+        For each child result that has a parent_id, fetches the parent from
+        Qdrant and attaches its content as `parent_context` in metadata.
+        Groups by collection since parent fetches are per-collection.
+        """
+        if not results:
+            return results
+
+        # Check if any result actually has a parent_id
+        has_parent = any(
+            r.get("metadata", {}).get("parent_id")
+            and r.get("metadata", {}).get("level") == "child"
+            for r in results
+        )
+        if not has_parent:
+            return results
+
+        try:
+            from retrieval.parent_context import ParentContextExpander
+
+            expander = ParentContextExpander(
+                qdrant_host=self.settings.qdrant_host,
+                qdrant_port=self.settings.qdrant_port,
+                max_parent_chars=self.settings.parent_max_chars,
+            )
+
+            # Group results by collection for efficient parent fetching
+            # Determine collection from metadata or use first active collection
+            collection_groups: Dict[str, List[int]] = {}
+            for idx, result in enumerate(results):
+                coll = (
+                    result.get("collection", "")
+                    or result.get("metadata", {}).get("collection", "")
+                )
+                if not coll and collections:
+                    coll = collections[0]
+                if coll:
+                    collection_groups.setdefault(coll, []).append(idx)
+
+            # Expand each collection group
+            for coll, indices in collection_groups.items():
+                group_results = [results[i] for i in indices]
+                expanded = expander.expand_with_parents(group_results, coll)
+                for i, expanded_result in zip(indices, expanded):
+                    results[i] = expanded_result
+
+        except Exception:
+            logger.warning("Parent context expansion failed", exc_info=True)
+
+        return results
 
     def web_search(self, query: str, max_results: int = 3) -> Any:
         """Run a Tavily web search.

@@ -3,8 +3,8 @@
 This runner intentionally keeps runtime settings in the CONFIG dictionary below
 instead of accepting CLI arguments. It is designed for long SFT runs where the
 backend or LLM provider may disconnect: each completed/failed sample is appended
-to one run-level JSONL file, progress is written atomically, and later invocations can
-resume from the same output directory by default.
+to one run-level JSONL file, progress is written atomically, and explicit
+``resume_dir`` can continue an interrupted run.
 """
 
 from __future__ import annotations
@@ -36,13 +36,19 @@ load_dotenv(PROJECT_ROOT / ".env")
 logger = logging.getLogger(__name__)
 
 
+def _frontend_default_backend_url() -> str:
+    """Match the web client default: VITE_API_URL or localhost, then /chat/v3."""
+    api_base_url = (os.getenv("VITE_API_URL") or "http://localhost:8000").rstrip("/")
+    return f"{api_base_url}/chat/v3"
+
+
 CONFIG: Dict[str, Any] = {
     "dataset_path": "eval/data/sft_dataset (1).jsonl",
-    "backend_url": "http://localhost:8000/chat/v3",
+    "backend_url": _frontend_default_backend_url(),
     "output_dir": "evaluation/results/sft_backend_eval",
     "run_dir": None,  # None = use output_dir directly; set a path to isolate a run
-    "timestamped_run_dir": False,  # True = old behavior: output_dir/YYYYMMDD_HHMMSS
-    "merge_child_run_dirs": True,  # read old timestamped runs under output_dir for resume
+    "timestamped_run_dir": True,  # fresh live-backend run: output_dir/YYYYMMDD_HHMMSS
+    "merge_child_run_dirs": False,  # do not reuse stale child-run records by default
     "resume_dir": None,
     "batch_size": 1,  # number of questions grouped into one runner batch
     "batch_index": 0,  # 0 = all batches; 1..N = only that batch after start/limit selection
@@ -51,8 +57,17 @@ CONFIG: Dict[str, Any] = {
     "start_index": 0,
     "top_k": 5,
     "mode": "auto",
-    "timeout_s": 180,
+    "timeout_s": 240,  # frontend axios timeout is 240000 ms
     "delay_s": 0.5,  # pause between batches, not between samples
+    # Frontend-compatible identity/request fields. None means "omit from JSON",
+    # matching JSON.stringify({field: undefined}) in the web client.
+    "history": [],
+    "session_id": None,
+    "user_context": None,
+    "user_id": None,
+    "send_null_optional_fields": False,
+    "auth_token": "",
+    "auth_token_env": "EVAL_AUTH_TOKEN",
     "judge_backend": "gemini",  # "none" | "lmstudio" | "gemini"
     "retry_failed": False,
     "lmstudio_base_url": "http://localhost:1234/v1",
@@ -132,6 +147,81 @@ def _config_bool(config: Dict[str, Any], key: str, default: bool = False) -> boo
     if isinstance(value, str):
         return value.strip().lower() in {"1", "true", "yes", "y", "on"}
     return bool(value)
+
+
+def _clean_optional_text(value: Any) -> Optional[str]:
+    if not isinstance(value, str):
+        return None
+    cleaned = value.strip()
+    return cleaned or None
+
+
+def _sanitize_user_context(raw_context: Any) -> Optional[Dict[str, str]]:
+    """Mirror frontend sanitizeUserContext before sending /chat/v3 payloads."""
+    if not isinstance(raw_context, dict):
+        return None
+
+    cleaned: Dict[str, str] = {}
+    for key in ("student_id", "cohort", "major", "major_code", "full_name"):
+        value = _clean_optional_text(raw_context.get(key))
+        if value:
+            cleaned[key] = value
+    return cleaned or None
+
+
+def _normalise_history(raw_history: Any) -> List[Dict[str, str]]:
+    if not isinstance(raw_history, list):
+        return []
+
+    history: List[Dict[str, str]] = []
+    for item in raw_history:
+        if not isinstance(item, dict):
+            continue
+        role = _clean_optional_text(item.get("role"))
+        content = _clean_optional_text(item.get("content"))
+        if role in {"user", "assistant"} and content:
+            history.append({"role": role, "content": content})
+    return history
+
+
+def _frontend_chat_headers(config: Dict[str, Any]) -> Dict[str, str]:
+    """Mirror frontend chatApi authHeaders() for evaluator HTTP requests."""
+    headers = {"Content-Type": "application/json"}
+    token = _clean_optional_text(config.get("auth_token"))
+    if not token:
+        token_env = _clean_optional_text(config.get("auth_token_env")) or "EVAL_AUTH_TOKEN"
+        token = _clean_optional_text(os.getenv(token_env))
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
+def _build_frontend_chat_payload(
+    *,
+    question: str,
+    config: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Build the same JSON shape as frontend sendMessageV3()."""
+    payload: Dict[str, Any] = {
+        "question": question,
+        "mode": str(config.get("mode") or "auto"),
+        "top_k": int(config.get("top_k") or 5),
+        "history": _normalise_history(config.get("history")),
+    }
+
+    optional_fields: Dict[str, Any] = {
+        "session_id": _clean_optional_text(config.get("session_id")),
+        "user_context": _sanitize_user_context(config.get("user_context")),
+        "user_id": _clean_optional_text(config.get("user_id")),
+    }
+    include_nulls = _config_bool(config, "send_null_optional_fields", False)
+    for key, value in optional_fields.items():
+        if value is not None:
+            payload[key] = value
+        elif include_nulls:
+            payload[key] = None
+
+    return payload
 
 
 def _atomic_write_json(path: Path, payload: Dict[str, Any]) -> None:
@@ -326,21 +416,14 @@ def _post_backend(
     *,
     backend_url: str,
     question: str,
-    mode: str,
-    top_k: int,
+    config: Dict[str, Any],
     timeout_s: float,
 ) -> Dict[str, Any]:
-    payload = {
-        "question": question,
-        "mode": mode,
-        "top_k": top_k,
-        "history": [],
-        "session_id": None,
-    }
+    payload = _build_frontend_chat_payload(question=question, config=config)
     request = urllib.request.Request(
         backend_url,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers=_frontend_chat_headers(config),
         method="POST",
     )
     try:
@@ -723,8 +806,7 @@ def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]
     response = _post_backend(
         backend_url=str(config["backend_url"]),
         question=sample.instruction,
-        mode=str(config["mode"]),
-        top_k=int(config["top_k"]),
+        config=config,
         timeout_s=float(config["timeout_s"]),
     )
     latency_ms = round((time.perf_counter() - started) * 1000, 2)

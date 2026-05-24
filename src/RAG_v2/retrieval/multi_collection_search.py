@@ -373,6 +373,26 @@ class MultiCollectionSearch:
             name: str, hybrid: HybridSearch
         ) -> Tuple[str, List[Dict], List[Dict]]:
             qdrant_filter, es_filter = resolved_filters.get(name, (None, None))
+
+            # Exclude parent chunks from vector search (search children only)
+            parent_exclusion = qdrant_models.FieldCondition(
+                key="level",
+                match=qdrant_models.MatchValue(value="parent"),
+            )
+            if qdrant_filter is not None:
+                # Merge with existing filter
+                existing_must_not = list(qdrant_filter.must_not or [])
+                existing_must_not.append(parent_exclusion)
+                qdrant_filter = qdrant_models.Filter(
+                    must=qdrant_filter.must,
+                    should=qdrant_filter.should,
+                    must_not=existing_must_not,
+                )
+            else:
+                qdrant_filter = qdrant_models.Filter(
+                    must_not=[parent_exclusion]
+                )
+
             vecs = hybrid.qdrant.search(
                 bge_m3_query=bge_m3_query,
                 e5_query=e5_query,

@@ -72,11 +72,16 @@ class HyDEExpander:
         try:
             hypothesis = self.llm.generate(prompt)
             if not hypothesis or not hypothesis.strip():
-                logger.warning("HyDE: LLM returned empty hypothesis for query: %s", query[:60])
+                logger.warning(
+                    "HyDE: LLM returned empty hypothesis for query: %s",
+                    query[:60],
+                )
                 return query  # fallback to original query
             return hypothesis[: self.max_hypothesis_len]
         except Exception as exc:
-            logger.error("HyDE generation failed: %s — falling back to raw query", exc)
+            logger.error(
+                "HyDE generation failed: %s — falling back to raw query", exc
+            )
             return query
 
     def generate_embedding(self, query: str) -> List[float]:

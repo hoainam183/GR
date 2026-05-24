@@ -30,7 +30,6 @@ from query.decomposer import QueryDecomposer
 from query.prompts import DOMAIN_CLASSIFICATION_PROMPT
 from query.reflection import QueryReflector
 from query.router import QueryRouter
-from query.signals import coerce_query_signals, fold_vietnamese_text
 from query.training_data import RAG_LABELS
 from utils.tracing import RequestTrace
 
@@ -756,73 +755,6 @@ class RAGPipeline:
             },
         }
 
-    @staticmethod
-    def _has_personal_eligibility_inputs(question: str) -> bool:
-        folded = fold_vietnamese_text(question)
-        return bool(
-            "cpa" in folded
-            or "gpa" in folded
-            or "ielts" in folded
-            or "toeic" in folded
-            or "gdtc" in folded
-            or "gdqp" in folded
-            or "ngoai ngu" in folded
-            or "ky luat" in folded
-            or "dang ky tot nghiep" in folded
-            or "tin chi" in folded and any(ch.isdigit() for ch in folded)
-        )
-
-    @staticmethod
-    def _should_clarify_personal_check(
-        question: str,
-        route_result: Dict[str, Any],
-    ) -> bool:
-        signals = coerce_query_signals(route_result.get("query_signals"))
-        subtype = route_result.get("complex_subtype")
-        return bool(
-            subtype == "personal_check"
-            and signals.personal_reference
-            and signals.eligibility_check
-            and not RAGPipeline._has_personal_eligibility_inputs(question)
-        )
-
-    @staticmethod
-    def _personal_check_clarification(question: str, route_result: Dict[str, Any]) -> Dict[str, Any]:
-        answer = (
-            "Mình chưa thể kết luận bạn đã đủ điều kiện hay chưa chỉ từ câu hỏi này. "
-            "Bạn muốn mình liệt kê điều kiện tốt nghiệp chung, hay kiểm tra tình trạng cá nhân? "
-            "Nếu muốn kiểm tra cá nhân, hãy cung cấp CPA/GPA, số tín chỉ đã tích lũy, "
-            "trạng thái chuẩn ngoại ngữ, GDTC, GDQP-AN, kỷ luật hoặc truy cứu trách nhiệm hình sự, "
-            "và việc đăng ký tốt nghiệp."
-        )
-        return {
-            "question": question,
-            "answer": answer,
-            "mode": "clarify",
-            "route": "personal_check",
-            "route_reason": route_result.get("reason", ""),
-            "tools_used": ["clarify_question"],
-            "tool_calls": [
-                {
-                    "name": "clarify_question",
-                    "args": {
-                        "missing": [
-                            "CPA/GPA",
-                            "số tín chỉ tích lũy",
-                            "chuẩn ngoại ngữ",
-                            "GDTC",
-                            "GDQP-AN",
-                            "kỷ luật/truy cứu trách nhiệm hình sự",
-                            "đăng ký tốt nghiệp",
-                        ]
-                    },
-                }
-            ],
-            "iterations": 0,
-            "agent_trace": None,
-            "sources": [],
-        }
-
     def query_v3(
         self,
         question: str,
@@ -859,10 +791,6 @@ class RAGPipeline:
                 "iterations": 0,
                 "agent_trace": None,
             }
-
-        # ── Multi-source queries: decompose into per-domain sub-queries ────────
-        if self._should_clarify_personal_check(question, route_result):
-            return self._personal_check_clarification(question, route_result)
 
         # This handles compound questions like Q1 (equivalent course + graduation
         # requirements) without dispatching to the agent, which can hallucinate.
