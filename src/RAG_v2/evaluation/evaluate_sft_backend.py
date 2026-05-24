@@ -3,8 +3,8 @@
 This runner intentionally keeps runtime settings in the CONFIG dictionary below
 instead of accepting CLI arguments. It is designed for long SFT runs where the
 backend or LLM provider may disconnect: each completed/failed sample is appended
-to a batch JSONL file, progress is written atomically, and later invocations can
-resume by setting CONFIG["resume_dir"] to an existing run directory.
+to one run-level JSONL file, progress is written atomically, and later invocations can
+resume from the same output directory by default.
 """
 
 from __future__ import annotations
@@ -21,6 +21,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -39,15 +40,20 @@ CONFIG: Dict[str, Any] = {
     "dataset_path": "eval/data/sft_dataset (1).jsonl",
     "backend_url": "http://localhost:8000/chat/v3",
     "output_dir": "evaluation/results/sft_backend_eval",
+    "run_dir": None,  # None = use output_dir directly; set a path to isolate a run
+    "timestamped_run_dir": False,  # True = old behavior: output_dir/YYYYMMDD_HHMMSS
+    "merge_child_run_dirs": True,  # read old timestamped runs under output_dir for resume
     "resume_dir": None,
-    "batch_size": 25,
+    "batch_size": 1,  # number of questions grouped into one runner batch
+    "batch_index": 0,  # 0 = all batches; 1..N = only that batch after start/limit selection
+    "batch_concurrency": 1,  # independent /chat/v3 HTTP requests in flight per batch
     "limit": 0,
     "start_index": 0,
     "top_k": 5,
     "mode": "auto",
     "timeout_s": 180,
-    "delay_s": 0.5,
-    "judge_backend": "none",  # "none" | "lmstudio" | "gemini"
+    "delay_s": 0.5,  # pause between batches, not between samples
+    "judge_backend": "gemini",  # "none" | "lmstudio" | "gemini"
     "retry_failed": False,
     "lmstudio_base_url": "http://localhost:1234/v1",
     "lmstudio_model": "qwen/qwen3-8b:2",
@@ -117,6 +123,15 @@ def _json_default(value: Any) -> Any:
     if isinstance(value, Path):
         return str(value)
     return str(value)
+
+
+def _config_bool(config: Dict[str, Any], key: str, default: bool = False) -> bool:
+    value = config.get(key, default)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "y", "on"}
+    return bool(value)
 
 
 def _atomic_write_json(path: Path, payload: Dict[str, Any]) -> None:
@@ -408,20 +423,68 @@ def _compare_with_reference(
 
 
 def _batch_files(run_dir: Path) -> List[Path]:
+    # Backward compatibility for runs created before results.jsonl became the
+    # live append file.
     return sorted((run_dir / "batches").glob("batch_*.jsonl"))
 
 
-def load_existing_records(run_dir: Path) -> Dict[str, Dict[str, Any]]:
-    records: Dict[str, Dict[str, Any]] = {}
-    for batch_file in _batch_files(run_dir):
-        with batch_file.open(encoding="utf-8") as handle:
-            for line in handle:
-                if not line.strip():
-                    continue
+def _looks_like_legacy_run_dir(path: Path) -> bool:
+    return (
+        path.is_dir()
+        and (
+            (path / "results.jsonl").exists()
+            or (path / "batches").is_dir()
+            or (path / "progress.json").exists()
+        )
+    )
+
+
+def _child_run_dirs(run_dir: Path) -> List[Path]:
+    if not run_dir.exists():
+        return []
+    return sorted(
+        child
+        for child in run_dir.iterdir()
+        if _looks_like_legacy_run_dir(child)
+    )
+
+
+def _read_record_file(path: Path, records: Dict[str, Dict[str, Any]]) -> None:
+    if not path.exists():
+        return
+    with path.open(encoding="utf-8") as handle:
+        for line_no, line in enumerate(handle, start=1):
+            if not line.strip():
+                continue
+            try:
                 record = json.loads(line)
-                sample_id = str(record.get("sample_id") or "")
-                if sample_id:
-                    records[sample_id] = record
+            except json.JSONDecodeError as exc:
+                logger.warning("Skipping malformed JSONL row %s:%d: %s", path, line_no, exc)
+                continue
+            sample_id = str(record.get("sample_id") or "")
+            if sample_id:
+                records[sample_id] = record
+
+
+def _load_records_from_single_run_dir(
+    run_dir: Path,
+    records: Dict[str, Dict[str, Any]],
+) -> None:
+    for batch_file in _batch_files(run_dir):
+        _read_record_file(batch_file, records)
+    _read_record_file(run_dir / "results.jsonl", records)
+
+
+def load_existing_records(
+    run_dir: Path,
+    *,
+    include_child_run_dirs: bool = False,
+) -> Dict[str, Dict[str, Any]]:
+    records: Dict[str, Dict[str, Any]] = {}
+    if include_child_run_dirs:
+        for child_run_dir in _child_run_dirs(run_dir):
+            _load_records_from_single_run_dir(child_run_dir, records)
+    _load_records_from_single_run_dir(run_dir, records)
     return records
 
 
@@ -448,16 +511,26 @@ def _select_samples(samples: List[SFTSample], config: Dict[str, Any]) -> List[SF
     return selected[:limit] if limit > 0 else selected
 
 
-def _next_batch_number(run_dir: Path) -> int:
-    existing = _batch_files(run_dir)
-    if not existing:
-        return 1
-    numbers = []
-    for path in existing:
-        match = re.search(r"batch_(\d+)\.jsonl$", path.name)
-        if match:
-            numbers.append(int(match.group(1)))
-    return max(numbers or [0]) + 1
+def _chunk_samples(samples: List[SFTSample], batch_size: int) -> List[List[SFTSample]]:
+    if batch_size <= 0:
+        raise ValueError("CONFIG['batch_size'] must be > 0")
+    return [
+        samples[start:start + batch_size]
+        for start in range(0, len(samples), batch_size)
+    ]
+
+
+def _select_batches(
+    samples: List[SFTSample],
+    config: Dict[str, Any],
+) -> List[tuple[int, List[SFTSample]]]:
+    batches = _chunk_samples(samples, int(config.get("batch_size") or 1))
+    batch_index = int(config.get("batch_index") or 0)
+    if batch_index <= 0:
+        return list(enumerate(batches, start=1))
+    if batch_index > len(batches):
+        return []
+    return [(batch_index, batches[batch_index - 1])]
 
 
 def _append_jsonl(path: Path, record: Dict[str, Any]) -> None:
@@ -578,7 +651,7 @@ def _write_final_outputs(run_dir: Path, records: Dict[str, Dict[str, Any]]) -> D
 
     results_csv = run_dir / "results.csv"
     fields = [
-        "sample_id", "index", "status", "question", "reference_answer",
+        "sample_id", "index", "batch_index", "status", "question", "reference_answer",
         "generated_answer", "doc_type", "document_title", "article", "clause",
         "backend_mode", "route", "num_sources", "latency_ms", "error",
         "reference_keyword_coverage", "atomic_fact_coverage", "citation_text_hit",
@@ -612,10 +685,18 @@ def _prepare_run_dir(config: Dict[str, Any]) -> tuple[str, Path]:
         return run_id, run_dir
 
     output_dir = _resolve_project_path(str(config["output_dir"]))
+    if config.get("run_dir"):
+        run_dir = _resolve_project_path(str(config["run_dir"]))
+        run_dir.mkdir(parents=True, exist_ok=True)
+        return run_dir.name, run_dir
+
+    if not _config_bool(config, "timestamped_run_dir", False):
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return output_dir.name, output_dir
+
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = output_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=False)
-    (run_dir / "batches").mkdir(parents=True, exist_ok=True)
     return run_id, run_dir
 
 
@@ -690,6 +771,94 @@ def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]
     }
 
 
+def _evaluate_sample_safe(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]:
+    sample_t0 = time.perf_counter()
+    try:
+        return evaluate_sample(sample, config)
+    except Exception as exc:
+        latency_ms = round((time.perf_counter() - sample_t0) * 1000, 2)
+        logger.error("Sample failed: %s", exc)
+        return _record_failure(sample, exc, latency_ms)
+
+
+def _evaluate_batch(
+    *,
+    batch_no: int,
+    batch_samples: List[SFTSample],
+    records: Dict[str, Dict[str, Any]],
+    run_dir: Path,
+    run_id: str,
+    samples_total: int,
+    config: Dict[str, Any],
+) -> int:
+    pending: List[SFTSample] = []
+    retry_failed = bool(config.get("retry_failed"))
+    for sample in batch_samples:
+        if should_skip_sample(sample, records, retry_failed=retry_failed):
+            logger.info(
+                "Batch %04d skip sample=%s status=%s",
+                batch_no,
+                sample.sample_id,
+                records[sample.sample_id].get("status"),
+            )
+            continue
+        pending.append(sample)
+
+    if not pending:
+        logger.info("Batch %04d has no pending samples", batch_no)
+        _write_progress(
+            run_dir=run_dir,
+            run_id=run_id,
+            samples_total=samples_total,
+            records=records,
+            config=config,
+        )
+        return 0
+
+    max_workers = max(1, int(config.get("batch_concurrency") or 1))
+    max_workers = min(max_workers, len(pending))
+    results_path = run_dir / "results.jsonl"
+
+    logger.info(
+        "Batch %04d sending %d independent requests with concurrency=%d",
+        batch_no,
+        len(pending),
+        max_workers,
+    )
+
+    written = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(_evaluate_sample_safe, sample, config): sample
+            for sample in pending
+        }
+        for future in as_completed(futures):
+            sample = futures[future]
+            record = future.result()
+            record["batch_index"] = batch_no
+            _append_jsonl(results_path, record)
+            records[sample.sample_id] = record
+            written += 1
+
+            logger.info(
+                "Batch %04d wrote sample=%s status=%s (%d/%d)",
+                batch_no,
+                sample.sample_id,
+                record.get("status"),
+                written,
+                len(pending),
+            )
+            _write_progress(
+                run_dir=run_dir,
+                run_id=run_id,
+                samples_total=samples_total,
+                records=records,
+                config=config,
+            )
+
+    return written
+
+
 def run(config: Dict[str, Any] = CONFIG) -> Dict[str, Any]:
     logging.basicConfig(
         level=logging.INFO,
@@ -697,46 +866,21 @@ def run(config: Dict[str, Any] = CONFIG) -> Dict[str, Any]:
         datefmt="%H:%M:%S",
     )
     run_id, run_dir = _prepare_run_dir(config)
-    (run_dir / "batches").mkdir(parents=True, exist_ok=True)
 
     samples = _select_samples(load_sft_dataset(str(config["dataset_path"])), config)
-    records = load_existing_records(run_dir)
-    batch_no = _next_batch_number(run_dir)
-    batch_path = run_dir / "batches" / f"batch_{batch_no:04d}.jsonl"
-    batch_written = 0
+    batches = _select_batches(samples, config)
+    records = load_existing_records(
+        run_dir,
+        include_child_run_dirs=_config_bool(config, "merge_child_run_dirs", True),
+    )
 
     logger.info("Run directory: %s", run_dir)
     logger.info("Loaded %d selected samples", len(samples))
+    logger.info("Selected %d batch(es)", len(batches))
     logger.info("Existing records: %d", len(records))
 
-    for ordinal, sample in enumerate(samples, start=1):
-        if should_skip_sample(
-            sample,
-            records,
-            retry_failed=bool(config.get("retry_failed")),
-        ):
-            logger.info(
-                "[%d/%d] skip sample=%s status=%s",
-                ordinal,
-                len(samples),
-                sample.sample_id,
-                records[sample.sample_id].get("status"),
-            )
-            continue
-
-        logger.info("[%d/%d] Q: %s", ordinal, len(samples), sample.instruction[:90])
-        sample_t0 = time.perf_counter()
-        try:
-            record = evaluate_sample(sample, config)
-        except Exception as exc:
-            latency_ms = round((time.perf_counter() - sample_t0) * 1000, 2)
-            record = _record_failure(sample, exc, latency_ms)
-            logger.error("Sample failed: %s", exc)
-
-        _append_jsonl(batch_path, record)
-        records[sample.sample_id] = record
-        batch_written += 1
-
+    if not batches:
+        logger.warning("No batches selected. Check CONFIG['batch_index'], start_index, and limit.")
         _write_progress(
             run_dir=run_dir,
             run_id=run_id,
@@ -745,11 +889,17 @@ def run(config: Dict[str, Any] = CONFIG) -> Dict[str, Any]:
             config=config,
         )
 
-        if batch_written >= int(config["batch_size"]):
-            _atomic_write_json(run_dir / "summary_partial.json", build_summary(records.values()))
-            batch_no += 1
-            batch_path = run_dir / "batches" / f"batch_{batch_no:04d}.jsonl"
-            batch_written = 0
+    for batch_no, batch_samples in batches:
+        _evaluate_batch(
+            batch_no=batch_no,
+            batch_samples=batch_samples,
+            records=records,
+            run_dir=run_dir,
+            run_id=run_id,
+            samples_total=len(samples),
+            config=config,
+        )
+        _atomic_write_json(run_dir / "summary_partial.json", build_summary(records.values()))
 
         delay = float(config.get("delay_s") or 0.0)
         if delay > 0:
