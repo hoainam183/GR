@@ -30,6 +30,7 @@ evaluation/
   evaluate_llm_quality.py            Older answer-quality eval.
   evaluate_phase3.py                 Older phase eval.
   evaluate_hf_dataset.py             HuggingFace dataset eval utility.
+  evaluate_sft_backend.py            Live /chat/v3 SFT runner with resumable JSONL artifacts.
   results/                           JSON/CSV run artifacts.
   ground_truth_drafts/               Draft current-policy cases and seed labels.
 ```
@@ -105,6 +106,23 @@ Pipeline:
 5. Persist artifacts/Mongo run.
 
 Do not treat factual mismatch with old email ground truth as production failure if current policy changed.
+
+## SFT Backend Eval
+
+`evaluate_sft_backend.py` defaults to `identity_mode: "anonymous"` so live
+backend runs mirror a new anonymous frontend session: no auth header, no
+client-supplied `session_id`, no `user_context`, no `user_id`, empty history,
+`mode: "auto"`, and `top_k: 5`. Use `identity_mode: "frontend_env"` only when a
+run intentionally needs the older env-driven identity behavior from
+`EVAL_SESSION_ID`, `EVAL_USER_CONTEXT_JSON`, `EVAL_USER_ID`, or
+`EVAL_AUTH_TOKEN`.
+
+Each SFT backend record stores request identity diagnostics including
+`identity_mode`, whether an auth header was sent, optional request fields sent,
+the backend URL, `response_session_id`, and a stable request payload hash. The
+saved `response_trace` includes rerank, answer-quality, context, fusion, and
+tool fields to help distinguish evaluator identity issues from pipeline
+retrieval/rerank/fallback issues.
 
 ## Ground Truth Builder
 

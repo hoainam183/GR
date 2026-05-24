@@ -66,8 +66,11 @@ CONFIG: Dict[str, Any] = {
     "mode": "auto",
     "timeout_s": 240,  # frontend axios timeout is 240000 ms
     "delay_s": 0.5,  # pause between batches, not between samples
-    # Frontend-compatible identity/request fields. None means "omit from JSON",
-    # matching JSON.stringify({field: undefined}) in the web client.
+    # "anonymous" mirrors a new unauthenticated frontend session. "frontend_env"
+    # keeps the previous evaluator behavior of reading auth/session/profile env.
+    "identity_mode": "anonymous",
+    # Frontend-compatible identity/request fields for identity_mode=frontend_env.
+    # None means "omit from JSON", matching JSON.stringify({field: undefined}).
     "history": [],
     "session_id": None,
     "user_context": None,
@@ -161,6 +164,13 @@ def _config_bool(config: Dict[str, Any], key: str, default: bool = False) -> boo
     return bool(value)
 
 
+def _identity_mode(config: Dict[str, Any]) -> str:
+    mode = str(config.get("identity_mode") or "anonymous").strip().lower()
+    if mode not in {"anonymous", "frontend_env"}:
+        raise ValueError(f"Unsupported identity_mode={mode!r}")
+    return mode
+
+
 def _clean_optional_text(value: Any) -> Optional[str]:
     if not isinstance(value, str):
         return None
@@ -234,6 +244,9 @@ def _normalise_history(raw_history: Any) -> List[Dict[str, str]]:
 def _frontend_chat_headers(config: Dict[str, Any]) -> Dict[str, str]:
     """Mirror frontend chatApi authHeaders() for evaluator HTTP requests."""
     headers = {"Content-Type": "application/json"}
+    if _identity_mode(config) == "anonymous":
+        return headers
+
     token = _clean_optional_text(config.get("auth_token"))
     if not token:
         token_env = _clean_optional_text(config.get("auth_token_env")) or "EVAL_AUTH_TOKEN"
@@ -249,12 +262,16 @@ def _build_frontend_chat_payload(
     config: Dict[str, Any],
 ) -> Dict[str, Any]:
     """Build the same JSON shape as frontend sendMessageV3()."""
+    identity_mode = _identity_mode(config)
     payload: Dict[str, Any] = {
         "question": question,
-        "mode": str(config.get("mode") or "auto"),
-        "top_k": int(config.get("top_k") or 5),
-        "history": _normalise_history(config.get("history")),
+        "mode": "auto" if identity_mode == "anonymous" else str(config.get("mode") or "auto"),
+        "top_k": 5 if identity_mode == "anonymous" else int(config.get("top_k") or 5),
+        "history": [] if identity_mode == "anonymous" else _normalise_history(config.get("history")),
     }
+
+    if identity_mode == "anonymous":
+        return payload
 
     optional_fields: Dict[str, Any] = {
         "session_id": _text_from_config_or_env(
@@ -273,6 +290,41 @@ def _build_frontend_chat_payload(
             payload[key] = None
 
     return payload
+
+
+def _request_payload_hash(payload: Dict[str, Any]) -> str:
+    canonical = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=_json_default,
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _optional_fields_sent(payload: Dict[str, Any]) -> List[str]:
+    return [
+        key
+        for key in ("session_id", "user_context", "user_id")
+        if key in payload
+    ]
+
+
+def _request_record_metadata(
+    *,
+    config: Dict[str, Any],
+    backend_url: str,
+    request_payload: Dict[str, Any],
+    request_headers: Dict[str, str],
+) -> Dict[str, Any]:
+    return {
+        "identity_mode": _identity_mode(config),
+        "auth_header_sent": "Authorization" in request_headers,
+        "optional_fields_sent": _optional_fields_sent(request_payload),
+        "request_payload_hash": _request_payload_hash(request_payload),
+        "backend_url": backend_url,
+    }
 
 
 def _atomic_write_json(path: Path, payload: Dict[str, Any]) -> None:
@@ -469,18 +521,19 @@ def _post_backend(
     question: str,
     config: Dict[str, Any],
     timeout_s: float,
-) -> tuple[Dict[str, Any], Dict[str, Any]]:
+) -> tuple[Dict[str, Any], Dict[str, Any], Dict[str, str]]:
     payload = _build_frontend_chat_payload(question=question, config=config)
+    headers = _frontend_chat_headers(config)
     request = urllib.request.Request(
         backend_url,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers=_frontend_chat_headers(config),
+        headers=headers,
         method="POST",
     )
     try:
         with urllib.request.urlopen(request, timeout=timeout_s) as response:
             body = response.read().decode("utf-8")
-            return json.loads(body), payload
+            return json.loads(body), payload, headers
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"HTTP {exc.code}: {detail}") from exc
@@ -787,8 +840,9 @@ def _write_final_outputs(run_dir: Path, records: Dict[str, Dict[str, Any]]) -> D
     fields = [
         "sample_id", "index", "batch_index", "status", "question", "reference_answer",
         "generated_answer", "doc_type", "document_title", "article", "clause",
+        "identity_mode", "auth_header_sent", "optional_fields_sent", "request_payload_hash",
         "request_mode", "request_top_k", "request_history_len", "request_session_id",
-        "response_session_id", "backend_mode", "route", "reflected_question",
+        "response_session_id", "backend_url", "backend_mode", "route", "reflected_question",
         "num_sources", "latency_ms", "cache_hit", "query_cache_hit", "agent_error",
         "iterations", "error",
         "reference_keyword_coverage", "atomic_fact_coverage", "citation_text_hit",
@@ -837,8 +891,13 @@ def _prepare_run_dir(config: Dict[str, Any]) -> tuple[str, Path]:
     return run_id, run_dir
 
 
-def _record_failure(sample: SFTSample, exc: Exception, latency_ms: float) -> Dict[str, Any]:
-    return {
+def _record_failure(
+    sample: SFTSample,
+    exc: Exception,
+    latency_ms: float,
+    config: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
+    record = {
         "sample_id": sample.sample_id,
         "index": sample.index,
         "status": "failed",
@@ -854,10 +913,35 @@ def _record_failure(sample: SFTSample, exc: Exception, latency_ms: float) -> Dic
         "finished_at": _now_iso(),
     }
 
+    if config is not None:
+        try:
+            request_payload = _build_frontend_chat_payload(
+                question=sample.instruction,
+                config=config,
+            )
+            request_headers = _frontend_chat_headers(config)
+            record.update(
+                _request_record_metadata(
+                    config=config,
+                    backend_url=str(config.get("backend_url") or ""),
+                    request_payload=request_payload,
+                    request_headers=request_headers,
+                )
+            )
+            record["request_payload"] = (
+                request_payload
+                if _config_bool(config, "record_request_payload", True)
+                else None
+            )
+        except Exception as metadata_exc:
+            record["request_metadata_error"] = str(metadata_exc)
+
+    return record
+
 
 def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]:
     started = time.perf_counter()
-    response, request_payload = _post_backend(
+    response, request_payload, request_headers = _post_backend(
         backend_url=str(config["backend_url"]),
         question=sample.instruction,
         config=config,
@@ -880,14 +964,26 @@ def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]
         "query_cache_hit",
         "agent_error",
         "agent_trace",
+        "rerank_trace",
+        "answer_quality_gate",
+        "context_trace",
+        "fusion_weights",
         "tools_used",
         "tool_calls",
         "iterations",
     )
+    always_trace_keys = {
+        "rerank_trace",
+        "answer_quality_gate",
+        "context_trace",
+        "fusion_weights",
+        "tools_used",
+        "tool_calls",
+    }
     response_trace = {
         key: response.get(key)
         for key in response_trace_keys
-        if response.get(key) is not None
+        if response.get(key) is not None or key in always_trace_keys
     }
 
     judge = _compare_with_reference(
@@ -911,6 +1007,12 @@ def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]
         "article": sample.metadata.get("article", ""),
         "clause": sample.metadata.get("clause", ""),
         "effective_date": sample.metadata.get("effective_date", ""),
+        **_request_record_metadata(
+            config=config,
+            backend_url=str(config["backend_url"]),
+            request_payload=request_payload,
+            request_headers=request_headers,
+        ),
         "request_mode": request_payload.get("mode"),
         "request_top_k": request_payload.get("top_k"),
         "request_history_len": (
@@ -964,7 +1066,7 @@ def _evaluate_sample_safe(sample: SFTSample, config: Dict[str, Any]) -> Dict[str
     except Exception as exc:
         latency_ms = round((time.perf_counter() - sample_t0) * 1000, 2)
         logger.error("Sample failed: %s", exc)
-        return _record_failure(sample, exc, latency_ms)
+        return _record_failure(sample, exc, latency_ms, config)
 
 
 def _evaluate_batch(

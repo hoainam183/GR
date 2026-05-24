@@ -22,7 +22,7 @@ Pytest config is in `pytest.ini`.
 | `retrieval/test_*.py` | Retrieval module unit/regression checks moved out of runtime package. |
 | `test_reference_resolver.py`, `test_multi_collection_fusion.py` | Retrieval post-processing/fusion. |
 | `test_mobile_api_contracts.py` | Backend contract for mobile/shared API. |
-| `test_two_layer_eval.py`, `test_week4_evaluate.py` | Evaluation layer. |
+| `test_two_layer_eval.py`, `test_week4_evaluate.py`, `test_sft_backend_eval.py` | Evaluation layer. |
 | `conversation_regression_queries.jsonl` | Saved chat/RAG regression prompts. |
 
 Root-level test files such as `test_reflection.py`, `test_retrieval.py`, and `test_retrieval_docs.py` are legacy/manual checks outside the default pytest `testpaths`; retrieval pytest files should stay under `tests/retrieval/`.
@@ -39,6 +39,9 @@ Use `-m "not integration"` for fast local checks that should not require externa
 ## Maintenance Notes
 
 - When fixing chat/RAG behavior, add or replay saved conversation regression queries.
+- `test_sft_backend_eval.py` covers the live SFT backend runner's anonymous
+  identity default, retained `frontend_env` behavior, resumable artifacts, and
+  request diagnostics.
 - Keep mobile contract tests aligned with `packages/shared` and backend schemas.
 - Keep RAGPipeline admin reload tests aligned with the current hot-swap contract; route cache is cleared on reload, but reflection no longer has a separate pipeline cache.
 - Prefer focused tests for doc-only changes only when there is parser/link/script impact.

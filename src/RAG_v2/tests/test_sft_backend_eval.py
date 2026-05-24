@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 
 
@@ -170,6 +171,171 @@ def test_select_batches_supports_specific_batch_index():
     assert [sample.index for sample in all_batches[0][1]] == [1, 2]
     assert selected_batch[0][0] == 2
     assert [sample.index for sample in selected_batch[0][1]] == [3, 4]
+
+
+def test_anonymous_identity_mode_ignores_eval_env_and_identity_config(monkeypatch):
+    from evaluation.evaluate_sft_backend import (
+        _build_frontend_chat_payload,
+        _frontend_chat_headers,
+    )
+
+    monkeypatch.setenv("EVAL_SESSION_ID", "env-session")
+    monkeypatch.setenv("EVAL_USER_CONTEXT_JSON", json.dumps({"cohort": "K70"}))
+    monkeypatch.setenv("EVAL_USER_ID", "env-user")
+    monkeypatch.setenv("EVAL_AUTH_TOKEN", "env-token")
+
+    config = {
+        "identity_mode": "anonymous",
+        "mode": "manual",
+        "top_k": 99,
+        "history": [{"role": "user", "content": "previous turn"}],
+        "session_id": "configured-session",
+        "user_context": {"cohort": "K69", "full_name": "Configured User"},
+        "user_id": "configured-user",
+        "send_null_optional_fields": True,
+        "auth_token": "configured-token",
+        "session_id_env": "EVAL_SESSION_ID",
+        "user_context_env": "EVAL_USER_CONTEXT_JSON",
+        "user_id_env": "EVAL_USER_ID",
+        "auth_token_env": "EVAL_AUTH_TOKEN",
+    }
+
+    payload = _build_frontend_chat_payload(question="hello", config=config)
+    headers = _frontend_chat_headers(config)
+
+    assert payload == {
+        "question": "hello",
+        "mode": "auto",
+        "top_k": 5,
+        "history": [],
+    }
+    assert headers == {"Content-Type": "application/json"}
+
+
+def test_frontend_env_identity_mode_keeps_env_driven_identity(monkeypatch):
+    from evaluation.evaluate_sft_backend import (
+        _build_frontend_chat_payload,
+        _frontend_chat_headers,
+    )
+
+    monkeypatch.setenv("EVAL_SESSION_ID", "env-session")
+    monkeypatch.setenv(
+        "EVAL_USER_CONTEXT_JSON",
+        json.dumps(
+            {
+                "student_id": "20260001",
+                "cohort": "K70",
+                "major": "Computer Science",
+                "ignored": "drop-me",
+            }
+        ),
+    )
+    monkeypatch.setenv("EVAL_USER_ID", "env-user")
+    monkeypatch.setenv("EVAL_AUTH_TOKEN", "env-token")
+
+    config = {
+        "identity_mode": "frontend_env",
+        "mode": "auto",
+        "top_k": 7,
+        "history": [{"role": "assistant", "content": "previous answer"}],
+        "session_id": None,
+        "user_context": None,
+        "user_id": None,
+        "send_null_optional_fields": False,
+        "auth_token": "",
+        "session_id_env": "EVAL_SESSION_ID",
+        "user_context_env": "EVAL_USER_CONTEXT_JSON",
+        "user_id_env": "EVAL_USER_ID",
+        "auth_token_env": "EVAL_AUTH_TOKEN",
+    }
+
+    payload = _build_frontend_chat_payload(question="hello", config=config)
+    headers = _frontend_chat_headers(config)
+
+    assert payload["mode"] == "auto"
+    assert payload["top_k"] == 7
+    assert payload["history"] == [{"role": "assistant", "content": "previous answer"}]
+    assert payload["session_id"] == "env-session"
+    assert payload["user_id"] == "env-user"
+    assert payload["user_context"] == {
+        "student_id": "20260001",
+        "cohort": "K70",
+        "major": "Computer Science",
+    }
+    assert headers["Authorization"] == "Bearer env-token"
+
+
+def test_evaluate_sample_records_identity_and_request_payload_hash(monkeypatch):
+    from evaluation import evaluate_sft_backend as runner
+
+    request_payload = {
+        "question": "hello",
+        "mode": "auto",
+        "top_k": 5,
+        "history": [],
+    }
+    request_headers = {"Content-Type": "application/json"}
+
+    def fake_post_backend(*, backend_url, question, config, timeout_s):
+        assert backend_url == "http://backend.test/chat/v3"
+        assert question == "hello"
+        assert timeout_s == 1.0
+        return (
+            {
+                "answer": "answer",
+                "session_id": "backend-session",
+                "sources": [],
+            },
+            request_payload,
+            request_headers,
+        )
+
+    monkeypatch.setattr(runner, "_post_backend", fake_post_backend)
+
+    sample = runner.SFTSample(
+        index=1,
+        sample_id="id-1",
+        instruction="hello",
+        input="",
+        reference_answer="answer",
+        doc_type="doc",
+    )
+
+    record = runner.evaluate_sample(
+        sample,
+        {
+            "backend_url": "http://backend.test/chat/v3",
+            "timeout_s": 1.0,
+            "judge_backend": "none",
+            "identity_mode": "anonymous",
+            "record_request_payload": True,
+            "record_response_trace": True,
+        },
+    )
+
+    expected_hash = hashlib.sha256(
+        json.dumps(
+            request_payload,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            default=runner._json_default,
+        ).encode("utf-8")
+    ).hexdigest()
+
+    assert record["identity_mode"] == "anonymous"
+    assert record["auth_header_sent"] is False
+    assert record["optional_fields_sent"] == []
+    assert record["request_payload_hash"] == expected_hash
+    assert record["backend_url"] == "http://backend.test/chat/v3"
+    assert record["response_session_id"] == "backend-session"
+    assert record["request_payload"] == request_payload
+    assert record["response_trace"]["rerank_trace"] is None
+    assert record["response_trace"]["answer_quality_gate"] is None
+    assert record["response_trace"]["context_trace"] is None
+    assert record["response_trace"]["fusion_weights"] is None
+    assert record["response_trace"]["tools_used"] is None
+    assert record["response_trace"]["tool_calls"] is None
 
 
 def test_evaluate_batch_writes_each_independent_request_result(tmp_path, monkeypatch):
