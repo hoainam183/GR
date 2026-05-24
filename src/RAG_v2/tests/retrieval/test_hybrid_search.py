@@ -1,9 +1,5 @@
 """Quick test for HybridSearch RRF fusion logic (no live services needed)."""
 
-import sys
-
-sys.path.insert(0, "..")
-
 from retrieval.hybrid_search import HybridSearch, rrf_score
 
 

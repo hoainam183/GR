@@ -163,15 +163,6 @@ def _log_timings(flow_name: str, timings_ms: Dict[str, Any]) -> None:
     logger.info("%s timings (ms): %s", flow_name, summary)
 
 
-def _retrieval_candidate_k(top_k: int) -> int:
-    """Return candidate pool size before reranking.
-
-    Keep the previous proportional heuristic (4x final top_k) while enforcing
-    a minimum of 20 candidates for stronger reranker recall.
-    """
-    return max(top_k * 4, 40)
-
-
 def _resolve_top_k(base_top_k: int, query: str) -> int:
     """Return an effective top_k, scaled up for list/enumerate queries.
 
@@ -1247,22 +1238,6 @@ def _is_context_length_error(exc: Exception) -> bool:
     """Detect provider errors caused by prompt/context length overflow."""
     message = str(exc).lower()
     return any(marker in message for marker in _CTX_ERROR_MARKERS)
-
-
-def _try_direct_answer(question: str) -> Optional[str]:
-    """Handle simple out-of-domain questions locally — no LLM or retrieval."""
-    q = question.lower().strip()
-    now = datetime.now()
-    days_vi = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"]
-
-    if any(kw in q for kw in ("mấy giờ", "may gio", "bây giờ là mấy", "bay gio la may")):
-        return f"Bây giờ là {now.strftime('%H:%M')} ngày {now.strftime('%d/%m/%Y')}."
-
-    if any(kw in q for kw in ("hôm nay", "hom nay", "ngày mấy", "ngay may", "thứ mấy", "thu may")):
-        day_name = days_vi[now.weekday()]
-        return f"Hôm nay là {day_name}, ngày {now.strftime('%d/%m/%Y')}."
-
-    return None
 
 
 def _extract_session_profile_dict(
@@ -3081,7 +3056,6 @@ def _tavily_search_context(
             "sources": [],
             "used": False,
         }
-
     try:
         from tools.tavily_search import HUST_OFFICIAL_DOMAINS
 
@@ -3167,8 +3141,6 @@ def _tavily_search_context(
             "sources": [],
             "used": False,
         }
-
-
 def _tavily_fallback_result(
     *,
     question: str,
@@ -3200,7 +3172,6 @@ def _tavily_fallback_result(
             "sources": tavily_sources,
             "used": False,
         }
-
     try:
         regenerate_t0 = time.perf_counter()
         new_answer = chat_model.generate(
@@ -3230,26 +3201,3 @@ def _tavily_fallback_result(
             "sources": tavily_sources,
             "used": False,
         }
-
-
-def _tavily_fallback(
-    *,
-    question: str,
-    answer: str,
-    tavily_tool: Any | None,
-    chat_model: BaseLLM,
-    history: List[Dict[str, str]],
-    max_results: int = 3,
-    search_depth: str = "basic",
-) -> tuple[str, Dict[str, float]]:
-    """Backward-compatible wrapper for Tavily fallback."""
-    result = _tavily_fallback_result(
-        question=question,
-        answer=answer,
-        tavily_tool=tavily_tool,
-        chat_model=chat_model,
-        history=history,
-        max_results=max_results,
-        search_depth=search_depth,
-    )
-    return str(result["answer"]), result["timings"]

@@ -422,7 +422,6 @@ def test_pipeline_llm_reload_prepares_before_swapping(monkeypatch) -> None:
     pipeline._tavily = object()
     pipeline._retrieval_service = retrieval_service
     pipeline._route_cache = OrderedDict([("route", (0.0, {}))])
-    pipeline._reflect_cache = OrderedDict([("reflect", (0.0, "q"))])
     pipeline._llm_runtime_lock = rag_pipeline_module.RLock()
 
     new_reflector = object()
@@ -471,7 +470,6 @@ def test_pipeline_llm_reload_prepares_before_swapping(monkeypatch) -> None:
     assert retrieval_service.tavily_tool is new_tavily
     assert retrieval_service.settings is settings
     assert pipeline._route_cache == {}
-    assert pipeline._reflect_cache == {}
     assert rebuilt["agent"] == "new-agent"
     assert injected == [retrieval_service]
     assert pipeline._llm_runtime_snapshot().chat is new_chat

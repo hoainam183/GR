@@ -82,11 +82,9 @@ from .flows import (
 
 logger = logging.getLogger(__name__)
 
-# Route + reflection cache — avoids repeat classifier/LLM calls
+# Route cache avoids repeat classifier calls.
 _ROUTE_CACHE_TTL_SEC = 45.0
 _ROUTE_CACHE_MAX_SIZE = 256
-_REFLECT_CACHE_TTL_SEC = 30.0
-_REFLECT_CACHE_MAX_SIZE = 256
 
 
 def _build_cache_key(
@@ -319,7 +317,6 @@ class RAGPipeline:
         self._llm_cache = llm_cache
         self._llm_runtime_lock = RLock()
         self._route_cache: OrderedDict[str, tuple[float, Dict[str, Any]]] = OrderedDict()
-        self._reflect_cache: OrderedDict[str, tuple[float, str]] = OrderedDict()
 
         # Inject pipeline's shared retrieval stack into agent tool adapters.
         # This eliminates the ~17 s cold-start that occurs when the agent
@@ -404,7 +401,6 @@ class RAGPipeline:
             self._retrieval_service.settings = settings
             self._retrieval_service.tavily_tool = prepared.tavily_tool
             self._route_cache.clear()
-            self._reflect_cache.clear()
 
         from agent.tool_adapters import inject_from_retrieval_service
 
@@ -449,38 +445,6 @@ class RAGPipeline:
         while len(self._route_cache) > _ROUTE_CACHE_MAX_SIZE:
             self._route_cache.popitem(last=False)
         return routed
-
-    def _reflect_with_cache(
-        self,
-        question: str,
-        history: Optional[List[Dict[str, str]]],
-    ) -> str:
-        """Reflect with a short-lived cache for similar queries."""
-        import time as _time
-        reflector = self._llm_runtime_snapshot().reflector
-        if reflector is None:
-            return question
-        now = _time.time()
-        key = _build_cache_key(question, history)
-        cached = self._reflect_cache.get(key)
-        if cached is not None:
-            ts, rewritten = cached
-            if now - ts <= _REFLECT_CACHE_TTL_SEC:
-                self._reflect_cache.move_to_end(key)
-                logger.debug("Reflect cache hit: %r", question[:60])
-                return rewritten
-            del self._reflect_cache[key]
-        try:
-            result = reflector.reflect(question, chat_history=history)
-            rewritten = result.get("rewritten", question)
-        except Exception:
-            logger.warning("Reflection failed", exc_info=True)
-            rewritten = question
-        self._reflect_cache[key] = (now, rewritten)
-        self._reflect_cache.move_to_end(key)
-        while len(self._reflect_cache) > _REFLECT_CACHE_MAX_SIZE:
-            self._reflect_cache.popitem(last=False)
-        return rewritten
 
     # ------------------------------------------------------------------
     # Public API
@@ -786,6 +750,28 @@ class RAGPipeline:
                 "mode": "chitchat",
                 "route": "chitchat",
                 "route_reason": route_result.get("reason", ""),
+                "tools_used": [],
+                "tool_calls": [],
+                "iterations": 0,
+                "agent_trace": None,
+            }
+
+        if route == "complex" and subtype == "personal_check":
+            return {
+                "question": question,
+                "answer": (
+                    "Để kiểm tra điều kiện tốt nghiệp cá nhân, mình cần thêm "
+                    "CPA/GPA, số tín chỉ đã tích lũy, trạng thái chuẩn ngoại ngữ, "
+                    "GDTC, GDQP-AN, tình trạng kỷ luật/pháp lý và trạng thái đăng ký "
+                    "xét tốt nghiệp. Bạn muốn mình nêu điều kiện tốt nghiệp chung, "
+                    "hay kiểm tra theo thông tin cá nhân của bạn?"
+                ),
+                "mode": "clarify",
+                "route": "personal_check",
+                "route_reason": route_result.get("reason", ""),
+                "intent": "personal_check",
+                "sources": [],
+                "num_sources": 0,
                 "tools_used": [],
                 "tool_calls": [],
                 "iterations": 0,

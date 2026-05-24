@@ -5,7 +5,7 @@ Covers:
   - P1: metadata-aware reranking, multi-query expansion
   - P2: score fusion edge cases, filter fallback chain
 
-Run with: python -m pytest retrieval/test_retrieval_improvements.py -v
+Run with: python -m pytest tests/retrieval/test_retrieval_improvements.py -v
 """
 
 from __future__ import annotations

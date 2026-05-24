@@ -9,12 +9,7 @@ from __future__ import annotations
 
 import json
 
-try:
-    from .elasticsearch_store import ElasticsearchStore
-    from .elasticsearch_store import INDEX_SETTINGS
-except ImportError:  # pragma: no cover - script execution from retrieval/
-    from elasticsearch_store import ElasticsearchStore
-    from elasticsearch_store import INDEX_SETTINGS
+from retrieval.elasticsearch_store import ElasticsearchStore, INDEX_SETTINGS
 
 TEST_INDEX = "test_university_docs"
 

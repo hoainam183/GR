@@ -60,7 +60,8 @@ retrieval/
 |--------|-----------|-------------|
 | `embed_query` | `(query) → (bge_vec, e5_vec)` | Embed with both models |
 | `search` | `(query, *, collections, top_k, resolved_major, resolved_cohort, rerank=True) → List[Dict]` | Full hybrid search + optional reranking |
-| `web_search` | `(query, max_results=3) → Any` | Tavily web search |
+
+`RetrievalService` may still hold an optional `tavily_tool` for pipeline/agent runtime wiring, but Tavily calls are made through the pipeline/agent tool layer rather than a retrieval-service `web_search()` wrapper.
 
 ### `search()` internals
 
@@ -563,6 +564,7 @@ Resolved chunks are marked with `_cross_reference=True`, `_referenced_from`, and
 - When changing fusion/scoring, run current policy eval and search strategy benchmark.
 - `date_str` is stored as keyword `"D/M/YYYY"` — not a native ES date field, so sorting requires Python-side parsing.
 - The `fallback_analyzer` in ES uses `standard` tokenizer as a safe fallback when the ICU plugin is missing.
+- Runtime code stays under `retrieval/`; retrieval-specific pytest files live under `tests/retrieval/`.
 
 ---
 
@@ -570,5 +572,5 @@ Resolved chunks are marked with `_cross_reference=True`, `_referenced_from`, and
 
 ```bash
 python -m py_compile retrieval/*.py
-python -m pytest tests/test_multi_collection_fusion.py tests/test_reference_resolver.py retrieval/test_metadata_filters.py retrieval/test_hybrid_search.py -q -m "not integration"
+python -m pytest tests/retrieval tests/test_multi_collection_fusion.py tests/test_reference_resolver.py -q -m "not integration"
 ```

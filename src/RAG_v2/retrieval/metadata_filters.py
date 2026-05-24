@@ -963,19 +963,6 @@ def _match_only(field: str, value: str) -> Dict[str, Any]:
     return {"match": {field: {"query": value, "fuzziness": "AUTO"}}}
 
 
-def _null_or_match(field: str, value: str) -> Dict[str, Any]:
-    """ES query: ``field`` contains *value* (fuzzy match) OR field is absent."""
-    return {
-        "bool": {
-            "should": [
-                _match_only(field, value),
-                _null_clause(field),
-            ],
-            "minimum_should_match": 1,
-        }
-    }
-
-
 # ─── Collection-specific extractors ─────────────────────────────────────────────
 
 

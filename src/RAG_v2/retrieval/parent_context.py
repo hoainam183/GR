@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, Set
 
-from qdrant_client import QdrantClient, models
+from qdrant_client import QdrantClient
 
 logger = logging.getLogger(__name__)
 
@@ -158,71 +158,6 @@ class ParentContextExpander:
         parents = self._fetch_parents([parent_id], collection)
         return parents.get(parent_id)
 
-    def get_siblings(
-        self,
-        child_result: Dict[str, Any],
-        collection: str,
-        max_siblings: int = 5,
-    ) -> List[Dict[str, Any]]:
-        """Fetch sibling chunks that share the same parent.
-
-        Args:
-            child_result: A child search result.
-            collection: Qdrant collection name.
-            max_siblings: Maximum number of siblings to return.
-
-        Returns:
-            List of sibling chunk dicts (excluding the input child).
-        """
-        metadata = child_result.get("metadata", {})
-        parent_id = metadata.get("parent_id")
-        child_id = child_result.get("id", "")
-
-        if not parent_id:
-            return []
-
-        try:
-            # Search for chunks with the same parent_id
-            scroll_results, _ = self.client.scroll(
-                collection_name=collection,
-                scroll_filter=models.Filter(
-                    must=[
-                        models.FieldCondition(
-                            key="parent_id",
-                            match=models.MatchValue(value=parent_id),
-                        ),
-                        models.FieldCondition(
-                            key="level",
-                            match=models.MatchValue(value="child"),
-                        ),
-                    ]
-                ),
-                limit=max_siblings + 1,  # +1 to account for the input child itself
-                with_payload=True,
-                with_vectors=False,
-            )
-        except Exception:
-            logger.warning("Failed to fetch siblings for parent_id=%s", parent_id, exc_info=True)
-            return []
-
-        siblings = []
-        for point in scroll_results:
-            pid = str(point.id)
-            if pid == child_id:
-                continue
-            payload = dict(point.payload or {})
-            text = payload.pop("text", "")
-            siblings.append({
-                "id": pid,
-                "text": text,
-                "metadata": payload,
-                "score": 0.0,  # Siblings don't have a search score
-            })
-            if len(siblings) >= max_siblings:
-                break
-
-        return siblings
-
     def _fetch_parents(
         self,
         parent_ids: List[str],
@@ -262,12 +197,3 @@ class ParentContextExpander:
             }
 
         return result
-
-
-def create_expander_from_settings(settings: Any) -> ParentContextExpander:
-    """Factory: create a ParentContextExpander from application Settings."""
-    return ParentContextExpander(
-        qdrant_host=getattr(settings, "qdrant_host", "localhost"),
-        qdrant_port=getattr(settings, "qdrant_port", 6333),
-        max_parent_chars=getattr(settings, "context_total_char_budget_with_expansion", 16000) // 2,
-    )

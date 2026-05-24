@@ -77,7 +77,6 @@ cold-loading retrieval models.
 Private orchestration helpers:
 
 - `_route_with_cache()`
-- `_reflect_with_cache()`
 - `_query_decomposed()`
 - `_llm_domain_classify()`
 - `_handle_chitchat()`
@@ -88,15 +87,17 @@ Private orchestration helpers:
 query_v3(question)
   -> ComplexityRouter
      -> chitchat: _handle_chitchat(), no retrieval
+     -> complex + personal_check: clarify, no retrieval/agent
      -> simple: query()
      -> complex + multi_source/comparison: QueryDecomposer -> _query_decomposed()
-     -> complex general/personal_check: query_agent()
+     -> complex general: query_agent()
         -> fallback to query() when agent disabled/errors unless require_agent
 ```
 
 Typical returned modes:
 
 - `chitchat`
+- `clarify`
 - `rag_v2`
 - `rag_v2_decomposed`
 - `agent`
@@ -128,6 +129,7 @@ Important current behavior:
 - List/enumeration queries can raise effective `top_k`.
 - Freshness/plan queries routed to `kehoach` can lock collection selection to `kehoach`.
 - Profile notes are injected only for profile-dependent wording like "nganh cua toi"; generic latest/freshness queries should not inherit major/cohort from profile/history.
+- Personal eligibility checks such as "dieu kien tot nghiep cua toi" return a clarification asking for CPA/GPA, credits, foreign-language, GDTC, GDQP-AN, discipline/legal, and graduation registration status instead of pretending to evaluate missing student data.
 - Streaming runs retrieval first, then streams tokens; it intentionally avoids post-generation self-eval/Tavily to preserve streaming semantics.
 
 ## Tavily/Web Fallback

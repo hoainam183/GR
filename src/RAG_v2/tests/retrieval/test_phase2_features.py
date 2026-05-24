@@ -1,6 +1,6 @@
 """Tests for Phase 2 features: HyDE, Contextual Retrieval, Multi-Query Service.
 
-Run with: python -m pytest retrieval/test_phase2_features.py -v
+Run with: python -m pytest tests/retrieval/test_phase2_features.py -v
 """
 
 from __future__ import annotations

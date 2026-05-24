@@ -19,12 +19,13 @@ Pytest config is in `pytest.ini`.
 | `test_rbac.py` | Auth and admin/superadmin behavior. |
 | `test_phase1_redis.py`, `test_phase2_redis.py` | Redis session/history/cache/rate limit behavior. |
 | `test_phase7.py`, `test_phase8.py` | Recent RAG/Tavily/profile/freshness guardrails. |
+| `retrieval/test_*.py` | Retrieval module unit/regression checks moved out of runtime package. |
 | `test_reference_resolver.py`, `test_multi_collection_fusion.py` | Retrieval post-processing/fusion. |
 | `test_mobile_api_contracts.py` | Backend contract for mobile/shared API. |
 | `test_two_layer_eval.py`, `test_week4_evaluate.py` | Evaluation layer. |
 | `conversation_regression_queries.jsonl` | Saved chat/RAG regression prompts. |
 
-Root-level test files such as `test_reflection.py`, `test_retrieval.py`, and `test_retrieval_docs.py` are legacy/module-specific checks outside the `tests/` folder.
+Root-level test files such as `test_reflection.py`, `test_retrieval.py`, and `test_retrieval_docs.py` are legacy/manual checks outside the default pytest `testpaths`; retrieval pytest files should stay under `tests/retrieval/`.
 
 ## Markers
 
@@ -39,6 +40,7 @@ Use `-m "not integration"` for fast local checks that should not require externa
 
 - When fixing chat/RAG behavior, add or replay saved conversation regression queries.
 - Keep mobile contract tests aligned with `packages/shared` and backend schemas.
+- Keep RAGPipeline admin reload tests aligned with the current hot-swap contract; route cache is cleared on reload, but reflection no longer has a separate pipeline cache.
 - Prefer focused tests for doc-only changes only when there is parser/link/script impact.
 - For retrieval/model/service tests, be explicit about whether Qdrant/ES/Mongo/Redis/local models are required.
 
@@ -46,6 +48,7 @@ Use `-m "not integration"` for fast local checks that should not require externa
 
 ```bash
 python -m pytest tests -q -m "not integration"
+python -m pytest tests/retrieval -q -m "not integration"
 python -m pytest tests/test_chat_route_mode.py tests/test_response_mapper.py -q -m "not integration"
 python -m pytest tests/test_upload_api.py tests/test_document_pipeline.py -q -m "not integration"
 ```

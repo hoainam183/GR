@@ -140,6 +140,7 @@ RAG_v2/
 
 - Chạy `ComplexityRouter` trước mọi branch.
 - `chitchat`: trả canned response, không gọi LLM/retrieval.
+- `complex` + `personal_check`: trả `mode=clarify` để hỏi thêm dữ liệu cá nhân bắt buộc, không gọi retrieval/agent.
 - `complex` + multi-source decomposition hợp lệ: chạy decomposed RAG và trả `mode=rag_v2_decomposed`.
 - `simple` hoặc `agent_enabled=false`: fallback về classic `query()` và trả `mode=rag_v2`.
 - Các complex còn lại: chạy `query_agent()`, nếu agent lỗi thì fallback classic RAG trừ khi caller yêu cầu `require_agent=True`.
@@ -306,6 +307,9 @@ routing_probabilities
 reflection_prompt
 llm_prompt
 ```
+
+`mode` may be `clarify` when `query_v3()` detects a personal eligibility check
+that lacks required student-specific data.
 
 ### Auth & RBAC
 

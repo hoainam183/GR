@@ -494,16 +494,3 @@ class RetrievalService:
             logger.warning("Parent context expansion failed", exc_info=True)
 
         return results
-
-    def web_search(self, query: str, max_results: int = 3) -> Any:
-        """Run a Tavily web search.
-
-        Returns:
-            Search results dict, or None if Tavily is not configured.
-
-        Raises:
-            RuntimeError: If Tavily is not available.
-        """
-        if self.tavily_tool is None:
-            raise RuntimeError("Tavily web search tool is not configured.")
-        return self.tavily_tool.search(query=query, max_results=max_results)
