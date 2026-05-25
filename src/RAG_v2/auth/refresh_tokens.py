@@ -21,6 +21,22 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _as_utc(dt: datetime) -> datetime:
+    """Return *dt* as a timezone-aware UTC datetime.
+
+    Motor/PyMongo returns **naive** datetimes (UTC, no tzinfo) by default
+    because the MongoDB wire protocol stores dates as UTC milliseconds and the
+    driver does not add tzinfo unless ``tz_aware=True`` is passed to the
+    client.  We store aware datetimes (from ``_now()``), which PyMongo
+    converts to UTC on write and strips on read.
+
+    This helper re-attaches UTC so we can compare safely with ``_now()``.
+    """
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 def _settings() -> tuple[int, int]:
     lifetime_days = int(os.environ.get("JWT_REFRESH_EXPIRE_DAYS", "30"))
     idle_days = int(os.environ.get("JWT_REFRESH_IDLE_DAYS", "7"))
@@ -49,12 +65,13 @@ def _unauthorized(detail: str) -> HTTPException:
 def _is_expired(doc: dict[str, Any], now: datetime) -> bool:
     _, idle_days = _settings()
     expires_at = doc.get("expires_at")
-    if isinstance(expires_at, datetime) and expires_at <= now:
+    # Motor returns naive UTC datetimes; normalize before comparing with aware `now`.
+    if isinstance(expires_at, datetime) and _as_utc(expires_at) <= now:
         return True
 
     last_used_at = doc.get("last_used_at") or doc.get("created_at")
     if isinstance(last_used_at, datetime):
-        return last_used_at + timedelta(days=idle_days) <= now
+        return _as_utc(last_used_at) + timedelta(days=idle_days) <= now
 
     return False
 

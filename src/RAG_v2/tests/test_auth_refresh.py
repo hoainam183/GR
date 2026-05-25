@@ -256,3 +256,34 @@ async def test_expired_refresh_token_is_rejected(app: FastAPI, fake_db: _FakeDb)
             json={"refresh_token": refresh_token, "client_type": "mobile"},
         )
         assert refreshed.status_code == 401
+
+
+@pytest.mark.anyio
+async def test_naive_utc_datetime_from_mongodb_does_not_crash(app: FastAPI, fake_db: _FakeDb):
+    """Motor returns naive UTC datetimes; _is_expired must not throw TypeError."""
+    await _create_user(fake_db)
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        login = await client.post(
+            "/auth/login",
+            json={
+                "username": "student",
+                "password": "password123",
+                "client_type": "mobile",
+            },
+        )
+        refresh_token = login.json()["refresh_token"]
+
+        # Simulate what Motor does: strip tzinfo from stored datetimes.
+        token_doc = fake_db[REFRESH_TOKENS_COLLECTION].find_by_hash(refresh_token)
+        assert token_doc is not None
+        for key in ("expires_at", "last_used_at", "created_at"):
+            if isinstance(token_doc.get(key), datetime):
+                token_doc[key] = token_doc[key].replace(tzinfo=None)
+
+        # Must NOT crash with TypeError and must return 200.
+        refreshed = await client.post(
+            "/auth/refresh",
+            json={"refresh_token": refresh_token, "client_type": "mobile"},
+        )
+        assert refreshed.status_code == 200, refreshed.json()
