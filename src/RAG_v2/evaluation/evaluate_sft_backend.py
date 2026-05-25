@@ -53,8 +53,8 @@ CONFIG: Dict[str, Any] = {
     "dataset_path": "eval/data/sft_dataset (1).jsonl",
     "backend_url": _frontend_default_backend_url(),
     "output_dir": "evaluation/results/sft_backend_eval",
-    "run_dir": None,  # None = use output_dir directly; set a path to isolate a run
-    "timestamped_run_dir": True,  # fresh live-backend run: output_dir/YYYYMMDD_HHMMSS
+    "run_dir": "evaluation/results/sft_backend_eval",  # None = use output_dir directly; set a path to isolate a run
+    "timestamped_run_dir": False,  # fresh live-backend run: output_dir/YYYYMMDD_HHMMSS
     "merge_child_run_dirs": False,  # do not reuse stale child-run records by default
     "resume_dir": None,
     "batch_size": 1,  # number of questions grouped into one runner batch
@@ -62,15 +62,20 @@ CONFIG: Dict[str, Any] = {
     "batch_concurrency": 1,  # independent /chat/v3 HTTP requests in flight per batch
     "limit": 0,
     "start_index": 0,
+    # 1-based dataset sample index for resume runs. Example: 256 = run sample
+    # index 256 through the end without checking samples 1..255.
+    "resume_from_index": 460,
     "top_k": 5,
     "mode": "auto",
     "timeout_s": 240,  # frontend axios timeout is 240000 ms
     "delay_s": 0.5,  # pause between batches, not between samples
-    # "anonymous" mirrors a new unauthenticated frontend session. "frontend_env"
-    # keeps the previous evaluator behavior of reading auth/session/profile env.
+    # "anonymous" sends a real user turn with no auth/session/profile identity.
+    # "frontend_env" keeps the previous evaluator behavior of reading
+    # auth/session/profile env.
     "identity_mode": "anonymous",
     # Frontend-compatible identity/request fields for identity_mode=frontend_env.
     # None means "omit from JSON", matching JSON.stringify({field: undefined}).
+    "role": "user",
     "history": [],
     "session_id": None,
     "user_context": None,
@@ -261,16 +266,24 @@ def _build_frontend_chat_payload(
     question: str,
     config: Dict[str, Any],
 ) -> Dict[str, Any]:
-    """Build the same JSON shape as frontend sendMessageV3()."""
+    """Build a frontend-compatible /chat/v3 JSON payload."""
     identity_mode = _identity_mode(config)
     payload: Dict[str, Any] = {
         "question": question,
+        "role": "user",
         "mode": "auto" if identity_mode == "anonymous" else str(config.get("mode") or "auto"),
         "top_k": 5 if identity_mode == "anonymous" else int(config.get("top_k") or 5),
         "history": [] if identity_mode == "anonymous" else _normalise_history(config.get("history")),
     }
 
     if identity_mode == "anonymous":
+        payload.update(
+            {
+                "session_id": "",
+                "user_context": None,
+                "user_id": "",
+            }
+        )
         return payload
 
     optional_fields: Dict[str, Any] = {
@@ -692,9 +705,18 @@ def should_skip_sample(
 
 
 def _select_samples(samples: List[SFTSample], config: Dict[str, Any]) -> List[SFTSample]:
-    start_index = max(0, int(config.get("start_index") or 0))
+    resume_from_index = max(0, int(config.get("resume_from_index") or 0))
+    if resume_from_index > 0:
+        selected = [
+            sample
+            for sample in samples
+            if sample.index >= resume_from_index
+        ]
+    else:
+        start_index = max(0, int(config.get("start_index") or 0))
+        selected = samples[start_index:]
+
     limit = int(config.get("limit") or 0)
-    selected = samples[start_index:]
     return selected[:limit] if limit > 0 else selected
 
 

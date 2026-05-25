@@ -205,9 +205,13 @@ def test_anonymous_identity_mode_ignores_eval_env_and_identity_config(monkeypatc
 
     assert payload == {
         "question": "hello",
+        "role": "user",
         "mode": "auto",
         "top_k": 5,
         "history": [],
+        "session_id": "",
+        "user_context": None,
+        "user_id": "",
     }
     assert headers == {"Content-Type": "application/json"}
 

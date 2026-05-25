@@ -1,28 +1,28 @@
 {
-  "total_records": 251,
-  "completed": 246,
-  "failed": 5,
-  "error_rate": 0.0199,
+  "total_records": 463,
+  "completed": 461,
+  "failed": 2,
+  "error_rate": 0.0043,
   "latency_ms": {
-    "mean": 28384.22,
-    "p50": 25623.99,
-    "p95": 60597.06,
-    "max": 122665.73
+    "mean": 34427.9,
+    "p50": 29454.41,
+    "p95": 86265.43,
+    "max": 156928.97
   },
   "metrics": {
-    "answer_nonempty_rate": 1.0,
-    "reference_keyword_coverage": 0.5508,
-    "atomic_fact_coverage": 0.293,
-    "expected_doc_hit_rate": 0.0041,
-    "expected_article_hit_rate": 0.594,
-    "expected_clause_hit_rate": 0.7051,
+    "answer_nonempty_rate": 0.974,
+    "reference_keyword_coverage": 0.5614,
+    "atomic_fact_coverage": 0.2228,
+    "expected_doc_hit_rate": 0.0087,
+    "expected_article_hit_rate": 0.6169,
+    "expected_clause_hit_rate": 0.7751,
     "citation_text_hit_rate": 0.0
   },
   "by_doc_type": {
     "Quy chế đào tạo năm 2025": {
-      "total": 140,
-      "completed": 135,
-      "failed": 5
+      "total": 224,
+      "completed": 222,
+      "failed": 2
     },
     "Quy định ngoại ngữ từ K65": {
       "total": 24,
@@ -45,22 +45,26 @@
       "failed": 0
     },
     "Quy chế công tác sinh viên": {
-      "total": 4,
-      "completed": 4,
+      "total": 113,
+      "completed": 113,
+      "failed": 0
+    },
+    "Quy định Học bổng KKHT 2023": {
+      "total": 19,
+      "completed": 19,
       "failed": 0
     }
   },
   "by_mode": {
-    "rag_v2": 205,
-    "agent": 27,
-    "clarify": 8,
-    "rag_v2_fallback": 5,
+    "rag_v2": 410,
+    "agent": 36,
+    "clarify": 14,
     "rag_v2_decomposed": 1
   },
   "judge": {
-    "incorrect": 22,
-    "correct": 14,
-    "partial": 15
+    "correct": 247,
+    "partial": 55,
+    "incorrect": 159
   },
-  "updated_at": "2026-05-24T15:52:00"
+  "updated_at": "2026-05-25T20:44:04"
 }
