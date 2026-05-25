@@ -1,6 +1,5 @@
 import axios from 'axios';
 import type { Session, Turn } from '@/types/chat';
-import { getStoredToken } from '@/services/authStorage';
 import { installAuthInterceptors } from '@/services/authSession';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -14,54 +13,34 @@ const apiClient = axios.create({
 
 installAuthInterceptors(apiClient);
 
-const authHeaders = (): Record<string, string> => {
-  const token = getStoredToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
-export const getSessions = async (userId: string): Promise<Session[]> => {
-  const token = getStoredToken();
-  if (token) {
-    const response = await apiClient.get<{ sessions: Session[]; count: number }>(
-      '/sessions/me',
-      { headers: authHeaders() },
-    );
-    return response.data.sessions;
-  }
-
-  const response = await apiClient.get<{ sessions: Session[]; count: number }>(
-    '/sessions',
-    { params: { user_id: userId } },
-  );
+export const getSessions = async (_userId?: string): Promise<Session[]> => {
+  // Always use the authenticated /sessions/me endpoint.
+  // The axios client's request interceptor (ensureAccessToken) will attach the
+  // Bearer token, refreshing via the HttpOnly cookie if the memory token has
+  // been cleared by a page reload.  The legacy ?user_id= fallback was racy
+  // (memory token not yet restored) and returned unscoped data.
+  const response = await apiClient.get<{ sessions: Session[]; count: number }>('/sessions/me');
   return response.data.sessions;
 };
 
 export const getSession = async (
   sessionId: string,
 ): Promise<{ session: Session; turns: Turn[] }> => {
-  const response = await apiClient.get<Session & { turns: Turn[] }>(
-    `/session/${sessionId}`,
-    { headers: authHeaders() },
-  );
+  const response = await apiClient.get<Session & { turns: Turn[] }>(`/session/${sessionId}`);
   const { turns, ...session } = response.data;
   return { session: session as Session, turns: turns ?? [] };
 };
 
 export const createSession = async (
-  userId: string,
+  _userId?: string,
 ): Promise<{ session_id: string }> => {
-  const response = await apiClient.post<{ session_id: string; created_at: string }>(
-    '/session',
-    { user_id: userId },
-    { headers: authHeaders() },
-  );
+  // Backend assigns user_id from JWT when authenticated; body.user_id is ignored.
+  const response = await apiClient.post<{ session_id: string; created_at: string }>('/session', {});
   return { session_id: response.data.session_id };
 };
 
 export const deleteSession = async (sessionId: string): Promise<void> => {
-  await apiClient.delete(`/session/${sessionId}`, {
-    headers: authHeaders(),
-  });
+  await apiClient.delete(`/session/${sessionId}`);
 };
 
 export const renameSession = async (
@@ -72,10 +51,6 @@ export const renameSession = async (
     updated: boolean;
     session_id: string;
     title: string;
-  }>(
-    `/session/${sessionId}`,
-    { title },
-    { headers: authHeaders() },
-  );
+  }>(`/session/${sessionId}`, { title });
   return response.data;
 };

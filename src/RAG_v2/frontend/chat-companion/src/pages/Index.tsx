@@ -118,7 +118,9 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { sessionId } = useParams<{ sessionId?: string }>();
-  const [user, setUser] = useState<UserPublic | null>(null);
+  // Initialise synchronously from localStorage so ownerId is available on
+  // the first render and the sessions query fires without waiting for an effect.
+  const [user, setUser] = useState<UserPublic | null>(() => getStoredUser<UserPublic>());
   const isAdmin = user?.role === 'admin';
   const isMobile = useIsMobile();
   const [isDark, setIsDark] = useState(() => {

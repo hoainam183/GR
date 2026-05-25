@@ -113,6 +113,12 @@ export const installAuthInterceptors = (client: AxiosInstance): void => {
   client.defaults.withCredentials = true;
 
   client.interceptors.request.use(async (config) => {
+    // Auth endpoints that create or destroy a session don't need a Bearer token.
+    const url = config.url ?? '';
+    if (url.includes('/auth/login') || url.includes('/auth/register')) {
+      return config;
+    }
+
     const token = await ensureAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
