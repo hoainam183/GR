@@ -6,15 +6,29 @@
  * callback (localStorage on web, expo-secure-store on mobile).
  */
 
-import axios, { type AxiosInstance } from 'axios';
+import axios, {
+  type AxiosError,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from 'axios';
 
 export interface ApiClientConfig {
   /** Base URL of the backend API (e.g. http://localhost:8000) */
   baseURL: string;
   /** Async callback that returns the current access token, or null */
   getToken?: () => Promise<string | null>;
+  /** Optional refresh callback used once after a 401 response */
+  refreshAuth?: () => Promise<string | null>;
+  /** Optional callback when refresh fails or auth is rejected */
+  onUnauthorized?: () => void | Promise<void>;
+  /** Whether cross-site credentials/cookies are sent */
+  withCredentials?: boolean;
   /** Request timeout in ms (default: 120_000) */
   timeout?: number;
+}
+
+interface RetryRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
 }
 
 /**
@@ -25,6 +39,7 @@ export const createApiClient = (config: ApiClientConfig): AxiosInstance => {
     baseURL: config.baseURL,
     timeout: config.timeout ?? 120_000,
     headers: { 'Content-Type': 'application/json' },
+    withCredentials: config.withCredentials,
   });
 
   // Inject Authorization header on every request
@@ -35,6 +50,31 @@ export const createApiClient = (config: ApiClientConfig): AxiosInstance => {
     }
     return req;
   });
+
+  client.interceptors.response.use(
+    (response) => response,
+    async (error: AxiosError) => {
+      const original = error.config as RetryRequestConfig | undefined;
+      if (
+        error.response?.status !== 401 ||
+        !original ||
+        original._retry ||
+        !config.refreshAuth
+      ) {
+        throw error;
+      }
+
+      original._retry = true;
+      const token = await config.refreshAuth().catch(() => null);
+      if (!token) {
+        await config.onUnauthorized?.();
+        throw error;
+      }
+
+      original.headers.Authorization = `Bearer ${token}`;
+      return client(original);
+    },
+  );
 
   return client;
 };

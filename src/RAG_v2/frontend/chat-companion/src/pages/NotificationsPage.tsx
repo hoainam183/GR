@@ -11,6 +11,7 @@ import {
 } from '@rag/shared';
 import type { NotificationItem } from '@rag/shared';
 import { getStoredToken } from '@/services/authStorage';
+import { clearSession, ensureAccessToken, refreshSession } from '@/services/authSession';
 
 const NotificationsPage = () => {
   const isAuthenticated = Boolean(getStoredToken());
@@ -18,7 +19,10 @@ const NotificationsPage = () => {
     () =>
       createApiClient({
         baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-        getToken: async () => getStoredToken(),
+        getToken: ensureAccessToken,
+        refreshAuth: async () => (await refreshSession()).access_token,
+        onUnauthorized: clearSession,
+        withCredentials: true,
       }),
     [],
   );

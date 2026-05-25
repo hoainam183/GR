@@ -1,6 +1,6 @@
 # Module: `models`
 
-Source-verified: 2026-05-22 from `models/*.py`, `api/main.py`, and auth/admin route usage.
+Source-verified: 2026-05-25 from `models/*.py`, `api/main.py`, and auth/admin route usage.
 
 ## Purpose
 
@@ -30,6 +30,7 @@ Main collections used by this codebase:
 | Collection | Owner | Purpose |
 | --- | --- | --- |
 | `users` | `auth`, `routers/auth.py` | Accounts, role, profile, HUST metadata. |
+| `refresh_tokens` | `auth/refresh_tokens.py`, `routers/auth.py` | Hashed refresh-token sessions, rotation families, revocation state. |
 | `sessions` | `MongoLogger`, `api/routes/session.py` | Chat session metadata. |
 | `turns` | `MongoLogger` | User/assistant turns with sources/metadata. |
 | `query_logs` | `MongoLogger` | Flat analytics log per turn. |
@@ -52,6 +53,7 @@ Responsibilities:
 - Provide `get_database()` FastAPI dependency.
 - Close the Motor client on shutdown.
 - Create indexes for users, sessions, turns, query logs, agent traces, mobile features, and document records.
+- Create indexes for refresh-token hashes, users, token families, and expiry.
 - Use safe index creation helpers so stale/conflicting indexes can be dropped and recreated where needed.
 
 Use this module for async route-level DB work.
@@ -115,6 +117,8 @@ It also stores collection, converter/chunker choices, file paths, chunk counts, 
 ## Maintenance Notes
 
 - Keep Mongo index names and fields aligned with route query patterns.
+- Refresh tokens are sensitive credentials. Store only token hashes and avoid
+  logging raw refresh token values.
 - Do not use `MongoLogger` for async FastAPI dependency reads unless the route already expects sync behavior.
 - For chat/session contract changes, update `cache/session_store.py`, `api/routes/session.py`, and shared frontend/mobile types.
 - For document status changes, update `schemas/document.py`, `api/routes/upload.py`, and `pipeline/document_pipeline.py`.

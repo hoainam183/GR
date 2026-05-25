@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { Session, Turn } from '@/types/chat';
 import { getStoredToken } from '@/services/authStorage';
+import { installAuthInterceptors } from '@/services/authSession';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -8,7 +9,10 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 });
+
+installAuthInterceptors(apiClient);
 
 const authHeaders = (): Record<string, string> => {
   const token = getStoredToken();

@@ -1,482 +1,985 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Chương này trình bày chi tiết về giải pháp đề xuất: xây dựng hệ thống Agentic RAG (Retrieval-Augmented Generation) thông minh hỗ trợ hỏi-đáp tài liệu quy chế đào tạo và thông tin học vụ tại Đại học Bách khoa Hà Nội. Nội dung chương tập trung vào kiến trúc đa tầng hiện đại, hệ thống điều hướng truy vấn thông minh (Multi-tier Routing), chiến lược truy hồi lai (Hybrid Retrieval) song song, và đặc biệt là cơ chế suy luận tác nhân (Agentic Reasoning) dựa trên mô hình Planner-Executor.
+\section{Mở đầu chương}
 
-Báo cáo bao gồm toàn bộ quá trình từ thu thập, xử lý dữ liệu (Phase 1) đến xây dựng pipeline truy hồi nâng cao và tích hợp tác nhân thông minh (Phase 2 & 3), tạo nên một hệ thống chatbot có khả năng hiểu sâu và trả lời chính xác các câu hỏi phức tạp.
+Chương này trình bày phương pháp đề xuất cho hệ thống trợ lý học vụ
+\texttt{RAG\_v2}. Mục tiêu của hệ thống là trả lời câu hỏi của sinh viên dựa
+trên các tài liệu học vụ có căn cứ, đồng thời hỗ trợ hội thoại nhiều lượt, truy
+vết nguồn, cập nhật tài liệu quản trị và xử lý các câu hỏi phức tạp bằng
+Agentic RAG.
 
-\section{Kiến trúc tổng thể hệ thống RAG v2}
+Phương pháp được xây dựng trực tiếp từ kiến trúc mã nguồn hiện tại. Hệ thống
+không chỉ là một pipeline RAG tuyến tính, mà là một nền tảng nhiều lớp gồm:
 
-\subsection{Sơ đồ kiến trúc đa tầng}
-Hệ thống được thiết kế theo kiến trúc phân tầng chuyên biệt, kết hợp giữa RAG truyền thống và Agentic RAG để tối ưu hóa giữa tốc độ phản hồi và khả năng suy luận phức tạp:
+\begin{itemize}
+    \item backend FastAPI cung cấp API chat, streaming, quản trị tài liệu, xác
+    thực, phiên hội thoại và các tính năng mobile;
+    \item tầng orchestration \texttt{RAGPipeline} điều phối classic RAG, smart
+    routing, agent, streaming và fallback;
+    \item tầng truy hồi lai dùng Qdrant, Elasticsearch, BGE-M3, E5 multilingual
+    và BGE reranker;
+    \item tầng hiểu truy vấn gồm complexity routing, domain classification,
+    reflection, entity extraction và decomposition;
+    \item tầng Agentic RAG dựa trên LangGraph cho các câu hỏi so sánh, nhiều
+    nguồn hoặc cần công cụ;
+    \item tầng dữ liệu, chunking, indexing, cache, logging, đánh giá và giao
+    diện web/mobile.
+\end{itemize}
+
+Khác với cách thiết kế một chatbot chỉ gọi LLM, phương pháp đề xuất đặt trọng
+tâm vào ba nguyên tắc: \textbf{có căn cứ}, \textbf{đúng miền dữ liệu} và
+\textbf{có khả năng quan sát}. Mỗi câu trả lời cần được sinh từ context truy hồi,
+có metadata để truy vết, có cơ chế tránh dùng sai văn bản và có fallback khi dữ
+liệu nội bộ không đủ.
+
+\section{Mục tiêu thiết kế}
+
+\subsection{Yêu cầu chức năng}
+
+Hệ thống được thiết kế để đáp ứng các nhóm yêu cầu chức năng sau:
+
+\begin{itemize}
+    \item \textbf{Hỏi đáp học vụ}: trả lời câu hỏi về chương trình đào tạo, quy
+    định, kế hoạch học tập, thủ tục và hỗ trợ sinh viên.
+    \item \textbf{Hội thoại nhiều lượt}: giữ lịch sử theo phiên, xử lý câu hỏi
+    nối tiếp, tham chiếu như ``ngành của em'', ``môn đó'', ``so với khóa kia''.
+    \item \textbf{Cá nhân hóa có kiểm soát}: dùng hồ sơ đăng nhập như mã ngành,
+    khóa, email hoặc mã sinh viên khi câu hỏi hiện tại thật sự phụ thuộc vào
+    người dùng; không để lịch sử hoặc hồ sơ làm nhiễu các câu hỏi chung.
+    \item \textbf{Streaming}: hỗ trợ luồng trả lời thời gian thực qua SSE cho
+    web và mobile.
+    \item \textbf{Agentic reasoning}: xử lý câu hỏi cần so sánh, nhiều nguồn,
+    nhiều bước hoặc cần hỏi lại người dùng.
+    \item \textbf{Quản trị tài liệu}: cho phép admin upload, convert, clean,
+    review, chunk, chọn chunk, index và rollback tài liệu.
+    \item \textbf{Quan sát và đánh giá}: ghi lại route, nguồn, filter, timings,
+    agent trace và hỗ trợ dashboard/evaluation.
+\end{itemize}
+
+\subsection{Yêu cầu phi chức năng}
+
+Các yêu cầu phi chức năng chính gồm:
+
+\begin{itemize}
+    \item \textbf{Độ chính xác}: ưu tiên tài liệu đúng collection, đúng ngành,
+    đúng khóa, đúng văn bản hiện hành và đúng thời điểm.
+    \item \textbf{Khả năng mở rộng}: dữ liệu được tách theo collection; retrieval
+    có thể chạy song song; Qdrant, Elasticsearch, MongoDB và Redis được tách
+    thành các hạ tầng độc lập.
+    \item \textbf{Hiệu năng}: dùng cache, candidate pool, rerank top-k, query-only
+    cache khi an toàn và streaming để giảm cảm nhận độ trễ.
+    \item \textbf{Tính bền vững vận hành}: cấu hình qua \texttt{Settings} và
+    \texttt{.env}; các override LLM của admin có thể persist trong MongoDB.
+    \item \textbf{An toàn dữ liệu}: Bearer JWT được ưu tiên hơn identity trong
+    request body; admin route dùng RBAC; thông tin cá nhân không nên đi vào
+    truy hồi nếu không cần.
+\end{itemize}
+
+\section{Kiến trúc tổng thể}
+
+\subsection{Mô hình phân tầng}
+
+Hệ thống được tổ chức theo kiến trúc phân tầng. Mỗi tầng có trách nhiệm rõ ràng
+và giao tiếp với tầng khác qua contract cụ thể.
 
 \begin{verbatim}
-       [ Người dùng đặt câu hỏi ]
-                   |
-                   v
-+-------------------------------------------+
-| 1. Complexity Router (Tier-0)             |
-|    - Phân loại: Chitchat / Simple / Complex|
-+-------------------------------------------+
-       |           |            |
-       |           |            +----(Complex: Agentic Path)----> [ Planner-Executor ]
-       |           |                                                      |
-       |           +----(Simple: RAG Path)------> [ RAG Pipeline ]        |
-       |                                                 |                |
-       +----(Chitchat: Direct Path)--> [ LLM ]           |                |
-                                         |               |                |
-                                         v               v                v
-+---------------------------------------------------------------------------+
-| 2. LLM Orchestration & Generation (Gemini 1.5 Flash / Qwen 2.5 8B)        |
-|    - Phân tích ngữ cảnh, lập kế hoạch, tổng hợp câu trả lời               |
-+---------------------------------------------------------------------------+
-                   |
-                   v
-+-------------------------------------------+
-| 3. Hybrid Retrieval & Knowledge Layer     |
-|    - Qdrant (Vector) + Elasticsearch (BM25)|
-|    - Metadata Pre-filtering (Major/Cohort) |
-+-------------------------------------------+
-                   |
-                   v
-+-------------------------------------------+
-| 4. Infrastructure & Caching               |
-|    - Redis (Cache/Session) + MongoDB (Logs)|
-+-------------------------------------------+
+Nguoi dung Web/Mobile/Admin
+        |
+        v
+FastAPI API Layer
+  - /chat, /chat/v3, /chat/stream
+  - /admin/documents, /retrieval/search, /metrics, /auth
+        |
+        v
+RAGPipeline / DocumentPipeline
+  - query_v3, query, query_agent, query_stream
+  - convert, clean, chunk, embed_and_index, rollback
+        |
+        v
+Query Understanding + Agent
+  - ComplexityRouter, QueryRouter, QueryReflector
+  - QueryDecomposer, ReActAgent, tool adapters
+        |
+        v
+Retrieval Layer
+  - RetrievalService
+  - MultiCollectionSearch
+  - Qdrant + Elasticsearch + BGE reranker
+        |
+        v
+Data / Persistence / Cache
+  - data collections, uploads
+  - MongoDB, Redis
 \end{verbatim}
 
-\subsection{Ngôn ngữ và Công nghệ sử dụng}
+Điểm trung tâm của thiết kế là \texttt{RAGPipeline}. FastAPI chỉ nhận request,
+xác thực, ánh xạ user context và chuẩn hóa response; các quyết định nghiệp vụ
+về route, truy hồi, agent, fallback và generation nằm trong pipeline.
 
-Hệ thống RAG v2 được xây dựng trên một tập hợp các công nghệ hiện đại, đảm bảo tính ổn định và hiệu năng cao:
+\subsection{Các module chính trong source code}
 
 \begin{table}[h]
 \centering
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|p{10.2cm}|}
 \hline
-\textbf{Thành phần} & \textbf{Công nghệ sử dụng} \\
+\textbf{Module} & \textbf{Vai trò chính} \\
 \hline
-\textbf{API Framework} & FastAPI (Python), hỗ trợ Streaming SSE \\
+\texttt{api/} & FastAPI app factory, lifespan, middleware, chat route, streaming,
+admin upload route, metrics, retrieval diagnostic, session, lookup, bookmark,
+feedback và notification. \\
 \hline
-\textbf{Agent Framework} & LangGraph (StateGraph) + LangChain \\
+\texttt{pipeline/} & Điều phối runtime chat/RAG qua \texttt{RAGPipeline} và pipeline
+quản trị tài liệu qua \texttt{DocumentPipeline}. \\
 \hline
-\textbf{Vector Store} & Qdrant (Hỗ trợ Dual-embedding BGE-M3 + E5) \\
+\texttt{query/} & Complexity routing, domain classification, query reflection,
+entity extraction, decomposition và structured query parsing. \\
 \hline
-\textbf{Keyword Store} & Elasticsearch (BM25, metadata filtering) \\
+\texttt{retrieval/} & Qdrant vector search, Elasticsearch keyword search, metadata
+filtering, multi-collection fusion, validity filtering và reference resolution. \\
 \hline
-\textbf{Reranker} & BGE-Reranker-v2-m3 (Cross-encoder) \\
+\texttt{agent/} & LangGraph ReAct agent, planner-executor, tool schema, tool
+adapter, agent state và trace. \\
 \hline
-\textbf{LLM (Chính)} & Google Gemini 1.5 Flash (Tốc độ cao, context lớn) \\
+\texttt{chunking/} & Các chunker cho tài liệu pháp lý, CTDT, kế hoạch và STSV; làm
+giàu metadata cho chunk. \\
 \hline
-\textbf{LLM (Tác nhân)} & Qwen 2.5 8B (Local via LM Studio) \\
+\texttt{document\_loader/} & Convert PDF sang Markdown bằng Docling/PyMuPDF4LLM và
+clean Markdown trước khi chunking. \\
 \hline
-\textbf{Cache \& State} & Redis (Session, LLM Cache, Rate Limiting) \\
+\texttt{embedding/} & BGE-M3, E5 multilingual và interface embedding dùng trong
+retrieval/classification/indexing. \\
 \hline
-\textbf{Database Logging} & MongoDB (Lưu lịch sử chat và Agent Trace) \\
+\texttt{reranking/} & BGE reranker cross-encoder và factory tạo reranker. \\
+\hline
+\texttt{models/} & MongoDB access, user, session, turn, query log, agent trace,
+document và system config. \\
+\hline
+\texttt{cache/} & Redis session store, history cache, LLM cache và sliding-window
+rate limiter. \\
+\hline
+\texttt{frontend/}, \texttt{mobile/}, \texttt{packages/} & React web app, Expo
+mobile app và shared TypeScript API/types/stores. \\
+\hline
+\texttt{evaluation/} & Offline current-policy eval, historical conversation eval,
+benchmark retrieval và dashboard artifacts. \\
 \hline
 \end{tabular}
-\caption{Stack công nghệ của hệ thống RAG v2}
+\caption{Bản đồ module chính của hệ thống}
 \end{table}
 
-\subsection{Luồng xử lý thông minh (Adaptive Flow)}
-Hệ thống sử dụng cơ chế Adaptive RAG để chọn luồng xử lý tối ưu dựa trên độ phức tạp của câu hỏi:
+\subsection{Stack công nghệ}
 
-\subsubsection{Luồng 1: Direct Path (Chit-chat / Greeting)}
-Dành cho các câu hỏi xã giao không cần dữ liệu. Complexity Router phát hiện từ khóa (chào, cảm ơn...) và bỏ qua hoàn toàn các bước tìm kiếm để giảm latency xuống mức tối thiểu (< 500ms).
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{9.8cm}|}
+\hline
+\textbf{Thành phần} & \textbf{Công nghệ và implementation} \\
+\hline
+API backend & FastAPI, app factory/lifespan trong \texttt{api/main.py}, SSE cho
+\texttt{/chat/stream}. \\
+\hline
+LLM chat/reflection & Provider qua \texttt{llm.create\_llm()}, mặc định cấu hình
+Gemini; model đọc từ \texttt{Settings.chat\_model} và
+\texttt{Settings.reflection\_model}. \\
+\hline
+Agent & LangGraph \texttt{StateGraph}, LangChain tool schema, local LM Studio
+tool-calling model theo \texttt{agent\_model}, synthesis provider cấu hình riêng. \\
+\hline
+Vector store & Qdrant, mỗi collection có named vectors \texttt{bge\_m3} và
+\texttt{e5}, mỗi vector 1024 chiều, cosine distance. \\
+\hline
+Keyword store & Elasticsearch, index theo collection, BM25 trên \texttt{text} và
+\texttt{title}, kèm metadata filtering. \\
+\hline
+Embedding & \texttt{BAAI/bge-m3} và \texttt{intfloat/multilingual-e5-large}. \\
+\hline
+Reranker & \texttt{BAAI/bge-reranker-v2-m3} qua \texttt{BGEReranker}. \\
+\hline
+Persistence & MongoDB cho users, sessions, turns, query logs, agent traces,
+documents, document chunks và system config. \\
+\hline
+Cache & Redis tùy chọn cho session, history, LLM cache và rate limiting. \\
+\hline
+Web client & React 18, Vite, React Router, TanStack Query, shadcn/Radix,
+Tailwind CSS. \\
+\hline
+Mobile client & Expo/React Native, React Navigation, TanStack Query, SecureStore,
+MMKV fallback, \texttt{react-native-sse}. \\
+\hline
+\end{tabular}
+\caption{Stack công nghệ của phương pháp đề xuất}
+\end{table}
 
-\subsubsection{Luồng 2: Simple RAG Path (Standard)}
-Dành cho các câu hỏi đơn lẻ, rõ ràng về một chủ đề (Ví dụ: "Học bổng KKHT cần bao nhiêu điểm?"). Pipeline thực hiện: Reflection -> Retrieval -> Rerank -> Generation trong một lượt duy nhất.
+\section{Nguồn dữ liệu và tổ chức tri thức}
 
-\subsubsection{Luồng 3: Complex Agentic Path (Planner-Executor)}
-Dành cho các câu hỏi yêu cầu so sánh (K65 vs K70), tổng hợp từ nhiều nguồn, hoặc suy luận nhiều bước. Hệ thống khởi động LangGraph ReAct Agent:
-\begin{enumerate}
-    \item \textbf{Decompose}: Tách câu hỏi thành các câu hỏi con;
-    \item \textbf{Planner}: Lập kế hoạch truy hồi song song trên nhiều collections;
-    \item \textbf{Executor}: Thực thi truy hồi và rerank song song;
-    \item \textbf{Synthesize}: Tổng hợp kết quả bằng Gemini để đưa ra câu trả lời cuối cùng.
-\end{enumerate}
+\subsection{Các collection tri thức}
 
-\section{Hệ thống Routing và Hiểu truy vấn (Query Understanding)}
+Tri thức của hệ thống được chia thành các collection theo miền nghiệp vụ thay
+vì gom tất cả tài liệu vào một kho chung. Thiết kế này giúp routing, metadata
+filtering và evaluation rõ ràng hơn.
 
-\subsection{Hệ thống Routing đa tầng (Multi-tier Routing)}
-Để đảm bảo câu hỏi được đưa đến đúng "chuyên gia" xử lý, hệ thống triển khai 3 tầng routing:
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{4.0cm}|p{5.8cm}|}
+\hline
+\textbf{Collection} & \textbf{Nội dung} & \textbf{Metadata/logic quan trọng} \\
+\hline
+\texttt{ctdt} & Chương trình đào tạo, học phần, tín chỉ, học kỳ, tiên quyết. &
+\texttt{major\_code}, \texttt{major\_name}, \texttt{course\_code},
+\texttt{course\_name}, \texttt{semester}. \\
+\hline
+\texttt{quydinh} & Quy chế, học bổng, tốt nghiệp, ngoại ngữ, quy định học vụ. &
+\texttt{applicable\_cohort}, \texttt{applicable\_major},
+\texttt{effective\_date}, \texttt{document\_type}, lineage. \\
+\hline
+\texttt{kehoach} & Kế hoạch học kỳ, lịch đăng ký, thông báo, deadline. &
+\texttt{date\_str}, freshness sorting, recency bonus, web fallback cho truy vấn
+mới nhất. \\
+\hline
+\texttt{stsv} & Sổ tay sinh viên, biểu mẫu, thủ tục, hỗ trợ sinh viên. &
+\texttt{doc\_id}, \texttt{title}, \texttt{type\_doc},
+\texttt{section\_context}, thường không prefilter theo ngành/khóa. \\
+\hline
+\texttt{test} & Collection hợp lệ cho upload/dev. & Phụ thuộc metadata tài liệu
+upload. \\
+\hline
+\end{tabular}
+\caption{Các collection tri thức và vai trò runtime}
+\end{table}
+
+\subsection{Quy ước metadata}
+
+Mỗi chunk sau khi xử lý cần có text/content, id ổn định, metadata nguồn, thứ tự
+chunk và các trường miền dữ liệu. Metadata không chỉ phục vụ hiển thị nguồn mà
+còn là điều kiện lọc trước khi vector search. Ví dụ:
 
 \begin{itemize}
-    \item \textbf{Tier 0 -- Complexity Router (Regex)}: Sử dụng các biểu thức chính quy (Regex) hiệu năng cao để phân loại nhanh câu hỏi vào 3 nhóm: \texttt{chitchat}, \texttt{simple}, hoặc \texttt{complex}. Tầng này giúp lọc bỏ các truy vấn đơn giản mà không tốn chi phí LLM.
-    \item \textbf{Tier 1 -- Query Router (ML Classifier)}: Đối với các câu hỏi \texttt{simple} và \texttt{complex}, hệ thống sử dụng một bộ phân loại học máy (Logistic Regression trên nền BGE-M3 embedding) để xác định \textbf{Intent} (RAG/Chitchat) và \textbf{Domain} dữ liệu (\texttt{ctdt}, \texttt{quydinh}, \texttt{kehoach}, \texttt{stsv}).
-    \item \textbf{Tier 2 -- LLM Fallback}: Khi bộ phân loại Tier 1 có độ tin cậy (confidence) thấp (< 0.55), hệ thống tự động gọi Gemini Flash để kiểm chứng và hiệu đính lại domain, đảm bảo không tìm nhầm kho dữ liệu.
+    \item truy vấn về CTDT ngành \texttt{IT-E6} ưu tiên lọc
+    \texttt{major\_code=IT-E6};
+    \item truy vấn về quy định khóa \texttt{K70} dùng
+    \texttt{applicable\_cohort};
+    \item truy vấn kế hoạch mới nhất dùng \texttt{date\_str} và sort theo ngày
+    đăng;
+    \item văn bản upload qua admin dùng \texttt{document\_id} để rollback và
+    xóa dữ liệu đã index.
 \end{itemize}
 
-\subsection{Query Reflection và Trích xuất thực thể}
-Trước khi tìm kiếm, câu hỏi trải qua bước "phản chiếu" (Reflection) để làm giàu ngữ cảnh:
+\subsection{Lineage và hiệu lực văn bản}
+
+Với nhóm quy định, hệ thống sử dụng \texttt{data/document\_lineage.json} để mô
+tả tài liệu còn hiệu lực hoặc đã bị thay thế. \texttt{ValidityFilter} dùng registry
+này để loại các văn bản superseded khi có đủ kết quả thay thế. Nếu lọc làm số
+kết quả còn lại quá ít, hệ thống giữ lại kết quả gốc để tránh tạo context rỗng.
+
+\section{Pipeline xử lý và quản trị tài liệu}
+
+\subsection{Luồng xử lý tài liệu ngoại tuyến}
+
+Các nguồn dữ liệu ban đầu được xử lý bằng pipeline theo miền:
+
+\begin{enumerate}
+    \item thu thập hoặc crawl dữ liệu từ PDF, API hoặc website chính thức;
+    \item convert PDF sang Markdown bằng Docling, PyMuPDF4LLM hoặc output OCR;
+    \item làm sạch Markdown/text, chuẩn hóa heading, bảng, ký tự và HTML còn sót;
+    \item chunking theo chiến lược phù hợp với loại tài liệu;
+    \item enrich metadata về ngành, khóa, ngày, loại tài liệu và cấu trúc;
+    \item embed bằng BGE-M3 và E5;
+    \item index vào Qdrant và Elasticsearch.
+\end{enumerate}
+
+Các script vận hành trong \texttt{scripts/} như \texttt{index\_kehoach.py},
+\texttt{index\_quydinh.py}, \texttt{index\_stsv.py}, \texttt{index\_to\_es.py}
+và \texttt{auto\_crawler.py} hỗ trợ cập nhật dữ liệu độc lập với runtime API.
+
+\subsection{Chunking theo loại tài liệu}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{4.2cm}|p{5.7cm}|}
+\hline
+\textbf{Chunker} & \textbf{File chính} & \textbf{Chiến lược} \\
+\hline
+Recursive & \texttt{chunking/chunker/recursive\_chunker.py} & Chia theo heading
+Markdown và recursive splitter, bảo vệ bảng, thêm section context. \\
+\hline
+Hierarchical legal & \texttt{hierarchical\_legal\_chunker.py},
+\texttt{olmocr\_legal\_chunker.py} & Nhận diện chương, điều, khoản, phụ lục;
+tạo parent/child chunk với hierarchy metadata. \\
+\hline
+\texttt{kehoach} & \texttt{chunking/chunker/kehoach\_chunker.py} & Chia bài kế
+hoạch/thông báo, giữ tiêu đề, URL, ngày đăng và category. \\
+\hline
+\texttt{stsv} & \texttt{chunking/chunker/stsv\_chunker.py} & Chia nội dung JSON
+theo phần Roman, mục số, văn xuôi và thêm context prefix. \\
+\hline
+\end{tabular}
+\caption{Các chiến lược chunking theo source code hiện tại}
+\end{table}
+
+Điểm quan trọng của chunking là không chỉ tạo các đoạn text ngắn hơn, mà còn giữ
+ngữ cảnh để đoạn truy hồi có thể đứng độc lập. Với tài liệu pháp lý, điều/khoản
+được biểu diễn trong metadata. Với CTDT, bảng học phần cần được bảo vệ để không
+tách mất header. Với STSV, prefix gồm tiêu đề, loại tài liệu và section giúp
+chunk ngắn vẫn có ngữ cảnh.
+
+\subsection{Admin DocumentPipeline}
+
+Bên cạnh pipeline ngoại tuyến, hệ thống có luồng quản trị tài liệu trong
+\texttt{DocumentPipeline}. Luồng này được gọi qua các endpoint \texttt{/admin}
+và yêu cầu quyền admin.
+
+\begin{verbatim}
+uploaded
+  -> converting -> converted
+  -> cleaning   -> cleaned
+  -> chunking   -> chunked
+  -> embedding  -> indexed
+\end{verbatim}
+
+\texttt{DocumentPipeline} cung cấp các phương thức chính:
+\texttt{convert\_pdf()}, \texttt{clean()}, \texttt{chunk()},
+\texttt{embed\_and\_index()}, \texttt{run\_full\_pipeline()},
+\texttt{delete\_indexed\_data()} và \texttt{rollback()}. Dữ liệu quản trị được
+lưu ở Mongo collections \texttt{documents} và \texttt{document\_chunks}; nội dung
+đã index được ghi vào Qdrant và Elasticsearch. Khi index, policy
+\texttt{utils.chunk\_indexing.is\_indexable\_chunk()} giúp bỏ qua parent/header
+chunk không phù hợp cho retrieval trực tiếp.
+
+\section{Luồng runtime của RAGPipeline}
+
+\subsection{Khởi tạo backend}
+
+Entrypoint backend là \texttt{api/main.py}. Khi FastAPI khởi động, lifespan thực
+hiện các bước:
+
+\begin{enumerate}
+    \item load \texttt{.env} và tạo \texttt{Settings};
+    \item merge admin LLM override từ Mongo \texttt{system\_config/llm\_config}
+    nếu có;
+    \item khởi tạo \texttt{MongoLogger} khi MongoDB được bật;
+    \item khởi tạo Redis manager, session store, history cache, LLM cache và
+    rate limiter khi Redis được bật;
+    \item tạo một \texttt{RAGPipeline} dùng chung \texttt{Settings};
+    \item tạo Mongo indexes và warm up agent LLM nếu khả dụng;
+    \item tùy chọn schedule auto crawler khi \texttt{crawler\_enabled=True}.
+\end{enumerate}
+
+Thiết kế này giúp toàn bộ backend dùng một cấu hình hiệu lực duy nhất. Admin có
+thể cập nhật cấu hình LLM runtime qua API quản trị; pipeline chuẩn bị client mới,
+persist override rồi commit thay đổi dưới runtime lock.
+
+\subsection{Các entrypoint chat}
+
+\texttt{RAGPipeline} có bốn entrypoint chính:
+
 \begin{itemize}
-    \item \textbf{Rewriting}: Chuyển các đại từ ("ngành của em", "môn đó") thành các thực thể cụ thể dựa trên lịch sử hội thoại và \texttt{user\_context} (thông tin ngành, khóa của sinh viên đã đăng nhập).
-    \item \textbf{Entity Extraction}: Sử dụng Regex chuyên dụng để trích xuất: Mã ngành (IT-E6, IT1...), Khóa (K65, K67...), Mã môn học (IT4060...), Học kỳ (20241, 20242...).
+    \item \texttt{query()}: classic RAG tuyến tính;
+    \item \texttt{query\_v3()}: smart entrypoint dùng bởi web/mobile/API;
+    \item \texttt{query\_agent()}: chạy agent trực tiếp;
+    \item \texttt{query\_stream()}: retrieval trước rồi stream token qua
+    \texttt{/chat/stream}.
 \end{itemize}
 
-\section{Pipeline thu thập và xử lý dữ liệu}
+\texttt{query\_v3()} là entrypoint quan trọng nhất. Nó quyết định câu hỏi đi theo
+nhánh chitchat, classic RAG, decomposed RAG, agent hoặc clarify.
 
-\subsection{Tổng quan nguồn dữ liệu}
-Hệ thống thu thập dữ liệu từ 3 nguồn chính, mỗi nguồn có đặc điểm và pipeline xử lý riêng:
+\subsection{Smart query flow}
 
-\begin{table}[h]
-\centering
-\begin{tabular}{|l|l|l|l|}
-\hline
-\textbf{Nguồn} & \textbf{Định dạng} & \textbf{Số lượng} & \textbf{Đặc điểm} \\
-\hline
-Quy định (quydinh) & PDF & 16 files & Cấu trúc Chương-Điều-Khoản \\
-\hline
-CTDT (ctdt) & PDF & 6 khoa, nhiều ngành & Bảng, heading markdown \\
-\hline
-STSV (stsv) & JSON & 83 files & Web crawl, text ngắn \\
-\hline
-\end{tabular}
-\caption{Tổng quan nguồn dữ liệu hệ thống}
-\end{table}
+\begin{verbatim}
+query_v3(question, history, user_context)
+  -> ComplexityRouter
+     -> chitchat
+        -> _handle_chitchat()
+     -> complex + personal_check
+        -> clarify, khong truy hoi khi thieu du lieu ca nhan
+     -> simple
+        -> query()
+     -> complex + comparison/multi_source
+        -> QueryDecomposer -> _query_decomposed()
+     -> complex general
+        -> query_agent()
+           -> fallback query() neu agent loi va require_agent=False
+\end{verbatim}
 
-\subsection{Nguồn 1: Văn bản quy định đào tạo (quydinh)}
-Đây là nguồn dữ liệu cốt lõi của hệ thống, bao gồm 16 văn bản PDF pháp lý chính thức:
+Các mode response thường gặp gồm \texttt{chitchat}, \texttt{clarify},
+\texttt{rag\_v2}, \texttt{rag\_v2\_decomposed}, \texttt{agent} và
+\texttt{rag\_v2\_fallback}. Với câu hỏi kiểm tra điều kiện cá nhân như tốt
+nghiệp, nếu thiếu CPA/GPA, số tín chỉ, ngoại ngữ, GDTC, GDQP-AN hoặc trạng thái
+kỷ luật, hệ thống trả \texttt{clarify} thay vì tự suy đoán từ tài liệu chung.
 
-\begin{table}[h]
-\centering
-\begin{tabular}{|l|p{9cm}|}
-\hline
-\textbf{STT} & \textbf{Tên văn bản} \\
-\hline
-1 & Quy chế đào tạo 2025 (QCDT\_2025\_5445\_QD-DHBK) \\
-\hline
-2 & Quy chế công tác sinh viên ĐHBK Hà Nội 2025 \\
-\hline
-3 & Quyết định học bổng KKHT 2023 \\
-\hline
-4 & Quy định ngoại ngữ từ K65, K68, K70 \\
-\hline
-5 & Quy định đánh giá điểm rèn luyện sinh viên 2023 \\
-\hline
-6 & Khung đánh giá rèn luyện 2020-2021 \\
-\hline
-7 & HD học chuyển tiếp kỹ sư 180 TC \\
-\hline
-8 & QĐ tổ chức dạy học trực tuyến \\
-\hline
-9 & QĐ tổ chức thi trực tuyến \\
-\hline
-10 & QĐ thi Olympic và ĐMST 2023 \\
-\hline
-11 & Quy định quản lý SV nước ngoài 2023 \\
-\hline
-12 & Quy định xét cấp HB tài trợ 2024 \\
-\hline
-13 & QĐ hướng dẫn chính sách HT cho SV khuyết tật \\
-\hline
-14 & TT liên tịch QĐ đánh giá QP-AN \\
-\hline
-\end{tabular}
-\caption{Danh sách văn bản quy định đào tạo}
-\end{table}
+\subsection{Classic RAG flow}
 
-\subsubsection{Pipeline xử lý PDF quy định}
-Pipeline xử lý PDF cho văn bản quy định gồm các bước:
+Classic RAG được triển khai chủ yếu trong \texttt{pipeline/flows.py}. Luồng xử lý
+chính gồm:
+
 \begin{enumerate}
-    \item \textbf{Thu thập}: Tải PDF từ website Phòng Đào tạo và Phòng Công tác Sinh viên;
-    \item \textbf{OCR/Convert}: Sử dụng olmOCR (vision-based) để chuyển đổi PDF sang Markdown, đảm bảo xử lý được PDF lỗi font;
-    \item \textbf{Làm sạch}: Loại bỏ header/footer, watermark, page numbers; sửa lỗi ký tự; chuẩn hóa format;
-    \item \textbf{Chunking}: Sử dụng \texttt{OlmOcrLegalChunker} chuyên biệt cho cấu trúc pháp lý.
+    \item trim lịch sử hội thoại theo ngân sách context;
+    \item kiểm tra query-only cache khi truy vấn không mang tính dynamic;
+    \item route domain bằng \texttt{QueryRouter};
+    \item chọn collection bằng \texttt{CollectionSelector};
+    \item rewrite truy vấn và extract entities bằng \texttt{QueryReflector};
+    \item xây metadata filters theo collection;
+    \item embed truy vấn bằng BGE-M3 và E5;
+    \item chạy \texttt{MultiCollectionSearch};
+    \item retry với chiến lược nới lỏng khi không có kết quả;
+    \item deduplicate candidate;
+    \item rerank bằng BGE reranker;
+    \item áp \texttt{ValidityFilter};
+    \item resolve dẫn chiếu pháp lý bằng \texttt{ReferenceResolver};
+    \item format context, thêm profile note khi phù hợp;
+    \item sinh câu trả lời bằng LLM;
+    \item ghi cache, logging, timings và metadata;
+    \item tùy chọn chạy self-eval/Tavily fallback ở non-streaming path.
 \end{enumerate}
 
-\subsection{Nguồn 2: Chương trình đào tạo (ctdt)}
-Dữ liệu chương trình đào tạo được tổ chức theo khoa/viện:
+\subsection{Streaming flow}
 
-\begin{table}[h]
-\centering
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Thư mục} & \textbf{Khoa/Viện} & \textbf{Ví dụ ngành} \\
-\hline
-cokhi & Trường Cơ khí & KT Cơ khí, KT Cơ điện tử \\
-\hline
-dien-dientu & Viện Điện & KT Điện, KT Điều khiển \\
-\hline
-hoa & Viện KT Hóa học & Công nghệ Hóa học \\
-\hline
-soict & Viện CNTT\&TT & CNTT, KHMT, ATTT \\
-\hline
-toan & Viện Toán UD\&TH & Toán Tin \\
-\hline
-vatlieu & Viện KH\&KT Vật liệu & KT Vật liệu \\
-\hline
-\end{tabular}
-\caption{Phân bố dữ liệu CTDT theo khoa/viện}
-\end{table}
+\texttt{query\_stream()} phục vụ \texttt{/chat/stream}. Endpoint SSE gửi các event:
 
-\subsubsection{Pipeline xử lý CTDT}
+\begin{verbatim}
+{"type":"session","session_id":"..."}
+{"type":"token","delta":"..."}
+{"type":"metadata", ...}
+{"type":"done"}
+\end{verbatim}
+
+Streaming path vẫn chạy retrieval trước để có context grounded, sau đó mới phát
+token. Khác với non-streaming path, streaming không chạy post-generation
+self-eval/Tavily fallback để giữ semantics phát token ổn định.
+
+\section{Hiểu truy vấn và định tuyến}
+
+\subsection{ComplexityRouter}
+
+\texttt{ComplexityRouter} là tầng đầu tiên trong \texttt{query\_v3()}. Router này
+trả về \texttt{tier}, \texttt{reason}, \texttt{confidence} và có thể thêm
+\texttt{complex\_subtype}. Các subtype phức tạp chính gồm:
+\texttt{comparison}, \texttt{multi\_source}, \texttt{personal\_check} và
+\texttt{general}.
+
+Việc tách complexity trước retrieval giúp hệ thống tránh chi phí không cần thiết:
+câu chào hỏi không truy hồi; câu hỏi đơn giản đi classic RAG; câu hỏi so sánh đi
+decomposition hoặc agent.
+
+\subsection{Domain classification và collection selection}
+
+\texttt{DomainClassifier} có hai bước: phân loại intent
+\texttt{chitchat}/\texttt{rag}/\texttt{tool\_search}, sau đó phân loại domain RAG
+trong \texttt{ctdt}, \texttt{quydinh}, \texttt{kehoach}, \texttt{stsv}. Classifier
+dùng BGE-M3 embedding làm feature cho mô hình học máy trong repo.
+
+\texttt{QueryRouter} bổ sung cơ chế two-pass: nếu câu hỏi ngắn và confidence
+thấp, router có thể dùng thêm lịch sử hội thoại để phân loại; câu hỏi dài và tự
+chứa không nên bị lịch sử làm lệch chủ đề.
+
+\texttt{CollectionSelector} ánh xạ domain sang collection:
+
+\begin{verbatim}
+ctdt    -> [ctdt]
+quydinh -> [quydinh, stsv]
+kehoach -> [kehoach]
+stsv    -> [stsv, quydinh]
+\end{verbatim}
+
+Khi confidence thấp, selector giữ collection của domain dự đoán trước rồi mở
+rộng với fallback set. Với truy vấn freshness đã route về \texttt{kehoach}, hệ
+thống có logic khóa route để kế hoạch/thông báo mới không bị chìm trong tài liệu
+quy định hoặc CTDT.
+
+\subsection{Query reflection và guardrail}
+
+\texttt{QueryReflector} nhận câu hỏi hiện tại, lịch sử và
+\texttt{user\_context}, sau đó trả về truy vấn đã rewrite, prompt và entities.
+Các bước chính:
+
 \begin{enumerate}
-    \item \textbf{Thu thập}: Tải PDF chương trình đào tạo từ website các khoa/viện;
-    \item \textbf{OCR/Convert}: Sử dụng Docling hoặc PyMuPDF4LLM (có markdown heading);
-    \item \textbf{Làm sạch}: Chuẩn hóa heading, sửa bảng, loại bỏ artifact, lưu vào thư mục \texttt{clean\_data/};
-    \item \textbf{Chunking}: Sử dụng \texttt{RecursiveChunker} với bảo vệ bảng markdown, lưu vào \texttt{chunks\_recursive\_parent\_child/};
-    \item \textbf{Làm giàu metadata}: Tự động trích xuất ngày ban hành, khóa áp dụng, ngành đào tạo, loại tài liệu.
+    \item strip PII/noise không cần cho retrieval;
+    \item merge profile context khi câu hỏi có tín hiệu phụ thuộc hồ sơ;
+    \item gọi LLM rewrite để tạo truy vấn standalone;
+    \item áp guardrail chống unresolved reference và context bleed;
+    \item rewrite deterministic cho follow-up so sánh ngắn;
+    \item extract entities bằng regex.
 \end{enumerate}
 
-\subsection{Nguồn 3: Thông tin sinh viên (stsv)}
-Dữ liệu từ Cổng thông tin sinh viên (\url{https://ctt-sv.hust.edu.vn}) gồm 83 tài liệu dạng JSON:
+Entities quan trọng gồm \texttt{major\_code}, \texttt{major\_name},
+\texttt{cohort}, \texttt{year\_of\_study}, \texttt{course\_code},
+\texttt{semester} và \texttt{academic\_year}. Guardrail đảm bảo câu hỏi mới nhất
+hoặc câu hỏi chung không tự động thừa kế ngành, khóa hoặc học kỳ từ lịch sử nếu
+câu hỏi hiện tại không có tín hiệu rõ ràng.
 
-\subsubsection{Cấu trúc dữ liệu STSV}
-Mỗi tài liệu là một file JSON với cấu trúc:
+\subsection{Query decomposition}
+
+\texttt{QueryDecomposer} dùng LLM để tách câu hỏi nhiều nguồn thành tối đa vài
+subquery có collection rõ ràng:
+
 \begin{verbatim}
 {
-    "DocumentID": int,
-    "Title": "Tên tài liệu",
-    "TypeDoc": "Sổ tay SV" | "Kit nhập học" | ...,
-    "Description": "Nội dung chính (markdown-like)",
-    "CreaterID": str,
-    "TimeCreate": str,
-    "Status": int
+  "subqueries": [
+    {"query": "...", "collection": "ctdt"},
+    {"query": "...", "collection": "quydinh"}
+  ]
 }
 \end{verbatim}
 
-\subsubsection{Các chủ đề chính}
-Dữ liệu STSV bao phủ nhiều chủ đề:
+Nếu parsing lỗi, decomposer fallback về một subquery dùng câu hỏi gốc. Decomposition
+giúp các câu hỏi so sánh hoặc multi-source tránh trộn toàn bộ mục tiêu vào một
+truy vấn duy nhất.
+
+\section{RetrievalService và truy hồi lai}
+
+\subsection{RetrievalService dùng chung}
+
+\texttt{RetrievalService.from\_settings(settings)} là entrypoint chuẩn của tầng
+retrieval. Service này tạo và giữ:
+
 \begin{itemize}
-    \item Hướng dẫn thủ tục nhập học, đăng ký ký túc xá;
-    \item Hướng dẫn sử dụng cổng thông tin, email sinh viên;
-    \item Thủ tục học bổng, bảo hiểm y tế, chính sách hỗ trợ;
-    \item Hướng dẫn các thủ tục thường gặp (cấp giấy tờ, chuyển sinh hoạt Đoàn);
-    \item Lịch kế hoạch đào tạo, tuần định hướng;
-    \item Thông tin liên hệ các phòng ban.
+    \item \texttt{BGEm3Embedder};
+    \item \texttt{E5MultilingualEmbedder};
+    \item \texttt{MultiCollectionSearch};
+    \item optional \texttt{BGEReranker};
+    \item optional \texttt{TavilySearchTool}.
 \end{itemize}
 
-\subsubsection{Pipeline xử lý STSV}
+\texttt{RAGPipeline} tạo một instance \texttt{RetrievalService} duy nhất và inject
+instance này vào agent tool adapters. Đây là contract quan trọng vì nó tránh load
+lại các model nặng cho classic RAG và agent.
+
+\subsection{Qdrant dual named vectors}
+
+Mỗi collection trong Qdrant lưu hai named vectors:
+
+\begin{itemize}
+    \item \texttt{bge\_m3}: vector 1024 chiều từ BGE-M3;
+    \item \texttt{e5}: vector 1024 chiều từ E5 multilingual.
+\end{itemize}
+
+Khi vector search, Qdrant chạy cả hai vector và fuse điểm theo trọng số nội bộ.
+Kết quả vector sau đó được đưa vào tầng fusion với kết quả keyword từ
+Elasticsearch.
+
+\subsection{Elasticsearch keyword và metadata search}
+
+Elasticsearch đảm nhiệm hai nhiệm vụ:
+
+\begin{itemize}
+    \item keyword search bằng \texttt{multi\_match} trên \texttt{text} và
+    \texttt{title} để bắt exact term, tên riêng, mã môn, số điều;
+    \item metadata search để lấy danh sách chunk id phù hợp với filter trước khi
+    Qdrant vector search.
+\end{itemize}
+
+Cơ chế metadata search rất quan trọng vì vector database cần một tập id phù hợp
+để áp \texttt{HasIdCondition}. Nếu metadata filter không match kết quả nào,
+fallback chain sẽ nới lỏng filter thay vì trả rỗng ngay.
+
+\subsection{MultiCollectionSearch}
+
+\texttt{MultiCollectionSearch} là engine tìm kiếm toàn cục. Luồng chính:
+
 \begin{enumerate}
-    \item \textbf{Thu thập}: Crawl dữ liệu từ API cổng thông tin sinh viên, lưu dưới dạng JSON;
-    \item \textbf{Làm sạch}: Chuẩn hóa nội dung, loại bỏ HTML tags, sửa encoding, lưu vào \texttt{clean\_data/data.json};
-    \item \textbf{Chunking}: Sử dụng \texttt{STSVChunker} chuyên biệt, lưu vào \texttt{chunks/stsv\_all\_chunks.json}.
+    \item parse structured query và exclusion terms;
+    \item xác định fusion weight thích ứng;
+    \item tạo filter spec theo collection;
+    \item resolve filter bằng Elasticsearch metadata search;
+    \item chạy vector và keyword search song song trên các collection;
+    \item prefix id dạng \texttt{\{collection\}/\{id\}} để tránh trùng id;
+    \item tạo global vector pool và global keyword pool;
+    \item hợp nhất điểm bằng linear score fusion hoặc RRF;
+    \item cộng recency bonus cho \texttt{kehoach};
+    \item deduplicate theo id và text;
+    \item trả top candidate cho reranker.
 \end{enumerate}
 
-\section{Module Chunking}
+Ở runtime, settings mặc định dùng \texttt{vector\_weight=0.8},
+\texttt{keyword\_weight=0.2}, \texttt{vector\_top\_k=50},
+\texttt{keyword\_top\_k=50}, \texttt{vector\_pool\_k=40},
+\texttt{keyword\_pool\_k=40} và \texttt{top\_k=5}. Với truy vấn giống câu hỏi học
+phần, hệ thống tăng trọng số keyword lên ít nhất 0.6 để ưu tiên mã môn và tên
+học phần.
 
-\subsection{Tổng quan hệ thống Chunking}
-Hệ thống chunking được thiết kế với 4 loại chunker chuyên biệt, phục vụ cho từng loại tài liệu khác nhau:
+\subsection{Metadata filtering theo collection}
 
 \begin{table}[h]
 \centering
-\begin{tabular}{|l|p{4cm}|p{5.5cm}|}
+\begin{tabular}{|l|p{9.4cm}|}
 \hline
-\textbf{Chunker} & \textbf{Dùng cho} & \textbf{Chiến lược} \\
+\textbf{Collection} & \textbf{Chiến lược filter} \\
 \hline
-OlmOcrLegalChunker & Văn bản pháp lý (olmOCR output) & Nhận diện Chương-Điều-Khoản \\
+\texttt{ctdt} & Ưu tiên \texttt{major\_code} exact match, fallback sang
+\texttt{major\_name} fuzzy, sau đó bao gồm chunk generic hoặc bỏ filter. \\
 \hline
-ArticleLevelLegalChunker & Văn bản pháp lý (Docling output) & Tương tự, detect Markdown heading \\
+\texttt{quydinh} & Dùng \texttt{applicable\_cohort} từ query hoặc resolved
+cohort; fallback bao gồm văn bản generic không gắn khóa. \\
 \hline
-RecursiveChunker & CTDT, tài liệu có heading & H2 section + RecursiveTextSplitter \\
+\texttt{kehoach} & Nếu có tháng/năm đăng bài thì wildcard trên
+\texttt{date\_str}; nếu có freshness intent thì lấy chunk mới nhất theo
+\texttt{date\_str}. Token học kỳ như \texttt{2025.2} không bị coi là ngày đăng. \\
 \hline
-STSVChunker & Dữ liệu JSON STSV & Roman/numbered items, recursive split \\
+\texttt{stsv} & Không có prefilter mặc định; tìm trực tiếp theo nội dung và
+metadata chung. \\
 \hline
 \end{tabular}
-\caption{Các chunker chuyên biệt trong hệ thống}
+\caption{Metadata filtering theo collection}
 \end{table}
 
-\subsection{OlmOcrLegalChunker -- Chunker cho văn bản pháp lý}
-\textbf{File:} \texttt{chunker/olmocr\_legal\_chunker.py} (1,126 dòng, 40,500 bytes)
+\subsection{Reranking và hậu xử lý}
 
-\subsubsection{Chiến lược tổng thể}
-OlmOcrLegalChunker tự động nhận diện cấu trúc pháp lý Việt Nam và tạo chunks với metadata:
-\begin{enumerate}
-    \item Nhận diện và tách phần Header (căn cứ pháp lý, quyết định ban hành);
-    \item Phân chia theo Chương (Chapter);
-    \item Trong mỗi Chương, phân chia theo Điều (Article);
-    \item Mỗi Điều đầy đủ tạo thành 1 \textbf{parent chunk};
-    \item Trong Điều, tách từng Khoản (Clause) thành \textbf{child chunk};
-    \item Nhận diện và xử lý phụ lục (Appendix) riêng.
-\end{enumerate}
+Sau hybrid retrieval, BGE reranker đánh điểm cặp query--document và sắp xếp lại
+candidate. Ngưỡng mặc định cho chunk thường là \texttt{0.0}; chunk có bảng dùng
+ngưỡng riêng \texttt{reranker\_table\_score\_threshold}, hiện mặc định
+\texttt{-1.0}, để giữ bảng liên quan nhưng loại bảng sai ngành quá nhiễu.
 
-\subsubsection{Cấu trúc metadata}
-Mỗi chunk mang theo metadata đầy đủ:
+Sau rerank, pipeline áp các bước hậu xử lý:
+
+\begin{itemize}
+    \item \textbf{ValidityFilter}: loại văn bản superseded khi còn đủ nguồn;
+    \item \textbf{ReferenceResolver}: bổ sung chunk cùng văn bản khi đoạn truy
+    hồi có dẫn chiếu như ``Điều 5'', ``khoản 1 Điều 5'';
+    \item \textbf{context formatting}: thêm metadata header, source và profile
+    note khi câu hỏi thật sự cần cá nhân hóa.
+\end{itemize}
+
+\section{Agentic RAG}
+
+\subsection{Vai trò của agent}
+
+Classic RAG tuyến tính phù hợp với câu hỏi một mục tiêu. Tuy nhiên, các câu hỏi
+như ``so sánh chương trình IT-E6 và IT-E7'', ``điều kiện tốt nghiệp của khóa K70
+khác K65 thế nào'' hoặc ``vừa hỏi quy định vừa hỏi lịch đăng ký'' cần nhiều bước
+truy hồi và tổng hợp. Vì vậy hệ thống bổ sung agent trong \texttt{agent/}.
+
+\subsection{Hai đường thực thi}
+
+\texttt{ReActAgent} hiện có hai đường thực thi:
+
+\begin{itemize}
+    \item \textbf{Planner-executor}: dùng cho subtype \texttt{comparison} và
+    \texttt{multi\_source}. Agent decompose câu hỏi, tạo retrieval plan, validate
+    plan, execute song song và synthesize câu trả lời.
+    \item \textbf{ReAct tool loop}: dùng cho câu hỏi phức tạp tổng quát hoặc khi
+    planner fallback. Local tool-calling LLM chọn công cụ, nhận kết quả, lặp lại
+    hoặc synthesize.
+\end{itemize}
+
 \begin{verbatim}
-{
-    "id": "uuid",
-    "readable_id": "c1_d5_k2",
-    "content": "Nội dung chunk...",
-    "parent_id": "parent-uuid",
-    "metadata": {
-        "level": "child",
-        "chapter": "I",
-        "chapter_full": "CHƯƠNG I: QUY ĐỊNH CHUNG",
-        "article": "5",
-        "article_full": "Điều 5. Điều kiện tôt nghiệp",
-        "clause": "2",
-        "chunk_size": 856,
-        "has_table": false,
-        "is_appendix": false
-    }
-}
+RAGPipeline.query_agent()
+  -> init_agent_docs()
+  -> ReActAgent.run()
+     -> planner path: decompose -> planner -> validate -> executor -> synthesize
+     -> react path: LLM tool call -> tools -> continue/synthesize/clarify
+  -> get_agent_docs()
+  -> response mapper + Mongo trace
 \end{verbatim}
 
-\subsubsection{Cấu hình mặc định}
+\subsection{Tool contract}
+
+Các công cụ được bind trực tiếp cho ReAct LLM:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{8.8cm}|}
+\hline
+\textbf{Tool} & \textbf{Chức năng} \\
+\hline
+\texttt{rag\_search} & Tìm kiếm một logical collection của RAG. \\
+\hline
+\texttt{web\_search} & Tìm kiếm Tavily trên domain HUST/giáo dục khi cần dữ
+liệu mới hoặc thiếu nguồn nội bộ. \\
+\hline
+\texttt{clarify\_question} & Trả câu hỏi làm rõ và dừng lượt hiện tại. \\
+\hline
+\end{tabular}
+\caption{Tool visible với LangGraph agent}
+\end{table}
+
+Adapter vẫn hỗ trợ các tool cũ như \texttt{multi\_rag\_search},
+\texttt{compare\_cohorts} và \texttt{compare\_programs} cho test và backward
+compatibility, nhưng các tool này không được bind trực tiếp cho LLM. So sánh và
+multi-source nên đi qua planner-executor.
+
+\subsection{Agent collection alias}
+
+Agent dùng alias thân thiện hơn với domain nội bộ:
+
 \begin{verbatim}
-OlmOcrLegalChunker(
-    min_child_size=300,       # Kích thước tối thiểu child chunk
-    max_child_size=1000,      # Kích thước tối đa child chunk
-    parent_size_limit=4000,   # Merge điều nhỏ thành 1 parent
-    chunk_overlap=100,        # Overlap giữa chunks
-    fallback_chunk_size=1000, # Size cho RecursiveTextSplitter
-    fallback_chunk_overlap=200
-)
+chuong_trinh -> ctdt
+quy_dinh     -> quydinh
+ke_hoach     -> kehoach
+ho_tro_sv    -> stsv
 \end{verbatim}
 
-\subsection{RecursiveChunker -- Chunker cho tài liệu CTDT}
-\textbf{File:} \texttt{chunker/recursive\_chunker.py} (1,260 dòng, 52,522 bytes)
+Tool adapter map alias về collection thật, strip PII/student id, dùng query đã
+chuẩn hóa cho vector và giữ query phù hợp cho Elasticsearch. Reranker trong agent
+được bảo vệ bằng lock vì tokenizer/runtime path không được giả định thread-safe.
 
-\subsubsection{Chiến lược Parent-Child dựa trên H2 Section}
-RecursiveChunker sử dụng chiến lược phân cấp:
-\begin{enumerate}
-    \item Trích xuất tất cả các section H2 từ document;
-    \item Mỗi section H2 đầy đủ tạo thành 1 \textbf{parent chunk} (truncate nếu quá dài);
-    \item Nội dung trong mỗi section H2 được tách thành các \textbf{child chunks} bằng RecursiveCharacterTextSplitter;
-    \item Child chunks luôn nhỏ hơn hoặc bằng parent chunk.
-\end{enumerate}
+\section{Web fallback và tự đánh giá}
 
-\subsubsection{Xử lý đặc biệt}
-RecursiveChunker có nhiều xử lý đặc biệt để đảm bảo chất lượng:
+\subsection{Tavily fallback có kiểm soát}
+
+Tavily là thành phần optional. \texttt{RetrievalService} chỉ tạo
+\texttt{TavilySearchTool} khi API key hợp lệ. Web search được giới hạn trong các
+domain HUST chính thức, domain HUST mở rộng và các nguồn giáo dục có thẩm quyền.
+
+Trong non-streaming classic RAG, có hai giai đoạn web:
+
 \begin{itemize}
-    \item \textbf{Bảo vệ bảng markdown}: Bảng nhỏ hơn \texttt{chunk\_size} được bảo vệ nguyên vẹn, không bị tách giữa bảng. Bảng quá lớn được tách theo rows với header preserved;
-    \item \textbf{Sửa bảng bị tách}: Nếu chunk bắt đầu giữa bảng (thiếu header), tự động tìm và ghép header từ chunk trước;
-    \item \textbf{Inject section context}: Chunk không có heading được tự động thêm heading context từ metadata;
-    \item \textbf{Inject khoản cha}: Với chunk bắt đầu bằng sub-item (a), b), c)...), tự động tìm và thêm khoản số cha;
-    \item \textbf{Loại bỏ trùng lặp heading}: Xử lý heading bị duplicate do context injection + merging.
+    \item \textbf{Pre-generation enrichment}: bổ sung context web khi local source
+    rỗng, truy vấn dynamic/freshness hoặc retrieval confidence thấp;
+    \item \textbf{Post-generation fallback}: regenerate khi câu trả lời báo
+    không có thông tin, không có source hoặc self-eval yêu cầu web search với
+    trạng thái \texttt{insufficient}/\texttt{stale\_risk}.
 \end{itemize}
 
-\subsubsection{Cấu hình mặc định}
-\begin{verbatim}
-RecursiveChunker(
-    chunk_size=1024,              # Kích thước tối đa child chunk
-    chunk_overlap=0,              # Không overlap (H2 boundary đủ context)
-    protect_tables=True,          # Bảo vệ bảng markdown
-    add_section_context=True,     # Thêm heading context
-    min_chunk_size=50,            # Kích thước tối thiều (loại tiny)
-    parent_chunk_max_chars=10000  # Giới hạn parent chunk
-)
-\end{verbatim}
+Cả hai giai đoạn đều phụ thuộc \texttt{tavily\_fallback\_enabled}. Streaming path
+không chạy post-generation Tavily để không phá vỡ trải nghiệm stream.
 
-\subsection{STSVChunker -- Chunker cho dữ liệu JSON STSV}
-\textbf{File:} \texttt{chunker/stsv\_chunker.py} (508 dòng, 20,516 bytes)
+\subsection{SelfEvaluator}
 
-\subsubsection{Phân loại nội dung và chiến lược}
-STSVChunker phân loại nội dung Description của mỗi tài liệu JSON thành 4 loại:
+Self-evaluation được dùng như quality gate tùy chọn. Nếu direct self-eval tắt
+nhưng Tavily fallback bật, pipeline vẫn có thể khởi tạo evaluator vì self-eval
+là tín hiệu quyết định fallback web. Ngưỡng
+\texttt{self\_eval\_min\_top\_score} mặc định rất cao vì BGE reranker trả raw
+logit, không phải xác suất.
 
-\begin{enumerate}
-    \item \textbf{Loại 1 -- Ngắn} ($<$ 1.500 ký tự): Giữ nguyên toàn bộ làm 1 chunk duy nhất;
-    \item \textbf{Loại 2 -- Có phần Roman} (I., II., III.): Tách theo ranh giới phần Roman, trong mỗi phần tiếp tục tách theo mục số;
-    \item \textbf{Loại 3 -- Có mục số} (1., 2., ...): Mục dài ($>$ 300 ký tự) tạo chunk riêng, mục ngắn gộp nhiều mục;
-    \item \textbf{Loại 4 -- Văn xuôi thuần}: Sử dụng RecursiveCharacterTextSplitter.
-\end{enumerate}
+\section{API, xác thực và contract response}
 
-\subsubsection{Context prefix}
-Mỗi chunk được thêm prefix chứa context: \texttt{[Title | TypeDoc | Section\_context]} giúp chunk có thể đứng độc lập khi retrieval, không mất ngữ cảnh nguồn.
+\subsection{Chat API}
 
-\subsection{Metadata Enrichment -- Làm giàu metadata}
-\textbf{File:} \texttt{enrich\_metadata.py} (575 dòng, 19,409 bytes)
+Các endpoint chat chính:
 
-Pipeline làm giàu metadata tự động trích xuất các trường bổ sung cho chunks CTDT:
 \begin{itemize}
-    \item \textbf{effective\_date}: Ngày ban hành/hiệu lực, trích xuất từ tên file hoặc nội dung header;
-    \item \textbf{applicable\_cohort}: Khóa áp dụng (K65, K68, K70...), phát hiện từ filename và content;
-    \item \textbf{applicable\_major}: Ngành đào tạo, xác định qua nhiều nguồn (trường ``Ngành đào tạo'', H1 heading, program code mapping);
-    \item \textbf{document\_type}: Phân loại tài liệu (curriculum, talent\_program, advanced\_program, international\_program, ...).
+    \item \texttt{POST /chat}: gọi \texttt{query\_v3()} và map về
+    \texttt{ChatResponse};
+    \item \texttt{POST /chat/v3}: response giàu trace/debug cho web/mobile;
+    \item \texttt{POST /api/chat/v3}: alias của \texttt{/chat/v3};
+    \item \texttt{POST /chat/stream}: SSE streaming;
+    \item \texttt{GET /chat/suggest}: câu hỏi gợi ý cho mobile/profile context.
 \end{itemize}
 
-\section{Pipeline Chunking tổng hợp}
-\textbf{File:} \texttt{main.py} (356 dòng, 12,023 bytes)
+Nếu có Bearer JWT hợp lệ, route lấy \texttt{user\_id} và
+\texttt{user\_context} từ DB user, không tin identity spoofable trong request
+body. Request body vẫn giữ các field legacy để hỗ trợ client cũ hoặc anonymous
+mode.
 
-Module \texttt{main.py} cung cấp pipeline tổng hợp với CLI interface:
-\begin{verbatim}
-# Chunking văn bản pháp lý (olmOCR output)
-python main.py --chunker olmocr --input <input_dir> --output <output>
+\subsection{Response metadata}
 
-# Chunking CTDT (Docling/PyMuPDF output)
-python main.py --chunker recursive --input <input_dir> --output <output>
+\texttt{api/response\_mapper.py} chuẩn hóa output không đồng nhất của classic
+RAG và agent thành schema cho client. Metadata có thể gồm:
 
-# Chunking dữ liệu STSV (JSON)
-python main.py --chunker stsv --input <stsv_dir>
-\end{verbatim}
-
-Pipeline có các tính năng:
 \begin{itemize}
-    \item \textbf{Skip logic}: Tự động bỏ qua files đã được chunking, tránh xử lý lại;
-    \item \textbf{Batch processing}: Xử lý tất cả files trong thư mục;
-    \item \textbf{Thống kê}: In thống kê chi tiết sau khi chunking (total chunks, by level, avg/min/max size).
+    \item answer và retrieved documents;
+    \item target collections, collection scores, collection results;
+    \item reflected question, applied filters, routing probabilities;
+    \item mode, route, tools, tool calls, iterations;
+    \item agent trace, agent error;
+    \item timings, session id, turn id;
+    \item prompt/debug fields khi có.
 \end{itemize}
 
-\section{Hệ thống Truy hồi lai song song (Parallel Hybrid Retrieval)}
+Nhờ response mapper, backend có thể thay đổi chi tiết nội bộ của pipeline nhưng
+vẫn giữ contract tương đối ổn định cho web/mobile.
 
-\subsection{Cơ chế tìm kiếm đa nguồn song song}
-Để tối ưu hóa thời gian phản hồi, hệ thống thực hiện tìm kiếm đồng thời trên nhiều collection (\texttt{ctdt}, \texttt{quydinh}, \texttt{kehoach}, \texttt{stsv}) bằng \texttt{ThreadPoolExecutor}. Mỗi collection được tìm kiếm bằng cả hai phương thức:
+\subsection{Auth và RBAC}
+
+Auth route nằm ở \texttt{routers/auth.py} với prefix \texttt{/auth}. JWT chứa
+\texttt{sub}, \texttt{email}, \texttt{role}, \texttt{iat}, \texttt{exp}. Các
+admin endpoint dùng \texttt{require\_admin}; superadmin là overlay cấu hình qua
+\texttt{SUPERADMIN\_USER\_IDS}, không phải role DB riêng.
+
+Microsoft OAuth được hỗ trợ cho tài khoản HUST/SIS. User document lưu email,
+username, role, student id, full name, cohort, major và \texttt{major\_code} để
+phục vụ context hội thoại.
+
+\subsection{API quản trị, lookup và mobile features}
+
+Ngoài chat, backend cung cấp:
+
 \begin{itemize}
-    \item \textbf{Dense Retrieval (Qdrant)}: Sử dụng cơ chế \textbf{Dual-embedding} kết hợp mô hình BGE-M3 (đa năng) và E5 (chuyên ngữ nghĩa dense) để bao phủ tối đa không gian vector;
-    \item \textbf{Keyword Retrieval (Elasticsearch)}: Sử dụng thuật toán BM25 để bắt các từ khóa chính xác (mã môn, tên riêng).
+    \item \texttt{/admin/documents*}: upload, convert, clean, chunk, approve,
+    index, rollback tài liệu;
+    \item \texttt{/retrieval/search}: endpoint diagnostic cho raw retrieval;
+    \item \texttt{/metrics/usage}, \texttt{/metrics/eval}: metrics và eval
+    dashboard;
+    \item \texttt{/session}, \texttt{/sessions}, \texttt{/sessions/me}: quản lý
+    phiên hội thoại;
+    \item \texttt{/lookup/ctdt/\{major\_code\}},
+    \texttt{/lookup/regulations}, \texttt{/lookup/calendar},
+    \texttt{/lookup/compare}: tra cứu nhanh cho mobile;
+    \item \texttt{/bookmarks}, \texttt{/bookmark-folders}, \texttt{/feedback},
+    \texttt{/notifications}: các tính năng mobile/web phụ trợ.
 \end{itemize}
 
-\subsection{Metadata Pre-filtering (Lọc tiên quyết)}
-Hệ thống sử dụng các thực thể đã trích xuất để giới hạn không gian tìm kiếm, giúp tăng độ chính xác và giảm nhiễu:
-\begin{enumerate}
-    \item \textbf{ES Metadata Search}: Tìm các Document ID thỏa mãn điều kiện (Ví dụ: \texttt{major\_code="IT-E6"} và \texttt{applicable\_cohort="K65"});
-    \item \textbf{Qdrant Constraint}: Truyền danh sách IDs này vào Qdrant dưới dạng \texttt{HasIdCondition} để ép bộ lọc vector search chỉ tìm trong các tài liệu phù hợp.
-\end{enumerate}
+\section{Persistence, cache và quan sát}
 
-\subsection{Adaptive Score Fusion (Gộp điểm thích ứng)}
-Điểm số từ Vector search và Keyword search được chuẩn hóa (Min-Max Normalization) và gộp lại theo trọng số:
-\[ Score = w_{vector} \times Norm(Score_{vec}) + w_{keyword} \times Norm(Score_{kw}) \]
-Hệ thống tự động điều chỉnh trọng số: Nếu câu hỏi chứa mã môn học hoặc từ khóa "môn", "học phần", trọng số Keyword sẽ được tăng từ 0.3 lên 0.6 để ưu tiên khớp chính xác.
+\subsection{MongoDB}
 
-\subsection{Reranking Layer và Xử lý dữ liệu bảng}
-Sau khi truy hồi, các ứng viên (Top 50) được đưa qua bộ reranker \texttt{bge-reranker-v2-m3} (Cross-encoder). Điểm đặc biệt của hệ thống là cơ chế lọc ngưỡng linh hoạt:
+MongoDB là tầng lưu trữ bền vững. Các collection quan trọng:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{9.0cm}|}
+\hline
+\textbf{Collection} & \textbf{Vai trò} \\
+\hline
+\texttt{users} & Tài khoản, role, profile và context sinh viên. \\
+\hline
+\texttt{sessions} & Metadata phiên chat. \\
+\hline
+\texttt{turns} & Lượt hỏi đáp, answer, sources và metadata. \\
+\hline
+\texttt{query\_logs} & Analytics log phẳng theo turn. \\
+\hline
+\texttt{agent\_traces} & Trace LangGraph/tool calls của agent. \\
+\hline
+\texttt{documents}, \texttt{document\_chunks} & Tài liệu admin upload và chunks
+review/indexing. \\
+\hline
+\texttt{system\_config} & Override LLM/admin config, đặc biệt document
+\texttt{llm\_config}. \\
+\hline
+\end{tabular}
+\caption{Các MongoDB collection chính}
+\end{table}
+
+\subsection{Redis}
+
+Redis là thành phần fail-soft, điều khiển bởi \texttt{redis\_enabled} và các flag
+con. Khi Redis không khả dụng, backend tiếp tục qua MongoDB hoặc bỏ qua cache.
+
+Các nhóm key chính:
+
 \begin{itemize}
-    \item \textbf{Standard Threshold} (0.0): Loại bỏ các đoạn văn bản không liên quan;
-    \item \textbf{Table Threshold} (-5.0): Áp dụng ngưỡng thấp hơn cho các đoạn chứa bảng biểu (\texttt{has\_table: true}) vì mô hình Cross-encoder thường đánh giá thấp các cấu trúc bảng;
-    \item \textbf{Bypass Logic}: Tự động bỏ qua rerank cho các bảng chương trình đào tạo dài khi phát hiện truy vấn liệt kê học kỳ, tránh mất mát dữ liệu do model bias.
+    \item \texttt{session:\{sid\}} và \texttt{user\_sessions:\{uid\}} cho session
+    metadata/list;
+    \item \texttt{history:\{sid\}} cho context hội thoại gần đây;
+    \item \texttt{llm\_cache:\{sha\}} và \texttt{llm\_cache:q:\{sha\}} cho cache
+    post-retrieval và query-only;
+    \item \texttt{rate:min:\{id\}}, \texttt{rate:day:\{id\}} cho rate limiting.
 \end{itemize}
 
-\section{Cơ chế Tác nhân thông minh (Agentic RAG)}
+Rate limit mặc định là \texttt{20} request/phút và \texttt{200} request/ngày.
+Nếu Redis lỗi, middleware cho request đi qua và log warning thay vì làm hệ thống
+fail-closed.
 
-\subsection{Kiến trúc Planner-Executor với LangGraph}
-Đối với các câu hỏi phức tạp, hệ thống chuyển sang luồng Tác nhân (Agent). Thay vì sử dụng vòng lặp ReAct truyền thống (thường chậm do phải gọi LLM nhiều lần), hệ thống sử dụng mô hình \textbf{Planner-Executor} được tối ưu:
+\subsection{Trace và observability}
+
+Trace metadata được ghi ở nhiều tầng:
+
 \begin{itemize}
-    \item \textbf{Planner (Gemini)}: Nhận câu hỏi phức tạp và lập kế hoạch dưới dạng danh sách các bước truy hồi (JSON plan);
-    \item \textbf{Executor (Parallel)}: Thực thi tất cả các bước trong kế hoạch một cách song song mà không cần LLM can thiệp vào từng bước;
-    \item \textbf{Synthesizer (Gemini)}: Tổng hợp toàn bộ dữ liệu thu thập được để đưa ra câu trả lời cuối cùng.
-\end{itemize}
-Cơ chế này giúp giảm thời gian xử lý các câu hỏi so sánh từ 60-80 giây xuống còn 10-15 giây.
-
-\section{Hạ tầng và Tối ưu hóa hệ thống}
-
-\subsection{Hệ thống Caching đa tầng với Redis}
-Hệ thống triển khai Redis để tối ưu hóa hiệu năng và chi phí:
-\begin{itemize}
-    \item \textbf{Session Store}: Lưu trữ thông tin phiên làm việc, hỗ trợ dual-write (ghi đồng thời xuống MongoDB và Redis);
-    \item \textbf{LLM Response Cache}: Lưu trữ câu trả lời của các câu hỏi phổ biến (FAQ) với TTL linh hoạt;
-    \item \textbf{Rate Limiter}: Giới hạn số lượng yêu cầu (20 RPM / 200 RPD) để bảo vệ hệ thống.
+    \item route/domain confidence và routing probabilities;
+    \item reflected question và extracted entities;
+    \item filter đã áp dụng, số id match và collection counts;
+    \item fusion weights, structured query, excluded counts;
+    \item rerank scores, validity/reference resolver behavior;
+    \item timings từng bước;
+    \item agent tool calls, iterations, route và errors.
 \end{itemize}
 
-\subsection{MongoDB MongoLogger}
-Toàn bộ dữ liệu vận hành được lưu trữ vào MongoDB thông qua \texttt{MongoLogger} với cấu trúc 4 collection chính:
+Thông tin này phục vụ debug trong frontend trace page, phân tích lỗi retrieval và
+đánh giá chất lượng sau khi cập nhật dữ liệu.
+
+\section{Giao diện web, mobile và shared package}
+
+\subsection{Web frontend}
+
+Web app nằm ở \texttt{frontend/chat-companion}. Các route chính gồm
+\texttt{/chat}, \texttt{/chat/:sessionId}, \texttt{/login}, \texttt{/register},
+\texttt{/complete-profile}, \texttt{/trace}, \texttt{/retrieval},
+\texttt{/eval}, \texttt{/admin}, \texttt{/admin/documents/:id},
+\texttt{/bookmarks} và \texttt{/notifications}.
+
+\texttt{ChatContainer} điều phối gửi tin nhắn, streaming token, session history,
+metadata/debug panel và invalidation. Admin UI dùng \texttt{services/adminApi.ts}
+để upload, review, chunk và index tài liệu. Trace UI đọc metadata từ
+\texttt{/chat/v3} hoặc stream metadata để hiển thị pipeline.
+
+\subsection{Mobile app}
+
+Mobile app nằm ở \texttt{mobile/} và dùng Expo/React Native. Main tabs gồm Chat,
+Lookup, Bookmarks, Notifications và Profile. Token được lưu trong SecureStore;
+cache offline không nhạy cảm dùng MMKV khi native runtime hỗ trợ, còn Expo Go có
+fallback in-memory.
+
+Streaming mobile dùng \texttt{/chat/stream} qua \texttt{react-native-sse}; nếu
+streaming lỗi trước token đầu tiên, client có thể fallback sang \texttt{/chat/v3}.
+
+\subsection{Shared TypeScript package}
+
+\texttt{packages/shared} cung cấp API clients, types, stores và utilities dùng
+chung. Các path như \texttt{/chat/v3}, \texttt{/chat/stream},
+\texttt{/auth/login}, \texttt{/sessions/me}, \texttt{/lookup/calendar},
+\texttt{/notifications} được khai báo tập trung để web/mobile giảm lệch contract.
+
+\section{Đánh giá và hồi quy}
+
+\subsection{Hai lớp đánh giá}
+
+Module \texttt{evaluation/} tách đánh giá thành hai lớp:
+
 \begin{itemize}
-    \item \textbf{users}: Quản lý thông tin định danh và context sinh viên;
-    \item \textbf{sessions}: Quản lý các phiên hội thoại và trạng thái tác nhân;
-    \item \textbf{turns}: Lưu trữ chi tiết từng lượt hỏi-đáp (câu hỏi, câu trả lời, nguồn trích dẫn, timings);
-    \item \textbf{query\_logs}: Lưu trữ chi tiết Agent Trace, bao gồm các tool calls và suy luận trung gian của tác nhân.
+    \item \textbf{Current policy eval}: đo retrieval theo dữ liệu và chính sách
+    hiện hành, gồm collection accuracy, recall, NDCG, MRR, context
+    precision/recall, citation accuracy và freshness;
+    \item \textbf{Historical conversation eval}: đo hiểu hội thoại, follow-up,
+    personalization, clarification và advisory behavior trên dữ liệu lịch sử.
 \end{itemize}
-Dữ liệu này giúp phân tích hiệu năng từng bước (Reflection, Search, Rerank) và phục vụ việc tinh chỉnh (Fine-tuning) hệ thống trong tương lai.
+
+Sự tách biệt này cần thiết vì câu trả lời lịch sử có thể khác chính sách hiện
+hành. Mismatch với email cũ không nên tự động coi là lỗi factual nếu tài liệu
+hiện tại đã thay đổi.
+
+\subsection{Các check phù hợp sau thay đổi}
+
+Theo cấu trúc module hiện tại, các thay đổi cần chọn test tương ứng:
+
+\begin{itemize}
+    \item thay đổi query/routing/reflection: chạy test query, phase7/phase8 và
+    regression conversation;
+    \item thay đổi retrieval/fusion/filter: chạy \texttt{tests/retrieval},
+    \texttt{test\_multi\_collection\_fusion.py} và current policy eval;
+    \item thay đổi document pipeline: chạy \texttt{tests/test\_document\_pipeline.py}
+    và \texttt{tests/test\_upload\_api.py};
+    \item thay đổi response metadata: cập nhật mapper, web/mobile normalizer và
+    trace components;
+    \item sau indexing/crawling lớn: chạy post-index hoặc current policy eval.
+\end{itemize}
+
+\section{Tổng hợp điểm mới của phương pháp đề xuất}
+
+Phương pháp đề xuất trong hệ thống \texttt{RAG\_v2} có các điểm nổi bật:
+
+\begin{itemize}
+    \item \textbf{Smart entrypoint}: \texttt{query\_v3()} chọn chitchat, clarify,
+    classic RAG, decomposed RAG hoặc agent theo độ phức tạp câu hỏi.
+    \item \textbf{RetrievalService dùng chung}: classic RAG và agent dùng cùng
+    embedders, searcher, reranker và Tavily tool để tránh load model trùng.
+    \item \textbf{Hybrid retrieval đa collection}: Qdrant dual vectors kết hợp
+    Elasticsearch BM25, metadata prefilter, global fusion, adaptive weights và
+    recency bonus.
+    \item \textbf{Guardrail hội thoại}: reflection chỉ dùng profile/history khi
+    câu hỏi có tín hiệu cần cá nhân hóa, giảm context bleed.
+    \item \textbf{Validity và reference resolution}: xử lý văn bản superseded và
+    dẫn chiếu điều/khoản trong cùng tài liệu.
+    \item \textbf{Agentic path}: planner-executor cho so sánh/nhiều nguồn và
+    ReAct tool loop cho câu hỏi phức tạp tổng quát.
+    \item \textbf{Admin document lifecycle}: tài liệu mới có thể được upload,
+    review, chunk, index và rollback qua API/UI quản trị.
+    \item \textbf{Observability}: route, filter, scores, timings, agent traces và
+    eval artifacts giúp phân tích lỗi và cải tiến hệ thống.
+\end{itemize}
 
 \section{Kết luận chương}
-Chương này đã trình bày chi tiết giải pháp đề xuất cho hệ thống RAG v2, bao gồm:
-\begin{itemize}
-    \item \textbf{Kiến trúc đa tầng hiện đại}: Kết hợp linh hoạt giữa RAG truyền thống và Agentic RAG;
-    \item \textbf{Hệ thống Routing và Hiểu truy vấn}: Tối ưu hóa việc phân loại và làm giàu ngữ cảnh câu hỏi;
-    \item \textbf{Pipeline dữ liệu và Chunking chuyên biệt}: Xây dựng nền tảng tri thức vững chắc từ đa nguồn dữ liệu;
-    \item \textbf{Cơ chế Truy hồi và Tác nhân nâng cao}: Tăng cường độ chính xác và khả năng xử lý các truy vấn phức tạp;
-    \item \textbf{Hạ tầng tối ưu}: Đảm bảo tính sẵn sàng và khả năng mở rộng của hệ thống qua Caching và Logging.
-\end{itemize}
 
-Chương tiếp theo sẽ đi sâu vào chi tiết cài đặt kỹ thuật, các thuật toán cụ thể và kết quả thực nghiệm của hệ thống.
+Chương này đã mô tả đầy đủ phương pháp đề xuất của hệ thống \texttt{RAG\_v2}
+dựa trên source code hiện tại. Kiến trúc được tổ chức quanh \texttt{RAGPipeline}
+và \texttt{RetrievalService}, kết hợp query understanding, hybrid retrieval,
+reranking, validity filtering, Agentic RAG, web fallback, persistence, cache,
+admin document pipeline và client web/mobile.
+
+Thiết kế này cho phép hệ thống trả lời câu hỏi học vụ theo hướng có căn cứ,
+truy vết được nguồn, mở rộng được dữ liệu và xử lý được cả truy vấn đơn giản lẫn
+truy vấn nhiều bước. Các chương tiếp theo có thể đi sâu vào triển khai từng
+pipeline, thuật toán cụ thể và kết quả thực nghiệm.
 
 \end{document}

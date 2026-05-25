@@ -1,6 +1,6 @@
 # Module: `schemas`
 
-Source-verified: 2026-05-20 from `schemas/*.py`, `api/routes/*.py`, and `packages/shared`.
+Source-verified: 2026-05-25 from `schemas/*.py`, `api/routes/*.py`, and `packages/shared`.
 
 ## Purpose
 
@@ -72,10 +72,15 @@ Keep this aligned with `models/document.py`, `models/document_chunk.py`, and adm
 `user.py` supports:
 
 - manual registration/login
+- refresh token request
 - user profile update
 - public user response
 - token response
 - admin creation
+
+`TokenResponse` includes `access_token`, `token_type`, `expires_in`, `user`, and
+optional `refresh_token` for mobile clients. Web refresh tokens are delivered by
+HttpOnly cookie instead of the JSON body.
 
 `UserPublic` should stay aligned with `packages/shared/src/types/auth.ts`.
 
@@ -86,6 +91,8 @@ Keep this aligned with `models/document.py`, `models/document_chunk.py`, and adm
 ## Maintenance Notes
 
 - Schema changes are public API changes. Update `api/response_mapper.py`, web/mobile/shared TypeScript types, and tests.
+- Auth schema changes must stay aligned across `routers/auth.py`,
+  `packages/shared/src/types/auth.ts`, web auth services, and mobile auth hooks.
 - Prefer additive fields with sensible defaults when possible.
 - Keep trace/debug fields optional; pipeline outputs can vary by route/mode/fallback.
 

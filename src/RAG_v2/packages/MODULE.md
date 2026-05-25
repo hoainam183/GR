@@ -1,6 +1,6 @@
 # Module: `packages`
 
-Source-verified: 2026-05-20 from `packages/shared/src/**` and root `package.json`.
+Source-verified: 2026-05-25 from `packages/shared/src/**` and root `package.json`.
 
 ## Purpose
 
@@ -25,7 +25,7 @@ Root `package.json` workspaces:
 ```text
 packages/shared/src/
   api/
-    client.ts          Axios factory with Bearer token injection.
+    client.ts          Axios factory with Bearer token injection and refresh retry.
     chatApi.ts         /chat/v3 helpers and identity resolution.
     authApi.ts         /auth/register, /auth/login, /auth/me.
     sessionApi.ts      /sessions, /sessions/me, /session/:id, create session.
@@ -35,10 +35,10 @@ packages/shared/src/
     notificationApi.ts Notification endpoints.
   types/
     chat.ts            Chat requests/responses, retrieved docs, trace types.
-    auth.ts            Auth/user/token types and normalizeUser().
+    auth.ts            Auth/user/token/refresh types and normalizeUser().
     mobile.ts          Bookmark/feedback/lookup/notification types.
   stores/
-    authStore.ts       Zustand auth store factory.
+    authStore.ts       Zustand auth store factory with optional refresh token.
     chatStore.ts       Zustand chat state factory.
   utils/
     constants.ts       API_PATHS.
@@ -88,7 +88,12 @@ If backend chat metadata changes, update:
 
 - Avoid app-specific UI code in shared package.
 - Shared APIs should accept an `AxiosInstance` so apps can own base URL/token behavior.
+- `createApiClient` supports app-owned `getToken`, `refreshAuth`,
+  `onUnauthorized`, and `withCredentials`. Refresh is attempted once per 401
+  response before clearing auth.
 - `UserPublic` normalization should keep canonical `id` from backend `_id`/`id`.
+- `TokenResponse` includes `expires_in`; `refresh_token` is optional because web
+  receives refresh credentials by HttpOnly cookie and mobile receives JSON.
 
 ## Useful Checks
 

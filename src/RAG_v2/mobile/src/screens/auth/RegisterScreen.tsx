@@ -135,12 +135,13 @@ const RegisterScreen = ({ navigation }: Props) => {
       const loginResult = await loginUser(apiClient, {
         username: form.username.trim(),
         password: form.password,
+        client_type: 'mobile',
       });
 
       // Persist auth
-      await setToken(loginResult.access_token);
+      await setToken(loginResult.access_token, loginResult.refresh_token ?? undefined);
       await setUserProfile(loginResult.user);
-      setAuth(loginResult.access_token, loginResult.user);
+      setAuth(loginResult.access_token, loginResult.user, loginResult.refresh_token ?? null);
       // Auth state change triggers RootNavigator to show MainTab
     } catch (err: unknown) {
       let message = 'Đăng ký thất bại.';

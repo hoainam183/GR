@@ -1,11 +1,26 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { setStoredToken, setStoredUser } from "@/services/authStorage";
 import { loginUser } from "@/services/authApi";
+import { applyTokenResponse } from "@/services/authSession";
 import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+const isInternalPath = (value: string | null): value is string =>
+  Boolean(value?.startsWith("/") && !value.startsWith("//"));
+
+const isAdminPath = (value: string): boolean =>
+  value === "/admin" ||
+  value.startsWith("/admin/") ||
+  value === "/trace" ||
+  value === "/retrieval" ||
+  value === "/eval";
+
+const safeNextPath = (value: string | null): string | null =>
+  isInternalPath(value) ? value : null;
 
 const MicrosoftIcon = () => (
   <svg width="18" height="18" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
@@ -51,6 +66,7 @@ const EyeIcon = ({ show }: { show: boolean }) =>
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -71,10 +87,11 @@ const LoginPage = () => {
     setLoading(true);
     setErrors({});
     try {
-      const result = await loginUser({ username, password });
-      setStoredToken(result.access_token);
-      setStoredUser(result.user);
-      if (result.user.role === "admin") {
+      const result = applyTokenResponse(await loginUser({ username, password }));
+      const next = safeNextPath(searchParams.get("next"));
+      if (next && (result.user.role === "admin" || !isAdminPath(next))) {
+        navigate(next);
+      } else if (result.user.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/chat");
@@ -87,6 +104,18 @@ const LoginPage = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMicrosoftLogin = async () => {
+    try {
+      const response = await axios.get<{ authorization_url: string }>(
+        `${API_BASE_URL}/auth/login`,
+        { withCredentials: true },
+      );
+      window.location.href = response.data.authorization_url;
+    } catch {
+      setErrors({ api: "Không thể bắt đầu đăng nhập Microsoft." });
     }
   };
 
@@ -125,6 +154,7 @@ const LoginPage = () => {
             variant="outline"
             className="w-full justify-center gap-2.5 border-border bg-card text-sm font-medium text-foreground hover:bg-secondary"
             type="button"
+            onClick={handleMicrosoftLogin}
           >
             <MicrosoftIcon />
             Continue with Microsoft

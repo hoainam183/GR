@@ -1,11 +1,13 @@
 /**
- * Authentication hook — login, logout, and session restoration.
+ * Authentication hook - login, logout, and session restoration.
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
 import { loginUser, getMe, type LoginRequest, type UserPublic } from '@rag/shared';
-import { apiClient } from '../services/api';
+import { apiClient, refreshAccessToken } from '../services/api';
 import {
+  getRefreshToken,
   getToken,
   setToken,
   clearAll,
@@ -20,7 +22,6 @@ export const useAuth = () => {
   const { isAuthenticated, user, setAuth, clearAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
 
-  // ─── Restore session on app launch ───────────────────────────────────────
   useEffect(() => {
     const restore = async () => {
       if (hasBootstrappedAuth) {
@@ -28,33 +29,46 @@ export const useAuth = () => {
         return;
       }
       hasBootstrappedAuth = true;
+
       try {
         const token = await getToken();
-        if (!token) {
+        const refreshToken = await getRefreshToken();
+        const cachedUser = await getUserProfile<UserPublic>();
+
+        if (!token && !refreshToken) {
           setIsLoading(false);
           return;
         }
 
-        // Try to get user from cache first
-        const cachedUser = await getUserProfile<UserPublic>();
-        if (cachedUser) {
-          setAuth(token, cachedUser);
+        if (token && cachedUser) {
+          setAuth(token, cachedUser, refreshToken);
         }
 
-        // Validate token against server (may fail if offline — that's ok)
         try {
+          if (!token) throw new Error('missing access token');
           const freshUser = await getMe(apiClient, token);
-          setAuth(token, freshUser);
+          setAuth(token, freshUser, refreshToken);
           await setUserProfile(freshUser);
-        } catch {
-          // Token expired or server unreachable — use cached if available
-          if (!cachedUser) {
+        } catch (error) {
+          if (axios.isAxiosError(error) && !error.response && cachedUser && token) {
+            return;
+          }
+
+          const refreshedToken = await refreshAccessToken().catch(() => null);
+          if (!refreshedToken) {
             clearAuth();
             await clearAll();
+            return;
           }
+
+          const freshUser = await getMe(apiClient, refreshedToken);
+          const nextRefresh = await getRefreshToken();
+          setAuth(refreshedToken, freshUser, nextRefresh);
+          await setUserProfile(freshUser);
         }
       } catch {
         clearAuth();
+        await clearAll();
       } finally {
         setIsLoading(false);
       }
@@ -63,20 +77,27 @@ export const useAuth = () => {
     restore();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ─── Login ───────────────────────────────────────────────────────────────
   const login = useCallback(
     async (data: LoginRequest) => {
-      const result = await loginUser(apiClient, data);
-      await setToken(result.access_token);
+      const result = await loginUser(apiClient, { ...data, client_type: 'mobile' });
+      await setToken(result.access_token, result.refresh_token ?? undefined);
       await setUserProfile(result.user);
-      setAuth(result.access_token, result.user);
+      setAuth(result.access_token, result.user, result.refresh_token ?? null);
       return result;
     },
     [setAuth],
   );
 
-  // ─── Logout ──────────────────────────────────────────────────────────────
   const logout = useCallback(async () => {
+    const refreshToken = await getRefreshToken();
+    if (refreshToken) {
+      await apiClient
+        .post('/auth/logout', {
+          refresh_token: refreshToken,
+          client_type: 'mobile',
+        })
+        .catch(() => undefined);
+    }
     clearAuth();
     await clearAll();
   }, [clearAuth]);

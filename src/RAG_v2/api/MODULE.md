@@ -1,6 +1,6 @@
 # Module: `api`
 
-Source-verified: 2026-05-22 from `api/main.py`, `api/routes/*.py`, `api/response_mapper.py`, `api/dependencies.py`, and GitNexus route map.
+Source-verified: 2026-05-25 from `api/main.py`, `api/routes/*.py`, `api/response_mapper.py`, `api/dependencies.py`, and GitNexus route map.
 
 ## Purpose
 
@@ -73,7 +73,7 @@ Shutdown stops the scheduler and closes Redis resources when present.
 | `lookup.py` | `/lookup` | `/lookup/ctdt/{major_code}`, `/lookup/regulations`, `/lookup/calendar`, `/lookup/compare` |
 | `notification.py` | none | `/notifications*` |
 | `notification_admin.py` | `/admin/notifications` | admin notification creation |
-| `routers/auth.py` | app prefix `/auth` | `/auth/login`, `/auth/callback`, `/auth/register`, `/auth/login`, `/auth/me`, `/auth/logout`, `/auth/admin/create` |
+| `routers/auth.py` | app prefix `/auth` | `/auth/login`, `/auth/callback`, `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/me`, `/auth/logout`, `/auth/admin/create` |
 
 ## Chat Routes
 
@@ -87,6 +87,9 @@ Shutdown stops the scheduler and closes Redis resources when present.
 Authenticated requests:
 
 - If Bearer JWT is valid, routes derive `user_id` and `user_context` from the DB user.
+- Access JWTs are intentionally short-lived; web/mobile clients refresh through
+  `/auth/refresh` and retry requests rather than expecting chat/session routes
+  to refresh credentials themselves.
 - Body-supplied identity fields remain for legacy unauthenticated clients but should not override authenticated identity.
 
 SSE event contract:

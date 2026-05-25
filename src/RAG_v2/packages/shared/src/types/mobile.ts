@@ -62,6 +62,7 @@ export interface FeedbackStats {
   down: number;
   by_category: Record<string, number>;
   recent_days: number;
+  with_comment?: number;
 }
 
 export interface LookupDocument {

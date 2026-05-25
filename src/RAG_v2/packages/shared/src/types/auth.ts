@@ -23,6 +23,7 @@ export interface UserPublic {
   cohort: string;
   major: string;
   major_code: string;
+  role?: string;
   is_profile_complete: boolean;
   is_active: boolean;
   created_at: string;
@@ -33,12 +34,15 @@ export interface UserPublic {
 export interface LoginRequest {
   username: string;
   password: string;
+  client_type?: 'web' | 'mobile';
 }
 
 export interface TokenResponse {
   access_token: string;
   token_type: string;
+  expires_in: number;
   user: UserPublic;
+  refresh_token?: string | null;
 }
 
 export const normalizeUser = (user: UserPublic): UserPublic => ({

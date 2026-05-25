@@ -18,21 +18,42 @@ from datetime import datetime, timezone
 from typing import Annotated
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    Body,
+    Cookie,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    status,
+)
 from fastapi.responses import RedirectResponse
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from auth.jwt_handler import create_access_token, get_current_user
+from auth.jwt_handler import (
+    access_token_expires_in_seconds,
+    create_access_token,
+    get_current_user,
+)
 from auth.microsoft import (
     exchange_code_for_token,
     get_authorization_url,
     get_microsoft_user_info,
 )
 from auth.password import hash_password, verify_password
+from auth.refresh_tokens import (
+    create_refresh_session,
+    refresh_token_max_age_seconds,
+    revoke_refresh_token,
+    rotate_refresh_token,
+)
 from models.database import USERS_COLLECTION, get_database
 from models.user import UserDocument
 from schemas.user import (
     AdminCreateRequest,
+    RefreshRequest,
     TokenResponse,
     UserCreate,
     UserLoginRequest,
@@ -48,6 +69,51 @@ router = APIRouter()
 _HUST_DOMAIN = "@sis.hust.edu.vn"
 # Frontend base URL — where the user is redirected after authentication.
 _FRONTEND_BASE = os.environ.get("FRONTEND_BASE_URL", "http://localhost:8080").rstrip("/")
+_REFRESH_COOKIE_NAME = os.environ.get("AUTH_REFRESH_COOKIE_NAME", "refresh_token")
+
+
+def _cookie_secure() -> bool:
+    configured = os.environ.get("AUTH_REFRESH_COOKIE_SECURE")
+    if configured is not None:
+        return configured.lower() in {"1", "true", "yes", "on"}
+    return _FRONTEND_BASE.startswith("https://")
+
+
+def _set_refresh_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        _REFRESH_COOKIE_NAME,
+        token,
+        max_age=refresh_token_max_age_seconds(),
+        path="/",
+        httponly=True,
+        secure=_cookie_secure(),
+        samesite=os.environ.get("AUTH_REFRESH_COOKIE_SAMESITE", "lax"),
+    )
+
+
+def _clear_refresh_cookie(response: Response) -> None:
+    response.delete_cookie(
+        _REFRESH_COOKIE_NAME,
+        path="/",
+        httponly=True,
+        secure=_cookie_secure(),
+        samesite=os.environ.get("AUTH_REFRESH_COOKIE_SAMESITE", "lax"),
+    )
+
+
+def _token_response(
+    *,
+    access_token: str,
+    user: UserPublic,
+    refresh_token: str | None = None,
+) -> TokenResponse:
+    return TokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in=access_token_expires_in_seconds(),
+        user=user,
+        refresh_token=refresh_token,
+    )
 
 
 # ─── /auth/login ──────────────────────────────────────────────────────────────
@@ -86,9 +152,12 @@ async def callback(
     6. Issue a JWT.
     7. Redirect the user to the appropriate frontend page.
 
-    Redirect targets:
-    - New user or incomplete profile → ``/complete-profile?token=<JWT>``
-    - Existing user with complete profile → ``/chat?token=<JWT>``
+    Redirect targets (token delivered via HttpOnly refresh cookie, NOT the URL):
+    - New user or incomplete profile → ``/complete-profile``
+    - Existing user with complete profile → ``/chat``
+
+    The frontend then calls ``POST /auth/refresh`` (which sends the cookie automatically)
+    to obtain a short-lived access JWT.
     """
     # ── Step 1: Exchange code → Microsoft tokens ──────────────────────────────
     token_response = await exchange_code_for_token(code)
@@ -179,15 +248,21 @@ async def callback(
     user_role = "student"
     if existing_doc is not None:
         user_role = existing_doc.get("role", "student")
-    jwt_token = create_access_token(user_id=user_id, email=hust_email, role=user_role)
+    refresh_token = await create_refresh_session(
+        db,
+        user_id=user_id,
+        client_type="web",
+    )
 
     # ── Step 7: Redirect to frontend ─────────────────────────────────────────
     if is_profile_complete:
-        redirect_url = f"{_FRONTEND_BASE}/chat?token={jwt_token}"
+        redirect_url = f"{_FRONTEND_BASE}/chat"
     else:
-        redirect_url = f"{_FRONTEND_BASE}/complete-profile?token={jwt_token}"
+        redirect_url = f"{_FRONTEND_BASE}/complete-profile"
 
-    return RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
+    response = RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
+    _set_refresh_cookie(response, refresh_token)
+    return response
 
 
 # ─── /auth/register ───────────────────────────────────────────────────────────
@@ -254,6 +329,7 @@ async def register(
 )
 async def login(
     body: UserLoginRequest,
+    response: Response,
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
 ) -> TokenResponse:
     """Authenticate with username + password, return a JWT.
@@ -291,15 +367,64 @@ async def login(
     user_role = doc.get("role", "student")
     # Use username as the email claim (informational; get_current_user only uses sub)
     jwt_token = create_access_token(user_id=user_id, email=body.username, role=user_role)
+    client_type = "mobile" if body.client_type == "mobile" else "web"
+    refresh_token = await create_refresh_session(
+        db,
+        user_id=user_id,
+        client_type=client_type,
+    )
+    if client_type == "web":
+        _set_refresh_cookie(response, refresh_token)
 
-    return TokenResponse(
+    return _token_response(
         access_token=jwt_token,
-        token_type="bearer",
         user=UserPublic.from_document(doc),
+        refresh_token=refresh_token if client_type == "mobile" else None,
     )
 
 
 # ─── /auth/me  (GET) ──────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/refresh",
+    response_model=TokenResponse,
+    summary="Rotate refresh token and issue a new access token",
+)
+async def refresh(
+    response: Response,
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+    body: RefreshRequest | None = Body(default=None),
+    refresh_cookie: Annotated[str | None, Cookie(alias=_REFRESH_COOKIE_NAME)] = None,
+) -> TokenResponse:
+    """Rotate a web cookie or mobile refresh token and issue a new access token."""
+    raw_refresh = body.refresh_token if body and body.refresh_token else refresh_cookie
+    if not raw_refresh:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token is required",
+        )
+
+    client_type = "mobile" if body and body.client_type == "mobile" else "web"
+    next_refresh, user = await rotate_refresh_token(
+        db,
+        raw_refresh,
+        client_type=client_type,
+    )
+    email_claim = user.email or user.username or str(user.id)
+    access_token = create_access_token(
+        user_id=str(user.id),
+        email=email_claim,
+        role=user.role,
+    )
+    if client_type == "web":
+        _set_refresh_cookie(response, next_refresh)
+
+    return _token_response(
+        access_token=access_token,
+        user=UserPublic.model_validate(user.model_dump(by_alias=True)),
+        refresh_token=next_refresh if client_type == "mobile" else None,
+    )
 
 
 @router.get("/me", response_model=UserPublic, summary="Get current user profile")
@@ -355,18 +480,22 @@ async def update_me(
 # ─── /auth/logout ─────────────────────────────────────────────────────────────
 
 
-@router.post("/logout", summary="Log out (stateless)")
+@router.post("/logout", summary="Log out and revoke the refresh token when present")
 async def logout(
-    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    response: Response,
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+    request: Request,
+    body: RefreshRequest | None = Body(default=None),
 ) -> dict:
-    """Invalidate the session on the client side.
-
-    Because JWTs are stateless there is nothing to revoke server-side.
-    The frontend must delete the token from storage (localStorage / cookie)
-    upon receiving this response.
-
-    Requires ``Authorization: Bearer <JWT>``.
-    """
+    """Revoke the refresh token if supplied, then clear the browser cookie."""
+    raw_refresh = (
+        body.refresh_token
+        if body and body.refresh_token
+        else request.cookies.get(_REFRESH_COOKIE_NAME)
+    )
+    if raw_refresh:
+        await revoke_refresh_token(db, raw_refresh)
+    _clear_refresh_cookie(response)
     return {"message": "Logged out successfully"}
 
 

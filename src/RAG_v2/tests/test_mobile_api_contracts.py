@@ -19,6 +19,7 @@ from schemas.mobile import (
     NotificationSubscribe,
     NotificationUnsubscribe,
 )
+from schemas.user import TokenResponse, UserPublic
 
 
 class _FakePipeline:
@@ -172,6 +173,32 @@ async def test_sessions_me_uses_authenticated_user_id():
     assert response["sessions"][0]["user_id"] == "user-123"
     assert ("user-123", 10) in mongo.list_calls
     assert ("20210001", 10) in mongo.list_calls
+
+
+def test_mobile_token_response_allows_refresh_token():
+    user = UserPublic(
+        full_name="Nguyen Van A",
+        student_id="20210001",
+        cohort="K68",
+        major="CNTT",
+        major_code="IT1",
+        role="student",
+        is_profile_complete=True,
+        is_active=True,
+        created_at="2026-01-01T00:00:00Z",
+        updated_at="2026-01-01T00:00:00Z",
+        last_login_at="2026-01-01T00:00:00Z",
+    )
+    token = TokenResponse(
+        access_token="access",
+        token_type="bearer",
+        expires_in=900,
+        refresh_token="refresh",
+        user=user,
+    )
+
+    assert token.expires_in == 900
+    assert token.refresh_token == "refresh"
 
 
 @pytest.mark.anyio

@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { setStoredToken, setStoredUser } from "@/services/authStorage";
+import { setStoredUser } from "@/services/authStorage";
+import { authFetch, ensureSession, throwIfNotOk } from "@/services/authSession";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -34,32 +35,14 @@ const CompleteProfile = () => {
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [token, setToken] = useState<string>("");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlToken = params.get("token");
-
-    if (!urlToken) {
-      toast.error("Missing authentication token. Please log in again.");
-      navigate("/login");
-      return;
-    }
-
-    setStoredToken(urlToken);
-    setToken(urlToken);
-
-    fetch(`${API_BASE_URL}/auth/me`, {
-      headers: { Authorization: `Bearer ${urlToken}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data?.detail || `Error ${res.status}`);
-        }
-        return res.json();
-      })
+    ensureSession()
       .then((user) => {
+        if (!user) {
+          navigate("/login");
+          return;
+        }
         setForm({
           full_name: user.full_name ?? "",
           student_id: user.student_id ?? "",
@@ -91,11 +74,10 @@ const CompleteProfile = () => {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      const res = await authFetch(`${API_BASE_URL}/auth/me`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           full_name: form.full_name,
@@ -104,10 +86,7 @@ const CompleteProfile = () => {
         }),
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.detail || `Error ${res.status}`);
-      }
+      await throwIfNotOk(res, "Failed to save profile.");
 
       const updatedUser = await res.json().catch(() => null);
       if (updatedUser) {

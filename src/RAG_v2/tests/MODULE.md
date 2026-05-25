@@ -1,6 +1,6 @@
 # Module: `tests`
 
-Source-verified: 2026-05-22 from `tests/*.py`, root test files, and pytest config.
+Source-verified: 2026-05-25 from `tests/*.py`, root test files, and pytest config.
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Pytest config is in `pytest.ini`.
 | `test_chat_route_mode.py`, `test_response_mapper.py`, `test_dependencies.py` | API chat routing, mapper, dependencies. |
 | `test_admin_llm_config.py` | Persisted admin LLM config, startup merge, endpoint ordering, pipeline reload. |
 | `test_upload_api.py`, `test_document_pipeline.py`, `test_storage.py` | Admin upload/document pipeline/storage. |
-| `test_rbac.py` | Auth and admin/superadmin behavior. |
+| `test_auth_refresh.py`, `test_rbac.py` | Auth refresh rotation/logout/reuse and admin/superadmin behavior. |
 | `test_phase1_redis.py`, `test_phase2_redis.py` | Redis session/history/cache/rate limit behavior. |
 | `test_phase7.py`, `test_phase8.py` | Recent RAG/Tavily/profile/freshness guardrails. |
 | `retrieval/test_*.py` | Retrieval module unit/regression checks moved out of runtime package. |
@@ -39,6 +39,9 @@ Use `-m "not integration"` for fast local checks that should not require externa
 ## Maintenance Notes
 
 - When fixing chat/RAG behavior, add or replay saved conversation regression queries.
+- Auth contract changes should cover backend schema behavior plus mobile/shared
+  contract expectations; prefer focused tests that do not require a live MongoDB
+  when the behavior can be tested with route dependency overrides.
 - `test_sft_backend_eval.py` covers the live SFT backend runner's anonymous
   identity default, retained `frontend_env` behavior, resumable artifacts, and
   request diagnostics, including the incorrect-record rerun CLI.
@@ -54,4 +57,5 @@ python -m pytest tests -q -m "not integration"
 python -m pytest tests/retrieval -q -m "not integration"
 python -m pytest tests/test_chat_route_mode.py tests/test_response_mapper.py -q -m "not integration"
 python -m pytest tests/test_upload_api.py tests/test_document_pipeline.py -q -m "not integration"
+python -m pytest tests/test_auth_refresh.py tests/test_rbac.py tests/test_mobile_api_contracts.py -q -m "not integration"
 ```

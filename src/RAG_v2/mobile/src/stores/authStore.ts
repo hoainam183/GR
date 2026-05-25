@@ -16,9 +16,12 @@ export const authStore = createAuthStore();
 // ─── Sync state changes to SecureStore ───────────────────────────────────────
 authStore.subscribe(async (state, prev) => {
   // Persist token changes
-  if (state.accessToken !== prev.accessToken) {
+  if (
+    state.accessToken !== prev.accessToken ||
+    state.refreshToken !== prev.refreshToken
+  ) {
     if (state.accessToken) {
-      await setToken(state.accessToken);
+      await setToken(state.accessToken, state.refreshToken ?? undefined);
     } else {
       await clearTokens();
     }

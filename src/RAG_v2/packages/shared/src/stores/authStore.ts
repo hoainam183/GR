@@ -12,9 +12,10 @@ import type { UserPublic } from '../types/auth';
 export interface AuthState {
   isAuthenticated: boolean;
   accessToken: string | null;
+  refreshToken: string | null;
   user: UserPublic | null;
 
-  setAuth: (token: string, user: UserPublic) => void;
+  setAuth: (token: string, user: UserPublic, refreshToken?: string | null) => void;
   clearAuth: () => void;
   setUser: (user: UserPublic) => void;
 }
@@ -27,13 +28,14 @@ export const createAuthStore = () =>
   createStore<AuthState>((set) => ({
     isAuthenticated: false,
     accessToken: null,
+    refreshToken: null,
     user: null,
 
-    setAuth: (token, user) =>
-      set({ isAuthenticated: true, accessToken: token, user }),
+    setAuth: (token, user, refreshToken = null) =>
+      set({ isAuthenticated: true, accessToken: token, refreshToken, user }),
 
     clearAuth: () =>
-      set({ isAuthenticated: false, accessToken: null, user: null }),
+      set({ isAuthenticated: false, accessToken: null, refreshToken: null, user: null }),
 
     setUser: (user) => set({ user }),
   }));

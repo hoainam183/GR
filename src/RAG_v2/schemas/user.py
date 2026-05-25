@@ -13,7 +13,7 @@ it is tightly coupled to the MongoDB ObjectId type.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -144,6 +144,14 @@ class UserLoginRequest(BaseModel):
 
     username: str
     password: str
+    client_type: Literal["web", "mobile"] = "web"
+
+
+class RefreshRequest(BaseModel):
+    """Request body for refresh-token rotation."""
+
+    refresh_token: Optional[str] = None
+    client_type: Literal["web", "mobile"] = "web"
 
 
 class TokenResponse(BaseModel):
@@ -151,7 +159,9 @@ class TokenResponse(BaseModel):
 
     access_token: str
     token_type: str = "bearer"
+    expires_in: int
     user: UserPublic
+    refresh_token: Optional[str] = None
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

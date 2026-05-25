@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ChatContainer from '@/components/chat/ChatContainer';
 import { ConversationSidebar } from '@/components/sidebar/ConversationSidebar';
@@ -13,14 +13,11 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import {
-  clearStoredAuth,
-  clearStoredUser,
-  getStoredToken,
   getStoredUser,
-  setStoredToken,
   setStoredUser,
 } from '@/services/authStorage';
-import { getMe, type UserPublic } from '@/services/authApi';
+import { type UserPublic } from '@/services/authApi';
+import { ensureSession, logoutSession } from '@/services/authSession';
 import { getSessions } from '@/services/sessionApi';
 import { Activity, Bookmark, Moon, PanelLeft, Sun } from 'lucide-react';
 
@@ -119,7 +116,6 @@ const UserMenu = ({ user, onLogout }: UserMenuProps) => {
 const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
   const { sessionId } = useParams<{ sessionId?: string }>();
   const [user, setUser] = useState<UserPublic | null>(null);
   const isAdmin = user?.role === 'admin';
@@ -169,18 +165,6 @@ const Index = () => {
     let cancelled = false;
 
     const bootstrapUser = async () => {
-      const urlToken = searchParams.get('token');
-      if (urlToken) {
-        setStoredToken(urlToken);
-        navigate('/chat', { replace: true });
-      }
-
-      const storedToken = urlToken || getStoredToken();
-      if (!storedToken) {
-        navigate('/login', { replace: true });
-        return;
-      }
-
       const storedUser = getStoredUser<UserPublic>();
       if (storedUser) {
         if (!cancelled) {
@@ -190,8 +174,12 @@ const Index = () => {
       }
 
       try {
-        const profile = await getMe(storedToken);
+        const profile = await ensureSession();
         if (cancelled) {
+          return;
+        }
+        if (!profile) {
+          navigate('/login', { replace: true });
           return;
         }
         setUser(profile);
@@ -200,7 +188,6 @@ const Index = () => {
         if (cancelled) {
           return;
         }
-        clearStoredAuth();
         navigate('/login', { replace: true });
       }
     };
@@ -210,7 +197,7 @@ const Index = () => {
     return () => {
       cancelled = true;
     };
-  }, [navigate, searchParams]);
+  }, [navigate]);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -227,9 +214,8 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handler);
   }, [isMobile, toggle]);
 
-  const handleLogout = () => {
-    clearStoredAuth();
-    clearStoredUser();
+  const handleLogout = async () => {
+    await logoutSession();
     setUser(null);
     setMobileOpen(false);
     queryClient.clear();

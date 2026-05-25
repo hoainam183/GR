@@ -8,7 +8,7 @@ import EventSource from 'react-native-sse';
 import { useCallback, useRef } from 'react';
 import { getToken } from '../services/secureStorage';
 import { API_BASE_URL } from '../utils/constants';
-import { apiClient } from '../services/api';
+import { apiClient, refreshAccessToken } from '../services/api';
 import type { ChatRequest, ChatV3Response } from '@rag/shared';
 import { normalizeV3Response, cleanText, sendMessageV3 } from '@rag/shared';
 
@@ -25,10 +25,11 @@ export const useStreamChat = () => {
 
   const startStream = useCallback(
     async (request: ChatRequest, handlers: StreamChatHandlers = {}) => {
-      // Cleanup any previous stream
-      esRef.current?.close();
+      const openStream = async (retryOnAuthError: boolean) => {
+        // Cleanup any previous stream
+        esRef.current?.close();
 
-      const token = await getToken();
+      const token = (await getToken()) ?? (await refreshAccessToken().catch(() => null));
       const url = `${API_BASE_URL}/chat/stream`;
 
       const es = new EventSource<'message' | 'error'>(url, {
@@ -114,6 +115,20 @@ export const useStreamChat = () => {
       es.addEventListener('error', (event) => {
         const message = (event as { message?: string }).message || 'Connection lost';
         if (!receivedFirstToken) {
+          if (retryOnAuthError) {
+            void refreshAccessToken()
+              .then((refreshed) => {
+                if (refreshed) {
+                  void openStream(false);
+                } else {
+                  void fallbackToNonStreaming(message);
+                }
+              })
+              .catch(() => {
+                void fallbackToNonStreaming(message);
+              });
+            return;
+          }
           void fallbackToNonStreaming(message);
           return;
         }
@@ -121,6 +136,9 @@ export const useStreamChat = () => {
         handlers.onError?.(message);
         es.close();
       });
+      };
+
+      await openStream(true);
     },
     [],
   );

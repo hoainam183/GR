@@ -1,6 +1,6 @@
 # Module: `frontend`
 
-Source-verified: 2026-05-20 from `frontend/chat-companion/src/**`, package files, and API contracts.
+Source-verified: 2026-05-25 from `frontend/chat-companion/src/**`, package files, and API contracts.
 
 ## Purpose
 
@@ -50,7 +50,15 @@ frontend/chat-companion/src/
 | `/bookmarks` | Saved answers. |
 | `/notifications` | Notification inbox. |
 
-`AdminGuard` currently checks `localStorage.user.role === "admin"`.
+Protected routes use live session validation:
+
+- `RequireAuth`: `/chat`, `/chat/:sessionId`, `/complete-profile`,
+  `/bookmarks`, `/notifications`.
+- `RequireAdmin`: `/trace`, `/retrieval`, `/eval`, `/admin`,
+  `/admin/documents/:id`.
+
+Unauthenticated direct navigation redirects to `/login?next=<current-path>`.
+Non-admin users who reach admin-only routes are redirected to `/chat`.
 
 ## API Services
 
@@ -58,14 +66,22 @@ Important local services:
 
 - `services/chatApi.ts`: `/chat/v3`, `/chat/stream`, response normalization, source mapping.
 - `services/authApi.ts`: login/register/profile helpers.
-- `services/authStorage.ts`: token/user localStorage compatibility.
+- `services/authSession.ts`: central access-token memory state, refresh single-flight,
+  route-session validation, credentialed fetch, and logout.
+- `services/authStorage.ts`: in-memory access token plus legacy localStorage
+  migration/cleanup; user cache remains in localStorage.
 - `services/sessionApi.ts`: session list/get/create/update/delete.
 - `services/adminApi.ts`: upload pipeline actions and polling.
 
 Token behavior:
 
-- New auth should normalize to `localStorage.token`.
-- Some helpers also read legacy `localStorage.access_token` for compatibility.
+- Web access tokens are kept in memory only.
+- Legacy `localStorage.token` and `localStorage.access_token` are read once for
+  migration and then removed.
+- Refresh tokens are HttpOnly cookies set by the backend; axios/fetch clients use
+  `withCredentials`/`credentials: "include"`.
+- Axios and streaming fetch helpers refresh once on 401 and retry the original
+  request once.
 
 ## Chat UI Contract
 
@@ -93,6 +109,8 @@ Crawler status may include collection-level crawl summaries with bounded `saved_
 ## Maintenance Notes
 
 - Keep web response normalization aligned with `api/response_mapper.py` and `packages/shared/src/utils/normalize.ts`.
+- Keep auth flow aligned with `routers/auth.py`,
+  `packages/shared/src/types/auth.ts`, and mobile auth behavior.
 - When backend chat metadata changes, update `types/chat.ts`, `services/chatApi.ts`, and trace components.
 - When admin document schemas change, update `types/admin.ts`, `services/adminApi.ts`, and admin components.
 - Avoid adding runtime-only secrets to Vite env; only `VITE_*` values are exposed.

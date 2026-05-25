@@ -22,6 +22,7 @@ from schemas.chat import (  # noqa: F401
     RetrievedDocument,
 )
 from schemas.user import (  # noqa: F401
+    RefreshRequest,
     TokenResponse,
     UserCreate,
     UserLoginRequest,
@@ -39,6 +40,7 @@ __all__ = [
     "HistoryMessage",
     "RetrievedDocument",
     # user
+    "RefreshRequest",
     "TokenResponse",
     "UserCreate",
     "UserLoginRequest",

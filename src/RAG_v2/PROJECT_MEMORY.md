@@ -1,11 +1,15 @@
 # PROJECT MEMORY - RAG v2 (HUST Academic Chatbot)
 
 > Đây là memory cấp dự án. Đọc trước khi sửa code trong `src/RAG_v2`.
-> Snapshot gần nhất: 2026-05-13, đối chiếu từ source code hiện tại.
+> Snapshot gần nhất: 2026-05-25, đối chiếu từ source code hiện tại.
 
 ---
 
 ## 0. Documentation Workflow
+
+Recent architecture update: 2026-05-25 access/refresh token auth flow. See
+`auth/MODULE.md`, `routers/MODULE.md`, `frontend/MODULE.md`, `mobile/MODULE.md`,
+and `packages/MODULE.md` for module-specific details.
 
 - Trước khi sửa code trong module nào, đọc `MODULE.md` của module đó nếu có.
 - Sau khi sửa code và verify xong, cập nhật `MODULE.md` của module bị ảnh hưởng.
@@ -314,10 +318,25 @@ that lacks required student-specific data.
 ### Auth & RBAC
 
 - Auth router được include prefix `/auth`.
-- Routes: `GET /auth/login`, `GET /auth/callback`, `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `PATCH /auth/me`, `POST /auth/logout`, `POST /auth/admin/create`.
+- Routes: `GET /auth/login`, `GET /auth/callback`, `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `GET /auth/me`, `PATCH /auth/me`, `POST /auth/logout`, `POST /auth/admin/create`.
+- Access JWTs contain `sub`, `email`, `role`, `typ=access`, `jti`, `iat`, and
+  `exp`. Lifetime defaults to `JWT_ACCESS_EXPIRE_MINUTES=15`; legacy
+  `JWT_EXPIRE_MINUTES` remains a fallback.
+- `TokenResponse` returns `access_token`, `token_type`, `expires_in`, `user`,
+  and optional `refresh_token` for mobile clients.
+- Refresh tokens are opaque credentials stored server-side only as SHA-256
+  hashes in Mongo `refresh_tokens`, with `family_id`, expiry, idle timeout,
+  revocation state, replacement link, and client type.
+- `/auth/refresh` rotates refresh tokens on every use. Reuse of a revoked
+  refresh token revokes the whole token family.
+- Web refresh tokens are HttpOnly cookies. Mobile sends `client_type="mobile"`
+  on login and receives/sends refresh tokens in JSON for SecureStore storage.
+- OAuth callback sets the web refresh cookie and redirects without putting a
+  token in the URL.
+- `/auth/logout` revokes the supplied/cookie refresh token and clears the web
+  cookie without requiring a still-valid access token.
 - `PATCH /auth/me` supports `major_code` in addition to profile fields used by chat context.
 - Microsoft OAuth chỉ chấp nhận email domain `@sis.hust.edu.vn`.
-- JWT có `sub`, `email`, `role`, `iat`, `exp`; role đọc lại từ DB khi login.
 - Role DB: `student` mặc định, `admin` cho admin.
 - Superadmin không phải DB role; xác định bằng `SUPERADMIN_USER_IDS`.
 - Upload/admin endpoints dùng `require_admin`; tạo admin dùng superadmin check.
@@ -393,14 +412,19 @@ Tool adapter details:
 - Auth callback redirects use `FRONTEND_BASE_URL`, defaulting to `http://localhost:8080`.
 - Main routes include `/`, `/chat`, `/chat/:sessionId`, `/login`, `/register`, `/complete-profile`, `/trace`, `/retrieval`, `/admin`, `/admin/documents/:id`.
 - `ChatContainer` supports `/chat/stream`, session history, metadata/debug panel, and route/session invalidation.
-- Authenticated web chat/session requests attach the JWT from `localStorage.token`.
-  Web auth helpers also read legacy `localStorage.access_token` for compatibility,
-  but new login/OAuth writes should normalize back to `token`.
+- Authenticated web requests keep access tokens in memory only. On first load,
+  legacy `localStorage.token` and `localStorage.access_token` are migrated to
+  memory and removed.
+- Web refresh tokens live in backend-set HttpOnly cookies; axios/fetch clients
+  use credentials and refresh once on 401 before retrying the original request.
+- Web protected routes validate the live session through `RequireAuth` and
+  `RequireAdmin`; direct protected navigation redirects to `/login?next=...`.
   The conversation sidebar supports search, date grouping, inline rename, hard
   delete, mobile sheet rendering, and desktop resizing persisted in
   `localStorage` key `sidebar:size`.
 - Admin UI uses `services/adminApi.ts` for upload pipeline actions and polling.
-- `AdminGuard` currently checks `localStorage.user.role === "admin"`.
+- Admin route access is based on `/auth/me` session validation, not only cached
+  localStorage role.
 - Admin crawler status can surface nested `AutoCrawlPipeline` collection summaries from the last manual crawl. Each per-pipeline summary includes target collection counts and a bounded `saved_chunks` preview for newly indexed data; the web system tab renders those previews after a successful crawl.
 
 ### Mobile app
@@ -409,7 +433,9 @@ Tool adapter details:
 - Stack: Expo, React Native, React Query, React Navigation, NativeWind, SecureStore, `react-native-sse`, `@rag/shared`.
 - API base URL uses `EXPO_PUBLIC_API_BASE_URL`, then emulator/simulator defaults.
 - Streaming uses `/chat/stream` with non-streaming `/chat/v3` fallback before the first token.
-- Auth uses a single JWT access token in SecureStore; `401` clears SecureStore and auth state.
+- Auth stores access and refresh tokens in SecureStore. Restore validates the
+  access token, then attempts refresh before clearing auth. Axios and early SSE
+  auth failures refresh and retry once.
 - Bottom tabs cover Chat, Lookup, Bookmarks, Notifications, and Profile. MMKV caches sessions, suggestions, and bookmarks for partial offline read access.
 - In Expo Go, the mobile offline cache uses an in-memory fallback because `react-native-mmkv` requires NitroModules that are only available in a rebuilt native/dev-client app; native builds still use MMKV when available.
 
@@ -418,6 +444,9 @@ Tool adapter details:
 - Located at `packages/shared`.
 - Exports API client, auth/chat/session/bookmark/feedback/lookup/notification helpers, shared types, stores, constants and normalization utilities.
 - `UserPublic` is normalized with canonical `id` from backend `_id`.
+- Shared API clients support app-owned refresh callbacks and one retry on 401.
+- Shared auth state includes optional `refreshToken`; `TokenResponse` includes
+  `expires_in` and optional `refresh_token`.
 
 ---
 
@@ -463,6 +492,12 @@ MONGODB_ENABLED=true
 REDIS_ENABLED=false
 RATE_LIMIT_ENABLED=true
 SUPERADMIN_USER_IDS=...
+JWT_ACCESS_EXPIRE_MINUTES=15
+JWT_REFRESH_EXPIRE_DAYS=30
+JWT_REFRESH_IDLE_DAYS=7
+AUTH_REFRESH_COOKIE_NAME=refresh_token
+AUTH_REFRESH_COOKIE_SECURE=
+AUTH_REFRESH_COOKIE_SAMESITE=lax
 UPLOAD_DIR=...
 ```
 

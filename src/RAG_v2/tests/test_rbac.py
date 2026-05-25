@@ -74,6 +74,10 @@ def _clean_db_and_motor():
     import models.database as db_module
 
     db_module._motor_client = None
+    if not _mongo_available():
+        yield
+        db_module._motor_client = None
+        return
 
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
     client.drop_database(TEST_DB)
@@ -220,6 +224,7 @@ class TestLoginRole:
             )
             assert resp.status_code == 200
             data = resp.json()
+            assert data["expires_in"] == 3600
             assert data["user"]["role"] == "student"
             payload = verify_token(data["access_token"])
             assert payload["role"] == "student"
@@ -240,6 +245,7 @@ class TestLoginRole:
             )
             assert resp.status_code == 200
             data = resp.json()
+            assert data["expires_in"] == 3600
             assert data["user"]["role"] == "admin"
             payload = verify_token(data["access_token"])
             assert payload["role"] == "admin"
@@ -472,6 +478,7 @@ class TestBackwardCompatibility:
             )
             assert resp.status_code == 200
             data = resp.json()
+            assert data["expires_in"] == 3600
             assert data["user"]["role"] == "student"
 
     @pytest.mark.asyncio

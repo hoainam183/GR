@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { getStoredToken } from '@/services/authStorage';
+import { installAuthInterceptors } from '@/services/authSession';
 import type {
   DocumentDetail,
   DocumentListResponse,
@@ -15,10 +17,13 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const adminClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 120_000,
+  withCredentials: true,
 });
 
+installAuthInterceptors(adminClient);
+
 function authHeaders() {
-  const token = localStorage.getItem('token');
+  const token = getStoredToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 

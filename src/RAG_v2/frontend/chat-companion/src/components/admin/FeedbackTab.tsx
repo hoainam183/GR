@@ -14,7 +14,7 @@ import { getFeedbackTopics } from '@/services/adminApi';
 import { createApiClient, getFeedbackStats, listAllFeedback } from '@rag/shared';
 import type { FeedbackResponse, FeedbackStats } from '@rag/shared';
 import type { FeedbackTopics } from '@/types/adminStats';
-import { getStoredToken } from '@/services/authStorage';
+import { clearSession, ensureAccessToken, refreshSession } from '@/services/authSession';
 import { ThumbsUp, ThumbsDown, BarChart2, MessageCircle } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -33,7 +33,10 @@ export default function FeedbackTab() {
   const client = useMemo(
     () => createApiClient({
       baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-      getToken: async () => getStoredToken(),
+      getToken: ensureAccessToken,
+      refreshAuth: async () => (await refreshSession()).access_token,
+      onUnauthorized: clearSession,
+      withCredentials: true,
     }),
     [],
   );
@@ -83,7 +86,7 @@ export default function FeedbackTab() {
     : null;
 
   const responseRate = stats
-    ? stats.total > 0 ? Math.round(((stats as any).with_comment ?? 0) / stats.total * 100) : 0
+    ? stats.total > 0 ? Math.round((stats.with_comment ?? 0) / stats.total * 100) : 0
     : null;
 
   if (loading && !stats) {

@@ -7,6 +7,7 @@ import type {
   UserContext,
 } from '@/types/chat';
 import { getStoredToken, getStoredUser } from '@/services/authStorage';
+import { authFetch, installAuthInterceptors } from '@/services/authSession';
 
 type StoredUserShape = UserContext & {
   email?: string | null;
@@ -110,7 +111,10 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
+
+installAuthInterceptors(apiClient);
 
 const authHeaders = (): Record<string, string> => {
   const token = getStoredToken();
@@ -405,11 +409,10 @@ export const sendMessageStream = async (
   const identity = resolveChatIdentity(userContext, userId);
   const streamUrl = `${API_BASE_URL.replace(/\/+$/, '')}/chat/stream`;
 
-  const response = await fetch(streamUrl, {
+  const response = await authFetch(streamUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...authHeaders(),
     },
     body: JSON.stringify({
       question,

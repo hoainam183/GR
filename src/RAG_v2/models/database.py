@@ -47,6 +47,7 @@ NOTIFICATION_SUBSCRIPTIONS_COLLECTION: str = "notification_subscriptions"
 EVAL_RUNS_COLLECTION: str = "eval_runs"
 EVAL_CASE_RESULTS_COLLECTION: str = "eval_case_results"
 SYSTEM_CONFIG_COLLECTION: str = "system_config"
+REFRESH_TOKENS_COLLECTION: str = "refresh_tokens"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -304,3 +305,25 @@ async def create_indexes() -> None:
         name="topics_asc",
     )
     logger.info("Indexes ensured on mobile feature collections")
+
+    refresh_tokens = db[REFRESH_TOKENS_COLLECTION]
+    await safe_create(
+        refresh_tokens,
+        [("token_hash", ASCENDING)],
+        unique=True,
+        name="token_hash_unique",
+    )
+    await safe_create(refresh_tokens, [("user_id", ASCENDING)], name="user_id_asc")
+    await safe_create(refresh_tokens, [("family_id", ASCENDING)], name="family_id_asc")
+    # TTL index: MongoDB automatically deletes documents once expires_at has passed.
+    # expireAfterSeconds=0 means deletion happens as soon as the field value is in the past.
+    await safe_create(
+        refresh_tokens,
+        [("expires_at", ASCENDING)],
+        name="expires_at_ttl",
+        expireAfterSeconds=0,
+    )
+    logger.info(
+        "Indexes ensured on collection '%s': token_hash_unique, user_id_asc, family_id_asc, expires_at_ttl",
+        REFRESH_TOKENS_COLLECTION,
+    )

@@ -21,6 +21,7 @@ from __future__ import annotations
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
+from uuid import uuid4
 
 from bson import ObjectId
 from fastapi import Depends, HTTPException, status
@@ -49,8 +50,19 @@ def _jwt_settings() -> tuple[str, str, int]:
             "Set it to a long, random secret before starting the server."
         )
     algorithm = os.environ.get("JWT_ALGORITHM", "HS256")
-    expire_minutes = int(os.environ.get("JWT_EXPIRE_MINUTES", "60"))
+    expire_minutes = int(
+        os.environ.get(
+            "JWT_ACCESS_EXPIRE_MINUTES",
+            os.environ.get("JWT_EXPIRE_MINUTES", "15"),
+        )
+    )
     return secret, algorithm, expire_minutes
+
+
+def access_token_expires_in_seconds() -> int:
+    """Return the configured access-token lifetime in seconds."""
+    _, _, expire_minutes = _jwt_settings()
+    return expire_minutes * 60
 
 
 # ─── Public API ───────────────────────────────────────────────────────────────
@@ -80,6 +92,8 @@ def create_access_token(user_id: str, email: str, role: str = "student") -> str:
         "sub": user_id,
         "email": email,
         "role": role,
+        "typ": "access",
+        "jti": str(uuid4()),
         "iat": now,
         "exp": now + timedelta(minutes=expire_minutes),
     }

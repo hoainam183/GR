@@ -10,6 +10,7 @@ import {
 } from '@rag/shared';
 import { toast } from 'sonner';
 import { getStoredToken } from '@/services/authStorage';
+import { clearSession, ensureAccessToken, refreshSession } from '@/services/authSession';
 
 interface Props {
   sessionId: string;
@@ -33,7 +34,10 @@ const MessageActionsWeb = ({ sessionId, turnId, content }: Props) => {
     () =>
       createApiClient({
         baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-        getToken: async () => getStoredToken(),
+        getToken: ensureAccessToken,
+        refreshAuth: async () => (await refreshSession()).access_token,
+        onUnauthorized: clearSession,
+        withCredentials: true,
       }),
     [],
   );

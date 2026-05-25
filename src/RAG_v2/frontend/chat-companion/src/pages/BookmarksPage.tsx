@@ -16,6 +16,7 @@ import {
 import { createApiClient, listBookmarks, listBookmarkFolders, deleteBookmark } from '@rag/shared';
 import type { Bookmark as BookmarkType, BookmarkFolder } from '@rag/shared';
 import { getStoredToken } from '@/services/authStorage';
+import { clearSession, ensureAccessToken, refreshSession } from '@/services/authSession';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -240,7 +241,10 @@ const BookmarksPage = () => {
     () =>
       createApiClient({
         baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-        getToken: async () => getStoredToken(),
+        getToken: ensureAccessToken,
+        refreshAuth: async () => (await refreshSession()).access_token,
+        onUnauthorized: clearSession,
+        withCredentials: true,
       }),
     [],
   );
