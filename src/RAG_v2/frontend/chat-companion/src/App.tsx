@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,30 +25,44 @@ const queryClient = new QueryClient();
 const loginRedirect = (pathname: string, search: string) =>
   `/login?next=${encodeURIComponent(`${pathname}${search}`)}`;
 
+/**
+ * Renders children if the user has an active session.
+ *
+ * Strategy:
+ * - If a user is already cached in localStorage, render children immediately
+ *   (optimistic) while the session is being verified in the background.
+ * - If no cached user, render a blank screen until the first check resolves.
+ * - Only redirect to /login once we know for certain there is no valid session.
+ * - The session check runs once on mount; subsequent navigations within a
+ *   protected subtree do NOT trigger a new network round-trip.
+ */
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [user, setUser] = useState<UserPublic | null>(() => getCurrentSessionUser());
-  const [loading, setLoading] = useState(true);
+  // Start in "checking" only when there is no cached user to show immediately.
+  const [checking, setChecking] = useState(() => getCurrentSessionUser() === null);
+  const verified = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
+    // Already verified in this component lifetime — skip on subsequent renders.
+    if (verified.current) return;
+    verified.current = true;
+
     ensureSession()
       .then((sessionUser) => {
-        if (!cancelled) setUser(sessionUser);
+        setUser(sessionUser);
       })
       .catch(() => {
-        if (!cancelled) setUser(null);
+        setUser(null);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        setChecking(false);
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [location.pathname, location.search]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (loading) return null;
+  // Show nothing only while the very first check is in flight AND there is
+  // no cached user to render behind it.
+  if (checking) return null;
   if (!user) return <Navigate to={loginRedirect(location.pathname, location.search)} replace />;
   return <>{children}</>;
 }
@@ -56,27 +70,26 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [user, setUser] = useState<UserPublic | null>(() => getCurrentSessionUser());
-  const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(() => getCurrentSessionUser() === null);
+  const verified = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
+    if (verified.current) return;
+    verified.current = true;
+
     ensureSession()
       .then((sessionUser) => {
-        if (!cancelled) setUser(sessionUser);
+        setUser(sessionUser);
       })
       .catch(() => {
-        if (!cancelled) setUser(null);
+        setUser(null);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        setChecking(false);
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [location.pathname, location.search]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (loading) return null;
+  if (checking) return null;
   if (!user) return <Navigate to={loginRedirect(location.pathname, location.search)} replace />;
   if (user.role !== "admin") return <Navigate to="/chat" replace />;
   return <>{children}</>;

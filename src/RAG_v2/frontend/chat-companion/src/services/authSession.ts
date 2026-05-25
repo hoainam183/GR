@@ -79,18 +79,23 @@ export const ensureAccessToken = async (): Promise<string | null> => {
 };
 
 export const ensureSession = async (): Promise<UserPublic | null> => {
-  const token = await ensureAccessToken();
-  if (!token) return null;
+  // Fast path: access token is already in memory and not expiring soon.
+  // Trust the cached user — the token is still valid.
+  const cachedToken = getStoredToken();
+  if (cachedToken && !isStoredTokenExpiringSoon()) {
+    const cachedUser = getStoredUser<UserPublic>();
+    if (cachedUser) return cachedUser;
+  }
 
-  const response = await authFetch('/auth/me');
-  if (!response.ok) {
+  // Need a fresh access token. The /auth/refresh response already contains
+  // the full user object, so we skip an extra /auth/me round-trip.
+  try {
+    const refreshed = await refreshSession();
+    return refreshed.user;
+  } catch {
     clearSession();
     return null;
   }
-
-  const user = (await response.json()) as UserPublic;
-  setStoredUser(user);
-  return user;
 };
 
 export const logoutSession = async (): Promise<void> => {

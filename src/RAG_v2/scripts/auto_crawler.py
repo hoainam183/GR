@@ -27,7 +27,7 @@ import logging
 import re
 import time
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 from urllib.parse import parse_qs, urljoin, urlparse
@@ -923,6 +923,81 @@ class AutoCrawlPipeline:
             msg += f"  Errors: {summary['errors']}\n"
         msg += "=" * 60
         logger.info(msg)
+
+        # Broadcast notification cho tất cả users khi có data mới
+        if summary.get("indexed", 0) > 0:
+            try:
+                import asyncio
+
+                loop = asyncio.new_event_loop()
+                count = loop.run_until_complete(
+                    AutoCrawler._create_user_notifications(summary)
+                )
+                loop.close()
+                logger.info("Created %d user notifications.", count)
+            except Exception:
+                logger.warning("Failed to create user notifications", exc_info=True)
+
+    @staticmethod
+    async def _create_user_notifications(summary: Dict[str, Any]) -> int:
+        """Broadcast notification cho tất cả users khi có dữ liệu mới."""
+        from models.database import (
+            NOTIFICATIONS_COLLECTION,
+            USERS_COLLECTION,
+            _get_settings,
+            get_motor_client,
+        )
+
+        _, db_name = _get_settings()
+        db = get_motor_client()[db_name]
+
+        pipeline_name = summary.get("pipeline", "unknown")
+        new_articles = summary.get("new_articles", 0)
+        saved_chunks = summary.get("saved_chunks", [])
+
+        body_parts = [
+            f"Hệ thống vừa cập nhật {new_articles} bài viết mới từ nguồn {pipeline_name}."
+        ]
+        if saved_chunks:
+            body_parts.append("\nBài viết mới:")
+            for chunk in saved_chunks[:5]:
+                title = chunk.get("title", "")
+                url = chunk.get("url", "")
+                if title and url:
+                    body_parts.append(f"• {title}\n  {url}")
+                elif title:
+                    body_parts.append(f"• {title}")
+
+        users_cursor = db[USERS_COLLECTION].find({}, {"_id": 1})
+        user_ids = [str(u["_id"]) async for u in users_cursor]
+        if not user_ids:
+            return 0
+
+        now = datetime.now(timezone.utc)
+        docs = [
+            {
+                "user_id": uid,
+                "title": "📚 Dữ liệu mới đã cập nhật",
+                "body": "\n".join(body_parts),
+                "type": "crawler_update",
+                "read": False,
+                "created_at": now,
+                "related_doc_id": None,
+                "metadata": {
+                    "pipeline": pipeline_name,
+                    "new_articles": new_articles,
+                    "indexed": summary.get("indexed", 0),
+                    "article_links": [
+                        {"title": c.get("title", ""), "url": c.get("url", "")}
+                        for c in saved_chunks[:5]
+                        if c.get("url")
+                    ],
+                },
+            }
+            for uid in user_ids
+        ]
+        result = await db[NOTIFICATIONS_COLLECTION].insert_many(docs)
+        return len(result.inserted_ids)
 
 
 # ───────────────────────────────────────────────────────────────

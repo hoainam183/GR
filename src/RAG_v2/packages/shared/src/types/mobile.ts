@@ -90,6 +90,15 @@ export interface NotificationItem {
   related_doc_id?: string | null;
   read: boolean;
   created_at: string;
+  metadata?: {
+    pipeline?: string;
+    new_articles?: number;
+    indexed?: number;
+    article_links?: Array<{
+      title: string;
+      url: string;
+    }>;
+  } | null;
 }
 
 export interface NotificationSubscribeRequest {

@@ -20,6 +20,7 @@ import { type UserPublic } from '@/services/authApi';
 import { ensureSession, logoutSession } from '@/services/authSession';
 import { getSessions } from '@/services/sessionApi';
 import { Activity, Bookmark, Moon, PanelLeft, Sun } from 'lucide-react';
+import { NotificationBell } from '@/components/NotificationBell';
 
 interface UserMenuProps {
   user: UserPublic;
@@ -289,6 +290,7 @@ const Index = () => {
               <Bookmark className="h-4 w-4" />
             </Button>
           )}
+          {user && <NotificationBell />}
           <Button
             variant="ghost"
             size="icon"

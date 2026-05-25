@@ -30,6 +30,7 @@ def _serialize_notification(doc: dict[str, Any]) -> dict[str, Any]:
         "related_doc_id": doc.get("related_doc_id"),
         "read": bool(doc.get("read", False)),
         "created_at": doc.get("created_at"),
+        "metadata": doc.get("metadata"),
     }
 
 
