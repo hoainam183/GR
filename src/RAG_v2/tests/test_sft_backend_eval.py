@@ -551,6 +551,105 @@ def test_load_incorrect_samples_reads_filtered_json_records(tmp_path):
     assert samples[0].metadata["clause"] == "Ghi chú"
 
 
+def test_load_incorrect_samples_prefers_canonical_dataset_sample(tmp_path):
+    from evaluation.evaluate_sft_backend import load_sft_dataset
+    from evaluation.rerun_incorrect_sft_backend import load_incorrect_samples
+
+    dataset_path = tmp_path / "sft.jsonl"
+    dataset_path.write_text(
+        json.dumps(
+            {
+                "instruction": "Nghiên cứu sinh cần báo cáo tiến độ học tập bao lâu một lần?",
+                "input": (
+                    "CONTEXT:\n---\n"
+                    "Văn bản: Quy chế đào tạo năm 2025\n"
+                    "Chương: CHƯƠNG V ĐÀO TẠO TIẾN SĨ\n"
+                    "Điều: Điều 37. Lập kế hoạch và báo cáo tiến độ thực hiện\n"
+                    "Khoản: 4\n"
+                    "Ngày hiệu lực: 2025-05-28\n\n"
+                    "Nội dung:\n"
+                    "4. Định kỳ mỗi 6 tháng kể từ khi có quyết định công nhận NCS.\n"
+                    "---"
+                ),
+                "output": "Nghiên cứu sinh báo cáo tiến độ định kỳ mỗi 6 tháng.",
+                "doc_type": "Quy chế đào tạo năm 2025",
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    canonical = load_sft_dataset(dataset_path)[0]
+
+    incorrect_path = tmp_path / "incorrect_results.json"
+    incorrect_path.write_text(
+        json.dumps(
+            [
+                {
+                    "sample_id": canonical.sample_id,
+                    "index": canonical.index,
+                    "question": canonical.instruction,
+                    "reference_answer": "stale reference",
+                    "doc_type": canonical.doc_type,
+                    "document_title": "stale title",
+                    "judge_match": "incorrect",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    samples = load_incorrect_samples(incorrect_path, dataset_path=dataset_path)
+
+    assert len(samples) == 1
+    assert samples[0].sample_id == canonical.sample_id
+    assert samples[0].reference_answer == canonical.reference_answer
+    assert samples[0].input == canonical.input
+    assert samples[0].metadata["article"] == (
+        "Điều 37. Lập kế hoạch và báo cáo tiến độ thực hiện"
+    )
+    assert samples[0].metadata["document_title"] == "Quy chế đào tạo năm 2025"
+
+
+def test_load_incorrect_samples_parses_sft_input_fallback(tmp_path):
+    from evaluation.rerun_incorrect_sft_backend import load_incorrect_samples
+
+    incorrect_path = tmp_path / "incorrect_results.jsonl"
+    incorrect_path.write_text(
+        json.dumps(
+            {
+                "instruction": "Một tín chỉ tương đương bao nhiêu giờ học tập?",
+                "input": (
+                    "CONTEXT:\n---\n"
+                    "Văn bản: Quy chế đào tạo năm 2025\n"
+                    "Chương: CHƯƠNG I\n"
+                    "Điều: Điều 4. Tín chỉ và học phần\n"
+                    "Khoản: 1\n"
+                    "Ngày hiệu lực: 2025-05-28\n\n"
+                    "Nội dung:\nMột TC được tính tương đương 50 giờ học tập.\n"
+                    "---"
+                ),
+                "output": "Một tín chỉ tương đương 50 giờ học tập.",
+                "doc_type": "Quy chế đào tạo năm 2025",
+                "judge_match": "incorrect",
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    samples = load_incorrect_samples(incorrect_path)
+
+    assert len(samples) == 1
+    assert samples[0].input
+    assert samples[0].metadata["document_title"] == "Quy chế đào tạo năm 2025"
+    assert samples[0].metadata["article"] == "Điều 4. Tín chỉ và học phần"
+    assert samples[0].metadata["clause"] == "1"
+    assert samples[0].metadata["effective_date"] == "2025-05-28"
+
+
 def test_rerun_incorrect_config_from_args_supports_identity_mode():
     from evaluation import rerun_incorrect_sft_backend as runner
 
