@@ -1,10 +1,10 @@
 {
   "run_id": "sft_backend_eval",
   "samples_total": 528,
-  "records_total": 478,
+  "records_total": 499,
   "status_counts": {
-    "completed": 472,
-    "failed": 6
+    "completed": 498,
+    "failed": 1
   },
   "sample_statuses": {
     "67bbfccc75f55bf3": "completed",
@@ -478,13 +478,34 @@
     "796efe3b0686f639": "completed",
     "2016fd035e7b4c52": "completed",
     "badc7da7d8610f8d": "completed",
-    "2505053311dc2134": "completed",
-    "8c7be497485876ff": "failed",
+    "8c7be497485876ff": "completed",
     "8699c214aaa68f92": "completed",
-    "b8eab0210e35ce18": "failed",
-    "b85ee0a36c383f37": "failed",
-    "e3022d5cf2846acf": "failed",
-    "ee733fcc78227f55": "failed"
+    "b8eab0210e35ce18": "completed",
+    "b85ee0a36c383f37": "completed",
+    "e3022d5cf2846acf": "completed",
+    "ee733fcc78227f55": "completed",
+    "7c6557b1a69cf049": "completed",
+    "8cc62d2c9c8d7b59": "completed",
+    "87b71b2ed8c3a37e": "completed",
+    "b58e33880ca9148c": "completed",
+    "510078e5b87599fd": "completed",
+    "1a139edd73b0b62d": "completed",
+    "f404fa41e29466d1": "completed",
+    "47bbc1684cdf7e1f": "completed",
+    "535983d271e1ad1c": "completed",
+    "b9fbdb9a3fa7406a": "completed",
+    "98736bf9796a90d2": "completed",
+    "d2dbba626ea055e3": "completed",
+    "9f3a9d2ad3d367bb": "completed",
+    "38b75504400286fb": "completed",
+    "dafcef2fe6722ace": "completed",
+    "107c191cb3f69bc8": "completed",
+    "63ec17e0a54ba3d7": "completed",
+    "9028b000e71f04c7": "completed",
+    "26052552f9a878a3": "completed",
+    "050b8a23773a70c9": "completed",
+    "2b58de9792d1d747": "completed",
+    "e9be48d3c570cb38": "completed"
   },
   "config": {
     "dataset_path": "eval/data/sft_dataset (1).jsonl",
@@ -526,5 +547,5 @@
     "lmstudio_model": "qwen/qwen3-8b:2",
     "gemini_model": "gemini-3.1-flash-lite"
   },
-  "updated_at": "2026-05-26T12:43:26"
+  "updated_at": "2026-05-26T16:31:54"
 }
