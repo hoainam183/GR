@@ -1,0 +1,75 @@
+{
+  "run_id": "20260526_193830",
+  "run_dir": "D:\\GR\\src\\RAG_v2\\evaluation\\results\\sft_backend_eval\\rerun_incorrect\\20260526_193830",
+  "incorrect_results_path": "D:\\GR\\src\\RAG_v2\\evaluation\\results\\sft_backend_eval\\incorrect_results.json",
+  "summary": {
+    "total_records": 179,
+    "completed": 9,
+    "failed": 170,
+    "setup_valid": true,
+    "setup_invalid_count": 0,
+    "setup_invalid_reasons": [],
+    "error_rate": 0.9497,
+    "latency_ms": {
+      "mean": 128589.0,
+      "p50": 132089.25,
+      "p95": 159486.89,
+      "max": 159486.89
+    },
+    "metrics": {
+      "answer_nonempty_rate": 1.0,
+      "reference_keyword_coverage": 0.3771,
+      "atomic_fact_coverage": 0.0,
+      "expected_doc_hit_rate": 0.1111,
+      "expected_article_hit_rate": 0.2222,
+      "expected_clause_hit_rate": 1.0,
+      "citation_text_hit_rate": 0.0
+    },
+    "by_doc_type": {
+      "Quy chế đào tạo năm 2025": {
+        "total": 75,
+        "completed": 9,
+        "failed": 66
+      },
+      "Quy định ngoại ngữ từ K65": {
+        "total": 19,
+        "completed": 0,
+        "failed": 19
+      },
+      "Quyết định ngoại ngữ từ K68": {
+        "total": 16,
+        "completed": 0,
+        "failed": 16
+      },
+      "Quyết định ngoại ngữ từ K70": {
+        "total": 24,
+        "completed": 0,
+        "failed": 24
+      },
+      "N/A": {
+        "total": 3,
+        "completed": 0,
+        "failed": 3
+      },
+      "Quy chế công tác sinh viên": {
+        "total": 39,
+        "completed": 0,
+        "failed": 39
+      },
+      "Quy định Học bổng KKHT 2023": {
+        "total": 3,
+        "completed": 0,
+        "failed": 3
+      }
+    },
+    "by_mode": {
+      "rag_v2": 9
+    },
+    "judge": {
+      "incorrect": 8,
+      "partial": 1
+    },
+    "updated_at": "2026-05-26T20:07:47"
+  },
+  "updated_at": "2026-05-26T20:07:47"
+}

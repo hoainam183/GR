@@ -228,6 +228,95 @@ class TestTavilyFallback:
         assert result["tools_used"] == ["tavily_search"]
         assert result["tool_calls"][0]["args"]["query"] == "HUST test"
 
+    def test_strong_local_evidence_retries_before_tavily(self) -> None:
+        from pipeline.flows import rag_flow
+        mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
+        local_doc = {
+            "text": (
+                "### Điều 37. Lập kế hoạch và báo cáo tiến độ thực hiện\n"
+                "4. Định kỳ mỗi 6 tháng kể từ khi có quyết định công nhận NCS, "
+                "NCS phải trình bày báo cáo tiến độ học tập."
+            ),
+            "score": 2.1291,
+            "rerank_score": 2.1291,
+            "collection": "quydinh",
+            "metadata": {
+                "title": "QUY CHẾ ĐÀO TẠO ĐẠI HỌC BÁCH KHOA HÀ NỘI",
+                "section_h3": "Điều 37. Lập kế hoạch và báo cáo tiến độ thực hiện",
+            },
+        }
+        mock_searcher.search.return_value = [local_doc]
+        mock_reranker.rerank.return_value = [local_doc]
+        cfg.update({
+            "tavily_fallback_enabled": True,
+            "web_bypass_min_local_score": 0.5,
+        })
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate.side_effect = [
+            "Tôi không tìm thấy thông tin này trong tài liệu hiện có.",
+            "Theo Điều 37, NCS phải báo cáo tiến độ học tập định kỳ mỗi 6 tháng.",
+        ]
+        mock_self_eval = MagicMock()
+        mock_self_eval.evaluate.return_value = {
+            "pass": False,
+            "answer_status": "insufficient",
+            "should_web_search": True,
+            "web_search_query": "quy định báo cáo tiến độ học tập nghiên cứu sinh HUST",
+            "reason": "answer missed local evidence",
+        }
+        mock_tavily = MagicMock()
+
+        result = rag_flow(
+            question="Nghiên cứu sinh cần báo cáo tiến độ học tập bao lâu một lần?",
+            history=None, reflector=None,
+            bge_embedder=mock_bge, e5_embedder=mock_e5,
+            searcher=mock_searcher, reranker=mock_reranker,
+            chat_model=mock_chat, self_evaluator=mock_self_eval,
+            tavily_tool=mock_tavily, cfg=cfg,
+        )
+
+        assert mock_chat.generate.call_count == 2
+        assert not mock_tavily.search.called
+        assert "mỗi 6 tháng" in result["answer"]
+        assert result["timings_ms"]["local_evidence_retry_used"] == 1.0
+        assert result["answer_quality_gate"]["strong_local_evidence"] is True
+        assert result["answer_quality_gate"]["should_web_search"] is False
+
+    def test_tavily_regeneration_merges_local_context_first(self) -> None:
+        from pipeline.flows import _tavily_fallback_result
+
+        mock_chat = MagicMock()
+        mock_chat.model = "test-model"
+        mock_chat.generate.return_value = "merged answer"
+        mock_tavily = MagicMock()
+        mock_tavily.search.return_value = {
+            "context": "web context",
+            "results": [
+                {
+                    "title": "Official web result",
+                    "url": "https://hust.edu.vn/test",
+                    "content": "web context",
+                }
+            ],
+        }
+
+        result = _tavily_fallback_result(
+            question="test",
+            answer="bad answer",
+            tavily_tool=mock_tavily,
+            chat_model=mock_chat,
+            history=[],
+            search_query="test query",
+            local_context="local Điều 37 context",
+        )
+
+        generated_context = mock_chat.generate.call_args.kwargs["context"]
+        assert result["used"] is True
+        assert generated_context.index("local Điều 37 context") < generated_context.index(
+            "web context"
+        )
+
     def test_exact_policy_local_evidence_suppresses_self_eval_web_request(self) -> None:
         from pipeline.flows import _build_answer_quality_gate
 

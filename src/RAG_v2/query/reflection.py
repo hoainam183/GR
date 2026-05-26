@@ -19,6 +19,7 @@ from .prompts import (
     REWRITE_SYSTEM_PROMPT,
     REWRITE_WITH_HISTORY_TEMPLATE,
 )
+from utils.terminology import expand_academic_abbreviations
 
 logger = logging.getLogger(__name__)
 
@@ -1049,6 +1050,10 @@ class QueryReflector:
         if not deterministic_followup_applied:
             rewritten = _expand_major_codes_in_query(rewritten)
 
+        terminology_candidate = rewritten
+        rewritten = expand_academic_abbreviations(rewritten)
+        terminology_expanded = rewritten != terminology_candidate
+
         logger.info(
             "Reflection: %r → %r (history_len=%d)",
             query[:60],
@@ -1074,6 +1079,7 @@ class QueryReflector:
             "reflection_candidate": reflection_candidate,
             "reflection_guardrail_reverted": reflection_guardrail_reverted,
             "reflection_rejected_scope": reflection_rejected_scope,
+            "terminology_expanded": terminology_expanded,
         }
 
     def extract_entities(

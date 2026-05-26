@@ -1340,6 +1340,45 @@ def _best_explicit_rerank_score(
     return max(scores) if scores else None
 
 
+def _is_web_document(document: Dict[str, Any]) -> bool:
+    metadata = document.get("metadata") or {}
+    return (
+        str(document.get("collection") or "").lower() == "web"
+        or str(metadata.get("collection") or "").lower() == "web"
+        or str(metadata.get("provider") or "").lower() == "tavily"
+    )
+
+
+def _best_local_evidence_score(
+    documents: List[Dict[str, Any]],
+) -> Optional[float]:
+    scores: List[float] = []
+    for doc in documents:
+        if not isinstance(doc, dict) or _is_web_document(doc):
+            continue
+        score_value = doc.get("rerank_score")
+        if score_value is None:
+            score_value = doc.get("score")
+        if score_value is None:
+            continue
+        scores.append(_safe_float(score_value))
+    return max(scores) if scores else None
+
+
+def _has_strong_local_evidence(
+    documents: List[Dict[str, Any]],
+    context: str,
+    cfg: Dict[str, Any],
+) -> bool:
+    """Return True when local retrieved evidence is strong enough to retry locally."""
+    if not context.strip():
+        return False
+    best_score = _best_local_evidence_score(documents)
+    if best_score is None:
+        return False
+    return best_score >= _cfg_float(cfg, "web_bypass_min_local_score", 0.5)
+
+
 def _trim_history(
     history: Optional[List[Dict[str, str]]],
     limit: int = _DEFAULT_HISTORY_LIMIT,
@@ -2413,6 +2452,71 @@ def rag_flow(
         pre_web_fallback_used=pre_web_fallback_used,
     )
     timings_ms["answer_quality_gate"] = _elapsed_ms(gate_t0)
+
+    local_context_for_fallback = (
+        full_context
+        if context_trace.get("context_docs_used", 0) and full_context.strip()
+        else ""
+    )
+    strong_local_evidence = _has_strong_local_evidence(
+        reranked,
+        local_context_for_fallback,
+        cfg,
+    )
+    can_retry_with_local_evidence = bool(
+        answer_quality_gate["should_web_search"]
+        and strong_local_evidence
+        and not answer_quality_gate.get("no_sources")
+        and not answer_quality_gate.get("dynamic_query")
+        and not answer_quality_gate.get("freshness_query")
+        and not pre_web_fallback_used
+    )
+    if can_retry_with_local_evidence:
+        retry_t0 = time.perf_counter()
+        try:
+            answer = chat_model.generate(
+                query=question,
+                context=local_context_for_fallback,
+                history=trimmed,
+                mode="rag",
+            )
+            timings_ms["local_evidence_retry_generate"] = _elapsed_ms(retry_t0)
+            timings_ms["local_evidence_retry_used"] = 1.0
+            retry_gate_t0 = time.perf_counter()
+            answer_quality_gate = _build_answer_quality_gate(
+                question=question,
+                search_query=search_query,
+                answer=answer,
+                reranked=reranked,
+                target_collections=target_collections,
+                routing_result=routing_result,
+                eval_result=None,
+                cfg=cfg,
+                pre_web_fallback_used=pre_web_fallback_used,
+            )
+            timings_ms["answer_quality_gate_after_local_retry"] = _elapsed_ms(
+                retry_gate_t0
+            )
+            answer_quality_gate["local_evidence_retry_used"] = True
+            logger.info("Retried generation with strong local evidence before Tavily")
+        except Exception:
+            timings_ms["local_evidence_retry_failed"] = 1.0
+            logger.warning(
+                "Local evidence retry failed, continuing to web fallback decision",
+                exc_info=True,
+            )
+    else:
+        answer_quality_gate["local_evidence_retry_used"] = False
+
+    answer_quality_gate["strong_local_evidence"] = strong_local_evidence
+    answer_quality_gate["pre_generation_reasons"] = pre_web_fallback_reasons
+    answer_quality_gate["pre_generation_web_used"] = pre_web_fallback_used
+    answer_quality_gate["pre_generation_freshness_query"] = bool(
+        pre_web_decision.get("freshness_query")
+    )
+    web_fallback_query = str(
+        answer_quality_gate.get("web_search_query") or web_fallback_query or search_query
+    )
     timings_ms[f"answer_status_{answer_quality_gate['answer_status']}"] = 1.0
     if answer_quality_gate["should_web_search"]:
         timings_ms["web_fallback_requested"] = 1.0
@@ -2422,14 +2526,6 @@ def rag_flow(
             answer_quality_gate["reasons"],
         )
 
-    answer_quality_gate["pre_generation_reasons"] = pre_web_fallback_reasons
-    answer_quality_gate["pre_generation_web_used"] = pre_web_fallback_used
-    answer_quality_gate["pre_generation_freshness_query"] = bool(
-        pre_web_decision.get("freshness_query")
-    )
-    web_fallback_query = str(
-        answer_quality_gate.get("web_search_query") or web_fallback_query or search_query
-    )
     if answer_quality_gate["should_web_search"]:
         if cfg.get("tavily_fallback_enabled", False):
             try:
@@ -2445,6 +2541,7 @@ def rag_flow(
                 max_results=tavily_max_results,
                 search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
                 search_query=web_fallback_query,
+                local_context=local_context_for_fallback or None,
             )
             timings_ms.update(fallback_result["timings"])
             if fallback_result["used"]:
@@ -3403,6 +3500,7 @@ def _tavily_fallback_result(
     max_results: int = 3,
     search_depth: str = "basic",
     search_query: Optional[str] = None,
+    local_context: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Use Tavily web search and return answer, timings, source docs, status."""
     fallback_t0 = time.perf_counter()
@@ -3424,11 +3522,15 @@ def _tavily_fallback_result(
             "sources": tavily_sources,
             "used": False,
         }
+    generation_context = _merge_local_and_web_context(
+        str(local_context or "").strip(),
+        web_context,
+    )
     try:
         regenerate_t0 = time.perf_counter()
         new_answer = chat_model.generate(
             query=question,
-            context=web_context,
+            context=generation_context,
             history=history,
             mode="rag",
         )

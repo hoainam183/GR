@@ -4,6 +4,8 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional
 
+from utils.terminology import HUST_TERMINOLOGY_GLOSSARY_TEXT
+
 # ─── RAG Answer Prompt ──────────────────────────────────────────────────────────
 
 RAG_SYSTEM_PROMPT = """\
@@ -16,6 +18,7 @@ nói rõ: "Tôi không tìm thấy thông tin này trong tài liệu hiện có.
 giữ thuật ngữ gốc trong ngoặc nếu cần để tránh mất nghĩa.
 - Khi các tài liệu cho số liệu khác nhau, ưu tiên tài liệu đầu tiên và ghi chú ngắn.
 - KHÔNG tổng hợp hay trung bình hóa số liệu (tín chỉ, GPA, mã ngành) từ nhiều nguồn.
+- TỪ VIẾT TẮT QUY CHẾ: {terminology_glossary} Chỉ dùng bảng này để hiểu thuật ngữ; thông tin trả lời vẫn phải nằm trong tài liệu tham khảo.
 
 TRÍCH DẪN:
 - KHÔNG dùng số thứ tự nguồn dưới mọi hình thức: [1], [2], "Tài liệu 1", "nguồn 1", v.v.
@@ -36,6 +39,10 @@ HỘI THOẠI:
 chính xác hơn. Không hỏi lại những gì đã biết.
 - Nếu Câu hỏi hiện tại nêu rõ mã ngành/khóa/mã môn cụ thể, ưu tiên thực thể trong
     Câu hỏi hiện tại; KHÔNG trộn với thông tin mâu thuẫn từ lịch sử/hồ sơ."""
+
+RAG_SYSTEM_PROMPT = RAG_SYSTEM_PROMPT.format(
+    terminology_glossary=HUST_TERMINOLOGY_GLOSSARY_TEXT
+)
 
 RAG_USER_TEMPLATE = """\
 ### Tài liệu tham khảo:
@@ -98,6 +105,8 @@ Kiểm tra các tiêu chí sau:
 2. **Tính trung thực (Faithfulness)**: Câu trả lời có dựa trên ngữ cảnh được cung cấp không? Không bịa đặt thông tin.
 3. **Tính đầy đủ (Completeness)**: Câu trả lời có bao gồm tất cả thông tin liên quan từ ngữ cảnh không?
 
+TỪ VIẾT TẮT QUY CHẾ: {terminology_glossary} Chỉ dùng bảng này để hiểu thuật ngữ; không coi đây là nguồn dữ kiện độc lập.
+
 Trả lời bằng một đối tượng JSON duy nhất:
 {
   "pass": true/false,
@@ -126,6 +135,11 @@ mới hoặc không đủ cụ thể, đặt "answer_status" là "stale_risk" v�
 giữ các thực thể quan trọng trong câu hỏi gốc. Nếu không cần, để chuỗi rỗng.
 - KHÔNG viết bất kỳ văn bản nào ngoài đối tượng JSON.
 - KHÔNG bọc JSON trong markdown code block (```). Trả về JSON thuần túy."""
+
+SELF_EVAL_SYSTEM_PROMPT = SELF_EVAL_SYSTEM_PROMPT.replace(
+    "{terminology_glossary}",
+    HUST_TERMINOLOGY_GLOSSARY_TEXT,
+)
 
 SELF_EVAL_USER_TEMPLATE = """\
 ### Câu hỏi người dùng:
