@@ -264,6 +264,7 @@ def run_indexing(
     dry_run: bool = False,
     skip_qdrant: bool = False,
     skip_es: bool = False,
+    parents_only: bool = False,
 ) -> Dict[str, Any]:
     """Main indexing pipeline for parent-child chunks.
 
@@ -273,6 +274,7 @@ def run_indexing(
         dry_run: If True, only report what would be indexed.
         skip_qdrant: Skip Qdrant indexing.
         skip_es: Skip Elasticsearch indexing.
+        parents_only: Only index parent chunks (skip children already in Qdrant/ES).
 
     Returns:
         Stats dict with counts.
@@ -328,14 +330,25 @@ def run_indexing(
         logger.info("DRY RUN — no indexing performed.")
         return stats
 
+    # Optionally filter to parent chunks only (children already exist in stores)
+    qdrant_chunks = prepared_chunks
+    if parents_only:
+        qdrant_chunks = [c for c in prepared_chunks if c["metadata"].get("level") == "parent"]
+        logger.info(
+            "--parents-only: %d parent chunks selected (skipping %d children)",
+            len(qdrant_chunks),
+            len(prepared_chunks) - len(qdrant_chunks),
+        )
+        stats["parents_only"] = True
+
     # Index to Qdrant
     if not skip_qdrant:
-        qdrant_count = index_to_qdrant(prepared_chunks, collection, settings)
+        qdrant_count = index_to_qdrant(qdrant_chunks, collection, settings)
         stats["qdrant_indexed"] = qdrant_count
         logger.info("Qdrant: indexed %d chunks", qdrant_count)
 
-    # Index to Elasticsearch
-    if not skip_es:
+    # Index to Elasticsearch (always skip parents; also skip if parents_only)
+    if not skip_es and not parents_only:
         es_count = index_to_elasticsearch(prepared_chunks, collection, settings)
         stats["es_indexed"] = es_count
         logger.info("Elasticsearch: indexed %d chunks", es_count)
@@ -375,6 +388,11 @@ def main():
         action="store_true",
         help="Skip Elasticsearch indexing (Qdrant only)",
     )
+    parser.add_argument(
+        "--parents-only",
+        action="store_true",
+        help="Only index parent chunks to Qdrant (skip children already indexed)",
+    )
     args = parser.parse_args()
 
     stats = run_indexing(
@@ -383,6 +401,7 @@ def main():
         dry_run=args.dry_run,
         skip_qdrant=args.skip_qdrant,
         skip_es=args.skip_es,
+        parents_only=args.parents_only,
     )
 
     print(f"\n{'='*50}")
