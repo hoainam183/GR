@@ -27,7 +27,19 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
 
 from auth.rbac import require_admin
-from models.database import get_database
+from models.crawler import (
+    CRAWLER_EDITABLE_STATUSES,
+    CRAWLER_INDEXABLE_STATUSES,
+    CRAWLER_STATUS_INDEX_FAILED,
+    CRAWLER_STATUS_INDEXED,
+    CRAWLER_STATUS_INDEXING,
+    CRAWLER_STATUS_PENDING_REVIEW,
+)
+from models.database import (
+    CRAWLER_CHUNKS_COLLECTION,
+    CRAWLER_RUNS_COLLECTION,
+    get_database,
+)
 from models.system_config import (
     API_KEY_SETTING_FIELDS,
     ApiKeyRegistryError,
@@ -79,6 +91,130 @@ _CRAWL_COOLDOWN_SECONDS = 60  # minimum 1 minute between triggers
 _crawl_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="crawl")
 
 
+def _jsonify_datetime(value: Any) -> Any:
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return value
+
+
+def _has_pending_review(value: Any) -> bool:
+    if isinstance(value, dict):
+        status = value.get("review_status") or value.get("status")
+        if status in {CRAWLER_STATUS_PENDING_REVIEW, CRAWLER_STATUS_INDEX_FAILED}:
+            return True
+        return any(_has_pending_review(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_has_pending_review(item) for item in value)
+    return False
+
+
+def _has_crawler_error(value: Any) -> bool:
+    if isinstance(value, dict):
+        if value.get("status") in {"error", "timeout"}:
+            return True
+        return any(_has_crawler_error(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_has_crawler_error(item) for item in value)
+    return False
+
+
+def _crawl_result_status(result: Any) -> str:
+    if _has_pending_review(result):
+        return "pending_review"
+    if _has_crawler_error(result):
+        return "error"
+    return "success"
+
+
+def _serialize_crawler_chunk(doc: dict[str, Any], *, include_content: bool = True) -> dict[str, Any]:
+    metadata = doc.get("metadata") or {}
+    content = str(doc.get("content") or "")
+    payload = {
+        "run_id": str(doc.get("run_id") or ""),
+        "chunk_id": str(doc.get("chunk_id") or ""),
+        "chunk_index": int(doc.get("chunk_index") or 0),
+        "title": str(metadata.get("title") or ""),
+        "source": str(metadata.get("source") or ""),
+        "url": str(metadata.get("url") or ""),
+        "section_label": str(metadata.get("section_label") or ""),
+        "metadata": metadata,
+        "content_preview": " ".join(content.split())[:280],
+        "content_length": len(content),
+        "edited": bool(doc.get("edited", False)),
+        "index_status": str(doc.get("index_status") or "pending"),
+        "created_at": _jsonify_datetime(doc.get("created_at")),
+        "updated_at": _jsonify_datetime(doc.get("updated_at")),
+    }
+    if include_content:
+        payload["content"] = content
+    return payload
+
+
+def _serialize_crawler_run(doc: dict[str, Any], saved_chunks: list[dict[str, Any]]) -> dict[str, Any]:
+    status = str(doc.get("status") or "unknown")
+    return {
+        "review_run_id": str(doc.get("run_id") or ""),
+        "run_id": str(doc.get("run_id") or ""),
+        "collection": str(doc.get("collection") or ""),
+        "pipeline": str(doc.get("pipeline") or ""),
+        "status": status,
+        "review_status": status,
+        "can_edit": status in CRAWLER_EDITABLE_STATUSES,
+        "can_index": status in CRAWLER_INDEXABLE_STATUSES,
+        "new_articles": int(doc.get("new_articles") or 0),
+        "new_chunks": int(doc.get("new_chunks") or 0),
+        "indexed": int(doc.get("indexed") or 0),
+        "expired_removed": int(doc.get("expired_removed") or 0),
+        "saved_chunks": saved_chunks,
+        "created_at": _jsonify_datetime(doc.get("created_at")),
+        "updated_at": _jsonify_datetime(doc.get("updated_at")),
+        "indexed_at": _jsonify_datetime(doc.get("indexed_at")),
+        "error_message": doc.get("error_message"),
+    }
+
+
+async def _crawler_run_with_preview(
+    db: AsyncIOMotorDatabase,
+    run_doc: dict[str, Any],
+    *,
+    chunk_limit: int = 5,
+) -> dict[str, Any]:
+    cursor = (
+        db[CRAWLER_CHUNKS_COLLECTION]
+        .find({"run_id": run_doc["run_id"]})
+        .sort("chunk_index", 1)
+        .limit(chunk_limit)
+    )
+    chunk_docs = await cursor.to_list(length=chunk_limit)
+    previews = [
+        _serialize_crawler_chunk(doc, include_content=False)
+        for doc in chunk_docs
+    ]
+    return _serialize_crawler_run(run_doc, previews)
+
+
+async def _list_crawler_runs(
+    db: AsyncIOMotorDatabase,
+    *,
+    statuses: list[str] | None = None,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    query: dict[str, Any] = {}
+    if statuses:
+        query["status"] = {"$in": statuses}
+    cursor = (
+        db[CRAWLER_RUNS_COLLECTION]
+        .find(query)
+        .sort("created_at", -1)
+        .limit(limit)
+    )
+    docs = await cursor.to_list(length=limit)
+    return [
+        await _crawler_run_with_preview(db, doc)
+        for doc in docs
+    ]
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Request/Response schemas
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -111,6 +247,10 @@ class ApiKeyCreateBody(BaseModel):
     provider: str
     name: str
     key: str
+
+
+class CrawlerChunkUpdateBody(BaseModel):
+    content: str
 
 
 _LLM_CACHE_INVALIDATION_FIELDS = {
@@ -678,11 +818,12 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
             _do_crawl, crawl_pipeline, pipeline_target,
         )
         result = await asyncio.wait_for(future, timeout=_CRAWL_TIMEOUT_SECONDS)
+        status = _crawl_result_status(result)
         _last_manual_crawl = {
-            "status": "success",
+            **(result if isinstance(result, dict) else {"details": str(result)}),
+            "status": status,
             "pipeline": pipeline_target,
             "completed_at": datetime.now(timezone.utc).isoformat(),
-            **(result if isinstance(result, dict) else {"details": str(result)}),
         }
     except asyncio.TimeoutError:
         _last_manual_crawl = {
@@ -722,13 +863,163 @@ def _do_crawl(crawl_pipeline, pipeline_target: str) -> dict:
 @router.get("/crawler/status")
 async def get_crawler_status(
     _user: Annotated[UserDocument, Depends(require_admin)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
 ):
-    """Return current crawler running state and last result."""
+    """Return current crawler running state, last result, and review runs."""
+    pending_statuses = [
+        CRAWLER_STATUS_PENDING_REVIEW,
+        CRAWLER_STATUS_INDEXING,
+        CRAWLER_STATUS_INDEX_FAILED,
+    ]
+    pending_runs = await _list_crawler_runs(db, statuses=pending_statuses, limit=20)
+    indexed_runs = await _list_crawler_runs(db, statuses=[CRAWLER_STATUS_INDEXED], limit=10)
     return {
         "is_running": _crawl_running,
         "last_result": _last_manual_crawl,
         "cooldown_seconds": _CRAWL_COOLDOWN_SECONDS,
+        "pending_runs": pending_runs,
+        "indexed_runs": indexed_runs,
+        "runs": pending_runs + indexed_runs,
     }
+
+
+@router.get("/crawler/runs/{run_id}/chunks")
+async def get_crawler_run_chunks(
+    run_id: str,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+):
+    """Return full staged chunks for a crawler review run."""
+    run_doc = await db[CRAWLER_RUNS_COLLECTION].find_one({"run_id": run_id})
+    if not run_doc:
+        raise HTTPException(404, "Crawler run not found")
+
+    cursor = (
+        db[CRAWLER_CHUNKS_COLLECTION]
+        .find({"run_id": run_id})
+        .sort("chunk_index", 1)
+    )
+    chunk_docs = await cursor.to_list(length=None)
+    return {
+        "run": _serialize_crawler_run(
+            run_doc,
+            [_serialize_crawler_chunk(doc, include_content=False) for doc in chunk_docs[:5]],
+        ),
+        "chunks": [_serialize_crawler_chunk(doc) for doc in chunk_docs],
+    }
+
+
+@router.patch("/crawler/runs/{run_id}/chunks/{chunk_id}")
+async def update_crawler_run_chunk(
+    run_id: str,
+    chunk_id: str,
+    body: CrawlerChunkUpdateBody,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+):
+    """Update staged crawler chunk content before indexing."""
+    run_doc = await db[CRAWLER_RUNS_COLLECTION].find_one({"run_id": run_id})
+    if not run_doc:
+        raise HTTPException(404, "Crawler run not found")
+    if run_doc.get("status") not in CRAWLER_EDITABLE_STATUSES:
+        raise HTTPException(409, "Crawler run is not editable")
+
+    content = body.content
+    if not content.strip():
+        raise HTTPException(400, "Chunk content cannot be empty")
+
+    chunk_doc = await db[CRAWLER_CHUNKS_COLLECTION].find_one({
+        "run_id": run_id,
+        "chunk_id": chunk_id,
+    })
+    if not chunk_doc:
+        raise HTTPException(404, "Crawler chunk not found")
+
+    now = datetime.now(timezone.utc)
+    edited = content != str(chunk_doc.get("original_content") or "")
+    await db[CRAWLER_CHUNKS_COLLECTION].update_one(
+        {"run_id": run_id, "chunk_id": chunk_id},
+        {"$set": {
+            "content": content,
+            "edited": edited,
+            "updated_at": now,
+        }},
+    )
+    await db[CRAWLER_RUNS_COLLECTION].update_one(
+        {"run_id": run_id},
+        {"$set": {"updated_at": now}},
+    )
+    updated = await db[CRAWLER_CHUNKS_COLLECTION].find_one({
+        "run_id": run_id,
+        "chunk_id": chunk_id,
+    })
+    return _serialize_crawler_chunk(updated or chunk_doc)
+
+
+@router.post("/crawler/runs/{run_id}/index")
+async def index_crawler_run(
+    run_id: str,
+    request: Request,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+):
+    """Start background indexing for a reviewed crawler run."""
+    run_doc = await db[CRAWLER_RUNS_COLLECTION].find_one({"run_id": run_id})
+    if not run_doc:
+        raise HTTPException(404, "Crawler run not found")
+    if run_doc.get("status") not in CRAWLER_INDEXABLE_STATUSES:
+        raise HTTPException(409, "Crawler run is not indexable")
+
+    now = datetime.now(timezone.utc)
+    result = await db[CRAWLER_RUNS_COLLECTION].update_one(
+        {"run_id": run_id, "status": {"$in": list(CRAWLER_INDEXABLE_STATUSES)}},
+        {"$set": {
+            "status": CRAWLER_STATUS_INDEXING,
+            "updated_at": now,
+            "error_message": None,
+        }},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(409, "Crawler run is already being indexed")
+
+    await db[CRAWLER_CHUNKS_COLLECTION].update_many(
+        {"run_id": run_id},
+        {"$set": {"index_status": CRAWLER_STATUS_INDEXING, "updated_at": now}},
+    )
+
+    bge, e5 = _get_pipeline_embedders(request)
+    asyncio.create_task(_index_crawler_run_background(request.app.state.settings, run_id, bge, e5))
+    return {"ok": True, "run_id": run_id, "status": CRAWLER_STATUS_INDEXING}
+
+
+def _get_pipeline_embedders(request: Request) -> tuple[Any, Any]:
+    pipe = request.app.state.pipeline
+    retrieval_service = (
+        getattr(pipe, "retrieval_service", None)
+        or getattr(pipe, "_retrieval_service", None)
+    )
+    return (
+        getattr(retrieval_service, "bge_embedder", None),
+        getattr(retrieval_service, "e5_embedder", None),
+    )
+
+
+async def _index_crawler_run_background(settings, run_id: str, bge=None, e5=None) -> None:
+    try:
+        from scripts.auto_crawler import index_staged_crawler_run
+
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            _crawl_executor,
+            index_staged_crawler_run,
+            settings,
+            run_id,
+            bge,
+            e5,
+        )
+        logger.info("Crawler review run %s indexed successfully.", run_id)
+    except Exception:
+        logger.error("Crawler review run %s failed during indexing.", run_id, exc_info=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

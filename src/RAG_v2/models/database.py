@@ -48,6 +48,8 @@ EVAL_RUNS_COLLECTION: str = "eval_runs"
 EVAL_CASE_RESULTS_COLLECTION: str = "eval_case_results"
 SYSTEM_CONFIG_COLLECTION: str = "system_config"
 REFRESH_TOKENS_COLLECTION: str = "refresh_tokens"
+CRAWLER_RUNS_COLLECTION: str = "crawler_runs"
+CRAWLER_CHUNKS_COLLECTION: str = "crawler_chunks"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -327,3 +329,25 @@ async def create_indexes() -> None:
         "Indexes ensured on collection '%s': token_hash_unique, user_id_asc, family_id_asc, expires_at_ttl",
         REFRESH_TOKENS_COLLECTION,
     )
+
+    crawler_runs = db[CRAWLER_RUNS_COLLECTION]
+    await safe_create(crawler_runs, [("run_id", ASCENDING)], unique=True, name="run_id_unique")
+    await safe_create(
+        crawler_runs,
+        [("status", ASCENDING), ("created_at", DESCENDING)],
+        name="status_created_at_desc",
+    )
+
+    crawler_chunks = db[CRAWLER_CHUNKS_COLLECTION]
+    await safe_create(
+        crawler_chunks,
+        [("run_id", ASCENDING), ("chunk_id", ASCENDING)],
+        unique=True,
+        name="run_id_chunk_id_unique",
+    )
+    await safe_create(
+        crawler_chunks,
+        [("run_id", ASCENDING), ("chunk_index", ASCENDING)],
+        name="run_id_chunk_index",
+    )
+    logger.info("Indexes ensured on crawler review collections")

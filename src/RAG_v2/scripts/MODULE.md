@@ -31,6 +31,7 @@ scripts/
 - `DualIndexer`
 - `RetentionManager`
 - `AutoCrawlPipeline`
+- `index_staged_crawler_run()`
 
 Flow:
 
@@ -38,14 +39,16 @@ Flow:
 crawl official sources
   -> save JSON
   -> chunk content
+  -> stage pending crawler_runs/crawler_chunks in Mongo
+  -> admin review/index approval
   -> embed with BGE/E5
   -> index Qdrant + Elasticsearch
-  -> retention cleanup
+  -> append reviewed chunks to archive
 ```
 
 FastAPI lifespan may schedule this script daily when `crawler_enabled=True`.
 
-`AutoCrawlPipeline` per-pipeline summaries include the target `collection` and a bounded `saved_chunks` preview for newly indexed chunks. Admin crawler status uses this summary payload to show what was saved after a manual crawl without querying the vector stores directly.
+`AutoCrawlPipeline` no longer indexes chunks during default manual, scheduled, or CLI `all` runs. Per-pipeline summaries include `review_run_id`, `review_status`, edit/index booleans, and bounded `saved_chunks` previews for staged chunks. `index_staged_crawler_run()` is the approval path that reads edited Mongo chunks, indexes them, appends them to the chunk archive, invalidates cache, triggers post-index eval, and sends notifications.
 
 Supported crawler targets in source include:
 

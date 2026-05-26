@@ -104,7 +104,7 @@ Token behavior:
 
 `SystemTab` keeps LLM model fields as selects. The configured current model is injected as an option when it is outside the curated model list so admin saves do not accidentally discard runtime settings.
 
-Crawler status may include collection-level crawl summaries with bounded `saved_chunks` previews after a manual crawl. Render those previews from `last_result` recursively because the `all` target nests the `kehoach` and `quydinh` pipeline results.
+Crawler status may include collection-level crawl summaries with bounded `saved_chunks` previews after a manual crawl. New crawler runs are staged for review in Mongo; `SystemTab` renders pending/indexed runs from `crawlerStatus.runs`, allows expanding a preview chunk to fetch/edit full content, and starts indexing through the per-run index endpoint. Article URLs in crawler previews should render as normal external links.
 
 ## Maintenance Notes
 

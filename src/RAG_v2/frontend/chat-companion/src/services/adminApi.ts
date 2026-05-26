@@ -227,6 +227,9 @@ import type {
   UserStatusResponse,
   CrawlerTriggerResponse,
   CrawlerStatus,
+  CrawlerRunChunksResponse,
+  CrawlerChunkDetail,
+  CrawlerIndexResponse,
   ConfigToggleResponse,
   LLMConfig,
   LLMConfigUpdateBody,
@@ -319,6 +322,36 @@ export async function getCrawlerStatus(): Promise<CrawlerStatus> {
   const { data } = await adminClient.get<CrawlerStatus>('/admin/crawler/status', {
     headers: authHeaders(),
   });
+  return data;
+}
+
+export async function getCrawlerRunChunks(runId: string): Promise<CrawlerRunChunksResponse> {
+  const { data } = await adminClient.get<CrawlerRunChunksResponse>(
+    `/admin/crawler/runs/${runId}/chunks`,
+    { headers: authHeaders() },
+  );
+  return data;
+}
+
+export async function updateCrawlerRunChunk(
+  runId: string,
+  chunkId: string,
+  content: string,
+): Promise<CrawlerChunkDetail> {
+  const { data } = await adminClient.patch<CrawlerChunkDetail>(
+    `/admin/crawler/runs/${runId}/chunks/${chunkId}`,
+    { content },
+    { headers: authHeaders() },
+  );
+  return data;
+}
+
+export async function indexCrawlerRun(runId: string): Promise<CrawlerIndexResponse> {
+  const { data } = await adminClient.post<CrawlerIndexResponse>(
+    `/admin/crawler/runs/${runId}/index`,
+    null,
+    { headers: authHeaders() },
+  );
   return data;
 }
 

@@ -43,6 +43,8 @@ Main collections used by this codebase:
 | `notifications` | `api/routes/notification.py` | User notification inbox. |
 | `notification_subscriptions` | `api/routes/notification.py` | Push token/topic subscriptions. |
 | `system_config` | `models/system_config.py`, admin LLM config route | Fixed `_id=llm_config` overrides for the SystemTab LLM form. |
+| `crawler_runs` | `scripts/auto_crawler.py`, `api/routes/admin_stats.py` | Pending/indexed crawler review run metadata before Qdrant/ES indexing. |
+| `crawler_chunks` | `scripts/auto_crawler.py`, `api/routes/admin_stats.py` | Reviewable crawler chunk content, edit flags, and per-chunk index status. |
 
 ## `database.py`
 
@@ -54,6 +56,7 @@ Responsibilities:
 - Close the Motor client on shutdown.
 - Create indexes for users, sessions, turns, query logs, agent traces, mobile features, and document records.
 - Create indexes for refresh-token hashes, users, token families, and expiry.
+- Create crawler review indexes: unique `run_id`, `status + created_at`, unique `run_id + chunk_id`, and `run_id + chunk_index`.
 - Use safe index creation helpers so stale/conflicting indexes can be dropped and recreated where needed.
 
 Use this module for async route-level DB work.

@@ -15,6 +15,7 @@ Pytest config is in `pytest.ini`.
 | `test_agent_langgraph.py`, `test_adapters.py`, `test_constants.py` | Agent graph/tools/constants. |
 | `test_chat_route_mode.py`, `test_response_mapper.py`, `test_dependencies.py` | API chat routing, mapper, dependencies. |
 | `test_admin_llm_config.py` | Persisted admin LLM config, startup merge, endpoint ordering, pipeline reload. |
+| `test_crawler_review.py` | Auto-crawler Mongo staging, admin review status/edit contract, and reviewed indexing success/failure behavior. |
 | `test_upload_api.py`, `test_document_pipeline.py`, `test_storage.py` | Admin upload/document pipeline/storage. |
 | `test_auth_refresh.py`, `test_rbac.py` | Auth refresh rotation/logout/reuse and admin/superadmin behavior. |
 | `test_phase1_redis.py`, `test_phase2_redis.py` | Redis session/history/cache/rate limit behavior. |

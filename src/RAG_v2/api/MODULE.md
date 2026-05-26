@@ -140,6 +140,8 @@ All admin document routes depend on `auth.rbac.require_admin`.
 - `GET /admin/config/llm` returns effective runtime LLM settings with keys masked.
 - `PUT /admin/config/llm` prepares a pipeline LLM reload, persists approved overrides in Mongo, then commits the prepared runtime and invalidates Redis LLM answers when chat generation tuning changes.
 - Runtime toggle endpoint `PATCH /admin/config` is separate; it does not share the persisted LLM override contract.
+- Admin crawler review endpoints live here too: `POST /admin/crawler/trigger` starts crawl/chunk/stage, `GET /admin/crawler/status` returns pending/indexed review runs with chunk previews, `GET /admin/crawler/runs/{run_id}/chunks` returns full chunk content, `PATCH /admin/crawler/runs/{run_id}/chunks/{chunk_id}` edits staged content, and `POST /admin/crawler/runs/{run_id}/index` starts background indexing.
+- Crawler indexing uses the app pipeline's warmed BGE/E5 embedders when available, then indexes edited chunks via `scripts.auto_crawler.index_staged_crawler_run()`.
 
 ## Session Routes
 

@@ -373,6 +373,28 @@ All `/admin/*` document endpoints yêu cầu admin role:
 
 `DocumentPipeline` supports PyMuPDF4LLM/Docling conversion, clean, chunk, embed/index to Mongo/Qdrant/ES, delete indexed data by `document_id`, and rollback by status.
 
+### Admin Crawler Review
+
+Crawler runs are now two-step for manual trigger, scheduler, and default CLI runs:
+
+```text
+crawl official source -> save raw JSON -> chunk -> stage Mongo review
+admin edit/approve -> index edited chunks to Qdrant/ES -> append chunk archive
+```
+
+Mongo collections:
+
+- `crawler_runs`: one run per crawler pipeline, status `pending_review | indexing | indexed | index_failed`.
+- `crawler_chunks`: staged chunk content keyed by `run_id + chunk_id`; admins edit `content` only.
+
+Admin API:
+
+- `POST /admin/crawler/trigger` starts crawl/chunk/stage; completed status is `pending_review` when chunks need review.
+- `GET /admin/crawler/status` returns pending/indexed runs with bounded chunk previews.
+- `GET /admin/crawler/runs/{run_id}/chunks` returns full staged chunk content.
+- `PATCH /admin/crawler/runs/{run_id}/chunks/{chunk_id}` updates chunk content and marks `edited=true`.
+- `POST /admin/crawler/runs/{run_id}/index` starts background indexing with edited chunks and warmed BGE/E5 embedders where available.
+
 ---
 
 ## 7. Agent Tools
@@ -425,7 +447,7 @@ Tool adapter details:
 - Admin UI uses `services/adminApi.ts` for upload pipeline actions and polling.
 - Admin route access is based on `/auth/me` session validation, not only cached
   localStorage role.
-- Admin crawler status can surface nested `AutoCrawlPipeline` collection summaries from the last manual crawl. Each per-pipeline summary includes target collection counts and a bounded `saved_chunks` preview for newly indexed data; the web system tab renders those previews after a successful crawl.
+- Admin crawler status surfaces staged review runs from Mongo. Each run includes target collection counts and bounded `saved_chunks` previews; the web System tab can expand chunks, edit pending/index-failed content, index a run, and open article URLs in a new tab.
 
 ### Mobile app
 

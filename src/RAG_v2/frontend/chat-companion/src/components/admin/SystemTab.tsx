@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, type FormEvent } from 'react'
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,6 +15,7 @@ import EmptyState from './EmptyState';
 import { useAdminFetch } from '@/hooks/useAdminFetch';
 import {
   getSystemStats, triggerCrawler, getCrawlerStatus,
+  getCrawlerRunChunks, updateCrawlerRunChunk, indexCrawlerRun,
   toggleConfig, getLLMConfig, updateLLMConfig,
   activateApiKey, createApiKey, getApiKeys,
 } from '@/services/adminApi';
@@ -25,8 +27,12 @@ import type {
   ApiKeyRecord,
   CrawlerCollectionResult,
   CrawlerSavedChunkPreview,
+  CrawlerChunkDetail,
 } from '@/types/adminStats';
-import { Settings, Loader2, PlayCircle, CheckCircle2, XCircle, Save, Key, Cpu, Database, Plus, RefreshCw } from 'lucide-react';
+import {
+  Settings, Loader2, PlayCircle, CheckCircle2, XCircle, Save, Key, Cpu, Database,
+  Plus, RefreshCw, ChevronDown, ChevronRight, ExternalLink,
+} from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -123,12 +129,17 @@ function toSavedChunkPreview(value: unknown): CrawlerSavedChunkPreview | null {
   if (!value || typeof value !== 'object') return null;
   const record = value as Record<string, unknown>;
   return {
+    run_id: stringFromUnknown(record.run_id) || undefined,
     chunk_id: stringFromUnknown(record.chunk_id),
+    chunk_index: numberFromUnknown(record.chunk_index) || undefined,
     title: stringFromUnknown(record.title),
     source: stringFromUnknown(record.source),
     url: stringFromUnknown(record.url),
     section_label: stringFromUnknown(record.section_label) || undefined,
     content_preview: stringFromUnknown(record.content_preview),
+    content_length: numberFromUnknown(record.content_length) || undefined,
+    edited: Boolean(record.edited),
+    index_status: stringFromUnknown(record.index_status) || undefined,
   };
 }
 
@@ -149,14 +160,23 @@ function collectCrawlerCollectionResults(value: unknown): CrawlerCollectionResul
     : [];
 
   return [{
+    run_id: stringFromUnknown(record.run_id) || undefined,
+    review_run_id: stringFromUnknown(record.review_run_id) || undefined,
     collection,
     pipeline,
     status: stringFromUnknown(record.status) || 'unknown',
+    review_status: stringFromUnknown(record.review_status) || undefined,
+    can_edit: typeof record.can_edit === 'boolean' ? record.can_edit : undefined,
+    can_index: typeof record.can_index === 'boolean' ? record.can_index : undefined,
     new_articles: numberFromUnknown(record.new_articles),
     new_chunks: numberFromUnknown(record.new_chunks),
     indexed: numberFromUnknown(record.indexed),
     expired_removed: numberFromUnknown(record.expired_removed),
     saved_chunks: savedChunks,
+    created_at: stringFromUnknown(record.created_at) || undefined,
+    updated_at: stringFromUnknown(record.updated_at) || undefined,
+    indexed_at: stringFromUnknown(record.indexed_at) || null,
+    error_message: stringFromUnknown(record.error_message) || null,
   }, ...nested];
 }
 
@@ -190,6 +210,12 @@ export default function SystemTab() {
   const [crawlerStatus, setCrawlerStatus] = useState<CrawlerStatus | null>(null);
   const [crawlTarget, setCrawlTarget] = useState('all');
   const [triggering, setTriggering] = useState(false);
+  const [expandedChunkKey, setExpandedChunkKey] = useState<string | null>(null);
+  const [loadingRunId, setLoadingRunId] = useState<string | null>(null);
+  const [savingChunkKey, setSavingChunkKey] = useState<string | null>(null);
+  const [indexingRunId, setIndexingRunId] = useState<string | null>(null);
+  const [runChunks, setRunChunks] = useState<Record<string, CrawlerChunkDetail[]>>({});
+  const [chunkDrafts, setChunkDrafts] = useState<Record<string, string>>({});
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Sync config state when data loads
@@ -234,18 +260,23 @@ export default function SystemTab() {
     refreshApiKeys();
   }, [refreshApiKeys]);
 
+  const refreshCrawlerStatus = useCallback(async () => {
+    const status = await getCrawlerStatus();
+    setCrawlerStatus(status);
+    return status;
+  }, []);
+
   // Fetch crawler status
   useEffect(() => {
-    getCrawlerStatus().then(setCrawlerStatus).catch(() => {});
-  }, []);
+    refreshCrawlerStatus().catch(() => {});
+  }, [refreshCrawlerStatus]);
 
   // Poll while crawling
   useEffect(() => {
     if (crawlerStatus?.is_running) {
       pollRef.current = setInterval(async () => {
         try {
-          const status = await getCrawlerStatus();
-          setCrawlerStatus(status);
+          const status = await refreshCrawlerStatus();
           if (!status.is_running) {
             if (pollRef.current) clearInterval(pollRef.current);
             toast.success('Crawl hoàn tất');
@@ -256,7 +287,7 @@ export default function SystemTab() {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [crawlerStatus?.is_running]);
+  }, [crawlerStatus?.is_running, refreshCrawlerStatus]);
 
   const handleToggle = async (key: string, newVal: boolean) => {
     setTogglingKey(key);
@@ -365,8 +396,7 @@ export default function SystemTab() {
     try {
       await triggerCrawler(crawlTarget);
       toast.success('Đã khởi động crawl');
-      const status = await getCrawlerStatus();
-      setCrawlerStatus(status);
+      await refreshCrawlerStatus();
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { status?: number; data?: { detail?: string } } };
@@ -382,6 +412,74 @@ export default function SystemTab() {
       }
     } finally {
       setTriggering(false);
+    }
+  };
+
+  const ensureRunChunks = async (runId: string) => {
+    if (runChunks[runId]) return runChunks[runId];
+
+    setLoadingRunId(runId);
+    try {
+      const response = await getCrawlerRunChunks(runId);
+      setRunChunks((prev) => ({ ...prev, [runId]: response.chunks }));
+      setChunkDrafts((prev) => {
+        const next = { ...prev };
+        response.chunks.forEach((chunk) => {
+          next[`${runId}:${chunk.chunk_id}`] = chunk.content;
+        });
+        return next;
+      });
+      return response.chunks;
+    } catch {
+      toast.error('KhÃ´ng thá»ƒ táº£i ná»™i dung chunk');
+      return [];
+    } finally {
+      setLoadingRunId(null);
+    }
+  };
+
+  const handleExpandChunk = async (runId: string, chunkId: string) => {
+    const key = `${runId}:${chunkId}`;
+    if (expandedChunkKey === key) {
+      setExpandedChunkKey(null);
+      return;
+    }
+    await ensureRunChunks(runId);
+    setExpandedChunkKey(key);
+  };
+
+  const handleSaveCrawlerChunk = async (runId: string, chunk: CrawlerChunkDetail) => {
+    const key = `${runId}:${chunk.chunk_id}`;
+    const content = chunkDrafts[key] ?? chunk.content;
+    setSavingChunkKey(key);
+    try {
+      const updated = await updateCrawlerRunChunk(runId, chunk.chunk_id, content);
+      setRunChunks((prev) => ({
+        ...prev,
+        [runId]: (prev[runId] || []).map((item) => (
+          item.chunk_id === updated.chunk_id ? updated : item
+        )),
+      }));
+      setChunkDrafts((prev) => ({ ...prev, [key]: updated.content }));
+      toast.success('ÄÃ£ lÆ°u chunk');
+      await refreshCrawlerStatus();
+    } catch {
+      toast.error('KhÃ´ng thá»ƒ lÆ°u chunk');
+    } finally {
+      setSavingChunkKey(null);
+    }
+  };
+
+  const handleIndexCrawlerRun = async (runId: string) => {
+    setIndexingRunId(runId);
+    try {
+      await indexCrawlerRun(runId);
+      toast.success('ÄÃ£ báº¯t Ä‘áº§u index run');
+      await refreshCrawlerStatus();
+    } catch {
+      toast.error('KhÃ´ng thá»ƒ index run');
+    } finally {
+      setIndexingRunId(null);
     }
   };
 
@@ -415,7 +513,11 @@ export default function SystemTab() {
 
   const docStatusData = Object.entries(data.documents_by_status).map(([status, count]) => ({ name: status, value: count }));
   const docCollData = Object.entries(data.documents_by_collection).map(([coll, count]) => ({ name: coll, value: count }));
-  const crawlCollectionResults = collectCrawlerCollectionResults(crawlerStatus?.last_result);
+  const crawlCollectionResults = crawlerStatus?.runs?.length
+    ? crawlerStatus.runs
+    : collectCrawlerCollectionResults(crawlerStatus?.last_result);
+  const lastCrawlerStatus = crawlerStatus?.last_result?.status;
+  const lastCrawlerOk = lastCrawlerStatus === 'success' || lastCrawlerStatus === 'pending_review';
 
   return (
     <div className="space-y-6">
@@ -767,18 +869,18 @@ export default function SystemTab() {
 
         {crawlerStatus?.last_result && !crawlerStatus.is_running && (
           <div className={`flex items-center gap-2 p-3 rounded-lg ${
-            crawlerStatus.last_result.status === 'success'
+            lastCrawlerOk
               ? 'bg-emerald-50 dark:bg-emerald-950'
               : 'bg-red-50 dark:bg-red-950'
           }`}>
-            {crawlerStatus.last_result.status === 'success' ? (
+            {lastCrawlerOk ? (
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
             ) : (
               <XCircle className="h-4 w-4 text-red-500" />
             )}
             <div className="text-sm">
               <span className="font-medium">
-                {crawlerStatus.last_result.status === 'success' ? 'Thành công' : 'Lỗi'}
+                {lastCrawlerStatus === 'pending_review' ? 'Chờ duyệt' : lastCrawlerOk ? 'Thành công' : 'Lỗi'}
               </span>
               {crawlerStatus.last_result.error && (
                 <span className="ml-2 text-muted-foreground">{crawlerStatus.last_result.error}</span>
@@ -799,9 +901,15 @@ export default function SystemTab() {
               <p className="text-sm font-semibold">Dữ liệu đã lưu vào collection</p>
             </div>
 
-            {crawlCollectionResults.map((result) => (
+            {crawlCollectionResults.map((result) => {
+              const runId = result.review_run_id || result.run_id || '';
+              const status = result.review_status || result.status;
+              const canIndex = Boolean(runId && result.can_index && !crawlerStatus?.is_running);
+              const isIndexing = status === 'indexing' || indexingRunId === runId;
+
+              return (
               <section
-                key={`${result.collection}-${result.pipeline}`}
+                key={runId || `${result.collection}-${result.pipeline}-${status}`}
                 className="rounded-lg border border-border bg-background p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -816,14 +924,37 @@ export default function SystemTab() {
                       {result.new_articles} bài mới, {result.new_chunks} chunks tạo, {result.indexed} chunks đã index
                     </p>
                   </div>
-                  {result.expired_removed > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant={status === 'indexed' ? 'default' : status === 'index_failed' ? 'destructive' : 'secondary'}>
+                      {status}
+                    </Badge>
+                    {result.expired_removed > 0 && (
                     <Badge variant="secondary">{result.expired_removed} chunks hết hạn đã xóa</Badge>
-                  )}
+                    )}
+                    {runId && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2"
+                        disabled={!canIndex || isIndexing}
+                        onClick={() => handleIndexCrawlerRun(runId)}
+                      >
+                        {isIndexing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Database className="h-3.5 w-3.5" />}
+                        Index
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {result.saved_chunks.length > 0 ? (
                   <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg border border-border">
-                    {result.saved_chunks.map((chunk) => (
+                    {result.saved_chunks.map((chunk) => {
+                      const chunkKey = `${runId}:${chunk.chunk_id}`;
+                      const isExpanded = expandedChunkKey === chunkKey;
+                      const fullChunk = runChunks[runId]?.find((item) => item.chunk_id === chunk.chunk_id);
+                      const draft = chunkDrafts[chunkKey] ?? fullChunk?.content ?? '';
+
+                      return (
                       <article key={chunk.chunk_id} className="bg-card px-4 py-3">
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <div className="min-w-0">
@@ -835,20 +966,95 @@ export default function SystemTab() {
                             </p>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
+                            {runId && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0"
+                                disabled={loadingRunId === runId}
+                                onClick={() => handleExpandChunk(runId, chunk.chunk_id)}
+                                title="Xem/sá»­a chunk"
+                              >
+                                {loadingRunId === runId ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : isExpanded ? (
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                ) : (
+                                  <ChevronRight className="h-3.5 w-3.5" />
+                                )}
+                              </Button>
+                            )}
                             {chunk.source && <Badge variant="outline">{chunk.source}</Badge>}
                             {chunk.section_label && <Badge variant="secondary">Mục {chunk.section_label}</Badge>}
                           </div>
                         </div>
                         {chunk.url && (
-                          <p className="mt-2 truncate text-xs text-primary" title={chunk.url}>{chunk.url}</p>
+                          <a
+                            className="mt-2 inline-flex max-w-full items-center gap-1 truncate text-xs text-primary hover:underline"
+                            href={chunk.url}
+                            title={chunk.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <span className="truncate">{chunk.url}</span>
+                            <ExternalLink className="h-3 w-3 shrink-0" />
+                          </a>
                         )}
                         {chunk.content_preview && (
                           <p className="mt-2 break-words text-xs leading-5 text-muted-foreground">
                             {chunk.content_preview}
                           </p>
                         )}
+                        {isExpanded && (
+                          <div className="mt-3 space-y-2 rounded-lg border border-border bg-background p-3">
+                            {fullChunk ? (
+                              <>
+                                <Textarea
+                                  className="min-h-[180px] resize-y text-xs leading-5"
+                                  value={draft}
+                                  readOnly={!result.can_edit}
+                                  onChange={(event) => setChunkDrafts((prev) => ({
+                                    ...prev,
+                                    [chunkKey]: event.target.value,
+                                  }))}
+                                />
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    {fullChunk.edited && <Badge variant="secondary">edited</Badge>}
+                                    {fullChunk.content_length !== undefined && (
+                                      <span className="text-xs text-muted-foreground">
+                                        {fullChunk.content_length} chars
+                                      </span>
+                                    )}
+                                  </div>
+                                  {result.can_edit && (
+                                    <Button
+                                      size="sm"
+                                      className="gap-2"
+                                      disabled={savingChunkKey === chunkKey}
+                                      onClick={() => handleSaveCrawlerChunk(runId, fullChunk)}
+                                    >
+                                      {savingChunkKey === chunkKey ? (
+                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                      ) : (
+                                        <Save className="h-3.5 w-3.5" />
+                                      )}
+                                      Save
+                                    </Button>
+                                  )}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                Loading chunk...
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </article>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="mt-3 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
@@ -856,7 +1062,8 @@ export default function SystemTab() {
                   </p>
                 )}
               </section>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

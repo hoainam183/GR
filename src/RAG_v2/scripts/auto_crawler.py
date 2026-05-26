@@ -27,6 +27,7 @@ import logging
 import re
 import time
 import traceback
+import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -34,6 +35,7 @@ from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from pymongo import MongoClient
 
 logger = logging.getLogger("auto_crawler")
 
@@ -770,7 +772,6 @@ class AutoCrawlPipeline:
         logger.info("PIPELINE [%s] STARTED at %s", pipeline_name, start_time.isoformat())
         logger.info("=" * 60)
 
-        indexer = None
         try:
             delay = self._settings.crawler_delay if self._settings else 1.0
             tags = self._parse_tags()
@@ -813,43 +814,23 @@ class AutoCrawlPipeline:
                 summary["new_chunks"] = len(new_chunks)
 
                 if new_chunks:
-                    chunker.save_chunks(new_chunks)
-
-                    # Step 3: Index
-                    logger.info("─── STEP 3: Index [%s] (Qdrant + ES) ───", pipeline_name)
-                    indexer = self._make_indexer(collection=collection)
-                    indexed = indexer.index_chunks(new_chunks)
-                    summary["indexed"] = indexed
-                    if indexed > 0:
-                        summary["saved_chunks"] = self._build_saved_chunk_preview(new_chunks)
-
-                    # Invalidate LLM Cache (Phase 2) — tag-based
-                    if indexed > 0:
-                        try:
-                            from config.settings import Settings
-                            settings = Settings()
-                            if settings.redis_enabled and settings.use_redis_cache:
-                                from cache.redis_client import RedisManager
-                                from cache.llm_cache import LLMResponseCache
-                                rm = RedisManager.from_settings(settings)
-                                cache = LLMResponseCache(redis_client=rm.get_client())
-                                chunk_ids = [c["chunk_id"] for c in new_chunks if c.get("chunk_id")]
-                                invalidated = cache.invalidate_by_docs(chunk_ids)
-                                logger.info("Auto crawler: invalidated %d LLM cache entries for %d new chunks.",
-                                            invalidated, len(chunk_ids))
-                        except Exception:
-                            logger.warning("Failed to invalidate LLM cache during auto crawl", exc_info=True)
-                        try:
-                            from evaluation.post_index import trigger_post_index_eval
-                            from config.settings import Settings as _EvalSettings
-
-                            trigger_post_index_eval(
-                                self._settings or _EvalSettings(),
-                                reason=f"auto_crawler_{pipeline_name}",
-                                collection=collection,
-                            )
-                        except Exception:
-                            logger.warning("Failed to trigger post-index eval during auto crawl", exc_info=True)
+                    logger.info("Staging %d chunks for admin review [%s].", len(new_chunks), pipeline_name)
+                    run_id = self._stage_pending_review(
+                        pipeline_name=pipeline_name,
+                        collection=collection,
+                        source_label=source_label,
+                        output_file=output_file,
+                        chunks_file=chunks_file,
+                        new_chunks=new_chunks,
+                        summary=summary,
+                    )
+                    summary["status"] = "pending_review"
+                    summary["review_run_id"] = run_id
+                    summary["review_status"] = "pending_review"
+                    summary["can_edit"] = True
+                    summary["can_index"] = True
+                    summary["saved_chunks"] = self._build_saved_chunk_preview(new_chunks)
+                    logger.info("Crawler run %s is pending admin review.", run_id)
 
             # Step 4: Retention
             logger.info("─── STEP 4: Retention [%s] (%d months) ───",
@@ -859,8 +840,7 @@ class AutoCrawlPipeline:
                 output_file=output_file,
                 chunks_file=chunks_file,
             )
-            indexer_for_del = indexer or self._make_indexer(collection=collection)
-            expired = retention.cleanup(indexer=indexer_for_del)
+            expired = retention.cleanup(indexer=None)
             summary["expired_removed"] = expired
 
         except Exception as e:
@@ -889,8 +869,78 @@ class AutoCrawlPipeline:
                 "url": str(metadata.get("url") or ""),
                 "section_label": str(section_label) if section_label is not None else "",
                 "content_preview": content[:280],
+                "content_length": len(str(chunk.get("content") or "")),
+                "edited": bool(chunk.get("edited", False)),
+                "index_status": str(chunk.get("index_status") or "pending"),
             })
         return previews
+
+    def _stage_pending_review(
+        self,
+        *,
+        pipeline_name: str,
+        collection: str,
+        source_label: str,
+        output_file: Path,
+        chunks_file: Path,
+        new_chunks: List[Dict],
+        summary: Dict[str, Any],
+    ) -> str:
+        if not self._settings:
+            raise RuntimeError("Crawler review staging requires settings")
+        if not getattr(self._settings, "mongodb_enabled", True):
+            raise RuntimeError("Crawler review staging requires MongoDB")
+
+        from models.crawler import CRAWLER_STATUS_PENDING_REVIEW
+        from models.database import CRAWLER_CHUNKS_COLLECTION, CRAWLER_RUNS_COLLECTION
+
+        run_id = f"{pipeline_name}-{uuid.uuid4().hex}"
+        now = datetime.now(timezone.utc)
+        client = MongoClient(self._settings.mongodb_uri)
+        try:
+            db = client[self._settings.mongodb_database]
+            run_doc = {
+                "run_id": run_id,
+                "pipeline": pipeline_name,
+                "collection": collection,
+                "status": CRAWLER_STATUS_PENDING_REVIEW,
+                "source_label": source_label,
+                "output_file": str(output_file),
+                "chunks_file": str(chunks_file),
+                "new_articles": int(summary.get("new_articles", 0)),
+                "new_chunks": len(new_chunks),
+                "indexed": 0,
+                "expired_removed": int(summary.get("expired_removed", 0)),
+                "created_at": now,
+                "updated_at": now,
+                "indexed_at": None,
+                "error_message": None,
+                "summary": dict(summary),
+            }
+            chunk_docs = []
+            for index, chunk in enumerate(new_chunks):
+                content = str(chunk.get("content") or "")
+                chunk_id = str(chunk.get("chunk_id") or f"{run_id}:{index}")
+                metadata = dict(chunk.get("metadata") or {})
+                chunk_docs.append({
+                    "run_id": run_id,
+                    "chunk_id": chunk_id,
+                    "chunk_index": index,
+                    "content": content,
+                    "original_content": content,
+                    "metadata": metadata,
+                    "edited": False,
+                    "index_status": "pending",
+                    "created_at": now,
+                    "updated_at": now,
+                })
+
+            db[CRAWLER_RUNS_COLLECTION].insert_one(run_doc)
+            db[CRAWLER_CHUNKS_COLLECTION].insert_many(chunk_docs)
+            logger.info("Staged crawler run %s with %d chunks.", run_id, len(chunk_docs))
+            return run_id
+        finally:
+            client.close()
 
     def _make_indexer(self, collection: str = "kehoach") -> DualIndexer:
         s = self._settings
@@ -908,7 +958,7 @@ class AutoCrawlPipeline:
     def _notify(summary: Dict[str, Any]) -> None:
         pipeline = summary.get("pipeline", "unknown")
         status = summary["status"]
-        icon = "✅" if status == "success" else "❌"
+        icon = "✅" if status in {"success", "pending_review", "indexed"} else "❌"
         msg = (
             f"\n{'=' * 60}\n"
             f"{icon} PIPELINE [{pipeline}] {status.upper()}\n"
@@ -931,7 +981,7 @@ class AutoCrawlPipeline:
 
                 loop = asyncio.new_event_loop()
                 count = loop.run_until_complete(
-                    AutoCrawler._create_user_notifications(summary)
+                    AutoCrawlPipeline._create_user_notifications(summary)
                 )
                 loop.close()
                 logger.info("Created %d user notifications.", count)
@@ -998,6 +1048,159 @@ class AutoCrawlPipeline:
         ]
         result = await db[NOTIFICATIONS_COLLECTION].insert_many(docs)
         return len(result.inserted_ids)
+
+
+def index_staged_crawler_run(settings, run_id: str, bge=None, e5=None) -> Dict[str, Any]:
+    """Index a reviewed crawler run from Mongo into Qdrant/ES."""
+    if not getattr(settings, "mongodb_enabled", True):
+        raise RuntimeError("Crawler review indexing requires MongoDB")
+
+    from models.crawler import (
+        CRAWLER_STATUS_INDEX_FAILED,
+        CRAWLER_STATUS_INDEXED,
+        CRAWLER_STATUS_INDEXING,
+        CRAWLER_STATUS_PENDING_REVIEW,
+    )
+    from models.database import CRAWLER_CHUNKS_COLLECTION, CRAWLER_RUNS_COLLECTION
+
+    client = MongoClient(settings.mongodb_uri)
+    try:
+        db = client[settings.mongodb_database]
+        runs = db[CRAWLER_RUNS_COLLECTION]
+        chunks_collection = db[CRAWLER_CHUNKS_COLLECTION]
+        run_doc = runs.find_one({"run_id": run_id})
+        if not run_doc:
+            raise ValueError(f"Crawler run not found: {run_id}")
+
+        allowed = {
+            CRAWLER_STATUS_PENDING_REVIEW,
+            CRAWLER_STATUS_INDEX_FAILED,
+            CRAWLER_STATUS_INDEXING,
+        }
+        if run_doc.get("status") not in allowed:
+            raise ValueError(f"Crawler run {run_id} is not indexable")
+
+        now = datetime.now(timezone.utc)
+        runs.update_one(
+            {"run_id": run_id},
+            {"$set": {
+                "status": CRAWLER_STATUS_INDEXING,
+                "updated_at": now,
+                "error_message": None,
+            }},
+        )
+        chunks_collection.update_many(
+            {"run_id": run_id},
+            {"$set": {"index_status": CRAWLER_STATUS_INDEXING, "updated_at": now}},
+        )
+
+        chunk_docs = list(chunks_collection.find({"run_id": run_id}).sort("chunk_index", 1))
+        chunks = [
+            {
+                "chunk_id": str(doc.get("chunk_id") or ""),
+                "content": str(doc.get("content") or ""),
+                "metadata": dict(doc.get("metadata") or {}),
+                "edited": bool(doc.get("edited", False)),
+                "index_status": CRAWLER_STATUS_INDEXED,
+            }
+            for doc in chunk_docs
+        ]
+        if not chunks:
+            raise ValueError(f"Crawler run {run_id} has no chunks")
+
+        try:
+            pipeline = AutoCrawlPipeline(settings=settings, bge=bge, e5=e5)
+            indexer = pipeline._make_indexer(collection=str(run_doc["collection"]))
+            indexed = indexer.index_chunks(chunks)
+
+            chunks_file = Path(str(run_doc["chunks_file"]))
+            archived = _load_json(chunks_file)
+            _save_json(archived + chunks, chunks_file)
+
+            indexed_at = datetime.now(timezone.utc)
+            runs.update_one(
+                {"run_id": run_id},
+                {"$set": {
+                    "status": CRAWLER_STATUS_INDEXED,
+                    "indexed": indexed,
+                    "indexed_at": indexed_at,
+                    "updated_at": indexed_at,
+                    "error_message": None,
+                }},
+            )
+            chunks_collection.update_many(
+                {"run_id": run_id},
+                {"$set": {"index_status": CRAWLER_STATUS_INDEXED, "updated_at": indexed_at}},
+            )
+
+            summary = dict(run_doc.get("summary") or {})
+            summary.update({
+                "pipeline": run_doc.get("pipeline", "unknown"),
+                "collection": run_doc.get("collection", ""),
+                "status": CRAWLER_STATUS_INDEXED,
+                "review_run_id": run_id,
+                "review_status": CRAWLER_STATUS_INDEXED,
+                "can_edit": False,
+                "can_index": False,
+                "new_articles": run_doc.get("new_articles", 0),
+                "new_chunks": run_doc.get("new_chunks", len(chunks)),
+                "indexed": indexed,
+                "saved_chunks": AutoCrawlPipeline._build_saved_chunk_preview(chunks),
+                "indexed_at": indexed_at.isoformat(),
+            })
+            _invalidate_crawler_cache(settings, chunks)
+            _trigger_crawler_post_index_eval(settings, summary)
+            AutoCrawlPipeline._notify(summary)
+            return summary
+        except Exception as exc:
+            failed_at = datetime.now(timezone.utc)
+            runs.update_one(
+                {"run_id": run_id},
+                {"$set": {
+                    "status": CRAWLER_STATUS_INDEX_FAILED,
+                    "updated_at": failed_at,
+                    "error_message": str(exc),
+                }},
+            )
+            chunks_collection.update_many(
+                {"run_id": run_id},
+                {"$set": {"index_status": CRAWLER_STATUS_INDEX_FAILED, "updated_at": failed_at}},
+            )
+            raise
+    finally:
+        client.close()
+
+
+def _invalidate_crawler_cache(settings, chunks: List[Dict[str, Any]]) -> None:
+    try:
+        if getattr(settings, "redis_enabled", False) and getattr(settings, "use_redis_cache", False):
+            from cache.llm_cache import LLMResponseCache
+            from cache.redis_client import RedisManager
+
+            rm = RedisManager.from_settings(settings)
+            cache = LLMResponseCache(redis_client=rm.get_client())
+            chunk_ids = [c["chunk_id"] for c in chunks if c.get("chunk_id")]
+            invalidated = cache.invalidate_by_docs(chunk_ids)
+            logger.info(
+                "Crawler index: invalidated %d LLM cache entries for %d chunks.",
+                invalidated,
+                len(chunk_ids),
+            )
+    except Exception:
+        logger.warning("Failed to invalidate LLM cache during crawler index", exc_info=True)
+
+
+def _trigger_crawler_post_index_eval(settings, summary: Dict[str, Any]) -> None:
+    try:
+        from evaluation.post_index import trigger_post_index_eval
+
+        trigger_post_index_eval(
+            settings,
+            reason=f"auto_crawler_{summary.get('pipeline', 'unknown')}",
+            collection=str(summary.get("collection") or ""),
+        )
+    except Exception:
+        logger.warning("Failed to trigger post-index eval during crawler index", exc_info=True)
 
 
 # ───────────────────────────────────────────────────────────────
@@ -1144,13 +1347,10 @@ if __name__ == "__main__":
         for pname in pipelines_to_run:
             cfg = _get_pipeline_config(pname)
             logger.info("Running ONLY INDEX module [%s]...", pname)
-            chunks = _load_json(cfg["chunks_file"])
-            if not args.dry and chunks:
-                indexer = pipeline._make_indexer(collection=cfg["collection"])
-                indexed = indexer.index_chunks(chunks)
-                logger.info("[%s] Index completed. Indexed %d new chunks.", pname, indexed)
-            else:
-                logger.info("[%s] Index skipped (dry run or no chunks).", pname)
+            logger.info(
+                "[%s] Direct CLI indexing is disabled. Review and index staged runs from the admin API.",
+                pname,
+            )
 
     elif args.module == "retention":
         for pname in pipelines_to_run:

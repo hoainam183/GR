@@ -173,23 +173,57 @@ export interface CrawlerTriggerResponse {
 }
 
 export interface CrawlerSavedChunkPreview {
+  run_id?: string;
   chunk_id: string;
+  chunk_index?: number;
   title: string;
   source: string;
   url: string;
   section_label?: string;
   content_preview: string;
+  content_length?: number;
+  edited?: boolean;
+  index_status?: string;
 }
 
 export interface CrawlerCollectionResult {
+  run_id?: string;
+  review_run_id?: string;
   collection: string;
   pipeline: string;
   status: string;
+  review_status?: string;
+  can_edit?: boolean;
+  can_index?: boolean;
   new_articles: number;
   new_chunks: number;
   indexed: number;
   expired_removed: number;
   saved_chunks: CrawlerSavedChunkPreview[];
+  created_at?: string;
+  updated_at?: string;
+  indexed_at?: string | null;
+  error_message?: string | null;
+}
+
+export interface CrawlerChunkDetail extends CrawlerSavedChunkPreview {
+  run_id: string;
+  chunk_index: number;
+  content: string;
+  metadata: Record<string, unknown>;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CrawlerRunChunksResponse {
+  run: CrawlerCollectionResult;
+  chunks: CrawlerChunkDetail[];
+}
+
+export interface CrawlerIndexResponse {
+  ok: boolean;
+  run_id: string;
+  status: string;
 }
 
 // ─── EP10: Crawler status ─────────────────────────────────
@@ -203,4 +237,7 @@ export interface CrawlerStatus {
     [key: string]: unknown;
   } | null;
   cooldown_seconds: number;
+  pending_runs?: CrawlerCollectionResult[];
+  indexed_runs?: CrawlerCollectionResult[];
+  runs?: CrawlerCollectionResult[];
 }
