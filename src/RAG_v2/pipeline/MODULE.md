@@ -87,7 +87,7 @@ Private orchestration helpers:
 query_v3(question)
   -> ComplexityRouter
      -> chitchat: _handle_chitchat(), no retrieval
-     -> complex + personal_check: clarify, no retrieval/agent
+     -> complex + personal_check: query() classic RAG, mode=rag_v2, route=personal_check
      -> simple: query()
      -> complex + multi_source/comparison: QueryDecomposer -> _query_decomposed()
      -> complex general: query_agent()
@@ -129,7 +129,9 @@ Important current behavior:
 - List/enumeration queries can raise effective `top_k`.
 - Freshness/plan queries routed to `kehoach` can lock collection selection to `kehoach`.
 - Profile notes are injected only for profile-dependent wording like "nganh cua toi"; generic latest/freshness queries should not inherit major/cohort from profile/history.
-- Personal eligibility checks such as "dieu kien tot nghiep cua toi" return a clarification asking for CPA/GPA, credits, foreign-language, GDTC, GDQP-AN, discipline/legal, and graduation registration status instead of pretending to evaluate missing student data.
+- Personal-check wording such as "dieu kien tot nghiep cua toi" stays on classic RAG instead of returning `mode=clarify` or entering the agent. `query_v3()` returns `mode="rag_v2"` and `route="personal_check"` so API consumers keep the same public mode surface while trace still shows the special route.
+- If BGE reranking receives raw candidates but returns an empty list, both `rag_flow()` and `rag_flow_stream()` retry reranking with the original question. If the retry is still empty or has only negative explicit scores, they use raw fusion top-k, set `timings_ms["rerank_raw_fallback"] = 1.0`, and update `rerank_trace` with `fallback_reason`, `rerank_fallback`, `rerank_raw_fallback`, and final candidate/returned counts.
+- RAG answer cache writes are allowed only for stable local answers: `answer_quality_gate.answer_status == "answered"`, no no-info answer text, no `should_web_search`, no `no_sources`, no `self_eval_failed`, no dynamic/stale-risk signal, and no pre/post web fallback. Cache hits return minimal trace fields with `llm_prompt="(cached)"` where applicable.
 - Streaming runs retrieval first, then streams tokens; it intentionally avoids post-generation self-eval/Tavily to preserve streaming semantics.
 
 ## Tavily/Web Fallback

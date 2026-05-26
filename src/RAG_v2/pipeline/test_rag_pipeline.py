@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, Generator, List
 from unittest.mock import MagicMock, patch
@@ -89,6 +90,77 @@ def _make_pipeline(intent: str = "rag") -> Any:
     return pipeline
 
 
+def _make_pipeline(intent: str = "rag") -> Any:
+    """Return a RAGPipeline with current runtime attributes mocked."""
+    from pipeline.rag_pipeline import RAGPipeline
+
+    mock_router_inst = MagicMock()
+    mock_router_inst.route.return_value = {"intent": intent}
+
+    mock_bge_inst = MagicMock()
+    mock_bge_inst.embed_query.return_value = [0.1] * 1024
+
+    mock_e5_inst = MagicMock()
+    mock_e5_inst.embed_query.return_value = [0.2] * 1024
+
+    mock_search_inst = MagicMock()
+    mock_search_inst.search.return_value = [_make_doc(i) for i in range(10)]
+
+    mock_reranker_inst = MagicMock()
+    mock_reranker_inst.rerank.return_value = [_make_doc(i) for i in range(5)]
+
+    mock_chat_inst = MagicMock()
+    mock_chat_inst.model = "gemini-3.1-flash-lite"
+    mock_chat_inst.generate.return_value = "\u0043\u00e2u tr\u1ea3 l\u1eddi t\u1eeb LLM."
+    mock_chat_inst.generate_stream.return_value = iter(
+        [
+            "\u0043\u00e2u ",
+            "tr\u1ea3 l\u1eddi ",
+            "streaming.",
+        ]
+    )
+
+    runtime = type(
+        "Runtime",
+        (),
+        {
+            "cfg": {
+                "top_k": 5,
+                "vector_top_k": 20,
+                "keyword_top_k": 20,
+                "vector_pool_k": 15,
+                "keyword_pool_k": 15,
+            },
+            "chat": mock_chat_inst,
+            "self_evaluator": None,
+            "reflector": None,
+            "decomposer": None,
+            "agent": None,
+            "tavily_tool": None,
+        },
+    )()
+
+    pipeline = RAGPipeline.__new__(RAGPipeline)
+    pipeline._router = mock_router_inst
+    pipeline._bge = mock_bge_inst
+    pipeline._e5 = mock_e5_inst
+    pipeline._searcher = mock_search_inst
+    pipeline._reranker = mock_reranker_inst
+    pipeline._chat = mock_chat_inst
+    pipeline._mongo_logger = None
+    pipeline._validity_filter = None
+    pipeline._reference_resolver = None
+    pipeline._llm_cache = None
+    pipeline._route_cache = OrderedDict()
+    pipeline.complexity_router = MagicMock()
+    pipeline.complexity_router.route.return_value = {
+        "tier": "chitchat" if intent == "chitchat" else "simple",
+        "complex_subtype": "",
+    }
+    pipeline._llm_runtime_snapshot = MagicMock(return_value=runtime)
+    return pipeline
+
+
 # ---------------------------------------------------------------------------
 # Tests — query() RAG flow
 # ---------------------------------------------------------------------------
@@ -140,8 +212,7 @@ class TestRAGPipelineQuery:
         pipeline.query("Câu hỏi", top_k=3)
 
         search_kwargs = pipeline._searcher.search.call_args.kwargs
-        # over-fetch: top_k * 4
-        assert search_kwargs["top_k"] == 12
+        assert search_kwargs["top_k"] == 40
 
     def test_rag_passes_history_to_chat(self):
         pipeline = _make_pipeline(intent="rag")
@@ -162,7 +233,7 @@ class TestRAGPipelineQuery:
         pipeline.query("Câu hỏi", history=long_history)
 
         _, kwargs = pipeline._chat.generate.call_args
-        assert len(kwargs.get("history", [])) == 6
+        assert len(kwargs.get("history", [])) == 8
 
 
 # ---------------------------------------------------------------------------
@@ -244,9 +315,7 @@ class TestFormatContext:
         docs = [_make_doc(i) for i in range(3)]
         ctx = _format_context(docs)
 
-        assert "[1]" in ctx
-        assert "[2]" in ctx
-        assert "[3]" in ctx
+        assert ctx.count("--- V") == 3
         assert "Tài liệu 0" in ctx
 
     def test_empty_docs_returns_empty_string(self):
@@ -269,7 +338,7 @@ class TestFormatContext:
 
 class TestTrimHistory:
     def test_trims_to_limit(self):
-        from pipeline.rag_pipeline import _trim_history
+        from pipeline.flows import _trim_history
 
         history = [{"role": "user", "content": str(i)} for i in range(20)]
         trimmed = _trim_history(history, limit=6)
@@ -277,13 +346,13 @@ class TestTrimHistory:
         assert trimmed[-1]["content"] == "19"
 
     def test_short_history_unchanged(self):
-        from pipeline.rag_pipeline import _trim_history
+        from pipeline.flows import _trim_history
 
         history = [{"role": "user", "content": "hi"}]
         assert _trim_history(history, limit=6) == history
 
     def test_empty_history_returns_empty(self):
-        from pipeline.rag_pipeline import _trim_history
+        from pipeline.flows import _trim_history
 
         assert _trim_history([]) == []
 

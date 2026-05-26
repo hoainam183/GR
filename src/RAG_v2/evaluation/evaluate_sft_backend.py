@@ -93,6 +93,7 @@ CONFIG: Dict[str, Any] = {
     "send_null_optional_fields": False,
     "record_request_payload": True,
     "record_response_trace": True,
+    "require_no_cache": True,
     "auth_token": "",
     "auth_token_env": "EVAL_AUTH_TOKEN",
     "judge_backend": "gemini",  # "none" | "lmstudio" | "gemini"
@@ -357,6 +358,22 @@ def _request_record_metadata(
         "request_payload_hash": _request_payload_hash(request_payload),
         "backend_url": backend_url,
     }
+
+
+def _cache_hit_markers(response: Dict[str, Any]) -> List[str]:
+    """Return cache-hit markers found in a backend response."""
+    markers: List[str] = []
+    for key in ("cache_hit", "query_cache_hit", "llm_cache_hit"):
+        if response.get(key):
+            markers.append(key)
+
+    timings = response.get("timings_ms")
+    if isinstance(timings, dict):
+        for key in ("cache_hit", "query_cache_hit", "llm_cache_hit"):
+            if timings.get(key):
+                markers.append(f"timings_ms.{key}")
+
+    return sorted(set(markers))
 
 
 def _atomic_write_json(path: Path, payload: Dict[str, Any]) -> None:
@@ -779,6 +796,7 @@ def build_summary(records: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
     rows = list(records)
     completed = [row for row in rows if row.get("status") == "completed"]
     failed = [row for row in rows if row.get("status") == "failed"]
+    setup_invalid_rows = [row for row in rows if row.get("setup_invalid")]
     latencies = [
         float(row.get("latency_ms") or 0.0)
         for row in completed
@@ -819,6 +837,15 @@ def build_summary(records: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
         "total_records": len(rows),
         "completed": len(completed),
         "failed": len(failed),
+        "setup_valid": len(setup_invalid_rows) == 0,
+        "setup_invalid_count": len(setup_invalid_rows),
+        "setup_invalid_reasons": sorted(
+            {
+                str(row.get("setup_invalid_reason") or "")
+                for row in setup_invalid_rows
+                if row.get("setup_invalid_reason")
+            }
+        ),
         "error_rate": round(len(failed) / len(rows), 4) if rows else 0.0,
         "latency_ms": {
             "mean": round(statistics.mean(latencies), 2) if latencies else 0.0,
@@ -885,6 +912,7 @@ def _write_final_outputs(run_dir: Path, records: Dict[str, Dict[str, Any]]) -> D
         "request_mode", "request_top_k", "request_history_len", "request_session_id",
         "response_session_id", "backend_url", "backend_mode", "route", "reflected_question",
         "num_sources", "latency_ms", "cache_hit", "query_cache_hit", "agent_error",
+        "cache_hit_markers", "setup_invalid", "setup_invalid_reason",
         "iterations", "error",
         "reference_keyword_coverage", "atomic_fact_coverage", "citation_text_hit",
         "expected_doc_hit", "expected_article_hit", "expected_clause_hit",
@@ -1026,6 +1054,11 @@ def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]
         for key in response_trace_keys
         if response.get(key) is not None or key in always_trace_keys
     }
+    cache_markers = _cache_hit_markers(response)
+    setup_invalid = bool(
+        _config_bool(config, "require_no_cache", False)
+        and cache_markers
+    )
 
     judge = _compare_with_reference(
         judge_backend=str(config.get("judge_backend") or "none"),
@@ -1077,6 +1110,14 @@ def evaluate_sample(sample: SFTSample, config: Dict[str, Any]) -> Dict[str, Any]
         "timings_ms": response.get("timings_ms"),
         "cache_hit": response.get("cache_hit", False),
         "query_cache_hit": response.get("query_cache_hit", False),
+        "cache_hit_markers": cache_markers,
+        "setup_invalid": setup_invalid,
+        "setup_invalid_reason": (
+            "cache hit observed while require_no_cache=true: "
+            + ", ".join(cache_markers)
+            if setup_invalid
+            else ""
+        ),
         "agent_error": response.get("agent_error", ""),
         "iterations": response.get("iterations"),
         "response_trace": (

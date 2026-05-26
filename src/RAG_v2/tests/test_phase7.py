@@ -635,7 +635,7 @@ class TestTavilyFallback:
         assert result["answer"] == "fresh grounded answer"
         assert result["timings_ms"]["query_cache_ignored_no_info"] == 1.0
 
-    def test_cache_stores_final_answer_after_tavily_fallback(self) -> None:
+    def test_cache_does_not_store_answer_after_tavily_fallback(self) -> None:
         from pipeline.flows import rag_flow
         mock_bge, mock_e5, mock_searcher, mock_reranker, _, cfg = _make_pipeline_mocks()
         cfg["tavily_fallback_enabled"] = True
@@ -669,9 +669,45 @@ class TestTavilyFallback:
         )
 
         assert result["answer"] == "final web answer"
-        assert mock_cache.put.called
-        assert mock_cache.put.call_args.args[3] == "final web answer"
+        assert not mock_cache.put.called
         assert not mock_cache.put_by_query.called
+
+    def test_cache_gate_blocks_unstable_answers(self) -> None:
+        from pipeline.flows import _should_cache_final_answer
+
+        base_gate = {
+            "answer_status": "answered",
+            "should_web_search": False,
+            "no_info": False,
+            "no_sources": False,
+            "self_eval_failed": False,
+        }
+
+        assert _should_cache_final_answer(
+            answer="grounded answer",
+            answer_quality_gate=base_gate,
+        )
+        assert not _should_cache_final_answer(
+            answer="grounded answer",
+            answer_quality_gate={**base_gate, "answer_status": "insufficient"},
+        )
+        assert not _should_cache_final_answer(
+            answer="grounded answer",
+            answer_quality_gate={**base_gate, "answer_status": "stale_risk"},
+        )
+        assert not _should_cache_final_answer(
+            answer="grounded answer",
+            answer_quality_gate={**base_gate, "self_eval_failed": True},
+        )
+        assert not _should_cache_final_answer(
+            answer="grounded answer",
+            answer_quality_gate={**base_gate, "no_sources": True},
+        )
+        assert not _should_cache_final_answer(
+            answer="grounded answer",
+            answer_quality_gate=base_gate,
+            web_fallback_used=True,
+        )
 
     def test_bge_raw_logit_does_not_skip_self_eval_by_default(self) -> None:
         from pipeline.flows import rag_flow

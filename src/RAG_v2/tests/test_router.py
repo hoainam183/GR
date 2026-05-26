@@ -46,6 +46,12 @@ class TestSimple:
         assert result["query_signals"]["table_lookup"] is True
 
 
+    def test_registration_count_lookup_stays_simple(self) -> None:
+        result = router.route("Sinh vien co the dang ky dieu chinh bao nhieu lan?")
+        assert result["tier"] == "simple"
+        assert result["reason"] == "signals: single_fact_policy_lookup"
+
+
 class TestComplex:
     def test_cohort_comparison(self) -> None:
         assert router.route_tier("So sánh học bổng giữa K65 và K70") == "complex"

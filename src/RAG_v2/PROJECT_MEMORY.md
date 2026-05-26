@@ -142,6 +142,11 @@ RAG_v2/
 
 ### 4.1 `query_v3()` smart entrypoint
 
+Current P0 routing contract:
+
+- `complex` + `personal_check` no longer returns `mode=clarify`; it calls classic `query()` and returns `mode=rag_v2`, `route=personal_check`.
+- Single-fact policy lookups such as registration-count/table/exact questions should stay `simple -> rag_v2` unless they contain explicit comparison, multiple domains, or multiple tasks.
+
 - Chạy `ComplexityRouter` trước mọi branch.
 - `chitchat`: trả canned response, không gọi LLM/retrieval.
 - `complex` + `personal_check`: trả `mode=clarify` để hỏi thêm dữ liệu cá nhân bắt buộc, không gọi retrieval/agent.
@@ -150,6 +155,11 @@ RAG_v2/
 - Các complex còn lại: chạy `query_agent()`, nếu agent lỗi thì fallback classic RAG trừ khi caller yêu cầu `require_agent=True`.
 
 ### 4.2 Classic RAG flow
+
+Current P0 reliability contracts:
+
+- If rerank returns empty despite raw candidates, classic and streaming RAG retry with the original question, then fall back to raw fusion top-k when retry is still empty or only negative. Trace records `rerank_fallback`, optional `rerank_raw_fallback`, `fallback_reason`, and final candidate/returned counts.
+- LLM cache writes are gated to stable local answers only: answered status, no no-info/no-source/self-eval-failed markers, no dynamic/stale-risk signal, and no pre/post Tavily fallback. Eval runs that require no cache treat any cache-hit marker as invalid setup.
 
 - Load history từ Mongo/Redis cache nếu có `session_id`.
 - Route domain bằng `QueryRouter`, có route cache.

@@ -504,6 +504,34 @@ def _answer_has_no_info_signal(answer: str) -> bool:
     return any(pattern in folded for pattern in _WEB_FALLBACK_NO_INFO_PATTERNS)
 
 
+def _should_cache_final_answer(
+    *,
+    answer: str,
+    answer_quality_gate: Dict[str, Any],
+    dynamic_web_query: bool = False,
+    pre_web_fallback_used: bool = False,
+    web_fallback_used: bool = False,
+    web_fallback_reasons: Optional[List[str]] = None,
+) -> bool:
+    """Return True only for stable, fully answered local-RAG responses."""
+    reasons = web_fallback_reasons or []
+    if dynamic_web_query:
+        return False
+    if pre_web_fallback_used or web_fallback_used or reasons:
+        return False
+    if _answer_has_no_info_signal(answer):
+        return False
+    if answer_quality_gate.get("answer_status") != "answered":
+        return False
+    if answer_quality_gate.get("should_web_search"):
+        return False
+    if answer_quality_gate.get("no_info") or answer_quality_gate.get("no_sources"):
+        return False
+    if answer_quality_gate.get("self_eval_failed"):
+        return False
+    return True
+
+
 def _selected_collections(
     *,
     target_collections: Optional[List[str]],
@@ -1260,6 +1288,46 @@ def _build_rerank_trace(
     return trace
 
 
+def _update_rerank_trace_after_fallback(
+    rerank_trace: Dict[str, Any],
+    *,
+    candidate_count: int,
+    reranked: List[Dict[str, Any]],
+    fallback_reason: str,
+    raw_fallback: bool,
+) -> Dict[str, Any]:
+    """Update rerank trace so it describes the final fallback result."""
+    updated = dict(rerank_trace)
+    for key in ("rerank_score_min", "rerank_score_max", "rerank_score_mean"):
+        updated.pop(key, None)
+
+    scores = [
+        float(doc["rerank_score"])
+        for doc in reranked
+        if isinstance(doc, dict) and doc.get("rerank_score") is not None
+    ]
+    updated.update(
+        {
+            "rerank_candidate_count": candidate_count,
+            "rerank_returned_count": len(reranked),
+            "rerank_dropped_count": max(0, candidate_count - len(reranked)),
+            "rerank_fallback": True,
+            "fallback_reason": fallback_reason,
+        }
+    )
+    if raw_fallback:
+        updated["rerank_raw_fallback"] = True
+    if scores:
+        updated.update(
+            {
+                "rerank_score_min": round(min(scores), 6),
+                "rerank_score_max": round(max(scores), 6),
+                "rerank_score_mean": round(sum(scores) / len(scores), 6),
+            }
+        )
+    return updated
+
+
 def _best_explicit_rerank_score(
     documents: List[Dict[str, Any]],
 ) -> Optional[float]:
@@ -1630,9 +1698,23 @@ def rag_flow(
                     "reflected_question": question,
                     "routing_probabilities": None,
                     "reflection_prompt": None,
-                    "llm_prompt": "(query_cached)",
+                    "llm_prompt": "(cached)",
                     "applied_filters": None,
                     "collection_results": None,
+                    "rerank_trace": {
+                        "cache_hit": True,
+                        "query_cache_hit": True,
+                        "rerank_candidate_count": len(_qcached["sources"]),
+                        "rerank_returned_count": len(_qcached["sources"]),
+                    },
+                    "answer_quality_gate": {
+                        "answer_status": "answered",
+                        "cache_hit": True,
+                    },
+                    "context_trace": {
+                        "cache_hit": True,
+                        "context_docs_used": len(_qcached["sources"]),
+                    },
                 }
 
     # 1. Reflection — rewrite query + extract entities
@@ -2015,8 +2097,13 @@ def rag_flow(
         # Also trigger when all surviving docs have negative scores (only table-docs
         # passed through the relaxed table_score_threshold but no regular content matched).
         _best_rerank_score = _best_explicit_rerank_score(reranked)
-        _rerank_quality_ok = _best_rerank_score is None or _best_rerank_score >= 0.0
+        _rerank_quality_ok = bool(reranked) and (
+            _best_rerank_score is None or _best_rerank_score >= 0.0
+        )
         if raw_results and not _rerank_quality_ok:
+            fallback_reason = (
+                "empty_rerank" if not reranked else "negative_rerank_score"
+            )
             logger.info(
                 "Reranker gave no positive-score candidates (best=%.3f, n=%d). "
                 "Retrying rerank with original question.",
@@ -2033,6 +2120,9 @@ def rag_flow(
             if not reranked or (
                 retry_best_score is not None and retry_best_score < 0.0
             ):
+                fallback_reason = (
+                    "empty_rerank" if not reranked else "negative_rerank_score"
+                )
                 # Last resort: use raw top-k by fusion score without threshold.
                 logger.info(
                     "Reranker still no positive candidates after fallback. "
@@ -2043,6 +2133,13 @@ def rag_flow(
                     raw_results, key=lambda d: d.get("score", 0.0), reverse=True
                 )[:top_k_value]
                 timings_ms["rerank_raw_fallback"] = 1.0
+            rerank_trace = _update_rerank_trace_after_fallback(
+                rerank_trace,
+                candidate_count=len(raw_results),
+                reranked=reranked,
+                fallback_reason=fallback_reason,
+                raw_fallback=bool(timings_ms.get("rerank_raw_fallback")),
+            )
     else:
         reranked = sorted(
             raw_results, key=lambda d: d.get("score", 0.0), reverse=True
@@ -2158,6 +2255,19 @@ def rag_flow(
                     "llm_prompt": "(cached)",
                     "applied_filters": search_trace.get("filters"),
                     "collection_results": search_trace.get("collection_counts"),
+                    "rerank_trace": {
+                        **rerank_trace,
+                        "cache_hit": True,
+                        "llm_cache_hit": True,
+                    },
+                    "answer_quality_gate": {
+                        "answer_status": "answered",
+                        "cache_hit": True,
+                    },
+                    "context_trace": {
+                        "cache_hit": True,
+                        "context_docs_used": len(cached["sources"]),
+                    },
                     "cache_hit": True,
                 }
 
@@ -2348,9 +2458,13 @@ def rag_flow(
             timings_ms["tavily_skipped"] = 1.0
             logger.info("AnswerQualityGate requested web fallback, but Tavily is disabled")
 
-    cache_final_answer = (
-        not answer_quality_gate["should_web_search"]
-        or web_fallback_used
+    cache_final_answer = _should_cache_final_answer(
+        answer=answer,
+        answer_quality_gate=answer_quality_gate,
+        dynamic_web_query=dynamic_web_query,
+        pre_web_fallback_used=pre_web_fallback_used,
+        web_fallback_used=web_fallback_used,
+        web_fallback_reasons=pre_web_fallback_reasons,
     )
     if llm_cache is not None and cache_final_answer:
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
@@ -2477,6 +2591,20 @@ def rag_flow_stream(
                     metadata_out["collection_scores"] = {}
                     metadata_out["applied_filters"] = None
                     metadata_out["collection_results"] = None
+                    metadata_out["rerank_trace"] = {
+                        "cache_hit": True,
+                        "query_cache_hit": True,
+                        "rerank_candidate_count": len(_qcached["sources"]),
+                        "rerank_returned_count": len(_qcached["sources"]),
+                    }
+                    metadata_out["answer_quality_gate"] = {
+                        "answer_status": "answered",
+                        "cache_hit": True,
+                    }
+                    metadata_out["context_trace"] = {
+                        "cache_hit": True,
+                        "context_docs_used": len(_qcached["sources"]),
+                    }
                     metadata_out["tools_used"] = []
                     metadata_out["tool_calls"] = []
 
@@ -2810,15 +2938,17 @@ def rag_flow_stream(
         # docs have negative scores (reflected query drift or only table-threshold
         # docs survived).
         _best_rerank_score_s = _best_explicit_rerank_score(reranked)
-        if (
-            raw_results
-            and _best_rerank_score_s is not None
-            and _best_rerank_score_s < 0.0
-        ):
+        _rerank_quality_ok_s = bool(reranked) and (
+            _best_rerank_score_s is None or _best_rerank_score_s >= 0.0
+        )
+        if raw_results and not _rerank_quality_ok_s:
+            fallback_reason_s = (
+                "empty_rerank" if not reranked else "negative_rerank_score"
+            )
             logger.info(
                 "Stream: reranker gave no positive-score candidates (best=%.3f). "
                 "Retrying with original question.",
-                _best_rerank_score_s,
+                _best_rerank_score_s if _best_rerank_score_s is not None else -999.0,
             )
             reranked = reranker.rerank(
                 query=question,
@@ -2830,6 +2960,9 @@ def rag_flow_stream(
             if not reranked or (
                 retry_best_score_s is not None and retry_best_score_s < 0.0
             ):
+                fallback_reason_s = (
+                    "empty_rerank" if not reranked else "negative_rerank_score"
+                )
                 logger.info(
                     "Stream: reranker still no positive candidates. "
                     "Using raw fusion top-%d.",
@@ -2839,6 +2972,13 @@ def rag_flow_stream(
                     raw_results, key=lambda d: d.get("score", 0.0), reverse=True
                 )[:top_k_value]
                 timings_ms["rerank_raw_fallback"] = 1.0
+            rerank_trace = _update_rerank_trace_after_fallback(
+                rerank_trace,
+                candidate_count=len(raw_results),
+                reranked=reranked,
+                fallback_reason=fallback_reason_s,
+                raw_fallback=bool(timings_ms.get("rerank_raw_fallback")),
+            )
     else:
         reranked = sorted(
             raw_results, key=lambda d: d.get("score", 0.0), reverse=True
@@ -3021,6 +3161,20 @@ def rag_flow_stream(
             else:
                 logger.info("LLM cache HIT (stream) for query: %r", question[:80])
                 timings_ms["llm_cache_hit"] = 1.0
+                if metadata_out is not None:
+                    metadata_out["rerank_trace"] = {
+                        **(metadata_out.get("rerank_trace") or {}),
+                        "cache_hit": True,
+                        "llm_cache_hit": True,
+                    }
+                    metadata_out["answer_quality_gate"] = {
+                        "answer_status": "answered",
+                        "cache_hit": True,
+                    }
+                    metadata_out["context_trace"] = {
+                        "cache_hit": True,
+                        "context_docs_used": len(cached["sources"]),
+                    }
 
                 def _cached_stream() -> Generator[str, None, None]:
                     yield cached["answer"]
@@ -3053,15 +3207,24 @@ def rag_flow_stream(
         logger.info("rag_flow_stream: streamed %d chars", generated_chars)
         _log_timings("rag_flow_stream", timings_ms)
 
+        stream_answer = "".join(full_cached_answer)
+
         # Cache newly generated stream response (Phase 2)
-        cache_stream_answer = not web_fallback_reasons or web_fallback_used
+        cache_stream_answer = _should_cache_final_answer(
+            answer=stream_answer,
+            answer_quality_gate=web_decision,
+            dynamic_web_query=dynamic_web_query,
+            pre_web_fallback_used=web_fallback_used,
+            web_fallback_used=web_fallback_used,
+            web_fallback_reasons=web_fallback_reasons,
+        )
         if llm_cache is not None and cache_stream_answer:
             doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
             llm_cache.put(
                 question,
                 doc_ids,
                 chat_model.model,
-                "".join(full_cached_answer),
+                stream_answer,
                 reranked,
             )
 
@@ -3069,11 +3232,12 @@ def rag_flow_stream(
         if (
             llm_cache is not None
             and hasattr(llm_cache, "put_by_query")
+            and cache_stream_answer
             and not dynamic_web_query
             and not web_fallback_used
             and not web_fallback_reasons
         ):
-            llm_cache.put_by_query(question, chat_model.model, "".join(full_cached_answer), reranked)
+            llm_cache.put_by_query(question, chat_model.model, stream_answer, reranked)
 
     return _timed_stream(), reranked
 

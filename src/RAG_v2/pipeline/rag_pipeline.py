@@ -757,6 +757,23 @@ class RAGPipeline:
             }
 
         if route == "complex" and subtype == "personal_check":
+            result = self.query(
+                question=question,
+                history=history,
+                top_k=top_k,
+                session_id=session_id,
+                user_context=user_context,
+            )
+            result["mode"] = "rag_v2"
+            result["route"] = "personal_check"
+            result["route_reason"] = route_result.get("reason", "")
+            result.setdefault("tools_used", [])
+            result.setdefault("tool_calls", [])
+            result.setdefault("iterations", 0)
+            result.setdefault("agent_trace", None)
+            return result
+
+        if False and route == "complex" and subtype == "personal_check":
             return {
                 "question": question,
                 "answer": (
@@ -1047,6 +1064,7 @@ class RAGPipeline:
         complexity_t0 = time.perf_counter()
         complexity = self.complexity_router.route(question)
         complexity_tier = complexity["tier"]
+        complexity_subtype = complexity.get("complex_subtype")
         pipeline_timings["complexity_routing"] = _elapsed_ms(complexity_t0)
         logger.info("ComplexityRouter: %r → %s", question[:60], complexity_tier)
 
@@ -1088,7 +1106,11 @@ class RAGPipeline:
             pipeline_timings["stream_generate"] = _elapsed_ms(stream_t0)
 
         # ── Complex branch → agent ────────────────────────────────────────────
-        elif complexity_tier == "complex" and runtime.agent is not None:
+        elif (
+            complexity_tier == "complex"
+            and complexity_subtype != "personal_check"
+            and runtime.agent is not None
+        ):
             self.last_mode = "agent"
             self.last_intent = "complex"
 
@@ -1161,7 +1183,11 @@ class RAGPipeline:
         else:
             # Fall back to classic RAG v2 when complexity tier is simple or agent disabled
             self.last_mode = "rag_v2"
-            if complexity_tier == "complex" and runtime.agent is None:
+            if (
+                complexity_tier == "complex"
+                and complexity_subtype != "personal_check"
+                and runtime.agent is None
+            ):
                 logger.info("Agent disabled, falling back to RAG v2 for complex query")
                 self.last_mode = "rag_v2_fallback"
 

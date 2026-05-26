@@ -40,6 +40,10 @@ Use `-m "not integration"` for fast local checks that should not require externa
 ## Maintenance Notes
 
 - When fixing chat/RAG behavior, add or replay saved conversation regression queries.
+- Current P0 replay prompts for SFT backend failures are recorded in
+  `conversation_regression_queries.jsonl` and can be run through
+  `evaluation/results/sft_backend_eval/p0_replay_queries.json` with
+  `evaluation.rerun_incorrect_sft_backend`.
 - Auth contract changes should cover backend schema behavior plus mobile/shared
   contract expectations; prefer focused tests that do not require a live MongoDB
   when the behavior can be tested with route dependency overrides.

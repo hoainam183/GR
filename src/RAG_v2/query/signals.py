@@ -57,10 +57,12 @@ _PERSONAL_PATTERNS = (
 )
 
 _ELIGIBILITY_PATTERNS = (
-    r"\b(dieu kien|du dieu kien|dat dieu kien|co du dieu kien)\b",
+    r"\b(du dieu kien|dat dieu kien|co du dieu kien)\b",
+    r"\bdieu kien\s+(?:xet|duoc xet|tot nghiep|nhan|cap|tham gia|dang ky)\b",
     r"\b(tot nghiep|xet tot nghiep|dang ky tot nghiep|cong nhan tot nghiep)\b",
     r"\b(chuan dau ra|ngoai ngu dau ra|gdtc|gdqp|giao duc the chat|quoc phong)\b",
-    r"\b(hoc bong|mien giam|duoc xet|co duoc|duoc khong|ky luat|dinh chi)\b",
+    r"\b(?:duoc xet|xet)\s+(?:hoc bong|mien giam|tot nghiep)\b",
+    r"\b(?:hoc bong|mien giam).{0,30}\b(?:du dieu kien|dat dieu kien|duoc xet)\b",
 )
 
 _EXACT_LOOKUP_PATTERNS = (

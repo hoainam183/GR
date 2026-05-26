@@ -59,6 +59,12 @@ Known complex subtypes:
 
 Pattern order matters. First match wins.
 
+P0 routing guards:
+
+- Single-fact policy/table/exact lookup questions should remain `simple` unless the text has explicit comparison, multiple domains, or multiple tasks.
+- Personal-check subtype detection should not force a public clarify mode by itself. `RAGPipeline.query_v3()` keeps these on classic RAG with `route="personal_check"`.
+- Broad words such as scholarship/fee-waiver/allowed-question wording are not enough to emit eligibility intent unless the query explicitly asks about being eligible/qualified/considered.
+
 ## DomainClassifier And QueryRouter
 
 `DomainClassifier` uses a two-stage design:

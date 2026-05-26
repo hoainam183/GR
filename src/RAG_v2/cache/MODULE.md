@@ -77,6 +77,12 @@ Expected behavior:
 
 Document-tag reverse index is used for invalidation after document updates.
 
+Pipeline write contract:
+
+- `pipeline.flows` should write query/doc answer cache entries only for stable local answers: answered status, no no-info/no-source/self-eval-failed markers, no dynamic/stale-risk signal, and no pre/post web fallback.
+- Cached responses returned by pipeline must expose minimal trace metadata (`cache_hit`, `query_cache_hit`/`llm_cache_hit`, context/rerank counts, and cached prompt marker) so evaluators do not mistake cache hits for full retrieval traces.
+- Backend eval defaults to no-cache validation and marks runs setup-invalid if cache-hit markers appear when no-cache is required.
+
 ## Rate Limiter
 
 `SlidingWindowRateLimiter` uses Redis sorted sets for continuous windows:

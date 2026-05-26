@@ -1,0 +1,42 @@
+[
+  {
+    "index": 1,
+    "sample_id": "p0-personal-check-rag",
+    "question": "\u0111i\u1ec1u ki\u1ec7n t\u1ed1t nghi\u1ec7p c\u1ee7a t\u00f4i",
+    "reference_answer": "Route as rag_v2 with route personal_check; do not return mode clarify.",
+    "doc_type": "routing",
+    "judge_match": "incorrect"
+  },
+  {
+    "index": 2,
+    "sample_id": "p0-agent-single-fact",
+    "question": "Sinh vi\u00ean c\u00f3 th\u1ec3 \u0111\u0103ng k\u00fd/\u0111i\u1ec1u ch\u1ec9nh k\u1ebf ho\u1ea1ch h\u1ecdc t\u1eadp bao nhi\u00eau l\u1ea7n?",
+    "reference_answer": "Route as simple rag_v2, not agent, and answer the registration count from local policy.",
+    "doc_type": "routing",
+    "judge_match": "incorrect"
+  },
+  {
+    "index": 3,
+    "sample_id": "p0-rerank-empty-k70-bac23",
+    "question": "K70: N\u1ebfu t\u00f4i \u0111\u1ea1t B\u1eadc 2.3 th\u00ec t\u00f4i thu\u1ed9c nh\u00f3m m\u1ea5y?",
+    "reference_answer": "Use local K70 foreign-language table evidence; B\u1eadc 2.3 maps to Nh\u00f3m 5.",
+    "doc_type": "rerank",
+    "judge_match": "incorrect"
+  },
+  {
+    "index": 4,
+    "sample_id": "p0-zero-context-credit-hour-a",
+    "question": "M\u1ed9t t\u00edn ch\u1ec9 t\u01b0\u01a1ng \u0111\u01b0\u01a1ng bao nhi\u00eau gi\u1edd h\u1ecdc t\u1eadp?",
+    "reference_answer": "Retrieve local curriculum/regulation context and answer the credit-hour equivalence.",
+    "doc_type": "rerank",
+    "judge_match": "incorrect"
+  },
+  {
+    "index": 5,
+    "sample_id": "p0-zero-context-credit-hour-b",
+    "question": "M\u1ed9t t\u00edn ch\u1ec9 t\u01b0\u01a1ng \u0111\u01b0\u01a1ng bao nhi\u00eau gi\u1edd h\u1ecdc t\u1eadp?",
+    "reference_answer": "Duplicate replay query used to detect cache hit markers when require_no_cache=true.",
+    "doc_type": "cache",
+    "judge_match": "incorrect"
+  }
+]

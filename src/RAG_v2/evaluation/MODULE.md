@@ -110,6 +110,13 @@ Do not treat factual mismatch with old email ground truth as production failure 
 
 ## SFT Backend Eval
 
+No-cache eval contract:
+
+- SFT backend eval defaults to `require_no_cache=True`.
+- Each record captures `cache_hit_markers`; if `cache_hit`, `query_cache_hit`, or `llm_cache_hit` appears while no-cache is required, the record is marked `setup_invalid`.
+- Run summaries include `setup_valid`, `setup_invalid_count`, and `setup_invalid_reasons`; accuracy should not be interpreted from a setup-invalid run.
+- `rerun_incorrect_sft_backend.py` resets `resume_from_index` to 0 so small incorrect subsets are not filtered out by the full SFT resume default.
+
 `evaluate_sft_backend.py` and `rerun_incorrect_sft_backend.py` default to
 `identity_mode: "anonymous"` so live backend runs mirror a new anonymous
 frontend session: no auth header, no client-supplied `session_id`, no

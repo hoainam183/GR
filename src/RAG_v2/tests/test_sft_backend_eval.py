@@ -342,6 +342,75 @@ def test_evaluate_sample_records_identity_and_request_payload_hash(monkeypatch):
     assert record["response_trace"]["tool_calls"] is None
 
 
+def test_evaluate_sample_marks_no_cache_setup_invalid(monkeypatch):
+    from evaluation import evaluate_sft_backend as runner
+
+    def fake_post_backend(*, backend_url, question, config, timeout_s):
+        return (
+            {
+                "answer": "answer",
+                "session_id": "backend-session",
+                "sources": [],
+                "timings_ms": {"llm_cache_hit": 1.0},
+            },
+            {
+                "question": question,
+                "mode": "auto",
+                "top_k": 5,
+                "history": [],
+            },
+            {"Content-Type": "application/json"},
+        )
+
+    monkeypatch.setattr(runner, "_post_backend", fake_post_backend)
+
+    sample = runner.SFTSample(
+        index=1,
+        sample_id="id-1",
+        instruction="hello",
+        input="",
+        reference_answer="answer",
+        doc_type="doc",
+    )
+
+    record = runner.evaluate_sample(
+        sample,
+        {
+            "backend_url": "http://backend.test/chat/v3",
+            "timeout_s": 1.0,
+            "judge_backend": "none",
+            "identity_mode": "anonymous",
+            "require_no_cache": True,
+        },
+    )
+
+    assert record["setup_invalid"] is True
+    assert record["cache_hit_markers"] == ["timings_ms.llm_cache_hit"]
+    assert "require_no_cache=true" in record["setup_invalid_reason"]
+
+
+def test_build_summary_reports_setup_invalid():
+    from evaluation.evaluate_sft_backend import build_summary
+
+    summary = build_summary(
+        [
+            {
+                "status": "completed",
+                "doc_type": "doc",
+                "latency_ms": 1,
+                "backend_mode": "rag_v2",
+                "setup_invalid": True,
+                "setup_invalid_reason": "cache hit",
+                "metrics": {"answer_nonempty": True},
+            }
+        ]
+    )
+
+    assert summary["setup_valid"] is False
+    assert summary["setup_invalid_count"] == 1
+    assert summary["setup_invalid_reasons"] == ["cache hit"]
+
+
 def test_evaluate_batch_writes_each_independent_request_result(tmp_path, monkeypatch):
     from evaluation import evaluate_sft_backend as runner
 

@@ -131,6 +131,67 @@ def test_rag_flow_stream_uses_raw_results_when_reranker_unavailable() -> None:
     assert metadata["rerank_trace"]["rerank_skipped"] is True
 
 
+def test_rag_flow_uses_raw_results_when_reranker_returns_empty() -> None:
+    deps = _make_deps()
+    deps["reranker"].rerank.side_effect = [[], []]
+
+    result = rag_flow(
+        question="mot tin chi tuong duong bao nhieu gio hoc tap",
+        history=None,
+        reflector=None,
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=deps["cfg"],
+    )
+
+    assert result["sources"][0]["id"] == "doc-1"
+    assert result["timings_ms"]["rerank_fallback"] == 1.0
+    assert result["timings_ms"]["rerank_raw_fallback"] == 1.0
+    assert result["context_trace"]["context_docs_used"] == 1
+    assert result["rerank_trace"]["rerank_fallback"] is True
+    assert result["rerank_trace"]["rerank_raw_fallback"] is True
+    assert result["rerank_trace"]["fallback_reason"] == "empty_rerank"
+    assert result["rerank_trace"]["rerank_candidate_count"] == 1
+    assert result["rerank_trace"]["rerank_returned_count"] == 1
+
+
+def test_rag_flow_stream_uses_raw_results_when_reranker_returns_empty() -> None:
+    deps = _make_deps()
+    deps["reranker"].rerank.side_effect = [[], []]
+    timings_ms: Dict[str, float] = {}
+    metadata: Dict[str, Any] = {}
+
+    stream, sources = rag_flow_stream(
+        question="mot tin chi tuong duong bao nhieu gio hoc tap",
+        history=None,
+        reflector=None,
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        cfg=deps["cfg"],
+        timings_ms_out=timings_ms,
+        metadata_out=metadata,
+    )
+
+    assert list(stream) == ["ok"]
+    assert sources[0]["id"] == "doc-1"
+    assert timings_ms["rerank_fallback"] == 1.0
+    assert timings_ms["rerank_raw_fallback"] == 1.0
+    assert metadata["context_trace"]["context_docs_used"] == 1
+    assert metadata["rerank_trace"]["rerank_fallback"] is True
+    assert metadata["rerank_trace"]["rerank_raw_fallback"] is True
+    assert metadata["rerank_trace"]["fallback_reason"] == "empty_rerank"
+    assert metadata["rerank_trace"]["rerank_candidate_count"] == 1
+    assert metadata["rerank_trace"]["rerank_returned_count"] == 1
+
+
 def test_rag_flow_fallback_extracts_major_from_query_when_reflection_missing_entities() -> None:
     deps = _make_deps()
     question = "môn lập trình mạng của ngành IT-E6"
@@ -628,7 +689,7 @@ def test_rag_flow_does_not_prepend_profile_note_when_query_has_explicit_major_co
     assert "Ngành: Công nghệ thông tin Việt - Nhật [IT-E6]" not in llm_context
 
 
-def test_query_v3_clarifies_only_personal_graduation_check() -> None:
+def test_query_v3_routes_personal_graduation_check_to_rag() -> None:
     from pipeline.rag_pipeline import RAGPipeline
     from query.complexity_router import ComplexityRouter
 
@@ -637,13 +698,70 @@ def test_query_v3_clarifies_only_personal_graduation_check() -> None:
     pipeline._llm_runtime_snapshot = MagicMock(
         return_value=SimpleNamespace(decomposer=None, agent=None)
     )
+    pipeline.query = MagicMock(
+        return_value={"question": "q", "answer": "rag answer", "sources": []}
+    )
 
     result = RAGPipeline.query_v3(pipeline, "điều kiện tốt nghiệp của tôi")
 
-    assert result["mode"] == "clarify"
+    assert result["mode"] == "rag_v2"
     assert result["route"] == "personal_check"
-    assert "CPA/GPA" in result["answer"]
-    assert result["sources"] == []
+    assert result["answer"] == "rag answer"
+    pipeline.query.assert_called_once()
+
+
+def test_query_stream_personal_check_uses_rag_path_not_agent(monkeypatch) -> None:
+    from pipeline import rag_pipeline as rag_pipeline_module
+    from pipeline.rag_pipeline import RAGPipeline
+    from query.complexity_router import ComplexityRouter
+
+    pipeline = RAGPipeline.__new__(RAGPipeline)
+    pipeline.complexity_router = ComplexityRouter()
+    pipeline._mongo_logger = None
+    pipeline._bge = MagicMock()
+    pipeline._e5 = MagicMock()
+    pipeline._searcher = MagicMock()
+    pipeline._reranker = MagicMock()
+    pipeline._validity_filter = None
+    pipeline._reference_resolver = None
+    pipeline._llm_cache = None
+    pipeline._route_with_cache = MagicMock(
+        return_value={
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": ["quydinh"],
+            "confidence": 1.0,
+        }
+    )
+    pipeline.query_agent = MagicMock()
+    runtime = SimpleNamespace(
+        cfg={"top_k": 5},
+        chat=SimpleNamespace(model="test-model"),
+        reflector=None,
+        agent=object(),
+        tavily_tool=None,
+    )
+    pipeline._llm_runtime_snapshot = MagicMock(return_value=runtime)
+
+    def _fake_rag_flow_stream(**kwargs: Any):
+        metadata = kwargs["metadata_out"]
+        metadata["reflected_question"] = kwargs["question"]
+        metadata["tools_used"] = []
+        metadata["tool_calls"] = []
+        return iter(["ok"]), [{"id": "doc-1"}]
+
+    monkeypatch.setattr(rag_pipeline_module, "rag_flow_stream", _fake_rag_flow_stream)
+
+    chunks = list(
+        RAGPipeline.query_stream(
+            pipeline,
+            "dieu kien tot nghiep cua toi",
+        )
+    )
+
+    assert chunks == ["ok"]
+    assert pipeline.last_mode == "rag_v2"
+    pipeline.query_agent.assert_not_called()
 
 
 def test_query_v3_does_not_clarify_general_graduation_question() -> None:

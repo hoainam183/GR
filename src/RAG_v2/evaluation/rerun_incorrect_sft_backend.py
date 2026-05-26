@@ -45,6 +45,7 @@ CONFIG: Dict[str, Any] = {
     "batch_concurrency": 1,
     "limit": 0,
     "start_index": 0,
+    "resume_from_index": 0,
     "retry_failed": True,
     "include_judge_match": "incorrect",
 }

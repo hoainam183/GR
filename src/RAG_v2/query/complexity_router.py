@@ -109,6 +109,42 @@ _MULTI_TOPIC_RE: re.Pattern = re.compile(
     re.IGNORECASE,
 )
 
+_FOLDED_MULTI_TOPIC_RE: re.Pattern = re.compile(
+    r"\b(cung|ngoai ra|dong thoi|ben canh do|ket hop)\b",
+    re.IGNORECASE,
+)
+_FOLDED_COMPARISON_RE: re.Pattern = re.compile(
+    r"\b(so sanh|so voi|khac nhau|khac biet|giong nhau)\b",
+    re.IGNORECASE,
+)
+_FOLDED_SINGLE_FACT_RE: re.Pattern = re.compile(
+    r"\b(bao nhieu|bao lau|bao lan|may|muc nao|muc diem|thang diem|can bao nhieu|nhom may)\b",
+    re.IGNORECASE,
+)
+
+
+def _is_single_fact_policy_lookup(
+    q_folded: str,
+    query_signals: Any,
+) -> bool:
+    """Return True for one-shot policy/table lookups that should stay RAG."""
+    has_lookup_signal = bool(
+        query_signals.exact_policy_lookup
+        or query_signals.table_lookup
+        or _FOLDED_SINGLE_FACT_RE.search(q_folded)
+    )
+    if not has_lookup_signal:
+        return False
+    if _FOLDED_COMPARISON_RE.search(q_folded):
+        return False
+    if _FOLDED_MULTI_TOPIC_RE.search(q_folded):
+        return False
+    if q_folded.count("?") > 1:
+        return False
+    if q_folded.count(" va ") >= 3:
+        return False
+    return True
+
 
 class ComplexityRouter:
     """
@@ -171,6 +207,33 @@ class ComplexityRouter:
         # 2. Signal-based overrides for broad/personal requests. These cover
         # variants like "điều kiện tốt nghiệp của tôi", where the personal
         # reference appears after the eligibility concept.
+        if q_lower.count("cho") >= 2:
+            result = {
+                "tier": "complex",
+                "reason": "signals: repeated_request_connector",
+                "confidence": "high",
+                "complex_subtype": "general",
+                "query_signals": query_signals_dict,
+            }
+            logger.info(
+                "ComplexityRouter: %r â†’ %s/%s (%s)",
+                q[:60], result["tier"], result["complex_subtype"], result["reason"],
+            )
+            return result
+
+        if _is_single_fact_policy_lookup(q_folded, query_signals):
+            result = {
+                "tier": "simple",
+                "reason": "signals: single_fact_policy_lookup",
+                "confidence": "high",
+                "query_signals": query_signals_dict,
+            }
+            logger.info(
+                "ComplexityRouter: %r â†’ %s (%s)",
+                q[:60], result["tier"], result["reason"],
+            )
+            return result
+
         if query_signals.personal_reference and query_signals.eligibility_check:
             result = {
                 "tier": "complex",
@@ -203,6 +266,54 @@ class ComplexityRouter:
             }
             logger.info(
                 "ComplexityRouter: %r → %s/%s (%s)",
+                q[:60], result["tier"], result["complex_subtype"], result["reason"],
+            )
+            return result
+
+        if (
+            _FOLDED_COMPARISON_RE.search(q_folded)
+            and re.search(r"\b(k\d{2,3}|nganh|chuong trinh|ctdt|hoc ky|quy dinh)\b", q_folded)
+        ):
+            result = {
+                "tier": "complex",
+                "reason": "signals: folded_comparison",
+                "confidence": "high",
+                "complex_subtype": "comparison",
+                "query_signals": query_signals_dict,
+            }
+            logger.info(
+                "ComplexityRouter: %r â†’ %s/%s (%s)",
+                q[:60], result["tier"], result["complex_subtype"], result["reason"],
+            )
+            return result
+
+        if (
+            " va " in q_folded
+            and re.search(r"\b(cho biet|liet ke|so sanh|giai thich)\b", q_folded)
+        ):
+            result = {
+                "tier": "complex",
+                "reason": "signals: multi_step_connector",
+                "confidence": "high",
+                "complex_subtype": "general",
+                "query_signals": query_signals_dict,
+            }
+            logger.info(
+                "ComplexityRouter: %r â†’ %s/%s (%s)",
+                q[:60], result["tier"], result["complex_subtype"], result["reason"],
+            )
+            return result
+
+        if q_lower.count("cho") >= 2 and (" v" in q_lower or " va " in q_folded):
+            result = {
+                "tier": "complex",
+                "reason": "signals: repeated_request_connector",
+                "confidence": "high",
+                "complex_subtype": "general",
+                "query_signals": query_signals_dict,
+            }
+            logger.info(
+                "ComplexityRouter: %r â†’ %s/%s (%s)",
                 q[:60], result["tier"], result["complex_subtype"], result["reason"],
             )
             return result

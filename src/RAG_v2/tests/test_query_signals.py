@@ -21,6 +21,13 @@ def test_accent_insensitive_policy_table_lookup() -> None:
     assert signals.personal_reference is False
 
 
+def test_broad_scholarship_words_do_not_imply_eligibility() -> None:
+    signals = analyze_query_signals("hoc bong co duoc bao nhieu tien")
+
+    assert signals.eligibility_check is False
+    assert signals.exact_policy_lookup is True
+
+
 def test_procedural_support_can_combine_with_exact_policy_lookup() -> None:
     signals = analyze_query_signals(
         "toi da tham gia hien mau nhung chua nhan duoc diem ren luyen"
