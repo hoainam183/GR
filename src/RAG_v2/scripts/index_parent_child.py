@@ -45,15 +45,26 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 
 # Collections with parent-child data
+# Each collection can have a flat config (subfolders + chunk_dir/pattern)
+# OR a list of explicit sources via "multi_source" for collections with mixed folder structures.
 PARENT_CHILD_SOURCES = {
     "ctdt": {
         "subfolders": ["soict", "cokhi", "dien-dientu", "hoa", "toan", "vatlieu"],
         "chunk_dir": "chunks_recursive_parent_child",
     },
     "quydinh": {
-        "subfolders": ["admin_upload"],
-        "chunk_dir": None,  # Files are directly in admin_upload with _recursive_chunks.json suffix
-        "pattern": "*_recursive_chunks.json",
+        "multi_source": [
+            {
+                "subfolder": "admin_upload",
+                "chunk_dir": None,
+                "pattern": "*_recursive_chunks.json",
+            },
+            {
+                "subfolder": "olmocr",
+                "chunk_dir": "chunks_recursive_parent_child_3",
+                "pattern": None,
+            },
+        ]
     },
 }
 
@@ -73,19 +84,35 @@ def discover_chunk_files(
         return []
 
     files: List[Tuple[Path, str]] = []
-    subfolders = [subfolder] if subfolder else source_config["subfolders"]
 
-    for sf in subfolders:
+    # Support both flat config and multi_source list
+    if "multi_source" in source_config:
+        sources = source_config["multi_source"]
+        if subfolder:
+            sources = [s for s in sources if s["subfolder"] == subfolder]
+    else:
+        subfolders = [subfolder] if subfolder else source_config["subfolders"]
+        sources = [
+            {
+                "subfolder": sf,
+                "chunk_dir": source_config.get("chunk_dir"),
+                "pattern": source_config.get("pattern"),
+            }
+            for sf in subfolders
+        ]
+
+    for src in sources:
+        sf = src["subfolder"]
         base = DATA_DIR / collection / sf
 
-        if source_config.get("chunk_dir"):
-            chunk_dir = base / source_config["chunk_dir"]
+        if src.get("chunk_dir"):
+            chunk_dir = base / src["chunk_dir"]
             if chunk_dir.exists():
                 for f in sorted(chunk_dir.glob("*.json")):
                     files.append((f, sf))
-        elif source_config.get("pattern"):
+        elif src.get("pattern"):
             if base.exists():
-                for f in sorted(base.glob(source_config["pattern"])):
+                for f in sorted(base.glob(src["pattern"])):
                     files.append((f, sf))
         else:
             if base.exists():
