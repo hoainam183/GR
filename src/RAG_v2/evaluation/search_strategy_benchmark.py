@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import math
 import sys
 import time
@@ -36,11 +37,26 @@ from config.settings import Settings
 from query.structured_query import parse_structured_query, text_contains_excluded_term
 from retrieval.service import RetrievalService
 
+logger = logging.getLogger(__name__)
+
 _GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 _DEFAULT_GOLDEN = PROJECT_ROOT / "eval" / "golden_dataset.json"
 _DEFAULT_LABELS = PROJECT_ROOT / "evaluation" / "search_strategy_labels.jsonl"
 _DEFAULT_OUTPUT = PROJECT_ROOT / "evaluation" / "search_strategy_results.json"
 _DEFAULT_REPORT = PROJECT_ROOT / "evaluation" / "search_strategy_report.md"
+
+_COLLECTION_QUERY_CLASSES = {
+    "quydinh": "policy",
+    "ctdt": "course",
+    "kehoach": "schedule",
+    "stsv": "stsv_form",
+}
+_DOMAIN_QUERY_CLASSES = {
+    **_COLLECTION_QUERY_CLASSES,
+    "chitchat": "chitchat",
+    "tool_search": "tool_search",
+}
+_DOMAIN_CLASSIFIER: Optional[Any] = None
 
 
 @dataclass
@@ -79,23 +95,65 @@ def _candidate_id(collection: str, raw_id: Any) -> str:
     return f"{collection}/{rid}" if collection else rid
 
 
-def _query_class(query: str, fallback: str = "general") -> str:
-    sq = parse_structured_query(query)
-    q = sq.normalized_query.lower()
-    if sq.exclude_terms:
-        return "negation"
-    if "so sánh" in q or "khác nhau" in q or len(sq.cohorts) >= 2 or len(sq.major_codes) >= 2:
-        return "comparison"
-    if sq.course_codes or "môn " in q or "học phần" in q:
-        return "course"
-    if "học bổng" in q or "tốt nghiệp" in q or "quy định" in q:
-        return "policy"
-    if "lịch" in q or "thời hạn" in q or "đăng ký" in q:
-        return "schedule"
-    if "biểu mẫu" in q or "thủ tục" in q or "xin " in q:
-        return "stsv_form"
-    if q and q == q.encode("ascii", errors="ignore").decode("ascii"):
-        return "typo_no_diacritic"
+def _listify(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return [str(value).strip()] if str(value).strip() else []
+
+
+def _expected_collections(case: Dict[str, Any]) -> List[str]:
+    return _listify(case.get("expected_collections")) + _listify(
+        case.get("expected_collection")
+    )
+
+
+def _classifier_query_class(query: str, fallback: str) -> str:
+    global _DOMAIN_CLASSIFIER
+    if _DOMAIN_CLASSIFIER is None:
+        try:
+            from query.domain_classifier import DomainClassifier
+
+            _DOMAIN_CLASSIFIER = DomainClassifier()
+            _DOMAIN_CLASSIFIER.load()
+        except Exception as exc:
+            logger.warning(
+                "DomainClassifier unavailable for benchmark query_class fallback: %s",
+                exc,
+            )
+            return fallback
+    try:
+        prediction = _DOMAIN_CLASSIFIER.predict(query)
+    except Exception as exc:
+        logger.warning("DomainClassifier query_class fallback failed: %s", exc)
+        return fallback
+
+    domain = prediction.get("domain") or prediction.get("label")
+    return _DOMAIN_QUERY_CLASSES.get(str(domain), fallback)
+
+
+def _case_query_class(
+    case: Dict[str, Any],
+    *,
+    query: str,
+    fallback: str = "general",
+) -> str:
+    explicit = str(case.get("query_class") or "").strip()
+    if explicit:
+        return explicit
+
+    for collection in _expected_collections(case):
+        qclass = _COLLECTION_QUERY_CLASSES.get(collection)
+        if qclass:
+            return qclass
+
+    category = str(case.get("category") or "").strip()
+    if category and category != "retrieval":
+        return category
+
+    if query:
+        return _classifier_query_class(query, fallback)
     return fallback
 
 
@@ -141,7 +199,7 @@ def load_feedback_cases(path: Optional[Path]) -> List[BenchmarkCase]:
             BenchmarkCase(
                 id=f"feedback_{case_id}",
                 query=query,
-                query_class=_query_class(query, fallback="feedback"),
+                query_class=_case_query_class(row, query=query, fallback="feedback"),
                 source="feedback",
                 expected_source_ids=_expected_ids(row),
             )
@@ -170,7 +228,7 @@ def load_cases(
             BenchmarkCase(
                 id=str(item.get("id") or f"case_{len(cases) + 1}"),
                 query=query,
-                query_class=_query_class(query),
+                query_class=_case_query_class(item, query=query),
                 source="golden",
                 expected_source_ids=_expected_ids(item),
             )

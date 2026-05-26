@@ -329,6 +329,70 @@ def test_ground_truth_builder_generates_valid_draft(tmp_path):
     assert validation["valid"] is True
 
 
+def test_ground_truth_builder_query_class_follows_collection():
+    from evaluation.build_current_policy_ground_truth import ChunkRecord, build_cases
+
+    record = ChunkRecord(
+        doc_id="quydinh/chunk-1",
+        collection="quydinh",
+        content="Lịch đăng ký học tập được nêu trong quy chế đào tạo.",
+        title="Lịch đăng ký học tập",
+        source_path="data/quydinh/chunks/example.json",
+    )
+
+    payload = build_cases([record], target_cases=1, include_variants=False)
+    assert payload["test_cases"][0]["query_class"] == "policy"
+
+
+def test_search_strategy_benchmark_uses_case_metadata_for_query_class(tmp_path):
+    from evaluation.search_strategy_benchmark import load_cases, load_feedback_cases
+
+    golden = tmp_path / "golden.json"
+    golden.write_text(
+        json.dumps(
+            {
+                "test_cases": [
+                    {
+                        "id": "case_policy",
+                        "category": "retrieval",
+                        "query": "Lịch đăng ký học tập được quy định thế nào?",
+                        "expected_collection": "quydinh",
+                    },
+                    {
+                        "id": "case_explicit",
+                        "category": "retrieval",
+                        "query": "hoc bong khuyen khich hoc tap",
+                        "expected_collection": "quydinh",
+                        "query_class": "typo_no_diacritic",
+                    },
+                ]
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    cases = load_cases(golden, include_diagnostics=False)
+    assert [case.query_class for case in cases] == ["policy", "typo_no_diacritic"]
+
+    feedback = tmp_path / "feedback.jsonl"
+    feedback.write_text(
+        json.dumps(
+            {
+                "id": "fb1",
+                "rating": "down",
+                "query": "đăng ký gửi xe ở đâu?",
+                "expected_collection": "stsv",
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    assert load_feedback_cases(feedback)[0].query_class == "stsv_form"
+
+
 def test_artifact_dashboard_returns_latest_breakdown_and_failures(tmp_path):
     from evaluation.eval_schemas import EvalCaseResult, EvalRun
     from evaluation.eval_store import load_latest_artifact_dashboard, write_eval_artifacts

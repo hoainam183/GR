@@ -32,6 +32,13 @@ DEFAULT_SEED_LABELS = DEFAULT_DRAFT_DIR / "search_strategy_labels_seed.jsonl"
 DEFAULT_AUDIT_CSV = DEFAULT_DRAFT_DIR / "current_policy_audit.csv"
 DEFAULT_LINEAGE = PROJECT_ROOT / "data" / "document_lineage.json"
 
+COLLECTION_QUERY_CLASSES = {
+    "quydinh": "policy",
+    "ctdt": "course",
+    "kehoach": "schedule",
+    "stsv": "stsv_form",
+}
+
 
 @dataclass
 class ChunkRecord:
@@ -175,33 +182,8 @@ def load_chunk_inventory(data_dir: Path = DEFAULT_DATA_DIR) -> List[ChunkRecord]
     return records
 
 
-def _query_class(collection: str, title: str, content: str) -> str:
-    haystack = f"{title} {content}".lower()
-    title_l = title.lower()
-    if collection == "ctdt":
-        return "course"
-    if any(term in title_l for term in ("biểu mẫu", "thủ tục", "hồ sơ", "giấy", "đơn xin", "xác nhận")):
-        return "stsv_form"
-    if any(term in title_l for term in ("lịch", "thời gian", "thời hạn", "deadline", "kỳ học")):
-        return "schedule"
-    if any(term in title_l for term in ("học bổng", "tốt nghiệp", "ngoại ngữ", "quy định", "kỷ luật", "học phí")):
-        return "policy"
-    if any(term in haystack for term in ("lịch", "thời gian", "thời hạn", "đăng ký", "deadline", "kỳ học")):
-        return "schedule"
-    if any(term in haystack for term in ("biểu mẫu", "thủ tục", "hồ sơ", "giấy", "đơn xin", "xác nhận")):
-        return "stsv_form"
-    if any(term in haystack for term in ("học bổng", "tốt nghiệp", "ngoại ngữ", "quy định", "kỷ luật", "học phí")):
-        return "policy"
-    if collection == "stsv":
-        return "stsv_form"
-    if any(term in haystack for term in ("tín chỉ", "học phần", "chương trình đào tạo", "ctđt", "môn ")):
-        return "course"
-    return {
-        "quydinh": "policy",
-        "kehoach": "schedule",
-        "stsv": "stsv_form",
-        "ctdt": "course",
-    }.get(collection, "general")
+def query_class_for_collection(collection: str) -> str:
+    return COLLECTION_QUERY_CLASSES.get(collection, "general")
 
 
 def _difficulty(record: ChunkRecord, qclass: str) -> str:
@@ -283,7 +265,7 @@ def build_cases(records: List[ChunkRecord], target_cases: int, include_variants:
     selected = _select_stratified(records, target_cases)
     cases: List[Dict[str, Any]] = []
     for index, record in enumerate(selected, start=1):
-        qclass = _query_class(record.collection, record.title, record.content)
+        qclass = query_class_for_collection(record.collection)
         query = _query_for(record, qclass)
         case = {
             "id": _case_id(record.collection, qclass, index),
