@@ -233,19 +233,26 @@ def index_to_elasticsearch(
 
     logger.info(
         "Connecting to Elasticsearch at %s:%d, index='%s'",
-        settings.es_host,
-        settings.es_port,
+        settings.elasticsearch_host,
+        settings.elasticsearch_port,
         index_name,
     )
     es_store = ElasticsearchStore(
-        host=settings.es_host,
-        port=settings.es_port,
+        host=settings.elasticsearch_host,
+        port=settings.elasticsearch_port,
         index_name=index_name,
     )
 
-    texts = [c["text"] for c in prepared_chunks]
-    metadatas = [c["metadata"] for c in prepared_chunks]
-    ids = [c["id"] for c in prepared_chunks]
+    # Only index searchable chunks (child/recursive/appendix) to ES for BM25.
+    # Parent chunks are excluded — they're only needed in Qdrant for ID-based fetch.
+    searchable_chunks = [
+        c for c in prepared_chunks
+        if str(c.get("metadata", {}).get("level", "child")).strip().lower()
+        not in ("parent", "header")
+    ]
+    texts = [c["text"] for c in searchable_chunks]
+    metadatas = [c["metadata"] for c in searchable_chunks]
+    ids = [c["id"] for c in searchable_chunks]
 
     indexed = es_store.index_documents(texts, metadatas, ids)
     return indexed

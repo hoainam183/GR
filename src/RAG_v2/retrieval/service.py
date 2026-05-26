@@ -436,6 +436,10 @@ class RetrievalService:
             all_results.sort(key=lambda x: x.get("score", 0), reverse=True)
             all_results = all_results[:effective_top_k]
 
+        # Parent-child context expansion (same as _search_single)
+        if self.settings.parent_context_enabled:
+            all_results = self._expand_parent_context(all_results, active_collections)
+
         return all_results
 
     def _expand_parent_context(

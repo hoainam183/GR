@@ -222,7 +222,8 @@ class Settings(BaseSettings):
     low_conf_pool_expand_enabled: bool = False    # C4: 2x candidate pool in Tier 3
     sibling_budget_ratio: float = 0.30            # 30% of total budget for siblings
     sibling_per_doc_limit: int = 800              # Per-sibling char limit
-    parent_max_chars: int = 3000                  # Max chars from parent content
+    parent_max_chars: int = 1500                  # Max chars from parent content
+    parent_max_chars_agent: int = 500             # Reduced for agent (tighter token budget)
     context_total_char_budget_with_expansion: int = 16000  # Expanded total when siblings
 
     # --- Admin / Document Upload ---

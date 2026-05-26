@@ -355,6 +355,67 @@ def _resolve_candidate_pool(
     return base_pool
 
 
+# ── C5: Parent context expansion (post-rerank) ───────────────────────────────
+
+def _expand_parent_context_post_rerank(
+    reranked: List[Dict[str, Any]],
+    cfg: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    """Expand child results with parent chunk context (AFTER rerank).
+
+    Best practice order: Search children → Rerank → Expand parent → Format.
+    Parent expansion is a READ operation (fetch by ID), not a search operation.
+    """
+    if not _cfg_bool(cfg, "parent_context_enabled", True):
+        return reranked
+    if not reranked:
+        return reranked
+
+    # Quick check: any child with parent_id?
+    has_parent = any(
+        r.get("metadata", {}).get("parent_id")
+        and str(r.get("metadata", {}).get("level", "child")).strip().lower() == "child"
+        for r in reranked
+    )
+    if not has_parent:
+        return reranked
+
+    try:
+        from retrieval.parent_context import ParentContextExpander
+        from config.settings import Settings
+
+        settings = Settings()
+        expander = ParentContextExpander(
+            qdrant_host=settings.qdrant_host,
+            qdrant_port=settings.qdrant_port,
+            max_parent_chars=_cfg_int(cfg, "parent_max_chars", 1500),
+        )
+
+        # Group by collection for batch fetch
+        collection_groups: Dict[str, List[int]] = {}
+        for idx, r in enumerate(reranked):
+            coll = (
+                r.get("collection", "")
+                or r.get("metadata", {}).get("collection", "")
+            )
+            if coll:
+                collection_groups.setdefault(coll, []).append(idx)
+
+        for coll, indices in collection_groups.items():
+            group = [reranked[i] for i in indices]
+            expanded = expander.expand_with_parents(group, coll)
+            for i, exp in zip(indices, expanded):
+                reranked[i] = exp
+
+    except Exception:
+        logger.warning(
+            "Parent context expansion failed, continuing without parent",
+            exc_info=True,
+        )
+
+    return reranked
+
+
 # ── C1: Sibling chunk expansion ──────────────────────────────────────────────
 
 def _expand_with_siblings_pre_rerank(
@@ -1081,10 +1142,27 @@ def _format_context(
         meta_str = f" [{', '.join(meta_parts)}]" if meta_parts else ""
         
         text = str(doc.get("text", "") or "").strip()
+
+        # C5: Prepend parent context for broader section context
+        parent_ctx = str((meta.get("parent_context") or "")).strip()
+        parent_title = str(
+            (meta.get("parent_title") or meta.get("parent_section_h2") or "")
+        ).strip()
+        if parent_ctx:
+            parent_header = (
+                f"[Ngữ cảnh section: {parent_title}]"
+                if parent_title
+                else "[Ngữ cảnh section]"
+            )
+            text = f"{parent_header}\n{parent_ctx}\n\n[Chi tiết]\n{text}"
+
         # Siblings get reduced per-doc limit (C2: 70/30 budget split)
         effective_limit = (
             sibling_per_doc_limit if doc.get("_expansion_source") else per_doc_char_limit
         )
+        # When parent context is prepended, allow more chars per doc
+        if parent_ctx:
+            effective_limit = min(effective_limit + 1500, per_doc_char_limit + 1500)
         if len(text) > effective_limit:
             text = text[:effective_limit] + "\u2026"  # ellipsis
         chunk = f"--- Văn bản: {title}{meta_str}\n{text}"
@@ -2001,6 +2079,11 @@ def rag_flow(
         timings_ms["cliff_triggered"] = 1.0 if cliff_dropped > 0 else 0.0
         timings_ms["cliff_dropped_count"] = float(cliff_dropped)
 
+    # 5.4 Parent context expansion (C5) — fetch parent by ID after rerank
+    parent_t0 = time.perf_counter()
+    reranked = _expand_parent_context_post_rerank(reranked, cfg)
+    timings_ms["parent_expansion"] = _elapsed_ms(parent_t0)
+
     # ── LLM Response Cache Check (Phase 2) ─────────────────────────
     web_fallback_used = False
     pre_web_fallback_used = False
@@ -2791,6 +2874,11 @@ def rag_flow_stream(
         cliff_dropped = pre_cliff_count - len(reranked)
         timings_ms["cliff_triggered"] = 1.0 if cliff_dropped > 0 else 0.0
         timings_ms["cliff_dropped_count"] = float(cliff_dropped)
+
+    # 5.4 Parent context expansion (C5) — fetch parent by ID after rerank
+    parent_t0 = time.perf_counter()
+    reranked = _expand_parent_context_post_rerank(reranked, cfg)
+    timings_ms["parent_expansion"] = _elapsed_ms(parent_t0)
 
     web_fallback_used = False
     web_decision = _build_pre_generation_web_decision(

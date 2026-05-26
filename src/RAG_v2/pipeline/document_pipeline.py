@@ -19,7 +19,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from config.settings import Settings
 from models.database import DOCUMENTS_COLLECTION, DOCUMENT_CHUNKS_COLLECTION
-from utils.chunk_indexing import is_indexable_chunk
+from utils.chunk_indexing import is_indexable_chunk, is_qdrant_storable
 from utils.storage import LocalStorage
 
 logger = logging.getLogger(__name__)
@@ -437,6 +437,10 @@ class DocumentPipeline:
                         "collection": doc["collection"],
                     }
                 )
+                # Preserve chunker-assigned ID for parent_id remapping in embed_and_index
+                chunker_original_id = ch.get("id", "")
+                if chunker_original_id:
+                    chunk_meta["chunker_original_id"] = chunker_original_id
                 # Merge admin-provided metadata overrides
                 if doc.get("metadata_overrides"):
                     chunk_meta.update(doc["metadata_overrides"])
@@ -547,51 +551,91 @@ class DocumentPipeline:
             if not chunks:
                 raise ValueError("No chunks found in database")
 
-            indexable_chunks = [c for c in chunks if is_indexable_chunk(c)]
-            skipped_chunks = len(chunks) - len(indexable_chunks)
+            # --- Separate ES vs Qdrant chunk sets ---
+            # ES: only child/recursive/appendix (searchable via BM25)
+            es_chunks = [c for c in chunks if is_indexable_chunk(c)]
+            # Qdrant: parent + child (parent stored for ID-based expansion,
+            # excluded from search by must_not level=parent filter)
+            qdrant_chunks = [c for c in chunks if is_qdrant_storable(c)]
+
+            skipped_chunks = len(chunks) - len(qdrant_chunks)
             if skipped_chunks:
                 logger.info(
-                    "Skipping %d non-indexable parent/header chunk(s) for document %s.",
+                    "Skipping %d non-storable header chunk(s) for document %s.",
                     skipped_chunks,
                     doc_id,
                 )
-            chunks = indexable_chunks
-            if not chunks:
+            if not qdrant_chunks:
                 raise ValueError("No indexable chunks found in database")
 
-            texts = [c["content"] for c in chunks]
-            metadatas = [c.get("metadata", {}) for c in chunks]
-            # Convert MongoDB ObjectId to a valid UUID string for Qdrant (or use pre-generated qdrant_id)
-            ids = [c.get("qdrant_id", str(uuid.uuid5(uuid.NAMESPACE_OID, str(c["_id"])))) for c in chunks]
+            # --- Build parent_id remapping ---
+            # RecursiveChunker assigns uuid4() as parent.id (stored as chunker_original_id)
+            # Qdrant uses uuid5(NAMESPACE_OID, MongoDB_ObjectId) as point ID
+            # Map: chunker_original_id → qdrant_point_id for parent chunks
+            parent_id_remap: Dict[str, str] = {}
+            for c in qdrant_chunks:
+                meta = c.get("metadata", {})
+                level = str(meta.get("level", "")).strip().lower()
+                if level == "parent":
+                    chunker_id = meta.get("chunker_original_id", "")
+                    qdrant_id = c.get("qdrant_id", str(uuid.uuid5(uuid.NAMESPACE_OID, str(c["_id"]))))
+                    if chunker_id:
+                        parent_id_remap[chunker_id] = qdrant_id
 
-            # Embed with both models
+            # Remap children's metadata.parent_id to actual Qdrant point IDs
+            remapped_count = 0
+            for c in qdrant_chunks:
+                meta = c.get("metadata", {})
+                old_pid = meta.get("parent_id")
+                if old_pid and old_pid in parent_id_remap:
+                    meta["parent_id"] = parent_id_remap[old_pid]
+                    remapped_count += 1
+            if remapped_count:
+                logger.info(
+                    "Remapped parent_id for %d child chunks (document %s).",
+                    remapped_count,
+                    doc_id,
+                )
+
+            # --- Embed and index to Qdrant (parent + child) ---
+            qdrant_texts = [c["content"] for c in qdrant_chunks]
+            qdrant_metadatas = [c.get("metadata", {}) for c in qdrant_chunks]
+            qdrant_ids = [c.get("qdrant_id", str(uuid.uuid5(uuid.NAMESPACE_OID, str(c["_id"])))) for c in qdrant_chunks]
+
             logger.info(
-                "Embedding %d chunks for document %s...", len(texts), doc_id
+                "Embedding %d chunks (%d parents) for document %s...",
+                len(qdrant_texts),
+                len(parent_id_remap),
+                doc_id,
             )
             bge_embedder = self._get_bge_embedder()
             e5_embedder = self._get_e5_embedder()
 
-            bge_vectors = bge_embedder.embed_documents(texts)
-            e5_vectors = e5_embedder.embed_documents(texts)
+            bge_vectors = bge_embedder.embed_documents(qdrant_texts)
+            e5_vectors = e5_embedder.embed_documents(qdrant_texts)
 
-            # Index into Qdrant (dual-vector)
             collection_name = doc["collection"]
             qdrant_store = self._get_qdrant_store(collection_name)
             qdrant_store.index_documents(
-                texts=texts,
+                texts=qdrant_texts,
                 bge_m3_vectors=bge_vectors,
                 e5_vectors=e5_vectors,
-                metadatas=metadatas,
-                ids=ids,
+                metadatas=qdrant_metadatas,
+                ids=qdrant_ids,
             )
 
-            # Index into Elasticsearch (text + metadata only)
-            es_store = self._get_es_store(collection_name)
-            es_store.index_documents(
-                texts=texts,
-                metadatas=metadatas,
-                ids=ids,
-            )
+            # --- Index to Elasticsearch (child/recursive/appendix only) ---
+            if es_chunks:
+                es_texts = [c["content"] for c in es_chunks]
+                es_metadatas = [c.get("metadata", {}) for c in es_chunks]
+                es_ids = [c.get("qdrant_id", str(uuid.uuid5(uuid.NAMESPACE_OID, str(c["_id"])))) for c in es_chunks]
+
+                es_store = self._get_es_store(collection_name)
+                es_store.index_documents(
+                    texts=es_texts,
+                    metadatas=es_metadatas,
+                    ids=es_ids,
+                )
 
             await self._update_status(
                 db,
@@ -600,8 +644,9 @@ class DocumentPipeline:
                 {"indexed_at": datetime.now(timezone.utc)},
             )
             logger.info(
-                "Indexed %d chunks for document %s into '%s'.",
-                len(texts),
+                "Indexed %d chunks (%d parents) for document %s into '%s'.",
+                len(qdrant_texts),
+                len(parent_id_remap),
                 doc_id,
                 collection_name,
             )

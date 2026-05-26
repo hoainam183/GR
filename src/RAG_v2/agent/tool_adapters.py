@@ -376,6 +376,20 @@ def _rag_search(
     else:
         results = results[:effective_top_k]
 
+    # Parent context expansion for agent (tight budget: 500 chars)
+    if getattr(runtime.settings, "parent_context_enabled", True):
+        try:
+            from retrieval.parent_context import ParentContextExpander
+
+            expander = ParentContextExpander(
+                qdrant_host=runtime.settings.qdrant_host,
+                qdrant_port=runtime.settings.qdrant_port,
+                max_parent_chars=getattr(runtime.settings, "parent_max_chars_agent", 500),
+            )
+            results = expander.expand_with_parents(results, qdrant_collection)
+        except Exception:
+            pass  # Graceful degradation — continue without parent
+
     # Accumulate for UI diagnostic logging (per-request, thread-safe)
     _append_agent_docs(results)
 
@@ -712,6 +726,14 @@ def _format_search_results(
             content = str(item)
 
         content = " ".join(content.split())
+
+        # Include parent section context for broader understanding
+        parent_ctx = str((metadata.get("parent_context") or "")).strip()
+        if parent_ctx:
+            parent_short = parent_ctx[:300] + "..." if len(parent_ctx) > 300 else parent_ctx
+            parent_short = " ".join(parent_short.split())
+            content = f"[Section] {parent_short}\n[Detail] {content}"
+
         if len(content) > char_limit:
             content = content[:char_limit].rstrip() + "..."
 

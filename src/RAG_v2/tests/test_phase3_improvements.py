@@ -486,8 +486,8 @@ class TestParentContextConfig:
         assert "parent_context_enabled: bool = True" in self.source
 
     def test_parent_max_chars_config(self):
-        """parent_max_chars should be configurable."""
-        assert "parent_max_chars: int = 3000" in self.source
+        """parent_max_chars should be configurable (reduced to 1500 to prevent budget overflow)."""
+        assert "parent_max_chars: int = 1500" in self.source
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
