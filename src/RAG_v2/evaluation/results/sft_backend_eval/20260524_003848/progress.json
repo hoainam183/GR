@@ -89,7 +89,7 @@
     "retry_failed": false,
     "lmstudio_base_url": "http://localhost:1234/v1",
     "lmstudio_model": "qwen/qwen3-8b:2",
-    "gemini_model": "gemini-3.1-flash-lite-preview"
+    "gemini_model": "gemini-3.1-flash-lite"
   },
   "updated_at": "2026-05-24T01:04:59"
 }

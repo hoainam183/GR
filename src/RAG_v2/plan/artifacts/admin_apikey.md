@@ -57,14 +57,14 @@ Module quản lý system config CRUD. Bao gồm:
     "google_api_key": "AIza...",                      # Gemini API key
     "tavily_api_key": "tvly-...",                     # Tavily web search key
     "llm_provider": "gemini",                         # gemini | openai | lm_studio
-    "chat_model": "gemini-3.1-flash-lite-preview",    # chat answer generation model
+    "chat_model": "gemini-3.1-flash-lite",    # chat answer generation model
     "chat_temperature": 0.3,
     "chat_max_tokens": 1500,
     "agent_model": "qwen2.5-7b-instruct",             # agent tool-calling model
     "agent_synthesis_provider": "gemini",              # agent final answer provider
-    "agent_synthesis_model": "gemini-3.1-flash-lite-preview",
+    "agent_synthesis_model": "gemini-3.1-flash-lite",
     "reflection_provider": "gemini",                   # query rewrite provider
-    "reflection_model": "gemini-3.1-flash-lite-preview",
+    "reflection_model": "gemini-3.1-flash-lite",
     "updated_at": datetime,
 }
 ```

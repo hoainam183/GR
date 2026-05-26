@@ -1,28 +1,28 @@
 {
-  "total_records": 463,
-  "completed": 461,
-  "failed": 2,
-  "error_rate": 0.0043,
+  "total_records": 478,
+  "completed": 472,
+  "failed": 6,
+  "error_rate": 0.0126,
   "latency_ms": {
-    "mean": 34427.9,
-    "p50": 29454.41,
+    "mean": 33882.86,
+    "p50": 28805.21,
     "p95": 86265.43,
     "max": 156928.97
   },
   "metrics": {
-    "answer_nonempty_rate": 0.974,
-    "reference_keyword_coverage": 0.5614,
-    "atomic_fact_coverage": 0.2228,
-    "expected_doc_hit_rate": 0.0087,
-    "expected_article_hit_rate": 0.6169,
-    "expected_clause_hit_rate": 0.7751,
+    "answer_nonempty_rate": 0.9682,
+    "reference_keyword_coverage": 0.5582,
+    "atomic_fact_coverage": 0.2219,
+    "expected_doc_hit_rate": 0.0085,
+    "expected_article_hit_rate": 0.6152,
+    "expected_clause_hit_rate": 0.7717,
     "citation_text_hit_rate": 0.0
   },
   "by_doc_type": {
     "Quy chế đào tạo năm 2025": {
-      "total": 224,
-      "completed": 222,
-      "failed": 2
+      "total": 239,
+      "completed": 233,
+      "failed": 6
     },
     "Quy định ngoại ngữ từ K65": {
       "total": 24,
@@ -56,15 +56,15 @@
     }
   },
   "by_mode": {
-    "rag_v2": 410,
-    "agent": 36,
+    "rag_v2": 420,
+    "agent": 37,
     "clarify": 14,
     "rag_v2_decomposed": 1
   },
   "judge": {
-    "correct": 247,
-    "partial": 55,
-    "incorrect": 159
+    "correct": 252,
+    "partial": 56,
+    "incorrect": 164
   },
-  "updated_at": "2026-05-25T20:44:04"
+  "updated_at": "2026-05-26T12:43:26"
 }

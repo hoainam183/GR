@@ -21,7 +21,7 @@ from llm.prompts import (
 logger = logging.getLogger(__name__)
 
 # ─── Constants ──────────────────────────────────────────────────────────────────
-DEFAULT_MODEL = "gemini-3.1-flash-lite-preview"
+DEFAULT_MODEL = "gemini-3.1-flash-lite"
 DEFAULT_MAX_TOKENS = 1024
 DEFAULT_TEMPERATURE = 0.3
 _GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
@@ -40,7 +40,7 @@ class GeminiLLM(BaseLLM):
 
     Parameters:
         api_key: Google API key. If *None*, reads from ``GOOGLE_API_KEY`` env var.
-        model: Gemini model identifier (e.g. ``gemini-3.1-flash-lite-preview``).
+        model: Gemini model identifier (e.g. ``gemini-3.1-flash-lite``).
         temperature: Sampling temperature.
         max_tokens: Maximum tokens in the generated response.
     """

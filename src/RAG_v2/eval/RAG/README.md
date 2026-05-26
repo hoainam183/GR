@@ -60,7 +60,7 @@ export GOOGLE_API_KEY=YOUR_GOOGLE_API_KEY
 python main_eval.py --backend gemini
 ```
 
-Model mặc định: `gemini-3.1-flash-lite-preview` (nhanh, rẻ). Đổi sang `gemini-1.5-pro` trong `config.py` nếu cần độ chính xác cao hơn.
+Model mặc định: `gemini-3.1-flash-lite` (nhanh, rẻ). Đổi sang `gemini-1.5-pro` trong `config.py` nếu cần độ chính xác cao hơn.
 
 ### 3. Load QA dataset đã có sẵn
 
@@ -123,7 +123,7 @@ Trong `src/llm_client.py`, dòng `model="text-embedding-nomic-embed-text-v1.5"` 
 - Tăng `timeout` trong `LMStudioConfig` nếu máy chậm
 
 **Gemini quota error:**
-- Dùng `gemini-3.1-flash-lite-preview` thay vì `gemini-1.5-pro`
+- Dùng `gemini-3.1-flash-lite` thay vì `gemini-1.5-pro`
 - Giảm `max_chunks_to_sample` xuống 10-15
 
 **RAGAS điểm thấp bất thường:**

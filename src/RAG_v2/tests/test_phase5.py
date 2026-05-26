@@ -17,7 +17,7 @@ class TestSettings:
     def test_chat_model_default(self) -> None:
         from config.settings import Settings
         s = Settings()
-        assert s.chat_model == "gemini-3.1-flash-lite-preview"
+        assert s.chat_model == "gemini-3.1-flash-lite"
 
     def test_api_port_default(self) -> None:
         from config.settings import Settings

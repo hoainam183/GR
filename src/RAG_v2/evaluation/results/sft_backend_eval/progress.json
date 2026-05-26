@@ -1,10 +1,10 @@
 {
   "run_id": "sft_backend_eval",
-  "samples_total": 541,
-  "records_total": 463,
+  "samples_total": 528,
+  "records_total": 478,
   "status_counts": {
-    "completed": 461,
-    "failed": 2
+    "completed": 472,
+    "failed": 6
   },
   "sample_statuses": {
     "67bbfccc75f55bf3": "completed",
@@ -466,10 +466,25 @@
     "d67f290d3fa7b5b4": "completed",
     "95ea7d70e4b369c8": "completed",
     "d3381637be7639eb": "completed",
-    "2505053311dc2134": "completed",
     "3fafe87a00b55cf5": "completed",
-    "7cd5951ee977ca19": "completed",
-    "2b85123bd6c9b48c": "failed"
+    "2b85123bd6c9b48c": "completed",
+    "d2f70d9958cbceb8": "completed",
+    "ceb59e776f34f110": "completed",
+    "4830aa43f93f9ecc": "completed",
+    "15814f8ec9c5d1e0": "completed",
+    "4f3ebf2e37f985ef": "completed",
+    "7a06c4aac417771c": "completed",
+    "fef1139ceeb7d43b": "completed",
+    "796efe3b0686f639": "completed",
+    "2016fd035e7b4c52": "completed",
+    "badc7da7d8610f8d": "completed",
+    "2505053311dc2134": "completed",
+    "8c7be497485876ff": "failed",
+    "8699c214aaa68f92": "completed",
+    "b8eab0210e35ce18": "failed",
+    "b85ee0a36c383f37": "failed",
+    "e3022d5cf2846acf": "failed",
+    "ee733fcc78227f55": "failed"
   },
   "config": {
     "dataset_path": "eval/data/sft_dataset (1).jsonl",
@@ -484,11 +499,13 @@
     "batch_concurrency": 1,
     "limit": 0,
     "start_index": 0,
-    "resume_from_index": 460,
+    "resume_from_index": 473,
     "top_k": 5,
     "mode": "auto",
     "timeout_s": 240,
-    "delay_s": 0.5,
+    "llm_rpm": 15,
+    "llm_calls_per_test": 3,
+    "delay_s": null,
     "identity_mode": "anonymous",
     "role": "user",
     "history": [],
@@ -507,7 +524,7 @@
     "retry_failed": false,
     "lmstudio_base_url": "http://localhost:1234/v1",
     "lmstudio_model": "qwen/qwen3-8b:2",
-    "gemini_model": "gemini-3.1-flash-lite-preview"
+    "gemini_model": "gemini-3.1-flash-lite"
   },
-  "updated_at": "2026-05-25T20:44:04"
+  "updated_at": "2026-05-26T12:43:26"
 }

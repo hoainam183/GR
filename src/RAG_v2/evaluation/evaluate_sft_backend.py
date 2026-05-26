@@ -57,18 +57,25 @@ CONFIG: Dict[str, Any] = {
     "timestamped_run_dir": False,  # fresh live-backend run: output_dir/YYYYMMDD_HHMMSS
     "merge_child_run_dirs": False,  # do not reuse stale child-run records by default
     "resume_dir": None,
-    "batch_size": 1,  # number of questions grouped into one runner batch
+    "batch_size": 1,  # keep 1 so delay_s is effectively between tests
     "batch_index": 0,  # 0 = all batches; 1..N = only that batch after start/limit selection
-    "batch_concurrency": 1,  # independent /chat/v3 HTTP requests in flight per batch
+    "batch_concurrency": 1,  # keep 1 for provider RPM pacing
     "limit": 0,
     "start_index": 0,
     # 1-based dataset sample index for resume runs. Example: 256 = run sample
     # index 256 through the end without checking samples 1..255.
-    "resume_from_index": 460,
+    "resume_from_index": 473,
     "top_k": 5,
     "mode": "auto",
     "timeout_s": 240,  # frontend axios timeout is 240000 ms
-    "delay_s": 0.5,  # pause between batches, not between samples
+    # Rate-limit pacing for provider quota. Normal simple-RAG test cost here:
+    # backend /chat/v3 = 2 LLM calls (reflection + answer), evaluator judge = 1.
+    # RPM 15 / 3 calls = 5 tests/minute => 12 seconds between tests.
+    # If backend self-eval, Tier-3 routing, web fallback, or agent is enabled,
+    # increase llm_calls_per_test accordingly.
+    "llm_rpm": 15,
+    "llm_calls_per_test": 3,
+    "delay_s": None,  # None = auto-calculate from llm_rpm and llm_calls_per_test
     # "anonymous" sends a real user turn with no auth/session/profile identity.
     # "frontend_env" keeps the previous evaluator behavior of reading
     # auth/session/profile env.
@@ -92,7 +99,7 @@ CONFIG: Dict[str, Any] = {
     "retry_failed": False,
     "lmstudio_base_url": "http://localhost:1234/v1",
     "lmstudio_model": "qwen/qwen3-8b:2",
-    "gemini_model": "gemini-3.1-flash-lite-preview",
+    "gemini_model": "gemini-3.1-flash-lite",
 }
 
 
@@ -167,6 +174,18 @@ def _config_bool(config: Dict[str, Any], key: str, default: bool = False) -> boo
     if isinstance(value, str):
         return value.strip().lower() in {"1", "true", "yes", "y", "on"}
     return bool(value)
+
+
+def _inter_test_delay_s(config: Dict[str, Any]) -> float:
+    configured_delay = config.get("delay_s")
+    if configured_delay is not None:
+        return max(0.0, float(configured_delay))
+
+    rpm = float(config.get("llm_rpm") or 0.0)
+    calls_per_test = float(config.get("llm_calls_per_test") or 0.0)
+    if rpm <= 0 or calls_per_test <= 0:
+        return 0.0
+    return float(math.ceil((60.0 / rpm) * calls_per_test))
 
 
 def _identity_mode(config: Dict[str, Any]) -> str:
@@ -1188,6 +1207,27 @@ def run(config: Dict[str, Any] = CONFIG) -> Dict[str, Any]:
     logger.info("Loaded %d selected samples", len(samples))
     logger.info("Selected %d batch(es)", len(batches))
     logger.info("Existing records: %d", len(records))
+    inter_test_delay_s = _inter_test_delay_s(config)
+    logger.info(
+        "Inter-test delay: %.1fs (llm_rpm=%s, llm_calls_per_test=%s)",
+        inter_test_delay_s,
+        config.get("llm_rpm"),
+        config.get("llm_calls_per_test"),
+    )
+    if (
+        inter_test_delay_s > 0
+        and int(config.get("batch_size") or 1) != 1
+    ):
+        logger.warning(
+            "delay_s is applied between batches; set batch_size=1 for true inter-test pacing."
+        )
+    if (
+        inter_test_delay_s > 0
+        and int(config.get("batch_concurrency") or 1) != 1
+    ):
+        logger.warning(
+            "batch_concurrency > 1 can exceed RPM even with delay_s; use 1 for rate-limited runs."
+        )
 
     if not batches:
         logger.warning("No batches selected. Check CONFIG['batch_index'], start_index, and limit.")
@@ -1199,8 +1239,8 @@ def run(config: Dict[str, Any] = CONFIG) -> Dict[str, Any]:
             config=config,
         )
 
-    for batch_no, batch_samples in batches:
-        _evaluate_batch(
+    for batch_position, (batch_no, batch_samples) in enumerate(batches, start=1):
+        written = _evaluate_batch(
             batch_no=batch_no,
             batch_samples=batch_samples,
             records=records,
@@ -1211,9 +1251,9 @@ def run(config: Dict[str, Any] = CONFIG) -> Dict[str, Any]:
         )
         _atomic_write_json(run_dir / "summary_partial.json", build_summary(records.values()))
 
-        delay = float(config.get("delay_s") or 0.0)
-        if delay > 0:
-            time.sleep(delay)
+        if written > 0 and inter_test_delay_s > 0 and batch_position < len(batches):
+            logger.info("Sleeping %.1fs for RPM pacing", inter_test_delay_s)
+            time.sleep(inter_test_delay_s)
 
     summary = _write_final_outputs(run_dir, records)
     output_root = _resolve_project_path(str(config["output_dir"]))

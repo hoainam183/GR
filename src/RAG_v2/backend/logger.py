@@ -73,7 +73,7 @@ if __name__ == "__main__":
     logger.log(
         question="Test question?",
         answer="This is the LLM's answer to the test question.",
-        model_name="gemini-3.1-flash-lite-preview",
+        model_name="gemini-3.1-flash-lite",
     )
 
     print("Test completed!")

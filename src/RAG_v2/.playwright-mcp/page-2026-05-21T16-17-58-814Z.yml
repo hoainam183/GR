@@ -74,13 +74,13 @@
               - generic [ref=e169]:
                 - generic [ref=e170]:
                   - text: Chat Model
-                  - textbox "Chat Model" [ref=e171]: gemini-3.1-flash-lite-preview
+                  - textbox "Chat Model" [ref=e171]: gemini-3.1-flash-lite
                 - generic [ref=e172]:
                   - text: Agent Model
                   - textbox "Agent Model" [ref=e173]: qwen/qwen3-8b
                 - generic [ref=e174]:
                   - text: Reflection Model
-                  - textbox "Reflection Model" [ref=e175]: gemini-3.1-flash-lite-preview
+                  - textbox "Reflection Model" [ref=e175]: gemini-3.1-flash-lite
               - generic [ref=e176]:
                 - generic [ref=e177]:
                   - text: Temperature
