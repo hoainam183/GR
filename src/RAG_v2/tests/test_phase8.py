@@ -87,6 +87,26 @@ class TestCollectionSelector:
         )
         assert result == ["ctdt"]
 
+    def test_foreign_language_fl_code_lookup_adds_quydinh(self) -> None:
+        from retrieval.collection_selector import CollectionSelector
+        selector = CollectionSelector()
+        result = selector.select(
+            domain="ctdt",
+            confidence=0.90,
+            query="K65: Lớp FL1129 có thời lượng bao nhiêu?",
+        )
+        assert result == ["quydinh", "ctdt"]
+
+    def test_foreign_language_cohort_lookup_adds_quydinh(self) -> None:
+        from retrieval.collection_selector import CollectionSelector
+        selector = CollectionSelector()
+        result = selector.select(
+            domain="kehoach",
+            confidence=0.90,
+            query="K70: Nếu tôi đạt Bậc 2.3 thì tôi thuộc nhóm mấy?",
+        )
+        assert result == ["quydinh", "kehoach"]
+
     def test_low_confidence_returns_fallback(self) -> None:
         from retrieval.collection_selector import CollectionSelector, MULTI_DOMAIN_FALLBACK
         selector = CollectionSelector()
@@ -211,7 +231,9 @@ class TestMultiCollectionSearchFiltering:
         )
 
         stsv.es.get_latest_chunk_ids_by_date.assert_not_called()
-        assert stsv.qdrant.search.call_args.kwargs["filters"] is None
+        qdrant_filter = stsv.qdrant.search.call_args.kwargs["filters"]
+        assert qdrant_filter is not None
+        assert not qdrant_filter.must
 
     def test_unknown_collection_falls_back_to_all(self) -> None:
         from retrieval.multi_collection_search import MultiCollectionSearch
@@ -261,19 +283,19 @@ class TestMultiCollectionSearchFiltering:
         assert trace["candidate_pool_sizes"]["keyword_pool_k"] == 80
         assert trace["fusion_weights"]["reason"] == "exact_policy_keyword_bias"
 
-    def test_exact_phrase_hits_are_pinned_into_keyword_pool(self) -> None:
+    def test_table_hits_are_pinned_into_keyword_pool(self) -> None:
         from retrieval.multi_collection_search import MultiCollectionSearch
 
         high_noise = {"id": "quydinh/noise", "text": "noise", "score": 10.0, "metadata": {}}
-        exact_hit = {
+        table_hit = {
             "id": "quydinh/df79f3f4",
             "text": "Tham gia hiến máu nhân đạo được 6 điểm",
             "score": 1.0,
-            "metadata": {"_keyword_exact_phrase_hit": True},
+            "metadata": {"_keyword_table_lookup_hit": True},
         }
 
         pool, pinned_count = MultiCollectionSearch._pin_keyword_hits(
-            [high_noise, exact_hit],
+            [high_noise, table_hit],
             [high_noise],
             k=2,
         )
@@ -292,7 +314,7 @@ class TestMultiCollectionSearchFiltering:
             "id": "stsv/1177b82e-759b-42d6-aea8-c09ac514926f",
             "text": "minh chứng chưa được xác nhận",
             "score": 0.2,
-            "metadata": {"_keyword_exact_phrase_hit": True},
+            "metadata": {},
         }
 
         final = MultiCollectionSearch._ensure_collection_evidence(

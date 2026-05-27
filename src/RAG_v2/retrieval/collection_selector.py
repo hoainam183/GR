@@ -49,6 +49,31 @@ def _is_ctdt_course_lookup(query: str, collections: List[str]) -> bool:
     return course_like and not rule_like
 
 
+def _is_foreign_language_policy_lookup(query: str) -> bool:
+    """Return True for cohort/FL-code queries whose rules live in ``quydinh``."""
+    folded = fold_vietnamese_text(query)
+    has_fl_code = bool(re.search(r"\bfl\d{4}\b", folded))
+    if has_fl_code:
+        return True
+
+    has_cohort = bool(re.search(r"\bk(?:6[5-9]|70)\b", folded))
+    if not has_cohort:
+        return False
+
+    foreign_language_hint = bool(
+        re.search(
+            r"\b("
+            r"ngoai ngu|tieng\s+(?:anh|duc|nhat|phap|trung|han|nga)|"
+            r"ielts|toeic|vstep|bac\s*\d+(?:\.\d+)?|"
+            r"nhom\s*(?:may|\d+)|thuoc nhom|xep hoc|"
+            r"mien hoc phan|quy doi|chuan dau ra"
+            r")\b",
+            folded,
+        )
+    )
+    return foreign_language_hint
+
+
 def augment_collections_for_query(
     query: Optional[str],
     collections: List[str],
@@ -70,12 +95,16 @@ def augment_collections_for_query(
     )
     output = _dedup(list(collections))
     ctdt_course_lookup = _is_ctdt_course_lookup(query, output)
+    foreign_language_policy_lookup = _is_foreign_language_policy_lookup(query)
 
     needs_regulations = (
         signals.eligibility_check
         or signals.table_lookup
         or signals.exact_policy_lookup
     )
+    if foreign_language_policy_lookup:
+        output = _dedup(["quydinh", *output])
+
     if needs_regulations and not ctdt_course_lookup:
         output = _dedup(["quydinh", *output])
 

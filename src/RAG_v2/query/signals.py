@@ -74,6 +74,10 @@ _EXACT_LOOKUP_PATTERNS = (
 _TABLE_LOOKUP_PATTERNS = (
     r"\b(bang|khung|phu luc|muc|thang diem|quy doi|xep loai)\b",
     r"\b(diem ren luyen|diem cong|tin chi|hoc phi|muc thu|chuan)\b",
+    r"\b(thoi luong|ma hoc phan|co ma|ma\s+la gi|danh cho ai|xep hoc)\b",
+    r"\b(hoc ky|ky)\s*\d+\b",
+    r"\b(thuoc nhom|nhom\s*(?:may|\d+)|bac\s*\d+(?:\.\d+)?)\b",
+    r"\bfl\d{4}\b",
 )
 
 _PROCEDURAL_PATTERNS = (

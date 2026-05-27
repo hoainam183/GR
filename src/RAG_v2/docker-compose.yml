@@ -13,7 +13,12 @@ services:
       - ./volumes/qdrant:/qdrant/storage
 
   elasticsearch:
-    image: elasticsearch:8.15.0
+    build:
+      context: ./docker/elasticsearch
+      args:
+        ES_VERSION: "8.7.0"
+        VI_ANALYSIS_PLUGIN_URL: "https://github.com/duydo/elasticsearch-analysis-vietnamese/releases/download/v8.7.0/elasticsearch-analysis-vietnamese-8.7.0.zip"
+    image: gr-elasticsearch-vietnamese:8.7.0
     restart: unless-stopped
     environment:
       - discovery.type=single-node
@@ -22,7 +27,7 @@ services:
     ports:
       - "9200:9200"
     volumes:
-      - ./volumes/elasticsearch:/usr/share/elasticsearch/data
+      - ./volumes/elasticsearch_vi:/usr/share/elasticsearch/data
     user: "1000"   # ES từ chối chạy root; đặt UID host user sở hữu thư mục
 
   mongodb:

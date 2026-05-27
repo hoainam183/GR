@@ -696,10 +696,7 @@ class MultiCollectionSearch:
     @staticmethod
     def _is_pinned_keyword_hit(item: Dict[str, Any]) -> bool:
         metadata = item.get("metadata") or {}
-        return bool(
-            metadata.get("_keyword_exact_phrase_hit")
-            or metadata.get("_keyword_table_lookup_hit")
-        )
+        return bool(metadata.get("_keyword_table_lookup_hit"))
 
     @classmethod
     def _pin_keyword_hits(

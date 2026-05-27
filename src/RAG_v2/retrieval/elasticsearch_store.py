@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+import re
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from elasticsearch import Elasticsearch, helpers
 
@@ -15,14 +16,20 @@ logger = logging.getLogger(__name__)
 DEFAULT_INDEX = "stsv"
 
 _KEYWORD_SEARCH_FIELDS = [
-    "text^2.0",
-    "title^1.8",
-    "doc_title^1.6",
-    "hierarchy_path^1.4",
-    "section_h2^1.3",
-    "section_h3^1.2",
-    "section_context^1.1",
-    "item_label^1.1",
+    "search_text^3.0",
+    "title^2.0",
+    "doc_title^1.8",
+    "text^1.6",
+    "hierarchy_path^1.5",
+    "section_h1^1.4",
+    "section_h2^1.4",
+    "section_h3^1.3",
+    "section_h4^1.1",
+    "course_name^1.4",
+    "major_name^1.2",
+    "semester^1.2",
+    "section_context^1.0",
+    "item_label^1.0",
 ]
 
 _GENERIC_POLICY_PHRASES = {
@@ -41,55 +48,180 @@ _GENERIC_POLICY_PHRASES = {
 def _is_generic_policy_phrase(phrase: str) -> bool:
     return fold_vietnamese_text(phrase) in _GENERIC_POLICY_PHRASES
 
-# Index mapping with Vietnamese-friendly analysis (legacy constant — new indices
-# are created via ``_make_settings()`` which includes synonyms and BM25 tuning).
-INDEX_SETTINGS = {
-    "settings": {
-        "number_of_shards": 1,
-        "number_of_replicas": 0,
-        "analysis": {
-            "analyzer": {
-                "vietnamese_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "icu_tokenizer",
-                    "filter": ["lowercase", "icu_folding"],
-                },
-                "fallback_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "standard",
-                    "filter": ["lowercase", "asciifolding"],
-                },
+
+VIETNAMESE_SYNONYMS = [
+    "CTDT,ctdt,chương trình đào tạo",
+    "STSV,stsv,sổ tay sinh viên",
+    "CNTT,cntt,công nghệ thông tin",
+    "SV,sv,sinh viên",
+    "GV,gv,giảng viên",
+    "ĐHBK,đhbk,đại học bách khoa hà nội",
+    "HUST,hust,đại học bách khoa hà nội",
+    "HP,hp,học phần",
+    "TC,tc,tín chỉ,tin chi",
+    "GPA,gpa,điểm trung bình tích lũy,diem trung binh tich luy",
+    "NCKH,nckh,nghiên cứu khoa học",
+    "KLTN,kltn,khóa luận tốt nghiệp,khoa luan tot nghiep",
+    "ĐATN,đatn,datn,đồ án tốt nghiệp,do an tot nghiep",
+    "HK,hk,học kỳ,hoc ky",
+    "NH,nh,năm học,nam hoc",
+    "ĐRL,đrl,drl,điểm rèn luyện,diem ren luyen",
+    "TBCTL,tbctl,trung bình chung tích lũy,trung binh chung tich luy",
+    "TBC,tbc,trung bình chung,trung binh chung",
+]
+
+VIETNAMESE_STOPWORDS = [
+    "và", "hoặc", "của", "trong", "là", "có", "được", "cho",
+    "với", "về", "từ", "theo", "đến", "các", "những", "một",
+    "này", "đó", "khi", "nếu", "thì", "để", "do", "bởi",
+    "vì", "như", "tại", "bằng", "qua", "trên", "dưới",
+]
+
+_SEARCH_TEXT_METADATA_FIELDS = (
+    "title",
+    "doc_title",
+    "hierarchy_path",
+    "section_context",
+    "section_h1",
+    "section_h2",
+    "section_h3",
+    "section_h4",
+    "item_label",
+    "course_code",
+    "course_name",
+    "semester",
+    "major_code",
+    "major_name",
+    "applicable_cohort",
+    "applicable_major",
+    "document_type",
+    "type_doc",
+    "readable_id",
+    "source_file",
+)
+
+_MARKDOWN_CODE_FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
+_MARKDOWN_LINK_RE = re.compile(r"!?(\[([^\]]*)\]\([^)]+\))")
+_MARKDOWN_INLINE_CODE_RE = re.compile(r"`([^`]+)`")
+_MARKDOWN_DECORATION_RE = re.compile(r"[*_#>`~]+")
+_MARKDOWN_TABLE_SEPARATOR_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$", re.MULTILINE)
+_WHITESPACE_RE = re.compile(r"\s+")
+
+
+def _text_field(analyzer: str, *, keyword: bool = False) -> Dict[str, Any]:
+    field: Dict[str, Any] = {
+        "type": "text",
+        "analyzer": analyzer,
+        "search_analyzer": analyzer,
+        "similarity": "custom_bm25",
+    }
+    if keyword:
+        field["fields"] = {"keyword": {"type": "keyword"}}
+    return field
+
+
+def _build_index_settings(use_vietnamese_plugin: bool) -> Dict[str, Any]:
+    """Build index settings for the CocCoc Vietnamese plugin or fallback mode."""
+    tokenizer = "vi_tokenizer" if use_vietnamese_plugin else "standard"
+    text_analyzer = "vietnamese_analyzer"
+
+    filter_cfg = {
+        "vietnamese_ascii_folding": {
+            "type": "asciifolding",
+            "preserve_original": True,
+        },
+        "vietnamese_synonym": {
+            "type": "synonym",
+            "synonyms": VIETNAMESE_SYNONYMS,
+            "lenient": True,
+        },
+        "vietnamese_stop": {
+            "type": "stop",
+            "stopwords": VIETNAMESE_STOPWORDS,
+        },
+    }
+    analyzer_cfg = {
+        text_analyzer: {
+            "type": "custom",
+            "tokenizer": tokenizer,
+            "filter": [
+                "lowercase",
+                "vietnamese_synonym",
+                "vietnamese_stop",
+                "vietnamese_ascii_folding",
+            ],
+        }
+    }
+
+    text_fields = {
+        "search_text": _text_field(text_analyzer),
+        "text": _text_field(text_analyzer),
+        "title": _text_field(text_analyzer, keyword=True),
+        "doc_title": _text_field(text_analyzer, keyword=True),
+        "hierarchy_path": _text_field(text_analyzer, keyword=True),
+        "section_context": _text_field(text_analyzer, keyword=True),
+        "section_h1": _text_field(text_analyzer, keyword=True),
+        "section_h2": _text_field(text_analyzer, keyword=True),
+        "section_h3": _text_field(text_analyzer, keyword=True),
+        "section_h4": _text_field(text_analyzer, keyword=True),
+        "course_name": _text_field(text_analyzer, keyword=True),
+        "semester": _text_field(text_analyzer, keyword=True),
+        "major_name": _text_field(text_analyzer, keyword=True),
+    }
+
+    keyword_fields = {
+        "type_doc": {"type": "keyword"},
+        "time_create": {"type": "keyword"},
+        "item_label": {"type": "keyword"},
+        "major_code": {"type": "keyword"},
+        "applicable_cohort": {"type": "keyword"},
+        "applicable_major": {"type": "keyword"},
+        "date_str": {"type": "keyword"},
+        "document_type": {"type": "keyword"},
+        "course_code": {"type": "keyword"},
+        "level": {"type": "keyword"},
+        "chunk_id": {"type": "keyword"},
+        "readable_id": {"type": "keyword"},
+        "parent_id": {"type": "keyword"},
+        "collection": {"type": "keyword"},
+        "source_file": {"type": "keyword"},
+    }
+
+    return {
+        "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "analysis": {
+                "analyzer": analyzer_cfg,
+                "filter": filter_cfg,
+            },
+            "index": {
+                "similarity": {
+                    "custom_bm25": {
+                        "type": "BM25",
+                        "k1": 1.5,
+                        "b": 0.5,
+                    }
+                }
+            },
+        },
+        "mappings": {
+            "properties": {
+                **text_fields,
+                **keyword_fields,
+                "doc_id": {"type": "integer"},
+                "chunk_index": {"type": "integer"},
+                "total_chunks": {"type": "integer"},
+                "chunk_size": {"type": "integer"},
+                "has_links": {"type": "boolean"},
+                "has_table": {"type": "boolean"},
             }
         },
-    },
-    "mappings": {
-        "properties": {
-            "text": {"type": "text", "analyzer": "fallback_analyzer"},
-            "doc_id": {"type": "integer"},
-            "title": {
-                "type": "text",
-                "analyzer": "fallback_analyzer",
-                "fields": {"keyword": {"type": "keyword"}},
-            },
-            "type_doc": {"type": "keyword"},
-            "time_create": {"type": "keyword"},
-            "section_context": {"type": "keyword"},
-            "section_h2": {"type": "text", "analyzer": "fallback_analyzer"},
-            "section_h3": {"type": "text", "analyzer": "fallback_analyzer"},
-            "item_label": {"type": "keyword"},
-            "chunk_index": {"type": "integer"},
-            "total_chunks": {"type": "integer"},
-            "chunk_size": {"type": "integer"},
-            "has_links": {"type": "boolean"},
-            "has_table": {"type": "boolean"},
-            "major_code": {"type": "keyword"},
-            "applicable_cohort": {"type": "keyword"},
-            "applicable_major": {"type": "keyword"},
-            "date_str": {"type": "keyword"},
-            "document_type": {"type": "keyword"},
-        }
-    },
-}
+    }
+
+
+# Legacy constant for callers/tests that import INDEX_SETTINGS directly.
+INDEX_SETTINGS = _build_index_settings(use_vietnamese_plugin=True)
 
 
 class ElasticsearchStore:
@@ -126,9 +258,11 @@ class ElasticsearchStore:
         """Create the index with custom mapping if it does not exist."""
         if self.client.indices.exists(index=self.index_name):
             logger.info("Index '%s' already exists.", self.index_name)
+            self.uses_vietnamese_plugin = self._index_uses_vi_tokenizer()
             return
 
-        # Try ICU analyzer first; fall back to standard if ICU plugin is missing
+        # Production path: CocCoc Vietnamese tokenizer plugin. Fallback remains
+        # available for local/unit environments without the ES plugin.
         try:
             settings = self._make_settings(use_icu=True)
             self.client.indices.create(
@@ -137,11 +271,16 @@ class ElasticsearchStore:
                 mappings=settings["mappings"],
             )
             logger.info(
-                "Created index '%s' with ICU analyzer.", self.index_name
+                "Created index '%s' with vi_tokenizer analyzer.",
+                self.index_name,
             )
+            self.uses_vietnamese_plugin = True
         except Exception:
+            if not self._is_missing_vietnamese_plugin_error():
+                raise
             logger.warning(
-                "ICU plugin not available; falling back to standard analyzer."
+                "Vietnamese analysis plugin is not available; falling back to "
+                "standard tokenizer analyzer."
             )
             settings = self._make_settings(use_icu=False)
             self.client.indices.create(
@@ -152,174 +291,102 @@ class ElasticsearchStore:
             logger.info(
                 "Created index '%s' with fallback analyzer.", self.index_name
             )
+            self.uses_vietnamese_plugin = False
 
     @staticmethod
-    def _make_settings(use_icu: bool) -> Dict[str, Any]:
-        """Build index settings, optionally using ICU analysis."""
-        # Vietnamese synonym mappings for common abbreviations
-        vietnamese_synonyms = [
-            "CTDT,ctdt,chương trình đào tạo",
-            "STSV,stsv,sổ tay sinh viên",
-            "CNTT,cntt,công nghệ thông tin",
-            "SV,sv,sinh viên",
-            "GV,gv,giảng viên",
-            "ĐHBK,đhbk,đại học bách khoa hà nội",
-            "HUST,hust,đại học bách khoa hà nội",
-            "HP,hp,học phần",
-            "TC,tc,tín chỉ",
-            "GPA,gpa,điểm trung bình tích lũy",
-            "NCKH,nckh,nghiên cứu khoa học",
-            "KLTN,kltn,khóa luận tốt nghiệp",
-            "ĐATN,đatn,đồ án tốt nghiệp",
-            "HK,hk,học kỳ",
-            "NH,nh,năm học",
-            "ĐRL,đrl,điểm rèn luyện",
-            "TBCTL,tbctl,trung bình chung tích lũy",
-            "TBC,tbc,trung bình chung",
-        ]
+    def _make_settings(use_icu: bool = True) -> Dict[str, Any]:
+        """Build index settings.
 
-        # Vietnamese stopwords (function words with low retrieval value)
-        vietnamese_stopwords = [
-            "và", "hoặc", "của", "trong", "là", "có", "được", "cho",
-            "với", "về", "từ", "theo", "đến", "các", "những", "một",
-            "này", "đó", "khi", "nếu", "thì", "để", "do", "bởi",
-            "vì", "như", "tại", "bằng", "qua", "trên", "dưới",
-        ]
+        ``use_icu`` is kept as a backward-compatible parameter name. In the
+        current implementation, ``True`` means the CocCoc Vietnamese plugin
+        path (``vi_tokenizer``); ``False`` means the standard-tokenizer fallback.
+        """
+        return _build_index_settings(use_vietnamese_plugin=use_icu)
 
-        if use_icu:
-            filter_cfg = {
-                "vietnamese_synonym": {
-                    "type": "synonym",
-                    "synonyms": vietnamese_synonyms,
-                    "lenient": True,
-                },
-                "vietnamese_stop": {
-                    "type": "stop",
-                    "stopwords": vietnamese_stopwords,
-                },
-            }
-            analyzer_cfg = {
-                "vietnamese_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "icu_tokenizer",
-                    "filter": [
-                        "lowercase",
-                        "icu_folding",
-                        "vietnamese_synonym",
-                        "vietnamese_stop",
-                    ],
-                }
-            }
-            text_analyzer = "vietnamese_analyzer"
-        else:
-            filter_cfg = {
-                "vietnamese_synonym": {
-                    "type": "synonym",
-                    "synonyms": vietnamese_synonyms,
-                    "lenient": True,
-                },
-                "vietnamese_stop": {
-                    "type": "stop",
-                    "stopwords": vietnamese_stopwords,
-                },
-            }
-            analyzer_cfg = {
-                "vietnamese_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "standard",
-                    "filter": [
-                        "lowercase",
-                        "asciifolding",
-                        "vietnamese_synonym",
-                        "vietnamese_stop",
-                    ],
-                }
-            }
-            text_analyzer = "vietnamese_analyzer"
+    def _index_uses_vi_tokenizer(self) -> bool:
+        """Best-effort detection for existing indices."""
+        try:
+            resp = self.client.indices.get_settings(index=self.index_name)
+            index_settings = next(iter(resp.values())).get("settings", {}).get("index", {})
+            analysis = index_settings.get("analysis", {})
+            analyzer = analysis.get("analyzer", {}).get("vietnamese_analyzer", {})
+            return (
+                analyzer.get("tokenizer") == "vi_tokenizer"
+                or analyzer.get("type") == "vi_analyzer"
+            )
+        except Exception:
+            logger.warning(
+                "Could not inspect analyzer for index '%s'. Assuming fallback mode.",
+                self.index_name,
+                exc_info=True,
+            )
+            return False
 
-        return {
-            "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0,
-                "analysis": {
-                    "analyzer": analyzer_cfg,
-                    "filter": filter_cfg,
-                },
-                "index": {
-                    "similarity": {
-                        "custom_bm25": {
-                            "type": "BM25",
-                            "k1": 1.5,
-                            "b": 0.5,
-                        }
-                    }
-                },
-            },
-            "mappings": {
-                "properties": {
-                    "text": {
-                        "type": "text",
-                        "analyzer": text_analyzer,
-                        "similarity": "custom_bm25",
-                    },
-                    "doc_id": {"type": "integer"},
-                    "title": {
-                        "type": "text",
-                        "analyzer": text_analyzer,
-                        "similarity": "custom_bm25",
-                        "fields": {"keyword": {"type": "keyword"}},
-                    },
-                    "type_doc": {"type": "keyword"},
-                    "time_create": {"type": "keyword"},
-                    "section_context": {"type": "keyword"},
-                    # Curriculum section headings — used for keyword boosting on
-                    # "kỳ / đăng ký" queries to surface curriculum tables.
-                    "section_h2": {"type": "text", "analyzer": text_analyzer, "similarity": "custom_bm25"},
-                    "section_h3": {"type": "text", "analyzer": text_analyzer, "similarity": "custom_bm25"},
-                    "item_label": {"type": "keyword"},
-                    "chunk_index": {"type": "integer"},
-                    "total_chunks": {"type": "integer"},
-                    "chunk_size": {"type": "integer"},
-                    "has_links": {"type": "boolean"},
-                    # Boolean flag — True when chunk contains an HTML/markdown table
-                    "has_table": {"type": "boolean"},
-                    # Metadata filter fields — must be keyword for exact term queries
-                    "major_code": {"type": "keyword"},
-                    "applicable_cohort": {"type": "keyword"},
-                    "applicable_major": {"type": "keyword"},
-                    "date_str": {"type": "keyword"},
-                    "document_type": {"type": "keyword"},
-                    "major_name": {
-                        "type": "text",
-                        "analyzer": text_analyzer,
-                        "similarity": "custom_bm25",
-                        "fields": {"keyword": {"type": "keyword"}},
-                    },
-                    # ctdt-specific boosting fields
-                    "course_code": {
-                        "type": "keyword",
-                    },
-                    "course_name": {
-                        "type": "text",
-                        "analyzer": text_analyzer,
-                        "similarity": "custom_bm25",
-                        "fields": {"keyword": {"type": "keyword"}},
-                    },
-                    # kehoach-specific boosting field
-                    # Values: "Học kỳ I", "Học kỳ II", "năm học 2025-2026", …
-                    "semester": {
-                        "type": "text",
-                        "analyzer": text_analyzer,
-                        "similarity": "custom_bm25",
-                        "fields": {"keyword": {"type": "keyword"}},
-                    },
-                }
-            },
-        }
+    @staticmethod
+    def _is_missing_vietnamese_plugin_error() -> bool:
+        """Return True when the active exception looks like a missing ES plugin."""
+        import sys
+
+        exc = sys.exc_info()[1]
+        msg = str(exc or "").lower()
+        return (
+            ("vi_tokenizer" in msg or "vi_analyzer" in msg)
+            and (
+                "unknown" in msg
+                or "not found" in msg
+                or "failed to find" in msg
+                or "failed to load" in msg
+            )
+        )
 
     # ------------------------------------------------------------------
     # Indexing
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _metadata_text_values(metadata: Dict[str, Any]) -> Iterable[str]:
+        """Yield compact text values from metadata fields useful for BM25."""
+        for field in _SEARCH_TEXT_METADATA_FIELDS:
+            value = metadata.get(field)
+            if value is None:
+                continue
+            if isinstance(value, (list, tuple, set)):
+                for item in value:
+                    if item is not None and str(item).strip():
+                        yield str(item)
+                continue
+            if str(value).strip():
+                yield str(value)
+
+    @staticmethod
+    def _clean_search_text(value: Any) -> str:
+        """Normalize Markdown/table-heavy text before indexing as search_text."""
+        text = str(value or "")
+        if not text:
+            return ""
+        text = _MARKDOWN_CODE_FENCE_RE.sub(" ", text)
+        text = _MARKDOWN_LINK_RE.sub(lambda m: m.group(2) or " ", text)
+        text = _MARKDOWN_INLINE_CODE_RE.sub(r"\1", text)
+        text = _MARKDOWN_TABLE_SEPARATOR_RE.sub(" ", text)
+        text = text.replace("|", " ")
+        text = _MARKDOWN_DECORATION_RE.sub(" ", text)
+        return _WHITESPACE_RE.sub(" ", text).strip()
+
+    @classmethod
+    def _build_search_text(cls, text: str, metadata: Dict[str, Any]) -> str:
+        parts = [text, *cls._metadata_text_values(metadata)]
+        cleaned_parts: List[str] = []
+        seen: set[str] = set()
+        for part in parts:
+            cleaned = cls._clean_search_text(part)
+            if not cleaned:
+                continue
+            folded = fold_vietnamese_text(cleaned).lower()
+            if folded in seen:
+                continue
+            seen.add(folded)
+            cleaned_parts.append(cleaned)
+        return "\n".join(cleaned_parts)
 
     def index_documents(
         self,
@@ -350,6 +417,10 @@ class ElasticsearchStore:
             actions = []
             for i in range(start, end):
                 doc = {**metadatas[i], "text": texts[i]}
+                if _ids[i] is not None:
+                    doc.setdefault("chunk_id", str(_ids[i]))
+                if not doc.get("search_text"):
+                    doc["search_text"] = self._build_search_text(texts[i], doc)
                 action = {"_index": self.index_name, "_source": doc}
                 if _ids[i] is not None:
                     action["_id"] = _ids[i]
@@ -667,27 +738,6 @@ class ElasticsearchStore:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _source_contains_phrase(
-        text: str,
-        metadata: Dict[str, Any],
-        phrases: List[str],
-    ) -> bool:
-        haystack = " ".join(
-            [
-                text or "",
-                str(metadata.get("title", "") or ""),
-                str(metadata.get("doc_title", "") or ""),
-                str(metadata.get("hierarchy_path", "") or ""),
-                str(metadata.get("section_h2", "") or ""),
-                str(metadata.get("section_h3", "") or ""),
-                str(metadata.get("section_context", "") or ""),
-                str(metadata.get("item_label", "") or ""),
-            ]
-        )
-        folded_haystack = fold_vietnamese_text(haystack)
-        return any(fold_vietnamese_text(phrase) in folded_haystack for phrase in phrases)
-
-    @staticmethod
     def _merge_keyword_results(
         primary: List[Dict[str, Any]],
         fallback: List[Dict[str, Any]],
@@ -708,7 +758,6 @@ class ElasticsearchStore:
     def _hits_to_keyword_results(
         self,
         hits: List[Dict[str, Any]],
-        phrases: List[str],
         signals: Any,
         mode: str,
     ) -> List[Dict[str, Any]]:
@@ -716,15 +765,12 @@ class ElasticsearchStore:
         for hit in hits:
             source = dict(hit["_source"])
             text = source.pop("text", "")
-            phrase_hit = self._source_contains_phrase(text, source, phrases)
+            source.pop("search_text", None)
             table_hit = bool(signals.table_lookup and source.get("has_table"))
             score = float(hit["_score"] or 0.0)
-            if phrase_hit:
-                score *= 1.35
             if table_hit:
                 score *= 1.2
             source["_keyword_search_mode"] = mode
-            source["_keyword_exact_phrase_hit"] = phrase_hit
             source["_keyword_table_lookup_hit"] = table_hit
             results.append(
                 {
@@ -760,14 +806,14 @@ class ElasticsearchStore:
         """
         query_signals = analyze_query_signals(query)
         key_phrases = extract_key_phrases(query)
-        pin_phrases = [
-            phrase for phrase in key_phrases if not _is_generic_policy_phrase(phrase)
-        ] or key_phrases
 
-        # Vietnamese word segmentation: add segmented query variant for compound matching
-        from utils.vietnamese_segmenter import segment_query as _segment_query
+        segmented_query = query
+        if not getattr(self, "uses_vietnamese_plugin", True):
+            # Fallback-only path: add Python underscore segmentation when ES does
+            # not have the CocCoc vi_tokenizer plugin.
+            from utils.vietnamese_segmenter import segment_query as _segment_query
 
-        segmented_query = _segment_query(query)
+            segmented_query = _segment_query(query)
 
         must_clause: List[Dict[str, Any]] = [
             {
@@ -800,12 +846,15 @@ class ElasticsearchStore:
             else:
                 boost = 10.0 if idx < 3 else 5.0
             for field, field_boost in (
+                ("search_text", boost * 1.1),
                 ("text", boost),
                 ("title", boost * 0.8),
                 ("doc_title", boost * 0.8),
                 ("hierarchy_path", boost * 0.6),
+                ("section_h1", boost * 0.6),
                 ("section_h2", boost * 0.6),
                 ("section_h3", boost * 0.5),
+                ("section_h4", boost * 0.4),
             ):
                 should_clause.append(
                     {
@@ -845,21 +894,14 @@ class ElasticsearchStore:
         hits = resp["hits"]["hits"]
         exact_results = self._hits_to_keyword_results(
             hits,
-            phrases=pin_phrases,
             signals=query_signals,
             mode="exact_phrase",
         )
 
-        phrase_hit_count = sum(
-            1
-            for item in exact_results
-            if (item.get("metadata") or {}).get("_keyword_exact_phrase_hit")
-        )
         exact_mode = query_signals.exact_policy_lookup or query_signals.table_lookup
         should_fallback = (
             (not exact_results)
             or (not exact_mode and len(exact_results) < top_k)
-            or (exact_mode and phrase_hit_count == 0 and len(exact_results) < min(top_k, 5))
         )
         if not should_fallback:
             return exact_results
@@ -887,7 +929,6 @@ class ElasticsearchStore:
         )
         fuzzy_results = self._hits_to_keyword_results(
             fuzzy_resp["hits"]["hits"],
-            phrases=pin_phrases,
             signals=query_signals,
             mode="fuzzy_fallback",
         )
@@ -935,3 +976,8 @@ class ElasticsearchStore:
         except Exception:  # noqa: BLE001
             pass
         logger.info("Deleted index '%s'.", self.index_name)
+
+    def recreate_index(self) -> None:
+        """Drop and recreate the index with the current analyzer/mapping."""
+        self.delete_index()
+        self._ensure_index()

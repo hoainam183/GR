@@ -967,8 +967,7 @@ def _has_local_exact_policy_evidence(
             continue
 
         has_table_or_keyword_hit = bool(
-            metadata.get("_keyword_exact_phrase_hit")
-            or metadata.get("_keyword_table_lookup_hit")
+            metadata.get("_keyword_table_lookup_hit")
             or metadata.get("has_table")
             or "|" in text
         )

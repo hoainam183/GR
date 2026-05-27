@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 
+import retrieval.elasticsearch_store as es_module
 from retrieval.elasticsearch_store import ElasticsearchStore, INDEX_SETTINGS
 
 TEST_INDEX = "test_university_docs"
@@ -18,12 +19,21 @@ class _FakeESClient:
     def __init__(self, responses):
         self.responses = list(responses)
         self.calls = []
+        self.indices = _FakeIndices()
 
     def search(self, **kwargs):
         self.calls.append(kwargs)
         if self.responses:
             return self.responses.pop(0)
         return {"hits": {"hits": []}}
+
+
+class _FakeIndices:
+    def __init__(self):
+        self.refresh_calls = []
+
+    def refresh(self, **kwargs):
+        self.refresh_calls.append(kwargs)
 
 
 def _make_store_with_client(client: _FakeESClient) -> ElasticsearchStore:
@@ -42,6 +52,71 @@ def test_index_mapping_declares_applicable_cohort_keyword() -> None:
         INDEX_SETTINGS["mappings"]["properties"]["applicable_cohort"]["type"]
         == "keyword"
     )
+
+
+def test_index_mapping_uses_vi_tokenizer_and_search_text() -> None:
+    settings = ElasticsearchStore._make_settings(use_icu=True)
+    analysis = settings["settings"]["analysis"]
+    analyzer = analysis["analyzer"]["vietnamese_analyzer"]
+    filters = analysis["filter"]
+    properties = settings["mappings"]["properties"]
+
+    assert analyzer["tokenizer"] == "vi_tokenizer"
+    assert "vietnamese_ascii_folding" in analyzer["filter"]
+    assert filters["vietnamese_ascii_folding"]["type"] == "asciifolding"
+    assert filters["vietnamese_ascii_folding"]["preserve_original"] is True
+    assert properties["search_text"]["analyzer"] == "vietnamese_analyzer"
+    assert properties["search_text"]["similarity"] == "custom_bm25"
+    assert properties["level"]["type"] == "keyword"
+    assert properties["chunk_id"]["type"] == "keyword"
+    assert properties["readable_id"]["type"] == "keyword"
+    assert properties["parent_id"]["type"] == "keyword"
+    assert properties["collection"]["type"] == "keyword"
+    assert properties["source_file"]["type"] == "keyword"
+
+
+def test_index_mapping_fallback_uses_standard_tokenizer() -> None:
+    settings = ElasticsearchStore._make_settings(use_icu=False)
+    analyzer = settings["settings"]["analysis"]["analyzer"]["vietnamese_analyzer"]
+
+    assert analyzer["tokenizer"] == "standard"
+    assert "vietnamese_ascii_folding" in analyzer["filter"]
+
+
+def test_index_documents_builds_search_text_and_chunk_id(monkeypatch) -> None:
+    captured_actions = []
+
+    def fake_bulk(client, actions, raise_on_error=False):
+        captured_actions.extend(actions)
+        return len(actions), []
+
+    monkeypatch.setattr(es_module.helpers, "bulk", fake_bulk)
+    client = _FakeESClient([])
+    store = _make_store_with_client(client)
+
+    indexed = store.index_documents(
+        texts=["### Điều kiện tốt nghiệp\n| Tín chỉ | 120 |"],
+        metadatas=[
+            {
+                "title": "Quy chế đào tạo",
+                "doc_title": "Quy chế 2025",
+                "hierarchy_path": "Chương II / Điều 13",
+                "applicable_cohort": ["K70"],
+                "level": "child",
+            }
+        ],
+        ids=["chunk-1"],
+    )
+
+    source = captured_actions[0]["_source"]
+    assert indexed == 1
+    assert captured_actions[0]["_id"] == "chunk-1"
+    assert source["chunk_id"] == "chunk-1"
+    assert "search_text" in source
+    assert "Điều kiện tốt nghiệp" in source["search_text"]
+    assert "Quy chế đào tạo" in source["search_text"]
+    assert "K70" in source["search_text"]
+    assert "|" not in source["search_text"]
 
 
 def test_keyword_search_exact_phrase_and_table_boost_without_fuzzy_main() -> None:
@@ -74,7 +149,6 @@ def test_keyword_search_exact_phrase_and_table_boost_without_fuzzy_main() -> Non
     assert '"match_phrase"' in first_query
     assert '"has_table"' in first_query
     assert results[0]["id"] == "df79f3f4-5445-4da1-aa34-c59a81784319"
-    assert results[0]["metadata"]["_keyword_exact_phrase_hit"] is True
     assert results[0]["metadata"]["_keyword_table_lookup_hit"] is True
 
 

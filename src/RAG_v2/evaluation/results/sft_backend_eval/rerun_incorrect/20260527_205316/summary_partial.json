@@ -1,0 +1,68 @@
+{
+  "total_records": 74,
+  "completed": 74,
+  "failed": 0,
+  "setup_valid": false,
+  "setup_invalid_count": 4,
+  "setup_invalid_reasons": [
+    "cache hit observed while require_no_cache=true: cache_hit, timings_ms.llm_cache_hit"
+  ],
+  "error_rate": 0.0,
+  "latency_ms": {
+    "mean": 18180.9,
+    "p50": 16941.3,
+    "p95": 30736.24,
+    "max": 39771.4
+  },
+  "metrics": {
+    "answer_nonempty_rate": 0.9595,
+    "reference_keyword_coverage": 0.4579,
+    "atomic_fact_coverage": 0.2856,
+    "expected_doc_hit_rate": 0.027,
+    "expected_article_hit_rate": 0.2676,
+    "expected_clause_hit_rate": 0.493,
+    "citation_text_hit_rate": 0.0
+  },
+  "by_doc_type": {
+    "Quy chế đào tạo năm 2025": {
+      "total": 4,
+      "completed": 4,
+      "failed": 0
+    },
+    "Quy định ngoại ngữ từ K65": {
+      "total": 13,
+      "completed": 13,
+      "failed": 0
+    },
+    "Quyết định ngoại ngữ từ K70": {
+      "total": 17,
+      "completed": 17,
+      "failed": 0
+    },
+    "Quyết định ngoại ngữ từ K68": {
+      "total": 12,
+      "completed": 12,
+      "failed": 0
+    },
+    "N/A": {
+      "total": 3,
+      "completed": 3,
+      "failed": 0
+    },
+    "Quy chế công tác sinh viên": {
+      "total": 25,
+      "completed": 25,
+      "failed": 0
+    }
+  },
+  "by_mode": {
+    "rag_v2": 73,
+    "agent": 1
+  },
+  "judge": {
+    "incorrect": 45,
+    "partial": 10,
+    "correct": 19
+  },
+  "updated_at": "2026-05-27T21:32:37"
+}

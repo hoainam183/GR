@@ -1,75 +1,67 @@
 {
-  "run_id": "20260526_193830",
-  "run_dir": "D:\\GR\\src\\RAG_v2\\evaluation\\results\\sft_backend_eval\\rerun_incorrect\\20260526_193830",
-  "incorrect_results_path": "D:\\GR\\src\\RAG_v2\\evaluation\\results\\sft_backend_eval\\incorrect_results.json",
+  "run_id": "20260527_193313",
+  "run_dir": "/Users/nam.nguyen/Documents/personal/GR/src/RAG_v2/evaluation/results/sft_backend_eval/rerun_incorrect/20260527_193313",
+  "incorrect_results_path": "/Users/nam.nguyen/Documents/personal/GR/src/RAG_v2/evaluation/results/sft_backend_eval/incorrect_results.json",
   "summary": {
-    "total_records": 179,
-    "completed": 9,
-    "failed": 170,
+    "total_records": 60,
+    "completed": 60,
+    "failed": 0,
     "setup_valid": true,
     "setup_invalid_count": 0,
     "setup_invalid_reasons": [],
-    "error_rate": 0.9497,
+    "error_rate": 0.0,
     "latency_ms": {
-      "mean": 128589.0,
-      "p50": 132089.25,
-      "p95": 159486.89,
-      "max": 159486.89
+      "mean": 25792.62,
+      "p50": 20276.28,
+      "p95": 45842.19,
+      "max": 116090.41
     },
     "metrics": {
       "answer_nonempty_rate": 1.0,
-      "reference_keyword_coverage": 0.3771,
-      "atomic_fact_coverage": 0.0,
-      "expected_doc_hit_rate": 0.1111,
-      "expected_article_hit_rate": 0.2222,
-      "expected_clause_hit_rate": 1.0,
+      "reference_keyword_coverage": 0.6365,
+      "atomic_fact_coverage": 0.36,
+      "expected_doc_hit_rate": 0.0167,
+      "expected_article_hit_rate": 0.6271,
+      "expected_clause_hit_rate": 0.7288,
       "citation_text_hit_rate": 0.0
     },
     "by_doc_type": {
       "Quy chế đào tạo năm 2025": {
-        "total": 75,
-        "completed": 9,
-        "failed": 66
+        "total": 32,
+        "completed": 32,
+        "failed": 0
       },
       "Quy định ngoại ngữ từ K65": {
-        "total": 19,
-        "completed": 0,
-        "failed": 19
+        "total": 11,
+        "completed": 11,
+        "failed": 0
       },
       "Quyết định ngoại ngữ từ K68": {
-        "total": 16,
-        "completed": 0,
-        "failed": 16
+        "total": 7,
+        "completed": 7,
+        "failed": 0
       },
       "Quyết định ngoại ngữ từ K70": {
-        "total": 24,
-        "completed": 0,
-        "failed": 24
+        "total": 9,
+        "completed": 9,
+        "failed": 0
       },
       "N/A": {
-        "total": 3,
-        "completed": 0,
-        "failed": 3
-      },
-      "Quy chế công tác sinh viên": {
-        "total": 39,
-        "completed": 0,
-        "failed": 39
-      },
-      "Quy định Học bổng KKHT 2023": {
-        "total": 3,
-        "completed": 0,
-        "failed": 3
+        "total": 1,
+        "completed": 1,
+        "failed": 0
       }
     },
     "by_mode": {
-      "rag_v2": 9
+      "rag_v2": 58,
+      "agent": 2
     },
     "judge": {
-      "incorrect": 8,
-      "partial": 1
+      "correct": 33,
+      "partial": 12,
+      "incorrect": 15
     },
-    "updated_at": "2026-05-26T20:07:47"
+    "updated_at": "2026-05-27T20:34:16"
   },
-  "updated_at": "2026-05-26T20:07:47"
+  "updated_at": "2026-05-27T20:34:16"
 }

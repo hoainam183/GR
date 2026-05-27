@@ -21,6 +21,15 @@ def test_accent_insensitive_policy_table_lookup() -> None:
     assert signals.personal_reference is False
 
 
+def test_foreign_language_table_lookup_terms() -> None:
+    for query in (
+        "K65: Lớp FL1129 có thời lượng bao nhiêu?",
+        "K70: Nếu tôi đạt Bậc 2.3 thì tôi thuộc nhóm mấy?",
+        "Tiếng Anh cơ sở 1 K70 xếp học ở kỳ 2",
+    ):
+        assert analyze_query_signals(query).table_lookup is True
+
+
 def test_broad_scholarship_words_do_not_imply_eligibility() -> None:
     signals = analyze_query_signals("hoc bong co duoc bao nhieu tien")
 
