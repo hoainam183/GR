@@ -172,6 +172,10 @@ def _settings_to_cfg(settings: Settings) -> Dict[str, Any]:
         "web_fallback_dynamic_collections": settings.web_fallback_dynamic_collections,
         "web_fallback_on_dynamic": settings.web_fallback_on_dynamic,
         "web_fallback_on_no_info": settings.web_fallback_on_no_info,
+        # HyDE post-rerank fallback
+        "hyde_enabled": settings.hyde_enabled,
+        "hyde_min_results": settings.hyde_min_results,
+        "hyde_confidence_threshold": settings.hyde_confidence_threshold,
     }
 
 

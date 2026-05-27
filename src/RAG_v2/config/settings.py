@@ -220,6 +220,9 @@ class Settings(BaseSettings):
     parent_context_enabled: bool = True           # C5: parent-child context expansion
     freshness_tavily_check_enabled: bool = False  # C3: date_str freshness check
     low_conf_pool_expand_enabled: bool = False    # C4: 2x candidate pool in Tier 3
+    hyde_enabled: bool = False                    # HyDE post-rerank fallback
+    hyde_min_results: int = 3                     # trigger when reranked < N results
+    hyde_confidence_threshold: float = 0.3        # trigger when reranker mean < this
     sibling_budget_ratio: float = 0.30            # 30% of total budget for siblings
     sibling_per_doc_limit: int = 800              # Per-sibling char limit
     parent_max_chars: int = 1500                  # Max chars from parent content
