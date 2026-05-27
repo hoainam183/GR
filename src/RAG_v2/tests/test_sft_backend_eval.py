@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 
+import pytest
+
 
 def test_load_sft_dataset_reads_instruction_output_doc_type(tmp_path):
     from evaluation.evaluate_sft_backend import load_sft_dataset
@@ -654,13 +656,156 @@ def test_rerun_incorrect_config_from_args_supports_identity_mode():
     from evaluation import rerun_incorrect_sft_backend as runner
 
     args = runner.build_parser().parse_args(
-        ["--identity-mode", "frontend_env", "--auth-token", "token"]
+        [
+            "--identity-mode",
+            "frontend_env",
+            "--auth-token",
+            "token",
+            "--latest-run-dir",
+            "previous-run",
+            "--from-start",
+        ]
     )
 
     config = runner._config_from_args(args)
 
     assert config["identity_mode"] == "frontend_env"
     assert config["auth_token"] == "token"
+    assert config["latest_run_dir"] == "previous-run"
+    assert config["continue_from_latest"] is False
+
+
+def test_rerun_incorrect_continue_selection_retries_failed_and_incorrect_then_tail(tmp_path):
+    from evaluation import evaluate_sft_backend as backend_eval
+    from evaluation import rerun_incorrect_sft_backend as runner
+
+    samples = [
+        backend_eval.SFTSample(i, f"id-{i}", f"q{i}", "", "a", "doc")
+        for i in range(1, 7)
+    ]
+    latest_run_dir = tmp_path / "rerun" / "20260526_215643"
+    latest_run_dir.mkdir(parents=True)
+    (latest_run_dir / "results.jsonl").write_text(
+        "\n".join(
+            [
+                json.dumps({"sample_id": "id-1", "status": "completed", "judge_match": "correct"}),
+                json.dumps({"sample_id": "id-2", "status": "completed", "judge_match": "partial"}),
+                json.dumps({"sample_id": "id-3", "status": "completed", "judge_match": "incorrect"}),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (latest_run_dir / "progress.json").write_text(
+        json.dumps(
+            {
+                "sample_statuses": {
+                    "id-1": "completed",
+                    "id-2": "completed",
+                    "id-3": "completed",
+                    "id-4": "failed",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    selected, info = runner._select_continue_samples(samples, latest_run_dir)
+
+    assert [sample.sample_id for sample in selected] == ["id-3", "id-4", "id-5", "id-6"]
+    assert info["anchor_position"] == 4
+    assert info["failed_count"] == 1
+    assert info["still_incorrect_count"] == 1
+    assert info["tail_count"] == 2
+    assert info["selected_count"] == 4
+
+
+def test_rerun_incorrect_latest_source_prefers_newest_timestamp_dir_over_stale_latest(tmp_path):
+    from evaluation import rerun_incorrect_sft_backend as runner
+
+    output_dir = tmp_path / "rerun"
+    old_run_dir = output_dir / "20260526_193830"
+    new_run_dir = output_dir / "20260526_215643"
+    old_run_dir.mkdir(parents=True)
+    new_run_dir.mkdir()
+    (output_dir / "latest.json").write_text(
+        json.dumps({"run_dir": str(old_run_dir)}),
+        encoding="utf-8",
+    )
+
+    source_dir = runner._latest_rerun_source_dir(
+        {"output_dir": str(output_dir), "latest_run_dir": None}
+    )
+
+    assert source_dir == new_run_dir
+
+
+def test_rerun_incorrect_continue_selection_falls_back_when_no_previous(tmp_path):
+    from evaluation import evaluate_sft_backend as backend_eval
+    from evaluation import rerun_incorrect_sft_backend as runner
+
+    samples = [
+        backend_eval.SFTSample(1, "id-1", "q1", "", "a", "doc"),
+        backend_eval.SFTSample(2, "id-2", "q2", "", "a", "doc"),
+    ]
+
+    selected, info = runner._select_continue_samples_from_config(
+        samples,
+        {
+            "output_dir": str(tmp_path / "missing"),
+            "continue_from_latest": True,
+            "latest_run_dir": None,
+            "resume_dir": None,
+        },
+    )
+
+    assert selected == samples
+    assert info["mode"] == "no_previous"
+
+
+def test_rerun_incorrect_from_start_disables_continue_selection(tmp_path):
+    from evaluation import evaluate_sft_backend as backend_eval
+    from evaluation import rerun_incorrect_sft_backend as runner
+
+    samples = [
+        backend_eval.SFTSample(1, "id-1", "q1", "", "a", "doc"),
+        backend_eval.SFTSample(2, "id-2", "q2", "", "a", "doc"),
+    ]
+    latest_run_dir = tmp_path / "rerun" / "20260526_215643"
+    latest_run_dir.mkdir(parents=True)
+    (latest_run_dir / "progress.json").write_text(
+        json.dumps({"sample_statuses": {"missing-id": "failed"}}),
+        encoding="utf-8",
+    )
+
+    selected, info = runner._select_continue_samples_from_config(
+        samples,
+        {
+            "output_dir": str(latest_run_dir.parent),
+            "continue_from_latest": False,
+            "latest_run_dir": None,
+            "resume_dir": None,
+        },
+    )
+
+    assert selected == samples
+    assert info["mode"] == "from_start"
+
+
+def test_rerun_incorrect_latest_source_without_overlap_fails(tmp_path):
+    from evaluation import evaluate_sft_backend as backend_eval
+    from evaluation import rerun_incorrect_sft_backend as runner
+
+    samples = [backend_eval.SFTSample(1, "id-1", "q1", "", "a", "doc")]
+    latest_run_dir = tmp_path / "rerun" / "20260526_215643"
+    latest_run_dir.mkdir(parents=True)
+    (latest_run_dir / "progress.json").write_text(
+        json.dumps({"sample_statuses": {"other-id": "failed"}}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="no overlapping sample_id"):
+        runner._select_continue_samples(samples, latest_run_dir)
 
 
 def test_rerun_incorrect_runner_writes_results(tmp_path, monkeypatch):

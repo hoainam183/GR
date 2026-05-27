@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import re
 import sys
 import time
 from datetime import datetime
@@ -48,6 +49,8 @@ CONFIG: Dict[str, Any] = {
     "resume_from_index": 0,
     "retry_failed": True,
     "include_judge_match": "incorrect",
+    "continue_from_latest": True,
+    "latest_run_dir": None,
 }
 
 
@@ -244,6 +247,154 @@ def load_incorrect_samples(
     return samples
 
 
+def _is_timestamp_run_dir(path: Path) -> bool:
+    return path.is_dir() and re.fullmatch(r"\d{8}_\d{6}", path.name) is not None
+
+
+def _find_latest_timestamp_run_dir(output_dir: str | Path) -> Optional[Path]:
+    root = _resolve_project_path(output_dir)
+    if not root.exists():
+        return None
+
+    run_dirs = [
+        child
+        for child in root.iterdir()
+        if _is_timestamp_run_dir(child)
+    ]
+    if not run_dirs:
+        return None
+    return max(run_dirs, key=lambda path: path.name)
+
+
+def _latest_rerun_source_dir(config: Dict[str, Any]) -> Optional[Path]:
+    latest_run_dir = config.get("latest_run_dir")
+    if latest_run_dir:
+        path = _resolve_project_path(str(latest_run_dir))
+        if not path.exists():
+            raise FileNotFoundError(f"Latest rerun directory not found: {path}")
+        if not path.is_dir():
+            raise NotADirectoryError(f"Latest rerun path is not a directory: {path}")
+        return path
+
+    return _find_latest_timestamp_run_dir(str(config["output_dir"]))
+
+
+def _load_progress_statuses(run_dir: Path) -> Dict[str, str]:
+    progress_path = run_dir / "progress.json"
+    if not progress_path.exists():
+        return {}
+
+    payload = json.loads(progress_path.read_text(encoding="utf-8"))
+    statuses = payload.get("sample_statuses") if isinstance(payload, dict) else None
+    if not isinstance(statuses, dict):
+        return {}
+    return {
+        str(sample_id): str(status)
+        for sample_id, status in statuses.items()
+        if str(sample_id)
+    }
+
+
+def _dedupe_samples(samples: Iterable[backend_eval.SFTSample]) -> List[backend_eval.SFTSample]:
+    selected: List[backend_eval.SFTSample] = []
+    seen: set[str] = set()
+    for sample in samples:
+        if sample.sample_id in seen:
+            continue
+        seen.add(sample.sample_id)
+        selected.append(sample)
+    return selected
+
+
+def _select_continue_samples(
+    samples: List[backend_eval.SFTSample],
+    latest_run_dir: Path,
+) -> tuple[List[backend_eval.SFTSample], Dict[str, Any]]:
+    records = backend_eval.load_existing_records(
+        latest_run_dir,
+        include_child_run_dirs=False,
+    )
+    progress_statuses = _load_progress_statuses(latest_run_dir)
+    touched_ids = set(records) | set(progress_statuses)
+    if not touched_ids:
+        return samples, {
+            "mode": "empty_previous",
+            "source_dir": str(latest_run_dir),
+            "selected_count": len(samples),
+        }
+
+    failed_ids = {
+        sample_id
+        for sample_id, status in progress_statuses.items()
+        if status.lower() == "failed"
+    }
+    failed_ids.update(
+        sample_id
+        for sample_id, record in records.items()
+        if _clean_text(record.get("status")).lower() == "failed"
+    )
+    still_incorrect_ids = {
+        sample_id
+        for sample_id, record in records.items()
+        if _clean_text(record.get("judge_match")).lower() == "incorrect"
+    }
+    sample_ids = {sample.sample_id for sample in samples}
+    failed_ids &= sample_ids
+    still_incorrect_ids &= sample_ids
+    unresolved_ids = failed_ids | still_incorrect_ids
+
+    anchor_position = -1
+    anchor_sample: Optional[backend_eval.SFTSample] = None
+    for position, sample in enumerate(samples):
+        if sample.sample_id in touched_ids:
+            anchor_position = position
+            anchor_sample = sample
+
+    if anchor_position < 0 or anchor_sample is None:
+        raise ValueError(
+            "Latest rerun source has no overlapping sample_id with incorrect input: "
+            f"{latest_run_dir}"
+        )
+
+    unresolved_samples = [
+        sample
+        for sample in samples[:anchor_position + 1]
+        if sample.sample_id in unresolved_ids
+    ]
+    tail_samples = samples[anchor_position + 1:]
+    selected = _dedupe_samples([*unresolved_samples, *tail_samples])
+    return selected, {
+        "mode": "continue",
+        "source_dir": str(latest_run_dir),
+        "anchor_position": anchor_position + 1,
+        "anchor_index": anchor_sample.index,
+        "anchor_sample_id": anchor_sample.sample_id,
+        "input_count": len(samples),
+        "failed_count": len(failed_ids),
+        "still_incorrect_count": len(still_incorrect_ids),
+        "unresolved_count": len(unresolved_ids),
+        "tail_count": len(tail_samples),
+        "selected_count": len(selected),
+        "deduped_count": len(unresolved_samples) + len(tail_samples) - len(selected),
+    }
+
+
+def _select_continue_samples_from_config(
+    samples: List[backend_eval.SFTSample],
+    config: Dict[str, Any],
+) -> tuple[List[backend_eval.SFTSample], Dict[str, Any]]:
+    if not backend_eval._config_bool(config, "continue_from_latest", True):
+        return samples, {"mode": "from_start", "selected_count": len(samples)}
+    if config.get("resume_dir"):
+        return samples, {"mode": "resume_dir", "selected_count": len(samples)}
+
+    latest_run_dir = _latest_rerun_source_dir(config)
+    if latest_run_dir is None:
+        return samples, {"mode": "no_previous", "selected_count": len(samples)}
+
+    return _select_continue_samples(samples, latest_run_dir)
+
+
 def _config_from_args(args: argparse.Namespace) -> Dict[str, Any]:
     config = dict(CONFIG)
     for key in (
@@ -265,6 +416,7 @@ def _config_from_args(args: argparse.Namespace) -> Dict[str, Any]:
         "judge_backend",
         "identity_mode",
         "auth_token",
+        "latest_run_dir",
     ):
         value = getattr(args, key)
         if value is not None:
@@ -277,6 +429,8 @@ def _config_from_args(args: argparse.Namespace) -> Dict[str, Any]:
 
     if args.no_timestamp:
         config["timestamped_run_dir"] = False
+    if args.from_start:
+        config["continue_from_latest"] = False
     if args.send_null_optional_fields:
         config["send_null_optional_fields"] = True
     return config
@@ -304,15 +458,20 @@ def run(config: Dict[str, Any] = CONFIG) -> Dict[str, Any]:
         datefmt="%H:%M:%S",
     )
     config = dict(CONFIG, **config)
-    run_id, run_dir = backend_eval._prepare_run_dir(config)
-    samples = backend_eval._select_samples(
-        load_incorrect_samples(
-            str(config["incorrect_results_path"]),
-            include_judge_match=config.get("include_judge_match"),
-            dataset_path=config.get("dataset_path"),
-        ),
+    all_samples = load_incorrect_samples(
+        str(config["incorrect_results_path"]),
+        include_judge_match=config.get("include_judge_match"),
+        dataset_path=config.get("dataset_path"),
+    )
+    base_samples, continue_info = _select_continue_samples_from_config(
+        all_samples,
         config,
     )
+    samples = backend_eval._select_samples(
+        base_samples,
+        config,
+    )
+    run_id, run_dir = backend_eval._prepare_run_dir(config)
     batches = backend_eval._select_batches(samples, config)
     records = backend_eval.load_existing_records(
         run_dir,
@@ -321,6 +480,34 @@ def run(config: Dict[str, Any] = CONFIG) -> Dict[str, Any]:
 
     logger.info("Rerun directory: %s", run_dir)
     logger.info("Incorrect input: %s", _resolve_project_path(str(config["incorrect_results_path"])))
+    if continue_info.get("mode") == "continue":
+        logger.info("Continue source run: %s", continue_info["source_dir"])
+        logger.info(
+            "Continue anchor: position=%d/%d index=%s sample=%s",
+            continue_info["anchor_position"],
+            continue_info["input_count"],
+            continue_info["anchor_index"],
+            continue_info["anchor_sample_id"],
+        )
+        logger.info(
+            "Continue selected: failed=%d still_incorrect=%d tail=%d total=%d deduped=%d",
+            continue_info["failed_count"],
+            continue_info["still_incorrect_count"],
+            continue_info["tail_count"],
+            continue_info["selected_count"],
+            continue_info["deduped_count"],
+        )
+    elif continue_info.get("mode") == "no_previous":
+        logger.info("No previous rerun source found; starting from incorrect input.")
+    elif continue_info.get("mode") == "empty_previous":
+        logger.info(
+            "Latest rerun source has no records; starting from incorrect input: %s",
+            continue_info["source_dir"],
+        )
+    elif continue_info.get("mode") == "from_start":
+        logger.info("Continue-from-latest disabled; starting from incorrect input.")
+    elif continue_info.get("mode") == "resume_dir":
+        logger.info("resume_dir is set; using existing in-place resume behavior.")
     logger.info("Loaded %d selected sample(s)", len(samples))
     logger.info("Selected %d batch(es)", len(batches))
     logger.info("Existing records: %d", len(records))
@@ -399,6 +586,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", default=None, help="Directory for rerun outputs.")
     parser.add_argument("--run-dir", default=None, help="Use a specific run directory.")
     parser.add_argument("--resume-dir", default=None, help="Resume an existing run directory.")
+    parser.add_argument(
+        "--latest-run-dir",
+        default=None,
+        help="Previous rerun directory to continue from. Defaults to newest timestamped output_dir child.",
+    )
     parser.add_argument("--batch-size", type=int, default=None)
     parser.add_argument("--batch-index", type=int, default=None, help="1-based batch number; 0 means all.")
     parser.add_argument("--batch-concurrency", type=int, default=None)
@@ -430,6 +622,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-timestamp",
         action="store_true",
         help="Write directly into output_dir instead of output_dir/YYYYMMDD_HHMMSS.",
+    )
+    parser.add_argument(
+        "--from-start",
+        action="store_true",
+        help="Disable continue-from-latest selection and rerun from the beginning of the input.",
     )
     parser.add_argument(
         "--send-null-optional-fields",
