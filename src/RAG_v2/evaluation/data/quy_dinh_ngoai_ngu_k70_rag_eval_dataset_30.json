@@ -1,0 +1,469 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "06_ Quy định ngoại ngữ từ K70_chính quy_final_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_001",
+      "question_type": "simple",
+      "question": "Quy định ngoại ngữ áp dụng từ K70 điều chỉnh những nội dung gì đối với sinh viên đại học chính quy?",
+      "gold_answer": "Quy định điều chỉnh việc đánh giá và phân loại trình độ ngoại ngữ đầu vào, chương trình ngoại ngữ cơ bản, điều kiện miễn học các học phần ngoại ngữ cơ bản, yêu cầu năng lực ngoại ngữ theo từng học kỳ và chuẩn ngoại ngữ đầu ra đối với sinh viên đại học hình thức chính quy; việc xác định bậc năng lực ngoại ngữ theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.",
+      "evidence_chunk_ids": [
+        "8054b460-5f30-4e8e-b36a-458771818bbf"
+      ],
+      "ground_truth_context": [
+        "## Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng\n\n**1.** Quy định này điều chỉnh việc đánh giá và phân loại trình độ ngoại ngữ đầu vào, chương trình ngoại ngữ cơ bản (NNCB), điều kiện miễn học các học phần NNCB, yêu cầu năng lực ngoại ngữ theo từng học kỳ và chuẩn ngoại ngữ đầu ra đối với sinh viên đại học hình thức chính quy; việc xác định bậc năng lực ngoại ngữ tuân theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.\n\n**2.** Quy định này áp dụng đối với sinh viên theo học các chương trình đào tạo (CTĐT) hình thức chính quy của Đại học Bách khoa Hà Nội; chi tiết yêu cầu đối với từng chương trình/nhóm chương trình được quy định tại các Phụ lục tương ứng.\n\n**3.** Quy định này không áp dụng cho sinh viên là người nước ngoài theo học CTĐT có ngôn ngữ giảng dạy chính là tiếng Việt; đối với sinh viên là người nước ngoài theo học các CTĐT có ngôn ngữ giảng dạy khác tiếng Việt, việc xét mi..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_002",
+      "question_type": "simple",
+      "question": "Sinh viên chính quy K70 thuộc các chương trình đào tạo nào phải áp dụng quy định ngoại ngữ từ K70?",
+      "gold_answer": "Quy định áp dụng đối với sinh viên theo học các chương trình đào tạo hình thức chính quy của Đại học Bách khoa Hà Nội; yêu cầu chi tiết với từng chương trình hoặc nhóm chương trình được quy định tại các phụ lục tương ứng.",
+      "evidence_chunk_ids": [
+        "8054b460-5f30-4e8e-b36a-458771818bbf"
+      ],
+      "ground_truth_context": [
+        "## Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng\n\n**1.** Quy định này điều chỉnh việc đánh giá và phân loại trình độ ngoại ngữ đầu vào, chương trình ngoại ngữ cơ bản (NNCB), điều kiện miễn học các học phần NNCB, yêu cầu năng lực ngoại ngữ theo từng học kỳ và chuẩn ngoại ngữ đầu ra đối với sinh viên đại học hình thức chính quy; việc xác định bậc năng lực ngoại ngữ tuân theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.\n\n**2.** Quy định này áp dụng đối với sinh viên theo học các chương trình đào tạo (CTĐT) hình thức chính quy của Đại học Bách khoa Hà Nội; chi tiết yêu cầu đối với từng chương trình/nhóm chương trình được quy định tại các Phụ lục tương ứng.\n\n**3.** Quy định này không áp dụng cho sinh viên là người nước ngoài theo học CTĐT có ngôn ngữ giảng dạy chính là tiếng Việt; đối với sinh viên là người nước ngoài theo học các CTĐT có ngôn ngữ giảng dạy khác tiếng Việt, việc xét mi..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên nước ngoài học chương trình có ngôn ngữ giảng dạy chính là tiếng Việt có thuộc phạm vi áp dụng của quy định ngoại ngữ từ K70 không?",
+      "gold_answer": "Không. Quy định không áp dụng cho sinh viên là người nước ngoài theo học chương trình đào tạo có ngôn ngữ giảng dạy chính là tiếng Việt.",
+      "evidence_chunk_ids": [
+        "8054b460-5f30-4e8e-b36a-458771818bbf"
+      ],
+      "ground_truth_context": [
+        "## Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng\n\n**1.** Quy định này điều chỉnh việc đánh giá và phân loại trình độ ngoại ngữ đầu vào, chương trình ngoại ngữ cơ bản (NNCB), điều kiện miễn học các học phần NNCB, yêu cầu năng lực ngoại ngữ theo từng học kỳ và chuẩn ngoại ngữ đầu ra đối với sinh viên đại học hình thức chính quy; việc xác định bậc năng lực ngoại ngữ tuân theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.\n\n**2.** Quy định này áp dụng đối với sinh viên theo học các chương trình đào tạo (CTĐT) hình thức chính quy của Đại học Bách khoa Hà Nội; chi tiết yêu cầu đối với từng chương trình/nhóm chương trình được quy định tại các Phụ lục tương ứng.\n\n**3.** Quy định này không áp dụng cho sinh viên là người nước ngoài theo học CTĐT có ngôn ngữ giảng dạy chính là tiếng Việt; đối với sinh viên là người nước ngoài theo học các CTĐT có ngôn ngữ giảng dạy khác tiếng Việt, việc xét mi..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_004",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình có chuẩn đầu ra là tiếng Anh được phân loại trình độ đầu vào dựa trên những tiêu chí nào?",
+      "gold_answer": "Sinh viên có thể được phân loại dựa trên một hoặc nhiều tiêu chí: kết quả kiểm tra tiếng Anh đầu khóa, chứng chỉ tiếng Anh quốc gia hoặc quốc tế, hoặc điểm thi môn tiếng Anh của kỳ thi tốt nghiệp THPT tại năm nhập học. Việc lựa chọn tiêu chí do Giám đốc Đại học Bách khoa Hà Nội quyết định theo từng khóa tuyển sinh.",
+      "evidence_chunk_ids": [
+        "e820d57e-c770-44de-a39f-fc352bbc764a"
+      ],
+      "ground_truth_context": [
+        "## Điều 2. Phân loại trình độ đầu vào và phân lớp học ngoại ngữ cơ bản\n\n**1.** Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc CTĐT có yêu cầu chuẩn đầu ra là tiếng Anh dựa trên một hoặc nhiều tiêu chí, bao gồm:\n\n- Dựa trên kết quả kiểm tra tiếng Anh đầu khóa;\n- Hoặc dựa trên chứng chỉ tiếng Anh quốc gia, quốc tế;\n- Hoặc dựa trên điểm thi môn tiếng Anh của kỳ thi tốt nghiệp trung học phổ thông (THPT) tại năm nhập học.\n\nViệc lựa chọn tiêu chí phân loại trong số các tiêu chí trên do Giám đốc Đại học Bách khoa Hà Nội quyết định theo từng khóa tuyển sinh.\n\n**2.** Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc CTĐT có yêu cầu chuẩn đầu ra là ngoại ngữ khác tiếng Anh: dựa trên chứng chỉ quốc tế của ngôn ngữ tương ứng.\n\n**3.** Căn cứ kết quả phân loại đầu vào, sinh viên được xét miễn học các học phần NNCB theo quy định tại các Phụ lục tương ứng kèm theo Quy định..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_005",
+      "question_type": "simple",
+      "question": "Sinh viên thuộc chương trình có chuẩn đầu ra là ngoại ngữ khác tiếng Anh được phân loại trình độ đầu vào dựa trên căn cứ nào?",
+      "gold_answer": "Sinh viên thuộc chương trình có yêu cầu chuẩn đầu ra là ngoại ngữ khác tiếng Anh được phân loại trình độ đầu vào dựa trên chứng chỉ quốc tế của ngôn ngữ tương ứng.",
+      "evidence_chunk_ids": [
+        "e820d57e-c770-44de-a39f-fc352bbc764a"
+      ],
+      "ground_truth_context": [
+        "## Điều 2. Phân loại trình độ đầu vào và phân lớp học ngoại ngữ cơ bản\n\n**1.** Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc CTĐT có yêu cầu chuẩn đầu ra là tiếng Anh dựa trên một hoặc nhiều tiêu chí, bao gồm:\n\n- Dựa trên kết quả kiểm tra tiếng Anh đầu khóa;\n- Hoặc dựa trên chứng chỉ tiếng Anh quốc gia, quốc tế;\n- Hoặc dựa trên điểm thi môn tiếng Anh của kỳ thi tốt nghiệp trung học phổ thông (THPT) tại năm nhập học.\n\nViệc lựa chọn tiêu chí phân loại trong số các tiêu chí trên do Giám đốc Đại học Bách khoa Hà Nội quyết định theo từng khóa tuyển sinh.\n\n**2.** Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc CTĐT có yêu cầu chuẩn đầu ra là ngoại ngữ khác tiếng Anh: dựa trên chứng chỉ quốc tế của ngôn ngữ tương ứng.\n\n**3.** Căn cứ kết quả phân loại đầu vào, sinh viên được xét miễn học các học phần NNCB theo quy định tại các Phụ lục tương ứng kèm theo Quy định..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_006",
+      "question_type": "simple",
+      "question": "Nếu sinh viên không đáp ứng điều kiện phân loại trình độ ngoại ngữ đầu vào thì sẽ học ngoại ngữ cơ bản từ đâu?",
+      "gold_answer": "Sinh viên không đáp ứng điều kiện phân loại trình độ ngoại ngữ theo quy định sẽ được xếp học từ học phần đầu tiên của khối ngoại ngữ cơ bản tương ứng của từng chương trình đào tạo.",
+      "evidence_chunk_ids": [
+        "30033016-737d-4fbd-9037-2ca12275474a"
+      ],
+      "ground_truth_context": [
+        "## Điều 2. Phân loại trình độ đầu vào và phân lớp học ngoại ngữ cơ bản\n\n**4.** Sinh viên không đáp ứng điều kiện phân loại trình độ ngoại ngữ theo khoản 1 hoặc khoản 2 Điều này sẽ được xếp học từ học phần đầu tiên của khối NNCB tương ứng của từng CTĐT.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_007",
+      "question_type": "simple",
+      "question": "Các học phần ngoại ngữ cơ bản có được tính tín chỉ trong chương trình đào tạo chính khóa không?",
+      "gold_answer": "Không. Các học phần ngoại ngữ cơ bản được xếp vào khối kiến thức ngoại ngữ bổ trợ tăng cường và không tính tín chỉ trong chương trình đào tạo chính khóa.",
+      "evidence_chunk_ids": [
+        "dcd4db2e-9c76-4ef3-952a-10d85482b250"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Công nhận, xét miễn học phần ngoại ngữ cơ bản\n\n**1.** Các học phần NNCB của các CTĐT được xếp vào khối kiến thức ngoại ngữ bổ trợ tăng cường và không tính tín chỉ trong CTĐT chính khóa. Danh sách các học phần NNCB của các CTĐT được quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**2.** Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần NNCB tương ứng với trình độ đạt được. Kết quả miễn học được ghi bằng ký hiệu \"R\" trong dữ liệu học tập và có giá trị toàn khóa kể từ ngày nhập điểm R.\n\n**3.** Chứng chỉ ngoại ngữ để xét miễn học phần NNCB phải còn hạn theo quy định tính tới thời điểm nộp đơn xét miễn. Danh mục chứng chỉ và học phần NNCB được miễn tương ứng được quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**4.** Các chứng chỉ ngoại ngữ quốc gia, quốc tế phải được thẩm định nguồn gốc và cập nhật..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_008",
+      "question_type": "simple",
+      "question": "Khi sinh viên được miễn học phần ngoại ngữ cơ bản, kết quả miễn học được ghi như thế nào?",
+      "gold_answer": "Kết quả miễn học phần ngoại ngữ cơ bản được ghi bằng ký hiệu “R” trong dữ liệu học tập và có giá trị toàn khóa kể từ ngày nhập điểm R.",
+      "evidence_chunk_ids": [
+        "dcd4db2e-9c76-4ef3-952a-10d85482b250"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Công nhận, xét miễn học phần ngoại ngữ cơ bản\n\n**1.** Các học phần NNCB của các CTĐT được xếp vào khối kiến thức ngoại ngữ bổ trợ tăng cường và không tính tín chỉ trong CTĐT chính khóa. Danh sách các học phần NNCB của các CTĐT được quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**2.** Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần NNCB tương ứng với trình độ đạt được. Kết quả miễn học được ghi bằng ký hiệu \"R\" trong dữ liệu học tập và có giá trị toàn khóa kể từ ngày nhập điểm R.\n\n**3.** Chứng chỉ ngoại ngữ để xét miễn học phần NNCB phải còn hạn theo quy định tính tới thời điểm nộp đơn xét miễn. Danh mục chứng chỉ và học phần NNCB được miễn tương ứng được quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**4.** Các chứng chỉ ngoại ngữ quốc gia, quốc tế phải được thẩm định nguồn gốc và cập nhật..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_009",
+      "question_type": "simple",
+      "question": "Chứng chỉ ngoại ngữ dùng để xét miễn học phần ngoại ngữ cơ bản phải đáp ứng điều kiện thời hạn như thế nào?",
+      "gold_answer": "Chứng chỉ ngoại ngữ để xét miễn học phần ngoại ngữ cơ bản phải còn hạn theo quy định tính tới thời điểm nộp đơn xét miễn.",
+      "evidence_chunk_ids": [
+        "dcd4db2e-9c76-4ef3-952a-10d85482b250"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Công nhận, xét miễn học phần ngoại ngữ cơ bản\n\n**1.** Các học phần NNCB của các CTĐT được xếp vào khối kiến thức ngoại ngữ bổ trợ tăng cường và không tính tín chỉ trong CTĐT chính khóa. Danh sách các học phần NNCB của các CTĐT được quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**2.** Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần NNCB tương ứng với trình độ đạt được. Kết quả miễn học được ghi bằng ký hiệu \"R\" trong dữ liệu học tập và có giá trị toàn khóa kể từ ngày nhập điểm R.\n\n**3.** Chứng chỉ ngoại ngữ để xét miễn học phần NNCB phải còn hạn theo quy định tính tới thời điểm nộp đơn xét miễn. Danh mục chứng chỉ và học phần NNCB được miễn tương ứng được quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**4.** Các chứng chỉ ngoại ngữ quốc gia, quốc tế phải được thẩm định nguồn gốc và cập nhật..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên cần nộp đơn đề nghị xét miễn học phần ngoại ngữ cơ bản muộn nhất khi nào?",
+      "gold_answer": "Thời gian tiếp nhận đơn đề nghị xét miễn học phần ngoại ngữ cơ bản muộn nhất là 2 tuần trước khi bắt đầu học kỳ theo Khung kế hoạch năm học.",
+      "evidence_chunk_ids": [
+        "dcd4db2e-9c76-4ef3-952a-10d85482b250"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Công nhận, xét miễn học phần ngoại ngữ cơ bản\n\n**1.** Các học phần NNCB của các CTĐT được xếp vào khối kiến thức ngoại ngữ bổ trợ tăng cường và không tính tín chỉ trong CTĐT chính khóa. Danh sách các học phần NNCB của các CTĐT được quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**2.** Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần NNCB tương ứng với trình độ đạt được. Kết quả miễn học được ghi bằng ký hiệu \"R\" trong dữ liệu học tập và có giá trị toàn khóa kể từ ngày nhập điểm R.\n\n**3.** Chứng chỉ ngoại ngữ để xét miễn học phần NNCB phải còn hạn theo quy định tính tới thời điểm nộp đơn xét miễn. Danh mục chứng chỉ và học phần NNCB được miễn tương ứng được quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**4.** Các chứng chỉ ngoại ngữ quốc gia, quốc tế phải được thẩm định nguồn gốc và cập nhật..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_011",
+      "question_type": "simple",
+      "question": "Trong học kỳ 1 và học kỳ 2, sinh viên K70 được xếp lớp học ngoại ngữ cơ bản dựa trên căn cứ nào?",
+      "gold_answer": "Trong học kỳ 1 và học kỳ 2, Ban Đào tạo xếp lớp học các học phần ngoại ngữ cơ bản cho sinh viên dựa trên kết quả phân loại trình độ ngoại ngữ đầu vào theo Điều 2.",
+      "evidence_chunk_ids": [
+        "1b54828d-d6aa-4fc1-9aab-cff419d715c7"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Lộ trình học tập các học phần ngoại ngữ cơ bản\n\nLộ trình học tập đối với các học phần NNCB được áp dụng để đảm bảo năng lực ngoại ngữ của sinh viên được tăng cường dần qua các học kỳ và được quy định như sau:\n\n**1.** Trong học kỳ 1 và học kỳ 2, Ban Đào tạo xếp lớp học các học phần NNCB cho sinh viên dựa trên kết quả phân loại trình độ ngoại ngữ đầu vào theo quy định tại Điều 2.\n\n**2.** Từ học kỳ 3 trở đi, sinh viên tự đăng ký học song hành các học phần NNCB cùng với các học phần khác trong CTĐT, bảo đảm tiến độ đáp ứng chuẩn ngoại ngữ theo từng học kỳ quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**3.** Việc đăng ký học song hành các học phần NNCB tương ứng ở mỗi kỳ kể từ kỳ 3 trở đi (trừ trường hợp đã học hoặc được miễn học phần) là điều kiện bắt buộc để được đăng ký học tập các học phần khác trong CTĐT.\n\n**4.** Sinh viên không được phép hủy các học phần NNCB đã ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_012",
+      "question_type": "simple",
+      "question": "Từ học kỳ 3 trở đi, sinh viên phải đăng ký học các học phần ngoại ngữ cơ bản như thế nào?",
+      "gold_answer": "Từ học kỳ 3 trở đi, sinh viên tự đăng ký học song hành các học phần ngoại ngữ cơ bản cùng với các học phần khác trong chương trình đào tạo, đồng thời phải bảo đảm tiến độ đáp ứng chuẩn ngoại ngữ theo từng học kỳ.",
+      "evidence_chunk_ids": [
+        "1b54828d-d6aa-4fc1-9aab-cff419d715c7"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Lộ trình học tập các học phần ngoại ngữ cơ bản\n\nLộ trình học tập đối với các học phần NNCB được áp dụng để đảm bảo năng lực ngoại ngữ của sinh viên được tăng cường dần qua các học kỳ và được quy định như sau:\n\n**1.** Trong học kỳ 1 và học kỳ 2, Ban Đào tạo xếp lớp học các học phần NNCB cho sinh viên dựa trên kết quả phân loại trình độ ngoại ngữ đầu vào theo quy định tại Điều 2.\n\n**2.** Từ học kỳ 3 trở đi, sinh viên tự đăng ký học song hành các học phần NNCB cùng với các học phần khác trong CTĐT, bảo đảm tiến độ đáp ứng chuẩn ngoại ngữ theo từng học kỳ quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**3.** Việc đăng ký học song hành các học phần NNCB tương ứng ở mỗi kỳ kể từ kỳ 3 trở đi (trừ trường hợp đã học hoặc được miễn học phần) là điều kiện bắt buộc để được đăng ký học tập các học phần khác trong CTĐT.\n\n**4.** Sinh viên không được phép hủy các học phần NNCB đã ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_013",
+      "question_type": "simple",
+      "question": "Từ kỳ 3 trở đi, việc đăng ký học song hành ngoại ngữ cơ bản có ý nghĩa gì đối với đăng ký học tập các học phần khác?",
+      "gold_answer": "Việc đăng ký học song hành các học phần ngoại ngữ cơ bản tương ứng ở mỗi kỳ kể từ kỳ 3 trở đi, trừ trường hợp đã học hoặc được miễn học phần, là điều kiện bắt buộc để được đăng ký học tập các học phần khác trong chương trình đào tạo.",
+      "evidence_chunk_ids": [
+        "1b54828d-d6aa-4fc1-9aab-cff419d715c7"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Lộ trình học tập các học phần ngoại ngữ cơ bản\n\nLộ trình học tập đối với các học phần NNCB được áp dụng để đảm bảo năng lực ngoại ngữ của sinh viên được tăng cường dần qua các học kỳ và được quy định như sau:\n\n**1.** Trong học kỳ 1 và học kỳ 2, Ban Đào tạo xếp lớp học các học phần NNCB cho sinh viên dựa trên kết quả phân loại trình độ ngoại ngữ đầu vào theo quy định tại Điều 2.\n\n**2.** Từ học kỳ 3 trở đi, sinh viên tự đăng ký học song hành các học phần NNCB cùng với các học phần khác trong CTĐT, bảo đảm tiến độ đáp ứng chuẩn ngoại ngữ theo từng học kỳ quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**3.** Việc đăng ký học song hành các học phần NNCB tương ứng ở mỗi kỳ kể từ kỳ 3 trở đi (trừ trường hợp đã học hoặc được miễn học phần) là điều kiện bắt buộc để được đăng ký học tập các học phần khác trong CTĐT.\n\n**4.** Sinh viên không được phép hủy các học phần NNCB đã ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_014",
+      "question_type": "simple",
+      "question": "Sinh viên có được hủy học phần ngoại ngữ cơ bản đã đăng ký học song hành không?",
+      "gold_answer": "Sinh viên không được phép hủy các học phần ngoại ngữ cơ bản đã đăng ký học song hành, trừ trường hợp xin rút hoặc chủ động rút toàn bộ đăng ký học tập trong học kỳ.",
+      "evidence_chunk_ids": [
+        "1b54828d-d6aa-4fc1-9aab-cff419d715c7"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Lộ trình học tập các học phần ngoại ngữ cơ bản\n\nLộ trình học tập đối với các học phần NNCB được áp dụng để đảm bảo năng lực ngoại ngữ của sinh viên được tăng cường dần qua các học kỳ và được quy định như sau:\n\n**1.** Trong học kỳ 1 và học kỳ 2, Ban Đào tạo xếp lớp học các học phần NNCB cho sinh viên dựa trên kết quả phân loại trình độ ngoại ngữ đầu vào theo quy định tại Điều 2.\n\n**2.** Từ học kỳ 3 trở đi, sinh viên tự đăng ký học song hành các học phần NNCB cùng với các học phần khác trong CTĐT, bảo đảm tiến độ đáp ứng chuẩn ngoại ngữ theo từng học kỳ quy định tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**3.** Việc đăng ký học song hành các học phần NNCB tương ứng ở mỗi kỳ kể từ kỳ 3 trở đi (trừ trường hợp đã học hoặc được miễn học phần) là điều kiện bắt buộc để được đăng ký học tập các học phần khác trong CTĐT.\n\n**4.** Sinh viên không được phép hủy các học phần NNCB đã ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_015",
+      "question_type": "simple",
+      "question": "Chứng chỉ tiếng Anh dùng để xét chuẩn ngoại ngữ đầu ra phải đánh giá những kỹ năng nào?",
+      "gold_answer": "Chứng chỉ tiếng Anh dùng để xét chuẩn ngoại ngữ đầu ra phải đánh giá đầy đủ 4 kỹ năng nghe, nói, đọc, viết.",
+      "evidence_chunk_ids": [
+        "509c8e54-ac72-4955-8049-151131962038"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Yêu cầu về chuẩn ngoại ngữ đầu ra\n\n**1.** Yêu cầu về chuẩn ngoại ngữ đầu ra được quy định cụ thể cho từng CTĐT tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**2.** Chứng chỉ tiếng Anh phải đánh giá đầy đủ 4 kỹ năng nghe, nói, đọc, viết; đồng thời phải được cấp trong vòng 2 năm tính đến thời điểm xét chuẩn ngoại ngữ đầu ra và còn hiệu lực tại thời điểm xét.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_016",
+      "question_type": "simple",
+      "question": "Chứng chỉ tiếng Anh dùng để xét chuẩn ngoại ngữ đầu ra phải được cấp trong khoảng thời gian nào?",
+      "gold_answer": "Chứng chỉ tiếng Anh phải được cấp trong vòng 2 năm tính đến thời điểm xét chuẩn ngoại ngữ đầu ra và còn hiệu lực tại thời điểm xét.",
+      "evidence_chunk_ids": [
+        "509c8e54-ac72-4955-8049-151131962038"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Yêu cầu về chuẩn ngoại ngữ đầu ra\n\n**1.** Yêu cầu về chuẩn ngoại ngữ đầu ra được quy định cụ thể cho từng CTĐT tại các Phụ lục tương ứng kèm theo Quy định này.\n\n**2.** Chứng chỉ tiếng Anh phải đánh giá đầy đủ 4 kỹ năng nghe, nói, đọc, viết; đồng thời phải được cấp trong vòng 2 năm tính đến thời điểm xét chuẩn ngoại ngữ đầu ra và còn hiệu lực tại thời điểm xét.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_017",
+      "question_type": "simple",
+      "question": "Các trường hợp ngoại lệ trong quy định ngoại ngữ từ K70 được xử lý bởi đơn vị nào?",
+      "gold_answer": "Các trường hợp ngoại lệ sẽ do Ban Đào tạo đề xuất Giám đốc Đại học Bách khoa Hà Nội xem xét quyết định.",
+      "evidence_chunk_ids": [
+        "a6451537-5890-4492-a86f-0bef1a1cbd35"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Các trường hợp ngoại lệ\n\nCác trường hợp ngoại lệ sẽ do Ban Đào tạo đề xuất Giám đốc Đại học Bách khoa Hà Nội xem xét quyết định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_018",
+      "question_type": "simple",
+      "question": "Quy định ngoại ngữ từ K70 được áp dụng từ thời điểm nào đối với sinh viên đại học chính quy?",
+      "gold_answer": "Quy định được áp dụng từ học kỳ 1 năm học 2025-2026 đối với sinh viên đại học hình thức chính quy và các chương trình đào tạo kể từ khóa 70 trở về sau, trừ một số quy định riêng về bảng quy đổi chứng chỉ.",
+      "evidence_chunk_ids": [
+        "980a08e0-5a06-4d4a-a6ef-246c5cb71fd6"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Hiệu lực thi hành\n\n**1.** Quy định này được áp dụng từ học kỳ 1 năm học 2025-2026 đối với sinh viên đại học hình thức chính quy và các CTĐT kể từ khóa 70 trở về sau, trừ các quy định sau:\n\n- **a)** Bảng quy đổi tương đương các chứng chỉ ngoại ngữ áp dụng cho toàn bộ sinh viên các khóa, đối với các chứng chỉ được cấp kể từ ngày Quy định này có hiệu lực.\n\n- **b)** Đối với sinh viên các khóa từ 69 trở về trước, nếu mức quy đổi tương đương cùng một chứng chỉ ngoại ngữ theo Quy định này khác với mức quy đổi theo quy định trước đây thì áp dụng mức quy đổi cao hơn trong hai quy định; mức cao hơn được xác định theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.\n\n**2.** Các quy định hiện hành về ngoại ngữ đối với sinh viên và CTĐT từ khóa 69 trở về trước (trừ quy định về quy đổi tương đương chứng chỉ) vẫn tiếp tục có hiệu lực thi hành cho đến thời điểm kết thúc khóa đào tạo.\n\n---\n\n#..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_019",
+      "question_type": "simple",
+      "question": "Sinh viên khóa 69 trở về trước được xử lý thế nào nếu cùng một chứng chỉ ngoại ngữ có mức quy đổi khác nhau giữa quy định mới và quy định cũ?",
+      "gold_answer": "Đối với sinh viên các khóa từ 69 trở về trước, nếu mức quy đổi tương đương cùng một chứng chỉ ngoại ngữ theo quy định mới khác với mức quy đổi theo quy định trước đây thì áp dụng mức quy đổi cao hơn trong hai quy định.",
+      "evidence_chunk_ids": [
+        "980a08e0-5a06-4d4a-a6ef-246c5cb71fd6"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Hiệu lực thi hành\n\n**1.** Quy định này được áp dụng từ học kỳ 1 năm học 2025-2026 đối với sinh viên đại học hình thức chính quy và các CTĐT kể từ khóa 70 trở về sau, trừ các quy định sau:\n\n- **a)** Bảng quy đổi tương đương các chứng chỉ ngoại ngữ áp dụng cho toàn bộ sinh viên các khóa, đối với các chứng chỉ được cấp kể từ ngày Quy định này có hiệu lực.\n\n- **b)** Đối với sinh viên các khóa từ 69 trở về trước, nếu mức quy đổi tương đương cùng một chứng chỉ ngoại ngữ theo Quy định này khác với mức quy đổi theo quy định trước đây thì áp dụng mức quy đổi cao hơn trong hai quy định; mức cao hơn được xác định theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.\n\n**2.** Các quy định hiện hành về ngoại ngữ đối với sinh viên và CTĐT từ khóa 69 trở về trước (trừ quy định về quy đổi tương đương chứng chỉ) vẫn tiếp tục có hiệu lực thi hành cho đến thời điểm kết thúc khóa đào tạo.\n\n---\n\n#..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_020",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình Công nghệ thông tin Việt-Nhật có ngoại ngữ chính là gì theo danh mục chương trình đào tạo?",
+      "gold_answer": "Theo danh mục chương trình đào tạo và ngoại ngữ chính yêu cầu, chương trình Công nghệ thông tin Việt-Nhật có ngoại ngữ chính là Tiếng Nhật.",
+      "evidence_chunk_ids": [
+        "cfe1768c-5378-4b17-bfcb-4f85cf891648"
+      ],
+      "ground_truth_context": [
+        "| NHÓM – LOẠI/TÊN CHƯƠNG TRÌNH ĐÀO TẠO | NGOẠI NGỮ CHÍNH |\n|---|---|\n| 15. Phân tích kinh doanh | Tiếng Anh |\n| 16. Tiếng Anh Chuyên nghiệp Quốc tế (IPE) | Tiếng Anh |\n| 17. Logistic và Quản lý chuỗi cung ứng | Tiếng Anh |\n| 18. Hệ thống nhúng thông minh và IoT | Tiếng Nhật |\n| 19. Công nghệ thông tin Việt-Nhật | Tiếng Nhật |\n| 20. Công nghệ thông tin Việt-Pháp | Tiếng Pháp |\n| **Các CTĐT hợp tác/liên kết quốc tế** | |\n| 1. Cơ khí Chế tạo máy (Đại học Griffith, Úc) | Tiếng Anh |\n| 2. Cơ điện tử (ĐH Nagaoka, Nhật Bản) | Tiếng Nhật |\n| 3. Điện tử - Viễn thông (Đại học Leibniz Hannover, Đức) | Tiếng Đức |\n| 4. Cơ điện tử (Đại học Leibniz Hannover, Đức) | Tiếng Đức |\n| 5. Quản trị kinh doanh (Đại học TROY, Mỹ) | Tiếng Anh |\n| 6. Khoa học Máy tính (Đại học TROY, Mỹ) | Tiếng Anh |\n---\n# PHỤ LỤC II"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_021",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình Việt-Pháp PFIEV có ngoại ngữ chính là gì theo danh mục chương trình đào tạo?",
+      "gold_answer": "Các chương trình Việt-Pháp PFIEV, mã tuyển sinh EE-EP và TE-EP, có ngoại ngữ chính là Tiếng Pháp.",
+      "evidence_chunk_ids": [
+        "4f853dba-4524-433f-8e36-60262604716b"
+      ],
+      "ground_truth_context": [
+        "## DANH MỤC CÁC CHƯƠNG TRÌNH ĐÀO TẠO VÀ NGOẠI NGỮ CHÍNH YÊU CẦU\n*(Kèm theo Quyết định số 10728/QĐ-DHBK ngày 26 tháng 9 năm 2025 của Giám đốc Đại học Bách khoa Hà Nội)*\n\n| NHÓM – LOẠI/TÊN CHƯƠNG TRÌNH ĐÀO TẠO | NGOẠI NGỮ CHÍNH |\n|---|---|\n| **Các CTĐT chuẩn** | |\n| CTĐT Tiếng Trung Khoa học và Công nghệ | Tiếng Trung Quốc |\n| Các CTĐT chuẩn khác | Tiếng Anh |\n| **Các CTĐT tài năng** | Tiếng Anh |\n| **Các CTĐT Việt-Pháp PFIEV (mã tuyển sinh: EE-EP, TE-EP)** | Tiếng Pháp |\n| **Các CTĐT Elitech tăng cường ngoại ngữ** | |\n| 1. Công nghệ thông tin Global ICT | Tiếng Anh |\n| 2. Khoa học dữ liệu và Trí tuệ nhân tạo | Tiếng Anh |\n| 3. An toàn không gian số | Tiếng Anh |\n| 4. Kỹ thuật điều khiển - Tự động hóa | Tiếng Anh |\n| 5. Hệ thống điện và năng lượng tái tạo | Tiếng Anh |\n| 6. Kỹ thuật Điện tử - Viễn thông | Tiếng Anh |\n| 7. Kỹ thuật Y sinh | Tiếng Anh |\n| 8. Truyền thông số và kỹ thuật đa ph..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_simple_022",
+      "question_type": "simple",
+      "question": "Kết quả TOEIC Placement do Đại học Bách khoa Hà Nội phối hợp tổ chức có được dùng để xét đạt chuẩn ngoại ngữ đầu ra không?",
+      "gold_answer": "Không. Kết quả TOEIC Placement chỉ được sử dụng để phân loại trình độ tiếng Anh cho mục đích xếp lớp và xét miễn học các học phần ngoại ngữ cơ bản, không sử dụng để xét đạt chuẩn ngoại ngữ đầu ra.",
+      "evidence_chunk_ids": [
+        "fbd73936-ac44-4c72-a81e-9cd98ac66ba6"
+      ],
+      "ground_truth_context": [
+        "### Điều kiện xét quy đổi tương đương chứng chỉ và miễn học\n\n- Kết quả bài kiểm tra TOEIC Placement do Đại học Bách khoa Hà Nội phối hợp tổ chức chỉ được sử dụng để phân loại trình độ tiếng Anh cho mục đích xếp lớp và xét miễn học các học phần thuộc khối ngoại ngữ cơ bản, không sử dụng để xét đạt chuẩn ngoại ngữ đầu ra.\n- Các chứng chỉ được quy đổi tương đương chỉ khi dạng thức thi đánh giá đầy đủ 4 kỹ năng nghe, nói, đọc, viết.\n- Chứng chỉ tiếng Anh phải được cấp trong vòng 2 năm tính đến thời điểm xét.\n- Chứng chỉ TOEIC 4 kỹ năng: quy đổi tương đương sang các chứng chỉ khác dựa theo kỹ năng đạt điểm thấp nhất.\n- Không công nhận sử dụng chứng chỉ tiếng Anh TOEFL iBT theo hình thức Home Edition.\n- Các trường hợp quy đổi tương đương khác do Ban Đào tạo đề xuất và trình Giám đốc đại học quyết định.\n\n---\n# PHỤ LỤC III"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K70 chương trình chuẩn có chuẩn đầu ra tiếng Anh cần làm gì ở học kỳ 3 nếu chưa học hoặc chưa được miễn FL1133, và chuẩn đầu ra khi xét tốt nghiệp là gì?",
+      "gold_answer": "Ở học kỳ 3, sinh viên phải đăng ký học song hành FL1133 Tiếng Anh cơ sở 3 nếu chưa học hoặc chưa được miễn. Khi xét tốt nghiệp chương trình chuẩn, trừ các chương trình nhóm ngành ngôn ngữ, sinh viên phải đạt chứng chỉ trình độ tối thiểu Bậc 3 theo Bảng 2.1 của Phụ lục II.",
+      "evidence_chunk_ids": [
+        "85defcca-192c-48a7-a663-7b0e44556f0a"
+      ],
+      "ground_truth_context": [
+        "### Bảng 3.2 – Yêu cầu trình độ tiếng Anh theo học kỳ và chuẩn ngoại ngữ đầu ra khi xét tốt nghiệp\n\n| Hạng mục | Yêu cầu |\n|---|---|\n| Đăng ký học tập cho học kỳ 1 | Được xếp lớp học theo quy định tại Bảng 3.1 |\n| Đăng ký học tập cho học kỳ 2 | Được xếp lớp học theo quy định tại Bảng 3.1 |\n| Đăng ký học tập cho học kỳ 3 | Sinh viên phải đăng ký học song hành học phần FL1133 Tiếng Anh cơ sở 3 nếu chưa học hoặc chưa được miễn. |\n| Đăng ký học tập cho học kỳ 4 | Sinh viên phải đăng ký học song hành học phần FL1134 Tiếng Anh cơ sở 4 nếu chưa học hoặc chưa được miễn. |\n| Đăng ký học tập cho học kỳ 5 | Sinh viên phải đăng ký học song hành học phần FL1135 Tiếng Anh cơ sở 5 nếu chưa học hoặc chưa được miễn. |\n| Chuẩn đầu ra khi xét tốt nghiệp với CTĐT chuẩn (trừ các CTĐT nhóm ngành ngôn ngữ) | Đạt chứng chỉ trình độ tối thiểu Bậc 3 (theo Bảng 2.1 của Phụ lục II) |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_table_reasoning",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K70 chương trình chuẩn thuộc Nhóm 5 trong Bảng 3.1 được miễn những học phần tiếng Anh cơ sở nào và còn phải học học phần nào?",
+      "gold_answer": "Nhóm 5 được miễn FL1131 Tiếng Anh cơ sở 1, FL1132 Tiếng Anh cơ sở 2, FL1133 Tiếng Anh cơ sở 3 và FL1134 Tiếng Anh cơ sở 4; sinh viên vẫn được xếp học FL1135 Tiếng Anh cơ sở 5 ở kỳ 2.",
+      "evidence_chunk_ids": [
+        "f5811db2-e214-4452-9cc1-a589f262bec1"
+      ],
+      "ground_truth_context": [
+        "### Bảng 3.1 – Danh mục các học phần tiếng Anh thuộc khối ngoại ngữ cơ bản và điều kiện miễn học\n\n| TT | Mã học phần | Tên học phần | Thời lượng | Nhóm 1 | Nhóm 2 | Nhóm 3 | Nhóm 4 | Nhóm 5 | Nhóm 6 |\n|---|---|---|---|---|---|---|---|---|---|\n| 1 | FL1131 | Tiếng Anh cơ sở 1 | 4(2-4-0-8) | Kỳ 1 | M | M | M | M | M |\n| 2 | FL1132 | Tiếng Anh cơ sở 2 | 4(2-4-0-8) | Kỳ 2 | Kỳ 1 | M | M | M | M |\n| 3 | FL1133 | Tiếng Anh cơ sở 3 | 4(2-4-0-8) | ĐK (Kỳ 3) | Kỳ 2 | Kỳ 1 | M | M | M |\n| 4 | FL1134 | Tiếng Anh cơ sở 4 | 4(2-4-0-8) | ĐK (Kỳ 4) | ĐK (Kỳ 4) | Kỳ 2 | Kỳ 1 | M | M |\n| 5 | FL1135 | Tiếng Anh cơ sở 5 | 4(2-4-0-8) | ĐK (Kỳ 5) | ĐK (Kỳ 5) | ĐK (Kỳ 5) | ĐK (Kỳ 5) | Kỳ 2 | Kỳ 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "table_lookup",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Elitech tăng cường ngoại ngữ có chuẩn đầu ra là tiếng Anh phải đạt bậc ngoại ngữ tối thiểu nào, và trong kỳ 2 phải đăng ký nhóm học phần nào nếu chưa được miễn?",
+      "gold_answer": "Sinh viên phải đạt chứng chỉ trình độ tối thiểu Bậc 4 theo Bảng 2.1 của Phụ lục II khi xét tốt nghiệp. Ở học kỳ 2, sinh viên phải đăng ký học song hành toàn bộ các học phần chưa được miễn trong nhóm {FL1231, FL1232, FL1233, FL1234}.",
+      "evidence_chunk_ids": [
+        "b68d4e01-30d2-4887-91a2-98a58d89916e"
+      ],
+      "ground_truth_context": [
+        "### Bảng 4.2 – Yêu cầu trình độ tiếng Anh theo học kỳ và chuẩn ngoại ngữ đầu ra khi xét tốt nghiệp\n*(Bảng 4.2 này không áp dụng với CTĐT hợp tác với Đại học TROY, Hoa Kỳ)*\n\n| Hạng mục | Yêu cầu |\n|---|---|\n| Đăng ký học tập cho học kỳ 1 | Được xếp lớp học theo quy định tại Bảng 4.1 |\n| Đăng ký học tập cho học kỳ 2 | Sinh viên phải đăng ký học song hành toàn bộ các học phần chưa được miễn của nhóm gồm {FL1231, FL1232, FL1233, FL1234} |\n| Đăng ký học tập cho học kỳ 3 | Sinh viên phải đăng ký học song hành toàn bộ các học phần chưa được miễn của nhóm gồm {FL1231, FL1232, FL1233, FL1234} |\n| **Chuẩn đầu ra khi xét tốt nghiệp** | Đạt chứng chỉ trình độ tối thiểu Bậc 4 (theo Bảng 2.1 của Phụ lục II) |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_table_reasoning",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên CTĐT hợp tác với Đại học TROY cần đạt yêu cầu tiếng Anh đầu khóa nào và yêu cầu này có áp dụng Bảng 4.2 không?",
+      "gold_answer": "Sinh viên CTĐT hợp tác với Đại học TROY phải có chứng chỉ tiếng Anh VSTEP trình độ B2 trở lên hoặc IELTS Academic 5.5 trở lên hoặc tương đương. Bảng 4.2 không áp dụng với CTĐT hợp tác với Đại học TROY, Hoa Kỳ.",
+      "evidence_chunk_ids": [
+        "b68d4e01-30d2-4887-91a2-98a58d89916e",
+        "3fe70b58-de2b-4023-90e7-725751406e78"
+      ],
+      "ground_truth_context": [
+        "### Bảng 4.2 – Yêu cầu trình độ tiếng Anh theo học kỳ và chuẩn ngoại ngữ đầu ra khi xét tốt nghiệp\n*(Bảng 4.2 này không áp dụng với CTĐT hợp tác với Đại học TROY, Hoa Kỳ)*\n\n| Hạng mục | Yêu cầu |\n|---|---|\n| Đăng ký học tập cho học kỳ 1 | Được xếp lớp học theo quy định tại Bảng 4.1 |\n| Đăng ký học tập cho học kỳ 2 | Sinh viên phải đăng ký học song hành toàn bộ các học phần chưa được miễn của nhóm gồm {FL1231, FL1232, FL1233, FL1234} |\n| Đăng ký học tập cho học kỳ 3 | Sinh viên phải đăng ký học song hành toàn bộ các học phần chưa được miễn của nhóm gồm {FL1231, FL1232, FL1233, FL1234} |\n| **Chuẩn đầu ra khi xét tốt nghiệp** | Đạt chứng chỉ trình độ tối thiểu Bậc 4 (theo Bảng 2.1 của Phụ lục II) |",
+        "### Bảng 4.3 – Yêu cầu chuẩn tiếng Anh đối với CTĐT hợp tác với Đại học TROY, Hoa Kỳ\n\n| Hạng mục | Yêu cầu trình độ ngoại ngữ tối thiểu |\n|---|---|\n| Yêu cầu đầu khóa học | Có chứng chỉ tiếng Anh VSTEP trình độ B2 trở lên; Hoặc có chứng chỉ IELTS (Academic) đạt 5.5 trở lên hoặc tương đương. |\n\n---\n# PHỤ LỤC V"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình CNTT Việt-Pháp cần đạt chuẩn ngoại ngữ nào khi xét tốt nghiệp cử nhân, và DELF B1 tương ứng với khoảng điểm TCF nào?",
+      "gold_answer": "Sinh viên chương trình CNTT Việt-Pháp khi xét tốt nghiệp cử nhân phải đạt trình độ tối thiểu DELF B1 hoặc tương đương theo Bảng 5.3. DELF B1 tương ứng với chứng chỉ TCF điểm bài thi trắc nghiệm 300÷399 và TCF 4 kỹ năng phần diễn đạt nói, viết đạt 6÷9/20.",
+      "evidence_chunk_ids": [
+        "d962c56d-f5b7-4cc1-8a6e-e2cf2217741a",
+        "20b7a82d-2fcb-4101-94c1-15e5c1910328"
+      ],
+      "ground_truth_context": [
+        "### Bảng 5.2 – Yêu cầu trình độ tiếng Pháp theo học kỳ và chuẩn ngoại ngữ đầu ra khi xét tốt nghiệp\n\n| Hạng mục | Yêu cầu với CTĐT Việt-Pháp PFIEV | Yêu cầu với CTĐT CNTT Việt-Pháp |\n|---|---|---|\n| Đăng ký học tập cho học kỳ 1 | Được xếp lớp học theo quy định tại Bảng 5.1 (số học phần xếp học trong học kỳ có thể khác giữa các lớp của CTĐT Việt-Pháp PFIEV và CTĐT CNTT Việt-Pháp) | |\n| Đăng ký học tập cho học kỳ 2 | Sinh viên phải đăng ký học song hành học phần FL1803 Tiếng Pháp PFIEV 3 nếu chưa học hoặc chưa được miễn. | |\n| Đăng ký học tập cho học kỳ 3 | Sinh viên phải đăng ký học song hành học phần FL1804 Tiếng Pháp PFIEV 4 nếu chưa học hoặc chưa được miễn. | |\n| Chuẩn đầu ra khi xét tốt nghiệp cử nhân | | Đạt trình độ tối thiểu DELF B1 hoặc tương đương theo Bảng 5.3 |\n| Chuẩn đầu ra khi xét tốt nghiệp kỹ sư chuyên sâu | Đạt trình độ tối thiểu DELF B2 (hoặc tương đương theo Bảng 5.3) h...",
+        "### Bảng 5.3 – Bảng quy đổi tương đương các văn bằng, chứng chỉ tiếng Pháp\n\n| DELF | Chứng chỉ TCF (Điểm bài thi trắc nghiệm: Nghe – Đọc & Kiến thức ngôn ngữ) | Chứng chỉ TCF 4 kỹ năng (Điểm bài thi Diễn đạt Nói & Viết) |\n|---|---|---|\n| DELF A1 | 101÷199 | Diễn đạt nói: 1/20; Diễn đạt viết: 1/20 |\n| DELF A2 | 200÷299 | Diễn đạt nói: 2÷5/20; Diễn đạt viết: 2÷5/20 |\n| DELF B1 | 300÷399 | Diễn đạt nói: 6÷9/20; Diễn đạt viết: 6÷9/20 |\n| DELF B2 | 400÷499 | Diễn đạt nói: 10÷13/20; Diễn đạt viết: 10÷13/20 |\n| DELF C1 | 500÷599 | Diễn đạt nói: 14÷17/20; Diễn đạt viết: 14÷17/20 |\n| DELF C2 | 600÷699 | Diễn đạt nói: 18÷20/20; Diễn đạt viết: 18÷20/20 |\n\n> **Ghi chú:** Văn bằng DELF được công nhận vô thời hạn; Chứng chỉ TCF có giá trị công nhận trong vòng 2 năm kể từ ngày cấp.\n\n---\n# PHỤ LỤC VI"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình Kỹ thuật Điện tử - Viễn thông hợp tác với Đại học Leibniz Hannover muốn biết học phần tiếng Đức 5 dành cho ai và chứng chỉ Goethe A2 được quy đổi tương đương ra sao?",
+      "gold_answer": "Học phần QT1524 Tiếng Đức 5 chỉ dành cho sinh viên học chuyển tiếp sang Đức theo chương trình Kỹ thuật Điện tử - Viễn thông hợp tác với Đại học Leibniz Hannover. Chứng chỉ Goethe-Zertifikat A2 được quy đổi tương đương với DSD1 và TELC/ÖSD/HUSTGC A2.",
+      "evidence_chunk_ids": [
+        "68ad0c23-8dc4-488e-8fb4-8ebe290e4935",
+        "7171f8ee-7871-470f-a66d-a9ca04a0e9d5"
+      ],
+      "ground_truth_context": [
+        "### Bảng 6.1 – Danh mục các học phần tiếng Đức thuộc khối ngoại ngữ cơ bản và điều kiện miễn học\n\n> **Ghi chú:**\n> - Nhóm 1: Không có chứng chỉ tiếng Đức hoặc khi trình độ Goethe-Zertifikat đạt dưới mức A1 hoặc tương đương\n> - Nhóm 2: Đạt trình độ Goethe-Zertifikat A1 hoặc tương đương\n> - Nhóm 3: Đạt trình độ Goethe-Zertifikat A2 hoặc tương đương\n> - M: Được miễn học (ghi điểm R); Kỳ 1: Được xếp học ở kỳ 1; Kỳ 2: Được xếp học ở kỳ 2\n> - ĐK: Sinh viên tự đăng ký học song hành với các học phần của CTĐT tại kỳ tương ứng (trong Bảng 6.1) nếu chưa học hoặc chưa được miễn.\n> - (*) Học phần QT1524 Tiếng Đức 5: chỉ dành cho các sinh viên học chuyển tiếp sang Đức theo chương trình Kỹ thuật Điện tử - Viễn thông, hợp tác với ĐH Leibniz Hannover.\n> - (*) Học phần QT1524 Tiếng Đức 5, QT1528 Tiếng Đức 6, QT1529 Tiếng Đức 7: chỉ dành cho các sinh viên học chuyển tiếp sang Đức theo chương trình Kỹ thuật...",
+        "### Bảng 6.2 – Bảng quy đổi tương đương các chứng chỉ tiếng Đức\n\n| Goethe-Zertifikat | TestDaF | DSD | TELC/ÖSD/HUSTGC |\n|---|---|---|---|\n| A1 | | | A1 |\n| A2 | | DSD1 | A2 |\n| B1 | TDN3 | DSD1 | B1 |\n| B2 | TDN4 | DSD2 | B2 |\n| C1 | TDN5 | DSD2 | C1 |\n| C2 | TDN5 | DSD2 | C2 |\n\n---\n# PHỤ LỤC VII"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình Công nghệ thông tin Việt-Nhật cần đạt chuẩn tiếng Nhật đầu ra nào và JLPT N3 tương ứng bậc mấy theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam?",
+      "gold_answer": "Sinh viên Công nghệ thông tin Việt-Nhật đạt chuẩn đầu ra khi có chứng chỉ tiếng Nhật từ N3 hoặc đạt toàn bộ các học phần tiếng Nhật JP1110, JP1120, JP1132, JP2111. JLPT N3 tương ứng Bậc 4 theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.",
+      "evidence_chunk_ids": [
+        "f1137bc9-d778-4e90-a26c-cbcb9dcdb34b",
+        "557fbaee-19f0-46a1-8a74-e15709777f65"
+      ],
+      "ground_truth_context": [
+        "### Bảng 7.3 – Danh mục các học phần tiếng Nhật, điều kiện miễn học và chuẩn đầu ra với chương trình Công nghệ thông tin Việt-Nhật\n\n| TT | Mã học phần | Tên học phần | Thời lượng | Nhóm 1 | Nhóm 2 |\n|---|---|---|---|---|---|\n| 1 | JP1110 | Tiếng Nhật 1 | 5(0-10-0-10) | Kỳ 1 | M |\n| 2 | JP1120 | Tiếng Nhật 2 | 5(0-10-0-10) | Kỳ 2 | M |\n| 3 | JP1132 | Tiếng Nhật 3 | 3(0-6-0-6) | ĐK (Kỳ 3) (Miễn học nếu có chứng chỉ tiếng Nhật N3) | M |\n| 4 | JP2111 | Tiếng Nhật 4 | 3(0-6-0-6) | ĐK (Kỳ 4) (Miễn học nếu có chứng chỉ tiếng Nhật N3) | M |\n| **Chuẩn đầu ra khi xét tốt nghiệp** | | | | Đạt chứng chỉ tiếng Nhật từ N3; Hoặc đạt toàn bộ các học phần tiếng Nhật gồm: {JP1110, JP1120, JP1132, JP2111} | Đạt chứng chỉ tiếng Nhật từ N3; Hoặc đạt toàn bộ các học phần tiếng Nhật gồm: {JP1110, JP1120, JP1132, JP2111} |",
+        "### Bảng 7.4 – Bảng xếp bậc các chứng chỉ tiếng Nhật theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam\n\n| JLPT | N5 | N4 | N3 | N2 | N1 |\n|---|---|---|---|---|---|\n| Bậc trình độ theo KNLNNVN | Bậc 2 | Bậc 3 | Bậc 4 | Bậc 5 | Bậc 6 |\n\n---\n# PHỤ LỤC VIII"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_dinh_ngoai_ngu_k70_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên ngành Tiếng Anh Khoa học Kỹ thuật và Công nghệ cần đạt chuẩn ngoại ngữ đầu ra nào đối với ngoại ngữ 1 và ngoại ngữ 2?",
+      "gold_answer": "Sinh viên CTĐT Tiếng Anh Khoa học Kỹ thuật và Công nghệ, mã tuyển sinh FL1, cần có ngoại ngữ 1 là Tiếng Anh đạt tối thiểu bậc 5 và ngoại ngữ 2 đạt năng lực tối thiểu bậc 3 theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.",
+      "evidence_chunk_ids": [
+        "f7a2170a-59d7-4d53-bc8b-10bbc6bdd5e6"
+      ],
+      "ground_truth_context": [
+        "## CHUẨN NGOẠI NGỮ ĐẦU RA ĐỐI VỚI CÁC CHƯƠNG TRÌNH ĐÀO TẠO NHÓM NGÀNH NGÔN NGỮ\n*(Kèm theo Quyết định số 10728/QĐ-DHBK ngày 26 tháng 9 năm 2025 của Giám đốc Đại học Bách khoa Hà Nội)*\n\n**1. Chuẩn ngoại ngữ đầu ra yêu cầu với CTĐT Tiếng Anh Khoa học Kỹ thuật và Công nghệ (mã tuyển sinh: FL1)**\n\n- **a.** Ngoại ngữ 1 là Tiếng Anh: có chứng chỉ đạt trình độ tối thiểu bậc 5 theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.\n- **b.** Ngoại ngữ 2: đạt năng lực tối thiểu bậc 3 theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.\n\n**2. Chuẩn ngoại ngữ đầu ra yêu cầu với CTĐT Tiếng Anh chuyên nghiệp quốc tế (mã tuyển sinh: FL2)**\n\n- **a.** Ngoại ngữ 1 là Tiếng Anh: có chứng chỉ đạt trình độ tối thiểu bậc 5 theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.\n- **b.** Ngoại ngữ 2: đạt năng lực tối thiểu bậc 3 theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam.\n\n**3. Chuẩn ngoại ngữ đầu ra..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

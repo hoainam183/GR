@@ -1,0 +1,477 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QD NN DHCQ-2020-2021-1501_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên đại học hệ chính quy thuộc ngành Ngôn ngữ Anh có thuộc phạm vi áp dụng của quy định ngoại ngữ theo Quyết định 119/QĐ-ĐHBK-ĐT năm 2021 không?",
+      "gold_answer": "Không. Quy định áp dụng cho sinh viên đại học hệ chính quy không thuộc ngành Ngôn ngữ Anh của Trường Đại học Bách khoa Hà Nội, và không áp dụng cho sinh viên là người nước ngoài đang học tại Trường.",
+      "evidence_chunk_ids": [
+        "3cf529a8-69d5-4b1f-933a-f751ea7a0d2a"
+      ],
+      "ground_truth_context": [
+        "## Điều 1. Phạm vi và đối tượng áp dụng\n\n1. Văn bản này quy định về công tác tổ chức đánh giá và phân loại trình độ ngoại ngữ đầu vào; chương trình môn học ngoại ngữ; điều kiện được miễn học các học phần ngoại ngữ; chuẩn ngoại ngữ yêu cầu theo tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra.\n\n2. Quy định này áp dụng cho sinh viên đại học hệ chính quy, không thuộc ngành Ngôn ngữ Anh của Trường Đại học Bách khoa Hà Nội.\n\n3. Quy định này không áp dụng cho sinh viên là người nước ngoài đang học tại Trường Đại học Bách khoa Hà Nội.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_002",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình đào tạo chuẩn được phân loại trình độ tiếng Anh đầu vào dựa trên căn cứ nào?",
+      "gold_answer": "Sinh viên chương trình đào tạo chuẩn được phân loại trình độ tiếng Anh đầu vào dựa trên điểm thi môn tiếng Anh của kỳ thi tốt nghiệp THPT tại năm nhập học hoặc chứng chỉ tiếng Anh quốc tế.",
+      "evidence_chunk_ids": [
+        "763ce4fa-b294-4321-ad69-511ee5736548"
+      ],
+      "ground_truth_context": [
+        "## Điều 2. Phân loại trình độ đầu vào và phân lớp học ngoại ngữ\n\n1. Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc chương trình đào tạo có yêu cầu chuẩn đầu ra là tiếng Anh:\n\n   a) Đối với các sinh viên thuộc chương trình đào tạo chuẩn: phân loại dựa trên điểm thi môn tiếng Anh của kỳ thi tốt nghiệp THPT tại năm nhập học hoặc chứng chỉ tiếng Anh quốc tế;\n\n   b) Đối với các sinh viên thuộc các chương trình đào tạo tiên tiến, tài năng và chương trình hợp tác quốc tế: phân loại dựa trên kết quả kiểm tra tiếng Anh nội bộ đầu khóa hoặc chứng chỉ tiếng Anh quốc tế.\n\n2. Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc chương trình đào tạo có yêu cầu chuẩn đầu ra là ngoại ngữ khác tiếng Anh: phân loại dựa trên điểm thi môn ngoại ngữ tương ứng của kỳ thi tốt nghiệp THPT tại năm nhập học hoặc chứng chỉ quốc tế của ngôn ngữ tương ứng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình tiên tiến, tài năng hoặc hợp tác quốc tế được phân loại trình độ tiếng Anh đầu vào dựa trên căn cứ nào?",
+      "gold_answer": "Sinh viên thuộc chương trình tiên tiến, tài năng hoặc hợp tác quốc tế được phân loại dựa trên kết quả kiểm tra tiếng Anh nội bộ đầu khóa hoặc chứng chỉ tiếng Anh quốc tế.",
+      "evidence_chunk_ids": [
+        "763ce4fa-b294-4321-ad69-511ee5736548"
+      ],
+      "ground_truth_context": [
+        "## Điều 2. Phân loại trình độ đầu vào và phân lớp học ngoại ngữ\n\n1. Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc chương trình đào tạo có yêu cầu chuẩn đầu ra là tiếng Anh:\n\n   a) Đối với các sinh viên thuộc chương trình đào tạo chuẩn: phân loại dựa trên điểm thi môn tiếng Anh của kỳ thi tốt nghiệp THPT tại năm nhập học hoặc chứng chỉ tiếng Anh quốc tế;\n\n   b) Đối với các sinh viên thuộc các chương trình đào tạo tiên tiến, tài năng và chương trình hợp tác quốc tế: phân loại dựa trên kết quả kiểm tra tiếng Anh nội bộ đầu khóa hoặc chứng chỉ tiếng Anh quốc tế.\n\n2. Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc chương trình đào tạo có yêu cầu chuẩn đầu ra là ngoại ngữ khác tiếng Anh: phân loại dựa trên điểm thi môn ngoại ngữ tương ứng của kỳ thi tốt nghiệp THPT tại năm nhập học hoặc chứng chỉ quốc tế của ngôn ngữ tương ứng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_004",
+      "question_type": "simple",
+      "question": "Nếu sinh viên không đáp ứng điều kiện phân loại trình độ ngoại ngữ đầu vào thì phải học ngoại ngữ như thế nào?",
+      "gold_answer": "Sinh viên không đáp ứng điều kiện phân loại trình độ ngoại ngữ đầu vào phải học toàn bộ chương trình ngoại ngữ theo quy định.",
+      "evidence_chunk_ids": [
+        "c34d73d8-7390-419c-9481-878daffcdb4e"
+      ],
+      "ground_truth_context": [
+        "## Điều 2. Phân loại trình độ đầu vào và phân lớp học ngoại ngữ\n\n3. Căn cứ trên kết quả phân loại trình độ ngoại ngữ đầu vào, sinh viên được xét miễn học các học phần theo quy định và được xếp lớp học ngoại ngữ tương ứng.\n\n4. Sinh viên không đáp ứng điều kiện phân loại trình độ ngoại ngữ theo mục 1 hoặc 2 của điều này sẽ phải học toàn bộ chương trình ngoại ngữ theo quy định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_005",
+      "question_type": "simple",
+      "question": "Các học phần ngoại ngữ trong chương trình đào tạo có phải là học phần bắt buộc không?",
+      "gold_answer": "Có. Tất cả các học phần ngoại ngữ tương ứng với từng chương trình đào tạo là các học phần bắt buộc, và Nhà trường đăng ký các học phần này theo kế hoạch học tập chuẩn cho sinh viên.",
+      "evidence_chunk_ids": [
+        "217c6b5d-5dfd-4994-9eba-0720493aafd5"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Công nhận, xét miễn học phần ngoại ngữ\n\n1. Tất cả các học phần ngoại ngữ tương ứng với từng chương trình đào tạo là các học phần bắt buộc. Nhà trường sẽ đăng ký các học phần ngoại ngữ theo kế hoạch học tập chuẩn cho các sinh viên.\n\n2. Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần ngoại ngữ tương ứng với trình độ đạt được. Các học phần được miễn sẽ ghi điểm R trong bảng điểm.\n\n3. Chứng chỉ ngoại ngữ để xét miễn học phần phải còn hạn theo quy định tính tới thời điểm nộp đơn xét miễn. Danh sách chứng chỉ và các học phần được miễn được ghi trong các phụ lục tương ứng.\n\n4. Toàn bộ các chứng chỉ ngoại ngữ quốc tế phải được thẩm định nguồn gốc và cập nhật mức điểm lên hệ thống phần mềm quản lý đào tạo trước thời điểm nộp đơn xét miễn học phần.\n\n5. Thời gian tiếp nhận đơn xét miễn học phần ngoại ngữ muộn nhất là **2 tuần** trước khi học kỳ bắt đầu theo Biểu đồ kế hoạch học tập của năm học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_006",
+      "question_type": "simple",
+      "question": "Khi sinh viên được miễn học phần ngoại ngữ do có chứng chỉ phù hợp, bảng điểm sẽ ghi điểm gì cho học phần được miễn?",
+      "gold_answer": "Các học phần ngoại ngữ được miễn sẽ được ghi điểm R trong bảng điểm.",
+      "evidence_chunk_ids": [
+        "217c6b5d-5dfd-4994-9eba-0720493aafd5"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Công nhận, xét miễn học phần ngoại ngữ\n\n1. Tất cả các học phần ngoại ngữ tương ứng với từng chương trình đào tạo là các học phần bắt buộc. Nhà trường sẽ đăng ký các học phần ngoại ngữ theo kế hoạch học tập chuẩn cho các sinh viên.\n\n2. Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần ngoại ngữ tương ứng với trình độ đạt được. Các học phần được miễn sẽ ghi điểm R trong bảng điểm.\n\n3. Chứng chỉ ngoại ngữ để xét miễn học phần phải còn hạn theo quy định tính tới thời điểm nộp đơn xét miễn. Danh sách chứng chỉ và các học phần được miễn được ghi trong các phụ lục tương ứng.\n\n4. Toàn bộ các chứng chỉ ngoại ngữ quốc tế phải được thẩm định nguồn gốc và cập nhật mức điểm lên hệ thống phần mềm quản lý đào tạo trước thời điểm nộp đơn xét miễn học phần.\n\n5. Thời gian tiếp nhận đơn xét miễn học phần ngoại ngữ muộn nhất là **2 tuần** trước khi học kỳ bắt đầu theo Biểu đồ kế hoạch học tập của năm học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_007",
+      "question_type": "simple",
+      "question": "Sinh viên cần nộp đơn xét miễn học phần ngoại ngữ muộn nhất vào thời điểm nào?",
+      "gold_answer": "Sinh viên cần nộp đơn xét miễn học phần ngoại ngữ muộn nhất 2 tuần trước khi học kỳ bắt đầu theo Biểu đồ kế hoạch học tập của năm học.",
+      "evidence_chunk_ids": [
+        "217c6b5d-5dfd-4994-9eba-0720493aafd5"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Công nhận, xét miễn học phần ngoại ngữ\n\n1. Tất cả các học phần ngoại ngữ tương ứng với từng chương trình đào tạo là các học phần bắt buộc. Nhà trường sẽ đăng ký các học phần ngoại ngữ theo kế hoạch học tập chuẩn cho các sinh viên.\n\n2. Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần ngoại ngữ tương ứng với trình độ đạt được. Các học phần được miễn sẽ ghi điểm R trong bảng điểm.\n\n3. Chứng chỉ ngoại ngữ để xét miễn học phần phải còn hạn theo quy định tính tới thời điểm nộp đơn xét miễn. Danh sách chứng chỉ và các học phần được miễn được ghi trong các phụ lục tương ứng.\n\n4. Toàn bộ các chứng chỉ ngoại ngữ quốc tế phải được thẩm định nguồn gốc và cập nhật mức điểm lên hệ thống phần mềm quản lý đào tạo trước thời điểm nộp đơn xét miễn học phần.\n\n5. Thời gian tiếp nhận đơn xét miễn học phần ngoại ngữ muộn nhất là **2 tuần** trước khi học kỳ bắt đầu theo Biểu đồ kế hoạch học tập của năm học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_008",
+      "question_type": "simple",
+      "question": "Kết quả thi tiếng Anh nội bộ của Đại học Bách khoa Hà Nội có giá trị công nhận trong bao lâu?",
+      "gold_answer": "Kết quả thi tiếng Anh nội bộ có giá trị công nhận trong vòng 2 năm kể từ ngày thi.",
+      "evidence_chunk_ids": [
+        "e9be4019-7128-4355-b70a-4adb1b55972d"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Yêu cầu về chuẩn ngoại ngữ theo tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra\n\n1. Yêu cầu về chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra được quy định cụ thể cho từng chương trình đào tạo tại các phụ lục tương ứng, được ban hành kèm quy định này.\n\n2. Kết quả thi các kỳ thi ngoại ngữ nội bộ của Trường Đại học Bách khoa Hà Nội được công nhận để xét điều kiện chuẩn ngoại ngữ theo tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra. Riêng với các sinh viên thuộc chương trình đào tạo tiên tiến, chương trình đào tạo tài năng và chương trình đào tạo hợp tác quốc tế phải có chứng chỉ ngoại ngữ quốc tế để được xét công nhận đạt chuẩn ngoại ngữ đầu ra.\n\n3. Sinh viên được tham dự các kỳ thi Tiếng Anh nội bộ của Trường nhiều lần và được công nhận điểm thi cao nhất trong các lần thi. Kết quả thi này có giá trị công nhận trong vòng **2 năm** kể từ ngày thi.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên không đạt chuẩn ngoại ngữ theo số tín chỉ tích lũy bị giới hạn đăng ký bao nhiêu tín chỉ trong một học kỳ chính?",
+      "gold_answer": "Sinh viên không đạt chuẩn ngoại ngữ theo số tín chỉ tích lũy chỉ được đăng ký tối đa 14 tín chỉ và tối thiểu 8 tín chỉ trong một học kỳ chính.",
+      "evidence_chunk_ids": [
+        "817c7fdb-d36d-4f7b-bc57-0ff2a7c9d4f6"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Hạn chế khối lượng học tập trong trường hợp không đạt chuẩn ngoại ngữ theo tín chỉ tích lũy và điều kiện gỡ bỏ hạn chế\n\n1. Sinh viên không đạt chuẩn ngoại ngữ quy định theo số tín chỉ tích lũy sẽ chỉ được đăng ký tối đa **14 TC** và tối thiểu **8 TC** cho một học kỳ chính, tương ứng với quy định tại Điều 19 của Quy chế đào tạo chính quy.\n\n2. Điều kiện gỡ bỏ hạn chế khối lượng học tập:\n\n   a) Chỉ áp dụng với sinh viên các chương trình đào tạo chuẩn, đào tạo tài năng, đào tạo tiên tiến và quốc tế với chuẩn ngoại ngữ đầu ra là tiếng Anh và đang ở trạng thái bị hạn chế khối lượng học tập theo quy định tại mục 1 của điều này.\n\n   b) Sinh viên được gỡ bỏ mức hạn chế khối lượng học tập hoặc được tiếp tục học tập nếu đã đăng ký học tại Trường ít nhất **90 tiết học** các học phần tiếng Anh bổ trợ. Các học phần tiếng Anh bổ trợ được đăng ký học phải đảm bảo tương đương với trình độ tiếng Anh yêu cầu trong học kỳ cần gỡ bỏ hạn chế khối lượng học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên muốn gỡ hạn chế khối lượng học tập do chưa đạt chuẩn tiếng Anh cần học tối thiểu bao nhiêu tiết tiếng Anh bổ trợ tại Trường?",
+      "gold_answer": "Sinh viên cần đăng ký học tại Trường ít nhất 90 tiết học các học phần tiếng Anh bổ trợ, với trình độ tương đương yêu cầu trong học kỳ cần gỡ hạn chế.",
+      "evidence_chunk_ids": [
+        "817c7fdb-d36d-4f7b-bc57-0ff2a7c9d4f6"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Hạn chế khối lượng học tập trong trường hợp không đạt chuẩn ngoại ngữ theo tín chỉ tích lũy và điều kiện gỡ bỏ hạn chế\n\n1. Sinh viên không đạt chuẩn ngoại ngữ quy định theo số tín chỉ tích lũy sẽ chỉ được đăng ký tối đa **14 TC** và tối thiểu **8 TC** cho một học kỳ chính, tương ứng với quy định tại Điều 19 của Quy chế đào tạo chính quy.\n\n2. Điều kiện gỡ bỏ hạn chế khối lượng học tập:\n\n   a) Chỉ áp dụng với sinh viên các chương trình đào tạo chuẩn, đào tạo tài năng, đào tạo tiên tiến và quốc tế với chuẩn ngoại ngữ đầu ra là tiếng Anh và đang ở trạng thái bị hạn chế khối lượng học tập theo quy định tại mục 1 của điều này.\n\n   b) Sinh viên được gỡ bỏ mức hạn chế khối lượng học tập hoặc được tiếp tục học tập nếu đã đăng ký học tại Trường ít nhất **90 tiết học** các học phần tiếng Anh bổ trợ. Các học phần tiếng Anh bổ trợ được đăng ký học phải đảm bảo tương đương với trình độ tiếng Anh yêu cầu trong học kỳ cần gỡ bỏ hạn chế khối lượng học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_011",
+      "question_type": "simple",
+      "question": "Yêu cầu chuyên cần tối thiểu khi sinh viên học các học phần tiếng Anh bổ trợ để gỡ hạn chế khối lượng học tập là bao nhiêu?",
+      "gold_answer": "Sinh viên phải tham dự tối thiểu 80% số tiết học theo yêu cầu của mỗi học phần tiếng Anh bổ trợ.",
+      "evidence_chunk_ids": [
+        "6fc6c553-d3e4-4318-bb67-32a5cd9b2b53"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Hạn chế khối lượng học tập trong trường hợp không đạt chuẩn ngoại ngữ theo tín chỉ tích lũy và điều kiện gỡ bỏ hạn chế\n\n\n2. Điều kiện gỡ bỏ hạn chế khối lượng học tập:\n\nc) Yêu cầu về chuyên cần khi tham gia học các học phần tiếng Anh bổ trợ: sinh viên cần đảm bảo tham dự tối thiểu **80%** số tiết học theo yêu cầu của mỗi học phần. Những sinh viên không đảm bảo điều kiện chuyên cần với bất cứ học phần tiếng Anh bổ trợ nào đã đăng ký sẽ bị áp dụng mức hạn chế khối lượng học tập ở học kỳ kế tiếp.\n\n   d) Điều kiện gỡ bỏ giới hạn khối lượng học tập không áp dụng cho các trường hợp sinh viên bị cảnh báo học tập, xét nhận đồ án tốt nghiệp/khóa luận tốt nghiệp, xét tốt nghiệp.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_012",
+      "question_type": "simple",
+      "question": "Quy định ngoại ngữ ban hành năm 2021 áp dụng từ khóa nào trở về sau?",
+      "gold_answer": "Quy định được áp dụng từ năm học 2020–2021 đối với các chương trình đào tạo kể từ khóa 65 trở về sau.",
+      "evidence_chunk_ids": [
+        "9ec99255-3c51-4c14-97ef-1afacce3a3e9"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Hiệu lực thi hành\n\n1. Quy định này được áp dụng từ năm học 2020-2021 đối với các chương trình đào tạo kể từ **khóa 65** trở về sau.\n\n2. Quy định hiện hành về ngoại ngữ đối với các chương trình đào tạo từ **khóa 64** trở về trước vẫn tiếp tục còn hiệu lực thi hành cho đến thời điểm kết thúc khóa đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_013",
+      "question_type": "simple",
+      "question": "Theo phụ lục danh mục chương trình đào tạo, chương trình Công nghệ thông tin Việt Nhật sử dụng ngoại ngữ chính là gì?",
+      "gold_answer": "Chương trình Công nghệ thông tin Việt Nhật sử dụng ngoại ngữ chính là tiếng Nhật.",
+      "evidence_chunk_ids": [
+        "65d62c1f-6153-4a74-8c00-5644e93be3db"
+      ],
+      "ground_truth_context": [
+        "# PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ yêu cầu\n\n*(Ban hành theo Quyết định số 119/QĐ-ĐHBK-ĐT ngày 15 tháng 01 năm 2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*\n\n| LOẠI/TÊN CHƯƠNG TRÌNH ĐÀO TẠO | NGOẠI NGỮ CHÍNH |\n|---|---|\n| Các chương trình đào tạo chuẩn | Anh |\n| Các chương trình đào tạo tài năng | Anh |\n| Các chương trình đào tạo chất lượng cao PFIEV | Pháp |\n| **Các chương trình đào tạo tiên tiến** | |\n| 1. Công nghệ thông tin Global ICT | Anh |\n| 2. Khoa học dữ liệu và Trí tuệ nhân tạo | Anh |\n| 3. Kỹ thuật điều khiển - Tự động hóa và Hệ thống điện | Anh |\n| 4. Kỹ thuật Điện tử - Viễn thông | Anh |\n| 5. Kỹ thuật Y sinh | Anh |\n| 6. Kỹ thuật Cơ điện tử | Anh |\n| 7. Kỹ thuật Ô tô | Anh |\n| 8. Khoa học và Kỹ thuật Vật liệu | Anh |\n| 9. Kỹ thuật hóa dược | Anh |\n| 10. Kỹ thuật thực phẩm | Anh |\n| 11. Phân tích kinh doanh | Anh |\n| 12. Logistic và Quản lý chuỗi cung ứng (từ K65) | Anh |\n| 13. Hệ thống nhúng thông minh và IoT | Nhật |\n| 14. Công nghệ thông tin Việt Nhật | Nhật |\n| 15. Công nghệ thông tin Việt Pháp | Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Công nghệ thông tin (ĐH La Trobe, Úc) | Anh |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_014",
+      "question_type": "simple",
+      "question": "Theo phụ lục danh mục chương trình đào tạo, chương trình Công nghệ thông tin Việt Pháp sử dụng ngoại ngữ chính là gì?",
+      "gold_answer": "Chương trình Công nghệ thông tin Việt Pháp sử dụng ngoại ngữ chính là tiếng Pháp.",
+      "evidence_chunk_ids": [
+        "65d62c1f-6153-4a74-8c00-5644e93be3db"
+      ],
+      "ground_truth_context": [
+        "# PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ yêu cầu\n\n*(Ban hành theo Quyết định số 119/QĐ-ĐHBK-ĐT ngày 15 tháng 01 năm 2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*\n\n| LOẠI/TÊN CHƯƠNG TRÌNH ĐÀO TẠO | NGOẠI NGỮ CHÍNH |\n|---|---|\n| Các chương trình đào tạo chuẩn | Anh |\n| Các chương trình đào tạo tài năng | Anh |\n| Các chương trình đào tạo chất lượng cao PFIEV | Pháp |\n| **Các chương trình đào tạo tiên tiến** | |\n| 1. Công nghệ thông tin Global ICT | Anh |\n| 2. Khoa học dữ liệu và Trí tuệ nhân tạo | Anh |\n| 3. Kỹ thuật điều khiển - Tự động hóa và Hệ thống điện | Anh |\n| 4. Kỹ thuật Điện tử - Viễn thông | Anh |\n| 5. Kỹ thuật Y sinh | Anh |\n| 6. Kỹ thuật Cơ điện tử | Anh |\n| 7. Kỹ thuật Ô tô | Anh |\n| 8. Khoa học và Kỹ thuật Vật liệu | Anh |\n| 9. Kỹ thuật hóa dược | Anh |\n| 10. Kỹ thuật thực phẩm | Anh |\n| 11. Phân tích kinh doanh | Anh |\n| 12. Logistic và Quản lý chuỗi cung ứng (từ K65) | Anh |\n| 13. Hệ thống nhúng thông minh và IoT | Nhật |\n| 14. Công nghệ thông tin Việt Nhật | Nhật |\n| 15. Công nghệ thông tin Việt Pháp | Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Công nghệ thông tin (ĐH La Trobe, Úc) | Anh |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_015",
+      "question_type": "simple",
+      "question": "Theo bảng quy đổi chứng chỉ tiếng Anh, IELTS Academic 5.5 tương đương mức TOEIC nào?",
+      "gold_answer": "IELTS Academic 5.5 tương đương TOEIC 650.",
+      "evidence_chunk_ids": [
+        "0b67b099-1485-410f-ba26-53d5151f415d"
+      ],
+      "ground_truth_context": [
+        "## 1. Bảng quy đổi tương đương các chứng chỉ tiếng Anh\n\n| TOEIC | APTIS (General) | APTIS (Advanced) | TOEFL iBT | IELTS (Academic) | Cambridge English Tests | Cambridge Scale |\n|---|---|---|---|---|---|---|\n| 350 | A1 (55-65) | N/A | 20-24 | 2.5 | Movers | 100-119 |\n| 400 | A2 (66-101) | N/A | 25-31 | 3.0-3.5 | KET with grade C/B | 120-139 |\n| 500 | B1 (102-130) | B1 (74-109) | 32-34 | 4.0-4.5 | KET with grade A / PET with \"Pass\" | 140-150 |\n| 600 | B1 (131-152) | B1 (110-125) | 35-45 | 5.0 | PET with \"Merit\" | 151-159 |\n| 650 | B2 (153-159) | B2 (126-152) | 46-59 | 5.5 | PET with Distinction / FCE with grade B | 160-170 |\n| 750 | B2 (160-183) | B2 (153-165) | 60-78 | 6.0 | FCE with grade C | 171-179 |\n| 850-950 | C (≥183) | C1 (166-199) | 79-114 | 6.5-8.0 | FCE with grade A / CAE with grade C/B | 180-199 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_016",
+      "question_type": "simple",
+      "question": "Theo bảng quy đổi chứng chỉ tiếng Anh, TOEFL iBT 60–78 tương đương mức TOEIC nào?",
+      "gold_answer": "TOEFL iBT 60–78 tương đương TOEIC 750.",
+      "evidence_chunk_ids": [
+        "0b67b099-1485-410f-ba26-53d5151f415d"
+      ],
+      "ground_truth_context": [
+        "## 1. Bảng quy đổi tương đương các chứng chỉ tiếng Anh\n\n| TOEIC | APTIS (General) | APTIS (Advanced) | TOEFL iBT | IELTS (Academic) | Cambridge English Tests | Cambridge Scale |\n|---|---|---|---|---|---|---|\n| 350 | A1 (55-65) | N/A | 20-24 | 2.5 | Movers | 100-119 |\n| 400 | A2 (66-101) | N/A | 25-31 | 3.0-3.5 | KET with grade C/B | 120-139 |\n| 500 | B1 (102-130) | B1 (74-109) | 32-34 | 4.0-4.5 | KET with grade A / PET with \"Pass\" | 140-150 |\n| 600 | B1 (131-152) | B1 (110-125) | 35-45 | 5.0 | PET with \"Merit\" | 151-159 |\n| 650 | B2 (153-159) | B2 (126-152) | 46-59 | 5.5 | PET with Distinction / FCE with grade B | 160-170 |\n| 750 | B2 (160-183) | B2 (153-165) | 60-78 | 6.0 | FCE with grade C | 171-179 |\n| 850-950 | C (≥183) | C1 (166-199) | 79-114 | 6.5-8.0 | FCE with grade A / CAE with grade C/B | 180-199 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình đào tạo chuẩn cần đạt mức TOEIC tối thiểu nào từ 64 đến 95 tín chỉ tích lũy?",
+      "gold_answer": "Từ 64 đến 95 tín chỉ tích lũy, sinh viên chương trình đào tạo chuẩn cần đạt TOEIC tối thiểu 400.",
+      "evidence_chunk_ids": [
+        "5e403ea7-94d9-41be-90da-948e29d99e55"
+      ],
+      "ground_truth_context": [
+        "## Bảng 3.2. Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Điểm TOEIC tối thiểu |\n|---|---|\n| Từ 0 ÷ 63 TC | Đạt các học phần tiếng Anh cơ sở (FL1129, FL1130) |\n| Từ 64 ÷ 95 TC | **400** |\n| Từ 96 TC | **450** |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | **500** |\n| Điều kiện khi xét tốt nghiệp | **500** |\n\n---\n\n# PHỤ LỤC 4: Danh mục các học phần tiếng Anh và chuẩn yêu cầu đối với các chương trình đào tạo Tài năng\n\n*(Kèm theo Quyết định số .../QĐ-DHBK-ĐT ngày 15/01/2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_018",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình đào tạo chuẩn cần đạt mức TOEIC tối thiểu nào để được xét nhận đồ án hoặc khóa luận tốt nghiệp?",
+      "gold_answer": "Sinh viên chương trình đào tạo chuẩn cần đạt TOEIC tối thiểu 500 để được xét nhận đồ án hoặc khóa luận tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "5e403ea7-94d9-41be-90da-948e29d99e55"
+      ],
+      "ground_truth_context": [
+        "## Bảng 3.2. Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Điểm TOEIC tối thiểu |\n|---|---|\n| Từ 0 ÷ 63 TC | Đạt các học phần tiếng Anh cơ sở (FL1129, FL1130) |\n| Từ 64 ÷ 95 TC | **400** |\n| Từ 96 TC | **450** |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | **500** |\n| Điều kiện khi xét tốt nghiệp | **500** |\n\n---\n\n# PHỤ LỤC 4: Danh mục các học phần tiếng Anh và chuẩn yêu cầu đối với các chương trình đào tạo Tài năng\n\n*(Kèm theo Quyết định số .../QĐ-DHBK-ĐT ngày 15/01/2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_019",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình đào tạo tài năng từ K65 cần đạt trình độ tiếng Anh nào khi xét tốt nghiệp?",
+      "gold_answer": "Sinh viên chương trình đào tạo tài năng từ K65 cần đạt IELTS 5.5 hoặc tương đương khi xét tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "402e5491-f35f-4445-8d9c-3255ab97da35"
+      ],
+      "ground_truth_context": [
+        "## Bảng 5.2. Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra từ K65\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ |\n|---|---|\n| Từ 32 TC | Yêu cầu đạt một trong các điều kiện sau: 1) Đạt điểm IELTS **4.5**; hoặc 2) Đạt tất cả các học phần tiếng Anh trong Bảng 5.1 (Nhóm 1: đạt các học phần từ 1÷7; Nhóm 2: đạt các học phần từ 8÷14) |\n| Từ 49 TC | Yêu cầu đạt một trong các điều kiện sau: 1) Đạt điểm IELTS **5.5**; hoặc 2) Đạt tất cả các học phần tiếng Anh từ 15÷18 trong Bảng 5.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | IELTS **5.5** hoặc tương đương |\n| Điều kiện khi xét tốt nghiệp | IELTS **5.5** hoặc tương đương |\n\n---\n\n# PHỤ LỤC 6: Danh mục các học phần tiếng Anh và chuẩn yêu cầu đối với các chương trình đào tạo hợp tác quốc tế (IEP) có ngoại ngữ chính là TIẾNG ANH\n\n*(Kèm theo Quyết định số .../QĐ-DHBK-ĐT ngày 15/01/2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_020",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình hợp tác quốc tế sử dụng tiếng Anh, không phải chương trình TROY, cần đạt chuẩn tiếng Anh nào để được xét nhận đồ án hoặc khóa luận tốt nghiệp?",
+      "gold_answer": "Sinh viên chương trình hợp tác quốc tế sử dụng tiếng Anh, không phải chương trình TROY, cần đạt IELTS 5.5 quốc tế để được xét nhận đồ án hoặc khóa luận tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "efb9bfae-a413-41bf-aeb4-7292d4dd1eed"
+      ],
+      "ground_truth_context": [
+        "## Bảng 6.2. Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra (không áp dụng đối với chương trình hợp tác với Đại học TROY, Mỹ)\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ tối thiểu |\n|---|---|\n| Từ 32 TC | Yêu cầu đạt một trong các điều kiện sau: 1) IELTS **4.5** hoặc tương đương; hoặc 2) Đạt tất cả các học phần có số thứ tự từ 1÷7 trong Bảng 6.1 |\n| Từ 64 TC | Yêu cầu đạt một trong các điều kiện sau: 1) IELTS **5.5** hoặc tương đương; hoặc 2) Đạt tất cả các học phần có số thứ tự từ 1÷9 trong Bảng 6.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | IELTS **5.5** quốc tế |\n| Điều kiện khi xét tốt nghiệp | IELTS **5.5** quốc tế |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_021",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình hợp tác với Đại học TROY, Mỹ cần đạt chuẩn tiếng Anh nào từ 32 tín chỉ tích lũy?",
+      "gold_answer": "Từ 32 tín chỉ tích lũy, sinh viên chương trình hợp tác với Đại học TROY, Mỹ cần đạt IELTS 5.5 quốc tế hoặc TOEFL iBT 61; không xét các chứng chỉ khác.",
+      "evidence_chunk_ids": [
+        "ab7ca88e-4f75-4177-9e87-8ad6eb1e3252"
+      ],
+      "ground_truth_context": [
+        "## Bảng 6.3. Yêu cầu chuẩn tiếng Anh đối với chương trình đào tạo hợp tác với Đại học TROY, Mỹ\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ tối thiểu |\n|---|---|\n| Yêu cầu đầu khóa học | IELTS **4.5** quốc tế hoặc kết quả thi nội bộ đầu khóa tương đương |\n| Từ 32 TC | IELTS **5.5** quốc tế hoặc TOEFL iBT **61**, không xét các chứng chỉ khác |\n\n---\n\n# PHỤ LỤC 7: Danh mục các học phần và chuẩn yêu cầu đối với các chương trình đào tạo chất lượng cao PFIEV và đào tạo tiên tiến có ngoại ngữ chính là TIẾNG PHÁP\n\n*(Kèm theo Quyết định số .../QĐ-ĐHBK-ĐT ngày 15/01/2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_simple_022",
+      "question_type": "simple",
+      "question": "Theo bảng quy đổi chứng chỉ tiếng Nhật, chứng chỉ JLPT N3 tương ứng mức CEFR-VN nào?",
+      "gold_answer": "JLPT N3 tương ứng mức CEFR-VN B2.",
+      "evidence_chunk_ids": [
+        "df710a75-d842-4633-9986-acd92b58e2cd"
+      ],
+      "ground_truth_context": [
+        "## Bảng 9.6. Bảng quy đổi tương đương các chứng chỉ tiếng Nhật\n\n| JLPT | CEFR-VN |\n|---|---|\n| N5 | A2 |\n| N4 | B1 |\n| N3 | B2 |\n| N2 | C1 |\n| N1 | C2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình đào tạo chuẩn đã tích lũy 96 tín chỉ cần đạt TOEIC bao nhiêu, và nếu chưa đạt chuẩn ngoại ngữ thì bị giới hạn đăng ký học tập thế nào trong học kỳ chính?",
+      "gold_answer": "Sinh viên chương trình đào tạo chuẩn từ 96 tín chỉ cần đạt TOEIC tối thiểu 450. Nếu không đạt chuẩn ngoại ngữ theo số tín chỉ tích lũy, sinh viên chỉ được đăng ký tối đa 14 tín chỉ và tối thiểu 8 tín chỉ trong một học kỳ chính.",
+      "evidence_chunk_ids": [
+        "5e403ea7-94d9-41be-90da-948e29d99e55",
+        "817c7fdb-d36d-4f7b-bc57-0ff2a7c9d4f6"
+      ],
+      "ground_truth_context": [
+        "## Bảng 3.2. Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Điểm TOEIC tối thiểu |\n|---|---|\n| Từ 0 ÷ 63 TC | Đạt các học phần tiếng Anh cơ sở (FL1129, FL1130) |\n| Từ 64 ÷ 95 TC | **400** |\n| Từ 96 TC | **450** |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | **500** |\n| Điều kiện khi xét tốt nghiệp | **500** |\n\n---\n\n# PHỤ LỤC 4: Danh mục các học phần tiếng Anh và chuẩn yêu cầu đối với các chương trình đào tạo Tài năng\n\n*(Kèm theo Quyết định số .../QĐ-DHBK-ĐT ngày 15/01/2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*",
+        "## Điều 5. Hạn chế khối lượng học tập trong trường hợp không đạt chuẩn ngoại ngữ theo tín chỉ tích lũy và điều kiện gỡ bỏ hạn chế\n\n1. Sinh viên không đạt chuẩn ngoại ngữ quy định theo số tín chỉ tích lũy sẽ chỉ được đăng ký tối đa **14 TC** và tối thiểu **8 TC** cho một học kỳ chính, tương ứng với quy định tại Điều 19 của Quy chế đào tạo chính quy.\n\n2. Điều kiện gỡ bỏ hạn chế khối lượng học tập:\n\n   a) Chỉ áp dụng với sinh viên các chương trình đào tạo chuẩn, đào tạo tài năng, đào tạo tiên tiến và quốc tế với chuẩn ngoại ngữ đầu ra là tiếng Anh và đang ở trạng thái bị hạn chế khối lượng học tập theo quy định tại mục 1 của điều này.\n\n   b) Sinh viên được gỡ bỏ mức hạn chế khối lượng học tập hoặc được tiếp tục học tập nếu đã đăng ký học tại Trường ít nhất **90 tiết học** các học phần tiếng Anh bổ trợ. Các học phần tiếng Anh bổ trợ được đăng ký học phải đảm bảo tương đương với trình độ tiếng Anh yêu cầu trong học kỳ cần gỡ bỏ hạn chế khối lượng học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình đào tạo chuẩn muốn xét tốt nghiệp cần TOEIC bao nhiêu, và kết quả thi tiếng Anh nội bộ được công nhận trong thời hạn bao lâu?",
+      "gold_answer": "Sinh viên chương trình đào tạo chuẩn cần TOEIC 500 khi xét tốt nghiệp. Kết quả thi tiếng Anh nội bộ được công nhận trong vòng 2 năm kể từ ngày thi.",
+      "evidence_chunk_ids": [
+        "5e403ea7-94d9-41be-90da-948e29d99e55",
+        "e9be4019-7128-4355-b70a-4adb1b55972d"
+      ],
+      "ground_truth_context": [
+        "## Bảng 3.2. Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Điểm TOEIC tối thiểu |\n|---|---|\n| Từ 0 ÷ 63 TC | Đạt các học phần tiếng Anh cơ sở (FL1129, FL1130) |\n| Từ 64 ÷ 95 TC | **400** |\n| Từ 96 TC | **450** |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | **500** |\n| Điều kiện khi xét tốt nghiệp | **500** |\n\n---\n\n# PHỤ LỤC 4: Danh mục các học phần tiếng Anh và chuẩn yêu cầu đối với các chương trình đào tạo Tài năng\n\n*(Kèm theo Quyết định số .../QĐ-DHBK-ĐT ngày 15/01/2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*",
+        "## Điều 4. Yêu cầu về chuẩn ngoại ngữ theo tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra\n\n1. Yêu cầu về chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra được quy định cụ thể cho từng chương trình đào tạo tại các phụ lục tương ứng, được ban hành kèm quy định này.\n\n2. Kết quả thi các kỳ thi ngoại ngữ nội bộ của Trường Đại học Bách khoa Hà Nội được công nhận để xét điều kiện chuẩn ngoại ngữ theo tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra. Riêng với các sinh viên thuộc chương trình đào tạo tiên tiến, chương trình đào tạo tài năng và chương trình đào tạo hợp tác quốc tế phải có chứng chỉ ngoại ngữ quốc tế để được xét công nhận đạt chuẩn ngoại ngữ đầu ra.\n\n3. Sinh viên được tham dự các kỳ thi Tiếng Anh nội bộ của Trường nhiều lần và được công nhận điểm thi cao nhất trong các lần thi. Kết quả thi này có giá trị công nhận trong vòng **2 năm** kể từ ngày thi.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình Công nghệ thông tin Việt Nhật từ K65 sử dụng ngoại ngữ chính nào, và cần đạt chuẩn tiếng Nhật nào từ 64 tín chỉ tích lũy?",
+      "gold_answer": "Chương trình Công nghệ thông tin Việt Nhật sử dụng ngoại ngữ chính là tiếng Nhật. Từ 64 tín chỉ tích lũy, sinh viên cần có chứng chỉ tiếng Nhật N3 hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4.",
+      "evidence_chunk_ids": [
+        "65d62c1f-6153-4a74-8c00-5644e93be3db",
+        "0a7cf49c-c799-4546-b690-c169d9c0afff"
+      ],
+      "ground_truth_context": [
+        "# PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ yêu cầu\n\n*(Ban hành theo Quyết định số 119/QĐ-ĐHBK-ĐT ngày 15 tháng 01 năm 2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*\n\n| LOẠI/TÊN CHƯƠNG TRÌNH ĐÀO TẠO | NGOẠI NGỮ CHÍNH |\n|---|---|\n| Các chương trình đào tạo chuẩn | Anh |\n| Các chương trình đào tạo tài năng | Anh |\n| Các chương trình đào tạo chất lượng cao PFIEV | Pháp |\n| **Các chương trình đào tạo tiên tiến** | |\n| 1. Công nghệ thông tin Global ICT | Anh |\n| 2. Khoa học dữ liệu và Trí tuệ nhân tạo | Anh |\n| 3. Kỹ thuật điều khiển - Tự động hóa và Hệ thống điện | Anh |\n| 4. Kỹ thuật Điện tử - Viễn thông | Anh |\n| 5. Kỹ thuật Y sinh | Anh |\n| 6. Kỹ thuật Cơ điện tử | Anh |\n| 7. Kỹ thuật Ô tô | Anh |\n| 8. Khoa học và Kỹ thuật Vật liệu | Anh |\n| 9. Kỹ thuật hóa dược | Anh |\n| 10. Kỹ thuật thực phẩm | Anh |\n| 11. Phân tích kinh doanh | Anh |\n| 12. Logistic và Quản lý chuỗi cung ứng (từ K65) | Anh |\n| 13. Hệ thống nhúng thông minh và IoT | Nhật |\n| 14. Công nghệ thông tin Việt Nhật | Nhật |\n| 15. Công nghệ thông tin Việt Pháp | Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Công nghệ thông tin (ĐH La Trobe, Úc) | Anh |",
+        "## Bảng 9.5. Yêu cầu chuẩn tiếng Nhật với các chương trình đào tạo sử dụng ngoại ngữ chính là tiếng Nhật\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ yêu cầu |\n|---|---|\n| Từ 32 TC | Chứng chỉ Tiếng Nhật **N4** hoặc đạt các học phần tiếng Nhật ở Mức 1 & Mức 2. Riêng với chương trình Công nghệ thông tin Việt Nhật yêu cầu đạt các học phần tiếng Nhật ở Mức 1 & Mức 2. |\n| Từ 64 TC | Chứng chỉ Tiếng Nhật **N3** hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4 |\n| Điều kiện xét nhận đồ án/khóa luận tốt nghiệp | Chứng chỉ Tiếng Nhật **N3** hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4. Riêng với chương trình Cơ điện tử (NUT) yêu cầu: Chứng chỉ Tiếng Nhật N3 và đạt các học phần tiếng Nhật Mức 3 & Mức 4; hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4. |\n| Điều kiện khi xét tốt nghiệp | Chứng chỉ Tiếng Nhật **N3** hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4. Riêng với chương trình Cơ điện tử (NUT) yêu cầu: Chứng chỉ Tiếng Nhật N3 và đạt các học phần tiếng Nhật Mức 3 & Mức 4; hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4. |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình Công nghệ thông tin Việt Pháp cần ngoại ngữ chính nào, và điều kiện ngoại ngữ khi xét tốt nghiệp là gì?",
+      "gold_answer": "Chương trình Công nghệ thông tin Việt Pháp sử dụng ngoại ngữ chính là tiếng Pháp. Khi xét tốt nghiệp, sinh viên chương trình tiên tiến CNTT Việt-Pháp cần đạt DELF B1 và TOEIC 500.",
+      "evidence_chunk_ids": [
+        "65d62c1f-6153-4a74-8c00-5644e93be3db",
+        "4ad6b610-2e56-46c3-9b08-e634b2d38d08"
+      ],
+      "ground_truth_context": [
+        "# PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ yêu cầu\n\n*(Ban hành theo Quyết định số 119/QĐ-ĐHBK-ĐT ngày 15 tháng 01 năm 2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*\n\n| LOẠI/TÊN CHƯƠNG TRÌNH ĐÀO TẠO | NGOẠI NGỮ CHÍNH |\n|---|---|\n| Các chương trình đào tạo chuẩn | Anh |\n| Các chương trình đào tạo tài năng | Anh |\n| Các chương trình đào tạo chất lượng cao PFIEV | Pháp |\n| **Các chương trình đào tạo tiên tiến** | |\n| 1. Công nghệ thông tin Global ICT | Anh |\n| 2. Khoa học dữ liệu và Trí tuệ nhân tạo | Anh |\n| 3. Kỹ thuật điều khiển - Tự động hóa và Hệ thống điện | Anh |\n| 4. Kỹ thuật Điện tử - Viễn thông | Anh |\n| 5. Kỹ thuật Y sinh | Anh |\n| 6. Kỹ thuật Cơ điện tử | Anh |\n| 7. Kỹ thuật Ô tô | Anh |\n| 8. Khoa học và Kỹ thuật Vật liệu | Anh |\n| 9. Kỹ thuật hóa dược | Anh |\n| 10. Kỹ thuật thực phẩm | Anh |\n| 11. Phân tích kinh doanh | Anh |\n| 12. Logistic và Quản lý chuỗi cung ứng (từ K65) | Anh |\n| 13. Hệ thống nhúng thông minh và IoT | Nhật |\n| 14. Công nghệ thông tin Việt Nhật | Nhật |\n| 15. Công nghệ thông tin Việt Pháp | Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Công nghệ thông tin (ĐH La Trobe, Úc) | Anh |",
+        "## Bảng 7.3. Yêu cầu chuẩn tiếng Pháp với các chương trình đào tạo tiên tiến và đào tạo chất lượng cao sử dụng ngoại ngữ chính là tiếng Pháp\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ – CTĐT chất lượng cao PFIEV | Trình độ ngoại ngữ – CTĐT tiên tiến CNTT Việt-Pháp |\n|---|---|---|\n| Từ 32 TC | DELF A1 hoặc đạt các học phần từ 1÷2 trong Bảng 7.1 | DELF A1 hoặc đạt các học phần từ 1÷3 trong Bảng 7.2 |\n| Từ 64 TC | DELF A2 hoặc đạt các học phần từ 1÷4 trong Bảng 7.1 | DELF A2 hoặc đạt các học phần từ 1÷5 trong Bảng 7.2 |\n| Từ 96 TC | DELF B1 hoặc đạt các học phần từ 1÷6 trong Bảng 7.1 | DELF B1 hoặc đạt các học phần từ 1÷9 trong Bảng 7.2 |\n| Điều kiện xét nhận đồ án/khóa luận TN | DELF B1 hoặc TOEIC **500** | DELF B1 **và** TOEIC **500** |\n| Điều kiện khi xét tốt nghiệp | DELF B1 **và** TOEIC **600** | DELF B1 **và** TOEIC **500** |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình chất lượng cao PFIEV sử dụng ngoại ngữ chính nào, và điều kiện ngoại ngữ khi xét tốt nghiệp là gì?",
+      "gold_answer": "Chương trình chất lượng cao PFIEV sử dụng ngoại ngữ chính là tiếng Pháp. Khi xét tốt nghiệp, sinh viên PFIEV cần đạt DELF B1 và TOEIC 600.",
+      "evidence_chunk_ids": [
+        "65d62c1f-6153-4a74-8c00-5644e93be3db",
+        "4ad6b610-2e56-46c3-9b08-e634b2d38d08"
+      ],
+      "ground_truth_context": [
+        "# PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ yêu cầu\n\n*(Ban hành theo Quyết định số 119/QĐ-ĐHBK-ĐT ngày 15 tháng 01 năm 2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*\n\n| LOẠI/TÊN CHƯƠNG TRÌNH ĐÀO TẠO | NGOẠI NGỮ CHÍNH |\n|---|---|\n| Các chương trình đào tạo chuẩn | Anh |\n| Các chương trình đào tạo tài năng | Anh |\n| Các chương trình đào tạo chất lượng cao PFIEV | Pháp |\n| **Các chương trình đào tạo tiên tiến** | |\n| 1. Công nghệ thông tin Global ICT | Anh |\n| 2. Khoa học dữ liệu và Trí tuệ nhân tạo | Anh |\n| 3. Kỹ thuật điều khiển - Tự động hóa và Hệ thống điện | Anh |\n| 4. Kỹ thuật Điện tử - Viễn thông | Anh |\n| 5. Kỹ thuật Y sinh | Anh |\n| 6. Kỹ thuật Cơ điện tử | Anh |\n| 7. Kỹ thuật Ô tô | Anh |\n| 8. Khoa học và Kỹ thuật Vật liệu | Anh |\n| 9. Kỹ thuật hóa dược | Anh |\n| 10. Kỹ thuật thực phẩm | Anh |\n| 11. Phân tích kinh doanh | Anh |\n| 12. Logistic và Quản lý chuỗi cung ứng (từ K65) | Anh |\n| 13. Hệ thống nhúng thông minh và IoT | Nhật |\n| 14. Công nghệ thông tin Việt Nhật | Nhật |\n| 15. Công nghệ thông tin Việt Pháp | Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Công nghệ thông tin (ĐH La Trobe, Úc) | Anh |",
+        "## Bảng 7.3. Yêu cầu chuẩn tiếng Pháp với các chương trình đào tạo tiên tiến và đào tạo chất lượng cao sử dụng ngoại ngữ chính là tiếng Pháp\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ – CTĐT chất lượng cao PFIEV | Trình độ ngoại ngữ – CTĐT tiên tiến CNTT Việt-Pháp |\n|---|---|---|\n| Từ 32 TC | DELF A1 hoặc đạt các học phần từ 1÷2 trong Bảng 7.1 | DELF A1 hoặc đạt các học phần từ 1÷3 trong Bảng 7.2 |\n| Từ 64 TC | DELF A2 hoặc đạt các học phần từ 1÷4 trong Bảng 7.1 | DELF A2 hoặc đạt các học phần từ 1÷5 trong Bảng 7.2 |\n| Từ 96 TC | DELF B1 hoặc đạt các học phần từ 1÷6 trong Bảng 7.1 | DELF B1 hoặc đạt các học phần từ 1÷9 trong Bảng 7.2 |\n| Điều kiện xét nhận đồ án/khóa luận TN | DELF B1 hoặc TOEIC **500** | DELF B1 **và** TOEIC **500** |\n| Điều kiện khi xét tốt nghiệp | DELF B1 **và** TOEIC **600** | DELF B1 **và** TOEIC **500** |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình Điện tử Viễn thông hợp tác với Đại học Leibniz Hannover sử dụng ngoại ngữ chính nào, và cần chuẩn ngoại ngữ nào khi xét tốt nghiệp?",
+      "gold_answer": "Chương trình Điện tử Viễn thông hợp tác với Đại học Leibniz Hannover sử dụng ngoại ngữ chính là tiếng Đức. Khi xét tốt nghiệp, sinh viên cần đạt Goethe-Zertifikat B1 hoặc tương đương theo Bảng 8.3, hoặc đạt các học phần số thứ tự 1–4 trong Bảng 8.1.",
+      "evidence_chunk_ids": [
+        "cec85b57-a1a5-455c-8b82-f4b9ae9e2a65",
+        "1dc45418-63ad-4768-bb1f-59d9bd028c21"
+      ],
+      "ground_truth_context": [
+        "| LOẠI/TÊN CHƯƠNG TRÌNH ĐÀO TẠO | NGOẠI NGỮ CHÍNH |\n|---|---|\n| 2. Công nghệ thông tin (ĐH Victoria Wellington, New Zealand) | Anh |\n| 3. Quản trị kinh doanh (ĐH Victoria Wellington, New Zealand) | Anh |\n| 4. Cơ khí Chế tạo máy (ĐH Griffith, Anh) | Anh |\n| 5. Logistic và Quản lý chuỗi cung ứng (ĐH Northamton, Anh, từ K64 về trước) | Anh |\n| 6. Cơ điện tử (ĐH Nagaoka, Nhật Bản) | Nhật |\n| 7. Điện tử Viễn thông (ĐH Leibniz Hannover, Đức) | Đức |\n| 8. Cơ điện tử (ĐH Leibniz Hannover, Đức) | Đức |\n| 9. Quản trị kinh doanh (ĐH TROY, Mỹ) | Anh |\n| 10. Khoa học Máy tính (ĐH TROY, Mỹ) | Anh |\n\n---\n# PHỤ LỤC 2: Bảng quy đổi tương đương các chứng chỉ tiếng Anh\n\n*(Ban hành theo Quyết định số 149/QĐ-DHBK-ĐT ngày 15 tháng 01 năm 2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*",
+        "## Bảng 8.2. Yêu cầu chuẩn tiếng Đức với các chương trình đào tạo sử dụng ngoại ngữ chính là tiếng Đức\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ yêu cầu |\n|---|---|\n| Từ 32 TC | Đạt chứng chỉ Goethe-Zertifikat **A2** hoặc tương đương (theo Bảng 8.3); hoặc đạt các học phần số thứ tự 1 & 2 trong Bảng 8.1 |\n| Từ 64 TC | Đạt chứng chỉ Goethe-Zertifikat **B1** hoặc tương đương (theo Bảng 8.3); hoặc đạt các học phần số thứ tự 1-4 trong Bảng 8.1 |\n| Điều kiện xét nhận đồ án/khóa luận tốt nghiệp | Đạt trình độ Goethe-Zertifikat **B1** hoặc tương đương (theo Bảng 8.3); hoặc đạt các học phần số thứ tự 1-4 trong Bảng 8.1 |\n| Điều kiện khi xét tốt nghiệp | Đạt trình độ Goethe-Zertifikat **B1** hoặc tương đương (theo Bảng 8.3); hoặc đạt các học phần số thứ tự 1-4 trong Bảng 8.1 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên có IELTS Academic 5.5 được quy đổi TOEIC bao nhiêu, và mức đó có đáp ứng điều kiện xét nhận đồ án tốt nghiệp của chương trình đào tạo chuẩn không?",
+      "gold_answer": "IELTS Academic 5.5 được quy đổi tương đương TOEIC 650. Mức này đáp ứng điều kiện xét nhận đồ án/khóa luận tốt nghiệp của chương trình đào tạo chuẩn, vì điều kiện tối thiểu là TOEIC 500.",
+      "evidence_chunk_ids": [
+        "0b67b099-1485-410f-ba26-53d5151f415d",
+        "5e403ea7-94d9-41be-90da-948e29d99e55"
+      ],
+      "ground_truth_context": [
+        "## 1. Bảng quy đổi tương đương các chứng chỉ tiếng Anh\n\n| TOEIC | APTIS (General) | APTIS (Advanced) | TOEFL iBT | IELTS (Academic) | Cambridge English Tests | Cambridge Scale |\n|---|---|---|---|---|---|---|\n| 350 | A1 (55-65) | N/A | 20-24 | 2.5 | Movers | 100-119 |\n| 400 | A2 (66-101) | N/A | 25-31 | 3.0-3.5 | KET with grade C/B | 120-139 |\n| 500 | B1 (102-130) | B1 (74-109) | 32-34 | 4.0-4.5 | KET with grade A / PET with \"Pass\" | 140-150 |\n| 600 | B1 (131-152) | B1 (110-125) | 35-45 | 5.0 | PET with \"Merit\" | 151-159 |\n| 650 | B2 (153-159) | B2 (126-152) | 46-59 | 5.5 | PET with Distinction / FCE with grade B | 160-170 |\n| 750 | B2 (160-183) | B2 (153-165) | 60-78 | 6.0 | FCE with grade C | 171-179 |\n| 850-950 | C (≥183) | C1 (166-199) | 79-114 | 6.5-8.0 | FCE with grade A / CAE with grade C/B | 180-199 |",
+        "## Bảng 3.2. Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Điểm TOEIC tối thiểu |\n|---|---|\n| Từ 0 ÷ 63 TC | Đạt các học phần tiếng Anh cơ sở (FL1129, FL1130) |\n| Từ 64 ÷ 95 TC | **400** |\n| Từ 96 TC | **450** |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | **500** |\n| Điều kiện khi xét tốt nghiệp | **500** |\n\n---\n\n# PHỤ LỤC 4: Danh mục các học phần tiếng Anh và chuẩn yêu cầu đối với các chương trình đào tạo Tài năng\n\n*(Kèm theo Quyết định số .../QĐ-DHBK-ĐT ngày 15/01/2021 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_nn_dhcq_2020_2021_1501_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên bị hạn chế khối lượng học tập do chưa đạt chuẩn tiếng Anh cần học tiếng Anh bổ trợ và đảm bảo chuyên cần như thế nào để được gỡ hạn chế?",
+      "gold_answer": "Sinh viên cần đăng ký học tại Trường ít nhất 90 tiết các học phần tiếng Anh bổ trợ tương đương trình độ yêu cầu trong học kỳ cần gỡ hạn chế, đồng thời phải tham dự tối thiểu 80% số tiết học của mỗi học phần tiếng Anh bổ trợ. Nếu không đảm bảo chuyên cần ở bất kỳ học phần bổ trợ nào đã đăng ký, sinh viên sẽ bị áp dụng hạn chế khối lượng học tập ở học kỳ kế tiếp.",
+      "evidence_chunk_ids": [
+        "817c7fdb-d36d-4f7b-bc57-0ff2a7c9d4f6",
+        "6fc6c553-d3e4-4318-bb67-32a5cd9b2b53"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Hạn chế khối lượng học tập trong trường hợp không đạt chuẩn ngoại ngữ theo tín chỉ tích lũy và điều kiện gỡ bỏ hạn chế\n\n1. Sinh viên không đạt chuẩn ngoại ngữ quy định theo số tín chỉ tích lũy sẽ chỉ được đăng ký tối đa **14 TC** và tối thiểu **8 TC** cho một học kỳ chính, tương ứng với quy định tại Điều 19 của Quy chế đào tạo chính quy.\n\n2. Điều kiện gỡ bỏ hạn chế khối lượng học tập:\n\n   a) Chỉ áp dụng với sinh viên các chương trình đào tạo chuẩn, đào tạo tài năng, đào tạo tiên tiến và quốc tế với chuẩn ngoại ngữ đầu ra là tiếng Anh và đang ở trạng thái bị hạn chế khối lượng học tập theo quy định tại mục 1 của điều này.\n\n   b) Sinh viên được gỡ bỏ mức hạn chế khối lượng học tập hoặc được tiếp tục học tập nếu đã đăng ký học tại Trường ít nhất **90 tiết học** các học phần tiếng Anh bổ trợ. Các học phần tiếng Anh bổ trợ được đăng ký học phải đảm bảo tương đương với trình độ tiếng Anh yêu cầu trong học kỳ cần gỡ bỏ hạn chế khối lượng học tập.",
+        "## Điều 5. Hạn chế khối lượng học tập trong trường hợp không đạt chuẩn ngoại ngữ theo tín chỉ tích lũy và điều kiện gỡ bỏ hạn chế\n\n\n2. Điều kiện gỡ bỏ hạn chế khối lượng học tập:\n\nc) Yêu cầu về chuyên cần khi tham gia học các học phần tiếng Anh bổ trợ: sinh viên cần đảm bảo tham dự tối thiểu **80%** số tiết học theo yêu cầu của mỗi học phần. Những sinh viên không đảm bảo điều kiện chuyên cần với bất cứ học phần tiếng Anh bổ trợ nào đã đăng ký sẽ bị áp dụng mức hạn chế khối lượng học tập ở học kỳ kế tiếp.\n\n   d) Điều kiện gỡ bỏ giới hạn khối lượng học tập không áp dụng cho các trường hợp sinh viên bị cảnh báo học tập, xét nhận đồ án tốt nghiệp/khóa luận tốt nghiệp, xét tốt nghiệp.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

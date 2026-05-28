@@ -1,0 +1,475 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QD ban hanh QD to chuc thi Truc tuyen_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_001",
+      "question_type": "simple",
+      "question": "Theo quy định tổ chức thi trực tuyến của Trường Đại học Bách khoa Hà Nội, thi trực tuyến được thực hiện trên những hệ thống hoặc phần mềm nào?",
+      "gold_answer": "Thi trực tuyến được thực hiện trên Microsoft Teams, hệ thống LMS kết hợp với Safe Exam Browser (SEB) và các phần mềm tổ chức thi khác do Hiệu trưởng quyết định.",
+      "evidence_chunk_ids": [
+        "a4e5b914-ccfe-440a-b7db-3157bab70589"
+      ],
+      "ground_truth_context": [
+        "## Điều 2. Hệ thống thi trực tuyến\n\nThi trực tuyến được thực hiện trên ứng dụng Microsoft Teams (MS Teams), hệ thống Learning Management System (LMS) kết hợp với phần mềm Safe Exam Browser (SEB) và các phần mềm tổ chức thi khác do Hiệu trưởng quyết định (sau đây gọi chung là hệ thống thi trực tuyến).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_002",
+      "question_type": "simple",
+      "question": "Quy định tổ chức thi trực tuyến của Trường Đại học Bách khoa Hà Nội áp dụng cho những loại kiểm tra, thi nào?",
+      "gold_answer": "Quy định áp dụng cho kiểm tra đánh giá trực tuyến qua internet đối với thi kết thúc học phần; thi/kiểm tra ngoại ngữ để phân loại trình độ, phân lớp học; thi đánh giá năng lực ngoại ngữ theo số tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra.",
+      "evidence_chunk_ids": [
+        "bf19e450-7ace-4c95-a299-f105c02410d3"
+      ],
+      "ground_truth_context": [
+        "## Điều 1. Phạm vi điều chỉnh\n\nVăn bản này quy định về tổ chức kiểm tra đánh giá theo phương thức trực tuyến qua mạng internet đối với thi kết thúc học phần trong chương trình đào tạo; thi/kiểm tra ngoại ngữ để phân loại trình độ và phân lớp học; thi đánh giá năng lực ngoại ngữ theo số tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra đối với sinh viên, học viên sau đại học (sau đây gọi chung là sinh viên) tại Trường Đại học Bách khoa Hà Nội (sau đây gọi tắt là Trường).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên có thể gặp những hình thức thi trực tuyến nào theo quy định tổ chức thi trực tuyến của Trường Đại học Bách khoa Hà Nội?",
+      "gold_answer": "Các hình thức thi trực tuyến gồm tự luận với đề thi dạng mở, trắc nghiệm khách quan, vấn đáp trực tuyến hoặc phối hợp các hình thức trên.",
+      "evidence_chunk_ids": [
+        "5456cc00-8a29-428a-9e84-d543b88a55d0"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Các hình thức thi trực tuyến\n\n**1.** Các hình thức thi trực tuyến được áp dụng tại Trường bao gồm: tự luận với đề thi dạng mở, trắc nghiệm khách quan, vấn đáp trực tuyến, hoặc phối hợp các hình thức trên.\n\n**a)** Thi tự luận với đề thi dạng mở là hình thức giao câu hỏi mở, đánh giá năng lực vận dụng kiến thức, tư duy, quan điểm của sinh viên để giải quyết vấn đề. Sinh viên làm bài thi tự luận viết tay trên giấy và nộp bài bằng cách chụp ảnh bài thi và gửi file định dạng JPG, PNG hoặc PDF qua hệ thống thi trực tuyến.\n\n**b)** Thi có nội dung vấn đáp là hình thức giao câu hỏi cho sinh viên ngay tại buổi thi hoặc sinh viên chuẩn bị bài tập lớn/tiểu luận, nộp trước trên hệ thống. Việc đánh giá sinh viên có phần hỏi đáp, trả lời các câu hỏi trực tiếp từ giảng viên thông qua hệ thống thi trực tuyến.\n\n**c)** Thi trắc nghiệm khách quan là hình thức cho câu hỏi, sinh viên lựa chọn các phương án đúng trong các phương án trả lời sẵn, cho phép đề thi có thể có một số lượng câu hỏi dạng tự luận."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_004",
+      "question_type": "simple",
+      "question": "Khi thi tự luận trực tuyến với đề thi dạng mở, sinh viên phải nộp bài theo định dạng nào?",
+      "gold_answer": "Sinh viên làm bài viết tay trên giấy, sau đó chụp ảnh bài thi và gửi file định dạng JPG, PNG hoặc PDF qua hệ thống thi trực tuyến.",
+      "evidence_chunk_ids": [
+        "5456cc00-8a29-428a-9e84-d543b88a55d0"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Các hình thức thi trực tuyến\n\n**1.** Các hình thức thi trực tuyến được áp dụng tại Trường bao gồm: tự luận với đề thi dạng mở, trắc nghiệm khách quan, vấn đáp trực tuyến, hoặc phối hợp các hình thức trên.\n\n**a)** Thi tự luận với đề thi dạng mở là hình thức giao câu hỏi mở, đánh giá năng lực vận dụng kiến thức, tư duy, quan điểm của sinh viên để giải quyết vấn đề. Sinh viên làm bài thi tự luận viết tay trên giấy và nộp bài bằng cách chụp ảnh bài thi và gửi file định dạng JPG, PNG hoặc PDF qua hệ thống thi trực tuyến.\n\n**b)** Thi có nội dung vấn đáp là hình thức giao câu hỏi cho sinh viên ngay tại buổi thi hoặc sinh viên chuẩn bị bài tập lớn/tiểu luận, nộp trước trên hệ thống. Việc đánh giá sinh viên có phần hỏi đáp, trả lời các câu hỏi trực tiếp từ giảng viên thông qua hệ thống thi trực tuyến.\n\n**c)** Thi trắc nghiệm khách quan là hình thức cho câu hỏi, sinh viên lựa chọn các phương án đúng trong các phương án trả lời sẵn, cho phép đề thi có thể có một số lượng câu hỏi dạng tự luận."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_005",
+      "question_type": "simple",
+      "question": "Thi vấn đáp trực tuyến được hiểu như thế nào trong quy định tổ chức thi trực tuyến?",
+      "gold_answer": "Thi vấn đáp là hình thức giảng viên giao câu hỏi tại buổi thi hoặc sinh viên chuẩn bị bài tập lớn/tiểu luận nộp trước trên hệ thống; việc đánh giá có phần hỏi đáp trực tiếp qua hệ thống thi trực tuyến.",
+      "evidence_chunk_ids": [
+        "5456cc00-8a29-428a-9e84-d543b88a55d0"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Các hình thức thi trực tuyến\n\n**1.** Các hình thức thi trực tuyến được áp dụng tại Trường bao gồm: tự luận với đề thi dạng mở, trắc nghiệm khách quan, vấn đáp trực tuyến, hoặc phối hợp các hình thức trên.\n\n**a)** Thi tự luận với đề thi dạng mở là hình thức giao câu hỏi mở, đánh giá năng lực vận dụng kiến thức, tư duy, quan điểm của sinh viên để giải quyết vấn đề. Sinh viên làm bài thi tự luận viết tay trên giấy và nộp bài bằng cách chụp ảnh bài thi và gửi file định dạng JPG, PNG hoặc PDF qua hệ thống thi trực tuyến.\n\n**b)** Thi có nội dung vấn đáp là hình thức giao câu hỏi cho sinh viên ngay tại buổi thi hoặc sinh viên chuẩn bị bài tập lớn/tiểu luận, nộp trước trên hệ thống. Việc đánh giá sinh viên có phần hỏi đáp, trả lời các câu hỏi trực tiếp từ giảng viên thông qua hệ thống thi trực tuyến.\n\n**c)** Thi trắc nghiệm khách quan là hình thức cho câu hỏi, sinh viên lựa chọn các phương án đúng trong các phương án trả lời sẵn, cho phép đề thi có thể có một số lượng câu hỏi dạng tự luận."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_006",
+      "question_type": "simple",
+      "question": "Mỗi học phần trong một học kỳ được chọn bao nhiêu hình thức thi trực tuyến?",
+      "gold_answer": "Mỗi học phần trong một học kỳ chỉ lựa chọn một hình thức thi trực tuyến.",
+      "evidence_chunk_ids": [
+        "205f7e5d-37ae-4469-9801-70bb6c023926"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Các hình thức thi trực tuyến\n\n**2.** Thi trực tuyến phải đảm bảo công bằng, khách quan và nhất quán về phương thức đánh giá kết quả học tập của sinh viên. Toàn bộ quá trình tiếp nhận đề thi, làm bài, nộp bài, hỏi-đáp được hỗ trợ và giám sát thông qua công cụ hỗ trợ trực tuyến.\n\n**3.** Căn cứ đề cương chi tiết học phần, bộ môn hoặc nhóm chuyên môn phụ trách giảng dạy xác định hình thức thi trực tuyến và đăng ký hình thức thi trực tuyến của học phần trên hệ thống quản lý đào tạo của Trường. Mỗi học phần trong một học kỳ chỉ lựa chọn một hình thức thi trực tuyến.\n\n- **a)** Ưu tiên tổ chức thi theo hình thức trắc nghiệm khách quan đối với học phần có nhiều lớp học phần, số lượng sinh viên lớn.\n- **b)** Ưu tiên tổ chức thi theo hình thức vấn đáp hoặc kết hợp giữa tự luận và vấn đáp đối với học phần có quy mô lớp nhỏ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_007",
+      "question_type": "simple",
+      "question": "Học phần có nhiều lớp học phần và số lượng sinh viên lớn được ưu tiên tổ chức thi trực tuyến theo hình thức nào?",
+      "gold_answer": "Học phần có nhiều lớp học phần và số lượng sinh viên lớn được ưu tiên tổ chức thi theo hình thức trắc nghiệm khách quan.",
+      "evidence_chunk_ids": [
+        "205f7e5d-37ae-4469-9801-70bb6c023926"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Các hình thức thi trực tuyến\n\n**2.** Thi trực tuyến phải đảm bảo công bằng, khách quan và nhất quán về phương thức đánh giá kết quả học tập của sinh viên. Toàn bộ quá trình tiếp nhận đề thi, làm bài, nộp bài, hỏi-đáp được hỗ trợ và giám sát thông qua công cụ hỗ trợ trực tuyến.\n\n**3.** Căn cứ đề cương chi tiết học phần, bộ môn hoặc nhóm chuyên môn phụ trách giảng dạy xác định hình thức thi trực tuyến và đăng ký hình thức thi trực tuyến của học phần trên hệ thống quản lý đào tạo của Trường. Mỗi học phần trong một học kỳ chỉ lựa chọn một hình thức thi trực tuyến.\n\n- **a)** Ưu tiên tổ chức thi theo hình thức trắc nghiệm khách quan đối với học phần có nhiều lớp học phần, số lượng sinh viên lớn.\n- **b)** Ưu tiên tổ chức thi theo hình thức vấn đáp hoặc kết hợp giữa tự luận và vấn đáp đối với học phần có quy mô lớp nhỏ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_008",
+      "question_type": "simple",
+      "question": "Học phần có quy mô lớp nhỏ được ưu tiên tổ chức thi trực tuyến theo hình thức nào?",
+      "gold_answer": "Học phần có quy mô lớp nhỏ được ưu tiên tổ chức thi vấn đáp hoặc kết hợp giữa tự luận và vấn đáp.",
+      "evidence_chunk_ids": [
+        "205f7e5d-37ae-4469-9801-70bb6c023926"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Các hình thức thi trực tuyến\n\n**2.** Thi trực tuyến phải đảm bảo công bằng, khách quan và nhất quán về phương thức đánh giá kết quả học tập của sinh viên. Toàn bộ quá trình tiếp nhận đề thi, làm bài, nộp bài, hỏi-đáp được hỗ trợ và giám sát thông qua công cụ hỗ trợ trực tuyến.\n\n**3.** Căn cứ đề cương chi tiết học phần, bộ môn hoặc nhóm chuyên môn phụ trách giảng dạy xác định hình thức thi trực tuyến và đăng ký hình thức thi trực tuyến của học phần trên hệ thống quản lý đào tạo của Trường. Mỗi học phần trong một học kỳ chỉ lựa chọn một hình thức thi trực tuyến.\n\n- **a)** Ưu tiên tổ chức thi theo hình thức trắc nghiệm khách quan đối với học phần có nhiều lớp học phần, số lượng sinh viên lớn.\n- **b)** Ưu tiên tổ chức thi theo hình thức vấn đáp hoặc kết hợp giữa tự luận và vấn đáp đối với học phần có quy mô lớp nhỏ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_009",
+      "question_type": "simple",
+      "question": "Thi hoặc kiểm tra ngoại ngữ trực tuyến để phân lớp và đánh giá chuẩn ngoại ngữ đầu ra có thể tổ chức theo hình thức nào?",
+      "gold_answer": "Thi/kiểm tra ngoại ngữ được thực hiện theo hình thức trắc nghiệm khách quan, hoặc có thể kết hợp giữa trắc nghiệm, tự luận và vấn đáp.",
+      "evidence_chunk_ids": [
+        "705f494d-44d8-4fcd-9775-84faca338a1d"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Các hình thức thi trực tuyến\n\n**4.** Thi/kiểm tra ngoại ngữ để phân lớp học theo trình độ, thi đánh giá năng lực ngoại ngữ theo số tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra được thực hiện theo hình thức trắc nghiệm khách quan, hoặc có thể kết hợp giữa trắc nghiệm, tự luận và vấn đáp.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên cần chuẩn bị thiết bị gì để dự thi trực tuyến?",
+      "gold_answer": "Sinh viên cần có máy tính kết nối Internet ổn định, camera giám sát trong suốt quá trình thi, loa/tai nghe và micro để liên lạc và trả lời khi thi vấn đáp; với thi chuẩn ngoại ngữ đầu ra phải có thêm camera thứ hai để giám sát.",
+      "evidence_chunk_ids": [
+        "19591440-bc00-4f9e-87dc-f0a57cdc4063"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Các yêu cầu đối với người dự thi\n\n**1.** Để đáp ứng yêu cầu triển khai thi trực tuyến, sinh viên phải có máy tính kết nối Internet với tín hiệu, băng thông ổn định; thiết bị camera giám sát trong toàn bộ quá trình làm bài thi; thiết bị loa/tai nghe và micro để liên lạc và trả lời câu hỏi khi thi vấn đáp. Đối với thi đánh giá chuẩn ngoại ngữ đầu ra, sinh viên phải có thêm thiết bị camera thứ hai phục vụ cho việc giám sát thi.\n\n**2.** Bố trí khu vực yên tĩnh, đảm bảo đủ ánh sáng, không có người xung quanh, trang phục nghiêm túc để dự thi.\n\n**3.** Đăng nhập vào phần mềm thi/phòng thi trực tuyến bằng tài khoản của trường cấp và xuất trình thẻ sinh viên và/hoặc chứng minh nhân dân, căn cước công dân."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_011",
+      "question_type": "simple",
+      "question": "Khi dự thi trực tuyến, sinh viên phải bố trí không gian thi như thế nào?",
+      "gold_answer": "Sinh viên phải bố trí khu vực yên tĩnh, đủ ánh sáng, không có người xung quanh và mặc trang phục nghiêm túc để dự thi.",
+      "evidence_chunk_ids": [
+        "19591440-bc00-4f9e-87dc-f0a57cdc4063"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Các yêu cầu đối với người dự thi\n\n**1.** Để đáp ứng yêu cầu triển khai thi trực tuyến, sinh viên phải có máy tính kết nối Internet với tín hiệu, băng thông ổn định; thiết bị camera giám sát trong toàn bộ quá trình làm bài thi; thiết bị loa/tai nghe và micro để liên lạc và trả lời câu hỏi khi thi vấn đáp. Đối với thi đánh giá chuẩn ngoại ngữ đầu ra, sinh viên phải có thêm thiết bị camera thứ hai phục vụ cho việc giám sát thi.\n\n**2.** Bố trí khu vực yên tĩnh, đảm bảo đủ ánh sáng, không có người xung quanh, trang phục nghiêm túc để dự thi.\n\n**3.** Đăng nhập vào phần mềm thi/phòng thi trực tuyến bằng tài khoản của trường cấp và xuất trình thẻ sinh viên và/hoặc chứng minh nhân dân, căn cước công dân."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_012",
+      "question_type": "simple",
+      "question": "Khi vào phần mềm hoặc phòng thi trực tuyến, sinh viên phải đăng nhập và xuất trình giấy tờ gì?",
+      "gold_answer": "Sinh viên phải đăng nhập bằng tài khoản do trường cấp và xuất trình thẻ sinh viên và/hoặc chứng minh nhân dân, căn cước công dân.",
+      "evidence_chunk_ids": [
+        "19591440-bc00-4f9e-87dc-f0a57cdc4063"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Các yêu cầu đối với người dự thi\n\n**1.** Để đáp ứng yêu cầu triển khai thi trực tuyến, sinh viên phải có máy tính kết nối Internet với tín hiệu, băng thông ổn định; thiết bị camera giám sát trong toàn bộ quá trình làm bài thi; thiết bị loa/tai nghe và micro để liên lạc và trả lời câu hỏi khi thi vấn đáp. Đối với thi đánh giá chuẩn ngoại ngữ đầu ra, sinh viên phải có thêm thiết bị camera thứ hai phục vụ cho việc giám sát thi.\n\n**2.** Bố trí khu vực yên tĩnh, đảm bảo đủ ánh sáng, không có người xung quanh, trang phục nghiêm túc để dự thi.\n\n**3.** Đăng nhập vào phần mềm thi/phòng thi trực tuyến bằng tài khoản của trường cấp và xuất trình thẻ sinh viên và/hoặc chứng minh nhân dân, căn cước công dân."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_013",
+      "question_type": "simple",
+      "question": "Trong suốt quá trình thi trực tuyến, sinh viên phải duy trì kết nối và vị trí làm bài như thế nào?",
+      "gold_answer": "Sinh viên phải duy trì liên lạc, kết nối video và âm thanh liên tục với phòng thi trực tuyến; không rời khỏi vị trí làm bài hoặc khung hình camera trong suốt quá trình thi.",
+      "evidence_chunk_ids": [
+        "cdd2f7d5-b8a6-4182-a533-5b3dd9efc127"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Các yêu cầu đối với người dự thi\n\n**4.** Đảm bảo duy trì liên lạc, kết nối video (hình ảnh trên camera, âm thanh) liên tục với phòng thi trực tuyến trong suốt quá trình thi; chỉ sử dụng micro khi có yêu cầu; không rời khỏi vị trí làm bài thi, khung hình giám sát của camera trong suốt quá trình thi. Khi cần liên lạc, sinh viên bật tín hiệu giơ tay hoặc giơ tay trước camera và thực hiện theo các chỉ dẫn của cán bộ coi thi.\n\n**5.** Không sử dụng điện thoại di động hay bất kỳ phương tiện nào khác để quay, chụp, lưu trữ, phát tán các thông tin liên quan tới đề thi, bài thi và/hoặc các hành động nhằm can thiệp vào phần mềm, hệ thống làm thay đổi dữ liệu, kết quả bài thi.\n\n**6.** Với hình thức thi tự luận, sinh viên làm bài trên giấy, ghi đầy đủ thông tin cá nhân và mã số đề. Sinh viên nộp bài bằng cách chụp ảnh rõ nét và tải (upload) lên hệ thống. Thời gian cho phép chụp ảnh và nộp bài tối đa là 10 phút sau hết giờ làm bài thi. Quá thời gian trên, bài thi sẽ không được công nhận.\n\n**7.** Sinh viên có hành vi gian lận thi sẽ bị xử lý kỷ luật theo các quy định hiện hành của Bộ Giáo dục và Đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_014",
+      "question_type": "simple",
+      "question": "Khi cần liên lạc với cán bộ coi thi trong buổi thi trực tuyến, sinh viên phải làm gì?",
+      "gold_answer": "Sinh viên bật tín hiệu giơ tay hoặc giơ tay trước camera và thực hiện theo chỉ dẫn của cán bộ coi thi.",
+      "evidence_chunk_ids": [
+        "cdd2f7d5-b8a6-4182-a533-5b3dd9efc127"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Các yêu cầu đối với người dự thi\n\n**4.** Đảm bảo duy trì liên lạc, kết nối video (hình ảnh trên camera, âm thanh) liên tục với phòng thi trực tuyến trong suốt quá trình thi; chỉ sử dụng micro khi có yêu cầu; không rời khỏi vị trí làm bài thi, khung hình giám sát của camera trong suốt quá trình thi. Khi cần liên lạc, sinh viên bật tín hiệu giơ tay hoặc giơ tay trước camera và thực hiện theo các chỉ dẫn của cán bộ coi thi.\n\n**5.** Không sử dụng điện thoại di động hay bất kỳ phương tiện nào khác để quay, chụp, lưu trữ, phát tán các thông tin liên quan tới đề thi, bài thi và/hoặc các hành động nhằm can thiệp vào phần mềm, hệ thống làm thay đổi dữ liệu, kết quả bài thi.\n\n**6.** Với hình thức thi tự luận, sinh viên làm bài trên giấy, ghi đầy đủ thông tin cá nhân và mã số đề. Sinh viên nộp bài bằng cách chụp ảnh rõ nét và tải (upload) lên hệ thống. Thời gian cho phép chụp ảnh và nộp bài tối đa là 10 phút sau hết giờ làm bài thi. Quá thời gian trên, bài thi sẽ không được công nhận.\n\n**7.** Sinh viên có hành vi gian lận thi sẽ bị xử lý kỷ luật theo các quy định hiện hành của Bộ Giáo dục và Đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_015",
+      "question_type": "simple",
+      "question": "Sinh viên có được sử dụng điện thoại để quay chụp đề thi hoặc bài thi trực tuyến không?",
+      "gold_answer": "Không. Sinh viên không được sử dụng điện thoại di động hoặc phương tiện khác để quay, chụp, lưu trữ, phát tán thông tin liên quan đến đề thi, bài thi hoặc can thiệp vào phần mềm, hệ thống làm thay đổi dữ liệu, kết quả bài thi.",
+      "evidence_chunk_ids": [
+        "cdd2f7d5-b8a6-4182-a533-5b3dd9efc127"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Các yêu cầu đối với người dự thi\n\n**4.** Đảm bảo duy trì liên lạc, kết nối video (hình ảnh trên camera, âm thanh) liên tục với phòng thi trực tuyến trong suốt quá trình thi; chỉ sử dụng micro khi có yêu cầu; không rời khỏi vị trí làm bài thi, khung hình giám sát của camera trong suốt quá trình thi. Khi cần liên lạc, sinh viên bật tín hiệu giơ tay hoặc giơ tay trước camera và thực hiện theo các chỉ dẫn của cán bộ coi thi.\n\n**5.** Không sử dụng điện thoại di động hay bất kỳ phương tiện nào khác để quay, chụp, lưu trữ, phát tán các thông tin liên quan tới đề thi, bài thi và/hoặc các hành động nhằm can thiệp vào phần mềm, hệ thống làm thay đổi dữ liệu, kết quả bài thi.\n\n**6.** Với hình thức thi tự luận, sinh viên làm bài trên giấy, ghi đầy đủ thông tin cá nhân và mã số đề. Sinh viên nộp bài bằng cách chụp ảnh rõ nét và tải (upload) lên hệ thống. Thời gian cho phép chụp ảnh và nộp bài tối đa là 10 phút sau hết giờ làm bài thi. Quá thời gian trên, bài thi sẽ không được công nhận.\n\n**7.** Sinh viên có hành vi gian lận thi sẽ bị xử lý kỷ luật theo các quy định hiện hành của Bộ Giáo dục và Đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_016",
+      "question_type": "simple",
+      "question": "Với hình thức thi tự luận trực tuyến, sinh viên được phép chụp ảnh và nộp bài tối đa trong bao lâu sau khi hết giờ làm bài?",
+      "gold_answer": "Sinh viên được phép chụp ảnh và nộp bài tối đa 10 phút sau khi hết giờ làm bài; quá thời gian này, bài thi sẽ không được công nhận.",
+      "evidence_chunk_ids": [
+        "cdd2f7d5-b8a6-4182-a533-5b3dd9efc127"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Các yêu cầu đối với người dự thi\n\n**4.** Đảm bảo duy trì liên lạc, kết nối video (hình ảnh trên camera, âm thanh) liên tục với phòng thi trực tuyến trong suốt quá trình thi; chỉ sử dụng micro khi có yêu cầu; không rời khỏi vị trí làm bài thi, khung hình giám sát của camera trong suốt quá trình thi. Khi cần liên lạc, sinh viên bật tín hiệu giơ tay hoặc giơ tay trước camera và thực hiện theo các chỉ dẫn của cán bộ coi thi.\n\n**5.** Không sử dụng điện thoại di động hay bất kỳ phương tiện nào khác để quay, chụp, lưu trữ, phát tán các thông tin liên quan tới đề thi, bài thi và/hoặc các hành động nhằm can thiệp vào phần mềm, hệ thống làm thay đổi dữ liệu, kết quả bài thi.\n\n**6.** Với hình thức thi tự luận, sinh viên làm bài trên giấy, ghi đầy đủ thông tin cá nhân và mã số đề. Sinh viên nộp bài bằng cách chụp ảnh rõ nét và tải (upload) lên hệ thống. Thời gian cho phép chụp ảnh và nộp bài tối đa là 10 phút sau hết giờ làm bài thi. Quá thời gian trên, bài thi sẽ không được công nhận.\n\n**7.** Sinh viên có hành vi gian lận thi sẽ bị xử lý kỷ luật theo các quy định hiện hành của Bộ Giáo dục và Đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_017",
+      "question_type": "simple",
+      "question": "Nếu sinh viên gian lận trong thi trực tuyến thì bị xử lý như thế nào?",
+      "gold_answer": "Sinh viên có hành vi gian lận thi sẽ bị xử lý kỷ luật theo các quy định hiện hành của Bộ Giáo dục và Đào tạo.",
+      "evidence_chunk_ids": [
+        "cdd2f7d5-b8a6-4182-a533-5b3dd9efc127"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Các yêu cầu đối với người dự thi\n\n**4.** Đảm bảo duy trì liên lạc, kết nối video (hình ảnh trên camera, âm thanh) liên tục với phòng thi trực tuyến trong suốt quá trình thi; chỉ sử dụng micro khi có yêu cầu; không rời khỏi vị trí làm bài thi, khung hình giám sát của camera trong suốt quá trình thi. Khi cần liên lạc, sinh viên bật tín hiệu giơ tay hoặc giơ tay trước camera và thực hiện theo các chỉ dẫn của cán bộ coi thi.\n\n**5.** Không sử dụng điện thoại di động hay bất kỳ phương tiện nào khác để quay, chụp, lưu trữ, phát tán các thông tin liên quan tới đề thi, bài thi và/hoặc các hành động nhằm can thiệp vào phần mềm, hệ thống làm thay đổi dữ liệu, kết quả bài thi.\n\n**6.** Với hình thức thi tự luận, sinh viên làm bài trên giấy, ghi đầy đủ thông tin cá nhân và mã số đề. Sinh viên nộp bài bằng cách chụp ảnh rõ nét và tải (upload) lên hệ thống. Thời gian cho phép chụp ảnh và nộp bài tối đa là 10 phút sau hết giờ làm bài thi. Quá thời gian trên, bài thi sẽ không được công nhận.\n\n**7.** Sinh viên có hành vi gian lận thi sẽ bị xử lý kỷ luật theo các quy định hiện hành của Bộ Giáo dục và Đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_018",
+      "question_type": "simple",
+      "question": "Đối với học phần có từ 30 sinh viên trở lên, thi tự luận trực tuyến dạng mở cần tối thiểu bao nhiêu đề thi cho một kíp thi?",
+      "gold_answer": "Thi tự luận với đề thi dạng mở cần tối thiểu 05 đề thi cho 1 kíp thi.",
+      "evidence_chunk_ids": [
+        "2f648a17-0fa8-4ccb-9d58-574e51faab4c"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Đề thi\n\n**1.** Trường bộ môn/nhóm chuyên môn chịu trách nhiệm tổ chức biên soạn đề thi, xây dựng ngân hàng câu hỏi, cấu trúc đề thi phù hợp với các học phần được giao phụ trách giảng dạy.\n\n**2.** Đề thi đảm bảo tính khoa học, chặt chẽ, chính xác, phân loại được học lực của sinh viên và phù hợp với thời gian thi cho mỗi học phần. Nội dung đề thi đảm bảo đánh giá đúng theo chuẩn đầu ra và đề cương giảng dạy của học phần. Đề thi phải có đáp án và thang điểm cho từng câu hỏi.\n\n**3.** Đối với các học phần có số lượng sinh viên từ 30 trở lên, số lượng đề thi với mỗi hình thức thi như sau:\n\n- **a)** Thi tự luận với đề thi dạng mở: tối thiểu 05 đề thi cho 1 kíp thi.\n- **b)** Thi trắc nghiệm khách quan: tối thiểu 05 đề gốc hoặc có ngân hàng câu hỏi thi; đề thi của mỗi sinh viên được trộn theo các thứ tự khác nhau từ các đề gốc hoặc được tạo ra ngẫu nhiên từ ngân hàng câu hỏi.\n- **c)** Thi vấn đáp: tối thiểu 30 đề/học phần.\n- **d)** Bài tập lớn/tiểu luận: tối đa 5 sinh viên/một đề."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_019",
+      "question_type": "simple",
+      "question": "Đối với học phần có từ 30 sinh viên trở lên, hình thức thi vấn đáp trực tuyến cần tối thiểu bao nhiêu đề?",
+      "gold_answer": "Thi vấn đáp cần tối thiểu 30 đề cho mỗi học phần.",
+      "evidence_chunk_ids": [
+        "2f648a17-0fa8-4ccb-9d58-574e51faab4c"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Đề thi\n\n**1.** Trường bộ môn/nhóm chuyên môn chịu trách nhiệm tổ chức biên soạn đề thi, xây dựng ngân hàng câu hỏi, cấu trúc đề thi phù hợp với các học phần được giao phụ trách giảng dạy.\n\n**2.** Đề thi đảm bảo tính khoa học, chặt chẽ, chính xác, phân loại được học lực của sinh viên và phù hợp với thời gian thi cho mỗi học phần. Nội dung đề thi đảm bảo đánh giá đúng theo chuẩn đầu ra và đề cương giảng dạy của học phần. Đề thi phải có đáp án và thang điểm cho từng câu hỏi.\n\n**3.** Đối với các học phần có số lượng sinh viên từ 30 trở lên, số lượng đề thi với mỗi hình thức thi như sau:\n\n- **a)** Thi tự luận với đề thi dạng mở: tối thiểu 05 đề thi cho 1 kíp thi.\n- **b)** Thi trắc nghiệm khách quan: tối thiểu 05 đề gốc hoặc có ngân hàng câu hỏi thi; đề thi của mỗi sinh viên được trộn theo các thứ tự khác nhau từ các đề gốc hoặc được tạo ra ngẫu nhiên từ ngân hàng câu hỏi.\n- **c)** Thi vấn đáp: tối thiểu 30 đề/học phần.\n- **d)** Bài tập lớn/tiểu luận: tối đa 5 sinh viên/một đề."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_020",
+      "question_type": "simple",
+      "question": "Thời gian làm bài thi trắc nghiệm trực tuyến được quy định trong khoảng bao lâu?",
+      "gold_answer": "Thời gian thi trắc nghiệm là từ 40 phút đến 70 phút, căn cứ yêu cầu của học phần.",
+      "evidence_chunk_ids": [
+        "b6daed98-7f07-4101-ba10-2743011311af"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Thời gian làm bài thi\n\n1. Thời gian thi tự luận với đề thi dạng mở trong khoảng 60 phút đến 120 phút.\n2. Thời gian thi trắc nghiệm: 40 phút đến 70 phút căn cứ yêu cầu của học phần.\n3. Thời gian thi vấn đáp tối thiểu từ 7 đến 10 phút/sinh viên (hỏi-đáp).\n4. Thời hạn nộp bài tập lớn/tiểu luận để đánh giá kết hợp với thi vấn đáp: muộn nhất là 3 ngày trước lịch thi học phần.\n5. Đối với các học phần đặc thù, Hiệu trưởng quyết định về hình thức và thời gian thi trên cơ sở đề xuất của phòng Đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_021",
+      "question_type": "simple",
+      "question": "Thời gian thi vấn đáp trực tuyến tối thiểu là bao lâu cho mỗi sinh viên?",
+      "gold_answer": "Thời gian thi vấn đáp tối thiểu từ 7 đến 10 phút cho mỗi sinh viên, tính cho phần hỏi-đáp.",
+      "evidence_chunk_ids": [
+        "b6daed98-7f07-4101-ba10-2743011311af"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Thời gian làm bài thi\n\n1. Thời gian thi tự luận với đề thi dạng mở trong khoảng 60 phút đến 120 phút.\n2. Thời gian thi trắc nghiệm: 40 phút đến 70 phút căn cứ yêu cầu của học phần.\n3. Thời gian thi vấn đáp tối thiểu từ 7 đến 10 phút/sinh viên (hỏi-đáp).\n4. Thời hạn nộp bài tập lớn/tiểu luận để đánh giá kết hợp với thi vấn đáp: muộn nhất là 3 ngày trước lịch thi học phần.\n5. Đối với các học phần đặc thù, Hiệu trưởng quyết định về hình thức và thời gian thi trên cơ sở đề xuất của phòng Đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_simple_022",
+      "question_type": "simple",
+      "question": "Bản ghi âm, ghi hình của kỳ thi trực tuyến được lưu trữ tối thiểu trong bao lâu?",
+      "gold_answer": "Các bản ghi âm, ghi hình được lưu trữ trên hệ thống máy chủ của Trường, tối thiểu 1 năm kể từ ngày công bố kết quả thi.",
+      "evidence_chunk_ids": [
+        "06c0752a-0402-4649-b3f8-ff5d71ffc1e3"
+      ],
+      "ground_truth_context": [
+        "## Điều 8. Quy trình tổ chức thi, chấm thi và lưu trữ dữ liệu, minh chứng\n\n**6.** Bài thi tự luận, bài tập lớn, tiểu luận của sinh viên được lưu trữ dưới dạng file dữ liệu tại bộ môn. Bài thi trắc nghiệm được lưu trữ trên hệ thống máy chủ của Trường. Thời hạn lưu trữ dữ liệu bằng thời hạn lưu trữ bài thi trên giấy theo quy định của Trường.\n\n**7.** Các bản ghi âm, ghi hình được lưu trữ trên hệ thống máy chủ của Trường. Thời hạn lưu trữ tối thiểu là 1 năm kể từ ngày công bố kết quả thi.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên thi tự luận trực tuyến dạng mở, sinh viên cần có mặt trước giờ thi bao lâu và phải làm gì sau khi hết giờ làm bài?",
+      "gold_answer": "Sinh viên và cán bộ coi thi phải có mặt trong phòng thi trực tuyến ít nhất 15 phút trước khi bắt đầu để kiểm tra điều kiện kỹ thuật. Sau khi hết giờ, sinh viên chụp ảnh bài thi viết tay và nộp bài lên hệ thống thi trực tuyến; thời gian chụp ảnh và nộp bài tối đa là 10 phút sau hết giờ, quá thời gian này bài thi không được công nhận.",
+      "evidence_chunk_ids": [
+        "085bf954-1128-414f-82fe-ae5256d21078",
+        "c7ef94cc-9a68-46d0-ad16-c2966e3e3c16",
+        "cdd2f7d5-b8a6-4182-a533-5b3dd9efc127"
+      ],
+      "ground_truth_context": [
+        "## A. Quy trình thi tự luận với đề thi dạng mở\n\n### 1. Yêu cầu\n\n- **a)** Cán bộ coi thi (CBCT) và sinh viên phải có mặt trong phòng thi trực tuyến ít nhất 15 phút trước khi bắt đầu buổi thi để kiểm tra điều kiện kỹ thuật.\n- **b)** Trong thời gian 05 phút trước khi tính giờ làm bài, CBCT nhắc sinh viên đọc đề, kiểm tra sai sót đề thi và thông báo cho CBCT nếu có sai sót để xử lý.\n- **c)** Đảm bảo ít nhất 01 CBCT giám sát 01 phòng thi trực tuyến.\n- **d)** Sinh viên bật camera trong toàn bộ thời gian có mặt tại phòng thi.\n- **e)** CBCT phải theo dõi, giám sát trong suốt quá trình làm bài của sinh viên.\n- **f)** CBCT phải thực hiện ghi hình và âm thanh trong toàn bộ thời gian kể từ khi sinh viên có mặt tại phòng thi trực tuyến cho đến khi kết thúc thi.",
+        "### 2. Quy trình coi thi\n\n- **Bước 1:** CBCT và sinh viên có mặt trong phòng thi trực tuyến.\n- **Bước 2:** CBCT kiểm tra điều kiện kỹ thuật của sinh viên dự thi.\n- **Bước 3:** CBCT bật chức năng ghi (recording) của MS Teams, thực hiện điểm danh, kiểm tra thẻ và thông tin cá nhân, phổ biến quy chế thi, thời gian thi.\n- **Bước 4:** CBCT giao đề thi cho sinh viên 05 phút trước giờ thi và nhắc sinh viên kiểm tra đề thi và thông báo ngay cho CBCT nếu đề thi có sai sót do lỗi chế bản. CBCT không giải thích nội dung đề thi.\n- **Bước 5:** CBCT nhắc sinh viên khi sắp hết giờ làm bài (trước 05 phút).\n- **Bước 6:** Hết giờ thi, sinh viên chụp ảnh bài thi đã viết tay, gửi nộp bài thi lên hệ thống thi trực tuyến. CBCT kiểm tra, lưu dữ liệu bài thi nhận được và báo cáo trưởng bộ môn các trường hợp không nộp bài.\n- **Bước 7:** Sau khi ghi nhận sinh viên đã nộp bài, CBCT yêu cầu tất cả sinh viên rời khỏi phòng thi, dừng chức năng recording và kết thúc thi.\n\n---",
+        "## Điều 4. Các yêu cầu đối với người dự thi\n\n**4.** Đảm bảo duy trì liên lạc, kết nối video (hình ảnh trên camera, âm thanh) liên tục với phòng thi trực tuyến trong suốt quá trình thi; chỉ sử dụng micro khi có yêu cầu; không rời khỏi vị trí làm bài thi, khung hình giám sát của camera trong suốt quá trình thi. Khi cần liên lạc, sinh viên bật tín hiệu giơ tay hoặc giơ tay trước camera và thực hiện theo các chỉ dẫn của cán bộ coi thi.\n\n**5.** Không sử dụng điện thoại di động hay bất kỳ phương tiện nào khác để quay, chụp, lưu trữ, phát tán các thông tin liên quan tới đề thi, bài thi và/hoặc các hành động nhằm can thiệp vào phần mềm, hệ thống làm thay đổi dữ liệu, kết quả bài thi.\n\n**6.** Với hình thức thi tự luận, sinh viên làm bài trên giấy, ghi đầy đủ thông tin cá nhân và mã số đề. Sinh viên nộp bài bằng cách chụp ảnh rõ nét và tải (upload) lên hệ thống. Thời gian cho phép chụp ảnh và nộp bài tối đa là 10 phút sau hết giờ làm bài thi. Quá thời gian trên, bài thi sẽ không được công nhận.\n\n**7.** Sinh viên có hành vi gian lận thi sẽ bị xử lý kỷ luật theo các quy định hiện hành của Bộ Giáo dục và Đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Khi thi trắc nghiệm trực tuyến, sinh viên phải chuẩn bị trước những gì và đăng nhập làm bài bằng tài khoản nào?",
+      "gold_answer": "Sinh viên phải cài đặt phần mềm thi trắc nghiệm trước khi thi, có mặt trong phòng coi thi trực tuyến ít nhất 30 phút trước giờ thi để kiểm tra kỹ thuật, bật camera trong toàn bộ thời gian thi, và đăng nhập làm bài bằng tài khoản Office 365 gồm email và mật khẩu email.",
+      "evidence_chunk_ids": [
+        "241d81bb-24e2-4d20-9b0a-092380eea210",
+        "1e5d6d34-c91e-4e5b-aa54-c585d235c150"
+      ],
+      "ground_truth_context": [
+        "## C. Quy trình thi trắc nghiệm\n\n### 1. Yêu cầu\n\n- **a)** Phòng Đào tạo khởi tạo và đưa thông tin về kíp thi, mã lớp thi, môn thi, giảng viên phụ trách lên hệ thống thi trực tuyến.\n- **b)** Giảng viên được phân công tạo phòng coi thi trên MS Teams với quy mô tối đa 49 sinh viên/phòng thi, gửi file danh sách dự thi lên MS Teams để người dự thi biết thông tin về phòng coi thi.\n- **c)** CBCT và sinh viên phải có mặt trong phòng coi thi trực tuyến ít nhất 30 phút trước khi bắt đầu buổi thi để kiểm tra điều kiện kỹ thuật.\n- **d)** Đảm bảo ít nhất 01 CBCT giám sát 01 phòng coi thi trực tuyến.\n- **e)** Sinh viên bật camera trong toàn bộ thời gian có mặt tại phòng coi thi.\n- **f)** Sinh viên phải thực hiện cài đặt phần mềm thi trắc nghiệm trước khi thi.\n- **g)** CBCT phải theo dõi, giám sát trong suốt quá trình làm bài của sinh viên.\n- **h)** CBCT phải thực hiện ghi hình và âm thanh trong toàn bộ thời gian kể từ khi sinh viên có mặt tại phòng coi thi trực tuyến cho đến khi kết thúc thi.",
+        "### 2. Quy trình coi thi\n- **Bước 1:** CBCT và sinh viên có mặt trong phòng coi thi trực tuyến.\n- **Bước 2:** CBCT kiểm tra điều kiện kỹ thuật của sinh viên dự thi. CBCT chọn chế độ Large Gallery trên MS Teams để quan sát đủ 7x7 ô hình ảnh trên một màn hình.\n- **Bước 3:** CBCT bật chức năng ghi (recording) của MS Teams, nhắc sinh viên về mã và tên học phần sắp thi, thời gian thi, thực hiện điểm danh, kiểm tra thẻ và thông tin sinh viên, phổ biến quy chế thi, lưu ý sinh viên không rời vị trí thi trong suốt quá trình thi, không tự ý thoát khỏi phần mềm thi, tắt tất cả những phần mềm không liên quan đến quá trình thi trắc nghiệm, chỉ để MS Teams chạy trong suốt quá trình thi.\n- **Bước 4:** CBCT cung cấp mật khẩu của bài thi cho sinh viên.\n- **Bước 5:** Sinh viên đăng nhập bằng Tài khoản Office 365 (email và mật khẩu email), chờ đến giờ làm bài chính thức, tự mở bài thi và làm bài.\n- **Bước 6:** CBCT nhắc sinh viên khi sắp hết giờ làm bài (trước 05 phút)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Trong thi vấn đáp trực tuyến, sinh viên có bao nhiêu thời gian chuẩn bị câu trả lời và quá trình thi cần tối thiểu bao nhiêu giảng viên tham gia?",
+      "gold_answer": "Thi vấn đáp trực tuyến cần tối thiểu 02 giảng viên thực hiện nhiệm vụ cán bộ coi thi và người hỏi thi. Khi nhận đề, sinh viên chuẩn bị trong khoảng 10–15 phút, viết tay ý chính, chụp ảnh và nộp bài chuẩn bị trên hệ thống trước khi trả lời các câu hỏi làm rõ để được đánh giá, chấm điểm.",
+      "evidence_chunk_ids": [
+        "0163d0ba-fd6b-4547-b8e2-af12bb03e64f",
+        "37e95ad8-b856-4963-bb5a-dfe451e44931"
+      ],
+      "ground_truth_context": [
+        "## B. Quy trình thi có nội dung vấn đáp\n\n### 1. Yêu cầu\n\n- **a)** Đảm bảo ít nhất 02 giảng viên khi thực hiện thi vấn đáp, thực hiện nhiệm vụ là CBCT và người hỏi thi.\n- **b)** CBCT và sinh viên phải có mặt trong phòng thi trực tuyến ít nhất 15 phút trước khi bắt đầu buổi thi để kiểm tra điều kiện kỹ thuật.\n- **c)** Sinh viên bật camera trong toàn bộ thời gian có mặt tại phòng thi.\n- **d)** CBCT phải theo dõi, giám sát trong suốt quá trình sinh viên chuẩn bị câu trả lời.\n- **e)** CBCT phải thực hiện ghi hình và âm thanh trong toàn bộ thời gian kể từ khi sinh viên có mặt tại phòng thi trực tuyến cho đến khi kết thúc thi.",
+        "### 2. Quy trình coi thi\n\n- **Bước 5:** CBCT chuyển cho sinh viên đề thi. Sinh viên chuẩn bị trong khoảng thời gian từ 10–15 phút, viết tay những ý chính để trả lời câu hỏi, chụp ảnh và nộp bài chuẩn bị cho CBCT trên hệ thống. Sau khi nhận được bài chuẩn bị của sinh viên, CBCT đặt các câu hỏi để làm rõ, đánh giá và chấm điểm. CBCT có thể tạo một phòng thi để giao đề thi, cho sinh viên chuẩn bị và một phòng thi khác để thực hiện vấn đáp. Tất cả các phòng thi đều có CBCT và thực hiện toàn bộ việc ghi hình ảnh và âm thanh. Sau khi kết thúc vấn đáp một sinh viên, CBCT yêu cầu sinh viên rời khỏi phòng thi và gọi sinh viên tiếp theo.\n- **Bước 6:** CBCT thực hiện cho đến khi hoàn thành buổi thi. CBCT kiểm tra, lưu dữ liệu bài chuẩn bị do sinh viên nộp trên hệ thống phần mềm; ghi lại và báo cáo trưởng bộ môn các trường hợp không nộp bài, không dự thi.\n- **Bước 7:** CBCT dừng chức năng recording và kết thúc thi.\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Nếu một học phần có quy mô lớp nhỏ và muốn thi vấn đáp trực tuyến, quy định ưu tiên hình thức thi và quy trình gọi sinh viên vào thi như thế nào?",
+      "gold_answer": "Học phần có quy mô lớp nhỏ được ưu tiên tổ chức thi vấn đáp hoặc kết hợp giữa tự luận và vấn đáp. Trong quy trình thi vấn đáp, cán bộ coi thi gọi lần lượt sinh viên theo danh sách vào phòng thi trực tuyến, kiểm tra thẻ và thông tin cá nhân trước khi giao đề và thực hiện phần vấn đáp.",
+      "evidence_chunk_ids": [
+        "205f7e5d-37ae-4469-9801-70bb6c023926",
+        "af8dc4f4-f68a-41b7-9653-7a20d149cd4c"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Các hình thức thi trực tuyến\n\n**2.** Thi trực tuyến phải đảm bảo công bằng, khách quan và nhất quán về phương thức đánh giá kết quả học tập của sinh viên. Toàn bộ quá trình tiếp nhận đề thi, làm bài, nộp bài, hỏi-đáp được hỗ trợ và giám sát thông qua công cụ hỗ trợ trực tuyến.\n\n**3.** Căn cứ đề cương chi tiết học phần, bộ môn hoặc nhóm chuyên môn phụ trách giảng dạy xác định hình thức thi trực tuyến và đăng ký hình thức thi trực tuyến của học phần trên hệ thống quản lý đào tạo của Trường. Mỗi học phần trong một học kỳ chỉ lựa chọn một hình thức thi trực tuyến.\n\n- **a)** Ưu tiên tổ chức thi theo hình thức trắc nghiệm khách quan đối với học phần có nhiều lớp học phần, số lượng sinh viên lớn.\n- **b)** Ưu tiên tổ chức thi theo hình thức vấn đáp hoặc kết hợp giữa tự luận và vấn đáp đối với học phần có quy mô lớp nhỏ.",
+        "### 2. Quy trình coi thi\n- **Bước 1:** CBCT và sinh viên có mặt trong phòng thi trực tuyến.\n- **Bước 2:** CBCT bật chức năng ghi (recording) của MS Teams, mời tất cả sinh viên vào phòng thi để phổ biến phương thức thi và thời gian thi cho sinh viên.\n- **Bước 3:** Yêu cầu tất cả sinh viên thoát khỏi phòng thi và nhắc sinh viên sẵn sàng vào thi khi được gọi tên.\n- **Bước 4:** CBCT gọi lần lượt theo thứ tự trong danh sách sinh viên vào phòng thi (thực hiện chức năng mời vào phòng thi trực tuyến), kiểm tra thẻ và thông tin cá nhân."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Đối với thi ngoại ngữ trực tuyến theo hình thức trắc nghiệm, mỗi phòng thi tối đa bao nhiêu thí sinh và cần bao nhiêu cán bộ coi thi?",
+      "gold_answer": "Trung tâm CLA lập danh sách thi với tối đa 40 thí sinh mỗi phòng thi. Mỗi phòng coi thi phải có tối thiểu 02 cán bộ coi thi và có thể bố trí thêm 01 kỹ thuật viên hỗ trợ nếu cần.",
+      "evidence_chunk_ids": [
+        "92a58a6d-17c0-495f-b6b4-443b768f3815"
+      ],
+      "ground_truth_context": [
+        "## D. Quy trình thi ngoại ngữ theo hình thức trắc nghiệm\n\n### 1. Yêu cầu\n\n- **a)** Trung tâm CLA lập danh sách thi (tối đa 40 thí sinh/phòng thi); công bố thời gian thi, ca thi của thí sinh và các hướng dẫn thi trên website của đơn vị; khởi tạo các phòng thi trực tuyến tương ứng (MS Teams) trước khi thi.\n- **b)** Mỗi phòng coi thi phải có tối thiểu 02 CBCT; có thể bố trí thêm 01 kỹ thuật viên hỗ trợ (nếu cần).\n- **c)** CBCT và thí sinh phải có mặt trong phòng coi thi trực tuyến ít nhất 30 phút trước thời điểm bắt đầu làm bài để kiểm tra các điều kiện kỹ thuật và làm thủ tục dự thi.\n- **d)** CBCT phải theo dõi, giám sát thí sinh và các hoạt động của phòng coi thi trong suốt ca thi; phải thực hiện ghi hình và ghi âm hoạt động của phòng coi thi trong suốt ca thi; phải báo cáo kịp thời các sự cố, các vi phạm quy chế (nếu có).\n- **đ)** Thí sinh dự thi phải tự chuẩn bị, đáp ứng các điều kiện kỹ thuật (phần cứng, phần mềm) theo thông báo thi và phải bật camera để CBCT có thể giám sát trong suốt thời gian thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Trong thi ngoại ngữ trực tuyến, thí sinh phải có mặt khi nào và quy trình đăng nhập làm bài diễn ra ra sao?",
+      "gold_answer": "Thí sinh phải có mặt trong phòng coi thi trực tuyến ít nhất 30 phút trước thời điểm bắt đầu làm bài để kiểm tra điều kiện kỹ thuật và làm thủ tục dự thi. Khi thi, thí sinh đăng nhập bằng tài khoản Office 365, chờ đến giờ làm bài chính thức rồi tự mở bài thi.",
+      "evidence_chunk_ids": [
+        "92a58a6d-17c0-495f-b6b4-443b768f3815",
+        "bc6578af-f08b-4ffc-a8aa-57937f97b5a9"
+      ],
+      "ground_truth_context": [
+        "## D. Quy trình thi ngoại ngữ theo hình thức trắc nghiệm\n\n### 1. Yêu cầu\n\n- **a)** Trung tâm CLA lập danh sách thi (tối đa 40 thí sinh/phòng thi); công bố thời gian thi, ca thi của thí sinh và các hướng dẫn thi trên website của đơn vị; khởi tạo các phòng thi trực tuyến tương ứng (MS Teams) trước khi thi.\n- **b)** Mỗi phòng coi thi phải có tối thiểu 02 CBCT; có thể bố trí thêm 01 kỹ thuật viên hỗ trợ (nếu cần).\n- **c)** CBCT và thí sinh phải có mặt trong phòng coi thi trực tuyến ít nhất 30 phút trước thời điểm bắt đầu làm bài để kiểm tra các điều kiện kỹ thuật và làm thủ tục dự thi.\n- **d)** CBCT phải theo dõi, giám sát thí sinh và các hoạt động của phòng coi thi trong suốt ca thi; phải thực hiện ghi hình và ghi âm hoạt động của phòng coi thi trong suốt ca thi; phải báo cáo kịp thời các sự cố, các vi phạm quy chế (nếu có).\n- **đ)** Thí sinh dự thi phải tự chuẩn bị, đáp ứng các điều kiện kỹ thuật (phần cứng, phần mềm) theo thông báo thi và phải bật camera để CBCT có thể giám sát trong suốt thời gian thi.",
+        "### 2. Quy trình coi thi\n\n- **Bước 1:** CBCT và thí sinh có mặt trong phòng thi trực tuyến theo lịch đã công bố.\n- **Bước 2:** CBCT kiểm tra điều kiện kỹ thuật của thí sinh và bật chức năng ghi (recording) của phòng coi thi trực tuyến.\n- **Bước 3:** CBCT làm thủ tục dự thi cho thí sinh: điểm danh, kiểm tra thẻ và đối chiếu với danh sách thi, phổ biến quy chế thi và hướng dẫn làm bài thi.\n- **Bước 4:** Thí sinh đăng nhập bằng Tài khoản Office 365 (email và mật khẩu email); chờ đến giờ làm bài chính thức và tự mở bài thi.\n- **Bước 5:** CBCT nhắc thí sinh khi sắp hết giờ làm bài (trước 05 phút).\n- **Bước 6:** Hết giờ thi, thí sinh nộp bài và thoát khỏi phần mềm thi.\n- **Bước 7:** CBCT yêu cầu tất cả thí sinh rời khỏi phòng thi trực tuyến; dừng chức năng recording; báo cáo Hội đồng thi về các trường hợp vắng thi, gặp sự cố kỹ thuật, vi phạm quy định thi, nộp biên bản coi thi và kết thúc kíp thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sau khi kết thúc thi vấn đáp trực tuyến, kết quả và dữ liệu thi được xử lý như thế nào?",
+      "gold_answer": "Giảng viên chấm thi vấn đáp công bố kết quả cho sinh viên ngay sau khi hoàn thành kíp thi của học phần. Cán bộ coi thi lưu dữ liệu bài chuẩn bị do sinh viên nộp trên hệ thống, ghi lại và báo cáo trưởng bộ môn các trường hợp không nộp bài hoặc không dự thi.",
+      "evidence_chunk_ids": [
+        "e47be436-5250-4ac3-8720-264523504426",
+        "37e95ad8-b856-4963-bb5a-dfe451e44931"
+      ],
+      "ground_truth_context": [
+        "## Điều 8. Quy trình tổ chức thi, chấm thi và lưu trữ dữ liệu, minh chứng\n\n**1.** Quy trình tổ chức thi đối với các hình thức thi trực tuyến được quy định tại Phụ lục đính kèm Quy định này.\n\n**2.** Sau khi kết thúc kíp thi theo hình thức tự luận, giảng viên (người được trưởng bộ môn/nhóm chuyên môn giao nhiệm vụ) in toàn bộ bài thi trên hệ thống thi trực tuyến và cho vào túi đựng bài thi, điền đầy đủ thông tin để bộ môn/nhóm chuyên môn tổ chức chấm thi.\n\n**3.** Giảng viên chấm thi vấn đáp công bố kết quả thi cho sinh viên ngay sau khi hoàn thành kíp thi của học phần.\n\n**4.** Sau khi kết thúc kíp thi theo hình thức trắc nghiệm khách quan, giảng viên (người được trưởng bộ môn/nhóm chuyên môn giao nhiệm vụ) truy cập vào hệ thống thi trực tuyến để thực hiện việc chấm bài và xuất kết quả điểm thi ra file dữ liệu điểm.\n\n**5.** Việc nhập điểm thi lên hệ thống quản lý đào tạo được thực hiện theo quy định hiện hành của Trường.",
+        "### 2. Quy trình coi thi\n\n- **Bước 5:** CBCT chuyển cho sinh viên đề thi. Sinh viên chuẩn bị trong khoảng thời gian từ 10–15 phút, viết tay những ý chính để trả lời câu hỏi, chụp ảnh và nộp bài chuẩn bị cho CBCT trên hệ thống. Sau khi nhận được bài chuẩn bị của sinh viên, CBCT đặt các câu hỏi để làm rõ, đánh giá và chấm điểm. CBCT có thể tạo một phòng thi để giao đề thi, cho sinh viên chuẩn bị và một phòng thi khác để thực hiện vấn đáp. Tất cả các phòng thi đều có CBCT và thực hiện toàn bộ việc ghi hình ảnh và âm thanh. Sau khi kết thúc vấn đáp một sinh viên, CBCT yêu cầu sinh viên rời khỏi phòng thi và gọi sinh viên tiếp theo.\n- **Bước 6:** CBCT thực hiện cho đến khi hoàn thành buổi thi. CBCT kiểm tra, lưu dữ liệu bài chuẩn bị do sinh viên nộp trên hệ thống phần mềm; ghi lại và báo cáo trưởng bộ môn các trường hợp không nộp bài, không dự thi.\n- **Bước 7:** CBCT dừng chức năng recording và kết thúc thi.\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_thi_truc_tuyen_2021_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên thi trắc nghiệm trực tuyến, khi hết giờ làm bài sinh viên và cán bộ coi thi phải thực hiện những bước kết thúc nào?",
+      "gold_answer": "Khi hết giờ thi, sinh viên nộp bài và đóng hoặc thoát khỏi phần mềm thi. Cán bộ coi thi yêu cầu tất cả thí sinh rời khỏi phòng coi thi trên MS Teams, dừng chức năng recording, kết thúc thi và báo cáo trưởng bộ môn/nhóm chuyên môn các trường hợp vắng thi.",
+      "evidence_chunk_ids": [
+        "d19c7968-ab80-4893-b7d5-be3cef02b081"
+      ],
+      "ground_truth_context": [
+        "### 2. Quy trình coi thi\n\n- **Bước 7:** Hết giờ thi, sinh viên nộp bài và đóng/thoát khỏi phần mềm thi. CBCT yêu cầu tất cả thí sinh rời khỏi phòng coi thi trên MS Teams, dừng chức năng recording và kết thúc thi. CBCT báo cáo Trường Bộ môn/nhóm chuyên môn các trường hợp vắng thi.\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

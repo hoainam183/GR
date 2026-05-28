@@ -1,0 +1,477 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QD_ngoai_ngu_tu_K68_CQ_final_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_001",
+      "question_type": "simple",
+      "question": "Quy định ngoại ngữ áp dụng từ K68 của Đại học Bách khoa Hà Nội áp dụng cho những sinh viên nào?",
+      "gold_answer": "Quy định áp dụng cho sinh viên đại học hệ chính quy của Đại học Bách khoa Hà Nội, không thuộc ngành Ngôn ngữ Anh. Quy định không áp dụng cho sinh viên là người nước ngoài đang học tại Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "7ab2ca8c-e254-46d4-8a1a-168e860e5c29"
+      ],
+      "ground_truth_context": [
+        "# QUY ĐỊNH\n\n**Phân loại trình độ đầu vào, chương trình môn học và chuẩn ngoại ngữ yêu cầu đối với sinh viên đại học hệ chính quy**\n\n*(Ban hành theo Quyết định số /QĐ-DHBK, ngày tháng 03 năm 2024 của Giám đốc Đại học Bách khoa Hà Nội)*\n\n---\n\n### Điều 1. Phạm vi và đối tượng áp dụng\n\n1. Văn bản này quy định về công tác tổ chức đánh giá và phân loại trình độ ngoại ngữ đầu vào; chương trình môn học ngoại ngữ; điều kiện được miễn học các học phần ngoại ngữ; chuẩn ngoại ngữ yêu cầu theo số lượng tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra.\n\n2. Quy định này áp dụng cho sinh viên đại học hệ chính quy, không thuộc ngành Ngôn ngữ Anh của Đại học Bách khoa Hà Nội.\n\n3. Quy định này không áp dụng cho sinh viên là người nước ngoài đang học tại Đại học Bách khoa Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_002",
+      "question_type": "simple",
+      "question": "Sinh viên K68 thuộc chương trình có chuẩn đầu ra là tiếng Anh được phân loại trình độ đầu vào dựa trên những tiêu chí nào?",
+      "gold_answer": "Sinh viên được phân loại trình độ ngoại ngữ đầu vào dựa trên một hoặc nhiều tiêu chí: kết quả kiểm tra tiếng Anh đầu khóa, chứng chỉ tiếng Anh quốc gia/quốc tế, hoặc điểm thi môn tiếng Anh của kỳ thi tốt nghiệp THPT tại năm nhập học. Tiêu chí cụ thể có thể thay đổi theo từng khóa tuyển sinh.",
+      "evidence_chunk_ids": [
+        "2e589d9a-5989-477e-a5af-f1c3a2b059f6"
+      ],
+      "ground_truth_context": [
+        "### Điều 2. Phân loại trình độ đầu vào và phân lớp học ngoại ngữ\n\n1. Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc chương trình đào tạo có yêu cầu chuẩn đầu ra là tiếng Anh dựa trên một hoặc nhiều tiêu chí, bao gồm:\n\n   - Dựa trên kết quả kiểm tra tiếng Anh đầu khóa;\n   - Hoặc dựa trên chứng chỉ tiếng Anh quốc gia, quốc tế;\n   - Hoặc dựa trên điểm thi môn tiếng Anh của kỳ thi tốt nghiệp trung học phổ thông (THPT) tại năm nhập học.\n\n   Việc lựa chọn tiêu chí phân loại cụ thể trong số các tiêu chí trên đây có thể thay đổi theo từng khóa tuyển sinh.\n\n2. Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc chương trình đào tạo có yêu cầu chuẩn đầu ra là ngoại ngữ khác tiếng Anh: dựa trên chứng chỉ quốc tế của ngôn ngữ tương ứng.\n\n3. Căn cứ trên kết quả phân loại trình độ ngoại ngữ đầu vào, sinh viên được xét miễn học các học phần theo quy định và được xếp lớp học ngoại ngữ tương ứng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên K68 thuộc chương trình có chuẩn đầu ra là ngoại ngữ khác tiếng Anh được phân loại trình độ đầu vào như thế nào?",
+      "gold_answer": "Sinh viên thuộc chương trình có chuẩn đầu ra là ngoại ngữ khác tiếng Anh được phân loại dựa trên chứng chỉ quốc tế của ngôn ngữ tương ứng.",
+      "evidence_chunk_ids": [
+        "2e589d9a-5989-477e-a5af-f1c3a2b059f6"
+      ],
+      "ground_truth_context": [
+        "### Điều 2. Phân loại trình độ đầu vào và phân lớp học ngoại ngữ\n\n1. Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc chương trình đào tạo có yêu cầu chuẩn đầu ra là tiếng Anh dựa trên một hoặc nhiều tiêu chí, bao gồm:\n\n   - Dựa trên kết quả kiểm tra tiếng Anh đầu khóa;\n   - Hoặc dựa trên chứng chỉ tiếng Anh quốc gia, quốc tế;\n   - Hoặc dựa trên điểm thi môn tiếng Anh của kỳ thi tốt nghiệp trung học phổ thông (THPT) tại năm nhập học.\n\n   Việc lựa chọn tiêu chí phân loại cụ thể trong số các tiêu chí trên đây có thể thay đổi theo từng khóa tuyển sinh.\n\n2. Căn cứ phân loại trình độ ngoại ngữ đầu vào với sinh viên thuộc chương trình đào tạo có yêu cầu chuẩn đầu ra là ngoại ngữ khác tiếng Anh: dựa trên chứng chỉ quốc tế của ngôn ngữ tương ứng.\n\n3. Căn cứ trên kết quả phân loại trình độ ngoại ngữ đầu vào, sinh viên được xét miễn học các học phần theo quy định và được xếp lớp học ngoại ngữ tương ứng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_004",
+      "question_type": "simple",
+      "question": "Nếu sinh viên K68 không đáp ứng điều kiện phân loại trình độ ngoại ngữ đầu vào thì phải học ngoại ngữ như thế nào?",
+      "gold_answer": "Sinh viên không đáp ứng điều kiện phân loại trình độ ngoại ngữ sẽ phải học toàn bộ các học phần ngoại ngữ tương ứng với từng chương trình đào tạo theo lộ trình quy định.",
+      "evidence_chunk_ids": [
+        "dd0941ad-884f-41ab-874f-cb1bb84b94aa"
+      ],
+      "ground_truth_context": [
+        "### Điều 2. Phân loại trình độ đầu vào và phân lớp học ngoại ngữ\n\n4. Sinh viên không đáp ứng điều kiện phân loại trình độ ngoại ngữ theo khoản 1 hoặc khoản 2 của điều này sẽ phải học toàn bộ các học phần ngoại ngữ tương ứng với từng chương trình đào tạo theo lộ trình quy định."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_005",
+      "question_type": "simple",
+      "question": "Lộ trình học các học phần ngoại ngữ bắt buộc của sinh viên K68 trong 2 học kỳ đầu được quy định như thế nào?",
+      "gold_answer": "Trong 2 học kỳ đầu, Ban Đào tạo sẽ đăng ký các học phần ngoại ngữ cho sinh viên dựa theo kết quả phân loại trình độ ngoại ngữ đầu vào.",
+      "evidence_chunk_ids": [
+        "164a6534-522d-4abe-9c50-6f88b6c2c2bb"
+      ],
+      "ground_truth_context": [
+        "### Điều 3. Công nhận, xét miễn học phần ngoại ngữ\n\n1. Tất cả các học phần ngoại ngữ tương ứng với từng chương trình đào tạo là các học phần bắt buộc. Lộ trình học tập đối với các học phần ngoại ngữ được quy định như sau:\n\n   a. Ban Đào tạo sẽ đăng ký các học phần ngoại ngữ đối với 2 học kỳ đầu cho sinh viên dựa theo kết quả phân loại trình độ ngoại ngữ đầu vào.\n\n   b. Học kỳ thứ 3: dành cho sinh viên để tự đăng ký học lại các học phần ngoại ngữ không đạt ở 2 học kỳ đầu (nếu có) và chủ động thi chứng chỉ ngoại ngữ.\n\n   c. Từ kỳ thứ 4 trở đi: Ban Đào tạo sẽ thực hiện việc đăng ký bắt buộc các học phần ngoại ngữ đối với các sinh viên không đạt chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy.\n\n2. Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần ngoại ngữ tương ứng với trình độ đạt được. Các học phần được miễn sẽ được ghi điểm R trong bảng điểm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_006",
+      "question_type": "simple",
+      "question": "Học kỳ thứ 3 trong lộ trình ngoại ngữ của sinh viên K68 được dùng để làm gì?",
+      "gold_answer": "Học kỳ thứ 3 dành cho sinh viên tự đăng ký học lại các học phần ngoại ngữ không đạt ở 2 học kỳ đầu, nếu có, và chủ động thi chứng chỉ ngoại ngữ.",
+      "evidence_chunk_ids": [
+        "164a6534-522d-4abe-9c50-6f88b6c2c2bb"
+      ],
+      "ground_truth_context": [
+        "### Điều 3. Công nhận, xét miễn học phần ngoại ngữ\n\n1. Tất cả các học phần ngoại ngữ tương ứng với từng chương trình đào tạo là các học phần bắt buộc. Lộ trình học tập đối với các học phần ngoại ngữ được quy định như sau:\n\n   a. Ban Đào tạo sẽ đăng ký các học phần ngoại ngữ đối với 2 học kỳ đầu cho sinh viên dựa theo kết quả phân loại trình độ ngoại ngữ đầu vào.\n\n   b. Học kỳ thứ 3: dành cho sinh viên để tự đăng ký học lại các học phần ngoại ngữ không đạt ở 2 học kỳ đầu (nếu có) và chủ động thi chứng chỉ ngoại ngữ.\n\n   c. Từ kỳ thứ 4 trở đi: Ban Đào tạo sẽ thực hiện việc đăng ký bắt buộc các học phần ngoại ngữ đối với các sinh viên không đạt chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy.\n\n2. Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần ngoại ngữ tương ứng với trình độ đạt được. Các học phần được miễn sẽ được ghi điểm R trong bảng điểm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_007",
+      "question_type": "simple",
+      "question": "Từ học kỳ thứ 4 trở đi, sinh viên K68 không đạt chuẩn ngoại ngữ theo số tín chỉ tích lũy sẽ được đăng ký học phần ngoại ngữ như thế nào?",
+      "gold_answer": "Từ học kỳ thứ 4 trở đi, Ban Đào tạo sẽ đăng ký bắt buộc các học phần ngoại ngữ đối với sinh viên không đạt chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy.",
+      "evidence_chunk_ids": [
+        "164a6534-522d-4abe-9c50-6f88b6c2c2bb"
+      ],
+      "ground_truth_context": [
+        "### Điều 3. Công nhận, xét miễn học phần ngoại ngữ\n\n1. Tất cả các học phần ngoại ngữ tương ứng với từng chương trình đào tạo là các học phần bắt buộc. Lộ trình học tập đối với các học phần ngoại ngữ được quy định như sau:\n\n   a. Ban Đào tạo sẽ đăng ký các học phần ngoại ngữ đối với 2 học kỳ đầu cho sinh viên dựa theo kết quả phân loại trình độ ngoại ngữ đầu vào.\n\n   b. Học kỳ thứ 3: dành cho sinh viên để tự đăng ký học lại các học phần ngoại ngữ không đạt ở 2 học kỳ đầu (nếu có) và chủ động thi chứng chỉ ngoại ngữ.\n\n   c. Từ kỳ thứ 4 trở đi: Ban Đào tạo sẽ thực hiện việc đăng ký bắt buộc các học phần ngoại ngữ đối với các sinh viên không đạt chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy.\n\n2. Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần ngoại ngữ tương ứng với trình độ đạt được. Các học phần được miễn sẽ được ghi điểm R trong bảng điểm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_008",
+      "question_type": "simple",
+      "question": "Nếu sinh viên K68 có chứng chỉ ngoại ngữ đạt yêu cầu thì các học phần ngoại ngữ được miễn được ghi điểm gì trong bảng điểm?",
+      "gold_answer": "Nếu sinh viên đạt chứng chỉ ngoại ngữ theo quy định, sinh viên được xét miễn các học phần ngoại ngữ tương ứng với trình độ đạt được; các học phần được miễn sẽ được ghi điểm R trong bảng điểm.",
+      "evidence_chunk_ids": [
+        "164a6534-522d-4abe-9c50-6f88b6c2c2bb"
+      ],
+      "ground_truth_context": [
+        "### Điều 3. Công nhận, xét miễn học phần ngoại ngữ\n\n1. Tất cả các học phần ngoại ngữ tương ứng với từng chương trình đào tạo là các học phần bắt buộc. Lộ trình học tập đối với các học phần ngoại ngữ được quy định như sau:\n\n   a. Ban Đào tạo sẽ đăng ký các học phần ngoại ngữ đối với 2 học kỳ đầu cho sinh viên dựa theo kết quả phân loại trình độ ngoại ngữ đầu vào.\n\n   b. Học kỳ thứ 3: dành cho sinh viên để tự đăng ký học lại các học phần ngoại ngữ không đạt ở 2 học kỳ đầu (nếu có) và chủ động thi chứng chỉ ngoại ngữ.\n\n   c. Từ kỳ thứ 4 trở đi: Ban Đào tạo sẽ thực hiện việc đăng ký bắt buộc các học phần ngoại ngữ đối với các sinh viên không đạt chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy.\n\n2. Trong quá trình học tập, nếu sinh viên đạt được chứng chỉ ngoại ngữ theo quy định sẽ được xét miễn các học phần ngoại ngữ tương ứng với trình độ đạt được. Các học phần được miễn sẽ được ghi điểm R trong bảng điểm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên K68 phải nộp đơn đề nghị xét miễn học phần ngoại ngữ muộn nhất khi nào?",
+      "gold_answer": "Sinh viên phải nộp đơn đề nghị xét miễn học phần ngoại ngữ muộn nhất 2 tuần trước khi bắt đầu học kỳ theo Khung kế hoạch thời gian của năm học.",
+      "evidence_chunk_ids": [
+        "9a3a5be0-cd84-4b1d-a010-95f5f7980c43"
+      ],
+      "ground_truth_context": [
+        "### Điều 3. Công nhận, xét miễn học phần ngoại ngữ\n\n3. Chứng chỉ ngoại ngữ để xét miễn học phần phải còn hạn theo quy định tính tới thời điểm nộp đơn xét miễn. Danh sách chứng chỉ và các học phần được miễn được ghi trong các phụ lục tương ứng kèm theo Quy định này.\n\n4. Toàn bộ các chứng chỉ ngoại ngữ quốc gia, quốc tế phải được thẩm định nguồn gốc và cập nhật mức điểm lên hệ thống phần mềm quản lý đào tạo trước thời điểm nộp đơn đề nghị xét miễn học phần ngoại ngữ.\n\n5. Thời gian tiếp nhận đơn đề nghị xét miễn học phần ngoại ngữ muộn nhất là 2 tuần trước khi bắt đầu học kỳ theo Khung kế hoạch thời gian của năm học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_010",
+      "question_type": "simple",
+      "question": "Kết quả thi tiếng Anh nội bộ của Đại học Bách khoa Hà Nội có giá trị công nhận trong bao lâu đối với sinh viên K68?",
+      "gold_answer": "Kết quả thi tiếng Anh nội bộ có giá trị công nhận trong vòng 2 năm kể từ ngày thi. Sinh viên được thi nhiều lần và được công nhận điểm thi cao nhất trong các lần thi.",
+      "evidence_chunk_ids": [
+        "f75723df-3116-4012-bd53-ff954aad5e56"
+      ],
+      "ground_truth_context": [
+        "### Điều 4. Yêu cầu về chuẩn ngoại ngữ theo tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra\n\n1. Yêu cầu về chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra được quy định cụ thể cho từng chương trình đào tạo tại các phụ lục tương ứng kèm theo Quy định này.\n\n2. Kết quả thi các kỳ thi ngoại ngữ nội bộ của Đại học Bách khoa Hà Nội được công nhận để xét điều kiện chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy.\n\n3. Sinh viên được tham dự các kỳ thi tiếng Anh nội bộ của Đại học Bách khoa Hà Nội nhiều lần và được công nhận điểm thi cao nhất trong các lần thi. Kết quả thi này có giá trị công nhận trong vòng 2 năm kể từ ngày thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_011",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình đào tạo chuẩn từ K68 cần loại chứng chỉ nào để được xét công nhận đạt chuẩn ngoại ngữ đầu ra tiếng Anh?",
+      "gold_answer": "Sinh viên chương trình đào tạo chuẩn phải có chứng chỉ tiếng Anh quốc tế 4 kỹ năng hoặc chứng chỉ VSTEP tương đương để được xét công nhận đạt chuẩn ngoại ngữ đầu ra. Các chứng chỉ tiếng Anh có giá trị công nhận trong vòng 2 năm kể từ ngày cấp.",
+      "evidence_chunk_ids": [
+        "28f79ea8-8ab0-4f9c-ab38-a29444e0acef"
+      ],
+      "ground_truth_context": [
+        "### Điều 4. Yêu cầu về chuẩn ngoại ngữ theo tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra\n\n4. Sinh viên thuộc các chương trình đào tạo Elitech (bao gồm chương trình tiên tiến, chương trình đào tạo tài năng và chương trình đào tạo hợp tác quốc tế) có ngoại ngữ yêu cầu là tiếng Anh và sinh viên thuộc các chương trình đào tạo chuẩn phải có chứng chỉ tiếng Anh quốc tế 4 kỹ năng hoặc chứng chỉ VSTEP tương đương để được xét công nhận đạt chuẩn ngoại ngữ đầu ra. Các chứng chỉ tiếng Anh có giá trị công nhận trong vòng 2 năm kể từ ngày cấp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_012",
+      "question_type": "simple",
+      "question": "Quy định ngoại ngữ từ K68 được áp dụng từ năm học nào và áp dụng cho khóa nào trở về sau?",
+      "gold_answer": "Quy định được áp dụng từ năm học 2023-2024 đối với các chương trình đào tạo kể từ khóa 68 trở về sau.",
+      "evidence_chunk_ids": [
+        "b8db641c-0582-43ac-ada8-d3a656e0ad48"
+      ],
+      "ground_truth_context": [
+        "### Điều 5. Hạn chế khối lượng học tập trong trường hợp không đạt chuẩn ngoại ngữ theo tín chỉ tích lũy và điều kiện gỡ bỏ hạn chế\n\n1. Sinh viên không đạt chuẩn ngoại ngữ quy định theo số lượng tín chỉ tích lũy sẽ bị hạn chế khối lượng tín chỉ học tập theo Quy chế đào tạo hiện hành.\n\n2. Điều kiện gỡ bỏ hạn chế khối lượng tín chỉ học tập được quy định cụ thể tại các phụ lục tương ứng kèm theo Quy định này.\n\n### Điều 6. Các trường hợp ngoại lệ\n\nCác trường hợp ngoại lệ sẽ do Ban Đào tạo đề xuất và trình Giám đốc đại học quyết định.\n\n### Điều 7. Hiệu lực thi hành\n\n1. Quy định này được áp dụng từ năm học 2023-2024 đối với các chương trình đào tạo kể từ khóa 68 trở về sau.\n\n2. Quy định hiện hành về ngoại ngữ đối với các chương trình đào tạo từ khóa 67 trở về trước vẫn tiếp tục còn hiệu lực thi hành cho đến thời điểm kết thúc khóa đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_013",
+      "question_type": "simple",
+      "question": "Chương trình Công nghệ thông tin Việt-Nhật từ K68 có ngoại ngữ chính là gì?",
+      "gold_answer": "Chương trình Công nghệ thông tin Việt-Nhật có ngoại ngữ chính là tiếng Nhật.",
+      "evidence_chunk_ids": [
+        "4043dfd3-f3a7-484e-b12b-58ffcb83f4fc"
+      ],
+      "ground_truth_context": [
+        "## PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ chính yêu cầu\n\n| Loại/Tên chương trình đào tạo | Ngoại ngữ chính |\n|-------------------------------|-----------------|\n| 16. Logistic và Quản lý chuỗi cung ứng | Tiếng Anh |\n| 17. Hệ thống nhúng thông minh và IoT | Tiếng Nhật |\n| 18. Công nghệ thông tin Việt-Nhật | Tiếng Nhật |\n| 19. Công nghệ thông tin Việt-Pháp | Tiếng Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Cơ khí Chế tạo máy (ĐH Griffith, Úc) | Tiếng Anh |\n| 2. Cơ điện tử (ĐH Nagaoka, Nhật Bản) | Tiếng Nhật |\n| 3. Điện tử - Viễn thông (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 4. Cơ điện tử (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 5. Quản trị kinh doanh (ĐH TROY, Mỹ) | Tiếng Anh |\n| 6. Khoa học Máy tính (ĐH TROY, Mỹ) | Tiếng Anh |\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_014",
+      "question_type": "simple",
+      "question": "Chương trình Công nghệ thông tin Việt-Pháp từ K68 có ngoại ngữ chính là gì?",
+      "gold_answer": "Chương trình Công nghệ thông tin Việt-Pháp có ngoại ngữ chính là tiếng Pháp.",
+      "evidence_chunk_ids": [
+        "4043dfd3-f3a7-484e-b12b-58ffcb83f4fc"
+      ],
+      "ground_truth_context": [
+        "## PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ chính yêu cầu\n\n| Loại/Tên chương trình đào tạo | Ngoại ngữ chính |\n|-------------------------------|-----------------|\n| 16. Logistic và Quản lý chuỗi cung ứng | Tiếng Anh |\n| 17. Hệ thống nhúng thông minh và IoT | Tiếng Nhật |\n| 18. Công nghệ thông tin Việt-Nhật | Tiếng Nhật |\n| 19. Công nghệ thông tin Việt-Pháp | Tiếng Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Cơ khí Chế tạo máy (ĐH Griffith, Úc) | Tiếng Anh |\n| 2. Cơ điện tử (ĐH Nagaoka, Nhật Bản) | Tiếng Nhật |\n| 3. Điện tử - Viễn thông (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 4. Cơ điện tử (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 5. Quản trị kinh doanh (ĐH TROY, Mỹ) | Tiếng Anh |\n| 6. Khoa học Máy tính (ĐH TROY, Mỹ) | Tiếng Anh |\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_015",
+      "question_type": "simple",
+      "question": "Theo bảng quy đổi tiếng Anh từ K68, IELTS Academic tối thiểu bao nhiêu tương đương Bậc 4?",
+      "gold_answer": "IELTS Academic từ 5.5 trở lên tương đương Bậc 4 trong bảng quy đổi tiếng Anh.",
+      "evidence_chunk_ids": [
+        "f99a8da0-e774-4be0-9629-689e1bd86311"
+      ],
+      "ground_truth_context": [
+        "### 1. Bảng quy đổi tương đương các chứng chỉ tiếng Anh\n\n| Bậc (NLNNVN) | CEFR | PEIC | TOEIC 2 kỹ năng | TOEIC 4KN Nghe | TOEIC 4KN Đọc | TOEIC 4KN Nói | TOEIC 4KN Viết | TOEFL iBT | TOEFL iTP | VSTEP | IELTS Academic | APTIS ESOL | Cambridge English Scale & Tests |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| Bậc 3.1 | B1 | Level 2 | 500÷545 | 240÷270 | 240÷270 | 120 | 120 | 30÷33 | 450÷459 | 4.0 | 4.0 | 102÷115 | 140÷149 (KET) |\n| Bậc 3.2 | B1 | Level 2 | 550÷595 | 275÷295 | 275÷290 | 120 | 120 | 34÷36 | 460÷469 | 4.5 | 4.0 | 116÷127 | 140÷149 (PET) |\n| Bậc 3.3 | B1 | Level 2 | 600÷645 | 300÷320 | 295÷215 | 130 | 130 | 37÷39 | 470÷479 | 5.0 | 4.5 | 128÷135 | 150÷155 (PET) |\n| Bậc 3.4 | B1 | Level 2 | 650÷700 | 325÷350 | 220÷340 | 130 | 130 | 40÷42 | 480÷489 | 5.0 | 4.5 | 136÷143 | 156÷159 (PET) |\n| Bậc 3.5 | B1 | Level 2 | 705÷780 | 355÷395 | 345÷380 | 140 | 140 | 43÷45 | 490÷499 | 5.5 | 5.0 | 144÷152 | 156÷159 (FCE) |\n| Bậc 4 | B2 | Level 3 | ≥785 | ≥400 | ≥385 | ≥150 | ≥150 | ≥46 | ≥500 | ≥6.0 | ≥5.5 | 153÷183 | ≥160 (PET/FCE) |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_016",
+      "question_type": "simple",
+      "question": "Theo quy định ngoại ngữ từ K68, chứng chỉ TOEIC 2 kỹ năng có được dùng để xét tốt nghiệp không?",
+      "gold_answer": "Không. TOEIC 2 kỹ năng chỉ được công nhận để xét điều kiện chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy, nhưng không được công nhận để xét nhận Đồ án tốt nghiệp/Khóa luận tốt nghiệp và không được công nhận để xét tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "97185899-6f89-49d3-9270-0dabfc55606d"
+      ],
+      "ground_truth_context": [
+        "### 2. Điều kiện xét quy đổi tương đương chứng chỉ\n\n- Đối với chứng chỉ TOEIC 4 kỹ năng: quy đổi tương đương sang các chứng chỉ khác dựa theo kỹ năng đạt điểm thấp nhất.\n\n- Sinh viên có chứng chỉ TOEIC 2 kỹ năng được công nhận để xét điều kiện chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy, tuy nhiên không được công nhận để xét nhận Đồ án tốt nghiệp/Khóa luận tốt nghiệp, không được công nhận để xét tốt nghiệp.\n\n- Các trường hợp quy đổi tương đương khác do Ban Đào tạo đề xuất và trình Giám đốc Đại học quyết định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình đào tạo chuẩn từ K68 cần đạt chuẩn tiếng Anh nào để được xét nhận đồ án hoặc khóa luận tốt nghiệp?",
+      "gold_answer": "Sinh viên chương trình đào tạo chuẩn cần đạt tối thiểu Bậc 3.1 để được xét nhận đồ án hoặc khóa luận tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "63b49d26-f8e0-4139-bcd1-fccd4f1741be"
+      ],
+      "ground_truth_context": [
+        "### Bảng 3.2: Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Trình độ tiếng Anh yêu cầu |\n|---------------------|---------------------------|\n| Đến 63 TC | - Đạt tất cả học phần Tiếng Anh cơ sở gồm: FL1131, FL1132, FL1133<br>- Hoặc đạt tối thiểu Bậc 2.1 |\n| Từ 64 ÷ 95 TC | - Đạt tất cả học phần tiếng Anh cơ sở FL1131, FL1132, FL1133, FL1134<br>- Hoặc đạt tối thiểu Bậc 2.2 |\n| Từ 96 TC | - Đạt tất cả học phần tiếng Anh cơ sở FL1131, FL1132, FL1133, FL1134, FL1135<br>- Hoặc đạt tối thiểu Bậc 2.3 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | Đạt tối thiểu Bậc 3.1 |\n| Điều kiện khi xét tốt nghiệp | Đạt tối thiểu Bậc 3.1 |\n\nBậc trình độ dựa trên Khung năng lực ngoại ngữ 6 bậc của Việt Nam có trong Phụ lục 2 của quy định này.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_018",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình đào tạo Tài năng từ K68 cần đạt chuẩn tiếng Anh nào khi đã tích lũy từ 96 tín chỉ?",
+      "gold_answer": "Sinh viên chương trình đào tạo Tài năng từ K68 khi tích lũy từ 96 tín chỉ cần đạt tối thiểu Bậc 3.1.",
+      "evidence_chunk_ids": [
+        "81e69ae8-11c3-474f-8f5f-bbfeae298a25"
+      ],
+      "ground_truth_context": [
+        "### Bảng 4.2: Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Trình độ tiếng Anh yêu cầu |\n|---------------------|---------------------------|\n| Đến 63 TC | 1) Đạt các học phần Tiếng Anh cơ sở gồm: FL1105, FL1106, FL1107, FL1108<br>2) Hoặc đạt tối thiểu Bậc 2.2 |\n| Từ 64 ÷ 95 TC | Đạt tối thiểu Bậc 2.3 |\n| Từ 96 TC | Đạt tối thiểu Bậc 3.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | Đạt tối thiểu Bậc 3.2 |\n| Điều kiện khi xét tốt nghiệp | *(Không quy định riêng trong bảng)* |\n\nBậc trình độ dựa trên Khung năng lực ngoại ngữ 6 bậc của Việt Nam có trong Phụ lục 2 của quy định này.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_019",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình tiên tiến Elitech có ngoại ngữ chính là tiếng Anh từ K68 cần đạt gì từ 49 tín chỉ?",
+      "gold_answer": "Từ 49 tín chỉ, sinh viên cần đạt IELTS 5.5 hoặc đạt tất cả các học phần tiếng Anh từ số thứ tự 15 đến 18 trong Bảng 5.1.",
+      "evidence_chunk_ids": [
+        "5c9fcf86-1329-41f1-ae7f-147fb46dd6de"
+      ],
+      "ground_truth_context": [
+        "### Bảng 5.2: Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ |\n|---------------------|--------------------|\n| Từ 32 TC | Yêu cầu đạt một trong các điều kiện sau:<br>1) Đạt điểm IELTS 4.5<br>2) Đạt tất cả các học phần tiếng Anh trong Bảng 5.1:<br>- Nhóm 1: đạt các học phần tiếng Anh từ 1÷7<br>- Nhóm 2: đạt các học phần tiếng Anh từ 8÷14 |\n| Từ 49 TC | Yêu cầu đạt một trong các điều kiện sau:<br>1) Đạt điểm IELTS 5.5<br>2) Hoặc đạt tất cả các học phần tiếng Anh từ 15÷18 trong Bảng 5.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng |\n| Điều kiện khi xét tốt nghiệp | IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_020",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình hợp tác quốc tế có ngoại ngữ chính là tiếng Anh, không thuộc chương trình TROY, cần đạt gì từ 64 tín chỉ?",
+      "gold_answer": "Từ 64 tín chỉ, sinh viên cần đạt IELTS 5.5 hoặc tương đương, hoặc đạt tất cả các học phần có số thứ tự từ 1 đến 9 trong Bảng 6.1.",
+      "evidence_chunk_ids": [
+        "bfb31d38-f59a-4f45-a183-4b787481cf32"
+      ],
+      "ground_truth_context": [
+        "### Bảng 6.2: Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra (không áp dụng đối với chương trình hợp tác với Đại học TROY, Hoa Kỳ)\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ tối thiểu |\n|---------------------|------------------------------|\n| Từ 32 TC | Yêu cầu đạt một trong các điều kiện sau:<br>1) IELTS 4.5 hoặc tương đương<br>2) Hoặc đạt tất cả các học phần có số thứ tự từ 1÷7 trong Bảng 6.1 |\n| Từ 64 TC | Yêu cầu đạt một trong các điều kiện sau:<br>1) IELTS 5.5 hoặc tương đương<br>2) Hoặc đạt tất cả các học phần có số thứ tự từ 1÷9 trong Bảng 6.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng |\n| Điều kiện khi xét tốt nghiệp | IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_021",
+      "question_type": "simple",
+      "question": "Đối với chương trình PFIEV từ K68, điều kiện xét tốt nghiệp cử nhân về ngoại ngữ là gì?",
+      "gold_answer": "Điều kiện xét tốt nghiệp cử nhân đối với chương trình PFIEV là đạt DELF B1 và TOEIC 500.",
+      "evidence_chunk_ids": [
+        "8505c4a1-cca8-4c37-b270-58d5b3c1a8f3"
+      ],
+      "ground_truth_context": [
+        "### Bảng 7.3: Yêu cầu chuẩn tiếng Pháp với chương trình đào tạo PFIEV và chương trình Công nghệ thông tin Việt - Pháp\n\n| Số tín chỉ tích lũy | Yêu cầu với CTĐT PFIEV | Yêu cầu với CTĐT CNTT Việt - Pháp |\n|---------------------|------------------------|-------------------------------------|\n| Từ 32 TC | DELF A1 hoặc đạt tất cả các học phần số thứ tự từ 1÷2 trong Bảng 7.1 | DELF A1 hoặc đạt tất cả các học phần số thứ tự từ 1÷2 trong Bảng 7.2 |\n| Từ 64 TC | DELF A2 hoặc đạt tất cả các học phần số thứ tự từ 1÷4 trong Bảng 7.1 | DELF A2 hoặc đạt tất cả các học phần số thứ tự từ 1÷4 trong Bảng 7.2 |\n| Từ 96 TC | DELF B1 hoặc đạt tất cả các học phần số thứ tự từ 1÷6 trong Bảng 7.1 | DELF B1 hoặc đạt tất cả các học phần số thứ tự từ 1÷6 trong Bảng 7.2 |\n| Điều kiện xét nhận Đồ án tốt nghiệp cử nhân | DELF B1 hoặc TOEIC 500 | DELF B1 hoặc TOEIC 500 |\n| Điều kiện xét tốt nghiệp cử nhân | DELF B1 và TOEIC 500 | DELF B1 và TOEIC 500 |\n| Điều kiện xét tốt nghiệp kỹ sư chuyên sâu đặc thù | DELF B2 hoặc VSTEP tương ứng trình độ Bậc 4 | Không có |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_simple_022",
+      "question_type": "simple",
+      "question": "Đối với các chương trình có ngoại ngữ chính là tiếng Nhật từ K68, JLPT N3 tương ứng với bậc nào theo CEFR-VN?",
+      "gold_answer": "Theo bảng quy đổi tiếng Nhật, JLPT N3 tương ứng với CEFR-VN B2.",
+      "evidence_chunk_ids": [
+        "6f3796fd-ecc0-43c2-8f7c-4dc4db9c782b"
+      ],
+      "ground_truth_context": [
+        "### Bảng 9.4: Yêu cầu chuẩn tiếng Nhật với các chương trình đào tạo sử dụng ngoại ngữ chính là tiếng Nhật\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ yêu cầu |\n|---------------------|---------------------------|\n| Điều kiện khi xét tốt nghiệp | - Chứng chỉ Tiếng Nhật N3 hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4<br>- Riêng với chương trình Cơ điện tử (NUT) yêu cầu:<br>  + Chứng chỉ Tiếng Nhật N3 và đạt các học phần tiếng Nhật Mức 3 & Mức 4;<br>  + Hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4. |\n\n### Bảng 9.5: Bảng quy đổi tương đương các chứng chỉ tiếng Nhật\n\n| JLPT | CEFR-VN |\n|------|---------|\n| N5 | A2 |\n| N4 | B1 |\n| N3 | B2 |\n| N2 | C1 |\n| N1 | C2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K68 chương trình đào tạo chuẩn đã tích lũy 96 tín chỉ cần đạt chuẩn tiếng Anh nào, và nếu dùng TOEIC 2 kỹ năng thì có đủ điều kiện xét tốt nghiệp không?",
+      "gold_answer": "Ở chương trình đào tạo chuẩn, từ 96 tín chỉ sinh viên cần đạt tất cả các học phần tiếng Anh cơ sở FL1131 đến FL1135 hoặc đạt tối thiểu Bậc 2.3. Tuy nhiên để xét tốt nghiệp cần đạt tối thiểu Bậc 3.1. TOEIC 2 kỹ năng không được công nhận để xét tốt nghiệp, nên chỉ có TOEIC 2 kỹ năng thì không đủ điều kiện xét tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "63b49d26-f8e0-4139-bcd1-fccd4f1741be",
+        "97185899-6f89-49d3-9270-0dabfc55606d"
+      ],
+      "ground_truth_context": [
+        "### Bảng 3.2: Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Trình độ tiếng Anh yêu cầu |\n|---------------------|---------------------------|\n| Đến 63 TC | - Đạt tất cả học phần Tiếng Anh cơ sở gồm: FL1131, FL1132, FL1133<br>- Hoặc đạt tối thiểu Bậc 2.1 |\n| Từ 64 ÷ 95 TC | - Đạt tất cả học phần tiếng Anh cơ sở FL1131, FL1132, FL1133, FL1134<br>- Hoặc đạt tối thiểu Bậc 2.2 |\n| Từ 96 TC | - Đạt tất cả học phần tiếng Anh cơ sở FL1131, FL1132, FL1133, FL1134, FL1135<br>- Hoặc đạt tối thiểu Bậc 2.3 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | Đạt tối thiểu Bậc 3.1 |\n| Điều kiện khi xét tốt nghiệp | Đạt tối thiểu Bậc 3.1 |\n\nBậc trình độ dựa trên Khung năng lực ngoại ngữ 6 bậc của Việt Nam có trong Phụ lục 2 của quy định này.\n\n---",
+        "### 2. Điều kiện xét quy đổi tương đương chứng chỉ\n\n- Đối với chứng chỉ TOEIC 4 kỹ năng: quy đổi tương đương sang các chứng chỉ khác dựa theo kỹ năng đạt điểm thấp nhất.\n\n- Sinh viên có chứng chỉ TOEIC 2 kỹ năng được công nhận để xét điều kiện chuẩn ngoại ngữ theo số lượng tín chỉ tích lũy, tuy nhiên không được công nhận để xét nhận Đồ án tốt nghiệp/Khóa luận tốt nghiệp, không được công nhận để xét tốt nghiệp.\n\n- Các trường hợp quy đổi tương đương khác do Ban Đào tạo đề xuất và trình Giám đốc Đại học quyết định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K68 chương trình đào tạo chuẩn có IELTS Academic 5.5 thì tương đương bậc nào và có đáp ứng điều kiện xét tốt nghiệp tiếng Anh không?",
+      "gold_answer": "IELTS Academic từ 5.5 trở lên tương đương Bậc 4. Chương trình đào tạo chuẩn yêu cầu tối thiểu Bậc 3.1 khi xét tốt nghiệp, nên IELTS Academic 5.5 đáp ứng điều kiện tiếng Anh khi xét tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "f99a8da0-e774-4be0-9629-689e1bd86311",
+        "63b49d26-f8e0-4139-bcd1-fccd4f1741be"
+      ],
+      "ground_truth_context": [
+        "### 1. Bảng quy đổi tương đương các chứng chỉ tiếng Anh\n\n| Bậc (NLNNVN) | CEFR | PEIC | TOEIC 2 kỹ năng | TOEIC 4KN Nghe | TOEIC 4KN Đọc | TOEIC 4KN Nói | TOEIC 4KN Viết | TOEFL iBT | TOEFL iTP | VSTEP | IELTS Academic | APTIS ESOL | Cambridge English Scale & Tests |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| Bậc 3.1 | B1 | Level 2 | 500÷545 | 240÷270 | 240÷270 | 120 | 120 | 30÷33 | 450÷459 | 4.0 | 4.0 | 102÷115 | 140÷149 (KET) |\n| Bậc 3.2 | B1 | Level 2 | 550÷595 | 275÷295 | 275÷290 | 120 | 120 | 34÷36 | 460÷469 | 4.5 | 4.0 | 116÷127 | 140÷149 (PET) |\n| Bậc 3.3 | B1 | Level 2 | 600÷645 | 300÷320 | 295÷215 | 130 | 130 | 37÷39 | 470÷479 | 5.0 | 4.5 | 128÷135 | 150÷155 (PET) |\n| Bậc 3.4 | B1 | Level 2 | 650÷700 | 325÷350 | 220÷340 | 130 | 130 | 40÷42 | 480÷489 | 5.0 | 4.5 | 136÷143 | 156÷159 (PET) |\n| Bậc 3.5 | B1 | Level 2 | 705÷780 | 355÷395 | 345÷380 | 140 | 140 | 43÷45 | 490÷499 | 5.5 | 5.0 | 144÷152 | 156÷159 (FCE) |\n| Bậc 4 | B2 | Level 3 | ≥785 | ≥400 | ≥385 | ≥150 | ≥150 | ≥46 | ≥500 | ≥6.0 | ≥5.5 | 153÷183 | ≥160 (PET/FCE) |",
+        "### Bảng 3.2: Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Trình độ tiếng Anh yêu cầu |\n|---------------------|---------------------------|\n| Đến 63 TC | - Đạt tất cả học phần Tiếng Anh cơ sở gồm: FL1131, FL1132, FL1133<br>- Hoặc đạt tối thiểu Bậc 2.1 |\n| Từ 64 ÷ 95 TC | - Đạt tất cả học phần tiếng Anh cơ sở FL1131, FL1132, FL1133, FL1134<br>- Hoặc đạt tối thiểu Bậc 2.2 |\n| Từ 96 TC | - Đạt tất cả học phần tiếng Anh cơ sở FL1131, FL1132, FL1133, FL1134, FL1135<br>- Hoặc đạt tối thiểu Bậc 2.3 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | Đạt tối thiểu Bậc 3.1 |\n| Điều kiện khi xét tốt nghiệp | Đạt tối thiểu Bậc 3.1 |\n\nBậc trình độ dựa trên Khung năng lực ngoại ngữ 6 bậc của Việt Nam có trong Phụ lục 2 của quy định này.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K68 thuộc chương trình Elitech tiếng Anh muốn được xét nhận đồ án tốt nghiệp cần đạt mức nào, và chứng chỉ tiếng Anh dùng để xét chuẩn đầu ra có thời hạn công nhận bao lâu?",
+      "gold_answer": "Sinh viên chương trình Elitech tiếng Anh cần IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng để được xét nhận đồ án/khóa luận tốt nghiệp. Chứng chỉ tiếng Anh để xét chuẩn đầu ra có giá trị công nhận trong vòng 2 năm kể từ ngày cấp.",
+      "evidence_chunk_ids": [
+        "5c9fcf86-1329-41f1-ae7f-147fb46dd6de",
+        "28f79ea8-8ab0-4f9c-ab38-a29444e0acef"
+      ],
+      "ground_truth_context": [
+        "### Bảng 5.2: Yêu cầu chuẩn tiếng Anh theo số tín chỉ tích lũy và chuẩn đầu ra\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ |\n|---------------------|--------------------|\n| Từ 32 TC | Yêu cầu đạt một trong các điều kiện sau:<br>1) Đạt điểm IELTS 4.5<br>2) Đạt tất cả các học phần tiếng Anh trong Bảng 5.1:<br>- Nhóm 1: đạt các học phần tiếng Anh từ 1÷7<br>- Nhóm 2: đạt các học phần tiếng Anh từ 8÷14 |\n| Từ 49 TC | Yêu cầu đạt một trong các điều kiện sau:<br>1) Đạt điểm IELTS 5.5<br>2) Hoặc đạt tất cả các học phần tiếng Anh từ 15÷18 trong Bảng 5.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng |\n| Điều kiện khi xét tốt nghiệp | IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng |\n\n---",
+        "### Điều 4. Yêu cầu về chuẩn ngoại ngữ theo tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra\n\n4. Sinh viên thuộc các chương trình đào tạo Elitech (bao gồm chương trình tiên tiến, chương trình đào tạo tài năng và chương trình đào tạo hợp tác quốc tế) có ngoại ngữ yêu cầu là tiếng Anh và sinh viên thuộc các chương trình đào tạo chuẩn phải có chứng chỉ tiếng Anh quốc tế 4 kỹ năng hoặc chứng chỉ VSTEP tương đương để được xét công nhận đạt chuẩn ngoại ngữ đầu ra. Các chứng chỉ tiếng Anh có giá trị công nhận trong vòng 2 năm kể từ ngày cấp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K68 chương trình Công nghệ thông tin Việt-Pháp cần ngoại ngữ chính là gì và từ 96 tín chỉ cần đạt chuẩn nào?",
+      "gold_answer": "Chương trình Công nghệ thông tin Việt-Pháp có ngoại ngữ chính là tiếng Pháp. Từ 96 tín chỉ, sinh viên cần đạt DELF B1 hoặc đạt tất cả các học phần số thứ tự từ 1 đến 6 trong Bảng 7.2.",
+      "evidence_chunk_ids": [
+        "4043dfd3-f3a7-484e-b12b-58ffcb83f4fc",
+        "8505c4a1-cca8-4c37-b270-58d5b3c1a8f3"
+      ],
+      "ground_truth_context": [
+        "## PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ chính yêu cầu\n\n| Loại/Tên chương trình đào tạo | Ngoại ngữ chính |\n|-------------------------------|-----------------|\n| 16. Logistic và Quản lý chuỗi cung ứng | Tiếng Anh |\n| 17. Hệ thống nhúng thông minh và IoT | Tiếng Nhật |\n| 18. Công nghệ thông tin Việt-Nhật | Tiếng Nhật |\n| 19. Công nghệ thông tin Việt-Pháp | Tiếng Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Cơ khí Chế tạo máy (ĐH Griffith, Úc) | Tiếng Anh |\n| 2. Cơ điện tử (ĐH Nagaoka, Nhật Bản) | Tiếng Nhật |\n| 3. Điện tử - Viễn thông (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 4. Cơ điện tử (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 5. Quản trị kinh doanh (ĐH TROY, Mỹ) | Tiếng Anh |\n| 6. Khoa học Máy tính (ĐH TROY, Mỹ) | Tiếng Anh |\n---",
+        "### Bảng 7.3: Yêu cầu chuẩn tiếng Pháp với chương trình đào tạo PFIEV và chương trình Công nghệ thông tin Việt - Pháp\n\n| Số tín chỉ tích lũy | Yêu cầu với CTĐT PFIEV | Yêu cầu với CTĐT CNTT Việt - Pháp |\n|---------------------|------------------------|-------------------------------------|\n| Từ 32 TC | DELF A1 hoặc đạt tất cả các học phần số thứ tự từ 1÷2 trong Bảng 7.1 | DELF A1 hoặc đạt tất cả các học phần số thứ tự từ 1÷2 trong Bảng 7.2 |\n| Từ 64 TC | DELF A2 hoặc đạt tất cả các học phần số thứ tự từ 1÷4 trong Bảng 7.1 | DELF A2 hoặc đạt tất cả các học phần số thứ tự từ 1÷4 trong Bảng 7.2 |\n| Từ 96 TC | DELF B1 hoặc đạt tất cả các học phần số thứ tự từ 1÷6 trong Bảng 7.1 | DELF B1 hoặc đạt tất cả các học phần số thứ tự từ 1÷6 trong Bảng 7.2 |\n| Điều kiện xét nhận Đồ án tốt nghiệp cử nhân | DELF B1 hoặc TOEIC 500 | DELF B1 hoặc TOEIC 500 |\n| Điều kiện xét tốt nghiệp cử nhân | DELF B1 và TOEIC 500 | DELF B1 và TOEIC 500 |\n| Điều kiện xét tốt nghiệp kỹ sư chuyên sâu đặc thù | DELF B2 hoặc VSTEP tương ứng trình độ Bậc 4 | Không có |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K68 chương trình PFIEV muốn đăng ký nhận Phụ lục văn bằng kỹ sư của phía Pháp cần đạt điều kiện nào, và chứng chỉ DELF B1 có thể quy đổi từ TCF mức nào?",
+      "gold_answer": "Sinh viên PFIEV muốn đăng ký nhận Phụ lục văn bằng kỹ sư của phía Pháp cần đạt DELF B1 và TOEIC 600. DELF B1 tương ứng với TCF 300–399; với TCF 4 kỹ năng, điểm bài thi trắc nghiệm 300–399 và điểm diễn đạt nói/viết 6–9/20.",
+      "evidence_chunk_ids": [
+        "8cc483bd-a89d-4372-b51c-500ed066af9d",
+        "012f6b9a-64c2-4944-bc16-87b32e638ed8"
+      ],
+      "ground_truth_context": [
+        "### Bảng 7.3: Yêu cầu chuẩn tiếng Pháp với chương trình đào tạo PFIEV và chương trình Công nghệ thông tin Việt - Pháp\n\n| Số tín chỉ tích lũy | Yêu cầu với CTĐT PFIEV | Yêu cầu với CTĐT CNTT Việt - Pháp |\n|---------------------|------------------------|-------------------------------------|\n| Điều kiện đăng ký nhận Phụ lục văn bằng kỹ sư của phía Pháp | DELF B1 và TOEIC 600 | Không có |",
+        "### Bảng 7.4: Bảng quy đổi tương đương các chứng chỉ tiếng Pháp\n\n| Chứng chỉ DELF | Chứng chỉ TCF | TCF 4KN: Điểm bài thi trắc nghiệm (Nghe - Đọc & Kiến thức ngôn ngữ) | TCF 4KN: Điểm bài thi Diễn đạt Nói & Viết |\n|----------------|---------------|----------------------------------------------------------------------|---------------------------------------------|\n| DELF A1 | 101÷199 | 101÷199 | Diễn đạt nói: 1/20; Diễn đạt viết: 1/20 |\n| DELF A2 | 200÷299 | 200÷299 | Diễn đạt nói: 2÷5/20; Diễn đạt viết: 2÷5/20 |\n| DELF B1 | 300÷399 | 300÷399 | Diễn đạt nói: 6÷9/20; Diễn đạt viết: 6÷9/20 |\n| DELF B2 | 400÷499 | 400÷499 | Diễn đạt nói: 10÷13/20; Diễn đạt viết: 10÷13/20 |\n| DELF C1 | 500÷599 | 500÷599 | Diễn đạt nói: 14÷17/20; Diễn đạt viết: 14÷17/20 |\n| DELF C2 | 600÷699 | 600÷699 | Diễn đạt nói: 18÷20/20; Diễn đạt viết: 18÷20/20 |\n\n**Ghi chú:** Chứng chỉ DELF được công nhận vô thời hạn; Chứng chỉ TCF được công nhận trong vòng 2 năm kể từ ngày cấp.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K68 thuộc chương trình Điện tử - Viễn thông hợp tác với Đại học Leibniz Hannover dùng ngoại ngữ chính gì và cần đạt gì khi xét tốt nghiệp?",
+      "gold_answer": "Chương trình Điện tử - Viễn thông hợp tác với Đại học Leibniz Hannover có ngoại ngữ chính là tiếng Đức. Khi xét tốt nghiệp, sinh viên cần đạt Goethe-Zertifikat B1 hoặc tương đương theo bảng quy đổi 8.3, hoặc đạt các học phần số thứ tự 1 đến 4 trong Bảng 8.1.",
+      "evidence_chunk_ids": [
+        "4043dfd3-f3a7-484e-b12b-58ffcb83f4fc",
+        "78a84fde-8af8-4c2e-aff8-3eee1abc096b"
+      ],
+      "ground_truth_context": [
+        "## PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ chính yêu cầu\n\n| Loại/Tên chương trình đào tạo | Ngoại ngữ chính |\n|-------------------------------|-----------------|\n| 16. Logistic và Quản lý chuỗi cung ứng | Tiếng Anh |\n| 17. Hệ thống nhúng thông minh và IoT | Tiếng Nhật |\n| 18. Công nghệ thông tin Việt-Nhật | Tiếng Nhật |\n| 19. Công nghệ thông tin Việt-Pháp | Tiếng Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Cơ khí Chế tạo máy (ĐH Griffith, Úc) | Tiếng Anh |\n| 2. Cơ điện tử (ĐH Nagaoka, Nhật Bản) | Tiếng Nhật |\n| 3. Điện tử - Viễn thông (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 4. Cơ điện tử (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 5. Quản trị kinh doanh (ĐH TROY, Mỹ) | Tiếng Anh |\n| 6. Khoa học Máy tính (ĐH TROY, Mỹ) | Tiếng Anh |\n---",
+        "### Bảng 8.2: Yêu cầu chuẩn tiếng Đức với các chương trình đào tạo sử dụng ngoại ngữ chính là tiếng Đức\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ yêu cầu |\n|---------------------|---------------------------|\n| Từ 32 TC | Đạt chứng chỉ Goethe-Zertifikat A2 hoặc tương đương (theo Bảng quy đổi 8.3)<br>Hoặc đạt các học phần số thứ tự 1 & 2 trong Bảng 8.1 |\n| Từ 64 TC | Đạt chứng chỉ Goethe-Zertifikat B1 hoặc tương đương (theo Bảng quy đổi 8.3)<br>Hoặc đạt các học phần số thứ tự 1÷4 trong Bảng 8.1 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | Đạt trình độ Goethe-Zertifikat B1 hoặc tương đương (theo Bảng quy đổi 8.3)<br>Hoặc đạt các học phần số thứ tự 1÷4 trong Bảng 8.1 |\n| Điều kiện khi xét tốt nghiệp | Đạt trình độ Goethe-Zertifikat B1 hoặc tương đương (theo Bảng quy đổi 8.3)<br>Hoặc đạt các học phần số thứ tự 1÷4 trong Bảng 8.1 |\n\n### Bảng 8.3: Bảng quy đổi tương đương các chứng chỉ tiếng Đức\n\n| Goethe-Zertifikat | TestDaF | DSD | TELC/ÖSD/HUSTGC |\n|-------------------|---------|-----|------------------|\n| A1 | TestDaF | DSD | A1 |\n| A2 | TestDaF | DSD1 | A2 |\n| B1 | TestDaF | DSD1 | B1 |\n| B2 | TDN3 tương đương B2.1; TDN4 tương đương B2.2 | DSD2 | B2 |\n| C1 | TDN5 | DSD2 | C1 |\n| C2 | TDN5 | DSD2 | C2 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K68 chương trình Công nghệ thông tin Việt-Nhật cần đạt chuẩn gì từ 32 tín chỉ và JLPT N4 tương ứng bậc nào theo CEFR-VN?",
+      "gold_answer": "Chương trình Công nghệ thông tin Việt-Nhật có ngoại ngữ chính là tiếng Nhật. Từ 32 tín chỉ, riêng chương trình Công nghệ thông tin Việt-Nhật yêu cầu đạt các học phần tiếng Nhật ở Mức 1 và Mức 2. Theo bảng quy đổi, JLPT N4 tương ứng CEFR-VN B1.",
+      "evidence_chunk_ids": [
+        "4043dfd3-f3a7-484e-b12b-58ffcb83f4fc",
+        "774296a4-4fda-4b32-80ee-e5e64ec9ff74",
+        "6f3796fd-ecc0-43c2-8f7c-4dc4db9c782b"
+      ],
+      "ground_truth_context": [
+        "## PHỤ LỤC 1: Danh mục các chương trình đào tạo và ngoại ngữ chính yêu cầu\n\n| Loại/Tên chương trình đào tạo | Ngoại ngữ chính |\n|-------------------------------|-----------------|\n| 16. Logistic và Quản lý chuỗi cung ứng | Tiếng Anh |\n| 17. Hệ thống nhúng thông minh và IoT | Tiếng Nhật |\n| 18. Công nghệ thông tin Việt-Nhật | Tiếng Nhật |\n| 19. Công nghệ thông tin Việt-Pháp | Tiếng Pháp |\n| **Các chương trình đào tạo hợp tác quốc tế** | |\n| 1. Cơ khí Chế tạo máy (ĐH Griffith, Úc) | Tiếng Anh |\n| 2. Cơ điện tử (ĐH Nagaoka, Nhật Bản) | Tiếng Nhật |\n| 3. Điện tử - Viễn thông (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 4. Cơ điện tử (ĐH Leibniz Hannover, Đức) | Tiếng Đức |\n| 5. Quản trị kinh doanh (ĐH TROY, Mỹ) | Tiếng Anh |\n| 6. Khoa học Máy tính (ĐH TROY, Mỹ) | Tiếng Anh |\n---",
+        "### Bảng 9.4: Yêu cầu chuẩn tiếng Nhật với các chương trình đào tạo sử dụng ngoại ngữ chính là tiếng Nhật\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ yêu cầu |\n|---------------------|---------------------------|\n| Từ 32 TC | - Chứng chỉ Tiếng Nhật N4 hoặc đạt các học phần tiếng Nhật ở Mức 1 & Mức 2<br>- Riêng với chương trình Công nghệ thông tin Việt Nhật yêu cầu đạt các học phần tiếng Nhật ở Mức 1 & Mức 2 |\n| Từ 64 TC | Chứng chỉ Tiếng Nhật N3 hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4 |\n| Điều kiện được xét nhận đồ án/khóa luận tốt nghiệp | - Chứng chỉ Tiếng Nhật N3 hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4<br>- Riêng với chương trình Cơ điện tử (NUT) yêu cầu:<br>  + Chứng chỉ Tiếng Nhật N3 và đạt các học phần tiếng Nhật Mức 3 & Mức 4;<br>  + Hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4. |",
+        "### Bảng 9.4: Yêu cầu chuẩn tiếng Nhật với các chương trình đào tạo sử dụng ngoại ngữ chính là tiếng Nhật\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ yêu cầu |\n|---------------------|---------------------------|\n| Điều kiện khi xét tốt nghiệp | - Chứng chỉ Tiếng Nhật N3 hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4<br>- Riêng với chương trình Cơ điện tử (NUT) yêu cầu:<br>  + Chứng chỉ Tiếng Nhật N3 và đạt các học phần tiếng Nhật Mức 3 & Mức 4;<br>  + Hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4. |\n\n### Bảng 9.5: Bảng quy đổi tương đương các chứng chỉ tiếng Nhật\n\n| JLPT | CEFR-VN |\n|------|---------|\n| N5 | A2 |\n| N4 | B1 |\n| N3 | B2 |\n| N2 | C1 |\n| N1 | C2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "qd_ngoai_ngu_tu_k68_cq_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K68 học chương trình Cơ điện tử hợp tác với Đại học Nagaoka cần điều kiện tiếng Nhật nào khi xét tốt nghiệp?",
+      "gold_answer": "Khi xét tốt nghiệp, riêng chương trình Cơ điện tử hợp tác với Đại học Nagaoka yêu cầu chứng chỉ tiếng Nhật N3 và đạt các học phần tiếng Nhật Mức 3 và Mức 4, hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4.",
+      "evidence_chunk_ids": [
+        "6f3796fd-ecc0-43c2-8f7c-4dc4db9c782b"
+      ],
+      "ground_truth_context": [
+        "### Bảng 9.4: Yêu cầu chuẩn tiếng Nhật với các chương trình đào tạo sử dụng ngoại ngữ chính là tiếng Nhật\n\n| Số tín chỉ tích lũy | Trình độ ngoại ngữ yêu cầu |\n|---------------------|---------------------------|\n| Điều kiện khi xét tốt nghiệp | - Chứng chỉ Tiếng Nhật N3 hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4<br>- Riêng với chương trình Cơ điện tử (NUT) yêu cầu:<br>  + Chứng chỉ Tiếng Nhật N3 và đạt các học phần tiếng Nhật Mức 3 & Mức 4;<br>  + Hoặc đạt các học phần tiếng Nhật từ Mức 1 đến Mức 4. |\n\n### Bảng 9.5: Bảng quy đổi tương đương các chứng chỉ tiếng Nhật\n\n| JLPT | CEFR-VN |\n|------|---------|\n| N5 | A2 |\n| N4 | B1 |\n| N3 | B2 |\n| N2 | C1 |\n| N1 | C2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

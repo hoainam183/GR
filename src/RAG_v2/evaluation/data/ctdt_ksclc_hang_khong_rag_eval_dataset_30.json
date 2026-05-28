@@ -1,0 +1,479 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "2017.07.02-CTDT-KSCLC-Hang-khong_fix_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên ngành Kỹ thuật hàng không chương trình Kỹ sư chất lượng cao sẽ nhận bằng tốt nghiệp gì?",
+      "gold_answer": "Sinh viên tốt nghiệp chương trình sẽ nhận bằng Kỹ sư chất lượng cao Cơ khí hàng không.",
+      "evidence_chunk_ids": [
+        "067a2dac-c2b5-44f2-98d0-4023e97f1cdc"
+      ],
+      "ground_truth_context": [
+        "## NGÀNH KỸ THUẬT HÀNG KHÔNG\n### Trường Đại học Bách khoa Hà Nội — Viện Cơ khí Động lực\n\n---\n\n**Tên chương trình:** Chương trình đào tạo Kỹ sư chất lượng cao  \n**Trình độ đào tạo:** Đại học  \n**Ngành đào tạo:** Chuyên ngành Kỹ thuật hàng không  \n**Loại hình đào tạo:** Chính quy  \n**Bằng tốt nghiệp:** Kỹ sư chất lượng cao Cơ khí hàng không\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_002",
+      "question_type": "simple",
+      "question": "Mục tiêu chung của chương trình Kỹ sư chất lượng cao Kỹ thuật hàng không là đào tạo người học có khả năng gì?",
+      "gold_answer": "Chương trình nhằm đào tạo kỹ sư chuyên ngành kỹ thuật hàng không có khả năng thích ứng cao với tiến bộ khoa học kỹ thuật nói chung và chuyên ngành kỹ thuật hàng không nói riêng; chương trình hướng tới trình độ kỹ sư được cộng đồng thế giới công nhận.",
+      "evidence_chunk_ids": [
+        "70babf30-1088-4cce-a9c7-8a66d6fc315b"
+      ],
+      "ground_truth_context": [
+        "### 1.1 Mục tiêu chung\n\nĐào tạo ra kỹ sư chuyên ngành kỹ thuật hàng không có khả năng thích ứng cao với sự tiến bộ của khoa học kỹ thuật nói chung và của chuyên ngành kỹ thuật hàng không nói riêng. Chương trình đào tạo phải được cộng đồng thế giới công nhận là trình độ kỹ sư.\n\nCác kỹ sư được cấp bằng chương trình đào tạo kỹ sư chất lượng cao chuyên ngành kỹ thuật hàng không đủ điều kiện học lên các bậc cao học và tiến sỹ của các nước tiên tiến như một kỹ sư tốt nghiệp tại các trường danh tiếng của các nước tiên tiến.\n\nCác kỹ sư tốt nghiệp chương trình đào tạo kỹ sư chất lượng cao chuyên ngành kỹ thuật hàng không có trình độ chuyên môn để có thể làm việc ở bất kỳ công ty, các cơ sở nghiên cứu hoạt động trong lĩnh vực hàng không."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên tốt nghiệp Kỹ sư chất lượng cao Kỹ thuật hàng không có thể làm việc ở đâu theo mục tiêu chung của chương trình?",
+      "gold_answer": "Sinh viên tốt nghiệp có trình độ chuyên môn để có thể làm việc ở bất kỳ công ty hoặc cơ sở nghiên cứu hoạt động trong lĩnh vực hàng không.",
+      "evidence_chunk_ids": [
+        "70babf30-1088-4cce-a9c7-8a66d6fc315b"
+      ],
+      "ground_truth_context": [
+        "### 1.1 Mục tiêu chung\n\nĐào tạo ra kỹ sư chuyên ngành kỹ thuật hàng không có khả năng thích ứng cao với sự tiến bộ của khoa học kỹ thuật nói chung và của chuyên ngành kỹ thuật hàng không nói riêng. Chương trình đào tạo phải được cộng đồng thế giới công nhận là trình độ kỹ sư.\n\nCác kỹ sư được cấp bằng chương trình đào tạo kỹ sư chất lượng cao chuyên ngành kỹ thuật hàng không đủ điều kiện học lên các bậc cao học và tiến sỹ của các nước tiên tiến như một kỹ sư tốt nghiệp tại các trường danh tiếng của các nước tiên tiến.\n\nCác kỹ sư tốt nghiệp chương trình đào tạo kỹ sư chất lượng cao chuyên ngành kỹ thuật hàng không có trình độ chuyên môn để có thể làm việc ở bất kỳ công ty, các cơ sở nghiên cứu hoạt động trong lĩnh vực hàng không."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_004",
+      "question_type": "simple",
+      "question": "Sau khi tốt nghiệp, sinh viên Kỹ thuật hàng không cần được trang bị những loại kiến thức nào?",
+      "gold_answer": "Sinh viên cần được trang bị đầy đủ kiến thức cơ bản, kiến thức kỹ thuật cơ sở và kiến thức chuyên ngành; các kiến thức này phải hiện đại, chuyên sâu, kết hợp nội dung đào tạo của các trường tiên tiến trên thế giới và tính thực tiễn của Việt Nam.",
+      "evidence_chunk_ids": [
+        "7120762f-c0e1-475b-91ac-e3fffcd1bfa6"
+      ],
+      "ground_truth_context": [
+        "### 1.2 Mục tiêu cụ thể\n\nSau khi tốt nghiệp, Kỹ sư chất lượng cao chuyên ngành kỹ thuật hàng không cần có được:\n\n1. **Kiến thức:** Kỹ sư chuyên ngành kỹ thuật hàng không phải được trang bị đầy đủ cả về kiến thức cơ bản, kiến thức kỹ thuật cơ sở và kiến thức chuyên ngành đảm bảo tính hiện đại, chuyên sâu kết hợp được nội dung đào tạo của các trường tiên tiến trên thế giới cùng chuyên ngành và tính thực tiễn của đất nước.\n2. **Năng lực:** Kỹ sư chuyên ngành kỹ thuật hàng không phải có năng lực làm việc tốt có khả năng thích ứng với công việc nhanh, có tính độc lập sáng tạo trong công việc nhưng cũng phải có khả năng làm việc theo nhóm. Đủ khả năng về chuyên môn để giải quyết nhiệm vụ được giao và chịu trách nhiệm cá nhân về kết quả công việc do mình đảm nhận."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_005",
+      "question_type": "simple",
+      "question": "Sinh viên Kỹ thuật hàng không cần có năng lực làm việc như thế nào sau khi tốt nghiệp?",
+      "gold_answer": "Sinh viên cần có năng lực làm việc tốt, thích ứng nhanh với công việc, có tính độc lập sáng tạo nhưng cũng có khả năng làm việc theo nhóm; đồng thời đủ năng lực chuyên môn để giải quyết nhiệm vụ được giao và chịu trách nhiệm cá nhân về kết quả công việc.",
+      "evidence_chunk_ids": [
+        "7120762f-c0e1-475b-91ac-e3fffcd1bfa6"
+      ],
+      "ground_truth_context": [
+        "### 1.2 Mục tiêu cụ thể\n\nSau khi tốt nghiệp, Kỹ sư chất lượng cao chuyên ngành kỹ thuật hàng không cần có được:\n\n1. **Kiến thức:** Kỹ sư chuyên ngành kỹ thuật hàng không phải được trang bị đầy đủ cả về kiến thức cơ bản, kiến thức kỹ thuật cơ sở và kiến thức chuyên ngành đảm bảo tính hiện đại, chuyên sâu kết hợp được nội dung đào tạo của các trường tiên tiến trên thế giới cùng chuyên ngành và tính thực tiễn của đất nước.\n2. **Năng lực:** Kỹ sư chuyên ngành kỹ thuật hàng không phải có năng lực làm việc tốt có khả năng thích ứng với công việc nhanh, có tính độc lập sáng tạo trong công việc nhưng cũng phải có khả năng làm việc theo nhóm. Đủ khả năng về chuyên môn để giải quyết nhiệm vụ được giao và chịu trách nhiệm cá nhân về kết quả công việc do mình đảm nhận."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_006",
+      "question_type": "simple",
+      "question": "Chuẩn đầu ra của chương trình Kỹ thuật hàng không yêu cầu sinh viên giao tiếp bằng tiếng Anh như thế nào?",
+      "gold_answer": "Sinh viên phải có khả năng giao tiếp hiệu quả thông qua báo cáo và thuyết trình bằng tiếng Anh.",
+      "evidence_chunk_ids": [
+        "f72e1b5d-2236-43f0-a75e-33f2e2bb6d71"
+      ],
+      "ground_truth_context": [
+        "### 1.3 Chuẩn đầu ra\n\nSau khi tốt nghiệp, Kỹ sư chất lượng cao chuyên ngành Kỹ thuật hàng không phải có được:\n\n- **a.** Khả năng áp dụng các kiến thức toán học, khoa học và kỹ thuật vào các vấn đề thuộc lĩnh vực liên ngành hàng không.\n- **b.** Khả năng thiết kế và tiến hành các thí nghiệm, phân tích và giải thích dữ liệu trong lĩnh vực liên ngành hàng không.\n- **c.** Khả năng thiết kế một hệ thống, một thành phần, một quá trình trong lĩnh vực liên quan để đáp ứng các nhu cầu mong muốn.\n- **d.** Khả năng hoạt động nhóm hiệu quả để hoàn thành một mục đích chung.\n- **e.** Khả năng nhận diện, diễn đạt và giải quyết các vấn đề kỹ thuật trong lĩnh vực hàng không.\n- **f.** Có sự hiểu biết sâu sắc về ngành nghề và trách nhiệm đạo đức trong việc hành nghề trong lĩnh vực hàng không.\n- **g.** Có khả năng giao tiếp hiệu quả thông qua báo cáo và thuyết trình bằng tiếng Anh.\n- **h.** Hiểu rõ tác động ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_007",
+      "question_type": "simple",
+      "question": "Chuẩn đầu ra của chương trình Kỹ thuật hàng không có yêu cầu gì về phần mềm kỹ thuật?",
+      "gold_answer": "Sinh viên phải sử dụng tốt một số phần mềm tính toán kỹ thuật, lập trình, thiết kế và mô phỏng liên quan đến lĩnh vực hàng không.",
+      "evidence_chunk_ids": [
+        "f72e1b5d-2236-43f0-a75e-33f2e2bb6d71"
+      ],
+      "ground_truth_context": [
+        "### 1.3 Chuẩn đầu ra\n\nSau khi tốt nghiệp, Kỹ sư chất lượng cao chuyên ngành Kỹ thuật hàng không phải có được:\n\n- **a.** Khả năng áp dụng các kiến thức toán học, khoa học và kỹ thuật vào các vấn đề thuộc lĩnh vực liên ngành hàng không.\n- **b.** Khả năng thiết kế và tiến hành các thí nghiệm, phân tích và giải thích dữ liệu trong lĩnh vực liên ngành hàng không.\n- **c.** Khả năng thiết kế một hệ thống, một thành phần, một quá trình trong lĩnh vực liên quan để đáp ứng các nhu cầu mong muốn.\n- **d.** Khả năng hoạt động nhóm hiệu quả để hoàn thành một mục đích chung.\n- **e.** Khả năng nhận diện, diễn đạt và giải quyết các vấn đề kỹ thuật trong lĩnh vực hàng không.\n- **f.** Có sự hiểu biết sâu sắc về ngành nghề và trách nhiệm đạo đức trong việc hành nghề trong lĩnh vực hàng không.\n- **g.** Có khả năng giao tiếp hiệu quả thông qua báo cáo và thuyết trình bằng tiếng Anh.\n- **h.** Hiểu rõ tác động ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_008",
+      "question_type": "simple",
+      "question": "Thời gian đào tạo thiết kế của chương trình Kỹ sư chất lượng cao Kỹ thuật hàng không là bao lâu?",
+      "gold_answer": "Thời gian đào tạo theo thiết kế là 5 năm, tương ứng 10 học kỳ chính.",
+      "evidence_chunk_ids": [
+        "1e81e593-1d10-4cec-99f6-ca1e0de597f0"
+      ],
+      "ground_truth_context": [
+        "## 2. Thời gian đào tạo\n\nThời gian đào tạo theo thiết kế là 5 năm (10 học kỳ chính). Theo quy chế đào tạo, để hoàn thành chương trình sinh viên có thể rút ngắn tối đa 3 học kỳ hoặc kéo dài tối đa 5 học kỳ.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên Kỹ thuật hàng không có thể rút ngắn hoặc kéo dài thời gian hoàn thành chương trình tối đa bao nhiêu học kỳ?",
+      "gold_answer": "Theo quy chế đào tạo, sinh viên có thể rút ngắn tối đa 3 học kỳ hoặc kéo dài tối đa 5 học kỳ để hoàn thành chương trình.",
+      "evidence_chunk_ids": [
+        "1e81e593-1d10-4cec-99f6-ca1e0de597f0"
+      ],
+      "ground_truth_context": [
+        "## 2. Thời gian đào tạo\n\nThời gian đào tạo theo thiết kế là 5 năm (10 học kỳ chính). Theo quy chế đào tạo, để hoàn thành chương trình sinh viên có thể rút ngắn tối đa 3 học kỳ hoặc kéo dài tối đa 5 học kỳ.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_010",
+      "question_type": "simple",
+      "question": "Khối lượng kiến thức toàn khóa của chương trình Kỹ thuật hàng không sau điều chỉnh tháng 11/2016 là bao nhiêu tín chỉ?",
+      "gold_answer": "Chương trình điều chỉnh tháng 11/2016 có khối lượng 213 tín chỉ.",
+      "evidence_chunk_ids": [
+        "c00122a0-b653-4c33-9605-d3595dd59ccf"
+      ],
+      "ground_truth_context": [
+        "## 3. Khối lượng kiến thức toàn khoá\n\n- Chương trình 2009: 237 tín chỉ (TC)\n- Chương trình điều chỉnh 11/2016: 213 TC\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_011",
+      "question_type": "simple",
+      "question": "Quy trình đào tạo của chương trình Kỹ thuật hàng không được tổ chức theo hình thức nào?",
+      "gold_answer": "Quy trình đào tạo được tổ chức theo học chế tín chỉ và tuân theo Quy chế đào tạo đại học, cao đẳng chính quy theo học chế tín chỉ của Trường Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "af175241-f87d-44aa-8c95-d2ee618f1492"
+      ],
+      "ground_truth_context": [
+        "## 5. Quy trình đào tạo, điều kiện tốt nghiệp\n\nQuy trình đào tạo được tổ chức theo học chế tín chỉ, tuân theo Quy chế đào tạo đại học, cao đẳng chính quy theo học chế tín chỉ của Trường Đại học Bách khoa Hà Nội, ban hành theo Quyết định số 804/QĐ-ĐHBK-ĐTĐH ngày 17 tháng 8 năm 2007 của Hiệu trưởng trường Đại học Bách khoa Hà Nội.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_012",
+      "question_type": "simple",
+      "question": "Trong thang điểm của chương trình Kỹ thuật hàng không, điểm dưới 4,0 được xếp loại gì?",
+      "gold_answer": "Điểm dưới 4,0 được xếp loại không đạt, điểm chữ F và điểm số thang 4 là 0.",
+      "evidence_chunk_ids": [
+        "c631f31d-99dd-4fbe-bdb1-bc57be823031"
+      ],
+      "ground_truth_context": [
+        "## 6. Thang điểm\n\nĐiểm chữ (A, B, C, D, F) và thang điểm 4 quy đổi tương ứng được sử dụng để đánh giá kết quả học tập chính thức. Thang điểm 10 được sử dụng cho điểm thành phần (điểm tiện ích) của học phần.\n\n| Kết quả | Thang điểm 10 (điểm thành phần) | | Điểm chữ | Điểm số (thang 4) |\n|---|---|---|---|---|\n| Đạt | từ 9,5 | đến 10 | A+ | 4,5 |\n| Đạt | từ 8,5 | đến 9,4 | A | 4,0 |\n| Đạt | từ 8,0 | đến 8,4 | B+ | 3,5 |\n| Đạt | từ 7,0 | đến 7,9 | B | 3,0 |\n| Đạt | từ 6,5 | đến 6,9 | C+ | 2,5 |\n| Đạt | từ 5,5 | đến 6,4 | C | 2,0 |\n| Đạt | từ 5,0 | đến 5,4 | D+ | 1,5 |\n| Đạt | từ 4,0 | đến 4,9 | D | 1,0 |\n| Không đạt | dưới 4,0 | | F | 0 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_013",
+      "question_type": "simple",
+      "question": "Trong chương trình Kỹ thuật hàng không, khối Giáo dục đại cương có tổng bao nhiêu tín chỉ?",
+      "gold_answer": "Khối Giáo dục đại cương có tổng 81 tín chỉ.",
+      "evidence_chunk_ids": [
+        "d06abeff-8a2e-4238-b08a-ff47e56cf417"
+      ],
+      "ground_truth_context": [
+        "## 7. Nội dung chương trình\n\n### 7.1 Cấu trúc chương trình đào tạo\n\n| Khối kiến thức | Phần kiến thức | Số tín chỉ |\n|---|---|---|\n| **Giáo dục đại cương (81 TC)** | CN Mác-Lênin và Tư tưởng HCM | 10 |\n| | Tiếng Anh | 10 |\n| | Tiếng Pháp | 25 |\n| | Toán cao cấp | 15 |\n| | Vật lý đại cương | 8 |\n| | Hóa học đại cương | 4 |\n| | Tin học đại cương | 3 |\n| | Quản trị học, Luật, Môi trường | 6 |\n| | Giáo dục thể chất, Giáo dục quốc phòng | —* |\n| **Giáo dục chuyên nghiệp (132 TC)** | Cơ sở kỹ thuật chung bắt buộc | 22 |\n| | Cơ sở ngành bắt buộc | 37 |\n| | Cơ sở ngành tự chọn | 5 |\n| | Chuyên ngành bắt buộc (bao gồm thực tập và đồ án tốt nghiệp) | 63 |\n| | Chuyên ngành tự chọn | 5 |\n| **Tổng** | | **213** |\n\n> *Các học phần GDTC và GDQP có chứng chỉ riêng, không xét trong tổng khối lượng kiến thức và không tính vào điểm trung bình chung của sinh viên. Thời gian học và nội dung theo quy định chu..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_014",
+      "question_type": "simple",
+      "question": "Trong chương trình Kỹ thuật hàng không, khối Giáo dục chuyên nghiệp có tổng bao nhiêu tín chỉ?",
+      "gold_answer": "Khối Giáo dục chuyên nghiệp có tổng 132 tín chỉ.",
+      "evidence_chunk_ids": [
+        "d06abeff-8a2e-4238-b08a-ff47e56cf417"
+      ],
+      "ground_truth_context": [
+        "## 7. Nội dung chương trình\n\n### 7.1 Cấu trúc chương trình đào tạo\n\n| Khối kiến thức | Phần kiến thức | Số tín chỉ |\n|---|---|---|\n| **Giáo dục đại cương (81 TC)** | CN Mác-Lênin và Tư tưởng HCM | 10 |\n| | Tiếng Anh | 10 |\n| | Tiếng Pháp | 25 |\n| | Toán cao cấp | 15 |\n| | Vật lý đại cương | 8 |\n| | Hóa học đại cương | 4 |\n| | Tin học đại cương | 3 |\n| | Quản trị học, Luật, Môi trường | 6 |\n| | Giáo dục thể chất, Giáo dục quốc phòng | —* |\n| **Giáo dục chuyên nghiệp (132 TC)** | Cơ sở kỹ thuật chung bắt buộc | 22 |\n| | Cơ sở ngành bắt buộc | 37 |\n| | Cơ sở ngành tự chọn | 5 |\n| | Chuyên ngành bắt buộc (bao gồm thực tập và đồ án tốt nghiệp) | 63 |\n| | Chuyên ngành tự chọn | 5 |\n| **Tổng** | | **213** |\n\n> *Các học phần GDTC và GDQP có chứng chỉ riêng, không xét trong tổng khối lượng kiến thức và không tính vào điểm trung bình chung của sinh viên. Thời gian học và nội dung theo quy định chu..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_015",
+      "question_type": "simple",
+      "question": "Các học phần Giáo dục thể chất và Giáo dục quốc phòng trong chương trình Kỹ thuật hàng không có được tính vào điểm trung bình chung không?",
+      "gold_answer": "Không. Các học phần Giáo dục thể chất và Giáo dục quốc phòng có chứng chỉ riêng, không xét trong tổng khối lượng kiến thức và không tính vào điểm trung bình chung của sinh viên.",
+      "evidence_chunk_ids": [
+        "d06abeff-8a2e-4238-b08a-ff47e56cf417"
+      ],
+      "ground_truth_context": [
+        "## 7. Nội dung chương trình\n\n### 7.1 Cấu trúc chương trình đào tạo\n\n| Khối kiến thức | Phần kiến thức | Số tín chỉ |\n|---|---|---|\n| **Giáo dục đại cương (81 TC)** | CN Mác-Lênin và Tư tưởng HCM | 10 |\n| | Tiếng Anh | 10 |\n| | Tiếng Pháp | 25 |\n| | Toán cao cấp | 15 |\n| | Vật lý đại cương | 8 |\n| | Hóa học đại cương | 4 |\n| | Tin học đại cương | 3 |\n| | Quản trị học, Luật, Môi trường | 6 |\n| | Giáo dục thể chất, Giáo dục quốc phòng | —* |\n| **Giáo dục chuyên nghiệp (132 TC)** | Cơ sở kỹ thuật chung bắt buộc | 22 |\n| | Cơ sở ngành bắt buộc | 37 |\n| | Cơ sở ngành tự chọn | 5 |\n| | Chuyên ngành bắt buộc (bao gồm thực tập và đồ án tốt nghiệp) | 63 |\n| | Chuyên ngành tự chọn | 5 |\n| **Tổng** | | **213** |\n\n> *Các học phần GDTC và GDQP có chứng chỉ riêng, không xét trong tổng khối lượng kiến thức và không tính vào điểm trung bình chung của sinh viên. Thời gian học và nội dung theo quy định chu..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_016",
+      "question_type": "simple",
+      "question": "Sinh viên Kỹ thuật hàng không học các học phần Tiếng Pháp KSCLC từ học kỳ nào đến học kỳ nào?",
+      "gold_answer": "Sinh viên học Tiếng Pháp KSCLC 1 ở học kỳ 1, tiếp tục các học phần Tiếng Pháp KSCLC 2, 3A, 3B, 4, 5, 6, 7 và 8 đến học kỳ 9.",
+      "evidence_chunk_ids": [
+        "456db1ef-ccba-48fa-a48e-25292a55d2e3"
+      ],
+      "ground_truth_context": [
+        "#### Giáo dục đại cương bắt buộc (81 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 17 | MI1034 | Toán III | 5(4-3-0-8) | 3 |\n| 18 | PH1014 | Vật lý I | 4(3-2-1-8) | 2 |\n| 19 | PH1024 | Vật lý II | 4(3-1-2-8) | 3 |\n| 20 | CH1014 | Hóa học đại cương | 4(4-1-1-8) | 3 |\n| 21 | IT1014 | Tin học đại cương | 3(2-1-2-6) | 1 |\n| 22 | EM1014 | Quản trị học | 2(2-1-0-4) | 3 |\n| 23 | EV1014 | Môi trường | 2(2-0-0-4) | 1 |\n| 24 | SSH1060 | Luật | 2(2-0-0-4) | 1 |\n| 25 | FL1401 | Tiếng Pháp KSCLC 1 | 3(3-2-0-6) | 1 |\n| 26 | FL1402 | Tiếng Pháp KSCLC 2 | 3(3-2-0-6) | 2 |\n| 27 | FL1501 | Tiếng Pháp KSCLC 3A | 3(3-2-0-6) | 3 |\n| 28 | FL1502 | Tiếng Pháp KSCLC 3B | 3(3-2-0-6) | 4 |\n| 29 | FL1404 | Tiếng Pháp KSCLC 4 | 3(3-2-0-6) | 5 |\n| 30 | FL1405 | Tiếng Pháp KSCLC 5 | 3(3-2-0-6) | 6 |\n| 31 | FL1406 | Tiếng Pháp KSCLC 6 | 3(3-2-0-6) | 7 |\n| 32 | FL1407 | Tiếng Pháp KSCLC..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_017",
+      "question_type": "simple",
+      "question": "Học phần Kỹ thuật thủy khí trong chương trình Kỹ thuật hàng không có mã học phần, số tín chỉ và học kỳ nào?",
+      "gold_answer": "Học phần Kỹ thuật thủy khí có mã TE3600, khối lượng 2(1-1-1-4) và được bố trí ở học kỳ 5.",
+      "evidence_chunk_ids": [
+        "ad737107-3824-42cb-a4e8-bb39b25996ee"
+      ],
+      "ground_truth_context": [
+        "#### Chuyên ngành bắt buộc (63 tín chỉ)\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 62 | TE3600 | Kỹ thuật thủy khí | 2(1-1-1-4) | 5 |\n| 63 | TE4820 | Kết cấu hàng không | 2(2-1-0-4) | 8 |\n| 64 | TE4830 | Đàn hồi khí động học | 2(2-1-0-4) | 8 |\n| 65 | TE4840 | Kỹ thuật điện và điện tử trên máy bay | 2(2-1-0-4) | 8 |\n| 66 | TE4850 | Hệ thống thời gian thực | 2(2-1-0-4) | 8 |\n| 67 | TE4870 | Khí động lực học cơ bản | 3(2-1-1-4) | 7 |\n| 68 | TE4880 | Động cơ và thiết bị đẩy I | 3(3-1-0-6) | 8 |\n| 69 | TE4890 | Cơ học vật bay I | 2(2-1-0-4) | 8 |\n| 70 | TE4900 | Máy thủy lực I | 2(2-0-0-4) | 7 |\n| 71 | TE4911 | Thực tập chuyên ngành | 4(0-0-4-0) | 7 |\n| 73 | TE5810 | Khí động lực học chuyên sâu | 2(2-1-0-4) | 9 |\n| 74 | TE5830 | Vật liệu hàng không | 2(2-1-0-4) | 7 |\n| 75 | TE5840 | Truyền động tự động thủy khí | 2(2-0-1-4) | 9 |\n| 76 | TE5850 | Phương pháp số trong ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_018",
+      "question_type": "simple",
+      "question": "Học phần Luật hàng không trong chương trình Kỹ thuật hàng không có bao nhiêu tín chỉ và học ở kỳ mấy?",
+      "gold_answer": "Học phần Luật hàng không có mã TE5920, khối lượng 2(2-0-0-4) và được bố trí ở học kỳ 5.",
+      "evidence_chunk_ids": [
+        "306683a0-4eec-4be4-9127-8097fbc8d16d"
+      ],
+      "ground_truth_context": [
+        "#### Chuyên ngành bắt buộc (63 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 79 | TE5900 | Kiểm tra và bảo dưỡng máy bay | 3(3-0-1-6) | 9 |\n| 80 | TE5910 | Khai thác và quản lý máy bay | 2(2-0-0-4) | 9 |\n| 81 | TE5920 | Luật hàng không | 2(2-0-0-4) | 5 |\n| 82 | TE5930 | Đồ án môn học | 3(0-3-0-6) | 9 |\n| 83 | TE5940 | Thực tập tốt nghiệp | 4(0-0-4-0) | 10 |\n| 84 | TE5950 | Đồ án tốt nghiệp | 10(0-10-0-20) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_019",
+      "question_type": "simple",
+      "question": "Thực tập tốt nghiệp và Đồ án tốt nghiệp của chương trình Kỹ thuật hàng không được bố trí ở học kỳ nào?",
+      "gold_answer": "Thực tập tốt nghiệp TE5940 và Đồ án tốt nghiệp TE5950 đều được bố trí ở học kỳ 10.",
+      "evidence_chunk_ids": [
+        "306683a0-4eec-4be4-9127-8097fbc8d16d"
+      ],
+      "ground_truth_context": [
+        "#### Chuyên ngành bắt buộc (63 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 79 | TE5900 | Kiểm tra và bảo dưỡng máy bay | 3(3-0-1-6) | 9 |\n| 80 | TE5910 | Khai thác và quản lý máy bay | 2(2-0-0-4) | 9 |\n| 81 | TE5920 | Luật hàng không | 2(2-0-0-4) | 5 |\n| 82 | TE5930 | Đồ án môn học | 3(0-3-0-6) | 9 |\n| 83 | TE5940 | Thực tập tốt nghiệp | 4(0-0-4-0) | 10 |\n| 84 | TE5950 | Đồ án tốt nghiệp | 10(0-10-0-20) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_020",
+      "question_type": "simple",
+      "question": "Học phần TE4870 Khí động lực học cơ bản yêu cầu học phần học trước nào?",
+      "gold_answer": "Học phần TE4870 Khí động lực học cơ bản yêu cầu học phần học trước là TE3600.",
+      "evidence_chunk_ids": [
+        "5bfc8e86-caa3-4e2b-b519-68be2242bd0a"
+      ],
+      "ground_truth_context": [
+        "#### 8.3.2 Kiến thức cơ sở chuyên ngành\n\n---\n\n**TE4850 — Hệ thống thời gian thực**\n\n- **Khối lượng:** 2(2-1-0-4)\n- **Mục tiêu:** Cung cấp cách tiếp cận kiến trúc tập trung, trường hợp sử dụng và chu trình phát triển tái lặp của ngôn ngữ mô hình hoá hợp nhất trong thời gian thực (RealTime UML) để phân tích, thiết kế và mô phỏng các hệ thống thời gian thực.\n- **Nội dung:** Phân tích, mô hình hoá, thiết kế và mô phỏng các hệ thống thời gian thực thông qua việc sử dụng ngôn ngữ mô hình hoá hợp nhất trong thời gian thực.\n\n---\n\n**TE4870 — Khí động lực học cơ bản**\n\n- **Khối lượng:** 3(2-1-1-4)\n- **Học phần học trước:** TE3600\n- **Mục tiêu:** Sinh viên nắm được các khái niệm cơ bản về khí động học, cấu tạo hình dạng khí động của máy bay, phương pháp tính toán các lực khí động cho cánh 2D và 3D dưới âm và trên âm. Đồng thời hiểu được các hiện tượng sóng va khi dòng chảy ở vận tốc trên âm.\n- **Nộ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_021",
+      "question_type": "simple",
+      "question": "Học phần TE5900 Kiểm tra và bảo dưỡng máy bay trang bị cho sinh viên những kiến thức chính nào?",
+      "gold_answer": "Học phần TE5900 trang bị kiến thức cơ bản về bảo dưỡng, đại tu máy bay, các biện pháp và tổ chức bảo dưỡng, hoạt động bảo dưỡng máy bay tại Vietnam Airlines, xây dựng chương trình và gói công việc bảo dưỡng, thông tin bảo dưỡng, chi phí bảo dưỡng và các vấn đề luật hàng không liên quan đến bảo dưỡng.",
+      "evidence_chunk_ids": [
+        "8ff6cd78-e3e9-4a7a-a536-f5eeaa22e861"
+      ],
+      "ground_truth_context": [
+        "#### 8.3.2 Kiến thức cơ sở chuyên ngành\n\n---\n\n**TE5900 — Kiểm tra và bảo dưỡng máy bay**\n\n- **Khối lượng:** 3(3-0-1-6)\n- **Học phần học trước:** TE4880\n- **Mục tiêu:** Sinh viên có được các kiến thức cơ bản trong lĩnh vực kiểm tra bảo dưỡng máy bay bao gồm: các khái niệm cơ bản về bảo dưỡng, đại tu máy bay, các biện pháp bảo dưỡng và tổ chức bảo dưỡng, hoạt động bảo dưỡng máy bay tại Vietnam Airlines, cách thức xây dựng các chương trình bảo dưỡng và các gói công việc bảo dưỡng, các hiểu biết về chương trình thông tin bảo dưỡng và xác định chi phí bảo dưỡng, cùng các vấn đề về luật hàng không liên quan đến bảo dưỡng.\n- **Nội dung:** Lý thuyết cơ bản về bảo dưỡng máy bay, các khái niệm về bảo dưỡng và đại tu máy bay, các biện pháp bảo dưỡng và tổ chức bảo dưỡng, các hệ thống bảo dưỡng, hoạt động bảo dưỡng tại Vietnam Airlines, cách thức xây dựng các chương trình bảo dưỡng và các gói công v..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_simple_022",
+      "question_type": "simple",
+      "question": "Học phần TE5890 Máy bay trực thăng yêu cầu học phần học trước nào?",
+      "gold_answer": "Học phần TE5890 Máy bay trực thăng yêu cầu học trước TE4880 và TE4890.",
+      "evidence_chunk_ids": [
+        "842cfd6e-f3f7-45c4-83aa-49898f2b7f27"
+      ],
+      "ground_truth_context": [
+        "### 8.4 Các học phần tự chọn (khuyến nghị)\n---\n\n**TE5890 — Máy bay trực thăng**\n\n- **Khối lượng:** 3(3-1-0-6)\n- **Học phần học trước:** TE4880, TE4890\n- **Mục tiêu:** Sinh viên cần nắm được những khái niệm cơ bản về máy bay trực thăng, những bộ phận chính cấu thành máy bay trực thăng, các chế độ bay, cấu tạo và nguyên lý làm việc của máy bay trực thăng, các phương trình biểu diễn các chế độ làm việc của máy bay trực thăng, tính toán và xác định được công suất ở các chế độ bay khác nhau, biết cách xác định trần bay lý thuyết và trần bay thực tế, biết cách tính toán ảnh hưởng của trọng lượng đến đặc tính làm việc của máy bay, biết cách tính ổn định ở một số chế độ bay."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên hỏi chương trình Kỹ thuật hàng không kéo dài bao lâu và tổng khối lượng kiến thức sau điều chỉnh 11/2016 là bao nhiêu, cần trả lời thế nào?",
+      "gold_answer": "Chương trình Kỹ sư chất lượng cao Kỹ thuật hàng không được thiết kế trong 5 năm, tương ứng 10 học kỳ chính. Khối lượng kiến thức toàn khóa sau điều chỉnh tháng 11/2016 là 213 tín chỉ.",
+      "evidence_chunk_ids": [
+        "1e81e593-1d10-4cec-99f6-ca1e0de597f0",
+        "c00122a0-b653-4c33-9605-d3595dd59ccf"
+      ],
+      "ground_truth_context": [
+        "## 2. Thời gian đào tạo\n\nThời gian đào tạo theo thiết kế là 5 năm (10 học kỳ chính). Theo quy chế đào tạo, để hoàn thành chương trình sinh viên có thể rút ngắn tối đa 3 học kỳ hoặc kéo dài tối đa 5 học kỳ.\n\n---",
+        "## 3. Khối lượng kiến thức toàn khoá\n\n- Chương trình 2009: 237 tín chỉ (TC)\n- Chương trình điều chỉnh 11/2016: 213 TC\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Kỹ thuật hàng không cần học bao nhiêu tín chỉ Giáo dục đại cương và bao nhiêu tín chỉ Giáo dục chuyên nghiệp?",
+      "gold_answer": "Sinh viên cần học 81 tín chỉ Giáo dục đại cương và 132 tín chỉ Giáo dục chuyên nghiệp, tổng cộng 213 tín chỉ.",
+      "evidence_chunk_ids": [
+        "d06abeff-8a2e-4238-b08a-ff47e56cf417"
+      ],
+      "ground_truth_context": [
+        "## 7. Nội dung chương trình\n\n### 7.1 Cấu trúc chương trình đào tạo\n\n| Khối kiến thức | Phần kiến thức | Số tín chỉ |\n|---|---|---|\n| **Giáo dục đại cương (81 TC)** | CN Mác-Lênin và Tư tưởng HCM | 10 |\n| | Tiếng Anh | 10 |\n| | Tiếng Pháp | 25 |\n| | Toán cao cấp | 15 |\n| | Vật lý đại cương | 8 |\n| | Hóa học đại cương | 4 |\n| | Tin học đại cương | 3 |\n| | Quản trị học, Luật, Môi trường | 6 |\n| | Giáo dục thể chất, Giáo dục quốc phòng | —* |\n| **Giáo dục chuyên nghiệp (132 TC)** | Cơ sở kỹ thuật chung bắt buộc | 22 |\n| | Cơ sở ngành bắt buộc | 37 |\n| | Cơ sở ngành tự chọn | 5 |\n| | Chuyên ngành bắt buộc (bao gồm thực tập và đồ án tốt nghiệp) | 63 |\n| | Chuyên ngành tự chọn | 5 |\n| **Tổng** | | **213** |\n\n> *Các học phần GDTC và GDQP có chứng chỉ riêng, không xét trong tổng khối lượng kiến thức và không tính vào điểm trung bình chung của sinh viên. Thời gian học và nội dung theo quy định chu..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_table_reasoning",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn biết phần tiếng Anh và tiếng Pháp trong khối Giáo dục đại cương của chương trình Kỹ thuật hàng không gồm bao nhiêu tín chỉ và các học phần tiếng Anh cụ thể là gì, cần trả lời thế nào?",
+      "gold_answer": "Trong khối Giáo dục đại cương, phần Tiếng Anh chiếm 10 tín chỉ và Tiếng Pháp chiếm 25 tín chỉ. Các học phần tiếng Anh cụ thể gồm Tiếng Anh KSCLC I FL1011 5 tín chỉ ở học kỳ 1, Tiếng Anh KSCLC II FL1021 3 tín chỉ ở học kỳ 2 và Tiếng Anh KSCLC III FL2011 2 tín chỉ ở học kỳ 3.",
+      "evidence_chunk_ids": [
+        "d06abeff-8a2e-4238-b08a-ff47e56cf417",
+        "a86ee9f7-b3ef-4325-9467-64019c3b82b3",
+        "456db1ef-ccba-48fa-a48e-25292a55d2e3"
+      ],
+      "ground_truth_context": [
+        "## 7. Nội dung chương trình\n\n### 7.1 Cấu trúc chương trình đào tạo\n\n| Khối kiến thức | Phần kiến thức | Số tín chỉ |\n|---|---|---|\n| **Giáo dục đại cương (81 TC)** | CN Mác-Lênin và Tư tưởng HCM | 10 |\n| | Tiếng Anh | 10 |\n| | Tiếng Pháp | 25 |\n| | Toán cao cấp | 15 |\n| | Vật lý đại cương | 8 |\n| | Hóa học đại cương | 4 |\n| | Tin học đại cương | 3 |\n| | Quản trị học, Luật, Môi trường | 6 |\n| | Giáo dục thể chất, Giáo dục quốc phòng | —* |\n| **Giáo dục chuyên nghiệp (132 TC)** | Cơ sở kỹ thuật chung bắt buộc | 22 |\n| | Cơ sở ngành bắt buộc | 37 |\n| | Cơ sở ngành tự chọn | 5 |\n| | Chuyên ngành bắt buộc (bao gồm thực tập và đồ án tốt nghiệp) | 63 |\n| | Chuyên ngành tự chọn | 5 |\n| **Tổng** | | **213** |\n\n> *Các học phần GDTC và GDQP có chứng chỉ riêng, không xét trong tổng khối lượng kiến thức và không tính vào điểm trung bình chung của sinh viên. Thời gian học và nội dung theo quy định chu...",
+        "### 7.2 Danh mục học phần chi tiết\n#### Giáo dục đại cương bắt buộc (81 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1110 | Những nguyên lý cơ bản của chủ nghĩa Mác-Lênin I | 2(2-1-0-4) | 2 |\n| 2 | SSH1120 | Những nguyên lý cơ bản của chủ nghĩa Mác-Lênin II | 3(3-0-0-6) | 3 |\n| 3 | SSH1130 | Đường lối CM của Đảng CSVN | 3(2-1-0-4) | 6 |\n| 4 | SSH1050 | Tư tưởng Hồ Chí Minh | 2(2-0-1-4) | 5 |\n| 5 | PE1010 | Giáo dục thể chất A | x(0-0-2-0) | 1 |\n| 6 | PE1020 | Giáo dục thể chất B | x(0-0-2-0) | 2 |\n| 7 | PE1030 | Giáo dục thể chất C | x(0-0-2-0) | 3 |\n| 8 | PE2010 | Giáo dục thể chất D | x(0-0-2-0) | 4 |\n| 9 | PE2020 | Giáo dục thể chất E | x(0-0-2-0) | 5 |\n| 10 | MIL1110 | Đường lối quân sự | x(3-0-0-6) | 1 |\n| 11 | MIL1120 | Công tác quốc phòng - an ninh | x(3-0-0-6) | 2 |\n| 12 | MIL1130 | QS chung và kỹ chiến thuật bắn súng AK | x(3-1-1-8) | 4 |...",
+        "#### Giáo dục đại cương bắt buộc (81 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 17 | MI1034 | Toán III | 5(4-3-0-8) | 3 |\n| 18 | PH1014 | Vật lý I | 4(3-2-1-8) | 2 |\n| 19 | PH1024 | Vật lý II | 4(3-1-2-8) | 3 |\n| 20 | CH1014 | Hóa học đại cương | 4(4-1-1-8) | 3 |\n| 21 | IT1014 | Tin học đại cương | 3(2-1-2-6) | 1 |\n| 22 | EM1014 | Quản trị học | 2(2-1-0-4) | 3 |\n| 23 | EV1014 | Môi trường | 2(2-0-0-4) | 1 |\n| 24 | SSH1060 | Luật | 2(2-0-0-4) | 1 |\n| 25 | FL1401 | Tiếng Pháp KSCLC 1 | 3(3-2-0-6) | 1 |\n| 26 | FL1402 | Tiếng Pháp KSCLC 2 | 3(3-2-0-6) | 2 |\n| 27 | FL1501 | Tiếng Pháp KSCLC 3A | 3(3-2-0-6) | 3 |\n| 28 | FL1502 | Tiếng Pháp KSCLC 3B | 3(3-2-0-6) | 4 |\n| 29 | FL1404 | Tiếng Pháp KSCLC 4 | 3(3-2-0-6) | 5 |\n| 30 | FL1405 | Tiếng Pháp KSCLC 5 | 3(3-2-0-6) | 6 |\n| 31 | FL1406 | Tiếng Pháp KSCLC 6 | 3(3-2-0-6) | 7 |\n| 32 | FL1407 | Tiếng Pháp KSCLC..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên Kỹ thuật hàng không muốn học các học phần liên quan đến kết cấu và tính toán cấu trúc, chương trình có những học phần nào ở nhóm cơ sở ngành tự chọn và chuyên ngành bắt buộc?",
+      "gold_answer": "Ở nhóm cơ sở ngành tự chọn có Cơ học các cấu trúc ME4541 và Phương pháp số trong tính toán cấu trúc ME4175. Ở nhóm chuyên ngành bắt buộc có Kết cấu hàng không TE4820 và Đàn hồi khí động học TE4830, đều bố trí ở học kỳ 8.",
+      "evidence_chunk_ids": [
+        "16ca3315-5db6-416f-bfb9-e34735c12629",
+        "ad737107-3824-42cb-a4e8-bb39b25996ee"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở ngành tự chọn — 5 TC (chọn trong 10 TC)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 58 | MSE4004 | Các phương pháp chế tạo và gia công vật liệu | 2(2-0-0-4) | 7 |\n| 59 | ME4541 | Cơ học các cấu trúc | 3(2-1-0,5-6) | 8 |\n| 60 | MSE4002 | Các tính chất vật liệu tiên tiến | 2(2-0-0-4) | 7 |\n| 61 | ME4175 | Phương pháp số trong tính toán cấu trúc | 3(2-1-0,5-6) | 8 |",
+        "#### Chuyên ngành bắt buộc (63 tín chỉ)\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 62 | TE3600 | Kỹ thuật thủy khí | 2(1-1-1-4) | 5 |\n| 63 | TE4820 | Kết cấu hàng không | 2(2-1-0-4) | 8 |\n| 64 | TE4830 | Đàn hồi khí động học | 2(2-1-0-4) | 8 |\n| 65 | TE4840 | Kỹ thuật điện và điện tử trên máy bay | 2(2-1-0-4) | 8 |\n| 66 | TE4850 | Hệ thống thời gian thực | 2(2-1-0-4) | 8 |\n| 67 | TE4870 | Khí động lực học cơ bản | 3(2-1-1-4) | 7 |\n| 68 | TE4880 | Động cơ và thiết bị đẩy I | 3(3-1-0-6) | 8 |\n| 69 | TE4890 | Cơ học vật bay I | 2(2-1-0-4) | 8 |\n| 70 | TE4900 | Máy thủy lực I | 2(2-0-0-4) | 7 |\n| 71 | TE4911 | Thực tập chuyên ngành | 4(0-0-4-0) | 7 |\n| 73 | TE5810 | Khí động lực học chuyên sâu | 2(2-1-0-4) | 9 |\n| 74 | TE5830 | Vật liệu hàng không | 2(2-1-0-4) | 7 |\n| 75 | TE5840 | Truyền động tự động thủy khí | 2(2-0-1-4) | 9 |\n| 76 | TE5850 | Phương pháp số trong ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Kỹ thuật hàng không quan tâm đến động cơ và thiết bị đẩy cần học các học phần bắt buộc và tự chọn nào liên quan trực tiếp?",
+      "gold_answer": "Trong chuyên ngành bắt buộc, sinh viên học Động cơ và thiết bị đẩy I TE4880, 3 tín chỉ ở học kỳ 8. Trong nhóm chuyên ngành tự chọn, sinh viên có thể học Động cơ và thiết bị đẩy II TE5820, 3 tín chỉ ở học kỳ 9.",
+      "evidence_chunk_ids": [
+        "ad737107-3824-42cb-a4e8-bb39b25996ee",
+        "e44efa10-a920-420f-b11f-6a22ac67aeb2"
+      ],
+      "ground_truth_context": [
+        "#### Chuyên ngành bắt buộc (63 tín chỉ)\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 62 | TE3600 | Kỹ thuật thủy khí | 2(1-1-1-4) | 5 |\n| 63 | TE4820 | Kết cấu hàng không | 2(2-1-0-4) | 8 |\n| 64 | TE4830 | Đàn hồi khí động học | 2(2-1-0-4) | 8 |\n| 65 | TE4840 | Kỹ thuật điện và điện tử trên máy bay | 2(2-1-0-4) | 8 |\n| 66 | TE4850 | Hệ thống thời gian thực | 2(2-1-0-4) | 8 |\n| 67 | TE4870 | Khí động lực học cơ bản | 3(2-1-1-4) | 7 |\n| 68 | TE4880 | Động cơ và thiết bị đẩy I | 3(3-1-0-6) | 8 |\n| 69 | TE4890 | Cơ học vật bay I | 2(2-1-0-4) | 8 |\n| 70 | TE4900 | Máy thủy lực I | 2(2-0-0-4) | 7 |\n| 71 | TE4911 | Thực tập chuyên ngành | 4(0-0-4-0) | 7 |\n| 73 | TE5810 | Khí động lực học chuyên sâu | 2(2-1-0-4) | 9 |\n| 74 | TE5830 | Vật liệu hàng không | 2(2-1-0-4) | 7 |\n| 75 | TE5840 | Truyền động tự động thủy khí | 2(2-0-1-4) | 9 |\n| 76 | TE5850 | Phương pháp số trong ...",
+        "#### Chuyên ngành tự chọn — 5 TC (chọn trong 10 TC)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 85 | TE4910 | Máy thủy lực II | 2(2-0-0-4) | 9 |\n| 86 | TE5860 | Cơ học vật bay II | 2(2-0,5-0,5-4) | 9 |\n| 87 | TE5820 | Động cơ và thiết bị đẩy II | 3(3-0-0-6) | 9 |\n| 88 | TE5890 | Máy bay trực thăng | 3(3-1-0-6) | 9 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn đi theo hướng cơ học vật bay trong chương trình Kỹ thuật hàng không thì các học phần bắt buộc và tự chọn liên quan được bố trí như thế nào?",
+      "gold_answer": "Học phần bắt buộc liên quan là Cơ học vật bay I TE4890, 2 tín chỉ ở học kỳ 8. Học phần tự chọn tiếp nối là Cơ học vật bay II TE5860, 2 tín chỉ ở học kỳ 9.",
+      "evidence_chunk_ids": [
+        "ad737107-3824-42cb-a4e8-bb39b25996ee",
+        "e44efa10-a920-420f-b11f-6a22ac67aeb2"
+      ],
+      "ground_truth_context": [
+        "#### Chuyên ngành bắt buộc (63 tín chỉ)\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 62 | TE3600 | Kỹ thuật thủy khí | 2(1-1-1-4) | 5 |\n| 63 | TE4820 | Kết cấu hàng không | 2(2-1-0-4) | 8 |\n| 64 | TE4830 | Đàn hồi khí động học | 2(2-1-0-4) | 8 |\n| 65 | TE4840 | Kỹ thuật điện và điện tử trên máy bay | 2(2-1-0-4) | 8 |\n| 66 | TE4850 | Hệ thống thời gian thực | 2(2-1-0-4) | 8 |\n| 67 | TE4870 | Khí động lực học cơ bản | 3(2-1-1-4) | 7 |\n| 68 | TE4880 | Động cơ và thiết bị đẩy I | 3(3-1-0-6) | 8 |\n| 69 | TE4890 | Cơ học vật bay I | 2(2-1-0-4) | 8 |\n| 70 | TE4900 | Máy thủy lực I | 2(2-0-0-4) | 7 |\n| 71 | TE4911 | Thực tập chuyên ngành | 4(0-0-4-0) | 7 |\n| 73 | TE5810 | Khí động lực học chuyên sâu | 2(2-1-0-4) | 9 |\n| 74 | TE5830 | Vật liệu hàng không | 2(2-1-0-4) | 7 |\n| 75 | TE5840 | Truyền động tự động thủy khí | 2(2-0-1-4) | 9 |\n| 76 | TE5850 | Phương pháp số trong ...",
+        "#### Chuyên ngành tự chọn — 5 TC (chọn trong 10 TC)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 85 | TE4910 | Máy thủy lực II | 2(2-0-0-4) | 9 |\n| 86 | TE5860 | Cơ học vật bay II | 2(2-0,5-0,5-4) | 9 |\n| 87 | TE5820 | Động cơ và thiết bị đẩy II | 3(3-0-0-6) | 9 |\n| 88 | TE5890 | Máy bay trực thăng | 3(3-1-0-6) | 9 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Trong năm cuối chương trình Kỹ thuật hàng không, sinh viên phải hoàn thành các học phần tốt nghiệp nào và các học phần đó đóng góp vào những chuẩn đầu ra nào trong ma trận?",
+      "gold_answer": "Ở học kỳ 10, sinh viên phải hoàn thành Thực tập tốt nghiệp TE5940 và Đồ án tốt nghiệp TE5950. Trong ma trận chuẩn đầu ra, cả hai học phần đều đóng góp vào các chuẩn a, b, c, e, f, g, h, i, j và k.",
+      "evidence_chunk_ids": [
+        "346af84b-45d9-427c-895f-89d2e3615402",
+        "306683a0-4eec-4be4-9127-8097fbc8d16d"
+      ],
+      "ground_truth_context": [
+        "#### Học kỳ 10\n\n| STT | Môn học | Mã MH | a | b | c | d | e | f | g | h | i | j | k |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| 1 | Thực tập tốt nghiệp | TE5940 | x | x | x | | x | x | x | x | x | x | x |\n| 2 | Đồ án tốt nghiệp | TE5950 | x | x | x | | x | x | x | x | x | x | x |\n\n---",
+        "#### Chuyên ngành bắt buộc (63 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 79 | TE5900 | Kiểm tra và bảo dưỡng máy bay | 3(3-0-1-6) | 9 |\n| 80 | TE5910 | Khai thác và quản lý máy bay | 2(2-0-0-4) | 9 |\n| 81 | TE5920 | Luật hàng không | 2(2-0-0-4) | 5 |\n| 82 | TE5930 | Đồ án môn học | 3(0-3-0-6) | 9 |\n| 83 | TE5940 | Thực tập tốt nghiệp | 4(0-0-4-0) | 10 |\n| 84 | TE5950 | Đồ án tốt nghiệp | 10(0-10-0-20) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ctdt_ksclc_hang_khong_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Học phần TE4880 là điều kiện học trước cho học phần tự chọn nào, và nội dung TE4880 tập trung vào những gì?",
+      "gold_answer": "TE4880 Động cơ và Thiết bị đẩy I là học phần học trước của TE5890 Máy bay trực thăng và TE5820 Động cơ và Thiết bị đẩy II. Bản thân TE4880 tập trung vào các loại động cơ máy bay, cấu tạo các bộ phận chính của động cơ tua-bin khí, tính toán chu trình nhiệt và các đặc tính của động cơ tua-bin khí.",
+      "evidence_chunk_ids": [
+        "20b54575-fbe3-4a8c-be85-0fc122962ed8",
+        "842cfd6e-f3f7-45c4-83aa-49898f2b7f27",
+        "5b04be88-0685-4c9c-a3fb-1dead71f2637"
+      ],
+      "ground_truth_context": [
+        "#### 8.3.2 Kiến thức cơ sở chuyên ngành\n\n---\n\n**TE4880 — Động cơ và Thiết bị đẩy I**\n\n- **Khối lượng:** 3(3-1-0-6)\n- **Học phần học trước:** TE3600\n- **Mục tiêu:** Sinh viên biết được sơ bộ các loại động cơ máy bay, nắm được cấu tạo và các bộ phận chính của động cơ tua-bin khí. Biết phân tích và tính toán chu trình nhiệt, các chế độ hoạt động cũng như các thông số đặc trưng của động cơ.\n- **Nội dung:** Các loại động cơ máy bay. Các bộ phận chính của động cơ tua-bin khí: ống hút, máy nén, buồng cháy, tua-bin, ống đẩy. Tính toán chu trình nhiệt động cơ: chu trình lý tưởng, chu trình thực. Đặc tính động cơ tua-bin khí.",
+        "### 8.4 Các học phần tự chọn (khuyến nghị)\n---\n\n**TE5890 — Máy bay trực thăng**\n\n- **Khối lượng:** 3(3-1-0-6)\n- **Học phần học trước:** TE4880, TE4890\n- **Mục tiêu:** Sinh viên cần nắm được những khái niệm cơ bản về máy bay trực thăng, những bộ phận chính cấu thành máy bay trực thăng, các chế độ bay, cấu tạo và nguyên lý làm việc của máy bay trực thăng, các phương trình biểu diễn các chế độ làm việc của máy bay trực thăng, tính toán và xác định được công suất ở các chế độ bay khác nhau, biết cách xác định trần bay lý thuyết và trần bay thực tế, biết cách tính toán ảnh hưởng của trọng lượng đến đặc tính làm việc của máy bay, biết cách tính ổn định ở một số chế độ bay.",
+        "### 8.4 Các học phần tự chọn (khuyến nghị)\n\n---\n\n**TE5820 — Động cơ và Thiết bị đẩy II**\n\n- **Khối lượng:** 3(3-0-0-6)\n- **Học phần học trước:** TE4880\n- **Mục tiêu:** Sinh viên có được các kiến thức cơ sở về các hệ thống phụ trợ của động cơ tua bin trong ngành Hàng không để đảm bảo động cơ luôn hoạt động ở chế độ tối ưu khi chế độ bay thay đổi cũng như một số hệ thống phụ trợ của máy bay, có khả năng phân tích các hệ thống, khai thác sử dụng và bảo dưỡng các hệ thống này khi làm việc trong ngành Hàng không, có khả năng tham khảo các tài liệu chuyên sâu.\n- **Nội dung:** Nghiên cứu các hệ thống: hệ thống bôi trơn, hệ thống tự động định lượng nhiên liệu, hệ thống trích khí, các hệ thống điều khiển khe hở giữa đầu cánh máy nén/tua bin với stato, hệ thống xoay cánh hướng máy nén khí, hệ thống đảo chiều lực đẩy, hệ thống chống vượt tốc, hệ thống khởi động động cơ. Nguyên lý, cấu tạo của các d..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    }
+  ]
+}

@@ -1,0 +1,465 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QĐ đánh giá điểm rèn luyện sinh viên 2023_converted_chunks(2).json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "qd_dgrl_2023_simple_001",
+      "question_type": "simple",
+      "question": "Quy định đánh giá kết quả rèn luyện sinh viên Đại học Bách khoa Hà Nội áp dụng cho những đối tượng nào?",
+      "gold_answer": "Quy định áp dụng cho sinh viên đại học hình thức đào tạo chính quy thuộc Đại học Bách khoa Hà Nội, không bao gồm lưu học sinh nước ngoài.",
+      "evidence_chunk_ids": [
+        "3c329118-b1aa-4baa-9506-14f4e9e80338"
+      ],
+      "ground_truth_context": [
+        "## Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng\n\nQuy định này quy định việc đánh giá kết quả rèn luyện của sinh viên đại học hình thức đào tạo chính quy (không bao gồm lưu học sinh nước ngoài) thuộc Đại học Bách khoa Hà Nội, bao gồm: nội dung đánh giá kết quả rèn luyện và khung điểm; cách thức và quy trình đánh giá; sử dụng kết quả đánh giá; tổ chức thực hiện.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_002",
+      "question_type": "simple",
+      "question": "Điểm rèn luyện của sinh viên Đại học Bách khoa Hà Nội được đánh giá theo thang điểm bao nhiêu?",
+      "gold_answer": "Điểm rèn luyện được đánh giá bằng thang điểm 100.",
+      "evidence_chunk_ids": [
+        "3c9af568-918b-418f-a345-9afe94d093e1"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Nội dung đánh giá và thang điểm\n\n**1.** Xem xét, đánh giá kết quả rèn luyện của sinh viên là đánh giá phẩm chất chính trị, đạo đức, lối sống của từng sinh viên theo các mức điểm đạt được trên các mặt:\n\n- Ý thức, thái độ học tập và nghiên cứu khoa học;\n- Ý thức và kết quả chấp hành nội quy, quy chế trong Đại học;\n- Ý thức và kết quả tham gia các hoạt động chính trị, xã hội, văn hoá, văn nghệ, thể thao, khoa học, hướng nghiệp, phòng chống tệ nạn của lớp, các đoàn thể, tổ chức khác trong và ngoài Đại học;\n- Phẩm chất công dân, trách nhiệm và quan hệ với cộng đồng;\n- Kết quả hoặc các thành tích đặc biệt trong học tập, rèn luyện của sinh viên.\n\n**2.** Điểm rèn luyện được đánh giá bằng thang điểm 100 và được xếp loại như sau:\n\n| TT | Khung điểm | Xếp loại |\n|---|---|---|\n| 1 | Từ 90 đến 100 điểm | Xuất sắc |\n| 2 | Từ 80 đến dưới 90 điểm | Tốt |\n| 3 | Từ 65 đến dưới 80 điểm | Khá |\n| 4 | Từ 50 đến dưới 65 điểm | Trung bình |\n| 5 | Từ 35 đến dưới 50 điểm | Yếu |\n\n**3.** Các nội dung đánh giá được quy định chi tiết trong khung đánh giá kết quả rèn luyện theo từng năm học (Phụ lục I).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên có điểm rèn luyện từ 90 đến 100 được xếp loại gì?",
+      "gold_answer": "Sinh viên có điểm rèn luyện từ 90 đến 100 điểm được xếp loại Xuất sắc.",
+      "evidence_chunk_ids": [
+        "3c9af568-918b-418f-a345-9afe94d093e1"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Nội dung đánh giá và thang điểm\n\n**1.** Xem xét, đánh giá kết quả rèn luyện của sinh viên là đánh giá phẩm chất chính trị, đạo đức, lối sống của từng sinh viên theo các mức điểm đạt được trên các mặt:\n\n- Ý thức, thái độ học tập và nghiên cứu khoa học;\n- Ý thức và kết quả chấp hành nội quy, quy chế trong Đại học;\n- Ý thức và kết quả tham gia các hoạt động chính trị, xã hội, văn hoá, văn nghệ, thể thao, khoa học, hướng nghiệp, phòng chống tệ nạn của lớp, các đoàn thể, tổ chức khác trong và ngoài Đại học;\n- Phẩm chất công dân, trách nhiệm và quan hệ với cộng đồng;\n- Kết quả hoặc các thành tích đặc biệt trong học tập, rèn luyện của sinh viên.\n\n**2.** Điểm rèn luyện được đánh giá bằng thang điểm 100 và được xếp loại như sau:\n\n| TT | Khung điểm | Xếp loại |\n|---|---|---|\n| 1 | Từ 90 đến 100 điểm | Xuất sắc |\n| 2 | Từ 80 đến dưới 90 điểm | Tốt |\n| 3 | Từ 65 đến dưới 80 điểm | Khá |\n| 4 | Từ 50 đến dưới 65 điểm | Trung bình |\n| 5 | Từ 35 đến dưới 50 điểm | Yếu |\n\n**3.** Các nội dung đánh giá được quy định chi tiết trong khung đánh giá kết quả rèn luyện theo từng năm học (Phụ lục I).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_004",
+      "question_type": "simple",
+      "question": "Sinh viên có điểm rèn luyện từ 80 đến dưới 90 được xếp loại gì?",
+      "gold_answer": "Sinh viên có điểm rèn luyện từ 80 đến dưới 90 điểm được xếp loại Tốt.",
+      "evidence_chunk_ids": [
+        "3c9af568-918b-418f-a345-9afe94d093e1"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Nội dung đánh giá và thang điểm\n\n**1.** Xem xét, đánh giá kết quả rèn luyện của sinh viên là đánh giá phẩm chất chính trị, đạo đức, lối sống của từng sinh viên theo các mức điểm đạt được trên các mặt:\n\n- Ý thức, thái độ học tập và nghiên cứu khoa học;\n- Ý thức và kết quả chấp hành nội quy, quy chế trong Đại học;\n- Ý thức và kết quả tham gia các hoạt động chính trị, xã hội, văn hoá, văn nghệ, thể thao, khoa học, hướng nghiệp, phòng chống tệ nạn của lớp, các đoàn thể, tổ chức khác trong và ngoài Đại học;\n- Phẩm chất công dân, trách nhiệm và quan hệ với cộng đồng;\n- Kết quả hoặc các thành tích đặc biệt trong học tập, rèn luyện của sinh viên.\n\n**2.** Điểm rèn luyện được đánh giá bằng thang điểm 100 và được xếp loại như sau:\n\n| TT | Khung điểm | Xếp loại |\n|---|---|---|\n| 1 | Từ 90 đến 100 điểm | Xuất sắc |\n| 2 | Từ 80 đến dưới 90 điểm | Tốt |\n| 3 | Từ 65 đến dưới 80 điểm | Khá |\n| 4 | Từ 50 đến dưới 65 điểm | Trung bình |\n| 5 | Từ 35 đến dưới 50 điểm | Yếu |\n\n**3.** Các nội dung đánh giá được quy định chi tiết trong khung đánh giá kết quả rèn luyện theo từng năm học (Phụ lục I).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_005",
+      "question_type": "simple",
+      "question": "Sinh viên có điểm rèn luyện từ 65 đến dưới 80 được xếp loại gì?",
+      "gold_answer": "Sinh viên có điểm rèn luyện từ 65 đến dưới 80 điểm được xếp loại Khá.",
+      "evidence_chunk_ids": [
+        "3c9af568-918b-418f-a345-9afe94d093e1"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Nội dung đánh giá và thang điểm\n\n**1.** Xem xét, đánh giá kết quả rèn luyện của sinh viên là đánh giá phẩm chất chính trị, đạo đức, lối sống của từng sinh viên theo các mức điểm đạt được trên các mặt:\n\n- Ý thức, thái độ học tập và nghiên cứu khoa học;\n- Ý thức và kết quả chấp hành nội quy, quy chế trong Đại học;\n- Ý thức và kết quả tham gia các hoạt động chính trị, xã hội, văn hoá, văn nghệ, thể thao, khoa học, hướng nghiệp, phòng chống tệ nạn của lớp, các đoàn thể, tổ chức khác trong và ngoài Đại học;\n- Phẩm chất công dân, trách nhiệm và quan hệ với cộng đồng;\n- Kết quả hoặc các thành tích đặc biệt trong học tập, rèn luyện của sinh viên.\n\n**2.** Điểm rèn luyện được đánh giá bằng thang điểm 100 và được xếp loại như sau:\n\n| TT | Khung điểm | Xếp loại |\n|---|---|---|\n| 1 | Từ 90 đến 100 điểm | Xuất sắc |\n| 2 | Từ 80 đến dưới 90 điểm | Tốt |\n| 3 | Từ 65 đến dưới 80 điểm | Khá |\n| 4 | Từ 50 đến dưới 65 điểm | Trung bình |\n| 5 | Từ 35 đến dưới 50 điểm | Yếu |\n\n**3.** Các nội dung đánh giá được quy định chi tiết trong khung đánh giá kết quả rèn luyện theo từng năm học (Phụ lục I).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_006",
+      "question_type": "simple",
+      "question": "Sinh viên có điểm rèn luyện từ 35 đến dưới 50 được xếp loại gì?",
+      "gold_answer": "Sinh viên có điểm rèn luyện từ 35 đến dưới 50 điểm được xếp loại Yếu.",
+      "evidence_chunk_ids": [
+        "3c9af568-918b-418f-a345-9afe94d093e1"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Nội dung đánh giá và thang điểm\n\n**1.** Xem xét, đánh giá kết quả rèn luyện của sinh viên là đánh giá phẩm chất chính trị, đạo đức, lối sống của từng sinh viên theo các mức điểm đạt được trên các mặt:\n\n- Ý thức, thái độ học tập và nghiên cứu khoa học;\n- Ý thức và kết quả chấp hành nội quy, quy chế trong Đại học;\n- Ý thức và kết quả tham gia các hoạt động chính trị, xã hội, văn hoá, văn nghệ, thể thao, khoa học, hướng nghiệp, phòng chống tệ nạn của lớp, các đoàn thể, tổ chức khác trong và ngoài Đại học;\n- Phẩm chất công dân, trách nhiệm và quan hệ với cộng đồng;\n- Kết quả hoặc các thành tích đặc biệt trong học tập, rèn luyện của sinh viên.\n\n**2.** Điểm rèn luyện được đánh giá bằng thang điểm 100 và được xếp loại như sau:\n\n| TT | Khung điểm | Xếp loại |\n|---|---|---|\n| 1 | Từ 90 đến 100 điểm | Xuất sắc |\n| 2 | Từ 80 đến dưới 90 điểm | Tốt |\n| 3 | Từ 65 đến dưới 80 điểm | Khá |\n| 4 | Từ 50 đến dưới 65 điểm | Trung bình |\n| 5 | Từ 35 đến dưới 50 điểm | Yếu |\n\n**3.** Các nội dung đánh giá được quy định chi tiết trong khung đánh giá kết quả rèn luyện theo từng năm học (Phụ lục I).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_007",
+      "question_type": "simple",
+      "question": "Điểm rèn luyện học kỳ của sinh viên được tính như thế nào?",
+      "gold_answer": "Điểm rèn luyện của học kỳ là tổng điểm đạt được của các nội dung đánh giá chi tiết.",
+      "evidence_chunk_ids": [
+        "b90fe8c9-7c14-47b1-aa62-3897ef8984c1"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Thời gian đánh giá\n\n1. Việc đánh giá kết quả rèn luyện của sinh viên được tiến hành định kỳ theo học kỳ, năm học và toàn khóa học.\n2. Điểm rèn luyện của học kỳ là tổng điểm đạt được của các nội dung đánh giá chi tiết.\n3. Điểm rèn luyện của năm học là trung bình cộng của điểm rèn luyện các học kỳ của năm học đó.\n4. Điểm rèn luyện toàn khóa là trung bình cộng của điểm rèn luyện của tối thiểu 07 học kỳ. Trong trường hợp đặc biệt, điểm rèn luyện toàn khóa do Ban Giám đốc quyết định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_008",
+      "question_type": "simple",
+      "question": "Điểm rèn luyện năm học của sinh viên được tính như thế nào?",
+      "gold_answer": "Điểm rèn luyện của năm học là trung bình cộng của điểm rèn luyện các học kỳ trong năm học đó.",
+      "evidence_chunk_ids": [
+        "b90fe8c9-7c14-47b1-aa62-3897ef8984c1"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Thời gian đánh giá\n\n1. Việc đánh giá kết quả rèn luyện của sinh viên được tiến hành định kỳ theo học kỳ, năm học và toàn khóa học.\n2. Điểm rèn luyện của học kỳ là tổng điểm đạt được của các nội dung đánh giá chi tiết.\n3. Điểm rèn luyện của năm học là trung bình cộng của điểm rèn luyện các học kỳ của năm học đó.\n4. Điểm rèn luyện toàn khóa là trung bình cộng của điểm rèn luyện của tối thiểu 07 học kỳ. Trong trường hợp đặc biệt, điểm rèn luyện toàn khóa do Ban Giám đốc quyết định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_009",
+      "question_type": "simple",
+      "question": "Điểm rèn luyện toàn khóa của sinh viên được tính dựa trên tối thiểu bao nhiêu học kỳ?",
+      "gold_answer": "Điểm rèn luyện toàn khóa là trung bình cộng của điểm rèn luyện của tối thiểu 7 học kỳ; trường hợp đặc biệt do Ban Giám đốc quyết định.",
+      "evidence_chunk_ids": [
+        "b90fe8c9-7c14-47b1-aa62-3897ef8984c1"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Thời gian đánh giá\n\n1. Việc đánh giá kết quả rèn luyện của sinh viên được tiến hành định kỳ theo học kỳ, năm học và toàn khóa học.\n2. Điểm rèn luyện của học kỳ là tổng điểm đạt được của các nội dung đánh giá chi tiết.\n3. Điểm rèn luyện của năm học là trung bình cộng của điểm rèn luyện các học kỳ của năm học đó.\n4. Điểm rèn luyện toàn khóa là trung bình cộng của điểm rèn luyện của tối thiểu 07 học kỳ. Trong trường hợp đặc biệt, điểm rèn luyện toàn khóa do Ban Giám đốc quyết định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_010",
+      "question_type": "simple",
+      "question": "Kết quả rèn luyện của sinh viên được sử dụng trong những việc gì?",
+      "gold_answer": "Kết quả đánh giá rèn luyện được dùng để xét học bổng, khen thưởng - kỷ luật, thôi học, ngừng học và xét lưu trú ký túc xá.",
+      "evidence_chunk_ids": [
+        "ffc7c8a3-6787-4133-b169-991bd7d9c976"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Sử dụng kết quả đánh giá\n\n1. Kết quả đánh giá rèn luyện của sinh viên được sử dụng trong việc xét duyệt học bổng, xét khen thưởng - kỷ luật, xét thôi học, ngừng học, xét lưu trú ký túc xá.\n2. Kết quả đánh giá rèn luyện toàn khóa học được ghi chung vào bảng điểm kết quả học tập và lưu trong hồ sơ của người học khi tốt nghiệp.\n3. Sinh viên có kết quả rèn luyện xuất sắc được Trường/Đại học xem xét biểu dương, khen thưởng.\n4. Sinh viên bị xếp loại rèn luyện Yếu/Kém trong hai học kỳ liên tiếp bị hạn chế đăng ký học tập tương đương cảnh báo học tập mức 2.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_011",
+      "question_type": "simple",
+      "question": "Kết quả rèn luyện toàn khóa có được ghi vào bảng điểm khi sinh viên tốt nghiệp không?",
+      "gold_answer": "Có. Kết quả rèn luyện toàn khóa được ghi chung vào bảng điểm kết quả học tập và lưu trong hồ sơ của người học khi tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "ffc7c8a3-6787-4133-b169-991bd7d9c976"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Sử dụng kết quả đánh giá\n\n1. Kết quả đánh giá rèn luyện của sinh viên được sử dụng trong việc xét duyệt học bổng, xét khen thưởng - kỷ luật, xét thôi học, ngừng học, xét lưu trú ký túc xá.\n2. Kết quả đánh giá rèn luyện toàn khóa học được ghi chung vào bảng điểm kết quả học tập và lưu trong hồ sơ của người học khi tốt nghiệp.\n3. Sinh viên có kết quả rèn luyện xuất sắc được Trường/Đại học xem xét biểu dương, khen thưởng.\n4. Sinh viên bị xếp loại rèn luyện Yếu/Kém trong hai học kỳ liên tiếp bị hạn chế đăng ký học tập tương đương cảnh báo học tập mức 2.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên bị xếp loại rèn luyện Yếu hoặc Kém trong hai học kỳ liên tiếp sẽ bị xử lý như thế nào?",
+      "gold_answer": "Sinh viên bị xếp loại rèn luyện Yếu/Kém trong hai học kỳ liên tiếp sẽ bị hạn chế đăng ký học tập tương đương cảnh báo học tập mức 2.",
+      "evidence_chunk_ids": [
+        "ffc7c8a3-6787-4133-b169-991bd7d9c976"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Sử dụng kết quả đánh giá\n\n1. Kết quả đánh giá rèn luyện của sinh viên được sử dụng trong việc xét duyệt học bổng, xét khen thưởng - kỷ luật, xét thôi học, ngừng học, xét lưu trú ký túc xá.\n2. Kết quả đánh giá rèn luyện toàn khóa học được ghi chung vào bảng điểm kết quả học tập và lưu trong hồ sơ của người học khi tốt nghiệp.\n3. Sinh viên có kết quả rèn luyện xuất sắc được Trường/Đại học xem xét biểu dương, khen thưởng.\n4. Sinh viên bị xếp loại rèn luyện Yếu/Kém trong hai học kỳ liên tiếp bị hạn chế đăng ký học tập tương đương cảnh báo học tập mức 2.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_013",
+      "question_type": "simple",
+      "question": "Sinh viên muốn khiếu nại điểm rèn luyện thì gửi khiếu nại thông qua đơn vị nào?",
+      "gold_answer": "Sinh viên có quyền khiếu nại lên Hội đồng đánh giá rèn luyện sinh viên thông qua Phòng/Ban chức năng Công tác Sinh viên nếu thấy việc đánh giá minh chứng hoặc rèn luyện chưa chính xác.",
+      "evidence_chunk_ids": [
+        "b75ec543-79b4-4a93-9139-985da43a7368"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Khiếu nại kết quả đánh giá rèn luyện sinh viên\n\nSinh viên có quyền khiếu nại lên Hội đồng đánh giá rèn luyện sinh viên (thông qua Phòng/Ban chức năng CTSV) nếu thấy việc đánh giá minh chứng tham gia hoạt động hay rèn luyện chưa chính xác.\n\nHội đồng đánh giá rèn luyện sinh viên cấp Đại học công bố thời gian nhận khiếu nại, trong đó xác định rõ thời điểm bắt đầu và thời điểm kết thúc khiếu nại, đảm bảo khoảng thời gian để sinh viên khiếu nại tối thiểu là 15 ngày.\n\nKhi nhận được đơn khiếu nại kết quả đánh giá rèn luyện sinh viên, Phòng/Ban chức năng CTSV, Đơn vị cấp phát minh chứng tham gia hoạt động, Giảng viên quản lý lớp Trường/Viện/Khoa đào tạo của sinh viên có trách nhiệm xem xét và trả lời sinh viên trong thời gian không quá 07 ngày kể từ ngày nhận được đơn khiếu nại.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_014",
+      "question_type": "simple",
+      "question": "Thời gian tối thiểu để sinh viên khiếu nại kết quả rèn luyện là bao lâu?",
+      "gold_answer": "Khoảng thời gian để sinh viên khiếu nại kết quả rèn luyện tối thiểu là 15 ngày.",
+      "evidence_chunk_ids": [
+        "b75ec543-79b4-4a93-9139-985da43a7368"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Khiếu nại kết quả đánh giá rèn luyện sinh viên\n\nSinh viên có quyền khiếu nại lên Hội đồng đánh giá rèn luyện sinh viên (thông qua Phòng/Ban chức năng CTSV) nếu thấy việc đánh giá minh chứng tham gia hoạt động hay rèn luyện chưa chính xác.\n\nHội đồng đánh giá rèn luyện sinh viên cấp Đại học công bố thời gian nhận khiếu nại, trong đó xác định rõ thời điểm bắt đầu và thời điểm kết thúc khiếu nại, đảm bảo khoảng thời gian để sinh viên khiếu nại tối thiểu là 15 ngày.\n\nKhi nhận được đơn khiếu nại kết quả đánh giá rèn luyện sinh viên, Phòng/Ban chức năng CTSV, Đơn vị cấp phát minh chứng tham gia hoạt động, Giảng viên quản lý lớp Trường/Viện/Khoa đào tạo của sinh viên có trách nhiệm xem xét và trả lời sinh viên trong thời gian không quá 07 ngày kể từ ngày nhận được đơn khiếu nại.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_015",
+      "question_type": "simple",
+      "question": "Sau khi nhận đơn khiếu nại điểm rèn luyện, các đơn vị liên quan phải trả lời sinh viên trong thời hạn bao lâu?",
+      "gold_answer": "Các đơn vị liên quan có trách nhiệm xem xét và trả lời sinh viên trong thời gian không quá 7 ngày kể từ ngày nhận được đơn khiếu nại.",
+      "evidence_chunk_ids": [
+        "b75ec543-79b4-4a93-9139-985da43a7368"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Khiếu nại kết quả đánh giá rèn luyện sinh viên\n\nSinh viên có quyền khiếu nại lên Hội đồng đánh giá rèn luyện sinh viên (thông qua Phòng/Ban chức năng CTSV) nếu thấy việc đánh giá minh chứng tham gia hoạt động hay rèn luyện chưa chính xác.\n\nHội đồng đánh giá rèn luyện sinh viên cấp Đại học công bố thời gian nhận khiếu nại, trong đó xác định rõ thời điểm bắt đầu và thời điểm kết thúc khiếu nại, đảm bảo khoảng thời gian để sinh viên khiếu nại tối thiểu là 15 ngày.\n\nKhi nhận được đơn khiếu nại kết quả đánh giá rèn luyện sinh viên, Phòng/Ban chức năng CTSV, Đơn vị cấp phát minh chứng tham gia hoạt động, Giảng viên quản lý lớp Trường/Viện/Khoa đào tạo của sinh viên có trách nhiệm xem xét và trả lời sinh viên trong thời gian không quá 07 ngày kể từ ngày nhận được đơn khiếu nại.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_016",
+      "question_type": "simple",
+      "question": "Sinh viên có GPA từ 3.2 đến dưới 3.6 được cộng bao nhiêu điểm rèn luyện ở tiêu chí kết quả học tập?",
+      "gold_answer": "Sinh viên có GPA từ 3.2 đến dưới 3.6 được cộng 18 điểm ở tiêu chí kết quả học tập.",
+      "evidence_chunk_ids": [
+        "d770e49f-7990-47e3-ac37-fa003e78a6da"
+      ],
+      "ground_truth_context": [
+        "## TC1. Điểm về ý thức, thái độ học tập và nghiên cứu khoa học (tối đa 30 điểm)\n\n### Tiêu chí 1.1 – Kết quả học tập (tối đa 24 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |\n\n### Tiêu chí 1.2 – Trình độ ngoại ngữ (tối đa 6 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| Đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên | * | 2 |\n\n### Tiêu chí 1.3 – Tham gia các hoạt động học thuật (tối đa 9 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến NCKH, học thuật, chuyên môn | MC | 3 |\n| Tham gia khóa đào tạo kỹ năng nghề nghiệp, kỹ năng bổ trợ chuyên môn | MC | 6 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên có GPA từ 2.5 đến dưới 3.2 được cộng bao nhiêu điểm rèn luyện ở tiêu chí kết quả học tập?",
+      "gold_answer": "Sinh viên có GPA từ 2.5 đến dưới 3.2 được cộng 16 điểm ở tiêu chí kết quả học tập.",
+      "evidence_chunk_ids": [
+        "d770e49f-7990-47e3-ac37-fa003e78a6da"
+      ],
+      "ground_truth_context": [
+        "## TC1. Điểm về ý thức, thái độ học tập và nghiên cứu khoa học (tối đa 30 điểm)\n\n### Tiêu chí 1.1 – Kết quả học tập (tối đa 24 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |\n\n### Tiêu chí 1.2 – Trình độ ngoại ngữ (tối đa 6 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| Đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên | * | 2 |\n\n### Tiêu chí 1.3 – Tham gia các hoạt động học thuật (tối đa 9 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến NCKH, học thuật, chuyên môn | MC | 3 |\n| Tham gia khóa đào tạo kỹ năng nghề nghiệp, kỹ năng bổ trợ chuyên môn | MC | 6 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_018",
+      "question_type": "simple",
+      "question": "Sinh viên đạt trình độ ngoại ngữ theo tiến độ chương trình đào tạo được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo được cộng 4 điểm.",
+      "evidence_chunk_ids": [
+        "d770e49f-7990-47e3-ac37-fa003e78a6da"
+      ],
+      "ground_truth_context": [
+        "## TC1. Điểm về ý thức, thái độ học tập và nghiên cứu khoa học (tối đa 30 điểm)\n\n### Tiêu chí 1.1 – Kết quả học tập (tối đa 24 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |\n\n### Tiêu chí 1.2 – Trình độ ngoại ngữ (tối đa 6 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| Đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên | * | 2 |\n\n### Tiêu chí 1.3 – Tham gia các hoạt động học thuật (tối đa 9 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến NCKH, học thuật, chuyên môn | MC | 3 |\n| Tham gia khóa đào tạo kỹ năng nghề nghiệp, kỹ năng bổ trợ chuyên môn | MC | 6 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_019",
+      "question_type": "simple",
+      "question": "Sinh viên có chứng chỉ ngoại ngữ tương đương TOEIC 600 trở lên được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên có chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên được cộng 2 điểm.",
+      "evidence_chunk_ids": [
+        "d770e49f-7990-47e3-ac37-fa003e78a6da"
+      ],
+      "ground_truth_context": [
+        "## TC1. Điểm về ý thức, thái độ học tập và nghiên cứu khoa học (tối đa 30 điểm)\n\n### Tiêu chí 1.1 – Kết quả học tập (tối đa 24 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |\n\n### Tiêu chí 1.2 – Trình độ ngoại ngữ (tối đa 6 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| Đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên | * | 2 |\n\n### Tiêu chí 1.3 – Tham gia các hoạt động học thuật (tối đa 9 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến NCKH, học thuật, chuyên môn | MC | 3 |\n| Tham gia khóa đào tạo kỹ năng nghề nghiệp, kỹ năng bổ trợ chuyên môn | MC | 6 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_020",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia Sinh hoạt công dân do Trường hoặc Viện tổ chức được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia Sinh hoạt công dân do Trường, Viện tổ chức được cộng 7 điểm.",
+      "evidence_chunk_ids": [
+        "55b40332-7810-4f8d-a795-2111fc32e8f7"
+      ],
+      "ground_truth_context": [
+        "## TC2. Điểm về ý thức tổ chức kỷ luật (tối đa 25 điểm)\n\n### Tiêu chí 2.1 – Tham gia các hoạt động bắt buộc (tối đa 20 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |\n| Tham gia Hợp lớp thường kỳ do Viện, Trường tổ chức | MC | 7 |\n| Nắm vững quy định và quy chế của Nhà trường | MC | 6 |\n\n### Tiêu chí 2.2 – Tham gia các hoạt động hỗ trợ (tối đa 9 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp | MC | 6 |\n| Tham gia khóa đào tạo kỹ năng mềm | MC | 6 |\n| Tham gia hội thảo tăng cường kỹ năng mềm, phương pháp học tập, ý thức học tập, làm việc | MC | 3 |\n| Tham gia các buổi nói chuyện, các chương trình thời sự, phòng chống tội phạm và tệ nạn xã hội | MC | 3 |\n| Tham gia hoạt động hướng nghiệp, tìm kiếm thông tin việc làm | MC | 3 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_021",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia hiến máu nhân đạo do Trường hoặc tổ chức hợp pháp phát động được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "df79f3f4-5445-4da1-aa34-c59a81784319"
+      ],
+      "ground_truth_context": [
+        "### Tiêu chí 3.2 – Tham gia các hoạt động chính trị - xã hội (tối đa 12 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia các diễn đàn sinh viên, các buổi toạ đàm với lãnh đạo Viện, Trường | MC | 3 |\n| Có hành động tích cực trên không gian mạng (hoạt động online) phù hợp với chủ trương của Nhà trường, Nhà nước được tập thể ghi nhận | MC | 3 |\n| Tham gia hoạt động khảo sát thông tin do Nhà trường thực hiện | MC | 3 |\n| Tham gia hoạt động tình nguyện (tình nguyện tại địa phương, công trường ATGT, hỗ trợ công tác tổ chức các hoạt động/sự kiện của Nhà trường, Viện) | MC | 3 |\n| Tham gia phong trào \"cốc trà đá vì cộng đồng\", \"tuổi trẻ Bách khoa Nhân ái\" | MC | 3 |\n| Tham gia sự kiện chính trị - xã hội (các Đại hội, Hội nghị, cuộc họp của tổ chức Đảng - Đoàn - Hội từ cấp Chi bộ - Chi đoàn - Chi hội trở lên,... và các chương trình mang tính chính trị - xã hội khác) | MC | 3 |\n| Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_simple_022",
+      "question_type": "simple",
+      "question": "Sinh viên vi phạm quy chế thi từ mức cảnh cáo trở lên bị trừ bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên vi phạm quy chế thi từ cảnh cáo trở lên bị trừ 10 điểm rèn luyện.",
+      "evidence_chunk_ids": [
+        "ade4a654-0137-4d34-9bc3-93b2acc70e20"
+      ],
+      "ground_truth_context": [
+        "## Phần II – Điểm trừ vi phạm\n\n### Vi phạm trong học tập\n\n| Hành vi vi phạm | Minh chứng | Điểm trừ |\n|---|---|---|\n| Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10 |\n| Bị kỷ luật khi thi hộ | * | -20 |\n\n### Vi phạm trong rèn luyện\n\n| Hành vi vi phạm | Minh chứng | Điểm trừ |\n|---|---|---|\n| Vi phạm Quy tắc ứng xử văn hóa | * | -10 |\n| Vi phạm các Quy định của Nhà trường, các Quy định của Pháp luật bị lập biên bản, bị ra quyết định xử lý | * | -20 |\n\n### Vi phạm pháp luật\n\n| Hành vi vi phạm | Minh chứng | Điểm trừ |\n|---|---|---|\n| Vi phạm pháp luật thuộc nhóm tội danh hình sự | * | -50 |\n\n**Tổng điểm trừ tối đa: -110 điểm**\n\n---\n\n> (*) Dựa trên hệ thống quản lý\n> (MC) Minh chứng được cấp khi tham gia hoạt động"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "qd_dgrl_2023_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên có GPA 3.4 và đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 trở lên thì được cộng bao nhiêu điểm từ kết quả học tập và chứng chỉ ngoại ngữ?",
+      "gold_answer": "GPA 3.4 thuộc mức 3.2 ≤ GPA < 3.6 nên được 18 điểm; chứng chỉ ngoại ngữ tương đương TOEIC 600 trở lên được 2 điểm. Tổng hai khoản là 20 điểm.",
+      "evidence_chunk_ids": [
+        "d770e49f-7990-47e3-ac37-fa003e78a6da"
+      ],
+      "ground_truth_context": [
+        "## TC1. Điểm về ý thức, thái độ học tập và nghiên cứu khoa học (tối đa 30 điểm)\n\n### Tiêu chí 1.1 – Kết quả học tập (tối đa 24 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |\n\n### Tiêu chí 1.2 – Trình độ ngoại ngữ (tối đa 6 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| Đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên | * | 2 |\n\n### Tiêu chí 1.3 – Tham gia các hoạt động học thuật (tối đa 9 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến NCKH, học thuật, chuyên môn | MC | 3 |\n| Tham gia khóa đào tạo kỹ năng nghề nghiệp, kỹ năng bổ trợ chuyên môn | MC | 6 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "same_chunk_multi_fact",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_dgrl_2023_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên có GPA 2.7 và đạt trình độ ngoại ngữ theo tiến độ chương trình đào tạo thì được cộng bao nhiêu điểm từ hai tiêu chí này?",
+      "gold_answer": "GPA 2.7 thuộc mức 2.5 ≤ GPA < 3.2 nên được 16 điểm; đạt trình độ ngoại ngữ theo tiến độ chương trình đào tạo được 4 điểm. Tổng là 20 điểm.",
+      "evidence_chunk_ids": [
+        "d770e49f-7990-47e3-ac37-fa003e78a6da"
+      ],
+      "ground_truth_context": [
+        "## TC1. Điểm về ý thức, thái độ học tập và nghiên cứu khoa học (tối đa 30 điểm)\n\n### Tiêu chí 1.1 – Kết quả học tập (tối đa 24 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |\n\n### Tiêu chí 1.2 – Trình độ ngoại ngữ (tối đa 6 điểm)\n\n| Điều kiện | Minh chứng | Điểm |\n|---|---|---|\n| Đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên | * | 2 |\n\n### Tiêu chí 1.3 – Tham gia các hoạt động học thuật (tối đa 9 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến NCKH, học thuật, chuyên môn | MC | 3 |\n| Tham gia khóa đào tạo kỹ năng nghề nghiệp, kỹ năng bổ trợ chuyên môn | MC | 6 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "same_chunk_multi_fact",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_dgrl_2023_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên tham gia Sinh hoạt công dân và tham gia họp lớp thường kỳ do Viện hoặc Trường tổ chức thì được cộng tối đa bao nhiêu điểm cho hai hoạt động này?",
+      "gold_answer": "Sinh hoạt công dân được 7 điểm và họp lớp thường kỳ do Viện, Trường tổ chức được 7 điểm. Tổng hai hoạt động là 14 điểm.",
+      "evidence_chunk_ids": [
+        "55b40332-7810-4f8d-a795-2111fc32e8f7"
+      ],
+      "ground_truth_context": [
+        "## TC2. Điểm về ý thức tổ chức kỷ luật (tối đa 25 điểm)\n\n### Tiêu chí 2.1 – Tham gia các hoạt động bắt buộc (tối đa 20 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |\n| Tham gia Hợp lớp thường kỳ do Viện, Trường tổ chức | MC | 7 |\n| Nắm vững quy định và quy chế của Nhà trường | MC | 6 |\n\n### Tiêu chí 2.2 – Tham gia các hoạt động hỗ trợ (tối đa 9 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp | MC | 6 |\n| Tham gia khóa đào tạo kỹ năng mềm | MC | 6 |\n| Tham gia hội thảo tăng cường kỹ năng mềm, phương pháp học tập, ý thức học tập, làm việc | MC | 3 |\n| Tham gia các buổi nói chuyện, các chương trình thời sự, phòng chống tội phạm và tệ nạn xã hội | MC | 3 |\n| Tham gia hoạt động hướng nghiệp, tìm kiếm thông tin việc làm | MC | 3 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "same_chunk_multi_fact",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_dgrl_2023_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên tham gia diễn đàn sinh viên và tham gia hiến máu nhân đạo thì được cộng bao nhiêu điểm rèn luyện theo nhóm hoạt động chính trị - xã hội?",
+      "gold_answer": "Tham gia diễn đàn sinh viên được 3 điểm; tham gia hiến máu nhân đạo được 6 điểm. Tổng là 9 điểm.",
+      "evidence_chunk_ids": [
+        "df79f3f4-5445-4da1-aa34-c59a81784319"
+      ],
+      "ground_truth_context": [
+        "### Tiêu chí 3.2 – Tham gia các hoạt động chính trị - xã hội (tối đa 12 điểm)\n\n| Hoạt động | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia các diễn đàn sinh viên, các buổi toạ đàm với lãnh đạo Viện, Trường | MC | 3 |\n| Có hành động tích cực trên không gian mạng (hoạt động online) phù hợp với chủ trương của Nhà trường, Nhà nước được tập thể ghi nhận | MC | 3 |\n| Tham gia hoạt động khảo sát thông tin do Nhà trường thực hiện | MC | 3 |\n| Tham gia hoạt động tình nguyện (tình nguyện tại địa phương, công trường ATGT, hỗ trợ công tác tổ chức các hoạt động/sự kiện của Nhà trường, Viện) | MC | 3 |\n| Tham gia phong trào \"cốc trà đá vì cộng đồng\", \"tuổi trẻ Bách khoa Nhân ái\" | MC | 3 |\n| Tham gia sự kiện chính trị - xã hội (các Đại hội, Hội nghị, cuộc họp của tổ chức Đảng - Đoàn - Hội từ cấp Chi bộ - Chi đoàn - Chi hội trở lên,... và các chương trình mang tính chính trị - xã hội khác) | MC | 3 |\n| Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "same_chunk_multi_fact",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_dgrl_2023_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên là cán bộ lớp hoàn thành tốt nhiệm vụ và đồng thời đạt danh hiệu Sinh viên 5 tốt cấp Trường thì hai thành tích này được cộng bao nhiêu điểm?",
+      "gold_answer": "Cán bộ lớp hoàn thành tốt nhiệm vụ được 4 điểm; đạt danh hiệu Sinh viên 5 tốt từ cấp Trường trở lên được 4 điểm. Tổng hai khoản là 8 điểm.",
+      "evidence_chunk_ids": [
+        "3df4fc37-56f3-4bdf-9761-c45c6c3d6e06",
+        "c33b0cda-4cd0-466a-ad3f-2b96dcf2bf3d"
+      ],
+      "ground_truth_context": [
+        "### Tiêu chí 3.3 – Tham gia công tác cán bộ tại Lớp, tổ chức Đoàn - Hội, Tổ/Đội/CLB hợp pháp (tối đa 6 điểm)\n\n| Mức độ hoàn thành | Minh chứng | Điểm |\n|---|---|---|\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận | MC | 6 |\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành tốt nhiệm vụ được tập thể công nhận | MC | 4 |\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành nhiệm vụ được tập thể công nhận | MC | 2 |\n\n---",
+        "### Tiêu chí 4.2 – Có các thành tích trong học tập và rèn luyện (tối đa 4 điểm)\n\n| Thành tích | Minh chứng | Điểm |\n|---|---|---|\n| Đạt giải trong các cuộc thi chính thức cấp Trường, cấp Thành phố, cấp Quốc gia, Quốc tế | MC | 4 |\n| Đạt danh hiệu \"Sinh viên 5 tốt\" từ cấp Trường trở lên | MC | 4 |\n| Được giấy khen, bằng khen của tổ chức Đoàn, Hội, Nhà trường hoặc chính quyền địa phương | MC | 4 |\n| Đạt loại Khá trở lên khi tham gia học \"Lớp bồi dưỡng nhận thức về Đảng\" | MC | 4 |\n| Đối tượng Đảng được kết nạp Đảng hoặc Đảng viên dự bị được chuyển Đảng chính thức | MC | 4 |\n| Được khen thưởng bằng khen, huy chương tương đương cấp Bộ trở lên | MC | 4 |\n\n**Tổng điểm cộng tối đa: 100 điểm**\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_dgrl_2023_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên thấy điểm rèn luyện bị đánh giá sai thì quy trình liên quan đến khiếu nại và cập nhật điểm được nêu như thế nào?",
+      "gold_answer": "Sinh viên có quyền khiếu nại lên Hội đồng đánh giá rèn luyện sinh viên thông qua Phòng/Ban chức năng CTSV; thời gian khiếu nại tối thiểu là 15 ngày và đơn vị liên quan phải trả lời trong không quá 7 ngày. Điểm rèn luyện sẽ được cập nhật lại sau khi có điều chỉnh kết quả đánh giá.",
+      "evidence_chunk_ids": [
+        "a85c13d2-32f1-492d-8f08-6e471733c1f5",
+        "b75ec543-79b4-4a93-9139-985da43a7368"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Cách thức và quy trình đánh giá kết quả rèn luyện\n\n1. Các Trường/Viện/Khoa, tổ chức Đoàn – Hội, Phòng/Ban chức năng tổ chức hoạt động công bố kế hoạch tổ chức hoạt động cho sinh viên, để sinh viên có thể đăng ký tham gia.\n2. Sinh viên tự lựa chọn tham gia hoạt động phù hợp theo định hướng rèn luyện của bản thân, cung cấp minh chứng tham gia hoạt động.\n3. Cán bộ phụ trách hoạt động cấp và xác nhận minh chứng tham gia hoạt động của sinh viên.\n4. Sinh viên sử dụng minh chứng được xác nhận để tự đánh giá kết quả rèn luyện của bản thân.\n5. Giảng viên quản lý lớp sinh viên căn cứ vào kết quả tự đánh giá của sinh viên, minh chứng kết quả tham gia hoạt động của sinh viên để chấm điểm theo khung đánh giá điểm rèn luyện được ban hành.\n6. Khi thấy có sự sai lệch kết quả rèn luyện, sinh viên thực hiện quyền khiếu nại theo Điều 7. Điểm rèn luyện sẽ được cập nhật lại sau khi có sự điều chỉnh kết quả đánh giá rèn luyện của sinh viên.",
+        "## Điều 7. Khiếu nại kết quả đánh giá rèn luyện sinh viên\n\nSinh viên có quyền khiếu nại lên Hội đồng đánh giá rèn luyện sinh viên (thông qua Phòng/Ban chức năng CTSV) nếu thấy việc đánh giá minh chứng tham gia hoạt động hay rèn luyện chưa chính xác.\n\nHội đồng đánh giá rèn luyện sinh viên cấp Đại học công bố thời gian nhận khiếu nại, trong đó xác định rõ thời điểm bắt đầu và thời điểm kết thúc khiếu nại, đảm bảo khoảng thời gian để sinh viên khiếu nại tối thiểu là 15 ngày.\n\nKhi nhận được đơn khiếu nại kết quả đánh giá rèn luyện sinh viên, Phòng/Ban chức năng CTSV, Đơn vị cấp phát minh chứng tham gia hoạt động, Giảng viên quản lý lớp Trường/Viện/Khoa đào tạo của sinh viên có trách nhiệm xem xét và trả lời sinh viên trong thời gian không quá 07 ngày kể từ ngày nhận được đơn khiếu nại.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_dgrl_2023_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Kết quả rèn luyện của sinh viên được công bố trước khi ra quyết định chính thức bao lâu và được hỗ trợ bởi hệ thống nào?",
+      "gold_answer": "Kết quả đánh giá, phân loại rèn luyện được công bố công khai trước 14 ngày trước khi ban hành quyết định chính thức. Quy trình được hỗ trợ bởi hệ thống sổ tay công tác sinh viên trực tuyến gồm website và ứng dụng di động.",
+      "evidence_chunk_ids": [
+        "6bc30588-801e-4236-919f-abd6922ecbe7"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Cách thức và quy trình đánh giá kết quả rèn luyện\n\nKết quả đánh giá, phân loại rèn luyện của sinh viên được công bố công khai trước 14 ngày trước khi ban hành quyết định chính thức.\n\nHệ thống sổ tay công tác sinh viên trực tuyến (online) là bộ công cụ hỗ trợ thực hiện quy trình đánh giá kết quả rèn luyện cho sinh viên. Hệ thống sổ tay công tác sinh viên online gồm website và ứng dụng di động, hỗ trợ các cá nhân có trách nhiệm: (1) đăng ký và cập nhật thông tin tài khoản; (2) cấp quyền thao tác trên hệ thống cho các cá nhân liên quan; (3) công bố hoạt động, tiếp nhận đăng ký tham gia nhóm và hoạt động; (4) cung cấp minh chứng, xác nhận và đánh giá minh chứng tham gia hoạt động; (5) chấm và công bố điểm rèn luyện cho sinh viên.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "same_chunk_multi_fact",
+      "difficulty": "medium"
+    },
+    {
+      "id": "qd_dgrl_2023_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên bị kỷ luật khi thi hộ và vi phạm Quy tắc ứng xử văn hóa thì bị trừ tổng cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Bị kỷ luật khi thi hộ bị trừ 20 điểm; vi phạm Quy tắc ứng xử văn hóa bị trừ 10 điểm. Tổng cộng sinh viên bị trừ 30 điểm.",
+      "evidence_chunk_ids": [
+        "ade4a654-0137-4d34-9bc3-93b2acc70e20"
+      ],
+      "ground_truth_context": [
+        "## Phần II – Điểm trừ vi phạm\n\n### Vi phạm trong học tập\n\n| Hành vi vi phạm | Minh chứng | Điểm trừ |\n|---|---|---|\n| Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10 |\n| Bị kỷ luật khi thi hộ | * | -20 |\n\n### Vi phạm trong rèn luyện\n\n| Hành vi vi phạm | Minh chứng | Điểm trừ |\n|---|---|---|\n| Vi phạm Quy tắc ứng xử văn hóa | * | -10 |\n| Vi phạm các Quy định của Nhà trường, các Quy định của Pháp luật bị lập biên bản, bị ra quyết định xử lý | * | -20 |\n\n### Vi phạm pháp luật\n\n| Hành vi vi phạm | Minh chứng | Điểm trừ |\n|---|---|---|\n| Vi phạm pháp luật thuộc nhóm tội danh hình sự | * | -50 |\n\n**Tổng điểm trừ tối đa: -110 điểm**\n\n---\n\n> (*) Dựa trên hệ thống quản lý\n> (MC) Minh chứng được cấp khi tham gia hoạt động"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "same_chunk_multi_fact",
+      "difficulty": "medium"
+    }
+  ]
+}

@@ -1,0 +1,473 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "01_3 HD hoc chuyen tiep ky su 180 TC_Final_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên từ khóa nào được áp dụng hướng dẫn học tập chương trình đào tạo kỹ sư chuyên sâu đặc thù 180 tín chỉ?",
+      "gold_answer": "Hướng dẫn áp dụng với sinh viên các khóa từ K62 đang học tập và có mong muốn tiếp tục học tập theo chương trình đào tạo kỹ sư chuyên sâu đặc thù.",
+      "evidence_chunk_ids": [
+        "bdd09c04-c9b6-4ee5-bd7d-92888ea813ba"
+      ],
+      "ground_truth_context": [
+        "## 1. Phạm vi áp dụng\n\n- Áp dụng với sinh viên các khóa từ K62 đang học tập và có mong muốn tiếp tục học tập theo chương trình đào tạo kỹ sư chuyên sâu đặc thù.\n- Áp dụng với các chương trình đào tạo (viết tắt là: CTĐT) có đào tạo bậc kỹ sư chuyên sâu đặc thù (viết tắt là: KS).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_002",
+      "question_type": "simple",
+      "question": "Những chương trình đào tạo nào thuộc phạm vi áp dụng của hướng dẫn học kỹ sư chuyên sâu đặc thù 180 tín chỉ?",
+      "gold_answer": "Hướng dẫn áp dụng với các chương trình đào tạo có đào tạo bậc kỹ sư chuyên sâu đặc thù, viết tắt là CTĐT KS.",
+      "evidence_chunk_ids": [
+        "bdd09c04-c9b6-4ee5-bd7d-92888ea813ba"
+      ],
+      "ground_truth_context": [
+        "## 1. Phạm vi áp dụng\n\n- Áp dụng với sinh viên các khóa từ K62 đang học tập và có mong muốn tiếp tục học tập theo chương trình đào tạo kỹ sư chuyên sâu đặc thù.\n- Áp dụng với các chương trình đào tạo (viết tắt là: CTĐT) có đào tạo bậc kỹ sư chuyên sâu đặc thù (viết tắt là: KS).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên chưa tốt nghiệp cử nhân cần tích lũy tối thiểu bao nhiêu tín chỉ để được học trước học phần của chương trình kỹ sư?",
+      "gold_answer": "Sinh viên chưa tốt nghiệp cử nhân cần tích lũy từ 118 tín chỉ trở lên của chương trình đào tạo cử nhân để được phép học tích lũy trước học phần của CTĐT KS.",
+      "evidence_chunk_ids": [
+        "ec18c2c7-c86b-4f3f-991c-44c693fb3add"
+      ],
+      "ground_truth_context": [
+        "## 2. Điều kiện học chuyển tiếp Cử nhân - Kỹ sư chuyên sâu đặc thù\n\n### A. Với các sinh viên chưa tốt nghiệp bậc cử nhân\n\n- Sinh viên đã tích lũy từ 118 tín chỉ trở lên của chương trình đào tạo cử nhân sẽ được phép học tích lũy trước tối đa 15 tín chỉ của CTĐT KS. Trường hợp sinh viên tích lũy trước nhiều hơn 15 tín chỉ thì cũng chỉ được công nhận tối đa 15 tín chỉ học trước.\n- Các học phần đã học tích lũy trước sẽ không được tính vào CTĐT cho tới khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp CTĐT KS.\n\n### B. Với các sinh viên đã tốt nghiệp bậc cử nhân\n\nSinh viên đã tốt nghiệp cử nhân được đăng ký xét tuyển để học CTĐT KS. Việc xét tuyển với các trường hợp này sẽ thực hiện theo quy định và hướng dẫn riêng.\n\n### C. Với sinh viên đã tốt nghiệp/đang học chương trình Elitech\n\nSinh viên các chương trình Elitech có thể học chuyển tiếp lên CTĐT KS chuẩn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_004",
+      "question_type": "simple",
+      "question": "Sinh viên chưa tốt nghiệp cử nhân được học tích lũy trước tối đa bao nhiêu tín chỉ của chương trình kỹ sư?",
+      "gold_answer": "Sinh viên đã tích lũy từ 118 tín chỉ trở lên được học tích lũy trước tối đa 15 tín chỉ của CTĐT KS.",
+      "evidence_chunk_ids": [
+        "ec18c2c7-c86b-4f3f-991c-44c693fb3add"
+      ],
+      "ground_truth_context": [
+        "## 2. Điều kiện học chuyển tiếp Cử nhân - Kỹ sư chuyên sâu đặc thù\n\n### A. Với các sinh viên chưa tốt nghiệp bậc cử nhân\n\n- Sinh viên đã tích lũy từ 118 tín chỉ trở lên của chương trình đào tạo cử nhân sẽ được phép học tích lũy trước tối đa 15 tín chỉ của CTĐT KS. Trường hợp sinh viên tích lũy trước nhiều hơn 15 tín chỉ thì cũng chỉ được công nhận tối đa 15 tín chỉ học trước.\n- Các học phần đã học tích lũy trước sẽ không được tính vào CTĐT cho tới khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp CTĐT KS.\n\n### B. Với các sinh viên đã tốt nghiệp bậc cử nhân\n\nSinh viên đã tốt nghiệp cử nhân được đăng ký xét tuyển để học CTĐT KS. Việc xét tuyển với các trường hợp này sẽ thực hiện theo quy định và hướng dẫn riêng.\n\n### C. Với sinh viên đã tốt nghiệp/đang học chương trình Elitech\n\nSinh viên các chương trình Elitech có thể học chuyển tiếp lên CTĐT KS chuẩn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_005",
+      "question_type": "simple",
+      "question": "Nếu sinh viên học trước nhiều hơn 15 tín chỉ của chương trình kỹ sư thì được công nhận tối đa bao nhiêu tín chỉ?",
+      "gold_answer": "Trường hợp sinh viên tích lũy trước nhiều hơn 15 tín chỉ của CTĐT KS thì cũng chỉ được công nhận tối đa 15 tín chỉ học trước.",
+      "evidence_chunk_ids": [
+        "ec18c2c7-c86b-4f3f-991c-44c693fb3add"
+      ],
+      "ground_truth_context": [
+        "## 2. Điều kiện học chuyển tiếp Cử nhân - Kỹ sư chuyên sâu đặc thù\n\n### A. Với các sinh viên chưa tốt nghiệp bậc cử nhân\n\n- Sinh viên đã tích lũy từ 118 tín chỉ trở lên của chương trình đào tạo cử nhân sẽ được phép học tích lũy trước tối đa 15 tín chỉ của CTĐT KS. Trường hợp sinh viên tích lũy trước nhiều hơn 15 tín chỉ thì cũng chỉ được công nhận tối đa 15 tín chỉ học trước.\n- Các học phần đã học tích lũy trước sẽ không được tính vào CTĐT cho tới khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp CTĐT KS.\n\n### B. Với các sinh viên đã tốt nghiệp bậc cử nhân\n\nSinh viên đã tốt nghiệp cử nhân được đăng ký xét tuyển để học CTĐT KS. Việc xét tuyển với các trường hợp này sẽ thực hiện theo quy định và hướng dẫn riêng.\n\n### C. Với sinh viên đã tốt nghiệp/đang học chương trình Elitech\n\nSinh viên các chương trình Elitech có thể học chuyển tiếp lên CTĐT KS chuẩn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_006",
+      "question_type": "simple",
+      "question": "Các học phần kỹ sư học tích lũy trước được tính vào chương trình kỹ sư khi nào?",
+      "gold_answer": "Các học phần đã học tích lũy trước chỉ được tính vào CTĐT KS sau khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp CTĐT KS.",
+      "evidence_chunk_ids": [
+        "ec18c2c7-c86b-4f3f-991c-44c693fb3add"
+      ],
+      "ground_truth_context": [
+        "## 2. Điều kiện học chuyển tiếp Cử nhân - Kỹ sư chuyên sâu đặc thù\n\n### A. Với các sinh viên chưa tốt nghiệp bậc cử nhân\n\n- Sinh viên đã tích lũy từ 118 tín chỉ trở lên của chương trình đào tạo cử nhân sẽ được phép học tích lũy trước tối đa 15 tín chỉ của CTĐT KS. Trường hợp sinh viên tích lũy trước nhiều hơn 15 tín chỉ thì cũng chỉ được công nhận tối đa 15 tín chỉ học trước.\n- Các học phần đã học tích lũy trước sẽ không được tính vào CTĐT cho tới khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp CTĐT KS.\n\n### B. Với các sinh viên đã tốt nghiệp bậc cử nhân\n\nSinh viên đã tốt nghiệp cử nhân được đăng ký xét tuyển để học CTĐT KS. Việc xét tuyển với các trường hợp này sẽ thực hiện theo quy định và hướng dẫn riêng.\n\n### C. Với sinh viên đã tốt nghiệp/đang học chương trình Elitech\n\nSinh viên các chương trình Elitech có thể học chuyển tiếp lên CTĐT KS chuẩn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_007",
+      "question_type": "simple",
+      "question": "Sinh viên đã tốt nghiệp cử nhân muốn học chương trình kỹ sư chuyên sâu đặc thù cần làm gì?",
+      "gold_answer": "Sinh viên đã tốt nghiệp cử nhân được đăng ký xét tuyển để học CTĐT KS; việc xét tuyển thực hiện theo quy định và hướng dẫn riêng.",
+      "evidence_chunk_ids": [
+        "ec18c2c7-c86b-4f3f-991c-44c693fb3add"
+      ],
+      "ground_truth_context": [
+        "## 2. Điều kiện học chuyển tiếp Cử nhân - Kỹ sư chuyên sâu đặc thù\n\n### A. Với các sinh viên chưa tốt nghiệp bậc cử nhân\n\n- Sinh viên đã tích lũy từ 118 tín chỉ trở lên của chương trình đào tạo cử nhân sẽ được phép học tích lũy trước tối đa 15 tín chỉ của CTĐT KS. Trường hợp sinh viên tích lũy trước nhiều hơn 15 tín chỉ thì cũng chỉ được công nhận tối đa 15 tín chỉ học trước.\n- Các học phần đã học tích lũy trước sẽ không được tính vào CTĐT cho tới khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp CTĐT KS.\n\n### B. Với các sinh viên đã tốt nghiệp bậc cử nhân\n\nSinh viên đã tốt nghiệp cử nhân được đăng ký xét tuyển để học CTĐT KS. Việc xét tuyển với các trường hợp này sẽ thực hiện theo quy định và hướng dẫn riêng.\n\n### C. Với sinh viên đã tốt nghiệp/đang học chương trình Elitech\n\nSinh viên các chương trình Elitech có thể học chuyển tiếp lên CTĐT KS chuẩn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_008",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình Elitech có thể học chuyển tiếp lên chương trình kỹ sư nào?",
+      "gold_answer": "Sinh viên các chương trình Elitech có thể học chuyển tiếp lên CTĐT KS chuẩn.",
+      "evidence_chunk_ids": [
+        "ec18c2c7-c86b-4f3f-991c-44c693fb3add"
+      ],
+      "ground_truth_context": [
+        "## 2. Điều kiện học chuyển tiếp Cử nhân - Kỹ sư chuyên sâu đặc thù\n\n### A. Với các sinh viên chưa tốt nghiệp bậc cử nhân\n\n- Sinh viên đã tích lũy từ 118 tín chỉ trở lên của chương trình đào tạo cử nhân sẽ được phép học tích lũy trước tối đa 15 tín chỉ của CTĐT KS. Trường hợp sinh viên tích lũy trước nhiều hơn 15 tín chỉ thì cũng chỉ được công nhận tối đa 15 tín chỉ học trước.\n- Các học phần đã học tích lũy trước sẽ không được tính vào CTĐT cho tới khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp CTĐT KS.\n\n### B. Với các sinh viên đã tốt nghiệp bậc cử nhân\n\nSinh viên đã tốt nghiệp cử nhân được đăng ký xét tuyển để học CTĐT KS. Việc xét tuyển với các trường hợp này sẽ thực hiện theo quy định và hướng dẫn riêng.\n\n### C. Với sinh viên đã tốt nghiệp/đang học chương trình Elitech\n\nSinh viên các chương trình Elitech có thể học chuyển tiếp lên CTĐT KS chuẩn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên được chọn hướng chuyên ngành kỹ sư như thế nào so với định hướng bậc cử nhân?",
+      "gold_answer": "Sinh viên được phép học theo hướng chuyên ngành KS phù hợp với định hướng ở bậc cử nhân.",
+      "evidence_chunk_ids": [
+        "1eb68764-8f4f-4daf-b896-6e94264c292a"
+      ],
+      "ground_truth_context": [
+        "### D. Yêu cầu về hướng chuyên sâu của CTĐT KS\n\nSinh viên được phép học theo hướng chuyên ngành KS phù hợp với định hướng ở bậc cử nhân. Trong trường hợp sinh viên chọn hướng chuyên ngành KS khác với định hướng ở bậc cử nhân sẽ cần phải học bổ sung các học phần theo quy định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_010",
+      "question_type": "simple",
+      "question": "Nếu sinh viên chọn hướng chuyên ngành kỹ sư khác với định hướng ở bậc cử nhân thì cần làm gì?",
+      "gold_answer": "Nếu chọn hướng chuyên ngành KS khác với định hướng ở bậc cử nhân, sinh viên cần học bổ sung các học phần theo quy định.",
+      "evidence_chunk_ids": [
+        "1eb68764-8f4f-4daf-b896-6e94264c292a"
+      ],
+      "ground_truth_context": [
+        "### D. Yêu cầu về hướng chuyên sâu của CTĐT KS\n\nSinh viên được phép học theo hướng chuyên ngành KS phù hợp với định hướng ở bậc cử nhân. Trong trường hợp sinh viên chọn hướng chuyên ngành KS khác với định hướng ở bậc cử nhân sẽ cần phải học bổ sung các học phần theo quy định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_011",
+      "question_type": "simple",
+      "question": "Khi đủ điều kiện tốt nghiệp chương trình cử nhân, sinh viên muốn học tiếp kỹ sư phải đăng ký những gì?",
+      "gold_answer": "Khi đủ điều kiện tốt nghiệp CTĐT cử nhân, sinh viên cần đăng ký tốt nghiệp và đồng thời đăng ký học chuyển tiếp lên CTĐT KS.",
+      "evidence_chunk_ids": [
+        "74ea8696-27a0-4e0e-aaaf-3d9cf19ba119"
+      ],
+      "ground_truth_context": [
+        "## 3. Về việc đăng ký tốt nghiệp bậc cử nhân\n\n- Khi đủ điều kiện tốt nghiệp CTĐT cử nhân (sinh viên cần hoàn thành cả học phần Thực tập kỹ thuật 2 tín chỉ và Đề án tốt nghiệp cử nhân 6 tín chỉ), sinh viên cần đăng ký tốt nghiệp và đồng thời đăng ký học chuyển tiếp lên CTĐT KS.\n- Sinh viên đã được công nhận tốt nghiệp bậc cử nhân nhưng chưa đăng ký học chuyển tiếp lên CTĐT KS sẽ không được phép đăng ký học tập ở kỳ kế tiếp.\n- Các sinh viên được công nhận tốt nghiệp CTĐT cử nhân sẽ được cấp bằng tốt nghiệp cử nhân theo quy định và đồng thời được chính thức chuyển sang học CTĐT KS 180 TC. Khi đó các học phần đã tích lũy trước sẽ được xét công nhận thuộc CTĐT KS của sinh viên.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_012",
+      "question_type": "simple",
+      "question": "Để đủ điều kiện tốt nghiệp chương trình cử nhân trước khi chuyển tiếp kỹ sư, sinh viên cần hoàn thành các học phần tốt nghiệp nào?",
+      "gold_answer": "Sinh viên cần hoàn thành cả học phần Thực tập kỹ thuật 2 tín chỉ và Đề án tốt nghiệp cử nhân 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "74ea8696-27a0-4e0e-aaaf-3d9cf19ba119"
+      ],
+      "ground_truth_context": [
+        "## 3. Về việc đăng ký tốt nghiệp bậc cử nhân\n\n- Khi đủ điều kiện tốt nghiệp CTĐT cử nhân (sinh viên cần hoàn thành cả học phần Thực tập kỹ thuật 2 tín chỉ và Đề án tốt nghiệp cử nhân 6 tín chỉ), sinh viên cần đăng ký tốt nghiệp và đồng thời đăng ký học chuyển tiếp lên CTĐT KS.\n- Sinh viên đã được công nhận tốt nghiệp bậc cử nhân nhưng chưa đăng ký học chuyển tiếp lên CTĐT KS sẽ không được phép đăng ký học tập ở kỳ kế tiếp.\n- Các sinh viên được công nhận tốt nghiệp CTĐT cử nhân sẽ được cấp bằng tốt nghiệp cử nhân theo quy định và đồng thời được chính thức chuyển sang học CTĐT KS 180 TC. Khi đó các học phần đã tích lũy trước sẽ được xét công nhận thuộc CTĐT KS của sinh viên.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_013",
+      "question_type": "simple",
+      "question": "Sinh viên đã được công nhận tốt nghiệp cử nhân nhưng chưa đăng ký học chuyển tiếp kỹ sư có được đăng ký học kỳ kế tiếp không?",
+      "gold_answer": "Không. Sinh viên đã được công nhận tốt nghiệp bậc cử nhân nhưng chưa đăng ký học chuyển tiếp lên CTĐT KS sẽ không được phép đăng ký học tập ở kỳ kế tiếp.",
+      "evidence_chunk_ids": [
+        "74ea8696-27a0-4e0e-aaaf-3d9cf19ba119"
+      ],
+      "ground_truth_context": [
+        "## 3. Về việc đăng ký tốt nghiệp bậc cử nhân\n\n- Khi đủ điều kiện tốt nghiệp CTĐT cử nhân (sinh viên cần hoàn thành cả học phần Thực tập kỹ thuật 2 tín chỉ và Đề án tốt nghiệp cử nhân 6 tín chỉ), sinh viên cần đăng ký tốt nghiệp và đồng thời đăng ký học chuyển tiếp lên CTĐT KS.\n- Sinh viên đã được công nhận tốt nghiệp bậc cử nhân nhưng chưa đăng ký học chuyển tiếp lên CTĐT KS sẽ không được phép đăng ký học tập ở kỳ kế tiếp.\n- Các sinh viên được công nhận tốt nghiệp CTĐT cử nhân sẽ được cấp bằng tốt nghiệp cử nhân theo quy định và đồng thời được chính thức chuyển sang học CTĐT KS 180 TC. Khi đó các học phần đã tích lũy trước sẽ được xét công nhận thuộc CTĐT KS của sinh viên.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_014",
+      "question_type": "simple",
+      "question": "Sau khi được công nhận tốt nghiệp cử nhân và chuyển sang chương trình kỹ sư 180 tín chỉ, sinh viên được cấp bằng gì?",
+      "gold_answer": "Sinh viên được công nhận tốt nghiệp CTĐT cử nhân sẽ được cấp bằng tốt nghiệp cử nhân theo quy định và đồng thời được chính thức chuyển sang học CTĐT KS 180 TC.",
+      "evidence_chunk_ids": [
+        "74ea8696-27a0-4e0e-aaaf-3d9cf19ba119"
+      ],
+      "ground_truth_context": [
+        "## 3. Về việc đăng ký tốt nghiệp bậc cử nhân\n\n- Khi đủ điều kiện tốt nghiệp CTĐT cử nhân (sinh viên cần hoàn thành cả học phần Thực tập kỹ thuật 2 tín chỉ và Đề án tốt nghiệp cử nhân 6 tín chỉ), sinh viên cần đăng ký tốt nghiệp và đồng thời đăng ký học chuyển tiếp lên CTĐT KS.\n- Sinh viên đã được công nhận tốt nghiệp bậc cử nhân nhưng chưa đăng ký học chuyển tiếp lên CTĐT KS sẽ không được phép đăng ký học tập ở kỳ kế tiếp.\n- Các sinh viên được công nhận tốt nghiệp CTĐT cử nhân sẽ được cấp bằng tốt nghiệp cử nhân theo quy định và đồng thời được chính thức chuyển sang học CTĐT KS 180 TC. Khi đó các học phần đã tích lũy trước sẽ được xét công nhận thuộc CTĐT KS của sinh viên.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_015",
+      "question_type": "simple",
+      "question": "Điểm các học phần bậc kỹ sư chuyên sâu đặc thù có dùng để xét học bổng khuyến khích học tập ở bậc cử nhân không?",
+      "gold_answer": "Không. Điểm của các học phần bậc kỹ sư chuyên sâu đặc thù không được sử dụng để xét cấp học bổng khuyến khích học tập ở bậc cử nhân.",
+      "evidence_chunk_ids": [
+        "3bd845f5-34ff-4107-bac1-96ef61a5dd8a"
+      ],
+      "ground_truth_context": [
+        "## 4. Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư\n\n- Điểm của các học phần bậc kỹ sư chuyên sâu đặc thù sẽ không được sử dụng để xét cấp học bổng khuyến khích học tập ở bậc cử nhân.\n- Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư được thực hiện theo Quy chế đào tạo hiện hành.\n\nTrích dẫn quy định về điểm trung bình toàn khóa: \"là điểm trung bình tích lũy của cả giai đoạn đào tạo cử nhân đã tốt nghiệp và giai đoạn đào tạo kỹ sư, với trọng số là tỷ lệ phần trăm của số tín chỉ tích lũy của mỗi giai đoạn đào tạo trong tổng số tín chỉ tích lũy của cả hai giai đoạn\".\n\n- Xếp bậc năng lực với người học được cấp bằng kỹ sư chuyên sâu đặc thù: người học hoàn thành đủ các học phần theo yêu cầu của CTĐT và đạt chứng chỉ ngoại ngữ tối thiểu trình độ B2 (hoặc tương đương) theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam: được cấp bằng Kỹ sư chuyên sâu đặc thù trình độ Bậc 7 theo Khung trình độ quốc gia Việt Nam.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_016",
+      "question_type": "simple",
+      "question": "Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư được thực hiện theo quy định nào?",
+      "gold_answer": "Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư được thực hiện theo Quy chế đào tạo hiện hành.",
+      "evidence_chunk_ids": [
+        "3bd845f5-34ff-4107-bac1-96ef61a5dd8a"
+      ],
+      "ground_truth_context": [
+        "## 4. Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư\n\n- Điểm của các học phần bậc kỹ sư chuyên sâu đặc thù sẽ không được sử dụng để xét cấp học bổng khuyến khích học tập ở bậc cử nhân.\n- Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư được thực hiện theo Quy chế đào tạo hiện hành.\n\nTrích dẫn quy định về điểm trung bình toàn khóa: \"là điểm trung bình tích lũy của cả giai đoạn đào tạo cử nhân đã tốt nghiệp và giai đoạn đào tạo kỹ sư, với trọng số là tỷ lệ phần trăm của số tín chỉ tích lũy của mỗi giai đoạn đào tạo trong tổng số tín chỉ tích lũy của cả hai giai đoạn\".\n\n- Xếp bậc năng lực với người học được cấp bằng kỹ sư chuyên sâu đặc thù: người học hoàn thành đủ các học phần theo yêu cầu của CTĐT và đạt chứng chỉ ngoại ngữ tối thiểu trình độ B2 (hoặc tương đương) theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam: được cấp bằng Kỹ sư chuyên sâu đặc thù trình độ Bậc 7 theo Khung trình độ quốc gia Việt Nam.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_017",
+      "question_type": "simple",
+      "question": "Điểm trung bình toàn khóa của người học kỹ sư chuyên sâu đặc thù được tính dựa trên những giai đoạn đào tạo nào?",
+      "gold_answer": "Điểm trung bình toàn khóa là điểm trung bình tích lũy của cả giai đoạn đào tạo cử nhân đã tốt nghiệp và giai đoạn đào tạo kỹ sư.",
+      "evidence_chunk_ids": [
+        "3bd845f5-34ff-4107-bac1-96ef61a5dd8a"
+      ],
+      "ground_truth_context": [
+        "## 4. Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư\n\n- Điểm của các học phần bậc kỹ sư chuyên sâu đặc thù sẽ không được sử dụng để xét cấp học bổng khuyến khích học tập ở bậc cử nhân.\n- Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư được thực hiện theo Quy chế đào tạo hiện hành.\n\nTrích dẫn quy định về điểm trung bình toàn khóa: \"là điểm trung bình tích lũy của cả giai đoạn đào tạo cử nhân đã tốt nghiệp và giai đoạn đào tạo kỹ sư, với trọng số là tỷ lệ phần trăm của số tín chỉ tích lũy của mỗi giai đoạn đào tạo trong tổng số tín chỉ tích lũy của cả hai giai đoạn\".\n\n- Xếp bậc năng lực với người học được cấp bằng kỹ sư chuyên sâu đặc thù: người học hoàn thành đủ các học phần theo yêu cầu của CTĐT và đạt chứng chỉ ngoại ngữ tối thiểu trình độ B2 (hoặc tương đương) theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam: được cấp bằng Kỹ sư chuyên sâu đặc thù trình độ Bậc 7 theo Khung trình độ quốc gia Việt Nam.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_018",
+      "question_type": "simple",
+      "question": "Người học kỹ sư chuyên sâu đặc thù cần đạt trình độ ngoại ngữ tối thiểu nào để được xếp bậc năng lực Bậc 7?",
+      "gold_answer": "Người học cần đạt chứng chỉ ngoại ngữ tối thiểu trình độ B2 hoặc tương đương theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam.",
+      "evidence_chunk_ids": [
+        "3bd845f5-34ff-4107-bac1-96ef61a5dd8a"
+      ],
+      "ground_truth_context": [
+        "## 4. Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư\n\n- Điểm của các học phần bậc kỹ sư chuyên sâu đặc thù sẽ không được sử dụng để xét cấp học bổng khuyến khích học tập ở bậc cử nhân.\n- Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư được thực hiện theo Quy chế đào tạo hiện hành.\n\nTrích dẫn quy định về điểm trung bình toàn khóa: \"là điểm trung bình tích lũy của cả giai đoạn đào tạo cử nhân đã tốt nghiệp và giai đoạn đào tạo kỹ sư, với trọng số là tỷ lệ phần trăm của số tín chỉ tích lũy của mỗi giai đoạn đào tạo trong tổng số tín chỉ tích lũy của cả hai giai đoạn\".\n\n- Xếp bậc năng lực với người học được cấp bằng kỹ sư chuyên sâu đặc thù: người học hoàn thành đủ các học phần theo yêu cầu của CTĐT và đạt chứng chỉ ngoại ngữ tối thiểu trình độ B2 (hoặc tương đương) theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam: được cấp bằng Kỹ sư chuyên sâu đặc thù trình độ Bậc 7 theo Khung trình độ quốc gia Việt Nam.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_019",
+      "question_type": "simple",
+      "question": "Khi sinh viên đã tốt nghiệp cử nhân và đã đăng ký học tiếp chương trình kỹ sư, hệ thống quản lý học tập sẽ cấp thông tin gì?",
+      "gold_answer": "Sinh viên được cấp mã số người học mới dựa trên mã số sinh viên bậc cử nhân.",
+      "evidence_chunk_ids": [
+        "ff629034-c377-4451-be13-b9fa960d05c2"
+      ],
+      "ground_truth_context": [
+        "## 5. Về thông tin trên hệ thống quản lý học tập\n\nKhi sinh viên đã được công nhận tốt nghiệp cử nhân:\n\n- Nếu đã đăng ký học tiếp CTĐT KS: Sinh viên được cấp mã số người học mới dựa trên mã số sinh viên bậc cử nhân.\n- Nếu chưa đăng ký học tiếp CTĐT KS: Trạng thái sinh viên sẽ là \"Tốt nghiệp ra trường\".\n\nThời gian học CTĐT KS của người học sẽ được tính từ khi có quyết định cho phép học CTĐT KS.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_020",
+      "question_type": "simple",
+      "question": "Nếu sinh viên tốt nghiệp cử nhân nhưng chưa đăng ký học tiếp chương trình kỹ sư, trạng thái trên hệ thống quản lý học tập là gì?",
+      "gold_answer": "Trạng thái sinh viên sẽ là \"Tốt nghiệp ra trường\".",
+      "evidence_chunk_ids": [
+        "ff629034-c377-4451-be13-b9fa960d05c2"
+      ],
+      "ground_truth_context": [
+        "## 5. Về thông tin trên hệ thống quản lý học tập\n\nKhi sinh viên đã được công nhận tốt nghiệp cử nhân:\n\n- Nếu đã đăng ký học tiếp CTĐT KS: Sinh viên được cấp mã số người học mới dựa trên mã số sinh viên bậc cử nhân.\n- Nếu chưa đăng ký học tiếp CTĐT KS: Trạng thái sinh viên sẽ là \"Tốt nghiệp ra trường\".\n\nThời gian học CTĐT KS của người học sẽ được tính từ khi có quyết định cho phép học CTĐT KS.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_021",
+      "question_type": "simple",
+      "question": "Thời gian học chương trình kỹ sư chuyên sâu đặc thù được tính từ thời điểm nào?",
+      "gold_answer": "Thời gian học CTĐT KS được tính từ khi có quyết định cho phép học CTĐT KS.",
+      "evidence_chunk_ids": [
+        "ff629034-c377-4451-be13-b9fa960d05c2"
+      ],
+      "ground_truth_context": [
+        "## 5. Về thông tin trên hệ thống quản lý học tập\n\nKhi sinh viên đã được công nhận tốt nghiệp cử nhân:\n\n- Nếu đã đăng ký học tiếp CTĐT KS: Sinh viên được cấp mã số người học mới dựa trên mã số sinh viên bậc cử nhân.\n- Nếu chưa đăng ký học tiếp CTĐT KS: Trạng thái sinh viên sẽ là \"Tốt nghiệp ra trường\".\n\nThời gian học CTĐT KS của người học sẽ được tính từ khi có quyết định cho phép học CTĐT KS.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_simple_022",
+      "question_type": "simple",
+      "question": "Học phí chương trình kỹ sư chuyên sâu đặc thù 180 tín chỉ được quy định như thế nào?",
+      "gold_answer": "Mức thu học phí tương đương học phí bậc đại học, tức bậc cử nhân.",
+      "evidence_chunk_ids": [
+        "b9288c9a-7edc-43af-867d-3a950a30460a"
+      ],
+      "ground_truth_context": [
+        "## 7. Học phí\n\nMức thu tương đương học phí bậc đại học (Cử nhân)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên K62 đã tích lũy 118 tín chỉ cử nhân và muốn học trước học phần kỹ sư thì được học trước tối đa bao nhiêu tín chỉ, và khi nào các tín chỉ đó mới được tính vào chương trình kỹ sư?",
+      "gold_answer": "Sinh viên từ K62 thuộc phạm vi áp dụng của hướng dẫn. Nếu đã tích lũy từ 118 tín chỉ cử nhân trở lên, sinh viên được học tích lũy trước tối đa 15 tín chỉ CTĐT KS; các học phần học trước chỉ được tính vào CTĐT KS sau khi sinh viên được công nhận tốt nghiệp cử nhân và đồng thời đăng ký học tiếp CTĐT KS.",
+      "evidence_chunk_ids": [
+        "bdd09c04-c9b6-4ee5-bd7d-92888ea813ba",
+        "ec18c2c7-c86b-4f3f-991c-44c693fb3add"
+      ],
+      "ground_truth_context": [
+        "## 1. Phạm vi áp dụng\n\n- Áp dụng với sinh viên các khóa từ K62 đang học tập và có mong muốn tiếp tục học tập theo chương trình đào tạo kỹ sư chuyên sâu đặc thù.\n- Áp dụng với các chương trình đào tạo (viết tắt là: CTĐT) có đào tạo bậc kỹ sư chuyên sâu đặc thù (viết tắt là: KS).\n\n---",
+        "## 2. Điều kiện học chuyển tiếp Cử nhân - Kỹ sư chuyên sâu đặc thù\n\n### A. Với các sinh viên chưa tốt nghiệp bậc cử nhân\n\n- Sinh viên đã tích lũy từ 118 tín chỉ trở lên của chương trình đào tạo cử nhân sẽ được phép học tích lũy trước tối đa 15 tín chỉ của CTĐT KS. Trường hợp sinh viên tích lũy trước nhiều hơn 15 tín chỉ thì cũng chỉ được công nhận tối đa 15 tín chỉ học trước.\n- Các học phần đã học tích lũy trước sẽ không được tính vào CTĐT cho tới khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp CTĐT KS.\n\n### B. Với các sinh viên đã tốt nghiệp bậc cử nhân\n\nSinh viên đã tốt nghiệp cử nhân được đăng ký xét tuyển để học CTĐT KS. Việc xét tuyển với các trường hợp này sẽ thực hiện theo quy định và hướng dẫn riêng.\n\n### C. Với sinh viên đã tốt nghiệp/đang học chương trình Elitech\n\nSinh viên các chương trình Elitech có thể học chuyển tiếp lên CTĐT KS chuẩn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đã đủ điều kiện tốt nghiệp cử nhân và muốn học tiếp kỹ sư 180 tín chỉ cần làm gì để các học phần kỹ sư đã học trước được xét công nhận?",
+      "gold_answer": "Sinh viên cần đăng ký tốt nghiệp cử nhân và đồng thời đăng ký học chuyển tiếp lên CTĐT KS. Khi được công nhận tốt nghiệp cử nhân và chính thức chuyển sang học CTĐT KS 180 TC, các học phần đã tích lũy trước sẽ được xét công nhận thuộc CTĐT KS.",
+      "evidence_chunk_ids": [
+        "ec18c2c7-c86b-4f3f-991c-44c693fb3add",
+        "74ea8696-27a0-4e0e-aaaf-3d9cf19ba119"
+      ],
+      "ground_truth_context": [
+        "## 2. Điều kiện học chuyển tiếp Cử nhân - Kỹ sư chuyên sâu đặc thù\n\n### A. Với các sinh viên chưa tốt nghiệp bậc cử nhân\n\n- Sinh viên đã tích lũy từ 118 tín chỉ trở lên của chương trình đào tạo cử nhân sẽ được phép học tích lũy trước tối đa 15 tín chỉ của CTĐT KS. Trường hợp sinh viên tích lũy trước nhiều hơn 15 tín chỉ thì cũng chỉ được công nhận tối đa 15 tín chỉ học trước.\n- Các học phần đã học tích lũy trước sẽ không được tính vào CTĐT cho tới khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp CTĐT KS.\n\n### B. Với các sinh viên đã tốt nghiệp bậc cử nhân\n\nSinh viên đã tốt nghiệp cử nhân được đăng ký xét tuyển để học CTĐT KS. Việc xét tuyển với các trường hợp này sẽ thực hiện theo quy định và hướng dẫn riêng.\n\n### C. Với sinh viên đã tốt nghiệp/đang học chương trình Elitech\n\nSinh viên các chương trình Elitech có thể học chuyển tiếp lên CTĐT KS chuẩn.",
+        "## 3. Về việc đăng ký tốt nghiệp bậc cử nhân\n\n- Khi đủ điều kiện tốt nghiệp CTĐT cử nhân (sinh viên cần hoàn thành cả học phần Thực tập kỹ thuật 2 tín chỉ và Đề án tốt nghiệp cử nhân 6 tín chỉ), sinh viên cần đăng ký tốt nghiệp và đồng thời đăng ký học chuyển tiếp lên CTĐT KS.\n- Sinh viên đã được công nhận tốt nghiệp bậc cử nhân nhưng chưa đăng ký học chuyển tiếp lên CTĐT KS sẽ không được phép đăng ký học tập ở kỳ kế tiếp.\n- Các sinh viên được công nhận tốt nghiệp CTĐT cử nhân sẽ được cấp bằng tốt nghiệp cử nhân theo quy định và đồng thời được chính thức chuyển sang học CTĐT KS 180 TC. Khi đó các học phần đã tích lũy trước sẽ được xét công nhận thuộc CTĐT KS của sinh viên.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên đã tốt nghiệp cử nhân nhưng chưa đăng ký học chuyển tiếp kỹ sư, sinh viên có được học kỳ kế tiếp không và trạng thái trên hệ thống là gì?",
+      "gold_answer": "Không. Sinh viên đã được công nhận tốt nghiệp bậc cử nhân nhưng chưa đăng ký học chuyển tiếp lên CTĐT KS sẽ không được phép đăng ký học tập ở kỳ kế tiếp; trên hệ thống quản lý học tập, trạng thái sinh viên sẽ là \"Tốt nghiệp ra trường\".",
+      "evidence_chunk_ids": [
+        "74ea8696-27a0-4e0e-aaaf-3d9cf19ba119",
+        "ff629034-c377-4451-be13-b9fa960d05c2"
+      ],
+      "ground_truth_context": [
+        "## 3. Về việc đăng ký tốt nghiệp bậc cử nhân\n\n- Khi đủ điều kiện tốt nghiệp CTĐT cử nhân (sinh viên cần hoàn thành cả học phần Thực tập kỹ thuật 2 tín chỉ và Đề án tốt nghiệp cử nhân 6 tín chỉ), sinh viên cần đăng ký tốt nghiệp và đồng thời đăng ký học chuyển tiếp lên CTĐT KS.\n- Sinh viên đã được công nhận tốt nghiệp bậc cử nhân nhưng chưa đăng ký học chuyển tiếp lên CTĐT KS sẽ không được phép đăng ký học tập ở kỳ kế tiếp.\n- Các sinh viên được công nhận tốt nghiệp CTĐT cử nhân sẽ được cấp bằng tốt nghiệp cử nhân theo quy định và đồng thời được chính thức chuyển sang học CTĐT KS 180 TC. Khi đó các học phần đã tích lũy trước sẽ được xét công nhận thuộc CTĐT KS của sinh viên.\n\n---",
+        "## 5. Về thông tin trên hệ thống quản lý học tập\n\nKhi sinh viên đã được công nhận tốt nghiệp cử nhân:\n\n- Nếu đã đăng ký học tiếp CTĐT KS: Sinh viên được cấp mã số người học mới dựa trên mã số sinh viên bậc cử nhân.\n- Nếu chưa đăng ký học tiếp CTĐT KS: Trạng thái sinh viên sẽ là \"Tốt nghiệp ra trường\".\n\nThời gian học CTĐT KS của người học sẽ được tính từ khi có quyết định cho phép học CTĐT KS.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên theo chương trình kỹ sư chuyên sâu đặc thù có được xét học bổng khuyến khích học tập không, và điểm học phần kỹ sư có dùng để xét học bổng ở bậc cử nhân không?",
+      "gold_answer": "Không. Học bổng khuyến khích học tập không áp dụng với người học theo CTĐT KS; đồng thời, điểm của các học phần bậc kỹ sư chuyên sâu đặc thù không được sử dụng để xét cấp học bổng khuyến khích học tập ở bậc cử nhân.",
+      "evidence_chunk_ids": [
+        "3bd845f5-34ff-4107-bac1-96ef61a5dd8a",
+        "48d444ed-de2d-4a36-a56a-6cd9cc52b132"
+      ],
+      "ground_truth_context": [
+        "## 4. Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư\n\n- Điểm của các học phần bậc kỹ sư chuyên sâu đặc thù sẽ không được sử dụng để xét cấp học bổng khuyến khích học tập ở bậc cử nhân.\n- Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư được thực hiện theo Quy chế đào tạo hiện hành.\n\nTrích dẫn quy định về điểm trung bình toàn khóa: \"là điểm trung bình tích lũy của cả giai đoạn đào tạo cử nhân đã tốt nghiệp và giai đoạn đào tạo kỹ sư, với trọng số là tỷ lệ phần trăm của số tín chỉ tích lũy của mỗi giai đoạn đào tạo trong tổng số tín chỉ tích lũy của cả hai giai đoạn\".\n\n- Xếp bậc năng lực với người học được cấp bằng kỹ sư chuyên sâu đặc thù: người học hoàn thành đủ các học phần theo yêu cầu của CTĐT và đạt chứng chỉ ngoại ngữ tối thiểu trình độ B2 (hoặc tương đương) theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam: được cấp bằng Kỹ sư chuyên sâu đặc thù trình độ Bậc 7 theo Khung trình độ quốc gia Việt Nam.\n\n---",
+        "## 6. Bảo hiểm y tế, thẻ học viên và học bổng khuyến khích học tập\n\nCác mục sau đây áp dụng với người học đã có quyết định cho phép học CTĐT KS:\n\n- Người học theo học CTĐT KS sẽ phải có bảo hiểm y tế bắt buộc theo quy định.\n- Người học CTĐT KS sẽ được cấp thẻ học viên.\n- Học bổng khuyến khích học tập không áp dụng với người học (là học viên) theo CTĐT KS.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sau khi có quyết định cho phép học chương trình kỹ sư, người học cần lưu ý những quyền lợi và nghĩa vụ nào về bảo hiểm y tế, thẻ học viên và thời gian học?",
+      "gold_answer": "Người học theo CTĐT KS phải có bảo hiểm y tế bắt buộc, được cấp thẻ học viên, và thời gian học CTĐT KS được tính từ khi có quyết định cho phép học CTĐT KS.",
+      "evidence_chunk_ids": [
+        "ff629034-c377-4451-be13-b9fa960d05c2",
+        "48d444ed-de2d-4a36-a56a-6cd9cc52b132"
+      ],
+      "ground_truth_context": [
+        "## 5. Về thông tin trên hệ thống quản lý học tập\n\nKhi sinh viên đã được công nhận tốt nghiệp cử nhân:\n\n- Nếu đã đăng ký học tiếp CTĐT KS: Sinh viên được cấp mã số người học mới dựa trên mã số sinh viên bậc cử nhân.\n- Nếu chưa đăng ký học tiếp CTĐT KS: Trạng thái sinh viên sẽ là \"Tốt nghiệp ra trường\".\n\nThời gian học CTĐT KS của người học sẽ được tính từ khi có quyết định cho phép học CTĐT KS.\n\n---",
+        "## 6. Bảo hiểm y tế, thẻ học viên và học bổng khuyến khích học tập\n\nCác mục sau đây áp dụng với người học đã có quyết định cho phép học CTĐT KS:\n\n- Người học theo học CTĐT KS sẽ phải có bảo hiểm y tế bắt buộc theo quy định.\n- Người học CTĐT KS sẽ được cấp thẻ học viên.\n- Học bổng khuyến khích học tập không áp dụng với người học (là học viên) theo CTĐT KS.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Để được cấp bằng kỹ sư chuyên sâu đặc thù trình độ Bậc 7, sinh viên cần đáp ứng yêu cầu học phần và ngoại ngữ nào?",
+      "gold_answer": "Người học cần hoàn thành đủ các học phần theo yêu cầu của CTĐT và đạt chứng chỉ ngoại ngữ tối thiểu trình độ B2 hoặc tương đương theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam để được cấp bằng Kỹ sư chuyên sâu đặc thù trình độ Bậc 7.",
+      "evidence_chunk_ids": [
+        "3bd845f5-34ff-4107-bac1-96ef61a5dd8a"
+      ],
+      "ground_truth_context": [
+        "## 4. Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư\n\n- Điểm của các học phần bậc kỹ sư chuyên sâu đặc thù sẽ không được sử dụng để xét cấp học bổng khuyến khích học tập ở bậc cử nhân.\n- Điểm trung bình toàn khóa và hạng tốt nghiệp kỹ sư được thực hiện theo Quy chế đào tạo hiện hành.\n\nTrích dẫn quy định về điểm trung bình toàn khóa: \"là điểm trung bình tích lũy của cả giai đoạn đào tạo cử nhân đã tốt nghiệp và giai đoạn đào tạo kỹ sư, với trọng số là tỷ lệ phần trăm của số tín chỉ tích lũy của mỗi giai đoạn đào tạo trong tổng số tín chỉ tích lũy của cả hai giai đoạn\".\n\n- Xếp bậc năng lực với người học được cấp bằng kỹ sư chuyên sâu đặc thù: người học hoàn thành đủ các học phần theo yêu cầu của CTĐT và đạt chứng chỉ ngoại ngữ tối thiểu trình độ B2 (hoặc tương đương) theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam: được cấp bằng Kỹ sư chuyên sâu đặc thù trình độ Bậc 7 theo Khung trình độ quốc gia Việt Nam.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên chọn hướng chuyên ngành kỹ sư khác với định hướng bậc cử nhân, điều đó ảnh hưởng thế nào đến kế hoạch học chuyển tiếp?",
+      "gold_answer": "Sinh viên vẫn có thể chọn hướng chuyên ngành KS khác với định hướng ở bậc cử nhân, nhưng sẽ cần học bổ sung các học phần theo quy định. Vì vậy, kế hoạch học chuyển tiếp cần tính thêm các học phần bổ sung ngoài các học phần thuộc CTĐT KS.",
+      "evidence_chunk_ids": [
+        "1eb68764-8f4f-4daf-b896-6e94264c292a"
+      ],
+      "ground_truth_context": [
+        "### D. Yêu cầu về hướng chuyên sâu của CTĐT KS\n\nSinh viên được phép học theo hướng chuyên ngành KS phù hợp với định hướng ở bậc cử nhân. Trong trường hợp sinh viên chọn hướng chuyên ngành KS khác với định hướng ở bậc cử nhân sẽ cần phải học bổ sung các học phần theo quy định.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hd_hoc_chuyen_tiep_ks_180tc_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên muốn so sánh chi phí và học bổng khi học kỹ sư chuyên sâu đặc thù 180 tín chỉ cần biết những điểm chính nào?",
+      "gold_answer": "Sinh viên cần biết học phí CTĐT KS có mức thu tương đương học phí bậc đại học/cử nhân, nhưng học bổng khuyến khích học tập không áp dụng với người học theo CTĐT KS.",
+      "evidence_chunk_ids": [
+        "48d444ed-de2d-4a36-a56a-6cd9cc52b132",
+        "b9288c9a-7edc-43af-867d-3a950a30460a"
+      ],
+      "ground_truth_context": [
+        "## 6. Bảo hiểm y tế, thẻ học viên và học bổng khuyến khích học tập\n\nCác mục sau đây áp dụng với người học đã có quyết định cho phép học CTĐT KS:\n\n- Người học theo học CTĐT KS sẽ phải có bảo hiểm y tế bắt buộc theo quy định.\n- Người học CTĐT KS sẽ được cấp thẻ học viên.\n- Học bổng khuyến khích học tập không áp dụng với người học (là học viên) theo CTĐT KS.\n\n---",
+        "## 7. Học phí\n\nMức thu tương đương học phí bậc đại học (Cử nhân)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

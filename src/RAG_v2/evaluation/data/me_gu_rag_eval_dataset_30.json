@@ -1,0 +1,479 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "ME_GU_Giới thiệu CTwebsite 01_fix_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "me_gu_simple_001",
+      "question_type": "simple",
+      "question": "Chương trình ME-GU hợp tác giữa Đại học Bách khoa Hà Nội và Griffith University có tên chương trình, trình độ đào tạo, thời gian đào tạo và tổng số tín chỉ là gì?",
+      "gold_answer": "Chương trình ME-GU có tên Mechanical Machine Engineering, là chương trình đào tạo hợp tác quốc tế ngành Mechanical Engineering ở trình độ Engineer, thời gian đào tạo 5 năm với tổng cộng 159 tín chỉ.",
+      "evidence_chunk_ids": [
+        "9eb473ef-696f-4ee0-95ec-37159215c496"
+      ],
+      "ground_truth_context": [
+        "# ME-GU - Cooperation Training Program between Hanoi University of Science and Technology, Vietnam and Griffith University, Australia\n\n**Name of program:** Mechanical Machine Engineering (International cooperation academic programme)\n\n**Education level:** Engineer\n\n**Major:** Mechanical Engineering\n\n**Program codes:** 7520130 (Engineering)\n\n**Duration:** 5 years\n\n**Credits in total:** 159 credits"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_002",
+      "question_type": "simple",
+      "question": "Sau khi hoàn thành chương trình hợp tác quốc tế ME-GU ngành Mechanical Engineering, sinh viên được kỳ vọng đạt những mục tiêu chung nào?",
+      "gold_answer": "Sinh viên được kỳ vọng có kiến thức và kỹ năng nền tảng về toán, khoa học ứng dụng, cơ khí, điện-điện tử, điều khiển và CNTT; có kiến thức chuyên ngành để vận hành, bảo trì, tính toán, thiết kế hệ thống cơ khí và giải quyết vấn đề kỹ thuật; có kỹ năng cá nhân, nghề nghiệp, khởi nghiệp, giao tiếp, làm việc nhóm; đồng thời có khả năng hình thành ý tưởng, thiết kế, triển khai và vận hành hệ thống trong bối cảnh doanh nghiệp và xã hội.",
+      "evidence_chunk_ids": [
+        "637ff5e7-642b-4bfe-a19d-24bf8c845076"
+      ],
+      "ground_truth_context": [
+        "## A. Program Goals\n\nUpon successful completion of the international cooperation training program in Mechanical Engineering, students will achieve:\n\n1. Basic knowledge and skills in mathematics and applied sciences in the fields of mechanics, electricity-electronics, control, and information technology to meet the acquisition of specialized knowledge; Having specialized knowledge to operate, maintain, calculate and design mechanical systems; solve mechanical technical issues.\n2. Personal and professional skills suitable to an interdisciplinary working environment, international integration and adapting to the industrial revolution 4.0; can start a business.\n3. Effective communication and teamwork skills in a professional environment and in the community.\n4. The ability to formulate ideas, design, implement and operate the system in the context of business and society."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_003",
+      "question_type": "simple",
+      "question": "Chuẩn đầu ra về kiến thức chuyên môn rộng của sinh viên chương trình ME-GU ngành Mechanical Engineering nhấn mạnh những năng lực nào?",
+      "gold_answer": "Chuẩn đầu ra về kiến thức chuyên môn rộng nhấn mạnh khả năng thích ứng với công việc liên quan đến cơ khí và khả năng áp dụng kiến thức cơ bản, kiến thức cốt lõi của ngành cùng công cụ hiện đại để vận hành các hệ thống, quá trình và sản phẩm cơ khí.",
+      "evidence_chunk_ids": [
+        "374db0b2-3fd3-49ed-a55a-64e0b391cf1d"
+      ],
+      "ground_truth_context": [
+        "## B. Program Learning Outcomes\n\nOn successful completion of the programme, students will have the following knowledge and ability:\n\n**1. Broad professional knowledge** to adapt well to jobs related to the mechanical engineering field; focusing on the ability to apply basic knowledge and core knowledge of the field in combination with the ability to use modern tools to operate mechanical engineering systems/processes/products:"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_004",
+      "question_type": "simple",
+      "question": "Trong chuẩn đầu ra ME-GU, sinh viên cần có những năng lực nào liên quan đến kiến thức toán, khoa học cơ bản và kiến thức cốt lõi ngành cơ khí?",
+      "gold_answer": "Sinh viên cần có khả năng áp dụng kiến thức toán và khoa học cơ bản để thiết kế, tính toán hệ thống/quá trình/sản phẩm cơ khí; áp dụng kiến thức nền tảng của ngành để phân tích; áp dụng kiến thức cốt lõi kết hợp phương pháp và công cụ hiện đại để thiết kế, đánh giá; đồng thời dùng kiến thức cốt lõi để khám phá, thiết kế, phát triển và dẫn dắt vận hành hệ thống/quá trình sản xuất cơ khí.",
+      "evidence_chunk_ids": [
+        "e45e9585-a413-4199-8f49-975ab8d8d7a5"
+      ],
+      "ground_truth_context": [
+        "## B. Program Learning Outcomes\n\n- 1.1 The ability to apply knowledge of mathematics and basic science to design and calculate mechanical systems / processes / products.\n- 1.2 The ability to apply the background knowledge of the field to perform an analysis on mechanical systems / processes / products.\n- 1.3 The ability to apply core knowledge of the field, combined with the capability to exploit and use modern methods and tools to participate in the design and evaluation of mechanical engineering systems / processes / products.\n- 1.4 The ability to apply core knowledge of the field to explore, design, develop, and lead the operation of mechanical production systems/processes.\n\n**2. Professional skills and personal qualities** needed to succeed in the career:"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_005",
+      "question_type": "simple",
+      "question": "Chuẩn đầu ra ME-GU yêu cầu sinh viên có những kỹ năng nghề nghiệp, phẩm chất cá nhân và kỹ năng xã hội nào?",
+      "gold_answer": "Sinh viên cần có kỹ năng phát hiện, phân tích và giải quyết vấn đề trong cơ khí; tư duy hệ thống và phản biện; năng động, nghiêm túc, kiên trì; khả năng thực nghiệm, khám phá tri thức, nghiên cứu phát triển; đạo đức và trách nhiệm nghề nghiệp; hiểu biết vấn đề đương đại và học tập suốt đời. Về kỹ năng xã hội, sinh viên cần biết hợp tác, tổ chức, làm việc nhóm, giao tiếp qua viết, thuyết trình, thảo luận, sử dụng công cụ hiện đại và dùng tiếng Anh trong công việc theo quy định của trường.",
+      "evidence_chunk_ids": [
+        "f5f84a8b-2366-400d-a02f-48b236488134"
+      ],
+      "ground_truth_context": [
+        "## B. Program Learning Outcomes\n\n- 2.1 Skills in detecting, analyzing and solving problems in mechanical engineering field.\n- 2.2 Skills in systematic and critical thinking.\n- 2.3 Dynamism, seriousness, and perseverance.\n- 2.4 The ability to experiment, explore knowledge, and conduct research and development.\n- 2.5 Ethics and professional responsibilities.\n- 2.6 An understanding of contemporary issues and lifelong learning.\n\n**3. Social skills** needed to work effectively in multidisciplinary teams and in an international environment:\n\n- 3.1 Skills in collaboration, organization, and teamwork.\n- 3.2 Communication skills through writing, presentation, discussion, effectively using modern tools and media.\n- 3.3 Skills in using English at work according to the regulations of the university.\n\n**4. The ability to participate in the design / construction / development** of mechanical systems / processes / products / technical solutions in fields of mechanical engineering in current social and environmental context:"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_006",
+      "question_type": "simple",
+      "question": "Trong chuẩn đầu ra ME-GU, sinh viên cần có những năng lực nào khi tham gia thiết kế, xây dựng hoặc phát triển giải pháp kỹ thuật cơ khí?",
+      "gold_answer": "Sinh viên cần nhận thức được quan hệ và ảnh hưởng của giải pháp công nghệ cơ khí tới yếu tố kinh tế, xã hội, môi trường trong bối cảnh toàn cầu; biết nhận diện vấn đề và hình thành ý tưởng giải pháp; có khả năng tham gia thiết lập dự án liên quan đến cơ khí; thiết kế hệ thống/quá trình/sản phẩm/giải pháp cơ khí; và thực hiện, chế tạo, khai thác các hệ thống/quá trình/sản phẩm/giải pháp kỹ thuật.",
+      "evidence_chunk_ids": [
+        "622b4c98-bb15-408e-b0b8-8cadd2c2d7fe"
+      ],
+      "ground_truth_context": [
+        "## B. Program Learning Outcomes\n\n- 4.1 The awareness of the close relationship and the influence of technology solutions in mechanical engineering to economical, social, and environmental factors in a globalized world.\n- 4.2 The ability to identify problems and to form ideas of technical solutions; the ability to participate in project settings related to mechanical engineering.\n- 4.3 The ability to design mechanical systems / processes / products / solutions.\n- 4.4 Ability to implement / manufacture / exploit mechanical systems / processes / products / technical solutions.\n\n**5. Political qualities, a sense of service to the people, and good health** to meet the requirements of the national construction and defense:\n\n- 5.1 Political theoretical qualifications under the general regulations program of the Ministry of Education and Training.\n- 5.2 Physical education certificate and certificate of national defense and security according to the regular for the general Bachelor program from the Ministry of Education and Training."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_007",
+      "question_type": "simple",
+      "question": "Cấu trúc chương trình ME-GU phân bổ bao nhiêu tín chỉ cho Giáo dục đại cương và Giáo dục chuyên nghiệp?",
+      "gold_answer": "Chương trình ME-GU phân bổ 50 tín chỉ cho Giáo dục đại cương và 109 tín chỉ cho Giáo dục chuyên nghiệp.",
+      "evidence_chunk_ids": [
+        "75a5871e-7afb-4b30-bdd1-7fc7bfee17d3"
+      ],
+      "ground_truth_context": [
+        "## C. General Program Structure\n\n| Professional Component | Credits | Note |\n|---|---|---|\n| **General Education** | **50** | |\n| Mathematics and basic sciences | 31 | Major oriented |\n| Law and politics | 13 | In accordance with regulations of Vietnam Ministry of Education and Training |\n| Physical Education / Military Education (Military Education is for Vietnamese students only) | - | In accordance with regulations of Vietnam Ministry of Education and Training |\n| English | 6 | 02 basic English courses |\n| **Professional Education** | **109** | |\n| Basic and Core of Engineering (Transfer Credits with Griffith) | 38 | |\n| Basic and Core of Engineering (Studying in HUST) | 19 | |\n| Major Oriented | 26 | |\n| Elective Module | 12 | Elective module provides specialized knowledge oriented towards different concentrations. |\n| Engineering Practicum | 2 | Scheduled for third year or above |\n| Graduation Internship | 3 | |\n| Graduation Thesis | 9 | Topic must be relevant to major, and knowledge gained during engineering practicum |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_008",
+      "question_type": "simple",
+      "question": "Trong cấu trúc chương trình ME-GU, phần Basic and Core of Engineering được chia như thế nào?",
+      "gold_answer": "Phần Basic and Core of Engineering được chia thành 38 tín chỉ chuyển đổi với Griffith và 19 tín chỉ học tại HUST.",
+      "evidence_chunk_ids": [
+        "75a5871e-7afb-4b30-bdd1-7fc7bfee17d3"
+      ],
+      "ground_truth_context": [
+        "## C. General Program Structure\n\n| Professional Component | Credits | Note |\n|---|---|---|\n| **General Education** | **50** | |\n| Mathematics and basic sciences | 31 | Major oriented |\n| Law and politics | 13 | In accordance with regulations of Vietnam Ministry of Education and Training |\n| Physical Education / Military Education (Military Education is for Vietnamese students only) | - | In accordance with regulations of Vietnam Ministry of Education and Training |\n| English | 6 | 02 basic English courses |\n| **Professional Education** | **109** | |\n| Basic and Core of Engineering (Transfer Credits with Griffith) | 38 | |\n| Basic and Core of Engineering (Studying in HUST) | 19 | |\n| Major Oriented | 26 | |\n| Elective Module | 12 | Elective module provides specialized knowledge oriented towards different concentrations. |\n| Engineering Practicum | 2 | Scheduled for third year or above |\n| Graduation Internship | 3 | |\n| Graduation Thesis | 9 | Topic must be relevant to major, and knowledge gained during engineering practicum |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_009",
+      "question_type": "simple",
+      "question": "Điều kiện tiếng Anh để sinh viên ME-GU chuyển tiếp sang Griffith University có thể đạt bằng IELTS Academic như thế nào?",
+      "gold_answer": "Sinh viên cần IELTS Academic tối thiểu overall 6.5 và không có kỹ năng nào dưới 6.0.",
+      "evidence_chunk_ids": [
+        "cfcbda41-adca-47bd-8b1d-ac1ee28dac37"
+      ],
+      "ground_truth_context": [
+        "## D. Transfer Requirements\n\n- A minimum overall band score of 6.5 on IELTS (Academic) with no sub-score of less than 6.0\n- OR a minimum score of 575 on TOEFL\n- OR an internet-based (iBT) TOEFL score of 79 (no sub-score less than 19)\n- OR no score less than 3+ in each skill of the ISLPR (conducted by ISLPR Language Services only)\n- OR a minimum overall score of 176 (no score less than 169) on C1 Advanced (formerly Cambridge Certificate in Advanced English) or C2 Proficiency (formerly Cambridge Certificate of Proficiency in English)\n- OR an overall score of 58 in the Pearson Test of English (Academic) with no score less than 50.\n\nEnglish test results must be no more than two years old. Applicants should refer to the following University procedure for further information."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_010",
+      "question_type": "simple",
+      "question": "Ngoài IELTS, sinh viên ME-GU có thể dùng các chứng chỉ tiếng Anh nào để đáp ứng điều kiện chuyển tiếp sang Griffith University?",
+      "gold_answer": "Sinh viên có thể dùng TOEFL tối thiểu 575, TOEFL iBT 79 với không kỹ năng nào dưới 19, ISLPR không kỹ năng nào dưới 3+, C1 Advanced/C2 Proficiency overall 176 không điểm nào dưới 169, hoặc Pearson Test of English Academic overall 58 không điểm nào dưới 50.",
+      "evidence_chunk_ids": [
+        "cfcbda41-adca-47bd-8b1d-ac1ee28dac37"
+      ],
+      "ground_truth_context": [
+        "## D. Transfer Requirements\n\n- A minimum overall band score of 6.5 on IELTS (Academic) with no sub-score of less than 6.0\n- OR a minimum score of 575 on TOEFL\n- OR an internet-based (iBT) TOEFL score of 79 (no sub-score less than 19)\n- OR no score less than 3+ in each skill of the ISLPR (conducted by ISLPR Language Services only)\n- OR a minimum overall score of 176 (no score less than 169) on C1 Advanced (formerly Cambridge Certificate in Advanced English) or C2 Proficiency (formerly Cambridge Certificate of Proficiency in English)\n- OR an overall score of 58 in the Pearson Test of English (Academic) with no score less than 50.\n\nEnglish test results must be no more than two years old. Applicants should refer to the following University procedure for further information."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_011",
+      "question_type": "simple",
+      "question": "Kết quả thi tiếng Anh dùng để chuyển tiếp trong chương trình ME-GU được yêu cầu còn hiệu lực trong bao lâu?",
+      "gold_answer": "Kết quả thi tiếng Anh phải không quá 2 năm tuổi.",
+      "evidence_chunk_ids": [
+        "cfcbda41-adca-47bd-8b1d-ac1ee28dac37"
+      ],
+      "ground_truth_context": [
+        "## D. Transfer Requirements\n\n- A minimum overall band score of 6.5 on IELTS (Academic) with no sub-score of less than 6.0\n- OR a minimum score of 575 on TOEFL\n- OR an internet-based (iBT) TOEFL score of 79 (no sub-score less than 19)\n- OR no score less than 3+ in each skill of the ISLPR (conducted by ISLPR Language Services only)\n- OR a minimum overall score of 176 (no score less than 169) on C1 Advanced (formerly Cambridge Certificate in Advanced English) or C2 Proficiency (formerly Cambridge Certificate of Proficiency in English)\n- OR an overall score of 58 in the Pearson Test of English (Academic) with no score less than 50.\n\nEnglish test results must be no more than two years old. Applicants should refer to the following University procedure for further information."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên tốt nghiệp chương trình ME-GU có cơ hội việc làm và mức lương trung bình được nêu như thế nào?",
+      "gold_answer": "Sinh viên có cơ hội tìm việc ngay sau tốt nghiệp với mức lương trung bình từ 10 đến 20 triệu đồng mỗi tháng.",
+      "evidence_chunk_ids": [
+        "4bc6b7bc-e6ff-4ef7-8b0d-537fb55ddb9b"
+      ],
+      "ground_truth_context": [
+        "## E. Employment Opportunities after Graduation\n\n- Students have the opportunity to find employment immediately after graduation with an average salary of 10 to 20 million VND/month.\n- Students who graduate in Australia will be awarded a degree by Griffith University and are allowed to work in Australia for a minimum of 2 years.\n\n*Source: Australian Government Job Outlook*\n\n**Typical job positions include:**\n\n- Design engineers, managers, and operators at domestic and international factories, enterprises, and corporations in the field of mechanical engineering.\n- Lecturers, researchers at universities, research institutes, and government agencies.\n- Pursue postgraduate studies and research at universities in Vietnam and abroad."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_013",
+      "question_type": "simple",
+      "question": "Sinh viên ME-GU tốt nghiệp tại Úc được nhận bằng từ đâu và có quyền làm việc tại Úc trong thời gian tối thiểu bao lâu?",
+      "gold_answer": "Sinh viên tốt nghiệp tại Úc được Griffith University cấp bằng và được phép làm việc tại Úc tối thiểu 2 năm.",
+      "evidence_chunk_ids": [
+        "4bc6b7bc-e6ff-4ef7-8b0d-537fb55ddb9b"
+      ],
+      "ground_truth_context": [
+        "## E. Employment Opportunities after Graduation\n\n- Students have the opportunity to find employment immediately after graduation with an average salary of 10 to 20 million VND/month.\n- Students who graduate in Australia will be awarded a degree by Griffith University and are allowed to work in Australia for a minimum of 2 years.\n\n*Source: Australian Government Job Outlook*\n\n**Typical job positions include:**\n\n- Design engineers, managers, and operators at domestic and international factories, enterprises, and corporations in the field of mechanical engineering.\n- Lecturers, researchers at universities, research institutes, and government agencies.\n- Pursue postgraduate studies and research at universities in Vietnam and abroad."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_014",
+      "question_type": "simple",
+      "question": "Các vị trí việc làm tiêu biểu sau khi tốt nghiệp ME-GU gồm những nhóm nào?",
+      "gold_answer": "Các vị trí tiêu biểu gồm kỹ sư thiết kế, quản lý và vận hành tại nhà máy, doanh nghiệp, tập đoàn trong lĩnh vực cơ khí trong nước và quốc tế; giảng viên, nhà nghiên cứu tại trường đại học, viện nghiên cứu, cơ quan nhà nước; hoặc học tiếp sau đại học và nghiên cứu ở Việt Nam hoặc nước ngoài.",
+      "evidence_chunk_ids": [
+        "4bc6b7bc-e6ff-4ef7-8b0d-537fb55ddb9b"
+      ],
+      "ground_truth_context": [
+        "## E. Employment Opportunities after Graduation\n\n- Students have the opportunity to find employment immediately after graduation with an average salary of 10 to 20 million VND/month.\n- Students who graduate in Australia will be awarded a degree by Griffith University and are allowed to work in Australia for a minimum of 2 years.\n\n*Source: Australian Government Job Outlook*\n\n**Typical job positions include:**\n\n- Design engineers, managers, and operators at domestic and international factories, enterprises, and corporations in the field of mechanical engineering.\n- Lecturers, researchers at universities, research institutes, and government agencies.\n- Pursue postgraduate studies and research at universities in Vietnam and abroad."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_015",
+      "question_type": "simple",
+      "question": "Trong kế hoạch học tập ME-GU, nhóm Political Theory and General Law có bao nhiêu tín chỉ và gồm các học phần nào?",
+      "gold_answer": "Nhóm Political Theory and General Law có 13 tín chỉ, gồm Philosophy of Marxism and Leninism, Political Economics of Marxism and Leninism, Scientific Socialism, Ho Chi Minh Ideology, History of Vietnamese Communist Party và Introduction to the Legal Environment.",
+      "evidence_chunk_ids": [
+        "8d17b86f-290a-436f-b764-823a1e15ec38"
+      ],
+      "ground_truth_context": [
+        "## F. Curriculum Schedule\n\n### Political Theory and General Law (13 credits / 18.4 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 1 | SSH1111Q | Philosophy of Marxism and Leninism | 3(3-0-0-6) | 3 | 4.25 | 2 |\n| 2 | SSH1121Q | Political Economics of Marxism and Leninism | 2(2-0-0-4) | 2 | 2.83 | 3 |\n| 3 | SSH1131Q | Scientific Socialism | 2(2-0-0-4) | 2 | 2.83 | 4 |\n| 4 | SSH1050Q | Ho Chi Minh Ideology | 2(2-0-0-4) | 2 | 2.83 | 5 |\n| 5 | SSH1130Q | History of Vietnamese Communist Party | 2(2-0-0-4) | 2 | 2.83 | 6 |\n| 6 | EM1170Q | Introduction to the Legal Environment | 2(2-0-0-4) | 2 | 2.83 | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_016",
+      "question_type": "simple",
+      "question": "Trong chương trình ME-GU, các học phần tiếng Anh ở curriculum schedule gồm những học phần nào và học ở học kỳ mấy?",
+      "gold_answer": "Phần English gồm QT1231 English 3 (B2.1) học kỳ 1 và QT1241 English 4 (B2.2) học kỳ 2, mỗi học phần 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "19fd143d-f9cf-4e4a-bce4-8d6cd8e7f106"
+      ],
+      "ground_truth_context": [
+        "### English (6 credits / 9.34 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 16 | QT1231 | English 3 (B2.1) | 3(2-2-0-6) | 3 | 4.67 | 1 |\n| 17 | QT1241 | English 4 (B2.2) | 3(2-2-0-6) | 3 | 4.67 | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_017",
+      "question_type": "simple",
+      "question": "Nhóm Mathematics and Basic Sciences trong chương trình ME-GU có bao nhiêu tín chỉ và bao nhiêu ECTs?",
+      "gold_answer": "Nhóm Mathematics and Basic Sciences có 31 tín chỉ, tương đương 48.09 ECTs.",
+      "evidence_chunk_ids": [
+        "1761b862-251a-44ec-b38e-5e982a9d69a5"
+      ],
+      "ground_truth_context": [
+        "### Mathematics and Basic Sciences (31 credits / 48.09 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 18 | MI1110Q | Calculus I | 4(3-2-0-8) | 4 | 6.08 | 1 |\n| 19 | MI1120Q | Calculus II | 3(2-2-0-6) | 3 | 4.67 | 2 |\n| 20 | MI1130Q | Calculus III | 3(2-2-0-6) | 3 | 4.67 | 3 |\n| 21 | MI1140Q | Algebra | 4(3-2-0-8) | 4 | 6.08 | 1 |\n| 22 | EM1010Q | Introduction to Management | 2(2-1-0-4) | 2 | 3.25 | 2 |\n| 23 | PH1110Q | Physics I | 3(2-1-1-6) | 3 | 4.67 | 1 |\n| 24 | PH1120Q | Physics II | 3(2-1-1-6) | 3 | 4.67 | 2 |\n| 25 | IT1110Q | Introduction to Informatics | 4(3-1-1-8) | 4 | 6.08 | 1 |\n| 26 | QT1811 | Computing and Programming with MATLAB | 3(2-1-1-6) | 3 | 4.67 | 3 |\n| 27 | ME2116Q | Presentation Techniques | 2(2-1-0-4) | 2 | 3.25 | 5 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_018",
+      "question_type": "simple",
+      "question": "Trong nhóm Mathematics and Basic Sciences của ME-GU, những học phần nào học ở học kỳ 1?",
+      "gold_answer": "Các học phần học ở học kỳ 1 gồm Calculus I, Algebra, Physics I và Introduction to Informatics.",
+      "evidence_chunk_ids": [
+        "1761b862-251a-44ec-b38e-5e982a9d69a5"
+      ],
+      "ground_truth_context": [
+        "### Mathematics and Basic Sciences (31 credits / 48.09 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 18 | MI1110Q | Calculus I | 4(3-2-0-8) | 4 | 6.08 | 1 |\n| 19 | MI1120Q | Calculus II | 3(2-2-0-6) | 3 | 4.67 | 2 |\n| 20 | MI1130Q | Calculus III | 3(2-2-0-6) | 3 | 4.67 | 3 |\n| 21 | MI1140Q | Algebra | 4(3-2-0-8) | 4 | 6.08 | 1 |\n| 22 | EM1010Q | Introduction to Management | 2(2-1-0-4) | 2 | 3.25 | 2 |\n| 23 | PH1110Q | Physics I | 3(2-1-1-6) | 3 | 4.67 | 1 |\n| 24 | PH1120Q | Physics II | 3(2-1-1-6) | 3 | 4.67 | 2 |\n| 25 | IT1110Q | Introduction to Informatics | 4(3-1-1-8) | 4 | 6.08 | 1 |\n| 26 | QT1811 | Computing and Programming with MATLAB | 3(2-1-1-6) | 3 | 4.67 | 3 |\n| 27 | ME2116Q | Presentation Techniques | 2(2-1-0-4) | 2 | 3.25 | 5 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_019",
+      "question_type": "simple",
+      "question": "Nhóm Basic and Core of Engineering - Transfer Credits with Griffith có bao nhiêu tín chỉ và gồm các học phần nào liên quan đến Engineering Graphics?",
+      "gold_answer": "Nhóm này có 38 tín chỉ. Các học phần liên quan đến Engineering Graphics gồm ME2011Q Engineering Graphics I ở học kỳ 3 và ME2012Q Engineering Graphics II ở học kỳ 4, mỗi học phần 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "0f451029-39ee-4e28-9c7b-f6566d29f412"
+      ],
+      "ground_truth_context": [
+        "### Basic and Core of Engineering - Transfer Credits with Griffith (38 credits / 58.11 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 28 | ME2011Q | Engineering Graphics I | 3(3-1-0-6) | 3 | 4.67 | 3 |\n| 29 | ME2012Q | Engineering Graphics II | 3(3-1-0-6) | 3 | 4.67 | 4 |\n| 30 | ET2012Q | Electronic Engineering | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 31 | ME2110Q | Introduction to Mechanical Engineering | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 32 | ME2140Q | Engineering Mechanics I | 3(2-2-0-4) | 3 | 3.67 | 3 |\n| 33 | ME3010Q | Engineering Mechanics II | 3(2-2-0-4) | 3 | 3.67 | 4 |\n| 34 | ME3040Q | Strength of Materials 1 | 2(2-0-1-4) | 2 | 3.25 | 3 |\n| 35 | ME3050Q | Strength of Materials 2 | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 36 | ME3060Q | Theory of Machinery | 3(3-0-1-6) | 3 | 4.67 | 3 |\n| 37 | ME2823Q | Introductory Mechanical Engineering | 2(2-0-1-4) | 2 | 3.25 | 2 |\n| 38 | ME3090Q | Machine Element Design | 3(3-0-1-6) | 3 | 4.67 | 4 |\n| 39 | MSE3100Q | Materials Science | 2(2-1-0-4) | 2 | 3.25 | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_020",
+      "question_type": "simple",
+      "question": "Trong phần Basic and Core of Engineering học tại HUST của ME-GU, các học phần học kỳ 5 gồm những môn nào?",
+      "gold_answer": "Các học phần học kỳ 5 gồm Fundamentals of Electrical Engineering, Measurement Techniques, Principle of Metal Cutting, Project in Machine Details, Machine Tools và Workshop Practice on CNC Machine.",
+      "evidence_chunk_ids": [
+        "3399555e-f4f9-4d2e-8a31-a834544c0584"
+      ],
+      "ground_truth_context": [
+        "### Basic and Core of Engineering - Study at HUST (19 credits / 31.51 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 44 | EE2012Q | Fundamentals of Electrical Engineering | 2(2-1-0-4) | 2 | 3.25 | 5 |\n| 45 | TE3600Q | Hydrodynamics | 2(2-1-0-4) | 2 | 3.25 | 6 |\n| 46 | ME3070Q | Measurement Techniques | 3(3-0-1-6) | 3 | 4.67 | 5 |\n| 47 | ME4212Q | Principle of Metal Cutting | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 48 | ME4222Q | Cutting Tool Design | 2(2-0-1-4) | 2 | 3.25 | 6 |\n| 49 | ME3130Q | Project in Machine Details | 2(0-0-4-4) | 2 | 3.67 | 5 |\n| 50 | ME4062Q | Machine Tools | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 51 | ME3140Q | Safety and Environmental Engineering | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 52 | ME3811Q | Workshop Practice on CNC Machine | 2(0-0-4-4) | 2 | 3.67 | 5 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_simple_021",
+      "question_type": "simple",
+      "question": "Trong phần Specialized Knowledge of Engineering học tại HUST của ME-GU, học phần Manufacturing Technology có mã, số tín chỉ và học kỳ như thế nào?",
+      "gold_answer": "Manufacturing Technology có mã ME3170Q, 4 tín chỉ, học ở học kỳ 6.",
+      "evidence_chunk_ids": [
+        "9816d593-564a-4db5-b361-711e712579f3"
+      ],
+      "ground_truth_context": [
+        "### Specialized Knowledge of Engineering - Study at HUST (26 credits / 41.68 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 53 | ME3170Q | Manufacturing Technology | 4(4-0-1-8) | 4 | 6.08 | 6 |\n| 54 | ME4022Q | Workpiece Fabrication | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 55 | ME4811Q | CNC Processing Techniques | 3(1-1-2-4) | 3 | 3.67 | 7 |\n| 56 | ME4032Q | Jig and Fixture | 2(2-1-0-4) | 2 | 3.25 | 7 |\n| 57 | ME4232Q | Project in Cutting Tool | 2(0-0-4-4) | 2 | 3.67 | 7 |\n| 58 | ME4192Q | Machine-Tool Design | 2(2-0-1-4) | 2 | 3.25 | 7 |\n| 59 | ME4282Q | CNC Machines and Industrial Robots | 2(2-0-1-4) | 2 | 3.25 | 7 |\n| 60 | ME4562Q | Project in Machine Design | 2(0-0-4-4) | 2 | 3.67 | 8 |\n| 61 | ME4833Q | Project in Mechanical Technology | 2(0-0-4-4) | 2 | 3.67 | 9 |\n| 62 | ME2822Q | Control Systems | 3(3-1-0-6) | 3 | 4.67 | 8 |\n| 63 | EE3059Q | Sensors and Signal Conditioning | 2(2-1-0-4) | 2 | 3.25 | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_gu_simple_022",
+      "question_type": "simple",
+      "question": "Trong chương trình ME-GU, phần Engineering Practicum and Graduation Thesis gồm những học phần nào và tổng cộng bao nhiêu tín chỉ?",
+      "gold_answer": "Phần này gồm ME4439Q Engineering Practicum 2 tín chỉ ở học kỳ 7, ME5011Q Engineering Internship 3 tín chỉ ở học kỳ 9 và ME5111Q Graduation Project 9 tín chỉ ở học kỳ 10; tổng cộng 14 tín chỉ.",
+      "evidence_chunk_ids": [
+        "e82f51cd-5352-4c06-859e-5767175aed6b"
+      ],
+      "ground_truth_context": [
+        "### Engineering Practicum and Graduation Thesis (14 credits / 26.5 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 79 | ME4439Q | Engineering Practicum | 2(0-0-6-4) | 2 | 4.5 | 7 |\n| 80 | ME5011Q | Engineering Internship | 3(0-0-6-6) | 3 | 5.5 | 9 |\n| 81 | ME5111Q | Graduation Project | 9(0-0-18-18) | 9 | 16.5 | 10 |\n\n**Total credits: 159 (276.88 ECTs)**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên ME-GU muốn biết chương trình kéo dài bao lâu và phần Professional Education chiếm bao nhiêu tín chỉ, cần trả lời thế nào?",
+      "gold_answer": "Chương trình ME-GU kéo dài 5 năm với tổng 159 tín chỉ. Trong cấu trúc chương trình, phần Professional Education chiếm 109 tín chỉ.",
+      "evidence_chunk_ids": [
+        "9eb473ef-696f-4ee0-95ec-37159215c496",
+        "75a5871e-7afb-4b30-bdd1-7fc7bfee17d3"
+      ],
+      "ground_truth_context": [
+        "# ME-GU - Cooperation Training Program between Hanoi University of Science and Technology, Vietnam and Griffith University, Australia\n\n**Name of program:** Mechanical Machine Engineering (International cooperation academic programme)\n\n**Education level:** Engineer\n\n**Major:** Mechanical Engineering\n\n**Program codes:** 7520130 (Engineering)\n\n**Duration:** 5 years\n\n**Credits in total:** 159 credits",
+        "## C. General Program Structure\n\n| Professional Component | Credits | Note |\n|---|---|---|\n| **General Education** | **50** | |\n| Mathematics and basic sciences | 31 | Major oriented |\n| Law and politics | 13 | In accordance with regulations of Vietnam Ministry of Education and Training |\n| Physical Education / Military Education (Military Education is for Vietnamese students only) | - | In accordance with regulations of Vietnam Ministry of Education and Training |\n| English | 6 | 02 basic English courses |\n| **Professional Education** | **109** | |\n| Basic and Core of Engineering (Transfer Credits with Griffith) | 38 | |\n| Basic and Core of Engineering (Studying in HUST) | 19 | |\n| Major Oriented | 26 | |\n| Elective Module | 12 | Elective module provides specialized knowledge oriented towards different concentrations. |\n| Engineering Practicum | 2 | Scheduled for third year or above |\n| Graduation Internship | 3 | |\n| Graduation Thesis | 9 | Topic must be relevant to major, and knowledge gained during engineering practicum |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên ME-GU muốn chuyển tiếp sang Griffith bằng IELTS Academic và quan tâm cơ hội sau khi tốt nghiệp tại Úc thì cần lưu ý gì?",
+      "gold_answer": "Về tiếng Anh, sinh viên cần IELTS Academic overall tối thiểu 6.5 và không kỹ năng nào dưới 6.0; kết quả thi không được quá 2 năm. Nếu tốt nghiệp tại Úc, sinh viên được Griffith University cấp bằng và được phép làm việc tại Úc tối thiểu 2 năm.",
+      "evidence_chunk_ids": [
+        "cfcbda41-adca-47bd-8b1d-ac1ee28dac37",
+        "4bc6b7bc-e6ff-4ef7-8b0d-537fb55ddb9b"
+      ],
+      "ground_truth_context": [
+        "## D. Transfer Requirements\n\n- A minimum overall band score of 6.5 on IELTS (Academic) with no sub-score of less than 6.0\n- OR a minimum score of 575 on TOEFL\n- OR an internet-based (iBT) TOEFL score of 79 (no sub-score less than 19)\n- OR no score less than 3+ in each skill of the ISLPR (conducted by ISLPR Language Services only)\n- OR a minimum overall score of 176 (no score less than 169) on C1 Advanced (formerly Cambridge Certificate in Advanced English) or C2 Proficiency (formerly Cambridge Certificate of Proficiency in English)\n- OR an overall score of 58 in the Pearson Test of English (Academic) with no score less than 50.\n\nEnglish test results must be no more than two years old. Applicants should refer to the following University procedure for further information.",
+        "## E. Employment Opportunities after Graduation\n\n- Students have the opportunity to find employment immediately after graduation with an average salary of 10 to 20 million VND/month.\n- Students who graduate in Australia will be awarded a degree by Griffith University and are allowed to work in Australia for a minimum of 2 years.\n\n*Source: Australian Government Job Outlook*\n\n**Typical job positions include:**\n\n- Design engineers, managers, and operators at domestic and international factories, enterprises, and corporations in the field of mechanical engineering.\n- Lecturers, researchers at universities, research institutes, and government agencies.\n- Pursue postgraduate studies and research at universities in Vietnam and abroad."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên ME-GU hỏi chương trình có bao nhiêu tín chỉ tiếng Anh trong cấu trúc chung và cụ thể học những môn tiếng Anh nào trong curriculum schedule?",
+      "gold_answer": "Trong cấu trúc chung, chương trình có 6 tín chỉ English, gồm 2 học phần tiếng Anh cơ bản. Trong curriculum schedule, đó là QT1231 English 3 (B2.1) ở học kỳ 1 và QT1241 English 4 (B2.2) ở học kỳ 2, mỗi học phần 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "75a5871e-7afb-4b30-bdd1-7fc7bfee17d3",
+        "19fd143d-f9cf-4e4a-bce4-8d6cd8e7f106"
+      ],
+      "ground_truth_context": [
+        "## C. General Program Structure\n\n| Professional Component | Credits | Note |\n|---|---|---|\n| **General Education** | **50** | |\n| Mathematics and basic sciences | 31 | Major oriented |\n| Law and politics | 13 | In accordance with regulations of Vietnam Ministry of Education and Training |\n| Physical Education / Military Education (Military Education is for Vietnamese students only) | - | In accordance with regulations of Vietnam Ministry of Education and Training |\n| English | 6 | 02 basic English courses |\n| **Professional Education** | **109** | |\n| Basic and Core of Engineering (Transfer Credits with Griffith) | 38 | |\n| Basic and Core of Engineering (Studying in HUST) | 19 | |\n| Major Oriented | 26 | |\n| Elective Module | 12 | Elective module provides specialized knowledge oriented towards different concentrations. |\n| Engineering Practicum | 2 | Scheduled for third year or above |\n| Graduation Internship | 3 | |\n| Graduation Thesis | 9 | Topic must be relevant to major, and knowledge gained during engineering practicum |",
+        "### English (6 credits / 9.34 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 16 | QT1231 | English 3 (B2.1) | 3(2-2-0-6) | 3 | 4.67 | 1 |\n| 17 | QT1241 | English 4 (B2.2) | 3(2-2-0-6) | 3 | 4.67 | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên ME-GU muốn hiểu sự khác nhau giữa phần Basic and Core of Engineering chuyển đổi với Griffith và phần học tại HUST thì so sánh số tín chỉ và ví dụ học phần như thế nào?",
+      "gold_answer": "Phần Basic and Core of Engineering chuyển đổi với Griffith có 38 tín chỉ, ví dụ Engineering Graphics I/II, Electronic Engineering, Introduction to Mechanical Engineering, Engineering Mechanics I/II, Strength of Materials, Theory of Machinery, Machine Element Design. Phần Basic and Core of Engineering học tại HUST có 19 tín chỉ, ví dụ Fundamentals of Electrical Engineering, Hydrodynamics, Measurement Techniques, Principle of Metal Cutting, Cutting Tool Design, Machine Tools và Workshop Practice on CNC Machine.",
+      "evidence_chunk_ids": [
+        "0f451029-39ee-4e28-9c7b-f6566d29f412",
+        "3399555e-f4f9-4d2e-8a31-a834544c0584"
+      ],
+      "ground_truth_context": [
+        "### Basic and Core of Engineering - Transfer Credits with Griffith (38 credits / 58.11 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 28 | ME2011Q | Engineering Graphics I | 3(3-1-0-6) | 3 | 4.67 | 3 |\n| 29 | ME2012Q | Engineering Graphics II | 3(3-1-0-6) | 3 | 4.67 | 4 |\n| 30 | ET2012Q | Electronic Engineering | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 31 | ME2110Q | Introduction to Mechanical Engineering | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 32 | ME2140Q | Engineering Mechanics I | 3(2-2-0-4) | 3 | 3.67 | 3 |\n| 33 | ME3010Q | Engineering Mechanics II | 3(2-2-0-4) | 3 | 3.67 | 4 |\n| 34 | ME3040Q | Strength of Materials 1 | 2(2-0-1-4) | 2 | 3.25 | 3 |\n| 35 | ME3050Q | Strength of Materials 2 | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 36 | ME3060Q | Theory of Machinery | 3(3-0-1-6) | 3 | 4.67 | 3 |\n| 37 | ME2823Q | Introductory Mechanical Engineering | 2(2-0-1-4) | 2 | 3.25 | 2 |\n| 38 | ME3090Q | Machine Element Design | 3(3-0-1-6) | 3 | 4.67 | 4 |\n| 39 | MSE3100Q | Materials Science | 2(2-1-0-4) | 2 | 3.25 | 2 |",
+        "### Basic and Core of Engineering - Study at HUST (19 credits / 31.51 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 44 | EE2012Q | Fundamentals of Electrical Engineering | 2(2-1-0-4) | 2 | 3.25 | 5 |\n| 45 | TE3600Q | Hydrodynamics | 2(2-1-0-4) | 2 | 3.25 | 6 |\n| 46 | ME3070Q | Measurement Techniques | 3(3-0-1-6) | 3 | 4.67 | 5 |\n| 47 | ME4212Q | Principle of Metal Cutting | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 48 | ME4222Q | Cutting Tool Design | 2(2-0-1-4) | 2 | 3.25 | 6 |\n| 49 | ME3130Q | Project in Machine Details | 2(0-0-4-4) | 2 | 3.67 | 5 |\n| 50 | ME4062Q | Machine Tools | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 51 | ME3140Q | Safety and Environmental Engineering | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 52 | ME3811Q | Workshop Practice on CNC Machine | 2(0-0-4-4) | 2 | 3.67 | 5 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "me_gu_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên ME-GU quan tâm cả học phần chuyên ngành học tại HUST và học phần tự chọn, chương trình phân bổ bao nhiêu tín chỉ cho mỗi phần và có ví dụ môn nào?",
+      "gold_answer": "Phần Specialized Knowledge of Engineering học tại HUST có 26 tín chỉ, gồm các môn như Manufacturing Technology, Workpiece Fabrication, CNC Processing Techniques, Jig and Fixture, Project in Cutting Tool, Machine-Tool Design, CNC Machines and Industrial Robots, Control Systems và Sensors and Signal Conditioning. Phần Elective Courses có 12 tín chỉ, gồm các môn như Manufacturing Automation, Laser Engineering, CAD/CAM, Tribology, Mould Design and Fabrication, Automatic Measurement in Mechanical Engineering, Manufacturing Technology of Plastic Product và Mold Technology.",
+      "evidence_chunk_ids": [
+        "9816d593-564a-4db5-b361-711e712579f3",
+        "11908186-e4c3-45af-a954-67bed393e3dc",
+        "0a6c80e8-2e0a-449f-ae2f-2f581f80cdb4"
+      ],
+      "ground_truth_context": [
+        "### Specialized Knowledge of Engineering - Study at HUST (26 credits / 41.68 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 53 | ME3170Q | Manufacturing Technology | 4(4-0-1-8) | 4 | 6.08 | 6 |\n| 54 | ME4022Q | Workpiece Fabrication | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 55 | ME4811Q | CNC Processing Techniques | 3(1-1-2-4) | 3 | 3.67 | 7 |\n| 56 | ME4032Q | Jig and Fixture | 2(2-1-0-4) | 2 | 3.25 | 7 |\n| 57 | ME4232Q | Project in Cutting Tool | 2(0-0-4-4) | 2 | 3.67 | 7 |\n| 58 | ME4192Q | Machine-Tool Design | 2(2-0-1-4) | 2 | 3.25 | 7 |\n| 59 | ME4282Q | CNC Machines and Industrial Robots | 2(2-0-1-4) | 2 | 3.25 | 7 |\n| 60 | ME4562Q | Project in Machine Design | 2(0-0-4-4) | 2 | 3.67 | 8 |\n| 61 | ME4833Q | Project in Mechanical Technology | 2(0-0-4-4) | 2 | 3.67 | 9 |\n| 62 | ME2822Q | Control Systems | 3(3-1-0-6) | 3 | 4.67 | 8 |\n| 63 | EE3059Q | Sensors and Signal Conditioning | 2(2-1-0-4) | 2 | 3.25 | 6 |",
+        "### Elective Courses (12 credits / 19.5 ECTs)\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 64 | ME4112Q | Manufacturing Automation | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 65 | ME4093Q | Laser Engineering | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 66 | ME4314Q | CAD/CAM | 2(2-1-0-4) | 2 | 3.25 | 9 |\n| 67 | ME4452Q | Tribology | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 68 | ME4245Q | Modeling and Numerical Simulation of Forming Process | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 69 | ME4972Q | Lubrication Technology | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 70 | ME4132Q | Mechanical Manufacturing Management | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 71 | ME4242Q | Shaping Technology | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 72 | ME4115Q | Mould Design and Fabrication | 3(3-1-0-6) | 3 | 4.67 | 7 |\n| 73 | ME4223Q | Computer Interfacing and Mechanical Device Control | 3(3-1-0-6) | 3 | 4.67 | 7 |\n| 74 | ME4163Q | Automatic Measurement in Mechanical Engineering | 2(2-1-0-4) | 2 | 3.25 | 9 |",
+        "### Elective Courses (12 credits / 19.5 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 75 | ME4472Q | Methods of Interpretation of Experimental Data | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 76 | ME4421Q | Manufacturing Technology of Plastic Product | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 77 | ME4372Q | Mold Technology | 2(2-0-1-4) | 2 | 3.25 | 6 |\n| 78 | ME4182Q | Automation of Hydraulic-Pneumatic Systems for Machines | 2(2-1-0-4) | 2 | 3.25 | 7 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "me_gu_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên ME-GU muốn biết chuẩn đầu ra về kỹ năng xã hội và đồng thời kiểm tra chương trình có hỗ trợ học tiếng Anh trong curriculum schedule không thì trả lời thế nào?",
+      "gold_answer": "Chuẩn đầu ra yêu cầu sinh viên có kỹ năng hợp tác, tổ chức, làm việc nhóm; giao tiếp qua viết, thuyết trình, thảo luận và sử dụng công cụ hiện đại; đồng thời có kỹ năng dùng tiếng Anh trong công việc theo quy định của trường. Trong curriculum schedule, chương trình có hai học phần tiếng Anh: QT1231 English 3 (B2.1) ở học kỳ 1 và QT1241 English 4 (B2.2) ở học kỳ 2.",
+      "evidence_chunk_ids": [
+        "f5f84a8b-2366-400d-a02f-48b236488134",
+        "19fd143d-f9cf-4e4a-bce4-8d6cd8e7f106"
+      ],
+      "ground_truth_context": [
+        "## B. Program Learning Outcomes\n\n- 2.1 Skills in detecting, analyzing and solving problems in mechanical engineering field.\n- 2.2 Skills in systematic and critical thinking.\n- 2.3 Dynamism, seriousness, and perseverance.\n- 2.4 The ability to experiment, explore knowledge, and conduct research and development.\n- 2.5 Ethics and professional responsibilities.\n- 2.6 An understanding of contemporary issues and lifelong learning.\n\n**3. Social skills** needed to work effectively in multidisciplinary teams and in an international environment:\n\n- 3.1 Skills in collaboration, organization, and teamwork.\n- 3.2 Communication skills through writing, presentation, discussion, effectively using modern tools and media.\n- 3.3 Skills in using English at work according to the regulations of the university.\n\n**4. The ability to participate in the design / construction / development** of mechanical systems / processes / products / technical solutions in fields of mechanical engineering in current social and environmental context:",
+        "### English (6 credits / 9.34 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 16 | QT1231 | English 3 (B2.1) | 3(2-2-0-6) | 3 | 4.67 | 1 |\n| 17 | QT1241 | English 4 (B2.2) | 3(2-2-0-6) | 3 | 4.67 | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_gu_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên ME-GU muốn biết phần thực hành/thực tập được bố trí như thế nào trong cấu trúc chung và curriculum schedule, cần trả lời ra sao?",
+      "gold_answer": "Trong cấu trúc chung, Engineering Practicum có 2 tín chỉ và được bố trí từ năm thứ ba trở lên; Graduation Internship có 3 tín chỉ; Graduation Thesis có 9 tín chỉ và đề tài phải phù hợp với ngành cũng như kiến thức từ engineering practicum. Trong curriculum schedule, các học phần tương ứng là ME4439Q Engineering Practicum ở học kỳ 7, ME5011Q Engineering Internship ở học kỳ 9 và ME5111Q Graduation Project ở học kỳ 10.",
+      "evidence_chunk_ids": [
+        "75a5871e-7afb-4b30-bdd1-7fc7bfee17d3",
+        "e82f51cd-5352-4c06-859e-5767175aed6b"
+      ],
+      "ground_truth_context": [
+        "## C. General Program Structure\n\n| Professional Component | Credits | Note |\n|---|---|---|\n| **General Education** | **50** | |\n| Mathematics and basic sciences | 31 | Major oriented |\n| Law and politics | 13 | In accordance with regulations of Vietnam Ministry of Education and Training |\n| Physical Education / Military Education (Military Education is for Vietnamese students only) | - | In accordance with regulations of Vietnam Ministry of Education and Training |\n| English | 6 | 02 basic English courses |\n| **Professional Education** | **109** | |\n| Basic and Core of Engineering (Transfer Credits with Griffith) | 38 | |\n| Basic and Core of Engineering (Studying in HUST) | 19 | |\n| Major Oriented | 26 | |\n| Elective Module | 12 | Elective module provides specialized knowledge oriented towards different concentrations. |\n| Engineering Practicum | 2 | Scheduled for third year or above |\n| Graduation Internship | 3 | |\n| Graduation Thesis | 9 | Topic must be relevant to major, and knowledge gained during engineering practicum |",
+        "### Engineering Practicum and Graduation Thesis (14 credits / 26.5 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 79 | ME4439Q | Engineering Practicum | 2(0-0-6-4) | 2 | 4.5 | 7 |\n| 80 | ME5011Q | Engineering Internship | 3(0-0-6-6) | 3 | 5.5 | 9 |\n| 81 | ME5111Q | Graduation Project | 9(0-0-18-18) | 9 | 16.5 | 10 |\n\n**Total credits: 159 (276.88 ECTs)**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "me_gu_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên ME-GU muốn liên hệ người phụ trách chương trình và đồng thời biết mã chương trình thì cần thông tin nào?",
+      "gold_answer": "Mã chương trình ME-GU là 7520130 cho bậc Engineering. Người phụ trách chương trình là Dr. Nguyen Thi Ngoc Huyen, email huyen.nguyenthingoc@hust.edu.vn, số điện thoại 0988 778 190.",
+      "evidence_chunk_ids": [
+        "9eb473ef-696f-4ee0-95ec-37159215c496",
+        "39fde702-f75b-48fe-b9d3-8f4a57d3fdc8"
+      ],
+      "ground_truth_context": [
+        "# ME-GU - Cooperation Training Program between Hanoi University of Science and Technology, Vietnam and Griffith University, Australia\n\n**Name of program:** Mechanical Machine Engineering (International cooperation academic programme)\n\n**Education level:** Engineer\n\n**Major:** Mechanical Engineering\n\n**Program codes:** 7520130 (Engineering)\n\n**Duration:** 5 years\n\n**Credits in total:** 159 credits",
+        "## G. Program Director\n\n- **Name:** Dr. Nguyen Thi Ngoc Huyen\n- **Email:** huyen.nguyenthingoc@hust.edu.vn\n- **Phone Number:** 0988 778 190"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

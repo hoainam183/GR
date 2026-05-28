@@ -1,0 +1,477 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "Quyển CTĐT Cơ điện tử_LUH website 01.docx_fix_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "me_luh_simple_001",
+      "question_type": "simple",
+      "question": "Chương trình Cử nhân Kỹ thuật Cơ điện tử hợp tác với Đại học Leibniz Hannover đào tạo trong bao lâu và có tổng khối lượng bao nhiêu tín chỉ?",
+      "gold_answer": "Chương trình Cử nhân Kỹ thuật Cơ điện tử hợp tác với Đại học Leibniz Hannover có thời gian đào tạo 4 năm và khối lượng kiến thức toàn khóa là 132 tín chỉ.",
+      "evidence_chunk_ids": [
+        "16455a53-1c8d-4bb2-99a9-814ac3202803"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2019 - CỬ NHÂN KỸ THUẬT CƠ ĐIỆN TỬ\n\nChương trình hợp tác đào tạo giữa Trường Đại học Bách Khoa Hà Nội và Trường Đại học Leibniz Hannover\n\n**Tên chương trình:** Chương trình đào tạo hợp tác quốc tế Kỹ thuật Cơ điện tử\n\n**Trình độ đào tạo:** Cử nhân\n\n**Ngành đào tạo:** Kỹ thuật Cơ điện tử\n\n**Mã ngành:** 7520114\n\n**Thời gian đào tạo:** 4 năm\n\n**Bằng tốt nghiệp:** Cử nhân Kỹ thuật Cơ điện tử\n\n**Khối lượng kiến thức toàn khóa:** 132 tín chỉ\n\n*(Ban hành tại Quyết định số 32A/QĐ-ĐHBK-ĐT ngày 09 tháng 4 năm 2019 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_002",
+      "question_type": "simple",
+      "question": "Sinh viên tốt nghiệp chương trình Cử nhân Kỹ thuật Cơ điện tử ME-LUH được cấp bằng gì?",
+      "gold_answer": "Sinh viên tốt nghiệp được cấp bằng Cử nhân Kỹ thuật Cơ điện tử.",
+      "evidence_chunk_ids": [
+        "16455a53-1c8d-4bb2-99a9-814ac3202803"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2019 - CỬ NHÂN KỸ THUẬT CƠ ĐIỆN TỬ\n\nChương trình hợp tác đào tạo giữa Trường Đại học Bách Khoa Hà Nội và Trường Đại học Leibniz Hannover\n\n**Tên chương trình:** Chương trình đào tạo hợp tác quốc tế Kỹ thuật Cơ điện tử\n\n**Trình độ đào tạo:** Cử nhân\n\n**Ngành đào tạo:** Kỹ thuật Cơ điện tử\n\n**Mã ngành:** 7520114\n\n**Thời gian đào tạo:** 4 năm\n\n**Bằng tốt nghiệp:** Cử nhân Kỹ thuật Cơ điện tử\n\n**Khối lượng kiến thức toàn khóa:** 132 tín chỉ\n\n*(Ban hành tại Quyết định số 32A/QĐ-ĐHBK-ĐT ngày 09 tháng 4 năm 2019 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_003",
+      "question_type": "simple",
+      "question": "Mã ngành của chương trình Cử nhân Kỹ thuật Cơ điện tử hợp tác với Đại học Leibniz Hannover là gì?",
+      "gold_answer": "Mã ngành của chương trình là 7520114.",
+      "evidence_chunk_ids": [
+        "16455a53-1c8d-4bb2-99a9-814ac3202803"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2019 - CỬ NHÂN KỸ THUẬT CƠ ĐIỆN TỬ\n\nChương trình hợp tác đào tạo giữa Trường Đại học Bách Khoa Hà Nội và Trường Đại học Leibniz Hannover\n\n**Tên chương trình:** Chương trình đào tạo hợp tác quốc tế Kỹ thuật Cơ điện tử\n\n**Trình độ đào tạo:** Cử nhân\n\n**Ngành đào tạo:** Kỹ thuật Cơ điện tử\n\n**Mã ngành:** 7520114\n\n**Thời gian đào tạo:** 4 năm\n\n**Bằng tốt nghiệp:** Cử nhân Kỹ thuật Cơ điện tử\n\n**Khối lượng kiến thức toàn khóa:** 132 tín chỉ\n\n*(Ban hành tại Quyết định số 32A/QĐ-ĐHBK-ĐT ngày 09 tháng 4 năm 2019 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_004",
+      "question_type": "simple",
+      "question": "Theo mục tiêu đào tạo ME-LUH, sinh viên tốt nghiệp cần có kiến thức chuyên ngành để làm gì với các hệ thống Cơ điện tử và robot?",
+      "gold_answer": "Sinh viên cần có kiến thức chuyên ngành để vận hành, bảo trì, tính toán và thiết kế các hệ thống Cơ điện tử và robot.",
+      "evidence_chunk_ids": [
+        "02f614c5-d20d-44c7-a03c-de975105eacf"
+      ],
+      "ground_truth_context": [
+        "## 1. Mục tiêu chương trình đào tạo\n\nSinh viên tốt nghiệp chương trình Cử nhân Kỹ thuật Cơ điện tử:\n\n- 1.1 Có kiến thức và kỹ năng cơ bản về toán học và khoa học, ứng dụng trong các lĩnh vực cơ khí, điện-điện tử, điều khiển và công nghệ thông tin để đáp ứng việc tiếp thu các kiến thức chuyên ngành; Có kiến thức chuyên ngành để: vận hành, bảo trì, tính toán và thiết kế các hệ thống Cơ điện tử và robot.\n- 1.2 Có kỹ năng mềm, tư duy phân biện, sử dụng tốt tiếng Đức trong giao tiếp và trao đổi học thuật, và khả năng làm việc nhóm hiệu quả phù hợp với môi trường làm việc liên ngành, hội nhập quốc tế (đặc biệt môi trường làm việc tại Đức) và thích ứng với cuộc cách mạng công nghiệp 4.0; có năng lực khởi nghiệp.\n- 1.3 Có khả năng hình thành ý tưởng, thiết kế, triển khai và vận hành hệ thống Cơ điện tử trong các bối cảnh của doanh nghiệp công nghệ trong và ngoài nước."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_005",
+      "question_type": "simple",
+      "question": "Theo mục tiêu đào tạo ME-LUH, sinh viên cần sử dụng tốt ngôn ngữ nào trong giao tiếp và trao đổi học thuật?",
+      "gold_answer": "Sinh viên cần sử dụng tốt tiếng Đức trong giao tiếp và trao đổi học thuật.",
+      "evidence_chunk_ids": [
+        "02f614c5-d20d-44c7-a03c-de975105eacf"
+      ],
+      "ground_truth_context": [
+        "## 1. Mục tiêu chương trình đào tạo\n\nSinh viên tốt nghiệp chương trình Cử nhân Kỹ thuật Cơ điện tử:\n\n- 1.1 Có kiến thức và kỹ năng cơ bản về toán học và khoa học, ứng dụng trong các lĩnh vực cơ khí, điện-điện tử, điều khiển và công nghệ thông tin để đáp ứng việc tiếp thu các kiến thức chuyên ngành; Có kiến thức chuyên ngành để: vận hành, bảo trì, tính toán và thiết kế các hệ thống Cơ điện tử và robot.\n- 1.2 Có kỹ năng mềm, tư duy phân biện, sử dụng tốt tiếng Đức trong giao tiếp và trao đổi học thuật, và khả năng làm việc nhóm hiệu quả phù hợp với môi trường làm việc liên ngành, hội nhập quốc tế (đặc biệt môi trường làm việc tại Đức) và thích ứng với cuộc cách mạng công nghiệp 4.0; có năng lực khởi nghiệp.\n- 1.3 Có khả năng hình thành ý tưởng, thiết kế, triển khai và vận hành hệ thống Cơ điện tử trong các bối cảnh của doanh nghiệp công nghệ trong và ngoài nước."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_006",
+      "question_type": "simple",
+      "question": "Chuẩn đầu ra về tiếng Đức của sinh viên chương trình ME-LUH là gì?",
+      "gold_answer": "Sinh viên cần có kỹ năng sử dụng tiếng Đức trong công việc, đạt tiêu chuẩn B1; riêng tiêu chuẩn chuyển tiếp là B2.",
+      "evidence_chunk_ids": [
+        "3e4d3190-e241-425b-b8ba-cd8e4fbb80b8"
+      ],
+      "ground_truth_context": [
+        "## 2. Chuẩn đầu ra của chương trình đào tạo\n\n- 2.2.1 Kỹ năng lập luận phân tích.\n- 2.2.2 Kỹ năng tư duy hệ thống và tư duy phản biện.\n- 2.2.3 Tính năng động, nghiêm túc và kiên trì.\n- 2.2.4 Khả năng khám phá tri thức và triển khai thực tế.\n- 2.2.5 Đạo đức và trách nhiệm nghề nghiệp.\n- 2.2.6 Hiểu biết các vấn đề đương đại và ý thức học suốt đời.\n\n**2.3 Kỹ năng xã hội** cần thiết để làm việc hiệu quả trong nhóm đa ngành và trong môi trường quốc tế:\n\n- 2.3.1 Kỹ năng hợp tác, tổ chức và làm việc theo nhóm.\n- 2.3.2 Kỹ năng giao tiếp thông qua viết, thuyết trình, thảo luận, sử dụng hiệu quả các công cụ và phương tiện hiện đại.\n- 2.3.3 Kỹ năng sử dụng tiếng Đức trong công việc, đạt tiêu chuẩn B1 (B2 cho tiêu chuẩn chuyển tiếp) theo quy định hiện hành.\n\n**2.4 Năng lực tham gia thiết kế, xây dựng/phát triển** hệ thống/sản phẩm/giải pháp kỹ thuật thuộc lĩnh vực ngành kỹ thuật Cơ điện tử trong bối cảnh kinh tế, xã hội của Việt Nam và quốc tế:"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_007",
+      "question_type": "simple",
+      "question": "Chuẩn đầu ra ME-LUH yêu cầu sinh viên có những kỹ năng xã hội nào?",
+      "gold_answer": "Sinh viên cần có kỹ năng hợp tác, tổ chức và làm việc theo nhóm; kỹ năng giao tiếp qua viết, thuyết trình, thảo luận và sử dụng hiệu quả công cụ/phương tiện hiện đại; đồng thời sử dụng tiếng Đức trong công việc đạt B1, B2 nếu chuyển tiếp.",
+      "evidence_chunk_ids": [
+        "3e4d3190-e241-425b-b8ba-cd8e4fbb80b8"
+      ],
+      "ground_truth_context": [
+        "## 2. Chuẩn đầu ra của chương trình đào tạo\n\n- 2.2.1 Kỹ năng lập luận phân tích.\n- 2.2.2 Kỹ năng tư duy hệ thống và tư duy phản biện.\n- 2.2.3 Tính năng động, nghiêm túc và kiên trì.\n- 2.2.4 Khả năng khám phá tri thức và triển khai thực tế.\n- 2.2.5 Đạo đức và trách nhiệm nghề nghiệp.\n- 2.2.6 Hiểu biết các vấn đề đương đại và ý thức học suốt đời.\n\n**2.3 Kỹ năng xã hội** cần thiết để làm việc hiệu quả trong nhóm đa ngành và trong môi trường quốc tế:\n\n- 2.3.1 Kỹ năng hợp tác, tổ chức và làm việc theo nhóm.\n- 2.3.2 Kỹ năng giao tiếp thông qua viết, thuyết trình, thảo luận, sử dụng hiệu quả các công cụ và phương tiện hiện đại.\n- 2.3.3 Kỹ năng sử dụng tiếng Đức trong công việc, đạt tiêu chuẩn B1 (B2 cho tiêu chuẩn chuyển tiếp) theo quy định hiện hành.\n\n**2.4 Năng lực tham gia thiết kế, xây dựng/phát triển** hệ thống/sản phẩm/giải pháp kỹ thuật thuộc lĩnh vực ngành kỹ thuật Cơ điện tử trong bối cảnh kinh tế, xã hội của Việt Nam và quốc tế:"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_luh_simple_008",
+      "question_type": "simple",
+      "question": "Trong cấu trúc chương trình ME-LUH, giáo dục đại cương gồm bao nhiêu tín chỉ?",
+      "gold_answer": "Giáo dục đại cương gồm 51 tín chỉ.",
+      "evidence_chunk_ids": [
+        "e7d7e634-0a12-470c-9e7d-f71e7bb52529"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản. Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương Toeic >= 300 có thể được miễn 2 học phần này. |\n| Tiếng Đức | 0 | 04 khóa học tiếng Đức cơ bản theo chuẩn đầu ra của chương trình và 03 khóa học nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 47 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai. |\n| Kiến thức bổ trợ xã hội | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_009",
+      "question_type": "simple",
+      "question": "Trong cấu trúc chương trình ME-LUH, giáo dục chuyên nghiệp gồm bao nhiêu tín chỉ?",
+      "gold_answer": "Giáo dục chuyên nghiệp gồm 81 tín chỉ.",
+      "evidence_chunk_ids": [
+        "e7d7e634-0a12-470c-9e7d-f71e7bb52529"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản. Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương Toeic >= 300 có thể được miễn 2 học phần này. |\n| Tiếng Đức | 0 | 04 khóa học tiếng Đức cơ bản theo chuẩn đầu ra của chương trình và 03 khóa học nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 47 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai. |\n| Kiến thức bổ trợ xã hội | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên ME-LUH có chứng chỉ tiếng Anh năm thứ nhất tương đương TOEIC từ bao nhiêu thì có thể được miễn hai học phần tiếng Anh cơ bản?",
+      "gold_answer": "Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương TOEIC từ 300 trở lên có thể được miễn hai học phần Tiếng Anh cơ bản.",
+      "evidence_chunk_ids": [
+        "e7d7e634-0a12-470c-9e7d-f71e7bb52529"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản. Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương Toeic >= 300 có thể được miễn 2 học phần này. |\n| Tiếng Đức | 0 | 04 khóa học tiếng Đức cơ bản theo chuẩn đầu ra của chương trình và 03 khóa học nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 47 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai. |\n| Kiến thức bổ trợ xã hội | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_011",
+      "question_type": "simple",
+      "question": "Chương trình ME-LUH có bao nhiêu khóa học tiếng Đức cơ bản và bao nhiêu khóa học tiếng Đức nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH?",
+      "gold_answer": "Chương trình có 4 khóa học tiếng Đức cơ bản theo chuẩn đầu ra và 3 khóa học tiếng Đức nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH.",
+      "evidence_chunk_ids": [
+        "e7d7e634-0a12-470c-9e7d-f71e7bb52529"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản. Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương Toeic >= 300 có thể được miễn 2 học phần này. |\n| Tiếng Đức | 0 | 04 khóa học tiếng Đức cơ bản theo chuẩn đầu ra của chương trình và 03 khóa học nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 47 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai. |\n| Kiến thức bổ trợ xã hội | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_012",
+      "question_type": "simple",
+      "question": "Khối cơ sở và cốt lõi ngành của chương trình ME-LUH có bao nhiêu tín chỉ và bao gồm khoảng bao nhiêu đồ án thiết kế/chế tạo/triển khai?",
+      "gold_answer": "Khối cơ sở và cốt lõi ngành có 47 tín chỉ và bao gồm từ 1 đến 3 đồ án thiết kế, chế tạo/triển khai.",
+      "evidence_chunk_ids": [
+        "e7d7e634-0a12-470c-9e7d-f71e7bb52529"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản. Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương Toeic >= 300 có thể được miễn 2 học phần này. |\n| Tiếng Đức | 0 | 04 khóa học tiếng Đức cơ bản theo chuẩn đầu ra của chương trình và 03 khóa học nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 47 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai. |\n| Kiến thức bổ trợ xã hội | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_013",
+      "question_type": "simple",
+      "question": "Trong chương trình ME-LUH, học phần Tiếng Đức 1 có mã học phần, trình độ và được học ở kỳ nào?",
+      "gold_answer": "Tiếng Đức 1 có mã QT0514, trình độ A1, 180 tiết, học ở kỳ 1.",
+      "evidence_chunk_ids": [
+        "0cbdad20-7b00-4507-8544-5c083a0c5174"
+      ],
+      "ground_truth_context": [
+        "#### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Mã số | Tên học phần | Khối lượng |\n|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-2-0-8) |\n\n#### Ngoại ngữ - Tiếng Đức (12 + 21 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 15 | QT0514 | Tiếng Đức 1 (A1 - 180 tiết) | 3(+5) | 1 |\n| 16 | QT0524 | Tiếng Đức 2 (A2 - 180 tiết) | 3(+2) | 2 |\n| 17 | QT0534 | Tiếng Đức 3 (A2 - 180 tiết) | 3(+2) | 3 |\n| 18 | QT1514 | Tiếng Đức 4 (B1.1 - 180 tiết) | 3(+2) | 4 |\n| 19 | QT1524 | Tiếng Đức 5 (B1.2 - 180 tiết) | (+5) | 5 |\n| 20 | QT1544 | Tiếng Đức 6 (B2.1 - 180 tiết) | (+5) | 6 |\n\n#### Ngoại ngữ - Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 21 | FL1100Q | Tiếng Anh I | 3(0-6-0-6) | 1 |\n| 22 | FL1101Q | Tiếng Anh II | 3(0-6-0-6) | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_014",
+      "question_type": "simple",
+      "question": "Trong chương trình ME-LUH, Tiếng Đức 6 tương ứng trình độ nào và học ở kỳ mấy?",
+      "gold_answer": "Tiếng Đức 6 tương ứng trình độ B2.1, 180 tiết, học ở kỳ 6.",
+      "evidence_chunk_ids": [
+        "0cbdad20-7b00-4507-8544-5c083a0c5174"
+      ],
+      "ground_truth_context": [
+        "#### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Mã số | Tên học phần | Khối lượng |\n|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-2-0-8) |\n\n#### Ngoại ngữ - Tiếng Đức (12 + 21 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 15 | QT0514 | Tiếng Đức 1 (A1 - 180 tiết) | 3(+5) | 1 |\n| 16 | QT0524 | Tiếng Đức 2 (A2 - 180 tiết) | 3(+2) | 2 |\n| 17 | QT0534 | Tiếng Đức 3 (A2 - 180 tiết) | 3(+2) | 3 |\n| 18 | QT1514 | Tiếng Đức 4 (B1.1 - 180 tiết) | 3(+2) | 4 |\n| 19 | QT1524 | Tiếng Đức 5 (B1.2 - 180 tiết) | (+5) | 5 |\n| 20 | QT1544 | Tiếng Đức 6 (B2.1 - 180 tiết) | (+5) | 6 |\n\n#### Ngoại ngữ - Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 21 | FL1100Q | Tiếng Anh I | 3(0-6-0-6) | 1 |\n| 22 | FL1101Q | Tiếng Anh II | 3(0-6-0-6) | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_015",
+      "question_type": "simple",
+      "question": "Trong khối Toán và Khoa học cơ bản của ME-LUH, học phần Giải tích I có bao nhiêu tín chỉ và học ở kỳ nào?",
+      "gold_answer": "Giải tích I có 4 tín chỉ và học ở kỳ 1.",
+      "evidence_chunk_ids": [
+        "e181cf36-ef80-4c59-842e-9b72fe4a0bdd"
+      ],
+      "ground_truth_context": [
+        "#### Toán và Khoa học cơ bản (32 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 23 | MI1110Q | Giải tích I | 4(3-2-0-8) | 1 |\n| 24 | MI1120Q | Giải tích II | 3(2-2-0-6) | 2 |\n| 25 | MI1130Q | Giải tích III | 3(2-2-0-6) | 3 |\n| 26 | MI1140Q | Đại số | 4(3-2-0-8) | 1 |\n| 27 | ME2030Q | Cơ khí đại cương | 2(2-0-1-4) | 4 |\n| 28 | PH1110Q | Vật lý đại cương I | 3(2-1-1-6) | 1 |\n| 29 | PH1120Q | Vật lý đại cương II | 3(2-1-1-6) | 3 |\n| 30 | IT1110Q | Tin học đại cương | 4(3-1-1-8) | 2 |\n| 31 | MI2110Q | Phương pháp tính và Matlab | 3(2-0-2-6) | 3 |\n| 32 | ME2011Q | Đồ họa kỹ thuật I | 3(3-1-0-6) | 3 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_016",
+      "question_type": "simple",
+      "question": "Trong khối Toán và Khoa học cơ bản của ME-LUH, học phần Phương pháp tính và Matlab có bao nhiêu tín chỉ và học ở kỳ nào?",
+      "gold_answer": "Phương pháp tính và Matlab có 3 tín chỉ và học ở kỳ 3.",
+      "evidence_chunk_ids": [
+        "e181cf36-ef80-4c59-842e-9b72fe4a0bdd"
+      ],
+      "ground_truth_context": [
+        "#### Toán và Khoa học cơ bản (32 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 23 | MI1110Q | Giải tích I | 4(3-2-0-8) | 1 |\n| 24 | MI1120Q | Giải tích II | 3(2-2-0-6) | 2 |\n| 25 | MI1130Q | Giải tích III | 3(2-2-0-6) | 3 |\n| 26 | MI1140Q | Đại số | 4(3-2-0-8) | 1 |\n| 27 | ME2030Q | Cơ khí đại cương | 2(2-0-1-4) | 4 |\n| 28 | PH1110Q | Vật lý đại cương I | 3(2-1-1-6) | 1 |\n| 29 | PH1120Q | Vật lý đại cương II | 3(2-1-1-6) | 3 |\n| 30 | IT1110Q | Tin học đại cương | 4(3-1-1-8) | 2 |\n| 31 | MI2110Q | Phương pháp tính và Matlab | 3(2-0-2-6) | 3 |\n| 32 | ME2011Q | Đồ họa kỹ thuật I | 3(3-1-0-6) | 3 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_017",
+      "question_type": "simple",
+      "question": "Trong khối cơ sở và cốt lõi ngành ME-LUH, học phần Robotics có mã gì, bao nhiêu tín chỉ và học ở kỳ nào?",
+      "gold_answer": "Học phần Robotics có mã ME3168Q, 3 tín chỉ và học ở kỳ 6.",
+      "evidence_chunk_ids": [
+        "15fe4aab-0636-4f88-9f8c-3cc675927311"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (47 tín chỉ)\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 33 | ME2201Q | Đồ họa kỹ thuật II | 2(2-1-0-4) | 4 |\n| 34 | ME2100Q | Nhập môn Cơ điện tử | 3(2-1-1-6) | 5 |\n| 35 | EE2012Q | Kỹ thuật điện | 2(2-1-0-4) | 4 |\n| 36 | ET2012Q | Kỹ thuật điện tử | 2(2-0-1-6) | 4 |\n| 37 | ME2112 | Cơ học kỹ thuật I | 2(2-1-0-4) | 3 |\n| 38 | ME3040Q | Sức bền vật liệu I | 2(2-1-0-4) | 3 |\n| 39 | ME3010Q | Cơ học kỹ thuật II | 3(2-2-0-6) | 4 |\n| 40 | EM3050Q | Sức bền vật liệu II | 2(2-0-1-4) | 4 |\n| 41 | ME2203Q | Nguyên lý máy | 2(2-0-1-4) | 5 |\n| 42 | EE3359Q | Lý thuyết điều khiển tự động | 3(3-1-0-6) | 5 |\n| 43 | MSE3100Q | Vật liệu học | 2(2-1-0-4) | 5 |\n| 44 | ME3212Q | Chi tiết máy | 2(2-0-1-4) | 6 |\n| 45 | ME3072Q | Kỹ thuật đo | 2(2-1-0-4) | 6 |\n| 46 | IT3011Q | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 5 |\n| 47 | ME3031Q | Công nghệ chế tạo máy | 3(3-0-1-6) | 6 |\n| 48 | ME3168Q | Robotics | 3(3-1-0-6) | 6 |\n| 49 | HE2010Q | Kỹ thuật nhiệt | 2(2-0-0-4) | 5|"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_018",
+      "question_type": "simple",
+      "question": "Trong khối cơ sở và cốt lõi ngành ME-LUH, học phần Lý thuyết điều khiển tự động học ở kỳ nào và có bao nhiêu tín chỉ?",
+      "gold_answer": "Lý thuyết điều khiển tự động có mã EE3359Q, học ở kỳ 5 và có 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "15fe4aab-0636-4f88-9f8c-3cc675927311"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (47 tín chỉ)\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 33 | ME2201Q | Đồ họa kỹ thuật II | 2(2-1-0-4) | 4 |\n| 34 | ME2100Q | Nhập môn Cơ điện tử | 3(2-1-1-6) | 5 |\n| 35 | EE2012Q | Kỹ thuật điện | 2(2-1-0-4) | 4 |\n| 36 | ET2012Q | Kỹ thuật điện tử | 2(2-0-1-6) | 4 |\n| 37 | ME2112 | Cơ học kỹ thuật I | 2(2-1-0-4) | 3 |\n| 38 | ME3040Q | Sức bền vật liệu I | 2(2-1-0-4) | 3 |\n| 39 | ME3010Q | Cơ học kỹ thuật II | 3(2-2-0-6) | 4 |\n| 40 | EM3050Q | Sức bền vật liệu II | 2(2-0-1-4) | 4 |\n| 41 | ME2203Q | Nguyên lý máy | 2(2-0-1-4) | 5 |\n| 42 | EE3359Q | Lý thuyết điều khiển tự động | 3(3-1-0-6) | 5 |\n| 43 | MSE3100Q | Vật liệu học | 2(2-1-0-4) | 5 |\n| 44 | ME3212Q | Chi tiết máy | 2(2-0-1-4) | 6 |\n| 45 | ME3072Q | Kỹ thuật đo | 2(2-1-0-4) | 6 |\n| 46 | IT3011Q | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 5 |\n| 47 | ME3031Q | Công nghệ chế tạo máy | 3(3-0-1-6) | 6 |\n| 48 | ME3168Q | Robotics | 3(3-1-0-6) | 6 |\n| 49 | HE2010Q | Kỹ thuật nhiệt | 2(2-0-0-4) | 5|"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_019",
+      "question_type": "simple",
+      "question": "Trong khối cơ sở và cốt lõi ngành ME-LUH, các học phần Kỹ thuật lập trình trong Cơ điện tử, Kỹ thuật thủy khí và Cơ sở Máy CNC đều học ở kỳ nào?",
+      "gold_answer": "Cả ba học phần Kỹ thuật lập trình trong Cơ điện tử, Kỹ thuật thủy khí và Cơ sở Máy CNC đều học ở kỳ 6.",
+      "evidence_chunk_ids": [
+        "e8fdc68e-eb84-4e66-bf80-e0409173fac0"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (47 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 50 | ME3300Q | Kỹ thuật lập trình trong Cơ điện tử | 3(2-2-0-6) | 6 |\n| 51 | TE3600Q | Kỹ thuật thủy khí | 2(2-1-0-4) | 6 |\n| 52 | ME3215Q | Cơ sở Máy CNC | 3(3-0-1-6) | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_020",
+      "question_type": "simple",
+      "question": "Trong kiến thức bổ trợ xã hội ME-LUH, học phần Technical Writing and Presentation có bao nhiêu tín chỉ?",
+      "gold_answer": "Technical Writing and Presentation có 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "44fdc144-9db4-4294-96e8-8f322d62190d"
+      ],
+      "ground_truth_context": [
+        "#### Kiến thức bổ trợ xã hội (9 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 53 | ED3220Q | Kỹ năng mềm | 2(1-2-0-2) | - |\n| 54 | EM1010Q | Quản trị học đại cương | 2(2-1-0-4) | - |\n| 55 | EM1180Q | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) | 7 |\n| 56 | ED3280Q | Tâm lý học ứng dụng | 2(1-2-0-4) | - |\n| 57 | TEX3123Q | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) | - |\n| 58 | ME2021Q | Technical Writing and Presentation | 3(2-2-0-6) | - |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_021",
+      "question_type": "simple",
+      "question": "Trong mô đun Robot của ME-LUH, các học phần Giao diện người máy, Xử lý ảnh và Robot tự hành học ở kỳ nào?",
+      "gold_answer": "Trong mô đun Robot, Giao diện người máy, Xử lý ảnh và Robot tự hành đều học ở kỳ 7.",
+      "evidence_chunk_ids": [
+        "161cc62c-d100-4f47-9957-5f4d19c1fbb2"
+      ],
+      "ground_truth_context": [
+        "#### Tự chọn theo định hướng ứng dụng - Mô đun 3: Robot (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 74 | IT4162Q | Vi xử lý | 2(2-1-0-4) | 7 |\n| 75 | ME4511Q | Cảm biến & xử lý tín hiệu | 2(2-1-0-4) | 7 |\n| 76 | ME4601Q | Thực tập xưởng Robot | 2(2-1-0-4) | 4 |\n| 77 | ME4181Q | Phương pháp phần tử hữu hạn | 2(2-1-0-4) | 5 |\n| 78 | ME4503Q | ĐA TKHTCK-Robot | 3(1-2-2-6) | 7 |\n| 79 | ME4508Q | Giao diện người máy | 2(2-1-0-4) | 7 |\n| 80 | ME4509Q | Xử lý ảnh | 2(2-1-0-4) | 7 |\n| 81 | ME4512Q | Robot tự hành | 2(2-1-0-4) | 7 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_simple_022",
+      "question_type": "simple",
+      "question": "Trong chương trình ME-LUH, Thực tập kỹ thuật và Đồ án tốt nghiệp cử nhân có bao nhiêu tín chỉ và học ở kỳ nào?",
+      "gold_answer": "Thực tập kỹ thuật có 2 tín chỉ và học ở kỳ 8; Đồ án tốt nghiệp cử nhân có 6 tín chỉ và cũng học ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "13e2ca89-7856-4815-81b8-ceff835084f0"
+      ],
+      "ground_truth_context": [
+        "#### Tự chọn theo định hướng ứng dụng - Mô đun 4: Hệ thống cơ điện tử thông minh (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 74 | IT4162Q | Vi xử lý | 2(2-1-0-4) | 7 |\n| 75 | ME4511Q | Cảm biến & xử lý tín hiệu | 2(2-1-0-4) | 7 |\n| 76 | ME4601Q | Thực tập xưởng HTCĐT TM | 2(2-1-0-4) | 4 |\n| 77 | ME4181Q | Phương pháp phần tử hữu hạn | 2(2-1-0-4) | 5 |\n| 78 | ME4503Q | ĐA TKHTCK-CĐTTM | 3(1-2-2-6) | 7 |\n| 79 | ME4508Q | Giao diện người máy | 2(2-1-0-4) | 7 |\n| 80 | ME4509Q | Xử lý ảnh | 2(2-1-0-4) | 7 |\n| 81 | ME4512Q | Điều khiển nối mạng | 2(2-1-0-4) | 7 |\n\n#### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 90 | ME4258Q | Thực tập kỹ thuật | 2(0-0-6-4) | 8 |\n| 91 | ME4992Q | Đồ án tốt nghiệp cử nhân | 6(0-0-12-12) | 8 |\n\n**Tổng cộng: 132 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên ME-LUH muốn chuyển tiếp sang LUH, chuẩn tiếng Đức cần đạt khác gì so với chuẩn đầu ra tiếng Đức chung của chương trình?",
+      "gold_answer": "Chuẩn đầu ra tiếng Đức chung của chương trình là B1, còn sinh viên muốn chuyển tiếp sang LUH cần đạt tiêu chuẩn B2. Ngoài ra, cấu trúc chương trình nêu có 4 khóa tiếng Đức cơ bản theo chuẩn đầu ra và 3 khóa nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH.",
+      "evidence_chunk_ids": [
+        "3e4d3190-e241-425b-b8ba-cd8e4fbb80b8",
+        "e7d7e634-0a12-470c-9e7d-f71e7bb52529"
+      ],
+      "ground_truth_context": [
+        "## 2. Chuẩn đầu ra của chương trình đào tạo\n\n- 2.2.1 Kỹ năng lập luận phân tích.\n- 2.2.2 Kỹ năng tư duy hệ thống và tư duy phản biện.\n- 2.2.3 Tính năng động, nghiêm túc và kiên trì.\n- 2.2.4 Khả năng khám phá tri thức và triển khai thực tế.\n- 2.2.5 Đạo đức và trách nhiệm nghề nghiệp.\n- 2.2.6 Hiểu biết các vấn đề đương đại và ý thức học suốt đời.\n\n**2.3 Kỹ năng xã hội** cần thiết để làm việc hiệu quả trong nhóm đa ngành và trong môi trường quốc tế:\n\n- 2.3.1 Kỹ năng hợp tác, tổ chức và làm việc theo nhóm.\n- 2.3.2 Kỹ năng giao tiếp thông qua viết, thuyết trình, thảo luận, sử dụng hiệu quả các công cụ và phương tiện hiện đại.\n- 2.3.3 Kỹ năng sử dụng tiếng Đức trong công việc, đạt tiêu chuẩn B1 (B2 cho tiêu chuẩn chuyển tiếp) theo quy định hiện hành.\n\n**2.4 Năng lực tham gia thiết kế, xây dựng/phát triển** hệ thống/sản phẩm/giải pháp kỹ thuật thuộc lĩnh vực ngành kỹ thuật Cơ điện tử trong bối cảnh kinh tế, xã hội của Việt Nam và quốc tế:",
+        "## 3. Nội dung chương trình\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản. Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương Toeic >= 300 có thể được miễn 2 học phần này. |\n| Tiếng Đức | 0 | 04 khóa học tiếng Đức cơ bản theo chuẩn đầu ra của chương trình và 03 khóa học nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 47 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai. |\n| Kiến thức bổ trợ xã hội | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_comparison",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_luh_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên ME-LUH muốn biết toàn khóa 132 tín chỉ được chia thành giáo dục đại cương và giáo dục chuyên nghiệp như thế nào thì trả lời ra sao?",
+      "gold_answer": "Toàn khóa có 132 tín chỉ. Trong đó, giáo dục đại cương chiếm 51 tín chỉ và giáo dục chuyên nghiệp chiếm 81 tín chỉ.",
+      "evidence_chunk_ids": [
+        "16455a53-1c8d-4bb2-99a9-814ac3202803",
+        "e7d7e634-0a12-470c-9e7d-f71e7bb52529"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2019 - CỬ NHÂN KỸ THUẬT CƠ ĐIỆN TỬ\n\nChương trình hợp tác đào tạo giữa Trường Đại học Bách Khoa Hà Nội và Trường Đại học Leibniz Hannover\n\n**Tên chương trình:** Chương trình đào tạo hợp tác quốc tế Kỹ thuật Cơ điện tử\n\n**Trình độ đào tạo:** Cử nhân\n\n**Ngành đào tạo:** Kỹ thuật Cơ điện tử\n\n**Mã ngành:** 7520114\n\n**Thời gian đào tạo:** 4 năm\n\n**Bằng tốt nghiệp:** Cử nhân Kỹ thuật Cơ điện tử\n\n**Khối lượng kiến thức toàn khóa:** 132 tín chỉ\n\n*(Ban hành tại Quyết định số 32A/QĐ-ĐHBK-ĐT ngày 09 tháng 4 năm 2019 của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)*",
+        "## 3. Nội dung chương trình\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản. Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương Toeic >= 300 có thể được miễn 2 học phần này. |\n| Tiếng Đức | 0 | 04 khóa học tiếng Đức cơ bản theo chuẩn đầu ra của chương trình và 03 khóa học nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 47 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai. |\n| Kiến thức bổ trợ xã hội | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_aggregation",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Trong chương trình ME-LUH, nếu so sánh tiếng Anh và tiếng Đức trong cấu trúc chương trình, mỗi phần được ghi nhận tín chỉ như thế nào?",
+      "gold_answer": "Tiếng Anh được ghi nhận 6 tín chỉ, gồm 2 học phần Tiếng Anh cơ bản. Tiếng Đức được ghi 0 tín chỉ trong cấu trúc chung, gồm 4 khóa tiếng Đức cơ bản theo chuẩn đầu ra và 3 khóa nâng cao cho sinh viên muốn chuyển tiếp sang LUH; trong danh mục học phần, các học phần tiếng Đức có khối lượng như QT0514 3(+5), QT0524 3(+2), QT0534 3(+2), QT1514 3(+2), QT1524 (+5), QT1544 (+5).",
+      "evidence_chunk_ids": [
+        "e7d7e634-0a12-470c-9e7d-f71e7bb52529",
+        "0cbdad20-7b00-4507-8544-5c083a0c5174"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản. Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương Toeic >= 300 có thể được miễn 2 học phần này. |\n| Tiếng Đức | 0 | 04 khóa học tiếng Đức cơ bản theo chuẩn đầu ra của chương trình và 03 khóa học nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 47 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai. |\n| Kiến thức bổ trợ xã hội | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |",
+        "#### Giáo dục Quốc phòng - An ninh (165 tiết)\n\n| TT | Mã số | Tên học phần | Khối lượng |\n|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-2-0-8) |\n\n#### Ngoại ngữ - Tiếng Đức (12 + 21 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 15 | QT0514 | Tiếng Đức 1 (A1 - 180 tiết) | 3(+5) | 1 |\n| 16 | QT0524 | Tiếng Đức 2 (A2 - 180 tiết) | 3(+2) | 2 |\n| 17 | QT0534 | Tiếng Đức 3 (A2 - 180 tiết) | 3(+2) | 3 |\n| 18 | QT1514 | Tiếng Đức 4 (B1.1 - 180 tiết) | 3(+2) | 4 |\n| 19 | QT1524 | Tiếng Đức 5 (B1.2 - 180 tiết) | (+5) | 5 |\n| 20 | QT1544 | Tiếng Đức 6 (B2.1 - 180 tiết) | (+5) | 6 |\n\n#### Ngoại ngữ - Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 21 | FL1100Q | Tiếng Anh I | 3(0-6-0-6) | 1 |\n| 22 | FL1101Q | Tiếng Anh II | 3(0-6-0-6) | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_luh_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên ME-LUH học các học phần liên quan đến robot ở khối cơ sở ngành và ở mô đun Robot như thế nào?",
+      "gold_answer": "Ở khối cơ sở và cốt lõi ngành, sinh viên học Robotics mã ME3168Q, 3 tín chỉ, kỳ 6. Ở mô đun Robot, sinh viên học các học phần như Thực tập xưởng Robot, ĐA TKHTCK-Robot, Giao diện người máy, Xử lý ảnh và Robot tự hành, chủ yếu ở kỳ 7, ngoài ra có Phương pháp phần tử hữu hạn ở kỳ 5 và Thực tập xưởng Robot ở kỳ 4.",
+      "evidence_chunk_ids": [
+        "15fe4aab-0636-4f88-9f8c-3cc675927311",
+        "161cc62c-d100-4f47-9957-5f4d19c1fbb2"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (47 tín chỉ)\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 33 | ME2201Q | Đồ họa kỹ thuật II | 2(2-1-0-4) | 4 |\n| 34 | ME2100Q | Nhập môn Cơ điện tử | 3(2-1-1-6) | 5 |\n| 35 | EE2012Q | Kỹ thuật điện | 2(2-1-0-4) | 4 |\n| 36 | ET2012Q | Kỹ thuật điện tử | 2(2-0-1-6) | 4 |\n| 37 | ME2112 | Cơ học kỹ thuật I | 2(2-1-0-4) | 3 |\n| 38 | ME3040Q | Sức bền vật liệu I | 2(2-1-0-4) | 3 |\n| 39 | ME3010Q | Cơ học kỹ thuật II | 3(2-2-0-6) | 4 |\n| 40 | EM3050Q | Sức bền vật liệu II | 2(2-0-1-4) | 4 |\n| 41 | ME2203Q | Nguyên lý máy | 2(2-0-1-4) | 5 |\n| 42 | EE3359Q | Lý thuyết điều khiển tự động | 3(3-1-0-6) | 5 |\n| 43 | MSE3100Q | Vật liệu học | 2(2-1-0-4) | 5 |\n| 44 | ME3212Q | Chi tiết máy | 2(2-0-1-4) | 6 |\n| 45 | ME3072Q | Kỹ thuật đo | 2(2-1-0-4) | 6 |\n| 46 | IT3011Q | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 5 |\n| 47 | ME3031Q | Công nghệ chế tạo máy | 3(3-0-1-6) | 6 |\n| 48 | ME3168Q | Robotics | 3(3-1-0-6) | 6 |\n| 49 | HE2010Q | Kỹ thuật nhiệt | 2(2-0-0-4) | 5|",
+        "#### Tự chọn theo định hướng ứng dụng - Mô đun 3: Robot (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 74 | IT4162Q | Vi xử lý | 2(2-1-0-4) | 7 |\n| 75 | ME4511Q | Cảm biến & xử lý tín hiệu | 2(2-1-0-4) | 7 |\n| 76 | ME4601Q | Thực tập xưởng Robot | 2(2-1-0-4) | 4 |\n| 77 | ME4181Q | Phương pháp phần tử hữu hạn | 2(2-1-0-4) | 5 |\n| 78 | ME4503Q | ĐA TKHTCK-Robot | 3(1-2-2-6) | 7 |\n| 79 | ME4508Q | Giao diện người máy | 2(2-1-0-4) | 7 |\n| 80 | ME4509Q | Xử lý ảnh | 2(2-1-0-4) | 7 |\n| 81 | ME4512Q | Robot tự hành | 2(2-1-0-4) | 7 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_luh_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên ME-LUH chọn mô đun Hệ thống sản xuất tự động, các học phần nào trùng với mô đun Thiết bị tự động?",
+      "gold_answer": "Hai mô đun cùng có các học phần: IT4162Q Vi xử lý, ME4511Q Cảm biến & xử lý tín hiệu, ME4601Q Thực tập xưởng, ME4181Q Phương pháp/Phần tử hữu hạn, ME4503Q Đồ án thiết kế hệ thống cơ khí, ME4501Q PLC và mạng công nghiệp, ME4082Q Công nghệ CNC. Điểm khác là mô đun Hệ thống sản xuất tự động có ME4112Q Tự động hoá sản xuất, còn mô đun Thiết bị tự động có ME4112Q Robot công nghiệp.",
+      "evidence_chunk_ids": [
+        "fbaf5f03-5656-4f04-9348-34e06a68481d",
+        "d5b36363-14cf-41e0-8adb-b9cdf57271d9"
+      ],
+      "ground_truth_context": [
+        "#### Tự chọn theo định hướng ứng dụng - Mô đun 1: Hệ thống sản xuất tự động (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 74 | IT4162Q | Vi xử lý | 2(2-1-0-4) | 7 |\n| 75 | ME4511Q | Cảm biến & xử lý tín hiệu | 2(2-1-0-4) | 7 |\n| 76 | ME4601Q | Thực tập xưởng Hệ thống | 2(2-1-0-4) | 4 |\n| 77 | ME4181Q | Phần tử hữu hạn - SXTĐ | 2(2-1-0-4) | 5 |\n| 78 | ME4503Q | ĐA TKHTCK-SXTĐ | 3(1-2-2-6) | 7 |\n| 79 | ME4501Q | PLC và mạng công nghiệp | 2(2-1-0-4) | 7 |\n| 80 | ME4082Q | Công nghệ CNC | 2(2-1-0-4) | 7 |\n| 81 | ME4112Q | Tự động hoá sản xuất | 2(2-1-0-4) | 7 |",
+        "#### Tự chọn theo định hướng ứng dụng - Mô đun 2: Thiết bị tự động (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 74 | IT4162Q | Vi xử lý | 2(2-1-0-4) | 7 |\n| 75 | ME4511Q | Cảm biến & xử lý tín hiệu | 2(2-1-0-4) | 7 |\n| 76 | ME4601Q | Thực tập xưởng TBTĐ | 2(2-1-0-4) | 4 |\n| 77 | ME4181Q | Phương pháp phần tử hữu hạn | 2(2-1-0-4) | 5 |\n| 78 | ME4503Q | ĐA TKHT Cơ khí-TBTĐ | 3(1-2-2-6) | 7 |\n| 79 | ME4501Q | PLC và mạng công nghiệp | 2(2-1-0-4) | 7 |\n| 80 | ME4082Q | Công nghệ CNC | 2(2-1-0-4) | 7 |\n| 81 | ME4112Q | Robot công nghiệp | 2(2-1-0-4) | 7 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_comparison",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_luh_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên ME-LUH chọn mô đun Robot hoặc Hệ thống cơ điện tử thông minh, hai mô đun này giống và khác nhau ở các học phần cuối như thế nào?",
+      "gold_answer": "Hai mô đun đều có Vi xử lý, Cảm biến & xử lý tín hiệu, Phương pháp phần tử hữu hạn, Đồ án thiết kế hệ thống cơ khí, Giao diện người máy và Xử lý ảnh. Mô đun Robot có Thực tập xưởng Robot và Robot tự hành; mô đun Hệ thống cơ điện tử thông minh có Thực tập xưởng HTCĐT TM và Điều khiển nối mạng.",
+      "evidence_chunk_ids": [
+        "161cc62c-d100-4f47-9957-5f4d19c1fbb2",
+        "13e2ca89-7856-4815-81b8-ceff835084f0"
+      ],
+      "ground_truth_context": [
+        "#### Tự chọn theo định hướng ứng dụng - Mô đun 3: Robot (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 74 | IT4162Q | Vi xử lý | 2(2-1-0-4) | 7 |\n| 75 | ME4511Q | Cảm biến & xử lý tín hiệu | 2(2-1-0-4) | 7 |\n| 76 | ME4601Q | Thực tập xưởng Robot | 2(2-1-0-4) | 4 |\n| 77 | ME4181Q | Phương pháp phần tử hữu hạn | 2(2-1-0-4) | 5 |\n| 78 | ME4503Q | ĐA TKHTCK-Robot | 3(1-2-2-6) | 7 |\n| 79 | ME4508Q | Giao diện người máy | 2(2-1-0-4) | 7 |\n| 80 | ME4509Q | Xử lý ảnh | 2(2-1-0-4) | 7 |\n| 81 | ME4512Q | Robot tự hành | 2(2-1-0-4) | 7 |",
+        "#### Tự chọn theo định hướng ứng dụng - Mô đun 4: Hệ thống cơ điện tử thông minh (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 74 | IT4162Q | Vi xử lý | 2(2-1-0-4) | 7 |\n| 75 | ME4511Q | Cảm biến & xử lý tín hiệu | 2(2-1-0-4) | 7 |\n| 76 | ME4601Q | Thực tập xưởng HTCĐT TM | 2(2-1-0-4) | 4 |\n| 77 | ME4181Q | Phương pháp phần tử hữu hạn | 2(2-1-0-4) | 5 |\n| 78 | ME4503Q | ĐA TKHTCK-CĐTTM | 3(1-2-2-6) | 7 |\n| 79 | ME4508Q | Giao diện người máy | 2(2-1-0-4) | 7 |\n| 80 | ME4509Q | Xử lý ảnh | 2(2-1-0-4) | 7 |\n| 81 | ME4512Q | Điều khiển nối mạng | 2(2-1-0-4) | 7 |\n\n#### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 90 | ME4258Q | Thực tập kỹ thuật | 2(0-0-6-4) | 8 |\n| 91 | ME4992Q | Đồ án tốt nghiệp cử nhân | 6(0-0-12-12) | 8 |\n\n**Tổng cộng: 132 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_comparison",
+      "difficulty": "medium"
+    },
+    {
+      "id": "me_luh_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Để hoàn thành phần cuối chương trình ME-LUH, sinh viên cần học những học phần thực tập/đồ án nào và chúng liên hệ thế nào với tổng số tín chỉ toàn khóa?",
+      "gold_answer": "Phần cuối chương trình gồm Thực tập kỹ thuật ME4258Q 2 tín chỉ ở kỳ 8 và Đồ án tốt nghiệp cử nhân ME4992Q 6 tín chỉ ở kỳ 8. Chương trình có tổng cộng 132 tín chỉ.",
+      "evidence_chunk_ids": [
+        "92410bda-73e7-4827-b199-59b31d3dfca7",
+        "13e2ca89-7856-4815-81b8-ceff835084f0"
+      ],
+      "ground_truth_context": [
+        "### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Tự chọn theo môđun | 17 | Khối kiến thức Tự chọn theo môđun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng. |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. |\n| Đồ án tốt nghiệp cử nhân | 6 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập tốt nghiệp. |\n| **Tổng cộng** | **132 tín chỉ** | |",
+        "#### Tự chọn theo định hướng ứng dụng - Mô đun 4: Hệ thống cơ điện tử thông minh (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 74 | IT4162Q | Vi xử lý | 2(2-1-0-4) | 7 |\n| 75 | ME4511Q | Cảm biến & xử lý tín hiệu | 2(2-1-0-4) | 7 |\n| 76 | ME4601Q | Thực tập xưởng HTCĐT TM | 2(2-1-0-4) | 4 |\n| 77 | ME4181Q | Phương pháp phần tử hữu hạn | 2(2-1-0-4) | 5 |\n| 78 | ME4503Q | ĐA TKHTCK-CĐTTM | 3(1-2-2-6) | 7 |\n| 79 | ME4508Q | Giao diện người máy | 2(2-1-0-4) | 7 |\n| 80 | ME4509Q | Xử lý ảnh | 2(2-1-0-4) | 7 |\n| 81 | ME4512Q | Điều khiển nối mạng | 2(2-1-0-4) | 7 |\n\n#### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Khối lượng (TC) | Kỳ |\n|---|---|---|---|---|\n| 90 | ME4258Q | Thực tập kỹ thuật | 2(0-0-6-4) | 8 |\n| 91 | ME4992Q | Đồ án tốt nghiệp cử nhân | 6(0-0-12-12) | 8 |\n\n**Tổng cộng: 132 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_aggregation",
+      "difficulty": "easy"
+    },
+    {
+      "id": "me_luh_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên ME-LUH cần học những nhóm học phần nào để vừa đáp ứng chuẩn phẩm chất chính trị, giáo dục thể chất/quốc phòng vừa hoàn thành cấu trúc giáo dục đại cương?",
+      "gold_answer": "Về chuẩn đầu ra, sinh viên cần có trình độ lý luận chính trị theo chương trình chung của Bộ GD&ĐT và có chứng chỉ Giáo dục thể chất, Giáo dục quốc phòng - an ninh. Trong cấu trúc chương trình, giáo dục đại cương gồm 51 tín chỉ, bao gồm Toán và khoa học cơ bản 32 tín chỉ, Lý luận chính trị + Pháp luật đại cương 13 tín chỉ, GDTC/GDQP-AN theo quy định và Tiếng Anh 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "5534b462-6527-4557-afce-210c045f1c1c",
+        "e7d7e634-0a12-470c-9e7d-f71e7bb52529"
+      ],
+      "ground_truth_context": [
+        "## 2. Chuẩn đầu ra của chương trình đào tạo\n\n- 2.4.1 Tham gia quá trình thiết kế, mô phỏng và triển khai hệ Cơ điện tử.\n- 2.4.2 Tham gia quy trình sản xuất phần cứng.\n- 2.4.3 Tham gia quy trình triển khai phần mềm.\n- 2.4.4 Tham gia kiểm tra, kiểm chứng, phê chuẩn và chứng nhận.\n- 2.4.5 Nhận thức về mối liên hệ mật thiết và ảnh hưởng của giải pháp kỹ thuật Cơ điện tử với các yếu tố kinh tế, xã hội và môi trường trong bối cảnh toàn cầu hóa.\n- 2.4.6 Năng lực nhận biết vấn đề và hình thành ý tưởng giải pháp kỹ thuật, khả năng tham gia xây dựng dự án liên quan đến lĩnh vực Cơ điện tử.\n\n**2.5 Phẩm chất chính trị, ý thức phục vụ nhân dân, có sức khỏe**, đáp ứng yêu cầu xây dựng và bảo vệ Tổ quốc:\n\n- 2.5.1 Có trình độ lý luận chính trị theo chương trình quy định chung của Bộ Giáo dục và Đào tạo.\n- 2.5.2 Có chứng chỉ Giáo dục thể chất và chứng chỉ Giáo dục quốc phòng - an ninh theo chương trình quy định chung của Bộ Giáo dục và Đào tạo.",
+        "## 3. Nội dung chương trình\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản. Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương Toeic >= 300 có thể được miễn 2 học phần này. |\n| Tiếng Đức | 0 | 04 khóa học tiếng Đức cơ bản theo chuẩn đầu ra của chương trình và 03 khóa học nâng cao dành cho sinh viên muốn chuyển tiếp sang LUH. |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 47 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai. |\n| Kiến thức bổ trợ xã hội | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC). |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_synthesis",
+      "difficulty": "medium"
+    }
+  ]
+}
