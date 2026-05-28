@@ -3,7 +3,6 @@
 Evaluates RAG retrieval metrics on the user's custom JSON dataset.
 Supports:
 - Local Classifier routing with dynamic Tier-3 LLM (Gemini) fallback.
-- direct LLM routing.
 - Baseline (no routing - querying all collections).
 - Metrics: Hit@K, Recall@K, Precision@K, MRR@K, NDCG@K for K in [3, 5, 7].
 - Breakdown analysis by question type and difficulty.
@@ -17,11 +16,11 @@ import csv
 import json
 import logging
 import math
-import os
+import re
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 # Set up logger
 logging.basicConfig(
@@ -203,6 +202,56 @@ def load_dataset(dataset_path: Path) -> List[Dict[str, Any]]:
         sys.exit(1)
 
 
+def resolve_dataset_paths(dataset_path: Path) -> List[Path]:
+    """Return one or more dataset JSON files from a file or directory path."""
+    if dataset_path.is_dir():
+        paths = sorted(dataset_path.glob("*.json"))
+        if not paths:
+            logger.error("No JSON dataset files found in %s", dataset_path)
+            sys.exit(1)
+        return paths
+    return [dataset_path]
+
+
+def _safe_output_name(path: Path) -> str:
+    """Create a filesystem-safe output folder name from a dataset filename."""
+    name = re.sub(r"[^A-Za-z0-9._-]+", "_", path.stem).strip("._-")
+    return name or "dataset"
+
+
+def _normalize_router_mode(router_mode: str) -> str:
+    if router_mode == "llm":
+        logger.warning(
+            "--router-mode llm is deprecated for this retrieval eval; "
+            "using classifier routing with Tier-3 Gemini fallback instead."
+        )
+        return "classifier"
+    return router_mode
+
+
+def build_evaluation_runtime(
+    router_mode: str,
+    top_k: int,
+) -> Tuple[Settings, RetrievalService, CollectionSelector, Optional[QueryRouter]]:
+    """Initialise shared retrieval/router objects once for a whole eval run."""
+    settings = Settings()
+    settings.top_k = top_k
+    # Retrieval eval mirrors the main flow: local classifier routing with Gemini
+    # used only as the Tier-3 fallback. Never instantiate QueryRouter in
+    # mode="llm" here because that path expects OPENAI_API_KEY.
+    settings.router_mode = "classifier"
+
+    logger.info("Initializing RetrievalService (embedders, stores, reranker) ...")
+    service = RetrievalService.from_settings(settings)
+    selector = CollectionSelector()
+    router = (
+        QueryRouter(mode="classifier", embedder=service.bge_embedder)
+        if router_mode == "classifier"
+        else None
+    )
+    return settings, service, selector, router
+
+
 # ─── Main Evaluation Loop ───────────────────────────────────────────────────────
 
 def run_evaluation(
@@ -210,25 +259,16 @@ def run_evaluation(
     router_mode: str,
     top_k: int,
     output_dir: Path,
+    dataset_name: Optional[str] = None,
+    settings: Optional[Settings] = None,
+    service: Optional[RetrievalService] = None,
+    selector: Optional[CollectionSelector] = None,
+    router: Optional[QueryRouter] = None,
 ) -> Dict[str, Any]:
-    
-    # 1. Initialize RAG settings and service
-    settings = Settings()
-    
-    # Override settings for evaluation
-    settings.top_k = top_k
-    settings.router_mode = "classifier" if router_mode == "classifier" else "llm"
-    
-    logger.info("Initializing RetrievalService (embedders, stores, reranker) ...")
-    service = RetrievalService.from_settings(settings)
-    
-    # 2. Setup Router and Selector
-    router = QueryRouter(mode=settings.router_mode, embedder=service.bge_embedder)
-    selector = CollectionSelector()
-    
-    # Instantiate Gemini client for Tier-3 fallback or LLM routing mode
-    logger.info("Initializing Gemini Chat LLM client for routing/fallback ...")
-    chat_llm = create_llm(settings)
+    router_mode = _normalize_router_mode(router_mode)
+    if settings is None or service is None or selector is None:
+        settings, service, selector, router = build_evaluation_runtime(router_mode, top_k)
+    chat_llm: Optional[Any] = None
     
     # K Cutoffs
     cutoffs = [3, 5, 7]
@@ -265,12 +305,18 @@ def run_evaluation(
                 "confidence": 1.0
             }
         else:
-            # Run local classifier or direct LLM
+            if router is None:
+                raise RuntimeError(f"Unsupported router_mode={router_mode!r}")
+
+            # Run local classifier first.
             routing_decision = router.route(question)
             
             # Tier-3 Gemini Fallback check
-            if router_mode == "classifier" and _should_trigger_tier3(routing_decision):
+            if _should_trigger_tier3(routing_decision):
                 logger.info("  ↳ Low confidence margin. Triggering Gemini LLM fallback...")
+                if chat_llm is None:
+                    logger.info("Initializing Gemini Chat LLM client for routing fallback ...")
+                    chat_llm = create_llm(settings)
                 routing_decision = _llm_domain_classify(chat_llm, question, routing_decision)
                 fallback_triggered = True
                 total_fallback_triggers += 1
@@ -332,6 +378,8 @@ def run_evaluation(
 
     # 3. Aggregate results and breakdowns
     summary = build_summary_report(records, total_fallback_triggers, top_k, router_mode)
+    if dataset_name:
+        summary["dataset"] = dataset_name
     
     # 4. Save results to disk
     save_outputs(records, summary, output_dir, router_mode)
@@ -502,6 +550,69 @@ def save_outputs(
     print("="*60 + "\n")
 
 
+def save_batch_summary(
+    summaries: List[Dict[str, Any]],
+    output_dir: Path,
+    router_mode: str,
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    total_queries = sum(int(s.get("total_queries", 0)) for s in summaries)
+    total_fallbacks = sum(int(s.get("fallback_count", 0)) for s in summaries)
+
+    metric_names = sorted(
+        {
+            metric
+            for summary in summaries
+            for metric in (summary.get("overall_metrics") or {}).keys()
+        }
+    )
+    overall_metrics = {}
+    if total_queries:
+        overall_metrics = {
+            metric: round(
+                sum(
+                    float((summary.get("overall_metrics") or {}).get(metric, 0.0))
+                    * int(summary.get("total_queries", 0))
+                    for summary in summaries
+                )
+                / total_queries,
+                4,
+            )
+            for metric in metric_names
+        }
+
+    def _weighted_average(key: str) -> float:
+        if not total_queries:
+            return 0.0
+        return round(
+            sum(
+                float(summary.get(key, 0.0)) * int(summary.get("total_queries", 0))
+                for summary in summaries
+            )
+            / total_queries,
+            1,
+        )
+
+    payload = {
+        "router_mode": router_mode,
+        "dataset_count": len(summaries),
+        "total_queries": total_queries,
+        "fallback_count": total_fallbacks,
+        "fallback_rate": round(total_fallbacks / total_queries, 4)
+        if total_queries
+        else 0.0,
+        "overall_avg_latency_ms": _weighted_average("overall_avg_latency_ms"),
+        "overall_avg_routing_ms": _weighted_average("overall_avg_routing_ms"),
+        "overall_avg_retrieval_ms": _weighted_average("overall_avg_retrieval_ms"),
+        "overall_metrics": overall_metrics,
+        "datasets": summaries,
+    }
+
+    path = output_dir / f"batch_summary_{router_mode}.json"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    logger.info("Wrote batch summary JSON → %s", path)
+
+
 # ─── Entry Point ────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -509,14 +620,17 @@ def main() -> None:
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=PROJECT_ROOT / "evaluation" / "data" / "CTDT-CNKT-TaiNang-2025.03.30_rag_evaluation_dataset_no_parent_evidence.json",
-        help="Path to evaluation JSON dataset."
+        default=PROJECT_ROOT / "evaluation" / "data",
+        help="Path to an evaluation JSON dataset file or a directory of JSON datasets."
     )
     parser.add_argument(
         "--router-mode",
         choices=["classifier", "llm", "none"],
         default="classifier",
-        help="Query router strategy: classifier (default), llm (Gemini), or none."
+        help=(
+            "Query router strategy: classifier (default, with Gemini fallback) "
+            "or none. llm is kept as a deprecated alias for classifier fallback."
+        )
     )
     parser.add_argument(
         "--top-k", "--k",
@@ -532,18 +646,42 @@ def main() -> None:
     )
     
     args = parser.parse_args()
-    
-    # Load dataset
-    logger.info("Loading dataset from %s ...", args.dataset)
-    dataset_items = load_dataset(args.dataset)
-    
-    # Run evaluation
-    run_evaluation(
-        dataset_items=dataset_items,
-        router_mode=args.router_mode,
+
+    router_mode = _normalize_router_mode(args.router_mode)
+    dataset_paths = resolve_dataset_paths(args.dataset)
+    multi_dataset = len(dataset_paths) > 1 or args.dataset.is_dir()
+
+    settings, service, selector, router = build_evaluation_runtime(
+        router_mode=router_mode,
         top_k=args.top_k,
-        output_dir=args.output_dir,
     )
+
+    summaries: List[Dict[str, Any]] = []
+    logger.info("Found %d dataset file(s).", len(dataset_paths))
+    for dataset_path in dataset_paths:
+        logger.info("Loading dataset from %s ...", dataset_path)
+        dataset_items = load_dataset(dataset_path)
+        dataset_output_dir = (
+            args.output_dir / _safe_output_name(dataset_path)
+            if multi_dataset
+            else args.output_dir
+        )
+
+        summary = run_evaluation(
+            dataset_items=dataset_items,
+            router_mode=router_mode,
+            top_k=args.top_k,
+            output_dir=dataset_output_dir,
+            dataset_name=dataset_path.name,
+            settings=settings,
+            service=service,
+            selector=selector,
+            router=router,
+        )
+        summaries.append(summary)
+
+    if multi_dataset:
+        save_batch_summary(summaries, args.output_dir, router_mode)
 
 
 if __name__ == "__main__":
