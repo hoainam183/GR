@@ -1,0 +1,476 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "Quy định xét cấp HB tài trợ 2024 LasVer_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 18,
+    "multi_hop": 8,
+    "adversarial": 4
+  },
+  "items": [
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_001",
+      "question_type": "simple",
+      "question": "Học bổng tài trợ dành cho sinh viên Đại học Bách khoa Hà Nội được hiểu là loại học bổng nào?",
+      "gold_answer": "Học bổng tài trợ là học bổng do các tổ chức, cá nhân trong và ngoài nước tài trợ cho sinh viên Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "a042f6c7-2b28-4e3f-99b8-d353b35e0f63"
+      ],
+      "ground_truth_context": [
+        "## Điều 2. Giải thích từ ngữ\n\n**1.** Học bổng tài trợ là học bổng do các tổ chức, cá nhân trong và ngoài nước tài trợ cho sinh viên Đại học Bách khoa Hà Nội (viết tắt là DHBK Hà Nội hoặc Đại học).\n\n**2.** Nhà tài trợ là tổ chức hoặc cá nhân tài trợ học bổng cho sinh viên DHBK Hà Nội.\n\n**3.** Đơn vị đào tạo là Trường hoặc Khoa quản lý ngành thuộc DHBK Hà Nội.\n\n**4.** Văn bản tài trợ học bổng là thỏa thuận/văn bản hợp tác về việc cấp học bổng giữa DHBK Hà Nội/đơn vị đào tạo với nhà tài trợ hoặc thông báo của nhà tài trợ về việc cấp học bổng cho sinh viên DHBK Hà Nội.\n\n**5.** Học bổng tài trợ do Đại học khai thác là học bổng được cấp thông qua các văn bản tài trợ học bổng với DHBK Hà Nội.\n\n**6.** Học bổng tài trợ do đơn vị đào tạo khai thác là học bổng được cấp thông qua các văn bản tài trợ học bổng với đơn vị đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_002",
+      "question_type": "simple",
+      "question": "Sinh viên hệ đại học chính quy còn đang học tại Đại học Bách khoa Hà Nội có thuộc phạm vi xét học bổng tài trợ khi nhà tài trợ ủy quyền cho Đại học hoặc đơn vị đào tạo không?",
+      "gold_answer": "Có. Quy định áp dụng khi nhà tài trợ ủy quyền cho Đại học Bách khoa Hà Nội hoặc đơn vị đào tạo xét, cấp học bổng cho sinh viên hệ đại học chính quy vẫn đang học tập tại Đại học.",
+      "evidence_chunk_ids": [
+        "6dcc3e46-3ed0-4102-8fc8-08068147046a"
+      ],
+      "ground_truth_context": [
+        "## Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng\n\n**1.** Quy định này quy định về đối tượng, tiêu chuẩn, tiêu chí, nguyên tắc, quy trình thủ tục, hồ sơ đăng ký, xét cấp học bổng tài trợ; trách nhiệm của các đơn vị liên quan trong việc xét, cấp học bổng tài trợ cho sinh viên DHBK Hà Nội.\n\n**2.** Quy định này áp dụng trong trường hợp nhà tài trợ ủy quyền cho DHBK Hà Nội hoặc đơn vị đào tạo xét, cấp học bổng cho sinh viên hệ đại học chính quy vẫn đang học tập tại DHBK Hà Nội.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_003",
+      "question_type": "simple",
+      "question": "Học bổng tài trợ dành cho sinh viên có kết quả học tập và rèn luyện tốt được xét chủ yếu dựa trên tiêu chí nào?",
+      "gold_answer": "Loại học bổng này được xét chọn dựa chủ yếu trên thành tích học tập, nghiên cứu và đổi mới sáng tạo của sinh viên.",
+      "evidence_chunk_ids": [
+        "81c41772-54fd-47ab-a401-1c1d6691c3d2"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Loại và mức học bổng\n\n**1.** Học bổng tài trợ gồm các loại:\n\n- **a)** Học bổng dành cho sinh viên có kết quả học tập tốt và rèn luyện tốt được xét chọn dựa trên tiêu chí chính là thành tích học tập, nghiên cứu, đổi mới sáng tạo của sinh viên.\n- **b)** Học bổng dành cho sinh viên có hoàn cảnh kinh tế khó khăn được xét chọn dựa trên tiêu chí chính là hoàn cảnh kinh tế của gia đình sinh viên.\n- **c)** Học bổng khác theo quy định của nhà tài trợ.\n\n**2.** Loại và mức học bổng tài trợ được quy định trong văn bản tài trợ học bổng hoặc do Giám đốc ĐHBK Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.\n\n---\n\n# Chương II – ĐỐI TƯỢNG, TIÊU CHUẨN, TIÊU CHÍ, NGUYÊN TẮC, QUY TRÌNH VÀ HỒ SƠ ĐĂNG KÝ, XÉT, CẤP HỌC BỔNG"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_004",
+      "question_type": "simple",
+      "question": "Học bổng tài trợ dành cho sinh viên có hoàn cảnh kinh tế khó khăn được xét chủ yếu dựa trên tiêu chí nào?",
+      "gold_answer": "Loại học bổng này được xét chọn dựa chủ yếu trên hoàn cảnh kinh tế của gia đình sinh viên.",
+      "evidence_chunk_ids": [
+        "81c41772-54fd-47ab-a401-1c1d6691c3d2"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Loại và mức học bổng\n\n**1.** Học bổng tài trợ gồm các loại:\n\n- **a)** Học bổng dành cho sinh viên có kết quả học tập tốt và rèn luyện tốt được xét chọn dựa trên tiêu chí chính là thành tích học tập, nghiên cứu, đổi mới sáng tạo của sinh viên.\n- **b)** Học bổng dành cho sinh viên có hoàn cảnh kinh tế khó khăn được xét chọn dựa trên tiêu chí chính là hoàn cảnh kinh tế của gia đình sinh viên.\n- **c)** Học bổng khác theo quy định của nhà tài trợ.\n\n**2.** Loại và mức học bổng tài trợ được quy định trong văn bản tài trợ học bổng hoặc do Giám đốc ĐHBK Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.\n\n---\n\n# Chương II – ĐỐI TƯỢNG, TIÊU CHUẨN, TIÊU CHÍ, NGUYÊN TẮC, QUY TRÌNH VÀ HỒ SƠ ĐĂNG KÝ, XÉT, CẤP HỌC BỔNG"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_005",
+      "question_type": "simple",
+      "question": "Loại và mức học bổng tài trợ cho sinh viên được xác định ở đâu?",
+      "gold_answer": "Loại và mức học bổng tài trợ được quy định trong văn bản tài trợ học bổng hoặc do Giám đốc Đại học Bách khoa Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.",
+      "evidence_chunk_ids": [
+        "81c41772-54fd-47ab-a401-1c1d6691c3d2"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Loại và mức học bổng\n\n**1.** Học bổng tài trợ gồm các loại:\n\n- **a)** Học bổng dành cho sinh viên có kết quả học tập tốt và rèn luyện tốt được xét chọn dựa trên tiêu chí chính là thành tích học tập, nghiên cứu, đổi mới sáng tạo của sinh viên.\n- **b)** Học bổng dành cho sinh viên có hoàn cảnh kinh tế khó khăn được xét chọn dựa trên tiêu chí chính là hoàn cảnh kinh tế của gia đình sinh viên.\n- **c)** Học bổng khác theo quy định của nhà tài trợ.\n\n**2.** Loại và mức học bổng tài trợ được quy định trong văn bản tài trợ học bổng hoặc do Giám đốc ĐHBK Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.\n\n---\n\n# Chương II – ĐỐI TƯỢNG, TIÊU CHUẨN, TIÊU CHÍ, NGUYÊN TẮC, QUY TRÌNH VÀ HỒ SƠ ĐĂNG KÝ, XÉT, CẤP HỌC BỔNG"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_006",
+      "question_type": "simple",
+      "question": "Nếu văn bản tài trợ học bổng không ghi rõ đối tượng, tiêu chuẩn và tiêu chí xét học bổng do Đại học khai thác thì ai quyết định các nội dung còn thiếu?",
+      "gold_answer": "Giám đốc Đại học Bách khoa Hà Nội quyết định đối tượng, tiêu chuẩn và tiêu chí xét học bổng do Đại học khai thác.",
+      "evidence_chunk_ids": [
+        "6892fbd2-ab64-405b-9c9f-ca706ee403b5"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Đối tượng, tiêu chuẩn, tiêu chí xét, cấp học bổng tài trợ\n\nĐối tượng, tiêu chuẩn, tiêu chí xét, cấp học bổng được quy định trong văn bản tài trợ học bổng. Trường hợp văn bản không ghi rõ đối tượng, tiêu chuẩn, tiêu chí xét học bổng thì Giám đốc ĐHBK Hà Nội quyết định đối tượng, tiêu chuẩn, tiêu chí của học bổng do Đại học khai thác; Trường đơn vị đào tạo quyết định đối tượng, tiêu chuẩn, tiêu chí của học bổng do đơn vị khai thác.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_007",
+      "question_type": "simple",
+      "question": "Nếu số sinh viên có cùng tiêu chuẩn nhiều hơn số suất học bổng thì có thể xét thêm những tiêu chí phụ nào?",
+      "gold_answer": "Có thể xét thêm các tiêu chí phụ liên quan như hoàn cảnh gia đình, thành tích học tập và rèn luyện trong quá trình học tập tại Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "a28cef90-9141-4f1e-b784-e86c97780f60"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Nguyên tắc xét, cấp học bổng tài trợ\n\n**1.** Trường hợp cùng một loại học bổng nhưng số ứng viên có cùng tiêu chuẩn, tiêu chí xét học bổng nhiều hơn số suất học bổng thì tiếp tục xét đến các tiêu chí phụ liên quan khác như: hoàn cảnh gia đình, thành tích về học tập và rèn luyện trong quá trình học tập tại ĐHBK Hà Nội. Thứ tự và mức độ ưu tiên của các tiêu chí phụ đối với mỗi học bổng do Giám đốc ĐHBK Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.\n\n**2.** Ưu tiên xét, cấp học bổng cho sinh viên không/chưa được nhận học bổng hoặc các khoản hỗ trợ tài chính khác (miễn, giảm học phí; học bổng khuyến khích học tập, học bổng Trần Đại Nghĩa, học bổng tài trợ,...) trong cùng học kỳ.\n\n**3.** Ưu tiên xét cấp học bổng cho sinh viên thuộc các ngành/các đơn vị đào tạo có ít học bổng tài trợ.\n\n**4.** Không xét học bổng cho sinh viên đã được học bổng tài trợ khác bằng tiền mặt từ 10 triệu đồng trở lên trong cùng học kỳ.\n\n**5.** Việc xét, cấp học bổng phải đảm bảo công khai, minh bạch, công bằng, đúng đối tượng.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_008",
+      "question_type": "simple",
+      "question": "Sinh viên đã nhận học bổng tài trợ khác bằng tiền mặt từ 10 triệu đồng trở lên trong cùng học kỳ có được xét học bổng tài trợ nữa không?",
+      "gold_answer": "Không. Sinh viên đã được học bổng tài trợ khác bằng tiền mặt từ 10 triệu đồng trở lên trong cùng học kỳ không được xét học bổng tài trợ.",
+      "evidence_chunk_ids": [
+        "a28cef90-9141-4f1e-b784-e86c97780f60"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Nguyên tắc xét, cấp học bổng tài trợ\n\n**1.** Trường hợp cùng một loại học bổng nhưng số ứng viên có cùng tiêu chuẩn, tiêu chí xét học bổng nhiều hơn số suất học bổng thì tiếp tục xét đến các tiêu chí phụ liên quan khác như: hoàn cảnh gia đình, thành tích về học tập và rèn luyện trong quá trình học tập tại ĐHBK Hà Nội. Thứ tự và mức độ ưu tiên của các tiêu chí phụ đối với mỗi học bổng do Giám đốc ĐHBK Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.\n\n**2.** Ưu tiên xét, cấp học bổng cho sinh viên không/chưa được nhận học bổng hoặc các khoản hỗ trợ tài chính khác (miễn, giảm học phí; học bổng khuyến khích học tập, học bổng Trần Đại Nghĩa, học bổng tài trợ,...) trong cùng học kỳ.\n\n**3.** Ưu tiên xét cấp học bổng cho sinh viên thuộc các ngành/các đơn vị đào tạo có ít học bổng tài trợ.\n\n**4.** Không xét học bổng cho sinh viên đã được học bổng tài trợ khác bằng tiền mặt từ 10 triệu đồng trở lên trong cùng học kỳ.\n\n**5.** Việc xét, cấp học bổng phải đảm bảo công khai, minh bạch, công bằng, đúng đối tượng.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_009",
+      "question_type": "simple",
+      "question": "Thông tin về chương trình học bổng tài trợ phải được đăng công khai tối thiểu trong bao lâu để sinh viên tìm hiểu và chuẩn bị hồ sơ?",
+      "gold_answer": "Thông tin chương trình học bổng phải được đăng công khai tối thiểu 02 tuần.",
+      "evidence_chunk_ids": [
+        "6cc0e60c-4e48-4cdd-98b3-42e85d2213f6"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Quy trình đăng ký xét, cấp học bổng\n\n**1.** Căn cứ vào văn bản tài trợ học bổng, Ban Công tác sinh viên/đơn vị đào tạo thông báo công khai thông tin về chương trình học bổng (đối tượng, tiêu chuẩn, tiêu chí, mức học bổng, loại học bổng, số suất, kế hoạch đăng ký xét, cấp học bổng) trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của Đại học/đơn vị đào tạo. Thời gian đăng tin tối thiểu là 02 tuần để sinh viên tìm hiểu, chuẩn bị hồ sơ và đăng ký.\n\n**2.** Sinh viên đăng ký xét học bổng tài trợ bằng hình thức trực tuyến (online) trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**3.** Hết thời gian đăng ký xét học bổng, Ban Công tác sinh viên/đơn vị đào tạo tổng hợp danh sách sinh viên đăng ký và báo cáo Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo họp xét.\n\n**4.** Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo tổ chức họp xét hồ sơ, phỏng vấn ứng viên (nếu thấy cần thiết) để lựa chọn sinh viên cấp học bổng và xếp danh sách ứng viên theo thứ tự ưu tiên từ trên xuống dưới.\n\n**5.** Sinh viên được Hội đồng lựa chọn cấp học bổng nộp hồ sơ văn bản giấy cho Ban Công tác sinh viên/đơn vị đào tạo để thực hiện hậu kiểm hồ sơ đăng ký online. Trường hợp sinh viên không nộp hồ sơ văn bản giấy theo quy định hoặc hồ sơ văn bản giấy không đúng với hồ sơ sinh viên đăng ký online thì ứng viên bị loại khỏi danh sách được cấp học bổng, ứng viên thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.\n\n**6.** Giám đốc Đại học/Trường đơn vị đào tạo ra Quyết định cấp học bổng và công bố công khai kết quả xét, cấp học bổng cho sinh viên.\n\n**7.** Ban Công tác sinh viên/đơn vị đào tạo làm thủ tục chi trả học bổng cho sinh viên và nhập danh sách sinh viên được học bổng lên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký xét học bổng tài trợ bằng hình thức nào?",
+      "gold_answer": "Sinh viên đăng ký xét học bổng tài trợ trực tuyến trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.",
+      "evidence_chunk_ids": [
+        "6cc0e60c-4e48-4cdd-98b3-42e85d2213f6"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Quy trình đăng ký xét, cấp học bổng\n\n**1.** Căn cứ vào văn bản tài trợ học bổng, Ban Công tác sinh viên/đơn vị đào tạo thông báo công khai thông tin về chương trình học bổng (đối tượng, tiêu chuẩn, tiêu chí, mức học bổng, loại học bổng, số suất, kế hoạch đăng ký xét, cấp học bổng) trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của Đại học/đơn vị đào tạo. Thời gian đăng tin tối thiểu là 02 tuần để sinh viên tìm hiểu, chuẩn bị hồ sơ và đăng ký.\n\n**2.** Sinh viên đăng ký xét học bổng tài trợ bằng hình thức trực tuyến (online) trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**3.** Hết thời gian đăng ký xét học bổng, Ban Công tác sinh viên/đơn vị đào tạo tổng hợp danh sách sinh viên đăng ký và báo cáo Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo họp xét.\n\n**4.** Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo tổ chức họp xét hồ sơ, phỏng vấn ứng viên (nếu thấy cần thiết) để lựa chọn sinh viên cấp học bổng và xếp danh sách ứng viên theo thứ tự ưu tiên từ trên xuống dưới.\n\n**5.** Sinh viên được Hội đồng lựa chọn cấp học bổng nộp hồ sơ văn bản giấy cho Ban Công tác sinh viên/đơn vị đào tạo để thực hiện hậu kiểm hồ sơ đăng ký online. Trường hợp sinh viên không nộp hồ sơ văn bản giấy theo quy định hoặc hồ sơ văn bản giấy không đúng với hồ sơ sinh viên đăng ký online thì ứng viên bị loại khỏi danh sách được cấp học bổng, ứng viên thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.\n\n**6.** Giám đốc Đại học/Trường đơn vị đào tạo ra Quyết định cấp học bổng và công bố công khai kết quả xét, cấp học bổng cho sinh viên.\n\n**7.** Ban Công tác sinh viên/đơn vị đào tạo làm thủ tục chi trả học bổng cho sinh viên và nhập danh sách sinh viên được học bổng lên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_011",
+      "question_type": "simple",
+      "question": "Sau khi hết thời gian đăng ký học bổng tài trợ, Ban Công tác sinh viên hoặc đơn vị đào tạo làm gì với danh sách sinh viên đăng ký?",
+      "gold_answer": "Ban Công tác sinh viên hoặc đơn vị đào tạo tổng hợp danh sách sinh viên đăng ký và báo cáo Hội đồng xét, cấp học bổng Đại học hoặc đơn vị đào tạo họp xét.",
+      "evidence_chunk_ids": [
+        "6cc0e60c-4e48-4cdd-98b3-42e85d2213f6"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Quy trình đăng ký xét, cấp học bổng\n\n**1.** Căn cứ vào văn bản tài trợ học bổng, Ban Công tác sinh viên/đơn vị đào tạo thông báo công khai thông tin về chương trình học bổng (đối tượng, tiêu chuẩn, tiêu chí, mức học bổng, loại học bổng, số suất, kế hoạch đăng ký xét, cấp học bổng) trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của Đại học/đơn vị đào tạo. Thời gian đăng tin tối thiểu là 02 tuần để sinh viên tìm hiểu, chuẩn bị hồ sơ và đăng ký.\n\n**2.** Sinh viên đăng ký xét học bổng tài trợ bằng hình thức trực tuyến (online) trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**3.** Hết thời gian đăng ký xét học bổng, Ban Công tác sinh viên/đơn vị đào tạo tổng hợp danh sách sinh viên đăng ký và báo cáo Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo họp xét.\n\n**4.** Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo tổ chức họp xét hồ sơ, phỏng vấn ứng viên (nếu thấy cần thiết) để lựa chọn sinh viên cấp học bổng và xếp danh sách ứng viên theo thứ tự ưu tiên từ trên xuống dưới.\n\n**5.** Sinh viên được Hội đồng lựa chọn cấp học bổng nộp hồ sơ văn bản giấy cho Ban Công tác sinh viên/đơn vị đào tạo để thực hiện hậu kiểm hồ sơ đăng ký online. Trường hợp sinh viên không nộp hồ sơ văn bản giấy theo quy định hoặc hồ sơ văn bản giấy không đúng với hồ sơ sinh viên đăng ký online thì ứng viên bị loại khỏi danh sách được cấp học bổng, ứng viên thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.\n\n**6.** Giám đốc Đại học/Trường đơn vị đào tạo ra Quyết định cấp học bổng và công bố công khai kết quả xét, cấp học bổng cho sinh viên.\n\n**7.** Ban Công tác sinh viên/đơn vị đào tạo làm thủ tục chi trả học bổng cho sinh viên và nhập danh sách sinh viên được học bổng lên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_012",
+      "question_type": "simple",
+      "question": "Hội đồng xét, cấp học bổng có thể phỏng vấn ứng viên khi xét hồ sơ không?",
+      "gold_answer": "Có. Hội đồng có thể phỏng vấn ứng viên nếu thấy cần thiết để lựa chọn sinh viên được cấp học bổng.",
+      "evidence_chunk_ids": [
+        "22fd7050-2f37-42e1-97a8-5e61d3079a18"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Quy trình đăng ký xét, cấp học bổng\n\n**4.** Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo tổ chức họp xét hồ sơ, phỏng vấn ứng viên (nếu thấy cần thiết) để lựa chọn sinh viên cấp học bổng và xếp danh sách ứng viên theo thứ tự ưu tiên từ trên xuống dưới.\n\n**5.** Sinh viên được Hội đồng lựa chọn cấp học bổng nộp hồ sơ văn bản giấy cho Ban Công tác sinh viên/đơn vị đào tạo để thực hiện hậu kiểm hồ sơ đăng ký online. Trường hợp sinh viên không nộp hồ sơ văn bản giấy theo quy định hoặc hồ sơ văn bản giấy không đúng với hồ sơ sinh viên đăng ký online thì ứng viên bị loại khỏi danh sách được cấp học bổng, ứng viên thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.\n\n**6.** Giám đốc Đại học/Trường đơn vị đào tạo ra Quyết định cấp học bổng và công bố công khai kết quả xét, cấp học bổng cho sinh viên.\n\n**7.** Ban Công tác sinh viên/đơn vị đào tạo làm thủ tục chi trả học bổng cho sinh viên và nhập danh sách sinh viên được học bổng lên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_013",
+      "question_type": "simple",
+      "question": "Nếu sinh viên được chọn nhận học bổng nhưng không nộp hồ sơ giấy theo quy định thì kết quả xử lý là gì?",
+      "gold_answer": "Sinh viên bị loại khỏi danh sách được cấp học bổng và ứng viên có thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.",
+      "evidence_chunk_ids": [
+        "22fd7050-2f37-42e1-97a8-5e61d3079a18"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Quy trình đăng ký xét, cấp học bổng\n\n**4.** Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo tổ chức họp xét hồ sơ, phỏng vấn ứng viên (nếu thấy cần thiết) để lựa chọn sinh viên cấp học bổng và xếp danh sách ứng viên theo thứ tự ưu tiên từ trên xuống dưới.\n\n**5.** Sinh viên được Hội đồng lựa chọn cấp học bổng nộp hồ sơ văn bản giấy cho Ban Công tác sinh viên/đơn vị đào tạo để thực hiện hậu kiểm hồ sơ đăng ký online. Trường hợp sinh viên không nộp hồ sơ văn bản giấy theo quy định hoặc hồ sơ văn bản giấy không đúng với hồ sơ sinh viên đăng ký online thì ứng viên bị loại khỏi danh sách được cấp học bổng, ứng viên thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.\n\n**6.** Giám đốc Đại học/Trường đơn vị đào tạo ra Quyết định cấp học bổng và công bố công khai kết quả xét, cấp học bổng cho sinh viên.\n\n**7.** Ban Công tác sinh viên/đơn vị đào tạo làm thủ tục chi trả học bổng cho sinh viên và nhập danh sách sinh viên được học bổng lên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_014",
+      "question_type": "simple",
+      "question": "Hồ sơ đăng ký xét học bổng tài trợ của sinh viên gồm những gì?",
+      "gold_answer": "Hồ sơ đăng ký xét học bổng gồm đơn đăng ký xét học bổng tài trợ theo mẫu Phụ lục I và các giấy tờ khác theo yêu cầu cụ thể của từng loại học bổng.",
+      "evidence_chunk_ids": [
+        "45c3a205-00c5-423b-9efb-ac6d19fde358"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Hồ sơ đăng ký xét, cấp học bổng tài trợ\n\n**1.** Hồ sơ đăng ký xét học bổng gồm có:\n\n- **a)** Đơn đăng ký xét học bổng tài trợ (theo mẫu Phụ lục I).\n- **b)** Các giấy tờ khác theo yêu cầu cụ thể của từng loại học bổng.\n\n**2.** Hồ sơ cấp học bổng gồm có:\n\n- **a)** Quyết định cấp học bổng của Giám đốc Đại học (với học bổng do Đại học khai thác) hoặc của Trường đơn vị đào tạo (với học bổng do đơn vị khai thác).\n- **b)** Biên bản họp Hội đồng xét, cấp học bổng.\n- **c)** Văn bản tài trợ học bổng cho sinh viên DHBK Hà Nội.\n- **d)** Các giấy tờ có liên quan khác (nếu có).\n\n---\n\n# Chương III – TỔ CHỨC THỰC HIỆN"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_015",
+      "question_type": "simple",
+      "question": "Ban Công tác sinh viên có trách nhiệm gì đối với hồ sơ đăng ký học bổng tài trợ do Đại học khai thác?",
+      "gold_answer": "Ban Công tác sinh viên là đầu mối tiếp nhận, chủ trì thẩm định, tổng hợp và trình hồ sơ đăng ký xét học bổng do Đại học khai thác lên Hội đồng xét, cấp học bổng Đại học.",
+      "evidence_chunk_ids": [
+        "3f5f04b8-132a-49a8-8a82-0ad14fe114cc"
+      ],
+      "ground_truth_context": [
+        "## Điều 8. Trách nhiệm của Ban Công tác sinh viên\n\n**1.** Đăng thông tin về chương trình học bổng trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của Đại học.\n\n**2.** Đầu mối tiếp nhận hồ sơ đăng ký xét học bổng tài trợ do Đại học khai thác.\n\n**3.** Chủ trì thẩm định hồ sơ đăng ký xét học bổng tài trợ do Đại học khai thác.\n\n**4.** Tổng hợp và trình hồ sơ đăng ký xét học bổng do Đại học khai thác lên Hội đồng xét, cấp học bổng Đại học.\n\n**5.** Trình Giám đốc Đại học phê duyệt danh sách sinh viên được đề nghị cấp học bổng do Đại học khai thác và phối hợp với các đơn vị liên quan làm thủ tục cấp học bổng cho sinh viên.\n\n**6.** Cập nhật danh sách sinh viên được nhận học bổng do Đại học khai thác lên phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**7.** Phối hợp với nhà tài trợ tổ chức Lễ trao học bổng cho sinh viên (nếu nhà tài trợ yêu cầu).\n\n**8.** Cung cấp thông tin kết quả rèn luyện của sinh viên cho đơn vị đào tạo (nếu có yêu cầu) phục vụ cho việc xét, cấp học bổng do đơn vị khai thác.\n\n**9.** Thực hiện thống kê, báo cáo Giám đốc định kỳ hoặc đột xuất theo yêu cầu.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_016",
+      "question_type": "simple",
+      "question": "Đơn vị đào tạo có trách nhiệm gì khi xét học bổng tài trợ do đơn vị khai thác?",
+      "gold_answer": "Đơn vị đào tạo đăng thông tin, tiếp nhận hồ sơ, tổ chức xét cấp học bổng công bằng, phê duyệt danh sách sinh viên được đề nghị cấp học bổng, làm thủ tục cấp học bổng, lưu trữ hồ sơ và cập nhật danh sách lên hệ thống.",
+      "evidence_chunk_ids": [
+        "39f5063b-6a91-4c85-ade1-c1fe5cfcb0f5"
+      ],
+      "ground_truth_context": [
+        "## Điều 9. Trách nhiệm của đơn vị đào tạo\n\n**1.** Đăng thông tin về chương trình học bổng trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của đơn vị.\n\n**2.** Đầu mối tiếp nhận hồ sơ đăng ký xét học bổng tài trợ do đơn vị khai thác.\n\n**3.** Tổ chức xét, cấp học bổng cho sinh viên đảm bảo công bằng, đúng đối tượng, tiêu chuẩn, tiêu chí.\n\n**4.** Trường đơn vị đào tạo phê duyệt danh sách sinh viên được đề nghị cấp học bổng, làm thủ tục cấp học bổng cho sinh viên và lưu trữ hồ sơ theo quy định.\n\n**5.** Cập nhật danh sách sinh viên được học bổng trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**6.** Phối hợp với nhà tài trợ tổ chức Lễ trao học bổng cho sinh viên (nếu nhà tài trợ yêu cầu).\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_017",
+      "question_type": "simple",
+      "question": "Ban Đào tạo cung cấp thông tin gì để phục vụ xét học bổng tài trợ?",
+      "gold_answer": "Ban Đào tạo cung cấp kết quả học tập của sinh viên để xét học bổng.",
+      "evidence_chunk_ids": [
+        "5a41bd33-a5f6-41bf-a7dd-f401d8b02b38"
+      ],
+      "ground_truth_context": [
+        "## Điều 10. Trách nhiệm của các đơn vị liên quan khác\n\n**1. Ban Hợp tác đối ngoại:**\n\n- **a)** Chủ động tìm kiếm, thu hút các nguồn học bổng tài trợ từ các tổ chức, cá nhân trong và ngoài nước và bàn giao cho Ban Công tác sinh viên/đơn vị đào tạo tổ chức xét, cấp học bổng cho sinh viên.\n- **b)** Phối hợp với Ban Công tác sinh viên/đơn vị đào tạo và nhà tài trợ tổ chức Lễ trao học bổng cho sinh viên (nếu nhà tài trợ yêu cầu).\n\n**2. Ban Đào tạo:**\n\n- **a)** Cung cấp kết quả học tập của sinh viên để xét học bổng.\n- **b)** Cử cán bộ tham gia Hội đồng xét, cấp học bổng tài trợ do Đại học khai thác.\n\n**3. Ban Tài chính - Kế hoạch:** Hướng dẫn Ban Công tác sinh viên và các đơn vị đào tạo thực hiện thủ tục cấp học bổng cho sinh viên theo đúng các quy định về quản lý tài chính hiện hành của Nhà nước và của ĐHBK Hà Nội.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_simple_018",
+      "question_type": "simple",
+      "question": "Trong mẫu đơn đăng ký xét học bổng tài trợ, sinh viên cần trình bày phần hoàn cảnh gia đình như thế nào nếu có khó khăn?",
+      "gold_answer": "Sinh viên trình bày những khó khăn của gia đình trong phần hoàn cảnh gia đình, với giới hạn không quá 200 từ.",
+      "evidence_chunk_ids": [
+        "4b592500-25b7-441c-bd48-2a303b1e3947"
+      ],
+      "ground_truth_context": [
+        "#### 4.2. Trình bày những khó khăn (nếu có) mà gia đình đang gặp phải\n*(Không quá 200 từ)*\n\n.............................................................................................................................................................................\n\n.............................................................................................................................................................................\n\n.............................................................................................................................................................................\n\n.............................................................................................................................................................................\n\n---\n\nEm cam đoan những thông tin trên là đúng sự thật, nếu sai em xin hoàn toàn chịu trách nhiệm trước Nhà trường. Em xin chân thành cảm ơn.\n\n| Xác nhận của UBND xã/phường nơi sinh viên đăng ký hộ khẩu thường trú về hoàn cảnh gia đình sinh viên | Ngày ....... tháng ........ năm 20.......... |\n|---|---|\n| | **Sinh viên** |\n| | *(Ký và ghi rõ họ tên)* |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn đăng ký học bổng tài trợ cần theo dõi thông báo ở đâu, có tối thiểu bao lâu để chuẩn bị và đăng ký bằng cách nào?",
+      "gold_answer": "Sinh viên cần theo dõi thông báo trên cổng thông tin sinh viên hoặc các trang thông tin chính thống của Đại học/đơn vị đào tạo. Thông tin phải được đăng tối thiểu 02 tuần và sinh viên đăng ký trực tuyến trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.",
+      "evidence_chunk_ids": [
+        "6cc0e60c-4e48-4cdd-98b3-42e85d2213f6"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Quy trình đăng ký xét, cấp học bổng\n\n**1.** Căn cứ vào văn bản tài trợ học bổng, Ban Công tác sinh viên/đơn vị đào tạo thông báo công khai thông tin về chương trình học bổng (đối tượng, tiêu chuẩn, tiêu chí, mức học bổng, loại học bổng, số suất, kế hoạch đăng ký xét, cấp học bổng) trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của Đại học/đơn vị đào tạo. Thời gian đăng tin tối thiểu là 02 tuần để sinh viên tìm hiểu, chuẩn bị hồ sơ và đăng ký.\n\n**2.** Sinh viên đăng ký xét học bổng tài trợ bằng hình thức trực tuyến (online) trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**3.** Hết thời gian đăng ký xét học bổng, Ban Công tác sinh viên/đơn vị đào tạo tổng hợp danh sách sinh viên đăng ký và báo cáo Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo họp xét.\n\n**4.** Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo tổ chức họp xét hồ sơ, phỏng vấn ứng viên (nếu thấy cần thiết) để lựa chọn sinh viên cấp học bổng và xếp danh sách ứng viên theo thứ tự ưu tiên từ trên xuống dưới.\n\n**5.** Sinh viên được Hội đồng lựa chọn cấp học bổng nộp hồ sơ văn bản giấy cho Ban Công tác sinh viên/đơn vị đào tạo để thực hiện hậu kiểm hồ sơ đăng ký online. Trường hợp sinh viên không nộp hồ sơ văn bản giấy theo quy định hoặc hồ sơ văn bản giấy không đúng với hồ sơ sinh viên đăng ký online thì ứng viên bị loại khỏi danh sách được cấp học bổng, ứng viên thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.\n\n**6.** Giám đốc Đại học/Trường đơn vị đào tạo ra Quyết định cấp học bổng và công bố công khai kết quả xét, cấp học bổng cho sinh viên.\n\n**7.** Ban Công tác sinh viên/đơn vị đào tạo làm thủ tục chi trả học bổng cho sinh viên và nhập danh sách sinh viên được học bổng lên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên được Hội đồng lựa chọn cấp học bổng nhưng hồ sơ giấy không khớp với hồ sơ đăng ký online thì kết quả học bổng được xử lý ra sao và ai ra quyết định cấp học bổng?",
+      "gold_answer": "Sinh viên bị loại khỏi danh sách được cấp học bổng, ứng viên có thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế. Sau đó Giám đốc Đại học hoặc Trường đơn vị đào tạo ra quyết định cấp học bổng và công bố công khai kết quả.",
+      "evidence_chunk_ids": [
+        "22fd7050-2f37-42e1-97a8-5e61d3079a18"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Quy trình đăng ký xét, cấp học bổng\n\n**4.** Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo tổ chức họp xét hồ sơ, phỏng vấn ứng viên (nếu thấy cần thiết) để lựa chọn sinh viên cấp học bổng và xếp danh sách ứng viên theo thứ tự ưu tiên từ trên xuống dưới.\n\n**5.** Sinh viên được Hội đồng lựa chọn cấp học bổng nộp hồ sơ văn bản giấy cho Ban Công tác sinh viên/đơn vị đào tạo để thực hiện hậu kiểm hồ sơ đăng ký online. Trường hợp sinh viên không nộp hồ sơ văn bản giấy theo quy định hoặc hồ sơ văn bản giấy không đúng với hồ sơ sinh viên đăng ký online thì ứng viên bị loại khỏi danh sách được cấp học bổng, ứng viên thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.\n\n**6.** Giám đốc Đại học/Trường đơn vị đào tạo ra Quyết định cấp học bổng và công bố công khai kết quả xét, cấp học bổng cho sinh viên.\n\n**7.** Ban Công tác sinh viên/đơn vị đào tạo làm thủ tục chi trả học bổng cho sinh viên và nhập danh sách sinh viên được học bổng lên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đang cân nhắc học bổng tài trợ cần biết những loại học bổng chính nào và nguyên tắc ưu tiên nào áp dụng nếu nhiều ứng viên cùng điều kiện?",
+      "gold_answer": "Các loại học bổng chính gồm học bổng cho sinh viên có học tập và rèn luyện tốt, học bổng cho sinh viên có hoàn cảnh kinh tế khó khăn và học bổng khác theo nhà tài trợ. Nếu nhiều ứng viên cùng tiêu chuẩn hơn số suất, việc xét có thể dựa thêm vào hoàn cảnh gia đình, thành tích học tập và rèn luyện; đồng thời ưu tiên sinh viên chưa nhận học bổng hoặc hỗ trợ tài chính khác trong cùng học kỳ.",
+      "evidence_chunk_ids": [
+        "81c41772-54fd-47ab-a401-1c1d6691c3d2",
+        "a28cef90-9141-4f1e-b784-e86c97780f60"
+      ],
+      "ground_truth_context": [
+        "## Điều 3. Loại và mức học bổng\n\n**1.** Học bổng tài trợ gồm các loại:\n\n- **a)** Học bổng dành cho sinh viên có kết quả học tập tốt và rèn luyện tốt được xét chọn dựa trên tiêu chí chính là thành tích học tập, nghiên cứu, đổi mới sáng tạo của sinh viên.\n- **b)** Học bổng dành cho sinh viên có hoàn cảnh kinh tế khó khăn được xét chọn dựa trên tiêu chí chính là hoàn cảnh kinh tế của gia đình sinh viên.\n- **c)** Học bổng khác theo quy định của nhà tài trợ.\n\n**2.** Loại và mức học bổng tài trợ được quy định trong văn bản tài trợ học bổng hoặc do Giám đốc ĐHBK Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.\n\n---\n\n# Chương II – ĐỐI TƯỢNG, TIÊU CHUẨN, TIÊU CHÍ, NGUYÊN TẮC, QUY TRÌNH VÀ HỒ SƠ ĐĂNG KÝ, XÉT, CẤP HỌC BỔNG",
+        "## Điều 5. Nguyên tắc xét, cấp học bổng tài trợ\n\n**1.** Trường hợp cùng một loại học bổng nhưng số ứng viên có cùng tiêu chuẩn, tiêu chí xét học bổng nhiều hơn số suất học bổng thì tiếp tục xét đến các tiêu chí phụ liên quan khác như: hoàn cảnh gia đình, thành tích về học tập và rèn luyện trong quá trình học tập tại ĐHBK Hà Nội. Thứ tự và mức độ ưu tiên của các tiêu chí phụ đối với mỗi học bổng do Giám đốc ĐHBK Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.\n\n**2.** Ưu tiên xét, cấp học bổng cho sinh viên không/chưa được nhận học bổng hoặc các khoản hỗ trợ tài chính khác (miễn, giảm học phí; học bổng khuyến khích học tập, học bổng Trần Đại Nghĩa, học bổng tài trợ,...) trong cùng học kỳ.\n\n**3.** Ưu tiên xét cấp học bổng cho sinh viên thuộc các ngành/các đơn vị đào tạo có ít học bổng tài trợ.\n\n**4.** Không xét học bổng cho sinh viên đã được học bổng tài trợ khác bằng tiền mặt từ 10 triệu đồng trở lên trong cùng học kỳ.\n\n**5.** Việc xét, cấp học bổng phải đảm bảo công khai, minh bạch, công bằng, đúng đối tượng.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên nhận học bổng do Đại học khai thác thì Ban Công tác sinh viên tham gia các bước nào từ công bố thông tin đến cập nhật kết quả?",
+      "gold_answer": "Ban Công tác sinh viên đăng thông tin học bổng, tiếp nhận và thẩm định hồ sơ đăng ký, tổng hợp và trình hồ sơ lên Hội đồng xét cấp học bổng Đại học, trình Giám đốc phê duyệt danh sách, phối hợp làm thủ tục cấp học bổng, cập nhật danh sách sinh viên nhận học bổng lên phần mềm và có thể phối hợp tổ chức lễ trao học bổng nếu nhà tài trợ yêu cầu.",
+      "evidence_chunk_ids": [
+        "3f5f04b8-132a-49a8-8a82-0ad14fe114cc",
+        "eff05ab5-47ab-4cff-8c31-c91046b55421"
+      ],
+      "ground_truth_context": [
+        "## Điều 8. Trách nhiệm của Ban Công tác sinh viên\n\n**1.** Đăng thông tin về chương trình học bổng trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của Đại học.\n\n**2.** Đầu mối tiếp nhận hồ sơ đăng ký xét học bổng tài trợ do Đại học khai thác.\n\n**3.** Chủ trì thẩm định hồ sơ đăng ký xét học bổng tài trợ do Đại học khai thác.\n\n**4.** Tổng hợp và trình hồ sơ đăng ký xét học bổng do Đại học khai thác lên Hội đồng xét, cấp học bổng Đại học.\n\n**5.** Trình Giám đốc Đại học phê duyệt danh sách sinh viên được đề nghị cấp học bổng do Đại học khai thác và phối hợp với các đơn vị liên quan làm thủ tục cấp học bổng cho sinh viên.\n\n**6.** Cập nhật danh sách sinh viên được nhận học bổng do Đại học khai thác lên phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**7.** Phối hợp với nhà tài trợ tổ chức Lễ trao học bổng cho sinh viên (nếu nhà tài trợ yêu cầu).\n\n**8.** Cung cấp thông tin kết quả rèn luyện của sinh viên cho đơn vị đào tạo (nếu có yêu cầu) phục vụ cho việc xét, cấp học bổng do đơn vị khai thác.\n\n**9.** Thực hiện thống kê, báo cáo Giám đốc định kỳ hoặc đột xuất theo yêu cầu.\n\n---",
+        "## Điều 8. Trách nhiệm của Ban Công tác sinh viên\n\n**1.** Đăng thông tin về chương trình học bổng trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của Đại học.\n\n**2.** Đầu mối tiếp nhận hồ sơ đăng ký xét học bổng tài trợ do Đại học khai thác.\n\n**3.** Chủ trì thẩm định hồ sơ đăng ký xét học bổng tài trợ do Đại học khai thác.\n\n**4.** Tổng hợp và trình hồ sơ đăng ký xét học bổng do Đại học khai thác lên Hội đồng xét, cấp học bổng Đại học.\n\n**5.** Trình Giám đốc Đại học phê duyệt danh sách sinh viên được đề nghị cấp học bổng do Đại học khai thác và phối hợp với các đơn vị liên quan làm thủ tục cấp học bổng cho sinh viên.\n\n**6.** Cập nhật danh sách sinh viên được nhận học bổng do Đại học khai thác lên phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**7.** Phối hợp với nhà tài trợ tổ chức Lễ trao học bổng cho sinh viên (nếu nhà tài trợ yêu cầu)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên nộp hồ sơ xét học bổng tài trợ cần chuẩn bị giấy tờ đăng ký nào và sau khi được cấp học bổng thì hồ sơ cấp học bổng gồm những tài liệu gì?",
+      "gold_answer": "Hồ sơ đăng ký gồm đơn đăng ký xét học bổng tài trợ theo mẫu Phụ lục I và các giấy tờ khác theo yêu cầu từng loại học bổng. Hồ sơ cấp học bổng gồm quyết định cấp học bổng, biên bản họp Hội đồng xét cấp học bổng, văn bản tài trợ học bổng cho sinh viên Đại học Bách khoa Hà Nội và các giấy tờ liên quan khác nếu có.",
+      "evidence_chunk_ids": [
+        "45c3a205-00c5-423b-9efb-ac6d19fde358"
+      ],
+      "ground_truth_context": [
+        "## Điều 7. Hồ sơ đăng ký xét, cấp học bổng tài trợ\n\n**1.** Hồ sơ đăng ký xét học bổng gồm có:\n\n- **a)** Đơn đăng ký xét học bổng tài trợ (theo mẫu Phụ lục I).\n- **b)** Các giấy tờ khác theo yêu cầu cụ thể của từng loại học bổng.\n\n**2.** Hồ sơ cấp học bổng gồm có:\n\n- **a)** Quyết định cấp học bổng của Giám đốc Đại học (với học bổng do Đại học khai thác) hoặc của Trường đơn vị đào tạo (với học bổng do đơn vị khai thác).\n- **b)** Biên bản họp Hội đồng xét, cấp học bổng.\n- **c)** Văn bản tài trợ học bổng cho sinh viên DHBK Hà Nội.\n- **d)** Các giấy tờ có liên quan khác (nếu có).\n\n---\n\n# Chương III – TỔ CHỨC THỰC HIỆN"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Nếu học bổng do đơn vị đào tạo khai thác, đơn vị đào tạo và Ban Công tác sinh viên phối hợp thông tin nào để xét cấp học bổng?",
+      "gold_answer": "Đơn vị đào tạo đăng thông tin, tiếp nhận hồ sơ và tổ chức xét cấp học bổng do đơn vị khai thác. Ban Công tác sinh viên cung cấp thông tin kết quả rèn luyện của sinh viên cho đơn vị đào tạo nếu có yêu cầu để phục vụ xét cấp học bổng.",
+      "evidence_chunk_ids": [
+        "39f5063b-6a91-4c85-ade1-c1fe5cfcb0f5",
+        "53665a87-c338-4c18-a3ab-733d02527d19"
+      ],
+      "ground_truth_context": [
+        "## Điều 9. Trách nhiệm của đơn vị đào tạo\n\n**1.** Đăng thông tin về chương trình học bổng trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của đơn vị.\n\n**2.** Đầu mối tiếp nhận hồ sơ đăng ký xét học bổng tài trợ do đơn vị khai thác.\n\n**3.** Tổ chức xét, cấp học bổng cho sinh viên đảm bảo công bằng, đúng đối tượng, tiêu chuẩn, tiêu chí.\n\n**4.** Trường đơn vị đào tạo phê duyệt danh sách sinh viên được đề nghị cấp học bổng, làm thủ tục cấp học bổng cho sinh viên và lưu trữ hồ sơ theo quy định.\n\n**5.** Cập nhật danh sách sinh viên được học bổng trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**6.** Phối hợp với nhà tài trợ tổ chức Lễ trao học bổng cho sinh viên (nếu nhà tài trợ yêu cầu).\n\n---",
+        "## Điều 8. Trách nhiệm của Ban Công tác sinh viên\n\n**8.** Cung cấp thông tin kết quả rèn luyện của sinh viên cho đơn vị đào tạo (nếu có yêu cầu) phục vụ cho việc xét, cấp học bổng do đơn vị khai thác.\n\n**9.** Thực hiện thống kê, báo cáo Giám đốc định kỳ hoặc đột xuất theo yêu cầu.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên cần hiểu sự khác nhau giữa học bổng tài trợ do Đại học khai thác và do đơn vị đào tạo khai thác như thế nào?",
+      "gold_answer": "Học bổng tài trợ do Đại học khai thác là học bổng được cấp thông qua văn bản tài trợ học bổng với Đại học Bách khoa Hà Nội. Học bổng tài trợ do đơn vị đào tạo khai thác là học bổng được cấp thông qua văn bản tài trợ học bổng với đơn vị đào tạo.",
+      "evidence_chunk_ids": [
+        "a042f6c7-2b28-4e3f-99b8-d353b35e0f63"
+      ],
+      "ground_truth_context": [
+        "## Điều 2. Giải thích từ ngữ\n\n**1.** Học bổng tài trợ là học bổng do các tổ chức, cá nhân trong và ngoài nước tài trợ cho sinh viên Đại học Bách khoa Hà Nội (viết tắt là DHBK Hà Nội hoặc Đại học).\n\n**2.** Nhà tài trợ là tổ chức hoặc cá nhân tài trợ học bổng cho sinh viên DHBK Hà Nội.\n\n**3.** Đơn vị đào tạo là Trường hoặc Khoa quản lý ngành thuộc DHBK Hà Nội.\n\n**4.** Văn bản tài trợ học bổng là thỏa thuận/văn bản hợp tác về việc cấp học bổng giữa DHBK Hà Nội/đơn vị đào tạo với nhà tài trợ hoặc thông báo của nhà tài trợ về việc cấp học bổng cho sinh viên DHBK Hà Nội.\n\n**5.** Học bổng tài trợ do Đại học khai thác là học bổng được cấp thông qua các văn bản tài trợ học bổng với DHBK Hà Nội.\n\n**6.** Học bổng tài trợ do đơn vị đào tạo khai thác là học bổng được cấp thông qua các văn bản tài trợ học bổng với đơn vị đào tạo.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Nếu nhà tài trợ yêu cầu tổ chức lễ trao học bổng, những đơn vị nào có thể phối hợp thực hiện?",
+      "gold_answer": "Ban Công tác sinh viên hoặc đơn vị đào tạo có thể phối hợp với nhà tài trợ tổ chức lễ trao học bổng. Ban Hợp tác đối ngoại cũng phối hợp với Ban Công tác sinh viên/đơn vị đào tạo và nhà tài trợ tổ chức lễ trao nếu nhà tài trợ yêu cầu.",
+      "evidence_chunk_ids": [
+        "3f5f04b8-132a-49a8-8a82-0ad14fe114cc",
+        "39f5063b-6a91-4c85-ade1-c1fe5cfcb0f5",
+        "5a41bd33-a5f6-41bf-a7dd-f401d8b02b38"
+      ],
+      "ground_truth_context": [
+        "## Điều 8. Trách nhiệm của Ban Công tác sinh viên\n\n**1.** Đăng thông tin về chương trình học bổng trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của Đại học.\n\n**2.** Đầu mối tiếp nhận hồ sơ đăng ký xét học bổng tài trợ do Đại học khai thác.\n\n**3.** Chủ trì thẩm định hồ sơ đăng ký xét học bổng tài trợ do Đại học khai thác.\n\n**4.** Tổng hợp và trình hồ sơ đăng ký xét học bổng do Đại học khai thác lên Hội đồng xét, cấp học bổng Đại học.\n\n**5.** Trình Giám đốc Đại học phê duyệt danh sách sinh viên được đề nghị cấp học bổng do Đại học khai thác và phối hợp với các đơn vị liên quan làm thủ tục cấp học bổng cho sinh viên.\n\n**6.** Cập nhật danh sách sinh viên được nhận học bổng do Đại học khai thác lên phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**7.** Phối hợp với nhà tài trợ tổ chức Lễ trao học bổng cho sinh viên (nếu nhà tài trợ yêu cầu).\n\n**8.** Cung cấp thông tin kết quả rèn luyện của sinh viên cho đơn vị đào tạo (nếu có yêu cầu) phục vụ cho việc xét, cấp học bổng do đơn vị khai thác.\n\n**9.** Thực hiện thống kê, báo cáo Giám đốc định kỳ hoặc đột xuất theo yêu cầu.\n\n---",
+        "## Điều 9. Trách nhiệm của đơn vị đào tạo\n\n**1.** Đăng thông tin về chương trình học bổng trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của đơn vị.\n\n**2.** Đầu mối tiếp nhận hồ sơ đăng ký xét học bổng tài trợ do đơn vị khai thác.\n\n**3.** Tổ chức xét, cấp học bổng cho sinh viên đảm bảo công bằng, đúng đối tượng, tiêu chuẩn, tiêu chí.\n\n**4.** Trường đơn vị đào tạo phê duyệt danh sách sinh viên được đề nghị cấp học bổng, làm thủ tục cấp học bổng cho sinh viên và lưu trữ hồ sơ theo quy định.\n\n**5.** Cập nhật danh sách sinh viên được học bổng trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**6.** Phối hợp với nhà tài trợ tổ chức Lễ trao học bổng cho sinh viên (nếu nhà tài trợ yêu cầu).\n\n---",
+        "## Điều 10. Trách nhiệm của các đơn vị liên quan khác\n\n**1. Ban Hợp tác đối ngoại:**\n\n- **a)** Chủ động tìm kiếm, thu hút các nguồn học bổng tài trợ từ các tổ chức, cá nhân trong và ngoài nước và bàn giao cho Ban Công tác sinh viên/đơn vị đào tạo tổ chức xét, cấp học bổng cho sinh viên.\n- **b)** Phối hợp với Ban Công tác sinh viên/đơn vị đào tạo và nhà tài trợ tổ chức Lễ trao học bổng cho sinh viên (nếu nhà tài trợ yêu cầu).\n\n**2. Ban Đào tạo:**\n\n- **a)** Cung cấp kết quả học tập của sinh viên để xét học bổng.\n- **b)** Cử cán bộ tham gia Hội đồng xét, cấp học bổng tài trợ do Đại học khai thác.\n\n**3. Ban Tài chính - Kế hoạch:** Hướng dẫn Ban Công tác sinh viên và các đơn vị đào tạo thực hiện thủ tục cấp học bổng cho sinh viên theo đúng các quy định về quản lý tài chính hiện hành của Nhà nước và của ĐHBK Hà Nội.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Sinh viên đã nhận học bổng tài trợ khác bằng tiền mặt 12 triệu đồng trong cùng học kỳ vẫn được xét thêm học bổng tài trợ khác đúng không?",
+      "gold_answer": "Không đúng. Sinh viên đã được học bổng tài trợ khác bằng tiền mặt từ 10 triệu đồng trở lên trong cùng học kỳ không được xét học bổng tài trợ.",
+      "evidence_chunk_ids": [
+        "a28cef90-9141-4f1e-b784-e86c97780f60"
+      ],
+      "ground_truth_context": [
+        "## Điều 5. Nguyên tắc xét, cấp học bổng tài trợ\n\n**1.** Trường hợp cùng một loại học bổng nhưng số ứng viên có cùng tiêu chuẩn, tiêu chí xét học bổng nhiều hơn số suất học bổng thì tiếp tục xét đến các tiêu chí phụ liên quan khác như: hoàn cảnh gia đình, thành tích về học tập và rèn luyện trong quá trình học tập tại ĐHBK Hà Nội. Thứ tự và mức độ ưu tiên của các tiêu chí phụ đối với mỗi học bổng do Giám đốc ĐHBK Hà Nội quy định đối với học bổng do Đại học khai thác, Trường đơn vị đào tạo quy định đối với học bổng do đơn vị khai thác.\n\n**2.** Ưu tiên xét, cấp học bổng cho sinh viên không/chưa được nhận học bổng hoặc các khoản hỗ trợ tài chính khác (miễn, giảm học phí; học bổng khuyến khích học tập, học bổng Trần Đại Nghĩa, học bổng tài trợ,...) trong cùng học kỳ.\n\n**3.** Ưu tiên xét cấp học bổng cho sinh viên thuộc các ngành/các đơn vị đào tạo có ít học bổng tài trợ.\n\n**4.** Không xét học bổng cho sinh viên đã được học bổng tài trợ khác bằng tiền mặt từ 10 triệu đồng trở lên trong cùng học kỳ.\n\n**5.** Việc xét, cấp học bổng phải đảm bảo công khai, minh bạch, công bằng, đúng đối tượng.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Sinh viên có thể đăng ký học bổng tài trợ bằng cách nộp trực tiếp tại bất kỳ phòng ban nào mà không cần hệ thống online đúng không?",
+      "gold_answer": "Không đúng theo nội dung được cung cấp. Sinh viên đăng ký xét học bổng tài trợ bằng hình thức trực tuyến trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.",
+      "evidence_chunk_ids": [
+        "6cc0e60c-4e48-4cdd-98b3-42e85d2213f6"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Quy trình đăng ký xét, cấp học bổng\n\n**1.** Căn cứ vào văn bản tài trợ học bổng, Ban Công tác sinh viên/đơn vị đào tạo thông báo công khai thông tin về chương trình học bổng (đối tượng, tiêu chuẩn, tiêu chí, mức học bổng, loại học bổng, số suất, kế hoạch đăng ký xét, cấp học bổng) trên cổng thông tin sinh viên hoặc các trang thông tin chính thống khác của Đại học/đơn vị đào tạo. Thời gian đăng tin tối thiểu là 02 tuần để sinh viên tìm hiểu, chuẩn bị hồ sơ và đăng ký.\n\n**2.** Sinh viên đăng ký xét học bổng tài trợ bằng hình thức trực tuyến (online) trên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n**3.** Hết thời gian đăng ký xét học bổng, Ban Công tác sinh viên/đơn vị đào tạo tổng hợp danh sách sinh viên đăng ký và báo cáo Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo họp xét.\n\n**4.** Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo tổ chức họp xét hồ sơ, phỏng vấn ứng viên (nếu thấy cần thiết) để lựa chọn sinh viên cấp học bổng và xếp danh sách ứng viên theo thứ tự ưu tiên từ trên xuống dưới.\n\n**5.** Sinh viên được Hội đồng lựa chọn cấp học bổng nộp hồ sơ văn bản giấy cho Ban Công tác sinh viên/đơn vị đào tạo để thực hiện hậu kiểm hồ sơ đăng ký online. Trường hợp sinh viên không nộp hồ sơ văn bản giấy theo quy định hoặc hồ sơ văn bản giấy không đúng với hồ sơ sinh viên đăng ký online thì ứng viên bị loại khỏi danh sách được cấp học bổng, ứng viên thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.\n\n**6.** Giám đốc Đại học/Trường đơn vị đào tạo ra Quyết định cấp học bổng và công bố công khai kết quả xét, cấp học bổng cho sinh viên.\n\n**7.** Ban Công tác sinh viên/đơn vị đào tạo làm thủ tục chi trả học bổng cho sinh viên và nhập danh sách sinh viên được học bổng lên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Quy định xét cấp học bổng tài trợ 2024 có nêu GPA tối thiểu cụ thể là 3.2 cho mọi sinh viên đăng ký không?",
+      "gold_answer": "Không có thông tin trong context cho biết GPA tối thiểu 3.2 áp dụng cho mọi sinh viên đăng ký. Đối tượng, tiêu chuẩn và tiêu chí xét cấp học bổng được quy định trong văn bản tài trợ học bổng; nếu văn bản không ghi rõ thì cấp có thẩm quyền quyết định theo loại học bổng.",
+      "evidence_chunk_ids": [
+        "6892fbd2-ab64-405b-9c9f-ca706ee403b5"
+      ],
+      "ground_truth_context": [
+        "## Điều 4. Đối tượng, tiêu chuẩn, tiêu chí xét, cấp học bổng tài trợ\n\nĐối tượng, tiêu chuẩn, tiêu chí xét, cấp học bổng được quy định trong văn bản tài trợ học bổng. Trường hợp văn bản không ghi rõ đối tượng, tiêu chuẩn, tiêu chí xét học bổng thì Giám đốc ĐHBK Hà Nội quyết định đối tượng, tiêu chuẩn, tiêu chí của học bổng do Đại học khai thác; Trường đơn vị đào tạo quyết định đối tượng, tiêu chuẩn, tiêu chí của học bổng do đơn vị khai thác.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "hard",
+      "adversarial_type": "unsupported_specific_value"
+    },
+    {
+      "id": "Quy_dinh_xet_cap_HB_tai_tro_2024_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Sinh viên đã được Hội đồng lựa chọn cấp học bổng có thể bỏ qua bước nộp hồ sơ giấy hậu kiểm mà vẫn chắc chắn nhận học bổng đúng không?",
+      "gold_answer": "Không đúng. Sinh viên được Hội đồng lựa chọn phải nộp hồ sơ văn bản giấy để hậu kiểm hồ sơ đăng ký online; nếu không nộp hoặc hồ sơ giấy không đúng với hồ sơ online thì bị loại khỏi danh sách được cấp học bổng.",
+      "evidence_chunk_ids": [
+        "22fd7050-2f37-42e1-97a8-5e61d3079a18"
+      ],
+      "ground_truth_context": [
+        "## Điều 6. Quy trình đăng ký xét, cấp học bổng\n\n**4.** Hội đồng xét, cấp học bổng Đại học/đơn vị đào tạo tổ chức họp xét hồ sơ, phỏng vấn ứng viên (nếu thấy cần thiết) để lựa chọn sinh viên cấp học bổng và xếp danh sách ứng viên theo thứ tự ưu tiên từ trên xuống dưới.\n\n**5.** Sinh viên được Hội đồng lựa chọn cấp học bổng nộp hồ sơ văn bản giấy cho Ban Công tác sinh viên/đơn vị đào tạo để thực hiện hậu kiểm hồ sơ đăng ký online. Trường hợp sinh viên không nộp hồ sơ văn bản giấy theo quy định hoặc hồ sơ văn bản giấy không đúng với hồ sơ sinh viên đăng ký online thì ứng viên bị loại khỏi danh sách được cấp học bổng, ứng viên thứ tự ưu tiên tiếp theo được tự động lựa chọn thay thế.\n\n**6.** Giám đốc Đại học/Trường đơn vị đào tạo ra Quyết định cấp học bổng và công bố công khai kết quả xét, cấp học bổng cho sinh viên.\n\n**7.** Ban Công tác sinh viên/đơn vị đào tạo làm thủ tục chi trả học bổng cho sinh viên và nhập danh sách sinh viên được học bổng lên hệ thống phần mềm quản lý xét, cấp học bổng của Đại học.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium",
+      "adversarial_type": "false_assumption"
+    }
+  ]
+}

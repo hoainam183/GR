@@ -1,0 +1,482 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "Quy chế CTSV ĐHBK Hà Nội 2025.3.10_final_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 18,
+    "multi_hop": 8,
+    "adversarial": 4
+  },
+  "items": [
+    {
+      "id": "quy_che_ctsv_2025_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên đại học hệ chính quy văn bằng thứ nhất tại Đại học Bách khoa Hà Nội có thuộc phạm vi áp dụng của công tác sinh viên không?",
+      "gold_answer": "Có. Công tác sinh viên áp dụng đối với các đơn vị, cá nhân và sinh viên đại học hệ chính quy văn bằng thứ nhất của Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "01d2873a-79ef-413f-a7c8-35dbae3beb7c"
+      ],
+      "ground_truth_context": [
+        "### Điều 2. Phạm vi điều chỉnh và đối tượng áp dụng\n\n1. Quy chế này quy định về công tác sinh viên đối với chương trình đào tạo đại học hệ chính quy tại Đại học Bách khoa Hà Nội, bao gồm: trách nhiệm và quyền lợi của sinh viên; các hành vi sinh viên không được làm; nội dung công tác sinh viên; đánh giá kết quả rèn luyện của sinh viên; khen thưởng và kỷ luật sinh viên; đánh giá công tác sinh viên; tổ chức thực hiện công tác sinh viên.\n\n2. Quy chế này áp dụng đối với các đơn vị, cá nhân và sinh viên đại học hệ chính quy văn bằng thứ nhất của Đại học Bách khoa Hà Nội.\n\n### Điều 3. Vị trí của sinh viên trong Đại học Bách khoa Hà Nội\n\nSinh viên là trung tâm các hoạt động giáo dục, đào tạo, nghiên cứu, khoa học công nghệ, đổi mới sáng tạo và khởi nghiệp tại Đại học Bách khoa Hà Nội, được hỗ trợ và tạo điều kiện tốt nhất về vật chất, tinh thần để phát triển toàn diện cả về đạo đức, trí thức, phẩm chất, năng lực, tầm nhìn, kỹ năng và sức khỏe để phục vụ xã hội và đất nước.\n\n### Điều 4. Từ viết tắt\n\n1. Đại học: Đại học Bách khoa Hà Nội;\n2. Đơn vị quản ngành: Trường/Khoa quản ngành;\n3. NCKH: nghiên cứu khoa học;\n4. QLLSV: quản lý lớp sinh viên.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_002",
+      "question_type": "simple",
+      "question": "Sinh viên tại Đại học Bách khoa Hà Nội có trách nhiệm cập nhật thông tin cá nhân ở đâu?",
+      "gold_answer": "Sinh viên phải khai báo và cập nhật đầy đủ, đúng thời hạn thông tin cá nhân trên cổng thông tin điện tử dành cho sinh viên trong quá trình học tập.",
+      "evidence_chunk_ids": [
+        "ecd07027-0ad5-4f6b-85ea-fe1f87ef5565"
+      ],
+      "ground_truth_context": [
+        "## Chương II: TRÁCH NHIỆM VÀ QUYỀN LỢI CỦA SINH VIÊN\n\n### Điều 5. Trách nhiệm của sinh viên\n1. Chấp hành nghiêm chủ trương, đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Đại học.\n2. Học tập, rèn luyện theo chương trình, kế hoạch của Đại học; chủ động, tích cực tự học tập, NCKH và rèn luyện đạo đức, lối sống.\n3. Thực hiện quy tắc văn hóa giao tiếp trong nhà trường và môi trường mạng.\n4. Thực hiện đầy đủ việc khám sức khỏe đầu khóa, khám sức khỏe định kỳ trong thời gian học tập theo quy định.\n5. Đóng học phí, bảo hiểm y tế và các khoản phí khác đầy đủ, đúng quy định của Đại học.\n6. Khai báo và cập nhật đầy đủ, đúng thời hạn các thông tin cá nhân trên cổng thông tin điện tử dành cho sinh viên trong quá trình học tập tại Đại học.\n7. Xây dựng, gìn giữ, bảo vệ và phát huy truyền thống, danh tiếng của Đại học.\n8. Tôn trọng nhà giáo, cán bộ quản lý, viên chức, người lao động và các sinh viên khác của Đại học.\n9. Đoàn kết, giúp đỡ lẫn nhau trong quá trình học tập, rèn luyện; thực hiện nếp sống văn hóa học đường."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên có phải tham gia khám sức khỏe đầu khóa và khám sức khỏe định kỳ không?",
+      "gold_answer": "Có. Sinh viên có trách nhiệm thực hiện đầy đủ việc khám sức khỏe đầu khóa và khám sức khỏe định kỳ trong thời gian học tập theo quy định.",
+      "evidence_chunk_ids": [
+        "ecd07027-0ad5-4f6b-85ea-fe1f87ef5565"
+      ],
+      "ground_truth_context": [
+        "## Chương II: TRÁCH NHIỆM VÀ QUYỀN LỢI CỦA SINH VIÊN\n\n### Điều 5. Trách nhiệm của sinh viên\n1. Chấp hành nghiêm chủ trương, đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Đại học.\n2. Học tập, rèn luyện theo chương trình, kế hoạch của Đại học; chủ động, tích cực tự học tập, NCKH và rèn luyện đạo đức, lối sống.\n3. Thực hiện quy tắc văn hóa giao tiếp trong nhà trường và môi trường mạng.\n4. Thực hiện đầy đủ việc khám sức khỏe đầu khóa, khám sức khỏe định kỳ trong thời gian học tập theo quy định.\n5. Đóng học phí, bảo hiểm y tế và các khoản phí khác đầy đủ, đúng quy định của Đại học.\n6. Khai báo và cập nhật đầy đủ, đúng thời hạn các thông tin cá nhân trên cổng thông tin điện tử dành cho sinh viên trong quá trình học tập tại Đại học.\n7. Xây dựng, gìn giữ, bảo vệ và phát huy truyền thống, danh tiếng của Đại học.\n8. Tôn trọng nhà giáo, cán bộ quản lý, viên chức, người lao động và các sinh viên khác của Đại học.\n9. Đoàn kết, giúp đỡ lẫn nhau trong quá trình học tập, rèn luyện; thực hiện nếp sống văn hóa học đường."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_004",
+      "question_type": "simple",
+      "question": "Sinh viên tốt nghiệp hoặc thôi học phải làm gì với đăng ký nghĩa vụ quân sự?",
+      "gold_answer": "Sinh viên thôi học hoặc tốt nghiệp phải làm thủ tục chuyển đăng ký nghĩa vụ quân sự về nơi cư trú theo quy định hiện hành của pháp luật.",
+      "evidence_chunk_ids": [
+        "dbfbf5f0-e0e5-4242-8c4c-9c9e4a1fc923"
+      ],
+      "ground_truth_context": [
+        "### Điều 5. Trách nhiệm của sinh viên\n\n10. Tham gia đầy đủ các hoạt động xã hội, tình nguyện vì cộng đồng phù hợp với khả năng theo yêu cầu của Đại học hoặc đơn vị quản ngành.\n11. Tham gia đầy đủ các hoạt động do Đại học hoặc đơn vị quản ngành triệu tập.\n12. Giữ gìn, bảo vệ tài sản công và tài sản của cá nhân bao gồm cả học liệu, thiết bị và phương tiện phục vụ học tập, NCKH; sử dụng tài khoản thông tin cá nhân đúng mục đích theo quy định.\n13. Tham gia phòng, chống tiêu cực và gian lận trong học tập/thi cử; kịp thời báo cáo các đơn vị chức năng của Đại học hoặc các cơ quan có thẩm quyền khi phát hiện những hành vi tiêu cực, gian lận trong học tập, thi cử hoặc những hành vi vi phạm pháp luật, vi phạm nội quy, quy chế khác của các cá nhân.\n14. Tham gia công tác đảm bảo an ninh, trật tự, an toàn giao thông, phòng chống tội phạm, tệ nạn xã hội trong trường học, gia đình, cộng đồng.\n15. Sinh viên thôi học hoặc tốt nghiệp phải làm thủ tục chuyển đăng ký nghĩa vụ quân sự về nơi cư trú theo quy định hiện hành của pháp luật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_005",
+      "question_type": "simple",
+      "question": "Sinh viên có được đăng ký xét học bổng của Đại học Bách khoa Hà Nội không?",
+      "gold_answer": "Có. Sinh viên được đăng ký xét, cấp các học bổng của Đại học nếu có nguyện vọng và đáp ứng đầy đủ điều kiện của học bổng.",
+      "evidence_chunk_ids": [
+        "22f433ab-a4cb-49b2-9c43-f8237ff0c676"
+      ],
+      "ground_truth_context": [
+        "### Điều 5. Trách nhiệm của sinh viên\n\n16. Thực hiện các nghĩa vụ khác có liên quan theo quy định của pháp luật và của Đại học.\n\n### Điều 6. Quyền lợi của sinh viên\n1. Được học tập đúng chương trình đào tạo trúng tuyển, được cấp thẻ sinh viên và tài khoản thông tin cá nhân phục vụ hoạt động học tập và rèn luyện tại Đại học.\n2. Được hưởng đầy đủ các quyền về đào tạo theo quy chế đào tạo hiện hành của Đại học.\n3. Được đăng ký tham gia các hoạt động giao lưu, trao đổi sinh viên trong nước và quốc tế do Đại học tổ chức.\n4. Được đăng ký tham gia các hoạt động NCKH, đổi mới sáng tạo, các kỳ thi Olympic môn học hoặc các diễn đàn, câu lạc bộ học tập, sở thích, năng khiếu theo quy định của Đại học.\n5. Được sử dụng học liệu, thiết bị và phương tiện phục vụ học tập, NCKH theo quy định của Đại học.\n6. Được đăng ký xét, cấp các học bổng của Đại học nếu có nguyện vọng và đáp ứng đầy đủ các điều kiện của học bổng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_006",
+      "question_type": "simple",
+      "question": "Sinh viên là người khuyết tật có thể được xem xét miễn hoặc giảm nội dung giáo dục thể chất, giáo dục quốc phòng không?",
+      "gold_answer": "Có. Sinh viên là người khuyết tật hoặc không đủ sức khỏe học một số nội dung thuộc các học phần giáo dục thể chất, giáo dục quốc phòng được xem xét miễn, giảm nội dung không phù hợp hoặc học nội dung thay thế phù hợp với hiện trạng sức khỏe.",
+      "evidence_chunk_ids": [
+        "2596162f-a50c-4ffc-b023-e56bc36a8773"
+      ],
+      "ground_truth_context": [
+        "### Điều 6. Quyền lợi của sinh viên\n\n13. Được hưởng đầy đủ các chế độ, chính sách theo quy định hiện hành của Nhà nước và của Đại học.\n14. Được xét vào ở trong ký túc xá của Đại học (nếu có nguyện vọng và đáp ứng các điều kiện theo quy định của Đại học) hoặc được hỗ trợ tìm kiếm chỗ ở.\n15. Được chăm lo, bảo vệ sức khỏe theo chế độ hiện hành của Nhà nước và của Đại học.\n16. Sinh viên là người khuyết tật hoặc không đủ sức khỏe học một số nội dung thuộc các học phần giáo dục thể chất, giáo dục quốc phòng được xem xét miễn, giảm các nội dung không phù hợp hoặc được học các nội dung thay thế phù hợp theo hiện trạng sức khỏe.\n17. Được cấp bằng tốt nghiệp đại học theo quy định của Đại học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_007",
+      "question_type": "simple",
+      "question": "Sinh viên có được dùng điện thoại hoặc mạng Internet để hỗ trợ làm bài thi khi chưa được phép không?",
+      "gold_answer": "Không. Gian lận trong học tập, kiểm tra, thi cử gồm việc mang điện thoại, thiết bị ghi âm, ghi hình vào phòng thi khi không được phép hoặc sử dụng công cụ, phần mềm, mạng Internet khi không được phép để hỗ trợ làm bài.",
+      "evidence_chunk_ids": [
+        "9f53bdee-be40-4673-88a9-d5e589d254ba"
+      ],
+      "ground_truth_context": [
+        "### Điều 7. Các hành vi sinh viên không được làm\n\n1. Xúc phạm nhân phẩm, danh dự, xâm phạm thân thể nhà giáo, cán bộ quản lý, viên chức, người lao động và người học của Đại học và người khác.\n\n2. Gian lận trong học tập, kiểm tra, thi cử như: quay cóp; mang tài liệu, điện thoại, thiết bị ghi âm, ghi hình vào phòng thi khi không được phép; sử dụng các công cụ, phần mềm, mạng internet khi không được phép để hỗ trợ làm bài thi/bài kiểm tra; xin điểm; học, thi, thực tập, thí nghiệm hộ người khác hoặc nhờ người khác học, thi, thực tập, thí nghiệm hộ; sao chép, nhờ hoặc làm hộ tiểu luận, đồ án, khóa luận tốt nghiệp; tổ chức hoặc tham gia tổ chức thi hộ hoặc các hành vi gian lận khác.\n\n3. Có hành vi làm xao nhãng, ảnh hưởng, gián đoạn quá trình học tập của lớp học.\n\n4. Hút thuốc, uống rượu, bia trong khuôn viên Đại học; say rượu, bia khi đến khuôn viên Đại học.\n\n5. Thực hiện các hành vi gây nguy hiểm cho bản thân và người khác trong khuôn viên Đại học như: leo trèo cây, lan can, đi xe tốc độ cao..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_008",
+      "question_type": "simple",
+      "question": "Hồ sơ quản lý quá trình học tập và rèn luyện của sinh viên có bao gồm tình trạng đóng học phí không?",
+      "gold_answer": "Có. Hồ sơ quản lý quá trình học tập, rèn luyện của sinh viên bao gồm cả tình trạng đóng học phí.",
+      "evidence_chunk_ids": [
+        "3549eb26-8634-4067-bfa5-d24fbc7051b0"
+      ],
+      "ground_truth_context": [
+        "### Điều 8. Quản lý thông tin sinh viên\n\n1. Hồ sơ nhập học của sinh viên\n\n   a) Sinh viên phải nộp đầy đủ hồ sơ văn bản giấy theo quy định được thông báo hàng năm khi sinh viên làm thủ tục nhập học.\n\n   b) Sinh viên phải kê khai, cung cấp đầy đủ thông tin theo quy định trên cổng thông tin sinh viên Đại học.\n\n2. Hồ sơ quản lý quá trình học tập, rèn luyện của sinh viên gồm:\n\n   a) Kết quả học tập (điểm quá trình, điểm kết thúc học phần, kết quả thi hoặc bảo vệ đồ án tốt nghiệp/khóa luận tốt nghiệp) và kết quả rèn luyện (điểm rèn luyện theo học kỳ, năm học, khóa học);\n\n   b) Kết quả các hoạt động xã hội đã tham gia trong từng học kỳ, năm học;\n\n   c) Hình thức khen thưởng (nếu có) mà sinh viên đạt được trong học tập, nghiên cứu khoa học, hoạt động phong trào, đoàn thể;\n\n   d) Hình thức kỷ luật (nếu có);\n\n   đ) Thông tin thay đổi (nếu có) do chuyển chương trình đào tạo, chuyển ngành học, chuyển trường, nghỉ học có thời hạn, thôi học, tốt nghiệp;\n\n   e) Địa chỉ nơi cư trú;\n\n   g) Tình trạng đóng học phí;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_009",
+      "question_type": "simple",
+      "question": "Hồ sơ nhập học và hồ sơ quản lý quá trình học tập, rèn luyện của sinh viên phải được lập chậm nhất khi nào?",
+      "gold_answer": "Hồ sơ nhập học và hồ sơ quản lý quá trình học tập, rèn luyện của sinh viên được lập chậm nhất 15 ngày sau khi sinh viên làm thủ tục nhập học.",
+      "evidence_chunk_ids": [
+        "75c74820-bd2e-4300-8767-0a6c45a9ab51"
+      ],
+      "ground_truth_context": [
+        "### Điều 8. Quản lý thông tin sinh viên\n\n\n2. Hồ sơ quản lý quá trình học tập, rèn luyện của sinh viên gồm:\n\nh) Thông tin về việc tham gia bảo hiểm y tế;\n\n   i) Thông tin kết quả khám sức khỏe cho sinh viên do Đại học tổ chức;\n\n   k) Các học bổng đã được nhận.\n\n3. Hồ sơ tốt nghiệp của sinh viên gồm:\n\n   a) Các loại giấy tờ được quy định tại điểm a khoản 1 Điều 8 của Quy chế này;\n\n   b) Văn bằng tốt nghiệp kèm phụ lục văn bằng;\n\n   c) Kết quả rèn luyện trong quá trình học tập của sinh viên.\n\n4. Hồ sơ nhập học và hồ sơ quản lý quá trình học tập, rèn luyện của sinh viên được lập chậm nhất 15 ngày sau khi sinh viên làm thủ tục nhập học. Hồ sơ tốt nghiệp của sinh viên được hoàn thiện chậm nhất 7 ngày trước thời điểm sinh viên được nhận bằng tốt nghiệp.\n\n5. Hồ sơ văn bản giấy của sinh viên được quản lý tập trung; hồ sơ dạng tài liệu điện tử được lưu trữ và cập nhật đầy đủ, thường xuyên trên cổng thông tin sinh viên Đại học.\n\n6. Thời gian lưu trữ hồ sơ sinh viên được thực hiện theo quy định hiện hành của pháp luật, quy định của Bộ Giáo dục và Đào tạo và quy định của Đại học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_010",
+      "question_type": "simple",
+      "question": "Một lớp sinh viên có tối đa bao nhiêu lớp phó?",
+      "gold_answer": "Ban cán sự lớp gồm lớp trưởng và tối đa 2 lớp phó.",
+      "evidence_chunk_ids": [
+        "c36eca3c-743d-434a-8a12-f671c7168889"
+      ],
+      "ground_truth_context": [
+        "### Điều 9. Tổ chức lớp sinh viên\n\nLớp sinh viên được lập và gọi tên theo chương trình đào tạo và khóa học. Đại diện cho lớp sinh viên là ban cán sự lớp gồm lớp trưởng và tối đa 2 lớp phó. Mỗi lớp sinh viên được quản lý bởi cán bộ QLLSV."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_011",
+      "question_type": "simple",
+      "question": "Cố vấn học tập có nhiệm vụ cung cấp cho sinh viên thông tin gì?",
+      "gold_answer": "Cố vấn học tập cung cấp cho sinh viên thông tin về chương trình và kế hoạch đào tạo, hướng dẫn sinh viên xây dựng kế hoạch học tập phù hợp, đồng thời tư vấn các vấn đề học tập theo quy định.",
+      "evidence_chunk_ids": [
+        "515ac215-9936-4fca-98e3-efabe9daf393"
+      ],
+      "ground_truth_context": [
+        "### Điều 14. Cố vấn học tập cho sinh viên\n\n1. Cung cấp cho sinh viên đầy đủ thông tin về chương trình và kế hoạch đào tạo.\n2. Tư vấn, hỗ trợ sinh viên xây dựng kế hoạch, phương pháp học tập phù hợp với mục tiêu và năng lực.\n3. Phối hợp hướng dẫn sinh viên tiếp cận các nguồn lực (về học thuật, tài liệu, tài chính, kỹ thuật...) nhằm nâng cao chất lượng, hiệu quả học tập, NCKH."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên được hỗ trợ những nội dung gì trong công tác hướng nghiệp?",
+      "gold_answer": "Sinh viên được tư vấn, giới thiệu ngành nghề, kỹ năng tìm kiếm việc làm, thông tin thị trường lao động và các nội dung hỗ trợ định hướng nghề nghiệp phù hợp với ngành học.",
+      "evidence_chunk_ids": [
+        "bd66218b-5151-416c-8a8a-00e48fbe46aa"
+      ],
+      "ground_truth_context": [
+        "### Điều 18. Công tác hướng nghiệp và tìm kiếm việc làm cho sinh viên\n\n1. Công tác hướng nghiệp\n\n   a) Tư vấn, giới thiệu về chương trình đào tạo, ngành học, cơ hội tìm kiếm việc làm sau khi tốt nghiệp;\n\n   b) Tổ chức hoạt động ngoại khóa nâng cao năng lực tìm kiếm việc làm, khả năng thích ứng, hòa nhập với môi trường làm việc sau khi tốt nghiệp;\n\n   c) Tổ chức hoạt động tham quan, trải nghiệm môi trường làm việc tại doanh nghiệp cho sinh viên.\n\n2. Tìm kiếm và giới thiệu việc làm cho sinh viên\n\n   a) Thiết lập hệ thống thông tin việc làm, thông tin hai chiều giữa đơn vị đào tạo và đơn vị sử dụng lao động để tư vấn, giới thiệu việc làm cho sinh viên sau khi tốt nghiệp; giúp các đơn vị có nhu cầu sử dụng lao động lựa chọn được sinh viên phù hợp;\n\n   b) Tổ chức hoặc phối hợp với các cơ quan, doanh nghiệp tổ chức các hoạt động giới thiệu việc làm cho sinh viên (hội thảo, hội nghị, hội chợ việc làm...);"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_013",
+      "question_type": "simple",
+      "question": "Sinh viên có hoàn cảnh khó khăn được hỗ trợ tài chính theo hướng nào?",
+      "gold_answer": "Sinh viên có hoàn cảnh khó khăn được hướng dẫn và hỗ trợ làm thủ tục vay vốn tín dụng; đồng thời Đại học tìm kiếm, khai thác các nguồn học bổng, tài trợ, hỗ trợ tài chính phù hợp.",
+      "evidence_chunk_ids": [
+        "b0b25935-ce20-420c-add9-ffe75ae033f9"
+      ],
+      "ground_truth_context": [
+        "### Điều 21. Hỗ trợ tài chính cho sinh viên\n\n1. Hướng dẫn và hỗ trợ sinh viên có hoàn cảnh khó khăn làm thủ tục vay vốn ngân hàng chính sách xã hội.\n2. Tăng cường khai thác, quản lý và sử dụng hiệu quả các nguồn tài trợ nhằm khuyến khích sinh viên có kết quả học tập tốt, động viên, hỗ trợ sinh viên có hoàn cảnh khó khăn.\n3. Quan tâm, hỗ trợ kịp thời những sinh viên có hoàn cảnh đặc biệt khó khăn về kinh tế, sinh viên mồ côi không nơi nương tựa, sinh viên là người khuyết tật, sinh viên gặp khó khăn rủi ro đột xuất.\n4. Hỗ trợ kinh phí cho sinh viên tham gia các hoạt động nghiên cứu sáng tạo và khởi nghiệp, hoạt động trao đổi sinh viên quốc tế, hoạt động học tập nâng cao trình độ ngoại ngữ.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_014",
+      "question_type": "simple",
+      "question": "Điểm rèn luyện của sinh viên được phân loại xuất sắc trong khoảng điểm nào?",
+      "gold_answer": "Kết quả rèn luyện từ 90 điểm đến 100 điểm được phân loại xuất sắc.",
+      "evidence_chunk_ids": [
+        "5a7bd87f-7807-431b-bb1c-dc14b17acf73"
+      ],
+      "ground_truth_context": [
+        "### Điều 24. Phân loại kết quả rèn luyện\n\nKết quả rèn luyện được phân loại như sau:\n\n- Từ 90 điểm đến 100 điểm: loại xuất sắc;\n- Từ 80 điểm đến 89 điểm: loại tốt;\n- Từ 65 điểm đến 79 điểm: loại khá;\n- Từ 50 điểm đến 64 điểm: loại trung bình;\n- Từ 35 điểm đến 49 điểm: loại yếu;\n- Dưới 35 điểm: loại kém.\n\n### Điều 25. Sử dụng kết quả rèn luyện\n\n1. Kết quả đánh giá rèn luyện từng học kỳ, năm học và toàn khóa học của sinh viên được lưu trong hồ sơ quản lý sinh viên.\n2. Kết quả đánh giá rèn luyện được sử dụng trong việc xét duyệt học bổng, xét khen thưởng, xét tham gia các hoạt động giao lưu, trao đổi sinh viên quốc tế.\n3. Kết quả đánh giá rèn luyện toàn khóa học của sinh viên được cấp trong hồ sơ tốt nghiệp của sinh viên.\n4. Sinh viên không tham gia đánh giá điểm rèn luyện tại học kỳ nào thì bị xếp kết quả rèn luyện loại kém tại học kỳ đó."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_015",
+      "question_type": "simple",
+      "question": "Sinh viên có quyền khiếu nại kết quả rèn luyện không?",
+      "gold_answer": "Có. Sinh viên có quyền khiếu nại về kết quả đánh giá rèn luyện nếu thấy việc đánh giá chưa chính xác.",
+      "evidence_chunk_ids": [
+        "84762469-406b-4789-a96e-6fd98c9c7fe4"
+      ],
+      "ground_truth_context": [
+        "### Điều 26. Khiếu nại kết quả rèn luyện\n\nSinh viên có quyền khiếu nại về kết quả đánh giá rèn luyện nếu thấy việc đánh giá không công bằng hoặc chưa chính xác. Việc giải quyết khiếu nại được thực hiện theo quy định hiện hành của Đại học về công tác đánh giá rèn luyện của sinh viên.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_016",
+      "question_type": "simple",
+      "question": "Sinh viên bị cảnh cáo trong kỷ luật có bị lưu vào hồ sơ quản lý sinh viên không?",
+      "gold_answer": "Có. Sinh viên bị kỷ luật từ mức cảnh cáo trở lên phải được lưu vào hồ sơ quản lý sinh viên và thông báo cho cha, mẹ hoặc người giám hộ biết để phối hợp quản lý, giáo dục.",
+      "evidence_chunk_ids": [
+        "0a20a912-c925-4552-b8ab-dff25f8b520f"
+      ],
+      "ground_truth_context": [
+        "### Điều 31. Xử lý kỷ luật\n\n\n1. Hình thức kỷ luật:\n\nd) Buộc thôi học: áp dụng đối với sinh viên đang trong thời gian bị đình chỉ học tập mà vẫn tiếp tục vi phạm kỷ luật hoặc vi phạm lần đầu nhưng có tính chất và mức độ vi phạm đặc biệt nghiêm trọng, gây ảnh hưởng xấu đến Đại học và xã hội; vi phạm pháp luật bị xử phạt tù giam.\n\n2. Nội dung vi phạm và khung xử lý kỷ luật thực hiện theo quy định tại Phụ lục của Quy chế này.\n\n3. Sinh viên bị kỷ luật từ mức cảnh cáo trở lên phải được lưu vào hồ sơ quản lý sinh viên và thông báo cho cha/mẹ hoặc người giám hộ của sinh viên biết để phối hợp quản lý, giáo dục sinh viên.\n\n4. Dừng xét tốt nghiệp đối với sinh viên đang trong thời gian thi hành kỷ luật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên bị kỷ luật khiển trách thì sau bao lâu quyết định kỷ luật có thể chấm dứt hiệu lực nếu không tái phạm?",
+      "gold_answer": "Sau 3 tháng kể từ ngày có quyết định kỷ luật, nếu sinh viên không tái phạm hoặc không có vi phạm đến mức phải xử lý kỷ luật, hiệu lực của quyết định kỷ luật khiển trách chấm dứt.",
+      "evidence_chunk_ids": [
+        "9d4d6888-2ba3-49cd-b3cc-f17b3d0c2bbb"
+      ],
+      "ground_truth_context": [
+        "### Điều 33. Chấm dứt hiệu lực của quyết định kỷ luật\n\n1. Đối với sinh viên bị kỷ luật khiển trách: sau 3 tháng kể từ ngày có quyết định kỷ luật, nếu sinh viên không tái phạm hoặc không có những vi phạm đến mức phải xử lý kỷ luật thì hiệu lực của quyết định kỷ luật chấm dứt và sinh viên tiếp tục được hưởng các quyền lợi đối với sinh viên theo quy định hiện hành.\n\n3. Đối với sinh viên bị đình chỉ học tập có thời hạn: khi hết thời hạn đình chỉ học tập, sinh viên cần làm đơn xin quay trở lại học tập để được xem xét, tiếp nhận vào học tiếp nếu đủ điều kiện. Trường hợp sinh viên bị tạm dừng học tập do chấp hành hình phạt tù nhưng cho hưởng án treo thì đơn quay trở lại học tập cần có xác nhận của công an xã/phường nơi sinh viên cư trú về việc đã chấp hành xong bản án.\n\n4. Thời gian sinh viên bị thi hành kỷ luật tính từ khi ban hành quyết định kỷ luật đến thời điểm hết thời hạn bị kỷ luật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_simple_018",
+      "question_type": "simple",
+      "question": "Sinh viên nội trú trong ký túc xá được đơn vị nào tiếp nhận, quản lý và phục vụ?",
+      "gold_answer": "Trung tâm Dịch vụ và Hỗ trợ Bách khoa có trách nhiệm tiếp nhận, quản lý và phục vụ sinh viên nội trú trong ký túc xá theo quy định.",
+      "evidence_chunk_ids": [
+        "32d9cea2-2ead-4ba8-9adf-ad65714f6697"
+      ],
+      "ground_truth_context": [
+        "### Điều 51. Trách nhiệm của Trung tâm Dịch vụ và Hỗ trợ Bách khoa\n\n1. Tiếp nhận, quản lý và phục vụ sinh viên nội trú trong ký túc xá theo quy định.\n2. Cung cấp các dịch vụ nâng cao đời sống, chăm sóc sức khỏe, hỗ trợ học tập cho sinh viên.\n3. Cung cấp các dịch vụ trông, giữ xe đạp, xe máy cho sinh viên được thuận tiện, an toàn.\n4. Chủ trì phối hợp với các đơn vị liên quan trong và ngoài Đại học đảm bảo an ninh, trật tự học đường và an ninh, trật tự cho sinh viên nội trú trong ký túc xá.\n5. Phối hợp với công an địa phương làm thủ tục đăng ký tạm trú trong ký túc xá cho sinh viên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "quy_che_ctsv_2025_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn ở ký túc xá và cần làm thủ tục tạm trú thì quyền lợi và đơn vị hỗ trợ được nêu như thế nào?",
+      "gold_answer": "Sinh viên được xét vào ở ký túc xá nếu có nguyện vọng và đáp ứng điều kiện, hoặc được hỗ trợ tìm kiếm chỗ ở. Trung tâm Dịch vụ và Hỗ trợ Bách khoa tiếp nhận, quản lý sinh viên nội trú và phối hợp với công an địa phương làm thủ tục đăng ký tạm trú trong ký túc xá.",
+      "evidence_chunk_ids": [
+        "2596162f-a50c-4ffc-b023-e56bc36a8773",
+        "32d9cea2-2ead-4ba8-9adf-ad65714f6697"
+      ],
+      "ground_truth_context": [
+        "### Điều 6. Quyền lợi của sinh viên\n\n13. Được hưởng đầy đủ các chế độ, chính sách theo quy định hiện hành của Nhà nước và của Đại học.\n14. Được xét vào ở trong ký túc xá của Đại học (nếu có nguyện vọng và đáp ứng các điều kiện theo quy định của Đại học) hoặc được hỗ trợ tìm kiếm chỗ ở.\n15. Được chăm lo, bảo vệ sức khỏe theo chế độ hiện hành của Nhà nước và của Đại học.\n16. Sinh viên là người khuyết tật hoặc không đủ sức khỏe học một số nội dung thuộc các học phần giáo dục thể chất, giáo dục quốc phòng được xem xét miễn, giảm các nội dung không phù hợp hoặc được học các nội dung thay thế phù hợp theo hiện trạng sức khỏe.\n17. Được cấp bằng tốt nghiệp đại học theo quy định của Đại học.",
+        "### Điều 51. Trách nhiệm của Trung tâm Dịch vụ và Hỗ trợ Bách khoa\n\n1. Tiếp nhận, quản lý và phục vụ sinh viên nội trú trong ký túc xá theo quy định.\n2. Cung cấp các dịch vụ nâng cao đời sống, chăm sóc sức khỏe, hỗ trợ học tập cho sinh viên.\n3. Cung cấp các dịch vụ trông, giữ xe đạp, xe máy cho sinh viên được thuận tiện, an toàn.\n4. Chủ trì phối hợp với các đơn vị liên quan trong và ngoài Đại học đảm bảo an ninh, trật tự học đường và an ninh, trật tự cho sinh viên nội trú trong ký túc xá.\n5. Phối hợp với công an địa phương làm thủ tục đăng ký tạm trú trong ký túc xá cho sinh viên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_che_ctsv_2025_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên phát hiện gian lận thi cử và muốn biết hành vi dùng mạng Internet khi chưa được phép bị xử lý ra sao thì cần đối chiếu những nội dung nào?",
+      "gold_answer": "Sinh viên có trách nhiệm tham gia phòng, chống tiêu cực và gian lận trong học tập, thi cử, đồng thời báo cáo hành vi vi phạm. Việc sử dụng phần mềm hoặc mạng Internet khi không được phép để hỗ trợ làm bài thi/bài kiểm tra bị xử lý kỷ luật: lần 1 đình chỉ có thời hạn, lần 2 buộc thôi học; ghi chú nêu lần 1 đình chỉ 1 học kỳ.",
+      "evidence_chunk_ids": [
+        "dbfbf5f0-e0e5-4242-8c4c-9c9e4a1fc923",
+        "8b00c335-ea13-41a9-8623-b33741a06a24"
+      ],
+      "ground_truth_context": [
+        "### Điều 5. Trách nhiệm của sinh viên\n\n10. Tham gia đầy đủ các hoạt động xã hội, tình nguyện vì cộng đồng phù hợp với khả năng theo yêu cầu của Đại học hoặc đơn vị quản ngành.\n11. Tham gia đầy đủ các hoạt động do Đại học hoặc đơn vị quản ngành triệu tập.\n12. Giữ gìn, bảo vệ tài sản công và tài sản của cá nhân bao gồm cả học liệu, thiết bị và phương tiện phục vụ học tập, NCKH; sử dụng tài khoản thông tin cá nhân đúng mục đích theo quy định.\n13. Tham gia phòng, chống tiêu cực và gian lận trong học tập/thi cử; kịp thời báo cáo các đơn vị chức năng của Đại học hoặc các cơ quan có thẩm quyền khi phát hiện những hành vi tiêu cực, gian lận trong học tập, thi cử hoặc những hành vi vi phạm pháp luật, vi phạm nội quy, quy chế khác của các cá nhân.\n14. Tham gia công tác đảm bảo an ninh, trật tự, an toàn giao thông, phòng chống tội phạm, tệ nạn xã hội trong trường học, gia đình, cộng đồng.\n15. Sinh viên thôi học hoặc tốt nghiệp phải làm thủ tục chuyển đăng ký nghĩa vụ quân sự về nơi cư trú theo quy định hiện hành của pháp luật.",
+        "## PHỤ LỤC: MỘT SỐ NỘI DUNG VI PHẠM VÀ KHUNG XỬ LÝ KỶ LUẬT SINH VIÊN\n\n| TT | Nội dung vi phạm | Khiển trách | Cảnh cáo | Đình chỉ có thời hạn | Buộc thôi học | Ghi chú |\n|----|-----------------|-------------|----------|----------------------|---------------|---------|\n| 5 | Giả mạo chữ ký của người khác để giải quyết công việc cá nhân | | | Lần 1 | Lần 2 | Lần 1: đình chỉ 1 năm học; trường hợp nghiêm trọng chuyển cơ quan chức năng xử lý theo quy định của pháp luật |\n| 6 | Khai man hồ sơ, lý lịch để hưởng các loại học bổng hoặc sử dụng giấy tờ giả để hưởng chế độ miễn giảm học phí theo quy định của Nhà nước | | | Lần 1 | Lần 2 | Lần 1: đình chỉ 1 năm học; trường hợp nghiêm trọng chuyển cơ quan chức năng xử lý theo quy định của pháp luật |\n| 7 | Mượn hoặc cho người khác mượn thẻ sinh viên để sử dụng vào các mục đích cá nhân trái quy định | | | Lần 1 | Lần 2 | Lần 2: đình chỉ 1 học kỳ |\n| 8 | Không chấp hành các quy định của Đại học về việc kê khai thông tin hồ sơ sinh viên | Lần 2 | Lần 3 | | | Từ lần 3 trở lên, xử lý từ khiển trách đến cảnh cáo |\n| 9 | Sử dụng phần mềm/mạng internet khi không được phép để hỗ trợ làm bài thi/bài kiểm tra | | | Lần 1 | Lần 2 | Lần 1: đình chỉ 1 học kỳ |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_che_ctsv_2025_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên bị điểm rèn luyện thấp trong hai học kỳ liên tiếp có thể bị ảnh hưởng gì đến đăng ký học tập và đơn vị đào tạo liên quan thế nào?",
+      "gold_answer": "Sinh viên bị xếp loại rèn luyện Yếu hoặc Kém trong hai học kỳ liên tiếp bị hạn chế đăng ký học tập tương đương cảnh báo học tập mức 2. Phòng hoặc Ban chức năng Đào tạo phối hợp với Phòng/Ban chức năng CTSV xử lý hạn chế đăng ký học tập đối với trường hợp này.",
+      "evidence_chunk_ids": [
+        "3549eb26-8634-4067-bfa5-d24fbc7051b0",
+        "c36eca3c-743d-434a-8a12-f671c7168889"
+      ],
+      "ground_truth_context": [
+        "### Điều 8. Quản lý thông tin sinh viên\n\n1. Hồ sơ nhập học của sinh viên\n\n   a) Sinh viên phải nộp đầy đủ hồ sơ văn bản giấy theo quy định được thông báo hàng năm khi sinh viên làm thủ tục nhập học.\n\n   b) Sinh viên phải kê khai, cung cấp đầy đủ thông tin theo quy định trên cổng thông tin sinh viên Đại học.\n\n2. Hồ sơ quản lý quá trình học tập, rèn luyện của sinh viên gồm:\n\n   a) Kết quả học tập (điểm quá trình, điểm kết thúc học phần, kết quả thi hoặc bảo vệ đồ án tốt nghiệp/khóa luận tốt nghiệp) và kết quả rèn luyện (điểm rèn luyện theo học kỳ, năm học, khóa học);\n\n   b) Kết quả các hoạt động xã hội đã tham gia trong từng học kỳ, năm học;\n\n   c) Hình thức khen thưởng (nếu có) mà sinh viên đạt được trong học tập, nghiên cứu khoa học, hoạt động phong trào, đoàn thể;\n\n   d) Hình thức kỷ luật (nếu có);\n\n   đ) Thông tin thay đổi (nếu có) do chuyển chương trình đào tạo, chuyển ngành học, chuyển trường, nghỉ học có thời hạn, thôi học, tốt nghiệp;\n\n   e) Địa chỉ nơi cư trú;\n\n   g) Tình trạng đóng học phí;",
+        "### Điều 9. Tổ chức lớp sinh viên\n\nLớp sinh viên được lập và gọi tên theo chương trình đào tạo và khóa học. Đại diện cho lớp sinh viên là ban cán sự lớp gồm lớp trưởng và tối đa 2 lớp phó. Mỗi lớp sinh viên được quản lý bởi cán bộ QLLSV."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_che_ctsv_2025_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn tự đánh giá điểm rèn luyện cần chuẩn bị gì và sau khi kết quả công bố có thể làm gì nếu thấy sai?",
+      "gold_answer": "Sinh viên cần sử dụng minh chứng được xác nhận để tự đánh giá kết quả rèn luyện. Nếu thấy kết quả rèn luyện chưa chính xác, sinh viên có quyền khiếu nại; điểm rèn luyện sẽ được cập nhật lại sau khi có điều chỉnh.",
+      "evidence_chunk_ids": [
+        "2596162f-a50c-4ffc-b023-e56bc36a8773",
+        "84762469-406b-4789-a96e-6fd98c9c7fe4"
+      ],
+      "ground_truth_context": [
+        "### Điều 6. Quyền lợi của sinh viên\n\n13. Được hưởng đầy đủ các chế độ, chính sách theo quy định hiện hành của Nhà nước và của Đại học.\n14. Được xét vào ở trong ký túc xá của Đại học (nếu có nguyện vọng và đáp ứng các điều kiện theo quy định của Đại học) hoặc được hỗ trợ tìm kiếm chỗ ở.\n15. Được chăm lo, bảo vệ sức khỏe theo chế độ hiện hành của Nhà nước và của Đại học.\n16. Sinh viên là người khuyết tật hoặc không đủ sức khỏe học một số nội dung thuộc các học phần giáo dục thể chất, giáo dục quốc phòng được xem xét miễn, giảm các nội dung không phù hợp hoặc được học các nội dung thay thế phù hợp theo hiện trạng sức khỏe.\n17. Được cấp bằng tốt nghiệp đại học theo quy định của Đại học.",
+        "### Điều 26. Khiếu nại kết quả rèn luyện\n\nSinh viên có quyền khiếu nại về kết quả đánh giá rèn luyện nếu thấy việc đánh giá không công bằng hoặc chưa chính xác. Việc giải quyết khiếu nại được thực hiện theo quy định hiện hành của Đại học về công tác đánh giá rèn luyện của sinh viên.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_che_ctsv_2025_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đạt thành tích Olympic hoặc nghiên cứu khoa học có thể được khen thưởng theo diện nào và điều kiện nhận danh hiệu sinh viên xuất sắc năm học là gì?",
+      "gold_answer": "Sinh viên đoạt giải Olympic môn học, nghiên cứu khoa học, đổi mới sáng tạo và khởi nghiệp do Đại học tổ chức hoặc được Đại học cử tham gia có thể được khen thưởng thường xuyên. Danh hiệu Sinh viên xuất sắc năm học được tặng cho sinh viên đồng thời có kết quả học tập và kết quả rèn luyện trung bình năm học đạt loại xuất sắc.",
+      "evidence_chunk_ids": [
+        "15249d1a-13e8-48a5-97fb-63aceacf7359",
+        "db1a4e70-28d0-4467-a8d7-c54217d74393"
+      ],
+      "ground_truth_context": [
+        "## Chương V: KHEN THƯỞNG VÀ KỶ LUẬT SINH VIÊN\n\n### Điều 27. Khen thưởng thường xuyên\n\nTặng giấy khen và phần thưởng cho sinh viên đạt thành tích xuất sắc trong học tập, NCKH, sinh viên có nhiều đóng góp trong hoạt động phong trào như sau:\n\n1. Sinh viên đoạt giải trong các kỳ thi Olympic môn học, NCKH, đổi mới sáng tạo và khởi nghiệp do Đại học tổ chức hoặc được Đại học cử tham gia.\n2. Sinh viên đạt thành tích cao hoặc có đóng góp hiệu quả trong công tác Đảng, công tác Đoàn Thanh niên, công tác Hội Sinh viên, các hoạt động văn hóa, văn nghệ, thể thao và các hoạt động vì cộng đồng.\n3. Sinh viên có nhiều đóng góp tích cực trong các hoạt động của Đại học.\n4. Sinh viên có thành tích trong việc thực hiện phong trào toàn dân bảo vệ an ninh tổ quốc, bảo đảm an ninh, trật tự học đường, phòng chống tội phạm, tệ nạn xã hội, dũng cảm cứu người bị nạn, chống tiêu cực, tham nhũng.\n5. Sinh viên có các thành tích đặc biệt xuất sắc khác.",
+        "### Điều 28. Khen thưởng định kỳ\n\n1. Tặng danh hiệu \"Sinh viên xuất sắc năm học\" cho sinh viên đồng thời có kết quả học tập và kết quả rèn luyện trung bình năm học đạt loại xuất sắc.\n\n2. Tặng danh hiệu \"Sinh viên tiêu biểu năm học\" cho sinh viên đạt danh hiệu \"Sinh viên xuất sắc năm học\" và có nhiều đóng góp tích cực trong hoạt động phong trào Đoàn Thanh niên - Hội Sinh viên và các hoạt động vì cộng đồng.\n\n3. Tặng danh hiệu \"Sinh viên tốt nghiệp xuất sắc\" cho sinh viên có đồng thời kết quả học tập và kết quả rèn luyện toàn khóa đạt loại xuất sắc.\n\n4. Tặng danh hiệu \"Sinh viên tốt nghiệp thủ khoa\" cho sinh viên đạt danh hiệu \"Sinh viên tốt nghiệp xuất sắc\" có kết quả học tập toàn khóa cao nhất của đơn vị quản ngành và không có học phần có tính điểm CPA không đạt trong quá trình học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_che_ctsv_2025_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên bị đình chỉ học tập có thời hạn vì kỷ luật muốn quay lại học cần lưu ý gì và trong thời gian kỷ luật có được xét tốt nghiệp không?",
+      "gold_answer": "Khi hết thời hạn đình chỉ học tập, sinh viên cần làm đơn xin quay trở lại học tập để được xem xét tiếp nhận nếu đủ điều kiện. Sinh viên đang trong thời gian thi hành kỷ luật bị dừng xét tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "9d4d6888-2ba3-49cd-b3cc-f17b3d0c2bbb",
+        "0a20a912-c925-4552-b8ab-dff25f8b520f"
+      ],
+      "ground_truth_context": [
+        "### Điều 33. Chấm dứt hiệu lực của quyết định kỷ luật\n\n1. Đối với sinh viên bị kỷ luật khiển trách: sau 3 tháng kể từ ngày có quyết định kỷ luật, nếu sinh viên không tái phạm hoặc không có những vi phạm đến mức phải xử lý kỷ luật thì hiệu lực của quyết định kỷ luật chấm dứt và sinh viên tiếp tục được hưởng các quyền lợi đối với sinh viên theo quy định hiện hành.\n\n3. Đối với sinh viên bị đình chỉ học tập có thời hạn: khi hết thời hạn đình chỉ học tập, sinh viên cần làm đơn xin quay trở lại học tập để được xem xét, tiếp nhận vào học tiếp nếu đủ điều kiện. Trường hợp sinh viên bị tạm dừng học tập do chấp hành hình phạt tù nhưng cho hưởng án treo thì đơn quay trở lại học tập cần có xác nhận của công an xã/phường nơi sinh viên cư trú về việc đã chấp hành xong bản án.\n\n4. Thời gian sinh viên bị thi hành kỷ luật tính từ khi ban hành quyết định kỷ luật đến thời điểm hết thời hạn bị kỷ luật.",
+        "### Điều 31. Xử lý kỷ luật\n\n\n1. Hình thức kỷ luật:\n\nd) Buộc thôi học: áp dụng đối với sinh viên đang trong thời gian bị đình chỉ học tập mà vẫn tiếp tục vi phạm kỷ luật hoặc vi phạm lần đầu nhưng có tính chất và mức độ vi phạm đặc biệt nghiêm trọng, gây ảnh hưởng xấu đến Đại học và xã hội; vi phạm pháp luật bị xử phạt tù giam.\n\n2. Nội dung vi phạm và khung xử lý kỷ luật thực hiện theo quy định tại Phụ lục của Quy chế này.\n\n3. Sinh viên bị kỷ luật từ mức cảnh cáo trở lên phải được lưu vào hồ sơ quản lý sinh viên và thông báo cho cha/mẹ hoặc người giám hộ của sinh viên biết để phối hợp quản lý, giáo dục sinh viên.\n\n4. Dừng xét tốt nghiệp đối với sinh viên đang trong thời gian thi hành kỷ luật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_che_ctsv_2025_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên cần tư vấn học tập và gặp khó khăn cá nhân thì cán bộ quản lý lớp sinh viên có nhiệm vụ hỗ trợ như thế nào?",
+      "gold_answer": "Cán bộ quản lý lớp sinh viên chủ động theo dõi kết quả học tập, kết quả rèn luyện và hoàn cảnh của sinh viên để kịp thời tư vấn, hướng dẫn sinh viên tháo gỡ khó khăn trong học tập và đời sống; đồng thời khuyến khích, hỗ trợ sinh viên tham gia hoạt động học thuật, nghiên cứu khoa học và hoạt động xã hội.",
+      "evidence_chunk_ids": [
+        "d6075c48-680d-40c8-af33-169fde2f57e2"
+      ],
+      "ground_truth_context": [
+        "### Điều 53. Cán bộ quản lý lớp sinh viên\n\n1. Cán bộ QLLSV là cán bộ giảng dạy, cán bộ hành chính hoặc cán bộ kỹ thuật đang công tác tại đơn vị quản ngành do trưởng đơn vị quản ngành cử làm công tác QLLSV.\n\n2. Nhiệm vụ của cán bộ QLLSV:\n\n   a) Chủ động theo dõi thông tin về kết quả học tập, kết quả rèn luyện và hoàn cảnh của sinh viên để kịp thời tư vấn và hướng dẫn sinh viên tháo gỡ những khó khăn, vướng mắc trong quá trình học tập và đời sống;\n\n   b) Khuyến khích và hỗ trợ sinh viên tham gia các hoạt động học thuật, NCKH, các hoạt động xã hội phù hợp với quy định chung của Đại học;\n\n   c) Thực hiện công tác đánh giá kết quả rèn luyện sinh viên;\n\n   d) Tham gia họp xét khen thưởng, kỷ luật sinh viên khi có yêu cầu của lãnh đạo đơn vị;\n\n   e) Hỗ trợ các đơn vị chức năng của Đại học liên hệ với sinh viên trong trường hợp cần thiết;\n\n   f) Thực hiện chế độ báo cáo tình hình lớp theo yêu cầu của lãnh đạo đơn vị.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_che_ctsv_2025_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên cần khám sức khỏe và chăm sóc sức khỏe ban đầu thì trách nhiệm của sinh viên và Trung tâm Y tế Bách khoa được nêu ra sao?",
+      "gold_answer": "Sinh viên có trách nhiệm thực hiện đầy đủ khám sức khỏe đầu khóa và khám sức khỏe định kỳ. Trung tâm Y tế Bách khoa chịu trách nhiệm công tác y tế, chăm sóc sức khỏe ban đầu và tổ chức hoặc phối hợp tổ chức khám sức khỏe ban đầu, khám sức khỏe định kỳ cho sinh viên.",
+      "evidence_chunk_ids": [
+        "ecd07027-0ad5-4f6b-85ea-fe1f87ef5565",
+        "e22b30d4-a43a-444b-a969-451f37c85c0e"
+      ],
+      "ground_truth_context": [
+        "## Chương II: TRÁCH NHIỆM VÀ QUYỀN LỢI CỦA SINH VIÊN\n\n### Điều 5. Trách nhiệm của sinh viên\n1. Chấp hành nghiêm chủ trương, đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Đại học.\n2. Học tập, rèn luyện theo chương trình, kế hoạch của Đại học; chủ động, tích cực tự học tập, NCKH và rèn luyện đạo đức, lối sống.\n3. Thực hiện quy tắc văn hóa giao tiếp trong nhà trường và môi trường mạng.\n4. Thực hiện đầy đủ việc khám sức khỏe đầu khóa, khám sức khỏe định kỳ trong thời gian học tập theo quy định.\n5. Đóng học phí, bảo hiểm y tế và các khoản phí khác đầy đủ, đúng quy định của Đại học.\n6. Khai báo và cập nhật đầy đủ, đúng thời hạn các thông tin cá nhân trên cổng thông tin điện tử dành cho sinh viên trong quá trình học tập tại Đại học.\n7. Xây dựng, gìn giữ, bảo vệ và phát huy truyền thống, danh tiếng của Đại học.\n8. Tôn trọng nhà giáo, cán bộ quản lý, viên chức, người lao động và các sinh viên khác của Đại học.\n9. Đoàn kết, giúp đỡ lẫn nhau trong quá trình học tập, rèn luyện; thực hiện nếp sống văn hóa học đường.",
+        "### Điều 52. Trách nhiệm của Trung tâm Y tế Bách khoa\n\n1. Chịu trách nhiệm về công tác y tế và chăm sóc sức khỏe ban đầu cho sinh viên.\n2. Tổ chức hoặc phối hợp tổ chức các hoạt động tư vấn, chăm sóc sức khỏe, khám chữa bệnh cho sinh viên.\n3. Lập kế hoạch và tổ chức khám sức khỏe ban đầu và khám sức khỏe định kỳ cho sinh viên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "quy_che_ctsv_2025_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Sinh viên đại học hệ chính quy được phép nhờ người khác thi hộ nếu đã báo trước cho lớp trưởng đúng không?",
+      "gold_answer": "Không. Nội dung được cung cấp không cho phép sinh viên nhờ người khác thi hộ. Gian lận bao gồm học, thi, thực tập, thí nghiệm hộ người khác hoặc nhờ người khác thực hiện hộ; phụ lục kỷ luật nêu hành vi nhờ người khác vào phòng thi để thi/kiểm tra thay hoặc thi/kiểm tra thay người khác bị xử lý kỷ luật.",
+      "evidence_chunk_ids": [
+        "9f53bdee-be40-4673-88a9-d5e589d254ba",
+        "48544c54-a452-494d-b16c-24b3d5efa262"
+      ],
+      "ground_truth_context": [
+        "### Điều 7. Các hành vi sinh viên không được làm\n\n1. Xúc phạm nhân phẩm, danh dự, xâm phạm thân thể nhà giáo, cán bộ quản lý, viên chức, người lao động và người học của Đại học và người khác.\n\n2. Gian lận trong học tập, kiểm tra, thi cử như: quay cóp; mang tài liệu, điện thoại, thiết bị ghi âm, ghi hình vào phòng thi khi không được phép; sử dụng các công cụ, phần mềm, mạng internet khi không được phép để hỗ trợ làm bài thi/bài kiểm tra; xin điểm; học, thi, thực tập, thí nghiệm hộ người khác hoặc nhờ người khác học, thi, thực tập, thí nghiệm hộ; sao chép, nhờ hoặc làm hộ tiểu luận, đồ án, khóa luận tốt nghiệp; tổ chức hoặc tham gia tổ chức thi hộ hoặc các hành vi gian lận khác.\n\n3. Có hành vi làm xao nhãng, ảnh hưởng, gián đoạn quá trình học tập của lớp học.\n\n4. Hút thuốc, uống rượu, bia trong khuôn viên Đại học; say rượu, bia khi đến khuôn viên Đại học.\n\n5. Thực hiện các hành vi gây nguy hiểm cho bản thân và người khác trong khuôn viên Đại học như: leo trèo cây, lan can, đi xe tốc độ cao...",
+        "## PHỤ LỤC: MỘT SỐ NỘI DUNG VI PHẠM VÀ KHUNG XỬ LÝ KỶ LUẬT SINH VIÊN\n\n| TT | Nội dung vi phạm | Khiển trách | Cảnh cáo | Đình chỉ có thời hạn | Buộc thôi học | Ghi chú |\n|----|-----------------|-------------|----------|----------------------|---------------|---------|\n| 10 | Dùng phương tiện kỹ thuật truyền tin để nhờ người khác làm hộ bài thi/bài kiểm tra hoặc làm hộ bài thi/bài kiểm tra | | | Lần 1 | Lần 2 | Lần 1: đình chỉ 1 học kỳ |\n| 11 | Nhờ người khác vào phòng thi để thi/kiểm tra thay hoặc vào phòng thi để thi/kiểm tra thay người khác | | | Lần 1 | Lần 2 | Lần 1: đình chỉ 1 năm học |\n| 12 | Nhờ làm hộ tiểu luận/đồ án/khóa luận tốt nghiệp hoặc làm hộ tiểu luận/đồ án/khóa luận tốt nghiệp | | | Lần 1 | Lần 2 | Lần 1: đình chỉ 1 năm học |\n| 13 | Tổ chức học, thi, kiểm tra, làm bài thi, làm bài kiểm tra hộ hoặc tổ chức làm hộ tiểu luận, đồ án, khóa luận tốt nghiệp dưới mọi hình thức | | | Lần 1 | | Tùy theo mức độ có thể chuyển cho cơ quan chức năng xử lý theo quy định của pháp luật |\n| 14 | Cố tình nộp chậm hoặc không nộp học phí, bảo hiểm y tế theo quy định mà không có lý do chính đáng | | | | | Tùy theo mức độ, xử lý từ khiển trách đến buộc thôi học |"
+      ],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_assumption",
+      "difficulty": "hard",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "quy_che_ctsv_2025_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Sinh viên chỉ cần nộp học phí, không cần cập nhật thông tin cá nhân trên cổng thông tin sinh viên đúng không?",
+      "gold_answer": "Không. Sinh viên có trách nhiệm đóng học phí, bảo hiểm y tế và các khoản phí khác đúng quy định, đồng thời phải khai báo và cập nhật đầy đủ, đúng thời hạn thông tin cá nhân trên cổng thông tin điện tử dành cho sinh viên.",
+      "evidence_chunk_ids": [
+        "ecd07027-0ad5-4f6b-85ea-fe1f87ef5565"
+      ],
+      "ground_truth_context": [
+        "## Chương II: TRÁCH NHIỆM VÀ QUYỀN LỢI CỦA SINH VIÊN\n\n### Điều 5. Trách nhiệm của sinh viên\n1. Chấp hành nghiêm chủ trương, đường lối của Đảng, chính sách pháp luật của Nhà nước và các quy định của Đại học.\n2. Học tập, rèn luyện theo chương trình, kế hoạch của Đại học; chủ động, tích cực tự học tập, NCKH và rèn luyện đạo đức, lối sống.\n3. Thực hiện quy tắc văn hóa giao tiếp trong nhà trường và môi trường mạng.\n4. Thực hiện đầy đủ việc khám sức khỏe đầu khóa, khám sức khỏe định kỳ trong thời gian học tập theo quy định.\n5. Đóng học phí, bảo hiểm y tế và các khoản phí khác đầy đủ, đúng quy định của Đại học.\n6. Khai báo và cập nhật đầy đủ, đúng thời hạn các thông tin cá nhân trên cổng thông tin điện tử dành cho sinh viên trong quá trình học tập tại Đại học.\n7. Xây dựng, gìn giữ, bảo vệ và phát huy truyền thống, danh tiếng của Đại học.\n8. Tôn trọng nhà giáo, cán bộ quản lý, viên chức, người lao động và các sinh viên khác của Đại học.\n9. Đoàn kết, giúp đỡ lẫn nhau trong quá trình học tập, rèn luyện; thực hiện nếp sống văn hóa học đường."
+      ],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_assumption",
+      "difficulty": "medium",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "quy_che_ctsv_2025_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Sinh viên bị kỷ luật cảnh cáo vẫn được xét tốt nghiệp bình thường trong thời gian thi hành kỷ luật đúng không?",
+      "gold_answer": "Không có cơ sở để khẳng định như vậy. Quy chế nêu dừng xét tốt nghiệp đối với sinh viên đang trong thời gian thi hành kỷ luật.",
+      "evidence_chunk_ids": [
+        "0a20a912-c925-4552-b8ab-dff25f8b520f"
+      ],
+      "ground_truth_context": [
+        "### Điều 31. Xử lý kỷ luật\n\n\n1. Hình thức kỷ luật:\n\nd) Buộc thôi học: áp dụng đối với sinh viên đang trong thời gian bị đình chỉ học tập mà vẫn tiếp tục vi phạm kỷ luật hoặc vi phạm lần đầu nhưng có tính chất và mức độ vi phạm đặc biệt nghiêm trọng, gây ảnh hưởng xấu đến Đại học và xã hội; vi phạm pháp luật bị xử phạt tù giam.\n\n2. Nội dung vi phạm và khung xử lý kỷ luật thực hiện theo quy định tại Phụ lục của Quy chế này.\n\n3. Sinh viên bị kỷ luật từ mức cảnh cáo trở lên phải được lưu vào hồ sơ quản lý sinh viên và thông báo cho cha/mẹ hoặc người giám hộ của sinh viên biết để phối hợp quản lý, giáo dục sinh viên.\n\n4. Dừng xét tốt nghiệp đối với sinh viên đang trong thời gian thi hành kỷ luật."
+      ],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_assumption",
+      "difficulty": "hard",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "quy_che_ctsv_2025_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Sinh viên uống rượu bia trong giờ học lần đầu sẽ bị buộc thôi học ngay đúng không?",
+      "gold_answer": "Không. Khung xử lý kỷ luật nêu uống rượu, bia trong giờ học hoặc say rượu, bia khi đến lớp: lần 1 khiển trách, lần 2 cảnh cáo, lần 3 đình chỉ có thời hạn, lần 4 buộc thôi học.",
+      "evidence_chunk_ids": [
+        "0e795996-0981-429b-a863-5b6f2b8a5ebd"
+      ],
+      "ground_truth_context": [
+        "## PHỤ LỤC: MỘT SỐ NỘI DUNG VI PHẠM VÀ KHUNG XỬ LÝ KỶ LUẬT SINH VIÊN\n\n| TT | Nội dung vi phạm | Khiển trách | Cảnh cáo | Đình chỉ có thời hạn | Buộc thôi học | Ghi chú |\n|----|-----------------|-------------|----------|----------------------|---------------|---------|\n| 15 | Làm hư hỏng tài sản của Đại học | | | | | Tùy mức độ xử lý từ khiển trách đến buộc thôi học và phải bồi thường thiệt hại |\n| 16 | Uống rượu, bia trong giờ học; say rượu, bia khi đến lớp | Lần 1 | Lần 2 | Lần 3 | Lần 4 | Lần 3: đình chỉ 1 học kỳ |\n| 17 | Hút thuốc lá trong giờ học, phòng học, phòng thí nghiệm và nơi cấm hút thuốc theo quy định | Lần 1 | Lần 2 | | | Từ lần 3 trở lên, xử lý từ khiển trách đến cảnh cáo |\n| 18 | Đánh bạc dưới mọi hình thức | Lần 1 | Lần 2 | Lần 3 | Lần 4 | Lần 3: đình chỉ học tập 1 năm học; nếu nghiêm trọng, chuyển cơ quan chức năng xử lý theo quy định của pháp luật |\n| 19 | Tổ chức đánh bạc | Lần 1 | Lần 2 | | Lần 1 | Chuyển cơ quan chức năng xử lý theo quy định của pháp luật |\n| 20 | Tàng trữ, lưu hành, truy cập, sử dụng sản phẩm văn hóa đồi trụy hoặc tham gia các hoạt động mê tín dị đoan, hoạt động tôn giáo trái phép | Lần 1 | Lần 2 | Lần 3 | Lần 4 | Lần 3: đình chỉ 1 năm học; nếu nghiêm trọng chuyển cơ quan chức năng xử lý theo quy định của pháp luật |"
+      ],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_assumption",
+      "difficulty": "medium",
+      "adversarial_type": "false_assumption"
+    }
+  ]
+}

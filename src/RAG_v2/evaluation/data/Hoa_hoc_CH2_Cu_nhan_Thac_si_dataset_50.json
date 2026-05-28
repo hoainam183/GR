@@ -1,0 +1,786 @@
+{
+  "dataset_name": "hoa_hoc_chuong_trinh_cu_nhan_thac_si_dataset",
+  "source_file": "Hoa_hoc_Chuong_trinh_cu_nhan_thac_si_fix_chunks.json",
+  "total_questions": 50,
+  "distribution": {
+    "simple": 30,
+    "multi_hop": 13,
+    "adversarial": 7
+  },
+  "items": [
+    {
+      "id": "hoa_hoc_ch2_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên ngành Hóa học CH2 học chương trình tích hợp trong bao lâu?",
+      "gold_answer": "Thời gian đào tạo của chương trình tích hợp Cử nhân - Thạc sĩ khoa học Hóa học là 5,5 năm.",
+      "evidence_chunk_ids": [
+        "daa5f451-798d-41da-ae73-234e722a4752"
+      ],
+      "ground_truth_context": [
+        "Thời gian đào tạo: 5,5 năm"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_002",
+      "question_type": "simple",
+      "question": "Chương trình Hóa học CH2 tích hợp có tổng khối lượng kiến thức bao nhiêu tín chỉ?",
+      "gold_answer": "Chương trình tích hợp Cử nhân - Thạc sĩ khoa học Hóa học có tổng khối lượng kiến thức toàn khóa là 180 tín chỉ.",
+      "evidence_chunk_ids": [
+        "daa5f451-798d-41da-ae73-234e722a4752"
+      ],
+      "ground_truth_context": [
+        "Khối lượng kiến thức toàn khóa: 180 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên hoàn thành chương trình Hóa học CH2 tích hợp được cấp bằng gì?",
+      "gold_answer": "Sinh viên được cấp bằng Cử nhân Hóa học và Thạc sĩ khoa học Hóa học.",
+      "evidence_chunk_ids": [
+        "daa5f451-798d-41da-ae73-234e722a4752"
+      ],
+      "ground_truth_context": [
+        "Bằng tốt nghiệp: Cử nhân Hóa học & Thạc sĩ khoa học Hóa học"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_004",
+      "question_type": "simple",
+      "question": "Mã ngành của bậc cử nhân và thạc sĩ trong chương trình Hóa học CH2 là gì?",
+      "gold_answer": "Mã ngành là 7440112 cho bậc Cử nhân và 8440112 cho bậc Thạc sĩ.",
+      "evidence_chunk_ids": [
+        "daa5f451-798d-41da-ae73-234e722a4752"
+      ],
+      "ground_truth_context": [
+        "Mã ngành: 7440112 (Cử nhân) - 8440112 (Thạc sĩ)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_005",
+      "question_type": "simple",
+      "question": "Sinh viên Cử nhân Hóa học sau khi tốt nghiệp cần có loại kiến thức nào để thích ứng với nhiều lĩnh vực của ngành?",
+      "gold_answer": "Sinh viên cần có kiến thức cơ bản và kiến thức cơ sở, chuyên môn rộng để thích ứng với nhiều công việc trong các lĩnh vực rộng của ngành Hóa học.",
+      "evidence_chunk_ids": [
+        "03719a5c-c194-4302-b4f4-8ae7daead4ce"
+      ],
+      "ground_truth_context": [
+        "Có kiến thức cơ bản và kiến thức cơ sở, chuyên môn rộng để có thể thích ứng tốt với những công việc khác nhau trong nhiều lĩnh vực rộng của ngành Hóa học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_006",
+      "question_type": "simple",
+      "question": "Mục tiêu về khởi nghiệp đối với sinh viên Cử nhân Hóa học được nêu như thế nào?",
+      "gold_answer": "Sinh viên cần có kỹ năng xã hội để làm việc hiệu quả trong nhóm đa ngành, trong môi trường quốc tế và có năng lực khởi nghiệp.",
+      "evidence_chunk_ids": [
+        "03719a5c-c194-4302-b4f4-8ae7daead4ce"
+      ],
+      "ground_truth_context": [
+        "Có kỹ năng xã hội cần thiết để làm việc hiệu quả trong nhóm đa ngành và trong môi trường quốc tế, có năng lực khởi nghiệp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_007",
+      "question_type": "simple",
+      "question": "Học viên thạc sĩ Hóa học cần có năng lực gì về tự đào tạo và thích ứng?",
+      "gold_answer": "Học viên cần có kiến thức chuyên môn nâng cao để làm việc độc lập, sáng tạo, có khả năng tự đào tạo, sẵn sàng hội nhập và thích ứng với cuộc cách mạng 4.0.",
+      "evidence_chunk_ids": [
+        "3684d6b5-9e0c-4071-8391-0d0876fea639"
+      ],
+      "ground_truth_context": [
+        "Có kiến thức chuyên môn nâng cao... có khả năng làm việc độc lập, sáng tạo và khả năng tự đào tạo... thích ứng với cuộc cách mạng 4.0."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_008",
+      "question_type": "simple",
+      "question": "Chuẩn đầu ra tiếng Anh của Cử nhân Hóa học yêu cầu mức TOEIC tối thiểu bao nhiêu?",
+      "gold_answer": "Cử nhân Hóa học cần sử dụng tiếng Anh hiệu quả trong công việc và đạt điểm TOEIC từ 500 trở lên.",
+      "evidence_chunk_ids": [
+        "e15ef2a2-03a3-4f1c-a871-2e34895e78cf"
+      ],
+      "ground_truth_context": [
+        "Sử dụng tiếng Anh hiệu quả trong công việc, đạt điểm TOEIC từ 500 trở lên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_009",
+      "question_type": "simple",
+      "question": "Cử nhân Hóa học cần áp dụng những kiến thức khoa học cơ bản nào để giải quyết vấn đề trong hóa học?",
+      "gold_answer": "Cử nhân Hóa học cần áp dụng kiến thức Toán và khoa học cơ bản gồm Vật lý, Hóa học, Hóa sinh.",
+      "evidence_chunk_ids": [
+        "e2452e56-8d2c-4b83-8748-5b9f2454010d"
+      ],
+      "ground_truth_context": [
+        "Áp dụng kiến thức Toán và khoa học cơ bản (Vật lý, Hóa học, Hóa sinh) trong giải quyết các vấn đề trong hóa học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_010",
+      "question_type": "simple",
+      "question": "Các kiến thức cơ sở và cốt lõi của ngành Hóa học được nêu gồm những mảng nào?",
+      "gold_answer": "Các mảng được nêu gồm Hóa vô cơ, Hóa hữu cơ, Hóa lý và Hóa phân tích.",
+      "evidence_chunk_ids": [
+        "e2452e56-8d2c-4b83-8748-5b9f2454010d"
+      ],
+      "ground_truth_context": [
+        "Áp dụng các kiến thức cơ sở và cốt lõi của ngành như Hóa vô cơ, Hóa hữu cơ, Hóa lý, Hóa phân tích."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_011",
+      "question_type": "simple",
+      "question": "Cử nhân Hóa học cần có kỹ năng gì liên quan đến thí nghiệm và nghiên cứu?",
+      "gold_answer": "Cử nhân Hóa học cần có khả năng tiến hành thí nghiệm, nghiên cứu, thử nghiệm và khám phá kỹ thuật mới, sản phẩm mới của hóa học.",
+      "evidence_chunk_ids": [
+        "5c318af6-9ed0-41dd-9e90-c3b15bcb5424"
+      ],
+      "ground_truth_context": [
+        "Có khả năng tiến hành các thí nghiệm, nghiên cứu, thử nghiệm và khám phá những kỹ thuật mới và sản phẩm mới của hóa học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_012",
+      "question_type": "simple",
+      "question": "Cử nhân Hóa học cần có chứng chỉ nào về giáo dục thể chất và quốc phòng?",
+      "gold_answer": "Cử nhân Hóa học cần có chứng chỉ Giáo dục thể chất và chứng chỉ Giáo dục quốc phòng - an ninh theo chương trình quy định chung của Bộ Giáo dục và Đào tạo.",
+      "evidence_chunk_ids": [
+        "4c5131bb-42e3-477e-a2da-eeced0b86211"
+      ],
+      "ground_truth_context": [
+        "Có chứng chỉ Giáo dục thể chất và chứng chỉ Giáo dục quốc phòng - an ninh theo chương trình quy định chung của Bộ Giáo dục và Đào tạo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_013",
+      "question_type": "simple",
+      "question": "Thạc sĩ khoa học Hóa học cần có khả năng tiếng Anh chuyên môn như thế nào?",
+      "gold_answer": "Người tốt nghiệp thạc sĩ khoa học Hóa học cần có khả năng đọc hiểu tài liệu chuyên môn bằng tiếng Anh.",
+      "evidence_chunk_ids": [
+        "b5c29c7a-d497-42af-9240-be41cbfbc5f5"
+      ],
+      "ground_truth_context": [
+        "Có khả năng đọc hiểu tài liệu chuyên môn bằng tiếng Anh."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_014",
+      "question_type": "simple",
+      "question": "Bậc cử nhân Hóa học có bao nhiêu tín chỉ giáo dục đại cương?",
+      "gold_answer": "Bậc cử nhân Hóa học có 51 tín chỉ giáo dục đại cương.",
+      "evidence_chunk_ids": [
+        "c0ef97e2-bef0-4ddd-8edf-a81ed6438900"
+      ],
+      "ground_truth_context": [
+        "A. Giáo dục đại cương | 51"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_015",
+      "question_type": "simple",
+      "question": "Bậc cử nhân Hóa học có bao nhiêu tín chỉ giáo dục chuyên nghiệp?",
+      "gold_answer": "Bậc cử nhân Hóa học có 81 tín chỉ giáo dục chuyên nghiệp.",
+      "evidence_chunk_ids": [
+        "c0ef97e2-bef0-4ddd-8edf-a81ed6438900"
+      ],
+      "ground_truth_context": [
+        "B. Giáo dục chuyên nghiệp | 81"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_016",
+      "question_type": "simple",
+      "question": "Bậc cử nhân Hóa học có bao nhiêu tín chỉ tiếng Anh cơ bản?",
+      "gold_answer": "Bậc cử nhân Hóa học có 6 tín chỉ tiếng Anh, gồm 2 học phần Tiếng Anh cơ bản.",
+      "evidence_chunk_ids": [
+        "c0ef97e2-bef0-4ddd-8edf-a81ed6438900"
+      ],
+      "ground_truth_context": [
+        "A3. Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_017",
+      "question_type": "simple",
+      "question": "Bậc cử nhân Hóa học có bao nhiêu tín chỉ Toán và khoa học cơ bản?",
+      "gold_answer": "Bậc cử nhân Hóa học có 32 tín chỉ Toán và khoa học cơ bản.",
+      "evidence_chunk_ids": [
+        "c0ef97e2-bef0-4ddd-8edf-a81ed6438900"
+      ],
+      "ground_truth_context": [
+        "A4. Toán và khoa học cơ bản | 32"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_018",
+      "question_type": "simple",
+      "question": "Bậc thạc sĩ Hóa học có tổng cộng bao nhiêu tín chỉ?",
+      "gold_answer": "Bậc thạc sĩ khoa học Hóa học có tổng cộng 60 tín chỉ.",
+      "evidence_chunk_ids": [
+        "f54e9181-d718-44bf-9931-5867ae63d315"
+      ],
+      "ground_truth_context": [
+        "Tổng cộng chương trình thạc sĩ khoa học | 60 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_019",
+      "question_type": "simple",
+      "question": "Trong bậc thạc sĩ Hóa học, khối kiến thức chung có bao nhiêu tín chỉ?",
+      "gold_answer": "Khối kiến thức chung của bậc thạc sĩ Hóa học có 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "f54e9181-d718-44bf-9931-5867ae63d315"
+      ],
+      "ground_truth_context": [
+        "C. Kiến thức chung | 3"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_020",
+      "question_type": "simple",
+      "question": "Bậc thạc sĩ Hóa học yêu cầu chuẩn đầu ra tiếng Anh ở mức nào?",
+      "gold_answer": "Bậc thạc sĩ Hóa học yêu cầu học viên đạt chuẩn đầu ra B2.",
+      "evidence_chunk_ids": [
+        "f54e9181-d718-44bf-9931-5867ae63d315"
+      ],
+      "ground_truth_context": [
+        "Tiếng Anh tự học, học viên đạt chuẩn đầu ra B2"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_021",
+      "question_type": "simple",
+      "question": "Sinh viên Hóa học học học phần Pháp luật đại cương ở kỳ mấy?",
+      "gold_answer": "Học phần Pháp luật đại cương mã EM1170 được bố trí ở kỳ 2.",
+      "evidence_chunk_ids": [
+        "c133cb6e-6fdc-4dff-9ccb-92255e0bb97d"
+      ],
+      "ground_truth_context": [
+        "EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 2"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_022",
+      "question_type": "simple",
+      "question": "Sinh viên Hóa học học Tiếng Anh 1 và Tiếng Anh 2 ở những kỳ nào?",
+      "gold_answer": "Tiếng Anh 1 học ở kỳ 1 và Tiếng Anh 2 học ở kỳ 2.",
+      "evidence_chunk_ids": [
+        "abc306bc-fcce-47a9-a4ce-830e0789fb82"
+      ],
+      "ground_truth_context": [
+        "FL1100 | Tiếng Anh 1 | 3(0-6-0-6) | 1; FL1101 | Tiếng Anh 2 | 3(0-6-0-6) | 2"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_023",
+      "question_type": "simple",
+      "question": "Học phần Hóa sinh đại cương của Cử nhân Hóa học có bao nhiêu tín chỉ và học ở kỳ mấy?",
+      "gold_answer": "Hóa sinh đại cương mã CH2014 có 3 tín chỉ và học ở kỳ 6.",
+      "evidence_chunk_ids": [
+        "84807aad-d019-4e4f-8bf2-133a4374cdf0"
+      ],
+      "ground_truth_context": [
+        "CH2014 | Hóa sinh đại cương | 3(3-0-0-6) | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_024",
+      "question_type": "simple",
+      "question": "Học phần Nhập môn hóa học trong chương trình Hóa học CH2 có bao nhiêu tín chỉ và học ở kỳ mấy?",
+      "gold_answer": "Nhập môn hóa học mã CH2003 có 2 tín chỉ và học ở kỳ 1.",
+      "evidence_chunk_ids": [
+        "3c9ee547-1dc1-4387-b1c4-d2c0812b6848"
+      ],
+      "ground_truth_context": [
+        "CH2003 | Nhập môn hóa học | 2(2-0-1-4) | 1"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_025",
+      "question_type": "simple",
+      "question": "Học phần Hóa Polyme trong chương trình Cử nhân Hóa học có bao nhiêu tín chỉ và học ở kỳ mấy?",
+      "gold_answer": "Hóa Polyme mã CH4093 có 3 tín chỉ và học ở kỳ 6.",
+      "evidence_chunk_ids": [
+        "c9bbcf3a-5bfc-4a7a-8a70-d2dd46894ec4"
+      ],
+      "ground_truth_context": [
+        "CH4093 | Hóa Polyme | 3(3-1-0-6) | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_026",
+      "question_type": "simple",
+      "question": "Khối kiến thức bổ trợ của Cử nhân Hóa học có học phần Technical Writing and Presentation bao nhiêu tín chỉ?",
+      "gold_answer": "Technical Writing and Presentation mã CH2020 có 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "51489c2d-4666-4701-8f96-6bf143edbb4c"
+      ],
+      "ground_truth_context": [
+        "CH2020 | Technical Writing and Presentation | 3(2-2-0-6)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_027",
+      "question_type": "simple",
+      "question": "Sinh viên Cử nhân Hóa học phải chọn bao nhiêu tín chỉ tự chọn định hướng?",
+      "gold_answer": "Sinh viên phải chọn 16 tín chỉ trong khối tự chọn định hướng.",
+      "evidence_chunk_ids": [
+        "213deb4f-d0de-4715-aa14-485c4ba0f8df"
+      ],
+      "ground_truth_context": [
+        "B3. Tự chọn định hướng - chọn 16 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_028",
+      "question_type": "simple",
+      "question": "Đối với hướng tốt nghiệp cử nhân Hóa học, Thực tập kỹ thuật và Đồ án cử nhân có bao nhiêu tín chỉ?",
+      "gold_answer": "Thực tập kỹ thuật CH3902 có 2 tín chỉ và Đồ án cử nhân CH4901 có 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "22eb04b1-1a90-492e-9482-0bfc9160ac9b"
+      ],
+      "ground_truth_context": [
+        "CH3902 | Thực tập kỹ thuật | 2; CH4901 | Đồ án cử nhân | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_029",
+      "question_type": "simple",
+      "question": "Sinh viên Hóa học học tích hợp Cử nhân - Thạc sĩ thực hiện học phần đồ án nào ở kỳ 8?",
+      "gold_answer": "Sinh viên học tích hợp thực hiện Đồ án nghiên cứu mã CH4903, 8 tín chỉ, ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "22eb04b1-1a90-492e-9482-0bfc9160ac9b"
+      ],
+      "ground_truth_context": [
+        "CH4903 | Đồ án nghiên cứu | 8(0-0-16-16) | 8"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_simple_030",
+      "question_type": "simple",
+      "question": "Bậc thạc sĩ Hóa học có học phần Triết học mã nào, bao nhiêu tín chỉ và học kỳ mấy?",
+      "gold_answer": "Bậc thạc sĩ Hóa học có học phần Triết học mã SS6010, 3 tín chỉ, học ở kỳ 9.",
+      "evidence_chunk_ids": [
+        "fd788636-d668-41a3-b011-48e037a5a88e"
+      ],
+      "ground_truth_context": [
+        "SS6010 | Triết học | 3(3-1-0-6) | 9"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên Hóa học CH2 học chương trình tích hợp, tổng thời gian đào tạo và tổng số tín chỉ toàn khóa là bao nhiêu?",
+      "gold_answer": "Chương trình tích hợp Hóa học CH2 có thời gian đào tạo 5,5 năm và tổng khối lượng toàn khóa 180 tín chỉ.",
+      "evidence_chunk_ids": [
+        "daa5f451-798d-41da-ae73-234e722a4752"
+      ],
+      "ground_truth_context": [
+        "Thời gian đào tạo: 5,5 năm",
+        "Khối lượng kiến thức toàn khóa: 180 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Hóa học CH2 theo lộ trình tích hợp học bao nhiêu tín chỉ ở bậc cử nhân và bao nhiêu tín chỉ ở bậc thạc sĩ?",
+      "gold_answer": "Bậc cử nhân có 132 tín chỉ, bậc thạc sĩ khoa học có 60 tín chỉ; tổng chương trình tích hợp là 180 tín chỉ.",
+      "evidence_chunk_ids": [
+        "c0ef97e2-bef0-4ddd-8edf-a81ed6438900",
+        "f54e9181-d718-44bf-9931-5867ae63d315"
+      ],
+      "ground_truth_context": [
+        "Tổng cộng chương trình cử nhân | 132 tín chỉ",
+        "Tổng cộng chương trình thạc sĩ khoa học | 60 tín chỉ",
+        "Tổng cộng chương trình tích hợp cử nhân - thạc sĩ khoa học | 180 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Ở bậc cử nhân Hóa học, giáo dục đại cương và giáo dục chuyên nghiệp lần lượt gồm bao nhiêu tín chỉ?",
+      "gold_answer": "Giáo dục đại cương gồm 51 tín chỉ, còn giáo dục chuyên nghiệp gồm 81 tín chỉ.",
+      "evidence_chunk_ids": [
+        "c0ef97e2-bef0-4ddd-8edf-a81ed6438900"
+      ],
+      "ground_truth_context": [
+        "A. Giáo dục đại cương | 51",
+        "B. Giáo dục chuyên nghiệp | 81"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Cử nhân Hóa học cần học những học phần tiếng Anh nào và chuẩn đầu ra tiếng Anh được nêu ra sao?",
+      "gold_answer": "Sinh viên học Tiếng Anh 1 và Tiếng Anh 2, mỗi học phần 3 tín chỉ; chuẩn đầu ra yêu cầu sử dụng tiếng Anh hiệu quả trong công việc và đạt TOEIC từ 500 trở lên.",
+      "evidence_chunk_ids": [
+        "e15ef2a2-03a3-4f1c-a871-2e34895e78cf",
+        "abc306bc-fcce-47a9-a4ce-830e0789fb82"
+      ],
+      "ground_truth_context": [
+        "FL1100 | Tiếng Anh 1 | 3(0-6-0-6) | 1; FL1101 | Tiếng Anh 2 | 3(0-6-0-6) | 2",
+        "Sử dụng tiếng Anh hiệu quả trong công việc, đạt điểm TOEIC từ 500 trở lên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên Hóa học muốn tốt nghiệp theo hướng cử nhân thay vì học tích hợp, các học phần cuối khóa tương ứng là gì?",
+      "gold_answer": "Sinh viên tốt nghiệp cử nhân thực hiện Thực tập kỹ thuật CH3902 2 tín chỉ ở kỳ 6 và Đồ án cử nhân CH4901 6 tín chỉ ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "22eb04b1-1a90-492e-9482-0bfc9160ac9b"
+      ],
+      "ground_truth_context": [
+        "B4.1. Tốt nghiệp cử nhân",
+        "CH3902 | Thực tập kỹ thuật | 2 | 6",
+        "CH4901 | Đồ án cử nhân | 6 | 8"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên Hóa học học tích hợp Cử nhân - Thạc sĩ, đồ án nghiên cứu ở bậc cử nhân liên quan thế nào đến phần thạc sĩ?",
+      "gold_answer": "Ở bậc cử nhân, sinh viên học tích hợp thực hiện Đồ án nghiên cứu CH4903 8 tín chỉ ở kỳ 8; ở bậc thạc sĩ, luận văn thạc sĩ khoa học có thể phát triển từ nội dung Đồ án nghiên cứu bậc cử nhân.",
+      "evidence_chunk_ids": [
+        "f54e9181-d718-44bf-9931-5867ae63d315",
+        "22eb04b1-1a90-492e-9482-0bfc9160ac9b"
+      ],
+      "ground_truth_context": [
+        "CH4903 | Đồ án nghiên cứu | 8(0-0-16-16) | 8",
+        "Nội dung luận văn thạc sĩ có thể được phát triển từ nội dung Đồ án nghiên cứu tại bậc học cử nhân"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "So với bậc cử nhân, bậc thạc sĩ Hóa học nhấn mạnh thêm năng lực nghiên cứu nào?",
+      "gold_answer": "Bậc thạc sĩ nhấn mạnh năng lực làm việc độc lập, sáng tạo, tự đào tạo, nghiên cứu khoa học, khám phá tri thức, tự cập nhật kiến thức và giải quyết vấn đề thực tế trong lĩnh vực Hóa học.",
+      "evidence_chunk_ids": [
+        "3684d6b5-9e0c-4071-8391-0d0876fea639",
+        "66621ec6-c8c9-4972-aeba-4f4288d3bac0"
+      ],
+      "ground_truth_context": [
+        "Có khả năng làm việc độc lập, sáng tạo và khả năng tự đào tạo",
+        "Có khả năng độc lập, sáng tạo trong nghiên cứu khoa học và khám phá tri thức"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Các nhóm kiến thức cử nhân Hóa học gồm giáo dục đại cương, cơ sở ngành, tự chọn định hướng và đồ án nghiên cứu có số tín chỉ như thế nào?",
+      "gold_answer": "Giáo dục đại cương có 51 tín chỉ, cơ sở và cốt lõi ngành có 48 tín chỉ trong cấu trúc chung, tự chọn theo định hướng có 16 tín chỉ và đồ án nghiên cứu có 8 tín chỉ.",
+      "evidence_chunk_ids": [
+        "c0ef97e2-bef0-4ddd-8edf-a81ed6438900"
+      ],
+      "ground_truth_context": [
+        "A. Giáo dục đại cương | 51",
+        "B1. Cơ sở và cốt lõi ngành | 48",
+        "B3. Tự chọn theo định hướng | 16",
+        "B4. Đồ án nghiên cứu | 8"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_009",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Hóa học học các học phần Hóa lý và thí nghiệm Hóa lý ở những kỳ nào?",
+      "gold_answer": "Hóa lý I và Thí nghiệm Hóa lý I học ở kỳ 4; Hóa lý II và Thí nghiệm Hóa lý II học ở kỳ 5.",
+      "evidence_chunk_ids": [
+        "3c9ee547-1dc1-4387-b1c4-d2c0812b6848"
+      ],
+      "ground_truth_context": [
+        "CH3042 | Hóa lý I | 3(3-1-0-6) | 4",
+        "CH3052 | Thí nghiệm Hóa lý I | 1(0-0-2-2) | 4",
+        "CH3061 | Hóa lý II | 3(3-1-0-6) | 5",
+        "CH3062 | Thí nghiệm Hóa lý II | 1(0-0-2-2) | 5"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_010",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Hóa học học các học phần Hóa hữu cơ và thí nghiệm Hóa hữu cơ ở kỳ nào?",
+      "gold_answer": "Hóa Hữu cơ I và TN Hóa hữu cơ I học ở kỳ 5; Hóa Hữu cơ II và TN Hóa hữu cơ II học ở kỳ 6.",
+      "evidence_chunk_ids": [
+        "3c9ee547-1dc1-4387-b1c4-d2c0812b6848"
+      ],
+      "ground_truth_context": [
+        "CH3202 | Hóa Hữu cơ I | 3(3-1-0-6) | 5",
+        "CH3231 | TN Hóa hữu cơ I | 1(0-0-2-2) | 5",
+        "CH3203 | Hóa Hữu cơ II | 2(2-1-0-4) | 6",
+        "CH3232 | TN Hóa hữu cơ II | 1(0-0-2-2) | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_011",
+      "question_type": "multi_hop",
+      "question": "Ở bậc thạc sĩ Hóa học, kiến thức ngành rộng và kiến thức ngành nâng cao lần lượt có bao nhiêu tín chỉ?",
+      "gold_answer": "Kiến thức ngành rộng có 12 tín chỉ, còn kiến thức ngành nâng cao có 22 tín chỉ.",
+      "evidence_chunk_ids": [
+        "f54e9181-d718-44bf-9931-5867ae63d315"
+      ],
+      "ground_truth_context": [
+        "D. Kiến thức ngành rộng | 12",
+        "E. Kiến thức ngành nâng cao | 22"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_012",
+      "question_type": "multi_hop",
+      "question": "Sinh viên thạc sĩ Hóa học phải chọn bao nhiêu tín chỉ tự chọn định hướng nghiên cứu và luận văn thạc sĩ có bao nhiêu tín chỉ?",
+      "gold_answer": "Sinh viên chọn 8 tín chỉ tự chọn theo định hướng nghiên cứu và thực hiện luận văn thạc sĩ khoa học 15 tín chỉ.",
+      "evidence_chunk_ids": [
+        "f54e9181-d718-44bf-9931-5867ae63d315",
+        "6a9a15ac-7c3b-484b-84f3-e1529f248438"
+      ],
+      "ground_truth_context": [
+        "F. Tự chọn theo định hướng nghiên cứu | 8",
+        "G. Luận văn thạc sĩ KH | 15"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_multi_hop_013",
+      "question_type": "multi_hop",
+      "question": "Các học phần trong khối kiến thức bổ trợ của Cử nhân Hóa học có thể hỗ trợ những kỹ năng nghề nghiệp nào theo chuẩn đầu ra?",
+      "gold_answer": "Khối kiến thức bổ trợ có Technical Writing and Presentation, kỹ năng mềm, tư duy công nghệ và thiết kế kỹ thuật, văn hóa kinh doanh và tinh thần khởi nghiệp; các học phần này phù hợp với chuẩn đầu ra về giao tiếp, làm việc nhóm, kỹ năng chuyên nghiệp, năng lực khởi nghiệp và học tập suốt đời.",
+      "evidence_chunk_ids": [
+        "03719a5c-c194-4302-b4f4-8ae7daead4ce",
+        "5c318af6-9ed0-41dd-9e90-c3b15bcb5424",
+        "e15ef2a2-03a3-4f1c-a871-2e34895e78cf",
+        "51489c2d-4666-4701-8f96-6bf143edbb4c"
+      ],
+      "ground_truth_context": [
+        "Có kỹ năng xã hội cần thiết... có năng lực khởi nghiệp",
+        "Có được các kỹ năng cá nhân và thái độ... khả năng học tập suốt đời",
+        "Thực hiện thành thạo kỹ năng giao tiếp hiệu quả",
+        "CH2020 | Technical Writing and Presentation; ED3220 | Kỹ năng mềm; EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "hoa_hoc_ch2_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Sinh viên Hóa học CH2 có bắt buộc học tiếng Nhật để tốt nghiệp chương trình tích hợp không?",
+      "gold_answer": "Không có thông tin trong file chunk về yêu cầu bắt buộc học tiếng Nhật để tốt nghiệp chương trình Hóa học CH2.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable",
+      "difficulty": "hard"
+    },
+    {
+      "id": "hoa_hoc_ch2_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Chương trình Hóa học CH2 yêu cầu sinh viên đạt JLPT N3 ở bậc cử nhân đúng không?",
+      "gold_answer": "Không đúng. File chunk chỉ nêu chuẩn tiếng Anh TOEIC từ 500 trở lên cho cử nhân và chuẩn đầu ra B2/đọc hiểu tài liệu chuyên môn bằng tiếng Anh cho thạc sĩ, không nêu yêu cầu JLPT N3.",
+      "evidence_chunk_ids": [
+        "e15ef2a2-03a3-4f1c-a871-2e34895e78cf",
+        "b5c29c7a-d497-42af-9240-be41cbfbc5f5",
+        "f54e9181-d718-44bf-9931-5867ae63d315"
+      ],
+      "ground_truth_context": [
+        "Sử dụng tiếng Anh hiệu quả trong công việc, đạt điểm TOEIC từ 500 trở lên.",
+        "Có khả năng đọc hiểu tài liệu chuyên môn bằng tiếng Anh.",
+        "Tiếng Anh tự học, học viên đạt chuẩn đầu ra B2"
+      ],
+      "is_answerable": false,
+      "reasoning_required": "false_premise",
+      "difficulty": "hard"
+    },
+    {
+      "id": "hoa_hoc_ch2_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Sinh viên Hóa học CH2 học chương trình tích hợp trong 4 năm và nhận bằng kỹ sư Hóa học phải không?",
+      "gold_answer": "Không đúng. Chương trình tích hợp Hóa học CH2 có thời gian đào tạo 5,5 năm và bằng tốt nghiệp là Cử nhân Hóa học & Thạc sĩ khoa học Hóa học.",
+      "evidence_chunk_ids": [
+        "daa5f451-798d-41da-ae73-234e722a4752"
+      ],
+      "ground_truth_context": [
+        "Thời gian đào tạo: 5,5 năm",
+        "Bằng tốt nghiệp: Cử nhân Hóa học & Thạc sĩ khoa học Hóa học"
+      ],
+      "is_answerable": false,
+      "reasoning_required": "false_premise",
+      "difficulty": "hard"
+    },
+    {
+      "id": "hoa_hoc_ch2_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Khối giáo dục chuyên nghiệp của Cử nhân Hóa học có 100 tín chỉ phải không?",
+      "gold_answer": "Không đúng. Khối giáo dục chuyên nghiệp của bậc cử nhân Hóa học có 81 tín chỉ.",
+      "evidence_chunk_ids": [
+        "c0ef97e2-bef0-4ddd-8edf-a81ed6438900"
+      ],
+      "ground_truth_context": [
+        "B. Giáo dục chuyên nghiệp | 81"
+      ],
+      "is_answerable": false,
+      "reasoning_required": "false_premise",
+      "difficulty": "hard"
+    },
+    {
+      "id": "hoa_hoc_ch2_adversarial_005",
+      "question_type": "adversarial",
+      "question": "File chunk có nêu học phí từng tín chỉ của chương trình Hóa học CH2 không?",
+      "gold_answer": "Không có thông tin về học phí từng tín chỉ của chương trình Hóa học CH2 trong file chunk.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable",
+      "difficulty": "hard"
+    },
+    {
+      "id": "hoa_hoc_ch2_adversarial_006",
+      "question_type": "adversarial",
+      "question": "Sinh viên Hóa học CH2 có bắt buộc thực tập tại doanh nghiệp nước ngoài ở kỳ 7 không?",
+      "gold_answer": "Không có thông tin trong file chunk về yêu cầu bắt buộc thực tập tại doanh nghiệp nước ngoài ở kỳ 7.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable",
+      "difficulty": "hard"
+    },
+    {
+      "id": "hoa_hoc_ch2_adversarial_007",
+      "question_type": "adversarial",
+      "question": "Luận văn thạc sĩ Hóa học CH2 chỉ có 6 tín chỉ đúng không?",
+      "gold_answer": "Không đúng. Cấu trúc chương trình thạc sĩ khoa học Hóa học nêu luận văn thạc sĩ KH có 15 tín chỉ.",
+      "evidence_chunk_ids": [
+        "f54e9181-d718-44bf-9931-5867ae63d315"
+      ],
+      "ground_truth_context": [
+        "G. Luận văn thạc sĩ KH | 15"
+      ],
+      "is_answerable": false,
+      "reasoning_required": "false_premise",
+      "difficulty": "hard"
+    }
+  ]
+}

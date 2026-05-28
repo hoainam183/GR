@@ -1,0 +1,478 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "Khung-DGRL-2020-2021_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 18,
+    "multi_hop": 8,
+    "adversarial": 4
+  },
+  "items": [
+    {
+      "id": "Khung-DGRL-2020-2021_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên có GPA học kỳ từ 3.6 trở lên được cộng bao nhiêu điểm rèn luyện ở tiêu chí điểm học tập?",
+      "gold_answer": "Sinh viên có GPA học kỳ từ 3.6 trở lên được cộng 20 điểm ở phần kết quả học tập.",
+      "evidence_chunk_ids": [
+        "54f7e59b-123b-4d33-994b-b10324b83496"
+      ],
+      "ground_truth_context": [
+        "## I. Tiêu chí điểm cộng (Tối đa 100 điểm)\n\n### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**1. Kết quả học tập có điểm trung bình học kỳ (tối đa 24 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_002",
+      "question_type": "simple",
+      "question": "Sinh viên có GPA học kỳ từ 3.2 đến dưới 3.6 được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên có GPA học kỳ từ 3.2 đến dưới 3.6 được cộng 18 điểm.",
+      "evidence_chunk_ids": [
+        "54f7e59b-123b-4d33-994b-b10324b83496"
+      ],
+      "ground_truth_context": [
+        "## I. Tiêu chí điểm cộng (Tối đa 100 điểm)\n\n### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**1. Kết quả học tập có điểm trung bình học kỳ (tối đa 24 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên có GPA học kỳ từ 2.5 đến dưới 3.2 được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên có GPA học kỳ từ 2.5 đến dưới 3.2 được cộng 16 điểm.",
+      "evidence_chunk_ids": [
+        "54f7e59b-123b-4d33-994b-b10324b83496"
+      ],
+      "ground_truth_context": [
+        "## I. Tiêu chí điểm cộng (Tối đa 100 điểm)\n\n### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**1. Kết quả học tập có điểm trung bình học kỳ (tối đa 24 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_004",
+      "question_type": "simple",
+      "question": "Sinh viên có nỗ lực học tập như GPA kỳ đánh giá cao hơn kỳ trước được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên có nỗ lực học tập được cộng 8 điểm.",
+      "evidence_chunk_ids": [
+        "54f7e59b-123b-4d33-994b-b10324b83496"
+      ],
+      "ground_truth_context": [
+        "## I. Tiêu chí điểm cộng (Tối đa 100 điểm)\n\n### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**1. Kết quả học tập có điểm trung bình học kỳ (tối đa 24 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_005",
+      "question_type": "simple",
+      "question": "Sinh viên đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 trở lên được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 trở lên được cộng 2 điểm.",
+      "evidence_chunk_ids": [
+        "131320f4-ddb2-4150-8c33-6e2bb266b41b"
+      ],
+      "ground_truth_context": [
+        "### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**2. Trình độ ngoại ngữ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Đạt yêu cầu tiền đồ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |\n\n**3. Tham gia các hoạt động học thuật (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến nghiên cứu khoa học, học thuật, chuyên môn | MC | 3 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_006",
+      "question_type": "simple",
+      "question": "Sinh viên đạt yêu cầu tiến độ của chương trình đào tạo được cộng bao nhiêu điểm ở phần trình độ ngoại ngữ?",
+      "gold_answer": "Sinh viên đạt yêu cầu tiến độ của chương trình đào tạo được cộng 4 điểm.",
+      "evidence_chunk_ids": [
+        "131320f4-ddb2-4150-8c33-6e2bb266b41b"
+      ],
+      "ground_truth_context": [
+        "### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**2. Trình độ ngoại ngữ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Đạt yêu cầu tiền đồ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |\n\n**3. Tham gia các hoạt động học thuật (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến nghiên cứu khoa học, học thuật, chuyên môn | MC | 3 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_007",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia hoạt động nghiên cứu khoa học hoặc học thuật được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên tham gia hoạt động, sự kiện liên quan đến nghiên cứu khoa học, học thuật hoặc chuyên môn được cộng 3 điểm.",
+      "evidence_chunk_ids": [
+        "131320f4-ddb2-4150-8c33-6e2bb266b41b"
+      ],
+      "ground_truth_context": [
+        "### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**2. Trình độ ngoại ngữ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Đạt yêu cầu tiền đồ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |\n\n**3. Tham gia các hoạt động học thuật (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến nghiên cứu khoa học, học thuật, chuyên môn | MC | 3 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_008",
+      "question_type": "simple",
+      "question": "Sinh viên là thành viên CLB học thuật, lab nghiên cứu, nhóm nghiên cứu hoặc nhóm khởi nghiệp được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên là thành viên CLB học thuật, lab nghiên cứu, nhóm nghiên cứu hoặc nhóm khởi nghiệp được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "131320f4-ddb2-4150-8c33-6e2bb266b41b"
+      ],
+      "ground_truth_context": [
+        "### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**2. Trình độ ngoại ngữ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Đạt yêu cầu tiền đồ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |\n\n**3. Tham gia các hoạt động học thuật (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến nghiên cứu khoa học, học thuật, chuyên môn | MC | 3 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia Sinh hoạt công dân do Trường hoặc Viện tổ chức được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên tham gia Sinh hoạt công dân do Trường hoặc Viện tổ chức được cộng 7 điểm.",
+      "evidence_chunk_ids": [
+        "7ceb5dc0-a807-4b9f-bb5a-6ab2866c8d8e"
+      ],
+      "ground_truth_context": [
+        "### TC2. Điểm về ý thức tổ chức kỷ luật (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động bắt buộc (tối đa 20 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |\n| Tham gia họp lớp, chi đoàn, chi bộ do Viện, Lớp, Cấp ủy tổ chức | MC | 7 |\n| Nắm vững quy định và quy chế của Nhà trường | MC | 6 |\n\n**2. Tham gia các hoạt động bổ trợ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp | MC | 6 |\n| Tham gia hội thảo, khóa đào tạo tăng cường kỹ năng mềm, ý thức làm việc | MC | 3 |\n| Tham gia các buổi nói chuyện thời sự, phòng chống tội phạm và tệ nạn xã hội | MC | 3 |\n| Tham gia hoạt động hưởng ứng, sự kiện chính trị - xã hội | MC | 3 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia họp lớp, chi đoàn hoặc chi bộ được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia họp lớp, chi đoàn hoặc chi bộ do Viện, Lớp, Cấp ủy tổ chức được cộng 7 điểm.",
+      "evidence_chunk_ids": [
+        "7ceb5dc0-a807-4b9f-bb5a-6ab2866c8d8e"
+      ],
+      "ground_truth_context": [
+        "### TC2. Điểm về ý thức tổ chức kỷ luật (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động bắt buộc (tối đa 20 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |\n| Tham gia họp lớp, chi đoàn, chi bộ do Viện, Lớp, Cấp ủy tổ chức | MC | 7 |\n| Nắm vững quy định và quy chế của Nhà trường | MC | 6 |\n\n**2. Tham gia các hoạt động bổ trợ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp | MC | 6 |\n| Tham gia hội thảo, khóa đào tạo tăng cường kỹ năng mềm, ý thức làm việc | MC | 3 |\n| Tham gia các buổi nói chuyện thời sự, phòng chống tội phạm và tệ nạn xã hội | MC | 3 |\n| Tham gia hoạt động hưởng ứng, sự kiện chính trị - xã hội | MC | 3 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_011",
+      "question_type": "simple",
+      "question": "Sinh viên nắm vững quy định và quy chế của Nhà trường được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên nắm vững quy định và quy chế của Nhà trường được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "7ceb5dc0-a807-4b9f-bb5a-6ab2866c8d8e"
+      ],
+      "ground_truth_context": [
+        "### TC2. Điểm về ý thức tổ chức kỷ luật (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động bắt buộc (tối đa 20 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |\n| Tham gia họp lớp, chi đoàn, chi bộ do Viện, Lớp, Cấp ủy tổ chức | MC | 7 |\n| Nắm vững quy định và quy chế của Nhà trường | MC | 6 |\n\n**2. Tham gia các hoạt động bổ trợ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp | MC | 6 |\n| Tham gia hội thảo, khóa đào tạo tăng cường kỹ năng mềm, ý thức làm việc | MC | 3 |\n| Tham gia các buổi nói chuyện thời sự, phòng chống tội phạm và tệ nạn xã hội | MC | 3 |\n| Tham gia hoạt động hưởng ứng, sự kiện chính trị - xã hội | MC | 3 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "7ceb5dc0-a807-4b9f-bb5a-6ab2866c8d8e"
+      ],
+      "ground_truth_context": [
+        "### TC2. Điểm về ý thức tổ chức kỷ luật (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động bắt buộc (tối đa 20 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |\n| Tham gia họp lớp, chi đoàn, chi bộ do Viện, Lớp, Cấp ủy tổ chức | MC | 7 |\n| Nắm vững quy định và quy chế của Nhà trường | MC | 6 |\n\n**2. Tham gia các hoạt động bổ trợ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp | MC | 6 |\n| Tham gia hội thảo, khóa đào tạo tăng cường kỹ năng mềm, ý thức làm việc | MC | 3 |\n| Tham gia các buổi nói chuyện thời sự, phòng chống tội phạm và tệ nạn xã hội | MC | 3 |\n| Tham gia hoạt động hưởng ứng, sự kiện chính trị - xã hội | MC | 3 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_013",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia hoạt động văn hóa của Viện hoặc Trường được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên tham gia hoạt động văn hóa của Viện hoặc Trường được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "db94c352-ef3c-4b4d-99ec-4a5707cf813f"
+      ],
+      "ground_truth_context": [
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động phong trào văn hóa, thể thao (tối đa 10 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động văn hóa (các sự kiện/phong trào văn nghệ, thi SVBK..., của Viện, Trường) | MC | 6 |\n| Tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_014",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia hoạt động thể thao hoặc giải thể thao của Viện, Trường được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên tham gia hoạt động thể thao hoặc giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "db94c352-ef3c-4b4d-99ec-4a5707cf813f"
+      ],
+      "ground_truth_context": [
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động phong trào văn hóa, thể thao (tối đa 10 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động văn hóa (các sự kiện/phong trào văn nghệ, thi SVBK..., của Viện, Trường) | MC | 6 |\n| Tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_015",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia hiến máu nhân đạo được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "9f8637c4-3be0-4e7c-8815-f0afbc56c26c"
+      ],
+      "ground_truth_context": [
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**2. Tham gia các hoạt động xã hội (tối đa 9 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia các diễn đàn sinh viên, các buổi toạ đàm với lãnh đạo Viện, Trường | MC | 3 |\n| Có hành động tích cực trên không gian mạng (hoạt động online) phù hợp với chủ trương của Nhà trường, Nhà nước được tập thể ghi nhận | MC | 3 |\n| Tham gia hoạt động tình nguyện (tình nguyện tại địa phương, công trường ATGT, hỗ trợ Công tác tổ chức các hoạt động/sự kiện của Nhà trường, Viện) | MC | 3 |\n| Tham gia phong trào \"cốc trà đá vì cộng đồng\", \"tươi trẻ Bách khoa Nhân ái\" | MC | 3 |\n| Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6 |\n| Tham gia đội tình nguyện của Viện, Đoàn TN - HSV, tham gia chiến dịch tình nguyện \"mùa hè xanh\", \"tình nguyện mùa đông\", \"tiếp sức mùa thi\".... | MC | 6 |\n\n**3. Tham gia công tác cán bộ tại Lớp, tổ chức Đoàn - Hội, Tổ/Đội/CLB hợp pháp (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận | MC | 6 |\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành tốt nhiệm vụ được tập thể công nhận | MC | 4 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_016",
+      "question_type": "simple",
+      "question": "Sinh viên khai báo thông tin liên lạc và nơi cư trú theo yêu cầu của Nhà trường được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên khai báo thông tin liên lạc và nơi cư trú theo yêu cầu của Nhà trường được cộng 4 điểm.",
+      "evidence_chunk_ids": [
+        "1d1055b3-f8e7-4cf0-a72d-563f52b07cb1"
+      ],
+      "ground_truth_context": [
+        "### TC4. Điểm ý thức công dân trong quan hệ cộng đồng (Tối đa 20 điểm)\n\n**1. Các hoạt động liên quan đến trách nhiệm công dân (tối đa 16 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú | MC | 8 |\n| Khai báo thông tin liên lạc và nơi cư trú theo yêu cầu của Nhà trường | * | 4 |\n| Tham gia tuyên truyền chủ trương của Đảng, chính sách pháp luật của Nhà nước, quy định của nơi cư trú, quy định và quy chế của Nhà trường được địa phương, Nhà trường công nhận | MC | 4 |\n| Tham gia giữ gìn an ninh - trật tự, bảo vệ sinh cảnh quan - môi trường, nếp sống văn minh nơi công cộng, quảng bá hình ảnh đẹp của Nhà trường được địa phương, Nhà trường công nhận | MC | 4 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên vi phạm quy chế thi từ mức cảnh cáo trở lên bị trừ bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên vi phạm quy chế thi từ mức cảnh cáo trở lên bị trừ 10 điểm.",
+      "evidence_chunk_ids": [
+        "133a4814-8e26-4df3-a5a2-3e9204eae9fb"
+      ],
+      "ground_truth_context": [
+        "## II. Sinh viên bị trừ điểm nếu vi phạm các quy định sau đây\n\n**1. Vi phạm trong học tập:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10 |\n| Bị kỷ luật khi thi hộ | * | -20 |\n\n**2. Vi phạm quy định về an ninh trật tự, an toàn giao thông, giữ gìn vệ sinh, cảnh quan môi trường, nếp sống văn minh bị Hội đồng kỷ luật của Trường ra quyết định kỷ luật tương ứng với các mức:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm ở mức độ Khiển trách | * | -6 |\n| Vi phạm ở mức độ Cảnh cáo | * | -9 |\n| Vi phạm ở mức độ Kỷ luật buộc thôi học, tạm dừng | * | -12 |\n\n**3. Vi phạm pháp luật:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm pháp luật thuộc nhóm tội danh hình sự | * | -50 |\n\n**Tổng điểm trừ tối đa: -50 điểm**\n\n---\n\n**Ghi chú:**\n- (*): Dựa trên hệ thống quản lý\n- (MC): Minh chứng được cấp khi tham gia hoạt động"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_018",
+      "question_type": "simple",
+      "question": "Sinh viên bị kỷ luật khi thi hộ bị trừ bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên bị kỷ luật khi thi hộ bị trừ 20 điểm.",
+      "evidence_chunk_ids": [
+        "133a4814-8e26-4df3-a5a2-3e9204eae9fb"
+      ],
+      "ground_truth_context": [
+        "## II. Sinh viên bị trừ điểm nếu vi phạm các quy định sau đây\n\n**1. Vi phạm trong học tập:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10 |\n| Bị kỷ luật khi thi hộ | * | -20 |\n\n**2. Vi phạm quy định về an ninh trật tự, an toàn giao thông, giữ gìn vệ sinh, cảnh quan môi trường, nếp sống văn minh bị Hội đồng kỷ luật của Trường ra quyết định kỷ luật tương ứng với các mức:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm ở mức độ Khiển trách | * | -6 |\n| Vi phạm ở mức độ Cảnh cáo | * | -9 |\n| Vi phạm ở mức độ Kỷ luật buộc thôi học, tạm dừng | * | -12 |\n\n**3. Vi phạm pháp luật:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm pháp luật thuộc nhóm tội danh hình sự | * | -50 |\n\n**Tổng điểm trừ tối đa: -50 điểm**\n\n---\n\n**Ghi chú:**\n- (*): Dựa trên hệ thống quản lý\n- (MC): Minh chứng được cấp khi tham gia hoạt động"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Sinh viên vừa có GPA 3.4 vừa đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 trở lên thì được cộng tối đa bao nhiêu điểm từ hai tiêu chí học tập và ngoại ngữ?",
+      "gold_answer": "GPA 3.4 thuộc mức 3.2 ≤ GPA < 3.6 nên được cộng 18 điểm; chứng chỉ ngoại ngữ tương đương TOEIC 600 trở lên được cộng 2 điểm. Tổng tối đa từ hai tiêu chí là 20 điểm.",
+      "evidence_chunk_ids": [
+        "54f7e59b-123b-4d33-994b-b10324b83496",
+        "131320f4-ddb2-4150-8c33-6e2bb266b41b"
+      ],
+      "ground_truth_context": [
+        "## I. Tiêu chí điểm cộng (Tối đa 100 điểm)\n\n### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**1. Kết quả học tập có điểm trung bình học kỳ (tối đa 24 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |",
+        "### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**2. Trình độ ngoại ngữ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Đạt yêu cầu tiền đồ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |\n\n**3. Tham gia các hoạt động học thuật (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến nghiên cứu khoa học, học thuật, chuyên môn | MC | 3 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên có GPA 3.7, đồng thời duy trì GPA trên 3.6 so với kỳ trước thì phần kết quả học tập và nỗ lực học tập có thể cộng tổng bao nhiêu điểm?",
+      "gold_answer": "GPA từ 3.6 trở lên được cộng 20 điểm; nỗ lực học tập như duy trì GPA trên 3.6 được cộng 8 điểm. Tổng hai mục là 28 điểm.",
+      "evidence_chunk_ids": [
+        "54f7e59b-123b-4d33-994b-b10324b83496"
+      ],
+      "ground_truth_context": [
+        "## I. Tiêu chí điểm cộng (Tối đa 100 điểm)\n\n### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**1. Kết quả học tập có điểm trung bình học kỳ (tối đa 24 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên tham gia Sinh hoạt công dân và họp lớp trong kỳ đánh giá thì hai hoạt động bắt buộc cộng tổng bao nhiêu điểm?",
+      "gold_answer": "Tham gia Sinh hoạt công dân được cộng 7 điểm và tham gia họp lớp, chi đoàn, chi bộ được cộng 7 điểm. Tổng là 14 điểm.",
+      "evidence_chunk_ids": [
+        "7ceb5dc0-a807-4b9f-bb5a-6ab2866c8d8e"
+      ],
+      "ground_truth_context": [
+        "### TC2. Điểm về ý thức tổ chức kỷ luật (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động bắt buộc (tối đa 20 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |\n| Tham gia họp lớp, chi đoàn, chi bộ do Viện, Lớp, Cấp ủy tổ chức | MC | 7 |\n| Nắm vững quy định và quy chế của Nhà trường | MC | 6 |\n\n**2. Tham gia các hoạt động bổ trợ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp | MC | 6 |\n| Tham gia hội thảo, khóa đào tạo tăng cường kỹ năng mềm, ý thức làm việc | MC | 3 |\n| Tham gia các buổi nói chuyện thời sự, phòng chống tội phạm và tệ nạn xã hội | MC | 3 |\n| Tham gia hoạt động hưởng ứng, sự kiện chính trị - xã hội | MC | 3 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên tham gia thực tập tăng cường tại doanh nghiệp và tham gia hội thảo kỹ năng mềm thì phần hoạt động bổ trợ cộng tối đa bao nhiêu điểm?",
+      "gold_answer": "Thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp được cộng 6 điểm; hội thảo hoặc khóa đào tạo kỹ năng mềm được cộng 3 điểm. Tổng theo từng tiêu chí là 9 điểm, nhưng nhóm hoạt động bổ trợ có giới hạn tối đa 6 điểm.",
+      "evidence_chunk_ids": [
+        "7ceb5dc0-a807-4b9f-bb5a-6ab2866c8d8e"
+      ],
+      "ground_truth_context": [
+        "### TC2. Điểm về ý thức tổ chức kỷ luật (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động bắt buộc (tối đa 20 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |\n| Tham gia họp lớp, chi đoàn, chi bộ do Viện, Lớp, Cấp ủy tổ chức | MC | 7 |\n| Nắm vững quy định và quy chế của Nhà trường | MC | 6 |\n\n**2. Tham gia các hoạt động bổ trợ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp | MC | 6 |\n| Tham gia hội thảo, khóa đào tạo tăng cường kỹ năng mềm, ý thức làm việc | MC | 3 |\n| Tham gia các buổi nói chuyện thời sự, phòng chống tội phạm và tệ nạn xã hội | MC | 3 |\n| Tham gia hoạt động hưởng ứng, sự kiện chính trị - xã hội | MC | 3 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên tham gia hoạt động văn hóa của Trường và hiến máu nhân đạo thì hai hoạt động phong trào, xã hội cộng tổng bao nhiêu điểm?",
+      "gold_answer": "Tham gia hoạt động văn hóa được cộng 6 điểm; tham gia hiến máu nhân đạo được cộng 6 điểm. Tổng hai hoạt động là 12 điểm.",
+      "evidence_chunk_ids": [
+        "db94c352-ef3c-4b4d-99ec-4a5707cf813f",
+        "9f8637c4-3be0-4e7c-8815-f0afbc56c26c"
+      ],
+      "ground_truth_context": [
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động phong trào văn hóa, thể thao (tối đa 10 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động văn hóa (các sự kiện/phong trào văn nghệ, thi SVBK..., của Viện, Trường) | MC | 6 |\n| Tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp | MC | 6 |",
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**2. Tham gia các hoạt động xã hội (tối đa 9 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia các diễn đàn sinh viên, các buổi toạ đàm với lãnh đạo Viện, Trường | MC | 3 |\n| Có hành động tích cực trên không gian mạng (hoạt động online) phù hợp với chủ trương của Nhà trường, Nhà nước được tập thể ghi nhận | MC | 3 |\n| Tham gia hoạt động tình nguyện (tình nguyện tại địa phương, công trường ATGT, hỗ trợ Công tác tổ chức các hoạt động/sự kiện của Nhà trường, Viện) | MC | 3 |\n| Tham gia phong trào \"cốc trà đá vì cộng đồng\", \"tươi trẻ Bách khoa Nhân ái\" | MC | 3 |\n| Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6 |\n| Tham gia đội tình nguyện của Viện, Đoàn TN - HSV, tham gia chiến dịch tình nguyện \"mùa hè xanh\", \"tình nguyện mùa đông\", \"tiếp sức mùa thi\".... | MC | 6 |\n\n**3. Tham gia công tác cán bộ tại Lớp, tổ chức Đoàn - Hội, Tổ/Đội/CLB hợp pháp (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận | MC | 6 |\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành tốt nhiệm vụ được tập thể công nhận | MC | 4 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên làm cán bộ lớp hoàn thành tốt nhiệm vụ và tham gia đội tình nguyện của Viện thì được cộng tổng bao nhiêu điểm từ hai hoạt động?",
+      "gold_answer": "Cán bộ lớp hoàn thành tốt nhiệm vụ được cộng 4 điểm; tham gia đội tình nguyện của Viện hoặc Đoàn TN - HSV được cộng 6 điểm. Tổng là 10 điểm.",
+      "evidence_chunk_ids": [
+        "9f8637c4-3be0-4e7c-8815-f0afbc56c26c"
+      ],
+      "ground_truth_context": [
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**2. Tham gia các hoạt động xã hội (tối đa 9 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia các diễn đàn sinh viên, các buổi toạ đàm với lãnh đạo Viện, Trường | MC | 3 |\n| Có hành động tích cực trên không gian mạng (hoạt động online) phù hợp với chủ trương của Nhà trường, Nhà nước được tập thể ghi nhận | MC | 3 |\n| Tham gia hoạt động tình nguyện (tình nguyện tại địa phương, công trường ATGT, hỗ trợ Công tác tổ chức các hoạt động/sự kiện của Nhà trường, Viện) | MC | 3 |\n| Tham gia phong trào \"cốc trà đá vì cộng đồng\", \"tươi trẻ Bách khoa Nhân ái\" | MC | 3 |\n| Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6 |\n| Tham gia đội tình nguyện của Viện, Đoàn TN - HSV, tham gia chiến dịch tình nguyện \"mùa hè xanh\", \"tình nguyện mùa đông\", \"tiếp sức mùa thi\".... | MC | 6 |\n\n**3. Tham gia công tác cán bộ tại Lớp, tổ chức Đoàn - Hội, Tổ/Đội/CLB hợp pháp (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận | MC | 6 |\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành tốt nhiệm vụ được tập thể công nhận | MC | 4 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đạt giải trong cuộc thi Olympic và đồng thời có chứng chỉ ngoại ngữ tương đương TOEIC 600 trở lên thì được cộng bao nhiêu điểm từ hai thành tích?",
+      "gold_answer": "Đạt giải trong cuộc thi Olympic thuộc nhóm thành tích học tập, NCKH và rèn luyện được cộng 4 điểm; chứng chỉ ngoại ngữ tương đương TOEIC 600 trở lên được cộng 2 điểm. Tổng là 6 điểm.",
+      "evidence_chunk_ids": [
+        "ab5e6161-cd44-4eb0-a93a-915767131756",
+        "131320f4-ddb2-4150-8c33-6e2bb266b41b"
+      ],
+      "ground_truth_context": [
+        "### TC4. Điểm ý thức công dân trong quan hệ cộng đồng (Tối đa 20 điểm)\n\n**2. Có các thành tích trong học tập, NCKH và rèn luyện (tối đa 4 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Đạt giải trong các cuộc thi SV NCKH, Olympic, thi khoa học kỹ thuật | MC | 4 |\n| Nhận bằng khen, huy chương tương đương cấp Bộ trở lên | MC | 4 |\n| Có chứng nhận tham gia lớp bồi dưỡng nhận thức về Đảng từ mức Khá trở lên | MC | 4 |\n| Được kết nạp Đảng Cộng sản Việt Nam | MC | 4 |\n| Đạt danh hiệu Sinh viên năm tốt cấp Trường trở lên, Giấy khen Cán bộ đoàn học tốt, Giấy khen Sinh viên tích cực đóng góp hoạt động của Nhà trường | MC | 4 |\n| Được khen thưởng khi tham gia tuyên truyền chủ trương của Đảng, chính sách pháp luật của Nhà nước, quy định của nơi cư trú, giữ gìn an ninh - trật tự, bảo vệ sinh cảnh quan - môi trường, nếp sống văn minh nơi công cộng, hoạt động xã hội | MC | 4 |\n\n**Tổng điểm cộng tối đa: 100 điểm**\n\n---",
+        "### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**2. Trình độ ngoại ngữ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Đạt yêu cầu tiền đồ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |\n\n**3. Tham gia các hoạt động học thuật (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến nghiên cứu khoa học, học thuật, chuyên môn | MC | 3 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên bị cảnh cáo do vi phạm an ninh trật tự và đồng thời bị cảnh cáo do vi phạm quy chế thi thì tổng điểm bị trừ là bao nhiêu?",
+      "gold_answer": "Vi phạm an ninh trật tự ở mức cảnh cáo bị trừ 9 điểm; vi phạm quy chế thi từ cảnh cáo trở lên bị trừ 10 điểm. Tổng điểm trừ là 19 điểm.",
+      "evidence_chunk_ids": [
+        "133a4814-8e26-4df3-a5a2-3e9204eae9fb"
+      ],
+      "ground_truth_context": [
+        "## II. Sinh viên bị trừ điểm nếu vi phạm các quy định sau đây\n\n**1. Vi phạm trong học tập:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10 |\n| Bị kỷ luật khi thi hộ | * | -20 |\n\n**2. Vi phạm quy định về an ninh trật tự, an toàn giao thông, giữ gìn vệ sinh, cảnh quan môi trường, nếp sống văn minh bị Hội đồng kỷ luật của Trường ra quyết định kỷ luật tương ứng với các mức:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm ở mức độ Khiển trách | * | -6 |\n| Vi phạm ở mức độ Cảnh cáo | * | -9 |\n| Vi phạm ở mức độ Kỷ luật buộc thôi học, tạm dừng | * | -12 |\n\n**3. Vi phạm pháp luật:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm pháp luật thuộc nhóm tội danh hình sự | * | -50 |\n\n**Tổng điểm trừ tối đa: -50 điểm**\n\n---\n\n**Ghi chú:**\n- (*): Dựa trên hệ thống quản lý\n- (MC): Minh chứng được cấp khi tham gia hoạt động"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Sinh viên chỉ cần tham gia một hoạt động văn hóa là chắc chắn đạt tối đa 25 điểm ở TC3 phải không?",
+      "gold_answer": "Không. Tham gia hoạt động văn hóa được cộng 6 điểm, còn TC3 có nhiều nhóm tiêu chí và tổng tối đa 25 điểm; một hoạt động văn hóa không đủ để đạt tối đa TC3.",
+      "evidence_chunk_ids": [
+        "db94c352-ef3c-4b4d-99ec-4a5707cf813f",
+        "9f8637c4-3be0-4e7c-8815-f0afbc56c26c"
+      ],
+      "ground_truth_context": [
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động phong trào văn hóa, thể thao (tối đa 10 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động văn hóa (các sự kiện/phong trào văn nghệ, thi SVBK..., của Viện, Trường) | MC | 6 |\n| Tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp | MC | 6 |",
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**2. Tham gia các hoạt động xã hội (tối đa 9 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia các diễn đàn sinh viên, các buổi toạ đàm với lãnh đạo Viện, Trường | MC | 3 |\n| Có hành động tích cực trên không gian mạng (hoạt động online) phù hợp với chủ trương của Nhà trường, Nhà nước được tập thể ghi nhận | MC | 3 |\n| Tham gia hoạt động tình nguyện (tình nguyện tại địa phương, công trường ATGT, hỗ trợ Công tác tổ chức các hoạt động/sự kiện của Nhà trường, Viện) | MC | 3 |\n| Tham gia phong trào \"cốc trà đá vì cộng đồng\", \"tươi trẻ Bách khoa Nhân ái\" | MC | 3 |\n| Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6 |\n| Tham gia đội tình nguyện của Viện, Đoàn TN - HSV, tham gia chiến dịch tình nguyện \"mùa hè xanh\", \"tình nguyện mùa đông\", \"tiếp sức mùa thi\".... | MC | 6 |\n\n**3. Tham gia công tác cán bộ tại Lớp, tổ chức Đoàn - Hội, Tổ/Đội/CLB hợp pháp (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận | MC | 6 |\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành tốt nhiệm vụ được tập thể công nhận | MC | 4 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Sinh viên có GPA 3.6 được cộng 30 điểm trọn vẹn cho TC1 điểm học tập phải không?",
+      "gold_answer": "Không. GPA từ 3.6 trở lên được cộng 20 điểm trong mục kết quả học tập. TC1 điểm học tập tối đa 30 điểm còn bao gồm các mục khác như ngoại ngữ và hoạt động học thuật.",
+      "evidence_chunk_ids": [
+        "54f7e59b-123b-4d33-994b-b10324b83496",
+        "131320f4-ddb2-4150-8c33-6e2bb266b41b"
+      ],
+      "ground_truth_context": [
+        "## I. Tiêu chí điểm cộng (Tối đa 100 điểm)\n\n### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**1. Kết quả học tập có điểm trung bình học kỳ (tối đa 24 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| GPA ≥ 3.6 | * | 20 |\n| 3.2 ≤ GPA < 3.6 | * | 18 |\n| 2.5 ≤ GPA < 3.2 | * | 16 |\n| 2.0 ≤ GPA < 2.5 | * | 14 |\n| 1.5 ≤ GPA < 2.0 | * | 12 |\n| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |",
+        "### TC1. Điểm học tập (Tối đa 30 điểm)\n\n**2. Trình độ ngoại ngữ (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Đạt yêu cầu tiền đồ của chương trình đào tạo | * | 4 |\n| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |\n\n**3. Tham gia các hoạt động học thuật (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động, sự kiện liên quan đến nghiên cứu khoa học, học thuật, chuyên môn | MC | 3 |\n| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |\n| Tham gia công bố khoa học tại Hội nghị hoặc tạp chí khoa học chuyên ngành | MC | 6 |\n| Tham gia các cuộc thi Olympic cấp trường, cấp quốc gia, quốc tế | MC | 6 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Sinh viên bị kỷ luật thi hộ chỉ bị trừ 10 điểm giống vi phạm quy chế thi từ cảnh cáo trở lên phải không?",
+      "gold_answer": "Không. Vi phạm quy chế thi từ cảnh cáo trở lên bị trừ 10 điểm, còn bị kỷ luật khi thi hộ bị trừ 20 điểm.",
+      "evidence_chunk_ids": [
+        "133a4814-8e26-4df3-a5a2-3e9204eae9fb"
+      ],
+      "ground_truth_context": [
+        "## II. Sinh viên bị trừ điểm nếu vi phạm các quy định sau đây\n\n**1. Vi phạm trong học tập:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10 |\n| Bị kỷ luật khi thi hộ | * | -20 |\n\n**2. Vi phạm quy định về an ninh trật tự, an toàn giao thông, giữ gìn vệ sinh, cảnh quan môi trường, nếp sống văn minh bị Hội đồng kỷ luật của Trường ra quyết định kỷ luật tương ứng với các mức:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm ở mức độ Khiển trách | * | -6 |\n| Vi phạm ở mức độ Cảnh cáo | * | -9 |\n| Vi phạm ở mức độ Kỷ luật buộc thôi học, tạm dừng | * | -12 |\n\n**3. Vi phạm pháp luật:**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Vi phạm pháp luật thuộc nhóm tội danh hình sự | * | -50 |\n\n**Tổng điểm trừ tối đa: -50 điểm**\n\n---\n\n**Ghi chú:**\n- (*): Dựa trên hệ thống quản lý\n- (MC): Minh chứng được cấp khi tham gia hoạt động"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Khung đánh giá rèn luyện năm học 2020-2021 có quy định điểm cộng cho việc tham gia câu lạc bộ âm nhạc ngoài Trường không?",
+      "gold_answer": "Không có thông tin cụ thể về điểm cộng cho câu lạc bộ âm nhạc ngoài Trường. Nội dung chỉ nêu điểm cho hoạt động văn hóa của Viện, Trường và các hoạt động thể thao, xã hội hoặc tổ chức hợp pháp theo từng tiêu chí.",
+      "evidence_chunk_ids": [
+        "db94c352-ef3c-4b4d-99ec-4a5707cf813f",
+        "9f8637c4-3be0-4e7c-8815-f0afbc56c26c"
+      ],
+      "ground_truth_context": [
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**1. Tham gia các hoạt động phong trào văn hóa, thể thao (tối đa 10 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia hoạt động văn hóa (các sự kiện/phong trào văn nghệ, thi SVBK..., của Viện, Trường) | MC | 6 |\n| Tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp | MC | 6 |",
+        "### TC3. Điểm tham gia hoạt động chính trị, xã hội, văn hoá, thể thao (Tối đa 25 điểm)\n\n**2. Tham gia các hoạt động xã hội (tối đa 9 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Tham gia các diễn đàn sinh viên, các buổi toạ đàm với lãnh đạo Viện, Trường | MC | 3 |\n| Có hành động tích cực trên không gian mạng (hoạt động online) phù hợp với chủ trương của Nhà trường, Nhà nước được tập thể ghi nhận | MC | 3 |\n| Tham gia hoạt động tình nguyện (tình nguyện tại địa phương, công trường ATGT, hỗ trợ Công tác tổ chức các hoạt động/sự kiện của Nhà trường, Viện) | MC | 3 |\n| Tham gia phong trào \"cốc trà đá vì cộng đồng\", \"tươi trẻ Bách khoa Nhân ái\" | MC | 3 |\n| Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6 |\n| Tham gia đội tình nguyện của Viện, Đoàn TN - HSV, tham gia chiến dịch tình nguyện \"mùa hè xanh\", \"tình nguyện mùa đông\", \"tiếp sức mùa thi\".... | MC | 6 |\n\n**3. Tham gia công tác cán bộ tại Lớp, tổ chức Đoàn - Hội, Tổ/Đội/CLB hợp pháp (tối đa 6 điểm):**\n\n| Tiêu chí | Minh chứng | Điểm |\n|---|---|---|\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận | MC | 6 |\n| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành tốt nhiệm vụ được tập thể công nhận | MC | 4 |\n\n---"
+      ],
+      "is_answerable": false,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium",
+      "adversarial_type": "unanswerable_or_insufficient_context"
+    }
+  ]
+}

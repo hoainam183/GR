@@ -38,6 +38,8 @@ from models.crawler import (
 from models.database import (
     CRAWLER_CHUNKS_COLLECTION,
     CRAWLER_RUNS_COLLECTION,
+    NOTIFICATIONS_COLLECTION,
+    USERS_COLLECTION,
     get_database,
 )
 from models.system_config import (
@@ -825,6 +827,9 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
             "pipeline": pipeline_target,
             "completed_at": datetime.now(timezone.utc).isoformat(),
         }
+        # Send notifications to all users when crawl succeeds
+        if status in ("success", "pending_review"):
+            await _create_crawl_notifications(result, pipeline_target)
     except asyncio.TimeoutError:
         _last_manual_crawl = {
             "status": "timeout",
@@ -843,6 +848,53 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
         logger.error("Manual crawl failed: %s", e, exc_info=True)
     finally:
         _crawl_running = False
+
+
+async def _create_crawl_notifications(crawl_result: dict, pipeline_target: str):
+    """Insert notification for all users when crawl completes."""
+    try:
+        from models.database import get_motor_client, _get_settings
+        client = get_motor_client()
+        _, db_name = _get_settings()
+        db = client[db_name]
+
+        # Get all user IDs
+        users_cursor = db[USERS_COLLECTION].find({}, {"_id": 1})
+        user_ids = [str(doc["_id"]) async for doc in users_cursor]
+
+        if not user_ids:
+            return
+
+        new_articles = crawl_result.get("new_articles", 0)
+        new_chunks = crawl_result.get("new_chunks", 0)
+        collection_name = crawl_result.get("collection", pipeline_target)
+
+        title = "📰 Dữ liệu mới đã được cập nhật"
+        body = f"Hệ thống vừa thu thập {new_articles} bài viết mới ({new_chunks} đoạn) từ nguồn '{collection_name}'."
+        if new_articles == 0:
+            body = f"Crawl '{collection_name}' hoàn tất. Không có bài viết mới."
+
+        now = datetime.now(timezone.utc)
+        docs = [
+            {
+                "user_id": uid,
+                "title": title,
+                "body": body,
+                "type": "crawler_update",
+                "metadata": {
+                    "pipeline": pipeline_target,
+                    "new_articles": new_articles,
+                    "new_chunks": new_chunks,
+                },
+                "read": False,
+                "created_at": now,
+            }
+            for uid in user_ids
+        ]
+        await db[NOTIFICATIONS_COLLECTION].insert_many(docs)
+        logger.info("Created %d crawl notifications for pipeline '%s'", len(docs), pipeline_target)
+    except Exception as e:
+        logger.warning("Failed to create crawl notifications: %s", e, exc_info=True)
 
 
 def _do_crawl(crawl_pipeline, pipeline_target: str) -> dict:
@@ -1349,4 +1401,107 @@ async def update_llm_config(
         "rebuilt": rebuilt,
         "llm_cache_invalidated": invalidated_cache_keys,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# EP13: Advanced Config (env settings editable from UI)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+_ENV_CONFIG_WHITELIST: dict[str, dict[str, Any]] = {
+    # Retrieval
+    "top_k": {"type": "int", "label": "Top K (final)", "description": "Số documents cuối cùng sau reranking", "category": "Retrieval"},
+    "vector_top_k": {"type": "int", "label": "Vector Top K", "description": "Số kết quả vector search mỗi collection", "category": "Retrieval"},
+    "keyword_top_k": {"type": "int", "label": "Keyword Top K", "description": "Số kết quả keyword search mỗi collection", "category": "Retrieval"},
+    "vector_weight": {"type": "float", "label": "Vector Weight", "description": "Trọng số vector trong RRF fusion (0-1)", "category": "Retrieval"},
+    "keyword_weight": {"type": "float", "label": "Keyword Weight", "description": "Trọng số keyword trong RRF fusion (0-1)", "category": "Retrieval"},
+    "reranker_top_k": {"type": "int", "label": "Reranker Top K", "description": "Số documents giữ lại sau reranking", "category": "Retrieval"},
+    "reranker_score_threshold": {"type": "float", "label": "Reranker Threshold", "description": "Ngưỡng điểm reranker (raw logit)", "category": "Retrieval"},
+    # Crawler
+    "crawler_schedule_hour": {"type": "int", "label": "Giờ crawl", "description": "Giờ tự động crawl (0-23)", "category": "Crawler"},
+    "crawler_schedule_minute": {"type": "int", "label": "Phút crawl", "description": "Phút tự động crawl (0-59)", "category": "Crawler"},
+    "crawler_delay": {"type": "float", "label": "Delay (giây)", "description": "Delay giữa các request crawl", "category": "Crawler"},
+    "crawler_retention_months": {"type": "int", "label": "Retention (tháng)", "description": "Số tháng giữ lại dữ liệu crawl", "category": "Crawler"},
+    # Rate Limit
+    "rate_limit_rpm": {"type": "int", "label": "RPM", "description": "Requests tối đa mỗi phút", "category": "Rate Limit"},
+    "rate_limit_rpd": {"type": "int", "label": "RPD", "description": "Requests tối đa mỗi ngày", "category": "Rate Limit"},
+    # Chat
+    "chat_temperature": {"type": "float", "label": "Temperature", "description": "Nhiệt độ sampling (0-2)", "category": "Chat"},
+    "chat_max_tokens": {"type": "int", "label": "Max Tokens", "description": "Số token tối đa cho câu trả lời", "category": "Chat"},
+    "context_doc_char_limit": {"type": "int", "label": "Doc Char Limit", "description": "Giới hạn ký tự mỗi document context", "category": "Chat"},
+    # Self Eval
+    "self_eval_min_top_score": {"type": "float", "label": "Min Top Score", "description": "Ngưỡng score tối thiểu để skip self-eval", "category": "Self Eval"},
+    # Tavily
+    "tavily_max_results": {"type": "int", "label": "Max Results", "description": "Số kết quả Tavily fetch", "category": "Tavily"},
+    "tavily_web_result_count": {"type": "int", "label": "Web Result Count", "description": "Số kết quả Tavily giữ lại", "category": "Tavily"},
+    "tavily_search_depth": {"type": "str", "label": "Search Depth", "description": "Mức độ tìm kiếm: basic (1 credit) / advanced (2 credits)", "category": "Tavily"},
+}
+
+SYSTEM_CONFIG_COLLECTION = "system_config"
+
+
+class EnvConfigUpdateBody(BaseModel):
+    configs: dict[str, Any]
+
+
+@router.get("/config/env")
+async def get_env_config(
+    request: Request,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+):
+    """Return editable environment configurations grouped by category."""
+    settings = request.app.state.settings
+    items = []
+    for key, meta in _ENV_CONFIG_WHITELIST.items():
+        value = getattr(settings, key, None)
+        items.append({
+            "key": key,
+            "value": value,
+            "type": meta["type"],
+            "label": meta["label"],
+            "description": meta["description"],
+            "category": meta["category"],
+        })
+    return {"configs": items}
+
+
+@router.put("/config/env")
+async def update_env_config(
+    request: Request,
+    body: EnvConfigUpdateBody,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+):
+    """Update whitelisted environment configs at runtime and persist to MongoDB."""
+    settings = request.app.state.settings
+    updated = {}
+
+    for key, value in body.configs.items():
+        if key not in _ENV_CONFIG_WHITELIST:
+            raise HTTPException(400, f"Config '{key}' is not editable from UI")
+
+        meta = _ENV_CONFIG_WHITELIST[key]
+        # Type coercion
+        try:
+            if meta["type"] == "int":
+                value = int(value)
+            elif meta["type"] == "float":
+                value = float(value)
+            else:
+                value = str(value)
+        except (ValueError, TypeError):
+            raise HTTPException(400, f"Invalid type for '{key}': expected {meta['type']}")
+
+        setattr(settings, key, value)
+        updated[key] = value
+
+    # Persist to MongoDB system_config collection
+    if updated:
+        await db[SYSTEM_CONFIG_COLLECTION].update_one(
+            {"_id": "env_config"},
+            {"$set": {"configs": updated, "updated_at": datetime.now(timezone.utc)}},
+            upsert=True,
+        )
+
+    logger.info("Admin updated env config: %s", list(updated.keys()))
+    return {"ok": True, "updated": updated}
 

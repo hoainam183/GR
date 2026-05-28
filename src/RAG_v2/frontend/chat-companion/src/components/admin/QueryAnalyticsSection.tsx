@@ -54,8 +54,36 @@ export default function QueryAnalyticsSection() {
     return <EmptyState icon={BarChart3} title="Chưa có dữ liệu câu hỏi" description="Hệ thống chưa ghi nhận câu hỏi nào" />;
   }
 
+  const totalQueries = data.volume.reduce((sum, d) => sum + d.count, 0);
+  const avgLatency = data.latency.length
+    ? Math.round(data.latency.reduce((sum, d) => sum + (d.avg_ms ?? 0), 0) / data.latency.length)
+    : 0;
+  const queriesPerDay = data.volume.length ? Math.round(totalQueries / data.volume.length) : 0;
+
   return (
     <div className="space-y-6">
+      {/* KPI Summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-lg border border-border bg-card p-3 text-center">
+          <p className="text-xs text-muted-foreground">Tổng queries</p>
+          <p className="text-xl font-semibold text-foreground">{totalQueries.toLocaleString()}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-3 text-center">
+          <p className="text-xs text-muted-foreground">Avg Latency</p>
+          <p className="text-xl font-semibold text-foreground">{avgLatency}ms</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-3 text-center">
+          <p className="text-xs text-muted-foreground">Queries/ngày</p>
+          <p className="text-xl font-semibold text-foreground">{queriesPerDay}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-3 text-center">
+          <p className="text-xs text-muted-foreground">Error Rate</p>
+          <p className={`text-xl font-semibold ${data.error_count > 0 ? 'text-destructive' : 'text-emerald-600'}`}>
+            {totalQueries > 0 ? ((data.error_count / totalQueries) * 100).toFixed(1) : '0'}%
+          </p>
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="flex items-center gap-3">
         <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>

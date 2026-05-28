@@ -1,0 +1,793 @@
+{
+  "dataset_name": "EV1_Ky_thuat_Moi_truong_Cu_nhan_Ky_su_Bac_7_dataset_50",
+  "source_file": "KT_Moi_truong_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+  "total_questions": 50,
+  "distribution": {
+    "simple": 30,
+    "multi_hop": 13,
+    "adversarial": 7
+  },
+  "notes": "Câu hỏi viết theo góc nhìn sinh viên ngành Kỹ thuật Môi trường EV1; tránh từ quy chiếu mơ hồ như này/đó/văn bản này/quy định này/chương trình này; evidence_chunk_ids sử dụng trường id unique trong file chunk.",
+  "items": [
+    {
+      "id": "EV1_dataset_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên ngành Kỹ thuật Môi trường EV1 học chương trình kỹ sư bậc 7 trong bao lâu?",
+      "gold_answer": "Thời gian đào tạo ngành Kỹ thuật Môi trường EV1 là 5,5 năm, gồm 4 năm bậc cử nhân và 1,5 năm bậc kỹ sư.",
+      "evidence_chunk_ids": [
+        "d92aef02-8de0-46af-9887-a47357bb3b25"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT MÔI TRƯỜNG\n\n**Tên chương trình:** Kỹ thuật Môi trường  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Môi trường  \n**Mã ngành:** 7520320  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật môi trường  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_002",
+      "question_type": "simple",
+      "question": "Ngành Kỹ thuật Môi trường EV1 có mã ngành là gì?",
+      "gold_answer": "Mã ngành Kỹ thuật Môi trường EV1 là 7520320.",
+      "evidence_chunk_ids": [
+        "d92aef02-8de0-46af-9887-a47357bb3b25"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT MÔI TRƯỜNG\n\n**Tên chương trình:** Kỹ thuật Môi trường  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Môi trường  \n**Mã ngành:** 7520320  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật môi trường  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên EV1 tốt nghiệp toàn khóa được cấp bằng gì?",
+      "gold_answer": "Sinh viên tốt nghiệp được cấp bằng Kỹ sư Kỹ thuật môi trường.",
+      "evidence_chunk_ids": [
+        "d92aef02-8de0-46af-9887-a47357bb3b25"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT MÔI TRƯỜNG\n\n**Tên chương trình:** Kỹ thuật Môi trường  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Môi trường  \n**Mã ngành:** 7520320  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật môi trường  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_004",
+      "question_type": "simple",
+      "question": "Khối lượng kiến thức toàn khóa của ngành Kỹ thuật Môi trường EV1 là bao nhiêu tín chỉ?",
+      "gold_answer": "Khối lượng kiến thức toàn khóa là 180 tín chỉ, gồm 132 tín chỉ bậc cử nhân và 48 tín chỉ bậc kỹ sư.",
+      "evidence_chunk_ids": [
+        "d92aef02-8de0-46af-9887-a47357bb3b25"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT MÔI TRƯỜNG\n\n**Tên chương trình:** Kỹ thuật Môi trường  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Môi trường  \n**Mã ngành:** 7520320  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật môi trường  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_005",
+      "question_type": "simple",
+      "question": "Bậc cử nhân ngành Kỹ thuật Môi trường EV1 có bao nhiêu tín chỉ giáo dục đại cương?",
+      "gold_answer": "Bậc cử nhân có 51 tín chỉ giáo dục đại cương.",
+      "evidence_chunk_ids": [
+        "a948bd4a-2fc7-4369-a6dc-a95bd6bf2dd3"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm ít nhất 1 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_006",
+      "question_type": "simple",
+      "question": "Bậc cử nhân ngành Kỹ thuật Môi trường EV1 có bao nhiêu tín chỉ Toán và khoa học cơ bản?",
+      "gold_answer": "Bậc cử nhân có 32 tín chỉ Toán và khoa học cơ bản.",
+      "evidence_chunk_ids": [
+        "a948bd4a-2fc7-4369-a6dc-a95bd6bf2dd3"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm ít nhất 1 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_007",
+      "question_type": "simple",
+      "question": "Bậc cử nhân ngành Kỹ thuật Môi trường EV1 có bao nhiêu tín chỉ tiếng Anh?",
+      "gold_answer": "Bậc cử nhân có 6 tín chỉ tiếng Anh, gồm 2 học phần Tiếng Anh cơ bản.",
+      "evidence_chunk_ids": [
+        "a948bd4a-2fc7-4369-a6dc-a95bd6bf2dd3"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm ít nhất 1 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_008",
+      "question_type": "simple",
+      "question": "Khối cơ sở và cốt lõi ngành ở bậc cử nhân EV1 có bao nhiêu tín chỉ?",
+      "gold_answer": "Khối cơ sở và cốt lõi ngành ở bậc cử nhân có 48 tín chỉ.",
+      "evidence_chunk_ids": [
+        "a948bd4a-2fc7-4369-a6dc-a95bd6bf2dd3"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm ít nhất 1 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_009",
+      "question_type": "simple",
+      "question": "Bậc cử nhân EV1 có bao nhiêu tín chỉ kiến thức bổ trợ?",
+      "gold_answer": "Bậc cử nhân có 9 tín chỉ kiến thức bổ trợ.",
+      "evidence_chunk_ids": [
+        "a948bd4a-2fc7-4369-a6dc-a95bd6bf2dd3"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm ít nhất 1 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên EV1 thực hiện thực tập kỹ thuật từ trình độ năm thứ mấy?",
+      "gold_answer": "Thực tập kỹ thuật được thực hiện từ trình độ năm thứ ba.",
+      "evidence_chunk_ids": [
+        "a948bd4a-2fc7-4369-a6dc-a95bd6bf2dd3"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Bao gồm ít nhất 1 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ | 9 | Gồm hai phần bắt buộc: kỹ năng xã hội/khởi nghiệp và các kỹ năng khác (6TC); Technical Writing and Presentation (3TC) |\n| Tự chọn theo mô đun | 16 | Khối kiến thức tự chọn theo mô đun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_011",
+      "question_type": "simple",
+      "question": "Sinh viên EV1 muốn tốt nghiệp hệ cử nhân cần thực hiện loại đồ án nào?",
+      "gold_answer": "Sinh viên muốn tốt nghiệp hệ cử nhân đăng ký thực hiện Đồ án cử nhân.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên EV1 học tích hợp cử nhân-kỹ sư phải thực hiện mấy đồ án thiết kế ở bậc cử nhân?",
+      "gold_answer": "Sinh viên học tích hợp cử nhân-kỹ sư phải thực hiện 2 Đồ án thiết kế, mỗi đồ án 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_013",
+      "question_type": "simple",
+      "question": "Hai học phần Đồ án thiết kế của sinh viên tích hợp EV1 có mã học phần nào?",
+      "gold_answer": "Hai học phần là EV4396 Đồ án thiết kế 1 và EV4397 Đồ án thiết kế 2.",
+      "evidence_chunk_ids": [
+        "c2f607a2-8b28-4df1-a32c-74245a2ac811"
+      ],
+      "ground_truth_context": [
+        "## 3.2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Đồ án thiết kế (yêu cầu đối với SV học chương trình tích hợp cử nhân - kỹ sư ngành Kỹ thuật Môi trường)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | EV4396 | Đồ án thiết kế 1 (Design Project I) | 3(0-0-6-6) | 8 |\n| 2 | EV4397 | Đồ án thiết kế 2 (Design Project II) | 3(0-0-6-6) | 8 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_014",
+      "question_type": "simple",
+      "question": "Đồ án thiết kế 1 của sinh viên EV1 có bao nhiêu tín chỉ và học ở kỳ mấy?",
+      "gold_answer": "EV4396 Đồ án thiết kế 1 có 3 tín chỉ và học ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "c2f607a2-8b28-4df1-a32c-74245a2ac811"
+      ],
+      "ground_truth_context": [
+        "## 3.2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Đồ án thiết kế (yêu cầu đối với SV học chương trình tích hợp cử nhân - kỹ sư ngành Kỹ thuật Môi trường)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | EV4396 | Đồ án thiết kế 1 (Design Project I) | 3(0-0-6-6) | 8 |\n| 2 | EV4397 | Đồ án thiết kế 2 (Design Project II) | 3(0-0-6-6) | 8 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_015",
+      "question_type": "simple",
+      "question": "Đồ án thiết kế 2 của sinh viên EV1 có bao nhiêu tín chỉ và học ở kỳ mấy?",
+      "gold_answer": "EV4397 Đồ án thiết kế 2 có 3 tín chỉ và học ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "c2f607a2-8b28-4df1-a32c-74245a2ac811"
+      ],
+      "ground_truth_context": [
+        "## 3.2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Đồ án thiết kế (yêu cầu đối với SV học chương trình tích hợp cử nhân - kỹ sư ngành Kỹ thuật Môi trường)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | EV4396 | Đồ án thiết kế 1 (Design Project I) | 3(0-0-6-6) | 8 |\n| 2 | EV4397 | Đồ án thiết kế 2 (Design Project II) | 3(0-0-6-6) | 8 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_016",
+      "question_type": "simple",
+      "question": "Bậc kỹ sư ngành Kỹ thuật Môi trường EV1 có bao nhiêu tín chỉ chuyên ngành cốt lõi?",
+      "gold_answer": "Bậc kỹ sư có 19 tín chỉ chuyên ngành cốt lõi.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên bậc kỹ sư EV1 phải học bao nhiêu tín chỉ tự chọn kỹ sư?",
+      "gold_answer": "Sinh viên bậc kỹ sư học 14 tín chỉ tự chọn kỹ sư.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_018",
+      "question_type": "simple",
+      "question": "Thực tập kỹ sư của sinh viên EV1 có bao nhiêu tín chỉ?",
+      "gold_answer": "Thực tập kỹ sư có 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_019",
+      "question_type": "simple",
+      "question": "Đồ án kỹ sư của sinh viên EV1 có bao nhiêu tín chỉ?",
+      "gold_answer": "Đồ án kỹ sư có 9 tín chỉ.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_020",
+      "question_type": "simple",
+      "question": "Mô đun Kỹ thuật xử lý chất thải ở bậc kỹ sư EV1 có bao nhiêu tín chỉ?",
+      "gold_answer": "Mô đun Kỹ thuật xử lý chất thải có 19 tín chỉ.",
+      "evidence_chunk_ids": [
+        "1c505ab7-72cf-47cc-aefd-99a2e7df544a"
+      ],
+      "ground_truth_context": [
+        "## Bậc kỹ sư\n\n### Chuyên ngành cốt lõi - chọn theo mô đun\n\n#### Mô đun Kỹ thuật xử lý chất thải (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 3 | EV5121 | Ứng dụng kỹ thuật màng trong xử lý nước và nước thải | 2(2-1-0-4) | 8 |\n| 4 | EV5125 | Các quá trình xử lý Nito, Photpho trong nước thải | 2(2-0-0-4) | 8 |\n| 5 | EV5141 | Thí nghiệm xử lý nước và nước thải | 2(1-0-2-4) | 8 |\n| 6 | EV5131 | Thiết kế hệ thống xử lý chất thải | 2(2-1-0-4) | 9 |\n| 7 | EV5138 | Kỹ thuật xử lý khí thải công nghiệp | 3(2-2-0-6) | 9 |\n| 8 | EV5140 | Thiết kế lò đốt chất thải | 2(2-1-0-4) | 9 |\n| 9 | EV5143 | Xử lý chất thải bằng công nghệ sinh học | 2(2-1-0-4) | 8 |\n| 10 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 11 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_021",
+      "question_type": "simple",
+      "question": "Trong mô đun Kỹ thuật xử lý chất thải, học phần EV5138 tên là gì?",
+      "gold_answer": "EV5138 là học phần Kỹ thuật xử lý khí thải công nghiệp.",
+      "evidence_chunk_ids": [
+        "1c505ab7-72cf-47cc-aefd-99a2e7df544a"
+      ],
+      "ground_truth_context": [
+        "## Bậc kỹ sư\n\n### Chuyên ngành cốt lõi - chọn theo mô đun\n\n#### Mô đun Kỹ thuật xử lý chất thải (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 3 | EV5121 | Ứng dụng kỹ thuật màng trong xử lý nước và nước thải | 2(2-1-0-4) | 8 |\n| 4 | EV5125 | Các quá trình xử lý Nito, Photpho trong nước thải | 2(2-0-0-4) | 8 |\n| 5 | EV5141 | Thí nghiệm xử lý nước và nước thải | 2(1-0-2-4) | 8 |\n| 6 | EV5131 | Thiết kế hệ thống xử lý chất thải | 2(2-1-0-4) | 9 |\n| 7 | EV5138 | Kỹ thuật xử lý khí thải công nghiệp | 3(2-2-0-6) | 9 |\n| 8 | EV5140 | Thiết kế lò đốt chất thải | 2(2-1-0-4) | 9 |\n| 9 | EV5143 | Xử lý chất thải bằng công nghệ sinh học | 2(2-1-0-4) | 8 |\n| 10 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 11 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_022",
+      "question_type": "simple",
+      "question": "Trong mô đun Kỹ thuật xử lý chất thải, học phần Quản trị dự án có mã nào?",
+      "gold_answer": "Học phần Quản trị dự án có mã EV5264.",
+      "evidence_chunk_ids": [
+        "1c505ab7-72cf-47cc-aefd-99a2e7df544a"
+      ],
+      "ground_truth_context": [
+        "## Bậc kỹ sư\n\n### Chuyên ngành cốt lõi - chọn theo mô đun\n\n#### Mô đun Kỹ thuật xử lý chất thải (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 3 | EV5121 | Ứng dụng kỹ thuật màng trong xử lý nước và nước thải | 2(2-1-0-4) | 8 |\n| 4 | EV5125 | Các quá trình xử lý Nito, Photpho trong nước thải | 2(2-0-0-4) | 8 |\n| 5 | EV5141 | Thí nghiệm xử lý nước và nước thải | 2(1-0-2-4) | 8 |\n| 6 | EV5131 | Thiết kế hệ thống xử lý chất thải | 2(2-1-0-4) | 9 |\n| 7 | EV5138 | Kỹ thuật xử lý khí thải công nghiệp | 3(2-2-0-6) | 9 |\n| 8 | EV5140 | Thiết kế lò đốt chất thải | 2(2-1-0-4) | 9 |\n| 9 | EV5143 | Xử lý chất thải bằng công nghệ sinh học | 2(2-1-0-4) | 8 |\n| 10 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 11 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_023",
+      "question_type": "simple",
+      "question": "Mô đun Kỹ thuật kiểm soát ô nhiễm có học phần nào về chất thải phóng xạ?",
+      "gold_answer": "Học phần về chất thải phóng xạ là EV5117 Kiểm soát chất thải phóng xạ.",
+      "evidence_chunk_ids": [
+        "c5e150a0-9285-4198-942f-7819ca074175"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun Kỹ thuật kiểm soát ô nhiễm (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 12 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 8 |\n| 13 | EV5137 | Ứng dụng phương pháp dữ liệu đánh giá biến đổi hệ sinh thái | 2(2-1-0-4) | 8 |\n| 14 | EV5117 | Kiểm soát chất thải phóng xạ | 2(2-0-0-4) | 8 |\n| 15 | EV5144 | Các chất ô nhiễm mới nổi | 2(2-1-0-4) | 8 |\n| 16 | EV5145 | Sinh thái vi sinh vật ứng dụng trong phục hồi tài nguyên | 3(2-1-1-6) | 9 |\n| 17 | EV5146 | Ứng dụng nguyên lý kỹ thuật xanh trong thiết kế | 2(2-0-0-4) | 9 |\n| 18 | EV5250 | Kiểm kê phát thải | 2(2-1-0-4) | 9 |\n| 19 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 20 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_024",
+      "question_type": "simple",
+      "question": "Mô đun An toàn - Sức khỏe - Môi trường có học phần nào về đánh giá rủi ro sức khỏe?",
+      "gold_answer": "Học phần về đánh giá rủi ro sức khỏe là EV5245 Đánh giá rủi ro sức khỏe.",
+      "evidence_chunk_ids": [
+        "54ad3237-09f9-40d3-b465-adf8cf4ab8ff"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun An toàn - Sức khỏe - Môi trường (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 21 | EV5214 | Kinh tế môi trường | 2(2-1-0-4) | 8 |\n| 22 | EV5212 | Hệ thống quản lý môi trường | 2(2-1-0-4) | 8 |\n| 23 | EV5262 | Kiểm toán giảm thiểu chất thải | 2(2-0-0-4) | 9 |\n| 24 | EV5263 | Tái chế chất thải | 3(2-1-1-6) | 8 |\n| 25 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 9 |\n| 26 | EV5233 | Đánh giá vòng đời sản phẩm | 2(2-1-0-4) | 9 |\n| 27 | EV5245 | Đánh giá rủi ro sức khỏe | 2(2-1-0-4) | 9 |\n| 28 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 29 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |\n\n---\n\n### Tự chọn mô đun"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_025",
+      "question_type": "simple",
+      "question": "Mô đun Công trình xử lý chất thải có bao nhiêu tín chỉ?",
+      "gold_answer": "Mô đun Công trình xử lý chất thải có 8 tín chỉ.",
+      "evidence_chunk_ids": [
+        "25a19ec8-bd2e-4810-b490-623cd1024219"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 1: Công trình xử lý chất thải (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | EV5133 | Kỹ thuật công trình xử lý chất thải | 2(2-1-0-4) | 9 |\n| 31 | EV5147 | Xử lý khí thải bằng xúc tác | 2(2-1-0-4) | 10 |\n| 32 | EV5142 | Ứng dụng mô hình trong thiết kế hệ thống xử lý nước thải | 2(2-0-0-4) | 9 |\n| 33 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 34 | EV5148 | Nhiên liệu sinh học từ chất thải | 2(2-0-1-4) | 10 |\n| 35 | EV5149 | Công nghệ sinh học trong phòng ngừa và kiểm soát ô nhiễm | 2(2-0-0-4) | 10 |\n| 36 | EV5150 | Vật liệu sinh học trong bảo vệ môi trường | 2(2-0-0-4) | 9 |\n| 37 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_026",
+      "question_type": "simple",
+      "question": "Mô đun Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường có học phần nào học ở kỳ 9?",
+      "gold_answer": "Học phần EV5150 Vật liệu sinh học trong bảo vệ môi trường học ở kỳ 9.",
+      "evidence_chunk_ids": [
+        "25a19ec8-bd2e-4810-b490-623cd1024219"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 1: Công trình xử lý chất thải (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | EV5133 | Kỹ thuật công trình xử lý chất thải | 2(2-1-0-4) | 9 |\n| 31 | EV5147 | Xử lý khí thải bằng xúc tác | 2(2-1-0-4) | 10 |\n| 32 | EV5142 | Ứng dụng mô hình trong thiết kế hệ thống xử lý nước thải | 2(2-0-0-4) | 9 |\n| 33 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 34 | EV5148 | Nhiên liệu sinh học từ chất thải | 2(2-0-1-4) | 10 |\n| 35 | EV5149 | Công nghệ sinh học trong phòng ngừa và kiểm soát ô nhiễm | 2(2-0-0-4) | 10 |\n| 36 | EV5150 | Vật liệu sinh học trong bảo vệ môi trường | 2(2-0-0-4) | 9 |\n| 37 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_027",
+      "question_type": "simple",
+      "question": "Mô đun Quản lý môi trường công nghiệp có học phần nào học ở kỳ 10?",
+      "gold_answer": "EV5244 Hạch toán quản lý môi trường và EV5104 Đồ án chuyên ngành II học ở kỳ 10.",
+      "evidence_chunk_ids": [
+        "2586b149-0ccd-4bd4-b824-b9da21711aee"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 3: Quản lý môi trường công nghiệp (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 38 | EV5244 | Hạch toán quản lý môi trường | 2(2-0-0-4) | 10 |\n| 39 | EV5254 | Thẩm định và đánh giá công nghệ Môi trường | 2(2-0-0-4) | 9 |\n| 40 | EV5241 | Kiểm soát tai biến và rủi ro môi trường | 2(2-1-0-4) | 9 |\n| 41 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n---\n\n### Tự chọn chung - chọn đủ 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 42 | EV5151 | Kỹ thuật phục hồi các vùng ô nhiễm tồn lưu | 2(2-1-0-4) | 10 |\n| 43 | EV5129 | Mô hình hóa sự vận chuyển các chất ô nhiễm trong nước ngầm | 2(2-1-0-4) | 10 |\n| 44 | EV5139 | Chỉ số môi trường | 2(2-1-0-4) | 10 |\n| 45 | EV5251 | Đánh giá rủi ro sinh thái | 2(2-1-0-4) | 10 |\n| 46 | EV5232 | Thống kê môi trường | 2(2-0-0-4) | 10 |\n| 47 | EV5152 | Chuyên đề kỹ thuật môi trường | 2(2-0-0-4) | 10 |\n| 48 | EV5260 | Đạo đức môi trường | 2(2-0-0-4) | 10 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_028",
+      "question_type": "simple",
+      "question": "Sinh viên EV1 phải chọn đủ bao nhiêu tín chỉ tự chọn chung ở bậc kỹ sư?",
+      "gold_answer": "Sinh viên phải chọn đủ 6 tín chỉ tự chọn chung.",
+      "evidence_chunk_ids": [
+        "2586b149-0ccd-4bd4-b824-b9da21711aee"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 3: Quản lý môi trường công nghiệp (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 38 | EV5244 | Hạch toán quản lý môi trường | 2(2-0-0-4) | 10 |\n| 39 | EV5254 | Thẩm định và đánh giá công nghệ Môi trường | 2(2-0-0-4) | 9 |\n| 40 | EV5241 | Kiểm soát tai biến và rủi ro môi trường | 2(2-1-0-4) | 9 |\n| 41 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n---\n\n### Tự chọn chung - chọn đủ 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 42 | EV5151 | Kỹ thuật phục hồi các vùng ô nhiễm tồn lưu | 2(2-1-0-4) | 10 |\n| 43 | EV5129 | Mô hình hóa sự vận chuyển các chất ô nhiễm trong nước ngầm | 2(2-1-0-4) | 10 |\n| 44 | EV5139 | Chỉ số môi trường | 2(2-1-0-4) | 10 |\n| 45 | EV5251 | Đánh giá rủi ro sinh thái | 2(2-1-0-4) | 10 |\n| 46 | EV5232 | Thống kê môi trường | 2(2-0-0-4) | 10 |\n| 47 | EV5152 | Chuyên đề kỹ thuật môi trường | 2(2-0-0-4) | 10 |\n| 48 | EV5260 | Đạo đức môi trường | 2(2-0-0-4) | 10 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_029",
+      "question_type": "simple",
+      "question": "Học phần EV5198 trong chương trình kỹ sư EV1 là gì?",
+      "gold_answer": "EV5198 là học phần Thực tập kỹ sư, có 6 tín chỉ và học ở kỳ 10.",
+      "evidence_chunk_ids": [
+        "f38fc780-78fc-4cfb-9e2f-e07152abe669"
+      ],
+      "ground_truth_context": [
+        "### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 49 | EV5198 | Thực tập kỹ sư | 6(0-0-12-24) | 10 |\n| 50 | EV5199 | Đồ án kỹ sư | 9(0-0-18-36) | 11 |\n\n**Tổng cộng bậc kỹ sư: 48 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_simple_030",
+      "question_type": "simple",
+      "question": "Học phần EV5199 trong chương trình kỹ sư EV1 là gì?",
+      "gold_answer": "EV5199 là học phần Đồ án kỹ sư, có 9 tín chỉ và học ở kỳ 11.",
+      "evidence_chunk_ids": [
+        "f38fc780-78fc-4cfb-9e2f-e07152abe669"
+      ],
+      "ground_truth_context": [
+        "### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 49 | EV5198 | Thực tập kỹ sư | 6(0-0-12-24) | 10 |\n| 50 | EV5199 | Đồ án kỹ sư | 9(0-0-18-36) | 11 |\n\n**Tổng cộng bậc kỹ sư: 48 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Sinh viên EV1 học đủ cả bậc cử nhân và bậc kỹ sư thì tổng số tín chỉ được tính như thế nào?",
+      "gold_answer": "Toàn khóa có 180 tín chỉ, gồm 132 tín chỉ bậc cử nhân và 48 tín chỉ bậc kỹ sư.",
+      "evidence_chunk_ids": [
+        "d92aef02-8de0-46af-9887-a47357bb3b25",
+        "68686716-ab35-43fe-8b2d-81870ac7889b"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT MÔI TRƯỜNG\n\n**Tên chương trình:** Kỹ thuật Môi trường  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Môi trường  \n**Mã ngành:** 7520320  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật môi trường  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---",
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên EV1 theo lộ trình tích hợp cử nhân-kỹ sư, phần đồ án ở cuối bậc cử nhân khác gì so với sinh viên chỉ tốt nghiệp cử nhân?",
+      "gold_answer": "Sinh viên chỉ tốt nghiệp cử nhân đăng ký Đồ án cử nhân 6 tín chỉ; sinh viên tích hợp cử nhân-kỹ sư đăng ký 2 Đồ án thiết kế, mỗi đồ án 3 tín chỉ, gồm EV4396 và EV4397 ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b",
+        "c2f607a2-8b28-4df1-a32c-74245a2ac811"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---",
+        "## 3.2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Đồ án thiết kế (yêu cầu đối với SV học chương trình tích hợp cử nhân - kỹ sư ngành Kỹ thuật Môi trường)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | EV4396 | Đồ án thiết kế 1 (Design Project I) | 3(0-0-6-6) | 8 |\n| 2 | EV4397 | Đồ án thiết kế 2 (Design Project II) | 3(0-0-6-6) | 8 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Bậc kỹ sư EV1 gồm các khối kiến thức chính nào và tổng cộng bao nhiêu tín chỉ?",
+      "gold_answer": "Bậc kỹ sư gồm chuyên ngành cốt lõi 19 tín chỉ, tự chọn kỹ sư 14 tín chỉ, thực tập kỹ sư 6 tín chỉ và đồ án kỹ sư 9 tín chỉ; tổng cộng 48 tín chỉ.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b",
+        "f38fc780-78fc-4cfb-9e2f-e07152abe669"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---",
+        "### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 49 | EV5198 | Thực tập kỹ sư | 6(0-0-12-24) | 10 |\n| 50 | EV5199 | Đồ án kỹ sư | 9(0-0-18-36) | 11 |\n\n**Tổng cộng bậc kỹ sư: 48 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Trong bậc kỹ sư EV1, mô đun chuyên ngành cốt lõi nào có các học phần về xử lý nước thải và khí thải công nghiệp?",
+      "gold_answer": "Mô đun Kỹ thuật xử lý chất thải có các học phần về xử lý nước và nước thải như EV5121, EV5125, EV5141, đồng thời có EV5138 Kỹ thuật xử lý khí thải công nghiệp.",
+      "evidence_chunk_ids": [
+        "1c505ab7-72cf-47cc-aefd-99a2e7df544a"
+      ],
+      "ground_truth_context": [
+        "## Bậc kỹ sư\n\n### Chuyên ngành cốt lõi - chọn theo mô đun\n\n#### Mô đun Kỹ thuật xử lý chất thải (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 3 | EV5121 | Ứng dụng kỹ thuật màng trong xử lý nước và nước thải | 2(2-1-0-4) | 8 |\n| 4 | EV5125 | Các quá trình xử lý Nito, Photpho trong nước thải | 2(2-0-0-4) | 8 |\n| 5 | EV5141 | Thí nghiệm xử lý nước và nước thải | 2(1-0-2-4) | 8 |\n| 6 | EV5131 | Thiết kế hệ thống xử lý chất thải | 2(2-1-0-4) | 9 |\n| 7 | EV5138 | Kỹ thuật xử lý khí thải công nghiệp | 3(2-2-0-6) | 9 |\n| 8 | EV5140 | Thiết kế lò đốt chất thải | 2(2-1-0-4) | 9 |\n| 9 | EV5143 | Xử lý chất thải bằng công nghệ sinh học | 2(2-1-0-4) | 8 |\n| 10 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 11 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên EV1 muốn học sâu về kiểm soát ô nhiễm và phát thải có thể gặp các học phần nào trong mô đun Kỹ thuật kiểm soát ô nhiễm?",
+      "gold_answer": "Sinh viên có thể gặp các học phần như Quản lý hóa chất trong công nghiệp, Kiểm soát chất thải phóng xạ, Các chất ô nhiễm mới nổi, Kiểm kê phát thải, cùng Đồ án chuyên ngành I.",
+      "evidence_chunk_ids": [
+        "c5e150a0-9285-4198-942f-7819ca074175"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun Kỹ thuật kiểm soát ô nhiễm (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 12 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 8 |\n| 13 | EV5137 | Ứng dụng phương pháp dữ liệu đánh giá biến đổi hệ sinh thái | 2(2-1-0-4) | 8 |\n| 14 | EV5117 | Kiểm soát chất thải phóng xạ | 2(2-0-0-4) | 8 |\n| 15 | EV5144 | Các chất ô nhiễm mới nổi | 2(2-1-0-4) | 8 |\n| 16 | EV5145 | Sinh thái vi sinh vật ứng dụng trong phục hồi tài nguyên | 3(2-1-1-6) | 9 |\n| 17 | EV5146 | Ứng dụng nguyên lý kỹ thuật xanh trong thiết kế | 2(2-0-0-4) | 9 |\n| 18 | EV5250 | Kiểm kê phát thải | 2(2-1-0-4) | 9 |\n| 19 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 20 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên EV1 quan tâm đến sức khỏe, an toàn và quản lý môi trường sẽ học những học phần tiêu biểu nào ở mô đun An toàn - Sức khỏe - Môi trường?",
+      "gold_answer": "Các học phần tiêu biểu gồm Kinh tế môi trường, Hệ thống quản lý môi trường, Kiểm toán giảm thiểu chất thải, Tái chế chất thải, Đánh giá vòng đời sản phẩm, Đánh giá rủi ro sức khỏe, Quản trị dự án và Đồ án chuyên ngành I.",
+      "evidence_chunk_ids": [
+        "54ad3237-09f9-40d3-b465-adf8cf4ab8ff"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun An toàn - Sức khỏe - Môi trường (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 21 | EV5214 | Kinh tế môi trường | 2(2-1-0-4) | 8 |\n| 22 | EV5212 | Hệ thống quản lý môi trường | 2(2-1-0-4) | 8 |\n| 23 | EV5262 | Kiểm toán giảm thiểu chất thải | 2(2-0-0-4) | 9 |\n| 24 | EV5263 | Tái chế chất thải | 3(2-1-1-6) | 8 |\n| 25 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 9 |\n| 26 | EV5233 | Đánh giá vòng đời sản phẩm | 2(2-1-0-4) | 9 |\n| 27 | EV5245 | Đánh giá rủi ro sức khỏe | 2(2-1-0-4) | 9 |\n| 28 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 29 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |\n\n---\n\n### Tự chọn mô đun"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Ba mô đun chuyên ngành cốt lõi bậc kỹ sư EV1 có điểm chung nào về tín chỉ và học phần dự án?",
+      "gold_answer": "Cả ba mô đun chuyên ngành cốt lõi đều có 19 tín chỉ và đều có học phần EV5103 Đồ án chuyên ngành I 2 tín chỉ ở kỳ 9.",
+      "evidence_chunk_ids": [
+        "1c505ab7-72cf-47cc-aefd-99a2e7df544a",
+        "c5e150a0-9285-4198-942f-7819ca074175",
+        "54ad3237-09f9-40d3-b465-adf8cf4ab8ff"
+      ],
+      "ground_truth_context": [
+        "## Bậc kỹ sư\n\n### Chuyên ngành cốt lõi - chọn theo mô đun\n\n#### Mô đun Kỹ thuật xử lý chất thải (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 3 | EV5121 | Ứng dụng kỹ thuật màng trong xử lý nước và nước thải | 2(2-1-0-4) | 8 |\n| 4 | EV5125 | Các quá trình xử lý Nito, Photpho trong nước thải | 2(2-0-0-4) | 8 |\n| 5 | EV5141 | Thí nghiệm xử lý nước và nước thải | 2(1-0-2-4) | 8 |\n| 6 | EV5131 | Thiết kế hệ thống xử lý chất thải | 2(2-1-0-4) | 9 |\n| 7 | EV5138 | Kỹ thuật xử lý khí thải công nghiệp | 3(2-2-0-6) | 9 |\n| 8 | EV5140 | Thiết kế lò đốt chất thải | 2(2-1-0-4) | 9 |\n| 9 | EV5143 | Xử lý chất thải bằng công nghệ sinh học | 2(2-1-0-4) | 8 |\n| 10 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 11 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |",
+        "#### Mô đun Kỹ thuật kiểm soát ô nhiễm (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 12 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 8 |\n| 13 | EV5137 | Ứng dụng phương pháp dữ liệu đánh giá biến đổi hệ sinh thái | 2(2-1-0-4) | 8 |\n| 14 | EV5117 | Kiểm soát chất thải phóng xạ | 2(2-0-0-4) | 8 |\n| 15 | EV5144 | Các chất ô nhiễm mới nổi | 2(2-1-0-4) | 8 |\n| 16 | EV5145 | Sinh thái vi sinh vật ứng dụng trong phục hồi tài nguyên | 3(2-1-1-6) | 9 |\n| 17 | EV5146 | Ứng dụng nguyên lý kỹ thuật xanh trong thiết kế | 2(2-0-0-4) | 9 |\n| 18 | EV5250 | Kiểm kê phát thải | 2(2-1-0-4) | 9 |\n| 19 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 20 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |",
+        "#### Mô đun An toàn - Sức khỏe - Môi trường (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 21 | EV5214 | Kinh tế môi trường | 2(2-1-0-4) | 8 |\n| 22 | EV5212 | Hệ thống quản lý môi trường | 2(2-1-0-4) | 8 |\n| 23 | EV5262 | Kiểm toán giảm thiểu chất thải | 2(2-0-0-4) | 9 |\n| 24 | EV5263 | Tái chế chất thải | 3(2-1-1-6) | 8 |\n| 25 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 9 |\n| 26 | EV5233 | Đánh giá vòng đời sản phẩm | 2(2-1-0-4) | 9 |\n| 27 | EV5245 | Đánh giá rủi ro sức khỏe | 2(2-1-0-4) | 9 |\n| 28 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 29 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |\n\n---\n\n### Tự chọn mô đun"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên EV1 chọn mô đun Công trình xử lý chất thải ở phần tự chọn mô đun, sinh viên sẽ học những học phần nào?",
+      "gold_answer": "Sinh viên học EV5133 Kỹ thuật công trình xử lý chất thải, EV5147 Xử lý khí thải bằng xúc tác, EV5142 Ứng dụng mô hình trong thiết kế hệ thống xử lý nước thải và EV5104 Đồ án chuyên ngành II.",
+      "evidence_chunk_ids": [
+        "25a19ec8-bd2e-4810-b490-623cd1024219"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 1: Công trình xử lý chất thải (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | EV5133 | Kỹ thuật công trình xử lý chất thải | 2(2-1-0-4) | 9 |\n| 31 | EV5147 | Xử lý khí thải bằng xúc tác | 2(2-1-0-4) | 10 |\n| 32 | EV5142 | Ứng dụng mô hình trong thiết kế hệ thống xử lý nước thải | 2(2-0-0-4) | 9 |\n| 33 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 34 | EV5148 | Nhiên liệu sinh học từ chất thải | 2(2-0-1-4) | 10 |\n| 35 | EV5149 | Công nghệ sinh học trong phòng ngừa và kiểm soát ô nhiễm | 2(2-0-0-4) | 10 |\n| 36 | EV5150 | Vật liệu sinh học trong bảo vệ môi trường | 2(2-0-0-4) | 9 |\n| 37 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_009",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên EV1 chọn mô đun Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường, sinh viên sẽ học những học phần nào?",
+      "gold_answer": "Sinh viên học EV5148 Nhiên liệu sinh học từ chất thải, EV5149 Công nghệ sinh học trong phòng ngừa và kiểm soát ô nhiễm, EV5150 Vật liệu sinh học trong bảo vệ môi trường và EV5104 Đồ án chuyên ngành II.",
+      "evidence_chunk_ids": [
+        "25a19ec8-bd2e-4810-b490-623cd1024219"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 1: Công trình xử lý chất thải (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | EV5133 | Kỹ thuật công trình xử lý chất thải | 2(2-1-0-4) | 9 |\n| 31 | EV5147 | Xử lý khí thải bằng xúc tác | 2(2-1-0-4) | 10 |\n| 32 | EV5142 | Ứng dụng mô hình trong thiết kế hệ thống xử lý nước thải | 2(2-0-0-4) | 9 |\n| 33 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 34 | EV5148 | Nhiên liệu sinh học từ chất thải | 2(2-0-1-4) | 10 |\n| 35 | EV5149 | Công nghệ sinh học trong phòng ngừa và kiểm soát ô nhiễm | 2(2-0-0-4) | 10 |\n| 36 | EV5150 | Vật liệu sinh học trong bảo vệ môi trường | 2(2-0-0-4) | 9 |\n| 37 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_010",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên EV1 chọn mô đun Quản lý môi trường công nghiệp, sinh viên sẽ học những học phần nào?",
+      "gold_answer": "Sinh viên học EV5244 Hạch toán quản lý môi trường, EV5254 Thẩm định và đánh giá công nghệ Môi trường, EV5241 Kiểm soát tai biến và rủi ro môi trường và EV5104 Đồ án chuyên ngành II.",
+      "evidence_chunk_ids": [
+        "2586b149-0ccd-4bd4-b824-b9da21711aee"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 3: Quản lý môi trường công nghiệp (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 38 | EV5244 | Hạch toán quản lý môi trường | 2(2-0-0-4) | 10 |\n| 39 | EV5254 | Thẩm định và đánh giá công nghệ Môi trường | 2(2-0-0-4) | 9 |\n| 40 | EV5241 | Kiểm soát tai biến và rủi ro môi trường | 2(2-1-0-4) | 9 |\n| 41 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n---\n\n### Tự chọn chung - chọn đủ 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 42 | EV5151 | Kỹ thuật phục hồi các vùng ô nhiễm tồn lưu | 2(2-1-0-4) | 10 |\n| 43 | EV5129 | Mô hình hóa sự vận chuyển các chất ô nhiễm trong nước ngầm | 2(2-1-0-4) | 10 |\n| 44 | EV5139 | Chỉ số môi trường | 2(2-1-0-4) | 10 |\n| 45 | EV5251 | Đánh giá rủi ro sinh thái | 2(2-1-0-4) | 10 |\n| 46 | EV5232 | Thống kê môi trường | 2(2-0-0-4) | 10 |\n| 47 | EV5152 | Chuyên đề kỹ thuật môi trường | 2(2-0-0-4) | 10 |\n| 48 | EV5260 | Đạo đức môi trường | 2(2-0-0-4) | 10 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_011",
+      "question_type": "multi_hop",
+      "question": "Sinh viên EV1 cần phân biệt Đồ án chuyên ngành I, Đồ án chuyên ngành II và Đồ án kỹ sư như thế nào theo kế hoạch bậc kỹ sư?",
+      "gold_answer": "Đồ án chuyên ngành I là EV5103, thuộc mô đun chuyên ngành cốt lõi và học ở kỳ 9; Đồ án chuyên ngành II là EV5104, thuộc tự chọn mô đun và học ở kỳ 10; Đồ án kỹ sư là EV5199, 9 tín chỉ và học ở kỳ 11.",
+      "evidence_chunk_ids": [
+        "1c505ab7-72cf-47cc-aefd-99a2e7df544a",
+        "25a19ec8-bd2e-4810-b490-623cd1024219",
+        "f38fc780-78fc-4cfb-9e2f-e07152abe669"
+      ],
+      "ground_truth_context": [
+        "## Bậc kỹ sư\n\n### Chuyên ngành cốt lõi - chọn theo mô đun\n\n#### Mô đun Kỹ thuật xử lý chất thải (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 3 | EV5121 | Ứng dụng kỹ thuật màng trong xử lý nước và nước thải | 2(2-1-0-4) | 8 |\n| 4 | EV5125 | Các quá trình xử lý Nito, Photpho trong nước thải | 2(2-0-0-4) | 8 |\n| 5 | EV5141 | Thí nghiệm xử lý nước và nước thải | 2(1-0-2-4) | 8 |\n| 6 | EV5131 | Thiết kế hệ thống xử lý chất thải | 2(2-1-0-4) | 9 |\n| 7 | EV5138 | Kỹ thuật xử lý khí thải công nghiệp | 3(2-2-0-6) | 9 |\n| 8 | EV5140 | Thiết kế lò đốt chất thải | 2(2-1-0-4) | 9 |\n| 9 | EV5143 | Xử lý chất thải bằng công nghệ sinh học | 2(2-1-0-4) | 8 |\n| 10 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 11 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |",
+        "#### Mô đun 1: Công trình xử lý chất thải (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | EV5133 | Kỹ thuật công trình xử lý chất thải | 2(2-1-0-4) | 9 |\n| 31 | EV5147 | Xử lý khí thải bằng xúc tác | 2(2-1-0-4) | 10 |\n| 32 | EV5142 | Ứng dụng mô hình trong thiết kế hệ thống xử lý nước thải | 2(2-0-0-4) | 9 |\n| 33 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 34 | EV5148 | Nhiên liệu sinh học từ chất thải | 2(2-0-1-4) | 10 |\n| 35 | EV5149 | Công nghệ sinh học trong phòng ngừa và kiểm soát ô nhiễm | 2(2-0-0-4) | 10 |\n| 36 | EV5150 | Vật liệu sinh học trong bảo vệ môi trường | 2(2-0-0-4) | 9 |\n| 37 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |",
+        "### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 49 | EV5198 | Thực tập kỹ sư | 6(0-0-12-24) | 10 |\n| 50 | EV5199 | Đồ án kỹ sư | 9(0-0-18-36) | 11 |\n\n**Tổng cộng bậc kỹ sư: 48 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_012",
+      "question_type": "multi_hop",
+      "question": "Sinh viên EV1 học phần cuối bậc kỹ sư theo trình tự thực tập và đồ án ra sao?",
+      "gold_answer": "Sinh viên học EV5198 Thực tập kỹ sư 6 tín chỉ ở kỳ 10, sau đó học EV5199 Đồ án kỹ sư 9 tín chỉ ở kỳ 11; đề tài đồ án kỹ sư nên phù hợp với nội dung thực tập kỹ sư.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b",
+        "f38fc780-78fc-4cfb-9e2f-e07152abe669"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---",
+        "### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 49 | EV5198 | Thực tập kỹ sư | 6(0-0-12-24) | 10 |\n| 50 | EV5199 | Đồ án kỹ sư | 9(0-0-18-36) | 11 |\n\n**Tổng cộng bậc kỹ sư: 48 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_multi_hop_013",
+      "question_type": "multi_hop",
+      "question": "Sinh viên EV1 muốn học về công nghệ sinh học, xử lý chất thải và phục hồi tài nguyên có thể gặp các nhóm nội dung liên quan ở những mô đun nào?",
+      "gold_answer": "Nội dung xử lý chất thải bằng công nghệ sinh học nằm trong mô đun Kỹ thuật xử lý chất thải; Sinh thái vi sinh vật ứng dụng trong phục hồi tài nguyên nằm trong mô đun Kỹ thuật kiểm soát ô nhiễm; các học phần nhiên liệu sinh học, công nghệ sinh học kiểm soát ô nhiễm và vật liệu sinh học nằm trong mô đun Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường.",
+      "evidence_chunk_ids": [
+        "1c505ab7-72cf-47cc-aefd-99a2e7df544a",
+        "c5e150a0-9285-4198-942f-7819ca074175",
+        "25a19ec8-bd2e-4810-b490-623cd1024219"
+      ],
+      "ground_truth_context": [
+        "## Bậc kỹ sư\n\n### Chuyên ngành cốt lõi - chọn theo mô đun\n\n#### Mô đun Kỹ thuật xử lý chất thải (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 3 | EV5121 | Ứng dụng kỹ thuật màng trong xử lý nước và nước thải | 2(2-1-0-4) | 8 |\n| 4 | EV5125 | Các quá trình xử lý Nito, Photpho trong nước thải | 2(2-0-0-4) | 8 |\n| 5 | EV5141 | Thí nghiệm xử lý nước và nước thải | 2(1-0-2-4) | 8 |\n| 6 | EV5131 | Thiết kế hệ thống xử lý chất thải | 2(2-1-0-4) | 9 |\n| 7 | EV5138 | Kỹ thuật xử lý khí thải công nghiệp | 3(2-2-0-6) | 9 |\n| 8 | EV5140 | Thiết kế lò đốt chất thải | 2(2-1-0-4) | 9 |\n| 9 | EV5143 | Xử lý chất thải bằng công nghệ sinh học | 2(2-1-0-4) | 8 |\n| 10 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 11 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |",
+        "#### Mô đun Kỹ thuật kiểm soát ô nhiễm (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 12 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 8 |\n| 13 | EV5137 | Ứng dụng phương pháp dữ liệu đánh giá biến đổi hệ sinh thái | 2(2-1-0-4) | 8 |\n| 14 | EV5117 | Kiểm soát chất thải phóng xạ | 2(2-0-0-4) | 8 |\n| 15 | EV5144 | Các chất ô nhiễm mới nổi | 2(2-1-0-4) | 8 |\n| 16 | EV5145 | Sinh thái vi sinh vật ứng dụng trong phục hồi tài nguyên | 3(2-1-1-6) | 9 |\n| 17 | EV5146 | Ứng dụng nguyên lý kỹ thuật xanh trong thiết kế | 2(2-0-0-4) | 9 |\n| 18 | EV5250 | Kiểm kê phát thải | 2(2-1-0-4) | 9 |\n| 19 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 20 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |",
+        "#### Mô đun 1: Công trình xử lý chất thải (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | EV5133 | Kỹ thuật công trình xử lý chất thải | 2(2-1-0-4) | 9 |\n| 31 | EV5147 | Xử lý khí thải bằng xúc tác | 2(2-1-0-4) | 10 |\n| 32 | EV5142 | Ứng dụng mô hình trong thiết kế hệ thống xử lý nước thải | 2(2-0-0-4) | 9 |\n| 33 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 34 | EV5148 | Nhiên liệu sinh học từ chất thải | 2(2-0-1-4) | 10 |\n| 35 | EV5149 | Công nghệ sinh học trong phòng ngừa và kiểm soát ô nhiễm | 2(2-0-0-4) | 10 |\n| 36 | EV5150 | Vật liệu sinh học trong bảo vệ môi trường | 2(2-0-0-4) | 9 |\n| 37 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Sinh viên EV1 có thể hoàn thành toàn bộ chương trình kỹ sư bậc 7 chỉ với 132 tín chỉ không?",
+      "gold_answer": "Không. 132 tín chỉ là khối lượng bậc cử nhân; toàn khóa kỹ sư bậc 7 EV1 có 180 tín chỉ, gồm 132 tín chỉ cử nhân và 48 tín chỉ kỹ sư.",
+      "evidence_chunk_ids": [
+        "d92aef02-8de0-46af-9887-a47357bb3b25",
+        "68686716-ab35-43fe-8b2d-81870ac7889b"
+      ],
+      "ground_truth_context": [
+        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT MÔI TRƯỜNG\n\n**Tên chương trình:** Kỹ thuật Môi trường  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Môi trường  \n**Mã ngành:** 7520320  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật môi trường  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---",
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Sinh viên EV1 học tích hợp cử nhân-kỹ sư có phải chỉ làm một Đồ án thiết kế 6 tín chỉ ở kỳ 8 không?",
+      "gold_answer": "Không. Sinh viên tích hợp cử nhân-kỹ sư đăng ký 2 Đồ án thiết kế, mỗi đồ án 3 tín chỉ: EV4396 và EV4397, đều ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b",
+        "c2f607a2-8b28-4df1-a32c-74245a2ac811"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---",
+        "## 3.2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Đồ án thiết kế (yêu cầu đối với SV học chương trình tích hợp cử nhân - kỹ sư ngành Kỹ thuật Môi trường)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | EV4396 | Đồ án thiết kế 1 (Design Project I) | 3(0-0-6-6) | 8 |\n| 2 | EV4397 | Đồ án thiết kế 2 (Design Project II) | 3(0-0-6-6) | 8 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Mô đun Kỹ thuật xử lý chất thải của EV1 có học phần Kiểm soát chất thải phóng xạ không?",
+      "gold_answer": "Không. Kiểm soát chất thải phóng xạ thuộc mô đun Kỹ thuật kiểm soát ô nhiễm, không thuộc mô đun Kỹ thuật xử lý chất thải.",
+      "evidence_chunk_ids": [
+        "1c505ab7-72cf-47cc-aefd-99a2e7df544a",
+        "c5e150a0-9285-4198-942f-7819ca074175"
+      ],
+      "ground_truth_context": [
+        "## Bậc kỹ sư\n\n### Chuyên ngành cốt lõi - chọn theo mô đun\n\n#### Mô đun Kỹ thuật xử lý chất thải (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 3 | EV5121 | Ứng dụng kỹ thuật màng trong xử lý nước và nước thải | 2(2-1-0-4) | 8 |\n| 4 | EV5125 | Các quá trình xử lý Nito, Photpho trong nước thải | 2(2-0-0-4) | 8 |\n| 5 | EV5141 | Thí nghiệm xử lý nước và nước thải | 2(1-0-2-4) | 8 |\n| 6 | EV5131 | Thiết kế hệ thống xử lý chất thải | 2(2-1-0-4) | 9 |\n| 7 | EV5138 | Kỹ thuật xử lý khí thải công nghiệp | 3(2-2-0-6) | 9 |\n| 8 | EV5140 | Thiết kế lò đốt chất thải | 2(2-1-0-4) | 9 |\n| 9 | EV5143 | Xử lý chất thải bằng công nghệ sinh học | 2(2-1-0-4) | 8 |\n| 10 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 11 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |",
+        "#### Mô đun Kỹ thuật kiểm soát ô nhiễm (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 12 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 8 |\n| 13 | EV5137 | Ứng dụng phương pháp dữ liệu đánh giá biến đổi hệ sinh thái | 2(2-1-0-4) | 8 |\n| 14 | EV5117 | Kiểm soát chất thải phóng xạ | 2(2-0-0-4) | 8 |\n| 15 | EV5144 | Các chất ô nhiễm mới nổi | 2(2-1-0-4) | 8 |\n| 16 | EV5145 | Sinh thái vi sinh vật ứng dụng trong phục hồi tài nguyên | 3(2-1-1-6) | 9 |\n| 17 | EV5146 | Ứng dụng nguyên lý kỹ thuật xanh trong thiết kế | 2(2-0-0-4) | 9 |\n| 18 | EV5250 | Kiểm kê phát thải | 2(2-1-0-4) | 9 |\n| 19 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 20 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Sinh viên EV1 có bắt buộc học cả ba mô đun chuyên ngành cốt lõi ở bậc kỹ sư không?",
+      "gold_answer": "Không. Phần chuyên ngành cốt lõi ghi sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun được chọn.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b",
+        "d9a91fb7-2115-4e97-b299-186d448986d6"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---",
+        "## Bậc kỹ sư\n\n### Chuyên ngành cốt lõi - chọn theo mô đun\n\n#### Mô đun Kỹ thuật xử lý chất thải (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 3 | EV5121 | Ứng dụng kỹ thuật màng trong xử lý nước và nước thải | 2(2-1-0-4) | 8 |\n| 4 | EV5125 | Các quá trình xử lý Nito, Photpho trong nước thải | 2(2-0-0-4) | 8 |\n| 5 | EV5141 | Thí nghiệm xử lý nước và nước thải | 2(1-0-2-4) | 8 |\n| 6 | EV5131 | Thiết kế hệ thống xử lý chất thải | 2(2-1-0-4) | 9 |\n| 7 | EV5138 | Kỹ thuật xử lý khí thải công nghiệp | 3(2-2-0-6) | 9 |\n| 8 | EV5140 | Thiết kế lò đốt chất thải | 2(2-1-0-4) | 9 |\n| 9 | EV5143 | Xử lý chất thải bằng công nghệ sinh học | 2(2-1-0-4) | 8 |\n| 10 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 11 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |\n\n#### Mô đun Kỹ thuật kiểm soát ô nhiễm (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 12 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 8 |\n| 13 | EV5137 | Ứng dụng phương pháp dữ liệu đánh giá biến đổi hệ sinh thái | 2(2-1-0-4) | 8 |\n| 14 | EV5117 | Kiểm soát chất thải phóng xạ | 2(2-0-0-4) | 8 |\n| 15 | EV5144 | Các chất ô nhiễm mới nổi | 2(2-1-0-4) | 8 |\n| 16 | EV5145 | Sinh thái vi sinh vật ứng dụng trong phục hồi tài nguyên | 3(2-1-1-6) | 9 |\n| 17 | EV5146 | Ứng dụng nguyên lý kỹ thuật xanh trong thiết kế | 2(2-0-0-4) | 9 |\n| 18 | EV5250 | Kiểm kê phát thải | 2(2-1-0-4) | 9 |\n| 19 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 20 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |\n\n#### Mô đun An toàn - Sức khỏe - Môi trường (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 21 | EV5214 | Kinh tế môi trường | 2(2-1-0-4) | 8 |\n| 22 | EV5212 | Hệ thống quản lý môi trường | 2(2-1-0-4) | 8 |\n| 23 | EV5262 | Kiểm toán giảm thiểu chất thải | 2(2-0-0-4) | 9 |\n| 24 | EV5263 | Tái chế chất thải | 3(2-1-1-6) | 8 |\n| 25 | EV5134 | Quản lý hóa chất trong công nghiệp | 2(2-0-0-4) | 9 |\n| 26 | EV5233 | Đánh giá vòng đời sản phẩm | 2(2-1-0-4) | 9 |\n| 27 | EV5245 | Đánh giá rủi ro sức khỏe | 2(2-1-0-4) | 9 |\n| 28 | EV5264 | Quản trị dự án | 2(2-0-0-4) | 9 |\n| 29 | EV5103 | Đồ án chuyên ngành I | 2(0-4-0-4) | 9 |\n\n---\n\n### Tự chọn mô đun\n\n#### Mô đun 1: Công trình xử lý chất thải (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 30 | EV5133 | Kỹ thuật công trình xử lý chất thải | 2(2-1-0-4) | 9 |\n| 31 | EV5147 | Xử lý khí thải bằng xúc tác | 2(2-1-0-4) | 10 |\n| 32 | EV5142 | Ứng dụng mô hình trong thiết kế hệ thống xử lý nước thải | 2(2-0-0-4) | 9 |\n| 33 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n#### Mô đun 2: Ứng dụng Công nghệ sinh học trong bảo vệ Môi trường (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 34 | EV5148 | Nhiên liệu sinh học từ chất thải | 2(2-0-1-4) | 10 |\n| 35 | EV5149 | Công nghệ sinh học trong phòng ngừa và kiểm soát ô nhiễm | 2(2-0-0-4) | 10 |\n| 36 | EV5150 | Vật liệu sinh học trong bảo vệ môi trường | 2(2-0-0-4) | 9 |\n| 37 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n#### Mô đun 3: Quản lý môi trường công nghiệp (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 38 | EV5244 | Hạch toán quản lý môi trường | 2(2-0-0-4) | 10 |\n| 39 | EV5254 | Thẩm định và đánh giá công nghệ Môi trường | 2(2-0-0-4) | 9 |\n| 40 | EV5241 | Kiểm soát tai biến và rủi ro môi trường | 2(2-1-0-4) | 9 |\n| 41 | EV5104 | Đồ án chuyên ngành II | 2(0-4-0-4) | 10 |\n\n---\n\n### Tự chọn chung - chọn đủ 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 42 | EV5151 | Kỹ thuật phục hồi các vùng ô nhiễm tồn lưu | 2(2-1-0-4) | 10 |\n| 43 | EV5129 | Mô hình hóa sự vận chuyển các chất ô nhiễm trong nước ngầm | 2(2-1-0-4) | 10 |\n| 44 | EV5139 | Chỉ số môi trường | 2(2-1-0-4) | 10 |\n| 45 | EV5251 | Đánh giá rủi ro sinh thái | 2(2-1-0-4) | 10 |\n| 46 | EV5232 | Thống kê môi trường | 2(2-0-0-4) | 10 |\n| 47 | EV5152 | Chuyên đề kỹ thuật môi trường | 2(2-0-0-4) | 10 |\n| 48 | EV5260 | Đạo đức môi trường | 2(2-0-0-4) | 10 |\n\n---\n\n### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 49 | EV5198 | Thực tập kỹ sư | 6(0-0-12-24) | 10 |\n| 50 | EV5199 | Đồ án kỹ sư | 9(0-0-18-36) | 11 |\n\n**Tổng cộng bậc kỹ sư: 48 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_adversarial_005",
+      "question_type": "adversarial",
+      "question": "Thực tập kỹ sư EV1 có 9 tín chỉ và học ở kỳ 11 phải không?",
+      "gold_answer": "Không. Thực tập kỹ sư EV5198 có 6 tín chỉ và học ở kỳ 10; Đồ án kỹ sư EV5199 mới có 9 tín chỉ và học ở kỳ 11.",
+      "evidence_chunk_ids": [
+        "f38fc780-78fc-4cfb-9e2f-e07152abe669"
+      ],
+      "ground_truth_context": [
+        "### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 49 | EV5198 | Thực tập kỹ sư | 6(0-0-12-24) | 10 |\n| 50 | EV5199 | Đồ án kỹ sư | 9(0-0-18-36) | 11 |\n\n**Tổng cộng bậc kỹ sư: 48 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_adversarial_006",
+      "question_type": "adversarial",
+      "question": "Bậc kỹ sư EV1 có tổng cộng 60 tín chỉ giống chương trình thạc sĩ khoa học không?",
+      "gold_answer": "Không. Bậc kỹ sư EV1 có tổng cộng 48 tín chỉ; toàn khóa cử nhân-kỹ sư có 180 tín chỉ.",
+      "evidence_chunk_ids": [
+        "68686716-ab35-43fe-8b2d-81870ac7889b",
+        "f38fc780-78fc-4cfb-9e2f-e07152abe669"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc Đồ án thiết kế | 6 | SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. SV học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng bậc cử nhân** | **132 tín chỉ** | |\n### Bậc kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Chuyên ngành cốt lõi | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành 1 (2÷3 tín chỉ). Học phần Quản trị dự án (2 tín chỉ) cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| Tự chọn mô đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành 2 |\n| Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng toàn khóa** | **180 tín chỉ** | |\n\n---",
+        "### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 49 | EV5198 | Thực tập kỹ sư | 6(0-0-12-24) | 10 |\n| 50 | EV5199 | Đồ án kỹ sư | 9(0-0-18-36) | 11 |\n\n**Tổng cộng bậc kỹ sư: 48 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "medium"
+    },
+    {
+      "id": "EV1_dataset_adversarial_007",
+      "question_type": "adversarial",
+      "question": "Sinh viên EV1 có thể tìm thấy học phần Luận văn thạc sĩ trong khung bậc kỹ sư không?",
+      "gold_answer": "Không. File Kỹ thuật Môi trường EV1 bậc 7 liệt kê Thực tập kỹ sư và Đồ án kỹ sư, không có học phần Luận văn thạc sĩ.",
+      "evidence_chunk_ids": [
+        "f38fc780-78fc-4cfb-9e2f-e07152abe669"
+      ],
+      "ground_truth_context": [
+        "### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 49 | EV5198 | Thực tập kỹ sư | 6(0-0-12-24) | 10 |\n| 50 | EV5199 | Đồ án kỹ sư | 9(0-0-18-36) | 11 |\n\n**Tổng cộng bậc kỹ sư: 48 tín chỉ**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "medium"
+    }
+  ]
+}

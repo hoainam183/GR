@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { getCurrentSessionUser, ensureSession } from "@/services/authSession";
 
 const Logo = () => (
   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -84,6 +86,30 @@ const features = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const cached = getCurrentSessionUser();
+    if (cached) {
+      navigate(cached.role === "admin" ? "/admin" : "/chat", { replace: true });
+      return;
+    }
+    ensureSession().then((user) => {
+      if (user) {
+        navigate(user.role === "admin" ? "/admin" : "/chat", { replace: true });
+      } else {
+        setReady(true);
+      }
+    }).catch(() => setReady(true));
+  }, [navigate]);
+
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="animate-pulse text-muted-foreground text-sm">Đang kiểm tra phiên...</div>
+      </div>
+    );
+  }
 
   const scrollToFeatures = () => {
     document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });

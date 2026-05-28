@@ -1,0 +1,456 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "ITE6_fix_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 18,
+    "multi_hop": 8,
+    "adversarial": 4
+  },
+  "items": [
+    {
+      "id": "ITE6_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình Công nghệ thông tin Việt-Nhật học trong thời gian đào tạo chuẩn bao lâu và nhận bằng gì?",
+      "gold_answer": "Chương trình Công nghệ thông tin Việt-Nhật có thời gian đào tạo 4 năm; bằng tốt nghiệp là Cử nhân CNTT.",
+      "evidence_chunk_ids": [
+        "b4ac3a41-3b25-4fa3-979c-c5463e1d2413"
+      ],
+      "ground_truth_context": [
+        "## CỬ NHÂN CNTT VIỆT-NHẬT (HEDSPI)\n**Trường Đại học Bách khoa Hà Nội – Viện Công nghệ Thông tin và Truyền thông**\n\n---\n\n**Tên chương trình:** Công nghệ thông tin Việt-Nhật  \n**Trình độ đào tạo:** Cử nhân  \n**Ngành đào tạo:** CNTT  \n**Mã ngành:** 7480201  \n**Thời gian đào tạo:** 4 năm  \n**Bằng tốt nghiệp:** Cử nhân CNTT  \n**Khối lượng kiến thức toàn khóa:** 148 tín chỉ  \n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_002",
+      "question_type": "simple",
+      "question": "Chương trình Công nghệ thông tin Việt-Nhật có khối lượng kiến thức toàn khóa bao nhiêu tín chỉ?",
+      "gold_answer": "Khối lượng kiến thức toàn khóa của chương trình Công nghệ thông tin Việt-Nhật là 148 tín chỉ.",
+      "evidence_chunk_ids": [
+        "b4ac3a41-3b25-4fa3-979c-c5463e1d2413"
+      ],
+      "ground_truth_context": [
+        "## CỬ NHÂN CNTT VIỆT-NHẬT (HEDSPI)\n**Trường Đại học Bách khoa Hà Nội – Viện Công nghệ Thông tin và Truyền thông**\n\n---\n\n**Tên chương trình:** Công nghệ thông tin Việt-Nhật  \n**Trình độ đào tạo:** Cử nhân  \n**Ngành đào tạo:** CNTT  \n**Mã ngành:** 7480201  \n**Thời gian đào tạo:** 4 năm  \n**Bằng tốt nghiệp:** Cử nhân CNTT  \n**Khối lượng kiến thức toàn khóa:** 148 tín chỉ  \n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên CNTT Việt-Nhật cần đạt trình độ tiếng Nhật tối thiểu nào theo mục tiêu chung của chương trình?",
+      "gold_answer": "Theo mục tiêu chung, sinh viên cần có khả năng tiếng Nhật tối thiểu đạt trình độ N3.",
+      "evidence_chunk_ids": [
+        "a3b83b7b-06b9-4faf-a59c-a0ed5ac841dc"
+      ],
+      "ground_truth_context": [
+        "## 1. Mục tiêu chương trình đào tạo\n\n### 1.1 Mục tiêu chung\n\n- Đào tạo cử nhân trình độ cao có khả năng tham gia vào quá trình tạo ra tri thức, sản phẩm mới phục vụ xã hội và đất nước.\n- Đào tạo cử nhân trình độ cao có khả năng áp dụng thành thạo kiến thức cơ sở và chuyên môn, có kỹ năng thực hành nghề nghiệp, có khả năng sáng tạo để tham gia giải quyết vấn đề liên quan đến lĩnh vực CNTT, thích nghi với môi trường làm việc, có khả năng tự học để thích ứng với sự phát triển không ngừng của khoa học và công nghệ.\n- Đào tạo ra cử nhân trình độ cao có trình độ ngoại ngữ tiếng Anh và tiếng Nhật. Trong đó, khả năng tiếng Nhật tối thiểu đạt trình độ N3, là trình độ có thể giao tiếp đơn giản bằng tiếng Nhật. Với trình độ tiếng Nhật N3, sinh viên sẽ có cơ hội tiếp tục học sau đại học và làm việc tại Nhật Bản, hoặc làm việc tại các công ty Việt Nam cần sử dụng tiếng Nhật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_004",
+      "question_type": "simple",
+      "question": "Mục tiêu cụ thể của chương trình CNTT Việt-Nhật yêu cầu sinh viên có hiểu biết gì về văn hóa Nhật Bản?",
+      "gold_answer": "Sinh viên cần có hiểu biết về văn hóa xã hội Nhật Bản nói chung và văn hóa doanh nghiệp Nhật Bản nói riêng; thấm nhuần phong cách làm việc và hiểu các quy tắc ứng xử của người Nhật.",
+      "evidence_chunk_ids": [
+        "5de1a805-29f4-42c6-bcc8-c946890e9e6a"
+      ],
+      "ground_truth_context": [
+        "### 1.2 Mục tiêu cụ thể\n\n- Có hiểu biết về văn hoá xã hội Nhật Bản nói chung, văn hoá doanh nghiệp Nhật Bản nói riêng. Thấm nhuần phong cách làm việc, hiểu rõ các quy tắc trong ứng xử của người Nhật. Từ đó, có thể tự tin làm việc tại các công ty Nhật Bản sau khi tốt nghiệp.\n- Có khả năng nói tiếng Nhật cơ bản. Có khả năng đọc hiểu các tài liệu kỹ thuật bằng tiếng Nhật. Có khả năng thuyết trình, diễn đạt các nội dung kỹ thuật bằng tiếng Nhật.\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_005",
+      "question_type": "simple",
+      "question": "Chuẩn đầu ra về tiếng Nhật của sinh viên CNTT Việt-Nhật yêu cầu chứng chỉ nào?",
+      "gold_answer": "Chuẩn đầu ra yêu cầu sinh viên có kỹ năng sử dụng tiếng Nhật hiệu quả trong công việc và đạt chứng chỉ JLPT N3.",
+      "evidence_chunk_ids": [
+        "c80b7a88-fe86-46cb-9753-400bfe3241f1"
+      ],
+      "ground_truth_context": [
+        "## 2. Chuẩn đầu ra của chương trình giáo dục\n\n**2.3** Có kỹ năng xã hội cần thiết để làm việc hiệu quả trong nhóm đa ngành và trong môi trường quốc tế:\n- 2.3.1 Có kỹ năng tổ chức, lãnh đạo và làm việc theo nhóm (đa ngành).\n- 2.3.2 Có kỹ năng giao tiếp hiệu quả thông qua viết, thuyết trình, thảo luận, đàm phán, làm chủ tình huống, sử dụng hiệu quả các công cụ và phương tiện hiện đại.\n- 2.3.3 Có kỹ năng sử dụng tiếng Nhật hiệu quả trong công việc, đạt chứng chỉ JLPT N3."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_006",
+      "question_type": "simple",
+      "question": "Khối Giáo dục đại cương của chương trình CNTT Việt-Nhật gồm bao nhiêu tín chỉ?",
+      "gold_answer": "Khối Giáo dục đại cương của chương trình CNTT Việt-Nhật gồm 78 tín chỉ.",
+      "evidence_chunk_ids": [
+        "c1a4519e-cdb0-4dad-be27-fbeb90a85e46"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **78** | |\n| Toán và khoa học cơ bản | 33 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | 15 | Giáo dục quốc phòng chỉ áp dụng cho sinh viên Việt Nam |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh TOEIC |\n| Tiếng Nhật | 7 | Ngoài 07 TC Tiếng Nhật tính CPA, còn có 16 TC Tiếng Nhật không tính CPA |\n| Tiếng Nhật chuyên ngành | 4 | |\n| **Giáo dục chuyên nghiệp** | **85** | |\n| Cơ sở và cốt lõi ngành | 53 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ (kỹ năng mềm) | 9 | Bắt buộc 7TC + Tự chọn 2TC |\n| Kiến thức chuyên ngành | 15 | |\n| Thực tập kỹ thuật và Đồ án TN cử nhân | 8 | Thực tập công nghiệp (2TC) + Đồ án TN cử nhân (6TC) |\n| **Tổng cộng** | **148** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_007",
+      "question_type": "simple",
+      "question": "Trong cấu trúc chương trình CNTT Việt-Nhật, tiếng Nhật được tính tín chỉ như thế nào?",
+      "gold_answer": "Tiếng Nhật có 7 tín chỉ tính CPA; ngoài ra còn có 16 tín chỉ tiếng Nhật không tính CPA.",
+      "evidence_chunk_ids": [
+        "c1a4519e-cdb0-4dad-be27-fbeb90a85e46"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **78** | |\n| Toán và khoa học cơ bản | 33 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | 15 | Giáo dục quốc phòng chỉ áp dụng cho sinh viên Việt Nam |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh TOEIC |\n| Tiếng Nhật | 7 | Ngoài 07 TC Tiếng Nhật tính CPA, còn có 16 TC Tiếng Nhật không tính CPA |\n| Tiếng Nhật chuyên ngành | 4 | |\n| **Giáo dục chuyên nghiệp** | **85** | |\n| Cơ sở và cốt lõi ngành | 53 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ (kỹ năng mềm) | 9 | Bắt buộc 7TC + Tự chọn 2TC |\n| Kiến thức chuyên ngành | 15 | |\n| Thực tập kỹ thuật và Đồ án TN cử nhân | 8 | Thực tập công nghiệp (2TC) + Đồ án TN cử nhân (6TC) |\n| **Tổng cộng** | **148** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_008",
+      "question_type": "simple",
+      "question": "Trong cấu trúc chương trình CNTT Việt-Nhật, phần thực tập kỹ thuật và đồ án tốt nghiệp cử nhân gồm những gì?",
+      "gold_answer": "Phần thực tập kỹ thuật và đồ án tốt nghiệp cử nhân gồm 8 tín chỉ, bao gồm Thực tập công nghiệp 2 tín chỉ và Đồ án tốt nghiệp cử nhân 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "c1a4519e-cdb0-4dad-be27-fbeb90a85e46"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **78** | |\n| Toán và khoa học cơ bản | 33 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | 15 | Giáo dục quốc phòng chỉ áp dụng cho sinh viên Việt Nam |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh TOEIC |\n| Tiếng Nhật | 7 | Ngoài 07 TC Tiếng Nhật tính CPA, còn có 16 TC Tiếng Nhật không tính CPA |\n| Tiếng Nhật chuyên ngành | 4 | |\n| **Giáo dục chuyên nghiệp** | **85** | |\n| Cơ sở và cốt lõi ngành | 53 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ (kỹ năng mềm) | 9 | Bắt buộc 7TC + Tự chọn 2TC |\n| Kiến thức chuyên ngành | 15 | |\n| Thực tập kỹ thuật và Đồ án TN cử nhân | 8 | Thực tập công nghiệp (2TC) + Đồ án TN cử nhân (6TC) |\n| **Tổng cộng** | **148** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_009",
+      "question_type": "simple",
+      "question": "Học phần Pháp luật đại cương trong chương trình CNTT Việt-Nhật có bao nhiêu tín chỉ và học ở kỳ mấy?",
+      "gold_answer": "Học phần EM1170 Pháp luật đại cương có 2 tín chỉ, học ở kỳ 6.",
+      "evidence_chunk_ids": [
+        "5df876b8-b84f-45de-beaf-503cc694c190"
+      ],
+      "ground_truth_context": [
+        "### 3.2 Danh mục học phần và kế hoạch học tập chuẩn\n\n#### Lý luận chính trị (13 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác-Lênin | 3(3-0-0-6) | 3 |\n| 2 | SSH1121 | Kinh tế chính trị Mác-Lênin | 2(2-0-0-4) | 4 |\n| 3 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 5 |\n| 4 | SSH1141 | Lịch sử Đảng Cộng sản Việt Nam | 2(2-0-0-4) | 6 |\n| 5 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 7 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 6 |\n\n#### Giáo dục thể chất (5 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 7 | PE1014 | Lý luận TDTT | 0(0-0-2-0) | 1 |\n| 8 | PE1024 | Bơi lội | 0(0-0-2-0) | 2 |\n| 9 | PE2x01 | Giáo dục thể chất C | 0(0-0-2-0) | 3 |\n| 10 | PE2x02 | Giáo dục thể chất D | 0(0-0-2-0) | 4 |\n| 11 | PE2x03 | Giáo dục thể chất E | 0(0-0-2-0) | 5 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên CNTT Việt-Nhật học các học phần giáo dục quốc phòng - an ninh ở những kỳ nào?",
+      "gold_answer": "Sinh viên học MIL1110 ở kỳ 1, MIL1120 ở kỳ 3 và MIL1130 ở kỳ 4.",
+      "evidence_chunk_ids": [
+        "f0b1eec3-6326-45a5-b924-f2816e74e633"
+      ],
+      "ground_truth_context": [
+        "#### Giáo dục quốc phòng – an ninh (10 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) | 1 |\n| 13 | MIL1120 | Công tác quốc phòng – an ninh | 0(3-0-0-6) | 3 |\n| 14 | MIL1130 | QS chung và KCT bắn súng AK | 0(3-0-2-8) | 4 |\n\n#### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 15 | FL1101 | Tiếng Anh TOEIC I | 3(0-6-0-6) | 1 |\n| 16 | FL1102 | Tiếng Anh TOEIC II | 3(0-6-0-6) | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_011",
+      "question_type": "simple",
+      "question": "Hai học phần tiếng Anh TOEIC của chương trình CNTT Việt-Nhật là gì?",
+      "gold_answer": "Hai học phần tiếng Anh TOEIC là FL1101 Tiếng Anh TOEIC I, 3 tín chỉ, học kỳ 1; và FL1102 Tiếng Anh TOEIC II, 3 tín chỉ, học kỳ 2.",
+      "evidence_chunk_ids": [
+        "f0b1eec3-6326-45a5-b924-f2816e74e633"
+      ],
+      "ground_truth_context": [
+        "#### Giáo dục quốc phòng – an ninh (10 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) | 1 |\n| 13 | MIL1120 | Công tác quốc phòng – an ninh | 0(3-0-0-6) | 3 |\n| 14 | MIL1130 | QS chung và KCT bắn súng AK | 0(3-0-2-8) | 4 |\n\n#### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 15 | FL1101 | Tiếng Anh TOEIC I | 3(0-6-0-6) | 1 |\n| 16 | FL1102 | Tiếng Anh TOEIC II | 3(0-6-0-6) | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên CNTT Việt-Nhật học Tiếng Nhật 7 và Tiếng Nhật 8 ở kỳ nào?",
+      "gold_answer": "Tiếng Nhật 7 (JP2210) học ở kỳ 7 với 2 tín chỉ; Tiếng Nhật 8 (JP2220) học ở kỳ 8 với 1 tín chỉ.",
+      "evidence_chunk_ids": [
+        "2874d4db-8be7-4c58-8328-5c07b9d8c411"
+      ],
+      "ground_truth_context": [
+        "#### Tiếng Nhật (7 tín chỉ tính CPA + 16 tín chỉ không tính CPA)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 18 | JP1110 | Tiếng Nhật 1 | 5(0-10-0-10) | 1 |\n| 19 | JP1120 | Tiếng Nhật 2 | 5(0-10-0-10) | 2 |\n| 20 | JP1132 | Tiếng Nhật 3 | 3(0-6-0-6) | 3 |\n| 21 | JP2111 | Tiếng Nhật 4 | 3(0-6-0-6) | 4 |\n| 22 | JP2126 | Tiếng Nhật 5 | 2(0-4-0-4) | 5 |\n| 23 | JP2132 | Tiếng Nhật 6 | 2(0-4-0-4) | 6 |\n| 24 | JP2210 | Tiếng Nhật 7 | 2(0-4-0-4) | 7 |\n| 25 | JP2220 | Tiếng Nhật 8 | 1(0-2-0-2) | 8 |\n\n#### Tiếng Nhật chuyên ngành (4 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 26 | JP3110 | Tiếng Nhật chuyên ngành 1 | 2(0-4-0-4) | 5 |\n| 27 | JP3120 | Tiếng Nhật chuyên ngành 2 | 2(0-4-0-4) | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_013",
+      "question_type": "simple",
+      "question": "Các học phần tiếng Nhật chuyên ngành trong chương trình CNTT Việt-Nhật gồm những môn nào?",
+      "gold_answer": "Các học phần tiếng Nhật chuyên ngành gồm JP3110 Tiếng Nhật chuyên ngành 1, 2 tín chỉ, kỳ 5; và JP3120 Tiếng Nhật chuyên ngành 2, 2 tín chỉ, kỳ 6.",
+      "evidence_chunk_ids": [
+        "2874d4db-8be7-4c58-8328-5c07b9d8c411"
+      ],
+      "ground_truth_context": [
+        "#### Tiếng Nhật (7 tín chỉ tính CPA + 16 tín chỉ không tính CPA)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 18 | JP1110 | Tiếng Nhật 1 | 5(0-10-0-10) | 1 |\n| 19 | JP1120 | Tiếng Nhật 2 | 5(0-10-0-10) | 2 |\n| 20 | JP1132 | Tiếng Nhật 3 | 3(0-6-0-6) | 3 |\n| 21 | JP2111 | Tiếng Nhật 4 | 3(0-6-0-6) | 4 |\n| 22 | JP2126 | Tiếng Nhật 5 | 2(0-4-0-4) | 5 |\n| 23 | JP2132 | Tiếng Nhật 6 | 2(0-4-0-4) | 6 |\n| 24 | JP2210 | Tiếng Nhật 7 | 2(0-4-0-4) | 7 |\n| 25 | JP2220 | Tiếng Nhật 8 | 1(0-2-0-2) | 8 |\n\n#### Tiếng Nhật chuyên ngành (4 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 26 | JP3110 | Tiếng Nhật chuyên ngành 1 | 2(0-4-0-4) | 5 |\n| 27 | JP3120 | Tiếng Nhật chuyên ngành 2 | 2(0-4-0-4) | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_014",
+      "question_type": "simple",
+      "question": "Học phần IT3020 Toán rời rạc trong chương trình CNTT Việt-Nhật có bao nhiêu tín chỉ và học ở kỳ nào?",
+      "gold_answer": "IT3020 Toán rời rạc có 3 tín chỉ và học ở kỳ 2.",
+      "evidence_chunk_ids": [
+        "0b478904-c0fd-48b6-b12a-d9d929c1a3c6"
+      ],
+      "ground_truth_context": [
+        "#### Toán và khoa học cơ bản (33 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 29 | MI1144 | Đại số tuyến tính | 3(2-2-0-6) | 1 |\n| 30 | MI1114 | Giải tích 1 | 3(2-2-0-6) | 1 |\n| 31 | MI1124 | Giải tích 2 | 3(2-2-0-6) | 2 |\n| 32 | MI1134 | Phương trình vi phân và Chuỗi | 3(2-2-0-6) | 4 |\n| 33 | MI2021 | Xác suất thống kê | 2(2-0-0-4) | 4 |\n| 34 | PH1110 | Vật lý đại cương | 3(2-1-1-6) | 2 |\n| 35 | IT3420 | Điện tử cho CNTT | 2(2-1-0-4) | 3 |\n| 36 | IT2140 | Điện tử cho CNTT lab | 2(0-4-0-4) | 3 |\n| 37 | IT2110 | Nhập môn CNTT và TT | 2(2-0-0-4) | 1 |\n| 38 | IT2120 | Kiến thức máy tính | 2(0-4-0-4) | 1 |\n| 39 | IT3020 | Toán rời rạc | 3(3-1-0-6) | 2 |\n| 40 | IT4110 | Tính toán khoa học | 3(3-1-0-6) | 4 |\n| 41 | IT4172 | Xử lý tín hiệu | 2(2-1-0-4) | 3 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_015",
+      "question_type": "simple",
+      "question": "Trong khối cơ sở và cốt lõi ngành CNTT Việt-Nhật, học phần IT4015 học ở kỳ nào và có bao nhiêu tín chỉ?",
+      "gold_answer": "IT4015 Nhập môn an toàn thông tin có 3 tín chỉ và học ở kỳ 3.",
+      "evidence_chunk_ids": [
+        "b1721449-4322-4381-97ff-8975f3cd5364"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (53 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 57 | IT3283 | Kiến trúc máy tính | 2(2-1-0-4) | 4 |\n| 58 | IT3280 | Thực hành kiến trúc máy tính | 2(0-4-0-4) | 4 |\n| 59 | IT4015 | Nhập môn an toàn thông tin | 3(3-1-0-6) | 3 |\n| 60 | IT5021 | Nghiên cứu tốt nghiệp 1 | 2(0-0-4-4) | 6 |\n| 61 | IT5022 | Nghiên cứu tốt nghiệp 2 | 2(0-0-4-4) | 7 |\n| 62 | IT4549 | Phát triển phần mềm theo chuẩn ITSS | 3(3-1-0-6) | 6 |\n| 63 | IT4062 | Thực hành lập trình mạng | 2(0-4-0-4) | 7 |\n| 64 | IT3323 | Xây dựng chương trình dịch | 3(2-2-0-6) | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_016",
+      "question_type": "simple",
+      "question": "Sinh viên CNTT Việt-Nhật học Technical Writing and Presentation ở kỳ nào và bao nhiêu tín chỉ?",
+      "gold_answer": "Học phần IT2030 Technical Writing and Presentation có 3 tín chỉ và học ở kỳ 3.",
+      "evidence_chunk_ids": [
+        "7bd9d9bb-b603-4003-96bb-2b6d55ca2ae2"
+      ],
+      "ground_truth_context": [
+        "#### Kiến thức bổ trợ xã hội (9 tín chỉ)\n\n**Bắt buộc:**\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 65 | IT2030 | Technical Writing and Presentation | 3(2-2-0-6) | 3 |\n\n**Tự chọn (chọn 6 tín chỉ):**\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 66 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) |\n| 67 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) |\n| 68 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) |\n| 69 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) |\n| 70 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) |\n| 71 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_017",
+      "question_type": "simple",
+      "question": "Module Trí tuệ nhân tạo và Dữ liệu lớn của chương trình CNTT Việt-Nhật có học phần Giao diện và trải nghiệm người dùng không?",
+      "gold_answer": "Có. Module Trí tuệ nhân tạo và Dữ liệu lớn có học phần IT4441 Giao diện và trải nghiệm người dùng, 3 tín chỉ, học kỳ 6.",
+      "evidence_chunk_ids": [
+        "073063fc-405f-4be2-b0c0-b753cb562614"
+      ],
+      "ground_truth_context": [
+        "#### Tự chọn theo định hướng (15 tín chỉ)\n\n**Module 1 – Trí tuệ nhân tạo và Dữ liệu lớn:**\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| B.1 | IT4409 | Công nghệ Web và dịch vụ trực tuyến | 3(2-2-0-6) | 7 |\n| B.2 | IT4785 | Phát triển ứng dụng cho thiết bị di động | 2(2-1-0-4) | 7 |\n| B.3 | IT4542 | Quản trị phát triển phần mềm | 2(2-0-0-4) | 8 |\n| B.4 | IT4930 | Nhập môn Khoa học dữ liệu | 2(2-1-0-4) | 8 |\n| B.5 | IT3190 | Học máy và khai phá dữ liệu | 3(3-1-0-6) | 7 |\n| B.6 | IT4441 | Giao diện và trải nghiệm người dùng | 3(2-2-0-6) | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_simple_018",
+      "question_type": "simple",
+      "question": "Trong chương trình CNTT Việt-Nhật, học phần thực tập công nghiệp và đồ án tốt nghiệp có mã học phần nào?",
+      "gold_answer": "Thực tập công nghiệp có mã IT4948, 2 tín chỉ, học kỳ 7; Đồ án tốt nghiệp có mã IT4125, 6 tín chỉ, học kỳ 8.",
+      "evidence_chunk_ids": [
+        "83e689ec-40bb-469b-bc89-9450a303a4c3"
+      ],
+      "ground_truth_context": [
+        "#### Thực tập kỹ thuật và Đồ án tốt nghiệp (8 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 72 | IT4948 | Thực tập công nghiệp | 2(0-0-4-4) | 7 |\n| 73 | IT4125 | Đồ án tốt nghiệp | 6(0-0-12-12) | 8 |\n\n#### Phân bổ tín chỉ theo kỳ\n\n| | Kỳ 1 | Kỳ 2 | Kỳ 3 | Kỳ 4 | Kỳ 5 | Kỳ 6 | Kỳ 7 | Kỳ 8 | Tổng |\n|---|---|---|---|---|---|---|---|---|---|\n| Chỉ tính môn CPA | 13 | 16 | 19 | 18 | 17 | 21 | 20 | 16 | **148** |\n| Tất cả các môn | 18 | 21 | 22 | 21 | 19 | 21 | 20 | 16 | |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên CNTT Việt-Nhật quan tâm đến tiếng Nhật trong chương trình, sinh viên cần biết mục tiêu trình độ đầu ra và các học phần tiếng Nhật chính nào?",
+      "gold_answer": "Sinh viên cần hướng tới trình độ tiếng Nhật tối thiểu N3/JLPT N3. Các học phần tiếng Nhật chính gồm JP1110 Tiếng Nhật 1, JP1120 Tiếng Nhật 2, JP1132 Tiếng Nhật 3, JP2111 Tiếng Nhật 4, JP2126 Tiếng Nhật 5, JP2132 Tiếng Nhật 6, JP2210 Tiếng Nhật 7 và JP2220 Tiếng Nhật 8.",
+      "evidence_chunk_ids": [
+        "a3b83b7b-06b9-4faf-a59c-a0ed5ac841dc",
+        "c80b7a88-fe86-46cb-9753-400bfe3241f1",
+        "2874d4db-8be7-4c58-8328-5c07b9d8c411"
+      ],
+      "ground_truth_context": [
+        "## 1. Mục tiêu chương trình đào tạo\n\n### 1.1 Mục tiêu chung\n\n- Đào tạo cử nhân trình độ cao có khả năng tham gia vào quá trình tạo ra tri thức, sản phẩm mới phục vụ xã hội và đất nước.\n- Đào tạo cử nhân trình độ cao có khả năng áp dụng thành thạo kiến thức cơ sở và chuyên môn, có kỹ năng thực hành nghề nghiệp, có khả năng sáng tạo để tham gia giải quyết vấn đề liên quan đến lĩnh vực CNTT, thích nghi với môi trường làm việc, có khả năng tự học để thích ứng với sự phát triển không ngừng của khoa học và công nghệ.\n- Đào tạo ra cử nhân trình độ cao có trình độ ngoại ngữ tiếng Anh và tiếng Nhật. Trong đó, khả năng tiếng Nhật tối thiểu đạt trình độ N3, là trình độ có thể giao tiếp đơn giản bằng tiếng Nhật. Với trình độ tiếng Nhật N3, sinh viên sẽ có cơ hội tiếp tục học sau đại học và làm việc tại Nhật Bản, hoặc làm việc tại các công ty Việt Nam cần sử dụng tiếng Nhật.",
+        "## 2. Chuẩn đầu ra của chương trình giáo dục\n\n**2.3** Có kỹ năng xã hội cần thiết để làm việc hiệu quả trong nhóm đa ngành và trong môi trường quốc tế:\n- 2.3.1 Có kỹ năng tổ chức, lãnh đạo và làm việc theo nhóm (đa ngành).\n- 2.3.2 Có kỹ năng giao tiếp hiệu quả thông qua viết, thuyết trình, thảo luận, đàm phán, làm chủ tình huống, sử dụng hiệu quả các công cụ và phương tiện hiện đại.\n- 2.3.3 Có kỹ năng sử dụng tiếng Nhật hiệu quả trong công việc, đạt chứng chỉ JLPT N3.",
+        "#### Tiếng Nhật (7 tín chỉ tính CPA + 16 tín chỉ không tính CPA)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 18 | JP1110 | Tiếng Nhật 1 | 5(0-10-0-10) | 1 |\n| 19 | JP1120 | Tiếng Nhật 2 | 5(0-10-0-10) | 2 |\n| 20 | JP1132 | Tiếng Nhật 3 | 3(0-6-0-6) | 3 |\n| 21 | JP2111 | Tiếng Nhật 4 | 3(0-6-0-6) | 4 |\n| 22 | JP2126 | Tiếng Nhật 5 | 2(0-4-0-4) | 5 |\n| 23 | JP2132 | Tiếng Nhật 6 | 2(0-4-0-4) | 6 |\n| 24 | JP2210 | Tiếng Nhật 7 | 2(0-4-0-4) | 7 |\n| 25 | JP2220 | Tiếng Nhật 8 | 1(0-2-0-2) | 8 |\n\n#### Tiếng Nhật chuyên ngành (4 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 26 | JP3110 | Tiếng Nhật chuyên ngành 1 | 2(0-4-0-4) | 5 |\n| 27 | JP3120 | Tiếng Nhật chuyên ngành 2 | 2(0-4-0-4) | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Tổng số tín chỉ của chương trình CNTT Việt-Nhật được cấu thành từ các khối kiến thức lớn nào?",
+      "gold_answer": "Tổng chương trình là 148 tín chỉ, gồm Giáo dục đại cương 78 tín chỉ và Giáo dục chuyên nghiệp 85 tín chỉ theo cấu trúc chương trình; trong phần liệt kê có các khối như Toán và khoa học cơ bản, lý luận chính trị, GDTC/GDQP-AN, tiếng Anh, tiếng Nhật, tiếng Nhật chuyên ngành, cơ sở cốt lõi ngành, kiến thức bổ trợ, kiến thức chuyên ngành, thực tập kỹ thuật và đồ án tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "c1a4519e-cdb0-4dad-be27-fbeb90a85e46"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình\n\n### 3.1 Cấu trúc chung của chương trình đào tạo\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **78** | |\n| Toán và khoa học cơ bản | 33 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | 15 | Giáo dục quốc phòng chỉ áp dụng cho sinh viên Việt Nam |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh TOEIC |\n| Tiếng Nhật | 7 | Ngoài 07 TC Tiếng Nhật tính CPA, còn có 16 TC Tiếng Nhật không tính CPA |\n| Tiếng Nhật chuyên ngành | 4 | |\n| **Giáo dục chuyên nghiệp** | **85** | |\n| Cơ sở và cốt lõi ngành | 53 | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai |\n| Kiến thức bổ trợ (kỹ năng mềm) | 9 | Bắt buộc 7TC + Tự chọn 2TC |\n| Kiến thức chuyên ngành | 15 | |\n| Thực tập kỹ thuật và Đồ án TN cử nhân | 8 | Thực tập công nghiệp (2TC) + Đồ án TN cử nhân (6TC) |\n| **Tổng cộng** | **148** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_table_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Trong chương trình CNTT Việt-Nhật, sinh viên học các học phần ngoại ngữ nào ở giai đoạn đầu chương trình?",
+      "gold_answer": "Ở giai đoạn đầu, sinh viên học Tiếng Anh TOEIC I ở kỳ 1 và Tiếng Anh TOEIC II ở kỳ 2; đồng thời học Tiếng Nhật 1 ở kỳ 1 và Tiếng Nhật 2 ở kỳ 2.",
+      "evidence_chunk_ids": [
+        "f0b1eec3-6326-45a5-b924-f2816e74e633",
+        "2874d4db-8be7-4c58-8328-5c07b9d8c411"
+      ],
+      "ground_truth_context": [
+        "#### Giáo dục quốc phòng – an ninh (10 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) | 1 |\n| 13 | MIL1120 | Công tác quốc phòng – an ninh | 0(3-0-0-6) | 3 |\n| 14 | MIL1130 | QS chung và KCT bắn súng AK | 0(3-0-2-8) | 4 |\n\n#### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 15 | FL1101 | Tiếng Anh TOEIC I | 3(0-6-0-6) | 1 |\n| 16 | FL1102 | Tiếng Anh TOEIC II | 3(0-6-0-6) | 2 |",
+        "#### Tiếng Nhật (7 tín chỉ tính CPA + 16 tín chỉ không tính CPA)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 18 | JP1110 | Tiếng Nhật 1 | 5(0-10-0-10) | 1 |\n| 19 | JP1120 | Tiếng Nhật 2 | 5(0-10-0-10) | 2 |\n| 20 | JP1132 | Tiếng Nhật 3 | 3(0-6-0-6) | 3 |\n| 21 | JP2111 | Tiếng Nhật 4 | 3(0-6-0-6) | 4 |\n| 22 | JP2126 | Tiếng Nhật 5 | 2(0-4-0-4) | 5 |\n| 23 | JP2132 | Tiếng Nhật 6 | 2(0-4-0-4) | 6 |\n| 24 | JP2210 | Tiếng Nhật 7 | 2(0-4-0-4) | 7 |\n| 25 | JP2220 | Tiếng Nhật 8 | 1(0-2-0-2) | 8 |\n\n#### Tiếng Nhật chuyên ngành (4 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 26 | JP3110 | Tiếng Nhật chuyên ngành 1 | 2(0-4-0-4) | 5 |\n| 27 | JP3120 | Tiếng Nhật chuyên ngành 2 | 2(0-4-0-4) | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên CNTT Việt-Nhật muốn theo hướng AI và dữ liệu lớn thì có thể gặp các học phần nào trong module tự chọn và trong khối cơ sở cốt lõi liên quan đến AI/dữ liệu?",
+      "gold_answer": "Trong khối cơ sở cốt lõi có IT3160 Nhập môn Trí tuệ nhân tạo. Trong Module 1 – Trí tuệ nhân tạo và Dữ liệu lớn có các học phần như IT4930 Nhập môn Khoa học dữ liệu, IT3190 Học máy và khai phá dữ liệu, cùng các học phần ứng dụng như Công nghệ Web, Phát triển ứng dụng di động, Quản trị phát triển phần mềm và Giao diện và trải nghiệm người dùng.",
+      "evidence_chunk_ids": [
+        "6efb75c6-8aff-4841-b753-aa4ea33bd2df",
+        "073063fc-405f-4be2-b0c0-b753cb562614"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (53 tín chỉ)\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 42 | IT3362 | Kỹ năng ITSS 1 (học bằng tiếng Nhật) | 2(0-4-0-4) | 7 |\n| 43 | IT3382 | Kỹ năng ITSS 2 (học bằng tiếng Nhật) | 2(0-4-0-4) | 8 |\n| 44 | IT3210 | Ngôn ngữ lập trình C | 2(2-0-0-4) | 2 |\n| 45 | IT3220 | Thực hành ngôn ngữ lập trình C | 2(0-4-0-4) | 2 |\n| 46 | IT4593 | Nhập môn kỹ thuật truyền thông | 2(2-1-0-4) | 5 |\n| 47 | IT3011 | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 3 |\n| 48 | IT3230 | Lập trình C (cơ bản) | 2(0-4-0-4) | 3 |\n| 49 | IT3170 | Thuật toán ứng dụng | 2(2-0-1-4) | 5 |\n| 50 | IT4082 | Kỹ thuật phần mềm | 2(2-1-0-4) | 6 |\n| 51 | IT3070 | Nguyên lý hệ điều hành | 3(3-1-0-6) | 5 |\n| 52 | IT3080 | Mạng máy tính | 3(3-0-1-6) | 5 |\n| 53 | IT3292 | Cơ sở dữ liệu | 2(2-0-0-4) | 4 |\n| 54 | IT3290 | Thực hành cơ sở dữ liệu | 2(0-4-0-4) | 4 |\n| 55 | IT3160 | Nhập môn Trí tuệ nhân tạo | 3(3-1-0-6) | 6 |\n| 56 | IT3103 | Lập trình hướng đối tượng | 3(2-1-1-6) | 5 |",
+        "#### Tự chọn theo định hướng (15 tín chỉ)\n\n**Module 1 – Trí tuệ nhân tạo và Dữ liệu lớn:**\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| B.1 | IT4409 | Công nghệ Web và dịch vụ trực tuyến | 3(2-2-0-6) | 7 |\n| B.2 | IT4785 | Phát triển ứng dụng cho thiết bị di động | 2(2-1-0-4) | 7 |\n| B.3 | IT4542 | Quản trị phát triển phần mềm | 2(2-0-0-4) | 8 |\n| B.4 | IT4930 | Nhập môn Khoa học dữ liệu | 2(2-1-0-4) | 8 |\n| B.5 | IT3190 | Học máy và khai phá dữ liệu | 3(3-1-0-6) | 7 |\n| B.6 | IT4441 | Giao diện và trải nghiệm người dùng | 3(2-2-0-6) | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên CNTT Việt-Nhật muốn theo hướng AIoT cần chú ý những học phần nào trong Module 2?",
+      "gold_answer": "Module 2 – AI và IoT (AIoT) gồm IT4409 Công nghệ Web và dịch vụ trực tuyến, IT4785 Phát triển ứng dụng cho thiết bị di động, IT4542 Quản trị phát triển phần mềm, IT4210 Hệ nhúng, IT4735 IoT và ứng dụng, IT4651 Thiết kế và triển khai mạng IP.",
+      "evidence_chunk_ids": [
+        "f9220ebd-00f6-4356-83bb-00d6e351aec2"
+      ],
+      "ground_truth_context": [
+        "#### Tự chọn theo định hướng (15 tín chỉ)\n\n**Module 2 – AI và IoT (AIoT):**\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| I.1 | IT4409 | Công nghệ Web và dịch vụ trực tuyến | 3(2-2-0-6) | 7 |\n| I.2 | IT4785 | Phát triển ứng dụng cho thiết bị di động | 2(2-1-0-4) | 7 |\n| I.3 | IT4542 | Quản trị phát triển phần mềm | 2(2-0-0-4) | 8 |\n| I.4 | IT4210 | Hệ nhúng | 3(3-0-1-6) | 6 |\n| I.5 | IT4735 | IoT và ứng dụng | 2(2-1-0-4) | 8 |\n| I.6 | IT4651 | Thiết kế và triển khai mạng IP | 3(2-0-2-6) | 7 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_table_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên CNTT Việt-Nhật học các học phần nghiên cứu tốt nghiệp trước đồ án tốt nghiệp như thế nào?",
+      "gold_answer": "Trong khối cơ sở và cốt lõi ngành có IT5021 Nghiên cứu tốt nghiệp 1, 2 tín chỉ, kỳ 6 và IT5022 Nghiên cứu tốt nghiệp 2, 2 tín chỉ, kỳ 7; sau đó phần thực tập và đồ án tốt nghiệp gồm IT4948 Thực tập công nghiệp kỳ 7 và IT4125 Đồ án tốt nghiệp kỳ 8.",
+      "evidence_chunk_ids": [
+        "b1721449-4322-4381-97ff-8975f3cd5364",
+        "83e689ec-40bb-469b-bc89-9450a303a4c3"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (53 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 57 | IT3283 | Kiến trúc máy tính | 2(2-1-0-4) | 4 |\n| 58 | IT3280 | Thực hành kiến trúc máy tính | 2(0-4-0-4) | 4 |\n| 59 | IT4015 | Nhập môn an toàn thông tin | 3(3-1-0-6) | 3 |\n| 60 | IT5021 | Nghiên cứu tốt nghiệp 1 | 2(0-0-4-4) | 6 |\n| 61 | IT5022 | Nghiên cứu tốt nghiệp 2 | 2(0-0-4-4) | 7 |\n| 62 | IT4549 | Phát triển phần mềm theo chuẩn ITSS | 3(3-1-0-6) | 6 |\n| 63 | IT4062 | Thực hành lập trình mạng | 2(0-4-0-4) | 7 |\n| 64 | IT3323 | Xây dựng chương trình dịch | 3(2-2-0-6) | 8 |",
+        "#### Thực tập kỹ thuật và Đồ án tốt nghiệp (8 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 72 | IT4948 | Thực tập công nghiệp | 2(0-0-4-4) | 7 |\n| 73 | IT4125 | Đồ án tốt nghiệp | 6(0-0-12-12) | 8 |\n\n#### Phân bổ tín chỉ theo kỳ\n\n| | Kỳ 1 | Kỳ 2 | Kỳ 3 | Kỳ 4 | Kỳ 5 | Kỳ 6 | Kỳ 7 | Kỳ 8 | Tổng |\n|---|---|---|---|---|---|---|---|---|---|\n| Chỉ tính môn CPA | 13 | 16 | 19 | 18 | 17 | 21 | 20 | 16 | **148** |\n| Tất cả các môn | 18 | 21 | 22 | 21 | 19 | 21 | 20 | 16 | |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên CNTT Việt-Nhật cần hoàn thành các học phần giáo dục chính trị và giáo dục thể chất nào theo kế hoạch học tập?",
+      "gold_answer": "Khối lý luận chính trị gồm Triết học Mác-Lênin, Kinh tế chính trị Mác-Lênin, Chủ nghĩa xã hội khoa học, Lịch sử Đảng Cộng sản Việt Nam, Tư tưởng Hồ Chí Minh và Pháp luật đại cương. Giáo dục thể chất gồm Lý luận TDTT, Bơi lội, Giáo dục thể chất C, D và E.",
+      "evidence_chunk_ids": [
+        "5df876b8-b84f-45de-beaf-503cc694c190"
+      ],
+      "ground_truth_context": [
+        "### 3.2 Danh mục học phần và kế hoạch học tập chuẩn\n\n#### Lý luận chính trị (13 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác-Lênin | 3(3-0-0-6) | 3 |\n| 2 | SSH1121 | Kinh tế chính trị Mác-Lênin | 2(2-0-0-4) | 4 |\n| 3 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 5 |\n| 4 | SSH1141 | Lịch sử Đảng Cộng sản Việt Nam | 2(2-0-0-4) | 6 |\n| 5 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 7 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 6 |\n\n#### Giáo dục thể chất (5 tín chỉ)\n\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 7 | PE1014 | Lý luận TDTT | 0(0-0-2-0) | 1 |\n| 8 | PE1024 | Bơi lội | 0(0-0-2-0) | 2 |\n| 9 | PE2x01 | Giáo dục thể chất C | 0(0-0-2-0) | 3 |\n| 10 | PE2x02 | Giáo dục thể chất D | 0(0-0-2-0) | 4 |\n| 11 | PE2x03 | Giáo dục thể chất E | 0(0-0-2-0) | 5 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_table_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên CNTT Việt-Nhật muốn biết môn học liên quan đến cơ sở dữ liệu và thực hành cơ sở dữ liệu, chương trình bố trí ra sao?",
+      "gold_answer": "Trong khối cơ sở và cốt lõi ngành, IT3292 Cơ sở dữ liệu có 2 tín chỉ, học kỳ 4; IT3290 Thực hành cơ sở dữ liệu có 2 tín chỉ, học kỳ 4.",
+      "evidence_chunk_ids": [
+        "6efb75c6-8aff-4841-b753-aa4ea33bd2df"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (53 tín chỉ)\n| TT | Mã học phần (Mã HP) | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 42 | IT3362 | Kỹ năng ITSS 1 (học bằng tiếng Nhật) | 2(0-4-0-4) | 7 |\n| 43 | IT3382 | Kỹ năng ITSS 2 (học bằng tiếng Nhật) | 2(0-4-0-4) | 8 |\n| 44 | IT3210 | Ngôn ngữ lập trình C | 2(2-0-0-4) | 2 |\n| 45 | IT3220 | Thực hành ngôn ngữ lập trình C | 2(0-4-0-4) | 2 |\n| 46 | IT4593 | Nhập môn kỹ thuật truyền thông | 2(2-1-0-4) | 5 |\n| 47 | IT3011 | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 3 |\n| 48 | IT3230 | Lập trình C (cơ bản) | 2(0-4-0-4) | 3 |\n| 49 | IT3170 | Thuật toán ứng dụng | 2(2-0-1-4) | 5 |\n| 50 | IT4082 | Kỹ thuật phần mềm | 2(2-1-0-4) | 6 |\n| 51 | IT3070 | Nguyên lý hệ điều hành | 3(3-1-0-6) | 5 |\n| 52 | IT3080 | Mạng máy tính | 3(3-0-1-6) | 5 |\n| 53 | IT3292 | Cơ sở dữ liệu | 2(2-0-0-4) | 4 |\n| 54 | IT3290 | Thực hành cơ sở dữ liệu | 2(0-4-0-4) | 4 |\n| 55 | IT3160 | Nhập môn Trí tuệ nhân tạo | 3(3-1-0-6) | 6 |\n| 56 | IT3103 | Lập trình hướng đối tượng | 3(2-1-1-6) | 5 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_table_synthesis",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Sinh viên chương trình CNTT Việt-Nhật phải đóng học phí bao nhiêu tiền cho mỗi tín chỉ?",
+      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_from_context",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ITE6_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Điểm chuẩn tuyển sinh của chương trình CNTT Việt-Nhật trong năm 2025 là bao nhiêu?",
+      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_from_context",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ITE6_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Sinh viên CNTT Việt-Nhật có được miễn học phần tiếng Nhật nếu đã có chứng chỉ JLPT N3 trước khi nhập học không?",
+      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_from_context",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ITE6_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Chương trình CNTT Việt-Nhật yêu cầu sinh viên đi thực tập tại công ty Nhật Bản cụ thể nào?",
+      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_from_context",
+      "difficulty": "hard"
+    }
+  ]
+}

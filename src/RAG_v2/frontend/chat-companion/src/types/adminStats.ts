@@ -241,3 +241,22 @@ export interface CrawlerStatus {
   indexed_runs?: CrawlerCollectionResult[];
   runs?: CrawlerCollectionResult[];
 }
+
+// ─── EP13: Env Config ─────────────────────────────────────
+export interface EnvConfigItem {
+  key: string;
+  value: number | string | boolean;
+  type: 'int' | 'float' | 'str';
+  label: string;
+  description: string;
+  category: string;
+}
+
+export interface EnvConfigResponse {
+  configs: EnvConfigItem[];
+}
+
+export interface EnvConfigUpdateResponse {
+  ok: boolean;
+  updated: Record<string, unknown>;
+}

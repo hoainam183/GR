@@ -1,0 +1,454 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QLTNMT_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 18,
+    "multi_hop": 8,
+    "adversarial": 4
+  },
+  "items": [
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên ngành Quản lý Tài nguyên và Môi trường hệ kỹ sư học trong thời gian đào tạo chuẩn bao lâu?",
+      "gold_answer": "Chương trình Quản lý Tài nguyên và Môi trường trình độ kỹ sư có thời gian đào tạo 5,5 năm, gồm cử nhân 4 năm và kỹ sư 1,5 năm.",
+      "evidence_chunk_ids": [
+        "0fd48260-f35a-44cf-a1fe-e15815c77233"
+      ],
+      "ground_truth_context": [
+        "## CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC\n\nTên chương trình: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nTrình độ đào tạo: Kỹ sư (bậc 7)\n\nNgành đào tạo: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nMã ngành: 7520320\n\nThời gian đào tạo: 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)\n\nBằng tốt nghiệp: Kỹ sư Quản lý Tài nguyên và Môi trường (Engineer in Natural Resources and Environmental Management)\n\nKhối lượng kiến thức toàn khóa: 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n(Ban hành tại Quyết định số /QĐ-ĐHBK-ĐT ngày tháng năm của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_002",
+      "question_type": "simple",
+      "question": "Sinh viên hoàn thành chương trình Quản lý Tài nguyên và Môi trường bậc 7 được cấp bằng gì?",
+      "gold_answer": "Sinh viên tốt nghiệp được cấp bằng Kỹ sư Quản lý Tài nguyên và Môi trường, tiếng Anh là Engineer in Natural Resources and Environmental Management.",
+      "evidence_chunk_ids": [
+        "0fd48260-f35a-44cf-a1fe-e15815c77233"
+      ],
+      "ground_truth_context": [
+        "## CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC\n\nTên chương trình: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nTrình độ đào tạo: Kỹ sư (bậc 7)\n\nNgành đào tạo: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nMã ngành: 7520320\n\nThời gian đào tạo: 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)\n\nBằng tốt nghiệp: Kỹ sư Quản lý Tài nguyên và Môi trường (Engineer in Natural Resources and Environmental Management)\n\nKhối lượng kiến thức toàn khóa: 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n(Ban hành tại Quyết định số /QĐ-ĐHBK-ĐT ngày tháng năm của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_003",
+      "question_type": "simple",
+      "question": "Mã ngành của chương trình Quản lý Tài nguyên và Môi trường là gì?",
+      "gold_answer": "Mã ngành của chương trình Quản lý Tài nguyên và Môi trường là 7520320.",
+      "evidence_chunk_ids": [
+        "0fd48260-f35a-44cf-a1fe-e15815c77233"
+      ],
+      "ground_truth_context": [
+        "## CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC\n\nTên chương trình: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nTrình độ đào tạo: Kỹ sư (bậc 7)\n\nNgành đào tạo: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nMã ngành: 7520320\n\nThời gian đào tạo: 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)\n\nBằng tốt nghiệp: Kỹ sư Quản lý Tài nguyên và Môi trường (Engineer in Natural Resources and Environmental Management)\n\nKhối lượng kiến thức toàn khóa: 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n(Ban hành tại Quyết định số /QĐ-ĐHBK-ĐT ngày tháng năm của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_004",
+      "question_type": "simple",
+      "question": "Khối lượng kiến thức toàn khóa của chương trình Quản lý Tài nguyên và Môi trường bậc kỹ sư là bao nhiêu tín chỉ?",
+      "gold_answer": "Khối lượng kiến thức toàn khóa là 180 tín chỉ, gồm 132 tín chỉ bậc cử nhân và 48 tín chỉ bậc kỹ sư.",
+      "evidence_chunk_ids": [
+        "0fd48260-f35a-44cf-a1fe-e15815c77233"
+      ],
+      "ground_truth_context": [
+        "## CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC\n\nTên chương trình: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nTrình độ đào tạo: Kỹ sư (bậc 7)\n\nNgành đào tạo: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nMã ngành: 7520320\n\nThời gian đào tạo: 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)\n\nBằng tốt nghiệp: Kỹ sư Quản lý Tài nguyên và Môi trường (Engineer in Natural Resources and Environmental Management)\n\nKhối lượng kiến thức toàn khóa: 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n(Ban hành tại Quyết định số /QĐ-ĐHBK-ĐT ngày tháng năm của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_005",
+      "question_type": "simple",
+      "question": "Ở bậc cử nhân ngành Quản lý Tài nguyên và Môi trường, khối giáo dục đại cương có bao nhiêu tín chỉ?",
+      "gold_answer": "Ở bậc cử nhân, khối giáo dục đại cương có 51 tín chỉ.",
+      "evidence_chunk_ids": [
+        "db51a0e0-9619-4228-b9df-90a548d77c8f"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc Cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị, Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC/GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Trong đó từ 4 TC đồ án, mỗi kỳ thực hiện không quá 1 đồ án |\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Viết và thuyết trình kỹ thuật (3TC) |\n| Tự chọn theo môđun | 16 | Khối kiến thức Tự chọn theo môđun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_006",
+      "question_type": "simple",
+      "question": "Ở bậc cử nhân ngành Quản lý Tài nguyên và Môi trường, phần Toán và khoa học cơ bản có bao nhiêu tín chỉ?",
+      "gold_answer": "Phần Toán và khoa học cơ bản có 32 tín chỉ.",
+      "evidence_chunk_ids": [
+        "db51a0e0-9619-4228-b9df-90a548d77c8f"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc Cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị, Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC/GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Trong đó từ 4 TC đồ án, mỗi kỳ thực hiện không quá 1 đồ án |\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Viết và thuyết trình kỹ thuật (3TC) |\n| Tự chọn theo môđun | 16 | Khối kiến thức Tự chọn theo môđun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_007",
+      "question_type": "simple",
+      "question": "Ở bậc cử nhân ngành Quản lý Tài nguyên và Môi trường, phần Tiếng Anh gồm bao nhiêu tín chỉ?",
+      "gold_answer": "Phần Tiếng Anh gồm 6 tín chỉ, gồm 2 học phần Tiếng Anh cơ bản.",
+      "evidence_chunk_ids": [
+        "db51a0e0-9619-4228-b9df-90a548d77c8f"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc Cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị, Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC/GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Trong đó từ 4 TC đồ án, mỗi kỳ thực hiện không quá 1 đồ án |\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Viết và thuyết trình kỹ thuật (3TC) |\n| Tự chọn theo môđun | 16 | Khối kiến thức Tự chọn theo môđun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_008",
+      "question_type": "simple",
+      "question": "Ở bậc cử nhân ngành Quản lý Tài nguyên và Môi trường, cơ sở và cốt lõi ngành có bao nhiêu tín chỉ?",
+      "gold_answer": "Khối cơ sở và cốt lõi ngành có 48 tín chỉ, trong đó từ 4 tín chỉ đồ án và mỗi kỳ thực hiện không quá 1 đồ án.",
+      "evidence_chunk_ids": [
+        "db51a0e0-9619-4228-b9df-90a548d77c8f"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc Cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị, Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC/GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Trong đó từ 4 TC đồ án, mỗi kỳ thực hiện không quá 1 đồ án |\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Viết và thuyết trình kỹ thuật (3TC) |\n| Tự chọn theo môđun | 16 | Khối kiến thức Tự chọn theo môđun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên ngành Quản lý Tài nguyên và Môi trường thực hiện thực tập kỹ thuật từ trình độ nào?",
+      "gold_answer": "Thực tập kỹ thuật có 2 tín chỉ và được thực hiện từ trình độ năm thứ ba.",
+      "evidence_chunk_ids": [
+        "db51a0e0-9619-4228-b9df-90a548d77c8f"
+      ],
+      "ground_truth_context": [
+        "## 3.1. Cấu trúc chung của chương trình đào tạo\n### Bậc Cử nhân\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị, Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC/GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt lõi ngành | 48 | Trong đó từ 4 TC đồ án, mỗi kỳ thực hiện không quá 1 đồ án |\n| Kiến thức bổ trợ | 9 | Gồm hai phần kiến thức bắt buộc: Kiến thức bổ trợ về xã hội, khởi nghiệp và các kỹ năng khác (6TC); Viết và thuyết trình kỹ thuật (3TC) |\n| Tự chọn theo môđun | 16 | Khối kiến thức Tự chọn theo môđun tạo điều kiện cho sinh viên tiếp cận theo một lĩnh vực ứng dụng |\n| Thực tập kỹ thuật | 2 | Thực hiện từ trình độ năm thứ ba. Theo chương trình đào tạo cử nhân đã được phê duyệt |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_010",
+      "question_type": "simple",
+      "question": "Nếu sinh viên Quản lý Tài nguyên và Môi trường muốn tốt nghiệp hệ cử nhân thì cần đăng ký học phần nào?",
+      "gold_answer": "Sinh viên muốn tốt nghiệp hệ cử nhân đăng ký thực hiện Đồ án cử nhân; học phần thuộc nhóm Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế có 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "575add59-f330-41d7-880a-6a7895eedf2e"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế | 6 | Sinh viên đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. Sinh viên học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng chương trình cử nhân** | **132 tín chỉ** | |\n### Bậc Kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Kiến thức chuyên ngành cốt lõi (chọn theo mô đun) | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 1) với thời lượng 2÷3 tín chỉ trong mỗi mô đun. Học phần Quản trị dự án (2 tín chỉ): cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| — Tự chọn mô-đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 2) |\n| — Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại các cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc Kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_011",
+      "question_type": "simple",
+      "question": "Sinh viên học chương trình tích hợp cử nhân-kỹ sư ngành Quản lý Tài nguyên và Môi trường phải đăng ký bao nhiêu đồ án thiết kế?",
+      "gold_answer": "Sinh viên học chương trình tích hợp cử nhân-kỹ sư phải đăng ký 02 Đồ án thiết kế, mỗi đồ án 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "575add59-f330-41d7-880a-6a7895eedf2e"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế | 6 | Sinh viên đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. Sinh viên học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng chương trình cử nhân** | **132 tín chỉ** | |\n### Bậc Kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Kiến thức chuyên ngành cốt lõi (chọn theo mô đun) | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 1) với thời lượng 2÷3 tín chỉ trong mỗi mô đun. Học phần Quản trị dự án (2 tín chỉ): cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| — Tự chọn mô-đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 2) |\n| — Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại các cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc Kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_012",
+      "question_type": "simple",
+      "question": "Tổng số tín chỉ của bậc kỹ sư ngành Quản lý Tài nguyên và Môi trường là bao nhiêu?",
+      "gold_answer": "Tổng cộng bậc kỹ sư là 48 tín chỉ.",
+      "evidence_chunk_ids": [
+        "575add59-f330-41d7-880a-6a7895eedf2e"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế | 6 | Sinh viên đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. Sinh viên học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng chương trình cử nhân** | **132 tín chỉ** | |\n### Bậc Kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Kiến thức chuyên ngành cốt lõi (chọn theo mô đun) | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 1) với thời lượng 2÷3 tín chỉ trong mỗi mô đun. Học phần Quản trị dự án (2 tín chỉ): cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| — Tự chọn mô-đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 2) |\n| — Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại các cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc Kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_013",
+      "question_type": "simple",
+      "question": "Thực tập kỹ sư ngành Quản lý Tài nguyên và Môi trường có bao nhiêu tín chỉ?",
+      "gold_answer": "Thực tập kỹ sư có 6 tín chỉ và thực hiện tại các cơ sở công nghiệp.",
+      "evidence_chunk_ids": [
+        "575add59-f330-41d7-880a-6a7895eedf2e"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế | 6 | Sinh viên đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. Sinh viên học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng chương trình cử nhân** | **132 tín chỉ** | |\n### Bậc Kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Kiến thức chuyên ngành cốt lõi (chọn theo mô đun) | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 1) với thời lượng 2÷3 tín chỉ trong mỗi mô đun. Học phần Quản trị dự án (2 tín chỉ): cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| — Tự chọn mô-đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 2) |\n| — Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại các cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc Kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_014",
+      "question_type": "simple",
+      "question": "Đồ án kỹ sư ngành Quản lý Tài nguyên và Môi trường có bao nhiêu tín chỉ?",
+      "gold_answer": "Đồ án kỹ sư có 9 tín chỉ; đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư.",
+      "evidence_chunk_ids": [
+        "575add59-f330-41d7-880a-6a7895eedf2e"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế | 6 | Sinh viên đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. Sinh viên học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng chương trình cử nhân** | **132 tín chỉ** | |\n### Bậc Kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Kiến thức chuyên ngành cốt lõi (chọn theo mô đun) | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 1) với thời lượng 2÷3 tín chỉ trong mỗi mô đun. Học phần Quản trị dự án (2 tín chỉ): cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| — Tự chọn mô-đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 2) |\n| — Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại các cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc Kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_015",
+      "question_type": "simple",
+      "question": "Học phần EV4296 trong chương trình tích hợp cử nhân-kỹ sư ngành Quản lý Tài nguyên và Môi trường là học phần gì?",
+      "gold_answer": "EV4296 là Đồ án thiết kế 1 (Design Project 1), có 3 tín chỉ và học ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "f876185d-f8c0-4528-8596-ce5491ad8e9f"
+      ],
+      "ground_truth_context": [
+        "## 3.2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Đồ án thiết kế (yêu cầu đối với sinh viên học chương trình tích hợp cử nhân-kỹ sư ngành Quản lý Tài nguyên và Môi trường)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| — | EV4296 | Đồ án thiết kế 1 (Design Project 1) | 3(0-0-6-6) | 8 |\n| — | EV4297 | Đồ án thiết kế 2 (Design Project 2) | 3(0-0-6-6) | 8 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_016",
+      "question_type": "simple",
+      "question": "Học phần EV4297 trong chương trình tích hợp cử nhân-kỹ sư ngành Quản lý Tài nguyên và Môi trường có bao nhiêu tín chỉ và học kỳ mấy?",
+      "gold_answer": "EV4297 là Đồ án thiết kế 2, có 3 tín chỉ và học ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "f876185d-f8c0-4528-8596-ce5491ad8e9f"
+      ],
+      "ground_truth_context": [
+        "## 3.2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Đồ án thiết kế (yêu cầu đối với sinh viên học chương trình tích hợp cử nhân-kỹ sư ngành Quản lý Tài nguyên và Môi trường)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| — | EV4296 | Đồ án thiết kế 1 (Design Project 1) | 3(0-0-6-6) | 8 |\n| — | EV4297 | Đồ án thiết kế 2 (Design Project 2) | 3(0-0-6-6) | 8 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_017",
+      "question_type": "simple",
+      "question": "Trong chuyên ngành cốt lõi An toàn và môi trường công nghiệp, học phần EV5242 là học phần gì?",
+      "gold_answer": "EV5242 là Hệ thống quản lý môi trường và năng lượng (Environmental and Energy Management System), có 3 tín chỉ và học ở kỳ 9.",
+      "evidence_chunk_ids": [
+        "7ba957ed-2c6b-44af-bf4b-b81a8c98095e"
+      ],
+      "ground_truth_context": [
+        "## Bậc Kỹ sư\n\n### Chuyên ngành cốt lõi 1: An toàn và môi trường công nghiệp (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 77 | EV5134 | Quản lý hoá chất trong công nghiệp (Chemical Management in industry) | 2(2-0-0-4) | 9 |\n| 78 | EV5240 | Kiểm toán môi trường (Environmental Audit) | 2(2-1-0-4) | 9 |\n| 79 | EV5241 | Kiểm soát tai biến và rủi ro môi trường (Control of Environmental hazards and risks) | 2(2-1-0-4) | 9 |\n| 80 | EV5242 | Hệ thống quản lý môi trường và năng lượng (Environmental and Energy Management System) | 3(2-1-1-6) | 9 |\n| 81 | EV5243 | Thí nghiệm chuyên ngành (Specialized Practical Experiments) | 2(0-0-4-4) | 10 |\n| 82 | EV5244 | Hạch toán quản lý môi trường (Environmental Management Accounting) | 2(2-0-0-4) | 9 |\n| 83 | EV5245 | Đánh giá rủi ro sức khoẻ (Health Risk Assessment) | 2(2-1-0-4) | 9 |\n| 84 | EV5246 | Đồ án chuyên ngành 1 (Specialized Project 1) | 2(0-0-4-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_simple_018",
+      "question_type": "simple",
+      "question": "Trong chuyên ngành cốt lõi Quản lý môi trường, học phần Mô hình hóa sự phát tán chất ô nhiễm có mã học phần nào?",
+      "gold_answer": "Học phần Mô hình hóa sự phát tán chất ô nhiễm có mã EV5247, 3 tín chỉ và học ở kỳ 9.",
+      "evidence_chunk_ids": [
+        "66494a77-af27-4f63-b27f-4dfd36695be6"
+      ],
+      "ground_truth_context": [
+        "### Chuyên ngành cốt lõi 2: Quản lý môi trường (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 86 | EV5211 | Qui hoạch môi trường (Environmental Planning) | 2(2-1-0-4) | 9 |\n| 87 | EV5247 | Mô hình hóa sự phát tán chất ô nhiễm (Pollutant Dispersion Modelling) | 3(2-1-1-6) | 9 |\n| 88 | EV5248 | Thí nghiệm phân tích môi trường (Experiments on Environmental Analysis) | 2(0-0-4-4) | 10 |\n| 89 | EV5249 | Phục hồi bãi chôn lấp chất thải dừng hoạt động (Inactive Waste Landfill Remediation) | 2(2-1-0-4) | 9 |\n| 90 | EV5250 | Kiểm kê phát thải (Emission Inventory) | 2(2-1-0-4) | 9 |\n| 91 | EV5251 | Đánh giá rủi ro sinh thái (Ecological Risk Assessment) | 2(2-1-0-4) | 9 |\n| 92 | EV5252 | Thích ứng với BĐKH theo tiếp cận sinh thái học (Ecosystem-based Approach to Climate Change Adaption) | 2(2-1-0-4) | 9 |\n| 93 | EV5246 | Đồ án chuyên ngành 1 (Specialized Project 1) | 2(0-0-4-4) | 9 |\n| 94 | EV5263 | Quản trị dự án môi trường (Environmental Project Management) | 2(2-1-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Sinh viên ngành Quản lý Tài nguyên và Môi trường học hệ kỹ sư cần hoàn thành bao nhiêu tín chỉ ở bậc cử nhân và bậc kỹ sư?",
+      "gold_answer": "Sinh viên cần hoàn thành tổng 180 tín chỉ, gồm 132 tín chỉ chương trình cử nhân và 48 tín chỉ bậc kỹ sư.",
+      "evidence_chunk_ids": [
+        "0fd48260-f35a-44cf-a1fe-e15815c77233",
+        "575add59-f330-41d7-880a-6a7895eedf2e"
+      ],
+      "ground_truth_context": [
+        "## CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC\n\nTên chương trình: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nTrình độ đào tạo: Kỹ sư (bậc 7)\n\nNgành đào tạo: Quản lý Tài nguyên và Môi trường (Natural Resources and Environmental Management)\n\nMã ngành: 7520320\n\nThời gian đào tạo: 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)\n\nBằng tốt nghiệp: Kỹ sư Quản lý Tài nguyên và Môi trường (Engineer in Natural Resources and Environmental Management)\n\nKhối lượng kiến thức toàn khóa: 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n(Ban hành tại Quyết định số /QĐ-ĐHBK-ĐT ngày tháng năm của Hiệu trưởng Trường Đại học Bách khoa Hà Nội)\n\n---",
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế | 6 | Sinh viên đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. Sinh viên học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng chương trình cử nhân** | **132 tín chỉ** | |\n### Bậc Kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Kiến thức chuyên ngành cốt lõi (chọn theo mô đun) | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 1) với thời lượng 2÷3 tín chỉ trong mỗi mô đun. Học phần Quản trị dự án (2 tín chỉ): cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| — Tự chọn mô-đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 2) |\n| — Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại các cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc Kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên ngành Quản lý Tài nguyên và Môi trường đi theo hướng tích hợp cử nhân-kỹ sư, các đồ án thiết kế ở kỳ 8 gồm những học phần nào và tổng bao nhiêu tín chỉ?",
+      "gold_answer": "Sinh viên học tích hợp cử nhân-kỹ sư cần học EV4296 Đồ án thiết kế 1 và EV4297 Đồ án thiết kế 2, mỗi học phần 3 tín chỉ, tổng 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "575add59-f330-41d7-880a-6a7895eedf2e",
+        "f876185d-f8c0-4528-8596-ce5491ad8e9f"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế | 6 | Sinh viên đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. Sinh viên học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng chương trình cử nhân** | **132 tín chỉ** | |\n### Bậc Kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Kiến thức chuyên ngành cốt lõi (chọn theo mô đun) | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 1) với thời lượng 2÷3 tín chỉ trong mỗi mô đun. Học phần Quản trị dự án (2 tín chỉ): cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| — Tự chọn mô-đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 2) |\n| — Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại các cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc Kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng** | **180 tín chỉ** | |\n\n---",
+        "## 3.2. Danh mục học phần và kế hoạch học tập chuẩn\n\n### Đồ án thiết kế (yêu cầu đối với sinh viên học chương trình tích hợp cử nhân-kỹ sư ngành Quản lý Tài nguyên và Môi trường)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| — | EV4296 | Đồ án thiết kế 1 (Design Project 1) | 3(0-0-6-6) | 8 |\n| — | EV4297 | Đồ án thiết kế 2 (Design Project 2) | 3(0-0-6-6) | 8 |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên bậc kỹ sư ngành Quản lý Tài nguyên và Môi trường cần thực hiện thực tập kỹ sư và đồ án kỹ sư ở kỳ nào, mỗi học phần bao nhiêu tín chỉ?",
+      "gold_answer": "Ở kỳ 11, sinh viên học EV5298 Thực tập kỹ sư 6 tín chỉ và EV5299 Đồ án kỹ sư 9 tín chỉ.",
+      "evidence_chunk_ids": [
+        "575add59-f330-41d7-880a-6a7895eedf2e",
+        "59de6fda-7e61-4144-ac3a-beb013409fe1"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế | 6 | Sinh viên đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. Sinh viên học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng chương trình cử nhân** | **132 tín chỉ** | |\n### Bậc Kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Kiến thức chuyên ngành cốt lõi (chọn theo mô đun) | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 1) với thời lượng 2÷3 tín chỉ trong mỗi mô đun. Học phần Quản trị dự án (2 tín chỉ): cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| — Tự chọn mô-đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 2) |\n| — Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại các cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc Kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng** | **180 tín chỉ** | |\n\n---",
+        "### Tự chọn chung (chọn 6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 107 | EV5259 | Đạo đức môi trường (Environmental Ethics) | 2(2-0-0-4) | 10 |\n| 108 | EV5260 | Quản lý môi trường nông nghiệp và nông thôn (Agriculture and Rural Environmental Management) | 2(2-0-0-4) | 10 |\n| 109 | EV5226 | Chuyên đề Quản lý môi trường (Special topics in Environmental Management) | 2(2-0-0-4) | 10 |\n| 110 | EV5261 | Truyền thông môi trường (Environmental Communication) | 2(2-0-0-4) | 10 |\n| 111 | EV5129 | Mô hình hoá sự vận chuyển các chất ô nhiễm trong nước ngầm (Ground Water Modelling) | 2(2-1-0-4) | 10 |\n| 112 | EV5262 | Tái chế chất thải (Waste Recycling) | 3(2-0-2-6) | 10 |\n\n### Thực tập kỹ sư và Đồ án kỹ sư (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 113 | EV5298 | Thực tập kỹ sư (Technical Internship) | 6(0-0-12-12) | 11 |\n| 114 | EV5299 | Đồ án kỹ sư (Engineering Thesis) | 9(0-0-18-18) | 11 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Trong bậc kỹ sư ngành Quản lý Tài nguyên và Môi trường, phần chuyên ngành cốt lõi và phần tự chọn kỹ sư có tổng bao nhiêu tín chỉ?",
+      "gold_answer": "Phần chuyên ngành cốt lõi có 19 tín chỉ và phần tự chọn kỹ sư có 14 tín chỉ, tổng cộng 33 tín chỉ.",
+      "evidence_chunk_ids": [
+        "575add59-f330-41d7-880a-6a7895eedf2e"
+      ],
+      "ground_truth_context": [
+        "| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Đồ án tốt nghiệp cử nhân hoặc đồ án thiết kế | 6 | Sinh viên đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân. Sinh viên học chương trình tích hợp cử nhân-kỹ sư thì đăng ký thực hiện 02 Đồ án thiết kế, khối lượng mỗi Đồ án thiết kế là 3 tín chỉ |\n| **Tổng cộng chương trình cử nhân** | **132 tín chỉ** | |\n### Bậc Kỹ sư\n\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| Kiến thức chuyên ngành cốt lõi (chọn theo mô đun) | 19 | Sinh viên lựa chọn một mô đun chuyên ngành và học toàn bộ các học phần trong mô đun đó. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 1) với thời lượng 2÷3 tín chỉ trong mỗi mô đun. Học phần Quản trị dự án (2 tín chỉ): cung cấp các kiến thức liên quan tới dự án kỹ thuật |\n| Tự chọn kỹ sư | 14 | |\n| — Tự chọn mô-đun | 8 | Được thiết kế hướng tới các lĩnh vực ứng dụng của ngành đào tạo. Bao gồm ít nhất một Đồ án chuyên ngành (Đồ án chuyên ngành 2) |\n| — Tự chọn chung | 6 | |\n| Thực tập kỹ sư | 6 | Thực hiện tại các cơ sở công nghiệp |\n| Đồ án kỹ sư | 9 | Đề tài tốt nghiệp gắn liền với lĩnh vực ứng dụng và phù hợp với nội dung thực tập kỹ sư |\n| **Tổng cộng bậc Kỹ sư** | **48 tín chỉ** | |\n| **Tổng cộng** | **180 tín chỉ** | |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_comparison",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên chọn chuyên ngành cốt lõi Quản lý môi trường, các học phần có nội dung rủi ro hoặc biến đổi khí hậu gồm những học phần nào?",
+      "gold_answer": "Các học phần liên quan gồm EV5251 Đánh giá rủi ro sinh thái và EV5252 Thích ứng với BĐKH theo tiếp cận sinh thái học, đều có 2 tín chỉ và học ở kỳ 9.",
+      "evidence_chunk_ids": [
+        "66494a77-af27-4f63-b27f-4dfd36695be6"
+      ],
+      "ground_truth_context": [
+        "### Chuyên ngành cốt lõi 2: Quản lý môi trường (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 86 | EV5211 | Qui hoạch môi trường (Environmental Planning) | 2(2-1-0-4) | 9 |\n| 87 | EV5247 | Mô hình hóa sự phát tán chất ô nhiễm (Pollutant Dispersion Modelling) | 3(2-1-1-6) | 9 |\n| 88 | EV5248 | Thí nghiệm phân tích môi trường (Experiments on Environmental Analysis) | 2(0-0-4-4) | 10 |\n| 89 | EV5249 | Phục hồi bãi chôn lấp chất thải dừng hoạt động (Inactive Waste Landfill Remediation) | 2(2-1-0-4) | 9 |\n| 90 | EV5250 | Kiểm kê phát thải (Emission Inventory) | 2(2-1-0-4) | 9 |\n| 91 | EV5251 | Đánh giá rủi ro sinh thái (Ecological Risk Assessment) | 2(2-1-0-4) | 9 |\n| 92 | EV5252 | Thích ứng với BĐKH theo tiếp cận sinh thái học (Ecosystem-based Approach to Climate Change Adaption) | 2(2-1-0-4) | 9 |\n| 93 | EV5246 | Đồ án chuyên ngành 1 (Specialized Project 1) | 2(0-0-4-4) | 9 |\n| 94 | EV5263 | Quản trị dự án môi trường (Environmental Project Management) | 2(2-1-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_comparison",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên muốn học mô đun tự chọn về Quản lý Tài nguyên, sinh viên sẽ học những học phần nào trong mô đun đó?",
+      "gold_answer": "Mô đun Quản lý Tài nguyên gồm EV5255 Quản lý tài nguyên rừng và đa dạng sinh học, EV5256 Quản lý tổng hợp lưu vực sông và đới bờ, EV5148 Nhiên liệu sinh học từ chất thải, và EV5254 Đồ án chuyên ngành 2; mỗi học phần 2 tín chỉ ở kỳ 10.",
+      "evidence_chunk_ids": [
+        "36a2f701-9e56-4759-99da-92e497040291"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun Quản lý Tài nguyên (Natural Resource Management)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 99 | EV5255 | Quản lý tài nguyên rừng và đa dạng sinh học (Forest Resource Management and Biodiversity Conservation) | 2(2-0-0-4) | 10 |\n| 100 | EV5256 | Quản lý tổng hợp lưu vực sông và đới bờ (Integrated Management of Watersheds and Coastal zones) | 2(2-0-0-4) | 10 |\n| 101 | EV5148 | Nhiên liệu sinh học từ chất thải (Biofuels from wastes recycling) | 2(2-0-1-4) | 10 |\n| 102 | EV5254 | Đồ án chuyên ngành 2 (Specialized Project 2) | 2(0-0-4-4) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_comparison",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên quan tâm đến công cụ quản lý môi trường công nghiệp ở bậc kỹ sư sẽ gặp những học phần tự chọn mô đun nào?",
+      "gold_answer": "Mô đun Công cụ Quản lý Môi trường Công nghiệp gồm EV5233 Đánh giá vòng đời sản phẩm, EV5117 Kiểm soát chất thải phóng xạ, EV5253 Thẩm định và đánh giá công nghệ môi trường, và EV5254 Đồ án chuyên ngành 2; mỗi học phần 2 tín chỉ ở kỳ 10.",
+      "evidence_chunk_ids": [
+        "22cc1c94-7050-47cf-8a26-5eeef1c2e7df"
+      ],
+      "ground_truth_context": [
+        "### Tự chọn mô đun (8 tín chỉ)\n\n#### Mô đun Công cụ Quản lý Môi trường Công nghiệp (Industrial Environmental Management Tools)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 95 | EV5233 | Đánh giá vòng đời sản phẩm (Life Cycle Assessment) | 2(2-1-0-4) | 10 |\n| 96 | EV5117 | Kiểm soát chất thải phóng xạ (Control of Radioactive Waste) | 2(2-0-0-4) | 10 |\n| 97 | EV5253 | Thẩm định và đánh giá công nghệ môi trường (Appraisal and Assessment of Environmental Technologies) | 2(2-0-0-4) | 10 |\n| 98 | EV5254 | Đồ án chuyên ngành 2 (Specialized Project 2) | 2(0-0-4-4) | 10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk_comparison",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Trong bậc kỹ sư ngành Quản lý Tài nguyên và Môi trường, các học phần Quản trị dự án môi trường xuất hiện ở những chuyên ngành cốt lõi nào?",
+      "gold_answer": "Học phần EV5263 Quản trị dự án môi trường xuất hiện trong cả chuyên ngành cốt lõi An toàn và môi trường công nghiệp và chuyên ngành cốt lõi Quản lý môi trường, đều có 2 tín chỉ ở kỳ 9.",
+      "evidence_chunk_ids": [
+        "298352a4-87c4-43dc-a3e4-829d565ec031",
+        "66494a77-af27-4f63-b27f-4dfd36695be6"
+      ],
+      "ground_truth_context": [
+        "### Chuyên ngành cốt lõi 1: An toàn và môi trường công nghiệp (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 85 | EV5263 | Quản trị dự án môi trường (Environmental Project Management) | 2(2-1-0-4) | 9 |",
+        "### Chuyên ngành cốt lõi 2: Quản lý môi trường (19 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 86 | EV5211 | Qui hoạch môi trường (Environmental Planning) | 2(2-1-0-4) | 9 |\n| 87 | EV5247 | Mô hình hóa sự phát tán chất ô nhiễm (Pollutant Dispersion Modelling) | 3(2-1-1-6) | 9 |\n| 88 | EV5248 | Thí nghiệm phân tích môi trường (Experiments on Environmental Analysis) | 2(0-0-4-4) | 10 |\n| 89 | EV5249 | Phục hồi bãi chôn lấp chất thải dừng hoạt động (Inactive Waste Landfill Remediation) | 2(2-1-0-4) | 9 |\n| 90 | EV5250 | Kiểm kê phát thải (Emission Inventory) | 2(2-1-0-4) | 9 |\n| 91 | EV5251 | Đánh giá rủi ro sinh thái (Ecological Risk Assessment) | 2(2-1-0-4) | 9 |\n| 92 | EV5252 | Thích ứng với BĐKH theo tiếp cận sinh thái học (Ecosystem-based Approach to Climate Change Adaption) | 2(2-1-0-4) | 9 |\n| 93 | EV5246 | Đồ án chuyên ngành 1 (Specialized Project 1) | 2(0-0-4-4) | 9 |\n| 94 | EV5263 | Quản trị dự án môi trường (Environmental Project Management) | 2(2-1-0-4) | 9 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Sinh viên ngành Quản lý Tài nguyên và Môi trường phải đạt IELTS bao nhiêu để tốt nghiệp?",
+      "gold_answer": "Không có thông tin trong các chunk được cung cấp về mức IELTS bắt buộc để tốt nghiệp ngành Quản lý Tài nguyên và Môi trường.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable",
+      "difficulty": "hard"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Chương trình Quản lý Tài nguyên và Môi trường quy định học phí mỗi tín chỉ là bao nhiêu?",
+      "gold_answer": "Không có thông tin trong các chunk được cung cấp về học phí mỗi tín chỉ của chương trình Quản lý Tài nguyên và Môi trường.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable",
+      "difficulty": "hard"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Sinh viên ngành Quản lý Tài nguyên và Môi trường có bắt buộc đi thực tập tại doanh nghiệp nước ngoài không?",
+      "gold_answer": "Không có thông tin trong các chunk được cung cấp cho biết sinh viên bắt buộc phải thực tập tại doanh nghiệp nước ngoài.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable",
+      "difficulty": "hard"
+    },
+    {
+      "id": "QLTNMT_Cu_nhan_Ky_su_Bac_7_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Điểm trung bình tối thiểu để sinh viên ngành Quản lý Tài nguyên và Môi trường được làm đồ án kỹ sư là bao nhiêu?",
+      "gold_answer": "Không có thông tin trong các chunk được cung cấp về điểm trung bình tối thiểu để được làm đồ án kỹ sư.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable",
+      "difficulty": "hard"
+    }
+  ]
+}

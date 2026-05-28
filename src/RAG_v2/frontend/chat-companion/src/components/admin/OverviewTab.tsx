@@ -1,11 +1,16 @@
-import { Users, MessageSquare, Activity, ThumbsUp, BarChart3, UserCheck } from 'lucide-react';
+import { Users, MessageSquare, Activity, ThumbsUp, BarChart3, UserCheck, TrendingUp } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import EmptyState from './EmptyState';
 import { useAdminFetch } from '@/hooks/useAdminFetch';
-import { getOverviewStats } from '@/services/adminApi';
-import type { OverviewStats } from '@/types/adminStats';
+import { getOverviewStats, getUserBreakdown } from '@/services/adminApi';
+import type { OverviewStats, UserBreakdown } from '@/types/adminStats';
+import {
+  AreaChart, Area,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
+import { useEffect, useState } from 'react';
 
 const TONE_STYLES = {
   sky: 'bg-sky-100 text-sky-700',
@@ -50,6 +55,12 @@ export default function OverviewTab() {
     () => getOverviewStats(),
     [],
   );
+
+  const [breakdown, setBreakdown] = useState<UserBreakdown | null>(null);
+
+  useEffect(() => {
+    getUserBreakdown(30).then(setBreakdown).catch(() => {});
+  }, []);
 
   if (loading) {
     return (
@@ -211,6 +222,44 @@ export default function OverviewTab() {
           </dl>
         </aside>
       </div>
+
+      {/* Registration trend */}
+      {breakdown?.registrations.length > 0 && (
+        <section className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold text-foreground">Xu hướng đăng ký (30 ngày)</h3>
+          </div>
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={breakdown.registrations}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 10 }}
+                tickFormatter={(d: string) => {
+                  const parts = d.split('-');
+                  return `${parts[2]}/${parts[1]}`;
+                }}
+              />
+              <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+              <Tooltip
+                labelFormatter={(d: string) => {
+                  const parts = String(d).split('-');
+                  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="count"
+                name="Đăng ký"
+                stroke="#3b82f6"
+                fill="#3b82f680"
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </section>
+      )}
     </div>
   );
 }

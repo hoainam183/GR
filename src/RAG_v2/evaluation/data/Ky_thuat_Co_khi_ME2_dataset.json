@@ -1,0 +1,466 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "1.2. Kỹ thuật Cơ khí_fix_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 18,
+    "multi_hop": 8,
+    "adversarial": 4
+  },
+  "items": [
+    {
+      "id": "ky_thuat_co_khi_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên ngành Kỹ thuật Cơ khí được trang bị để giải quyết những nhóm vấn đề nghề nghiệp nào?",
+      "gold_answer": "Sinh viên ngành Kỹ thuật Cơ khí được trang bị kiến thức, kỹ năng và năng lực nghiên cứu để giải quyết các vấn đề liên quan đến thiết kế, chế tạo, vận hành, bảo trì máy móc, thiết bị cơ khí và các hệ thống sản xuất công nghiệp.",
+      "evidence_chunk_ids": [
+        "1114d5fa-8a1c-43f4-b4df-ba43b82e42b3"
+      ],
+      "ground_truth_context": [
+        "## 1. Tên chương trình\n\nChương trình đào tạo cử nhân - kỹ sư ngành Kỹ thuật Cơ khí được xây dựng dựa trên sự phát triển chương trình đào tạo ngành Chế tạo máy trước đây kết hợp với sự tham khảo chương trình đào tạo ngành chế tạo máy của các trường đại học tiên tiến trên thế giới như: Stanford (Hoa Kỳ), NTU (Đài Loan), RMIT (Úc), …\n\nSinh viên theo học ngành này sẽ được trang bị các kiến thức cơ sở và chuyên ngành vững chắc, có kỹ năng nghề nghiệp và năng lực nghiên cứu để có thể làm việc và sáng tạo trong mọi môi trường lao động nhằm giải quyết những vấn đề liên quan đến thiết kế, chế tạo, vận hành và bảo trì các máy móc, thiết bị cơ khí và các hệ thống sản xuất công nghiệp đáp ứng yêu cầu củ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_002",
+      "question_type": "simple",
+      "question": "Chương trình Kỹ thuật Cơ khí được phát triển dựa trên nền tảng chương trình đào tạo nào trước đây?",
+      "gold_answer": "Chương trình Kỹ thuật Cơ khí được xây dựng dựa trên sự phát triển của chương trình đào tạo ngành Chế tạo máy trước đây.",
+      "evidence_chunk_ids": [
+        "1114d5fa-8a1c-43f4-b4df-ba43b82e42b3"
+      ],
+      "ground_truth_context": [
+        "## 1. Tên chương trình\n\nChương trình đào tạo cử nhân - kỹ sư ngành Kỹ thuật Cơ khí được xây dựng dựa trên sự phát triển chương trình đào tạo ngành Chế tạo máy trước đây kết hợp với sự tham khảo chương trình đào tạo ngành chế tạo máy của các trường đại học tiên tiến trên thế giới như: Stanford (Hoa Kỳ), NTU (Đài Loan), RMIT (Úc), …\n\nSinh viên theo học ngành này sẽ được trang bị các kiến thức cơ sở và chuyên ngành vững chắc, có kỹ năng nghề nghiệp và năng lực nghiên cứu để có thể làm việc và sáng tạo trong mọi môi trường lao động nhằm giải quyết những vấn đề liên quan đến thiết kế, chế tạo, vận hành và bảo trì các máy móc, thiết bị cơ khí và các hệ thống sản xuất công nghiệp đáp ứng yêu cầu củ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên tốt nghiệp ngành Kỹ thuật Cơ khí cần đạt chuẩn tiếng Anh tối thiểu bao nhiêu điểm TOEIC?",
+      "gold_answer": "Sinh viên tốt nghiệp ngành Kỹ thuật Cơ khí cần sử dụng hiệu quả tiếng Anh trong giao tiếp và công việc, đạt TOEIC từ 500 điểm trở lên.",
+      "evidence_chunk_ids": [
+        "b2a3c842-536c-462b-8b27-856160bdee1b"
+      ],
+      "ground_truth_context": [
+        "## 2. Kiến thức, kỹ năng đạt được sau tốt nghiệp\n\n### a. Kiến thức\n\nCó kiến thức cơ sở chuyên môn rộng và vững chắc, thích ứng tốt với những công việc phù hợp với ngành học. Chú trọng khả năng áp dụng kiến thức cơ sở và cốt lõi ngành Kỹ thuật Cơ khí kết hợp khả năng sử dụng công cụ hiện đại để thiết kế, chế tạo, vận hành, nghiên cứu phân tích, cải tiến máy móc, thiết bị hay hệ thống sản xuất.\n\n### b. Kỹ năng\n\n- Có kỹ năng làm việc chuyên nghiệp, phẩm chất cá nhân và kỹ năng xã hội cần thiết để thành công trong công việc.\n- Có kỹ năng hợp tác, tổ chức và làm việc theo nhóm đa ngành.\n- Có kỹ năng giao tiếp hiệu quả thông qua viết, thuyết trình, thảo luận, sử dụng hiệu quả các công cụ và phương..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_004",
+      "question_type": "simple",
+      "question": "Sinh viên ngành Kỹ thuật Cơ khí học bậc Cử nhân trong bao lâu?",
+      "gold_answer": "Thời gian đào tạo bậc Cử nhân ngành Kỹ thuật Cơ khí là 4 năm.",
+      "evidence_chunk_ids": [
+        "95bfbcc2-1248-4c2b-a6bd-3c439fb75062"
+      ],
+      "ground_truth_context": [
+        "## 3. Thời gian đào tạo và khả năng học lên bậc học cao hơn\n\n| Bậc đào tạo | Thời gian |\n|---|---|\n| Cử nhân | 4 năm |\n| Kỹ sư | 5 năm |\n| Tích hợp Cử nhân - Thạc sĩ | 5,5 năm |\n| Tích hợp Cử nhân - Thạc sĩ - Tiến sĩ | 8,5 năm |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_005",
+      "question_type": "simple",
+      "question": "Sinh viên ngành Kỹ thuật Cơ khí học bậc Kỹ sư trong bao lâu?",
+      "gold_answer": "Thời gian đào tạo bậc Kỹ sư ngành Kỹ thuật Cơ khí là 5 năm.",
+      "evidence_chunk_ids": [
+        "95bfbcc2-1248-4c2b-a6bd-3c439fb75062"
+      ],
+      "ground_truth_context": [
+        "## 3. Thời gian đào tạo và khả năng học lên bậc học cao hơn\n\n| Bậc đào tạo | Thời gian |\n|---|---|\n| Cử nhân | 4 năm |\n| Kỹ sư | 5 năm |\n| Tích hợp Cử nhân - Thạc sĩ | 5,5 năm |\n| Tích hợp Cử nhân - Thạc sĩ - Tiến sĩ | 8,5 năm |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_006",
+      "question_type": "simple",
+      "question": "Lộ trình tích hợp Cử nhân - Thạc sĩ ngành Kỹ thuật Cơ khí kéo dài bao nhiêu năm?",
+      "gold_answer": "Lộ trình tích hợp Cử nhân - Thạc sĩ ngành Kỹ thuật Cơ khí kéo dài 5,5 năm.",
+      "evidence_chunk_ids": [
+        "95bfbcc2-1248-4c2b-a6bd-3c439fb75062"
+      ],
+      "ground_truth_context": [
+        "## 3. Thời gian đào tạo và khả năng học lên bậc học cao hơn\n\n| Bậc đào tạo | Thời gian |\n|---|---|\n| Cử nhân | 4 năm |\n| Kỹ sư | 5 năm |\n| Tích hợp Cử nhân - Thạc sĩ | 5,5 năm |\n| Tích hợp Cử nhân - Thạc sĩ - Tiến sĩ | 8,5 năm |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_007",
+      "question_type": "simple",
+      "question": "Lộ trình tích hợp Cử nhân - Thạc sĩ - Tiến sĩ ngành Kỹ thuật Cơ khí kéo dài bao nhiêu năm?",
+      "gold_answer": "Lộ trình tích hợp Cử nhân - Thạc sĩ - Tiến sĩ ngành Kỹ thuật Cơ khí kéo dài 8,5 năm.",
+      "evidence_chunk_ids": [
+        "95bfbcc2-1248-4c2b-a6bd-3c439fb75062"
+      ],
+      "ground_truth_context": [
+        "## 3. Thời gian đào tạo và khả năng học lên bậc học cao hơn\n\n| Bậc đào tạo | Thời gian |\n|---|---|\n| Cử nhân | 4 năm |\n| Kỹ sư | 5 năm |\n| Tích hợp Cử nhân - Thạc sĩ | 5,5 năm |\n| Tích hợp Cử nhân - Thạc sĩ - Tiến sĩ | 8,5 năm |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_008",
+      "question_type": "simple",
+      "question": "Khối Lý luận chính trị và Pháp luật đại cương trong chương trình Kỹ thuật Cơ khí có bao nhiêu tín chỉ?",
+      "gold_answer": "Khối Lý luận chính trị và Pháp luật đại cương có 12 tín chỉ.",
+      "evidence_chunk_ids": [
+        "84fc37f6-0ad5-4ea6-aa55-dff46f1328fe"
+      ],
+      "ground_truth_context": [
+        "## 4. Danh mục học phần và thời lượng học tập\n\n> Chương trình đào tạo có thể được điều chỉnh hàng năm để đảm bảo tính cập nhật với sự phát triển của khoa học, kỹ thuật và công nghệ; tuy nhiên đảm bảo nguyên tắc không gây ảnh hưởng ngược tới kết quả người học đã tích lũy.\n\n### Lý luận chính trị + Pháp luật đại cương — 12 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 1 | SSH1110 | Những NLCB của CN Mác-Lênin I | 2(2-1-0-4) |\n| 2 | SSH1120 | Những NLCB của CN Mác-Lênin II | 3(2-1-0-6) |\n| 3 | SSH1050 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) |\n| 4 | SSH1130 | Đường lối CM của Đảng CSVN | 3(2-1-0-6) |\n| 5 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên Kỹ thuật Cơ khí phải học những học phần tiếng Anh nào trong chương trình?",
+      "gold_answer": "Sinh viên phải học Tiếng Anh I mã FL1100 và Tiếng Anh II mã FL1101, mỗi học phần 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "dec55c3e-dd68-42f2-8cb1-4e8d27cac1d1"
+      ],
+      "ground_truth_context": [
+        "### Giáo dục thể chất — 5 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 6 | PE1014 | Lý luận thể dục thể thao (bắt buộc) | 1(0-0-2-0) |\n| 7 | PE1024 | Bơi lội (bắt buộc) | 1(0-0-2-0) |\n| 8 | — | Tự chọn thể dục 1 | 1(0-0-2-0) |\n| 9 | Tự chọn trong danh mục | Tự chọn thể dục 2 | 1(0-0-2-0) |\n| 10 | Tự chọn trong danh mục | Tự chọn thể dục 3 | 1(0-0-2-0) |\n\n### Giáo dục Quốc phòng - An ninh — 165 tiết\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 11 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 12 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 13 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-0-2-8) |..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_010",
+      "question_type": "simple",
+      "question": "Khối kiến thức Toán và Khoa học cơ bản của ngành Kỹ thuật Cơ khí có bao nhiêu tín chỉ?",
+      "gold_answer": "Khối kiến thức Toán và Khoa học cơ bản có 32 tín chỉ.",
+      "evidence_chunk_ids": [
+        "ca51fd87-44d5-4b72-a7f8-9006d639b8f9"
+      ],
+      "ground_truth_context": [
+        "### Khối kiến thức Toán và Khoa học cơ bản — 32 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 16 | MI1111 | Giải tích I | 4(3-2-0-8) |\n| 17 | MI1121 | Giải tích II | 3(2-2-0-6) |\n| 18 | MI1131 | Giải tích III | 3(2-2-0-6) |\n| 19 | MI1141 | Đại số | 4(3-2-0-8) |\n| 20 | ME2030 | Cơ khí đại cương | 2(2-1-0-4) |\n| 21 | PH1110 | Vật lý đại cương I | 3(2-1-1-6) |\n| 22 | PH1120 | Vật lý đại cương II | 3(2-1-1-6) |\n| 23 | IT1110 | Tin học đại cương | 4(3-1-1-8) |\n| 24 | MI2110 | Phương pháp tính và Matlab | 3(2-0-2-6) |\n| 25 | ME2011 | Đồ họa kỹ thuật I | 3(3-1-0-6) |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_011",
+      "question_type": "simple",
+      "question": "Học phần Cơ khí đại cương trong chương trình Kỹ thuật Cơ khí có mã học phần và số tín chỉ như thế nào?",
+      "gold_answer": "Học phần Cơ khí đại cương có mã ME2030 và khối lượng 2 tín chỉ.",
+      "evidence_chunk_ids": [
+        "ca51fd87-44d5-4b72-a7f8-9006d639b8f9"
+      ],
+      "ground_truth_context": [
+        "### Khối kiến thức Toán và Khoa học cơ bản — 32 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 16 | MI1111 | Giải tích I | 4(3-2-0-8) |\n| 17 | MI1121 | Giải tích II | 3(2-2-0-6) |\n| 18 | MI1131 | Giải tích III | 3(2-2-0-6) |\n| 19 | MI1141 | Đại số | 4(3-2-0-8) |\n| 20 | ME2030 | Cơ khí đại cương | 2(2-1-0-4) |\n| 21 | PH1110 | Vật lý đại cương I | 3(2-1-1-6) |\n| 22 | PH1120 | Vật lý đại cương II | 3(2-1-1-6) |\n| 23 | IT1110 | Tin học đại cương | 4(3-1-1-8) |\n| 24 | MI2110 | Phương pháp tính và Matlab | 3(2-0-2-6) |\n| 25 | ME2011 | Đồ họa kỹ thuật I | 3(3-1-0-6) |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_012",
+      "question_type": "simple",
+      "question": "Khối Cơ sở và cốt lõi ngành trong chương trình Kỹ thuật Cơ khí có bao nhiêu tín chỉ?",
+      "gold_answer": "Khối Cơ sở và cốt lõi ngành có 50 tín chỉ.",
+      "evidence_chunk_ids": [
+        "97a6ae38-181b-4455-bc71-e7a90f65fcf2"
+      ],
+      "ground_truth_context": [
+        "### Cơ sở và cốt lõi ngành — 50 tín chỉ\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 26 | ME2201 | Đồ họa kỹ thuật II | 2(2-1-0-4) |\n| 27 | EE2012 | Kỹ thuật điện | 2(2-1-0-4) |\n| 28 | ET2012 | Kỹ thuật điện tử | 2(2-0-1-6) |\n| 29 | ME2000 | Nhập môn kỹ thuật cơ khí | 3(2-1-1-6) |\n| 30 | ME2112 | Cơ học kỹ thuật I | 2(2-1-0-4) |\n| 31 | ME2211 | Cơ học kỹ thuật II | 3(2-2-0-6) |\n| 32 | ME2101 | Sức bền vật liệu I | 2(2-0-1-4) |\n| 33 | ME2202 | Sức bền vật liệu II | 2(2-0-1-4) |\n| 34 | ME2203 | Nguyên lý máy | 2(2-0-1-4) |\n| 35 | ME3101 | Chi tiết máy | 2(2-0-1-4) |\n| 36 | ME3201 | Cơ sở Máy công cụ | 2(2-0-1-4) |\n| 37 | ME3202 | Kỹ thuật điều khiển tự động | 2(2-0-1-4) |\n| 38 |..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_013",
+      "question_type": "simple",
+      "question": "Học phần Nhập môn kỹ thuật cơ khí có mã học phần và số tín chỉ như thế nào?",
+      "gold_answer": "Học phần Nhập môn kỹ thuật cơ khí có mã ME2000 và khối lượng 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "97a6ae38-181b-4455-bc71-e7a90f65fcf2"
+      ],
+      "ground_truth_context": [
+        "### Cơ sở và cốt lõi ngành — 50 tín chỉ\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 26 | ME2201 | Đồ họa kỹ thuật II | 2(2-1-0-4) |\n| 27 | EE2012 | Kỹ thuật điện | 2(2-1-0-4) |\n| 28 | ET2012 | Kỹ thuật điện tử | 2(2-0-1-6) |\n| 29 | ME2000 | Nhập môn kỹ thuật cơ khí | 3(2-1-1-6) |\n| 30 | ME2112 | Cơ học kỹ thuật I | 2(2-1-0-4) |\n| 31 | ME2211 | Cơ học kỹ thuật II | 3(2-2-0-6) |\n| 32 | ME2101 | Sức bền vật liệu I | 2(2-0-1-4) |\n| 33 | ME2202 | Sức bền vật liệu II | 2(2-0-1-4) |\n| 34 | ME2203 | Nguyên lý máy | 2(2-0-1-4) |\n| 35 | ME3101 | Chi tiết máy | 2(2-0-1-4) |\n| 36 | ME3201 | Cơ sở Máy công cụ | 2(2-0-1-4) |\n| 37 | ME3202 | Kỹ thuật điều khiển tự động | 2(2-0-1-4) |\n| 38 |..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_014",
+      "question_type": "simple",
+      "question": "Mô đun Chế tạo máy trong nhóm tự chọn định hướng ứng dụng của ngành Kỹ thuật Cơ khí có bao nhiêu tín chỉ?",
+      "gold_answer": "Mô đun Chế tạo máy có 16 tín chỉ.",
+      "evidence_chunk_ids": [
+        "85ac711f-34fd-4c0e-8f78-8dabc3dd7c47"
+      ],
+      "ground_truth_context": [
+        "### Kiến thức bổ trợ — 9 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 49 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) |\n| 50 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) |\n| 51 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) |\n| 52 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) |\n| 53 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) |\n| 54 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) |\n| 55 | ME2021 | Technical Writing and Presentation | 3(2-2-0-6) |\n\n### Tự chọn theo định hướng ứng dụng — 16 tín chỉ (chọn theo mô đun)\n\n#### Mô đun 1: Chế tạo máy - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 56 | ME3150 | Th..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_015",
+      "question_type": "simple",
+      "question": "Mô đun Công nghệ hàn của ngành Kỹ thuật Cơ khí gồm học phần Công nghệ hàn vật liệu kim loại bao nhiêu tín chỉ?",
+      "gold_answer": "Học phần Công nghệ hàn vật liệu kim loại mã ME4138 có 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "9c9c0e56-c05f-42bd-92bc-26567e350d96"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 2: Công nghệ và khuôn dập tạo hình - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 62 | ME3150 | Thực tập cơ khí | 2(0-0-4-4) |\n| 63 | ME4025 | Lý thuyết dập tạo hình | 2(2-1-0-4) |\n| 64 | ME3266 | Thiết bị gia công áp lực | 3(3-0-1-6) |\n| 65 | ME4055 | Công nghệ tạo hình tấm | 2(2-0-1-4) |\n| 66 | ME4065 | Công nghệ tạo hình khối | 2(2-0-1-4) |\n| 67 | ME4285 | Đồ án Gia công áp lực | 2(0-0-4-4) |\n| 68 | ME4188 | Công nghệ tạo hình tiên tiến | 3(3-0-1-6) |\n\n#### Mô đun 3: Công nghệ hàn - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 69 | ME3150 | Thực tập cơ khí | 2(0-0-4-4) |\n| 70 | ME3267 | Các quá trình hàn | 2(2-0-1-4) |\n| 71..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_016",
+      "question_type": "simple",
+      "question": "Mô đun Cơ khí chính xác và quang học có học phần Đồ án Máy chính xác bao nhiêu tín chỉ?",
+      "gold_answer": "Học phần Đồ án Máy chính xác mã ME4117 có 2 tín chỉ.",
+      "evidence_chunk_ids": [
+        "ebe988f9-a4d8-4eac-a6d8-897e407d3b33"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 4: Cơ khí chính xác và quang học - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 76 | ME3150 | Thực tập cơ khí | 2(0-0-4-4) |\n| 77 | ME4083 | Công nghệ máy chính xác | 2(2-0-1-4) |\n| 78 | ME4178 | Hệ thống đo lường Quang điện tử | 2(2-0-1-4) |\n| 79 | ME4179 | Xử lý tín hiệu đo lường cơ khí | 2(2-0-1-4) |\n| 80 | ME4013 | Chi tiết cơ cấu chính xác | 2(2-0-1-4) |\n| 81 | ME4063 | Kỹ thuật vi cơ | 2(2-1-0-4) |\n| 82 | ME4149 | Đảm bảo chất lượng sản phẩm | 2(2-1-0-4) |\n| 83 | ME4117 | Đồ án Máy chính xác | 2(0-0-4-4) |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_017",
+      "question_type": "simple",
+      "question": "Mô đun Công nghệ chất dẻo và composite có học phần Đồ án khuôn chất dẻo bao nhiêu tín chỉ?",
+      "gold_answer": "Học phần Đồ án khuôn chất dẻo mã ME4146 có 2 tín chỉ.",
+      "evidence_chunk_ids": [
+        "4f73289d-0e11-499c-8f80-a3c398909250"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 5: Công nghệ chất dẻo và composite - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 84 | ME3150 | Thực tập cơ khí | 2(0-0-4-4) |\n| 85 | ME4721 | Cơ học vật liệu chất dẻo và composite | 2(2-0-1-4) |\n| 86 | ME4038 | Công nghệ các sản phẩm composite | 2(2-0-0-4) |\n| 87 | ME3252 | Vật liệu chất dẻo và composite | 2(2-0-0-4) |\n| 88 | ME4039 | Cơ học chất lỏng ứng dụng cho polymer | 2(2-1-0-4) |\n| 89 | ME4078 | Công nghệ và thiết bị đúc phun chất dẻo | 2(2-0-1-4) |\n| 90 | ME4077 | Công nghệ và thiết bị đùn chất dẻo | 2(2-1-0-4) |\n| 91 | ME4146 | Đồ án khuôn chất dẻo | 2(0-0-4-4) |\n\n### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân — 8 tín chỉ\n\n| TT | Mã số | Tê..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_simple_018",
+      "question_type": "simple",
+      "question": "Khối kiến thức Kỹ sư của ngành Kỹ thuật Cơ khí gồm những hạng mục tín chỉ nào?",
+      "gold_answer": "Khối kiến thức Kỹ sư gồm Tự chọn kỹ sư 19 tín chỉ, Thực tập kỹ sư 4 tín chỉ và Đồ án tốt nghiệp kỹ sư 12 tín chỉ.",
+      "evidence_chunk_ids": [
+        "4f73289d-0e11-499c-8f80-a3c398909250"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 5: Công nghệ chất dẻo và composite - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 84 | ME3150 | Thực tập cơ khí | 2(0-0-4-4) |\n| 85 | ME4721 | Cơ học vật liệu chất dẻo và composite | 2(2-0-1-4) |\n| 86 | ME4038 | Công nghệ các sản phẩm composite | 2(2-0-0-4) |\n| 87 | ME3252 | Vật liệu chất dẻo và composite | 2(2-0-0-4) |\n| 88 | ME4039 | Cơ học chất lỏng ứng dụng cho polymer | 2(2-1-0-4) |\n| 89 | ME4078 | Công nghệ và thiết bị đúc phun chất dẻo | 2(2-0-1-4) |\n| 90 | ME4077 | Công nghệ và thiết bị đùn chất dẻo | 2(2-1-0-4) |\n| 91 | ME4146 | Đồ án khuôn chất dẻo | 2(0-0-4-4) |\n\n### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân — 8 tín chỉ\n\n| TT | Mã số | Tê..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ky_thuat_co_khi_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên Kỹ thuật Cơ khí muốn học từ Cử nhân lên Kỹ sư thì thời gian đào tạo tăng thêm bao lâu?",
+      "gold_answer": "Bậc Cử nhân kéo dài 4 năm, bậc Kỹ sư kéo dài 5 năm, nên thời gian đào tạo tăng thêm 1 năm nếu học lên Kỹ sư.",
+      "evidence_chunk_ids": [
+        "95bfbcc2-1248-4c2b-a6bd-3c439fb75062"
+      ],
+      "ground_truth_context": [
+        "## 3. Thời gian đào tạo và khả năng học lên bậc học cao hơn\n\n| Bậc đào tạo | Thời gian |\n|---|---|\n| Cử nhân | 4 năm |\n| Kỹ sư | 5 năm |\n| Tích hợp Cử nhân - Thạc sĩ | 5,5 năm |\n| Tích hợp Cử nhân - Thạc sĩ - Tiến sĩ | 8,5 năm |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_step_single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ky_thuat_co_khi_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Kỹ thuật Cơ khí cần học bao nhiêu tín chỉ tiếng Anh trong chương trình và vẫn phải đạt chuẩn ngoại ngữ nào khi tốt nghiệp?",
+      "gold_answer": "Trong chương trình, sinh viên học 6 tín chỉ tiếng Anh gồm Tiếng Anh I và Tiếng Anh II; khi tốt nghiệp cần sử dụng hiệu quả tiếng Anh trong giao tiếp và công việc, đạt TOEIC từ 500 điểm trở lên.",
+      "evidence_chunk_ids": [
+        "dec55c3e-dd68-42f2-8cb1-4e8d27cac1d1",
+        "b2a3c842-536c-462b-8b27-856160bdee1b"
+      ],
+      "ground_truth_context": [
+        "### Giáo dục thể chất — 5 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 6 | PE1014 | Lý luận thể dục thể thao (bắt buộc) | 1(0-0-2-0) |\n| 7 | PE1024 | Bơi lội (bắt buộc) | 1(0-0-2-0) |\n| 8 | — | Tự chọn thể dục 1 | 1(0-0-2-0) |\n| 9 | Tự chọn trong danh mục | Tự chọn thể dục 2 | 1(0-0-2-0) |\n| 10 | Tự chọn trong danh mục | Tự chọn thể dục 3 | 1(0-0-2-0) |\n\n### Giáo dục Quốc phòng - An ninh — 165 tiết\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 11 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 12 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 13 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-0-2-8) |...",
+        "## 2. Kiến thức, kỹ năng đạt được sau tốt nghiệp\n\n### a. Kiến thức\n\nCó kiến thức cơ sở chuyên môn rộng và vững chắc, thích ứng tốt với những công việc phù hợp với ngành học. Chú trọng khả năng áp dụng kiến thức cơ sở và cốt lõi ngành Kỹ thuật Cơ khí kết hợp khả năng sử dụng công cụ hiện đại để thiết kế, chế tạo, vận hành, nghiên cứu phân tích, cải tiến máy móc, thiết bị hay hệ thống sản xuất.\n\n### b. Kỹ năng\n\n- Có kỹ năng làm việc chuyên nghiệp, phẩm chất cá nhân và kỹ năng xã hội cần thiết để thành công trong công việc.\n- Có kỹ năng hợp tác, tổ chức và làm việc theo nhóm đa ngành.\n- Có kỹ năng giao tiếp hiệu quả thông qua viết, thuyết trình, thảo luận, sử dụng hiệu quả các công cụ và phương..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ky_thuat_co_khi_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Kỹ thuật Cơ khí học các học phần Giáo dục thể chất và Giáo dục quốc phòng - An ninh với khối lượng như thế nào?",
+      "gold_answer": "Sinh viên học Giáo dục thể chất 5 tín chỉ và Giáo dục quốc phòng - An ninh 165 tiết.",
+      "evidence_chunk_ids": [
+        "dec55c3e-dd68-42f2-8cb1-4e8d27cac1d1"
+      ],
+      "ground_truth_context": [
+        "### Giáo dục thể chất — 5 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 6 | PE1014 | Lý luận thể dục thể thao (bắt buộc) | 1(0-0-2-0) |\n| 7 | PE1024 | Bơi lội (bắt buộc) | 1(0-0-2-0) |\n| 8 | — | Tự chọn thể dục 1 | 1(0-0-2-0) |\n| 9 | Tự chọn trong danh mục | Tự chọn thể dục 2 | 1(0-0-2-0) |\n| 10 | Tự chọn trong danh mục | Tự chọn thể dục 3 | 1(0-0-2-0) |\n\n### Giáo dục Quốc phòng - An ninh — 165 tiết\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 11 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 12 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 13 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-0-2-8) |..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_step_single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ky_thuat_co_khi_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên quan tâm đến chế tạo và gia công trong ngành Kỹ thuật Cơ khí sẽ gặp các học phần cơ sở ngành nào trước khi chọn mô đun Chế tạo máy?",
+      "gold_answer": "Ở khối cơ sở và cốt lõi ngành, sinh viên học các học phần như Nguyên lý gia công vật liệu, Công nghệ chế tạo máy, Cơ sở Máy công cụ, Dung sai lắp ghép và Kỹ thuật đo; khi chọn mô đun Chế tạo máy, sinh viên tiếp tục học các học phần như Máy CNC và Rôbốt công nghiệp, Công nghệ CNC, Thiết kế máy công cụ và Thiết kế dụng cụ cắt.",
+      "evidence_chunk_ids": [
+        "97a6ae38-181b-4455-bc71-e7a90f65fcf2",
+        "85ac711f-34fd-4c0e-8f78-8dabc3dd7c47"
+      ],
+      "ground_truth_context": [
+        "### Cơ sở và cốt lõi ngành — 50 tín chỉ\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 26 | ME2201 | Đồ họa kỹ thuật II | 2(2-1-0-4) |\n| 27 | EE2012 | Kỹ thuật điện | 2(2-1-0-4) |\n| 28 | ET2012 | Kỹ thuật điện tử | 2(2-0-1-6) |\n| 29 | ME2000 | Nhập môn kỹ thuật cơ khí | 3(2-1-1-6) |\n| 30 | ME2112 | Cơ học kỹ thuật I | 2(2-1-0-4) |\n| 31 | ME2211 | Cơ học kỹ thuật II | 3(2-2-0-6) |\n| 32 | ME2101 | Sức bền vật liệu I | 2(2-0-1-4) |\n| 33 | ME2202 | Sức bền vật liệu II | 2(2-0-1-4) |\n| 34 | ME2203 | Nguyên lý máy | 2(2-0-1-4) |\n| 35 | ME3101 | Chi tiết máy | 2(2-0-1-4) |\n| 36 | ME3201 | Cơ sở Máy công cụ | 2(2-0-1-4) |\n| 37 | ME3202 | Kỹ thuật điều khiển tự động | 2(2-0-1-4) |\n| 38 |...",
+        "### Kiến thức bổ trợ — 9 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 49 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) |\n| 50 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) |\n| 51 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) |\n| 52 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) |\n| 53 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) |\n| 54 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) |\n| 55 | ME2021 | Technical Writing and Presentation | 3(2-2-0-6) |\n\n### Tự chọn theo định hướng ứng dụng — 16 tín chỉ (chọn theo mô đun)\n\n#### Mô đun 1: Chế tạo máy - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 56 | ME3150 | Th..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ky_thuat_co_khi_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Kỹ thuật Cơ khí muốn theo hướng Công nghệ hàn cần học Thực tập cơ khí và những học phần chuyên sâu nào trong mô đun tương ứng?",
+      "gold_answer": "Trong mô đun Công nghệ hàn, sinh viên học Thực tập cơ khí và các học phần chuyên sâu gồm Các quá trình hàn, Thiết bị hàn, Vật liệu hàn, Công nghệ hàn vật liệu kim loại, Tính toán & thiết kế kết cấu hàn, Bảo đảm chất lượng hàn.",
+      "evidence_chunk_ids": [
+        "9c9c0e56-c05f-42bd-92bc-26567e350d96"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 2: Công nghệ và khuôn dập tạo hình - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 62 | ME3150 | Thực tập cơ khí | 2(0-0-4-4) |\n| 63 | ME4025 | Lý thuyết dập tạo hình | 2(2-1-0-4) |\n| 64 | ME3266 | Thiết bị gia công áp lực | 3(3-0-1-6) |\n| 65 | ME4055 | Công nghệ tạo hình tấm | 2(2-0-1-4) |\n| 66 | ME4065 | Công nghệ tạo hình khối | 2(2-0-1-4) |\n| 67 | ME4285 | Đồ án Gia công áp lực | 2(0-0-4-4) |\n| 68 | ME4188 | Công nghệ tạo hình tiên tiến | 3(3-0-1-6) |\n\n#### Mô đun 3: Công nghệ hàn - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 69 | ME3150 | Thực tập cơ khí | 2(0-0-4-4) |\n| 70 | ME3267 | Các quá trình hàn | 2(2-0-1-4) |\n| 71..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_step_single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ky_thuat_co_khi_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Kỹ thuật Cơ khí muốn làm việc trong thiết kế, chế tạo và bảo trì hệ thống cơ khí thì chương trình trang bị những kiến thức và kỹ năng nào?",
+      "gold_answer": "Chương trình trang bị kiến thức cơ sở chuyên môn rộng và vững chắc, khả năng áp dụng kiến thức cơ sở và cốt lõi ngành với công cụ hiện đại để thiết kế, chế tạo, vận hành, phân tích, cải tiến máy móc, thiết bị hoặc hệ thống sản xuất; đồng thời rèn kỹ năng làm việc chuyên nghiệp, hợp tác nhóm đa ngành, giao tiếp hiệu quả và tham gia nghiên cứu thiết kế, chế tạo, vận hành, bảo trì sản phẩm hoặc hệ thống kỹ thuật.",
+      "evidence_chunk_ids": [
+        "b2a3c842-536c-462b-8b27-856160bdee1b"
+      ],
+      "ground_truth_context": [
+        "## 2. Kiến thức, kỹ năng đạt được sau tốt nghiệp\n\n### a. Kiến thức\n\nCó kiến thức cơ sở chuyên môn rộng và vững chắc, thích ứng tốt với những công việc phù hợp với ngành học. Chú trọng khả năng áp dụng kiến thức cơ sở và cốt lõi ngành Kỹ thuật Cơ khí kết hợp khả năng sử dụng công cụ hiện đại để thiết kế, chế tạo, vận hành, nghiên cứu phân tích, cải tiến máy móc, thiết bị hay hệ thống sản xuất.\n\n### b. Kỹ năng\n\n- Có kỹ năng làm việc chuyên nghiệp, phẩm chất cá nhân và kỹ năng xã hội cần thiết để thành công trong công việc.\n- Có kỹ năng hợp tác, tổ chức và làm việc theo nhóm đa ngành.\n- Có kỹ năng giao tiếp hiệu quả thông qua viết, thuyết trình, thảo luận, sử dụng hiệu quả các công cụ và phương..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_step_single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ky_thuat_co_khi_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên Kỹ thuật Cơ khí hoàn thành bậc Cử nhân rồi muốn học tiếp tích hợp Cử nhân - Thạc sĩ thì tổng thời gian theo lộ trình tích hợp là bao lâu và dài hơn Cử nhân bao nhiêu?",
+      "gold_answer": "Lộ trình tích hợp Cử nhân - Thạc sĩ kéo dài 5,5 năm; so với bậc Cử nhân 4 năm thì dài hơn 1,5 năm.",
+      "evidence_chunk_ids": [
+        "95bfbcc2-1248-4c2b-a6bd-3c439fb75062"
+      ],
+      "ground_truth_context": [
+        "## 3. Thời gian đào tạo và khả năng học lên bậc học cao hơn\n\n| Bậc đào tạo | Thời gian |\n|---|---|\n| Cử nhân | 4 năm |\n| Kỹ sư | 5 năm |\n| Tích hợp Cử nhân - Thạc sĩ | 5,5 năm |\n| Tích hợp Cử nhân - Thạc sĩ - Tiến sĩ | 8,5 năm |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_step_single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ky_thuat_co_khi_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Kỹ thuật Cơ khí muốn tốt nghiệp Cử nhân cần thực hiện các học phần thực tập và đồ án cuối chương trình nào?",
+      "gold_answer": "Sinh viên cần học Thực tập kỹ thuật mã ME4439 với 2 tín chỉ và Đồ án tốt nghiệp cử nhân mã ME4955 với 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "4f73289d-0e11-499c-8f80-a3c398909250"
+      ],
+      "ground_truth_context": [
+        "#### Mô đun 5: Công nghệ chất dẻo và composite - 16 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 84 | ME3150 | Thực tập cơ khí | 2(0-0-4-4) |\n| 85 | ME4721 | Cơ học vật liệu chất dẻo và composite | 2(2-0-1-4) |\n| 86 | ME4038 | Công nghệ các sản phẩm composite | 2(2-0-0-4) |\n| 87 | ME3252 | Vật liệu chất dẻo và composite | 2(2-0-0-4) |\n| 88 | ME4039 | Cơ học chất lỏng ứng dụng cho polymer | 2(2-1-0-4) |\n| 89 | ME4078 | Công nghệ và thiết bị đúc phun chất dẻo | 2(2-0-1-4) |\n| 90 | ME4077 | Công nghệ và thiết bị đùn chất dẻo | 2(2-1-0-4) |\n| 91 | ME4146 | Đồ án khuôn chất dẻo | 2(0-0-4-4) |\n\n### Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân — 8 tín chỉ\n\n| TT | Mã số | Tê..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_step_single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ky_thuat_co_khi_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Sinh viên Kỹ thuật Cơ khí chỉ cần học 3 năm để nhận bằng Cử nhân đúng không?",
+      "gold_answer": "Không đúng. Thời gian đào tạo bậc Cử nhân ngành Kỹ thuật Cơ khí là 4 năm.",
+      "evidence_chunk_ids": [
+        "95bfbcc2-1248-4c2b-a6bd-3c439fb75062"
+      ],
+      "ground_truth_context": [
+        "## 3. Thời gian đào tạo và khả năng học lên bậc học cao hơn\n\n| Bậc đào tạo | Thời gian |\n|---|---|\n| Cử nhân | 4 năm |\n| Kỹ sư | 5 năm |\n| Tích hợp Cử nhân - Thạc sĩ | 5,5 năm |\n| Tích hợp Cử nhân - Thạc sĩ - Tiến sĩ | 8,5 năm |\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "false_premise_check",
+      "difficulty": "hard",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "ky_thuat_co_khi_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Sinh viên Kỹ thuật Cơ khí có thể dùng tiếng Nhật thay cho chuẩn TOEIC 500 khi tốt nghiệp không?",
+      "gold_answer": "Không có thông tin trong context cho phép dùng tiếng Nhật thay cho chuẩn TOEIC 500. Context chỉ nêu yêu cầu sử dụng tiếng Anh hiệu quả và đạt TOEIC từ 500 điểm trở lên.",
+      "evidence_chunk_ids": [
+        "b2a3c842-536c-462b-8b27-856160bdee1b"
+      ],
+      "ground_truth_context": [
+        "## 2. Kiến thức, kỹ năng đạt được sau tốt nghiệp\n\n### a. Kiến thức\n\nCó kiến thức cơ sở chuyên môn rộng và vững chắc, thích ứng tốt với những công việc phù hợp với ngành học. Chú trọng khả năng áp dụng kiến thức cơ sở và cốt lõi ngành Kỹ thuật Cơ khí kết hợp khả năng sử dụng công cụ hiện đại để thiết kế, chế tạo, vận hành, nghiên cứu phân tích, cải tiến máy móc, thiết bị hay hệ thống sản xuất.\n\n### b. Kỹ năng\n\n- Có kỹ năng làm việc chuyên nghiệp, phẩm chất cá nhân và kỹ năng xã hội cần thiết để thành công trong công việc.\n- Có kỹ năng hợp tác, tổ chức và làm việc theo nhóm đa ngành.\n- Có kỹ năng giao tiếp hiệu quả thông qua viết, thuyết trình, thảo luận, sử dụng hiệu quả các công cụ và phương..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "false_premise_check",
+      "difficulty": "hard",
+      "adversarial_type": "unsupported_alternative"
+    },
+    {
+      "id": "ky_thuat_co_khi_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Chương trình Kỹ thuật Cơ khí yêu cầu sinh viên học bao nhiêu tín chỉ học phí cho học kỳ đầu tiên?",
+      "gold_answer": "Không có thông tin trong context về số tín chỉ học phí của học kỳ đầu tiên trong chương trình Kỹ thuật Cơ khí.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable",
+      "difficulty": "hard",
+      "adversarial_type": "unanswerable"
+    },
+    {
+      "id": "ky_thuat_co_khi_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Sinh viên Kỹ thuật Cơ khí được miễn học Giáo dục quốc phòng - An ninh nếu đã học bơi đúng không?",
+      "gold_answer": "Không có thông tin trong context khẳng định việc học bơi làm sinh viên được miễn Giáo dục quốc phòng - An ninh. Context chỉ liệt kê Giáo dục thể chất gồm Bơi lội bắt buộc và Giáo dục quốc phòng - An ninh gồm 165 tiết.",
+      "evidence_chunk_ids": [
+        "dec55c3e-dd68-42f2-8cb1-4e8d27cac1d1"
+      ],
+      "ground_truth_context": [
+        "### Giáo dục thể chất — 5 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 6 | PE1014 | Lý luận thể dục thể thao (bắt buộc) | 1(0-0-2-0) |\n| 7 | PE1024 | Bơi lội (bắt buộc) | 1(0-0-2-0) |\n| 8 | — | Tự chọn thể dục 1 | 1(0-0-2-0) |\n| 9 | Tự chọn trong danh mục | Tự chọn thể dục 2 | 1(0-0-2-0) |\n| 10 | Tự chọn trong danh mục | Tự chọn thể dục 3 | 1(0-0-2-0) |\n\n### Giáo dục Quốc phòng - An ninh — 165 tiết\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 11 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 12 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 13 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-0-2-8) |..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "false_premise_check",
+      "difficulty": "hard",
+      "adversarial_type": "false_assumption"
+    }
+  ]
+}

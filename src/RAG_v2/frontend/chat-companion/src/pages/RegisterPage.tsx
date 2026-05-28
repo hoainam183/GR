@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { registerUser } from "@/services/authApi";
+import { getCurrentSessionUser, ensureSession } from "@/services/authSession";
 import axios from "axios";
 
 const EyeIcon = ({ show }: { show: boolean }) =>
@@ -44,6 +45,22 @@ const RegisterPage = () => {
   const [majorCode, setMajorCode] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const cached = getCurrentSessionUser();
+    if (cached) {
+      navigate(cached.role === "admin" ? "/admin" : "/chat", { replace: true });
+      return;
+    }
+    ensureSession().then((user) => {
+      if (user) {
+        navigate(user.role === "admin" ? "/admin" : "/chat", { replace: true });
+      } else {
+        setChecking(false);
+      }
+    }).catch(() => setChecking(false));
+  }, [navigate]);
 
   const validate = (): boolean => {
     const next: FormErrors = {};
@@ -87,6 +104,14 @@ const RegisterPage = () => {
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="animate-pulse text-muted-foreground text-sm">Đang kiểm tra phiên...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">

@@ -237,6 +237,8 @@ import type {
   ApiKeyListResponse,
   ApiKeyMutationResponse,
   CreateApiKeyBody,
+  EnvConfigResponse,
+  EnvConfigUpdateResponse,
 } from '@/types/adminStats';
 
 export async function getOverviewStats(): Promise<OverviewStats> {
@@ -404,6 +406,24 @@ export async function activateApiKey(id: string): Promise<ApiKeyMutationResponse
   const { data } = await adminClient.post<ApiKeyMutationResponse>(
     `/admin/config/api-keys/${id}/activate`,
     null,
+    { headers: authHeaders() },
+  );
+  return data;
+}
+
+// ──────────────────── Env Config API ────────────────────
+
+export async function getEnvConfig(): Promise<EnvConfigResponse> {
+  const { data } = await adminClient.get<EnvConfigResponse>('/admin/config/env', {
+    headers: authHeaders(),
+  });
+  return data;
+}
+
+export async function updateEnvConfig(configs: Record<string, unknown>): Promise<EnvConfigUpdateResponse> {
+  const { data } = await adminClient.put<EnvConfigUpdateResponse>(
+    '/admin/config/env',
+    { configs },
     { headers: authHeaders() },
   );
   return data;

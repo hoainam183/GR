@@ -1,0 +1,785 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "KT_Sinh_hoc_Cu_nhan_Ky_su_Bac_7_fix_chunks.json",
+  "total_questions": 50,
+  "distribution": {
+    "simple": 30,
+    "multi_hop": 13,
+    "adversarial": 7
+  },
+  "notes": [
+    "Câu hỏi viết theo góc nhìn sinh viên ngành Kỹ thuật Sinh học BF1.",
+    "Không dùng các từ quy chiếu mơ hồ trong câu hỏi như 'này', 'đó', 'văn bản này', 'quy định này', 'chương trình này'.",
+    "evidence_chunk_ids sử dụng trường id unique trong file chunk, không sử dụng chunk_id."
+  ],
+  "items": [
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên ngành Kỹ thuật Sinh học BF1 học trong bao lâu để nhận bằng kỹ sư bậc 7?",
+      "gold_answer": "Thời gian đào tạo ngành Kỹ thuật Sinh học là 5,5 năm, gồm 4 năm cử nhân và 1,5 năm kỹ sư.",
+      "evidence_chunk_ids": [
+        "b6cfcf13-1227-4fce-9f16-a44c8d37cdfd"
+      ],
+      "ground_truth_context": [
+        "Thời gian đào tạo: 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_002",
+      "question_type": "simple",
+      "question": "Ngành Kỹ thuật Sinh học BF1 có tổng khối lượng kiến thức toàn khóa bao nhiêu tín chỉ?",
+      "gold_answer": "Toàn khóa Kỹ thuật Sinh học BF1 có 180 tín chỉ, gồm 132 tín chỉ bậc cử nhân và 48 tín chỉ bậc kỹ sư.",
+      "evidence_chunk_ids": [
+        "b6cfcf13-1227-4fce-9f16-a44c8d37cdfd"
+      ],
+      "ground_truth_context": [
+        "Khối lượng kiến thức toàn khóa: 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên hoàn thành toàn khóa Kỹ thuật Sinh học BF1 được nhận bằng tốt nghiệp gì?",
+      "gold_answer": "Sinh viên hoàn thành toàn khóa được cấp bằng Kỹ sư Kỹ thuật Sinh học.",
+      "evidence_chunk_ids": [
+        "b6cfcf13-1227-4fce-9f16-a44c8d37cdfd"
+      ],
+      "ground_truth_context": [
+        "Bằng tốt nghiệp: Kỹ sư Kỹ thuật Sinh học"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_004",
+      "question_type": "simple",
+      "question": "Mã ngành đào tạo của Kỹ thuật Sinh học BF1 là gì?",
+      "gold_answer": "Mã ngành đào tạo của Kỹ thuật Sinh học BF1 là 7420202.",
+      "evidence_chunk_ids": [
+        "b6cfcf13-1227-4fce-9f16-a44c8d37cdfd"
+      ],
+      "ground_truth_context": [
+        "Mã ngành: 7420202"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_005",
+      "question_type": "simple",
+      "question": "Bậc cử nhân Kỹ thuật Sinh học có bao nhiêu tín chỉ giáo dục đại cương?",
+      "gold_answer": "Bậc cử nhân Kỹ thuật Sinh học có 51 tín chỉ giáo dục đại cương.",
+      "evidence_chunk_ids": [
+        "ab5575f6-41e7-42da-948b-2f2f034fc6a1"
+      ],
+      "ground_truth_context": [
+        "Giáo dục đại cương | 51"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_006",
+      "question_type": "simple",
+      "question": "Bậc cử nhân Kỹ thuật Sinh học có bao nhiêu tín chỉ Toán và khoa học cơ bản?",
+      "gold_answer": "Bậc cử nhân Kỹ thuật Sinh học có 32 tín chỉ Toán và khoa học cơ bản.",
+      "evidence_chunk_ids": [
+        "ab5575f6-41e7-42da-948b-2f2f034fc6a1"
+      ],
+      "ground_truth_context": [
+        "Toán và khoa học cơ bản | 32"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_007",
+      "question_type": "simple",
+      "question": "Bậc cử nhân Kỹ thuật Sinh học học bao nhiêu tín chỉ tiếng Anh?",
+      "gold_answer": "Bậc cử nhân Kỹ thuật Sinh học học 6 tín chỉ tiếng Anh, gồm 2 học phần Tiếng Anh cơ bản.",
+      "evidence_chunk_ids": [
+        "ab5575f6-41e7-42da-948b-2f2f034fc6a1"
+      ],
+      "ground_truth_context": [
+        "Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_008",
+      "question_type": "simple",
+      "question": "Khối cơ sở và cốt lõi ngành của cử nhân Kỹ thuật Sinh học có bao nhiêu tín chỉ?",
+      "gold_answer": "Khối cơ sở và cốt lõi ngành của cử nhân Kỹ thuật Sinh học có 48 tín chỉ.",
+      "evidence_chunk_ids": [
+        "ab5575f6-41e7-42da-948b-2f2f034fc6a1"
+      ],
+      "ground_truth_context": [
+        "Cơ sở và cốt lõi ngành | 48 | Bao gồm 02 đồ án kỹ thuật"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên Kỹ thuật Sinh học muốn tốt nghiệp hệ cử nhân cần đăng ký đồ án nào?",
+      "gold_answer": "Sinh viên muốn tốt nghiệp hệ cử nhân cần đăng ký thực hiện Đồ án cử nhân.",
+      "evidence_chunk_ids": [
+        "ab5575f6-41e7-42da-948b-2f2f034fc6a1"
+      ],
+      "ground_truth_context": [
+        "SV đăng ký thực hiện Đồ án cử nhân nếu muốn tốt nghiệp hệ cử nhân"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_010",
+      "question_type": "simple",
+      "question": "Bậc kỹ sư Kỹ thuật Sinh học có bao nhiêu tín chỉ chuyên ngành cốt lõi?",
+      "gold_answer": "Bậc kỹ sư Kỹ thuật Sinh học có 19 tín chỉ chuyên ngành cốt lõi.",
+      "evidence_chunk_ids": [
+        "0ad04347-d427-4dd6-a62f-4c5a2495c642"
+      ],
+      "ground_truth_context": [
+        "Chuyên ngành cốt lõi | 19"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_011",
+      "question_type": "simple",
+      "question": "Bậc kỹ sư Kỹ thuật Sinh học có bao nhiêu tín chỉ thực tập kỹ sư?",
+      "gold_answer": "Bậc kỹ sư Kỹ thuật Sinh học có 6 tín chỉ thực tập kỹ sư.",
+      "evidence_chunk_ids": [
+        "0ad04347-d427-4dd6-a62f-4c5a2495c642"
+      ],
+      "ground_truth_context": [
+        "Thực tập kỹ sư | 6 | Thực hiện tại cơ sở công nghiệp"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_012",
+      "question_type": "simple",
+      "question": "Đồ án kỹ sư ngành Kỹ thuật Sinh học có bao nhiêu tín chỉ?",
+      "gold_answer": "Đồ án kỹ sư ngành Kỹ thuật Sinh học có 9 tín chỉ.",
+      "evidence_chunk_ids": [
+        "0ad04347-d427-4dd6-a62f-4c5a2495c642"
+      ],
+      "ground_truth_context": [
+        "Đồ án kỹ sư | 9 | Đề tài tốt nghiệp nên phù hợp với nội dung thực tập kỹ sư"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_013",
+      "question_type": "simple",
+      "question": "Học phần Tiếng Anh I trong Kỹ thuật Sinh học có mã học phần nào và học ở kỳ mấy?",
+      "gold_answer": "Tiếng Anh I có mã FL1100, 3 tín chỉ và được học ở kỳ 1.",
+      "evidence_chunk_ids": [
+        "36c79c7d-2671-49c4-9f45-d024bdf8b5b3"
+      ],
+      "ground_truth_context": [
+        "FL1100 | Tiếng Anh I | 3(0-6-0-6) | 1"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_014",
+      "question_type": "simple",
+      "question": "Học phần Tiếng Anh II trong Kỹ thuật Sinh học có mã học phần nào và học ở kỳ mấy?",
+      "gold_answer": "Tiếng Anh II có mã FL1101, 3 tín chỉ và được học ở kỳ 2.",
+      "evidence_chunk_ids": [
+        "36c79c7d-2671-49c4-9f45-d024bdf8b5b3"
+      ],
+      "ground_truth_context": [
+        "FL1101 | Tiếng Anh II | 3(0-6-0-6) | 2"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_015",
+      "question_type": "simple",
+      "question": "Học phần Xác suất thống kê và qui hoạch thực nghiệm của Kỹ thuật Sinh học học ở kỳ mấy?",
+      "gold_answer": "Học phần MI3180 Xác suất thống kê và qui hoạch thực nghiệm học ở kỳ 5.",
+      "evidence_chunk_ids": [
+        "775f08a9-d086-4660-a747-73160679f36e"
+      ],
+      "ground_truth_context": [
+        "MI3180 | Xác suất thống kê và qui hoạch thực nghiệm | 3(3-1-0-6) | 5"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_016",
+      "question_type": "simple",
+      "question": "Học phần Hóa học trong khối Toán và Khoa học cơ bản của Kỹ thuật Sinh học có mã gì?",
+      "gold_answer": "Học phần Hóa học có mã CH1018, 2 tín chỉ và học ở kỳ 1.",
+      "evidence_chunk_ids": [
+        "775f08a9-d086-4660-a747-73160679f36e"
+      ],
+      "ground_truth_context": [
+        "CH1018 | Hóa học | 2(2-1-0-4) | 1"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên Kỹ thuật Sinh học học Nhập môn kỹ thuật sinh học ở kỳ mấy?",
+      "gold_answer": "Sinh viên học BF2701 Nhập môn kỹ thuật sinh học ở kỳ 3.",
+      "evidence_chunk_ids": [
+        "cd2526e4-c514-4b69-a8ce-616eb354625a"
+      ],
+      "ground_truth_context": [
+        "BF2701 | Nhập môn kỹ thuật sinh học | 2(1-1-1-4) | 3"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_018",
+      "question_type": "simple",
+      "question": "Học phần Hóa sinh của Kỹ thuật Sinh học có bao nhiêu tín chỉ và học ở kỳ mấy?",
+      "gold_answer": "Học phần BF2702 Hóa sinh có 4 tín chỉ và học ở kỳ 4.",
+      "evidence_chunk_ids": [
+        "cd2526e4-c514-4b69-a8ce-616eb354625a"
+      ],
+      "ground_truth_context": [
+        "BF2702 | Hóa sinh | 4(4-0-0-8) | 4"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_019",
+      "question_type": "simple",
+      "question": "Học phần Kỹ thuật gen trong Kỹ thuật Sinh học có bao nhiêu tín chỉ?",
+      "gold_answer": "Học phần BF3706 Kỹ thuật gen có 2 tín chỉ.",
+      "evidence_chunk_ids": [
+        "92528709-4dcb-4ef1-87e3-cfd2c38160f8"
+      ],
+      "ground_truth_context": [
+        "BF3706 | Kỹ thuật gen | 2(2-0-1-4) | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_020",
+      "question_type": "simple",
+      "question": "Học phần Tin sinh học trong Kỹ thuật Sinh học học ở kỳ mấy?",
+      "gold_answer": "Học phần BF3707 Tin sinh học học ở kỳ 6.",
+      "evidence_chunk_ids": [
+        "92528709-4dcb-4ef1-87e3-cfd2c38160f8"
+      ],
+      "ground_truth_context": [
+        "BF3707 | Tin sinh học | 2(1-0-2-4) | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_021",
+      "question_type": "simple",
+      "question": "Kiến thức bổ trợ của Kỹ thuật Sinh học có học phần Technical Writing and Presentation không?",
+      "gold_answer": "Có. Học phần BF2020 Technical Writing and Presentation có 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "8edb02e1-d44c-4fea-aed4-e8d15928c0d7"
+      ],
+      "ground_truth_context": [
+        "BF2020 | Technical Writing and Presentation | 3(2-2-0-6)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_022",
+      "question_type": "simple",
+      "question": "Mô đun Công nghệ sinh học Môi trường bậc cử nhân có bao nhiêu tín chỉ?",
+      "gold_answer": "Mô đun Công nghệ sinh học Môi trường bậc cử nhân có 16 tín chỉ.",
+      "evidence_chunk_ids": [
+        "70309f5a-9f95-438c-ae16-6053614fd782"
+      ],
+      "ground_truth_context": [
+        "Mô đun 1: Công nghệ sinh học Môi trường (16 tín chỉ)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_023",
+      "question_type": "simple",
+      "question": "Trong mô đun Công nghệ sinh học Môi trường bậc cử nhân, học phần Kỹ thuật sinh học xử lý chất thải học ở kỳ mấy?",
+      "gold_answer": "Học phần BF4701 Kỹ thuật sinh học xử lý chất thải học ở kỳ 7.",
+      "evidence_chunk_ids": [
+        "70309f5a-9f95-438c-ae16-6053614fd782"
+      ],
+      "ground_truth_context": [
+        "BF4701 | Kỹ thuật sinh học xử lý chất thải | 3(2-2-0-6) | 7"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_024",
+      "question_type": "simple",
+      "question": "Mô đun Công nghệ sinh học Thực phẩm bậc cử nhân có học phần Sinh vật biến đổi gen và ứng dụng không?",
+      "gold_answer": "Có. Học phần BF4721 Sinh vật biến đổi gen và ứng dụng có 2 tín chỉ, học ở kỳ 7.",
+      "evidence_chunk_ids": [
+        "84041116-9c3a-431d-ba3b-38499de6621c"
+      ],
+      "ground_truth_context": [
+        "BF4721 | Sinh vật biến đổi gen và ứng dụng | 2(2-0-0-4) | 7"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_025",
+      "question_type": "simple",
+      "question": "Mô đun Công nghệ sinh học công nghiệp bậc cử nhân có học phần Enzyme học không?",
+      "gold_answer": "Có. Học phần BF4712 Enzyme học có 2 tín chỉ, học ở kỳ 7.",
+      "evidence_chunk_ids": [
+        "e4346ffa-b869-4c9d-a304-c48a3c387db3"
+      ],
+      "ground_truth_context": [
+        "BF4712 | Enzyme học | 2(2-0-0-4) | 7"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_026",
+      "question_type": "simple",
+      "question": "Mô đun Kỹ thuật sinh học phân tử và tế bào bậc cử nhân có học phần Công nghệ tế bào động vật bao nhiêu tín chỉ?",
+      "gold_answer": "Học phần BF4713 Công nghệ tế bào động vật có 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "408fd641-4a84-4203-9aa5-4e4dcd8a6cb0"
+      ],
+      "ground_truth_context": [
+        "BF4713 | Công nghệ tế bào động vật | 3(2-2-0-6) | 7"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_027",
+      "question_type": "simple",
+      "question": "Thực tập kỹ thuật bậc cử nhân Kỹ thuật Sinh học có mã học phần nào?",
+      "gold_answer": "Thực tập kỹ thuật bậc cử nhân có mã BF4781, 2 tín chỉ và học ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "408fd641-4a84-4203-9aa5-4e4dcd8a6cb0"
+      ],
+      "ground_truth_context": [
+        "BF4781 | Thực tập kỹ thuật | 2(0-0-6-4) | 8"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_028",
+      "question_type": "simple",
+      "question": "Đồ án tốt nghiệp cử nhân Kỹ thuật Sinh học có mã học phần nào?",
+      "gold_answer": "Đồ án tốt nghiệp cử nhân Kỹ thuật Sinh học có mã BF4791, 6 tín chỉ và học ở kỳ 8.",
+      "evidence_chunk_ids": [
+        "408fd641-4a84-4203-9aa5-4e4dcd8a6cb0"
+      ],
+      "ground_truth_context": [
+        "BF4791 | Đồ án tốt nghiệp cử nhân KTSH | 6(0-0-12-12) | 8"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_029",
+      "question_type": "simple",
+      "question": "Trong bậc kỹ sư, học phần Cơ sở lập dự án và thiết kế nhà máy có mã gì?",
+      "gold_answer": "Học phần Cơ sở lập dự án và thiết kế nhà máy có mã BF5728, 2 tín chỉ và xuất hiện trong các mô đun chuyên ngành cốt lõi.",
+      "evidence_chunk_ids": [
+        "dd35138a-8cb4-4276-9091-b9d15e50ac6f"
+      ],
+      "ground_truth_context": [
+        "BF5728 | Cơ sở lập dự án và thiết kế nhà máy | 2(2-1-0-4) | 9"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_simple_030",
+      "question_type": "simple",
+      "question": "Thực tập kỹ sư Kỹ thuật Sinh học có bao nhiêu tín chỉ và học ở kỳ mấy?",
+      "gold_answer": "Thực tập kỹ sư Kỹ thuật Sinh học có 6 tín chỉ và học ở kỳ 11.",
+      "evidence_chunk_ids": [
+        "3a267955-3bd2-44ec-9388-677c3ab32848"
+      ],
+      "ground_truth_context": [
+        "BF5783 | Thực tập kỹ sư | 6(0-0-12-12) | 11"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_031",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Kỹ thuật Sinh học BF1 cần hoàn thành bao nhiêu tín chỉ ở bậc cử nhân và bậc kỹ sư để đạt tổng 180 tín chỉ?",
+      "gold_answer": "Sinh viên cần hoàn thành 132 tín chỉ bậc cử nhân và 48 tín chỉ bậc kỹ sư, tổng cộng 180 tín chỉ.",
+      "evidence_chunk_ids": [
+        "b6cfcf13-1227-4fce-9f16-a44c8d37cdfd",
+        "0ad04347-d427-4dd6-a62f-4c5a2495c642"
+      ],
+      "ground_truth_context": [
+        "Khối lượng kiến thức toàn khóa: 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)",
+        "Tổng cộng bậc kỹ sư | 48 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_032",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên Kỹ thuật Sinh học theo hướng tốt nghiệp kỹ sư, phần cuối bậc cử nhân và phần cuối bậc kỹ sư gồm những học phần đồ án hoặc thực tập nào?",
+      "gold_answer": "Ở cuối bậc cử nhân có Thực tập kỹ thuật BF4781 và Đồ án tốt nghiệp cử nhân BF4791; ở cuối bậc kỹ sư có Thực tập kỹ sư BF5783 và Đồ án kỹ sư BF5784.",
+      "evidence_chunk_ids": [
+        "408fd641-4a84-4203-9aa5-4e4dcd8a6cb0",
+        "3a267955-3bd2-44ec-9388-677c3ab32848"
+      ],
+      "ground_truth_context": [
+        "BF4781 | Thực tập kỹ thuật | 2(0-0-6-4) | 8",
+        "BF4791 | Đồ án tốt nghiệp cử nhân KTSH | 6(0-0-12-12) | 8",
+        "BF5783 | Thực tập kỹ sư | 6(0-0-12-12) | 11",
+        "BF5784 | Đồ án kỹ sư | 9(0-18-0-18) | 11"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_033",
+      "question_type": "multi_hop",
+      "question": "Sinh viên BF1 quan tâm Công nghệ sinh học Môi trường sẽ gặp nhóm học phần nào ở bậc cử nhân và nhóm chuyên ngành cốt lõi nào ở bậc kỹ sư?",
+      "gold_answer": "Ở bậc cử nhân, sinh viên có mô đun Công nghệ sinh học Môi trường 16 tín chỉ với các học phần như BF4701, BF4702, BF4703, EV4241. Ở bậc kỹ sư, sinh viên có mô đun Công nghệ sinh học Môi trường 19 tín chỉ với các học phần như BF5728, BF5742, BF5703, BF5704.",
+      "evidence_chunk_ids": [
+        "70309f5a-9f95-438c-ae16-6053614fd782",
+        "dd35138a-8cb4-4276-9091-b9d15e50ac6f"
+      ],
+      "ground_truth_context": [
+        "Mô đun 1: Công nghệ sinh học Môi trường (16 tín chỉ)",
+        "Mô đun 1: Công nghệ sinh học Môi trường ... BF5728, BF5742, BF5703, BF5704"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_034",
+      "question_type": "multi_hop",
+      "question": "Sinh viên BF1 theo định hướng Công nghệ sinh học Thực phẩm sẽ học những học phần nào liên quan đến lên men ở bậc cử nhân và bậc kỹ sư?",
+      "gold_answer": "Ở bậc cử nhân có BF4705 Kỹ thuật lên men và BF4708 Thí nghiệm kỹ thuật lên men. Ở bậc kỹ sư hướng Công nghệ sinh học Thực phẩm có BF5732 Công nghệ sản phẩm thực phẩm lên men.",
+      "evidence_chunk_ids": [
+        "84041116-9c3a-431d-ba3b-38499de6621c",
+        "f3cce5ba-c2b7-4320-a3cf-59f0d286fd2f"
+      ],
+      "ground_truth_context": [
+        "BF4705 | Kỹ thuật lên men",
+        "BF4708 | Thí nghiệm kỹ thuật lên men",
+        "BF5732 | Công nghệ sản phẩm thực phẩm lên men"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_035",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn theo mảng sinh học phân tử và tế bào sẽ gặp các học phần nào ở bậc cử nhân và đồ án nào ở bậc kỹ sư?",
+      "gold_answer": "Ở bậc cử nhân có các học phần như Công nghệ tế bào động vật, Kỹ thuật phân tích và chẩn đoán phân tử, Kỹ thuật nuôi cấy vi rút, Công nghệ DNA tái tổ hợp. Ở bậc kỹ sư có Đồ án 1 - Kỹ sư SHPT&TB mã BF5745.",
+      "evidence_chunk_ids": [
+        "408fd641-4a84-4203-9aa5-4e4dcd8a6cb0",
+        "3a6a9d1c-e882-4fb4-9f26-9761075a273f"
+      ],
+      "ground_truth_context": [
+        "Mô đun 4: Kỹ thuật sinh học phân tử và tế bào",
+        "BF5745 | Đồ án 1 - Kỹ sư SHPT&TB | 3(0-6-0-6) | 9"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_036",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Kỹ thuật Sinh học học bao nhiêu tín chỉ tiếng Anh và các học phần tiếng Anh cụ thể ở giai đoạn cử nhân là gì?",
+      "gold_answer": "Sinh viên học 6 tín chỉ tiếng Anh ở giai đoạn cử nhân, gồm FL1100 Tiếng Anh I và FL1101 Tiếng Anh II, mỗi học phần 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "ab5575f6-41e7-42da-948b-2f2f034fc6a1",
+        "36c79c7d-2671-49c4-9f45-d024bdf8b5b3"
+      ],
+      "ground_truth_context": [
+        "Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản",
+        "FL1100 | Tiếng Anh I | 3(0-6-0-6) | 1",
+        "FL1101 | Tiếng Anh II | 3(0-6-0-6) | 2"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_037",
+      "question_type": "multi_hop",
+      "question": "Các học phần liên quan đến phân tích và xử lý số liệu xuất hiện ở bậc kỹ sư BF1 như thế nào?",
+      "gold_answer": "BF5567 Phân tích và xử lý số liệu xuất hiện trong các mô đun chuyên ngành cốt lõi bậc kỹ sư, như Công nghệ sinh học Môi trường, Thực phẩm và Công nghiệp, với 2 tín chỉ ở kỳ 9.",
+      "evidence_chunk_ids": [
+        "dd35138a-8cb4-4276-9091-b9d15e50ac6f",
+        "f3cce5ba-c2b7-4320-a3cf-59f0d286fd2f",
+        "1edd31b1-55fc-4c59-9136-3aea5664a745"
+      ],
+      "ground_truth_context": [
+        "BF5567 | Phân tích và xử lý số liệu | 2(2-1-0-4) | 9"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_038",
+      "question_type": "multi_hop",
+      "question": "Sinh viên BF1 có thể thấy học phần Kỹ thuật lên men trong những mô đun tự chọn cử nhân nào?",
+      "gold_answer": "Học phần BF4705 Kỹ thuật lên men xuất hiện trong mô đun Công nghệ sinh học Môi trường, Công nghệ sinh học Thực phẩm, Công nghệ sinh học công nghiệp và Kỹ thuật sinh học phân tử và tế bào.",
+      "evidence_chunk_ids": [
+        "70309f5a-9f95-438c-ae16-6053614fd782",
+        "84041116-9c3a-431d-ba3b-38499de6621c",
+        "e4346ffa-b869-4c9d-a304-c48a3c387db3",
+        "408fd641-4a84-4203-9aa5-4e4dcd8a6cb0"
+      ],
+      "ground_truth_context": [
+        "BF4705 | Kỹ thuật lên men",
+        "Mô đun 1, 2, 3 và 4 đều có BF4705"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_039",
+      "question_type": "multi_hop",
+      "question": "Sinh viên BF1 học những học phần nào liên quan trực tiếp đến vi sinh ở giai đoạn cử nhân?",
+      "gold_answer": "Ở cơ sở ngành có BF3701 Vi sinh vật I và BF3702 Thí nghiệm vi sinh vật; trong các mô đun tự chọn có Vi sinh vật II - môi trường, Vi sinh vật II - thực phẩm và Vi sinh vật II - công nghiệp.",
+      "evidence_chunk_ids": [
+        "cd2526e4-c514-4b69-a8ce-616eb354625a",
+        "70309f5a-9f95-438c-ae16-6053614fd782",
+        "84041116-9c3a-431d-ba3b-38499de6621c",
+        "e4346ffa-b869-4c9d-a304-c48a3c387db3"
+      ],
+      "ground_truth_context": [
+        "BF3701 | Vi sinh vật I",
+        "BF3702 | Thí nghiệm vi sinh vật",
+        "BF4703 | Vi sinh vật II - môi trường",
+        "BF4707 | Vi sinh vật II - thực phẩm",
+        "BF4711 | Vi sinh vật II - công nghiệp"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_040",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên BF1 chọn học tiếp bậc kỹ sư, khối chuyên ngành cốt lõi và tự chọn kỹ sư được thiết kế như thế nào?",
+      "gold_answer": "Bậc kỹ sư gồm chuyên ngành cốt lõi 19 tín chỉ, trong đó sinh viên chọn một mô đun và học toàn bộ học phần của mô đun; phần tự chọn kỹ sư có 14 tín chỉ, gồm tự chọn mô đun 8 tín chỉ và tự chọn chung 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "0ad04347-d427-4dd6-a62f-4c5a2495c642",
+        "3242de33-3ddf-4735-95f4-377cca99309f",
+        "2435de08-d9f4-48ed-bfa9-dd94d96ab3dc"
+      ],
+      "ground_truth_context": [
+        "Chuyên ngành cốt lõi | 19",
+        "Tự chọn kỹ sư | 14",
+        "Tự chọn mô đun | 8",
+        "Tự chọn chung | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_041",
+      "question_type": "multi_hop",
+      "question": "Sinh viên BF1 muốn học về công nghệ sinh học công nghiệp sẽ gặp nhóm học phần nào ở bậc cử nhân và bậc kỹ sư?",
+      "gold_answer": "Ở bậc cử nhân có mô đun Công nghệ sinh học công nghiệp 16 tín chỉ với các học phần như Kỹ thuật lên men, Kỹ thuật thu hồi hoàn thiện sản phẩm, Vi sinh vật II - công nghiệp, Enzyme học. Ở bậc kỹ sư có mô đun Công nghệ sinh học công nghiệp 19 tín chỉ với các học phần như Công nghệ chế phẩm vi sinh vật, Công nghệ axit amin, Thí nghiệm chuyên ngành CNSHCN.",
+      "evidence_chunk_ids": [
+        "e4346ffa-b869-4c9d-a304-c48a3c387db3",
+        "1edd31b1-55fc-4c59-9136-3aea5664a745"
+      ],
+      "ground_truth_context": [
+        "Mô đun 3: Công nghệ sinh học công nghiệp (16 tín chỉ)",
+        "Mô đun 3: Công nghệ sinh học công nghiệp ... BF5711, BF5712, BF5714"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_042",
+      "question_type": "multi_hop",
+      "question": "Sinh viên BF1 học các học phần hóa học nền tảng nào trước khi vào các học phần cơ sở ngành sinh học?",
+      "gold_answer": "Trong khối Toán và Khoa học cơ bản có Hóa học, Hóa hữu cơ, Hóa lý và Thí nghiệm hóa lý; trong khối cơ sở và cốt lõi ngành có Hóa phân tích, Thí nghiệm hóa phân tích, Hóa sinh và Thí nghiệm hóa sinh.",
+      "evidence_chunk_ids": [
+        "775f08a9-d086-4660-a747-73160679f36e",
+        "cd2526e4-c514-4b69-a8ce-616eb354625a"
+      ],
+      "ground_truth_context": [
+        "CH1018 | Hóa học",
+        "CH3224 | Hoá hữu cơ",
+        "CH3081 | Hóa lý",
+        "CH3082 | Thí nghiệm hóa lý",
+        "CH3316 | Hoá phân tích",
+        "BF2702 | Hóa sinh"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_multi_hop_043",
+      "question_type": "multi_hop",
+      "question": "Sinh viên BF1 có bao nhiêu tín chỉ thực tập và đồ án ở cuối bậc kỹ sư, và các học phần cụ thể là gì?",
+      "gold_answer": "Cuối bậc kỹ sư có 15 tín chỉ, gồm BF5783 Thực tập kỹ sư 6 tín chỉ và BF5784 Đồ án kỹ sư 9 tín chỉ, đều ở kỳ 11.",
+      "evidence_chunk_ids": [
+        "0ad04347-d427-4dd6-a62f-4c5a2495c642",
+        "3a267955-3bd2-44ec-9388-677c3ab32848"
+      ],
+      "ground_truth_context": [
+        "Thực tập kỹ sư | 6",
+        "Đồ án kỹ sư | 9",
+        "BF5783 | Thực tập kỹ sư | 6(0-0-12-12) | 11",
+        "BF5784 | Đồ án kỹ sư | 9(0-18-0-18) | 11"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_adversarial_044",
+      "question_type": "adversarial",
+      "question": "Sinh viên BF1 có bắt buộc học 200 tín chỉ để nhận bằng Kỹ sư Kỹ thuật Sinh học không?",
+      "gold_answer": "Không có thông tin cho thấy sinh viên BF1 phải học 200 tín chỉ. Tài liệu ghi toàn khóa Kỹ thuật Sinh học là 180 tín chỉ.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "hard"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_adversarial_045",
+      "question_type": "adversarial",
+      "question": "Sinh viên BF1 có thể nhận bằng Bác sĩ Công nghệ sinh học sau 5,5 năm không?",
+      "gold_answer": "Không có thông tin về bằng Bác sĩ Công nghệ sinh học. Tài liệu ghi bằng tốt nghiệp là Kỹ sư Kỹ thuật Sinh học.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "hard"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_adversarial_046",
+      "question_type": "adversarial",
+      "question": "Bậc kỹ sư BF1 có mô đun chuyên ngành cốt lõi Công nghệ thông tin y sinh 19 tín chỉ không?",
+      "gold_answer": "Không có thông tin về mô đun Công nghệ thông tin y sinh 19 tín chỉ trong tài liệu. Các mô đun được nêu gồm Công nghệ sinh học Môi trường, Công nghệ sinh học Thực phẩm, Công nghệ sinh học công nghiệp, và Kỹ thuật sinh học phân tử và tế bào.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "hard"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_adversarial_047",
+      "question_type": "adversarial",
+      "question": "Sinh viên BF1 học học phần Lập trình web nâng cao ở kỳ 7 trong mô đun Công nghệ sinh học Thực phẩm đúng không?",
+      "gold_answer": "Không có thông tin về học phần Lập trình web nâng cao trong mô đun Công nghệ sinh học Thực phẩm. Mô đun này nêu các học phần như Kỹ thuật lên men, Kỹ thuật phân tích phân tử trong CNTP, Vi sinh vật II - thực phẩm, Enzym trong công nghệ thực phẩm.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "hard"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_adversarial_048",
+      "question_type": "adversarial",
+      "question": "Đồ án kỹ sư BF1 có 20 tín chỉ và học ở kỳ 12 phải không?",
+      "gold_answer": "Không đúng theo tài liệu. Đồ án kỹ sư BF1 có 9 tín chỉ và học ở kỳ 11.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "hard"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_adversarial_049",
+      "question_type": "adversarial",
+      "question": "Sinh viên BF1 có bắt buộc chọn đồng thời cả bốn mô đun tự chọn định hướng ứng dụng bậc cử nhân không?",
+      "gold_answer": "Không có thông tin yêu cầu sinh viên chọn đồng thời cả bốn mô đun. Tài liệu mô tả phần tự chọn theo định hướng ứng dụng là chọn theo mô đun 16 tín chỉ.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "hard"
+    },
+    {
+      "id": "KT_Sinh_hoc_BF1_adversarial_050",
+      "question_type": "adversarial",
+      "question": "Mã ngành Kỹ thuật Sinh học BF1 trong tài liệu là 7520320 đúng không?",
+      "gold_answer": "Không đúng. Tài liệu ghi mã ngành Kỹ thuật Sinh học là 7420202; 7520320 không phải mã ngành được nêu cho BF1 trong file này.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_or_false_premise",
+      "difficulty": "hard"
+    }
+  ]
+}

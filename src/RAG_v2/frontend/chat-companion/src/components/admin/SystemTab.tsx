@@ -18,6 +18,7 @@ import {
   getCrawlerRunChunks, updateCrawlerRunChunk, indexCrawlerRun,
   toggleConfig, getLLMConfig, updateLLMConfig,
   activateApiKey, createApiKey, getApiKeys,
+  getEnvConfig, updateEnvConfig,
 } from '@/services/adminApi';
 import type {
   SystemStats,
@@ -28,6 +29,7 @@ import type {
   CrawlerCollectionResult,
   CrawlerSavedChunkPreview,
   CrawlerChunkDetail,
+  EnvConfigItem,
 } from '@/types/adminStats';
 import {
   Settings, Loader2, PlayCircle, CheckCircle2, XCircle, Save, Key, Cpu, Database,
@@ -178,6 +180,138 @@ function collectCrawlerCollectionResults(value: unknown): CrawlerCollectionResul
     indexed_at: stringFromUnknown(record.indexed_at) || null,
     error_message: stringFromUnknown(record.error_message) || null,
   }, ...nested];
+}
+
+function EnvConfigSection() {
+  const [configs, setConfigs] = useState<EnvConfigItem[]>([]);
+  const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [loadingConfig, setLoadingConfig] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    getEnvConfig()
+      .then((res) => {
+        setConfigs(res.configs);
+        const values: Record<string, string> = {};
+        res.configs.forEach((c) => { values[c.key] = String(c.value); });
+        setFormValues(values);
+        // Expand all categories by default
+        const cats = new Set(res.configs.map((c) => c.category));
+        setExpandedCategories(cats);
+      })
+      .catch(() => toast.error('Không thể tải cấu hình'))
+      .finally(() => setLoadingConfig(false));
+  }, []);
+
+  const toggleCategory = (cat: string) => {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
+      return next;
+    });
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const payload: Record<string, unknown> = {};
+      for (const c of configs) {
+        const raw = formValues[c.key];
+        if (raw !== String(c.value)) {
+          payload[c.key] = raw;
+        }
+      }
+      if (Object.keys(payload).length === 0) {
+        toast.info('Không có thay đổi');
+        return;
+      }
+      await updateEnvConfig(payload);
+      toast.success('Cấu hình đã được lưu');
+      // Refresh configs
+      const res = await getEnvConfig();
+      setConfigs(res.configs);
+      const values: Record<string, string> = {};
+      res.configs.forEach((c) => { values[c.key] = String(c.value); });
+      setFormValues(values);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Lưu thất bại';
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loadingConfig) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <Skeleton className="h-6 w-48 mb-4" />
+        <Skeleton className="h-32" />
+      </div>
+    );
+  }
+
+  const grouped = configs.reduce<Record<string, EnvConfigItem[]>>((acc, item) => {
+    (acc[item.category] ??= []).push(item);
+    return acc;
+  }, {});
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Settings className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm font-semibold">Cấu hình nâng cao</p>
+        </div>
+        <Button size="sm" onClick={handleSave} disabled={saving}>
+          {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+          Lưu cấu hình
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        Thay đổi các thông số hệ thống tại đây. Giá trị được áp dụng ngay lập tức và lưu vào database.
+      </p>
+
+      <div className="space-y-3">
+        {Object.entries(grouped).map(([category, items]) => (
+          <div key={category} className="rounded-lg border border-border overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleCategory(category)}
+              className="flex w-full items-center justify-between px-4 py-2.5 bg-secondary/50 hover:bg-secondary transition-colors text-left"
+            >
+              <span className="text-xs font-medium text-foreground">{category}</span>
+              {expandedCategories.has(category) ? (
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+              )}
+            </button>
+            {expandedCategories.has(category) && (
+              <div className="divide-y divide-border">
+                {items.map((item) => (
+                  <div key={item.key} className="flex items-center gap-4 px-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-xs font-medium">{item.label}</Label>
+                      <p className="text-[10px] text-muted-foreground truncate">{item.description}</p>
+                    </div>
+                    <Input
+                      className="w-28 h-8 text-xs"
+                      type={item.type === 'str' ? 'text' : 'number'}
+                      step={item.type === 'float' ? '0.01' : '1'}
+                      value={formValues[item.key] ?? ''}
+                      onChange={(e) => setFormValues((prev) => ({ ...prev, [item.key]: e.target.value }))}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default function SystemTab() {
@@ -768,25 +902,6 @@ export default function SystemTab() {
         </DialogContent>
       </Dialog>
 
-      {/* Service status */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <p className="text-sm font-semibold mb-3">Trạng thái dịch vụ</p>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-lg border border-border bg-background px-4 py-3 flex items-center justify-between">
-            <span className="text-xs">MongoDB</span>
-            <Badge variant={data.mongo_status === 'ok' ? 'default' : 'destructive'}>
-              {data.mongo_status}
-            </Badge>
-          </div>
-          <div className="rounded-lg border border-border bg-background px-4 py-3 flex items-center justify-between">
-            <span className="text-xs">Redis</span>
-            <Badge variant={data.redis_status === 'ok' ? 'default' : 'secondary'}>
-              {data.redis_status}
-            </Badge>
-          </div>
-        </div>
-      </div>
-
       {/* Documents charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {docStatusData.length > 0 && (
@@ -1067,6 +1182,9 @@ export default function SystemTab() {
           </div>
         )}
       </div>
+
+      {/* Advanced Config Table */}
+      <EnvConfigSection />
     </div>
   );
 }

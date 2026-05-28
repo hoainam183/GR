@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginUser } from "@/services/authApi";
-import { applyTokenResponse } from "@/services/authSession";
+import { applyTokenResponse, getCurrentSessionUser, ensureSession } from "@/services/authSession";
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -72,6 +72,22 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ username?: string; password?: string; api?: string }>({});
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const cached = getCurrentSessionUser();
+    if (cached) {
+      navigate(cached.role === "admin" ? "/admin" : "/chat", { replace: true });
+      return;
+    }
+    ensureSession().then((user) => {
+      if (user) {
+        navigate(user.role === "admin" ? "/admin" : "/chat", { replace: true });
+      } else {
+        setChecking(false);
+      }
+    }).catch(() => setChecking(false));
+  }, [navigate]);
 
   const validate = () => {
     const next: { username?: string; password?: string } = {};
@@ -118,6 +134,14 @@ const LoginPage = () => {
       setErrors({ api: "Không thể bắt đầu đăng nhập Microsoft." });
     }
   };
+
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="animate-pulse text-muted-foreground text-sm">Đang kiểm tra phiên...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">

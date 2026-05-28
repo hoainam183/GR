@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import ReactMarkdown, { type Components } from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -27,6 +29,31 @@ const CATEGORY_LABELS: Record<string, string> = {
   wrong: 'Sai thông tin',
   incomplete: 'Chưa đầy đủ',
   outdated: 'Thông tin cũ',
+};
+
+const feedbackMarkdownComponents: Components = {
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>,
+  ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-1">{children}</ol>,
+  li: ({ children }) => <li className="ml-2">{children}</li>,
+  strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+  em: ({ children }) => <em className="italic">{children}</em>,
+  code: ({ children, className }) => {
+    const isInline = !className;
+    return isInline ? (
+      <code className="rounded bg-muted px-1 py-0.5 text-xs">{children}</code>
+    ) : (
+      <code className={className}>{children}</code>
+    );
+  },
+  pre: ({ children }) => (
+    <pre className="my-2 overflow-x-auto rounded bg-muted p-2 text-xs">{children}</pre>
+  ),
+  a: ({ children, href }) => (
+    <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  ),
 };
 
 export default function FeedbackTab() {
@@ -279,7 +306,14 @@ export default function FeedbackTab() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-1">Câu trả lời</p>
-                <p className="text-sm whitespace-pre-wrap">{selectedFeedback.answer_snapshot}</p>
+                <div className="prose prose-sm max-w-none break-words text-sm leading-relaxed dark:prose-invert">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={feedbackMarkdownComponents}
+                  >
+                    {selectedFeedback.answer_snapshot}
+                  </ReactMarkdown>
+                </div>
               </div>
               {selectedFeedback.comment && (
                 <div>

@@ -92,7 +92,7 @@ export default function UsersTab() {
       {breakdown && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Role distribution */}
-          {roleData.length > 0 && (
+          {/* {roleData.length > 0 && (
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="text-sm font-semibold mb-3">Phân bố vai trò</p>
               <ResponsiveContainer width="100%" height={180}>
@@ -114,7 +114,7 @@ export default function UsersTab() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          )}
+          )} */}
           {/* Registration trend */}
           {breakdown.registrations.length > 0 && (
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">

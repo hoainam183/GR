@@ -1,0 +1,470 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "CTDT-CNKT-TaiNang-2025.03.30_fix_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 18,
+    "multi_hop": 8,
+    "adversarial": 4
+  },
+  "items": [
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình Cử nhân tài năng Khoa học máy tính học trong bao lâu và tổng khối lượng kiến thức toàn khóa là bao nhiêu tín chỉ?",
+      "gold_answer": "Chương trình Cử nhân tài năng Khoa học máy tính có thời gian đào tạo 4 năm và khối lượng kiến thức toàn khóa là 131 tín chỉ.",
+      "evidence_chunk_ids": [
+        "16b47fab-cabe-44fe-895d-58e2d71e69cf"
+      ],
+      "ground_truth_context": [
+        "## VIỆN CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG **CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC 2017** **CỬ NHÂN TÀI NĂNG KHOA HỌC MÁY TÍNH** --- | | | |---|---| | **Tên chương trình** | Khoa học máy tính / Computer Science | | **Trình độ đào tạo** | Cử nhân / Bachelor | | **Ngành đào tạo** | Khoa học máy tính / Computer Science | | **Mã ngành** | 7480101 | | **Thời gian đào tạo** | 4 năm / 4 years | | **Bằng tốt nghiệp** | Cử nhân tài năng Khoa học máy tính / Bachelor talent of science in Computer Science | | **Khối lượng kiến thức toàn khóa** | 131 tín chỉ / 131 credits | ---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_002",
+      "question_type": "simple",
+      "question": "Mục tiêu chung của chương trình Cử nhân tài năng Khoa học máy tính là đào tạo sinh viên có những khả năng gì?",
+      "gold_answer": "Mục tiêu chung là đào tạo cử nhân trình độ cao có khả năng tham gia tạo ra tri thức, sản phẩm mới phục vụ xã hội và đất nước; đồng thời áp dụng thành thạo kiến thức cơ sở và chuyên môn, có kỹ năng thực hành nghề nghiệp, sáng tạo giải quyết vấn đề trong Khoa học máy tính, thích nghi môi trường làm việc và tự học để theo kịp sự phát triển khoa học công nghệ.",
+      "evidence_chunk_ids": [
+        "fa230a92-3667-436b-bfa6-a35d71602c12"
+      ],
+      "ground_truth_context": [
+        "## 1. Mục tiêu chương trình đào tạo (Program Goals) ### 1.1 Mục tiêu chung (General objectives) - Đào tạo cử nhân trình độ cao có khả năng tham gia vào quá trình tạo ra tri thức, sản phẩm mới phục vụ xã hội và đất nước. - Đào tạo cử nhân trình độ cao có khả năng áp dụng thành thạo kiến thức cơ sở và chuyên môn, có kỹ năng thực hành nghề nghiệp, có khả năng sáng tạo để tham gia giải quyết vấn đề liên quan đến lĩnh vực Khoa học máy tính, thích nghi với môi trường làm việc, có khả năng tự học để thích ứng với sự phát triển không ngừng của khoa học và công nghệ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_003",
+      "question_type": "simple",
+      "question": "Sau khi tốt nghiệp chương trình Cử nhân tài năng Khoa học máy tính, sinh viên cần đạt chuẩn tiếng Anh nào?",
+      "gold_answer": "Sinh viên cần có kỹ năng sử dụng tiếng Anh hiệu quả trong công việc và đạt TOEIC từ 600 điểm trở lên.",
+      "evidence_chunk_ids": [
+        "89b9393e-9c60-4ffb-91fe-ee4f7178075f"
+      ],
+      "ground_truth_context": [
+        "## 2. Chuẩn đầu ra của chương trình giáo dục (Program Learning Outcomes) **2.3** Có kỹ năng xã hội cần thiết để làm việc hiệu quả trong nhóm đa ngành và trong môi trường quốc tế: - 2.3.1 Có kỹ năng tổ chức, lãnh đạo và làm việc theo nhóm (đa ngành). - 2.3.2 Có kỹ năng giao tiếp hiệu quả thông qua viết, thuyết trình, thảo luận, đàm phán, làm chủ tình huống, sử dụng hiệu quả các công cụ và phương tiện hiện đại. - 2.3.3 Có kỹ năng sử dụng tiếng Anh hiệu quả trong công việc, đạt điểm TOEIC ≥ 600."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_004",
+      "question_type": "simple",
+      "question": "Trong cấu trúc chương trình Cử nhân tài năng Khoa học máy tính, khối Giáo dục đại cương có bao nhiêu tín chỉ?",
+      "gold_answer": "Khối Giáo dục đại cương của chương trình có 50 tín chỉ.",
+      "evidence_chunk_ids": [
+        "7497b872-b015-44ae-a624-4888a18bf4f6"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình (Program Content) ### 3.1 Cấu trúc chung của chương trình đào tạo (General Program Structure) | Khối kiến thức | Tín chỉ | Ghi chú | |---|---|---| | **Giáo dục đại cương (General Education)** | **50** | | | Toán và khoa học cơ bản (Mathematics and basic sciences) | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo | | Lý luận chính trị + Pháp luật đại cương (Law and politics) | 13 | Theo quy định của Bộ GD&ĐT | | GDTC / GD QP-AN (Physical Education / Military Education) | - | Theo quy định của Bộ GD&ĐT | | Tiếng Anh (English) | 6 | Gồm 2 học phần Tiếng Anh cơ bản | | **Giáo dục chuyên nghiệp (Professional Education)** | **85** | | | Cơ sở và cốt lõi ngành (Basic and Core of Engineering) | 52 (±2) | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai | | Kiến thức bổ trợ (Soft skills) | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ XH/khởi nghiệp (6TC) + Technical Writing and Presentation (3TC) | | Tự chọn theo môđun (Elective Module) | 16 (±2) | Tiếp cận theo một lĩnh vực ứng dụng | | Thực tập kỹ thuật (Engineering Internship) | 2 | Từ năm thứ ba trở lên |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_005",
+      "question_type": "simple",
+      "question": "Hai học phần Tiếng Anh trong kế hoạch học tập chuẩn của chương trình Cử nhân tài năng Khoa học máy tính là gì?",
+      "gold_answer": "Hai học phần Tiếng Anh là FL1100 - Tiếng Anh I, 3 tín chỉ, học kỳ 1 và FL1101 - Tiếng Anh II, 3 tín chỉ, học kỳ 2.",
+      "evidence_chunk_ids": [
+        "fe000c3a-5599-458c-afe2-c646e538d285"
+      ],
+      "ground_truth_context": [
+        "#### Giáo dục Quốc phòng - An ninh (165 tiết) | TT | Mã số | Tên học phần | Tín chỉ | |---|---|---|---| | 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) | | 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) | | 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-2-0-8) | #### Tiếng Anh | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 15 | FL1100 | Tiếng Anh I (English I) | 3(0-6-0-6) | 1 | | 16 | FL1101 | Tiếng Anh II (English II) | 3(0-6-0-6) | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_006",
+      "question_type": "simple",
+      "question": "Khối Toán và Khoa học cơ bản của chương trình Cử nhân tài năng Khoa học máy tính gồm bao nhiêu tín chỉ?",
+      "gold_answer": "Khối Toán và Khoa học cơ bản gồm 35 tín chỉ.",
+      "evidence_chunk_ids": [
+        "bbd29b14-4a1c-41f2-b252-7cb9c238a39c"
+      ],
+      "ground_truth_context": [
+        "#### Khối kiến thức Toán và Khoa học cơ bản (35 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 17 | MI1111 | Giải tích I | 4(3-2-0-8) | 1 | | 18 | MI1121 | Giải tích II | 3(2-2-0-6) | 2 | | 19 | MI1131 | Giải tích III | 3(2-2-0-6) | 3 | | 20 | MI1141 | Đại số | 4(3-2-0-8) | 1 | | 21 | MI2020 | Xác suất thống kê | 3(2-2-0-6) | 3 | | 22 | IT2000 | Nhập môn CNTT và TT | 3(2-0-2-6) | 1 | | 23 | PH1120 | Vật lý đại cương II | 3(2-1-1-6) | 3 | | 24 | IT1108 | Nhập môn lập trình | 4(3-0-2-8) | 1 | | 25 | IT3020 | Toán rời rạc | 3(3-1-0-6) | 2 | | 26 | MI3052 | Nhập môn các phương pháp tối ưu | 2(2-1-0-4) | 3 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_007",
+      "question_type": "simple",
+      "question": "Học phần IT3011 Cấu trúc dữ liệu và thuật toán trong chương trình Cử nhân tài năng Khoa học máy tính có bao nhiêu tín chỉ và học ở kỳ nào?",
+      "gold_answer": "IT3011 Cấu trúc dữ liệu và thuật toán có 2 tín chỉ, học ở kỳ 2.",
+      "evidence_chunk_ids": [
+        "a835d2d8-8322-4427-9725-e4a902c55f75"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (48 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 27 | IT2022 | Thống kê ứng dụng và quy hoạch thực nghiệm | 3(2-2-0-6) | 2 | | 28 | IT3011 | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 2 | | 29 | IT3030 | Kiến trúc máy tính | 3(3-1-0-6) | 3 | | 30 | IT3040 | Kỹ thuật lập trình | 2(2-0-1-4) | 4 | | 31 | IT3070 | Nguyên lý hệ điều hành | 3(3-1-0-6) | 4 | | 32 | IT3080 | Mạng máy tính | 3(3-0-1-6) | 4 | | 33 | IT3090 | Cơ sở dữ liệu | 3(2-1-1-6) | 5 | | 34 | IT3100 | Lập trình hướng đối tượng | 2(2-1-0-4) | 3 | | 35 | IT3170 | Thuật toán ứng dụng | 2(2-1-0-4) | 5 | | 36 | IT3180 | Nhập môn công nghệ phần mềm | 3(2-2-0-6) | 4 | | 37 | IT3150 | Project I | 2(0-0-4-8) | 5 | | 38 | IT3160 | Nhập môn Trí tuệ nhân tạo | 3(3-1-0-6) | 4 | | 39 | IT3120 | Phân tích và thiết kế hệ thống | 2(2-1-0-4) | 6 | | 40 | IT4015 | Nhập môn An toàn thông tin | 3(3-1-0-6) | 6 | | 41 | IT3190 | Nhập môn Học máy và khai phá dữ liệu | 3(3-1-0-6) | 5 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_008",
+      "question_type": "simple",
+      "question": "Trong chương trình Cử nhân tài năng Khoa học máy tính, học phần IT4930 Nhập môn Khoa học dữ liệu có bao nhiêu tín chỉ và học ở kỳ nào?",
+      "gold_answer": "IT4930 Nhập môn Khoa học dữ liệu có 2 tín chỉ và học ở kỳ 5.",
+      "evidence_chunk_ids": [
+        "a9e0cac7-c6ac-4b78-b41f-479d23c3c3ec"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (48 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 42 | IT4593 | Nhập môn kỹ thuật truyền thông | 2(2-1-0-4) | 6 | | 43 | IT4170 | Xử lý tín hiệu | 2(2-1-0-4) | 6 | | 44 | IT4930 | Nhập môn Khoa học dữ liệu | 2(2-1-0-4) | 5 | | 45 | IT4653 | Học sâu và ứng dụng | 2(2-1-0-4) | 6 | | 46 | IT3930 | Project II | 2(0-0-4-8) | 6 | | 47 | IT3940 | Project III | 3(0-0-6-12) | 7 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_009",
+      "question_type": "simple",
+      "question": "Học phần IT2030 Technical Writing and Presentation thuộc khối kiến thức bổ trợ xã hội có bao nhiêu tín chỉ?",
+      "gold_answer": "IT2030 Technical Writing and Presentation là học phần bắt buộc 3 tín chỉ.",
+      "evidence_chunk_ids": [
+        "6efd0b9a-75bf-49cc-bebf-e3ac77296c60"
+      ],
+      "ground_truth_context": [
+        "#### Kiến thức bổ trợ xã hội (9 tín chỉ) **Bắt buộc (3 tín chỉ):** | TT | Mã số | Tên học phần | Tín chỉ | |---|---|---|---| | 48 | IT2030 | Technical Writing and Presentation | 3(2-2-0-6) | **Tự chọn (6 tín chỉ, chọn 3 trong các môn sau):** | TT | Mã số | Tên học phần | Tín chỉ | |---|---|---|---| | 49 | EM1010 | Quản trị học đại cương | 2(1-2-0-4) | | 50 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(1-2-0-4) | | 51 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | | 52 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) | | 53 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | | 54 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_010",
+      "question_type": "simple",
+      "question": "Trong khối Kiến thức chuyên ngành của chương trình Cử nhân tài năng Khoa học máy tính, học phần IT4735 IoT và ứng dụng có bao nhiêu tín chỉ và học ở kỳ nào?",
+      "gold_answer": "IT4735 IoT và ứng dụng có 2 tín chỉ và học ở kỳ 7.",
+      "evidence_chunk_ids": [
+        "10fdad81-5682-4040-87e3-afe44a4acc6b"
+      ],
+      "ground_truth_context": [
+        "#### Kiến thức chuyên ngành (16 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 55 | IT4931 | Lưu trữ và xử lý dữ liệu lớn | 3(3-1-0-6) | 7 | | 56 | IT4130 | Lập trình song song | 2(2-1-0-4) | 6 | | 57 | IT4490 | Thiết kế và xây dựng phần mềm | 3(2-1-1-6) | 7 | | 58 | IT4663 | Tối ưu và lập kế hoạch | 3(3-1-0-6) | 7 | | 59 | IT4210 | Hệ nhúng | 3(3-0-1-6) | 7 | | 60 | IT4735 | IoT và ứng dụng | 2(2-1-0-4) | 7 | #### Thực tập kỹ thuật và Đồ án tốt nghiệp (8 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 61 | IT4991 | Thực tập kỹ thuật | 2(0-0-4-4) | 6 | | 62 | IT4995 | Đồ án tốt nghiệp | 6(0-0-12-12) | 8 | #### Tổng số tín chỉ theo kỳ | Kỳ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | |---|---|---|---|---|---|---|---|---| | Tín chỉ | 18 | 16 | 16 | 19 | 17 | 19 | 19 | 6 | ---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_011",
+      "question_type": "simple",
+      "question": "Học phần IT4991 Thực tập kỹ thuật của chương trình Cử nhân tài năng Khoa học máy tính có số tín chỉ, học kỳ và điều kiện học trước như thế nào?",
+      "gold_answer": "IT4991 Thực tập kỹ thuật có 2 tín chỉ, học ở kỳ 6; trong mô tả học phần, học phần học trước là IT3150 Project I.",
+      "evidence_chunk_ids": [
+        "10fdad81-5682-4040-87e3-afe44a4acc6b",
+        "bed07715-9ea9-4bde-bc02-08d3ca75b91f"
+      ],
+      "ground_truth_context": [
+        "#### Kiến thức chuyên ngành (16 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 55 | IT4931 | Lưu trữ và xử lý dữ liệu lớn | 3(3-1-0-6) | 7 | | 56 | IT4130 | Lập trình song song | 2(2-1-0-4) | 6 | | 57 | IT4490 | Thiết kế và xây dựng phần mềm | 3(2-1-1-6) | 7 | | 58 | IT4663 | Tối ưu và lập kế hoạch | 3(3-1-0-6) | 7 | | 59 | IT4210 | Hệ nhúng | 3(3-0-1-6) | 7 | | 60 | IT4735 | IoT và ứng dụng | 2(2-1-0-4) | 7 | #### Thực tập kỹ thuật và Đồ án tốt nghiệp (8 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 61 | IT4991 | Thực tập kỹ thuật | 2(0-0-4-4) | 6 | | 62 | IT4995 | Đồ án tốt nghiệp | 6(0-0-12-12) | 8 | #### Tổng số tín chỉ theo kỳ | Kỳ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | |---|---|---|---|---|---|---|---|---| | Tín chỉ | 18 | 16 | 16 | 19 | 17 | 19 | 19 | 6 | ---",
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4991 – Thực tập kỹ thuật** *(Engineering Internship)* - **Tín chỉ:** 2(0-0-4-4) - **Học trước:** IT3150 (Project I) **Mục tiêu:** Tạo môi trường và điều kiện cho sinh viên làm quen với thực tế nghề nghiệp; bổ sung kiến thức học trong trường; hiểu biết thêm về tương tác giữa giải pháp kỹ thuật với bối cảnh kinh tế và xã hội; dần hình thành định hướng chuyên môn. **Nội dung:** Thực hiện 4 tuần tại một cơ sở ngoài trường; chia thành nhóm nhỏ hoặc cá nhân; sinh viên phải làm đề cương được cán bộ giám sát thông qua trước khi thực hiện."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_012",
+      "question_type": "simple",
+      "question": "Mục tiêu của học phần IT4931 Lưu trữ và xử lý dữ liệu lớn là gì?",
+      "gold_answer": "Mục tiêu của IT4931 là cung cấp kiến thức về công nghệ lưu trữ dữ liệu lớn, hệ quản trị CSDL NoSQL và NewSQL, các nguyên lý xử lý dữ liệu song song, phân tán, theo khối, theo luồng; xử lý sự kiện phức tạp, quản lý luồng công việc, đồng thời làm quen và vận dụng Hadoop-MapReduce và Spark.",
+      "evidence_chunk_ids": [
+        "928fc698-0ed4-4d25-9e88-bfea7962761c"
+      ],
+      "ground_truth_context": [
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4931 – Lưu trữ và xử lý dữ liệu lớn** *(Bigdata storage and processing)* - **Tín chỉ:** 3(3-1-0-6) - **Tiên quyết:** Không - **Học trước:** Không - **Song hành:** Không **Mục tiêu:** Cung cấp kiến thức về công nghệ lưu trữ dữ liệu lớn, hệ quản trị CSDL NoSQL và NewSQL; các nguyên lý xử lý dữ liệu song song, phân tán, theo khối, theo luồng; xử lý sự kiện phức tạp; quản lý luồng công việc; làm quen và vận dụng Hadoop-MapReduce và Spark. **Nội dung:** Tổng quan về lưu trữ và xử lý dữ liệu lớn; hệ sinh thái Hadoop; HDFS; cơ sở dữ liệu phi quan hệ NoSQL; các kỹ thuật xử lý dữ liệu lớn theo khối và theo luồng; một số giải thuật và thư viện xử lý dữ liệu lớn tiêu biểu."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_013",
+      "question_type": "simple",
+      "question": "Học phần IT4490 Thiết kế và xây dựng phần mềm yêu cầu học trước những học phần nào?",
+      "gold_answer": "IT4490 Thiết kế và xây dựng phần mềm yêu cầu học trước IT3180 và IT3120.",
+      "evidence_chunk_ids": [
+        "2a2d8edb-8e3a-4854-b26d-c20e8470d5b8"
+      ],
+      "ground_truth_context": [
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4490 – Thiết kế và xây dựng phần mềm** *(Software Design and Construction)* - **Tín chỉ:** 3(2-1-1-6) - **Tiên quyết:** Không - **Học trước:** IT3180, IT3120 - **Song hành:** Không **Mục tiêu:** Cung cấp kiến thức và kinh nghiệm thực tiễn về phát triển phần mềm theo chuẩn ITSS; nắm và vận dụng phương pháp phân tích thiết kế hướng đối tượng, các nguyên lý thiết kế, xây dựng phần mềm có chất lượng tốt với loose coupling và tight cohesion. **Nội dung:** Tổng quan về thiết kế và xây dựng phần mềm; thiết kế kiến trúc; thiết kế chi tiết; các nguyên lý thiết kế cơ bản (mô-đun hoá, tính móc nối, tính kết dính); các mức độ móc nối và kết dính phần mềm; chuẩn lập trình, tổ chức mã nguồn, framework, tái cấu trúc mã nguồn, tích hợp và quản lý mã nguồn (Git); kiểm thử đơn vị (JUnit); các nguyên lý thiết kế S.O.L.I.D; giới thiệu tổng quan về mẫu thiết kế."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_014",
+      "question_type": "simple",
+      "question": "Học phần IT4663 Tối ưu và lập kế hoạch hướng tới các bài toán ứng dụng nào?",
+      "gold_answer": "IT4663 hướng tới các bài toán ứng dụng như phân bổ môn học, phân công, lập lịch, xếp thời khóa biểu và lập lộ trình vận tải.",
+      "evidence_chunk_ids": [
+        "a4af3afb-096c-45ff-b71c-116bb732dd37"
+      ],
+      "ground_truth_context": [
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4663 – Tối ưu lập kế hoạch** *(Planning Optimization)* - **Tín chỉ:** 3(3-1-0-6) - **Tiên quyết:** Không - **Học trước:** IT3011, IT3020 - **Song hành:** Không **Mục tiêu:** Cung cấp kiến thức nền tảng và các công cụ thư viện phần mềm để mô hình hóa và giải các bài toán tối ưu hóa trong lập lịch, lập kế hoạch (phân công giảng dạy, xếp thời khóa biểu, lập lộ trình giao thông...). **Nội dung:** Bài toán tối ưu tổ hợp; mô hình hóa; phương pháp branch-and-cut; quy hoạch ràng buộc; thuật toán tham lam; phương pháp tìm kiếm cục bộ; các bài toán ứng dụng (phân bổ môn học, phân công, lập lịch, xếp thời khóa biểu, lập lộ trình vận tải)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_015",
+      "question_type": "simple",
+      "question": "Học phần IT4210 Hệ nhúng cung cấp nội dung chính nào cho sinh viên?",
+      "gold_answer": "IT4210 cung cấp kiến thức về hệ nhúng và quy trình phát triển, kiến trúc và thành phần của vi xử lý, vi điều khiển, thiết kế phần cứng hệ nhúng, ghép nối thiết bị ngoại vi và xây dựng phần mềm giao tiếp ngoại vi như LED, keypad, bộ định thời, ngắt, UART, SPI, I2C, USB.",
+      "evidence_chunk_ids": [
+        "aa009d6a-323d-420d-bab8-28db6cfecf8f"
+      ],
+      "ground_truth_context": [
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4210 – Hệ nhúng** *(Embedded Systems)* - **Tín chỉ:** 3(3-0-1-6) - **Tiên quyết:** Không - **Học trước:** IT1110 - **Song hành:** Không **Mục tiêu:** Giới thiệu các kiến thức liên quan tới việc xây dựng những hệ thống tính toán có tương tác trực tiếp với các quá trình vật lý; trang bị kỹ năng sử dụng các công cụ trong lĩnh vực phát triển ứng dụng hệ nhúng. **Nội dung:** Tổng quan về hệ nhúng và quy trình phát triển; kiến trúc và các thành phần của vi xử lý, vi điều khiển; thiết kế và xây dựng phần cứng hệ nhúng; ghép nối với thiết bị ngoại vi cơ bản; xây dựng phần mềm (giao tiếp ngoại vi LED, 7-seg LED, LED matrix, buttons/keypad, bộ định thời/đếm, xử lý ngắt, UART, SPI, I2C, USB)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_016",
+      "question_type": "simple",
+      "question": "Học phần IT4735 IoT và ứng dụng có học phần học trước là gì?",
+      "gold_answer": "Học phần IT4735 IoT và ứng dụng có học phần học trước là IT3030.",
+      "evidence_chunk_ids": [
+        "c53ea74f-1b14-4757-b673-3e8af5de1817"
+      ],
+      "ground_truth_context": [
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4735 – IoT và ứng dụng** *(IoT and Applications)* - **Tín chỉ:** 2(2-1-0-4) - **Tiên quyết:** Không - **Học trước:** IT3030 - **Song hành:** Không **Mục tiêu:** Cung cấp kiến thức tổng quan về Internet of Things (IoT) và xây dựng ứng dụng cụ thể dựa trên các công nghệ IoT. **Nội dung:** Tổng quan về IoT; kiến trúc, mô hình phân lớp và các thành phần của hệ thống IoT; các giao thức truyền thông trong IoT; các lĩnh vực ứng dụng của IoT; thu thập, xử lý và phân tích dữ liệu IoT; độ tin cậy, bảo mật và quyền riêng tư trong môi trường IoT; bài tập nhóm xây dựng một ứng dụng IoT cụ thể."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_017",
+      "question_type": "simple",
+      "question": "Học phần IT4995 Đồ án tốt nghiệp yêu cầu sinh viên đã học trước học phần nào?",
+      "gold_answer": "IT4995 Đồ án tốt nghiệp yêu cầu học trước IT4991.",
+      "evidence_chunk_ids": [
+        "cd1f9e2e-84a4-4917-8a2d-53672683444b"
+      ],
+      "ground_truth_context": [
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4995 – Đồ án tốt nghiệp** *(Bachelor Thesis)* - **Tín chỉ:** 6(0-0-12-12) - **Học trước:** IT4991 **Mục tiêu:** Liên kết và củng cố kiến thức cốt lõi; mở rộng và nâng cao kiến thức chuyên môn; phát triển năng lực xây dựng ý tưởng, thiết kế, cài đặt sản phẩm hoặc giải pháp kỹ thuật CNTT; rèn luyện kỹ năng trình bày, thuyết trình, giao tiếp và làm việc nhóm. **Nội dung:** Sinh viên được giao một đề tài cụ thể trong lĩnh vực khoa học máy tính; vận dụng kiến thức đã học để giải quyết nhiệm vụ của đề tài dưới sự hướng dẫn của giảng viên; phát triển sản phẩm liên quan tới đề tài; viết thuyết minh đồ án và thuyết trình trước hội đồng chấm đồ án tốt nghiệp. ---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_simple_018",
+      "question_type": "simple",
+      "question": "Lần cập nhật áp dụng từ khóa K70 trong chương trình Cử nhân tài năng Khoa học máy tính có hiệu lực từ kỳ nào?",
+      "gold_answer": "Lần cập nhật áp dụng từ khóa K70 có hiệu lực từ kỳ 2025.1.",
+      "evidence_chunk_ids": [
+        "86e7e056-781a-4093-bb53-608ec85404a6"
+      ],
+      "ground_truth_context": [
+        "### Lần cập nhật 05 – Kỳ 2025.1 - Áp dụng từ khóa: K70 - Áp dụng từ kỳ: 2025.1 1. **IT4653 – Học sâu và ứng dụng (2TC):** Chuyển từ Kiến thức chuyên ngành sang Cơ sở và cốt lõi ngành; kỳ 6. 2. **IT4930 – Nhập môn Khoa học dữ liệu (2TC):** Thêm mới vào Cơ sở và cốt lõi ngành; kỳ 5. 3. **IT4130 – Lập trình song song (2TC):** Thêm mới vào Kiến thức chuyên ngành; kỳ 6."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên Cử nhân tài năng Khoa học máy tính muốn làm đồ án tốt nghiệp, sinh viên cần hoàn thành học phần thực tập kỹ thuật nào trước và mỗi học phần có bao nhiêu tín chỉ?",
+      "gold_answer": "Sinh viên cần học trước IT4991 - Thực tập kỹ thuật trước khi làm IT4995 - Đồ án tốt nghiệp. IT4991 có 2 tín chỉ, còn IT4995 có 6 tín chỉ.",
+      "evidence_chunk_ids": [
+        "10fdad81-5682-4040-87e3-afe44a4acc6b",
+        "bed07715-9ea9-4bde-bc02-08d3ca75b91f",
+        "cd1f9e2e-84a4-4917-8a2d-53672683444b"
+      ],
+      "ground_truth_context": [
+        "#### Kiến thức chuyên ngành (16 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 55 | IT4931 | Lưu trữ và xử lý dữ liệu lớn | 3(3-1-0-6) | 7 | | 56 | IT4130 | Lập trình song song | 2(2-1-0-4) | 6 | | 57 | IT4490 | Thiết kế và xây dựng phần mềm | 3(2-1-1-6) | 7 | | 58 | IT4663 | Tối ưu và lập kế hoạch | 3(3-1-0-6) | 7 | | 59 | IT4210 | Hệ nhúng | 3(3-0-1-6) | 7 | | 60 | IT4735 | IoT và ứng dụng | 2(2-1-0-4) | 7 | #### Thực tập kỹ thuật và Đồ án tốt nghiệp (8 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 61 | IT4991 | Thực tập kỹ thuật | 2(0-0-4-4) | 6 | | 62 | IT4995 | Đồ án tốt nghiệp | 6(0-0-12-12) | 8 | #### Tổng số tín chỉ theo kỳ | Kỳ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | |---|---|---|---|---|---|---|---|---| | Tín chỉ | 18 | 16 | 16 | 19 | 17 | 19 | 19 | 6 | ---",
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4991 – Thực tập kỹ thuật** *(Engineering Internship)* - **Tín chỉ:** 2(0-0-4-4) - **Học trước:** IT3150 (Project I) **Mục tiêu:** Tạo môi trường và điều kiện cho sinh viên làm quen với thực tế nghề nghiệp; bổ sung kiến thức học trong trường; hiểu biết thêm về tương tác giữa giải pháp kỹ thuật với bối cảnh kinh tế và xã hội; dần hình thành định hướng chuyên môn. **Nội dung:** Thực hiện 4 tuần tại một cơ sở ngoài trường; chia thành nhóm nhỏ hoặc cá nhân; sinh viên phải làm đề cương được cán bộ giám sát thông qua trước khi thực hiện.",
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4995 – Đồ án tốt nghiệp** *(Bachelor Thesis)* - **Tín chỉ:** 6(0-0-12-12) - **Học trước:** IT4991 **Mục tiêu:** Liên kết và củng cố kiến thức cốt lõi; mở rộng và nâng cao kiến thức chuyên môn; phát triển năng lực xây dựng ý tưởng, thiết kế, cài đặt sản phẩm hoặc giải pháp kỹ thuật CNTT; rèn luyện kỹ năng trình bày, thuyết trình, giao tiếp và làm việc nhóm. **Nội dung:** Sinh viên được giao một đề tài cụ thể trong lĩnh vực khoa học máy tính; vận dụng kiến thức đã học để giải quyết nhiệm vụ của đề tài dưới sự hướng dẫn của giảng viên; phát triển sản phẩm liên quan tới đề tài; viết thuyết minh đồ án và thuyết trình trước hội đồng chấm đồ án tốt nghiệp. ---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Cử nhân tài năng Khoa học máy tính muốn theo hướng dữ liệu lớn và học máy sẽ gặp các học phần nào liên quan trong chương trình?",
+      "gold_answer": "Các học phần liên quan gồm IT3190 - Nhập môn Học máy và khai phá dữ liệu trong khối cơ sở và cốt lõi ngành; IT4930 - Nhập môn Khoa học dữ liệu; IT4653 - Học sâu và ứng dụng; và IT4931 - Lưu trữ và xử lý dữ liệu lớn trong khối kiến thức chuyên ngành.",
+      "evidence_chunk_ids": [
+        "a835d2d8-8322-4427-9725-e4a902c55f75",
+        "a9e0cac7-c6ac-4b78-b41f-479d23c3c3ec",
+        "10fdad81-5682-4040-87e3-afe44a4acc6b",
+        "928fc698-0ed4-4d25-9e88-bfea7962761c"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (48 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 27 | IT2022 | Thống kê ứng dụng và quy hoạch thực nghiệm | 3(2-2-0-6) | 2 | | 28 | IT3011 | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 2 | | 29 | IT3030 | Kiến trúc máy tính | 3(3-1-0-6) | 3 | | 30 | IT3040 | Kỹ thuật lập trình | 2(2-0-1-4) | 4 | | 31 | IT3070 | Nguyên lý hệ điều hành | 3(3-1-0-6) | 4 | | 32 | IT3080 | Mạng máy tính | 3(3-0-1-6) | 4 | | 33 | IT3090 | Cơ sở dữ liệu | 3(2-1-1-6) | 5 | | 34 | IT3100 | Lập trình hướng đối tượng | 2(2-1-0-4) | 3 | | 35 | IT3170 | Thuật toán ứng dụng | 2(2-1-0-4) | 5 | | 36 | IT3180 | Nhập môn công nghệ phần mềm | 3(2-2-0-6) | 4 | | 37 | IT3150 | Project I | 2(0-0-4-8) | 5 | | 38 | IT3160 | Nhập môn Trí tuệ nhân tạo | 3(3-1-0-6) | 4 | | 39 | IT3120 | Phân tích và thiết kế hệ thống | 2(2-1-0-4) | 6 | | 40 | IT4015 | Nhập môn An toàn thông tin | 3(3-1-0-6) | 6 | | 41 | IT3190 | Nhập môn Học máy và khai phá dữ liệu | 3(3-1-0-6) | 5 |",
+        "#### Cơ sở và cốt lõi ngành (48 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 42 | IT4593 | Nhập môn kỹ thuật truyền thông | 2(2-1-0-4) | 6 | | 43 | IT4170 | Xử lý tín hiệu | 2(2-1-0-4) | 6 | | 44 | IT4930 | Nhập môn Khoa học dữ liệu | 2(2-1-0-4) | 5 | | 45 | IT4653 | Học sâu và ứng dụng | 2(2-1-0-4) | 6 | | 46 | IT3930 | Project II | 2(0-0-4-8) | 6 | | 47 | IT3940 | Project III | 3(0-0-6-12) | 7 |",
+        "#### Kiến thức chuyên ngành (16 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 55 | IT4931 | Lưu trữ và xử lý dữ liệu lớn | 3(3-1-0-6) | 7 | | 56 | IT4130 | Lập trình song song | 2(2-1-0-4) | 6 | | 57 | IT4490 | Thiết kế và xây dựng phần mềm | 3(2-1-1-6) | 7 | | 58 | IT4663 | Tối ưu và lập kế hoạch | 3(3-1-0-6) | 7 | | 59 | IT4210 | Hệ nhúng | 3(3-0-1-6) | 7 | | 60 | IT4735 | IoT và ứng dụng | 2(2-1-0-4) | 7 | #### Thực tập kỹ thuật và Đồ án tốt nghiệp (8 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 61 | IT4991 | Thực tập kỹ thuật | 2(0-0-4-4) | 6 | | 62 | IT4995 | Đồ án tốt nghiệp | 6(0-0-12-12) | 8 | #### Tổng số tín chỉ theo kỳ | Kỳ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | |---|---|---|---|---|---|---|---|---| | Tín chỉ | 18 | 16 | 16 | 19 | 17 | 19 | 19 | 6 | ---",
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4931 – Lưu trữ và xử lý dữ liệu lớn** *(Bigdata storage and processing)* - **Tín chỉ:** 3(3-1-0-6) - **Tiên quyết:** Không - **Học trước:** Không - **Song hành:** Không **Mục tiêu:** Cung cấp kiến thức về công nghệ lưu trữ dữ liệu lớn, hệ quản trị CSDL NoSQL và NewSQL; các nguyên lý xử lý dữ liệu song song, phân tán, theo khối, theo luồng; xử lý sự kiện phức tạp; quản lý luồng công việc; làm quen và vận dụng Hadoop-MapReduce và Spark. **Nội dung:** Tổng quan về lưu trữ và xử lý dữ liệu lớn; hệ sinh thái Hadoop; HDFS; cơ sở dữ liệu phi quan hệ NoSQL; các kỹ thuật xử lý dữ liệu lớn theo khối và theo luồng; một số giải thuật và thư viện xử lý dữ liệu lớn tiêu biểu."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "So sánh chuẩn tiếng Anh đầu ra và các học phần tiếng Anh trong kế hoạch học tập chuẩn của chương trình Cử nhân tài năng Khoa học máy tính.",
+      "gold_answer": "Chuẩn đầu ra yêu cầu sinh viên sử dụng tiếng Anh hiệu quả trong công việc và đạt TOEIC ≥ 600. Trong kế hoạch học tập chuẩn, sinh viên học FL1100 - Tiếng Anh I 3 tín chỉ ở kỳ 1 và FL1101 - Tiếng Anh II 3 tín chỉ ở kỳ 2.",
+      "evidence_chunk_ids": [
+        "89b9393e-9c60-4ffb-91fe-ee4f7178075f",
+        "fe000c3a-5599-458c-afe2-c646e538d285"
+      ],
+      "ground_truth_context": [
+        "## 2. Chuẩn đầu ra của chương trình giáo dục (Program Learning Outcomes) **2.3** Có kỹ năng xã hội cần thiết để làm việc hiệu quả trong nhóm đa ngành và trong môi trường quốc tế: - 2.3.1 Có kỹ năng tổ chức, lãnh đạo và làm việc theo nhóm (đa ngành). - 2.3.2 Có kỹ năng giao tiếp hiệu quả thông qua viết, thuyết trình, thảo luận, đàm phán, làm chủ tình huống, sử dụng hiệu quả các công cụ và phương tiện hiện đại. - 2.3.3 Có kỹ năng sử dụng tiếng Anh hiệu quả trong công việc, đạt điểm TOEIC ≥ 600.",
+        "#### Giáo dục Quốc phòng - An ninh (165 tiết) | TT | Mã số | Tên học phần | Tín chỉ | |---|---|---|---| | 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) | | 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) | | 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK (CKC) | 0(3-2-0-8) | #### Tiếng Anh | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 15 | FL1100 | Tiếng Anh I (English I) | 3(0-6-0-6) | 1 | | 16 | FL1101 | Tiếng Anh II (English II) | 3(0-6-0-6) | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Cử nhân tài năng Khoa học máy tính học bao nhiêu tín chỉ ở khối Giáo dục đại cương và trong khối đó phần Toán và Khoa học cơ bản được liệt kê bao nhiêu tín chỉ trong danh mục học phần?",
+      "gold_answer": "Cấu trúc chung ghi khối Giáo dục đại cương có 50 tín chỉ. Trong danh mục học phần, khối Toán và Khoa học cơ bản được liệt kê 35 tín chỉ.",
+      "evidence_chunk_ids": [
+        "7497b872-b015-44ae-a624-4888a18bf4f6",
+        "bbd29b14-4a1c-41f2-b252-7cb9c238a39c"
+      ],
+      "ground_truth_context": [
+        "## 3. Nội dung chương trình (Program Content) ### 3.1 Cấu trúc chung của chương trình đào tạo (General Program Structure) | Khối kiến thức | Tín chỉ | Ghi chú | |---|---|---| | **Giáo dục đại cương (General Education)** | **50** | | | Toán và khoa học cơ bản (Mathematics and basic sciences) | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo | | Lý luận chính trị + Pháp luật đại cương (Law and politics) | 13 | Theo quy định của Bộ GD&ĐT | | GDTC / GD QP-AN (Physical Education / Military Education) | - | Theo quy định của Bộ GD&ĐT | | Tiếng Anh (English) | 6 | Gồm 2 học phần Tiếng Anh cơ bản | | **Giáo dục chuyên nghiệp (Professional Education)** | **85** | | | Cơ sở và cốt lõi ngành (Basic and Core of Engineering) | 52 (±2) | Bao gồm từ 1÷3 đồ án thiết kế, chế tạo/triển khai | | Kiến thức bổ trợ (Soft skills) | 9 | Gồm 2 phần bắt buộc: Kiến thức bổ trợ XH/khởi nghiệp (6TC) + Technical Writing and Presentation (3TC) | | Tự chọn theo môđun (Elective Module) | 16 (±2) | Tiếp cận theo một lĩnh vực ứng dụng | | Thực tập kỹ thuật (Engineering Internship) | 2 | Từ năm thứ ba trở lên |",
+        "#### Khối kiến thức Toán và Khoa học cơ bản (35 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 17 | MI1111 | Giải tích I | 4(3-2-0-8) | 1 | | 18 | MI1121 | Giải tích II | 3(2-2-0-6) | 2 | | 19 | MI1131 | Giải tích III | 3(2-2-0-6) | 3 | | 20 | MI1141 | Đại số | 4(3-2-0-8) | 1 | | 21 | MI2020 | Xác suất thống kê | 3(2-2-0-6) | 3 | | 22 | IT2000 | Nhập môn CNTT và TT | 3(2-0-2-6) | 1 | | 23 | PH1120 | Vật lý đại cương II | 3(2-1-1-6) | 3 | | 24 | IT1108 | Nhập môn lập trình | 4(3-0-2-8) | 1 | | 25 | IT3020 | Toán rời rạc | 3(3-1-0-6) | 2 | | 26 | MI3052 | Nhập môn các phương pháp tối ưu | 2(2-1-0-4) | 3 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Học phần IT4653 Học sâu và ứng dụng được đặt ở khối nào sau lần cập nhật áp dụng cho khóa K70, và trong kế hoạch học tập chuẩn học phần đó có bao nhiêu tín chỉ, học kỳ nào?",
+      "gold_answer": "Theo lần cập nhật 05 áp dụng từ khóa K70, IT4653 được chuyển từ Kiến thức chuyên ngành sang Cơ sở và cốt lõi ngành, học kỳ 6. Trong kế hoạch học tập chuẩn, IT4653 Học sâu và ứng dụng có 2 tín chỉ, học ở kỳ 6.",
+      "evidence_chunk_ids": [
+        "a9e0cac7-c6ac-4b78-b41f-479d23c3c3ec",
+        "86e7e056-781a-4093-bb53-608ec85404a6"
+      ],
+      "ground_truth_context": [
+        "#### Cơ sở và cốt lõi ngành (48 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 42 | IT4593 | Nhập môn kỹ thuật truyền thông | 2(2-1-0-4) | 6 | | 43 | IT4170 | Xử lý tín hiệu | 2(2-1-0-4) | 6 | | 44 | IT4930 | Nhập môn Khoa học dữ liệu | 2(2-1-0-4) | 5 | | 45 | IT4653 | Học sâu và ứng dụng | 2(2-1-0-4) | 6 | | 46 | IT3930 | Project II | 2(0-0-4-8) | 6 | | 47 | IT3940 | Project III | 3(0-0-6-12) | 7 |",
+        "### Lần cập nhật 05 – Kỳ 2025.1 - Áp dụng từ khóa: K70 - Áp dụng từ kỳ: 2025.1 1. **IT4653 – Học sâu và ứng dụng (2TC):** Chuyển từ Kiến thức chuyên ngành sang Cơ sở và cốt lõi ngành; kỳ 6. 2. **IT4930 – Nhập môn Khoa học dữ liệu (2TC):** Thêm mới vào Cơ sở và cốt lõi ngành; kỳ 5. 3. **IT4130 – Lập trình song song (2TC):** Thêm mới vào Kiến thức chuyên ngành; kỳ 6."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Học phần IT4130 Lập trình song song được bổ sung cho khóa K70 vào khối nào, và theo mô tả học phần sinh viên cần học trước học phần gì?",
+      "gold_answer": "Theo lần cập nhật 05, IT4130 Lập trình song song được thêm mới vào Kiến thức chuyên ngành, kỳ 6. Theo mô tả học phần, IT4130 có học phần tiên quyết là IT1110 và không yêu cầu học trước học phần nào.",
+      "evidence_chunk_ids": [
+        "b20a7a5a-2f94-463e-b6e9-f7b2042205b9",
+        "86e7e056-781a-4093-bb53-608ec85404a6"
+      ],
+      "ground_truth_context": [
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4130 – Lập trình song song và phân tán** *(Parallel and Distributed Programming)* - **Tín chỉ:** 3(3-1-0-6) *(2TC theo kế hoạch học tập chuẩn)* - **Tiên quyết:** IT1110 - **Học trước:** Không - **Song hành:** Không **Mục tiêu:** Giới thiệu kiến thức tổng quan về lập trình song song và phân tán; ứng dụng vào giải các bài toán hiệu năng cao; sau khóa học sinh viên có thể tự xây dựng giải thuật và cài đặt chương trình song song dùng các mô hình lập trình khác nhau. **Nội dung:** Kiến trúc tính toán song song và phân tán (đa luồng, đa lõi, GPU); thiết kế giải thuật tính toán song song; các mô hình lập trình song song (OpenMP, MPI, CUDA); xây dựng chương trình song song cho các bài toán điển hình (tính toán ma trận, đồ thị, sắp xếp, phương trình đạo hàm riêng).",
+        "### Lần cập nhật 05 – Kỳ 2025.1 - Áp dụng từ khóa: K70 - Áp dụng từ kỳ: 2025.1 1. **IT4653 – Học sâu và ứng dụng (2TC):** Chuyển từ Kiến thức chuyên ngành sang Cơ sở và cốt lõi ngành; kỳ 6. 2. **IT4930 – Nhập môn Khoa học dữ liệu (2TC):** Thêm mới vào Cơ sở và cốt lõi ngành; kỳ 5. 3. **IT4130 – Lập trình song song (2TC):** Thêm mới vào Kiến thức chuyên ngành; kỳ 6."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn học IT4490 Thiết kế và xây dựng phần mềm cần chú ý học phần học trước nào và trong kế hoạch chuẩn học phần IT4490 nằm ở kỳ nào?",
+      "gold_answer": "Sinh viên cần học trước IT3180 và IT3120. Trong kế hoạch chuẩn, IT4490 Thiết kế và xây dựng phần mềm có 3 tín chỉ và học ở kỳ 7.",
+      "evidence_chunk_ids": [
+        "10fdad81-5682-4040-87e3-afe44a4acc6b",
+        "2a2d8edb-8e3a-4854-b26d-c20e8470d5b8"
+      ],
+      "ground_truth_context": [
+        "#### Kiến thức chuyên ngành (16 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 55 | IT4931 | Lưu trữ và xử lý dữ liệu lớn | 3(3-1-0-6) | 7 | | 56 | IT4130 | Lập trình song song | 2(2-1-0-4) | 6 | | 57 | IT4490 | Thiết kế và xây dựng phần mềm | 3(2-1-1-6) | 7 | | 58 | IT4663 | Tối ưu và lập kế hoạch | 3(3-1-0-6) | 7 | | 59 | IT4210 | Hệ nhúng | 3(3-0-1-6) | 7 | | 60 | IT4735 | IoT và ứng dụng | 2(2-1-0-4) | 7 | #### Thực tập kỹ thuật và Đồ án tốt nghiệp (8 tín chỉ) | TT | Mã số | Tên học phần | Tín chỉ | Kỳ | |---|---|---|---|---| | 61 | IT4991 | Thực tập kỹ thuật | 2(0-0-4-4) | 6 | | 62 | IT4995 | Đồ án tốt nghiệp | 6(0-0-12-12) | 8 | #### Tổng số tín chỉ theo kỳ | Kỳ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | |---|---|---|---|---|---|---|---|---| | Tín chỉ | 18 | 16 | 16 | 19 | 17 | 19 | 19 | 6 | ---",
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4490 – Thiết kế và xây dựng phần mềm** *(Software Design and Construction)* - **Tín chỉ:** 3(2-1-1-6) - **Tiên quyết:** Không - **Học trước:** IT3180, IT3120 - **Song hành:** Không **Mục tiêu:** Cung cấp kiến thức và kinh nghiệm thực tiễn về phát triển phần mềm theo chuẩn ITSS; nắm và vận dụng phương pháp phân tích thiết kế hướng đối tượng, các nguyên lý thiết kế, xây dựng phần mềm có chất lượng tốt với loose coupling và tight cohesion. **Nội dung:** Tổng quan về thiết kế và xây dựng phần mềm; thiết kế kiến trúc; thiết kế chi tiết; các nguyên lý thiết kế cơ bản (mô-đun hoá, tính móc nối, tính kết dính); các mức độ móc nối và kết dính phần mềm; chuẩn lập trình, tổ chức mã nguồn, framework, tái cấu trúc mã nguồn, tích hợp và quản lý mã nguồn (Git); kiểm thử đơn vị (JUnit); các nguyên lý thiết kế S.O.L.I.D; giới thiệu tổng quan về mẫu thiết kế."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Mục tiêu đào tạo của chương trình Cử nhân tài năng Khoa học máy tính liên hệ như thế nào với học phần IT4995 Đồ án tốt nghiệp?",
+      "gold_answer": "Mục tiêu cụ thể của chương trình hướng tới khả năng hình thành ý tưởng, tham gia phân tích, thiết kế, thực hiện và vận hành các hệ thống CNTT trong thực tế. Học phần IT4995 giúp sinh viên liên kết, củng cố kiến thức cốt lõi, mở rộng chuyên môn và phát triển năng lực xây dựng ý tưởng, thiết kế, cài đặt sản phẩm hoặc giải pháp kỹ thuật CNTT.",
+      "evidence_chunk_ids": [
+        "83c2a32a-f575-4810-86ad-1db9b17a71e1",
+        "cd1f9e2e-84a4-4917-8a2d-53672683444b"
+      ],
+      "ground_truth_context": [
+        "### 1.2 Mục tiêu cụ thể (Specific Goals) Mục tiêu cụ thể của chương trình đào tạo cử nhân tài năng Khoa học máy tính (KHMT) là trang bị cho người tốt nghiệp: - Có kiến thức khoa học cơ bản vững vàng về toán, lý, điện tử, về thuật toán, cơ sở dữ liệu; phân tích và thiết kế hệ thống thông tin; phân tích, thiết kế và cài đặt phần mềm, kỹ thuật, kỹ năng lập trình; tổ chức, quản trị và khai thác dữ liệu, thông tin tri thức. - Có khả năng áp dụng các kiến thức chuyên môn để giải quyết các vấn đề cả trong thực tế và trong nghiên cứu. - Có kỹ năng nghề nghiệp và cá nhân, tính chuyên nghiệp, kỹ năng về quản lý, kiến thức về xã hội cũng như các cách tiếp cận và giải quyết vấn đề khác nhau phù hợp với các khía cạnh khác nhau của xã hội. - Có kỹ năng tổ chức, lãnh đạo, làm việc nhóm; kỹ năng giao tiếp và sử dụng tiếng Anh hiệu quả để có thể làm việc được trong môi trường đa ngành và môi trường quốc tế. - Có khả năng hình thành ý tưởng, tham gia phân tích, thiết kế, thực hiện cũng như vận hành các hệ thống CNTT trong thực tế. ---",
+        "#### B. Kiến thức chuyên ngành (Specialized subjects) --- **IT4995 – Đồ án tốt nghiệp** *(Bachelor Thesis)* - **Tín chỉ:** 6(0-0-12-12) - **Học trước:** IT4991 **Mục tiêu:** Liên kết và củng cố kiến thức cốt lõi; mở rộng và nâng cao kiến thức chuyên môn; phát triển năng lực xây dựng ý tưởng, thiết kế, cài đặt sản phẩm hoặc giải pháp kỹ thuật CNTT; rèn luyện kỹ năng trình bày, thuyết trình, giao tiếp và làm việc nhóm. **Nội dung:** Sinh viên được giao một đề tài cụ thể trong lĩnh vực khoa học máy tính; vận dụng kiến thức đã học để giải quyết nhiệm vụ của đề tài dưới sự hướng dẫn của giảng viên; phát triển sản phẩm liên quan tới đề tài; viết thuyết minh đồ án và thuyết trình trước hội đồng chấm đồ án tốt nghiệp. ---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Chương trình Cử nhân tài năng Khoa học máy tính quy định mức học phí mỗi tín chỉ là bao nhiêu?",
+      "gold_answer": "Không có thông tin về mức học phí mỗi tín chỉ trong các chunk được cung cấp.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_from_context",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Sinh viên Cử nhân tài năng Khoa học máy tính cần đạt điểm GPA tối thiểu bao nhiêu để được nhận học bổng?",
+      "gold_answer": "Không có thông tin về điểm GPA tối thiểu để nhận học bổng trong các chunk được cung cấp.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_from_context",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Chương trình Cử nhân tài năng Khoa học máy tính quy định sinh viên phải nộp chứng chỉ IELTS vào thời hạn nào trước khi tốt nghiệp?",
+      "gold_answer": "Không có thông tin về thời hạn nộp chứng chỉ IELTS trước khi tốt nghiệp trong các chunk được cung cấp.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_from_context",
+      "difficulty": "medium"
+    },
+    {
+      "id": "CTDT_CNKT_TaiNang_2025_03_30_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Sinh viên Cử nhân tài năng Khoa học máy tính có bắt buộc đi trao đổi quốc tế trong học kỳ 7 không?",
+      "gold_answer": "Không có thông tin cho biết sinh viên bắt buộc phải đi trao đổi quốc tế trong học kỳ 7 trong các chunk được cung cấp.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "unanswerable_from_context",
+      "difficulty": "medium"
+    }
+  ]
+}

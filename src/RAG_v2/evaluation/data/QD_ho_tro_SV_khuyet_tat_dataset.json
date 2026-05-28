@@ -1,0 +1,492 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QĐ Ban hành hướng dân triển khai chính sachsHT cho SV khuyết tật_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 18,
+    "multi_hop": 8,
+    "adversarial": 4
+  },
+  "items": [
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_001",
+      "question_type": "simple",
+      "question": "Sinh viên khuyết tật thuộc hệ đào tạo nào tại ĐHBK Hà Nội được áp dụng chính sách hỗ trợ?",
+      "gold_answer": "Tất cả sinh viên khuyết tật đang học tập tại ĐHBK Hà Nội thuộc hệ, bậc đào tạo chính quy được áp dụng chính sách hỗ trợ.",
+      "evidence_chunk_ids": [
+        "cf8c0143-be96-4a10-bd28-53ca15d8e431"
+      ],
+      "ground_truth_context": [
+        "## 1. ĐỐI TƯỢNG ÁP DỤNG\n\nTất cả sinh viên khuyết tật đang học tập tại ĐHBK Hà Nội thuộc hệ, bậc đào tạo chính quy.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_002",
+      "question_type": "simple",
+      "question": "Sinh viên khuyết tật tại ĐHBK Hà Nội có được miễn học phí không?",
+      "gold_answer": "Có. Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên khuyết tật thuộc hộ nghèo hoặc cận nghèo được hưởng học bổng chính sách bao nhiêu mỗi tháng?",
+      "gold_answer": "Sinh viên khuyết tật thuộc hộ nghèo hoặc cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_004",
+      "question_type": "simple",
+      "question": "Sinh viên khuyết tật thuộc hộ nghèo hoặc cận nghèo được hưởng học bổng chính sách trong bao nhiêu tháng mỗi năm học?",
+      "gold_answer": "Sinh viên khuyết tật thuộc hộ nghèo hoặc cận nghèo được hưởng học bổng trong 12 tháng mỗi năm học.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_005",
+      "question_type": "simple",
+      "question": "Sinh viên khuyết tật thuộc hộ nghèo hoặc cận nghèo được hỗ trợ bao nhiêu tiền mua phương tiện, đồ dùng học tập mỗi năm học?",
+      "gold_answer": "Sinh viên khuyết tật thuộc hộ nghèo hoặc cận nghèo được hỗ trợ 1 triệu đồng mỗi năm học để mua phương tiện, đồ dùng học tập.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_006",
+      "question_type": "simple",
+      "question": "ĐHBK Hà Nội hỗ trợ cơ sở vật chất chuyên dụng nào cho sinh viên khuyết tật trong khuôn viên đại học?",
+      "gold_answer": "ĐHBK Hà Nội trang bị thiết bị chuyên dụng cho người khuyết tật di chuyển và sử dụng trong khuôn viên đại học, ví dụ xe lăn, nhà vệ sinh cho người khuyết tật tại khu nhà có sinh viên khuyết tật học tập.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_007",
+      "question_type": "simple",
+      "question": "Sinh viên khuyết tật tại ĐHBK Hà Nội có được hỗ trợ chăm sóc sức khỏe tinh thần không?",
+      "gold_answer": "Có. Sinh viên khuyết tật được tư vấn tâm lý, chăm sóc sức khỏe tinh thần và hỗ trợ hòa nhập môi trường văn hóa đa dạng của ĐHBK Hà Nội.",
+      "evidence_chunk_ids": [
+        "e2c2606e-9266-4cee-a842-758669c6728f"
+      ],
+      "ground_truth_context": [
+        "### 2.3. Các hoạt động chăm sóc sức khỏe tinh thần\n\n- Phòng Công tác Sinh viên, các đơn vị chức năng, các Trường thuộc/Viện/Khoa, cố vấn và giáo viên quản lý lớp theo dõi tình hình học tập của sinh viên khuyết tật để hỗ trợ kịp thời.\n- Trung tâm Y tế Bách khoa tạo điều kiện chăm sóc y tế riêng cho đối tượng sinh viên khuyết tật theo quy định.\n- Thông báo đến sinh viên khuyết tật những hoạt động phù hợp tại ĐHBK Hà Nội.\n- Tư vấn tâm lý, chăm sóc sức khỏe tinh thần, hỗ trợ sinh viên khuyết tật hòa nhập môi trường văn hóa đa dạng của ĐHBK Hà Nội.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_008",
+      "question_type": "simple",
+      "question": "Đơn vị nào tạo điều kiện chăm sóc y tế riêng cho sinh viên khuyết tật tại ĐHBK Hà Nội?",
+      "gold_answer": "Trung tâm Y tế Bách khoa tạo điều kiện chăm sóc y tế riêng cho sinh viên khuyết tật theo quy định.",
+      "evidence_chunk_ids": [
+        "e2c2606e-9266-4cee-a842-758669c6728f"
+      ],
+      "ground_truth_context": [
+        "### 2.3. Các hoạt động chăm sóc sức khỏe tinh thần\n\n- Phòng Công tác Sinh viên, các đơn vị chức năng, các Trường thuộc/Viện/Khoa, cố vấn và giáo viên quản lý lớp theo dõi tình hình học tập của sinh viên khuyết tật để hỗ trợ kịp thời.\n- Trung tâm Y tế Bách khoa tạo điều kiện chăm sóc y tế riêng cho đối tượng sinh viên khuyết tật theo quy định.\n- Thông báo đến sinh viên khuyết tật những hoạt động phù hợp tại ĐHBK Hà Nội.\n- Tư vấn tâm lý, chăm sóc sức khỏe tinh thần, hỗ trợ sinh viên khuyết tật hòa nhập môi trường văn hóa đa dạng của ĐHBK Hà Nội.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_009",
+      "question_type": "simple",
+      "question": "Ai theo dõi tình hình học tập của sinh viên khuyết tật để hỗ trợ kịp thời?",
+      "gold_answer": "Phòng Công tác Sinh viên, các đơn vị chức năng, các Trường thuộc/Viện/Khoa, cố vấn và giáo viên quản lý lớp theo dõi tình hình học tập của sinh viên khuyết tật để hỗ trợ kịp thời.",
+      "evidence_chunk_ids": [
+        "e2c2606e-9266-4cee-a842-758669c6728f"
+      ],
+      "ground_truth_context": [
+        "### 2.3. Các hoạt động chăm sóc sức khỏe tinh thần\n\n- Phòng Công tác Sinh viên, các đơn vị chức năng, các Trường thuộc/Viện/Khoa, cố vấn và giáo viên quản lý lớp theo dõi tình hình học tập của sinh viên khuyết tật để hỗ trợ kịp thời.\n- Trung tâm Y tế Bách khoa tạo điều kiện chăm sóc y tế riêng cho đối tượng sinh viên khuyết tật theo quy định.\n- Thông báo đến sinh viên khuyết tật những hoạt động phù hợp tại ĐHBK Hà Nội.\n- Tư vấn tâm lý, chăm sóc sức khỏe tinh thần, hỗ trợ sinh viên khuyết tật hòa nhập môi trường văn hóa đa dạng của ĐHBK Hà Nội.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_010",
+      "question_type": "simple",
+      "question": "Phòng Công tác Sinh viên có trách nhiệm gì khi tiếp nhận thông tin sinh viên khuyết tật?",
+      "gold_answer": "Phòng Công tác Sinh viên tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.",
+      "evidence_chunk_ids": [
+        "9e092fd6-3eda-46b2-9839-5206ca94e8f4"
+      ],
+      "ground_truth_context": [
+        "## 3. PHÂN CÔNG THỰC HIỆN\n### 3.1. Phòng Công tác Sinh viên\n\n- Nghiên cứu các chính sách về sinh viên khuyết tật, tham mưu cho Ban Giám đốc.\n- Tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.\n- Cập nhật thông tin về người học khuyết tật cho các đơn vị liên quan (sau 1 tháng) khi người học trúng tuyển và hoàn tất thủ tục nhập học.\n- Phối hợp với Phòng Tài chính - Kế toán lập dự toán hàng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp với Phòng Truyền thông và Quản trị thương hiệu, các cá nhân và tổ chức bên ngoài đại học tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp cùng các đơn vị quản lý đào tạo, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_011",
+      "question_type": "simple",
+      "question": "Sau khi sinh viên khuyết tật trúng tuyển và hoàn tất nhập học, thông tin về người học khuyết tật được cập nhật cho các đơn vị liên quan trong thời hạn nào?",
+      "gold_answer": "Thông tin về người học khuyết tật được cập nhật cho các đơn vị liên quan sau 1 tháng khi người học trúng tuyển và hoàn tất thủ tục nhập học.",
+      "evidence_chunk_ids": [
+        "9e092fd6-3eda-46b2-9839-5206ca94e8f4"
+      ],
+      "ground_truth_context": [
+        "## 3. PHÂN CÔNG THỰC HIỆN\n### 3.1. Phòng Công tác Sinh viên\n\n- Nghiên cứu các chính sách về sinh viên khuyết tật, tham mưu cho Ban Giám đốc.\n- Tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.\n- Cập nhật thông tin về người học khuyết tật cho các đơn vị liên quan (sau 1 tháng) khi người học trúng tuyển và hoàn tất thủ tục nhập học.\n- Phối hợp với Phòng Tài chính - Kế toán lập dự toán hàng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp với Phòng Truyền thông và Quản trị thương hiệu, các cá nhân và tổ chức bên ngoài đại học tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp cùng các đơn vị quản lý đào tạo, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_012",
+      "question_type": "simple",
+      "question": "Phòng Công tác Sinh viên phối hợp với đơn vị nào để lập dự toán hằng năm dành cho sinh viên khuyết tật?",
+      "gold_answer": "Phòng Công tác Sinh viên phối hợp với Phòng Tài chính - Kế toán để lập dự toán hằng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.",
+      "evidence_chunk_ids": [
+        "9e092fd6-3eda-46b2-9839-5206ca94e8f4"
+      ],
+      "ground_truth_context": [
+        "## 3. PHÂN CÔNG THỰC HIỆN\n### 3.1. Phòng Công tác Sinh viên\n\n- Nghiên cứu các chính sách về sinh viên khuyết tật, tham mưu cho Ban Giám đốc.\n- Tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.\n- Cập nhật thông tin về người học khuyết tật cho các đơn vị liên quan (sau 1 tháng) khi người học trúng tuyển và hoàn tất thủ tục nhập học.\n- Phối hợp với Phòng Tài chính - Kế toán lập dự toán hàng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp với Phòng Truyền thông và Quản trị thương hiệu, các cá nhân và tổ chức bên ngoài đại học tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp cùng các đơn vị quản lý đào tạo, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_013",
+      "question_type": "simple",
+      "question": "Phòng Đào tạo có trách nhiệm bố trí phòng học cho sinh viên khuyết tật như thế nào?",
+      "gold_answer": "Phòng Đào tạo sắp xếp, bố trí sinh viên khuyết tật học tại các phòng học có trang bị phương tiện hỗ trợ người khuyết tật và cơ sở học thuận lợi cho việc di chuyển.",
+      "evidence_chunk_ids": [
+        "8face72d-4fdc-4dd5-99b0-dc4a2e03718d"
+      ],
+      "ground_truth_context": [
+        "### 3.2. Phòng Đào tạo\n\n- Phối hợp với Phòng Công tác sinh viên, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Sắp xếp, bố trí sinh viên khuyết tật được học tại các phòng học có trang bị phương tiện hỗ trợ người khuyết tật, cũng như cơ sở học thuận lợi cho việc di chuyển của sinh viên khuyết tật.\n\n### 3.3. Phòng Tài chính - Kế toán\n\n- Hướng dẫn, hỗ trợ thủ tục thanh quyết toán mua sắm dịch vụ, trang bị cơ sở vật chất và các khoản chi trả cho sinh viên khuyết tật theo các Quyết định và Kế hoạch được phê duyệt.\n\n### 3.4. Phòng Truyền thông và Quản trị thương hiệu\n\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Có các hoạt động truyền thông để động viên sự nỗ lực vượt khó vươn lên của sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_014",
+      "question_type": "simple",
+      "question": "Phòng Tài chính - Kế toán hỗ trợ sinh viên khuyết tật về thủ tục gì?",
+      "gold_answer": "Phòng Tài chính - Kế toán hướng dẫn, hỗ trợ thủ tục thanh quyết toán mua sắm dịch vụ, trang bị cơ sở vật chất và các khoản chi trả cho sinh viên khuyết tật theo các quyết định và kế hoạch được phê duyệt.",
+      "evidence_chunk_ids": [
+        "8face72d-4fdc-4dd5-99b0-dc4a2e03718d"
+      ],
+      "ground_truth_context": [
+        "### 3.2. Phòng Đào tạo\n\n- Phối hợp với Phòng Công tác sinh viên, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Sắp xếp, bố trí sinh viên khuyết tật được học tại các phòng học có trang bị phương tiện hỗ trợ người khuyết tật, cũng như cơ sở học thuận lợi cho việc di chuyển của sinh viên khuyết tật.\n\n### 3.3. Phòng Tài chính - Kế toán\n\n- Hướng dẫn, hỗ trợ thủ tục thanh quyết toán mua sắm dịch vụ, trang bị cơ sở vật chất và các khoản chi trả cho sinh viên khuyết tật theo các Quyết định và Kế hoạch được phê duyệt.\n\n### 3.4. Phòng Truyền thông và Quản trị thương hiệu\n\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Có các hoạt động truyền thông để động viên sự nỗ lực vượt khó vươn lên của sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_015",
+      "question_type": "simple",
+      "question": "Phòng Truyền thông và Quản trị thương hiệu hỗ trợ sinh viên khuyết tật thông qua hoạt động nào?",
+      "gold_answer": "Phòng Truyền thông và Quản trị thương hiệu phối hợp tìm kiếm nguồn tài trợ, chương trình học bổng và tổ chức truyền thông để động viên sinh viên khuyết tật vượt khó vươn lên.",
+      "evidence_chunk_ids": [
+        "8face72d-4fdc-4dd5-99b0-dc4a2e03718d"
+      ],
+      "ground_truth_context": [
+        "### 3.2. Phòng Đào tạo\n\n- Phối hợp với Phòng Công tác sinh viên, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Sắp xếp, bố trí sinh viên khuyết tật được học tại các phòng học có trang bị phương tiện hỗ trợ người khuyết tật, cũng như cơ sở học thuận lợi cho việc di chuyển của sinh viên khuyết tật.\n\n### 3.3. Phòng Tài chính - Kế toán\n\n- Hướng dẫn, hỗ trợ thủ tục thanh quyết toán mua sắm dịch vụ, trang bị cơ sở vật chất và các khoản chi trả cho sinh viên khuyết tật theo các Quyết định và Kế hoạch được phê duyệt.\n\n### 3.4. Phòng Truyền thông và Quản trị thương hiệu\n\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Có các hoạt động truyền thông để động viên sự nỗ lực vượt khó vươn lên của sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_016",
+      "question_type": "simple",
+      "question": "Phòng Cơ sở vật chất có trách nhiệm gì đối với thiết bị hỗ trợ sinh viên khuyết tật?",
+      "gold_answer": "Phòng Cơ sở vật chất phối hợp với Phòng Công tác Sinh viên để đề xuất trang bị thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.",
+      "evidence_chunk_ids": [
+        "cac51cbe-7c80-46c8-b258-d85aee5906fe"
+      ],
+      "ground_truth_context": [
+        "### 3.5. Phòng Cơ sở vật chất\n\n- Phối hợp với Phòng Công tác Sinh viên để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.\n\n### 3.6. Trung tâm Y tế Bách Khoa\n\n- Đề xuất và thực hiện chế độ chăm sóc sức khỏe và hỗ trợ thuốc men cho sinh viên khuyết tật.\n\n### 3.7. Các Trường/Viện/Khoa chuyên môn, giáo viên quản lý lớp\n\n- Phối hợp với Phòng Công tác sinh viên, phân công cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các sinh viên khuyết tật thuộc diện đơn vị quản lý.\n\n### 3.8. Khoa Giáo dục Thể chất, Khoa Giáo dục Quốc phòng - An Ninh\n\n- Nghiên cứu đề xuất và hỗ trợ thực hiện việc rèn luyện thể chất phù hợp cho sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_017",
+      "question_type": "simple",
+      "question": "Khoa Giáo dục Thể chất và Khoa Giáo dục Quốc phòng - An Ninh hỗ trợ sinh viên khuyết tật như thế nào?",
+      "gold_answer": "Khoa Giáo dục Thể chất và Khoa Giáo dục Quốc phòng - An Ninh nghiên cứu đề xuất và hỗ trợ thực hiện việc rèn luyện thể chất phù hợp cho sinh viên khuyết tật.",
+      "evidence_chunk_ids": [
+        "cac51cbe-7c80-46c8-b258-d85aee5906fe"
+      ],
+      "ground_truth_context": [
+        "### 3.5. Phòng Cơ sở vật chất\n\n- Phối hợp với Phòng Công tác Sinh viên để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.\n\n### 3.6. Trung tâm Y tế Bách Khoa\n\n- Đề xuất và thực hiện chế độ chăm sóc sức khỏe và hỗ trợ thuốc men cho sinh viên khuyết tật.\n\n### 3.7. Các Trường/Viện/Khoa chuyên môn, giáo viên quản lý lớp\n\n- Phối hợp với Phòng Công tác sinh viên, phân công cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các sinh viên khuyết tật thuộc diện đơn vị quản lý.\n\n### 3.8. Khoa Giáo dục Thể chất, Khoa Giáo dục Quốc phòng - An Ninh\n\n- Nghiên cứu đề xuất và hỗ trợ thực hiện việc rèn luyện thể chất phù hợp cho sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_simple_018",
+      "question_type": "simple",
+      "question": "Đoàn Thanh niên - Hội Sinh viên hỗ trợ sinh viên khuyết tật tham gia hoạt động cộng đồng như thế nào?",
+      "gold_answer": "Đoàn Thanh niên - Hội Sinh viên phối hợp hỗ trợ người học rèn luyện, tham gia hoạt động phù hợp và tổ chức các hoạt động sáng tạo, học thuật, nghiên cứu khoa học, văn hóa, văn nghệ, thể thao, tình nguyện phù hợp để sinh viên khuyết tật hòa nhập cộng đồng.",
+      "evidence_chunk_ids": [
+        "ae2bf9dd-0e22-4f96-b027-f90f50034907"
+      ],
+      "ground_truth_context": [
+        "### 3.9. Đoàn Thanh niên - Hội sinh viên\n\n- Phối hợp với Phòng Công tác sinh viên hỗ trợ người học rèn luyện và tham gia các hoạt động phù hợp với sinh viên khuyết tật.\n- Phối hợp với các đơn vị liên quan tổ chức các cuộc thi sáng tạo, học thuật; các hoạt động nghiên cứu khoa học, văn hóa, văn nghệ, thể thao, tình nguyện phù hợp cho sinh viên khuyết tật tham gia và hòa nhập vào cộng đồng chung.\n\n---\n\n*Hà Nội, ngày 28 tháng 4 năm 2023*  \n*KT. GIÁM ĐỐC – PHÓ GIÁM ĐỐC*  \n*PGS.TS. Nguyễn Phong Điền*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Sinh viên khuyết tật thuộc hộ cận nghèo tại ĐHBK Hà Nội có thể nhận những hỗ trợ tài chính nào trong năm học?",
+      "gold_answer": "Sinh viên khuyết tật thuộc hộ cận nghèo được miễn học phí, được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở trong 12 tháng/năm học và được hỗ trợ 1 triệu đồng/năm học để mua phương tiện, đồ dùng học tập.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên khuyết tật gặp khó khăn về di chuyển và học tập tại ĐHBK Hà Nội, những đơn vị nào có trách nhiệm liên quan đến phòng học và thiết bị hỗ trợ?",
+      "gold_answer": "Phòng Đào tạo sắp xếp phòng học có phương tiện hỗ trợ và cơ sở học thuận lợi cho việc di chuyển; Phòng Công tác Sinh viên phối hợp với Phòng Cơ sở Vật chất đề xuất trang bị thiết bị, dụng cụ hỗ trợ; Phòng Cơ sở vật chất phối hợp để đề xuất trang bị các thiết bị, dụng cụ hỗ trợ học tập.",
+      "evidence_chunk_ids": [
+        "9e092fd6-3eda-46b2-9839-5206ca94e8f4",
+        "8face72d-4fdc-4dd5-99b0-dc4a2e03718d",
+        "cac51cbe-7c80-46c8-b258-d85aee5906fe"
+      ],
+      "ground_truth_context": [
+        "## 3. PHÂN CÔNG THỰC HIỆN\n### 3.1. Phòng Công tác Sinh viên\n\n- Nghiên cứu các chính sách về sinh viên khuyết tật, tham mưu cho Ban Giám đốc.\n- Tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.\n- Cập nhật thông tin về người học khuyết tật cho các đơn vị liên quan (sau 1 tháng) khi người học trúng tuyển và hoàn tất thủ tục nhập học.\n- Phối hợp với Phòng Tài chính - Kế toán lập dự toán hàng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp với Phòng Truyền thông và Quản trị thương hiệu, các cá nhân và tổ chức bên ngoài đại học tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp cùng các đơn vị quản lý đào tạo, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.",
+        "### 3.2. Phòng Đào tạo\n\n- Phối hợp với Phòng Công tác sinh viên, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Sắp xếp, bố trí sinh viên khuyết tật được học tại các phòng học có trang bị phương tiện hỗ trợ người khuyết tật, cũng như cơ sở học thuận lợi cho việc di chuyển của sinh viên khuyết tật.\n\n### 3.3. Phòng Tài chính - Kế toán\n\n- Hướng dẫn, hỗ trợ thủ tục thanh quyết toán mua sắm dịch vụ, trang bị cơ sở vật chất và các khoản chi trả cho sinh viên khuyết tật theo các Quyết định và Kế hoạch được phê duyệt.\n\n### 3.4. Phòng Truyền thông và Quản trị thương hiệu\n\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Có các hoạt động truyền thông để động viên sự nỗ lực vượt khó vươn lên của sinh viên khuyết tật.",
+        "### 3.5. Phòng Cơ sở vật chất\n\n- Phối hợp với Phòng Công tác Sinh viên để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.\n\n### 3.6. Trung tâm Y tế Bách Khoa\n\n- Đề xuất và thực hiện chế độ chăm sóc sức khỏe và hỗ trợ thuốc men cho sinh viên khuyết tật.\n\n### 3.7. Các Trường/Viện/Khoa chuyên môn, giáo viên quản lý lớp\n\n- Phối hợp với Phòng Công tác sinh viên, phân công cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các sinh viên khuyết tật thuộc diện đơn vị quản lý.\n\n### 3.8. Khoa Giáo dục Thể chất, Khoa Giáo dục Quốc phòng - An Ninh\n\n- Nghiên cứu đề xuất và hỗ trợ thực hiện việc rèn luyện thể chất phù hợp cho sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên khuyết tật cần hỗ trợ cả sức khỏe thể chất lẫn tâm lý thì các đơn vị nào tại ĐHBK Hà Nội có trách nhiệm hỗ trợ?",
+      "gold_answer": "Phòng Công tác Sinh viên tư vấn, hỗ trợ các vấn đề tâm lý - xã hội và phối hợp tổ chức dịch vụ tư vấn, chăm sóc sức khỏe; Trung tâm Y tế Bách khoa đề xuất và thực hiện chế độ chăm sóc sức khỏe, hỗ trợ thuốc men; các đơn vị chức năng, trường/viện/khoa, cố vấn và giáo viên quản lý lớp theo dõi tình hình học tập để hỗ trợ kịp thời.",
+      "evidence_chunk_ids": [
+        "e2c2606e-9266-4cee-a842-758669c6728f",
+        "3c02a92a-d65b-40e2-914a-f5e98f7491f3",
+        "cac51cbe-7c80-46c8-b258-d85aee5906fe"
+      ],
+      "ground_truth_context": [
+        "### 2.3. Các hoạt động chăm sóc sức khỏe tinh thần\n\n- Phòng Công tác Sinh viên, các đơn vị chức năng, các Trường thuộc/Viện/Khoa, cố vấn và giáo viên quản lý lớp theo dõi tình hình học tập của sinh viên khuyết tật để hỗ trợ kịp thời.\n- Trung tâm Y tế Bách khoa tạo điều kiện chăm sóc y tế riêng cho đối tượng sinh viên khuyết tật theo quy định.\n- Thông báo đến sinh viên khuyết tật những hoạt động phù hợp tại ĐHBK Hà Nội.\n- Tư vấn tâm lý, chăm sóc sức khỏe tinh thần, hỗ trợ sinh viên khuyết tật hòa nhập môi trường văn hóa đa dạng của ĐHBK Hà Nội.\n\n---",
+        "### 3.1. Phòng Công tác Sinh viên\n\n- Phối hợp với Trung tâm Y tế Bách khoa trong việc chăm sóc sức khỏe và hỗ trợ thuốc men cho sinh viên là người khuyết tật.\n- Tư vấn, hỗ trợ sinh viên khi gặp phải các vấn đề về tâm lý - xã hội; phối hợp tổ chức các dịch vụ tư vấn, chăm sóc sức khỏe hỗ trợ, can thiệp cần thiết khi sinh viên khuyết tật gặp phải các vấn đề ảnh hưởng đến thể chất và tinh thần.\n- Phụ trách các vấn đề phát sinh khác liên quan đến người học khuyết tật.",
+        "### 3.5. Phòng Cơ sở vật chất\n\n- Phối hợp với Phòng Công tác Sinh viên để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.\n\n### 3.6. Trung tâm Y tế Bách Khoa\n\n- Đề xuất và thực hiện chế độ chăm sóc sức khỏe và hỗ trợ thuốc men cho sinh viên khuyết tật.\n\n### 3.7. Các Trường/Viện/Khoa chuyên môn, giáo viên quản lý lớp\n\n- Phối hợp với Phòng Công tác sinh viên, phân công cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các sinh viên khuyết tật thuộc diện đơn vị quản lý.\n\n### 3.8. Khoa Giáo dục Thể chất, Khoa Giáo dục Quốc phòng - An Ninh\n\n- Nghiên cứu đề xuất và hỗ trợ thực hiện việc rèn luyện thể chất phù hợp cho sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sau khi sinh viên khuyết tật nhập học, thông tin của sinh viên được xử lý ra sao và ai phối hợp theo dõi quá trình học tập?",
+      "gold_answer": "Phòng Công tác Sinh viên tiếp nhận, tổng hợp thông tin từ đơn vị quản lý đào tạo và cập nhật thông tin cho các đơn vị liên quan sau 1 tháng; sau đó phối hợp cùng đơn vị quản lý đào tạo, trường/viện/khoa, cố vấn học tập và giáo viên quản lý lớp để theo dõi quá trình học tập và hỗ trợ kịp thời.",
+      "evidence_chunk_ids": [
+        "9e092fd6-3eda-46b2-9839-5206ca94e8f4",
+        "8face72d-4fdc-4dd5-99b0-dc4a2e03718d",
+        "cac51cbe-7c80-46c8-b258-d85aee5906fe"
+      ],
+      "ground_truth_context": [
+        "## 3. PHÂN CÔNG THỰC HIỆN\n### 3.1. Phòng Công tác Sinh viên\n\n- Nghiên cứu các chính sách về sinh viên khuyết tật, tham mưu cho Ban Giám đốc.\n- Tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.\n- Cập nhật thông tin về người học khuyết tật cho các đơn vị liên quan (sau 1 tháng) khi người học trúng tuyển và hoàn tất thủ tục nhập học.\n- Phối hợp với Phòng Tài chính - Kế toán lập dự toán hàng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp với Phòng Truyền thông và Quản trị thương hiệu, các cá nhân và tổ chức bên ngoài đại học tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp cùng các đơn vị quản lý đào tạo, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.",
+        "### 3.2. Phòng Đào tạo\n\n- Phối hợp với Phòng Công tác sinh viên, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Sắp xếp, bố trí sinh viên khuyết tật được học tại các phòng học có trang bị phương tiện hỗ trợ người khuyết tật, cũng như cơ sở học thuận lợi cho việc di chuyển của sinh viên khuyết tật.\n\n### 3.3. Phòng Tài chính - Kế toán\n\n- Hướng dẫn, hỗ trợ thủ tục thanh quyết toán mua sắm dịch vụ, trang bị cơ sở vật chất và các khoản chi trả cho sinh viên khuyết tật theo các Quyết định và Kế hoạch được phê duyệt.\n\n### 3.4. Phòng Truyền thông và Quản trị thương hiệu\n\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Có các hoạt động truyền thông để động viên sự nỗ lực vượt khó vươn lên của sinh viên khuyết tật.",
+        "### 3.5. Phòng Cơ sở vật chất\n\n- Phối hợp với Phòng Công tác Sinh viên để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.\n\n### 3.6. Trung tâm Y tế Bách Khoa\n\n- Đề xuất và thực hiện chế độ chăm sóc sức khỏe và hỗ trợ thuốc men cho sinh viên khuyết tật.\n\n### 3.7. Các Trường/Viện/Khoa chuyên môn, giáo viên quản lý lớp\n\n- Phối hợp với Phòng Công tác sinh viên, phân công cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các sinh viên khuyết tật thuộc diện đơn vị quản lý.\n\n### 3.8. Khoa Giáo dục Thể chất, Khoa Giáo dục Quốc phòng - An Ninh\n\n- Nghiên cứu đề xuất và hỗ trợ thực hiện việc rèn luyện thể chất phù hợp cho sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Sinh viên khuyết tật muốn tìm nguồn học bổng hoặc tài trợ tại ĐHBK Hà Nội thì những đơn vị nào có trách nhiệm phối hợp?",
+      "gold_answer": "Phòng Công tác Sinh viên phối hợp với Phòng Truyền thông và Quản trị thương hiệu, cá nhân và tổ chức bên ngoài đại học để tìm nguồn tài trợ, chương trình học bổng. Các trường/viện/khoa chuyên môn cũng phối hợp với Phòng Công tác Sinh viên để tìm học bổng cho sinh viên khuyết tật thuộc diện đơn vị quản lý.",
+      "evidence_chunk_ids": [
+        "9e092fd6-3eda-46b2-9839-5206ca94e8f4",
+        "8face72d-4fdc-4dd5-99b0-dc4a2e03718d",
+        "cac51cbe-7c80-46c8-b258-d85aee5906fe"
+      ],
+      "ground_truth_context": [
+        "## 3. PHÂN CÔNG THỰC HIỆN\n### 3.1. Phòng Công tác Sinh viên\n\n- Nghiên cứu các chính sách về sinh viên khuyết tật, tham mưu cho Ban Giám đốc.\n- Tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.\n- Cập nhật thông tin về người học khuyết tật cho các đơn vị liên quan (sau 1 tháng) khi người học trúng tuyển và hoàn tất thủ tục nhập học.\n- Phối hợp với Phòng Tài chính - Kế toán lập dự toán hàng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp với Phòng Truyền thông và Quản trị thương hiệu, các cá nhân và tổ chức bên ngoài đại học tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp cùng các đơn vị quản lý đào tạo, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.",
+        "### 3.2. Phòng Đào tạo\n\n- Phối hợp với Phòng Công tác sinh viên, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Sắp xếp, bố trí sinh viên khuyết tật được học tại các phòng học có trang bị phương tiện hỗ trợ người khuyết tật, cũng như cơ sở học thuận lợi cho việc di chuyển của sinh viên khuyết tật.\n\n### 3.3. Phòng Tài chính - Kế toán\n\n- Hướng dẫn, hỗ trợ thủ tục thanh quyết toán mua sắm dịch vụ, trang bị cơ sở vật chất và các khoản chi trả cho sinh viên khuyết tật theo các Quyết định và Kế hoạch được phê duyệt.\n\n### 3.4. Phòng Truyền thông và Quản trị thương hiệu\n\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Có các hoạt động truyền thông để động viên sự nỗ lực vượt khó vươn lên của sinh viên khuyết tật.",
+        "### 3.5. Phòng Cơ sở vật chất\n\n- Phối hợp với Phòng Công tác Sinh viên để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.\n\n### 3.6. Trung tâm Y tế Bách Khoa\n\n- Đề xuất và thực hiện chế độ chăm sóc sức khỏe và hỗ trợ thuốc men cho sinh viên khuyết tật.\n\n### 3.7. Các Trường/Viện/Khoa chuyên môn, giáo viên quản lý lớp\n\n- Phối hợp với Phòng Công tác sinh viên, phân công cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các sinh viên khuyết tật thuộc diện đơn vị quản lý.\n\n### 3.8. Khoa Giáo dục Thể chất, Khoa Giáo dục Quốc phòng - An Ninh\n\n- Nghiên cứu đề xuất và hỗ trợ thực hiện việc rèn luyện thể chất phù hợp cho sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Sinh viên khuyết tật vừa cần hỗ trợ học tập vừa muốn tham gia hoạt động ngoại khóa phù hợp thì các đơn vị nào có vai trò hỗ trợ?",
+      "gold_answer": "Phòng Công tác Sinh viên và các đơn vị đào tạo theo dõi quá trình học tập để hỗ trợ kịp thời; Phòng Đào tạo bố trí phòng học thuận lợi; Đoàn Thanh niên - Hội Sinh viên phối hợp tổ chức các hoạt động sáng tạo, học thuật, nghiên cứu khoa học, văn hóa, văn nghệ, thể thao, tình nguyện phù hợp để sinh viên khuyết tật tham gia và hòa nhập.",
+      "evidence_chunk_ids": [
+        "9e092fd6-3eda-46b2-9839-5206ca94e8f4",
+        "8face72d-4fdc-4dd5-99b0-dc4a2e03718d",
+        "ae2bf9dd-0e22-4f96-b027-f90f50034907"
+      ],
+      "ground_truth_context": [
+        "## 3. PHÂN CÔNG THỰC HIỆN\n### 3.1. Phòng Công tác Sinh viên\n\n- Nghiên cứu các chính sách về sinh viên khuyết tật, tham mưu cho Ban Giám đốc.\n- Tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.\n- Cập nhật thông tin về người học khuyết tật cho các đơn vị liên quan (sau 1 tháng) khi người học trúng tuyển và hoàn tất thủ tục nhập học.\n- Phối hợp với Phòng Tài chính - Kế toán lập dự toán hàng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp với Phòng Truyền thông và Quản trị thương hiệu, các cá nhân và tổ chức bên ngoài đại học tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp cùng các đơn vị quản lý đào tạo, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.",
+        "### 3.2. Phòng Đào tạo\n\n- Phối hợp với Phòng Công tác sinh viên, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Sắp xếp, bố trí sinh viên khuyết tật được học tại các phòng học có trang bị phương tiện hỗ trợ người khuyết tật, cũng như cơ sở học thuận lợi cho việc di chuyển của sinh viên khuyết tật.\n\n### 3.3. Phòng Tài chính - Kế toán\n\n- Hướng dẫn, hỗ trợ thủ tục thanh quyết toán mua sắm dịch vụ, trang bị cơ sở vật chất và các khoản chi trả cho sinh viên khuyết tật theo các Quyết định và Kế hoạch được phê duyệt.\n\n### 3.4. Phòng Truyền thông và Quản trị thương hiệu\n\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Có các hoạt động truyền thông để động viên sự nỗ lực vượt khó vươn lên của sinh viên khuyết tật.",
+        "### 3.9. Đoàn Thanh niên - Hội sinh viên\n\n- Phối hợp với Phòng Công tác sinh viên hỗ trợ người học rèn luyện và tham gia các hoạt động phù hợp với sinh viên khuyết tật.\n- Phối hợp với các đơn vị liên quan tổ chức các cuộc thi sáng tạo, học thuật; các hoạt động nghiên cứu khoa học, văn hóa, văn nghệ, thể thao, tình nguyện phù hợp cho sinh viên khuyết tật tham gia và hòa nhập vào cộng đồng chung.\n\n---\n\n*Hà Nội, ngày 28 tháng 4 năm 2023*  \n*KT. GIÁM ĐỐC – PHÓ GIÁM ĐỐC*  \n*PGS.TS. Nguyễn Phong Điền*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Chính sách hỗ trợ sinh viên khuyết tật tại ĐHBK Hà Nội bao gồm những nhóm hỗ trợ chính nào?",
+      "gold_answer": "Các nhóm hỗ trợ chính gồm hỗ trợ tài chính, hỗ trợ trang bị dụng cụ học tập và cơ sở vật chất chuyên dụng, chăm sóc sức khỏe tinh thần, chăm sóc y tế, hỗ trợ học tập, hỗ trợ tìm tài trợ/học bổng và hỗ trợ tham gia hoạt động phù hợp để hòa nhập cộng đồng.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24",
+        "e2c2606e-9266-4cee-a842-758669c6728f",
+        "9e092fd6-3eda-46b2-9839-5206ca94e8f4",
+        "ae2bf9dd-0e22-4f96-b027-f90f50034907"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập.",
+        "### 2.3. Các hoạt động chăm sóc sức khỏe tinh thần\n\n- Phòng Công tác Sinh viên, các đơn vị chức năng, các Trường thuộc/Viện/Khoa, cố vấn và giáo viên quản lý lớp theo dõi tình hình học tập của sinh viên khuyết tật để hỗ trợ kịp thời.\n- Trung tâm Y tế Bách khoa tạo điều kiện chăm sóc y tế riêng cho đối tượng sinh viên khuyết tật theo quy định.\n- Thông báo đến sinh viên khuyết tật những hoạt động phù hợp tại ĐHBK Hà Nội.\n- Tư vấn tâm lý, chăm sóc sức khỏe tinh thần, hỗ trợ sinh viên khuyết tật hòa nhập môi trường văn hóa đa dạng của ĐHBK Hà Nội.\n\n---",
+        "## 3. PHÂN CÔNG THỰC HIỆN\n### 3.1. Phòng Công tác Sinh viên\n\n- Nghiên cứu các chính sách về sinh viên khuyết tật, tham mưu cho Ban Giám đốc.\n- Tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.\n- Cập nhật thông tin về người học khuyết tật cho các đơn vị liên quan (sau 1 tháng) khi người học trúng tuyển và hoàn tất thủ tục nhập học.\n- Phối hợp với Phòng Tài chính - Kế toán lập dự toán hàng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp với Phòng Truyền thông và Quản trị thương hiệu, các cá nhân và tổ chức bên ngoài đại học tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp cùng các đơn vị quản lý đào tạo, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.",
+        "### 3.9. Đoàn Thanh niên - Hội sinh viên\n\n- Phối hợp với Phòng Công tác sinh viên hỗ trợ người học rèn luyện và tham gia các hoạt động phù hợp với sinh viên khuyết tật.\n- Phối hợp với các đơn vị liên quan tổ chức các cuộc thi sáng tạo, học thuật; các hoạt động nghiên cứu khoa học, văn hóa, văn nghệ, thể thao, tình nguyện phù hợp cho sinh viên khuyết tật tham gia và hòa nhập vào cộng đồng chung.\n\n---\n\n*Hà Nội, ngày 28 tháng 4 năm 2023*  \n*KT. GIÁM ĐỐC – PHÓ GIÁM ĐỐC*  \n*PGS.TS. Nguyễn Phong Điền*"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Nếu sinh viên khuyết tật thuộc hộ nghèo cần hỗ trợ tài chính và dụng cụ học tập, ĐHBK Hà Nội có các hỗ trợ cụ thể nào và đơn vị nào tham gia đề xuất trang bị thiết bị?",
+      "gold_answer": "Sinh viên khuyết tật thuộc hộ nghèo được miễn học phí, hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở trong 12 tháng/năm học, được hỗ trợ 1 triệu đồng/năm học để mua phương tiện, đồ dùng học tập. Phòng Công tác Sinh viên phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị thiết bị, dụng cụ hỗ trợ học tập.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24",
+        "9e092fd6-3eda-46b2-9839-5206ca94e8f4",
+        "cac51cbe-7c80-46c8-b258-d85aee5906fe"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập.",
+        "## 3. PHÂN CÔNG THỰC HIỆN\n### 3.1. Phòng Công tác Sinh viên\n\n- Nghiên cứu các chính sách về sinh viên khuyết tật, tham mưu cho Ban Giám đốc.\n- Tiếp nhận, tổng hợp thông tin sinh viên khuyết tật từ các đơn vị quản lý đào tạo.\n- Cập nhật thông tin về người học khuyết tật cho các đơn vị liên quan (sau 1 tháng) khi người học trúng tuyển và hoàn tất thủ tục nhập học.\n- Phối hợp với Phòng Tài chính - Kế toán lập dự toán hàng năm dành cho sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp với Phòng Truyền thông và Quản trị thương hiệu, các cá nhân và tổ chức bên ngoài đại học tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các đối tượng sinh viên khuyết tật tại ĐHBK Hà Nội.\n- Phối hợp cùng các đơn vị quản lý đào tạo, các Trường thuộc/Viện/Khoa, cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Cơ sở Vật chất để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.",
+        "### 3.5. Phòng Cơ sở vật chất\n\n- Phối hợp với Phòng Công tác Sinh viên để đề xuất trang bị những thiết bị, dụng cụ hỗ trợ sinh viên khuyết tật trong học tập tại ĐHBK Hà Nội.\n\n### 3.6. Trung tâm Y tế Bách Khoa\n\n- Đề xuất và thực hiện chế độ chăm sóc sức khỏe và hỗ trợ thuốc men cho sinh viên khuyết tật.\n\n### 3.7. Các Trường/Viện/Khoa chuyên môn, giáo viên quản lý lớp\n\n- Phối hợp với Phòng Công tác sinh viên, phân công cố vấn học tập và giáo viên quản lý lớp sinh viên trong việc theo dõi quá trình học tập của sinh viên khuyết tật để kịp thời hỗ trợ.\n- Phối hợp với Phòng Công tác sinh viên tìm kiếm các nguồn tài trợ, các chương trình học bổng cho các sinh viên khuyết tật thuộc diện đơn vị quản lý.\n\n### 3.8. Khoa Giáo dục Thể chất, Khoa Giáo dục Quốc phòng - An Ninh\n\n- Nghiên cứu đề xuất và hỗ trợ thực hiện việc rèn luyện thể chất phù hợp cho sinh viên khuyết tật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_adversarial_001",
+      "question_type": "adversarial",
+      "question": "Sinh viên khuyết tật học hệ vừa làm vừa học tại ĐHBK Hà Nội có được áp dụng chính sách hỗ trợ dành cho sinh viên khuyết tật hệ chính quy không?",
+      "gold_answer": "Không thể khẳng định từ tài liệu rằng sinh viên khuyết tật học hệ vừa làm vừa học được áp dụng chính sách hỗ trợ. Nội dung áp dụng được nêu cho tất cả sinh viên khuyết tật đang học tập tại ĐHBK Hà Nội thuộc hệ, bậc đào tạo chính quy.",
+      "evidence_chunk_ids": [
+        "cf8c0143-be96-4a10-bd28-53ca15d8e431"
+      ],
+      "ground_truth_context": [
+        "## 1. ĐỐI TƯỢNG ÁP DỤNG\n\nTất cả sinh viên khuyết tật đang học tập tại ĐHBK Hà Nội thuộc hệ, bậc đào tạo chính quy.\n\n---"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "adversarial",
+      "difficulty": "hard",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_adversarial_002",
+      "question_type": "adversarial",
+      "question": "Sinh viên khuyết tật tại ĐHBK Hà Nội thuộc hộ nghèo có được hỗ trợ 2 triệu đồng mỗi năm học để mua đồ dùng học tập không?",
+      "gold_answer": "Không. Mức hỗ trợ kinh phí mua phương tiện, đồ dùng học tập cho sinh viên khuyết tật thuộc hộ nghèo hoặc cận nghèo là 1 triệu đồng/năm học, không phải 2 triệu đồng/năm học.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "adversarial",
+      "difficulty": "hard",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_adversarial_003",
+      "question_type": "adversarial",
+      "question": "Sinh viên không khuyết tật nhưng thuộc hộ cận nghèo có được hưởng học bổng 80% mức lương cơ sở trong 12 tháng/năm học theo chính sách hỗ trợ sinh viên khuyết tật tại ĐHBK Hà Nội không?",
+      "gold_answer": "Không có thông tin để khẳng định sinh viên không khuyết tật được hưởng học bổng theo chính sách hỗ trợ sinh viên khuyết tật. Nội dung chỉ nêu sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở trong 12 tháng/năm học.",
+      "evidence_chunk_ids": [
+        "d100fc9b-c80b-413c-893b-b0d3acbd3b24"
+      ],
+      "ground_truth_context": [
+        "## 2. NỘI DUNG CHÍNH SÁCH HỖ TRỢ SINH VIÊN KHUYẾT TẬT\n\n### 2.1. Hỗ trợ về tài chính\n\n- Sinh viên khuyết tật được miễn học phí theo quy định hiện hành của Nhà nước và của ĐHBK Hà Nội.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hưởng học bổng mỗi tháng bằng 80% mức lương cơ sở và hưởng 12 tháng/năm học.\n- Sinh viên khuyết tật thuộc hộ nghèo, cận nghèo được hỗ trợ kinh phí mua phương tiện, đồ dùng học tập với mức 1 triệu đồng/năm học.\n\n### 2.2. Hỗ trợ trang bị dụng cụ học tập, cơ sở vật chất chuyên dụng dành cho sinh viên khuyết tật tại cơ sở\n\n- Trang bị cơ sở vật chất: thiết bị chuyên dụng cho người khuyết tật di lại, sử dụng trong khuôn viên đại học (ví dụ: xe lăn, nhà vệ sinh,... cho người khuyết tật) tại khu nhà có sinh viên khuyết tật học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "adversarial",
+      "difficulty": "hard",
+      "adversarial_type": "false_assumption"
+    },
+    {
+      "id": "QD_HT_SV_khuyet_tat_2023_adversarial_004",
+      "question_type": "adversarial",
+      "question": "Sinh viên khuyết tật tại ĐHBK Hà Nội cần nộp mẫu đơn nào để nhận hỗ trợ miễn học phí và học bổng chính sách?",
+      "gold_answer": "Không có thông tin trong các chunk về mẫu đơn cụ thể cần nộp để nhận hỗ trợ miễn học phí và học bổng chính sách.",
+      "evidence_chunk_ids": [],
+      "ground_truth_context": [],
+      "is_answerable": false,
+      "reasoning_required": "adversarial",
+      "difficulty": "hard",
+      "adversarial_type": "unanswerable"
+    }
+  ]
+}
