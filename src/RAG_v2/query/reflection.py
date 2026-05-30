@@ -136,17 +136,19 @@ def _strip_pii_and_noise(query: str) -> str:
     cleaned = _THANKS_RE.sub("", cleaned)
     cleaned = _ADDRESSEE_RE.sub("", cleaned)
     # Normalise whitespace and stray leading punctuation
-    cleaned = re.sub(r"[ \t]+", " ", cleaned).strip(" \t\n\r\u2013\u2014\u002d.,–—")
+    cleaned = re.sub(r"[ \t]+", " ", cleaned).strip(
+        " \t\n\r\u2013\u2014\u002d.,–—"
+    )
     # Guard: if too much was stripped, keep original
     if len(cleaned.split()) < 3:
         logger.debug(
-            "PII strip produced too-short result; keeping original: %r", query[:80]
+            "PII strip produced too-short result; keeping original: %r",
+            query[:80],
         )
         return query
     if cleaned != query:
         logger.info("PII strip: %r → %r", query[:80], cleaned[:80])
     return cleaned
-
 
 
 def _merge_user_major_into_context(
@@ -192,15 +194,25 @@ def _enforce_major_reference_rewrite(
         (r"\bngành của tôi\b", f"ngành {major_label}"),
         (r"\bngành tôi\b", f"ngành {major_label}"),
         (r"\bngành này\b", f"ngành {major_label}"),
-        (r"\bchương trình học của tôi\b", f"chương trình đào tạo ngành {major_label}"),
-        (r"\bchương trình của tôi\b", f"chương trình đào tạo ngành {major_label}"),
+        (
+            r"\bchương trình học của tôi\b",
+            f"chương trình đào tạo ngành {major_label}",
+        ),
+        (
+            r"\bchương trình của tôi\b",
+            f"chương trình đào tạo ngành {major_label}",
+        ),
         (r"\bchương trình này\b", f"chương trình đào tạo ngành {major_label}"),
     ]
     for pattern, replacement in replacements:
         updated = re.sub(pattern, replacement, updated, flags=re.IGNORECASE)
 
     if updated != rewritten_query:
-        logger.debug("Reflection fallback rewrite applied: %r -> %r", rewritten_query, updated)
+        logger.debug(
+            "Reflection fallback rewrite applied: %r -> %r",
+            rewritten_query,
+            updated,
+        )
     return updated
 
 
@@ -217,7 +229,9 @@ def _has_profile_dependent_signal(query: str) -> bool:
     """Return True when the current query explicitly asks for profile context."""
     if _PERSONAL_REFS.search(query or ""):
         return True
-    return bool(_PROFILE_DEPENDENT_QUERY_RE.search(_fold_vietnamese(query or "")))
+    return bool(
+        _PROFILE_DEPENDENT_QUERY_RE.search(_fold_vietnamese(query or ""))
+    )
 
 
 def _extract_academic_scope_tokens(text: str) -> set[str]:
@@ -288,7 +302,10 @@ def _is_comparison_followup(query: str) -> bool:
         return False
 
     try:
-        from retrieval.metadata_filters import extract_major_codes  # noqa: PLC0415
+        from retrieval.metadata_filters import (
+            extract_major_codes,
+        )  # noqa: PLC0415
+
         explicit_major_count = len(extract_major_codes(raw))
     except Exception:
         explicit_major_count = 0
@@ -407,9 +424,13 @@ def _rewrite_comparison_followup(
         return None
 
     try:
-        major_codes = _comparison_followup_major_codes(query, chat_history, profile)
+        major_codes = _comparison_followup_major_codes(
+            query, chat_history, profile
+        )
     except Exception:
-        logger.debug("Could not resolve comparison follow-up entities", exc_info=True)
+        logger.debug(
+            "Could not resolve comparison follow-up entities", exc_info=True
+        )
         return None
 
     if len(major_codes) < 2:
@@ -433,7 +454,10 @@ def _expand_major_codes_in_query(query: str) -> str:
     URLs are protected via placeholder substitution so they are never mangled.
     """
     try:
-        from retrieval.metadata_filters import MAJOR_CODE_TO_NAME, extract_major_codes  # noqa: PLC0415
+        from retrieval.metadata_filters import (
+            MAJOR_CODE_TO_NAME,
+            extract_major_codes,
+        )  # noqa: PLC0415
     except Exception:
         return query
 
@@ -514,16 +538,11 @@ def _normalise_profile_context(
         or profile.get("user_major")
     )
     major_code = _clean_profile_value(
-        profile.get("major_code")
-        or profile.get("user_major_code")
+        profile.get("major_code") or profile.get("user_major_code")
     )
-    cohort = _clean_profile_value(
-        profile.get("cohort")
-        or profile.get("khoa")
-    )
+    cohort = _clean_profile_value(profile.get("cohort") or profile.get("khoa"))
     student_id = _clean_profile_value(
-        profile.get("student_id")
-        or profile.get("user_id")
+        profile.get("student_id") or profile.get("user_id")
     )
 
     out: Dict[str, str] = {}
@@ -600,7 +619,8 @@ def _extract_profile_note(history: List[Dict[str, str]]) -> str:
 
     profile: Dict[str, str] = {}
     user_messages = [
-        m.get("content", "") for m in history
+        m.get("content", "")
+        for m in history
         if m.get("role") == "user" and m.get("content")
     ]
 
@@ -719,7 +739,7 @@ def _extract_entities(
 
     if not entities["major_code"] and history:
         # Priority 3: user-stated session facts.
-        for msg in reversed(history):        # most-recent first
+        for msg in reversed(history):  # most-recent first
             if msg.get("role") == "user":
                 text = msg.get("content", "")
                 code = _extract_major_code(text)
@@ -729,13 +749,17 @@ def _extract_entities(
                     break
 
     # ── cohort ────────────────────────────────────────────────────────────────
-    _COHORT_RE = re.compile(r"\bk(\d{2,3})\b|kh\u00f3a\s*(\d{2,3})", re.IGNORECASE)
+    _COHORT_RE = re.compile(
+        r"\bk(\d{2,3})\b|kh\u00f3a\s*(\d{2,3})", re.IGNORECASE
+    )
     if profile.get("cohort"):
         entities["cohort"] = profile["cohort"]
     else:
-        sources = ([query] +
-                   [m.get("content", "") for m in (history or [])
-                    if m.get("role") == "user"])
+        sources = [query] + [
+            m.get("content", "")
+            for m in (history or [])
+            if m.get("role") == "user"
+        ]
         for text in sources:
             mo = _COHORT_RE.search(text)
             if mo:
@@ -748,9 +772,9 @@ def _extract_entities(
         r"|n\u0103m\s+(\d)\b",
         re.IGNORECASE,
     )
-    sources = ([query] +
-               [m.get("content", "") for m in (history or [])
-                if m.get("role") == "user"])
+    sources = [query] + [
+        m.get("content", "") for m in (history or []) if m.get("role") == "user"
+    ]
     for text in sources:
         mo = _YEAR_RE.search(text)
         if mo:
@@ -782,7 +806,9 @@ def _extract_entities(
         r"(?:h\u1ecdc\s*k\u1ef3|hk|semester)\s*([12h\u00e8])",
         re.IGNORECASE,
     )
-    _HE_RE = re.compile(r"k\u1ef3\s*h\u00e8|h\u1ecdc\s*k\u1ef3\s*h\u00e8", re.IGNORECASE)
+    _HE_RE = re.compile(
+        r"k\u1ef3\s*h\u00e8|h\u1ecdc\s*k\u1ef3\s*h\u00e8", re.IGNORECASE
+    )
 
     sem_sources = [query] + [
         m.get("content", "")
@@ -860,19 +886,28 @@ class QueryReflector:
     ) -> None:
         if settings is None:
             from config.settings import Settings
+
             settings = Settings()
 
         self.model = model or settings.reflection_model
-        self.temperature = temperature if temperature is not None else settings.reflection_temperature
+        self.temperature = (
+            temperature
+            if temperature is not None
+            else settings.reflection_temperature
+        )
         self.max_tokens: int = getattr(settings, "reflection_max_tokens", 256)
         self.history_limit = history_limit
-        
+
         provider = settings.reflection_provider
-        
+
         # Setup OpenAI client parameters based on provider
         if provider == "gemini":
             base_url = _GEMINI_BASE_URL
-            resolved_key = api_key or settings.google_api_key or os.getenv("GOOGLE_API_KEY", "")
+            resolved_key = (
+                api_key
+                or settings.google_api_key
+                or os.getenv("GOOGLE_API_KEY", "")
+            )
         elif provider == "lm_studio":
             base_url = settings.lm_studio_base_url
             resolved_key = api_key or "lm-studio"
@@ -883,11 +918,19 @@ class QueryReflector:
             resolved_key = api_key or "ollama"
         elif provider == "openai":
             base_url = "https://api.openai.com/v1"
-            resolved_key = api_key or settings.openai_api_key or os.getenv("OPENAI_API_KEY", "")
+            resolved_key = (
+                api_key
+                or settings.openai_api_key
+                or os.getenv("OPENAI_API_KEY", "")
+            )
         else:
             base_url = _GEMINI_BASE_URL
-            resolved_key = api_key or settings.google_api_key or os.getenv("GOOGLE_API_KEY", "")
-            
+            resolved_key = (
+                api_key
+                or settings.google_api_key
+                or os.getenv("GOOGLE_API_KEY", "")
+            )
+
         self._client = OpenAI(api_key=resolved_key, base_url=base_url)
 
     # ------------------------------------------------------------------
@@ -927,7 +970,9 @@ class QueryReflector:
         raw_query = query  # preserve for return value
         query = _strip_pii_and_noise(query)
 
-        context_with_major = _merge_user_major_into_context(user_context, user_major)
+        context_with_major = _merge_user_major_into_context(
+            user_context, user_major
+        )
         merged_profile, profile_note_override = _merge_profile_context(
             user_context=context_with_major,
             user_profile=user_profile,
@@ -947,52 +992,76 @@ class QueryReflector:
                 query[:60],
             )
 
-        user_prompt = self._build_user_prompt(
-            query=query,
-            chat_history=effective_history,
-            user_context=merged_profile or None,
-            profile_note_override=profile_note_override,
+        # Passthrough mode: skip LLM call when there is nothing to resolve.
+        # Without history, profile, personal references, anaphora, or comparison
+        # follow-up signals the LLM call has no information to add and only
+        # risks introducing spurious qualifiers or scope narrowing.
+        # The deterministic guardrails (major-code expansion, abbreviation
+        # expansion) are always applied regardless of this flag.
+        _needs_llm_rewrite = bool(
+            effective_history
+            or merged_profile
+            or _has_profile_dependent_signal(query)
+            or _is_comparison_followup(query)
+            or _ANAPHORA_SIGNALS_RE.search(query)
         )
 
-        messages = [
-            {"role": "system", "content": REWRITE_SYSTEM_PROMPT},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        # Retry with exponential backoff for rate-limit / 503 errors
-        last_exc: Optional[Exception] = None
-        for attempt in range(_MAX_RETRIES):
-            try:
-                response = self._client.chat.completions.create(
-                    model=self.model,
-                    messages=cast(Any, messages),
-                    temperature=self.temperature,
-                    max_tokens=self.max_tokens,
-                )
-                break
-            except (RateLimitError, InternalServerError) as exc:
-                # Retry on 429 Rate-Limit and 503 Service Unavailable
-                if isinstance(exc, InternalServerError) and exc.status_code != 503:
-                    raise
-                last_exc = exc
-                if attempt < _MAX_RETRIES - 1:
-                    delay = _BASE_RETRY_DELAY * (2**attempt)
-                    logger.warning(
-                        "Reflection transient error (attempt %d/%d), retrying in %.1fs: %s",
-                        attempt + 1,
-                        _MAX_RETRIES,
-                        delay,
-                        exc,
-                    )
-                    time.sleep(delay)
-        else:
-            raise last_exc  # type: ignore[misc]
-
-        rewritten = (response.choices[0].message.content or "").strip()
-
-        # If the LLM returns empty or just whitespace, keep the original
-        if not rewritten:
+        if not _needs_llm_rewrite:
             rewritten = query
+            user_prompt = ""
+            logger.info(
+                "Reflection passthrough (no context to resolve): %r", query[:60]
+            )
+        else:
+            user_prompt = self._build_user_prompt(
+                query=query,
+                chat_history=effective_history,
+                user_context=merged_profile or None,
+                profile_note_override=profile_note_override,
+            )
+
+            messages = [
+                {"role": "system", "content": REWRITE_SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ]
+
+            # Retry with exponential backoff for rate-limit / 503 errors
+            last_exc: Optional[Exception] = None
+            for attempt in range(_MAX_RETRIES):
+                try:
+                    response = self._client.chat.completions.create(
+                        model=self.model,
+                        messages=cast(Any, messages),
+                        temperature=self.temperature,
+                        max_tokens=self.max_tokens,
+                    )
+                    break
+                except (RateLimitError, InternalServerError) as exc:
+                    # Retry on 429 Rate-Limit and 503 Service Unavailable
+                    if (
+                        isinstance(exc, InternalServerError)
+                        and exc.status_code != 503
+                    ):
+                        raise
+                    last_exc = exc
+                    if attempt < _MAX_RETRIES - 1:
+                        delay = _BASE_RETRY_DELAY * (2**attempt)
+                        logger.warning(
+                            "Reflection transient error (attempt %d/%d), retrying in %.1fs: %s",
+                            attempt + 1,
+                            _MAX_RETRIES,
+                            delay,
+                            exc,
+                        )
+                        time.sleep(delay)
+            else:
+                raise last_exc  # type: ignore[misc]
+
+            rewritten = (response.choices[0].message.content or "").strip()
+
+            # If the LLM returns empty or just whitespace, keep the original
+            if not rewritten:
+                rewritten = query
 
         # Save the raw LLM candidate before any guardrails modify it.
         # Exposed as trace-only field so callers can see what was rejected.
@@ -1029,7 +1098,10 @@ class QueryReflector:
         # for their own programme/cohort/record. Without that signal, a query
         # like "Lich dang ki hoc tap moi nhat?" must not become IT-E6/K67/20252
         # specific because those facts appeared in profile or earlier turns.
-        if not deterministic_followup_applied and not _has_profile_dependent_signal(query):
+        if (
+            not deterministic_followup_applied
+            and not _has_profile_dependent_signal(query)
+        ):
             injected_scope = _detect_injected_scope(query, rewritten)
             if injected_scope:
                 logger.warning(
@@ -1070,9 +1142,9 @@ class QueryReflector:
 
         return {
             "original": raw_query,
-            "stripped": query,       # after PII removal, before LLM rewrite
+            "stripped": query,  # after PII removal, before LLM rewrite
             "rewritten": rewritten,
-            "prompt": user_prompt,
+            "prompt": user_prompt if _needs_llm_rewrite else "",
             "entities": entities,
             # Trace-only fields — expose LLM candidate and guardrail outcome
             # for debugging without affecting retrieval behavior.
@@ -1091,7 +1163,9 @@ class QueryReflector:
         user_major: Optional[str] = None,
     ) -> Dict[str, Optional[str]]:
         """Public wrapper around :func:`_extract_entities` for external callers."""
-        context_with_major = _merge_user_major_into_context(user_context, user_major)
+        context_with_major = _merge_user_major_into_context(
+            user_context, user_major
+        )
         merged_profile, _ = _merge_profile_context(
             user_context=context_with_major,
             user_profile=user_profile,
@@ -1164,7 +1238,10 @@ class QueryReflector:
         # only when the current query actually asks for personal context.
         profile_note = ""
         if _has_profile_dependent_signal(query):
-            profile_note = profile_note_override or _extract_profile_note_from_context(user_context)
+            profile_note = (
+                profile_note_override
+                or _extract_profile_note_from_context(user_context)
+            )
             if not profile_note and chat_history:
                 profile_note = _extract_profile_note(chat_history)
         profile_block = profile_note or "(khong co)"

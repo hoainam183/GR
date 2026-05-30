@@ -965,7 +965,9 @@ def main() -> None:
     # Load system settings and override top_k
     settings, pipeline, self_evaluator, judge_client = build_evaluation_runtime()
     settings.top_k = args.top_k
+    settings.reranker_top_k = args.top_k
     pipeline._cfg["top_k"] = args.top_k
+    pipeline._cfg["reranker_top_k"] = args.top_k
 
     # Disable ValidityFilter for evaluation as requested
     pipeline._validity_filter = None
@@ -978,8 +980,9 @@ def main() -> None:
     logger.info("Agent path has been DISABLED for E2E evaluation — all queries use RAG flow.")
 
     # Enable HyDE and set Reranker score threshold to -1.0 dynamically
-    settings.hyde_enabled = True
-    pipeline._cfg["hyde_enabled"] = True
+    # [MATCH CUSTOM EVAL]: Disable HyDE to perfectly match evaluate_retrieval_custom.py
+    settings.hyde_enabled = False
+    pipeline._cfg["hyde_enabled"] = False
     settings.reranker_score_threshold = -1.0
     pipeline._cfg["reranker_score_threshold"] = -1.0
 

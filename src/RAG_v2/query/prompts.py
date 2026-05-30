@@ -41,29 +41,56 @@ ROUTER_FEW_SHOT = [
     {"role": "user", "content": "Xin chào!"},
     {"role": "assistant", "content": '{"intent": "chitchat", "domains": []}'},
     {"role": "user", "content": "Điều kiện xét học bổng khuyến khích là gì?"},
-    {"role": "assistant", "content": '{"intent": "rag", "domains": ["quydinh"]}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "rag", "domains": ["quydinh"]}',
+    },
     {"role": "user", "content": "Quy chế đào tạo mới có gì thay đổi?"},
-    {"role": "assistant", "content": '{"intent": "rag", "domains": ["quydinh", "ctdt"]}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "rag", "domains": ["quydinh", "ctdt"]}',
+    },
     {"role": "user", "content": "Thời tiết hôm nay thế nào?"},
-    {"role": "assistant", "content": '{"intent": "tool_search", "domains": []}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "tool_search", "domains": []}',
+    },
     {"role": "user", "content": "Cảm ơn bạn nhiều nhé"},
     {"role": "assistant", "content": '{"intent": "chitchat", "domains": []}'},
-    {"role": "user", "content": "Sinh viên nước ngoài cần giấy tờ gì để nhập học?"},
+    {
+        "role": "user",
+        "content": "Sinh viên nước ngoài cần giấy tờ gì để nhập học?",
+    },
     {"role": "assistant", "content": '{"intent": "rag", "domains": ["stsv"]}'},
     {
         "role": "user",
         "content": "Tìm giúp mình thông tin mới nhất về học phí trên mạng",
     },
-    {"role": "assistant", "content": '{"intent": "tool_search", "domains": []}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "tool_search", "domains": []}',
+    },
     # ── kehoach — registration timing (most common real query type) ──────────
     {"role": "user", "content": "Khi nào mở đăng ký môn học kỳ 1?"},
-    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach"]}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "rag", "domains": ["kehoach"]}',
+    },
     {"role": "user", "content": "Môn IT4062E kỳ này còn slot không?"},
-    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach"]}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "rag", "domains": ["kehoach"]}',
+    },
     {"role": "user", "content": "Hạn cuối rút môn không bị điểm F là khi nào?"},
-    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach"]}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "rag", "domains": ["kehoach"]}',
+    },
     # ── ctdt — curriculum, ĐATN, học phần tương đương ───────────────────────
-    {"role": "user", "content": "Đồ án tốt nghiệp ngành CNTT bao nhiêu tín chỉ?"},
+    {
+        "role": "user",
+        "content": "Đồ án tốt nghiệp ngành CNTT bao nhiêu tín chỉ?",
+    },
     {"role": "assistant", "content": '{"intent": "rag", "domains": ["ctdt"]}'},
     {"role": "user", "content": "Môn nào có thể thay thế cho Giải tích 1?"},
     {"role": "assistant", "content": '{"intent": "rag", "domains": ["ctdt"]}'},
@@ -72,22 +99,34 @@ ROUTER_FEW_SHOT = [
         "role": "user",
         "content": "Điều kiện TC tích lũy để làm đồ án và deadline đăng ký đề tài?",
     },
-    {"role": "assistant", "content": '{"intent": "rag", "domains": ["ctdt", "quydinh", "kehoach"]}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "rag", "domains": ["ctdt", "quydinh", "kehoach"]}',
+    },
     {
         "role": "user",
         "content": "Lịch đăng ký tín chỉ kỳ 2 ngành Cơ điện tử",
     },
-    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach", "ctdt"]}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "rag", "domains": ["kehoach", "ctdt"]}',
+    },
     {
         "role": "user",
         "content": "Điều kiện nhận học bổng và nộp hồ sơ ở đâu?",
     },
-    {"role": "assistant", "content": '{"intent": "rag", "domains": ["quydinh", "stsv"]}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "rag", "domains": ["quydinh", "stsv"]}',
+    },
     {
         "role": "user",
         "content": "Danh sách sinh viên được nhận học bổng kỳ vừa rồi",
     },
-    {"role": "assistant", "content": '{"intent": "rag", "domains": ["kehoach"]}'},
+    {
+        "role": "assistant",
+        "content": '{"intent": "rag", "domains": ["kehoach"]}',
+    },
 ]
 
 # ─── Reflection Prompts ────────────────────────────────────────────────────────
@@ -150,6 +189,9 @@ Khi viết lại query, có thể bổ sung từ khóa tiếng Anh tương đư�
 15. Nếu trong câu hỏi có URL (bắt đầu bằng https://, http://, hoặc www.), bắt buộc GIỮ NGUYÊN toàn bộ \
 URL đó y hệt, bao gồm cả phần giao thức (https://, http://). TUYỆT ĐỐI KHÔNG rút gọn, bỏ giao thức, \
 hay thay đổi bất kỳ phần nào của URL.
+16. KHÔNG thêm từ giới hạn/phân loại (ví dụ: "chính quy", "đại học", "khuyến khích học tập", "không chính thức") \
+vào câu hỏi nếu người dùng không dùng từ đó. Ví dụ: "quy chế đào tạo" KHÔNG được viết thành \
+"quy chế đào tạo đại học chính quy"; "học bổng" KHÔNG được viết thành "học bổng khuyến khích học tập".
 VÍ DỤ FEW-SHOT:
 ---
 Ví dụ 1 — Giải tham chiếu ngành từ USER_PROFILE:
@@ -190,7 +232,7 @@ Ví dụ 5 — Câu hỏi không có tham chiếu mơ hồ, giữ nguyên:
 USER_PROFILE: (khong co)
 CHAT_HISTORY: (khong co)
 CÂU HỎI HIỆN TẠI: Quy định điểm F trong quy chế đào tạo 2025 là gì?
-STANDALONE QUERY: Quy định điểm F trong quy chế đào tạo đại học chính quy 2025 là gì?
+STANDALONE QUERY: Quy định điểm F trong quy chế đào tạo 2025 là gì?
 
 ---
 Ví dụ 6 — Câu hỏi tổng quát, KHÔNG thu hẹp phạm vi, KHÔNG inject profile:

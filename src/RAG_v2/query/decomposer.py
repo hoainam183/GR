@@ -44,10 +44,14 @@ Nguồn tài liệu:
 QUY TẮC:
 1. BỎ QUA hoàn toàn: tên người, mã sinh viên (MSSV), lời chào, lời cảm ơn.
 2. Chỉ phân tách khi câu hỏi RÕ RÀNG có ≥2 phần cần tra cứu ở nguồn khác nhau.
-   Nếu câu hỏi chỉ cần một nguồn → trả về list 1 phần tử.
+   Nếu câu hỏi chỉ cần một nguồn → trả về list 1 phần tử với câu hỏi NGUYÊN VĂN.
 3. Tối đa 3 câu hỏi con.
 4. Mỗi câu hỏi con phải ngắn gọn, cụ thể, tự thân (standalone).
 5. Giữ nguyên mã học phần (JP2111, IT4062E...) và mã ngành (IT-E6...) nếu có.
+   KHÔNG thêm tên học phần hoặc tên ngành bên cạnh mã nếu không có trong câu hỏi gốc.
+6. Câu hỏi con phải BÁM SÁT NGỮ NGHĨA GỐC — không thêm từ khóa, tên môn học,
+   điều kiện hoặc ngữ cảnh không xuất hiện trong câu hỏi ban đầu.
+7. Nếu câu hỏi chỉ cần một nguồn, field "query" phải là câu hỏi NGUYÊN VĂN gốc.
 
 OUTPUT: JSON thuần, không markdown:
 {"subqueries": [{"query": "<câu hỏi con>", "collection": "<ctdt|quydinh|kehoach|stsv>"}]}"""
@@ -66,11 +70,11 @@ _DECOMPOSE_FEW_SHOT: List[Dict[str, str]] = [
             {
                 "subqueries": [
                     {
-                        "query": "Học phần JP2111 tiếng Nhật 4 có thể chuyển đổi tương đương với học phần nào?",
+                        "query": "Học phần JP2111 có thể chuyển đổi tương đương với học phần nào?",
                         "collection": "ctdt",
                     },
                     {
-                        "query": "Điều kiện và thời hạn để được xét nhận đồ án tốt nghiệp là gì?",
+                        "query": "Điều kiện để được xét nhận đồ án tốt nghiệp là gì?",
                         "collection": "quydinh",
                     },
                 ]
@@ -161,7 +165,9 @@ class QueryDecomposer:
 
             settings = Settings()
 
-        self.model = model or getattr(settings, "reflection_model", DEFAULT_MODEL)
+        self.model = model or getattr(
+            settings, "reflection_model", DEFAULT_MODEL
+        )
         provider = getattr(settings, "reflection_provider", "gemini")
 
         if provider == "gemini":
@@ -172,10 +178,14 @@ class QueryDecomposer:
                 or os.getenv("GOOGLE_API_KEY", "")
             )
         elif provider == "lm_studio":
-            base_url = getattr(settings, "lm_studio_base_url", "http://localhost:1234/v1")
+            base_url = getattr(
+                settings, "lm_studio_base_url", "http://localhost:1234/v1"
+            )
             resolved_key = api_key or "lm-studio"
         elif provider == "ollama":
-            _base = getattr(settings, "ollama_base_url", "http://localhost:11434")
+            _base = getattr(
+                settings, "ollama_base_url", "http://localhost:11434"
+            )
             base_url = _base if _base.endswith("/v1") else f"{_base}/v1"
             resolved_key = api_key or "ollama"
         elif provider == "openai":
@@ -225,7 +235,10 @@ class QueryDecomposer:
                 )
                 break
             except (RateLimitError, InternalServerError) as exc:
-                if isinstance(exc, InternalServerError) and exc.status_code != 503:
+                if (
+                    isinstance(exc, InternalServerError)
+                    and exc.status_code != 503
+                ):
                     raise
                 last_exc = exc
                 if attempt < _MAX_RETRIES - 1:
@@ -275,6 +288,12 @@ class QueryDecomposer:
                 "Decomposer produced no valid subqueries from: %r", raw[:200]
             )
             return [{"query": fallback_query, "collection": ""}]
+
+        # Single-source: always return the original query to prevent semantic
+        # drift from LLM paraphrasing.  The collection hint is preserved so
+        # the caller can use it for targeted retrieval if desired.
+        if len(valid) == 1:
+            valid[0]["query"] = fallback_query
 
         logger.info(
             "Decomposed into %d sub-queries: %s",
