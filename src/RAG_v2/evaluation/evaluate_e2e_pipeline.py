@@ -840,6 +840,11 @@ def main() -> None:
     settings.top_k = args.top_k
     pipeline._cfg["top_k"] = args.top_k
 
+    # Disable ValidityFilter for evaluation as requested
+    pipeline._validity_filter = None
+    logger.info("ValidityFilter has been disabled for E2E evaluation.")
+
+
     summaries: List[Dict[str, Any]] = []
     logger.info("Found %d dataset file(s) for E2E evaluation.", len(dataset_paths))
     
@@ -850,11 +855,7 @@ def main() -> None:
             logger.info("Limiting evaluation to first %d queries as requested.", args.sample_n)
             dataset_items = dataset_items[:args.sample_n]
             
-        dataset_output_dir = (
-            args.output_dir / _safe_output_name(dataset_path)
-            if multi_dataset
-            else args.output_dir
-        )
+        dataset_output_dir = args.output_dir / _safe_output_name(dataset_path)
 
         summary = run_evaluation(
             dataset_items=dataset_items,

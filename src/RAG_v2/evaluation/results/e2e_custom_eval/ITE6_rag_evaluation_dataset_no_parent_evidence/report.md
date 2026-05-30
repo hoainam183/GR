@@ -1,6 +1,6 @@
 # RAG E2E Pipeline Quality Evaluation Report
 
-- **Date**: 2026-05-30 14:07:11
+- **Date**: 2026-05-30 13:41:45
 - **Total Queries Evaluated**: `1`
 
 ## E2E Generation Metrics (LLM Quality)
@@ -39,22 +39,22 @@
 
 | Phase / Event | Avg Latency / Trigger Rate |
 | :--- | :---: |
-| **Total Latency** | `58234.8 ms` |
-| Routing Latency | `5555.2 ms` |
-| Search Latency | `1145.4 ms` |
-| Rerank Latency | `45138.9 ms` |
-| Generation Latency | `1338.1 ms` |
-| Self-Evaluation Latency | `1273.2 ms` |
+| **Total Latency** | `73732.6 ms` |
+| Routing Latency | `2219.3 ms` |
+| Search Latency | `3054.4 ms` |
+| Rerank Latency | `48207.0 ms` |
+| Generation Latency | `1307.8 ms` |
+| Self-Evaluation Latency | `13988.1 ms` |
 | **HyDE Fallback Trigger Rate** | `0.00%` (`0` queries) |
 
 ## Breakdown by Question Type
 
 | Type | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **simple** | 1 | `100.0%` | `100.0%` | `100.0%` | `100.0%` | `100.0%` | `58234.8 ms` |
+| **simple** | 1 | `100.0%` | `100.0%` | `100.0%` | `100.0%` | `100.0%` | `73732.6 ms` |
 
 ## Breakdown by Difficulty
 
 | Difficulty | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **easy** | 1 | `100.0%` | `100.0%` | `100.0%` | `100.0%` | `100.0%` | `58234.8 ms` |
+| **easy** | 1 | `100.0%` | `100.0%` | `100.0%` | `100.0%` | `100.0%` | `73732.6 ms` |
