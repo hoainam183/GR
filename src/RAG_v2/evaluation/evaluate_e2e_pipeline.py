@@ -383,6 +383,8 @@ def run_evaluation(
             generated_answer = result.get("answer") or ""
             sources = result.get("sources") or []
             intent = result.get("intent") or "rag"
+            pipeline_mode = result.get("mode") or "unknown"
+            pipeline_route = result.get("route") or "unknown"
             num_sources = result.get("num_sources") or len(sources)
             timings = result.get("timings_ms") or {}
             
@@ -397,6 +399,8 @@ def run_evaluation(
                 "generated_answer": f"ERROR: {exc}",
                 "retrieved_chunk_ids": "",
                 "relevant_chunk_ids": ",".join(relevant_ids),
+                "mode": "error",
+                "route": "error",
                 "intent": "error",
                 "num_sources": 0,
                 "latency_ms": 0,
@@ -500,6 +504,8 @@ def run_evaluation(
             "generated_answer": generated_answer,
             "retrieved_chunk_ids": ",".join(retrieved_ids),
             "relevant_chunk_ids": ",".join(relevant_ids),
+            "mode": pipeline_mode,
+            "route": pipeline_route,
             "intent": intent,
             "num_sources": num_sources,
             "latency_ms": total_time,
@@ -523,7 +529,9 @@ def run_evaluation(
         
         # Latency & quality output log
         logger.info(
-            "  ↳ FinalHit@5: %.2f | Faithfulness: %s | Match: %s | Latency: %.1fms%s",
+            "  ↳ Mode: %s | Route: %s | FinalHit@5: %.2f | Faithfulness: %s | Match: %s | Latency: %.1fms%s",
+            pipeline_mode,
+            pipeline_route,
             retrieval_metrics["hit@5"],
             self_eval_faithfulness,
             ref_match,
@@ -636,6 +644,19 @@ def build_summary_report(records: List[Dict[str, Any]]) -> Dict[str, Any]:
             "faithfulness_rate": round(sum(1 for r in sub_recs if r["self_eval_faithfulness"] == "grounded") / len(sub_recs), 4)
         }
 
+    # Breakdowns by pipeline mode (rag_v2, rag_v2_decomposed, agent, chitchat, etc.)
+    mode_breakdown = {}
+    modes = sorted(list(set(r.get("mode", "unknown") for r in records)))
+    for mode in modes:
+        sub_recs = [r for r in records if r.get("mode", "unknown") == mode]
+        mode_breakdown[mode] = {
+            "count": len(sub_recs),
+            "metrics": _average_metrics(sub_recs),
+            "avg_latency_ms": round(sum(r["latency_ms"] for r in sub_recs) / len(sub_recs), 1),
+            "ref_correct_rate": round(sum(1 for r in sub_recs if r["ref_match"] == "correct") / len(sub_recs), 4),
+            "faithfulness_rate": round(sum(1 for r in sub_recs if r["self_eval_faithfulness"] == "grounded") / len(sub_recs), 4)
+        }
+
     return {
         "total_queries": total_queries,
         "avg_latency_ms": avg_latency,
@@ -657,6 +678,7 @@ def build_summary_report(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         "ref_incorrect_rate": ref_incorrect_rate,
         "by_question_type": type_breakdown,
         "by_difficulty": diff_breakdown,
+        "by_mode": mode_breakdown,
     }
 
 
@@ -754,7 +776,23 @@ def save_outputs(
             f"| **{diff}** | {info['count']} | `{m.get('hit@5', 0.0)*100:.1f}%` | `{m.get('recall@5', 0.0)*100:.1f}%` | `{m.get('ndcg@5', 0.0)*100:.1f}%` | "
             f"`{info['faithfulness_rate']*100:.1f}%` | `{info['ref_correct_rate']*100:.1f}%` | `{info['avg_latency_ms']} ms` |"
         )
-        
+
+    # Mode breakdown section
+    if summary.get("by_mode"):
+        lines.extend([
+            "",
+            "## Breakdown by Pipeline Mode",
+            "",
+            "| Mode | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |",
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"
+        ])
+        for mode, info in summary["by_mode"].items():
+            m = info["metrics"]
+            lines.append(
+                f"| **{mode}** | {info['count']} | `{m.get('hit@5', 0.0)*100:.1f}%` | `{m.get('recall@5', 0.0)*100:.1f}%` | `{m.get('ndcg@5', 0.0)*100:.1f}%` | "
+                f"`{info['faithfulness_rate']*100:.1f}%` | `{info['ref_correct_rate']*100:.1f}%` | `{info['avg_latency_ms']} ms` |"
+            )
+
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     logger.info("Wrote E2E report report.md → %s", md_path)
     
@@ -933,6 +971,12 @@ def main() -> None:
     pipeline._validity_filter = None
     logger.info("ValidityFilter has been disabled for E2E evaluation.")
 
+    # Disable agent path so all queries go through RAG flow.
+    # Agent returns URLs as sources (not chunk IDs), which causes retrieval
+    # metrics to collapse to 0 for queries routed through the agent path.
+    pipeline.agent = None
+    logger.info("Agent path has been DISABLED for E2E evaluation — all queries use RAG flow.")
+
     # Enable HyDE and set Reranker score threshold to -1.0 dynamically
     settings.hyde_enabled = True
     pipeline._cfg["hyde_enabled"] = True
@@ -954,7 +998,7 @@ def main() -> None:
 
     logger.info(
         "E2E eval config: query_v3 (production flow), HyDE enabled, "
-        "reranker_score_threshold=-1.0, ValidityFilter disabled."
+        "reranker_score_threshold=-1.0, ValidityFilter disabled, Agent disabled."
     )
     logger.info(
         "Rate-limit guard: llm_rpm=%.2f, llm_calls_per_question=%.2f, "
