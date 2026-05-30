@@ -225,7 +225,8 @@ class RetrievalService:
             List of result dicts with text, metadata, and scores.
         """
         effective_top_k = top_k or self.settings.top_k
-        raw_candidate_k = max(effective_top_k * 4, 20)
+        # Tăng phễu hứng candidates lên gấp 8 lần top_k (trước đây là 4) để hạn chế rớt chunk khi rerank
+        raw_candidate_k = max(effective_top_k * 8, 40)
         active_collections = collections or self.settings.collections
 
         # Multi-query expansion: search multiple query variants and merge
@@ -289,7 +290,7 @@ class RetrievalService:
         from retrieval.hyde import HyDEExpander
 
         effective_top_k = top_k or self.settings.top_k
-        raw_candidate_k = max(effective_top_k * 4, 20)
+        raw_candidate_k = max(effective_top_k * 8, 40)
         active_collections = collections or self.settings.collections
 
         hyde = HyDEExpander(llm=llm, embedder=self.bge_embedder)
