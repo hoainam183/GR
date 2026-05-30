@@ -87,22 +87,27 @@ class BGEReranker(BaseReranker):
         top_k: Optional[int] = None,
         score_threshold: Optional[float] = None,
         table_score_threshold: Optional[float] = None,
+        min_top_k: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """Rerank *documents* against *query* and return the top-K.
 
         Each document dict **must** contain a ``"text"`` key.  The returned
-        list is sorted by descending relevance score, each dict augmented
-        with a ``"rerank_score"`` field.
+        list contains threshold-passing documents first, followed by optional
+        below-threshold fallback documents when ``min_top_k`` is set.  Each
+        dict is augmented with a ``"rerank_score"`` field.
 
         Args:
             query: The user query.
             documents: Candidate documents from retrieval stage.
             top_k: Override instance default for number of results.
             score_threshold: Override instance default score threshold.
+            min_top_k: Keep at least this many scored documents, capped by
+                ``top_k``, by appending below-threshold candidates if needed.
 
         Returns:
-            Top-K documents sorted by rerank score (descending),
-            filtered to those with rerank_score >= score_threshold.
+            Up to top-K documents after threshold filtering, with optional
+            below-threshold fallback documents appended when ``min_top_k`` is
+            set and the strict filtered result is too small.
         """
         if not documents:
             return []
@@ -145,14 +150,39 @@ class BGEReranker(BaseReranker):
             else:
                 threshold_dropped += 1
 
-        # Now apply top_k on the threshold-passing documents
-        top_docs = filtered[:top_k]
+        # Now apply top_k on the threshold-passing documents.  Keep this
+        # strict list separately so evaluation can measure threshold impact.
+        strict_top_docs = filtered[:top_k]
+        top_docs = list(strict_top_docs)
+
+        fallback_used = False
+        fallback_count = 0
+        if min_top_k:
+            target_count = min(top_k, int(min_top_k), len(scored_docs))
+            if len(top_docs) < target_count:
+                selected_ids = {id(doc) for doc in top_docs}
+                for doc in scored_docs:
+                    if id(doc) in selected_ids:
+                        continue
+                    top_docs.append(doc)
+                    selected_ids.add(id(doc))
+                    if len(top_docs) >= target_count:
+                        break
+                fallback_count = len(top_docs) - len(strict_top_docs)
+                fallback_used = fallback_count > 0
+
         all_scores = [float(d["rerank_score"]) for d in scored_docs]
         self.last_stats = {
             "rerank_candidate_count": len(scored_docs),
             "rerank_threshold_dropped_count": threshold_dropped,
             "rerank_dropped_count": max(0, len(scored_docs) - len(top_docs)),
             "rerank_passing_count": len(filtered),
+            "rerank_strict_returned_count": len(strict_top_docs),
+            "rerank_strict_returned_ids": [
+                self._doc_id_for_stats(doc) for doc in strict_top_docs
+            ],
+            "rerank_threshold_fallback_used": fallback_used,
+            "rerank_threshold_fallback_count": fallback_count,
             "rerank_returned_count": len(top_docs),
             "rerank_score_min": round(min(all_scores), 6) if all_scores else 0.0,
             "rerank_score_max": round(max(all_scores), 6) if all_scores else 0.0,
@@ -170,6 +200,12 @@ class BGEReranker(BaseReranker):
                 len(filtered),
                 len(top_docs),
             )
+        if fallback_used:
+            logger.info(
+                "min_top_k fallback appended %d below-threshold doc(s) → top %d",
+                fallback_count,
+                len(top_docs),
+            )
 
         logger.info(
             "Reranked %d docs → top %d (best=%.4f, worst=%.4f)",
@@ -184,6 +220,23 @@ class BGEReranker(BaseReranker):
     # ------------------------------------------------------------------
     # Metadata enrichment
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _doc_id_for_stats(doc: Dict[str, Any]) -> str:
+        metadata = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}
+        for value in (
+            doc.get("id"),
+            doc.get("chunk_id"),
+            doc.get("source_id"),
+            metadata.get("chunk_id"),
+            metadata.get("id"),
+            metadata.get("doc_id"),
+            metadata.get("document_id"),
+        ):
+            text = str(value or "").strip()
+            if text:
+                return text.split("/", 1)[-1] if "/" in text else text
+        return ""
 
     @staticmethod
     def _enrich_text_for_reranking(doc: Dict[str, Any]) -> str:

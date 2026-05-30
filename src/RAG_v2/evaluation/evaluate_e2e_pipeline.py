@@ -43,6 +43,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("evaluate_e2e_pipeline")
 
+DEFAULT_LLM_RPM = 15.0
+DEFAULT_LLM_CALLS_PER_QUESTION = 4.0
+DEFAULT_RATE_LIMIT_BUFFER_S = 2.0
+
 # Make project imports work when executed from any cwd
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -148,6 +152,33 @@ def _safe_output_name(path: Path) -> str:
     """Create a filesystem-safe output folder name from a dataset filename."""
     name = re.sub(r"[^A-Za-z0-9._-]+", "_", path.stem).strip("._-")
     return name or "dataset"
+
+
+def _compute_inter_question_sleep_s(
+    llm_rpm: float,
+    llm_calls_per_question: float,
+    buffer_s: float = DEFAULT_RATE_LIMIT_BUFFER_S,
+) -> float:
+    """Return seconds to sleep after each question to stay under an LLM RPM cap."""
+    if llm_rpm <= 0 or llm_calls_per_question <= 0:
+        return 0.0
+    return round((60.0 * llm_calls_per_question / llm_rpm) + max(buffer_s, 0.0), 2)
+
+
+def _sleep_between_questions(
+    current_idx: int,
+    total_queries: int,
+    sleep_s: float,
+    *,
+    sleep_after_last: bool = False,
+) -> None:
+    """Sleep between evaluation questions when another question is still pending."""
+    if sleep_s <= 0:
+        return
+    if current_idx >= total_queries and not sleep_after_last:
+        return
+    logger.info("Sleeping %.2fs before next question to respect LLM RPM limit.", sleep_s)
+    time.sleep(sleep_s)
 
 
 # ─── Dataset Loading ────────────────────────────────────────────────────────────
@@ -318,6 +349,8 @@ def run_evaluation(
     pipeline: Optional[RAGPipeline] = None,
     self_evaluator: Optional[SelfEvaluator] = None,
     judge_client: Optional[OpenAI] = None,
+    inter_question_sleep_s: float = 0.0,
+    sleep_after_last: bool = False,
 ) -> Dict[str, Any]:
     if settings is None or pipeline is None or self_evaluator is None or judge_client is None:
         settings, pipeline, self_evaluator, judge_client = build_evaluation_runtime()
@@ -391,6 +424,12 @@ def run_evaluation(
                     f"ndcg@{k}": 0.0,
                 })
             records.append(record)
+            _sleep_between_questions(
+                idx,
+                total_queries,
+                inter_question_sleep_s,
+                sleep_after_last=sleep_after_last,
+            )
             continue
             
         # 2. Extract final retrieved document IDs for retrieval metrics
@@ -490,6 +529,12 @@ def run_evaluation(
             ref_match,
             total_time,
             " [HyDE-Triggered]" if hyde_triggered else "",
+        )
+        _sleep_between_questions(
+            idx,
+            total_queries,
+            inter_question_sleep_s,
+            sleep_after_last=sleep_after_last,
         )
         
     # Aggregate results
@@ -831,8 +876,50 @@ def main() -> None:
         default=None,
         help="Limit the number of queries to evaluate per dataset (useful for testing)."
     )
+    parser.add_argument(
+        "--llm-rpm",
+        type=float,
+        default=DEFAULT_LLM_RPM,
+        help="LLM requests-per-minute limit used to compute the default sleep."
+    )
+    parser.add_argument(
+        "--llm-calls-per-question",
+        type=float,
+        default=DEFAULT_LLM_CALLS_PER_QUESTION,
+        help="Estimated number of LLM calls consumed by one evaluated question."
+    )
+    parser.add_argument(
+        "--rate-limit-buffer-s",
+        type=float,
+        default=DEFAULT_RATE_LIMIT_BUFFER_S,
+        help="Extra seconds added to the computed inter-question sleep."
+    )
+    parser.add_argument(
+        "--inter-question-sleep-s",
+        type=float,
+        default=None,
+        help=(
+            "Seconds to sleep between questions. If omitted, computed from "
+            "--llm-rpm, --llm-calls-per-question, and --rate-limit-buffer-s."
+        )
+    )
     
     args = parser.parse_args()
+
+    inter_question_sleep_s = (
+        args.inter_question_sleep_s
+        if args.inter_question_sleep_s is not None
+        else _compute_inter_question_sleep_s(
+            args.llm_rpm,
+            args.llm_calls_per_question,
+            args.rate_limit_buffer_s,
+        )
+    )
+    min_interval_s = (
+        60.0 * args.llm_calls_per_question / args.llm_rpm
+        if args.llm_rpm > 0 and args.llm_calls_per_question > 0
+        else 0.0
+    )
 
     dataset_paths = resolve_dataset_paths(args.dataset)
     multi_dataset = len(dataset_paths) > 1 or args.dataset.is_dir()
@@ -869,13 +956,19 @@ def main() -> None:
         "E2E eval config: query_v3 (production flow), HyDE enabled, "
         "reranker_score_threshold=-1.0, ValidityFilter disabled."
     )
-
-
+    logger.info(
+        "Rate-limit guard: llm_rpm=%.2f, llm_calls_per_question=%.2f, "
+        "minimum_interval=%.2fs, inter_question_sleep=%.2fs.",
+        args.llm_rpm,
+        args.llm_calls_per_question,
+        min_interval_s,
+        inter_question_sleep_s,
+    )
 
     summaries: List[Dict[str, Any]] = []
     logger.info("Found %d dataset file(s) for E2E evaluation.", len(dataset_paths))
     
-    for dataset_path in dataset_paths:
+    for dataset_index, dataset_path in enumerate(dataset_paths, start=1):
         logger.info("Loading dataset from %s ...", dataset_path)
         dataset_items = load_dataset(dataset_path)
         if args.sample_n is not None:
@@ -892,6 +985,8 @@ def main() -> None:
             pipeline=pipeline,
             self_evaluator=self_evaluator,
             judge_client=judge_client,
+            inter_question_sleep_s=inter_question_sleep_s,
+            sleep_after_last=dataset_index < len(dataset_paths),
         )
         summaries.append(summary)
 
@@ -901,4 +996,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
