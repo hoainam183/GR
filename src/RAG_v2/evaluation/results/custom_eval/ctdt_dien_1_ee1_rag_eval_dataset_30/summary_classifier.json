@@ -1,0 +1,137 @@
+{
+  "router_mode": "classifier",
+  "top_k": 5,
+  "total_queries": 30,
+  "fallback_count": 0,
+  "fallback_rate": 0.0,
+  "overall_avg_latency_ms": 4506.1,
+  "overall_avg_routing_ms": 164.0,
+  "overall_avg_retrieval_ms": 4342.1,
+  "overall_metrics": {
+    "hit@3": 0.9333,
+    "precision@3": 0.3222,
+    "recall@3": 0.8167,
+    "mrr@3": 0.8111,
+    "ndcg@3": 0.7685,
+    "hit@5": 1.0,
+    "precision@5": 0.2333,
+    "recall@5": 0.9333,
+    "mrr@5": 0.8261,
+    "ndcg@5": 0.8246,
+    "hit@7": 1.0,
+    "precision@7": 0.1667,
+    "recall@7": 0.9333,
+    "mrr@7": 0.8261,
+    "ndcg@7": 0.8246
+  },
+  "by_question_type": {
+    "multi_hop": {
+      "count": 8,
+      "metrics": {
+        "hit@3": 0.875,
+        "precision@3": 0.3333,
+        "recall@3": 0.5,
+        "mrr@3": 0.75,
+        "ndcg@3": 0.5283,
+        "hit@5": 1.0,
+        "precision@5": 0.3,
+        "recall@5": 0.75,
+        "mrr@5": 0.7812,
+        "ndcg@5": 0.657,
+        "hit@7": 1.0,
+        "precision@7": 0.2143,
+        "recall@7": 0.75,
+        "mrr@7": 0.7812,
+        "ndcg@7": 0.657
+      },
+      "avg_latency_ms": 3977.3
+    },
+    "simple": {
+      "count": 22,
+      "metrics": {
+        "hit@3": 0.9545,
+        "precision@3": 0.3182,
+        "recall@3": 0.9318,
+        "mrr@3": 0.8333,
+        "ndcg@3": 0.8559,
+        "hit@5": 1.0,
+        "precision@5": 0.2091,
+        "recall@5": 1.0,
+        "mrr@5": 0.8424,
+        "ndcg@5": 0.8855,
+        "hit@7": 1.0,
+        "precision@7": 0.1494,
+        "recall@7": 1.0,
+        "mrr@7": 0.8424,
+        "ndcg@7": 0.8855
+      },
+      "avg_latency_ms": 4698.4
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "count": 13,
+      "metrics": {
+        "hit@3": 0.9231,
+        "precision@3": 0.3077,
+        "recall@3": 0.9231,
+        "mrr@3": 0.7692,
+        "ndcg@3": 0.8095,
+        "hit@5": 1.0,
+        "precision@5": 0.2,
+        "recall@5": 1.0,
+        "mrr@5": 0.7846,
+        "ndcg@5": 0.8393,
+        "hit@7": 1.0,
+        "precision@7": 0.1429,
+        "recall@7": 1.0,
+        "mrr@7": 0.7846,
+        "ndcg@7": 0.8393
+      },
+      "avg_latency_ms": 4640.5
+    },
+    "hard": {
+      "count": 4,
+      "metrics": {
+        "hit@3": 0.75,
+        "precision@3": 0.3333,
+        "recall@3": 0.5,
+        "mrr@3": 0.625,
+        "ndcg@3": 0.5,
+        "hit@5": 1.0,
+        "precision@5": 0.35,
+        "recall@5": 0.875,
+        "mrr@5": 0.6875,
+        "ndcg@5": 0.6981,
+        "hit@7": 1.0,
+        "precision@7": 0.25,
+        "recall@7": 0.875,
+        "mrr@7": 0.6875,
+        "ndcg@7": 0.6981
+      },
+      "avg_latency_ms": 4049.6
+    },
+    "medium": {
+      "count": 13,
+      "metrics": {
+        "hit@3": 1.0,
+        "precision@3": 0.3333,
+        "recall@3": 0.8077,
+        "mrr@3": 0.9103,
+        "ndcg@3": 0.8102,
+        "hit@5": 1.0,
+        "precision@5": 0.2308,
+        "recall@5": 0.8846,
+        "mrr@5": 0.9103,
+        "ndcg@5": 0.8488,
+        "hit@7": 1.0,
+        "precision@7": 0.1649,
+        "recall@7": 0.8846,
+        "mrr@7": 0.9103,
+        "ndcg@7": 0.8488
+      },
+      "avg_latency_ms": 4512.3
+    }
+  },
+  "dataset": "ctdt_dien_1_ee1_rag_eval_dataset_30.json"
+}

@@ -1,11 +1,10 @@
 {
   "dataset_name": "rag_evaluation_dataset",
   "source_file": "ITE6_fix_chunks.json",
-  "total_questions": 30,
+  "total_questions": 26,
   "distribution": {
     "simple": 18,
-    "multi_hop": 8,
-    "adversarial": 4
+    "multi_hop": 8
   },
   "items": [
     {
@@ -407,50 +406,6 @@
       "is_answerable": true,
       "reasoning_required": "single_chunk_table_synthesis",
       "difficulty": "medium"
-    },
-    {
-      "id": "ITE6_adversarial_001",
-      "question_type": "adversarial",
-      "question": "Sinh viên chương trình CNTT Việt-Nhật phải đóng học phí bao nhiêu tiền cho mỗi tín chỉ?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "hard"
-    },
-    {
-      "id": "ITE6_adversarial_002",
-      "question_type": "adversarial",
-      "question": "Điểm chuẩn tuyển sinh của chương trình CNTT Việt-Nhật trong năm 2025 là bao nhiêu?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "hard"
-    },
-    {
-      "id": "ITE6_adversarial_003",
-      "question_type": "adversarial",
-      "question": "Sinh viên CNTT Việt-Nhật có được miễn học phần tiếng Nhật nếu đã có chứng chỉ JLPT N3 trước khi nhập học không?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "hard"
-    },
-    {
-      "id": "ITE6_adversarial_004",
-      "question_type": "adversarial",
-      "question": "Chương trình CNTT Việt-Nhật yêu cầu sinh viên đi thực tập tại công ty Nhật Bản cụ thể nào?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "hard"
     }
   ]
 }

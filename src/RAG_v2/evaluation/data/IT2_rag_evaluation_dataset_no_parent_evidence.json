@@ -1,11 +1,10 @@
 {
   "dataset_name": "rag_evaluation_dataset",
   "source_file": "IT2_fix_chunks.json",
-  "total_questions": 30,
+  "total_questions": 26,
   "distribution": {
     "simple": 18,
-    "multi_hop": 8,
-    "adversarial": 4
+    "multi_hop": 8
   },
   "items": [
     {
@@ -419,50 +418,6 @@
       "is_answerable": true,
       "reasoning_required": "multi_chunk",
       "difficulty": "hard"
-    },
-    {
-      "id": "IT2_adversarial_001",
-      "question_type": "adversarial",
-      "question": "Sinh viên ngành Kỹ thuật máy tính cần đóng học phí bao nhiêu tiền cho mỗi tín chỉ trong chương trình đào tạo IT2?",
-      "gold_answer": "Không có thông tin về mức học phí theo tín chỉ trong các chunk được cung cấp cho chương trình Cử nhân Kỹ thuật máy tính IT2.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "medium"
-    },
-    {
-      "id": "IT2_adversarial_002",
-      "question_type": "adversarial",
-      "question": "Sinh viên Kỹ thuật máy tính muốn biết địa chỉ phòng làm việc của cố vấn học tập ngành IT2 thì tra được ở đâu trong chương trình đào tạo?",
-      "gold_answer": "Không có thông tin về địa chỉ phòng làm việc của cố vấn học tập ngành IT2 trong các chunk được cung cấp.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "medium"
-    },
-    {
-      "id": "IT2_adversarial_003",
-      "question_type": "adversarial",
-      "question": "Sinh viên ngành Kỹ thuật máy tính cần đạt GPA tối thiểu bao nhiêu để được nhận học bổng tài năng?",
-      "gold_answer": "Không có thông tin về GPA tối thiểu để nhận học bổng tài năng trong các chunk được cung cấp cho chương trình Cử nhân Kỹ thuật máy tính.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "medium"
-    },
-    {
-      "id": "IT2_adversarial_004",
-      "question_type": "adversarial",
-      "question": "Sinh viên Kỹ thuật máy tính có lịch thi cuối kỳ cụ thể của học phần IT3080 Mạng máy tính vào ngày nào?",
-      "gold_answer": "Không có thông tin về lịch thi cuối kỳ hoặc ngày thi cụ thể của học phần IT3080 Mạng máy tính trong các chunk được cung cấp.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "medium"
     }
   ]
 }

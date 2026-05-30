@@ -1,0 +1,203 @@
+{
+  "total_rows": 575,
+  "retrieval_status_counts": {
+    "full_miss_top0": 258,
+    "full_miss": 228,
+    "partial_hit_missing_some_evidence": 87,
+    "recovered_full_hit": 2
+  },
+  "miss_reason_counts": {
+    "routing_collection_miss_and_top0": 194,
+    "ranking_reranking_miss_with_correct_collection": 128,
+    "routing_collection_miss": 99,
+    "partial_evidence_missing_multi_hop": 87,
+    "reranker_filtered_all_or_no_final_docs_top0": 47,
+    "llm_fallback_routing_collection_miss_and_top0": 17,
+    "llm_fallback_routing_collection_miss": 1,
+    "recovered_on_rerun": 1,
+    "label_issue_fixed_and_recovered": 1
+  },
+  "unknown_relevant_id_count": 0,
+  "by_dataset_top_reasons": {
+    "CTDT-CNKT-TaiNang-2025.03.30_rag_evaluation_dataset_no_parent_evidence.json": {
+      "partial_evidence_missing_multi_hop": 6,
+      "ranking_reranking_miss_with_correct_collection": 3,
+      "reranker_filtered_all_or_no_final_docs_top0": 1,
+      "routing_collection_miss_and_top0": 1
+    },
+    "IT2_rag_evaluation_dataset_no_parent_evidence.json": {
+      "partial_evidence_missing_multi_hop": 3,
+      "routing_collection_miss": 2,
+      "reranker_filtered_all_or_no_final_docs_top0": 1,
+      "ranking_reranking_miss_with_correct_collection": 1
+    },
+    "ITE6_rag_evaluation_dataset_no_parent_evidence.json": {
+      "ranking_reranking_miss_with_correct_collection": 5,
+      "reranker_filtered_all_or_no_final_docs_top0": 2,
+      "partial_evidence_missing_multi_hop": 2
+    },
+    "KTHH_Ky_su_180TC_2021_23_rag_evaluation_dataset_no_parent_evidence.json": {
+      "ranking_reranking_miss_with_correct_collection": 5,
+      "partial_evidence_missing_multi_hop": 2
+    },
+    "baiviet_all_rag_evaluation_dataset_200.json": {
+      "routing_collection_miss_and_top0": 43,
+      "routing_collection_miss": 18,
+      "reranker_filtered_all_or_no_final_docs_top0": 15,
+      "ranking_reranking_miss_with_correct_collection": 10,
+      "partial_evidence_missing_multi_hop": 10
+    },
+    "chinh_sach_ho_tro_sv_khuyet_tat_rag_eval_dataset_30.json": {
+      "partial_evidence_missing_multi_hop": 2
+    },
+    "chuan_tieng_anh_k63_k64_rag_eval_dataset_30.json": {
+      "partial_evidence_missing_multi_hop": 1
+    },
+    "ctdt_dien_1_ee1_rag_eval_dataset_30.json": {
+      "partial_evidence_missing_multi_hop": 4
+    },
+    "ctdt_ksclc_hang_khong_rag_eval_dataset_30.json": {
+      "partial_evidence_missing_multi_hop": 3,
+      "ranking_reranking_miss_with_correct_collection": 2,
+      "routing_collection_miss_and_top0": 1,
+      "reranker_filtered_all_or_no_final_docs_top0": 1
+    },
+    "ee2_cu_nhan_thac_sy_k69_rag_eval_dataset_30.json": {
+      "ranking_reranking_miss_with_correct_collection": 3,
+      "partial_evidence_missing_multi_hop": 2,
+      "routing_collection_miss_and_top0": 1
+    },
+    "elitech_k62_k64_rag_eval_dataset_30.json": {
+      "ranking_reranking_miss_with_correct_collection": 10,
+      "reranker_filtered_all_or_no_final_docs_top0": 5,
+      "routing_collection_miss_and_top0": 3
+    },
+    "hd_hoc_chuyen_tiep_ks_180tc_rag_eval_dataset_30.json": {
+      "routing_collection_miss": 5,
+      "ranking_reranking_miss_with_correct_collection": 2,
+      "partial_evidence_missing_multi_hop": 2
+    },
+    "kehoach_list_all_chunks_rag_eval_dataset_100.json": {
+      "routing_collection_miss": 28,
+      "routing_collection_miss_and_top0": 22,
+      "llm_fallback_routing_collection_miss_and_top0": 3,
+      "partial_evidence_missing_multi_hop": 3,
+      "llm_fallback_routing_collection_miss": 1
+    },
+    "kehoach_list_all_rag_evaluation_dataset_200.json": {
+      "routing_collection_miss_and_top0": 77,
+      "routing_collection_miss": 23,
+      "ranking_reranking_miss_with_correct_collection": 21,
+      "partial_evidence_missing_multi_hop": 7,
+      "reranker_filtered_all_or_no_final_docs_top0": 1
+    },
+    "ky_thuat_co_khi_rag_eval_dataset_30.json": {
+      "partial_evidence_missing_multi_hop": 1
+    },
+    "ky_thuat_hoa_duoc_ct_tien_tien_2020_rag_evaluation_dataset_no_parent_evidence.json": {
+      "ranking_reranking_miss_with_correct_collection": 3,
+      "partial_evidence_missing_multi_hop": 1
+    },
+    "ky_thuat_nhiet_rag_eval_dataset_30.json": {
+      "partial_evidence_missing_multi_hop": 4
+    },
+    "ky_thuat_thuc_pham_ct_tien_tien_2019_rag_evaluation_dataset_no_parent_evidence.json": {
+      "ranking_reranking_miss_with_correct_collection": 19,
+      "reranker_filtered_all_or_no_final_docs_top0": 4
+    },
+    "me_gu_rag_eval_dataset_30.json": {
+      "ranking_reranking_miss_with_correct_collection": 2,
+      "routing_collection_miss_and_top0": 2,
+      "reranker_filtered_all_or_no_final_docs_top0": 2
+    },
+    "me_luh_rag_eval_dataset_30.json": {
+      "routing_collection_miss": 2,
+      "routing_collection_miss_and_top0": 1,
+      "partial_evidence_missing_multi_hop": 1
+    },
+    "qcdt_2025_5445_qd_dhbk_rag_eval_dataset_30.json": {
+      "ranking_reranking_miss_with_correct_collection": 3,
+      "partial_evidence_missing_multi_hop": 1
+    },
+    "qd_danh_gia_diem_ren_luyen_sv_2023_rag_eval_dataset_30.json": {
+      "ranking_reranking_miss_with_correct_collection": 2,
+      "reranker_filtered_all_or_no_final_docs_top0": 2,
+      "partial_evidence_missing_multi_hop": 1
+    },
+    "qd_hoc_bong_kkht_2023_rag_eval_dataset_30.json": {
+      "routing_collection_miss": 2,
+      "partial_evidence_missing_multi_hop": 2,
+      "reranker_filtered_all_or_no_final_docs_top0": 1
+    },
+    "qd_ngoai_ngu_tu_k68_cq_rag_eval_dataset_30.json": {
+      "routing_collection_miss_and_top0": 3,
+      "routing_collection_miss": 2,
+      "partial_evidence_missing_multi_hop": 2,
+      "ranking_reranking_miss_with_correct_collection": 1
+    },
+    "qd_nn_dhcq_2020_2021_1501_rag_eval_dataset_30.json": {
+      "routing_collection_miss": 3,
+      "reranker_filtered_all_or_no_final_docs_top0": 2,
+      "routing_collection_miss_and_top0": 2,
+      "partial_evidence_missing_multi_hop": 2,
+      "recovered_on_rerun": 1
+    },
+    "qd_qlsv_nuoc_ngoai_2023_rag_eval_dataset_30.json": {
+      "partial_evidence_missing_multi_hop": 3,
+      "ranking_reranking_miss_with_correct_collection": 2
+    },
+    "qd_thi_olympic_va_dmst_2023_rag_eval_dataset_30.json": {
+      "routing_collection_miss_and_top0": 7
+    },
+    "quy_che_ctsv_dhbk_ha_noi_2025_rag_eval_dataset_30.json": {
+      "ranking_reranking_miss_with_correct_collection": 9,
+      "partial_evidence_missing_multi_hop": 3,
+      "reranker_filtered_all_or_no_final_docs_top0": 2
+    },
+    "quy_dinh_day_hoc_truc_tuyen_blearning_rag_eval_dataset_30.json": {
+      "routing_collection_miss_and_top0": 5,
+      "ranking_reranking_miss_with_correct_collection": 1,
+      "llm_fallback_routing_collection_miss_and_top0": 1
+    },
+    "quy_dinh_ngoai_ngu_k70_rag_eval_dataset_30.json": {
+      "reranker_filtered_all_or_no_final_docs_top0": 2,
+      "routing_collection_miss_and_top0": 2,
+      "ranking_reranking_miss_with_correct_collection": 1,
+      "routing_collection_miss": 1,
+      "partial_evidence_missing_multi_hop": 1
+    },
+    "quy_dinh_to_chuc_thi_truc_tuyen_rag_eval_dataset_30.json": {
+      "routing_collection_miss_and_top0": 3,
+      "reranker_filtered_all_or_no_final_docs_top0": 1
+    },
+    "quy_dinh_xet_cap_hb_tai_tro_2024_rag_eval_dataset_30.json": {
+      "partial_evidence_missing_multi_hop": 3,
+      "ranking_reranking_miss_with_correct_collection": 1
+    },
+    "quydinh_all_rag_eval_dataset_50.json": {
+      "routing_collection_miss_and_top0": 4,
+      "routing_collection_miss": 4,
+      "ranking_reranking_miss_with_correct_collection": 3,
+      "partial_evidence_missing_multi_hop": 1
+    },
+    "stsv_all_chunks_rag_eval_dataset_100.json": {
+      "ranking_reranking_miss_with_correct_collection": 5,
+      "partial_evidence_missing_multi_hop": 5,
+      "routing_collection_miss_and_top0": 3,
+      "reranker_filtered_all_or_no_final_docs_top0": 2,
+      "routing_collection_miss": 2
+    },
+    "stsv_all_rag_evaluation_dataset_200.json": {
+      "routing_collection_miss_and_top0": 13,
+      "ranking_reranking_miss_with_correct_collection": 12,
+      "partial_evidence_missing_multi_hop": 9,
+      "routing_collection_miss": 5,
+      "llm_fallback_routing_collection_miss_and_top0": 4
+    },
+    "ttlt_18_2015_gdqp_an_rag_eval_dataset_30.json": {
+      "routing_collection_miss": 2,
+      "routing_collection_miss_and_top0": 1
+    }
+  },
+  "output_csv": "src/RAG_v2/evaluation/results/custom_eval/missed_queries_rerun/miss_reason_analysis_classifier.csv"
+}

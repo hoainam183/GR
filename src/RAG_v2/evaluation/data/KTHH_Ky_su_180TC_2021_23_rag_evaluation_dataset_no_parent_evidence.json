@@ -1,11 +1,10 @@
 {
   "dataset_name": "rag_evaluation_dataset",
   "source_file": "KTHH_Ky_su_180TC_2021_23_fix_chunks.json",
-  "total_questions": 30,
+  "total_questions": 26,
   "distribution": {
     "simple": 18,
-    "multi_hop": 8,
-    "adversarial": 4
+    "multi_hop": 8
   },
   "items": [
     {
@@ -417,66 +416,6 @@
       "is_answerable": true,
       "reasoning_required": "multi_chunk_compare",
       "difficulty": "medium"
-    },
-    {
-      "id": "KTHH_Ky_su_180TC_2021_23_adversarial_001",
-      "question_type": "adversarial",
-      "question": "Sinh viên ngành Kỹ thuật Hóa học phải đạt chuẩn tiếng Anh đầu ra mức nào để được xét tốt nghiệp kỹ sư?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [
-        "d8bf171a-0cf7-48c2-817b-671e3c164e4b"
-      ],
-      "ground_truth_context": [
-        "## 1. Nội dung chương trình\n### 1.1 Cấu trúc chung của chương trình đào tạo\n\n#### Bậc cử nhân\n| Khối kiến thức | Tín chỉ | Ghi chú |\n|---|---|---|\n| **Giáo dục đại cương** | **51** | |\n| Toán và khoa học cơ bản | 32 | Thiết kế phù hợp theo nhóm ngành đào tạo |\n| Lý luận chính trị + Pháp luật đại cương | 13 | Theo quy định của Bộ GD&ĐT |\n| GDTC / GD QP-AN | - | Theo quy định của Bộ GD&ĐT |\n| Tiếng Anh | 6 | Gồm 2 học phần Tiếng Anh cơ bản |\n| **Giáo dục chuyên nghiệp** | **81** | |\n| Cơ sở và cốt"
-      ],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "hard"
-    },
-    {
-      "id": "KTHH_Ky_su_180TC_2021_23_adversarial_002",
-      "question_type": "adversarial",
-      "question": "Học phí mỗi tín chỉ của chương trình Kỹ sư Kỹ thuật Hóa học là bao nhiêu tiền?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [
-        "9ed4c1e8-1b27-4165-b7ff-ca9fa79d6681"
-      ],
-      "ground_truth_context": [
-        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT HÓA HỌC\n\n**Tên chương trình:** Kỹ thuật Hóa học  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Hóa học  \n**Mã ngành:** 7520301  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật Hóa học  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---"
-      ],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "hard"
-    },
-    {
-      "id": "KTHH_Ky_su_180TC_2021_23_adversarial_003",
-      "question_type": "adversarial",
-      "question": "Sinh viên ngành Kỹ thuật Hóa học cần CPA tối thiểu bao nhiêu để được làm đồ án tốt nghiệp kỹ sư?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [
-        "52958aca-5838-48ee-8278-6129e19f29a8"
-      ],
-      "ground_truth_context": [
-        "### F. Đồ án kỹ sư (9 tín chỉ)\n| 230 | CH5900 | Đồ án tốt nghiệp Kỹ sư Hóa dầu ... | 9(0-0-18-18) | 11 |\n| 231 | CH5908 | Đồ án tốt nghiệp Kỹ sư Hóa dược ... | 9(0-0-18-18) | 11 |"
-      ],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "hard"
-    },
-    {
-      "id": "KTHH_Ky_su_180TC_2021_23_adversarial_004",
-      "question_type": "adversarial",
-      "question": "Chương trình Kỹ thuật Hóa học có quy định sinh viên được nhận học bổng theo tiêu chí nào không?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [
-        "9ed4c1e8-1b27-4165-b7ff-ca9fa79d6681"
-      ],
-      "ground_truth_context": [
-        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT HÓA HỌC\n\n**Tên chương trình:** Kỹ thuật Hóa học  \n**Trình độ đào tạo:** Kỹ sư (bậc 7)  \n**Ngành đào tạo:** Kỹ thuật Hóa học  \n**Mã ngành:** 7520301  \n**Thời gian đào tạo:** 5,5 năm (Cử nhân 4 năm và Kỹ sư 1,5 năm)  \n**Bằng tốt nghiệp:** Kỹ sư Kỹ thuật Hóa học  \n**Khối lượng kiến thức toàn khóa:** 180 tín chỉ (Cử nhân 132 tín chỉ, Kỹ sư 48 tín chỉ)\n\n---"
-      ],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "hard"
     }
   ]
 }

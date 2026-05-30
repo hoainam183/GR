@@ -184,6 +184,86 @@ def compute_all_metrics(retrieved_ids: List[str], relevant_ids: List[str], cutof
     return metrics
 
 
+def _collection_from_data_path(path: Path) -> str:
+    for collection in ("ctdt", "quydinh", "stsv", "kehoach"):
+        if collection in path.parts:
+            return collection
+    return ""
+
+
+def build_chunk_collection_index(data_dir: Path) -> Dict[str, str]:
+    """Map dataset evidence chunk IDs to their source collection."""
+    index: Dict[str, str] = {}
+    if not data_dir.exists():
+        logger.warning("Data directory not found for router recall: %s", data_dir)
+        return index
+
+    for path in data_dir.rglob("*.json"):
+        if "chunk" not in path.name.lower():
+            continue
+        collection = _collection_from_data_path(path)
+        if not collection:
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        if isinstance(payload, list):
+            records = payload
+        elif isinstance(payload, dict):
+            records = payload.get("items") or payload.get("chunks") or [payload]
+        else:
+            continue
+
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+            for key in ("id", "chunk_id"):
+                value = _raw_id(record.get(key))
+                if value:
+                    index[value] = collection
+
+    logger.info("Built chunk→collection index with %d IDs", len(index))
+    return index
+
+
+def _expected_collections(
+    relevant_ids: List[str],
+    chunk_collection_index: Dict[str, str],
+) -> List[str]:
+    seen: Dict[str, None] = {}
+    for chunk_id in relevant_ids:
+        collection = chunk_collection_index.get(_raw_id(chunk_id))
+        if collection:
+            seen.setdefault(collection, None)
+    return list(seen.keys())
+
+
+def _collection_recall(
+    target_collections: List[str],
+    expected_collections: List[str],
+) -> Tuple[float, float]:
+    expected = {col for col in expected_collections if col}
+    if not expected:
+        return 0.0, 0.0
+    target = {col for col in target_collections if col}
+    matched = expected & target
+    return (
+        round(len(matched) / len(expected), 4),
+        1.0 if expected.issubset(target) else 0.0,
+    )
+
+
+def _safe_score(value: Any) -> str:
+    if value is None:
+        return ""
+    try:
+        return str(round(float(value), 6))
+    except (TypeError, ValueError):
+        return str(value)
+
+
 # ─── Dataset Loading ────────────────────────────────────────────────────────────
 
 def load_dataset(dataset_path: Path) -> List[Dict[str, Any]]:
@@ -260,6 +340,7 @@ def run_evaluation(
     top_k: int,
     output_dir: Path,
     dataset_name: Optional[str] = None,
+    candidate_k: int = 20,
     settings: Optional[Settings] = None,
     service: Optional[RetrievalService] = None,
     selector: Optional[CollectionSelector] = None,
@@ -274,6 +355,8 @@ def run_evaluation(
     cutoffs = [3, 5, 7]
     
     records: List[Dict[str, Any]] = []
+    candidate_records: List[Dict[str, Any]] = []
+    chunk_collection_index = build_chunk_collection_index(PROJECT_ROOT / "data")
     
     total_fallback_triggers = 0
     total_queries = len(dataset_items)
@@ -325,27 +408,82 @@ def run_evaluation(
             domain = routing_decision.get("domain")
             domains = routing_decision.get("domains") or ([domain] if domain else [])
             confidence = float(routing_decision.get("confidence") or 0.0)
-            collections = selector.select(domain=domain, domains=domains, confidence=confidence)
+            collections = selector.select(
+                domain=domain,
+                domains=domains,
+                confidence=confidence,
+                query=question,
+            )
             
         routing_time_ms = round((time.perf_counter() - t_start) * 1000, 2)
         
-        # Retrieval Stage (Hybrid search + BGE reranking)
+        # Retrieval Stage (hybrid candidates → strict rerank → min_top_k final)
         t_start = time.perf_counter()
-        # Use ValidityFilter & ReferenceResolver implicitly as defined in pipeline if needed
-        # We query the service directly
-        retrieved_docs = service.search(
+        raw_candidate_k = max(candidate_k, top_k * 4)
+        search_trace: Dict[str, Any] = {}
+        bge_vec, e5_vec = service.embed_query(question)
+        raw_candidates = service.searcher.search(
             query=question,
-            collections=collections,
-            top_k=top_k,
-            rerank=True,
+            bge_m3_query=bge_vec,
+            e5_query=e5_vec,
+            top_k=raw_candidate_k,
+            vector_top_k=settings.vector_top_k,
+            keyword_top_k=settings.keyword_top_k,
+            vector_pool_k=settings.vector_pool_k,
+            keyword_pool_k=settings.keyword_pool_k,
+            active_collections=collections,
+            trace_out=search_trace,
+        )
+
+        strict_rerank_ids: List[str] = []
+        rerank_stats: Dict[str, Any] = {}
+        if service.reranker is not None:
+            reranked_docs = service.reranker.rerank(
+                query=question,
+                documents=raw_candidates,
+                top_k=top_k,
+                min_top_k=top_k,
+            )
+            rerank_stats = dict(getattr(service.reranker, "last_stats", {}) or {})
+            strict_rerank_ids = [
+                _raw_id(doc_id)
+                for doc_id in _as_list(rerank_stats.get("rerank_strict_returned_ids"))
+            ]
+        else:
+            reranked_docs = sorted(
+                raw_candidates,
+                key=lambda doc: float(doc.get("score") or 0.0),
+                reverse=True,
+            )[:top_k]
+            strict_rerank_ids = [_source_id(doc) for doc in reranked_docs if doc]
+            rerank_stats = {
+                "rerank_skipped": True,
+                "rerank_candidate_count": len(raw_candidates),
+                "rerank_returned_count": len(reranked_docs),
+            }
+
+        retrieved_docs = (
+            service._expand_parent_context(reranked_docs, collections)
+            if settings.parent_context_enabled
+            else reranked_docs
         )
         retrieval_time_ms = round((time.perf_counter() - t_start) * 1000, 2)
         
-        # Map retrieve document IDs
+        # Map retrieved document IDs at each stage
+        candidate_ids = [_source_id(doc) for doc in raw_candidates[:candidate_k] if doc]
         retrieved_ids = [_source_id(doc) for doc in retrieved_docs if doc]
+        reranked_ids = [_source_id(doc) for doc in reranked_docs if doc]
+        expected_collections = _expected_collections(
+            relevant_ids,
+            chunk_collection_index,
+        )
+        router_recall, router_hit = _collection_recall(collections, expected_collections)
         
         # Calculate metrics for the query
         metrics = compute_all_metrics(retrieved_ids, relevant_ids, cutoffs)
+        candidate_metrics = compute_metrics_for_k(candidate_ids, relevant_ids, candidate_k)
+        strict_rerank_metrics = compute_metrics_for_k(strict_rerank_ids, relevant_ids, 5)
+        final_stage_metrics = compute_metrics_for_k(retrieved_ids, relevant_ids, 5)
         
         # Add latency and routing details
         total_time_ms = round(routing_time_ms + retrieval_time_ms, 2)
@@ -356,8 +494,27 @@ def run_evaluation(
             "question_type": question_type,
             "difficulty": difficulty,
             "target_collections": ",".join(collections),
+            "expected_collections": ",".join(expected_collections),
+            "router_recall": router_recall,
+            "router_hit": router_hit,
             "relevant_chunk_ids": ",".join(relevant_ids),
+            "pre_rerank_candidate_ids@20": ",".join(candidate_ids),
+            "strict_rerank_chunk_ids": ",".join(strict_rerank_ids),
+            "reranked_chunk_ids": ",".join(reranked_ids),
             "retrieved_chunk_ids": ",".join(retrieved_ids),
+            "candidate_hit@20": candidate_metrics[f"hit@{candidate_k}"],
+            "candidate_recall@20": candidate_metrics[f"recall@{candidate_k}"],
+            "rerank_hit@5": strict_rerank_metrics["hit@5"],
+            "rerank_recall@5": strict_rerank_metrics["recall@5"],
+            "final_hit@5": final_stage_metrics["hit@5"],
+            "final_recall@5": final_stage_metrics["recall@5"],
+            "raw_candidate_count": len(raw_candidates),
+            "rerank_candidate_count": rerank_stats.get("rerank_candidate_count", ""),
+            "rerank_passing_count": rerank_stats.get("rerank_passing_count", ""),
+            "rerank_strict_returned_count": rerank_stats.get("rerank_strict_returned_count", ""),
+            "rerank_returned_count": rerank_stats.get("rerank_returned_count", ""),
+            "rerank_threshold_fallback_used": rerank_stats.get("rerank_threshold_fallback_used", False),
+            "rerank_threshold_fallback_count": rerank_stats.get("rerank_threshold_fallback_count", 0),
             "routing_time_ms": routing_time_ms,
             "retrieval_time_ms": retrieval_time_ms,
             "total_time_ms": total_time_ms,
@@ -367,13 +524,46 @@ def run_evaluation(
         }
         
         records.append(record)
+
+        relevant_set = {_raw_id(chunk_id) for chunk_id in relevant_ids}
+        for rank, doc in enumerate(raw_candidates[:candidate_k], start=1):
+            doc_id = _source_id(doc)
+            metadata = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}
+            candidate_records.append(
+                {
+                    "query_id": item_id,
+                    "question": question,
+                    "rank": rank,
+                    "candidate_chunk_id": doc_id,
+                    "is_relevant": 1 if doc_id in relevant_set else 0,
+                    "collection": doc.get("collection", ""),
+                    "score": _safe_score(doc.get("score")),
+                    "vector_score": _safe_score(doc.get("vector_score")),
+                    "keyword_score": _safe_score(doc.get("keyword_score")),
+                    "norm_vector": _safe_score(doc.get("norm_vector")),
+                    "norm_keyword": _safe_score(doc.get("norm_keyword")),
+                    "title": metadata.get("title") or metadata.get("doc_title") or "",
+                    "source": metadata.get("source") or "",
+                    "text_preview": str(doc.get("text") or "").replace("\n", " ")[:260],
+                }
+            )
         
         # Quick log of metrics
         logger.info(
-            "  ↳ Hit@3: %.2f | Hit@5: %.2f | Hit@7: %.2f | Latency: %.1fms (Routing: %.1fms, Retrieval: %.1fms)%s",
+            "  ↳ RouterR: %.2f | CandR@20: %.2f | StrictRerankR@5: %.2f | FinalHit@5: %.2f | Latency: %.1fms (Routing: %.1fms, Retrieval: %.1fms)%s",
+            router_recall,
+            candidate_metrics[f"recall@{candidate_k}"],
+            strict_rerank_metrics["recall@5"],
+            metrics["hit@5"],
+            total_time_ms,
+            routing_time_ms,
+            retrieval_time_ms,
+            " [LLM-FALLBACK]" if fallback_triggered else "",
+        )
+        logger.debug(
+            "  ↳ Hit@3: %.2f | Hit@5: %.2f | Hit@7: %.2f | trace=%s",
             metrics["hit@3"], metrics["hit@5"], metrics["hit@7"],
-            total_time_ms, routing_time_ms, retrieval_time_ms,
-            " [LLM-FALLBACK]" if fallback_triggered else ""
+            search_trace,
         )
 
     # 3. Aggregate results and breakdowns
@@ -382,7 +572,7 @@ def run_evaluation(
         summary["dataset"] = dataset_name
     
     # 4. Save results to disk
-    save_outputs(records, summary, output_dir, router_mode)
+    save_outputs(records, summary, output_dir, router_mode, candidate_records)
     
     return summary
 
@@ -392,7 +582,13 @@ def run_evaluation(
 def _average_metrics(recs: List[Dict[str, Any]]) -> Dict[str, float]:
     if not recs:
         return {}
-    keys = [k for k in recs[0].keys() if "@" in k]
+    stage_keys = {"router_recall", "router_hit"}
+    keys = []
+    for key, value in recs[0].items():
+        if "@" not in key and key not in stage_keys:
+            continue
+        if isinstance(value, (int, float, bool)):
+            keys.append(key)
     return {
         key: round(float(sum(r[key] for r in recs) / len(recs)), 4)
         for key in keys
@@ -456,6 +652,7 @@ def save_outputs(
     summary: Dict[str, Any],
     output_dir: Path,
     router_mode: str,
+    candidate_records: Optional[List[Dict[str, Any]]] = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     
@@ -468,6 +665,16 @@ def save_outputs(
             writer.writeheader()
             writer.writerows(records)
     logger.info("Wrote detailed results CSV → %s", csv_path)
+
+    # 1b. Save pre-rerank candidate CSV for retrieval-stage diagnosis
+    candidate_csv_path = output_dir / f"pre_rerank_candidates_{router_mode}.csv"
+    if candidate_records:
+        keys = list(candidate_records[0].keys())
+        with candidate_csv_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=keys)
+            writer.writeheader()
+            writer.writerows(candidate_records)
+        logger.info("Wrote pre-rerank candidate CSV → %s", candidate_csv_path)
             
     # 2. Save summary JSON
     json_path = output_dir / f"summary_{router_mode}.json"
@@ -502,6 +709,20 @@ def save_outputs(
     
     if router_mode == "classifier":
         lines.append(f"| **Gemini Fallback Rate** | `{summary['fallback_rate'] * 100:.2f}%` (`{summary['fallback_count']}` queries) |")
+
+    stage_metrics = summary["overall_metrics"]
+    lines.extend([
+        "",
+        "## Stage Metrics",
+        "",
+        "| Stage | Metric | Score |",
+        "| :--- | :--- | :---: |",
+        f"| Router | router_recall | `{stage_metrics.get('router_recall', 0.0) * 100:.2f}%` |",
+        f"| Router | router_hit | `{stage_metrics.get('router_hit', 0.0) * 100:.2f}%` |",
+        f"| Pre-rerank candidates | candidate_recall@20 | `{stage_metrics.get('candidate_recall@20', 0.0) * 100:.2f}%` |",
+        f"| Strict rerank | rerank_recall@5 | `{stage_metrics.get('rerank_recall@5', 0.0) * 100:.2f}%` |",
+        f"| Final | final_recall@5 | `{stage_metrics.get('final_recall@5', 0.0) * 100:.2f}%` |",
+    ])
         
     lines.extend([
         "",

@@ -1,0 +1,137 @@
+{
+  "router_mode": "classifier",
+  "top_k": 5,
+  "total_queries": 26,
+  "fallback_count": 0,
+  "fallback_rate": 0.0,
+  "overall_avg_latency_ms": 4475.7,
+  "overall_avg_routing_ms": 139.4,
+  "overall_avg_retrieval_ms": 4336.3,
+  "overall_metrics": {
+    "hit@3": 0.8077,
+    "precision@3": 0.3205,
+    "recall@3": 0.7244,
+    "mrr@3": 0.7692,
+    "ndcg@3": 0.719,
+    "hit@5": 0.8077,
+    "precision@5": 0.2154,
+    "recall@5": 0.7692,
+    "mrr@5": 0.7692,
+    "ndcg@5": 0.7439,
+    "hit@7": 0.8077,
+    "precision@7": 0.1539,
+    "recall@7": 0.7692,
+    "mrr@7": 0.7692,
+    "ndcg@7": 0.7439
+  },
+  "by_question_type": {
+    "multi_hop": {
+      "count": 8,
+      "metrics": {
+        "hit@3": 0.875,
+        "precision@3": 0.4583,
+        "recall@3": 0.6042,
+        "mrr@3": 0.8125,
+        "ndcg@3": 0.633,
+        "hit@5": 0.875,
+        "precision@5": 0.35,
+        "recall@5": 0.75,
+        "mrr@5": 0.8125,
+        "ndcg@5": 0.7139,
+        "hit@7": 0.875,
+        "precision@7": 0.25,
+        "recall@7": 0.75,
+        "mrr@7": 0.8125,
+        "ndcg@7": 0.7139
+      },
+      "avg_latency_ms": 4328.8
+    },
+    "simple": {
+      "count": 18,
+      "metrics": {
+        "hit@3": 0.7778,
+        "precision@3": 0.2592,
+        "recall@3": 0.7778,
+        "mrr@3": 0.75,
+        "ndcg@3": 0.7573,
+        "hit@5": 0.7778,
+        "precision@5": 0.1556,
+        "recall@5": 0.7778,
+        "mrr@5": 0.75,
+        "ndcg@5": 0.7573,
+        "hit@7": 0.7778,
+        "precision@7": 0.1111,
+        "recall@7": 0.7778,
+        "mrr@7": 0.75,
+        "ndcg@7": 0.7573
+      },
+      "avg_latency_ms": 4541.0
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "count": 19,
+      "metrics": {
+        "hit@3": 0.7895,
+        "precision@3": 0.2982,
+        "recall@3": 0.7719,
+        "mrr@3": 0.7632,
+        "ndcg@3": 0.7535,
+        "hit@5": 0.7895,
+        "precision@5": 0.1895,
+        "recall@5": 0.7895,
+        "mrr@5": 0.7632,
+        "ndcg@5": 0.7641,
+        "hit@7": 0.7895,
+        "precision@7": 0.1354,
+        "recall@7": 0.7895,
+        "mrr@7": 0.7632,
+        "ndcg@7": 0.7641
+      },
+      "avg_latency_ms": 4550.2
+    },
+    "hard": {
+      "count": 2,
+      "metrics": {
+        "hit@3": 0.5,
+        "precision@3": 0.3333,
+        "recall@3": 0.3333,
+        "mrr@3": 0.5,
+        "ndcg@3": 0.3827,
+        "hit@5": 0.5,
+        "precision@5": 0.3,
+        "recall@5": 0.5,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.4734,
+        "hit@7": 0.5,
+        "precision@7": 0.2143,
+        "recall@7": 0.5,
+        "mrr@7": 0.5,
+        "ndcg@7": 0.4734
+      },
+      "avg_latency_ms": 4113.0
+    },
+    "medium": {
+      "count": 5,
+      "metrics": {
+        "hit@3": 1.0,
+        "precision@3": 0.4,
+        "recall@3": 0.7,
+        "mrr@3": 0.9,
+        "ndcg@3": 0.7226,
+        "hit@5": 1.0,
+        "precision@5": 0.28,
+        "recall@5": 0.8,
+        "mrr@5": 0.9,
+        "ndcg@5": 0.7754,
+        "hit@7": 1.0,
+        "precision@7": 0.2,
+        "recall@7": 0.8,
+        "mrr@7": 0.9,
+        "ndcg@7": 0.7754
+      },
+      "avg_latency_ms": 4337.6
+    }
+  },
+  "dataset": "KTHH_Ky_su_180TC_2021_23_rag_evaluation_dataset_no_parent_evidence.json"
+}

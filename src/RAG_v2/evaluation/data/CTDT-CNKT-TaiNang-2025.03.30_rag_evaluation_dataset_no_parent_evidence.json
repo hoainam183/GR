@@ -1,11 +1,10 @@
 {
   "dataset_name": "rag_evaluation_dataset",
   "source_file": "CTDT-CNKT-TaiNang-2025.03.30_fix_chunks.json",
-  "total_questions": 30,
+  "total_questions": 26,
   "distribution": {
     "simple": 18,
-    "multi_hop": 8,
-    "adversarial": 4
+    "multi_hop": 8
   },
   "items": [
     {
@@ -421,50 +420,6 @@
       "is_answerable": true,
       "reasoning_required": "multi_chunk",
       "difficulty": "hard"
-    },
-    {
-      "id": "CTDT_CNKT_TaiNang_2025_03_30_adversarial_001",
-      "question_type": "adversarial",
-      "question": "Chương trình Cử nhân tài năng Khoa học máy tính quy định mức học phí mỗi tín chỉ là bao nhiêu?",
-      "gold_answer": "Không có thông tin về mức học phí mỗi tín chỉ trong các chunk được cung cấp.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "medium"
-    },
-    {
-      "id": "CTDT_CNKT_TaiNang_2025_03_30_adversarial_002",
-      "question_type": "adversarial",
-      "question": "Sinh viên Cử nhân tài năng Khoa học máy tính cần đạt điểm GPA tối thiểu bao nhiêu để được nhận học bổng?",
-      "gold_answer": "Không có thông tin về điểm GPA tối thiểu để nhận học bổng trong các chunk được cung cấp.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "medium"
-    },
-    {
-      "id": "CTDT_CNKT_TaiNang_2025_03_30_adversarial_003",
-      "question_type": "adversarial",
-      "question": "Chương trình Cử nhân tài năng Khoa học máy tính quy định sinh viên phải nộp chứng chỉ IELTS vào thời hạn nào trước khi tốt nghiệp?",
-      "gold_answer": "Không có thông tin về thời hạn nộp chứng chỉ IELTS trước khi tốt nghiệp trong các chunk được cung cấp.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "medium"
-    },
-    {
-      "id": "CTDT_CNKT_TaiNang_2025_03_30_adversarial_004",
-      "question_type": "adversarial",
-      "question": "Sinh viên Cử nhân tài năng Khoa học máy tính có bắt buộc đi trao đổi quốc tế trong học kỳ 7 không?",
-      "gold_answer": "Không có thông tin cho biết sinh viên bắt buộc phải đi trao đổi quốc tế trong học kỳ 7 trong các chunk được cung cấp.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable_from_context",
-      "difficulty": "medium"
     }
   ]
 }

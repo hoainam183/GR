@@ -1,0 +1,114 @@
+{
+  "total_queries": 575,
+  "final_misses": 249,
+  "final_hits": 326,
+  "stage_distribution_all_queries": {
+    "retrieval_candidates": 129,
+    "hit_strict_rerank": 299,
+    "reranker_final_top5": 78,
+    "recovered_by_min_top_k": 27,
+    "router": 42
+  },
+  "miss_distribution": {
+    "retrieval_candidates": 129,
+    "reranker_final_top5": 78,
+    "router": 42
+  },
+  "miss_by_question_type": {
+    "simple": 190,
+    "multi_hop": 59
+  },
+  "miss_by_difficulty": {
+    "easy": 171,
+    "medium": 73,
+    "hard": 5
+  },
+  "top_miss_dataset_prefixes": [
+    [
+      "kehoach_list_all",
+      55
+    ],
+    [
+      "baiviet_all",
+      31
+    ],
+    [
+      "stsv_all",
+      23
+    ],
+    [
+      "ky_thuat_thuc_pham_ct_tien_tien_2019",
+      22
+    ],
+    [
+      "elitech_k62_k64",
+      17
+    ],
+    [
+      "kehoach_list",
+      11
+    ],
+    [
+      "quy_che_ctsv_2025",
+      11
+    ],
+    [
+      "qd_olympic_dmst_2023",
+      7
+    ],
+    [
+      "day_hoc_truc_tuyen",
+      7
+    ],
+    [
+      "qd_nn_dhcq_2020_2021_1501",
+      6
+    ],
+    [
+      "quydinh_all",
+      6
+    ],
+    [
+      "KTHH_Ky_su_180TC_2021_23",
+      5
+    ],
+    [
+      "hd_hoc_chuyen_tiep_ks_180tc",
+      5
+    ],
+    [
+      "quy_dinh_ngoai_ngu_k70",
+      5
+    ],
+    [
+      "CTDT_CNKT_TaiNang_2025_03_30",
+      4
+    ],
+    [
+      "ITE6",
+      4
+    ],
+    [
+      "qd_dgrl_2023",
+      4
+    ],
+    [
+      "qd_thi_truc_tuyen_2021",
+      4
+    ],
+    [
+      "3khung_ct_cn_thac_sy_k69_ee2",
+      3
+    ],
+    [
+      "ky_thuat_hoa_duoc_ct_tien_tien_2020",
+      3
+    ]
+  ],
+  "notes": {
+    "router": "Expected collection not selected; may be routing or relevant_chunk_id collection mapping issue.",
+    "retrieval_candidates": "Expected collection selected, but hybrid retrieval did not surface relevant chunk in top20.",
+    "reranker_final_top5": "Relevant chunk was in pre-rerank candidates but lost after reranking/final top5.",
+    "recovered_by_min_top_k": "New min_top_k fallback fixed a strict threshold miss."
+  }
+}

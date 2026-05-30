@@ -1,11 +1,10 @@
 {
   "dataset_name": "rag_evaluation_dataset",
   "source_file": "ky_thuat_thuc_pham_ct_tien_tien_2019_fix_chunks.json",
-  "total_questions": 30,
+  "total_questions": 26,
   "distribution": {
     "simple": 18,
-    "multi_hop": 8,
-    "adversarial": 4
+    "multi_hop": 8
   },
   "items": [
     {
@@ -407,50 +406,6 @@
       "is_answerable": true,
       "reasoning_required": "multi_chunk",
       "difficulty": "medium"
-    },
-    {
-      "id": "ky_thuat_thuc_pham_ct_tien_tien_2019_adversarial_001",
-      "question_type": "adversarial",
-      "question": "Sinh viên chương trình tiên tiến Kỹ thuật Thực phẩm phải đóng học phí bao nhiêu tiền cho mỗi tín chỉ?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "hard"
-    },
-    {
-      "id": "ky_thuat_thuc_pham_ct_tien_tien_2019_adversarial_002",
-      "question_type": "adversarial",
-      "question": "Điều kiện điểm GPA tối thiểu để sinh viên chương trình tiên tiến Kỹ thuật Thực phẩm được làm đồ án tốt nghiệp là bao nhiêu?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "hard"
-    },
-    {
-      "id": "ky_thuat_thuc_pham_ct_tien_tien_2019_adversarial_003",
-      "question_type": "adversarial",
-      "question": "Sinh viên chương trình tiên tiến Kỹ thuật Thực phẩm cần đạt chứng chỉ IELTS tối thiểu bao nhiêu để được xét tốt nghiệp?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "hard"
-    },
-    {
-      "id": "ky_thuat_thuc_pham_ct_tien_tien_2019_adversarial_004",
-      "question_type": "adversarial",
-      "question": "Sau khi tốt nghiệp chương trình tiên tiến Kỹ thuật Thực phẩm, sinh viên được phân công làm việc tại doanh nghiệp nào?",
-      "gold_answer": "Không có thông tin trong các chunk được cung cấp để trả lời câu hỏi này.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "hard"
     }
   ]
 }

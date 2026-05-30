@@ -150,6 +150,10 @@ class Settings(BaseSettings):
     # to score below -1.0 (previously -5.0 was too permissive, allowing
     # wrong-program table docs to pollute LLM context).
     reranker_table_score_threshold: float = -1.0
+    # Keep at least this many top reranker-scored candidates even when all
+    # scores fall below thresholds. This prevents retrieval from returning
+    # top0 while preserving score ordering for answer context.
+    reranker_min_top_k: int = 5
 
     # --- Router ---
     router_mode: str = "classifier"

@@ -1,0 +1,116 @@
+{
+  "router_mode": "classifier",
+  "top_k": 5,
+  "total_queries": 26,
+  "fallback_count": 0,
+  "fallback_rate": 0.0,
+  "overall_avg_latency_ms": 5315.1,
+  "overall_avg_routing_ms": 210.0,
+  "overall_avg_retrieval_ms": 5105.1,
+  "overall_metrics": {
+    "hit@3": 0.8846,
+    "precision@3": 0.359,
+    "recall@3": 0.8462,
+    "mrr@3": 0.7821,
+    "ndcg@3": 0.7806,
+    "hit@5": 0.8846,
+    "precision@5": 0.2231,
+    "recall@5": 0.8654,
+    "mrr@5": 0.7821,
+    "ndcg@5": 0.7907,
+    "hit@7": 0.8846,
+    "precision@7": 0.1594,
+    "recall@7": 0.8654,
+    "mrr@7": 0.7821,
+    "ndcg@7": 0.7907
+  },
+  "by_question_type": {
+    "multi_hop": {
+      "count": 8,
+      "metrics": {
+        "hit@3": 0.875,
+        "precision@3": 0.4583,
+        "recall@3": 0.75,
+        "mrr@3": 0.8125,
+        "ndcg@3": 0.7299,
+        "hit@5": 0.875,
+        "precision@5": 0.3,
+        "recall@5": 0.8125,
+        "mrr@5": 0.8125,
+        "ndcg@5": 0.7629,
+        "hit@7": 0.875,
+        "precision@7": 0.2143,
+        "recall@7": 0.8125,
+        "mrr@7": 0.8125,
+        "ndcg@7": 0.7629
+      },
+      "avg_latency_ms": 5253.3
+    },
+    "simple": {
+      "count": 18,
+      "metrics": {
+        "hit@3": 0.8889,
+        "precision@3": 0.3148,
+        "recall@3": 0.8889,
+        "mrr@3": 0.7685,
+        "ndcg@3": 0.8031,
+        "hit@5": 0.8889,
+        "precision@5": 0.1889,
+        "recall@5": 0.8889,
+        "mrr@5": 0.7685,
+        "ndcg@5": 0.8031,
+        "hit@7": 0.8889,
+        "precision@7": 0.135,
+        "recall@7": 0.8889,
+        "mrr@7": 0.7685,
+        "ndcg@7": 0.8031
+      },
+      "avg_latency_ms": 5342.5
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "count": 18,
+      "metrics": {
+        "hit@3": 0.8889,
+        "precision@3": 0.3148,
+        "recall@3": 0.8889,
+        "mrr@3": 0.7685,
+        "ndcg@3": 0.8031,
+        "hit@5": 0.8889,
+        "precision@5": 0.1889,
+        "recall@5": 0.8889,
+        "mrr@5": 0.7685,
+        "ndcg@5": 0.8031,
+        "hit@7": 0.8889,
+        "precision@7": 0.135,
+        "recall@7": 0.8889,
+        "mrr@7": 0.7685,
+        "ndcg@7": 0.8031
+      },
+      "avg_latency_ms": 5342.5
+    },
+    "medium": {
+      "count": 8,
+      "metrics": {
+        "hit@3": 0.875,
+        "precision@3": 0.4583,
+        "recall@3": 0.75,
+        "mrr@3": 0.8125,
+        "ndcg@3": 0.7299,
+        "hit@5": 0.875,
+        "precision@5": 0.3,
+        "recall@5": 0.8125,
+        "mrr@5": 0.8125,
+        "ndcg@5": 0.7629,
+        "hit@7": 0.875,
+        "precision@7": 0.2143,
+        "recall@7": 0.8125,
+        "mrr@7": 0.8125,
+        "ndcg@7": 0.7629
+      },
+      "avg_latency_ms": 5253.3
+    }
+  },
+  "dataset": "ky_thuat_hoa_duoc_ct_tien_tien_2020_rag_evaluation_dataset_no_parent_evidence.json"
+}

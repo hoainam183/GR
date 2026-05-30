@@ -1,11 +1,10 @@
 {
   "dataset_name": "rag_evaluation_dataset",
   "source_file": "ky_thuat_hoa_duoc_ct_tien_tien_2020_fix_chunks.json",
-  "total_questions": 30,
+  "total_questions": 26,
   "distribution": {
     "simple": 18,
-    "multi_hop": 8,
-    "adversarial": 4
+    "multi_hop": 8
   },
   "items": [
     {
@@ -415,54 +414,6 @@
       "is_answerable": true,
       "reasoning_required": "multi_chunk",
       "difficulty": "medium"
-    },
-    {
-      "id": "ky_thuat_hoa_duoc_ct_tien_tien_2020_adversarial_001",
-      "question_type": "adversarial",
-      "question": "Chương trình tiên tiến Kỹ thuật Hóa dược có quy định mức học phí theo từng tín chỉ cho sinh viên không?",
-      "gold_answer": "Không có thông tin về mức học phí theo từng tín chỉ trong các chunk được cung cấp.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "hard"
-    },
-    {
-      "id": "ky_thuat_hoa_duoc_ct_tien_tien_2020_adversarial_002",
-      "question_type": "adversarial",
-      "question": "Sinh viên chương trình tiên tiến Kỹ thuật Hóa dược có bắt buộc học tiếng Nhật để tốt nghiệp không?",
-      "gold_answer": "Không có thông tin nào trong các chunk được cung cấp cho thấy sinh viên chương trình tiên tiến Kỹ thuật Hóa dược bắt buộc học tiếng Nhật để tốt nghiệp.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "hard"
-    },
-    {
-      "id": "ky_thuat_hoa_duoc_ct_tien_tien_2020_adversarial_003",
-      "question_type": "adversarial",
-      "question": "Chương trình tiên tiến Kỹ thuật Hóa dược có đào tạo bậc kỹ sư 5,5 năm với 180 tín chỉ không?",
-      "gold_answer": "Không. Theo chunk được cung cấp, chương trình tiên tiến Kỹ thuật Hóa dược có thời gian đào tạo 4 năm và khối lượng kiến thức toàn khóa là 126 tín chỉ, chưa tính các tín chỉ ngoại ngữ.",
-      "evidence_chunk_ids": [
-        "b1ae6419-5ff0-4999-8abb-8df7fbacb96b"
-      ],
-      "ground_truth_context": [
-        "# CHƯƠNG TRÌNH GIÁO DỤC ĐẠI HỌC - KỸ THUẬT HÓA DƯỢC (CHƯƠNG TRÌNH TIÊN TIẾN)\n\n**Tên chương trình:** Kỹ thuật Hóa dược (chương trình tiên tiến)\n**Trình độ đào tạo:** Cử nhân Khoa học\n**Ngành đào tạo:** Kỹ thuật Hóa học\n**Mã ngành:** 7520301\n**Thời gian đào tạo:** 4 năm\n**Bằng tốt nghiệp:** Cử nhân Kỹ thuật Hóa học\n**Khối lượng kiến thức toàn khóa:** 126 tín chỉ (chưa tính các tín chỉ ngoại ngữ)\n\n---"
-      ],
-      "is_answerable": true,
-      "reasoning_required": "single_chunk_contradiction",
-      "difficulty": "hard"
-    },
-    {
-      "id": "ky_thuat_hoa_duoc_ct_tien_tien_2020_adversarial_004",
-      "question_type": "adversarial",
-      "question": "Sinh viên chương trình tiên tiến Kỹ thuật Hóa dược cần đạt GPA tối thiểu bao nhiêu để được làm đồ án tốt nghiệp cử nhân?",
-      "gold_answer": "Không có thông tin về GPA tối thiểu để được làm đồ án tốt nghiệp cử nhân trong các chunk được cung cấp.",
-      "evidence_chunk_ids": [],
-      "ground_truth_context": [],
-      "is_answerable": false,
-      "reasoning_required": "unanswerable",
-      "difficulty": "hard"
     }
   ]
 }
