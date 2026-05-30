@@ -1349,41 +1349,19 @@ def _should_trigger_hyde(
 ) -> bool:
     """Decide whether HyDE second-pass retrieval should run.
 
-    Triggers when:
+    Triggers ONLY when:
       1. ``hyde_enabled`` config flag is True, AND
-      2. At least one of:
-         a. Fewer results than ``hyde_min_results`` (default 3).
-         b. Reranker mean score below ``hyde_confidence_threshold`` (default 0.3).
-         c. Best rerank score is negative (all docs irrelevant).
+      2. The best explicit rerank score is negative (all docs irrelevant)
+         or no documents survived the reranking.
     """
     if not _cfg_bool(cfg, "hyde_enabled", False):
         return False
 
-    min_results = _cfg_int(cfg, "hyde_min_results", 3)
-    if len(reranked) < min_results:
-        logger.info(
-            "HyDE trigger: only %d reranked results (min=%d)",
-            len(reranked),
-            min_results,
-        )
-        return True
-
-    if reranker is not None and hasattr(reranker, "last_stats"):
-        stats = reranker.last_stats or {}
-        mean_score = stats.get("rerank_score_mean", 999.0)
-        threshold = _cfg_float(cfg, "hyde_confidence_threshold", 0.3)
-        if mean_score < threshold:
-            logger.info(
-                "HyDE trigger: reranker mean=%.4f < threshold=%.4f",
-                mean_score,
-                threshold,
-            )
-            return True
-
     best = _best_explicit_rerank_score(reranked)
-    if best is not None and best < 0.0:
+    if not reranked or (best is not None and best < 0.0):
         logger.info(
-            "HyDE trigger: best rerank score=%.4f (negative)", best
+            "HyDE trigger: best rerank score=%.4f (negative or empty)",
+            best if best is not None else -999.0
         )
         return True
 

@@ -844,6 +844,14 @@ def main() -> None:
     pipeline._validity_filter = None
     logger.info("ValidityFilter has been disabled for E2E evaluation.")
 
+    # Enable HyDE and set Reranker score threshold to -1.0 dynamically
+    settings.hyde_enabled = True
+    pipeline._cfg["hyde_enabled"] = True
+    settings.reranker_score_threshold = -1.0
+    pipeline._cfg["reranker_score_threshold"] = -1.0
+    logger.info("HyDE enabled and Reranker score threshold set to -1.0 dynamically.")
+
+
 
     summaries: List[Dict[str, Any]] = []
     logger.info("Found %d dataset file(s) for E2E evaluation.", len(dataset_paths))
