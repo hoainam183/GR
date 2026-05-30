@@ -340,9 +340,11 @@ def run_evaluation(
         logger.info("[%d/%d] ID: %s | Question: '%s'", idx, total_queries, item_id, question[:50])
         
         # 1. E2E query execution via production RAGPipeline
+        #    Uses query_v3() — the same entrypoint that frontend/mobile API calls.
+        #    This enables ComplexityRouter + QueryDecomposer for multi_source queries.
         t_start = time.perf_counter()
         try:
-            result = pipeline.query(question)
+            result = pipeline.query_v3(question)
             latency_ms = round((time.perf_counter() - t_start) * 1000, 2)
             
             generated_answer = result.get("answer") or ""
@@ -849,7 +851,24 @@ def main() -> None:
     pipeline._cfg["hyde_enabled"] = True
     settings.reranker_score_threshold = -1.0
     pipeline._cfg["reranker_score_threshold"] = -1.0
-    logger.info("HyDE enabled and Reranker score threshold set to -1.0 dynamically.")
+
+    # CRITICAL: Also patch the already-instantiated reranker object.
+    # create_reranker(settings) runs INSIDE build_evaluation_runtime() and
+    # captures score_threshold at init time.  Mutating settings afterwards
+    # does NOT propagate to the reranker instance, so we patch it directly.
+    if pipeline._reranker is not None:
+        pipeline._reranker.score_threshold = -1.0
+        pipeline._reranker.table_score_threshold = -1.0
+        logger.info(
+            "Patched reranker instance: score_threshold=%.1f, table_score_threshold=%.1f",
+            pipeline._reranker.score_threshold,
+            pipeline._reranker.table_score_threshold,
+        )
+
+    logger.info(
+        "E2E eval config: query_v3 (production flow), HyDE enabled, "
+        "reranker_score_threshold=-1.0, ValidityFilter disabled."
+    )
 
 
 
