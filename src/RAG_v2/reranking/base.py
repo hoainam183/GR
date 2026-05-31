@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 # Provider registry — populated by @register_reranker decorators at import time.
 # Phase 3 will add the full create_reranker() factory around this registry.
@@ -33,6 +33,8 @@ class BaseReranker(ABC):
         query: str,
         documents: List[Dict[str, Any]],
         top_k: int = 5,
+        score_threshold: Optional[float] = None,
+        table_score_threshold: Optional[float] = None,
     ) -> List[Dict[str, Any]]:
         """Score and sort *documents* by relevance to *query*.
 
@@ -41,6 +43,10 @@ class BaseReranker(ABC):
             documents: List of document dicts (must contain at least a ``"text"``
                 key that the reranker can score against).
             top_k: Maximum number of documents to return.
+            score_threshold: Override instance default score threshold.
+                Documents below this score are filtered out.
+            table_score_threshold: Override instance default threshold for
+                table-type documents.
 
         Returns:
             Documents sorted by descending relevance, truncated to *top_k*.

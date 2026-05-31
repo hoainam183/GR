@@ -60,9 +60,9 @@ class Settings(BaseSettings):
 
     # --- Provider Selectors (change in .env, no code edits needed) ---
     # ✅ GEMINI: chat answer generation — quality-critical, needs strong model
-    llm_provider: str = "gemini"       # gemini | openai | azure | ollama | lm_studio
+    llm_provider: str = "gemini"  # gemini | openai | azure | ollama | lm_studio
     embedding_provider: str = "ensemble"  # ensemble | bge_m3 | e5
-    reranker_provider: str = "bge"     # bge | cohere | none
+    reranker_provider: str = "bge"  # bge | cohere | none
 
     # --- API Keys ---
     google_api_key: str = ""
@@ -85,18 +85,22 @@ class Settings(BaseSettings):
     # --- Agent (LangGraph) ---
     # ✅ LM STUDIO / QWEN: tool-calling only — needs fast inference, low quality OK
     agent_enabled: bool = True
-    agent_max_iterations: int = 3       # reduced from 4 → faster, less runaway
+    agent_max_iterations: int = 3  # reduced from 4 → faster, less runaway
     agent_model: str = "qwen2.5-7b-instruct"  # local Qwen for tool selection
-    agent_temperature: float = 0.0     # deterministic tool selection
-    agent_max_tokens: int = 1200       # enough for multi-tool reasoning
+    agent_temperature: float = 0.0  # deterministic tool selection
+    agent_max_tokens: int = 1200  # enough for multi-tool reasoning
     agent_tool_result_limit: int = 5000  # max chars per ToolMessage
 
     # Agent synthesis — uses a STRONGER model for the final answer.
     # ✅ GEMINI: synthesis is quality-critical (user-facing final answer)
-    agent_synthesis_provider: str = "gemini"   # "" | "gemini" | "lm_studio" | "ollama"
+    agent_synthesis_provider: str = (
+        "gemini"  # "" | "gemini" | "lm_studio" | "ollama"
+    )
     agent_synthesis_model: str = "gemini-3.1-flash-lite"  # fast + quality
     agent_synthesis_temperature: float = 0.2
-    agent_synthesis_max_tokens: int = 2500     # increased from 2000 to prevent truncation
+    agent_synthesis_max_tokens: int = (
+        2500  # increased from 2000 to prevent truncation
+    )
 
     # --- Ollama ---
     ollama_base_url: str = "http://localhost:11434"
@@ -119,9 +123,11 @@ class Settings(BaseSettings):
 
     # --- Chat Model (answer generation) ---
     # ✅ GEMINI: main answer generation — most important quality point
-    chat_model: str = "gemini-3.1-flash-lite"   # fast + quality
+    chat_model: str = "gemini-3.1-flash-lite"  # fast + quality
     chat_temperature: float = 0.0
-    chat_max_tokens: int = 1500            # increased from 1024 to prevent mid-sentence truncation
+    chat_max_tokens: int = (
+        1500  # increased from 1024 to prevent mid-sentence truncation
+    )
 
     # --- Retrieval ---
     top_k: int = 5
@@ -159,16 +165,34 @@ class Settings(BaseSettings):
     router_mode: str = "classifier"
 
     # --- Evaluation & Fallback ---
-    self_eval_enabled: bool = False     # disabled by default — adds ~2-5s per query
+    self_eval_enabled: bool = (
+        False  # disabled by default — adds ~2-5s per query
+    )
     # BGE reranker returns raw logits, not probabilities. Keep this very high
     # to avoid skipping self-eval just because a raw logit is greater than 0.72.
     self_eval_min_top_score: float = 100.0
+    # Master switch for Tavily web-search fallback. Actual API calls only happen
+    # when this is True AND a trigger condition fires (no_info pattern / no_sources
+    # / dynamic_query / freshness_query). Set self_eval_enabled=True as well to
+    # additionally use the LLM quality judge as a Tavily trigger.
     tavily_fallback_enabled: bool = False
-    tavily_search_depth: str = "basic"    # basic (1 credit) | advanced (2 credits)
-    tavily_max_results: int = 5           # fetch pool size (filter xuống tavily_web_result_count)
-    tavily_web_content_char_limit: int = 1500  # per-result content char limit cho web results
-    tavily_web_result_count: int = 3      # số results giữ lại sau filter (≤ max_results)
+    tavily_search_depth: str = (
+        "basic"  # basic (1 credit) | advanced (2 credits)
+    )
+    tavily_max_results: int = (
+        5  # fetch pool size (filter xuống tavily_web_result_count)
+    )
+    tavily_web_content_char_limit: int = (
+        1500  # per-result content char limit cho web results
+    )
+    tavily_web_result_count: int = (
+        3  # số results giữ lại sau filter (≤ max_results)
+    )
     web_fallback_dynamic_collections: List[str] = ["kehoach"]
+    # Granular sub-flags that control which conditions trigger Tavily.
+    # These also govern LLM response-cache bypass: dynamic/freshness queries
+    # bypass the cache even when tavily_fallback_enabled=False, because their
+    # answers can go stale regardless of whether web search is enabled.
     web_fallback_on_dynamic: bool = True
     web_fallback_on_no_info: bool = True
     tavily_cache_ttl_seconds: int = 3600
@@ -182,10 +206,14 @@ class Settings(BaseSettings):
     # --- Reflection ---
     # ✅ GEMINI: query rewriting — quality-critical for retrieval accuracy
     reflection_enabled: bool = True
-    reflection_provider: str = "gemini"      # gemini | lm_studio | ollama | openai
-    reflection_model: str = "gemini-3.1-flash-lite"  # fast flash for rewrite task
-    reflection_temperature: float = 0.0      # low temp → more deterministic rewrite
-    reflection_max_tokens: int = 1024         # increased from 256 to prevent truncation
+    reflection_provider: str = "gemini"  # gemini | lm_studio | ollama | openai
+    reflection_model: str = (
+        "gemini-3.1-flash-lite"  # fast flash for rewrite task
+    )
+    reflection_temperature: float = 0.0  # low temp → more deterministic rewrite
+    reflection_max_tokens: int = (
+        1024  # increased from 256 to prevent truncation
+    )
 
     # --- Collection-aware Routing (Phase 8) ---
     domain_routing_enabled: bool = True
@@ -201,40 +229,50 @@ class Settings(BaseSettings):
 
     # --- Redis ---
     redis_url: str = "redis://localhost:6379/0"
-    redis_enabled: bool = True            # Master switch for Redis
+    redis_enabled: bool = True  # Master switch for Redis
     redis_max_connections: int = 20
     redis_socket_timeout: float = 5.0
     redis_connect_timeout: float = 5.0
     redis_health_check_interval: int = 30  # seconds between PING on idle conns
-    use_redis_session: bool = True        # Phase 1: session migration
-    use_redis_cache: bool = True          # Phase 2: LLM response cache
-    use_redis_history: bool = True        # Phase 2: conversation history cache
+    use_redis_session: bool = True  # Phase 1: session migration
+    use_redis_cache: bool = True  # Phase 2: LLM response cache
+    use_redis_history: bool = True  # Phase 2: conversation history cache
 
     # --- Rate Limiting ---
     rate_limit_enabled: bool = True
-    rate_limit_rpm: int = 20              # requests per minute
-    rate_limit_rpd: int = 200             # requests per day
+    rate_limit_rpm: int = 20  # requests per minute
+    rate_limit_rpd: int = 200  # requests per day
     rate_limit_alert_threshold: float = 0.8  # alert at 80% capacity
 
     # --- Retrieval Improvement Flags (all default OFF for safe rollout) ---
-    web_query_enrichment_enabled: bool = False    # A1: academic year + homepage filter
-    score_cliff_enabled: bool = False             # B1: per-collection score cliff
-    per_collection_norm_enabled: bool = False     # B2: per-collection normalization
-    sibling_expansion_enabled: bool = False       # C1: sibling chunk expansion
-    parent_context_enabled: bool = True           # C5: parent-child context expansion
+    web_query_enrichment_enabled: bool = (
+        False  # A1: academic year + homepage filter
+    )
+    score_cliff_enabled: bool = False  # B1: per-collection score cliff
+    per_collection_norm_enabled: bool = (
+        False  # B2: per-collection normalization
+    )
+    sibling_expansion_enabled: bool = False  # C1: sibling chunk expansion
+    parent_context_enabled: bool = True  # C5: parent-child context expansion
     freshness_tavily_check_enabled: bool = False  # C3: date_str freshness check
-    low_conf_pool_expand_enabled: bool = False    # C4: 2x candidate pool in Tier 3
-    hyde_enabled: bool = False                    # HyDE post-rerank fallback
-    hyde_min_results: int = 3                     # trigger when reranked < N results
-    hyde_confidence_threshold: float = 0.3        # trigger when reranker mean < this
-    sibling_budget_ratio: float = 0.30            # 30% of total budget for siblings
-    sibling_per_doc_limit: int = 800              # Per-sibling char limit
-    parent_max_chars: int = 1500                  # Max chars from parent content
-    parent_max_chars_agent: int = 500             # Reduced for agent (tighter token budget)
-    context_total_char_budget_with_expansion: int = 16000  # Expanded total when siblings
+    low_conf_pool_expand_enabled: bool = (
+        False  # C4: 2x candidate pool in Tier 3
+    )
+    hyde_enabled: bool = False  # HyDE post-rerank fallback
+    hyde_min_results: int = 3  # trigger when reranked < N results
+    hyde_confidence_threshold: float = 0.3  # trigger when reranker mean < this
+    sibling_budget_ratio: float = 0.30  # 30% of total budget for siblings
+    sibling_per_doc_limit: int = 800  # Per-sibling char limit
+    parent_max_chars: int = 1500  # Max chars from parent content
+    parent_max_chars_agent: int = (
+        500  # Reduced for agent (tighter token budget)
+    )
+    context_total_char_budget_with_expansion: int = (
+        16000  # Expanded total when siblings
+    )
 
     # --- Admin / Document Upload ---
-    superadmin_user_ids: str = ""       # comma-separated MongoDB ObjectIds
+    superadmin_user_ids: str = ""  # comma-separated MongoDB ObjectIds
     upload_dir: str = "uploads"
     max_upload_size_mb: int = 50
     max_upload_batch: int = 5

@@ -72,6 +72,7 @@ def _should_trigger_tier3(routing: Dict[str, Any]) -> bool:
 
     return True
 
+
 from .flows import (
     _format_context,
     chitchat_flow,
@@ -96,7 +97,9 @@ def _build_cache_key(
     if not history:
         return q
     recent = history[-2:]
-    parts = [f"{m.get('role','')}:{str(m.get('content',''))[:120]}" for m in recent]
+    parts = [
+        f"{m.get('role','')}:{str(m.get('content',''))[:120]}" for m in recent
+    ]
     return f"{q}||{'|'.join(parts)}"
 
 
@@ -181,11 +184,18 @@ def _settings_to_cfg(settings: Settings) -> Dict[str, Any]:
 
 # ═══════════════════════════════════════════════════════════════════════════════
 def _should_enable_self_evaluator(cfg: Dict[str, Any]) -> bool:
-    """Return True when self-eval is needed directly or for Tavily fallback."""
-    return bool(
-        cfg.get("self_eval_enabled", False)
-        or cfg.get("tavily_fallback_enabled", False)
-    )
+    """Return True when self-evaluation is explicitly enabled.
+
+    Self-eval is intentionally NOT auto-enabled by ``tavily_fallback_enabled``.
+    Post-gen Tavily has independent trigger paths (``no_info`` pattern matching,
+    ``no_sources``) that work without an LLM-based quality judge, so forcing
+    self-eval on every query just because Tavily is configured would add
+    ~2–5 s latency per query unnecessarily.
+
+    To use self-eval as a Tavily trigger, set ``self_eval_enabled=True``
+    explicitly alongside ``tavily_fallback_enabled=True``.
+    """
+    return bool(cfg.get("self_eval_enabled", False))
 
 
 def _build_tavily_tool(settings: Settings) -> Any | None:
@@ -259,6 +269,7 @@ class RAGPipeline:
 
         # --- Unified retrieval service (embedders + searcher + reranker + tavily) ---
         from retrieval.service import RetrievalService
+
         self._retrieval_service = RetrievalService.from_settings(settings)
 
         # Convenient aliases — these are references into the shared service.
@@ -298,8 +309,7 @@ class RAGPipeline:
 
         # Query router (zero-cost local classifier)
         self._router = QueryRouter(
-            mode=cfg.get("router_mode", "classifier"),
-            embedder=self._bge
+            mode=cfg.get("router_mode", "classifier"), embedder=self._bge
         )
 
         # Chat model via factory
@@ -320,17 +330,21 @@ class RAGPipeline:
         self._mongo_logger = mongo_logger
         self._llm_cache = llm_cache
         self._llm_runtime_lock = RLock()
-        self._route_cache: OrderedDict[str, tuple[float, Dict[str, Any]]] = OrderedDict()
+        self._route_cache: OrderedDict[str, tuple[float, Dict[str, Any]]] = (
+            OrderedDict()
+        )
 
         # Inject pipeline's shared retrieval stack into agent tool adapters.
         # This eliminates the ~17 s cold-start that occurs when the agent
         # tools lazily build their own embedders / searcher / reranker.
         from agent.tool_adapters import inject_from_retrieval_service
+
         inject_from_retrieval_service(self._retrieval_service)
 
         # Phase 2: Retrieval Quality & Data Intelligence
         from retrieval.validity_filter import ValidityFilter
         from retrieval.reference_resolver import ReferenceResolver
+
         self._validity_filter = ValidityFilter()
         self._reference_resolver = ReferenceResolver(self._retrieval_service)
 
@@ -361,7 +375,9 @@ class RAGPipeline:
                 tavily_tool=self._tavily,
             )
 
-    def prepare_llm_config_reload(self, settings: Settings) -> _PreparedLLMRuntime:
+    def prepare_llm_config_reload(
+        self, settings: Settings
+    ) -> _PreparedLLMRuntime:
         """Build replacement LLM clients before persistent config is committed."""
         cfg = _settings_to_cfg(settings)
         chat = create_llm(settings)
@@ -411,8 +427,12 @@ class RAGPipeline:
         inject_from_retrieval_service(self._retrieval_service)
         rebuilt = {
             "chat_llm": settings.chat_model,
-            "reflector": settings.reflection_model if prepared.reflector else "disabled",
-            "decomposer": settings.reflection_model if prepared.decomposer else "disabled",
+            "reflector": (
+                settings.reflection_model if prepared.reflector else "disabled"
+            ),
+            "decomposer": (
+                settings.reflection_model if prepared.decomposer else "disabled"
+            ),
             "agent": settings.agent_model if prepared.agent else "disabled",
             "tavily": "reloaded" if prepared.tavily_tool else "disabled",
             "caches": "cleared",
@@ -433,6 +453,7 @@ class RAGPipeline:
     ) -> Dict[str, Any]:
         """Route with a short-lived cache to avoid repeat classifier calls."""
         import time as _time
+
         now = _time.time()
         key = _build_cache_key(question, history)
         cached = self._route_cache.get(key)
@@ -493,7 +514,9 @@ class RAGPipeline:
         if session_id and not history and self._mongo_logger:
             with trace.stage("history_load"):
                 history = self._mongo_logger.get_history(session_id)
-            pipeline_timings["history_load"] = trace.stages.get("history_load", 0.0)
+            pipeline_timings["history_load"] = trace.stages.get(
+                "history_load", 0.0
+            )
 
         # 1. Route the query (context-aware — Tier 1, cached)
         with trace.stage("routing"):
@@ -564,7 +587,9 @@ class RAGPipeline:
             if isinstance(ms, (int, float)):
                 trace.record_stage(stage, ms)
         trace.set_metadata("flow", "rag")
-        trace.set_metadata("model", str(getattr(runtime.chat, "model", "unknown")))
+        trace.set_metadata(
+            "model", str(getattr(runtime.chat, "model", "unknown"))
+        )
         trace.set_metadata("domain", routing.get("domain", ""))
         trace.log_summary("query(rag)")
 
@@ -610,7 +635,9 @@ class RAGPipeline:
         agent_t0 = time.perf_counter()
         agent = self._llm_runtime_snapshot().agent
 
-        def _fallback_result(agent_error: str, tool_payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def _fallback_result(
+            agent_error: str, tool_payload: Optional[Dict[str, Any]] = None
+        ) -> Dict[str, Any]:
             result = self.query(
                 question=question,
                 history=history,
@@ -640,7 +667,9 @@ class RAGPipeline:
             }
 
             existing_timings = (
-                result.get("timings_ms") if isinstance(result.get("timings_ms"), dict) else None
+                result.get("timings_ms")
+                if isinstance(result.get("timings_ms"), dict)
+                else None
             )
             result["timings_ms"] = _merge_timings(
                 existing_timings,
@@ -650,11 +679,14 @@ class RAGPipeline:
 
         if agent is None:
             if require_agent:
-                raise RuntimeError("Agent is required for this endpoint but is disabled")
+                raise RuntimeError(
+                    "Agent is required for this endpoint but is disabled"
+                )
             logger.warning("Agent unavailable, falling back to RAG v2")
             return _fallback_result("Agent is disabled")
 
         from agent.tool_adapters import init_agent_docs, get_agent_docs
+
         init_agent_docs()  # Tạo context riêng cho request này (thread-safe)
 
         try:
@@ -801,7 +833,11 @@ class RAGPipeline:
 
         # This handles compound questions like Q1 (equivalent course + graduation
         # requirements) without dispatching to the agent, which can hallucinate.
-        if route == "complex" and subtype == "multi_source" and runtime.decomposer is not None:
+        if (
+            route == "complex"
+            and subtype == "multi_source"
+            and runtime.decomposer is not None
+        ):
             domain_subqueries = runtime.decomposer.decompose(question)
             # Only use decomposition if we got ≥2 sub-queries (otherwise falls
             # through to regular RAG below).
@@ -1026,8 +1062,21 @@ class RAGPipeline:
             return "Rất vui được hỗ trợ bạn. Nếu cần thêm thông tin học vụ, bạn cứ hỏi nhé."
         if any(token in q for token in ("tạm biệt", "bye", "goodbye")):
             return "Chào bạn, chúc bạn học tốt. Khi cần hỗ trợ học vụ, mình luôn sẵn sàng."
-        if any(token in q for token in ("xin chào", "hello", "hi", "chào", "ok", "oke", "okay")):
-            return "Xin chào! Tôi là trợ lý tư vấn học vụ ĐHBK. Bạn cần hỗ trợ gì?"
+        if any(
+            token in q
+            for token in (
+                "xin chào",
+                "hello",
+                "hi",
+                "chào",
+                "ok",
+                "oke",
+                "okay",
+            )
+        ):
+            return (
+                "Xin chào! Tôi là trợ lý tư vấn học vụ ĐHBK. Bạn cần hỗ trợ gì?"
+            )
 
         return "Mình đang sẵn sàng hỗ trợ các câu hỏi học vụ ĐHBK. Bạn muốn hỏi nội dung nào?"
 
@@ -1106,7 +1155,9 @@ class RAGPipeline:
                 full_answer_chunks.append(chunk)
                 yield chunk
 
-            pipeline_timings["stream_first_token"] = round(first_token_ms or 0.0, 2)
+            pipeline_timings["stream_first_token"] = round(
+                first_token_ms or 0.0, 2
+            )
             pipeline_timings["stream_generate"] = _elapsed_ms(stream_t0)
 
         # ── Complex branch → agent ────────────────────────────────────────────
@@ -1169,13 +1220,19 @@ class RAGPipeline:
                 answer = agent_result.get("answer", "")
                 self.last_mode = str(agent_result.get("mode", "agent"))
                 self.last_agent_trace = agent_result.get("agent_trace")
-                self.last_tools_used = list(agent_result.get("tools_used") or [])
-                self.last_tool_calls = list(agent_result.get("tool_calls") or [])
+                self.last_tools_used = list(
+                    agent_result.get("tools_used") or []
+                )
+                self.last_tool_calls = list(
+                    agent_result.get("tool_calls") or []
+                )
                 self.last_iterations = int(agent_result.get("iterations") or 0)
                 self.last_sources = agent_result.get("sources") or []
                 pipeline_timings["agent_total"] = _elapsed_ms(agent_t0)
             except Exception as exc:
-                logger.warning("Agent failed in stream path (%s), falling back", exc)
+                logger.warning(
+                    "Agent failed in stream path (%s), falling back", exc
+                )
                 answer = "Xin lỗi, có lỗi xảy ra khi xử lý câu hỏi. Vui lòng thử lại."
 
             # Yield the full agent answer as a single chunk
@@ -1192,7 +1249,9 @@ class RAGPipeline:
                 and complexity_subtype != "personal_check"
                 and runtime.agent is None
             ):
-                logger.info("Agent disabled, falling back to RAG v2 for complex query")
+                logger.info(
+                    "Agent disabled, falling back to RAG v2 for complex query"
+                )
                 self.last_mode = "rag_v2_fallback"
 
             route_t0 = time.perf_counter()
@@ -1206,7 +1265,9 @@ class RAGPipeline:
             if intent == "rag" and _should_trigger_tier3(routing):
                 fallback_t0 = time.perf_counter()
                 routing = self._llm_domain_classify(question, history, routing)
-                pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(fallback_t0)
+                pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(
+                    fallback_t0
+                )
 
             flow_cfg = {**runtime.cfg, "top_k": effective_top_k}
             flow_timings: Dict[str, float] = {}
@@ -1231,12 +1292,20 @@ class RAGPipeline:
                 llm_cache=self._llm_cache,
             )
             self.last_sources = reranked
-            self.last_reflected_question = flow_metadata.get("reflected_question")
-            self.last_target_collections = flow_metadata.get("target_collections")
+            self.last_reflected_question = flow_metadata.get(
+                "reflected_question"
+            )
+            self.last_target_collections = flow_metadata.get(
+                "target_collections"
+            )
             self.last_collection_scores = flow_metadata.get("collection_scores")
-            self.last_routing_probabilities = flow_metadata.get("routing_probabilities")
+            self.last_routing_probabilities = flow_metadata.get(
+                "routing_probabilities"
+            )
             self.last_applied_filters = flow_metadata.get("applied_filters")
-            self.last_collection_results = flow_metadata.get("collection_results")
+            self.last_collection_results = flow_metadata.get(
+                "collection_results"
+            )
             self.last_tools_used = list(flow_metadata.get("tools_used") or [])
             self.last_tool_calls = list(flow_metadata.get("tool_calls") or [])
 
@@ -1246,7 +1315,9 @@ class RAGPipeline:
             pipeline_timings = _merge_timings(pipeline_timings, flow_timings)
             # Update collection scores after stream finishes (timings may have changed)
             if flow_metadata.get("collection_scores"):
-                self.last_collection_scores = flow_metadata.get("collection_scores")
+                self.last_collection_scores = flow_metadata.get(
+                    "collection_scores"
+                )
 
         timings_ms = _merge_timings(pipeline_timings)
         timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)

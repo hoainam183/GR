@@ -12,7 +12,7 @@ Metrics:
 Usage:
     # Run all datasets in evaluation/data folder
     python evaluation/evaluate_e2e_pipeline.py
-    
+
     # Run a single dataset file
     python evaluation/evaluate_e2e_pipeline.py --dataset evaluation/data/ITE6_rag_evaluation_dataset_no_parent_evidence.json
 """
@@ -59,8 +59,8 @@ from llm.self_eval import SelfEvaluator
 from pipeline.flows import _format_context
 from pipeline.rag_pipeline import RAGPipeline
 
-
 # ─── Helper Functions for Matching & Metrics ───────────────────────────────────
+
 
 def _raw_id(value: Any) -> str:
     text = str(value or "").strip()
@@ -69,7 +69,9 @@ def _raw_id(value: Any) -> str:
 
 def _source_id(doc: Dict[str, Any]) -> str:
     """Return the stable evidence id used by dataset ``evidence_chunk_ids``."""
-    metadata = doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}
+    metadata = (
+        doc.get("metadata") if isinstance(doc.get("metadata"), dict) else {}
+    )
     candidates = (
         doc.get("id"),
         doc.get("chunk_id"),
@@ -90,19 +92,25 @@ def _as_list(value: Any) -> List[str]:
     if value is None:
         return []
     if isinstance(value, str):
-        return [part.strip() for part in value.replace(";", ",").split(",") if part.strip()]
+        return [
+            part.strip()
+            for part in value.replace(";", ",").split(",")
+            if part.strip()
+        ]
     if isinstance(value, list):
         return [str(item).strip() for item in value if str(item).strip()]
     return [str(value).strip()] if str(value).strip() else []
 
 
-def compute_metrics_for_k(retrieved_ids: List[str], relevant_ids: List[str], k: int) -> Dict[str, float]:
+def compute_metrics_for_k(
+    retrieved_ids: List[str], relevant_ids: List[str], k: int
+) -> Dict[str, float]:
     """Calculate evaluation metrics for a specific K cutoff."""
     retrieved_raw = [_raw_id(rid) for rid in retrieved_ids if rid]
     relevant_set = {_raw_id(rid) for rid in relevant_ids if rid}
-    
+
     topk = retrieved_raw[:k]
-    
+
     if not relevant_set:
         return {
             f"hit@{k}": 0.0,
@@ -116,13 +124,13 @@ def compute_metrics_for_k(retrieved_ids: List[str], relevant_ids: List[str], k: 
     hit = 1.0 if hits else 0.0
     precision = len(set(hits)) / k if k > 0 else 0.0
     recall = len(set(hits)) / len(relevant_set)
-    
+
     mrr = 0.0
     for rank, doc_id in enumerate(topk, start=1):
         if doc_id in relevant_set:
             mrr = 1.0 / rank
             break
-            
+
     dcg = sum(
         1.0 / math.log2(rank + 1)
         for rank, doc_id in enumerate(topk, start=1)
@@ -131,7 +139,7 @@ def compute_metrics_for_k(retrieved_ids: List[str], relevant_ids: List[str], k: 
     ideal_hits = min(len(relevant_set), k)
     idcg = sum(1.0 / math.log2(rank + 1) for rank in range(1, ideal_hits + 1))
     ndcg = dcg / idcg if idcg else 0.0
-    
+
     return {
         f"hit@{k}": round(hit, 4),
         f"precision@{k}": round(precision, 4),
@@ -141,7 +149,9 @@ def compute_metrics_for_k(retrieved_ids: List[str], relevant_ids: List[str], k: 
     }
 
 
-def compute_all_metrics(retrieved_ids: List[str], relevant_ids: List[str], cutoffs: List[int]) -> Dict[str, float]:
+def compute_all_metrics(
+    retrieved_ids: List[str], relevant_ids: List[str], cutoffs: List[int]
+) -> Dict[str, float]:
     metrics = {}
     for k in cutoffs:
         metrics.update(compute_metrics_for_k(retrieved_ids, relevant_ids, k))
@@ -162,7 +172,9 @@ def _compute_inter_question_sleep_s(
     """Return seconds to sleep after each question to stay under an LLM RPM cap."""
     if llm_rpm <= 0 or llm_calls_per_question <= 0:
         return 0.0
-    return round((60.0 * llm_calls_per_question / llm_rpm) + max(buffer_s, 0.0), 2)
+    return round(
+        (60.0 * llm_calls_per_question / llm_rpm) + max(buffer_s, 0.0), 2
+    )
 
 
 def _sleep_between_questions(
@@ -177,21 +189,26 @@ def _sleep_between_questions(
         return
     if current_idx >= total_queries and not sleep_after_last:
         return
-    logger.info("Sleeping %.2fs before next question to respect LLM RPM limit.", sleep_s)
+    logger.info(
+        "Sleeping %.2fs before next question to respect LLM RPM limit.", sleep_s
+    )
     time.sleep(sleep_s)
 
 
 # ─── Dataset Loading ────────────────────────────────────────────────────────────
 
+
 def load_dataset(dataset_path: Path) -> List[Dict[str, Any]]:
     if not dataset_path.exists():
         logger.error("Dataset file not found at %s", dataset_path)
         sys.exit(1)
-        
+
     try:
         payload = json.loads(dataset_path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict) or "items" not in payload:
-            logger.error("Invalid dataset format. Must contain an 'items' array.")
+            logger.error(
+                "Invalid dataset format. Must contain an 'items' array."
+            )
             sys.exit(1)
         return payload["items"]
     except Exception as exc:
@@ -255,7 +272,9 @@ def _build_judge_client(settings: Settings) -> OpenAI:
     provider = settings.llm_provider
     if provider == "gemini":
         base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
-        api_key = settings.google_api_key or os.environ.get("GOOGLE_API_KEY", "")
+        api_key = settings.google_api_key or os.environ.get(
+            "GOOGLE_API_KEY", ""
+        )
     elif provider == "lm_studio":
         base_url = settings.lm_studio_base_url
         api_key = "lm-studio"
@@ -266,11 +285,15 @@ def _build_judge_client(settings: Settings) -> OpenAI:
         api_key = "ollama"
     elif provider == "openai":
         base_url = "https://api.openai.com/v1"
-        api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY", "")
+        api_key = settings.openai_api_key or os.environ.get(
+            "OPENAI_API_KEY", ""
+        )
     else:
         base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
-        api_key = settings.google_api_key or os.environ.get("GOOGLE_API_KEY", "")
-        
+        api_key = settings.google_api_key or os.environ.get(
+            "GOOGLE_API_KEY", ""
+        )
+
     if not api_key:
         raise EnvironmentError(
             f"API Key for LLM provider {provider!r} is not set in environment or .env file."
@@ -306,7 +329,9 @@ def _compare_with_reference(
         return {"match": "incorrect", "reason": f"Judge call error: {exc}"}
 
 
-def _parse_json_response(raw: str, fallback_match: str = "incorrect") -> Dict[str, str]:
+def _parse_json_response(
+    raw: str, fallback_match: str = "incorrect"
+) -> Dict[str, str]:
     """Parse a JSON response, stripping optional markdown fences."""
     cleaned = raw.strip()
     if cleaned.startswith("```"):
@@ -326,18 +351,21 @@ def _parse_json_response(raw: str, fallback_match: str = "incorrect") -> Dict[st
 
 # ─── Evaluation Setup & Loop ──────────────────────────────────────────────────
 
-def build_evaluation_runtime() -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
+
+def build_evaluation_runtime() -> (
+    Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]
+):
     settings = Settings()
-    
+
     logger.info("Initializing RAGPipeline (which builds RetrievalService) ...")
     pipeline = RAGPipeline(settings=settings)
-    
+
     logger.info("Initializing SelfEvaluator ...")
     self_evaluator = SelfEvaluator(llm=pipeline._chat)
-    
+
     logger.info("Initializing Reference comparison LLM client ...")
     judge_client = _build_judge_client(settings)
-    
+
     return settings, pipeline, self_evaluator, judge_client
 
 
@@ -352,16 +380,23 @@ def run_evaluation(
     inter_question_sleep_s: float = 0.0,
     sleep_after_last: bool = False,
 ) -> Dict[str, Any]:
-    if settings is None or pipeline is None or self_evaluator is None or judge_client is None:
-        settings, pipeline, self_evaluator, judge_client = build_evaluation_runtime()
-        
+    if (
+        settings is None
+        or pipeline is None
+        or self_evaluator is None
+        or judge_client is None
+    ):
+        settings, pipeline, self_evaluator, judge_client = (
+            build_evaluation_runtime()
+        )
+
     judge_model = settings.chat_model
     cutoffs = [3, 5, 7]
     records: List[Dict[str, Any]] = []
-    
+
     total_queries = len(dataset_items)
     logger.info("=== Running E2E evaluation on %d queries ===", total_queries)
-    
+
     for idx, item in enumerate(dataset_items, start=1):
         question = item["question"]
         gold_answer = item.get("gold_answer") or item.get("answer") or ""
@@ -369,9 +404,15 @@ def run_evaluation(
         question_type = item.get("question_type", "simple")
         difficulty = item.get("difficulty", "medium")
         item_id = item.get("id", f"case_{idx:03d}")
-        
-        logger.info("[%d/%d] ID: %s | Question: '%s'", idx, total_queries, item_id, question[:50])
-        
+
+        logger.info(
+            "[%d/%d] ID: %s | Question: '%s'",
+            idx,
+            total_queries,
+            item_id,
+            question[:50],
+        )
+
         # 1. E2E query execution via production RAGPipeline
         #    Uses query_v3() — the same entrypoint that frontend/mobile API calls.
         #    This enables ComplexityRouter + QueryDecomposer for multi_source queries.
@@ -379,7 +420,7 @@ def run_evaluation(
         try:
             result = pipeline.query_v3(question)
             latency_ms = round((time.perf_counter() - t_start) * 1000, 2)
-            
+
             generated_answer = result.get("answer") or ""
             sources = result.get("sources") or []
             intent = result.get("intent") or "rag"
@@ -387,7 +428,7 @@ def run_evaluation(
             pipeline_route = result.get("route") or "unknown"
             num_sources = result.get("num_sources") or len(sources)
             timings = result.get("timings_ms") or {}
-            
+
         except Exception as exc:
             logger.error("RAGPipeline query crashed: %s", exc, exc_info=True)
             record = {
@@ -420,13 +461,15 @@ def run_evaluation(
             }
             # Fill cutoffs with 0
             for k in cutoffs:
-                record.update({
-                    f"hit@{k}": 0.0,
-                    f"precision@{k}": 0.0,
-                    f"recall@{k}": 0.0,
-                    f"mrr@{k}": 0.0,
-                    f"ndcg@{k}": 0.0,
-                })
+                record.update(
+                    {
+                        f"hit@{k}": 0.0,
+                        f"precision@{k}": 0.0,
+                        f"recall@{k}": 0.0,
+                        f"mrr@{k}": 0.0,
+                        f"ndcg@{k}": 0.0,
+                    }
+                )
             records.append(record)
             _sleep_between_questions(
                 idx,
@@ -435,11 +478,13 @@ def run_evaluation(
                 sleep_after_last=sleep_after_last,
             )
             continue
-            
+
         # 2. Extract final retrieved document IDs for retrieval metrics
         retrieved_ids = [_source_id(doc) for doc in sources if doc]
-        retrieval_metrics = compute_all_metrics(retrieved_ids, relevant_ids, cutoffs)
-        
+        retrieval_metrics = compute_all_metrics(
+            retrieved_ids, relevant_ids, cutoffs
+        )
+
         # 3. Quality Metrics Stage
         # A. Self-Evaluation using the pipeline's LLM
         self_eval_pass = False
@@ -447,9 +492,13 @@ def run_evaluation(
         self_eval_faithfulness = "hallucinated"
         self_eval_completeness = "incomplete"
         self_eval_reason = ""
-        
+
         try:
-            context_str = _format_context(sources) if sources else "(no context retrieved)"
+            context_str = (
+                _format_context(sources)
+                if sources
+                else "(no context retrieved)"
+            )
             eval_result = self_evaluator.evaluate(
                 query=question,
                 context=context_str,
@@ -457,13 +506,17 @@ def run_evaluation(
             )
             self_eval_pass = eval_result.get("pass", False)
             self_eval_relevance = eval_result.get("relevance", "bad")
-            self_eval_faithfulness = eval_result.get("faithfulness", "hallucinated")
-            self_eval_completeness = eval_result.get("completeness", "incomplete")
+            self_eval_faithfulness = eval_result.get(
+                "faithfulness", "hallucinated"
+            )
+            self_eval_completeness = eval_result.get(
+                "completeness", "incomplete"
+            )
             self_eval_reason = eval_result.get("reason", "")
         except Exception as exc:
             logger.warning("Self-evaluation failed: %s", exc)
             self_eval_reason = f"Self-eval crashed: {exc}"
-            
+
         # B. Reference Answer Comparison using CHAT_MODEL
         ref_match = "incorrect"
         ref_match_reason = ""
@@ -477,24 +530,28 @@ def run_evaluation(
             )
             ref_match = ref_result.get("match", "incorrect")
             ref_match_reason = ref_result.get("reason", "")
-            
+
         # 4. Phase Latency Breakdown
         routing_time = round(
-            float(timings.get("routing", 0.0)) + 
-            float(timings.get("collection_routing", 0.0)) + 
-            float(timings.get("tier3_domain_fallback", 0.0)),
-            2
+            float(timings.get("routing", 0.0))
+            + float(timings.get("collection_routing", 0.0))
+            + float(timings.get("tier3_domain_fallback", 0.0)),
+            2,
         )
         search_time = round(float(timings.get("search", 0.0)), 2)
-        rerank_time = round(float(timings.get("rerank", 0.0)) + float(timings.get("rerank_fallback", 0.0)), 2)
+        rerank_time = round(
+            float(timings.get("rerank", 0.0))
+            + float(timings.get("rerank_fallback", 0.0)),
+            2,
+        )
         generation_time = round(float(timings.get("generate", 0.0)), 2)
         self_eval_time = round(float(timings.get("self_eval", 0.0)), 2)
         hyde_time = round(float(timings.get("hyde", 0.0)), 2)
         total_time = round(float(timings.get("pipeline_total", latency_ms)), 2)
-        
+
         # Check if HyDE was actually triggered in E2E timings
         hyde_triggered = bool(timings.get("hyde_triggered", 0.0) > 0.0)
-        
+
         record = {
             "id": item_id,
             "question": question,
@@ -523,10 +580,10 @@ def run_evaluation(
             "self_eval_reason": self_eval_reason,
             "ref_match": ref_match,
             "ref_match_reason": ref_match_reason,
-            **retrieval_metrics
+            **retrieval_metrics,
         }
         records.append(record)
-        
+
         # Latency & quality output log
         logger.info(
             "  ↳ Mode: %s | Route: %s | FinalHit@5: %.2f | Faithfulness: %s | Match: %s | Latency: %.1fms%s",
@@ -544,12 +601,12 @@ def run_evaluation(
             inter_question_sleep_s,
             sleep_after_last=sleep_after_last,
         )
-        
+
     # Aggregate results
     summary = build_summary_report(records)
     if dataset_name:
         summary["dataset"] = dataset_name
-        
+
     # Save files
     save_outputs(records, summary, output_dir)
     return summary
@@ -557,18 +614,19 @@ def run_evaluation(
 
 # ─── Summaries & Exporters ────────────────────────────────────────────────────
 
+
 def _average_metrics(recs: List[Dict[str, Any]]) -> Dict[str, float]:
     if not recs:
         return {}
     stage_keys = {"self_eval_pass", "hyde_triggered"}
     numeric_keys = []
-    
+
     # Identify retrieval keys like hit@3, recall@5 etc.
     for key, value in recs[0].items():
         if "@" in key or key in stage_keys:
             if isinstance(value, (int, float, bool)):
                 numeric_keys.append(key)
-                
+
     return {
         key: round(float(sum(float(r[key]) for r in recs) / len(recs)), 4)
         for key in numeric_keys
@@ -581,67 +639,119 @@ def build_summary_report(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         return {}
 
     overall_metrics = _average_metrics(records)
-    avg_latency = round(sum(r["latency_ms"] for r in records) / total_queries, 1)
-    avg_routing = round(sum(r["routing_time_ms"] for r in records) / total_queries, 1)
-    avg_search = round(sum(r["search_time_ms"] for r in records) / total_queries, 1)
-    avg_rerank = round(sum(r["rerank_time_ms"] for r in records) / total_queries, 1)
-    avg_gen = round(sum(r["generation_time_ms"] for r in records) / total_queries, 1)
-    avg_self_eval = round(sum(r["self_eval_time_ms"] for r in records) / total_queries, 1)
-    
+    avg_latency = round(
+        sum(r["latency_ms"] for r in records) / total_queries, 1
+    )
+    avg_routing = round(
+        sum(r["routing_time_ms"] for r in records) / total_queries, 1
+    )
+    avg_search = round(
+        sum(r["search_time_ms"] for r in records) / total_queries, 1
+    )
+    avg_rerank = round(
+        sum(r["rerank_time_ms"] for r in records) / total_queries, 1
+    )
+    avg_gen = round(
+        sum(r["generation_time_ms"] for r in records) / total_queries, 1
+    )
+    avg_self_eval = round(
+        sum(r["self_eval_time_ms"] for r in records) / total_queries, 1
+    )
+
     # HyDE stats
     hyde_count = sum(1 for r in records if r["hyde_triggered"])
     hyde_rate = round(hyde_count / total_queries, 4)
-    
+
     # E2E Quality aggregation
     # Relevance rate (good)
-    relevance_good = sum(1 for r in records if r["self_eval_relevance"] == "good")
+    relevance_good = sum(
+        1 for r in records if r["self_eval_relevance"] == "good"
+    )
     relevance_rate = round(relevance_good / total_queries, 4)
-    
+
     # Faithfulness (grounded)
-    faith_grounded = sum(1 for r in records if r["self_eval_faithfulness"] == "grounded")
+    faith_grounded = sum(
+        1 for r in records if r["self_eval_faithfulness"] == "grounded"
+    )
     faithfulness_rate = round(faith_grounded / total_queries, 4)
-    
+
     # Hallucination count/rate
-    hallucination_count = sum(1 for r in records if r["self_eval_faithfulness"] == "hallucinated")
+    hallucination_count = sum(
+        1 for r in records if r["self_eval_faithfulness"] == "hallucinated"
+    )
     hallucination_rate = round(hallucination_count / total_queries, 4)
-    
+
     # Completeness (complete)
-    complete_count = sum(1 for r in records if r["self_eval_completeness"] == "complete")
+    complete_count = sum(
+        1 for r in records if r["self_eval_completeness"] == "complete"
+    )
     completeness_rate = round(complete_count / total_queries, 4)
-    
+
     # Reference Match (correct / partial / incorrect)
     ref_correct = sum(1 for r in records if r["ref_match"] == "correct")
     ref_partial = sum(1 for r in records if r["ref_match"] == "partial")
     ref_incorrect = sum(1 for r in records if r["ref_match"] == "incorrect")
-    
+
     ref_correct_rate = round(ref_correct / total_queries, 4)
     ref_partial_rate = round(ref_partial / total_queries, 4)
     ref_incorrect_rate = round(ref_incorrect / total_queries, 4)
 
     # Breakdowns by question_type
     type_breakdown = {}
-    qtypes = sorted(list(set(r["question_type"] for r in records if r.get("question_type"))))
+    qtypes = sorted(
+        list(set(r["question_type"] for r in records if r.get("question_type")))
+    )
     for qt in qtypes:
         sub_recs = [r for r in records if r["question_type"] == qt]
         type_breakdown[qt] = {
             "count": len(sub_recs),
             "metrics": _average_metrics(sub_recs),
-            "avg_latency_ms": round(sum(r["latency_ms"] for r in sub_recs) / len(sub_recs), 1),
-            "ref_correct_rate": round(sum(1 for r in sub_recs if r["ref_match"] == "correct") / len(sub_recs), 4),
-            "faithfulness_rate": round(sum(1 for r in sub_recs if r["self_eval_faithfulness"] == "grounded") / len(sub_recs), 4)
+            "avg_latency_ms": round(
+                sum(r["latency_ms"] for r in sub_recs) / len(sub_recs), 1
+            ),
+            "ref_correct_rate": round(
+                sum(1 for r in sub_recs if r["ref_match"] == "correct")
+                / len(sub_recs),
+                4,
+            ),
+            "faithfulness_rate": round(
+                sum(
+                    1
+                    for r in sub_recs
+                    if r["self_eval_faithfulness"] == "grounded"
+                )
+                / len(sub_recs),
+                4,
+            ),
         }
-        
+
     # Breakdowns by difficulty
     diff_breakdown = {}
-    difficulties = sorted(list(set(r["difficulty"] for r in records if r.get("difficulty"))))
+    difficulties = sorted(
+        list(set(r["difficulty"] for r in records if r.get("difficulty")))
+    )
     for diff in difficulties:
         sub_recs = [r for r in records if r["difficulty"] == diff]
         diff_breakdown[diff] = {
             "count": len(sub_recs),
             "metrics": _average_metrics(sub_recs),
-            "avg_latency_ms": round(sum(r["latency_ms"] for r in sub_recs) / len(sub_recs), 1),
-            "ref_correct_rate": round(sum(1 for r in sub_recs if r["ref_match"] == "correct") / len(sub_recs), 4),
-            "faithfulness_rate": round(sum(1 for r in sub_recs if r["self_eval_faithfulness"] == "grounded") / len(sub_recs), 4)
+            "avg_latency_ms": round(
+                sum(r["latency_ms"] for r in sub_recs) / len(sub_recs), 1
+            ),
+            "ref_correct_rate": round(
+                sum(1 for r in sub_recs if r["ref_match"] == "correct")
+                / len(sub_recs),
+                4,
+            ),
+            "faithfulness_rate": round(
+                sum(
+                    1
+                    for r in sub_recs
+                    if r["self_eval_faithfulness"] == "grounded"
+                )
+                / len(sub_recs),
+                4,
+            ),
         }
 
     # Breakdowns by pipeline mode (rag_v2, rag_v2_decomposed, agent, chitchat, etc.)
@@ -652,9 +762,23 @@ def build_summary_report(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         mode_breakdown[mode] = {
             "count": len(sub_recs),
             "metrics": _average_metrics(sub_recs),
-            "avg_latency_ms": round(sum(r["latency_ms"] for r in sub_recs) / len(sub_recs), 1),
-            "ref_correct_rate": round(sum(1 for r in sub_recs if r["ref_match"] == "correct") / len(sub_recs), 4),
-            "faithfulness_rate": round(sum(1 for r in sub_recs if r["self_eval_faithfulness"] == "grounded") / len(sub_recs), 4)
+            "avg_latency_ms": round(
+                sum(r["latency_ms"] for r in sub_recs) / len(sub_recs), 1
+            ),
+            "ref_correct_rate": round(
+                sum(1 for r in sub_recs if r["ref_match"] == "correct")
+                / len(sub_recs),
+                4,
+            ),
+            "faithfulness_rate": round(
+                sum(
+                    1
+                    for r in sub_recs
+                    if r["self_eval_faithfulness"] == "grounded"
+                )
+                / len(sub_recs),
+                4,
+            ),
         }
 
     return {
@@ -688,7 +812,7 @@ def save_outputs(
     output_dir: Path,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # 1. Save detailed query results CSV
     csv_path = output_dir / "query_results.csv"
     if records:
@@ -698,15 +822,17 @@ def save_outputs(
             writer.writeheader()
             writer.writerows(records)
     logger.info("Wrote detailed results CSV → %s", csv_path)
-            
+
     # 2. Save summary JSON
     json_path = output_dir / "summary.json"
-    json_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    json_path.write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     logger.info("Wrote summary JSON → %s", json_path)
-    
+
     # 3. Save Markdown report
     md_path = output_dir / "report.md"
-    
+
     lines = [
         "# RAG E2E Pipeline Quality Evaluation Report",
         "",
@@ -730,46 +856,50 @@ def save_outputs(
         "| Metric | Score (Average) |",
         "| :--- | :---: |",
     ]
-    
+
     for metric, score in summary["overall_metrics"].items():
         if "@" in metric:
             lines.append(f"| **{metric}** | `{score * 100:.2f}%` |")
-            
-    lines.extend([
-        "",
-        "## Performance & Latency Breakdowns",
-        "",
-        "| Phase / Event | Avg Latency / Trigger Rate |",
-        "| :--- | :---: |",
-        f"| **Total Latency** | `{summary['avg_latency_ms']} ms` |",
-        f"| Routing Latency | `{summary['avg_routing_ms']} ms` |",
-        f"| Search Latency | `{summary['avg_search_ms']} ms` |",
-        f"| Rerank Latency | `{summary['avg_rerank_ms']} ms` |",
-        f"| Generation Latency | `{summary['avg_generation_ms']} ms` |",
-        f"| Self-Evaluation Latency | `{summary['avg_self_eval_ms']} ms` |",
-        f"| **HyDE Fallback Trigger Rate** | `{summary['hyde_rate'] * 100:.2f}%` (`{summary['hyde_count']}` queries) |",
-        "",
-        "## Breakdown by Question Type",
-        "",
-        "| Type | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |",
-        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"
-    ])
-    
+
+    lines.extend(
+        [
+            "",
+            "## Performance & Latency Breakdowns",
+            "",
+            "| Phase / Event | Avg Latency / Trigger Rate |",
+            "| :--- | :---: |",
+            f"| **Total Latency** | `{summary['avg_latency_ms']} ms` |",
+            f"| Routing Latency | `{summary['avg_routing_ms']} ms` |",
+            f"| Search Latency | `{summary['avg_search_ms']} ms` |",
+            f"| Rerank Latency | `{summary['avg_rerank_ms']} ms` |",
+            f"| Generation Latency | `{summary['avg_generation_ms']} ms` |",
+            f"| Self-Evaluation Latency | `{summary['avg_self_eval_ms']} ms` |",
+            f"| **HyDE Fallback Trigger Rate** | `{summary['hyde_rate'] * 100:.2f}%` (`{summary['hyde_count']}` queries) |",
+            "",
+            "## Breakdown by Question Type",
+            "",
+            "| Type | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |",
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+        ]
+    )
+
     for qt, info in summary["by_question_type"].items():
         m = info["metrics"]
         lines.append(
             f"| **{qt}** | {info['count']} | `{m.get('hit@5', 0.0)*100:.1f}%` | `{m.get('recall@5', 0.0)*100:.1f}%` | `{m.get('ndcg@5', 0.0)*100:.1f}%` | "
             f"`{info['faithfulness_rate']*100:.1f}%` | `{info['ref_correct_rate']*100:.1f}%` | `{info['avg_latency_ms']} ms` |"
         )
-        
-    lines.extend([
-        "",
-        "## Breakdown by Difficulty",
-        "",
-        "| Difficulty | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |",
-        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"
-    ])
-    
+
+    lines.extend(
+        [
+            "",
+            "## Breakdown by Difficulty",
+            "",
+            "| Difficulty | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |",
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+        ]
+    )
+
     for diff, info in summary["by_difficulty"].items():
         m = info["metrics"]
         lines.append(
@@ -779,13 +909,15 @@ def save_outputs(
 
     # Mode breakdown section
     if summary.get("by_mode"):
-        lines.extend([
-            "",
-            "## Breakdown by Pipeline Mode",
-            "",
-            "| Mode | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |",
-            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"
-        ])
+        lines.extend(
+            [
+                "",
+                "## Breakdown by Pipeline Mode",
+                "",
+                "| Mode | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |",
+                "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+            ]
+        )
         for mode, info in summary["by_mode"].items():
             m = info["metrics"]
             lines.append(
@@ -795,24 +927,34 @@ def save_outputs(
 
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     logger.info("Wrote E2E report report.md → %s", md_path)
-    
+
     # 4. Print beautiful console report
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print(" END-TO-END RAG PIPELINE EVALUATION SUMMARY")
-    print("="*70)
+    print("=" * 70)
     print(f"Total Queries:                {summary['total_queries']}")
     print(f"Avg Latency (Total):          {summary['avg_latency_ms']} ms")
-    print(f"HyDE Fallback Rate:           {summary['hyde_rate'] * 100:.2f}% ({summary['hyde_count']} triggers)")
-    print("-"*70)
-    print(f"Faithfulness (Grounded):      {summary['faithfulness_rate'] * 100:.2f}%")
-    print(f"Answer Relevance:             {summary['relevance_rate'] * 100:.2f}%")
-    print(f"Correctness (Fully Match):    {summary['ref_correct_rate'] * 100:.2f}%")
-    print(f"Hallucination Rate:           {summary['hallucination_rate'] * 100:.2f}%")
-    print("-"*70)
+    print(
+        f"HyDE Fallback Rate:           {summary['hyde_rate'] * 100:.2f}% ({summary['hyde_count']} triggers)"
+    )
+    print("-" * 70)
+    print(
+        f"Faithfulness (Grounded):      {summary['faithfulness_rate'] * 100:.2f}%"
+    )
+    print(
+        f"Answer Relevance:             {summary['relevance_rate'] * 100:.2f}%"
+    )
+    print(
+        f"Correctness (Fully Match):    {summary['ref_correct_rate'] * 100:.2f}%"
+    )
+    print(
+        f"Hallucination Rate:           {summary['hallucination_rate'] * 100:.2f}%"
+    )
+    print("-" * 70)
     for metric, score in summary["overall_metrics"].items():
         if "recall@5" in metric or "ndcg@5" in metric or "hit@5" in metric:
             print(f"{metric:<30} : {score * 100:.2f}%")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
 
 def save_batch_summary(
@@ -822,7 +964,9 @@ def save_batch_summary(
     output_dir.mkdir(parents=True, exist_ok=True)
     total_queries = sum(int(s.get("total_queries", 0)) for s in summaries)
     total_hydes = sum(int(s.get("hyde_count", 0)) for s in summaries)
-    total_hallucinations = sum(int(s.get("hallucination_count", 0)) for s in summaries)
+    total_hallucinations = sum(
+        int(s.get("hallucination_count", 0)) for s in summaries
+    )
 
     metric_names = sorted(
         {
@@ -836,7 +980,9 @@ def save_batch_summary(
         overall_metrics = {
             metric: round(
                 sum(
-                    float((summary.get("overall_metrics") or {}).get(metric, 0.0))
+                    float(
+                        (summary.get("overall_metrics") or {}).get(metric, 0.0)
+                    )
                     * int(summary.get("total_queries", 0))
                     for summary in summaries
                 )
@@ -851,7 +997,8 @@ def save_batch_summary(
             return 0.0
         return round(
             sum(
-                float(summary.get(key, 0.0)) * int(summary.get("total_queries", 0))
+                float(summary.get(key, 0.0))
+                * int(summary.get("total_queries", 0))
                 for summary in summaries
             )
             / total_queries,
@@ -868,12 +1015,18 @@ def save_batch_summary(
         "avg_generation_ms": _weighted_average("avg_generation_ms"),
         "avg_self_eval_ms": _weighted_average("avg_self_eval_ms"),
         "hyde_count": total_hydes,
-        "hyde_rate": round(total_hydes / total_queries, 4) if total_queries else 0.0,
+        "hyde_rate": (
+            round(total_hydes / total_queries, 4) if total_queries else 0.0
+        ),
         "relevance_rate": _weighted_average("relevance_rate"),
         "faithfulness_rate": _weighted_average("faithfulness_rate"),
         "completeness_rate": _weighted_average("completeness_rate"),
         "hallucination_count": total_hallucinations,
-        "hallucination_rate": round(total_hallucinations / total_queries, 4) if total_queries else 0.0,
+        "hallucination_rate": (
+            round(total_hallucinations / total_queries, 4)
+            if total_queries
+            else 0.0
+        ),
         "ref_correct_rate": _weighted_average("ref_correct_rate"),
         "ref_partial_rate": _weighted_average("ref_partial_rate"),
         "ref_incorrect_rate": _weighted_average("ref_incorrect_rate"),
@@ -882,55 +1035,61 @@ def save_batch_summary(
     }
 
     path = output_dir / "batch_summary.json"
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     logger.info("Wrote batch summary JSON → %s", path)
 
 
 # ─── Entry Point ────────────────────────────────────────────────────────────────
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Evaluate RAG E2E quality and retrieval metrics.")
+    parser = argparse.ArgumentParser(
+        description="Evaluate RAG E2E quality and retrieval metrics."
+    )
     parser.add_argument(
         "--dataset",
         type=Path,
         default=PROJECT_ROOT / "evaluation" / "data",
-        help="Path to an evaluation JSON dataset file or a directory of JSON datasets."
+        help="Path to an evaluation JSON dataset file or a directory of JSON datasets.",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=PROJECT_ROOT / "evaluation" / "results" / "e2e_custom_eval",
-        help="Directory to save evaluation reports."
+        help="Directory to save evaluation reports.",
     )
     parser.add_argument(
-        "--top-k", "--k",
+        "--top-k",
+        "--k",
         type=int,
         default=7,
-        help="Target top_k retrieved documents parameter for pipeline."
+        help="Target top_k retrieved documents parameter for pipeline.",
     )
     parser.add_argument(
         "--sample-n",
         type=int,
         default=None,
-        help="Limit the number of queries to evaluate per dataset (useful for testing)."
+        help="Limit the number of queries to evaluate per dataset (useful for testing).",
     )
     parser.add_argument(
         "--llm-rpm",
         type=float,
         default=DEFAULT_LLM_RPM,
-        help="LLM requests-per-minute limit used to compute the default sleep."
+        help="LLM requests-per-minute limit used to compute the default sleep.",
     )
     parser.add_argument(
         "--llm-calls-per-question",
         type=float,
         default=DEFAULT_LLM_CALLS_PER_QUESTION,
-        help="Estimated number of LLM calls consumed by one evaluated question."
+        help="Estimated number of LLM calls consumed by one evaluated question.",
     )
     parser.add_argument(
         "--rate-limit-buffer-s",
         type=float,
         default=DEFAULT_RATE_LIMIT_BUFFER_S,
-        help="Extra seconds added to the computed inter-question sleep."
+        help="Extra seconds added to the computed inter-question sleep.",
     )
     parser.add_argument(
         "--inter-question-sleep-s",
@@ -939,9 +1098,9 @@ def main() -> None:
         help=(
             "Seconds to sleep between questions. If omitted, computed from "
             "--llm-rpm, --llm-calls-per-question, and --rate-limit-buffer-s."
-        )
+        ),
     )
-    
+
     args = parser.parse_args()
 
     inter_question_sleep_s = (
@@ -963,7 +1122,9 @@ def main() -> None:
     multi_dataset = len(dataset_paths) > 1 or args.dataset.is_dir()
 
     # Load system settings and override top_k
-    settings, pipeline, self_evaluator, judge_client = build_evaluation_runtime()
+    settings, pipeline, self_evaluator, judge_client = (
+        build_evaluation_runtime()
+    )
     settings.top_k = args.top_k
     settings.reranker_top_k = args.top_k
     pipeline._cfg["top_k"] = args.top_k
@@ -977,7 +1138,20 @@ def main() -> None:
     # Agent returns URLs as sources (not chunk IDs), which causes retrieval
     # metrics to collapse to 0 for queries routed through the agent path.
     pipeline.agent = None
-    logger.info("Agent path has been DISABLED for E2E evaluation — all queries use RAG flow.")
+    logger.info(
+        "Agent path has been DISABLED for E2E evaluation — all queries use RAG flow."
+    )
+
+    # Disable web/Tavily fallback so URL-based sources do not pollute retrieved_chunk_ids.
+    # Web fallback injects Facebook/PDF URLs into sources which can never match
+    # evidence chunk IDs in the dataset, causing false metric drops.
+    settings.web_fallback_on_no_info = False
+    settings.web_fallback_on_dynamic = False
+    settings.tavily_fallback_enabled = False
+    pipeline._cfg["web_fallback_on_no_info"] = False
+    pipeline._cfg["web_fallback_on_dynamic"] = False
+    pipeline._cfg["tavily_fallback_enabled"] = False
+    logger.info("Web/Tavily fallback has been DISABLED for E2E evaluation.")
 
     # Enable HyDE and set Reranker score threshold to -1.0 dynamically
     # [MATCH CUSTOM EVAL]: Disable HyDE to perfectly match evaluate_retrieval_custom.py
@@ -1000,8 +1174,8 @@ def main() -> None:
         )
 
     logger.info(
-        "E2E eval config: query_v3 (production flow), HyDE enabled, "
-        "reranker_score_threshold=-1.0, ValidityFilter disabled, Agent disabled."
+        "E2E eval config: query_v3 (production flow), HyDE disabled, "
+        "reranker_score_threshold=-1.0, ValidityFilter/Agent/WebFallback disabled."
     )
     logger.info(
         "Rate-limit guard: llm_rpm=%.2f, llm_calls_per_question=%.2f, "
@@ -1013,15 +1187,20 @@ def main() -> None:
     )
 
     summaries: List[Dict[str, Any]] = []
-    logger.info("Found %d dataset file(s) for E2E evaluation.", len(dataset_paths))
-    
+    logger.info(
+        "Found %d dataset file(s) for E2E evaluation.", len(dataset_paths)
+    )
+
     for dataset_index, dataset_path in enumerate(dataset_paths, start=1):
         logger.info("Loading dataset from %s ...", dataset_path)
         dataset_items = load_dataset(dataset_path)
         if args.sample_n is not None:
-            logger.info("Limiting evaluation to first %d queries as requested.", args.sample_n)
-            dataset_items = dataset_items[:args.sample_n]
-            
+            logger.info(
+                "Limiting evaluation to first %d queries as requested.",
+                args.sample_n,
+            )
+            dataset_items = dataset_items[: args.sample_n]
+
         dataset_output_dir = args.output_dir / _safe_output_name(dataset_path)
 
         summary = run_evaluation(

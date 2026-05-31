@@ -2700,6 +2700,9 @@ def rag_flow(
                 timings_ms["web_fallback_used"] = 1.0
                 web_fallback_sources = list(fallback_result.get("sources") or [])
                 if web_fallback_sources:
+                    # Intentional prepend: the answer was replaced with web-based content,
+                    # so web sources ARE the primary evidence for the new answer.
+                    # Contrast with pre-gen path (append) where local docs still contribute.
                     reranked = web_fallback_sources + reranked
         else:
             timings_ms["tavily_skipped"] = 1.0
