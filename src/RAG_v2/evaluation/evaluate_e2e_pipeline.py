@@ -82,7 +82,7 @@ ABLATION_DISABLE_PARENT_EXPANSION: bool = (
     False  # No-op for hit@K: parent expansion only enriches metadata, does not reorder
 )
 ABLATION_FORCE_RERANKER_MIN_TOP_K: bool = (
-    False  # Always return ≥ top_k docs from reranker
+    True  # Always return ≥ top_k docs from reranker
 )
 ABLATION_FORCE_TOP_K_5: bool = (
     False  # Force top_k=5 to match classifier eval (overrides --top-k arg)
