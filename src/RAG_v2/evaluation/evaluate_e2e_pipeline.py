@@ -47,6 +47,36 @@ DEFAULT_LLM_RPM = 15.0
 DEFAULT_LLM_CALLS_PER_QUESTION = 4.0
 DEFAULT_RATE_LIMIT_BUFFER_S = 2.0
 
+# ─── Ablation Study Config ─────────────────────────────────────────────────────
+# Toggle individual pipeline components ON/OFF to isolate which cause the
+# metric gap between E2E and raw (classifier) retrieval evaluation.
+#
+# Differences vs evaluate_retrieval_custom.py:
+#   1. ComplexityRouter  — E2E classifies simple/complex before retrieval;
+#                          classifier only uses CollectionSelector.
+#   2. QueryReflector    — E2E rewrites the query with an LLM;
+#                          classifier uses the raw question as-is.
+#   3. Parent expansion  — E2E inserts parent chunks after reranking
+#                          (_expand_parent_context_post_rerank), which can
+#                          push relevant chunks beyond the @5 cutoff;
+#                          classifier has no parent expansion.
+#   4. Reranker min_top_k — classifier always calls rerank(min_top_k=top_k)
+#                          so it returns ≥ top_k results; E2E never passes
+#                          min_top_k and can return fewer.
+#
+# Set a flag to True to DISABLE that component (isolate its contribution).
+ABLATION_DISABLE_COMPLEXITY_ROUTER: bool = (
+    False  # Force all queries → simple path
+)
+ABLATION_DISABLE_REFLECTION: bool = False  # Use raw query; skip QueryReflector
+ABLATION_DISABLE_PARENT_EXPANSION: bool = (
+    False  # Skip parent chunk insertion post-rerank
+)
+ABLATION_FORCE_RERANKER_MIN_TOP_K: bool = (
+    False  # Always return ≥ top_k docs from reranker
+)
+# ───────────────────────────────────────────────────────────────────────────────
+
 # Make project imports work when executed from any cwd
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -1173,6 +1203,81 @@ def main() -> None:
             pipeline._reranker.table_score_threshold,
         )
 
+    # ── Apply ablation study overrides ──────────────────────────────────────
+    _active_ablations: List[str] = []
+
+    if ABLATION_DISABLE_COMPLEXITY_ROUTER:
+        # Monkeypatch complexity_router.route() to always return "simple".
+        # This removes the LLM-based complexity classification from query_v3()
+        # so all queries follow the same simple → query() path as classifier eval.
+        _orig_route = pipeline.complexity_router.route
+        pipeline.complexity_router.route = lambda query, **kw: {  # type: ignore[method-assign]
+            "tier": "simple",
+            "reason": "ablation_forced_simple",
+        }
+        logger.info(
+            "ABLATION [complexity_router=OFF]: All queries forced to 'simple' path."
+        )
+        _active_ablations.append("no_complexity_router")
+
+    if ABLATION_DISABLE_REFLECTION:
+        # Disable LLM-based query rewriting.  The raw question is used directly
+        # for embedding search, matching classifier eval behaviour.
+        settings.reflection_enabled = False
+        pipeline._cfg["reflection_enabled"] = False
+        logger.info(
+            "ABLATION [reflection=OFF]: QueryReflector disabled — raw query used."
+        )
+        _active_ablations.append("no_reflection")
+
+    if ABLATION_DISABLE_PARENT_EXPANSION:
+        # Disable parent context expansion so the reranked list is NOT padded
+        # with parent chunks.  Prevents relevant chunks from being pushed
+        # beyond the @5 cutoff due to parent insertion.
+        pipeline._cfg["parent_context_enabled"] = False
+        logger.info(
+            "ABLATION [parent_expansion=OFF]: Parent context expansion disabled."
+        )
+        _active_ablations.append("no_parent_expansion")
+
+    if ABLATION_FORCE_RERANKER_MIN_TOP_K and pipeline._reranker is not None:
+        # Monkeypatch reranker.rerank() to always pass min_top_k=top_k,
+        # matching evaluate_retrieval_custom.py which calls
+        # reranker.rerank(..., min_top_k=top_k) unconditionally.
+        _orig_rerank = pipeline._reranker.rerank
+        _forced_min_k = args.top_k
+
+        def _rerank_with_min_top_k(
+            query,
+            documents,
+            top_k=_forced_min_k,
+            min_top_k=None,
+            **kw,
+        ):
+            return _orig_rerank(
+                query=query,
+                documents=documents,
+                top_k=top_k,
+                min_top_k=_forced_min_k,
+                **kw,
+            )
+
+        pipeline._reranker.rerank = _rerank_with_min_top_k  # type: ignore[method-assign]
+        logger.info(
+            "ABLATION [reranker_min_top_k=ON]: Reranker forced to return "
+            "≥ %d docs (matches classifier eval).",
+            _forced_min_k,
+        )
+        _active_ablations.append(f"min_top_k_{_forced_min_k}")
+
+    if _active_ablations:
+        logger.info("Active ablations: %s", ", ".join(_active_ablations))
+    else:
+        logger.info(
+            "No ablations active — running full production E2E pipeline."
+        )
+    # ─────────────────────────────────────────────────────────────────────────
+
     logger.info(
         "E2E eval config: query_v3 (production flow), HyDE disabled, "
         "reranker_score_threshold=-1.0, ValidityFilter/Agent/WebFallback disabled."
@@ -1201,7 +1306,14 @@ def main() -> None:
             )
             dataset_items = dataset_items[: args.sample_n]
 
-        dataset_output_dir = args.output_dir / _safe_output_name(dataset_path)
+        # Include active ablation names in the output folder so different
+        # ablation runs never overwrite each other.
+        _ablation_suffix = (
+            ("__" + "_".join(_active_ablations)) if _active_ablations else ""
+        )
+        dataset_output_dir = args.output_dir / (
+            _safe_output_name(dataset_path) + _ablation_suffix
+        )
 
         summary = run_evaluation(
             dataset_items=dataset_items,

@@ -115,9 +115,7 @@
   html,
   body,
   #root {
-    height: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
+    min-height: 100vh;
   }
 
   * {
