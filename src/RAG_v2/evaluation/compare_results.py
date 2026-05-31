@@ -29,12 +29,13 @@ ITE6_multi_hop_007,q,multi_hop,medium,ctdt,5df876b8-b84f-45de-beaf-503cc694c190,
 ITE6_multi_hop_008,q,multi_hop,medium,ctdt,6efb75c6-8aff-4841-b753-aa4ea33bd2df,,91,4328,4420,False,rag,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0"""
 
 import os
-e2e_path = r'd:\GR\src\RAG_v2\evaluation\results\e2e_custom_eval\ITE6_rag_evaluation_dataset_no_parent_evidence\query_results.csv'
-with open(e2e_path, encoding='utf-8-sig') as f:
+
+e2e_path = r"d:\GR\src\RAG_v2\evaluation\results\e2e_custom_eval\ITE6_rag_evaluation_dataset_no_parent_evidence\query_results.csv"
+with open(e2e_path, encoding="utf-8-sig") as f:
     e2e_data = f.read()
 
-e2e = {r['id']: r for r in csv.DictReader(io.StringIO(e2e_data))}
-cls = {r['id']: r for r in csv.DictReader(io.StringIO(cls_raw))}
+e2e = {r["id"]: r for r in csv.DictReader(io.StringIO(e2e_data))}
+cls = {r["id"]: r for r in csv.DictReader(io.StringIO(cls_raw))}
 
 print(f"CLS rows: {len(cls)} | E2E rows: {len(e2e)}")
 print(f"E2E columns: {list(next(iter(e2e.values())).keys())}")
@@ -44,8 +45,8 @@ regressions, recoveries, shared_miss, shared_hit = [], [], [], []
 for qid in sorted(e2e.keys()):
     c = cls.get(qid)
     e = e2e[qid]
-    ch5 = float(c['hit@5']) if c else -1
-    eh5 = float(e['hit@5'])
+    ch5 = float(c["hit@5"]) if c else -1
+    eh5 = float(e["hit@5"])
     if ch5 == 1.0 and eh5 == 0.0:
         regressions.append(qid)
     elif ch5 == 0.0 and eh5 == 1.0:
@@ -57,40 +58,47 @@ for qid in sorted(e2e.keys()):
 
 print("=== REGRESSIONS (Classifier HIT -> E2E MISS) ===")
 for qid in regressions:
-    c = cls[qid]; e = e2e[qid]
+    c = cls[qid]
+    e = e2e[qid]
     print(f"  {qid}")
     print(f"    relevant : {c['relevant_chunk_ids']}")
     print(f"    CLS retr : {c['retrieved_chunk_ids']}")
     print(f"    E2E retr : {e['retrieved_chunk_ids']}")
-    route = e.get('route', '?')
-    mode = e.get('mode', '?')
-    rtms = e.get('routing_time_ms', '?')
-    nsrc = e.get('num_sources', '?')
-    print(f"    E2E route/mode: {route}/{mode} | routing_ms: {rtms} | n_src: {nsrc}")
+    route = e.get("route", "?")
+    mode = e.get("mode", "?")
+    rtms = e.get("routing_time_ms", "?")
+    nsrc = e.get("num_sources", "?")
+    print(
+        f"    E2E route/mode: {route}/{mode} | routing_ms: {rtms} | n_src: {nsrc}"
+    )
     print()
 
 print("=== RECOVERIES (Classifier MISS -> E2E HIT) ===")
 for qid in recoveries:
-    c = cls[qid]; e = e2e[qid]
+    c = cls[qid]
+    e = e2e[qid]
     print(f"  {qid}")
     print(f"    relevant : {c['relevant_chunk_ids']}")
     print(f"    CLS retr : {c['retrieved_chunk_ids']}")
     print(f"    E2E retr : {e['retrieved_chunk_ids']}")
-    nsrc = e.get('num_sources', '?')
+    nsrc = e.get("num_sources", "?")
     print(f"    n_src: {nsrc}")
     print()
 
 print("=== SHARED MISSES (both miss) ===")
 for qid in shared_miss:
-    c = cls[qid]; e = e2e[qid]
+    c = cls[qid]
+    e = e2e[qid]
     print(f"  {qid}")
     print(f"    relevant : {c['relevant_chunk_ids']}")
     print(f"    CLS retr : {c['retrieved_chunk_ids']}")
     print(f"    E2E retr : {e['retrieved_chunk_ids']}")
     print()
 
-cls_hit = sum(1 for qid in e2e if float(cls[qid]['hit@5']) == 1.0)
-e2e_hit = sum(1 for qid in e2e if float(e2e[qid]['hit@5']) == 1.0)
-print(f"Summary: Regressions={len(regressions)}, Recoveries={len(recoveries)}, Shared_miss={len(shared_miss)}, Shared_hit={len(shared_hit)}")
+cls_hit = sum(1 for qid in e2e if float(cls[qid]["hit@5"]) == 1.0)
+e2e_hit = sum(1 for qid in e2e if float(e2e[qid]["hit@5"]) == 1.0)
+print(
+    f"Summary: Regressions={len(regressions)}, Recoveries={len(recoveries)}, Shared_miss={len(shared_miss)}, Shared_hit={len(shared_hit)}"
+)
 print(f"Classifier hit@5: {cls_hit}/{len(e2e)} = {cls_hit/len(e2e):.1%}")
 print(f"E2E hit@5:        {e2e_hit}/{len(e2e)} = {e2e_hit/len(e2e):.1%}")

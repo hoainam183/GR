@@ -56,13 +56,22 @@ DEFAULT_RATE_LIMIT_BUFFER_S = 2.0
 #                          classifier only uses CollectionSelector.
 #   2. QueryReflector    — E2E rewrites the query with an LLM;
 #                          classifier uses the raw question as-is.
-#   3. Parent expansion  — E2E inserts parent chunks after reranking
-#                          (_expand_parent_context_post_rerank), which can
-#                          push relevant chunks beyond the @5 cutoff;
-#                          classifier has no parent expansion.
+#   3. Parent expansion  — NOTE: _expand_parent_context_post_rerank() does
+#                          NOT insert new parent chunks into the ranked list.
+#                          It only enriches each child chunk's metadata with
+#                          parent_context text (for LLM context quality).
+#                          List length and order are UNCHANGED, so this has
+#                          NO effect on hit@K metrics.  The ablation flag
+#                          below is kept for completeness but will not affect
+#                          retrieval scores.
 #   4. Reranker min_top_k — classifier always calls rerank(min_top_k=top_k)
 #                          so it returns ≥ top_k results; E2E never passes
 #                          min_top_k and can return fewer.
+#   5. top_k mismatch    — E2E default is --top-k 7; classifier uses top_k=5.
+#                          A larger reranker pool means more candidates compete,
+#                          so relevant chunks can fall to rank 6-7 instead of 5.
+#                          E.g. multi_001: a3b83b7b at rank 5 (classifier, k=5)
+#                          vs rank 7 (E2E, k=7 + pool expansion to 12 chunks).
 #
 # Set a flag to True to DISABLE that component (isolate its contribution).
 ABLATION_DISABLE_COMPLEXITY_ROUTER: bool = (
@@ -70,10 +79,13 @@ ABLATION_DISABLE_COMPLEXITY_ROUTER: bool = (
 )
 ABLATION_DISABLE_REFLECTION: bool = False  # Use raw query; skip QueryReflector
 ABLATION_DISABLE_PARENT_EXPANSION: bool = (
-    False  # Skip parent chunk insertion post-rerank
+    False  # No-op for hit@K: parent expansion only enriches metadata, does not reorder
 )
 ABLATION_FORCE_RERANKER_MIN_TOP_K: bool = (
     False  # Always return ≥ top_k docs from reranker
+)
+ABLATION_FORCE_TOP_K_5: bool = (
+    False  # Force top_k=5 to match classifier eval (overrides --top-k arg)
 )
 # ───────────────────────────────────────────────────────────────────────────────
 
@@ -1269,6 +1281,20 @@ def main() -> None:
             _forced_min_k,
         )
         _active_ablations.append(f"min_top_k_{_forced_min_k}")
+
+    if ABLATION_FORCE_TOP_K_5:
+        # Override top_k to 5 so E2E uses the same cutoff as classifier eval.
+        # This isolates whether the metric gap is purely due to the larger
+        # candidate pool (top_k=7 + pool expansion) pushing relevant chunks
+        # beyond the @5 cutoff.
+        for k_key in ("top_k", "reranker_top_k"):
+            settings.__dict__[k_key] = 5
+            pipeline._cfg[k_key] = 5
+        args.top_k = 5  # keep consistent for min_top_k monkeypatch below
+        logger.info(
+            "ABLATION [top_k=5]: top_k forced to 5 to match classifier eval."
+        )
+        _active_ablations.append("top_k_5")
 
     if _active_ablations:
         logger.info("Active ablations: %s", ", ".join(_active_ablations))
