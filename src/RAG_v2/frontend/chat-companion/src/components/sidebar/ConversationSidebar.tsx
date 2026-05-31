@@ -30,6 +30,7 @@ import {
 import { deleteSession, getSessions, renameSession } from '@/services/sessionApi';
 import type { Session } from '@/types/chat';
 import { cn, parseUtcDate } from '@/lib/utils';
+import HustLogo from '@/components/HustLogo';
 
 interface ConversationSidebarProps {
   userId: string | null | undefined;
@@ -203,33 +204,29 @@ export function ConversationSidebar({
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       {/* Branding */}
       <div className="flex shrink-0 items-center gap-2.5 border-b border-sidebar-border px-3 py-3">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary">
-          <svg className="h-3.5 w-3.5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-        </div>
+        <HustLogo size="md" />
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground leading-tight">HUST Assistant</p>
-          <p className="truncate text-[10px] text-muted-foreground leading-tight">Trợ lý học thuật BKHN</p>
+          <p className="truncate text-sm font-semibold text-sidebar-foreground leading-tight">ĐHBK Hà Nội</p>
+          <p className="truncate text-[10px] text-sidebar-foreground/60 leading-tight">Trợ Lý Học Vụ Thông Minh</p>
         </div>
       </div>
 
       <div className="shrink-0 space-y-2 border-b border-sidebar-border px-3 py-3">
         <button
           onClick={handleNewChat}
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+          className="flex h-9 w-full items-center justify-center gap-2 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground transition hover:bg-accent/90"
         >
           <Plus className="h-4 w-4" />
           Cuộc trò chuyện mới
         </button>
 
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-sidebar-foreground/50" />
           <input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Tìm kiếm..."
-            className="h-8 w-full rounded-md border border-sidebar-border bg-background pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="h-8 w-full rounded-md border border-sidebar-border bg-sidebar-accent/50 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
       </div>
@@ -238,7 +235,7 @@ export function ConversationSidebar({
         <button
           type="button"
           onClick={() => navigate('/bookmarks')}
-          className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-xs text-muted-foreground transition hover:bg-sidebar-accent/70 hover:text-foreground"
+          className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-xs text-sidebar-foreground/70 transition hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <Bookmark className="h-4 w-4" />
           Đã lưu
@@ -253,18 +250,18 @@ export function ConversationSidebar({
             ))}
           </div>
         ) : sessions.length === 0 ? (
-          <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+          <p className="px-3 py-4 text-center text-xs text-sidebar-foreground/50">
             Chưa có cuộc trò chuyện
           </p>
         ) : groups.length === 0 ? (
-          <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+          <p className="px-3 py-4 text-center text-xs text-sidebar-foreground/50">
             Không tìm thấy cuộc trò chuyện
           </p>
         ) : (
           <div className="space-y-4">
             {groups.map((group) => (
               <section key={group.label}>
-                <h2 className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <h2 className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wide text-sidebar-foreground/50">
                   {group.label}
                 </h2>
                 <div className="space-y-1">
@@ -281,7 +278,7 @@ export function ConversationSidebar({
                             : 'hover:bg-sidebar-accent/70',
                         )}
                       >
-                        <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <MessageSquare className="h-4 w-4 shrink-0 text-sidebar-foreground/50" />
                         {isEditing ? (
                           <input
                             ref={editInputRef}
@@ -309,7 +306,7 @@ export function ConversationSidebar({
                             <span className="block truncate text-sm leading-tight">
                               {sessionTitle(session)}
                             </span>
-                            <span className="block text-[10px] text-muted-foreground">
+                            <span className="block text-[10px] text-sidebar-foreground/50">
                               {relativeTime(session.updated_at)}
                             </span>
                           </button>
@@ -355,7 +352,7 @@ export function ConversationSidebar({
         <button
           type="button"
           onClick={onLogout}
-          className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-xs text-destructive transition hover:bg-destructive/10"
+          className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-xs text-sidebar-foreground/70 transition hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <LogOut className="h-4 w-4" />
           Đăng xuất

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { registerUser } from "@/services/authApi";
 import { getCurrentSessionUser, ensureSession } from "@/services/authSession";
+import HustLogo from "@/components/HustLogo";
 import axios from "axios";
 
 const EyeIcon = ({ show }: { show: boolean }) =>
@@ -115,30 +116,18 @@ const RegisterPage = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <div className="w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 w-full bg-accent"></div>
+        <div className="p-8">
         {/* Header */}
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-            <svg
-              className="h-5 w-5 text-primary-foreground"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
-          </div>
+          <HustLogo size="lg" />
           <div>
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              HUST Assistant
+              ĐẠI HỌC BÁCH KHOA HÀ NỘI
             </p>
             <h1 className="mt-1 text-2xl font-bold text-foreground">Tạo tài khoản</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Đăng ký để sử dụng HUST Assistant</p>
+            <p className="mt-1 text-sm text-muted-foreground">Đăng ký để sử dụng Trợ Lý Học Vụ</p>
           </div>
         </div>
 
@@ -327,6 +316,7 @@ const RegisterPage = () => {
             Trở về trang chủ
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

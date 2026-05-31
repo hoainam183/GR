@@ -70,6 +70,12 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        hust: {
+          red: "hsl(var(--hust-red))",
+          "red-dark": "hsl(var(--hust-red-dark))",
+          gold: "hsl(var(--hust-gold))",
+          brown: "hsl(var(--hust-brown))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -117,7 +117,7 @@ export default function AdminPage() {
   const ActiveTabIcon = activeTabInfo.icon;
 
   return (
-    <div className="flex h-dvh min-h-0 overflow-hidden bg-[#f5f7fb] text-foreground">
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-background text-foreground">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-background lg:flex">
         <div className="border-b border-border px-5 py-5">
           <div className="flex items-center gap-3">

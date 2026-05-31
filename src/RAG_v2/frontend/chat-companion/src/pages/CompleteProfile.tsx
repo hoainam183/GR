@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { setStoredUser } from "@/services/authStorage";
 import { authFetch, ensureSession, throwIfNotOk } from "@/services/authSession";
+import HustLogo from "@/components/HustLogo";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -104,31 +105,19 @@ const CompleteProfile = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-[420px] rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <div className="w-full max-w-[420px] overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 w-full bg-accent"></div>
+        <div className="p-8">
         {/* Header */}
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-            <svg
-              className="h-5 w-5 text-primary-foreground"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-          </div>
+          <HustLogo size="lg" />
           <div>
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              HUST Assistant
+              ĐẠI HỌC BÁCH KHOA HÀ NỘI
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-foreground">Complete your profile</h1>
+            <h1 className="mt-1 text-2xl font-bold text-foreground">Hoàn thiện hồ sơ</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Confirm your information before continuing
+              Xác nhận thông tin của bạn trước khi tiếp tục
             </p>
           </div>
         </div>
@@ -144,7 +133,7 @@ const CompleteProfile = () => {
             {/* Full Name */}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="full_name" className="text-sm font-medium text-foreground">
-                Full Name
+              Họ và tên
               </Label>
               <Input
                 id="full_name"
@@ -159,7 +148,7 @@ const CompleteProfile = () => {
             {/* Student ID */}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="student_id" className="text-sm font-medium text-foreground">
-                Student ID
+              Mã số sinh viên
               </Label>
               <Input
                 id="student_id"
@@ -174,14 +163,14 @@ const CompleteProfile = () => {
             {/* Cohort */}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="cohort" className="text-sm font-medium text-foreground">
-                Cohort
+              Khoá học
               </Label>
               <Select
                 value={form.cohort}
                 onValueChange={(val) => setForm((f) => ({ ...f, cohort: val }))}
               >
                 <SelectTrigger id="cohort" className="w-full">
-                  <SelectValue placeholder="Select your cohort" />
+                  <SelectValue placeholder="Chọn khoá học" />
                 </SelectTrigger>
                 <SelectContent>
                   {COHORTS.map((c) => (
@@ -196,7 +185,7 @@ const CompleteProfile = () => {
             {/* Major (disabled) */}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="major" className="text-sm font-medium text-foreground">
-                Major
+              Ngành học
               </Label>
               <Input
                 id="major"
@@ -212,10 +201,11 @@ const CompleteProfile = () => {
               className="mt-2 w-full"
               disabled={submitting}
             >
-              {submitting ? "Saving…" : "Save & Continue"}
+              {submitting ? "Đang lưu…" : "Lưu và tiếp tục"}
             </Button>
           </form>
         )}
+        </div>
       </div>
     </div>
   );
