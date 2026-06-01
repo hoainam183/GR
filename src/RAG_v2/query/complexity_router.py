@@ -30,11 +30,11 @@ CHITCHAT_PATTERNS: list[str] = [
 ]
 
 # ─── Complex patterns ─────────────────────────────────────────────────────────
-# Queries matching any of these need the full LangGraph ReAct agent.
+# Queries matching any of these need the Planner-Executor agent.
 # Design principle: be SPECIFIC to avoid false positives on simple questions.
 #
 # Each pattern is tagged with a complex_subtype so the downstream planner can
-# decide whether to use the deterministic planner path or the agent loop.
+# decide whether to decompose first or plan directly.
 
 # Patterns → complex_subtype mapping.
 # Order matters: first match wins.
@@ -50,16 +50,10 @@ _COMPLEX_PATTERN_SPECS: list[tuple[str, str]] = [
     (r"(khác nhau|khác biệt|giống nhau).{0,40}(K\d{2}|khóa|ngành|chương trình|học kỳ|quy định)", "comparison"),
     (r"(K\d{2}|khóa|ngành|chương trình).{0,40}(khác nhau|khác biệt|giống nhau)", "comparison"),
 
-    # ── multi_source subtype ──────────────────────────────────────────────────
-    # QUAN TRỌNG: personal_check phải nằm TRƯỚC multi_source vì first-match wins.
-    # Query "tôi có đủ điều kiện..." phải vào personal_check (ReAct), không vào
-    # multi_source (Planner) — vì Planner không thể trả lời "bạn CÓ đủ hay không"
-    # khi thiếu thông tin GPA/tín chỉ cá nhân của sinh viên.
-
     # ── multi_source override — curriculum+regulation compound queries ─────────
     # These queries combine an equivalence lookup (ctdt) WITH a graduation
     # condition lookup (quydinh). They are better handled by decomposition than
-    # the agent, so they must appear BEFORE personal_check to win the first-match.
+    # direct planning.
     (
         r"(?:tương\s+đương|chuyển\s+đổi|thay\s+thế).{0,60}"
         r"(?:đồ\s+án|tốt\s+nghiệp|xét\s+(?:tốt\s+nghiệp|nhận)|thời\s+hạn)",
@@ -71,11 +65,12 @@ _COMPLEX_PATTERN_SPECS: list[tuple[str, str]] = [
         "multi_source",
     ),
 
-    # ── personal_check subtype ────────────────────────────────────────────────
-    # Detect query cần context cá nhân: "tôi/mình/em ... có thể/đủ/đạt/được không"
+    # ── personal eligibility wording ─────────────────────────────────────────
+    # The old personal_check subtype is intentionally removed. These route as
+    # multi_source so query_v3 uses the normal Planner-Executor path.
     (
         r"\b(tôi|mình|em)\b.{0,80}\b(có\s+thể|đủ\s+điều\s+kiện|đạt\s+điều\s+kiện|đạt\s+chuẩn|được\s+không|có\s+được)\b",
-        "personal_check",
+        "multi_source",
     ),
 
     # ── multi_source subtype ──────────────────────────────────────────────────
@@ -155,14 +150,14 @@ class ComplexityRouter:
     - ``"simple"``    — single-domain factual question; handled by the
                         existing RAG v2 pipeline.
     - ``"complex"``   — multi-domain, comparative, or ambiguous query;
-                        routed to the LangGraph ReAct agent.
+                        routed to the Planner-Executor agent.
 
     When tier is ``"complex"``, the result also contains a
     ``complex_subtype`` field:
 
     - ``"comparison"``   — explicit A-vs-B comparison → planner path
     - ``"multi_source"`` — needs data from ≥2 collections → planner path
-    - ``"general"``      — ambiguous / multi-step → agent loop path
+    - ``"general"``      — ambiguous / multi-step → planner path without decomposition
 
     The ``route()`` method now returns a dict with ``tier``, ``reason``,
     ``confidence``, and optionally ``complex_subtype`` keys for better
@@ -239,7 +234,7 @@ class ComplexityRouter:
                 "tier": "complex",
                 "reason": "signals: personal_reference + eligibility_check",
                 "confidence": "high",
-                "complex_subtype": "personal_check",
+                "complex_subtype": "multi_source",
                 "query_signals": query_signals_dict,
             }
             logger.info(

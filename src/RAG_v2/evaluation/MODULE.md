@@ -1,6 +1,6 @@
 # Module: `evaluation`
 
-Source-verified: 2026-05-31 from `evaluation/*.py`, `eval/`, `api/routes/metrics.py`, and GitNexus query results.
+Source-verified: 2026-06-01 from `evaluation/*.py`, `eval/`, `api/routes/metrics.py`, and GitNexus query results.
 
 ## Purpose
 
@@ -107,12 +107,16 @@ Useful tuning flags:
 python -m evaluation.evaluate_e2e_pipeline --dataset evaluation/data/ITE6_rag_evaluation_dataset_no_parent_evidence.json --top-k 7 --reranker-min-top-k 7
 python -m evaluation.evaluate_e2e_pipeline --dataset ... --vector-pool-k 28 --keyword-pool-k 28 --vector-top-k 28 --keyword-top-k 28
 python -m evaluation.evaluate_e2e_pipeline --dataset ... --hyde-enabled --low-conf-pool-expand
+python -m evaluation.evaluate_e2e_pipeline --dataset ... --enable-agent
 python -m evaluation.evaluate_e2e_pipeline --dataset ... --disable-decomposer --disable-reflection --disable-complexity-router
 ```
 
 For chunk-id datasets, the runner disables ValidityFilter, agent, and
-Tavily/web fallback so retrieved sources remain comparable to
-`evidence_chunk_ids`. The ITE6 no-parent-evidence comparison indicates
+Tavily/web fallback by default so retrieved sources remain comparable to
+`evidence_chunk_ids`. Use `--enable-agent` only for intentional Planner-Executor
+evaluation; the chunk-id eval defaults are not production routing defaults. The
+run config and active ablations in reports reflect the actual toggles. The ITE6
+no-parent-evidence comparison indicates
 `top_k=7` with `reranker_min_top_k=7` is the best historical report among the
 tracked variants; HyDE did not trigger in those runs. A 2026-06-01 retest after
 the Qdrant payload-filter fallback for empty `ctdt` ES index produced

@@ -1,6 +1,6 @@
 # Module: `query`
 
-Source-verified: 2026-05-20 from `query/*.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, and GitNexus context for `QueryReflector`.
+Source-verified: 2026-06-01 from `query/*.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, and GitNexus context for `QueryReflector`.
 
 ## Purpose
 
@@ -54,7 +54,6 @@ Known complex subtypes:
 
 - `comparison`
 - `multi_source`
-- `personal_check`
 - `general`
 
 Pattern order matters. First match wins.
@@ -62,7 +61,7 @@ Pattern order matters. First match wins.
 P0 routing guards:
 
 - Single-fact policy/table/exact lookup questions should remain `simple` unless the text has explicit comparison, multiple domains, or multiple tasks.
-- Personal-check subtype detection should not force a public clarify mode by itself. `RAGPipeline.query_v3()` keeps these on classic RAG with `route="personal_check"`.
+- The old `personal_check` subtype is intentionally removed. Personal-reference plus eligibility/graduation wording routes as `multi_source` so it reaches the Planner-Executor instead of a clarify or classic-RAG special case.
 - Broad words such as scholarship/fee-waiver/allowed-question wording are not enough to emit eligibility intent unless the query explicitly asks about being eligible/qualified/considered.
 
 ## DomainClassifier And QueryRouter

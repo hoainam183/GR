@@ -1,7 +1,7 @@
 # PROJECT MEMORY - RAG v2 (HUST Academic Chatbot)
 
 > Đây là memory cấp dự án. Đọc trước khi sửa code trong `src/RAG_v2`.
-> Snapshot gần nhất: 2026-05-25, đối chiếu từ source code hiện tại.
+> Snapshot gần nhất: 2026-06-01, đối chiếu từ source code hiện tại.
 
 ---
 
@@ -24,13 +24,13 @@ and `packages/MODULE.md` for module-specific details.
 | --- | --- |
 | API | FastAPI, app factory/lifespan ở `api/main.py` |
 | Pipeline | `pipeline/rag_pipeline.py` là orchestrator chính |
-| Agent | LangGraph `StateGraph` + LangChain tools trong `agent/` |
+| Agent | LangGraph Planner-Executor trong `agent/`; class name `ReActAgent` retained for imports |
 | Vector store | Qdrant, named vectors `bge_m3` + `e5` |
 | Keyword store | Elasticsearch, index name trùng với collection |
 | Embedding | BGE-M3 + E5 multilingual ensemble |
 | Reranker | BGE reranker cross-encoder |
 | LLM | Gemini qua effective `Settings`; admin LLM overrides có thể persist trong Mongo `system_config` và override `.env` |
-| Agent tool LLM | LM Studio local, model đọc từ `AGENT_MODEL` |
+| Agent planner LLM | LM Studio/OpenAI-compatible fallback or synthesis provider, model đọc từ `AGENT_MODEL` |
 | Agent synthesis | Gemini/LM Studio/Ollama tùy `AGENT_SYNTHESIS_PROVIDER`, default code là Gemini |
 | DB logging | MongoDB qua `models/mongo_logger.py` |
 | Cache/session/rate limit | Redis optional trong `cache/`, mặc định phụ thuộc `redis_enabled` |
@@ -55,7 +55,7 @@ RAGPipeline
   |     +-- ComplexityRouter (query/complexity_router.py)
   |     |     +-- chitchat -> canned response
   |     |     +-- simple   -> classic query()
-  |     |     +-- complex  -> decomposed RAG or agent
+  |     |     +-- complex  -> agent
   |
   +-- classic RAG
   |     QueryRouter -> QueryReflector -> CollectionSelector
@@ -65,8 +65,8 @@ RAGPipeline
   |
   +-- agent path
         ReActAgent
-          +-- planner-executor for comparison/multi-source
-          +-- ReAct tool loop for normal tool-calling
+          +-- decompose for comparison/multi-source
+          +-- planner -> executor for all complex subtypes
           +-- synthesis LLM for final answer
 ```
 
@@ -97,7 +97,7 @@ RAG_v2/
 │
 ├── agent/
 │   ├── react_agent.py          # LangGraph agent, planner/executor, synthesis
-│   ├── lc_tools.py             # LANGGRAPH_TOOLS, TOOL_MAP
+│   ├── lc_tools.py             # legacy direct tool wrappers, no graph-bound tools
 │   ├── tool_adapters.py        # execute_tool + retrieval adapter impl
 │   ├── state.py                # AgentState, ToolResult
 │   └── graph_state.py          # LangGraph state TypedDict
@@ -144,15 +144,14 @@ RAG_v2/
 
 Current P0 routing contract:
 
-- `complex` + `personal_check` no longer returns `mode=clarify`; it calls classic `query()` and returns `mode=rag_v2`, `route=personal_check`.
 - Single-fact policy lookups such as registration-count/table/exact questions should stay `simple -> rag_v2` unless they contain explicit comparison, multiple domains, or multiple tasks.
+- `personal_check` and public `mode=clarify` special-cases have been removed. Personal-reference eligibility wording routes as complex/multi-source and reaches the Planner-Executor when the agent is enabled.
 
 - Chạy `ComplexityRouter` trước mọi branch.
 - `chitchat`: trả canned response, không gọi LLM/retrieval.
-- `complex` + `personal_check`: trả `mode=clarify` để hỏi thêm dữ liệu cá nhân bắt buộc, không gọi retrieval/agent.
-- `complex` + multi-source decomposition hợp lệ: chạy decomposed RAG và trả `mode=rag_v2_decomposed`.
 - `simple` hoặc `agent_enabled=false`: fallback về classic `query()` và trả `mode=rag_v2`.
-- Các complex còn lại: chạy `query_agent()`, nếu agent lỗi thì fallback classic RAG trừ khi caller yêu cầu `require_agent=True`.
+- `complex`: chạy `query_agent()`, nếu agent lỗi thì fallback classic RAG trừ khi caller yêu cầu `require_agent=True`.
+- `query_v3()` no longer bypasses the agent via `_query_decomposed()` for multi-source questions; decomposition now happens inside `ReActAgent`.
 
 ### 4.2 Classic RAG flow
 
@@ -219,10 +218,13 @@ Current P0 reliability contracts:
 ### 4.3 Agent flow
 
 - `query_agent()` gọi `ReActAgent.run()` và gom agent docs qua `ContextVar` để map vào API/UI trace.
-- `ReActAgent` có 2 path:
-  - Planner-executor cho comparison/multi-source: decompose, require every plan step to have a valid query/collection, execute retrieval steps song song, synthesize.
-  - ReAct loop cho query khác: local tool-calling LLM bind tools, execute, loop đến synthesis/clarify/error; direct model answers are accepted only after at least one tool result.
-- Planner/decomposer tránh auto-inject `user_context.major_code` vào comparison query để giảm bias.
+- `query_agent()` infers `complexity_subtype` when forced-agent callers do not pass one, so `/chat/v3 mode=agent` still decomposes comparison/multi-source questions.
+- `ReActAgent` is Planner-Executor only:
+  - comparison/multi-source: decompose, plan, validate, execute retrieval steps in parallel, synthesize.
+  - general/missing subtype: plan directly, validate, execute, synthesize.
+- Planner invalid JSON, empty steps, or invalid collection sets `AgentState.error`; `query_agent()` owns fallback to classic RAG unless `require_agent=True`.
+- Empty retrieval texts are filtered before synthesis. If every executor result is empty, the agent returns a deterministic no-information answer without fallback.
+- `top_k`, raw candidate pool, and reranker thresholds come from shared pipeline/runtime settings and are passed into the agent executor path.
 - Tool results được trim cho context, nhưng trace/log đầy đủ lưu qua Mongo.
 
 ---
@@ -330,8 +332,7 @@ reflection_prompt
 llm_prompt
 ```
 
-`mode` may be `clarify` when `query_v3()` detects a personal eligibility check
-that lacks required student-specific data.
+`query_v3()` no longer emits a public `mode=clarify` branch for personal eligibility checks; those queries route through the complex agent path when the agent is enabled.
 
 ### Auth & RBAC
 
@@ -417,19 +418,21 @@ Admin API:
 
 ## 7. Agent Tools
 
-`LANGGRAPH_TOOLS` in `agent/lc_tools.py` currently contains exactly:
+The LangGraph agent no longer binds LangChain tools. `lc_tools.py` only keeps
+legacy direct wrapper functions, and `execute_tool()` remains available for
+backward compatibility, tests, and older direct callers.
 
-| Tool | Bound to LangGraph LLM | Purpose |
-| --- | --- | --- |
-| `rag_search` | yes | Search one logical collection |
-| `web_search` | yes | Tavily/web fallback |
-| `clarify_question` | yes | Ask user one clarification and stop turn |
+Supported direct tool names:
+
+- `rag_search`
+- `multi_rag_search`
+- `compare_cohorts`
+- `compare_programs`
+- `web_search`
 
 `web_search` uses HUST official/extended domains plus authoritative education
 domains only; general news sites are not in the default Tavily scope. The tool
 uses `TAVILY_MAX_RESULTS` and `TAVILY_SEARCH_DEPTH` from settings.
-
-Important: `execute_tool()` in `agent/tool_adapters.py` still supports `multi_rag_search`, `compare_cohorts`, and `compare_programs` for backward compatibility, tests, and direct callers. These are not currently in `LANGGRAPH_TOOLS`, so the ReAct LLM is not schema-bound directly to them. Comparison/multi-source work is handled primarily by the planner-executor path.
 
 Tool adapter details:
 
@@ -557,7 +560,6 @@ Do not hardcode provider/model/host values in code; use settings/env.
 - Search result ids after cross-collection merge use `{collection}/{doc_id}`.
 - Fallbacks are expected: agent error -> classic RAG, filter empty -> relaxed/no filter, reflection fail -> original query, retrieval empty -> broader search or web fallback when enabled.
 - Chat history context budget is trimmed before prompt construction.
-- `CLARIFY_SENTINEL` lives in `schemas/constants.py` and marks clarify-tool output.
 
 ---
 

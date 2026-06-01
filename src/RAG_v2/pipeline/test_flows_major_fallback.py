@@ -749,29 +749,69 @@ def test_rag_flow_does_not_prepend_profile_note_when_query_has_explicit_major_co
     assert "Ngành: Công nghệ thông tin Việt - Nhật [IT-E6]" not in llm_context
 
 
-def test_query_v3_routes_personal_graduation_check_to_rag() -> None:
+def test_query_v3_routes_personal_graduation_check_to_agent() -> None:
     from pipeline.rag_pipeline import RAGPipeline
     from query.complexity_router import ComplexityRouter
 
     pipeline = RAGPipeline.__new__(RAGPipeline)
     pipeline.complexity_router = ComplexityRouter()
     pipeline._llm_runtime_snapshot = MagicMock(
-        return_value=SimpleNamespace(decomposer=None, agent=None)
+        return_value=SimpleNamespace(decomposer=None, agent=object())
     )
-    pipeline.query = MagicMock(
-        return_value={"question": "q", "answer": "rag answer", "sources": []}
+    pipeline.query = MagicMock()
+    pipeline.query_agent = MagicMock(
+        return_value={
+            "question": "q",
+            "answer": "agent answer",
+            "mode": "agent",
+            "route": "complex",
+        }
     )
 
     result = RAGPipeline.query_v3(pipeline, "điều kiện tốt nghiệp của tôi")
 
-    assert result["mode"] == "rag_v2"
-    assert result["route"] == "personal_check"
-    assert result["answer"] == "rag answer"
-    pipeline.query.assert_called_once()
+    assert result["mode"] == "agent"
+    assert result["route"] == "complex"
+    assert result["answer"] == "agent answer"
+    pipeline.query.assert_not_called()
+    pipeline.query_agent.assert_called_once()
+    assert pipeline.query_agent.call_args.kwargs["complexity_subtype"] == "multi_source"
 
 
-def test_query_stream_personal_check_uses_rag_path_not_agent(monkeypatch) -> None:
-    from pipeline import rag_pipeline as rag_pipeline_module
+def test_query_v3_multi_source_uses_agent_not_decomposed_rag() -> None:
+    from pipeline.rag_pipeline import RAGPipeline
+    from query.complexity_router import ComplexityRouter
+
+    decomposer = MagicMock()
+    pipeline = RAGPipeline.__new__(RAGPipeline)
+    pipeline.complexity_router = ComplexityRouter()
+    pipeline._llm_runtime_snapshot = MagicMock(
+        return_value=SimpleNamespace(decomposer=decomposer, agent=object())
+    )
+    pipeline._query_decomposed = MagicMock()
+    pipeline.query = MagicMock()
+    pipeline.query_agent = MagicMock(
+        return_value={
+            "question": "q",
+            "answer": "agent answer",
+            "mode": "agent",
+            "route": "complex",
+        }
+    )
+
+    result = RAGPipeline.query_v3(
+        pipeline,
+        "điều kiện tốt nghiệp ngành IT-E6 theo chương trình đào tạo",
+    )
+
+    assert result["mode"] == "agent"
+    pipeline.query_agent.assert_called_once()
+    assert pipeline.query_agent.call_args.kwargs["complexity_subtype"] == "multi_source"
+    pipeline._query_decomposed.assert_not_called()
+    decomposer.decompose.assert_not_called()
+
+
+def test_query_stream_personal_eligibility_uses_agent_path() -> None:
     from pipeline.rag_pipeline import RAGPipeline
     from query.complexity_router import ComplexityRouter
 
@@ -793,7 +833,17 @@ def test_query_stream_personal_check_uses_rag_path_not_agent(monkeypatch) -> Non
             "confidence": 1.0,
         }
     )
-    pipeline.query_agent = MagicMock()
+    pipeline.query_agent = MagicMock(
+        return_value={
+            "answer": "agent stream answer",
+            "mode": "agent",
+            "agent_trace": {"ok": True},
+            "tools_used": ["planned_rag_search:quy_dinh"],
+            "tool_calls": [],
+            "iterations": 1,
+            "sources": [{"id": "doc-1"}],
+        }
+    )
     runtime = SimpleNamespace(
         cfg={"top_k": 5},
         chat=SimpleNamespace(model="test-model"),
@@ -803,15 +853,6 @@ def test_query_stream_personal_check_uses_rag_path_not_agent(monkeypatch) -> Non
     )
     pipeline._llm_runtime_snapshot = MagicMock(return_value=runtime)
 
-    def _fake_rag_flow_stream(**kwargs: Any):
-        metadata = kwargs["metadata_out"]
-        metadata["reflected_question"] = kwargs["question"]
-        metadata["tools_used"] = []
-        metadata["tool_calls"] = []
-        return iter(["ok"]), [{"id": "doc-1"}]
-
-    monkeypatch.setattr(rag_pipeline_module, "rag_flow_stream", _fake_rag_flow_stream)
-
     chunks = list(
         RAGPipeline.query_stream(
             pipeline,
@@ -819,12 +860,13 @@ def test_query_stream_personal_check_uses_rag_path_not_agent(monkeypatch) -> Non
         )
     )
 
-    assert chunks == ["ok"]
-    assert pipeline.last_mode == "rag_v2"
-    pipeline.query_agent.assert_not_called()
+    assert chunks == ["agent stream answer"]
+    assert pipeline.last_mode == "agent"
+    pipeline.query_agent.assert_called_once()
+    assert pipeline.query_agent.call_args.kwargs["complexity_subtype"] == "multi_source"
 
 
-def test_query_v3_does_not_clarify_general_graduation_question() -> None:
+def test_query_v3_general_graduation_question_stays_classic_rag() -> None:
     from pipeline.rag_pipeline import RAGPipeline
     from query.complexity_router import ComplexityRouter
 
@@ -845,3 +887,61 @@ def test_query_v3_does_not_clarify_general_graduation_question() -> None:
     assert result["mode"] == "rag_v2"
     assert result["answer"] == "general answer"
     pipeline.query.assert_called_once()
+
+
+def test_query_agent_infers_complexity_subtype_for_forced_agent() -> None:
+    from pipeline.rag_pipeline import RAGPipeline
+    from query.complexity_router import ComplexityRouter
+
+    class _State:
+        final_answer = "agent answer"
+        tool_call_history = []
+        tool_results = []
+        iteration = 0
+        error = None
+
+        def to_log_dict(self) -> dict[str, Any]:
+            return {
+                "query": "q",
+                "session_id": "",
+                "route": "complex",
+                "iterations": 0,
+                "tool_calls": [],
+                "tool_names_sequence": [],
+                "final_answer_length": len(self.final_answer),
+                "error": None,
+            }
+
+    class _Agent:
+        model_name = "agent"
+
+        def __init__(self) -> None:
+            self.last_complexity_subtype: str | None = None
+            self.last_top_k: int | None = None
+
+        def run(self, *args: Any, **kwargs: Any) -> _State:
+            self.last_complexity_subtype = kwargs.get("complexity_subtype")
+            self.last_top_k = kwargs.get("top_k")
+            return _State()
+
+    agent = _Agent()
+    pipeline = RAGPipeline.__new__(RAGPipeline)
+    pipeline.complexity_router = ComplexityRouter()
+    pipeline._llm_runtime_snapshot = MagicMock(
+        return_value=SimpleNamespace(agent=agent, cfg={"top_k": 5})
+    )
+    pipeline._mongo_logger = None
+    pipeline.query = MagicMock()
+
+    result = RAGPipeline.query_agent(
+        pipeline,
+        "So sanh hoc bong giua K65 va K70",
+        top_k=7,
+        route_label="agent_forced",
+        require_agent=True,
+    )
+
+    assert result["mode"] == "agent"
+    assert agent.last_complexity_subtype == "comparison"
+    assert agent.last_top_k == 7
+    pipeline.query.assert_not_called()

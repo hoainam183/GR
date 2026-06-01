@@ -647,10 +647,20 @@ class RAGPipeline:
 
         Args:
             complexity_subtype: Passed to ``agent.run()`` to choose planner
-                vs agent-loop path ("comparison", "multi_source", "general").
+                path shape ("comparison", "multi_source", "general").
         """
         agent_t0 = time.perf_counter()
-        agent = self._llm_runtime_snapshot().agent
+        runtime = self._llm_runtime_snapshot()
+        agent = runtime.agent
+        effective_top_k = top_k or runtime.cfg["top_k"]
+
+        if complexity_subtype is None:
+            try:
+                inferred = self.complexity_router.route(question)
+                if inferred.get("tier") == "complex":
+                    complexity_subtype = inferred.get("complex_subtype") or "general"
+            except Exception:
+                logger.debug("Failed to infer agent complexity subtype", exc_info=True)
 
         def _fallback_result(
             agent_error: str, tool_payload: Optional[Dict[str, Any]] = None
@@ -658,7 +668,7 @@ class RAGPipeline:
             result = self.query(
                 question=question,
                 history=history,
-                top_k=top_k,
+                top_k=effective_top_k,
                 session_id=session_id,
                 user_context=user_context,
             )
@@ -713,6 +723,7 @@ class RAGPipeline:
                 history=history,
                 complexity_subtype=complexity_subtype,
                 user_context=user_context,
+                top_k=effective_top_k,
             )
         except Exception as exc:
             logger.warning(
@@ -785,9 +796,7 @@ class RAGPipeline:
         Routing:
             - chitchat      → lightweight local handler
             - simple        → classic RAG v2 pipeline (query)
-            - complex/multi_source → query decomposition into per-domain sub-queries,
-                              then parallel RAG retrieval (no hallucination risk)
-            - complex/other → LangGraph agent when enabled (fallback to RAG)
+            - complex       → Planner-Executor agent when enabled (fallback to RAG)
 
         Falls back to RAG v2 when agent is unavailable or fails.
         """
@@ -808,77 +817,6 @@ class RAGPipeline:
                 "iterations": 0,
                 "agent_trace": None,
             }
-
-        if route == "complex" and subtype == "personal_check":
-            result = self.query(
-                question=question,
-                history=history,
-                top_k=top_k,
-                session_id=session_id,
-                user_context=user_context,
-            )
-            result["mode"] = "rag_v2"
-            result["route"] = "personal_check"
-            result["route_reason"] = route_result.get("reason", "")
-            result.setdefault("tools_used", [])
-            result.setdefault("tool_calls", [])
-            result.setdefault("iterations", 0)
-            result.setdefault("agent_trace", None)
-            return result
-
-        if False and route == "complex" and subtype == "personal_check":
-            return {
-                "question": question,
-                "answer": (
-                    "Để kiểm tra điều kiện tốt nghiệp cá nhân, mình cần thêm "
-                    "CPA/GPA, số tín chỉ đã tích lũy, trạng thái chuẩn ngoại ngữ, "
-                    "GDTC, GDQP-AN, tình trạng kỷ luật/pháp lý và trạng thái đăng ký "
-                    "xét tốt nghiệp. Bạn muốn mình nêu điều kiện tốt nghiệp chung, "
-                    "hay kiểm tra theo thông tin cá nhân của bạn?"
-                ),
-                "mode": "clarify",
-                "route": "personal_check",
-                "route_reason": route_result.get("reason", ""),
-                "intent": "personal_check",
-                "sources": [],
-                "num_sources": 0,
-                "tools_used": [],
-                "tool_calls": [],
-                "iterations": 0,
-                "agent_trace": None,
-            }
-
-        # This handles compound questions like Q1 (equivalent course + graduation
-        # requirements) without dispatching to the agent, which can hallucinate.
-        if (
-            route == "complex"
-            and subtype == "multi_source"
-            and runtime.decomposer is not None
-        ):
-            domain_subqueries = runtime.decomposer.decompose(question)
-            # Only use decomposition if we got ≥2 sub-queries (otherwise falls
-            # through to regular RAG below).
-            if len(domain_subqueries) >= 2:
-                logger.info(
-                    "query_v3: decomposed multi_source into %d sub-queries",
-                    len(domain_subqueries),
-                )
-                result = self._query_decomposed(
-                    question=question,
-                    domain_subqueries=domain_subqueries,
-                    history=history,
-                    top_k=top_k,
-                    session_id=session_id,
-                    user_context=user_context,
-                )
-                result["mode"] = "rag_v2_decomposed"
-                result["route"] = "multi_source"
-                result["route_reason"] = route_result.get("reason", "")
-                result.setdefault("tools_used", [])
-                result.setdefault("tool_calls", [])
-                result.setdefault("iterations", 0)
-                result.setdefault("agent_trace", None)
-                return result
 
         if route == "simple" or runtime.agent is None:
             result = self.query(
@@ -1180,7 +1118,6 @@ class RAGPipeline:
         # ── Complex branch → agent ────────────────────────────────────────────
         elif (
             complexity_tier == "complex"
-            and complexity_subtype != "personal_check"
             and runtime.agent is not None
         ):
             self.last_mode = "agent"
@@ -1263,7 +1200,6 @@ class RAGPipeline:
             self.last_mode = "rag_v2"
             if (
                 complexity_tier == "complex"
-                and complexity_subtype != "personal_check"
                 and runtime.agent is None
             ):
                 logger.info(

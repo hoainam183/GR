@@ -7,10 +7,8 @@ api/routes/chat.py, agent/react_agent.py, and agent/tool_adapters.py.
 from __future__ import annotations
 
 
-# ─── Clarify tool sentinel ────────────────────────────────────────────────────
-# Written by _clarify_question() in tool_adapters.py.
-# Stripped by _relay_last_clarify_output() in react_agent.py.
-# Using a constant prevents the two modules being coupled by a raw string.
+# Legacy clarify sentinel retained only for backward-compatible consumers.
+# Current Planner-Executor code does not emit clarify tool output.
 
 CLARIFY_SENTINEL: str = "[CLARIFY]"
 

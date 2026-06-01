@@ -35,11 +35,6 @@ TUNE_QUESTIONS: list[tuple[str, str, str | None]] = [
         "thong_bao",
     ),
     (
-        "Học bổng",
-        "clarify_question",
-        None,
-    ),
-    (
         "Môn Toán cao cấp 1 có mã môn là gì và có bao nhiêu tín chỉ?",
         "rag_search",
         "chuong_trinh",

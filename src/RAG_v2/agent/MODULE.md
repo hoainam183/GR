@@ -1,27 +1,24 @@
 # Module: `agent`
 
-Source-verified: 2026-05-20 from `agent/*.py`, `pipeline/rag_pipeline.py`, and GitNexus symbol context.
+Source-verified: 2026-06-01 from `agent/*.py`, `pipeline/rag_pipeline.py`, and focused planner-executor tests.
 
 ## Purpose
 
 `agent` is the agentic RAG layer used by `RAGPipeline.query_agent()` for complex questions. It does not expose HTTP routes directly. The public caller is the pipeline, which converts the final `AgentState` into API metadata, retrieved documents, Mongo traces, and UI debug payloads.
 
-The module has two execution paths:
-
-- Planner-executor path for `complexity_subtype in {"comparison", "multi_source"}`.
-- ReAct tool loop path for general complex questions or planner fallback.
+The public class name remains `ReActAgent` for import compatibility, but the runtime graph is now Planner-Executor only. The old LangGraph tool-binding loop and clarify tool path have been removed.
 
 ## File Map
 
 ```text
 agent/
-  __init__.py       Public exports for state, tools, adapters, and ReActAgent.
+  __init__.py       Public exports for state, adapters, and ReActAgent.
   graph_state.py    AgentGraphState TypedDict used by LangGraph.
-  lc_tools.py       LangChain StructuredTool schemas and TOOL_MAP.
+  lc_tools.py       Legacy direct wrapper functions; no graph-bound tools.
   prompts.py        System, synthesis, decomposition, and planner prompts.
-  react_agent.py    ReActAgent graph nodes, routing, validation, synthesis.
+  react_agent.py    Planner-Executor graph nodes, routing, validation, synthesis.
   state.py          AgentState and ToolResult dataclasses for logging/API.
-  tool_adapters.py  Tool dispatcher, retrieval/web adapters, cache, ContextVar docs.
+  tool_adapters.py  Legacy tool dispatcher, retrieval/web adapters, cache, ContextVar docs.
 ```
 
 ## Public Contracts
@@ -30,7 +27,6 @@ agent/
 
 - `ReActAgent`
 - `AgentState`, `ToolResult`, `AgentGraphState`
-- `LANGGRAPH_TOOLS`, `TOOL_MAP`
 - `execute_tool()`, `execute_retrieval_plan()`, `web_search_for_executor()`
 - `set_runtime()`, `cache_clear()`
 - `init_agent_docs()`, `get_agent_docs()`
@@ -42,47 +38,39 @@ agent/
 ```text
 RAGPipeline.query_agent()
   -> init_agent_docs()
-  -> ReActAgent.run(query, history, user_context, complexity_subtype)
-     -> planner path for comparison/multi_source
-        -> decompose -> planner -> validate plan -> executor -> synthesize
-     -> react path for general complex
-        -> local tool-calling LLM -> tools -> loop/synthesize/extract
+  -> ReActAgent.run(query, history, user_context, complexity_subtype, top_k)
+     -> route_entry
+        -> comparison/multi_source: decompose -> planner
+        -> general/missing subtype: planner
+     -> validate plan
+     -> executor when the plan is valid and has steps
+     -> synthesize
   -> get_agent_docs()
   -> API response mapper + Mongo agent trace
 ```
 
-Planner path:
+Planner-Executor behavior:
 
-- `_decompose_node()` uses the synthesis LLM and `DECOMPOSE_SYSTEM_PROMPT`.
+- `_decompose_node()` uses the synthesis LLM and `DECOMPOSE_SYSTEM_PROMPT` only for `comparison` and `multi_source`.
 - `_planner_node()` asks for JSON retrieval steps.
-- `_validate_plan()` requires valid `query` and `collection` fields.
-- `_executor_node()` calls `execute_retrieval_plan()` and optionally `web_search_for_executor()` for `needs_web`.
-- `_synthesize_node()` writes the final Vietnamese answer from tool results.
+- JSON fenced responses are parsed through the shared helper in `react_agent.py`; do not use naive backtick stripping.
+- `_validate_plan()` requires non-empty steps and valid `query` plus `collection` fields.
+- Planner invalid JSON, empty steps, or invalid collection sets `state.error`; `RAGPipeline.query_agent()` handles fallback policy.
+- `_executor_node()` calls `execute_retrieval_plan()` with the pipeline-provided effective `top_k`, and optionally calls `web_search_for_executor()` for `needs_web`.
+- Empty retrieval texts are filtered before synthesis. If every retrieval step is empty, the agent returns a deterministic no-information answer without triggering fallback.
+- `_synthesize_node()` writes the final Vietnamese answer from non-empty tool results.
 
-ReAct path:
+## Legacy Tools
 
-- `_agent_node()` calls the local OpenAI-compatible LLM bound to `LANGGRAPH_TOOLS`.
-- `_should_continue()` blocks direct answers before at least one tool result.
-- `_tools_node()` dispatches through `TOOL_MAP`.
-- `_after_tools()` stops for clarification, synthesizes on tool errors, otherwise loops.
+`execute_tool()` is kept as a compatibility wrapper for tests and older direct callers. It is not bound to the LangGraph agent.
 
-## Tools
+Supported direct tool names:
 
-Tools bound to the ReAct LLM in `LANGGRAPH_TOOLS`:
-
-| Tool | Input | Purpose |
-| --- | --- | --- |
-| `rag_search` | `query`, `collection` | Search one logical RAG collection. |
-| `web_search` | `query` | Tavily search over HUST/education domains for fresh or missing data. |
-| `clarify_question` | `message`, `options` | Ask the user to clarify and end the turn. |
-
-Adapter-only tools still supported by `execute_tool()`:
-
+- `rag_search`
 - `multi_rag_search`
 - `compare_cohorts`
 - `compare_programs`
-
-These adapter-only tools are for backward compatibility, tests, and direct callers. The local ReAct LLM is not schema-bound to them; comparisons should normally go through planner-executor.
+- `web_search`
 
 Agent-facing collection aliases:
 
@@ -99,10 +87,9 @@ Agent-facing collection aliases:
 
 - `messages`
 - `tool_call_history`
-- `tool_call_signatures`
-- `iteration`, `max_iterations`
 - `execution_path`
 - `sub_questions`, `retrieval_plan`
+- `top_k`
 - `final_answer`, `error`
 
 `AgentState` is the persistence/API shape. It keeps:
@@ -113,7 +100,7 @@ Agent-facing collection aliases:
 
 ## Runtime Injection And Thread Safety
 
-`tool_adapters` owns an `_AdapterRuntime` with settings, BGE/E5 embedders, `MultiCollectionSearch`, optional reranker, and Tavily tool. Runtime should come from the shared `RetrievalService` to avoid loading heavy models twice.
+`tool_adapters` owns an `_AdapterRuntime` with settings, BGE/E5 embedders, `MultiCollectionSearch`, optional reranker, and Tavily tool. Runtime must come from the shared `RetrievalService` so eval/admin/runtime overrides propagate to agent retrieval without loading heavy models twice.
 
 Thread-safety rules:
 
@@ -121,6 +108,14 @@ Thread-safety rules:
 - `_RAG_CACHE` is an in-process FIFO cache protected by `_CACHE_LOCK`.
 - `_RERANKER_LOCK` serializes reranker access because tokenizer/runtime paths are not thread-safe.
 - `execute_retrieval_plan()` runs plan steps in a thread pool and uses `contextvars.copy_context().run` per task.
+
+## Retrieval Knobs
+
+Agent retrieval uses the same runtime settings as classic RAG:
+
+- `top_k` is passed from `RAGPipeline.query_agent()` into `ReActAgent.run()` and `execute_retrieval_plan()`.
+- Raw candidate pool size comes from `raw_candidate_multiplier` and `raw_candidate_min`.
+- Reranker calls receive `reranker_min_top_k`, `reranker_score_threshold`, and `reranker_table_score_threshold`.
 
 ## Settings
 
@@ -137,15 +132,19 @@ Main settings consumed by this module:
 - `agent_synthesis_model`
 - `agent_synthesis_temperature`
 - `agent_synthesis_max_tokens`
+- `raw_candidate_multiplier`
+- `raw_candidate_min`
+- `reranker_min_top_k`
+- `reranker_score_threshold`
+- `reranker_table_score_threshold`
 
 Supported synthesis providers in code: `gemini`, `ollama`, or an LM Studio/OpenAI-compatible fallback.
 
 ## Maintenance Notes
 
 - Before changing graph topology, update the topology description here and tests in `tests/test_agent_langgraph.py`.
-- When adding a ReAct-visible tool, update `lc_tools.py`, `TOOL_MAP`, `tool_adapters.py`, prompts, and tests.
-- When adding adapter-only behavior, document whether it is included in `LANGGRAPH_TOOLS`.
-- Keep `CLARIFY_SENTINEL` handling aligned with `schemas/constants.py`.
+- When adding adapter behavior, update `tool_adapters.py` and direct adapter tests.
+- Do not reintroduce graph-bound tool schemas without also updating pipeline fallback policy, API trace expectations, and agent tests.
 - If changing public trace fields, update `api/response_mapper.py`, `schemas/chat.py`, frontend trace components, and this file.
 
 ## Useful Checks

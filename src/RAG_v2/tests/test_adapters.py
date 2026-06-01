@@ -7,17 +7,19 @@ Run unit-only checks:
 from __future__ import annotations
 
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 
 from agent import tool_adapters
 from agent.tool_adapters import (
-    _clarify_question,
+    _rag_search,
     _format_search_results,
     _format_web_results,
     execute_tool,
     get_agent_docs,
     init_agent_docs,
+    set_runtime,
 )
 
 
@@ -34,41 +36,6 @@ class TestExecuteToolRouter:
         result = execute_tool("rag_search", {"query": "test"})
         assert "[Loi:" in result
         assert "Tham so" in result
-
-    def test_clarify_question_no_api_needed(self) -> None:
-        result = _clarify_question(
-            message="Ban muon hoi ve hoc bong nao?",
-            options=["Hoc bong KKHT", "Hoc bong tai tro", "Hoc bong toan phan"],
-        )
-        assert "[CLARIFY]" in result
-        assert "KKHT" in result
-        assert "1." in result
-
-    def test_clarify_question_fills_default_options_when_missing(self) -> None:
-        result = _clarify_question(
-            message="Ban muon so sanh theo cach nao?",
-            options=[],
-        )
-        assert "[CLARIFY]" in result
-        assert "1." in result
-        assert "2." in result
-        assert "3." in result
-
-    def test_clarify_question_compare_uses_generic_non_mixed_options(self) -> None:
-        result = _clarify_question(
-            message="Ban muon so sanh mon lap trinh mang giua hai nganh/khoa nao?",
-            options=[
-                "So sanh IT-E6 vs IT-E7",
-                "So sanh K65 vs K70",
-                "So sanh IT-E6 va K65",
-            ],
-        )
-        assert "[CLARIFY]" in result
-        assert "hai ma nganh hay hai ma khoa" in result
-        assert "IT-E6 va K65" not in result
-        assert "1." in result
-        assert "2." in result
-        assert "3." in result
 
     def test_format_search_results_uses_agent_result_settings(self) -> None:
         results = [
@@ -219,6 +186,76 @@ class TestExecuteToolRouter:
         assert "compare_programs" in result  # steers user to correct tool
         assert calls == []  # no search calls should be made
 
+    def test_rag_search_passes_runtime_retrieval_knobs(self) -> None:
+        settings = SimpleNamespace(
+            top_k=5,
+            raw_candidate_multiplier=3.0,
+            raw_candidate_min=12,
+            vector_top_k=31,
+            keyword_top_k=32,
+            vector_pool_k=33,
+            keyword_pool_k=34,
+            reranker_min_top_k=4,
+            reranker_score_threshold=-1.0,
+            reranker_table_score_threshold=-2.0,
+            parent_context_enabled=False,
+            agent_search_result_count=3,
+            agent_search_result_char_limit=500,
+            agent_tool_result_limit=3000,
+        )
+        bge = SimpleNamespace(embed_query=lambda _query: [0.1])
+        e5 = SimpleNamespace(embed_query=lambda _query: [0.2])
+        searcher = MagicMock(
+            search=MagicMock(
+                return_value=[
+                    {
+                        "text": "noi dung hoc bong",
+                        "metadata": {"title": "doc"},
+                    }
+                ]
+            )
+        )
+        reranker = MagicMock(
+            rerank=MagicMock(
+                return_value=[
+                    {
+                        "text": "noi dung hoc bong",
+                        "metadata": {"title": "doc"},
+                    }
+                ]
+            )
+        )
+        runtime = tool_adapters._AdapterRuntime(
+            settings=settings,
+            bge_embedder=bge,
+            e5_embedder=e5,
+            searcher=searcher,
+            reranker=reranker,
+            tavily_tool=None,
+        )
+
+        tool_adapters.cache_clear()
+        init_agent_docs()
+        set_runtime(runtime)
+        try:
+            result = _rag_search("hoc bong KKHT", "quy_dinh", top_k=6)
+        finally:
+            set_runtime(None)
+            tool_adapters.cache_clear()
+
+        assert "noi dung hoc bong" in result
+        search_kwargs = searcher.search.call_args.kwargs
+        assert search_kwargs["top_k"] == 18
+        assert search_kwargs["vector_top_k"] == 31
+        assert search_kwargs["keyword_top_k"] == 32
+        assert search_kwargs["vector_pool_k"] == 33
+        assert search_kwargs["keyword_pool_k"] == 34
+        rerank_kwargs = reranker.rerank.call_args.kwargs
+        assert rerank_kwargs["top_k"] == 6
+        assert rerank_kwargs["min_top_k"] == 4
+        assert rerank_kwargs["score_threshold"] == -1.0
+        assert rerank_kwargs["table_score_threshold"] == -2.0
+
 
 class TestRagSearch:
     """Integration checks requiring Qdrant/Elasticsearch + local models."""
@@ -306,6 +343,11 @@ class TestWebSearch:
         assert result.count("URL:") == 2
         assert len(get_agent_docs()) == 2
 
+    def test_format_web_results_treats_none_answer_as_empty(self) -> None:
+        result = _format_web_results({"answer": None, "results": []})
+
+        assert result == "Khong tim thay thong tin tren web."
+
     @pytest.mark.integration
     def test_web_search_returns_content(self) -> None:
         result = execute_tool(
@@ -317,4 +359,6 @@ class TestWebSearch:
         assert isinstance(result, str)
         if "Tavily chua duoc cau hinh" in result:
             pytest.skip("Tavily API key is not configured for this environment")
+        if result == "Khong tim thay thong tin tren web.":
+            pytest.skip("Tavily returned no web content for this environment")
         assert len(result) > 100

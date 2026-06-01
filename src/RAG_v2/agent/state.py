@@ -39,7 +39,7 @@ class ToolResult:
 @dataclass
 class AgentState:
     """
-    Central agent state carried across ReAct iterations.
+    Central agent state carried across Planner-Executor execution.
 
     tool_results vs _log_tool_results
     -----------------------------------

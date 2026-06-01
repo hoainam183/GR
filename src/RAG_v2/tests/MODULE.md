@@ -1,6 +1,6 @@
 # Module: `tests`
 
-Source-verified: 2026-05-25 from `tests/*.py`, root test files, and pytest config.
+Source-verified: 2026-06-01 from `tests/*.py`, root test files, and pytest config.
 
 ## Purpose
 
@@ -12,7 +12,7 @@ Pytest config is in `pytest.ini`.
 
 | Files | Area |
 | --- | --- |
-| `test_agent_langgraph.py`, `test_adapters.py`, `test_constants.py` | Agent graph/tools/constants. |
+| `test_agent_langgraph.py`, `test_adapters.py`, `test_constants.py` | Planner-Executor agent graph, legacy adapters, constants. |
 | `test_chat_route_mode.py`, `test_response_mapper.py`, `test_dependencies.py` | API chat routing, mapper, dependencies. |
 | `test_admin_llm_config.py` | Persisted admin LLM config, startup merge, endpoint ordering, pipeline reload. |
 | `test_crawler_review.py` | Auto-crawler Mongo staging, admin review status/edit contract, and reviewed indexing success/failure behavior. |

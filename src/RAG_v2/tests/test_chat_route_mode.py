@@ -1,4 +1,4 @@
-"""Tests for /chat endpoint always-agent behavior and legacy turn logging."""
+"""Tests for /chat route mode behavior and legacy turn logging."""
 
 from __future__ import annotations
 
@@ -53,15 +53,22 @@ class _FakeAgent:
     def __init__(self) -> None:
         self.calls = 0
         self.last_history: list[dict] | None = None
+        self.last_complexity_subtype: str | None = None
+        self.last_top_k: int | None = None
 
     def run(
         self,
         question: str,
         session_id: str = "",
         history: list[dict] | None = None,
+        complexity_subtype: str | None = None,
+        user_context: dict | None = None,
+        top_k: int | None = None,
     ) -> _FakeAgentState:
         self.calls += 1
         self.last_history = history
+        self.last_complexity_subtype = complexity_subtype
+        self.last_top_k = top_k
         return _FakeAgentState()
 
 
@@ -73,6 +80,7 @@ class _FakePipeline:
         self.agent = _FakeAgent()
         self.last_query_history: list[dict] | None = None
         self.last_query_agent_route_label: str | None = None
+        self.last_query_agent_complexity_subtype: str | None = None
 
     def query(
         self,
@@ -97,6 +105,8 @@ class _FakePipeline:
             "num_sources": 1,
             "model_name": "gemini",
             "intent": "rag",
+            "mode": "rag_v2",
+            "route": "simple",
         }
 
     def query_v3(
@@ -113,7 +123,10 @@ class _FakePipeline:
             "answer": "Auto agent answer",
             "mode": "agent",
             "route": "complex",
+            "intent": "complex",
+            "model_name": "agent",
             "tools_used": ["compare_cohorts"],
+            "tool_calls": [],
             "iterations": 2,
         }
 
@@ -127,9 +140,11 @@ class _FakePipeline:
         *,
         route_label: str = "complex",
         require_agent: bool = False,
+        complexity_subtype: str | None = None,
     ) -> dict:
         self.query_agent_calls += 1
         self.last_query_agent_route_label = route_label
+        self.last_query_agent_complexity_subtype = complexity_subtype
         if self.agent is None and require_agent:
             raise RuntimeError("Agent is disabled")
 
@@ -137,6 +152,9 @@ class _FakePipeline:
             question,
             session_id=session_id or "",
             history=history,
+            complexity_subtype=complexity_subtype,
+            user_context=user_context,
+            top_k=top_k,
         )
         return {
             "question": question,
@@ -207,7 +225,7 @@ def _make_request(pipeline: _FakePipeline, mongo_logger: _FakeMongoLogger | None
 
 
 @pytest.mark.anyio
-async def test_chat_auto_mode_forces_agent_and_logs_legacy_turn() -> None:
+async def test_chat_auto_mode_uses_query_v3_and_logs_turn() -> None:
     pipeline = _FakePipeline()
     mongo_logger = _FakeMongoLogger()
     request = _make_request(pipeline, mongo_logger)
@@ -220,26 +238,23 @@ async def test_chat_auto_mode_forces_agent_and_logs_legacy_turn() -> None:
     response = await chat(request, body)
 
     assert pipeline.query_calls == 0
-    assert pipeline.query_v3_calls == 0
-    assert pipeline.query_agent_calls == 1
-    assert pipeline.agent.calls == 1
-    assert response.answer == "Agent answer"
-    assert response.intent == "agent_forced"
-    assert response.model_name == "agent"
+    assert pipeline.query_v3_calls == 1
+    assert pipeline.query_agent_calls == 0
+    assert pipeline.agent.calls == 0
+    assert response.answer == "Auto agent answer"
     assert response.session_id == "session-1"
     assert response.mode == "agent"
-    assert response.route == "agent_forced"
+    assert response.route == "complex"
     assert response.iterations == 2
 
     assert len(mongo_logger.logged_turns) == 1
     logged_turn = mongo_logger.logged_turns[0]
     assert logged_turn["question"] == body.question
-    assert logged_turn["result"]["intent"] == "agent_forced"
-    assert logged_turn["result"]["model_name"] == "agent"
+    assert logged_turn["result"]["route"] == "complex"
 
 
 @pytest.mark.anyio
-async def test_chat_rag_mode_still_forces_agent() -> None:
+async def test_chat_rag_mode_uses_classic_rag() -> None:
     pipeline = _FakePipeline()
     mongo_logger = _FakeMongoLogger()
     request = _make_request(pipeline, mongo_logger)
@@ -247,16 +262,16 @@ async def test_chat_rag_mode_still_forces_agent() -> None:
 
     response = await chat(request, body)
 
-    assert pipeline.query_calls == 0
+    assert pipeline.query_calls == 1
     assert pipeline.query_v3_calls == 0
-    assert pipeline.query_agent_calls == 1
-    assert pipeline.agent.calls == 1
-    assert response.answer == "Agent answer"
-    assert response.intent == "agent_forced"
-    assert response.model_name == "agent"
-    assert response.mode == "agent"
-    assert response.route == "agent_forced"
-    assert len(mongo_logger.logged_turns) == 1
+    assert pipeline.query_agent_calls == 0
+    assert pipeline.agent.calls == 0
+    assert response.answer == "RAG answer"
+    assert response.intent == "rag"
+    assert response.model_name == "gemini"
+    assert response.mode == "rag_v2"
+    assert response.route == "simple"
+    assert len(mongo_logger.logged_turns) == 0
 
 
 @pytest.mark.anyio
@@ -287,6 +302,7 @@ async def test_chat_agent_mode_uses_agent_runner_and_logs_legacy_turn() -> None:
     assert pipeline.query_agent_calls == 1
     assert pipeline.agent.calls == 1
     assert pipeline.last_query_agent_route_label == "agent_forced"
+    assert pipeline.last_query_agent_complexity_subtype is None
     assert response.answer == "Agent answer"
     assert response.intent == "agent_forced"
     assert response.model_name == "agent"

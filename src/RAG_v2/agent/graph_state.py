@@ -21,12 +21,10 @@ class AgentGraphState(TypedDict):
         The reducer appends / merges instead of overwriting, so nodes only need
         to return the *new* messages they produce.
     tool_call_history
-        Ordered list of tool names that have been executed.  Used for
-        coarse-grained loop detection (same name called twice).
+        Ordered list of executor tool names, preserved for trace/log output.
     tool_call_signatures
-        List of "toolname:arghash" strings.  Used for exact-duplicate detection
-        (same name AND same arguments) so the agent is not penalised for
-        legitimately calling rag_search with different collections.
+        Legacy compatibility list for callers that still inspect exact tool
+        signatures. The Planner-Executor graph does not use it for routing.
     """
 
     messages: Annotated[list, add_messages]
@@ -39,9 +37,10 @@ class AgentGraphState(TypedDict):
     final_answer: str | None
     error: str | None
 
-    # ─── Planner-Executor path (Phase 1 refactor) ─────────────────────────────
-    execution_path: str | None          # "planner" | "agent" — set before graph starts
+    # Planner-Executor path
+    execution_path: str | None          # "planner" for current graph topology
     sub_questions: list[str] | None     # Decomposed sub-questions from complex query
     retrieval_plan: dict | None         # Planner output: {steps, needs_web, reasoning}
     user_context: dict | None           # {student_id, cohort, major, major_code, full_name}
     empty_result_count: int             # Tracks consecutive empty tool returns for retry logic
+    top_k: int | None                   # Effective retrieval top_k supplied by the pipeline

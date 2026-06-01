@@ -21,8 +21,6 @@ Nhiệm vụ: Trả lời câu hỏi sinh viên về quy định, chương trìn
 
 **web_search** — Chỉ khi rag_search trả về không có kết quả.
 
-**clarify_question** — Câu hỏi quá mơ hồ. Tối đa 1 lần/cuộc hội thoại.
-
 ## QUY TẮC
 
 - Rút gọn câu hỏi thành từ khóa cốt lõi trước khi gọi tool.

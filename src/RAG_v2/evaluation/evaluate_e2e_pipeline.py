@@ -799,7 +799,7 @@ def build_summary_report(records: List[Dict[str, Any]]) -> Dict[str, Any]:
             ),
         }
 
-    # Breakdowns by pipeline mode (rag_v2, rag_v2_decomposed, agent, chitchat, etc.)
+    # Breakdowns by pipeline mode (rag_v2, agent, chitchat, etc.)
     mode_breakdown = {}
     modes = sorted(list(set(r.get("mode", "unknown") for r in records)))
     for mode in modes:
@@ -1217,6 +1217,11 @@ def main() -> None:
         help="Disable QueryDecomposer for complex multi-source E2E paths.",
     )
     parser.add_argument(
+        "--enable-agent",
+        action="store_true",
+        help="Enable Planner-Executor agent paths during E2E eval.",
+    )
+    parser.add_argument(
         "--disable-complexity-router",
         action="store_true",
         help="Force all queries through the simple classic RAG path.",
@@ -1350,13 +1355,17 @@ def main() -> None:
         pipeline._validity_filter = ValidityFilter()
     logger.info("ValidityFilter is ENABLED for E2E evaluation.")
 
-    # Disable agent path so all queries go through RAG flow.
-    # Agent returns URLs as sources (not chunk IDs), which causes retrieval
-    # metrics to collapse to 0 for queries routed through the agent path.
-    pipeline.agent = None
-    logger.info(
-        "Agent path has been DISABLED for E2E evaluation — all queries use RAG flow."
-    )
+    if args.enable_agent:
+        logger.info("Agent path is ENABLED for E2E evaluation.")
+    else:
+        # Disable agent path so all queries go through RAG flow.
+        # Agent/web sources often do not map to evidence chunk ids, which makes
+        # chunk-id retrieval metrics incomparable unless explicitly requested.
+        pipeline.agent = None
+        logger.info(
+            "Agent path has been DISABLED for E2E evaluation; use --enable-agent "
+            "to evaluate Planner-Executor."
+        )
 
     # Disable web/Tavily fallback so URL-based sources do not pollute retrieved_chunk_ids.
     # Web fallback injects Facebook/PDF URLs into sources which can never match
@@ -1456,6 +1465,8 @@ def main() -> None:
         pipeline._decomposer = None
         logger.info("E2E config [decomposer=OFF]: QueryDecomposer disabled.")
         _active_ablations.append("no_decomposer")
+    if not args.enable_agent:
+        _active_ablations.append("no_agent")
 
     if _active_ablations:
         logger.info("Active ablations: %s", ", ".join(_active_ablations))
@@ -1467,9 +1478,14 @@ def main() -> None:
 
     logger.info(
         "E2E eval config: query_v3 (production flow), HyDE %s, "
-        "reranker_score_threshold=-1.0, ValidityFilter enabled, "
-        "Agent/WebFallback disabled.",
+        "reranker_score_threshold=%.2f, table_threshold=%.2f, "
+        "ValidityFilter %s, Agent %s, WebFallback %s.",
         "enabled" if effective_hyde_enabled else "disabled",
+        args.reranker_score_threshold,
+        args.reranker_table_score_threshold,
+        "enabled" if pipeline._validity_filter is not None else "disabled",
+        "enabled" if pipeline.agent is not None else "disabled",
+        "enabled" if pipeline._cfg.get("tavily_fallback_enabled") else "disabled",
     )
     logger.info(
         "Rate-limit guard: llm_rpm=%.2f, llm_calls_per_question=%.2f, "
@@ -1501,8 +1517,8 @@ def main() -> None:
         "reflection_enabled": not disable_reflection,
         "complexity_router_enabled": not disable_complexity_router,
         "parent_context_enabled": not disable_parent_expansion,
-        "agent_enabled": False,
-        "web_fallback_enabled": False,
+        "agent_enabled": pipeline.agent is not None,
+        "web_fallback_enabled": bool(pipeline._cfg.get("tavily_fallback_enabled")),
         "validity_filter_enabled": pipeline._validity_filter is not None,
     }
 

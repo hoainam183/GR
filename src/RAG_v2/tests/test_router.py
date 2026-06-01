@@ -79,10 +79,10 @@ class TestComplex:
         assert router.route_tier("so sánh với IT-E7") == "complex"
 
 
-    def test_personal_graduation_check_suffix_pronoun(self) -> None:
+    def test_personal_graduation_check_suffix_pronoun_routes_multi_source(self) -> None:
         result = router.route("điều kiện tốt nghiệp của tôi")
         assert result["tier"] == "complex"
-        assert result["complex_subtype"] == "personal_check"
+        assert result["complex_subtype"] == "multi_source"
 
     def test_graduation_program_rule_is_multi_source(self) -> None:
         result = router.route("điều kiện tốt nghiệp ngành IT-E6 theo chương trình đào tạo")

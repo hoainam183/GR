@@ -1,6 +1,6 @@
 # Module: `schemas`
 
-Source-verified: 2026-05-25 from `schemas/*.py`, `api/routes/*.py`, and `packages/shared`.
+Source-verified: 2026-06-01 from `schemas/*.py`, `api/routes/*.py`, and `packages/shared`.
 
 ## Purpose
 
@@ -12,7 +12,7 @@ Source-verified: 2026-05-25 from `schemas/*.py`, `api/routes/*.py`, and `package
 schemas/
   __init__.py       Public schema exports.
   chat.py           Chat request/response, retrieved docs, trace payload, health response.
-  constants.py      Route/mode constants and CLARIFY_SENTINEL.
+  constants.py      Route/mode constants and legacy CLARIFY_SENTINEL.
   document.py       Admin upload/document/chunk review schemas.
   mobile.py         Bookmark, feedback, notification, lookup schemas.
   user.py           Auth/profile/token/admin schemas.
@@ -86,7 +86,7 @@ HttpOnly cookie instead of the JSON body.
 
 ## Constants
 
-`constants.py` contains route/mode constants and `CLARIFY_SENTINEL`. Agent clarification code depends on the sentinel string.
+`constants.py` contains route/mode constants and a legacy `CLARIFY_SENTINEL` kept for backward-compatible consumers. Current Planner-Executor code does not emit clarify tool output.
 
 ## Maintenance Notes
 

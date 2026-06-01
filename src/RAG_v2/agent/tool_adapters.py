@@ -15,7 +15,6 @@ from retrieval.metadata_filters import (
     strip_major_comparison_scaffold_for_retrieval,
     strip_major_from_query_for_retrieval,
 )
-from schemas.constants import CLARIFY_SENTINEL
 
 logger = logging.getLogger(__name__)
 
@@ -122,21 +121,6 @@ def cache_clear() -> None:
 
 _COHORT_RE = re.compile(r"\bK\d{2,3}\b", re.IGNORECASE)
 _COHORT_TOKEN_RE = re.compile(r"^\s*K?(\d{2,3})\s*$", re.IGNORECASE)
-_DEFAULT_CLARIFY_OPTIONS = [
-    "So sanh giua 2 ma nganh cu the",
-    "So sanh giua 2 khoa cu the",
-    "Dat lai cau hoi kem day du ma nganh hoac ma khoa",
-]
-_COMPARE_CLARIFY_MESSAGE = (
-    "Ban muon so sanh mon nay giua hai ma nganh hay hai ma khoa nao?"
-)
-_COMPARE_CLARIFY_OPTIONS = [
-    "Nhap 2 ma nganh (A va B)",
-    "Nhap 2 ma khoa (A va B)",
-    "Nhap lai cau hoi theo mau: so sanh <mon> giua <A> va <B>",
-]
-
-
 @dataclass
 class _AdapterRuntime:
     settings: Settings
@@ -222,7 +206,7 @@ def inject_from_retrieval_service(retrieval_service: Any) -> None:
     This avoids duplicating heavy model loading (BGE-M3, E5, reranker)
     that would otherwise add ~17 s to the first agent tool call.
     """
-    settings = Settings()
+    settings = getattr(retrieval_service, "settings", None) or Settings()
     tavily_key = settings.tavily_api_key or os.environ.get("TAVILY_API_KEY", "")
     tavily_tool = None
     if _is_valid_api_key(tavily_key):
@@ -266,7 +250,6 @@ def execute_tool(tool_name: str, args: dict[str, Any]) -> str:
         "compare_cohorts": _compare_cohorts,
         "compare_programs": _compare_programs,
         "web_search": _web_search,
-        "clarify_question": _clarify_question,
     }
     adapter = dispatch.get(tool_name)
     if adapter is None:
@@ -301,7 +284,7 @@ def _rag_search(
         return f"[Loi: Collection '{collection}' khong hop le]"
 
     runtime = _get_runtime()
-    effective_top_k = max(1, min(top_k if top_k is not None else runtime.settings.top_k, 10))
+    effective_top_k = max(1, int(top_k if top_k is not None else runtime.settings.top_k))
 
     raw_query = strip_personal_identifiers(query.strip())
     major_codes = extract_major_codes(raw_query)
@@ -332,7 +315,9 @@ def _rag_search(
         return cached
 
     # ── Execute search ────────────────────────────────────────────────────────
-    raw_candidate_k = max(effective_top_k * 4, 20)
+    raw_multiplier = max(float(getattr(runtime.settings, "raw_candidate_multiplier", 4.0)), 1.0)
+    raw_min = max(int(getattr(runtime.settings, "raw_candidate_min", 20)), 1)
+    raw_candidate_k = max(int(round(effective_top_k * raw_multiplier)), raw_min)
 
     bge_vec = runtime.bge_embedder.embed_query(retrieval_query)
     e5_vec = runtime.e5_embedder.embed_query(retrieval_query)
@@ -367,11 +352,22 @@ def _rag_search(
         skip_rerank = True
 
     if runtime.reranker is not None and not skip_rerank:
+        reranker_kwargs: dict[str, Any] = {}
+        min_top_k = int(getattr(runtime.settings, "reranker_min_top_k", 0) or 0)
+        if min_top_k > 0:
+            reranker_kwargs["min_top_k"] = min(min_top_k, effective_top_k)
+        if getattr(runtime.settings, "reranker_score_threshold", None) is not None:
+            reranker_kwargs["score_threshold"] = runtime.settings.reranker_score_threshold
+        if getattr(runtime.settings, "reranker_table_score_threshold", None) is not None:
+            reranker_kwargs["table_score_threshold"] = (
+                runtime.settings.reranker_table_score_threshold
+            )
         with _RERANKER_LOCK:
             results = runtime.reranker.rerank(
                 query=retrieval_query,
                 documents=results,
                 top_k=effective_top_k,
+                **reranker_kwargs,
             )
     else:
         results = results[:effective_top_k]
@@ -442,31 +438,6 @@ def _topic_with_course_focus(topic: str, course_keyword: str | None) -> str:
         return raw_topic
 
     return f"{raw_topic} (tap trung vao mon {raw_course})"
-
-
-def _extract_all_cohort_codes(value: str) -> list[str]:
-    return [match.group(0).upper() for match in _COHORT_RE.finditer(value or "")]
-
-
-def _is_compare_clarification(message: str, options: list[str]) -> bool:
-    merged = " ".join([message, *options]).lower()
-    return (
-        "so sanh" in merged
-        or "so sánh" in merged
-        or "vs" in merged
-        or "khac nhau" in merged
-    )
-
-
-def _normalise_compare_clarification(
-    message: str,
-    options: list[str],
-) -> tuple[str, list[str]]:
-    if not _is_compare_clarification(message, options):
-        return message, options
-
-    # Never suggest mixed major/cohort pairings for comparison clarification.
-    return _COMPARE_CLARIFY_MESSAGE, list(_COMPARE_CLARIFY_OPTIONS)
 
 
 def _compare_cohorts(
@@ -612,42 +583,13 @@ def web_search_for_executor(query: str) -> str:
     return _web_search(query=query)
 
 
-def _clarify_question(message: str, options: list[str]) -> str:
-    clean_message = (message or "").strip()
-    clean_options = [opt.strip() for opt in options if opt.strip()][:3]
-    clean_message, clean_options = _normalise_compare_clarification(
-        clean_message,
-        clean_options,
-    )
-
-    if len(clean_options) < 2:
-        for default_option in _DEFAULT_CLARIFY_OPTIONS:
-            if default_option not in clean_options:
-                clean_options.append(default_option)
-            if len(clean_options) >= 3:
-                break
-
-    # Remove options that accidentally mix major+cohort codes in one choice.
-    filtered_options: list[str] = []
-    for option in clean_options:
-        has_major = bool(extract_major_codes(option))
-        has_cohort = bool(_extract_all_cohort_codes(option))
-        if has_major and has_cohort:
-            continue
-        filtered_options.append(option)
-
-    clean_options = filtered_options[:3]
-    if len(clean_options) < 2:
-        clean_options = list(_COMPARE_CLARIFY_OPTIONS)
-
-    options_text = "\n".join(f"{i + 1}. {opt}" for i, opt in enumerate(clean_options))
-    return f"{CLARIFY_SENTINEL}\n{clean_message}\n\n{options_text}"
-
-
 # ─── Planner-Executor helpers (Phase 1 refactor) ─────────────────────────────
 
 
-def execute_retrieval_plan(steps: list[dict[str, Any]]) -> list[tuple[str, str]]:
+def execute_retrieval_plan(
+    steps: list[dict[str, Any]],
+    top_k: int | None = None,
+) -> list[tuple[str, str]]:
     """Execute a list of retrieval steps in parallel. No LLM involved.
 
     Each step is a dict with keys: query, collection, major_hint, cohort_hint, label.
@@ -664,6 +606,7 @@ def execute_retrieval_plan(steps: list[dict[str, Any]]) -> list[tuple[str, str]]
         result = _rag_search(
             query=step.get("query", ""),
             collection=step.get("collection", ""),
+            top_k=top_k,
             resolved_cohort=step.get("cohort_hint"),
             resolved_major=step.get("major_hint"),
         )
@@ -770,7 +713,8 @@ def _format_web_results(results: Any) -> str:
     items: list[dict[str, Any]] = []
 
     if isinstance(results, dict):
-        answer = str(results.get("answer", "")).strip()
+        raw_answer = results.get("answer")
+        answer = str(raw_answer).strip() if raw_answer is not None else ""
         raw_items = results.get("results", [])
         if isinstance(raw_items, list):
             items = [item for item in raw_items if isinstance(item, dict)]
