@@ -1,6 +1,6 @@
 # RAG E2E Pipeline Quality Evaluation Report
 
-- **Date**: 2026-06-01 20:52:29
+- **Date**: 2026-06-01 21:11:10
 - **Total Queries Evaluated**: `26`
 
 ## Run Config
@@ -31,10 +31,10 @@
 
 | Metric | Score (Rate) | Details / Counts |
 | :--- | :---: | :--- |
-| **Faithfulness (Grounded)** | `84.62%` | `23` grounded responses |
+| **Faithfulness (Grounded)** | `84.62%` | `22` grounded responses |
 | **Answer Relevance** | `100.00%` | Relevance of answer to question |
 | **Completeness** | `88.46%` | Context facts coverage rate |
-| **Hallucination Rate** | `11.54%` | `3` ungrounded/hallucinated claims |
+| **Hallucination Rate** | `15.38%` | `4` ungrounded/hallucinated claims |
 | **Correctness (Ref Match Correct)** | `80.77%` | Fully correct against golden reference answer |
 | **Ref Match Partial** | `7.69%` | Partially matches reference answer |
 | **Ref Match Incorrect** | `11.54%` | Missing facts / completely incorrect |
@@ -63,30 +63,30 @@
 
 | Phase / Event | Avg Latency / Trigger Rate |
 | :--- | :---: |
-| **Total Latency** | `10110.5 ms` |
-| Routing Latency | `458.9 ms` |
-| Search Latency | `65.6 ms` |
-| Rerank Latency | `4665.6 ms` |
-| Generation Latency | `1364.8 ms` |
-| Self-Evaluation Latency | `1191.2 ms` |
+| **Total Latency** | `10701.2 ms` |
+| Routing Latency | `537.4 ms` |
+| Search Latency | `137.6 ms` |
+| Rerank Latency | `4876.4 ms` |
+| Generation Latency | `1440.4 ms` |
+| Self-Evaluation Latency | `1190.6 ms` |
 | **HyDE Fallback Trigger Rate** | `0.00%` (`0` queries) |
 
 ## Breakdown by Question Type
 
 | Type | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **multi_hop** | 8 | `62.5%` | `56.2%` | `41.3%` | `62.5%` | `62.5%` | `11371.2 ms` |
-| **simple** | 18 | `77.8%` | `77.8%` | `65.3%` | `94.4%` | `88.9%` | `9550.1 ms` |
+| **multi_hop** | 8 | `62.5%` | `56.2%` | `41.3%` | `62.5%` | `62.5%` | `11638.1 ms` |
+| **simple** | 18 | `77.8%` | `77.8%` | `65.3%` | `94.4%` | `88.9%` | `10284.8 ms` |
 
 ## Breakdown by Difficulty
 
 | Difficulty | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **easy** | 18 | `77.8%` | `77.8%` | `65.3%` | `94.4%` | `88.9%` | `9550.1 ms` |
-| **medium** | 8 | `62.5%` | `56.2%` | `41.3%` | `62.5%` | `62.5%` | `11371.2 ms` |
+| **easy** | 18 | `77.8%` | `77.8%` | `65.3%` | `94.4%` | `88.9%` | `10284.8 ms` |
+| **medium** | 8 | `62.5%` | `56.2%` | `41.3%` | `62.5%` | `62.5%` | `11638.1 ms` |
 
 ## Breakdown by Pipeline Mode
 
 | Mode | Count | Hit@5 | Recall@5 | NDCG@5 | Faithfulness | Ref Correct | Avg Latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **rag_v2** | 26 | `73.1%` | `71.2%` | `58.0%` | `84.6%` | `80.8%` | `10110.5 ms` |
+| **rag_v2** | 26 | `73.1%` | `71.2%` | `58.0%` | `84.6%` | `80.8%` | `10701.2 ms` |

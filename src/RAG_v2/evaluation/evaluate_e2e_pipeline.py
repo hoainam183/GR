@@ -1201,7 +1201,15 @@ def main() -> None:
     parser.add_argument(
         "--hyde-enabled",
         action="store_true",
-        help="Enable HyDE post-rerank fallback during E2E eval.",
+        help=(
+            "Enable HyDE post-rerank fallback during E2E eval. "
+            "Kept for backwards compatibility; HyDE is enabled by default."
+        ),
+    )
+    parser.add_argument(
+        "--disable-hyde",
+        action="store_true",
+        help="Disable HyDE post-rerank fallback during E2E eval.",
     )
     parser.add_argument(
         "--disable-decomposer",
@@ -1279,6 +1287,7 @@ def main() -> None:
     disable_parent_expansion = (
         args.disable_parent_expansion or ABLATION_DISABLE_PARENT_EXPANSION
     )
+    effective_hyde_enabled = args.hyde_enabled or not args.disable_hyde
 
     inter_question_sleep_s = (
         args.inter_question_sleep_s
@@ -1308,7 +1317,7 @@ def main() -> None:
     settings.raw_candidate_multiplier = args.raw_candidate_multiplier
     settings.raw_candidate_min = args.raw_candidate_min
     settings.low_conf_pool_expand_enabled = args.low_conf_pool_expand
-    settings.hyde_enabled = args.hyde_enabled
+    settings.hyde_enabled = effective_hyde_enabled
     settings.reranker_score_threshold = args.reranker_score_threshold
     settings.reranker_table_score_threshold = args.reranker_table_score_threshold
     pipeline._cfg["top_k"] = args.top_k
@@ -1317,7 +1326,7 @@ def main() -> None:
     pipeline._cfg["raw_candidate_multiplier"] = args.raw_candidate_multiplier
     pipeline._cfg["raw_candidate_min"] = args.raw_candidate_min
     pipeline._cfg["low_conf_pool_expand_enabled"] = args.low_conf_pool_expand
-    pipeline._cfg["hyde_enabled"] = args.hyde_enabled
+    pipeline._cfg["hyde_enabled"] = effective_hyde_enabled
     pipeline._cfg["reranker_score_threshold"] = args.reranker_score_threshold
     pipeline._cfg["reranker_table_score_threshold"] = (
         args.reranker_table_score_threshold
@@ -1360,21 +1369,10 @@ def main() -> None:
     pipeline._cfg["tavily_fallback_enabled"] = False
     logger.info("Web/Tavily fallback has been DISABLED for E2E evaluation.")
 
-<<<<<<< HEAD
-    # Patch the already-instantiated reranker object because create_reranker()
-    # captured thresholds before the eval CLI overrides were applied.
-=======
-    # Enable HyDE and set Reranker score threshold to -1.0 dynamically.
-    settings.hyde_enabled = True
-    pipeline._cfg["hyde_enabled"] = True
-    settings.reranker_score_threshold = -1.0
-    pipeline._cfg["reranker_score_threshold"] = -1.0
-
     # CRITICAL: Also patch the already-instantiated reranker object.
     # create_reranker(settings) runs INSIDE build_evaluation_runtime() and
     # captures score_threshold at init time.  Mutating settings afterwards
     # does NOT propagate to the reranker instance, so we patch it directly.
->>>>>>> 5e24c8c0 (run evaluate)
     if pipeline._reranker is not None:
         pipeline._reranker.score_threshold = args.reranker_score_threshold
         pipeline._reranker.table_score_threshold = (
@@ -1438,7 +1436,7 @@ def main() -> None:
         )
         _active_ablations.append("top_k_5")
 
-    if args.hyde_enabled:
+    if effective_hyde_enabled:
         _active_ablations.append("hyde")
     if args.low_conf_pool_expand:
         _active_ablations.append("low_conf_pool")
@@ -1468,28 +1466,10 @@ def main() -> None:
     # ─────────────────────────────────────────────────────────────────────────
 
     logger.info(
-<<<<<<< HEAD
-        "E2E eval config: query_v3, top_k=%d, min_top_k=%d, raw_candidate=%gx/%d, "
-        "vector_top/pool=%s/%s, keyword_top/pool=%s/%s, "
-        "HyDE=%s, low_conf_pool=%s, reranker_threshold=%.2f, "
-        "table_threshold=%.2f, ValidityFilter/Agent/WebFallback disabled.",
-        args.top_k,
-        effective_reranker_min_top_k,
-        args.raw_candidate_multiplier,
-        args.raw_candidate_min,
-        pipeline._cfg.get("vector_top_k"),
-        pipeline._cfg.get("vector_pool_k"),
-        pipeline._cfg.get("keyword_top_k"),
-        pipeline._cfg.get("keyword_pool_k"),
-        args.hyde_enabled,
-        args.low_conf_pool_expand,
-        args.reranker_score_threshold,
-        args.reranker_table_score_threshold,
-=======
-        "E2E eval config: query_v3 (production flow), HyDE enabled, "
+        "E2E eval config: query_v3 (production flow), HyDE %s, "
         "reranker_score_threshold=-1.0, ValidityFilter enabled, "
-        "Agent/WebFallback disabled."
->>>>>>> 5e24c8c0 (run evaluate)
+        "Agent/WebFallback disabled.",
+        "enabled" if effective_hyde_enabled else "disabled",
     )
     logger.info(
         "Rate-limit guard: llm_rpm=%.2f, llm_calls_per_question=%.2f, "
@@ -1516,14 +1496,14 @@ def main() -> None:
         "vector_pool_k": pipeline._cfg.get("vector_pool_k"),
         "keyword_pool_k": pipeline._cfg.get("keyword_pool_k"),
         "low_conf_pool_expand_enabled": args.low_conf_pool_expand,
-        "hyde_enabled": args.hyde_enabled,
+        "hyde_enabled": bool(pipeline._cfg.get("hyde_enabled", False)),
         "decomposer_enabled": not args.disable_decomposer,
         "reflection_enabled": not disable_reflection,
         "complexity_router_enabled": not disable_complexity_router,
         "parent_context_enabled": not disable_parent_expansion,
         "agent_enabled": False,
         "web_fallback_enabled": False,
-        "validity_filter_enabled": False,
+        "validity_filter_enabled": pipeline._validity_filter is not None,
     }
 
     for dataset_index, dataset_path in enumerate(dataset_paths, start=1):
