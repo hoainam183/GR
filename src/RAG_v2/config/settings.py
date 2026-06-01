@@ -260,7 +260,7 @@ class Settings(BaseSettings):
     low_conf_pool_expand_enabled: bool = (
         False  # C4: 2x candidate pool in Tier 3
     )
-    hyde_enabled: bool = False  # HyDE post-rerank fallback
+    hyde_enabled: bool = True  # HyDE post-rerank fallback
     hyde_min_results: int = 3  # trigger when reranked < N results
     hyde_confidence_threshold: float = 0.3  # trigger when reranker mean < this
     sibling_budget_ratio: float = 0.30  # 30% of total budget for siblings

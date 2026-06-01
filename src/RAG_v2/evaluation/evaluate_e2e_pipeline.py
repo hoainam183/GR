@@ -1333,9 +1333,13 @@ def main() -> None:
             setattr(settings, attr_name, override)
             pipeline._cfg[cfg_key] = override
 
-    # Disable ValidityFilter for evaluation as requested
-    pipeline._validity_filter = None
-    logger.info("ValidityFilter has been disabled for E2E evaluation.")
+    # Keep ValidityFilter enabled so E2E evaluation matches the production
+    # frontend/API retrieval path more closely.
+    if pipeline._validity_filter is None:
+        from retrieval.validity_filter import ValidityFilter
+
+        pipeline._validity_filter = ValidityFilter()
+    logger.info("ValidityFilter is ENABLED for E2E evaluation.")
 
     # Disable agent path so all queries go through RAG flow.
     # Agent returns URLs as sources (not chunk IDs), which causes retrieval
@@ -1356,8 +1360,21 @@ def main() -> None:
     pipeline._cfg["tavily_fallback_enabled"] = False
     logger.info("Web/Tavily fallback has been DISABLED for E2E evaluation.")
 
+<<<<<<< HEAD
     # Patch the already-instantiated reranker object because create_reranker()
     # captured thresholds before the eval CLI overrides were applied.
+=======
+    # Enable HyDE and set Reranker score threshold to -1.0 dynamically.
+    settings.hyde_enabled = True
+    pipeline._cfg["hyde_enabled"] = True
+    settings.reranker_score_threshold = -1.0
+    pipeline._cfg["reranker_score_threshold"] = -1.0
+
+    # CRITICAL: Also patch the already-instantiated reranker object.
+    # create_reranker(settings) runs INSIDE build_evaluation_runtime() and
+    # captures score_threshold at init time.  Mutating settings afterwards
+    # does NOT propagate to the reranker instance, so we patch it directly.
+>>>>>>> 5e24c8c0 (run evaluate)
     if pipeline._reranker is not None:
         pipeline._reranker.score_threshold = args.reranker_score_threshold
         pipeline._reranker.table_score_threshold = (
@@ -1451,6 +1468,7 @@ def main() -> None:
     # ─────────────────────────────────────────────────────────────────────────
 
     logger.info(
+<<<<<<< HEAD
         "E2E eval config: query_v3, top_k=%d, min_top_k=%d, raw_candidate=%gx/%d, "
         "vector_top/pool=%s/%s, keyword_top/pool=%s/%s, "
         "HyDE=%s, low_conf_pool=%s, reranker_threshold=%.2f, "
@@ -1467,6 +1485,11 @@ def main() -> None:
         args.low_conf_pool_expand,
         args.reranker_score_threshold,
         args.reranker_table_score_threshold,
+=======
+        "E2E eval config: query_v3 (production flow), HyDE enabled, "
+        "reranker_score_threshold=-1.0, ValidityFilter enabled, "
+        "Agent/WebFallback disabled."
+>>>>>>> 5e24c8c0 (run evaluate)
     )
     logger.info(
         "Rate-limit guard: llm_rpm=%.2f, llm_calls_per_question=%.2f, "
