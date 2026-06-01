@@ -82,10 +82,10 @@ ABLATION_DISABLE_PARENT_EXPANSION: bool = (
     False  # No-op for hit@K: parent expansion only enriches metadata, does not reorder
 )
 ABLATION_FORCE_RERANKER_MIN_TOP_K: bool = (
-    True  # Always return ≥ top_k docs from reranker
+    False  # Legacy hidden toggle; prefer --reranker-min-top-k.
 )
 ABLATION_FORCE_TOP_K_5: bool = (
-    False  # Force top_k=5 to match classifier eval (overrides --top-k arg)
+    False  # Legacy hidden toggle; prefer --force-top-k-5.
 )
 # ───────────────────────────────────────────────────────────────────────────────
 
@@ -419,6 +419,7 @@ def run_evaluation(
     pipeline: Optional[RAGPipeline] = None,
     self_evaluator: Optional[SelfEvaluator] = None,
     judge_client: Optional[OpenAI] = None,
+    run_config: Optional[Dict[str, Any]] = None,
     inter_question_sleep_s: float = 0.0,
     sleep_after_last: bool = False,
 ) -> Dict[str, Any]:
@@ -648,6 +649,8 @@ def run_evaluation(
     summary = build_summary_report(records)
     if dataset_name:
         summary["dataset"] = dataset_name
+    if run_config:
+        summary["run_config"] = run_config
 
     # Save files
     save_outputs(records, summary, output_dir)
@@ -899,6 +902,20 @@ def save_outputs(
         "| :--- | :---: |",
     ]
 
+    run_config = summary.get("run_config") or {}
+    if run_config:
+        config_lines = [
+            "## Run Config",
+            "",
+            "| Key | Value |",
+            "| :--- | :--- |",
+        ]
+        config_lines.extend(
+            f"| `{key}` | `{value}` |" for key, value in run_config.items()
+        )
+        config_lines.append("")
+        lines[5:5] = config_lines
+
     for metric, score in summary["overall_metrics"].items():
         if "@" in metric:
             lines.append(f"| **{metric}** | `{score * 100:.2f}%` |")
@@ -1110,6 +1127,103 @@ def main() -> None:
         help="Target top_k retrieved documents parameter for pipeline.",
     )
     parser.add_argument(
+        "--force-top-k-5",
+        action="store_true",
+        help="Force top_k=5 to compare with classifier retrieval eval.",
+    )
+    parser.add_argument(
+        "--reranker-min-top-k",
+        type=int,
+        default=None,
+        help=(
+            "Minimum reranked docs to keep via below-threshold fallback. "
+            "Defaults to --top-k; use --disable-reranker-min-top-k to turn off."
+        ),
+    )
+    parser.add_argument(
+        "--disable-reranker-min-top-k",
+        action="store_true",
+        help="Disable min_top_k fallback in the reranker.",
+    )
+    parser.add_argument(
+        "--reranker-score-threshold",
+        type=float,
+        default=-1.0,
+        help="Score threshold override for non-table chunks during E2E eval.",
+    )
+    parser.add_argument(
+        "--reranker-table-score-threshold",
+        type=float,
+        default=-1.0,
+        help="Score threshold override for table chunks during E2E eval.",
+    )
+    parser.add_argument(
+        "--raw-candidate-multiplier",
+        type=float,
+        default=4.0,
+        help="Raw candidate pool multiplier before reranking.",
+    )
+    parser.add_argument(
+        "--raw-candidate-min",
+        type=int,
+        default=20,
+        help="Minimum raw candidate pool before reranking.",
+    )
+    parser.add_argument(
+        "--vector-top-k",
+        type=int,
+        default=None,
+        help="Override per-collection vector search limit for E2E eval.",
+    )
+    parser.add_argument(
+        "--keyword-top-k",
+        type=int,
+        default=None,
+        help="Override per-collection keyword search limit for E2E eval.",
+    )
+    parser.add_argument(
+        "--vector-pool-k",
+        type=int,
+        default=None,
+        help="Override global vector pool size before fusion for E2E eval.",
+    )
+    parser.add_argument(
+        "--keyword-pool-k",
+        type=int,
+        default=None,
+        help="Override global keyword pool size before fusion for E2E eval.",
+    )
+    parser.add_argument(
+        "--low-conf-pool-expand",
+        action="store_true",
+        help="Double the raw candidate pool when router confidence is low.",
+    )
+    parser.add_argument(
+        "--hyde-enabled",
+        action="store_true",
+        help="Enable HyDE post-rerank fallback during E2E eval.",
+    )
+    parser.add_argument(
+        "--disable-decomposer",
+        action="store_true",
+        help="Disable QueryDecomposer for complex multi-source E2E paths.",
+    )
+    parser.add_argument(
+        "--disable-complexity-router",
+        action="store_true",
+        help="Force all queries through the simple classic RAG path.",
+    )
+    parser.add_argument(
+        "--disable-reflection",
+        action="store_true",
+        help="Use raw questions instead of QueryReflector rewrites.",
+    )
+    parser.add_argument(
+        "--disable-parent-expansion",
+        action="store_true",
+        help="Disable parent context enrichment after reranking.",
+    )
+    parser.add_argument(
         "--sample-n",
         type=int,
         default=None,
@@ -1145,6 +1259,27 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    force_top_k_5 = args.force_top_k_5 or ABLATION_FORCE_TOP_K_5
+    if force_top_k_5:
+        args.top_k = 5
+
+    if args.disable_reranker_min_top_k:
+        effective_reranker_min_top_k = 0
+    else:
+        effective_reranker_min_top_k = (
+            args.reranker_min_top_k
+            if args.reranker_min_top_k is not None
+            else args.top_k
+        )
+
+    disable_complexity_router = (
+        args.disable_complexity_router or ABLATION_DISABLE_COMPLEXITY_ROUTER
+    )
+    disable_reflection = args.disable_reflection or ABLATION_DISABLE_REFLECTION
+    disable_parent_expansion = (
+        args.disable_parent_expansion or ABLATION_DISABLE_PARENT_EXPANSION
+    )
+
     inter_question_sleep_s = (
         args.inter_question_sleep_s
         if args.inter_question_sleep_s is not None
@@ -1169,8 +1304,34 @@ def main() -> None:
     )
     settings.top_k = args.top_k
     settings.reranker_top_k = args.top_k
+    settings.reranker_min_top_k = effective_reranker_min_top_k
+    settings.raw_candidate_multiplier = args.raw_candidate_multiplier
+    settings.raw_candidate_min = args.raw_candidate_min
+    settings.low_conf_pool_expand_enabled = args.low_conf_pool_expand
+    settings.hyde_enabled = args.hyde_enabled
+    settings.reranker_score_threshold = args.reranker_score_threshold
+    settings.reranker_table_score_threshold = args.reranker_table_score_threshold
     pipeline._cfg["top_k"] = args.top_k
     pipeline._cfg["reranker_top_k"] = args.top_k
+    pipeline._cfg["reranker_min_top_k"] = effective_reranker_min_top_k
+    pipeline._cfg["raw_candidate_multiplier"] = args.raw_candidate_multiplier
+    pipeline._cfg["raw_candidate_min"] = args.raw_candidate_min
+    pipeline._cfg["low_conf_pool_expand_enabled"] = args.low_conf_pool_expand
+    pipeline._cfg["hyde_enabled"] = args.hyde_enabled
+    pipeline._cfg["reranker_score_threshold"] = args.reranker_score_threshold
+    pipeline._cfg["reranker_table_score_threshold"] = (
+        args.reranker_table_score_threshold
+    )
+    for attr_name, cfg_key in (
+        ("vector_top_k", "vector_top_k"),
+        ("keyword_top_k", "keyword_top_k"),
+        ("vector_pool_k", "vector_pool_k"),
+        ("keyword_pool_k", "keyword_pool_k"),
+    ):
+        override = getattr(args, attr_name)
+        if override is not None:
+            setattr(settings, attr_name, override)
+            pipeline._cfg[cfg_key] = override
 
     # Disable ValidityFilter for evaluation as requested
     pipeline._validity_filter = None
@@ -1195,22 +1356,16 @@ def main() -> None:
     pipeline._cfg["tavily_fallback_enabled"] = False
     logger.info("Web/Tavily fallback has been DISABLED for E2E evaluation.")
 
-    # Enable HyDE and set Reranker score threshold to -1.0 dynamically
-    # [MATCH CUSTOM EVAL]: Disable HyDE to perfectly match evaluate_retrieval_custom.py
-    settings.hyde_enabled = False
-    pipeline._cfg["hyde_enabled"] = False
-    settings.reranker_score_threshold = -1.0
-    pipeline._cfg["reranker_score_threshold"] = -1.0
-
-    # CRITICAL: Also patch the already-instantiated reranker object.
-    # create_reranker(settings) runs INSIDE build_evaluation_runtime() and
-    # captures score_threshold at init time.  Mutating settings afterwards
-    # does NOT propagate to the reranker instance, so we patch it directly.
+    # Patch the already-instantiated reranker object because create_reranker()
+    # captured thresholds before the eval CLI overrides were applied.
     if pipeline._reranker is not None:
-        pipeline._reranker.score_threshold = -1.0
-        pipeline._reranker.table_score_threshold = -1.0
+        pipeline._reranker.score_threshold = args.reranker_score_threshold
+        pipeline._reranker.table_score_threshold = (
+            args.reranker_table_score_threshold
+        )
         logger.info(
-            "Patched reranker instance: score_threshold=%.1f, table_score_threshold=%.1f",
+            "Patched reranker instance: score_threshold=%.2f, "
+            "table_score_threshold=%.2f",
             pipeline._reranker.score_threshold,
             pipeline._reranker.table_score_threshold,
         )
@@ -1218,7 +1373,7 @@ def main() -> None:
     # ── Apply ablation study overrides ──────────────────────────────────────
     _active_ablations: List[str] = []
 
-    if ABLATION_DISABLE_COMPLEXITY_ROUTER:
+    if disable_complexity_router:
         # Monkeypatch complexity_router.route() to always return "simple".
         # This removes the LLM-based complexity classification from query_v3()
         # so all queries follow the same simple → query() path as classifier eval.
@@ -1232,7 +1387,7 @@ def main() -> None:
         )
         _active_ablations.append("no_complexity_router")
 
-    if ABLATION_DISABLE_REFLECTION:
+    if disable_reflection:
         # Disable LLM-based query rewriting.  The raw question is used directly
         # for embedding search, matching classifier eval behaviour.
         settings.reflection_enabled = False
@@ -1242,7 +1397,7 @@ def main() -> None:
         )
         _active_ablations.append("no_reflection")
 
-    if ABLATION_DISABLE_PARENT_EXPANSION:
+    if disable_parent_expansion:
         # Disable parent context expansion so the reranked list is NOT padded
         # with parent chunks.  Prevents relevant chunks from being pushed
         # beyond the @5 cutoff due to parent insertion.
@@ -1252,49 +1407,40 @@ def main() -> None:
         )
         _active_ablations.append("no_parent_expansion")
 
-    if ABLATION_FORCE_RERANKER_MIN_TOP_K and pipeline._reranker is not None:
-        # Monkeypatch reranker.rerank() to always pass min_top_k=top_k,
-        # matching evaluate_retrieval_custom.py which calls
-        # reranker.rerank(..., min_top_k=top_k) unconditionally.
-        _orig_rerank = pipeline._reranker.rerank
-        _forced_min_k = args.top_k
-
-        def _rerank_with_min_top_k(
-            query,
-            documents,
-            top_k=_forced_min_k,
-            min_top_k=None,
-            **kw,
-        ):
-            return _orig_rerank(
-                query=query,
-                documents=documents,
-                top_k=top_k,
-                min_top_k=_forced_min_k,
-                **kw,
-            )
-
-        pipeline._reranker.rerank = _rerank_with_min_top_k  # type: ignore[method-assign]
+    if effective_reranker_min_top_k > 0:
         logger.info(
-            "ABLATION [reranker_min_top_k=ON]: Reranker forced to return "
-            "≥ %d docs (matches classifier eval).",
-            _forced_min_k,
+            "E2E config [reranker_min_top_k=%d]: reranker keeps below-threshold "
+            "fallback docs up to top_k.",
+            effective_reranker_min_top_k,
         )
-        _active_ablations.append(f"min_top_k_{_forced_min_k}")
+        _active_ablations.append(f"min_top_k_{effective_reranker_min_top_k}")
 
-    if ABLATION_FORCE_TOP_K_5:
-        # Override top_k to 5 so E2E uses the same cutoff as classifier eval.
-        # This isolates whether the metric gap is purely due to the larger
-        # candidate pool (top_k=7 + pool expansion) pushing relevant chunks
-        # beyond the @5 cutoff.
-        for k_key in ("top_k", "reranker_top_k"):
-            settings.__dict__[k_key] = 5
-            pipeline._cfg[k_key] = 5
-        args.top_k = 5  # keep consistent for min_top_k monkeypatch below
+    if force_top_k_5:
         logger.info(
             "ABLATION [top_k=5]: top_k forced to 5 to match classifier eval."
         )
         _active_ablations.append("top_k_5")
+
+    if args.hyde_enabled:
+        _active_ablations.append("hyde")
+    if args.low_conf_pool_expand:
+        _active_ablations.append("low_conf_pool")
+    if args.raw_candidate_multiplier != 4.0:
+        _active_ablations.append(f"raw_x{args.raw_candidate_multiplier:g}")
+    if args.raw_candidate_min != 20:
+        _active_ablations.append(f"raw_min_{args.raw_candidate_min}")
+    if args.vector_pool_k is not None:
+        _active_ablations.append(f"vp_{args.vector_pool_k}")
+    if args.keyword_pool_k is not None:
+        _active_ablations.append(f"kp_{args.keyword_pool_k}")
+    if args.vector_top_k is not None:
+        _active_ablations.append(f"vt_{args.vector_top_k}")
+    if args.keyword_top_k is not None:
+        _active_ablations.append(f"kt_{args.keyword_top_k}")
+    if args.disable_decomposer:
+        pipeline._decomposer = None
+        logger.info("E2E config [decomposer=OFF]: QueryDecomposer disabled.")
+        _active_ablations.append("no_decomposer")
 
     if _active_ablations:
         logger.info("Active ablations: %s", ", ".join(_active_ablations))
@@ -1305,8 +1451,22 @@ def main() -> None:
     # ─────────────────────────────────────────────────────────────────────────
 
     logger.info(
-        "E2E eval config: query_v3 (production flow), HyDE disabled, "
-        "reranker_score_threshold=-1.0, ValidityFilter/Agent/WebFallback disabled."
+        "E2E eval config: query_v3, top_k=%d, min_top_k=%d, raw_candidate=%gx/%d, "
+        "vector_top/pool=%s/%s, keyword_top/pool=%s/%s, "
+        "HyDE=%s, low_conf_pool=%s, reranker_threshold=%.2f, "
+        "table_threshold=%.2f, ValidityFilter/Agent/WebFallback disabled.",
+        args.top_k,
+        effective_reranker_min_top_k,
+        args.raw_candidate_multiplier,
+        args.raw_candidate_min,
+        pipeline._cfg.get("vector_top_k"),
+        pipeline._cfg.get("vector_pool_k"),
+        pipeline._cfg.get("keyword_top_k"),
+        pipeline._cfg.get("keyword_pool_k"),
+        args.hyde_enabled,
+        args.low_conf_pool_expand,
+        args.reranker_score_threshold,
+        args.reranker_table_score_threshold,
     )
     logger.info(
         "Rate-limit guard: llm_rpm=%.2f, llm_calls_per_question=%.2f, "
@@ -1321,6 +1481,27 @@ def main() -> None:
     logger.info(
         "Found %d dataset file(s) for E2E evaluation.", len(dataset_paths)
     )
+    run_config = {
+        "top_k": args.top_k,
+        "reranker_min_top_k": effective_reranker_min_top_k,
+        "reranker_score_threshold": args.reranker_score_threshold,
+        "reranker_table_score_threshold": args.reranker_table_score_threshold,
+        "raw_candidate_multiplier": args.raw_candidate_multiplier,
+        "raw_candidate_min": args.raw_candidate_min,
+        "vector_top_k": pipeline._cfg.get("vector_top_k"),
+        "keyword_top_k": pipeline._cfg.get("keyword_top_k"),
+        "vector_pool_k": pipeline._cfg.get("vector_pool_k"),
+        "keyword_pool_k": pipeline._cfg.get("keyword_pool_k"),
+        "low_conf_pool_expand_enabled": args.low_conf_pool_expand,
+        "hyde_enabled": args.hyde_enabled,
+        "decomposer_enabled": not args.disable_decomposer,
+        "reflection_enabled": not disable_reflection,
+        "complexity_router_enabled": not disable_complexity_router,
+        "parent_context_enabled": not disable_parent_expansion,
+        "agent_enabled": False,
+        "web_fallback_enabled": False,
+        "validity_filter_enabled": False,
+    }
 
     for dataset_index, dataset_path in enumerate(dataset_paths, start=1):
         logger.info("Loading dataset from %s ...", dataset_path)
@@ -1349,6 +1530,7 @@ def main() -> None:
             pipeline=pipeline,
             self_evaluator=self_evaluator,
             judge_client=judge_client,
+            run_config=run_config,
             inter_question_sleep_s=inter_question_sleep_s,
             sleep_after_last=dataset_index < len(dataset_paths),
         )

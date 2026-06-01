@@ -938,15 +938,25 @@ class TestConfigSync:
         assert "tavily_search_depth" in cfg
         assert "tavily_max_results" in cfg
         assert "web_fallback_on_dynamic" in cfg
+        assert "raw_candidate_multiplier" in cfg
+        assert "raw_candidate_min" in cfg
+        assert "reranker_min_top_k" in cfg
+        assert "reranker_table_score_threshold" in cfg
+        assert "low_conf_pool_expand_enabled" in cfg
+        assert "parent_context_enabled" in cfg
         assert cfg["model"] == s.chat_model
         assert cfg["es_host"] == s.elasticsearch_host
         assert cfg["top_k"] == s.top_k
 
-    def test_tavily_fallback_requests_self_evaluator(self) -> None:
+    def test_tavily_fallback_does_not_force_self_evaluator(self) -> None:
         from pipeline.rag_pipeline import _should_enable_self_evaluator
 
-        assert _should_enable_self_evaluator({
+        assert not _should_enable_self_evaluator({
             "self_eval_enabled": False,
+            "tavily_fallback_enabled": True,
+        })
+        assert _should_enable_self_evaluator({
+            "self_eval_enabled": True,
             "tavily_fallback_enabled": True,
         })
         assert not _should_enable_self_evaluator({

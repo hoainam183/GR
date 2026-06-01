@@ -1,6 +1,6 @@
 # Module: `retrieval`
 
-Source-verified: 2026-05-22 from every `retrieval/*.py` file, `config/settings.py`, `pipeline/flows.py`, and `agent/tool_adapters.py`.
+Source-verified: 2026-06-01 from every `retrieval/*.py` file, `config/settings.py`, `pipeline/flows.py`, and `agent/tool_adapters.py`.
 
 ## Purpose
 
@@ -311,7 +311,9 @@ trace_out = {
    → ES:    Filter clause (restrict keyword search to same subset)
 
 4. If ALL queries in the chain return 0 results:
-   → No filter applied (search entire collection).
+   → No filter applied (search entire collection), except when the ES index is
+   empty. If ES is empty, simple exact metadata filters are translated into a
+   Qdrant payload filter so vector search can still be constrained.
 ```
 
 ### Per-Collection Filter Logic
@@ -556,6 +558,10 @@ Resolved chunks are marked with `_cross_reference=True`, `_referenced_from`, and
 
 - Preserve `{collection}/{id}` style runtime IDs when merging across collections.
 - Keep metadata field names aligned with `data/MODULE.md` and indexing scripts.
+- If a Qdrant collection is populated but its matching ES index is empty,
+  `MultiCollectionSearch._resolve_filter_with_fallback()` can still apply exact
+  Qdrant payload filters for fields such as `major_code`; do not remove this
+  fallback without fixing the indexing sync issue first.
 - When adding a collection:
   1. Update settings / `.env` collections list.
   2. Add extractor class in `metadata_filters.py` and register in `_COLLECTION_FILTER_REGISTRY`.

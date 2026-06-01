@@ -135,6 +135,8 @@ class Settings(BaseSettings):
     keyword_top_k: int = 50
     vector_pool_k: int = 40
     keyword_pool_k: int = 40
+    raw_candidate_multiplier: float = 4.0
+    raw_candidate_min: int = 20
     vector_weight: float = 0.8
     keyword_weight: float = 0.2
     context_doc_char_limit: int = 2000

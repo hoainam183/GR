@@ -1,0 +1,31 @@
+﻿sample_id,index,batch_index,status,question,reference_answer,generated_answer,doc_type,document_title,article,clause,identity_mode,auth_header_sent,optional_fields_sent,request_payload_hash,request_mode,request_top_k,request_history_len,request_session_id,response_session_id,backend_url,backend_mode,route,reflected_question,num_sources,latency_ms,cache_hit,query_cache_hit,agent_error,cache_hit_markers,setup_invalid,setup_invalid_reason,iterations,error,reference_keyword_coverage,atomic_fact_coverage,citation_text_hit,expected_doc_hit,expected_article_hit,expected_clause_hit,judge_match,judge_reason
+p0-personal-check-rag,1,1,completed,điều kiện tốt nghiệp của tôi,Route as rag_v2 with route personal_check; do not return mode clarify.,"Để được xét công nhận tốt nghiệp, bạn cần đáp ứng các điều kiện tùy thuộc vào bậc học của mình:
+
+**Đối với bậc Đại học/Cử nhân:**
+
+Theo Điều 14 của tài liệu không rõ nguồn về Đăng ký tốt nghiệp đại học và tài liệu về Đăng ký tốt nghiệp bậc cử nhân:
+*   Tại thời điểm xét tốt nghiệp, bạn không bị truy cứu trách nhiệm hình sự hoặc không đang trong thời gian bị kỷ luật ở mức đình chỉ học tập.
+*   Nếu bạn theo học Chương trình đào tạo (CTĐT) cử nhân, bạn cần hoàn thành cả học phần Thực tập kỹ thuật (2 tín chỉ) và Đề án tốt nghiệp cử nhân (6 tín chỉ).
+*   Sinh viên đã hết thời gian học tập tối đa nhưng chưa đủ điều kiện tốt nghiệp do chưa hoàn thành các học phần Giáo dục quốc phòng-an ninh hoặc Giáo dục thể chất, có thể đăng ký học để hoàn thiện các học phần còn thiếu này trong thời hạn tối đa 03 năm kể từ khi hết thời hạn học tập và đề nghị xét công nhận tốt nghiệp.
+*   Sinh viên đủ điều kiện tốt nghiệp CTĐT cử nhân cần đăng ký tốt nghiệp và đồng thời đăng ký học chuyển tiếp lên CTĐT Kỹ sư (KS).
+
+**Đối với bậc Thạc sĩ:**
+
+Theo Điều 34 của tài liệu không rõ nguồn về Điều kiện tốt nghiệp thạc sĩ và xếp hạng tốt nghiệp:
+*   Luận văn đạt yêu cầu.
+*   Hoàn thành việc nộp quyển luận văn đã được chỉnh sửa theo kết luận của Hội đồng đánh giá luận văn. Luận văn phải được công khai toàn văn trên trang thông tin điện tử thuộc ĐHBK Hà Nội theo quy định trong thời gian ít nhất 30 ngày, trừ một số đề tài thuộc các lĩnh vực cần bảo mật.
+*   Đã nộp quyển luận văn tốt nghiệp cho thư viện Tạ Quang Bửu theo quy cách của bản luận văn do ĐHBK Hà Nội quy định, thời hạn nộp luận văn là 20 ngày kể từ ngày bảo vệ thành công luận văn.
+*   Không bị truy cứu trách nhiệm hình sự và không trong thời gian bị kỷ luật, đình chỉ học tập.
+
+**Sau khi đủ điều kiện tốt nghiệp (áp dụng cho sinh viên):**
+
+Theo Hướng dẫn dự Lễ tốt nghiệp và nhận hồ sơ tốt nghiệp đợt tháng 9.2025:
+*   Bạn cần kiểm tra và hoàn thành việc thanh toán công nợ còn lại (nếu có). Bạn có thể kiểm tra công nợ tại [http://ctsv.hust.edu.vn/#/cong-no](http://ctsv.hust.edu.vn/#/cong-no). Bạn cần hoàn thành công nợ trước 5 ngày làm việc so với ngày bạn định đến nhận bằng và hồ sơ.
+*   Cung cấp ảnh và lưu bút để làm hình ảnh (kỷ yếu) chiếu lên màn hình trong lễ tốt nghiệp. Bạn có thể thực hiện tại [https://ctsv.hust.edu.vn/#/le-tot-nghiep](https://ctsv.hust.edu.vn/#/le-tot-nghiep). Bạn cần hoàn thành trước ngày 19.9.2025. Nếu không hoàn thành, Ban Tổ chức sẽ lấy ảnh thẻ của bạn làm ảnh trình chiếu lên sân khấu.
+*   Nên đọc kỹ hướng dẫn về việc tham gia dự lễ tốt nghiệp.",routing,routing,,,anonymous,False,"['session_id', 'user_context', 'user_id']",c01aa127c40ce372f77f26853eec65506322aaaa74a818b497776e41ba69a558,auto,5,0,,15add6b5-74cd-4905-bc4b-9642680e0451,http://localhost:8000/chat/v3,rag_v2,personal_check,điều kiện tốt nghiệp của tôi,5,150262.49,False,False,,[],False,,0,,0.0,0.0,False,False,,,,
+p0-agent-single-fact,2,2,failed,Sinh viên có thể đăng ký/điều chỉnh kế hoạch học tập bao nhiêu lần?,"Route as simple rag_v2, not agent, and answer the registration count from local policy.",,routing,routing,,,anonymous,False,"['session_id', 'user_context', 'user_id']",6cc996b4b29d0437ec90fc00796ae62d77971b8d9f37775015021b414344fc08,,,,,,http://localhost:8000/chat/v3,,,,,242085.24,,,,,,,,timed out,,,,,,,,
+p0-rerank-empty-k70-bac23,3,3,completed,K70: Nếu tôi đạt Bậc 2.3 thì tôi thuộc nhóm mấy?,Use local K70 foreign-language table evidence; Bậc 2.3 maps to Nhóm 5.,"Theo Bảng 3.1 – Danh mục các học phần tiếng Anh thuộc khối ngoại ngữ cơ bản và điều kiện miễn học (Tài liệu không rõ nguồn [Khóa: ['K70']]), nếu bạn đạt trình độ Bậc 2.3, bạn sẽ thuộc Nhóm 5.
+
+(Lưu ý: Theo Bảng 4.1 của tài liệu khác cùng nguồn, trình độ Bậc 2.3 sẽ thuộc Nhóm 2.)",rerank,rerank,,,anonymous,False,"['session_id', 'user_context', 'user_id']",c1f38d534d936c391958299fce8cc8af87cd967681ba984fd74df1b55061d726,auto,5,0,,c087b7cf-fc12-49f5-b6bf-13c890b79bec,http://localhost:8000/chat/v3,rag_v2,simple,K70: Nếu tôi đạt Bậc 2.3 thì tôi thuộc nhóm mấy?,9,201130.84,False,False,,[],False,,0,,0.1667,0.0,False,False,,,,
+p0-zero-context-credit-hour-a,4,4,completed,Một tín chỉ tương đương bao nhiêu giờ học tập?,Retrieve local curriculum/regulation context and answer the credit-hour equivalence.,"Theo tài liệu tham khảo, một tín chỉ (TC) được tính tương đương 50 giờ học tập định mức của người học. Thời gian này bao gồm cả thời gian dự giờ giảng, giờ học có hướng dẫn, tự học, nghiên cứu, trải nghiệm và dự kiểm tra, đánh giá.",rerank,rerank,,,anonymous,False,"['session_id', 'user_context', 'user_id']",1b4d98e79644f4dccf9c76d3f63327d57aa453a9e9fb091d7f62e9988d008d4a,auto,5,0,,ceab7e18-3ec2-4a46-9fc9-2e9660aae472,http://localhost:8000/chat/v3,rag_v2,simple,Một tín chỉ tương đương bao nhiêu giờ học tập?,1,111061.35,False,False,,[],False,,0,,0.0,0.0,False,False,,,,
+p0-zero-context-credit-hour-b,5,5,completed,Một tín chỉ tương đương bao nhiêu giờ học tập?,Duplicate replay query used to detect cache hit markers when require_no_cache=true.,"Theo Tài liệu không rõ nguồn, Điều 4, một tín chỉ (TC) được tính tương đương 50 giờ học tập định mức của người học. Khoảng thời gian này bao gồm cả thời gian dự giờ giảng, giờ học có hướng dẫn, tự học, nghiên cứu, trải nghiệm và dự kiểm tra, đánh giá.",cache,cache,,,anonymous,False,"['session_id', 'user_context', 'user_id']",1b4d98e79644f4dccf9c76d3f63327d57aa453a9e9fb091d7f62e9988d008d4a,auto,5,0,,260180ee-6900-4960-9215-b03b676fe641,http://localhost:8000/chat/v3,rag_v2,simple,Một tín chỉ tương đương bao nhiêu giờ học tập?,1,94130.27,False,False,,[],False,,0,,0.0,0.0,False,False,,,,

@@ -1,6 +1,6 @@
 # Module: `pipeline`
 
-Source-verified: 2026-05-22 from `pipeline/*.py`, `api/routes/chat.py`, `api/routes/upload.py`, and GitNexus context for `RAGPipeline` and `DocumentPipeline`.
+Source-verified: 2026-05-31 from `pipeline/*.py`, `api/routes/chat.py`, `api/routes/upload.py`, and GitNexus context for `RAGPipeline` and `DocumentPipeline`.
 
 ## Purpose
 
@@ -127,6 +127,12 @@ Implemented primarily in `flows.py:rag_flow()`:
 Important current behavior:
 
 - List/enumeration queries can raise effective `top_k`.
+- Raw candidate pool size is configurable via `raw_candidate_multiplier` and
+  `raw_candidate_min`; low-confidence routing can still double the resolved
+  pool when `low_conf_pool_expand_enabled` is true.
+- Classic and streaming RAG pass configured reranker knobs through every rerank
+  attempt: `reranker_score_threshold`, `reranker_table_score_threshold`, and
+  `reranker_min_top_k` capped to the effective `top_k`.
 - Freshness/plan queries routed to `kehoach` can lock collection selection to `kehoach`.
 - Profile notes are injected only for profile-dependent wording like "nganh cua toi"; generic latest/freshness queries should not inherit major/cohort from profile/history.
 - Personal-check wording such as "dieu kien tot nghiep cua toi" stays on classic RAG instead of returning `mode=clarify` or entering the agent. `query_v3()` returns `mode="rag_v2"` and `route="personal_check"` so API consumers keep the same public mode surface while trace still shows the special route.

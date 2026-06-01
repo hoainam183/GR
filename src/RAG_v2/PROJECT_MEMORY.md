@@ -159,6 +159,10 @@ Current P0 routing contract:
 Current P0 reliability contracts:
 
 - If rerank returns empty despite raw candidates, classic and streaming RAG retry with the original question, then fall back to raw fusion top-k when retry is still empty or only negative. Trace records `rerank_fallback`, optional `rerank_raw_fallback`, `fallback_reason`, and final candidate/returned counts.
+- Raw candidate pool sizing is runtime configurable through
+  `RAW_CANDIDATE_MULTIPLIER` and `RAW_CANDIDATE_MIN`; reranker lower-bound
+  behavior is configurable through `RERANKER_MIN_TOP_K` and is passed through
+  classic plus streaming RAG rerank calls.
 - LLM cache writes are gated to stable local answers only: answered status, no no-info/no-source/self-eval-failed markers, no dynamic/stale-risk signal, and no pre/post Tavily fallback. Eval runs that require no cache treat any cache-hit marker as invalid setup.
 
 - Load history từ Mongo/Redis cache nếu có `session_id`.
@@ -253,6 +257,10 @@ Retrieval facts:
 - Course-like queries (`môn`, `học phần`, mã học phần...) tăng keyword weight lên ít nhất `0.6`.
 - `kehoach_recency_bonus` có thể cộng điểm nhỏ cho tài liệu gần đây.
 - `ReferenceResolver` ưu tiên same-document Qdrant payload lookup theo `document_id` cho các tham chiếu kiểu `Điều/Khoản`, rồi insert chunks được resolve ngay sau chunk gốc; fallback semantic search bị post-filter cùng document/source.
+- If an ES metadata index is empty while Qdrant still has points, exact
+  metadata filters can fall back to Qdrant payload filtering. This currently
+  protects CTDT major filters such as `major_code=IT-E6` from becoming an
+  unfiltered vector search when the `ctdt` ES index is out of sync.
 
 Canonical major codes:
 
@@ -506,6 +514,9 @@ WEB_FALLBACK_ON_DYNAMIC=true
 WEB_FALLBACK_ON_NO_INFO=true
 TAVILY_CACHE_TTL_SECONDS=3600
 TAVILY_CACHE_MAXSIZE=200
+RAW_CANDIDATE_MULTIPLIER=4.0
+RAW_CANDIDATE_MIN=20
+RERANKER_MIN_TOP_K=5
 LM_STUDIO_BASE_URL=...
 LLM_PROVIDER=gemini
 EMBEDDING_PROVIDER=ensemble

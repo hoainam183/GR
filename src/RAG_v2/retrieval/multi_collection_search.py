@@ -49,6 +49,14 @@ from .qdrant_store import QdrantStore
 
 logger = logging.getLogger(__name__)
 
+_QDRANT_PAYLOAD_FILTER_FIELDS = {
+    "major_code",
+    "applicable_cohort",
+    "applicable_major",
+    "date_str",
+    "course_code",
+}
+
 
 class MultiCollectionSearch:
     """Hybrid search across multiple (Qdrant collection, ES index) pairs.
@@ -563,6 +571,85 @@ class MultiCollectionSearch:
     # Metadata pre-search helpers
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _normalise_es_filter_field(field: str) -> str:
+        """Return the payload field represented by an ES metadata filter field."""
+        field = str(field or "").strip()
+        if field.endswith(".keyword"):
+            return field[: -len(".keyword")]
+        return field
+
+    @classmethod
+    def _qdrant_payload_filter_from_es_query(
+        cls,
+        es_query: Dict[str, Any],
+    ) -> Tuple[Optional[qdrant_models.Filter], Optional[str]]:
+        """Translate simple exact ES metadata clauses into a Qdrant payload filter.
+
+        This is a fail-soft path for deployments where Qdrant is populated but
+        the matching ES metadata index is empty. It intentionally handles only
+        exact term/terms filters for known payload fields.
+        """
+        terms_by_field: Dict[str, List[Any]] = {}
+
+        def _collect(node: Any) -> None:
+            if isinstance(node, dict):
+                term_clause = node.get("term")
+                if isinstance(term_clause, dict):
+                    for raw_field, raw_value in term_clause.items():
+                        field = cls._normalise_es_filter_field(raw_field)
+                        if field not in _QDRANT_PAYLOAD_FILTER_FIELDS:
+                            continue
+                        value = (
+                            raw_value.get("value")
+                            if isinstance(raw_value, dict)
+                            else raw_value
+                        )
+                        if value is not None and str(value).strip():
+                            terms_by_field.setdefault(field, []).append(value)
+
+                terms_clause = node.get("terms")
+                if isinstance(terms_clause, dict):
+                    for raw_field, raw_values in terms_clause.items():
+                        field = cls._normalise_es_filter_field(raw_field)
+                        if field not in _QDRANT_PAYLOAD_FILTER_FIELDS:
+                            continue
+                        values = (
+                            raw_values
+                            if isinstance(raw_values, list)
+                            else [raw_values]
+                        )
+                        for value in values:
+                            if value is not None and str(value).strip():
+                                terms_by_field.setdefault(field, []).append(value)
+
+                for value in node.values():
+                    _collect(value)
+            elif isinstance(node, list):
+                for item in node:
+                    _collect(item)
+
+        _collect(es_query)
+
+        if len(terms_by_field) != 1:
+            return None, None
+
+        field, values = next(iter(terms_by_field.items()))
+        unique_values = list(dict.fromkeys(values))
+        if not unique_values:
+            return None, None
+
+        if len(unique_values) == 1:
+            match = qdrant_models.MatchValue(value=unique_values[0])
+        else:
+            match = qdrant_models.MatchAny(any=unique_values)
+
+        qdrant_filter = qdrant_models.Filter(
+            must=[qdrant_models.FieldCondition(key=field, match=match)]
+        )
+        values_desc = ",".join(str(value) for value in unique_values[:5])
+        return qdrant_filter, f"qdrant_payload:{field}={values_desc}"
+
     def _resolve_filter_with_fallback(
         self,
         col_name: str,
@@ -666,6 +753,31 @@ class MultiCollectionSearch:
                     "filter_desc": fdesc,
                 }
                 return qdrant_filter, es_query, trace
+
+        try:
+            es_doc_count = int(hybrid.es.count())
+        except Exception:
+            es_doc_count = -1
+
+        if es_doc_count == 0:
+            for es_query in cf.metadata_es_queries:
+                qdrant_filter, filter_desc = (
+                    self._qdrant_payload_filter_from_es_query(es_query)
+                )
+                if qdrant_filter is None or filter_desc is None:
+                    continue
+                logger.warning(
+                    "Metadata pre-search '%s': ES index is empty; applying "
+                    "Qdrant payload filter fallback (%s).",
+                    col_name,
+                    filter_desc,
+                )
+                trace = {
+                    "applied": True,
+                    "matched_ids": 0,
+                    "filter_desc": f"{filter_desc} (ES empty fallback)",
+                }
+                return qdrant_filter, None, trace
 
         # All queries returned zero results → fallback: search entire collection
         logger.info(

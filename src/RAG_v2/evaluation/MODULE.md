@@ -1,6 +1,6 @@
 # Module: `evaluation`
 
-Source-verified: 2026-05-20 from `evaluation/*.py`, `eval/`, `api/routes/metrics.py`, and GitNexus query results.
+Source-verified: 2026-05-31 from `evaluation/*.py`, `eval/`, `api/routes/metrics.py`, and GitNexus query results.
 
 ## Purpose
 
@@ -23,6 +23,7 @@ evaluation/
   eval_store.py                      Mongo/artifact persistence and dashboard payloads.
   two_layer_eval.py                  Main CLI runner for current and historical suites.
   evaluate_current_pipeline.py       Retrieval eval on real production stack.
+  evaluate_e2e_pipeline.py           Full query_v3 RAG eval with generation, judge, and tuning knobs.
   build_current_policy_ground_truth.py Draft inventory/cases/labels/audit exports.
   post_index.py                      Fail-soft post-index eval trigger.
   search_strategy_benchmark.py       BM25/BGE/E5/hybrid/rerank benchmark.
@@ -93,6 +94,32 @@ Metrics:
 - latency percentiles
 
 Current eval reads baseline from `evaluation/search_strategy_results.json` and can downgrade run status to `warning` when current metrics fall below baseline.
+
+## E2E Pipeline Eval
+
+`evaluate_e2e_pipeline.py` evaluates `RAGPipeline.query_v3()` and writes
+`query_results.csv`, `summary.json`, and `report.md`. The report includes a
+`Run Config` section so tuning runs are attributable.
+
+Useful tuning flags:
+
+```bash
+python -m evaluation.evaluate_e2e_pipeline --dataset evaluation/data/ITE6_rag_evaluation_dataset_no_parent_evidence.json --top-k 7 --reranker-min-top-k 7
+python -m evaluation.evaluate_e2e_pipeline --dataset ... --vector-pool-k 28 --keyword-pool-k 28 --vector-top-k 28 --keyword-top-k 28
+python -m evaluation.evaluate_e2e_pipeline --dataset ... --hyde-enabled --low-conf-pool-expand
+python -m evaluation.evaluate_e2e_pipeline --dataset ... --disable-decomposer --disable-reflection --disable-complexity-router
+```
+
+For chunk-id datasets, the runner disables ValidityFilter, agent, and
+Tavily/web fallback so retrieved sources remain comparable to
+`evidence_chunk_ids`. The ITE6 no-parent-evidence comparison indicates
+`top_k=7` with `reranker_min_top_k=7` is the best historical report among the
+tracked variants; HyDE did not trigger in those runs. A 2026-06-01 retest after
+the Qdrant payload-filter fallback for empty `ctdt` ES index produced
+`hit@5=53.85%`, `ref_correct=73.08%`, and avg latency about 61.6s. This is
+better than the pre-fix current run but still below the older `min_top_k_7`
+artifact, so investigate index sync and reranker latency before promoting wider
+candidate pools.
 
 ## Historical Email Eval
 

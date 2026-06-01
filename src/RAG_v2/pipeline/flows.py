@@ -339,8 +339,9 @@ def _resolve_candidate_pool(
     routing_confidence: float,
 ) -> int:
     """Increase candidate pool when routing is uncertain."""
-    # [MATCH CUSTOM EVAL]: Set base pool to max(top_k * 4, 20) to exactly match custom_eval's raw_candidate_k=28 (when top_k=7)
-    base_pool = max(top_k * 4, 20)
+    multiplier = max(_cfg_float(cfg, "raw_candidate_multiplier", 4.0), 1.0)
+    min_pool = max(_cfg_int(cfg, "raw_candidate_min", 20), 1)
+    base_pool = max(int(round(top_k * multiplier)), min_pool)
 
     if (
         _cfg_bool(cfg, "low_conf_pool_expand_enabled", False)
@@ -354,6 +355,32 @@ def _resolve_candidate_pool(
         return expanded
 
     return base_pool
+
+
+def _reranker_min_top_k(cfg: Dict[str, Any], top_k_value: int) -> Optional[int]:
+    """Return the configured reranker lower bound, capped to top_k."""
+    configured = _cfg_int(cfg, "reranker_min_top_k", 0)
+    if configured <= 0:
+        return None
+    return min(configured, top_k_value)
+
+
+def _reranker_kwargs(
+    cfg: Dict[str, Any],
+    top_k_value: int,
+) -> Dict[str, Any]:
+    """Build optional reranker kwargs from runtime config."""
+    kwargs: Dict[str, Any] = {}
+    if cfg.get("reranker_score_threshold") is not None:
+        kwargs["score_threshold"] = cfg.get("reranker_score_threshold")
+    if cfg.get("reranker_table_score_threshold") is not None:
+        kwargs["table_score_threshold"] = cfg.get(
+            "reranker_table_score_threshold"
+        )
+    min_top_k = _reranker_min_top_k(cfg, top_k_value)
+    if min_top_k is not None:
+        kwargs["min_top_k"] = min_top_k
+    return kwargs
 
 
 # ── C5: Parent context expansion (post-rerank) ───────────────────────────────
@@ -1448,6 +1475,7 @@ def _hyde_fallback_post_rerank(
                 query=rerank_query,
                 documents=merged,
                 top_k=top_k_value,
+                **_reranker_kwargs(cfg, top_k_value),
             )
         else:
             reranked = sorted(
@@ -2241,14 +2269,11 @@ def rag_flow(
     
     rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
     if reranker is not None:
-        # Pass cfg-level threshold so runtime overrides (e.g. eval scripts,
-        # hot-reload) actually propagate instead of using the baked-in default.
-        _cfg_score_thresh = cfg.get("reranker_score_threshold")
         reranked = reranker.rerank(
             query=rerank_query,
             documents=raw_results,
             top_k=top_k_value,
-            score_threshold=_cfg_score_thresh,
+            **_reranker_kwargs(cfg, top_k_value),
         )
         timings_ms["rerank"] = _elapsed_ms(rerank_t0)
         rerank_trace = _build_rerank_trace(
@@ -2283,6 +2308,7 @@ def rag_flow(
                 query=question,
                 documents=raw_results,
                 top_k=top_k_value,
+                **_reranker_kwargs(cfg, top_k_value),
             )
             timings_ms["rerank_fallback"] = 1.0
             retry_best_score = _best_explicit_rerank_score(reranked)
@@ -3175,6 +3201,7 @@ def rag_flow_stream(
             query=rerank_query,
             documents=raw_results,
             top_k=top_k_value,
+            **_reranker_kwargs(cfg, top_k_value),
         )
         timings_ms["rerank"] = _elapsed_ms(rerank_t0)
         rerank_trace = _build_rerank_trace(
@@ -3204,6 +3231,7 @@ def rag_flow_stream(
                 query=question,
                 documents=raw_results,
                 top_k=top_k_value,
+                **_reranker_kwargs(cfg, top_k_value),
             )
             timings_ms["rerank_fallback"] = 1.0
             retry_best_score_s = _best_explicit_rerank_score(reranked)

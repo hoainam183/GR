@@ -499,6 +499,7 @@ def test_metadata_presearch_zero_ids_falls_back_to_no_filter() -> None:
 
     hybrid = MagicMock()
     hybrid.es.metadata_filter_search.return_value = []
+    hybrid.es.count.return_value = 10
 
     cf = CollectionFilter(
         metadata_es_queries=[
@@ -515,3 +516,42 @@ def test_metadata_presearch_zero_ids_falls_back_to_no_filter() -> None:
     assert es_filter is None
     assert trace["applied"] is False
     hybrid.es.resolve_chunk_ids_for_qdrant.assert_not_called()
+
+
+def test_metadata_presearch_empty_es_index_uses_qdrant_payload_filter() -> None:
+    """When ES is empty, exact metadata filters should still constrain Qdrant."""
+    from unittest.mock import MagicMock
+    from retrieval.multi_collection_search import MultiCollectionSearch
+    from retrieval.metadata_filters import CollectionFilter
+
+    hybrid = MagicMock()
+    hybrid.es.metadata_filter_search.return_value = []
+    hybrid.es.count.return_value = 0
+
+    cf = CollectionFilter(
+        metadata_es_queries=[
+            {
+                "bool": {
+                    "should": [
+                        {"term": {"major_code": "IT-E6"}},
+                        {"term": {"major_code.keyword": "IT-E6"}},
+                    ],
+                    "minimum_should_match": 1,
+                }
+            }
+        ]
+    )
+
+    searcher = object.__new__(MultiCollectionSearch)
+    qdrant_filter, es_filter, trace = searcher._resolve_filter_with_fallback(
+        "ctdt", hybrid, cf
+    )
+
+    assert qdrant_filter is not None
+    assert es_filter is None
+    assert trace["applied"] is True
+    assert "qdrant_payload:major_code=IT-E6" in trace["filter_desc"]
+
+    condition = qdrant_filter.must[0]
+    assert condition.key == "major_code"
+    assert condition.match.value == "IT-E6"

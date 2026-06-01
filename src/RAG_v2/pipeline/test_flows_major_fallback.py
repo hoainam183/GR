@@ -11,7 +11,12 @@ from unittest.mock import MagicMock
 # Ensure src/RAG_v2 is importable in test context.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from pipeline.flows import _should_prepend_profile_note, rag_flow, rag_flow_stream
+from pipeline.flows import (
+    _resolve_candidate_pool,
+    _should_prepend_profile_note,
+    rag_flow,
+    rag_flow_stream,
+)
 
 
 def _make_doc() -> Dict[str, Any]:
@@ -82,6 +87,61 @@ def _make_deps() -> Dict[str, Any]:
         "chat": chat,
         "cfg": cfg,
     }
+
+
+def test_resolve_candidate_pool_uses_configured_raw_candidate_knobs() -> None:
+    cfg = {"raw_candidate_multiplier": 3.0, "raw_candidate_min": 12}
+
+    assert _resolve_candidate_pool(cfg, top_k=5, routing_confidence=1.0) == 15
+    assert _resolve_candidate_pool(cfg, top_k=3, routing_confidence=1.0) == 12
+
+
+def test_rag_flow_passes_reranker_min_top_k_and_thresholds() -> None:
+    deps = _make_deps()
+    cfg = {
+        **deps["cfg"],
+        "reranker_min_top_k": 4,
+        "reranker_score_threshold": -1.0,
+        "reranker_table_score_threshold": -2.0,
+    }
+
+    rag_flow(
+        question="hoc bong",
+        history=None,
+        reflector=None,
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        self_evaluator=None,
+        tavily_tool=None,
+        cfg=cfg,
+    )
+
+    kwargs = deps["reranker"].rerank.call_args.kwargs
+    assert kwargs["min_top_k"] == 4
+    assert kwargs["score_threshold"] == -1.0
+    assert kwargs["table_score_threshold"] == -2.0
+
+
+def test_rag_flow_stream_passes_reranker_min_top_k() -> None:
+    deps = _make_deps()
+    cfg = {**deps["cfg"], "reranker_min_top_k": 3}
+
+    stream, _sources = rag_flow_stream(
+        question="hoc bong",
+        history=None,
+        reflector=None,
+        bge_embedder=deps["bge"],
+        e5_embedder=deps["e5"],
+        searcher=deps["searcher"],
+        reranker=deps["reranker"],
+        chat_model=deps["chat"],
+        cfg=cfg,
+    )
+    assert list(stream) == ["ok"]
+    assert deps["reranker"].rerank.call_args.kwargs["min_top_k"] == 3
 
 
 def test_rag_flow_uses_raw_results_when_reranker_unavailable() -> None:

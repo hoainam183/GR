@@ -1,6 +1,6 @@
 # Module: `config`
 
-Source-verified: 2026-05-20 from `config/settings.py`.
+Source-verified: 2026-05-31 from `config/settings.py`.
 
 ## Purpose
 
@@ -24,8 +24,9 @@ Main setting families in `Settings`:
 - Store hosts: Qdrant, Elasticsearch, MongoDB, Redis
 - Collections: `collections`
 - Chat LLM: `chat_model`, temperature, token limit
-- Retrieval: top-k, vector/keyword pools, fusion weights, context budgets
-- Reranker: model, top-k, thresholds
+- Retrieval: top-k, vector/keyword pools, fusion weights, raw candidate pool,
+  context budgets
+- Reranker: model, top-k, thresholds, minimum returned top-k
 - Tavily/web fallback: fallback gates, depth, max results, cache settings
 - Reflection/routing: reflection provider/model, domain routing thresholds
 - Crawler: schedule and retention
@@ -43,6 +44,12 @@ defaults in settings.py
 ```
 
 Do not hard-code provider/model/host values in application code when a setting exists.
+
+RAG retrieval tuning settings are consumed through `RAGPipeline._cfg` and
+`pipeline.flows`, including `raw_candidate_multiplier`, `raw_candidate_min`,
+`reranker_score_threshold`, `reranker_table_score_threshold`, and
+`reranker_min_top_k`. Keep these in sync with `.env.example` and evaluation CLI
+overrides.
 
 ## Maintenance Notes
 
