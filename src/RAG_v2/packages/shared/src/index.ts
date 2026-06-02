@@ -94,6 +94,13 @@ export {
   CLARIFY_SENTINEL,
 } from './utils';
 
+export {
+  COHORT_OPTIONS,
+  MAJOR_OPTIONS,
+  findMajorOptionByCode,
+} from './profileOptions';
+export type { MajorOption } from './profileOptions';
+
 // ─── Stores ──────────────────────────────────────────────────────────────────
 export { createAuthStore, createChatStore } from './stores';
 export type {

@@ -14,16 +14,16 @@ import {
 import { setStoredUser } from "@/services/authStorage";
 import { authFetch, ensureSession, throwIfNotOk } from "@/services/authSession";
 import HustLogo from "@/components/HustLogo";
+import { COHORT_OPTIONS, MAJOR_OPTIONS, findMajorOptionByCode } from "@rag/shared";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
-const COHORTS = ["K65", "K66", "K67", "K68", "K69"] as const;
 
 interface ProfileForm {
   full_name: string;
   student_id: string;
   cohort: string;
   major: string;
+  major_code: string;
 }
 
 const CompleteProfile = () => {
@@ -32,10 +32,12 @@ const CompleteProfile = () => {
     full_name: "",
     student_id: "",
     cohort: "",
-    major: "CNTT Việt Nhật",
+    major: "",
+    major_code: "",
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const selectedMajor = findMajorOptionByCode(form.major_code);
 
   useEffect(() => {
     ensureSession()
@@ -44,11 +46,13 @@ const CompleteProfile = () => {
           navigate("/login");
           return;
         }
+        const majorOption = findMajorOptionByCode(user.major_code);
         setForm({
           full_name: user.full_name ?? "",
           student_id: user.student_id ?? "",
           cohort: user.cohort ?? "",
-          major: user.major ?? "CNTT Việt Nhật",
+          major: majorOption?.name ?? "",
+          major_code: majorOption?.code ?? "",
         });
       })
       .catch((err: unknown) => {
@@ -72,6 +76,10 @@ const CompleteProfile = () => {
       toast.error("Please select your cohort.");
       return;
     }
+    if (!selectedMajor) {
+      toast.error("Please select your major.");
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -84,6 +92,8 @@ const CompleteProfile = () => {
           full_name: form.full_name,
           student_id: form.student_id,
           cohort: form.cohort,
+          major: selectedMajor.name,
+          major_code: selectedMajor.code,
         }),
       });
 
@@ -173,7 +183,7 @@ const CompleteProfile = () => {
                   <SelectValue placeholder="Chọn khoá học" />
                 </SelectTrigger>
                 <SelectContent>
-                  {COHORTS.map((c) => (
+                  {COHORT_OPTIONS.map((c) => (
                     <SelectItem key={c} value={c}>
                       {c}
                     </SelectItem>
@@ -182,18 +192,38 @@ const CompleteProfile = () => {
               </Select>
             </div>
 
-            {/* Major (disabled) */}
+            {/* Major */}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="major" className="text-sm font-medium text-foreground">
               Ngành học
               </Label>
-              <Input
-                id="major"
-                type="text"
-                value={form.major}
-                disabled
-                className="cursor-not-allowed opacity-60"
-              />
+              <Select
+                value={form.major_code}
+                onValueChange={(code) => {
+                  const option = findMajorOptionByCode(code);
+                  setForm((f) => ({
+                    ...f,
+                    major: option?.name ?? "",
+                    major_code: option?.code ?? "",
+                  }));
+                }}
+              >
+                <SelectTrigger id="major" className="w-full">
+                  <SelectValue placeholder="Chọn ngành học" />
+                </SelectTrigger>
+                <SelectContent className="max-h-80">
+                  {MAJOR_OPTIONS.map((option) => (
+                    <SelectItem key={option.code} value={option.code}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedMajor && (
+                <p className="text-xs text-muted-foreground">
+                  Mã ngành: <span className="font-semibold text-foreground">{selectedMajor.code}</span>
+                </p>
+              )}
             </div>
 
             <Button

@@ -15,6 +15,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,23 +26,15 @@ import { apiClient } from '../../services/api';
 import { setUserProfile } from '../../services/secureStorage';
 import { useAuthStore } from '../../stores/authStore';
 import { useProfile } from '../../hooks/useProfile';
-import { API_PATHS } from '@rag/shared';
+import {
+  API_PATHS,
+  COHORT_OPTIONS,
+  MAJOR_OPTIONS,
+  type MajorOption,
+} from '@rag/shared';
 import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Nav = NativeStackNavigationProp<ProfileStackParamList, 'EditProfile'>;
-
-const COHORT_OPTIONS = ['K64', 'K65', 'K66', 'K67', 'K68', 'K69', 'K70'];
-const MAJOR_OPTIONS = [
-  { label: 'CNTT', code: 'IT1' },
-  { label: 'CNTT Việt Nhật', code: 'IT-EP' },
-  { label: 'CNTT Global ICT', code: 'IT2' },
-  { label: 'Khoa học máy tính', code: 'IT-E7' },
-  { label: 'Kỹ thuật máy tính', code: 'CE' },
-  { label: 'ĐTVT', code: 'ET1' },
-  { label: 'Tự động hóa', code: 'EE' },
-  { label: 'Cơ điện tử', code: 'ME' },
-  { label: 'Khác', code: '' },
-];
 
 const EditProfileScreen = () => {
   const { colors } = useAppTheme();
@@ -55,11 +48,14 @@ const EditProfileScreen = () => {
   const [cohort, setCohort] = useState(user?.cohort ?? '');
   const [major, setMajor] = useState(user?.major ?? '');
   const [majorCode, setMajorCode] = useState(user?.major_code ?? '');
+  const [majorPickerOpen, setMajorPickerOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const selectedMajor = MAJOR_OPTIONS.find((option) => option.code === majorCode);
 
-  const selectMajor = (label: string, code: string) => {
-    setMajor(label);
-    setMajorCode(code);
+  const selectMajor = (option: MajorOption) => {
+    setMajor(option.name);
+    setMajorCode(option.code);
+    setMajorPickerOpen(false);
   };
 
   const handleSave = async () => {
@@ -71,18 +67,19 @@ const EditProfileScreen = () => {
       Alert.alert('Lỗi', 'Vui lòng chọn khoá');
       return;
     }
-    if (!major) {
+    if (!selectedMajor || major !== selectedMajor.name) {
       Alert.alert('Lỗi', 'Vui lòng chọn ngành');
       return;
     }
+    const majorOption = selectedMajor;
 
     setLoading(true);
     try {
       const body: Record<string, string> = {};
       if (fullName.trim() !== user?.full_name) body.full_name = fullName.trim();
       if (cohort !== user?.cohort) body.cohort = cohort;
-      if (major !== user?.major) body.major = major;
-      if (majorCode !== user?.major_code) body.major_code = majorCode;
+      if (majorOption.name !== user?.major) body.major = majorOption.name;
+      if (majorOption.code !== user?.major_code) body.major_code = majorOption.code;
 
       // Only send if there are changes
       if (Object.keys(body).length === 0) {
@@ -190,27 +187,69 @@ const EditProfileScreen = () => {
             {/* Major */}
             <View style={styles.field}>
               <Text style={styles.label}>Ngành</Text>
-              <View style={styles.chipGroup}>
-                {MAJOR_OPTIONS.map((opt) => (
-                  <Pressable
-                    key={opt.label}
+              <Pressable
+                style={styles.selectorButton}
+                onPress={() => setMajorPickerOpen(true)}
+              >
+                <View style={styles.selectorTextGroup}>
+                  <Text
                     style={[
-                      styles.chip,
-                      major === opt.label && styles.chipActive,
+                      styles.selectorText,
+                      !selectedMajor && styles.selectorPlaceholder,
                     ]}
-                    onPress={() => selectMajor(opt.label, opt.code)}
                   >
-                    <Text
-                      style={[
-                        styles.chipText,
-                        major === opt.label && styles.chipTextActive,
-                      ]}
-                    >
-                      {opt.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
+                    {selectedMajor ? selectedMajor.name : 'Chọn ngành học'}
+                  </Text>
+                  {selectedMajor && (
+                    <Text style={styles.selectorMeta}>Mã ngành: {selectedMajor.code}</Text>
+                  )}
+                </View>
+                <Ionicons name="chevron-down" size={18} color={colors.mutedForeground} />
+              </Pressable>
+              <Modal
+                visible={majorPickerOpen}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setMajorPickerOpen(false)}
+              >
+                <View style={styles.modalBackdrop}>
+                  <Pressable
+                    style={StyleSheet.absoluteFill}
+                    onPress={() => setMajorPickerOpen(false)}
+                  />
+                  <View style={styles.modalCard}>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Chọn ngành học</Text>
+                      <Pressable
+                        style={styles.modalCloseButton}
+                        onPress={() => setMajorPickerOpen(false)}
+                      >
+                        <Ionicons name="close" size={22} color={colors.mutedForeground} />
+                      </Pressable>
+                    </View>
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                      {MAJOR_OPTIONS.map((opt) => {
+                        const active = selectedMajor?.code === opt.code;
+                        return (
+                          <Pressable
+                            key={opt.code}
+                            style={[styles.optionRow, active && styles.optionRowActive]}
+                            onPress={() => selectMajor(opt)}
+                          >
+                            <View style={styles.optionTextGroup}>
+                              <Text style={styles.optionCode}>{opt.code}</Text>
+                              <Text style={styles.optionName}>{opt.name}</Text>
+                            </View>
+                            {active && (
+                              <Ionicons name="checkmark" size={20} color={colors.primary} />
+                            )}
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                </View>
+              </Modal>
             </View>
           </View>
 
@@ -340,6 +379,89 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   },
   chipTextActive: {
     color: colors.primary,
+  },
+  selectorButton: {
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    backgroundColor: colors.input,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  selectorTextGroup: {
+    flex: 1,
+    gap: 3,
+  },
+  selectorText: {
+    color: colors.foreground,
+    fontSize: 15,
+    lineHeight: 20,
+  },
+  selectorPlaceholder: {
+    color: colors.mutedForeground,
+  },
+  selectorMeta: {
+    color: colors.mutedForeground,
+    fontSize: 12,
+  },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+    backgroundColor: 'rgba(0, 0, 0, 0.36)',
+  },
+  modalCard: {
+    maxHeight: '76%',
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 14,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  modalTitle: {
+    color: colors.foreground,
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  modalCloseButton: {
+    padding: 6,
+  },
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 11,
+  },
+  optionRowActive: {
+    backgroundColor: colors.primarySoft,
+  },
+  optionTextGroup: {
+    flex: 1,
+    gap: 2,
+  },
+  optionCode: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  optionName: {
+    color: colors.foreground,
+    fontSize: 14,
+    lineHeight: 19,
   },
   saveButton: {
     flexDirection: 'row',

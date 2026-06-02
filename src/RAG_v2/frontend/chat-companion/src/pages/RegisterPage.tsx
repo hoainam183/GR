@@ -3,9 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { registerUser } from "@/services/authApi";
 import { getCurrentSessionUser, ensureSession } from "@/services/authSession";
 import HustLogo from "@/components/HustLogo";
+import { COHORT_OPTIONS, MAJOR_OPTIONS, findMajorOptionByCode } from "@rag/shared";
 import axios from "axios";
 
 const EyeIcon = ({ show }: { show: boolean }) =>
@@ -47,6 +55,7 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+  const selectedMajor = findMajorOptionByCode(majorCode);
 
   useEffect(() => {
     const cached = getCurrentSessionUser();
@@ -74,9 +83,27 @@ const RegisterPage = () => {
     if (!fullName.trim()) next.fullName = "Họ và tên là bắt buộc.";
     if (!studentId.trim()) next.studentId = "Mã số sinh viên là bắt buộc.";
     if (!cohort.trim()) next.cohort = "Khoá học là bắt buộc.";
-    if (!major.trim()) next.major = "Ngành học là bắt buộc.";
+    if (!selectedMajor || !major.trim() || major !== selectedMajor.name) {
+      next.major = "Ngành học là bắt buộc.";
+    }
     setErrors(next);
     return Object.keys(next).length === 0;
+  };
+
+  const handleMajorChange = (code: string) => {
+    const option = findMajorOptionByCode(code);
+    setMajorCode(option?.code ?? "");
+    setMajor(option?.name ?? "");
+    if (errors.major || errors.majorCode) {
+      setErrors((prev) => ({ ...prev, major: undefined, majorCode: undefined }));
+    }
+  };
+
+  const handleCohortChange = (value: string) => {
+    setCohort(value);
+    if (errors.cohort) {
+      setErrors((prev) => ({ ...prev, cohort: undefined }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -194,44 +221,50 @@ const RegisterPage = () => {
             <Label htmlFor="major" className="text-sm font-medium text-foreground">
               Ngành học
             </Label>
-            <Input
-              id="major"
-              type="text"
-              placeholder="vd: CNTT Việt Nhật"
-              value={major}
-              onChange={(e) => setMajor(e.target.value)}
-              className={errors.major ? "border-destructive focus-visible:ring-destructive" : ""}
-            />
+            <Select value={majorCode} onValueChange={handleMajorChange}>
+              <SelectTrigger
+                id="major"
+                className={errors.major ? "border-destructive focus:ring-destructive" : ""}
+              >
+                <SelectValue placeholder="Chọn ngành học" />
+              </SelectTrigger>
+              <SelectContent className="max-h-80">
+                {MAJOR_OPTIONS.map((option) => (
+                  <SelectItem key={option.code} value={option.code}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {errors.major && <p className="text-xs text-destructive">{errors.major}</p>}
           </div>
 
-          {/* Major Code */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="majorCode" className="text-sm font-medium text-foreground">
-              Mã ngành học
-            </Label>
-            <Input
-              id="majorCode"
-              type="text"
-              placeholder="vd: 20"
-              value={majorCode}
-              onChange={(e) => setMajorCode(e.target.value)}
-            />
-          </div>
+          {selectedMajor && (
+            <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+              Mã ngành: <span className="font-semibold text-foreground">{selectedMajor.code}</span>
+            </div>
+          )}
 
           {/* Cohort */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cohort" className="text-sm font-medium text-foreground">
               Khoá học
             </Label>
-            <Input
-              id="cohort"
-              type="text"
-              placeholder="vd: K67"
-              value={cohort}
-              onChange={(e) => setCohort(e.target.value)}
-              className={errors.cohort ? "border-destructive focus-visible:ring-destructive" : ""}
-            />
+            <Select value={cohort} onValueChange={handleCohortChange}>
+              <SelectTrigger
+                id="cohort"
+                className={errors.cohort ? "border-destructive focus:ring-destructive" : ""}
+              >
+                <SelectValue placeholder="Chọn khoá học" />
+              </SelectTrigger>
+              <SelectContent>
+                {COHORT_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {errors.cohort && <p className="text-xs text-destructive">{errors.cohort}</p>}
           </div>
 

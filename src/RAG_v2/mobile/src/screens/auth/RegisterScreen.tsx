@@ -13,31 +13,24 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../navigation/AuthStack';
-import { registerUser, loginUser } from '@rag/shared';
+import {
+  registerUser,
+  loginUser,
+  COHORT_OPTIONS,
+  MAJOR_OPTIONS,
+  type MajorOption,
+} from '@rag/shared';
 import { apiClient } from '../../services/api';
 import { setToken, setUserProfile } from '../../services/secureStorage';
 import { useAuthStore } from '../../stores/authStore';
 import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
-
-// Options for dropdown-style pickers (rendered as chip selectors for mobile UX)
-const COHORT_OPTIONS = ['K64', 'K65', 'K66', 'K67', 'K68', 'K69', 'K70'];
-const MAJOR_OPTIONS = [
-  { label: 'CNTT', code: 'IT1' },
-  { label: 'CNTT Việt Nhật', code: 'IT-EP' },
-  { label: 'CNTT Global ICT', code: 'IT2' },
-  { label: 'Khoa học máy tính', code: 'IT-E7' },
-  { label: 'Kỹ thuật máy tính', code: 'CE' },
-  { label: 'ĐTVT', code: 'ET1' },
-  { label: 'Tự động hóa', code: 'EE' },
-  { label: 'Cơ điện tử', code: 'ME' },
-  { label: 'Khác', code: '' },
-];
 
 interface FormData {
   username: string;
@@ -76,8 +69,10 @@ const RegisterScreen = ({ navigation }: Props) => {
     major_code: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [majorPickerOpen, setMajorPickerOpen] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  const selectedMajor = MAJOR_OPTIONS.find((option) => option.code === form.major_code);
 
   const updateField = (key: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -87,8 +82,9 @@ const RegisterScreen = ({ navigation }: Props) => {
     }
   };
 
-  const selectMajor = (label: string, code: string) => {
-    setForm((prev) => ({ ...prev, major: label, major_code: code }));
+  const selectMajor = (option: MajorOption) => {
+    setForm((prev) => ({ ...prev, major: option.name, major_code: option.code }));
+    setMajorPickerOpen(false);
     if (errors.major) setErrors((prev) => ({ ...prev, major: undefined }));
   };
 
@@ -107,7 +103,7 @@ const RegisterScreen = ({ navigation }: Props) => {
       next.student_id = 'MSSV là bắt buộc';
     if (!form.cohort)
       next.cohort = 'Vui lòng chọn khóa';
-    if (!form.major)
+    if (!selectedMajor || form.major !== selectedMajor.name)
       next.major = 'Vui lòng chọn ngành';
 
     setErrors(next);
@@ -116,6 +112,8 @@ const RegisterScreen = ({ navigation }: Props) => {
 
   const handleSubmit = async () => {
     if (!validate()) return;
+    const majorOption = selectedMajor;
+    if (!majorOption) return;
     setLoading(true);
     setErrors({});
 
@@ -127,8 +125,8 @@ const RegisterScreen = ({ navigation }: Props) => {
         full_name: form.full_name.trim(),
         student_id: form.student_id.trim(),
         cohort: form.cohort,
-        major: form.major,
-        major_code: form.major_code,
+        major: majorOption.name,
+        major_code: majorOption.code,
       });
 
       // Auto-login after registration
@@ -320,28 +318,69 @@ const RegisterScreen = ({ navigation }: Props) => {
           {/* Major Picker */}
           <View style={styles.field}>
             <Text style={styles.label}>Ngành *</Text>
-            <View style={styles.chipGroup}>
-              {MAJOR_OPTIONS.map((opt) => (
-                <Pressable
-                  key={opt.label}
+            <Pressable
+              style={[styles.selectorButton, errors.major && styles.inputError]}
+              onPress={() => setMajorPickerOpen(true)}
+            >
+              <View style={styles.selectorTextGroup}>
+                <Text
                   style={[
-                    styles.chip,
-                    styles.chipLarge,
-                    form.major === opt.label && styles.chipActive,
+                    styles.selectorText,
+                    !selectedMajor && styles.selectorPlaceholder,
                   ]}
-                  onPress={() => selectMajor(opt.label, opt.code)}
                 >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      form.major === opt.label && styles.chipTextActive,
-                    ]}
-                  >
-                    {opt.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
+                  {selectedMajor ? selectedMajor.name : 'Chọn ngành học'}
+                </Text>
+                {selectedMajor && (
+                  <Text style={styles.selectorMeta}>Mã ngành: {selectedMajor.code}</Text>
+                )}
+              </View>
+              <Ionicons name="chevron-down" size={18} color={colors.mutedForeground} />
+            </Pressable>
+            <Modal
+              visible={majorPickerOpen}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setMajorPickerOpen(false)}
+            >
+              <View style={styles.modalBackdrop}>
+                <Pressable
+                  style={StyleSheet.absoluteFill}
+                  onPress={() => setMajorPickerOpen(false)}
+                />
+                <View style={styles.modalCard}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>Chọn ngành học</Text>
+                    <Pressable
+                      style={styles.modalCloseButton}
+                      onPress={() => setMajorPickerOpen(false)}
+                    >
+                      <Ionicons name="close" size={22} color={colors.mutedForeground} />
+                    </Pressable>
+                  </View>
+                  <ScrollView showsVerticalScrollIndicator={false}>
+                    {MAJOR_OPTIONS.map((opt) => {
+                      const active = selectedMajor?.code === opt.code;
+                      return (
+                        <Pressable
+                          key={opt.code}
+                          style={[styles.optionRow, active && styles.optionRowActive]}
+                          onPress={() => selectMajor(opt)}
+                        >
+                          <View style={styles.optionTextGroup}>
+                            <Text style={styles.optionCode}>{opt.code}</Text>
+                            <Text style={styles.optionName}>{opt.name}</Text>
+                          </View>
+                          {active && (
+                            <Ionicons name="checkmark" size={20} color={colors.primary} />
+                          )}
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              </View>
+            </Modal>
             {errors.major && (
               <Text style={styles.fieldError}>{errors.major}</Text>
             )}
@@ -488,10 +527,6 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.secondary,
   },
-  chipLarge: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-  },
   chipActive: {
     borderColor: colors.primary,
     backgroundColor: colors.primarySoft,
@@ -503,6 +538,89 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   },
   chipTextActive: {
     color: colors.primary,
+  },
+  selectorButton: {
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    backgroundColor: colors.input,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  selectorTextGroup: {
+    flex: 1,
+    gap: 3,
+  },
+  selectorText: {
+    color: colors.foreground,
+    fontSize: 15,
+    lineHeight: 20,
+  },
+  selectorPlaceholder: {
+    color: colors.mutedForeground,
+  },
+  selectorMeta: {
+    color: colors.mutedForeground,
+    fontSize: 12,
+  },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+    backgroundColor: 'rgba(0, 0, 0, 0.36)',
+  },
+  modalCard: {
+    maxHeight: '76%',
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 14,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  modalTitle: {
+    color: colors.foreground,
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  modalCloseButton: {
+    padding: 6,
+  },
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 11,
+  },
+  optionRowActive: {
+    backgroundColor: colors.primarySoft,
+  },
+  optionTextGroup: {
+    flex: 1,
+    gap: 2,
+  },
+  optionCode: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  optionName: {
+    color: colors.foreground,
+    fontSize: 14,
+    lineHeight: 19,
   },
   infoBanner: {
     flexDirection: 'row',
