@@ -54,6 +54,17 @@ def _to_string_list(raw_value: Any) -> list[str] | None:
     return values or None
 
 
+def _optional_dict(raw_value: Any) -> dict[str, Any] | None:
+    return raw_value if isinstance(raw_value, dict) else None
+
+
+def _optional_dict_list(raw_value: Any) -> list[dict[str, Any]] | None:
+    if not isinstance(raw_value, list):
+        return None
+    values = [item for item in raw_value if isinstance(item, dict)]
+    return values or None
+
+
 class ChatResponseMapper:
     """Static helpers that convert raw pipeline dicts → Pydantic response models."""
 
@@ -141,6 +152,15 @@ class ChatResponseMapper:
             ),
             collection_results=ChatResponseMapper.to_collection_result_models(
                 normalized.get("collection_results")
+            ),
+            context_trace=_optional_dict(normalized.get("context_trace")),
+            rerank_trace=_optional_dict(normalized.get("rerank_trace")),
+            answer_quality_gate=_optional_dict(normalized.get("answer_quality_gate")),
+            fusion_weights=_optional_dict(normalized.get("fusion_weights")),
+            answer_status=(
+                str(normalized.get("answer_status"))
+                if normalized.get("answer_status") is not None
+                else None
             ),
             mode=mode,
             route=route,
@@ -258,6 +278,22 @@ class ChatResponseMapper:
                 if raw_trace.get("route") is not None
                 else None
             ),
+            execution_path=(
+                str(raw_trace.get("execution_path"))
+                if raw_trace.get("execution_path") is not None
+                else None
+            ),
+            complexity_subtype=(
+                str(raw_trace.get("complexity_subtype"))
+                if raw_trace.get("complexity_subtype") is not None
+                else None
+            ),
+            sub_questions=_to_string_list(raw_trace.get("sub_questions")),
+            retrieval_plan=_optional_dict(raw_trace.get("retrieval_plan")),
+            decompose_trace=_optional_dict(raw_trace.get("decompose_trace")),
+            planner_trace=_optional_dict(raw_trace.get("planner_trace")),
+            executor_results=_optional_dict_list(raw_trace.get("executor_results")),
+            synthesis_trace=_optional_dict(raw_trace.get("synthesis_trace")),
             iterations=_optional_int(raw_trace.get("iterations")),
             tool_calls=tool_calls,
             tool_names_sequence=_to_string_list(raw_trace.get("tool_names_sequence")),

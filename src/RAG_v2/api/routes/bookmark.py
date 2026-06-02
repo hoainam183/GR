@@ -45,15 +45,37 @@ def _serialize_bookmark(doc: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _user_owner_aliases(user: UserDocument) -> list[str]:
+    aliases = [
+        str(user.id),
+        getattr(user, "email", None),
+        getattr(user, "username", None),
+        getattr(user, "student_id", None),
+    ]
+    return [str(alias) for alias in aliases if alias]
+
+
+def _user_id_query(user: UserDocument) -> dict[str, Any]:
+    return {"$in": _user_owner_aliases(user)}
+
+
+def _normalize_folder_name(value: str | None, default: str = "Chung") -> str:
+    cleaned = (value or "").strip()
+    return cleaned or default
+
+
 async def _get_owned_turn(
     db: AsyncIOMotorDatabase,
     *,
-    user_id: str,
+    current_user: UserDocument,
     session_id: str,
     turn_id: int,
 ) -> dict[str, Any]:
     session = await db[SESSIONS_COLLECTION].find_one({"session_id": session_id})
-    if session is None or session.get("user_id") != user_id:
+    if (
+        session is None
+        or str(session.get("user_id") or "") not in _user_owner_aliases(current_user)
+    ):
         raise HTTPException(status_code=404, detail="Session not found")
 
     turn = await db[TURNS_COLLECTION].find_one(
@@ -74,7 +96,7 @@ async def create_bookmark(
     user_id = str(current_user.id)
     turn = await _get_owned_turn(
         db,
-        user_id=user_id,
+        current_user=current_user,
         session_id=body.session_id,
         turn_id=body.turn_id,
     )
@@ -83,7 +105,7 @@ async def create_bookmark(
     answer = str(turn.get("answer") or "")
     update = {
         "$set": {
-            "folder": body.folder.strip() or "Chung",
+            "folder": _normalize_folder_name(body.folder),
             "note": body.note,
             "updated_at": now,
         },
@@ -123,9 +145,9 @@ async def list_bookmarks(
     limit: int = Query(default=20, ge=1, le=100),
 ) -> dict[str, Any]:
     """Return paginated bookmarks for the current user."""
-    query: dict[str, Any] = {"user_id": str(current_user.id)}
+    query: dict[str, Any] = {"user_id": _user_id_query(current_user)}
     if folder:
-        query["folder"] = folder
+        query["folder"] = _normalize_folder_name(folder)
     if session_id:
         query["session_id"] = session_id
     if turn_id is not None:
@@ -135,6 +157,7 @@ async def list_bookmarks(
         query["$or"] = [
             {"question": {"$regex": pattern}},
             {"answer_preview": {"$regex": pattern}},
+            {"answer_snapshot": {"$regex": pattern}},
         ]
 
     skip = (page - 1) * limit
@@ -160,7 +183,7 @@ async def delete_bookmark(
     if not ObjectId.is_valid(bookmark_id):
         raise HTTPException(status_code=404, detail="Bookmark not found")
     result = await db[BOOKMARKS_COLLECTION].delete_one(
-        {"_id": ObjectId(bookmark_id), "user_id": str(current_user.id)}
+        {"_id": ObjectId(bookmark_id), "user_id": _user_id_query(current_user)}
     )
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Bookmark not found")
@@ -178,15 +201,14 @@ async def update_bookmark(
     if not ObjectId.is_valid(bookmark_id):
         raise HTTPException(status_code=404, detail="Bookmark not found")
 
-    user_id = str(current_user.id)
     update_fields: dict[str, Any] = {"updated_at": datetime.now(timezone.utc)}
     if body.folder is not None:
-        update_fields["folder"] = body.folder.strip() or "Chung"
+        update_fields["folder"] = _normalize_folder_name(body.folder)
     if body.note is not None:
         update_fields["note"] = body.note
 
     result = await db[BOOKMARKS_COLLECTION].update_one(
-        {"_id": ObjectId(bookmark_id), "user_id": user_id},
+        {"_id": ObjectId(bookmark_id), "user_id": _user_id_query(current_user)},
         {"$set": update_fields},
     )
     if result.matched_count == 0:
@@ -204,7 +226,7 @@ async def list_bookmark_folders(
     """Return bookmark folders and counts for the current user."""
     user_id = str(current_user.id)
     pipeline = [
-        {"$match": {"user_id": user_id}},
+        {"$match": {"user_id": _user_id_query(current_user)}},
         {"$group": {"_id": "$folder", "count": {"$sum": 1}}},
         {"$sort": {"_id": 1}},
     ]
@@ -228,7 +250,7 @@ async def create_bookmark_folder(
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
 ) -> dict[str, Any]:
     """Create an empty bookmark folder for the current user."""
-    name = body.name.strip()
+    name = _normalize_folder_name(body.name, default="")
     if not name:
         raise HTTPException(status_code=422, detail="Folder name is required")
     await db[BOOKMARK_FOLDERS_COLLECTION].update_one(
@@ -253,28 +275,31 @@ async def rename_bookmark_folder(
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
 ) -> dict[str, Any]:
     """Rename a bookmark folder for the current user."""
-    if name == "Chung":
+    current_name = _normalize_folder_name(name)
+    if current_name == "Chung":
         raise HTTPException(
             status_code=422, detail="Cannot rename the default folder"
         )
 
     user_id = str(current_user.id)
-    new_name = body.new_name.strip()
+    new_name = _normalize_folder_name(body.new_name, default="")
+    if not new_name:
+        raise HTTPException(status_code=422, detail="Folder name is required")
 
     # Update all bookmarks in the old folder
     await db[BOOKMARKS_COLLECTION].update_many(
-        {"user_id": user_id, "folder": name},
+        {"user_id": _user_id_query(current_user), "folder": current_name},
         {"$set": {"folder": new_name, "updated_at": datetime.now(timezone.utc)}},
     )
 
     # Update the folder entry
     await db[BOOKMARK_FOLDERS_COLLECTION].update_one(
-        {"user_id": user_id, "name": name},
+        {"user_id": user_id, "name": current_name},
         {"$set": {"name": new_name}},
     )
 
     count = await db[BOOKMARKS_COLLECTION].count_documents(
-        {"user_id": user_id, "folder": new_name}
+        {"user_id": _user_id_query(current_user), "folder": new_name}
     )
     return {"folder": {"name": new_name, "count": count}}
 
@@ -287,22 +312,24 @@ async def delete_bookmark_folder(
     move_to: str = Query(default="Chung"),
 ) -> dict[str, Any]:
     """Delete a bookmark folder, moving its bookmarks to another folder."""
-    if name == "Chung":
+    current_name = _normalize_folder_name(name)
+    if current_name == "Chung":
         raise HTTPException(
             status_code=422, detail="Cannot delete the default folder"
         )
 
     user_id = str(current_user.id)
+    target_folder = _normalize_folder_name(move_to)
 
     # Move bookmarks to the target folder
     result = await db[BOOKMARKS_COLLECTION].update_many(
-        {"user_id": user_id, "folder": name},
-        {"$set": {"folder": move_to, "updated_at": datetime.now(timezone.utc)}},
+        {"user_id": _user_id_query(current_user), "folder": current_name},
+        {"$set": {"folder": target_folder, "updated_at": datetime.now(timezone.utc)}},
     )
 
     # Delete the folder entry
     await db[BOOKMARK_FOLDERS_COLLECTION].delete_one(
-        {"user_id": user_id, "name": name}
+        {"user_id": user_id, "name": current_name}
     )
 
     return {"status": "deleted", "moved_count": result.modified_count}

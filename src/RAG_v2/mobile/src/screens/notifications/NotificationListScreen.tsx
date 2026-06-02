@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   FlatList,
   Pressable,
   RefreshControl,
@@ -59,6 +60,17 @@ const NotificationListScreen = () => {
     queryClient.invalidateQueries({ queryKey: ['notifications'] });
     queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
   };
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
+      }
+    });
+    return () => subscription.remove();
+  }, [queryClient]);
+
   const markRead = useMutation({ mutationFn: (id: string) => markNotificationRead(apiClient, id), onSuccess: invalidateAll });
   const markAllRead = useMutation({ mutationFn: () => markAllNotificationsRead(apiClient), onSuccess: invalidateAll });
   const deleteItem = useMutation({ mutationFn: (id: string) => deleteNotification(apiClient, id), onSuccess: invalidateAll });

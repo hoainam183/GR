@@ -9,6 +9,7 @@ from .base import BaseLLM
 
 # Map provider name → dotted module path inside llm/
 _PROVIDER_MODULES: dict[str, str] = {
+    "deepseek": "llm.deepseek",
     "gemini": "llm.gemini",
     "lm_studio": "llm.lm_studio",
 }
@@ -50,7 +51,12 @@ def create_llm(settings: "Settings") -> BaseLLM:  # type: ignore[name-defined]
         importlib.import_module(module_path)  # triggers @register_llm
     cls = _REGISTRY[provider]
     kwargs = {
-        "api_key": settings.llm_api_key or settings.google_api_key,
+        "api_key": settings.llm_api_key
+        or (
+            settings.deepseek_api_key
+            if provider == "deepseek"
+            else settings.google_api_key
+        ),
         "model": settings.chat_model,
         "temperature": settings.chat_temperature,
         "max_tokens": settings.chat_max_tokens,

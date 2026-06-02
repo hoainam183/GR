@@ -170,6 +170,40 @@ class TestToChatResponse:
         )
         assert resp.question == "My fallback"
 
+    def test_preserves_extended_debug_trace_fields(self) -> None:
+        from api.response_mapper import ChatResponseMapper
+
+        resp = ChatResponseMapper.to_chat_response(
+            {
+                "answer": "ok",
+                "context_trace": {"context_docs_used": 2},
+                "rerank_trace": {"rerank_candidate_count": 4},
+                "answer_quality_gate": {"answer_status": "answered"},
+                "fusion_weights": {"vector": 0.7, "keyword": 0.3},
+                "answer_status": "answered",
+                "agent_trace": {
+                    "query": "q",
+                    "sub_questions": ["q1", "q2"],
+                    "planner_trace": {"raw_response_preview": "{}"},
+                    "executor_results": [{"query": "q1", "empty_result": False}],
+                    "synthesis_trace": {"context_chars": 1200},
+                },
+            },
+            fallback_question="q",
+            session_id="s",
+        )
+
+        assert resp.context_trace == {"context_docs_used": 2}
+        assert resp.rerank_trace == {"rerank_candidate_count": 4}
+        assert resp.answer_quality_gate == {"answer_status": "answered"}
+        assert resp.fusion_weights == {"vector": 0.7, "keyword": 0.3}
+        assert resp.answer_status == "answered"
+        assert resp.agent_trace is not None
+        assert resp.agent_trace.sub_questions == ["q1", "q2"]
+        assert resp.agent_trace.planner_trace == {"raw_response_preview": "{}"}
+        assert resp.agent_trace.executor_results == [{"query": "q1", "empty_result": False}]
+        assert resp.agent_trace.synthesis_trace == {"context_chars": 1200}
+
 
 class TestIsValidApiKey:
     def test_empty_key_invalid(self) -> None:

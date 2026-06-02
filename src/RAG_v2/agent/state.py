@@ -60,6 +60,14 @@ class AgentState:
     final_answer: str | None = None
     route: str = "complex"  # simple | complex | chitchat
     error: str | None = None
+    execution_path: str | None = None
+    complexity_subtype: str | None = None
+    sub_questions: list[str] | None = None
+    retrieval_plan: dict[str, Any] | None = None
+    decompose_trace: dict[str, Any] | None = None
+    planner_trace: dict[str, Any] | None = None
+    executor_results: list[dict[str, Any]] = field(default_factory=list)
+    synthesis_trace: dict[str, Any] | None = None
 
     # Private: full log preserved for MongoDB — never truncated
     _log_tool_results: list[ToolResult] = field(
@@ -135,7 +143,7 @@ class AgentState:
     def to_log_dict(self) -> dict[str, Any]:
         """Serialise to MongoDB-ready dict.  Uses the complete untruncated log."""
         all_results = self._log_tool_results or self.tool_results
-        return {
+        payload: dict[str, Any] = {
             "query": self.query,
             "session_id": self.session_id,
             "route": self.route,
@@ -145,6 +153,23 @@ class AgentState:
             "final_answer_length": len(self.final_answer) if self.final_answer else 0,
             "error": self.error,
         }
+        if self.execution_path is not None:
+            payload["execution_path"] = self.execution_path
+        if self.complexity_subtype is not None:
+            payload["complexity_subtype"] = self.complexity_subtype
+        if self.sub_questions is not None:
+            payload["sub_questions"] = self.sub_questions
+        if self.retrieval_plan is not None:
+            payload["retrieval_plan"] = self.retrieval_plan
+        if self.decompose_trace is not None:
+            payload["decompose_trace"] = self.decompose_trace
+        if self.planner_trace is not None:
+            payload["planner_trace"] = self.planner_trace
+        if self.executor_results:
+            payload["executor_results"] = self.executor_results
+        if self.synthesis_trace is not None:
+            payload["synthesis_trace"] = self.synthesis_trace
+        return payload
 
     @staticmethod
     def _build_call_signature(tool_name: str, args: dict[str, Any]) -> str:

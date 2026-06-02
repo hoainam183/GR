@@ -106,6 +106,8 @@ export interface ConfigToggleResponse {
 
 // ─── EP12: LLM config ─────────────────────────────────────
 export interface LLMConfig {
+  llm_provider: string;
+  deepseek_api_key: string;
   google_api_key: string;
   tavily_api_key: string;
   chat_model: string;
@@ -120,6 +122,8 @@ export interface LLMConfig {
 }
 
 export interface LLMConfigUpdateBody {
+  llm_provider?: string;
+  deepseek_api_key?: string;
   google_api_key?: string;
   tavily_api_key?: string;
   chat_model?: string;
@@ -134,7 +138,7 @@ export interface LLMConfigUpdateResponse {
   updated: Record<string, unknown>;
 }
 
-export type ApiKeyProvider = 'google' | 'tavily';
+export type ApiKeyProvider = 'deepseek' | 'google' | 'tavily';
 export type ApiKeyStatus = 'active' | 'inactive';
 
 export interface ApiKeyRecord {

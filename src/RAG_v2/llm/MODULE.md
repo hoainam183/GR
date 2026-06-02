@@ -6,7 +6,7 @@ Source-verified: 2026-05-20 from `llm/*.py`, `config/settings.py`, and `pipeline
 
 `llm` wraps chat model providers, prompt construction, streaming generation, and answer self-evaluation. It exposes a small `BaseLLM` contract so the pipeline can call generation without knowing provider-specific details.
 
-The production default is Gemini through an OpenAI-compatible endpoint. LM Studio is supported as another OpenAI-compatible provider.
+The production default is DeepSeek `deepseek-v4-flash` through an OpenAI-compatible endpoint. Gemini and LM Studio remain supported providers.
 
 ## File Map
 
@@ -14,6 +14,7 @@ The production default is Gemini through an OpenAI-compatible endpoint. LM Studi
 llm/
   __init__.py     Provider registry, lazy provider import, create_llm().
   base.py         BaseLLM abstract interface.
+  deepseek.py     DeepSeekLLM via DeepSeek OpenAI-compatible API.
   gemini.py       GeminiLLM via Google Generative Language OpenAI-compatible API.
   lm_studio.py    LMStudioLLM via local OpenAI-compatible endpoint.
   chat_model.py   Backward-compatible ChatModel export shim.
@@ -44,6 +45,12 @@ Known provider registry keys in code:
 
 ## Provider Behavior
 
+`DeepSeekLLM`:
+
+- Uses `https://api.deepseek.com`.
+- Reads `DEEPSEEK_API_KEY` or `LLM_API_KEY` fallback if no key is passed.
+- Supports full-response and streaming generation.
+
 `GeminiLLM`:
 
 - Uses `OpenAI(api_key=..., base_url="https://generativelanguage.googleapis.com/v1beta/openai/")`.
@@ -56,7 +63,7 @@ Known provider registry keys in code:
 - Has one attempt by default.
 - Supports non-streaming and streaming.
 
-Both providers call `build_rag_messages()`, `build_chitchat_messages()`, or `build_self_eval_messages()` depending on `mode`.
+All providers call `build_rag_messages()`, `build_chitchat_messages()`, or `build_self_eval_messages()` depending on `mode`.
 
 ## Prompt Contracts
 

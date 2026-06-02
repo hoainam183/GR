@@ -42,6 +42,28 @@ def _content_to_text(content: Any) -> str:
     return str(content or "")
 
 
+def _preview_text(value: Any, limit: int = 2000) -> str:
+    text = _content_to_text(value)
+    if len(text) <= limit:
+        return text
+    return text[:limit] + "\n...[truncated]"
+
+
+def _hash_text(value: Any) -> str:
+    return hashlib.sha256(_content_to_text(value).encode("utf-8")).hexdigest()
+
+
+def _trace_plan_step(step: dict[str, Any], top_k: int | None) -> dict[str, Any]:
+    traced = {
+        key: step.get(key)
+        for key in ("label", "query", "collection", "major_hint", "cohort_hint")
+        if step.get(key) is not None
+    }
+    if top_k is not None:
+        traced["top_k"] = top_k
+    return traced
+
+
 def _parse_json_object(content: Any) -> dict[str, Any]:
     """Parse strict JSON object content, accepting optional markdown fences."""
     raw = _content_to_text(content).strip()
@@ -182,6 +204,11 @@ class ReActAgent:
             "execution_path": execution_path,
             "sub_questions": None,
             "retrieval_plan": None,
+            "complexity_subtype": complexity_subtype,
+            "decompose_trace": None,
+            "planner_trace": None,
+            "executor_results": None,
+            "synthesis_trace": None,
             "user_context": user_context,
             "empty_result_count": 0,
             "top_k": top_k,
@@ -259,17 +286,29 @@ class ReActAgent:
                 for item in raw_sub_questions[:4]
                 if str(item).strip()
             ] or [query]
+            elapsed_ms = (time.perf_counter() - t0) * 1000
             logger.info(
                 "[Decompose] %d sub-questions in %.0fms: %s",
                 len(sub_questions),
-                (time.perf_counter() - t0) * 1000,
+                elapsed_ms,
                 parsed.get("reasoning", ""),
             )
+            trace = {
+                "sub_questions": sub_questions,
+                "reasoning": _preview_text(parsed.get("reasoning", ""), 1000),
+                "raw_response_preview": _preview_text(response.content, 1500),
+                "latency_ms": round(elapsed_ms, 2),
+            }
         except Exception as exc:
             logger.warning("[Decompose] Failed (%s), using original query", exc)
             sub_questions = [query]
+            trace = {
+                "sub_questions": sub_questions,
+                "error": str(exc),
+                "latency_ms": round((time.perf_counter() - t0) * 1000, 2),
+            }
 
-        return {"sub_questions": sub_questions}
+        return {"sub_questions": sub_questions, "decompose_trace": trace}
 
     def _planner_node(self, state: AgentGraphState) -> dict[str, Any]:
         """Generate and validate a retrieval plan."""
@@ -292,43 +331,92 @@ class ReActAgent:
             plan = _parse_json_object(response.content)
         except Exception as exc:
             logger.error("[Planner] Invalid JSON (%s)", exc)
-            return {"retrieval_plan": None, "error": f"planner_invalid_json: {exc}"}
+            return {
+                "retrieval_plan": None,
+                "planner_trace": {
+                    "prompt_hash": _hash_text(prompt),
+                    "prompt_preview": _preview_text(prompt, 1500),
+                    "error": str(exc),
+                    "latency_ms": round((time.perf_counter() - t0) * 1000, 2),
+                },
+                "error": f"planner_invalid_json: {exc}",
+            }
 
         steps = plan.get("steps", [])
         if not isinstance(steps, list):
             steps = []
         plan["steps"] = steps[:4]
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        planner_trace = {
+            "prompt_hash": _hash_text(prompt),
+            "prompt_preview": _preview_text(prompt, 1500),
+            "raw_response_preview": _preview_text(response.content, 2000),
+            "latency_ms": round(elapsed_ms, 2),
+            "reasoning": _preview_text(plan.get("reasoning", ""), 1000),
+            "needs_web": bool(plan.get("needs_web")),
+            "steps": [
+                _trace_plan_step(step, state.get("top_k"))
+                for step in plan["steps"]
+                if isinstance(step, dict)
+            ],
+        }
 
         if not plan["steps"]:
             logger.warning("[Planner] Empty plan")
-            return {"retrieval_plan": plan, "error": "planner_empty_steps"}
+            return {
+                "retrieval_plan": plan,
+                "planner_trace": planner_trace,
+                "error": "planner_empty_steps",
+            }
 
         if not self._validate_plan(plan):
-            return {"retrieval_plan": plan, "error": "planner_invalid_plan"}
+            return {
+                "retrieval_plan": plan,
+                "planner_trace": planner_trace,
+                "error": "planner_invalid_plan",
+            }
 
         logger.info(
             "[Planner] %d steps in %.0fms: %s",
             len(plan["steps"]),
-            (time.perf_counter() - t0) * 1000,
+            elapsed_ms,
             plan.get("reasoning", ""),
         )
-        return {"retrieval_plan": plan}
+        return {"retrieval_plan": plan, "planner_trace": planner_trace}
 
     def _executor_node(self, state: AgentGraphState) -> dict[str, Any]:
         """Execute a validated retrieval plan in parallel."""
         plan = state.get("retrieval_plan") or {}
         steps = self._valid_plan_steps(plan.get("steps", []))
         if not steps:
-            return {"final_answer": _PLANNER_ERROR_ANSWER, "error": "planner_empty_steps"}
+            return {
+                "final_answer": _PLANNER_ERROR_ANSWER,
+                "error": "planner_empty_steps",
+                "executor_results": [],
+            }
 
         t0 = time.perf_counter()
         labeled_results = execute_retrieval_plan(steps, top_k=state.get("top_k"))
+        elapsed_ms = (time.perf_counter() - t0) * 1000
         logger.info(
             "[Executor] %d/%d steps completed in %.0fms",
             len(labeled_results),
             len(steps),
-            (time.perf_counter() - t0) * 1000,
+            elapsed_ms,
         )
+        executor_results = [
+            {
+                **_trace_plan_step(
+                    steps[index] if index < len(steps) else {},
+                    state.get("top_k"),
+                ),
+                "label": label,
+                "result_chars": len(str(result or "")),
+                "empty_result": _is_empty_result_text(result),
+                "latency_ms": round(elapsed_ms / max(len(labeled_results), 1), 2),
+            }
+            for index, (label, result) in enumerate(labeled_results)
+        ]
 
         new_history = [f"planned_rag_search:{label}" for label, _ in labeled_results]
         non_empty_results = [
@@ -349,6 +437,15 @@ class ReActAgent:
         if plan.get("needs_web"):
             web_result = web_search_for_executor(query=state["query"])
             new_history.append("planned_web_search")
+            executor_results.append(
+                {
+                    "label": "web_search",
+                    "query": state["query"],
+                    "collection": "web",
+                    "result_chars": len(str(web_result or "")),
+                    "empty_result": _is_empty_result_text(web_result),
+                }
+            )
             if not _is_empty_result_text(web_result):
                 tool_messages.append(
                     ToolMessage(
@@ -362,9 +459,14 @@ class ReActAgent:
             return {
                 "final_answer": _NO_INFO_ANSWER,
                 "tool_call_history": new_history,
+                "executor_results": executor_results,
             }
 
-        return {"messages": tool_messages, "tool_call_history": new_history}
+        return {
+            "messages": tool_messages,
+            "tool_call_history": new_history,
+            "executor_results": executor_results,
+        }
 
     def _valid_plan_steps(self, steps: Any) -> list[dict[str, Any]]:
         """Return planner steps that are safe to execute."""
@@ -424,16 +526,13 @@ class ReActAgent:
             return {"final_answer": _PLANNER_ERROR_ANSWER if state.get("error") else _NO_INFO_ANSWER}
 
         context = "\n\n---\n\n".join(tool_contents)
+        prompt = f"Cau hoi: {state['query']}\n\nThong tin tim duoc:\n{context}"
+        t0 = time.perf_counter()
         try:
             response = self._synthesis_llm.invoke(
                 [
                     SystemMessage(content=SYNTHESIS_PROMPT),
-                    HumanMessage(
-                        content=(
-                            f"Cau hoi: {state['query']}\n\n"
-                            f"Thong tin tim duoc:\n{context}"
-                        )
-                    ),
+                    HumanMessage(content=prompt),
                 ]
             )
             answer = _content_to_text(response.content).strip() or _NO_INFO_ANSWER
@@ -441,7 +540,16 @@ class ReActAgent:
             logger.error("[Agent] Synthesis LLM failed: %s", exc)
             answer = f"Thong tin tim duoc:\n{tool_contents[0][:500]}"
 
-        return {"final_answer": answer}
+        return {
+            "final_answer": answer,
+            "synthesis_trace": {
+                "context_chars": len(context),
+                "prompt_hash": _hash_text(prompt),
+                "prompt_preview": _preview_text(prompt, 1500),
+                "latency_ms": round((time.perf_counter() - t0) * 1000, 2),
+                "answer_chars": len(answer),
+            },
+        }
 
     def _build_graph(self) -> Any:
         graph = StateGraph(AgentGraphState)  # type: ignore
@@ -477,11 +585,23 @@ class ReActAgent:
         state.tool_call_history = list(graph_result.get("tool_call_history", []))
         state.final_answer = graph_result.get("final_answer")
         state.error = graph_result.get("error")
+        state.execution_path = graph_result.get("execution_path")
+        state.complexity_subtype = graph_result.get("complexity_subtype")
+        state.sub_questions = graph_result.get("sub_questions")
+        state.decompose_trace = graph_result.get("decompose_trace")
+        state.planner_trace = graph_result.get("planner_trace")
+        state.synthesis_trace = graph_result.get("synthesis_trace")
 
         plan_steps = []
         plan = graph_result.get("retrieval_plan")
         if isinstance(plan, dict) and isinstance(plan.get("steps"), list):
+            state.retrieval_plan = plan
             plan_steps = [step for step in plan["steps"] if isinstance(step, dict)]
+        executor_results = graph_result.get("executor_results")
+        if isinstance(executor_results, list):
+            state.executor_results = [
+                result for result in executor_results if isinstance(result, dict)
+            ]
 
         iter_counter = 0
         for msg in graph_result.get("messages", []):

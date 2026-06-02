@@ -8,12 +8,14 @@ import pytest
 from fastapi import HTTPException
 
 from api.dependencies import sync_redis_session_from_mongo
-from api.routes.bookmark import create_bookmark_folder, rename_bookmark_folder
+from api.routes.bookmark import create_bookmark, create_bookmark_folder, rename_bookmark_folder
 from api.routes.chat import chat_v3
 from api.routes.notification import subscribe_notifications, unsubscribe_notifications
+from api.services.notification_delivery import broadcast_user_notification
 from api.routes.session import SessionUpdateRequest, delete_session, list_my_sessions, update_session
 from schemas.chat import ChatRequest, UserContext
 from schemas.mobile import (
+    BookmarkCreate,
     BookmarkFolderCreate,
     BookmarkFolderRename,
     NotificationSubscribe,
@@ -91,17 +93,92 @@ class _FakeRedisSession:
 
 
 class _FakeAsyncCollection:
-    def __init__(self) -> None:
+    def __init__(self, docs: list[dict] | None = None) -> None:
+        self.docs = docs or []
         self.update_one_calls = []
         self.delete_one_calls = []
+        self.insert_many_calls = []
+        self.delete_many_calls = []
 
     async def update_one(self, query, update, *, upsert=False):
         self.update_one_calls.append((query, update, upsert))
+        match = next((doc for doc in self.docs if _matches_query(doc, query)), None)
+        if match is not None:
+            match.update(update.get("$set", {}))
+        elif upsert:
+            inserted = {"_id": f"fake-{len(self.docs) + 1}", **query}
+            inserted.update(update.get("$setOnInsert", {}))
+            inserted.update(update.get("$set", {}))
+            self.docs.append(inserted)
         return SimpleNamespace()
+
+    async def update_many(self, query, update):
+        matched = 0
+        for doc in self.docs:
+            if _matches_query(doc, query):
+                doc.update(update.get("$set", {}))
+                matched += 1
+        return SimpleNamespace(modified_count=matched)
 
     async def delete_one(self, query):
         self.delete_one_calls.append(query)
         return SimpleNamespace(deleted_count=1)
+
+    async def delete_many(self, query):
+        self.delete_many_calls.append(query)
+        before = len(self.docs)
+        self.docs = [doc for doc in self.docs if not _matches_query(doc, query)]
+        return SimpleNamespace(deleted_count=before - len(self.docs))
+
+    async def find_one(self, query):
+        return next((doc for doc in self.docs if _matches_query(doc, query)), None)
+
+    def find(self, query=None, _projection=None):
+        query = query or {}
+        return _FakeAsyncCursor([doc for doc in self.docs if _matches_query(doc, query)])
+
+    async def insert_many(self, docs):
+        docs = list(docs)
+        self.insert_many_calls.append(docs)
+        inserted_ids = []
+        for doc in docs:
+            inserted = {"_id": f"fake-{len(self.docs) + 1}", **doc}
+            inserted_ids.append(inserted["_id"])
+            self.docs.append(inserted)
+        return SimpleNamespace(inserted_ids=inserted_ids)
+
+    async def count_documents(self, query):
+        return sum(1 for doc in self.docs if _matches_query(doc, query))
+
+    def aggregate(self, _pipeline):
+        return _FakeAsyncCursor([])
+
+
+class _FakeAsyncCursor:
+    def __init__(self, docs: list[dict]) -> None:
+        self._docs = docs
+        self._index = 0
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        if self._index >= len(self._docs):
+            raise StopAsyncIteration
+        item = self._docs[self._index]
+        self._index += 1
+        return item
+
+
+def _matches_query(doc: dict, query: dict) -> bool:
+    for key, expected in query.items():
+        actual = doc.get(key)
+        if isinstance(expected, dict) and "$in" in expected:
+            if actual not in expected["$in"]:
+                return False
+        elif actual != expected:
+            return False
+    return True
 
 
 class _FakeAsyncDb(dict):
@@ -273,6 +350,34 @@ async def test_bookmark_default_folder_cannot_be_renamed():
 
 
 @pytest.mark.anyio
+async def test_bookmark_create_accepts_legacy_session_owner_alias():
+    db = _FakeAsyncDb()
+    db["sessions"].docs.append({"session_id": "s-legacy", "user_id": "20210001"})
+    db["turns"].docs.append(
+        {
+            "session_id": "s-legacy",
+            "turn_id": 1,
+            "question": "Điều kiện tốt nghiệp?",
+            "answer": "Cần hoàn thành chương trình đào tạo.",
+            "sources": [{"metadata": {"source": "quy_dinh"}}],
+        }
+    )
+
+    response = await create_bookmark(
+        BookmarkCreate(session_id="s-legacy", turn_id=1, folder="  Quan trọng  "),
+        current_user=_user("auth-user"),
+        db=db,
+    )
+
+    assert response["bookmark"]["session_id"] == "s-legacy"
+    assert response["bookmark"]["folder"] == "Quan trọng"
+    assert response["bookmark"]["answer_snapshot"] == "Cần hoàn thành chương trình đào tạo."
+    query, _update, upsert = db["bookmarks"].update_one_calls[0]
+    assert query["user_id"] == "auth-user"
+    assert upsert is True
+
+
+@pytest.mark.anyio
 async def test_notification_broadcast_subscription_and_unsubscribe_contract():
     db = _FakeAsyncDb()
     token = "ExponentPushToken[test]"
@@ -297,3 +402,37 @@ async def test_notification_broadcast_subscription_and_unsubscribe_contract():
     assert db["notification_subscriptions"].delete_one_calls == [
         {"user_id": "user-push", "expo_push_token": token}
     ]
+
+
+@pytest.mark.anyio
+async def test_notification_broadcast_creates_db_notifications_and_sends_expo(monkeypatch):
+    db = _FakeAsyncDb()
+    db["users"].docs.append({"_id": "user-push"})
+    db["notification_subscriptions"].docs.append(
+        {"user_id": "user-push", "expo_push_token": "ExponentPushToken[test]"}
+    )
+    sent_batches = []
+
+    def fake_post(endpoint, messages, timeout_s):
+        sent_batches.append((endpoint, messages, timeout_s))
+        return {"data": [{"status": "ok"} for _ in messages]}
+
+    monkeypatch.setattr(
+        "api.services.notification_delivery._post_expo_push_batch",
+        fake_post,
+    )
+
+    response = await broadcast_user_notification(
+        db,
+        title="Crawler updated",
+        body="Có dữ liệu mới.",
+        notification_type="crawler_update",
+        push_enabled=True,
+    )
+
+    assert response["created_count"] == 1
+    assert response["push_sent_count"] == 1
+    assert response["push_error_count"] == 0
+    assert db["notifications"].docs[0]["user_id"] == "user-push"
+    assert db["notifications"].docs[0]["type"] == "crawler_update"
+    assert sent_batches[0][1][0]["to"] == "ExponentPushToken[test]"

@@ -92,6 +92,11 @@ export interface ChatResponse {
   llm_prompt?: string;
   applied_filters?: FilterInfo[];
   collection_results?: CollectionResult[];
+  context_trace?: Record<string, unknown>;
+  rerank_trace?: Record<string, unknown>;
+  answer_quality_gate?: Record<string, unknown>;
+  fusion_weights?: Record<string, unknown>;
+  answer_status?: string;
   mode?: string;
   route?: string;
   tools_used?: string[];
@@ -107,6 +112,7 @@ export interface AgentToolCall {
   args: Record<string, unknown>;
   result: string;
   iteration: number;
+  latency_ms?: number;
   timestamp?: string;
 }
 
@@ -114,6 +120,14 @@ export interface AgentTracePayload {
   query?: string;
   session_id?: string;
   route?: string;
+  execution_path?: string;
+  complexity_subtype?: string;
+  sub_questions?: string[];
+  retrieval_plan?: Record<string, unknown>;
+  decompose_trace?: Record<string, unknown>;
+  planner_trace?: Record<string, unknown>;
+  executor_results?: Array<Record<string, unknown>>;
+  synthesis_trace?: Record<string, unknown>;
   iterations?: number;
   tool_calls?: AgentToolCall[];
   tool_names_sequence?: string[];
@@ -160,6 +174,11 @@ export interface Turn {
   routing_probabilities?: Record<string, number>;
   applied_filters?: FilterInfo[];
   collection_results?: CollectionResult[];
+  context_trace?: Record<string, unknown>;
+  rerank_trace?: Record<string, unknown>;
+  answer_quality_gate?: Record<string, unknown>;
+  fusion_weights?: Record<string, unknown>;
+  answer_status?: string;
   mode?: string;
   route?: string;
   tools_used?: string[];

@@ -1091,6 +1091,10 @@ class RAGPipeline:
         self.last_tools_used: List[str] = []
         self.last_tool_calls: List[Dict[str, Any]] = []
         self.last_iterations: int = 0
+        self.last_context_trace: Optional[Dict[str, Any]] = None
+        self.last_rerank_trace: Optional[Dict[str, Any]] = None
+        self.last_answer_quality_gate: Optional[Dict[str, Any]] = None
+        self.last_fusion_weights: Optional[Dict[str, Any]] = None
 
         full_answer_chunks: List[str] = []
 
@@ -1182,6 +1186,7 @@ class RAGPipeline:
                 )
                 self.last_iterations = int(agent_result.get("iterations") or 0)
                 self.last_sources = agent_result.get("sources") or []
+                self.last_intent = str(agent_result.get("route") or "complex")
                 pipeline_timings["agent_total"] = _elapsed_ms(agent_t0)
             except Exception as exc:
                 logger.warning(
@@ -1259,6 +1264,10 @@ class RAGPipeline:
             self.last_collection_results = flow_metadata.get(
                 "collection_results"
             )
+            self.last_context_trace = flow_metadata.get("context_trace")
+            self.last_rerank_trace = flow_metadata.get("rerank_trace")
+            self.last_answer_quality_gate = flow_metadata.get("answer_quality_gate")
+            self.last_fusion_weights = flow_metadata.get("fusion_weights")
             self.last_tools_used = list(flow_metadata.get("tools_used") or [])
             self.last_tool_calls = list(flow_metadata.get("tool_calls") or [])
 
@@ -1283,13 +1292,28 @@ class RAGPipeline:
             result = {
                 "answer": "".join(full_answer_chunks),
                 "intent": self.last_intent,
+                "route": self.last_intent,
                 "mode": self.last_mode,
                 "num_sources": len(self.last_sources),
+                "sources": self.last_sources,
                 "model_name": runtime.chat.model,
                 "timings_ms": timings_ms,
+                "target_collections": self.last_target_collections,
+                "collection_scores": self.last_collection_scores,
+                "routing_probabilities": self.last_routing_probabilities,
+                "applied_filters": self.last_applied_filters,
+                "collection_results": self.last_collection_results,
+                "context_trace": self.last_context_trace,
+                "rerank_trace": self.last_rerank_trace,
+                "answer_quality_gate": self.last_answer_quality_gate,
+                "fusion_weights": self.last_fusion_weights,
+                "answer_status": (
+                    self.last_answer_quality_gate or {}
+                ).get("answer_status"),
                 "tools_used": self.last_tools_used,
                 "tool_calls": self.last_tool_calls,
                 "iterations": self.last_iterations,
+                "agent_trace": self.last_agent_trace,
             }
             turn_id = self._mongo_logger.log_turn(
                 session_id=session_id,

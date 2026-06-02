@@ -106,6 +106,7 @@ def test_filter_and_merge_keep_model_fields_outside_api_key_registry() -> None:
 
     filtered = filter_llm_config_updates(
         {
+            "llm_provider": "  deepseek  ",
             "chat_model": "  new-chat  ",
             "google_api_key": "",
             "agent_enabled": False,
@@ -114,8 +115,9 @@ def test_filter_and_merge_keep_model_fields_outside_api_key_registry() -> None:
     )
     applied = merge_llm_config_into_settings(settings, filtered)
 
-    assert filtered == {"chat_model": "new-chat"}
-    assert applied == ["chat_model"]
+    assert filtered == {"llm_provider": "deepseek", "chat_model": "new-chat"}
+    assert applied == ["llm_provider", "chat_model"]
+    assert settings.llm_provider == "deepseek"
     assert settings.chat_model == "new-chat"
     assert settings.agent_enabled is True
 
@@ -187,6 +189,23 @@ async def test_legacy_google_and_tavily_keys_import_into_registry() -> None:
 
 
 @pytest.mark.anyio
+async def test_legacy_deepseek_key_imports_into_registry() -> None:
+    db = _FakeDB(
+        {
+            "_id": LLM_CONFIG_DOCUMENT_ID,
+            "deepseek_api_key": "legacy-deepseek",
+        }
+    )
+
+    keys = await list_api_keys(db)
+
+    assert keys[0]["provider"] == "deepseek"
+    assert keys[0]["status"] == "active"
+    assert "secret" not in keys[0]
+    assert db.system_config.doc[API_KEYS_FIELD][0]["secret"] == "legacy-deepseek"
+
+
+@pytest.mark.anyio
 async def test_create_api_key_keeps_previous_provider_key_inactive() -> None:
     db = _FakeDB()
     old_key = await create_api_key(db, "google", "Old key", "old-google-secret")
@@ -211,6 +230,21 @@ async def test_create_api_key_rejects_duplicate_provider_secret() -> None:
         await create_api_key(db, "google", "Duplicate", "shared-google-secret")
 
 
+def test_create_llm_builds_deepseek_provider() -> None:
+    from llm import create_llm
+
+    settings = _make_settings(
+        llm_provider="deepseek",
+        chat_model="deepseek-v4-flash",
+        deepseek_api_key="deepseek-secret",
+    )
+
+    llm = create_llm(settings)
+
+    assert llm.__class__.__name__ == "DeepSeekLLM"
+    assert llm.model == "deepseek-v4-flash"
+
+
 @pytest.mark.anyio
 async def test_api_key_listing_keeps_env_fallback_out_of_registry() -> None:
     from api.routes.admin_stats import get_api_keys
@@ -224,6 +258,25 @@ async def test_api_key_listing_keeps_env_fallback_out_of_registry() -> None:
 
     assert listing["keys"] == []
     assert set(listing["fallback_providers"]) == {"google", "tavily"}
+    assert db.system_config.doc is None
+
+
+@pytest.mark.anyio
+async def test_deepseek_env_fallback_is_listed_when_unmanaged() -> None:
+    from api.routes.admin_stats import get_api_keys
+
+    db = _FakeDB()
+    listing = await get_api_keys(
+        _make_request(
+            _make_settings(deepseek_api_key="env-deepseek"),
+            _FakePipeline(),
+        ),
+        None,  # type: ignore[arg-type]
+        db,
+    )
+
+    assert "deepseek" in listing["fallback_providers"]
+    assert listing["keys"] == []
     assert db.system_config.doc is None
 
 
@@ -350,6 +403,41 @@ async def test_update_llm_config_persists_reloads_and_invalidates_chat_cache() -
     assert settings.chat_model == "new-chat"
     assert pipeline.prepared_settings is not settings
     assert pipeline.prepared_settings.chat_model == "new-chat"
+    assert pipeline.commit_calls == 1
+    assert llm_cache.calls == 1
+
+
+@pytest.mark.anyio
+async def test_update_llm_config_switches_chat_generation_to_deepseek() -> None:
+    from api.routes.admin_stats import LLMConfigBody, update_llm_config
+
+    settings = _make_settings()
+    pipeline = _FakePipeline()
+    llm_cache = _FakeLLMCache()
+    db = _FakeDB()
+
+    response = await update_llm_config(
+        _make_request(settings, pipeline, llm_cache),
+        LLMConfigBody(
+            llm_provider="deepseek",
+            deepseek_api_key="new-deepseek-key",
+            chat_model="deepseek-v4-flash",
+        ),
+        None,  # type: ignore[arg-type]
+        db,
+    )
+
+    assert response["ok"] is True
+    assert response["updated"]["llm_provider"] == "deepseek"
+    assert response["updated"]["deepseek_api_key"] == "new-***-key"
+    assert db.system_config.doc["llm_provider"] == "deepseek"
+    assert db.system_config.doc["chat_model"] == "deepseek-v4-flash"
+    assert db.system_config.doc[API_KEYS_FIELD][0]["provider"] == "deepseek"
+    assert settings.llm_provider == "deepseek"
+    assert settings.deepseek_api_key == "new-deepseek-key"
+    assert settings.chat_model == "deepseek-v4-flash"
+    assert pipeline.prepared_settings is not settings
+    assert pipeline.prepared_settings.llm_provider == "deepseek"
     assert pipeline.commit_calls == 1
     assert llm_cache.calls == 1
 

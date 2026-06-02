@@ -7,9 +7,11 @@ import {
   ArrowLeft,
   Bookmark,
   BookmarkX,
+  CalendarDays,
   ChevronDown,
   ChevronUp,
   ExternalLink,
+  FileText,
   Search,
   Trash2,
 } from 'lucide-react';
@@ -20,6 +22,16 @@ import { clearSession, ensureAccessToken, refreshSession } from '@/services/auth
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const bookmarkMarkdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
@@ -74,6 +86,17 @@ const bookmarkPreviewMarkdownComponents: Components = {
   th: ({ children }) => <span>{children} </span>,
   td: ({ children }) => <span>{children} </span>,
   img: ({ alt }) => <span>{alt}</span>,
+};
+
+const formatBookmarkDate = (value?: string) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
 };
 
 // ─── Skeleton loading card ─────────────────────────────────────────────────
@@ -134,18 +157,21 @@ function BookmarkCard({
   isExpanded,
   onToggleExpand,
   onNavigate,
-  onDelete,
+  onRequestDelete,
   isDeleting,
 }: {
   bm: BookmarkType;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onNavigate: () => void;
-  onDelete: () => void;
+  onRequestDelete: () => void;
   isDeleting: boolean;
 }) {
+  const savedDate = formatBookmarkDate(bm.created_at);
+  const sourceCount = bm.sources_snapshot?.length ?? 0;
+
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       {/* Card header — clickable area */}
       <button
         type="button"
@@ -162,6 +188,18 @@ function BookmarkCard({
           >
             {bm.answer_preview}
           </ReactMarkdown>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+          {savedDate && (
+            <span className="inline-flex items-center gap-1">
+              <CalendarDays className="h-3 w-3" />
+              {savedDate}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1">
+            <FileText className="h-3 w-3" />
+            {sourceCount} nguồn
+          </span>
         </div>
       </button>
 
@@ -221,7 +259,7 @@ function BookmarkCard({
             variant="ghost"
             size="icon"
             className="h-7 w-7 text-muted-foreground hover:text-destructive"
-            onClick={onDelete}
+            onClick={onRequestDelete}
             disabled={isDeleting}
             title="Xóa"
           >
@@ -252,6 +290,7 @@ const BookmarksPage = () => {
   const [search, setSearch] = useState('');
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<BookmarkType | null>(null);
 
   const { data: foldersData } = useQuery({
     queryKey: ['bookmark-folders'],
@@ -277,6 +316,7 @@ const BookmarksPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookmarks'] });
       queryClient.invalidateQueries({ queryKey: ['bookmark-folders'] });
+      setDeleteTarget(null);
     },
   });
 
@@ -342,6 +382,9 @@ const BookmarksPage = () => {
                 }`}
               >
                 Tất cả
+                <span className="ml-1 text-[10px] opacity-70">
+                  {folders.reduce((sum, item) => sum + item.count, 0)}
+                </span>
               </button>
               {folders.map((f) => (
                 <button
@@ -381,7 +424,7 @@ const BookmarksPage = () => {
                     setExpandedId(expandedId === bm.id ? null : bm.id)
                   }
                   onNavigate={() => navigate(`/chat/${bm.session_id}`)}
-                  onDelete={() => deleteMut.mutate(bm.id)}
+                  onRequestDelete={() => setDeleteTarget(bm)}
                   isDeleting={deleteMut.isPending}
                 />
               ))}
@@ -389,6 +432,29 @@ const BookmarksPage = () => {
           )}
         </div>
       </div>
+      <AlertDialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xóa mục đã lưu?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Mục này sẽ bị xóa khỏi danh sách đã lưu. Cuộc trò chuyện gốc vẫn được giữ nguyên.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMut.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                if (deleteTarget) deleteMut.mutate(deleteTarget.id);
+              }}
+            >
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

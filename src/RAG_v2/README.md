@@ -23,7 +23,7 @@ Tài liệu tổng quan chi tiết nằm ở [ARCHITECTURE.md](ARCHITECTURE.md).
 | Keyword search | Elasticsearch BM25 |
 | Embedding | `BAAI/bge-m3` + `intfloat/multilingual-e5-large` |
 | Reranking | `BAAI/bge-reranker-v2-m3` cross-encoder |
-| Main LLM | Gemini qua OpenAI-compatible endpoint |
+| Main LLM | DeepSeek `deepseek-v4-flash` qua OpenAI-compatible endpoint |
 | Agent tool LLM | LM Studio local, mặc định `qwen2.5-7b-instruct` |
 | Agent synthesis | Gemini/Ollama/LM Studio theo settings |
 | Persistence | MongoDB qua Motor và `MongoLogger` |
@@ -45,7 +45,7 @@ RAG_v2/
 ├── retrieval/              # Qdrant, Elasticsearch, hybrid search, filters, resolver
 ├── embedding/              # BGE-M3, E5, ensemble embedders
 ├── reranking/              # BGE cross-encoder reranker
-├── llm/                    # Gemini/LM Studio providers, prompts, self-eval
+├── llm/                    # DeepSeek/Gemini/LM Studio providers, prompts, self-eval
 ├── agent/                  # LangGraph ReAct + planner-executor agent
 ├── models/                 # MongoDB models, Motor client, MongoLogger
 ├── schemas/                # Pydantic API contracts
@@ -89,7 +89,7 @@ flowchart TD
     Retrieval --> ES[(Elasticsearch)]
     Retrieval --> Reranker[BGE reranker]
 
-    ClassicRAG --> LLM[Gemini / configured chat LLM]
+    ClassicRAG --> LLM[DeepSeek / configured chat LLM]
     Agent --> SynthLLM[Agent synthesis LLM]
 
     Pipeline --> Mongo[(MongoDB)]
@@ -267,7 +267,7 @@ Các bước chính:
 14. `ReferenceResolver` phát hiện tham chiếu kiểu `Điều 5`, `khoản 1 Điều 5` và insert chunk được tham chiếu cùng tài liệu.
 15. Kiểm tra P2 cache theo `(question, doc_ids, model)`.
 16. Format context theo settings hiện tại: `context_doc_char_limit=2000`, `context_total_char_budget=12000`, `context_list_total_char_budget=24000`.
-17. Gemini hoặc provider chat configured sinh câu trả lời.
+17. DeepSeek hoặc provider chat configured sinh câu trả lời.
 18. Ghi P2 + P0 cache nếu có Redis LLM cache.
 19. Nếu `self_eval_enabled=True`, top reranker score thấp hơn `self_eval_min_top_score=0.72`, và judge fail, pipeline có thể dùng Tavily fallback nếu `tavily_fallback_enabled=True`.
 20. Nếu có `session_id`, `MongoLogger.log_turn()` ghi turn vào MongoDB và trả `turn_id`.
@@ -592,7 +592,7 @@ Settings load từ `src/RAG_v2/.env` và environment variables qua `config/setti
 | `retrieval/` | [retrieval/MODULE.md](retrieval/MODULE.md) | `RetrievalService`, hybrid search, metadata filters, resolver |
 | `embedding/` | [embedding/MODULE.md](embedding/MODULE.md) | BGE-M3, E5, ensemble |
 | `reranking/` | [reranking/MODULE.md](reranking/MODULE.md) | BGE reranker, thresholds, table handling |
-| `llm/` | [llm/MODULE.md](llm/MODULE.md) | Gemini, LM Studio, prompts, self-eval |
+| `llm/` | [llm/MODULE.md](llm/MODULE.md) | DeepSeek, Gemini, LM Studio, prompts, self-eval |
 | `agent/` | [agent/MODULE.md](agent/MODULE.md) | LangGraph topology, planner-executor, ReAct tools |
 | `cache/` | [cache/MODULE.md](cache/MODULE.md) | Redis LLM cache, session, history, rate limiter |
 | `models/` | [models/MODULE.md](models/MODULE.md) | MongoDB models, indexes, MongoLogger |
@@ -615,7 +615,7 @@ Client gửi câu hỏi
      -> complex: LangGraph agent, fallback classic RAG nếu cần
   -> RetrievalService tìm Qdrant + Elasticsearch
   -> BGE reranker chọn chunks cuối
-  -> Gemini/agent synthesis tạo câu trả lời grounded
+  -> DeepSeek/agent synthesis tạo câu trả lời grounded
   -> Mongo/Redis lưu history, cache, telemetry
   -> API map response cho web/mobile
 ```

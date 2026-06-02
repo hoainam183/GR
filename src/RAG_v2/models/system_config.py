@@ -13,18 +13,21 @@ from models.database import SYSTEM_CONFIG_COLLECTION
 LLM_CONFIG_DOCUMENT_ID = "llm_config"
 API_KEYS_FIELD = "api_keys"
 API_KEY_SETTING_FIELDS = {
+    "deepseek": "deepseek_api_key",
     "google": "google_api_key",
     "tavily": "tavily_api_key",
 }
 _IMPORTED_API_KEY_NAMES = {
+    "deepseek": "Imported DeepSeek key",
     "google": "Imported Google key",
     "tavily": "Imported Tavily key",
 }
 
-# Keep this aligned with the current SystemTab LLM form. Runtime toggles and
-# provider switching have separate lifecycle semantics and are not persisted here.
+# Keep this aligned with the current SystemTab LLM form. Runtime toggles have
+# separate lifecycle semantics and are not persisted here.
 PERSISTABLE_LLM_FIELDS = frozenset(
     {
+        "llm_provider",
         "chat_model",
         "chat_temperature",
         "chat_max_tokens",

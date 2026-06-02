@@ -980,23 +980,26 @@ class AutoCrawlPipeline:
                 import asyncio
 
                 loop = asyncio.new_event_loop()
-                count = loop.run_until_complete(
-                    AutoCrawlPipeline._create_user_notifications(summary)
+                try:
+                    result = loop.run_until_complete(
+                        AutoCrawlPipeline._create_user_notifications(summary)
+                    )
+                finally:
+                    loop.close()
+                logger.info(
+                    "Created %d user notifications (push sent=%d, push errors=%d).",
+                    result.get("created_count", 0),
+                    result.get("push_sent_count", 0),
+                    result.get("push_error_count", 0),
                 )
-                loop.close()
-                logger.info("Created %d user notifications.", count)
             except Exception:
                 logger.warning("Failed to create user notifications", exc_info=True)
 
     @staticmethod
-    async def _create_user_notifications(summary: Dict[str, Any]) -> int:
+    async def _create_user_notifications(summary: Dict[str, Any]) -> Dict[str, Any]:
         """Broadcast notification cho tất cả users khi có dữ liệu mới."""
-        from models.database import (
-            NOTIFICATIONS_COLLECTION,
-            USERS_COLLECTION,
-            _get_settings,
-            get_motor_client,
-        )
+        from api.services.notification_delivery import broadcast_user_notification
+        from models.database import _get_settings, get_motor_client
 
         _, db_name = _get_settings()
         db = get_motor_client()[db_name]
@@ -1018,36 +1021,22 @@ class AutoCrawlPipeline:
                 elif title:
                     body_parts.append(f"• {title}")
 
-        users_cursor = db[USERS_COLLECTION].find({}, {"_id": 1})
-        user_ids = [str(u["_id"]) async for u in users_cursor]
-        if not user_ids:
-            return 0
-
-        now = datetime.now(timezone.utc)
-        docs = [
-            {
-                "user_id": uid,
-                "title": "📚 Dữ liệu mới đã cập nhật",
-                "body": "\n".join(body_parts),
-                "type": "crawler_update",
-                "read": False,
-                "created_at": now,
-                "related_doc_id": None,
-                "metadata": {
-                    "pipeline": pipeline_name,
-                    "new_articles": new_articles,
-                    "indexed": summary.get("indexed", 0),
-                    "article_links": [
-                        {"title": c.get("title", ""), "url": c.get("url", "")}
-                        for c in saved_chunks[:5]
-                        if c.get("url")
-                    ],
-                },
-            }
-            for uid in user_ids
-        ]
-        result = await db[NOTIFICATIONS_COLLECTION].insert_many(docs)
-        return len(result.inserted_ids)
+        return await broadcast_user_notification(
+            db,
+            title="📚 Dữ liệu mới đã cập nhật",
+            body="\n".join(body_parts),
+            notification_type="crawler_update",
+            metadata={
+                "pipeline": pipeline_name,
+                "new_articles": new_articles,
+                "indexed": summary.get("indexed", 0),
+                "article_links": [
+                    {"title": c.get("title", ""), "url": c.get("url", "")}
+                    for c in saved_chunks[:5]
+                    if c.get("url")
+                ],
+            },
+        )
 
 
 def index_staged_crawler_run(settings, run_id: str, bge=None, e5=None) -> Dict[str, Any]:

@@ -2,20 +2,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel, Field
 
+from api.services.notification_delivery import broadcast_user_notification
 from auth.jwt_handler import get_current_user
-from models.database import (
-    NOTIFICATIONS_COLLECTION,
-    NOTIFICATION_SUBSCRIPTIONS_COLLECTION,
-    USERS_COLLECTION,
-    get_database,
-)
+from models.database import get_database
 from models.user import UserDocument
 
 router = APIRouter(prefix="/admin/notifications", tags=["notifications-admin"])
@@ -43,40 +38,15 @@ async def create_notification(
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
 ) -> dict[str, Any]:
     """Create notifications for users subscribed to given topics (or all users)."""
-    now = datetime.now(timezone.utc)
-
-    # Find target user_ids based on topics
-    if body.topics:
-        # Find subscriptions matching any of the topics
-        subs_cursor = db[NOTIFICATION_SUBSCRIPTIONS_COLLECTION].find(
-            {"topics": {"$in": body.topics}},
-            {"user_id": 1},
-        )
-        user_ids = list({doc["user_id"] async for doc in subs_cursor})
-    else:
-        # Broadcast: get ALL user_ids from users collection (not just subscribed)
-        users_cursor = db[USERS_COLLECTION].find({}, {"_id": 1})
-        user_ids = [str(doc["_id"]) async for doc in users_cursor]
-
-    if not user_ids:
-        return {"created_count": 0, "target_user_ids": []}
-
-    # Create one notification per user
-    docs = [
-        {
-            "user_id": uid,
-            "title": body.title,
-            "body": body.body,
-            "type": body.type,
-            "related_doc_id": body.related_doc_id,
-            "topics": body.topics,
-            "read": False,
-            "created_at": now,
-        }
-        for uid in user_ids
-    ]
-    result = await db[NOTIFICATIONS_COLLECTION].insert_many(docs)
-    return {"created_count": len(result.inserted_ids), "target_user_ids": user_ids}
+    result = await broadcast_user_notification(
+        db,
+        title=body.title,
+        body=body.body,
+        notification_type=body.type,
+        related_doc_id=body.related_doc_id,
+        topics=body.topics,
+    )
+    return result
 
 
 @router.post("/broadcast", status_code=status.HTTP_201_CREATED)
@@ -86,26 +56,13 @@ async def broadcast_notification(
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
 ) -> dict[str, Any]:
     """Broadcast a notification to ALL users in the system."""
-    now = datetime.now(timezone.utc)
-
-    # Get all user IDs from users collection
-    users_cursor = db[USERS_COLLECTION].find({}, {"_id": 1})
-    user_ids = [str(doc["_id"]) async for doc in users_cursor]
-
-    if not user_ids:
-        return {"created_count": 0, "message": "No users found"}
-
-    docs = [
-        {
-            "user_id": uid,
-            "title": body.title,
-            "body": body.body,
-            "type": body.type,
-            "metadata": body.metadata,
-            "read": False,
-            "created_at": now,
-        }
-        for uid in user_ids
-    ]
-    result = await db[NOTIFICATIONS_COLLECTION].insert_many(docs)
-    return {"created_count": len(result.inserted_ids), "target_user_ids": user_ids}
+    result = await broadcast_user_notification(
+        db,
+        title=body.title,
+        body=body.body,
+        notification_type=body.type,
+        metadata=body.metadata,
+    )
+    if not result["target_user_ids"]:
+        return {**result, "message": "No users found"}
+    return result

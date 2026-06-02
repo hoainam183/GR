@@ -8,6 +8,7 @@ Schema (3 collections):
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import uuid
 from datetime import datetime, timezone
@@ -16,6 +17,39 @@ from typing import Any, Dict, List, Optional
 from pymongo import MongoClient, ASCENDING, DESCENDING
 
 logger = logging.getLogger(__name__)
+_PROMPT_PREVIEW_CHARS = 4000
+
+
+def _text_hash(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _prompt_preview(value: str) -> str:
+    if len(value) <= _PROMPT_PREVIEW_CHARS:
+        return value
+    return value[:_PROMPT_PREVIEW_CHARS] + "\n...[truncated]"
+
+
+def _copy_debug_fields(target: Dict[str, Any], result: Dict[str, Any]) -> None:
+    for field in (
+        "context_trace",
+        "rerank_trace",
+        "answer_quality_gate",
+        "fusion_weights",
+    ):
+        value = result.get(field)
+        if isinstance(value, dict):
+            target[field] = value
+
+    answer_status = result.get("answer_status")
+    if answer_status is not None:
+        target["answer_status"] = str(answer_status)
+
+    for field in ("llm_prompt", "reflection_prompt"):
+        value = result.get(field)
+        if isinstance(value, str) and value:
+            target[f"{field}_hash"] = _text_hash(value)
+            target[f"{field}_preview"] = _prompt_preview(value)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -232,6 +266,8 @@ class MongoLogger:
         if isinstance(collection_results, list):
             turn_doc["collection_results"] = collection_results
 
+        _copy_debug_fields(turn_doc, result)
+
         self._turns.insert_one(turn_doc)
 
         # Update history cache (Phase 2)
@@ -262,6 +298,7 @@ class MongoLogger:
             query_log_doc["route"] = str(route)
         if isinstance(iterations, (int, float)):
             query_log_doc["iterations"] = int(iterations)
+        _copy_debug_fields(query_log_doc, result)
         self._query_logs.insert_one(query_log_doc)
 
         return turn_id

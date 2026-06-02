@@ -178,6 +178,19 @@ const BookmarkListScreen = ({ navigation }: Props) => {
               <Text style={[styles.chipText, active && styles.chipTextActive]}>
                 {folder.name} ({folder.count})
               </Text>
+              {folder.name !== DEFAULT_FOLDER && (
+                <Pressable
+                  hitSlop={8}
+                  style={styles.chipAction}
+                  onPress={() => setFolderEditor({ mode: 'rename', originalName: folder.name, name: folder.name })}
+                >
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={14}
+                    color={active ? colors.primary : colors.mutedForeground}
+                  />
+                </Pressable>
+              )}
             </Pressable>
           );
         })}
@@ -260,7 +273,8 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, marginHorizontal: 16, marginTop: 12, paddingHorizontal: 12, borderRadius: 10, gap: 8 },
   searchInput: { flex: 1, color: colors.foreground, fontSize: 14, paddingVertical: 10 },
   chips: { paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
-  chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: colors.secondary, borderWidth: 1, borderColor: colors.border },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: colors.secondary, borderWidth: 1, borderColor: colors.border },
+  chipAction: { marginRight: -4, padding: 2 },
   chipActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
   chipText: { color: colors.mutedForeground, fontSize: 12, fontWeight: '600' },
   chipTextActive: { color: colors.primary },

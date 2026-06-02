@@ -10,6 +10,11 @@ import type {
 } from '../types/chat';
 import { cleanText } from './sanitize';
 
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+
 /**
  * Map a raw source object from the backend into a typed RetrievedDocument.
  */
@@ -135,6 +140,14 @@ export const normalizeV3Response = (
     collection_results: Array.isArray(payload.collection_results)
       ? (payload.collection_results as ChatResponse['collection_results'])
       : undefined,
+    context_trace: asRecord(payload.context_trace),
+    rerank_trace: asRecord(payload.rerank_trace),
+    answer_quality_gate: asRecord(payload.answer_quality_gate),
+    fusion_weights: asRecord(payload.fusion_weights),
+    answer_status:
+      typeof payload.answer_status === 'string'
+        ? payload.answer_status
+        : undefined,
     mode: typeof payload.mode === 'string' ? payload.mode : undefined,
     route: typeof payload.route === 'string' ? payload.route : undefined,
     tools_used: Array.isArray(payload.tools_used)

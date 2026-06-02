@@ -26,6 +26,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
 
+from api.services.notification_delivery import broadcast_user_notification
 from auth.rbac import require_admin
 from models.crawler import (
     CRAWLER_EDITABLE_STATUSES,
@@ -38,8 +39,6 @@ from models.crawler import (
 from models.database import (
     CRAWLER_CHUNKS_COLLECTION,
     CRAWLER_RUNS_COLLECTION,
-    NOTIFICATIONS_COLLECTION,
-    USERS_COLLECTION,
     get_database,
 )
 from models.system_config import (
@@ -232,6 +231,8 @@ class ConfigToggleBody(BaseModel):
 
 
 class LLMConfigBody(BaseModel):
+    llm_provider: str | None = None
+    deepseek_api_key: str | None = None
     google_api_key: str | None = None
     chat_model: str | None = None
     chat_temperature: float | None = None
@@ -256,6 +257,7 @@ class CrawlerChunkUpdateBody(BaseModel):
 
 
 _LLM_CACHE_INVALIDATION_FIELDS = {
+    "llm_provider",
     "chat_model",
     "chat_temperature",
     "chat_max_tokens",
@@ -858,13 +860,6 @@ async def _create_crawl_notifications(crawl_result: dict, pipeline_target: str):
         _, db_name = _get_settings()
         db = client[db_name]
 
-        # Get all user IDs
-        users_cursor = db[USERS_COLLECTION].find({}, {"_id": 1})
-        user_ids = [str(doc["_id"]) async for doc in users_cursor]
-
-        if not user_ids:
-            return
-
         new_articles = crawl_result.get("new_articles", 0)
         new_chunks = crawl_result.get("new_chunks", 0)
         collection_name = crawl_result.get("collection", pipeline_target)
@@ -874,25 +869,24 @@ async def _create_crawl_notifications(crawl_result: dict, pipeline_target: str):
         if new_articles == 0:
             body = f"Crawl '{collection_name}' hoàn tất. Không có bài viết mới."
 
-        now = datetime.now(timezone.utc)
-        docs = [
-            {
-                "user_id": uid,
-                "title": title,
-                "body": body,
-                "type": "crawler_update",
-                "metadata": {
-                    "pipeline": pipeline_target,
-                    "new_articles": new_articles,
-                    "new_chunks": new_chunks,
-                },
-                "read": False,
-                "created_at": now,
-            }
-            for uid in user_ids
-        ]
-        await db[NOTIFICATIONS_COLLECTION].insert_many(docs)
-        logger.info("Created %d crawl notifications for pipeline '%s'", len(docs), pipeline_target)
+        result = await broadcast_user_notification(
+            db,
+            title=title,
+            body=body,
+            notification_type="crawler_update",
+            metadata={
+                "pipeline": pipeline_target,
+                "new_articles": new_articles,
+                "new_chunks": new_chunks,
+            },
+        )
+        logger.info(
+            "Created %d crawl notifications for pipeline '%s' (push sent=%d, push errors=%d)",
+            result["created_count"],
+            pipeline_target,
+            result.get("push_sent_count", 0),
+            result.get("push_error_count", 0),
+        )
     except Exception as e:
         logger.warning("Failed to create crawl notifications: %s", e, exc_info=True)
 
@@ -1127,6 +1121,8 @@ async def get_llm_config(
         return key[:4] + "***" + key[-4:]
 
     return {
+        "llm_provider": settings.llm_provider,
+        "deepseek_api_key": mask_key(settings.deepseek_api_key),
         "google_api_key": mask_key(settings.google_api_key),
         "tavily_api_key": mask_key(settings.tavily_api_key),
         "chat_model": settings.chat_model,
@@ -1188,7 +1184,7 @@ async def get_api_keys(
     _user: Annotated[UserDocument, Depends(require_admin)],
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
-    """Return secret-free managed Google and Tavily key rows."""
+    """Return secret-free managed API key rows."""
     keys = await list_api_keys(db)
     managed_providers = {key["provider"] for key in keys}
     settings = request.app.state.settings

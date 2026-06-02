@@ -19,7 +19,7 @@ config/
 Main setting families in `Settings`:
 
 - Providers: `llm_provider`, `embedding_provider`, `reranker_provider`
-- API keys: `google_api_key`, `openai_api_key`, `tavily_api_key`, `llm_api_key`
+- API keys: `deepseek_api_key`, `google_api_key`, `openai_api_key`, `tavily_api_key`, `llm_api_key`
 - Agent: `agent_enabled`, model, max iterations, synthesis provider/model/tokens
 - Store hosts: Qdrant, Elasticsearch, MongoDB, Redis
 - Collections: `collections`

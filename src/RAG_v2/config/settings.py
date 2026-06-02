@@ -23,12 +23,13 @@ class Settings(BaseSettings):
     corresponding env var (case-insensitive).
 
     Provider strategy (recommended):
-        - llm_provider = "gemini"      → chat answer generation (quality-critical)
+        - llm_provider = "deepseek"    → chat answer generation (quality-critical)
         - reflection_provider = "gemini" → query rewrite (quality-critical)
         - agent_model = Qwen2.5 (local) → tool-calling only (low quality OK)
         - agent_synthesis_provider = "gemini" → final agent answer (quality-critical)
 
     Parameters:
+        deepseek_api_key: DeepSeek API key for answer generation.
         google_api_key: Google API key for Gemini.
         openai_api_key: OpenAI API key (optional, not used by default pipeline).
         tavily_api_key: Tavily API key for web search fallback.
@@ -39,7 +40,7 @@ class Settings(BaseSettings):
         mongodb_uri: MongoDB connection URI.
         mongodb_database: MongoDB database name.
         collections: Qdrant collection names to search.
-        chat_model: Gemini model identifier for answer generation.
+        chat_model: Chat model identifier for answer generation.
         chat_temperature: Sampling temperature for chat.
         chat_max_tokens: Max tokens for chat generation.
         top_k: Final number of documents after reranking.
@@ -59,12 +60,13 @@ class Settings(BaseSettings):
     """
 
     # --- Provider Selectors (change in .env, no code edits needed) ---
-    # ✅ GEMINI: chat answer generation — quality-critical, needs strong model
-    llm_provider: str = "gemini"  # gemini | openai | azure | ollama | lm_studio
+    # ✅ DEEPSEEK: chat answer generation — quality-critical, needs strong model
+    llm_provider: str = "deepseek"  # deepseek | gemini | openai | azure | ollama | lm_studio
     embedding_provider: str = "ensemble"  # ensemble | bge_m3 | e5
     reranker_provider: str = "bge"  # bge | cohere | none
 
     # --- API Keys ---
+    deepseek_api_key: str = ""
     google_api_key: str = ""
     openai_api_key: str = ""
     tavily_api_key: str = ""
@@ -122,8 +124,8 @@ class Settings(BaseSettings):
     collections: List[str] = ["stsv", "quydinh", "kehoach", "ctdt"]
 
     # --- Chat Model (answer generation) ---
-    # ✅ GEMINI: main answer generation — most important quality point
-    chat_model: str = "gemini-3.1-flash-lite"  # fast + quality
+    # ✅ DEEPSEEK: main answer generation — most important quality point
+    chat_model: str = "deepseek-v4-flash"  # fast + quality
     chat_temperature: float = 0.0
     chat_max_tokens: int = (
         1500  # increased from 1024 to prevent mid-sentence truncation

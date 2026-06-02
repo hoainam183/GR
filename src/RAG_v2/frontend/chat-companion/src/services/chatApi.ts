@@ -24,6 +24,9 @@ export interface ChatStreamHandlers {
   onSessionId?: (sessionId: string) => void;
   onToken?: (delta: string) => void;
   onMetadata?: (meta: Partial<ChatV3Response>) => void;
+  onDone?: () => void;
+  onError?: (message: string) => void;
+  signal?: AbortSignal;
 }
 
 export interface RetrievalSearchResponse {
@@ -128,6 +131,11 @@ const cleanText = (value: unknown): string | undefined => {
   const cleaned = value.trim();
   return cleaned.length > 0 ? cleaned : undefined;
 };
+
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
 
 const sanitizeUserContext = (
   context?: UserContext,
@@ -344,6 +352,14 @@ const normalizeV3Response = (
     collection_results: Array.isArray(payload.collection_results)
       ? (payload.collection_results as ChatResponse['collection_results'])
       : undefined,
+    context_trace: asRecord(payload.context_trace),
+    rerank_trace: asRecord(payload.rerank_trace),
+    answer_quality_gate: asRecord(payload.answer_quality_gate),
+    fusion_weights: asRecord(payload.fusion_weights),
+    answer_status:
+      typeof payload.answer_status === 'string'
+        ? payload.answer_status
+        : undefined,
     mode: typeof payload.mode === 'string' ? payload.mode : undefined,
     route: typeof payload.route === 'string' ? payload.route : undefined,
     tools_used: Array.isArray(payload.tools_used)
@@ -422,6 +438,7 @@ export const sendMessageStream = async (
       user_context: identity.userContext,
       user_id: identity.userId,
     } as ChatRequest),
+    signal: handlers.signal,
   });
 
   if (!response.ok) {
@@ -466,6 +483,7 @@ export const sendMessageStream = async (
         break;
       }
 
+      let streamErrorMessage: string | null = null;
       try {
         const parsed = JSON.parse(payload) as Record<string, unknown>;
         const type = typeof parsed.type === 'string' ? parsed.type : '';
@@ -487,7 +505,15 @@ export const sendMessageStream = async (
           const meta = normalizeV3Response(parsed, resolvedSessionId);
           resolvedMetadata = meta;
           handlers.onMetadata?.(meta);
+        } else if (type === 'error') {
+          const message =
+            typeof parsed.error === 'string'
+              ? parsed.error
+              : 'Streaming response failed.';
+          handlers.onError?.(message);
+          streamErrorMessage = message;
         } else if (type === 'done') {
+          handlers.onDone?.();
           done = true;
           break;
         } else if (typeof parsed.session_id === 'string') {
@@ -501,6 +527,10 @@ export const sendMessageStream = async (
         // Payload is not valid JSON — skip it silently.
         // Do NOT append raw payload (could be a stray URL, error text, etc.).
         console.warn('[stream] non-JSON SSE payload skipped:', payload);
+      }
+
+      if (streamErrorMessage) {
+        throw new Error(streamErrorMessage);
       }
 
       sepIndex = buffer.indexOf('\n\n');

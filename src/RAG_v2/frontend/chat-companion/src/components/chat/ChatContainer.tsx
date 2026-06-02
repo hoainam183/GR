@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import type { ChatResponse, Message, UserContext } from '@/types/chat';
-import { sendMessageV3, resolveChatIdentity } from '@/services/chatApi';
+import type { ChatResponse, ChatV3Response, Message, Turn, UserContext } from '@/types/chat';
+import { sendMessageStream, resolveChatIdentity } from '@/services/chatApi';
 import { getSession } from '@/services/sessionApi';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
@@ -23,6 +23,118 @@ interface ChatContainerProps {
   user?: UserPublic | null;
   sessionId?: string;
 }
+
+interface PendingChatTurn {
+  sessionId: string;
+  userMessageId: string;
+  assistantMessageId: string;
+  question: string;
+  startedAt: string;
+}
+
+const pendingKey = (sessionId: string) => `pending-chat:${sessionId}`;
+
+const readPendingTurn = (sessionId: string): PendingChatTurn | null => {
+  try {
+    const raw = sessionStorage.getItem(pendingKey(sessionId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PendingChatTurn;
+    return parsed?.question ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const writePendingTurn = (pending: PendingChatTurn) => {
+  sessionStorage.setItem(pendingKey(pending.sessionId), JSON.stringify(pending));
+};
+
+const clearPendingTurn = (sessionId?: string) => {
+  if (sessionId) sessionStorage.removeItem(pendingKey(sessionId));
+};
+
+const messagesFromTurns = (turns: Turn[], sessionId: string): Message[] =>
+  turns.flatMap((t) => [
+    {
+      id: `user-${t.turn_id}`,
+      role: 'user' as const,
+      content: t.question,
+      timestamp: parseUtcDate(t.timestamp),
+      sessionId,
+      turnId: t.turn_id,
+    },
+    {
+      id: `assistant-${t.turn_id}`,
+      role: 'assistant' as const,
+      content: t.answer,
+      timestamp: parseUtcDate(t.timestamp),
+      sessionId,
+      turnId: t.turn_id,
+      modelName: t.model_name,
+      mode: t.mode,
+      route: t.route ?? t.intent,
+      toolsUsed: t.tools_used,
+      toolCalls: t.tool_calls,
+      iterations: t.iterations,
+      error: t.error ?? undefined,
+      agentError: t.agent_error ?? undefined,
+      agentTrace: t.agent_trace,
+      reflectedQuestion: t.reflected_question ?? undefined,
+      timingsMs: t.timings_ms,
+      sources: t.sources,
+      collectionScores: t.collection_scores,
+      targetCollections: t.target_collections,
+      routingProbabilities: t.routing_probabilities,
+      appliedFilters: t.applied_filters,
+      collectionResults: t.collection_results,
+    },
+  ]);
+
+const pendingMessages = (pending: PendingChatTurn): Message[] => [
+  {
+    id: pending.userMessageId,
+    role: 'user',
+    content: pending.question,
+    timestamp: parseUtcDate(pending.startedAt),
+    sessionId: pending.sessionId,
+  },
+  {
+    id: pending.assistantMessageId,
+    role: 'assistant',
+    content: '',
+    timestamp: parseUtcDate(pending.startedAt),
+    sessionId: pending.sessionId,
+    isStreaming: true,
+  },
+];
+
+const applyResponseMetadata = (
+  message: Message,
+  response: Partial<ChatV3Response>,
+  sessionId?: string,
+): Message => ({
+  ...message,
+  sessionId: response.session_id || sessionId || message.sessionId,
+  turnId: response.turn_id,
+  mode: response.mode,
+  route: response.route ?? response.intent,
+  modelName: response.model_name,
+  timingsMs: response.timings_ms,
+  reflectedQuestion: response.reflected_question,
+  targetCollections: response.target_collections,
+  collectionScores: response.collection_scores,
+  routingProbabilities: response.routing_probabilities,
+  appliedFilters: response.applied_filters,
+  collectionResults: response.collection_results,
+  toolsUsed: response.tools_used,
+  toolCalls: response.tool_calls,
+  iterations: response.iterations,
+  agentTrace: response.agent_trace,
+  sources: response.retrieved_documents,
+  error: response.error ?? undefined,
+  agentError: response.agent_error ?? undefined,
+  isStreaming: false,
+});
 
 const buildUserContextFromUser = (
   currentUser?: UserPublic | null,
@@ -110,12 +222,15 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   // When the URL session param changes (user clicks sidebar item or New Chat),
   // reset state and optionally load history from the backend.
   useEffect(() => {
+    let cancelled = false;
+    let pollId: ReturnType<typeof setInterval> | undefined;
+
     setActiveSessionId(sessionIdProp);
 
     // Navigation triggered internally by handleSendMessage — don't reset or reload
     if (suppressNextHistoryLoad.current) {
       suppressNextHistoryLoad.current = false;
-      return;
+      return () => {};
     }
 
     // New session selected — reset chat state
@@ -123,65 +238,81 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     setChatPhase('idle');
     setLastResponsePayload(null);
 
-    if (!sessionIdProp) return;
+    if (!sessionIdProp) return () => {};
 
     setIsLoadingHistory(true);
+
+    const applyTurns = (turns: Turn[]) => {
+      if (turns.length > 0) {
+        clearPendingTurn(sessionIdProp);
+        setMessages(messagesFromTurns(turns, sessionIdProp));
+        setChatPhase('idle');
+        return true;
+      }
+
+      const pending = readPendingTurn(sessionIdProp);
+      if (pending) {
+        setMessages(pendingMessages(pending));
+        setChatPhase('thinking');
+      }
+      return false;
+    };
+
+    const pollUntilTurnSaved = () => {
+      pollId = setInterval(() => {
+        getSession(sessionIdProp)
+          .then(({ turns }) => {
+            if (cancelled) return;
+            if (applyTurns(turns) && pollId) {
+              clearInterval(pollId);
+              pollId = undefined;
+              if (resolvedIdentity.userId) {
+                queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
+              }
+            }
+          })
+          .catch((err) => {
+            console.error('Failed to poll pending session:', err);
+          });
+      }, 2500);
+    };
+
     getSession(sessionIdProp)
       .then(({ turns }) => {
-        const loaded: Message[] = turns.flatMap((t) => [
-          {
-            id: `user-${t.turn_id}`,
-            role: 'user' as const,
-            content: t.question,
-            timestamp: parseUtcDate(t.timestamp),
-            sessionId: sessionIdProp,
-            turnId: t.turn_id,
-          },
-          {
-            id: `assistant-${t.turn_id}`,
-            role: 'assistant' as const,
-            content: t.answer,
-            timestamp: parseUtcDate(t.timestamp),
-            sessionId: sessionIdProp,
-            turnId: t.turn_id,
-            modelName: t.model_name,
-            mode: t.mode,
-            route: t.route ?? t.intent,
-            toolsUsed: t.tools_used,
-            toolCalls: t.tool_calls,
-            iterations: t.iterations,
-            error: t.error ?? undefined,
-            agentError: t.agent_error ?? undefined,
-            agentTrace: t.agent_trace,
-            reflectedQuestion: t.reflected_question ?? undefined,
-            timingsMs: t.timings_ms,
-            sources: t.sources,
-            collectionScores: t.collection_scores,
-            targetCollections: t.target_collections,
-            routingProbabilities: t.routing_probabilities,
-            appliedFilters: t.applied_filters,
-            collectionResults: t.collection_results,
-          },
-        ]);
-        setMessages(loaded);
+        if (cancelled) return;
+        const hasSavedTurn = applyTurns(turns);
+        if (!hasSavedTurn && readPendingTurn(sessionIdProp)) {
+          pollUntilTurnSaved();
+        }
       })
       .catch((err) => {
         console.error('Failed to load session history:', err);
       })
-      .finally(() => setIsLoadingHistory(false));
-  }, [sessionIdProp]);
+      .finally(() => {
+        if (!cancelled) setIsLoadingHistory(false);
+      });
+
+    return () => {
+      cancelled = true;
+      if (pollId) clearInterval(pollId);
+    };
+  }, [sessionIdProp, queryClient, resolvedIdentity.userId]);
 
   const handleSendMessage = async (content: string) => {
     // Snapshot the session at call time — this is the "owner" of this request.
     // All async callbacks check this against the current session before mutating state.
     const capturedSessionId = activeSessionId;
+    const startedAt = new Date();
+    const userMessageId = `user-${startedAt.getTime()}`;
+    const assistantMessageId = `assistant-${startedAt.getTime()}`;
 
     // Add user message
     const userMessage: Message = {
-      id: `user-${Date.now()}`,
+      id: userMessageId,
       role: 'user',
       content,
-      timestamp: new Date(),
+      timestamp: startedAt,
+      sessionId: capturedSessionId,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -189,6 +320,24 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     forceScrollToBottom();
 
     let responseSessionId = capturedSessionId;
+    let receivedMetadata: Partial<ChatV3Response> | undefined;
+
+    const isCurrentRequest = () =>
+      !capturedSessionId || activeSessionIdRef.current === capturedSessionId || activeSessionIdRef.current === responseSessionId;
+
+    const persistPending = (sessionId: string) => {
+      writePendingTurn({
+        sessionId,
+        userMessageId,
+        assistantMessageId,
+        question: content,
+        startedAt: startedAt.toISOString(),
+      });
+    };
+
+    if (capturedSessionId) {
+      persistPending(capturedSessionId);
+    }
 
     try {
       // Build history from existing messages (last 6 turns)
@@ -197,58 +346,144 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         content: m.content,
       }));
 
-      const response = await sendMessageV3(
+      const response = await sendMessageStream(
         content,
         historyForApi,
         5,
-        'auto',
         capturedSessionId,
         explicitUserContext,
         explicitUserId,
+        {
+          onSessionId: (sid) => {
+            responseSessionId = sid;
+            persistPending(sid);
+            if (!isMountedRef.current) return;
+            suppressNextHistoryLoad.current = true;
+            setActiveSessionId(sid);
+            activeSessionIdRef.current = sid;
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === userMessageId || message.id === assistantMessageId
+                  ? { ...message, sessionId: sid }
+                  : message,
+              ),
+            );
+            if (sid !== capturedSessionId) {
+              navigate(`/chat/${sid}`, { replace: true });
+            }
+            if (resolvedIdentity.userId) {
+              queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
+            }
+          },
+          onToken: (delta) => {
+            if (!isMountedRef.current || !isCurrentRequest()) return;
+            setChatPhase('streaming');
+            setMessages((prev) => {
+              const existing = prev.find((message) => message.id === assistantMessageId);
+              if (!existing) {
+                return [
+                  ...prev,
+                  {
+                    id: assistantMessageId,
+                    role: 'assistant',
+                    content: delta,
+                    timestamp: new Date(),
+                    sessionId: responseSessionId,
+                    isStreaming: true,
+                  },
+                ];
+              }
+              return prev.map((message) =>
+                message.id === assistantMessageId
+                  ? { ...message, content: `${message.content}${delta}`, isStreaming: true }
+                  : message,
+              );
+            });
+          },
+          onMetadata: (meta) => {
+            receivedMetadata = meta;
+            if (!isMountedRef.current || !isCurrentRequest()) return;
+            responseSessionId = meta.session_id || responseSessionId;
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === assistantMessageId
+                  ? applyResponseMetadata(
+                      {
+                        ...message,
+                        content: message.content || meta.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
+                      },
+                      meta,
+                      responseSessionId,
+                    )
+                  : message,
+              ),
+            );
+            setLastResponsePayload(meta as ChatResponse);
+            clearPendingTurn(responseSessionId);
+            if (resolvedIdentity.userId) {
+              queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
+            }
+          },
+          onError: () => {
+            clearPendingTurn(responseSessionId);
+          },
+        },
       );
 
       // Component was unmounted (e.g. logout) — bail out entirely
       if (!isMountedRef.current) return;
 
-      responseSessionId = response.session_id || capturedSessionId;
-      if (responseSessionId && responseSessionId !== capturedSessionId) {
-        suppressNextHistoryLoad.current = true;
-        setActiveSessionId(responseSessionId);
-        navigate(`/chat/${responseSessionId}`, { replace: true });
-      }
-
-      // User navigated to a different session while this request was in flight.
-      if (activeSessionIdRef.current !== capturedSessionId &&
-          capturedSessionId !== undefined) {
+      responseSessionId = response.sessionId || responseSessionId;
+      if (!isCurrentRequest()) {
         return;
       }
 
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: response.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
-        timestamp: new Date(),
-        sessionId: responseSessionId,
-        turnId: response.turn_id,
-        mode: response.mode,
-        route: response.route ?? response.intent,
-        modelName: response.model_name,
-        timingsMs: response.timings_ms,
-        reflectedQuestion: response.reflected_question,
-        targetCollections: response.target_collections,
-        collectionScores: response.collection_scores,
-        routingProbabilities: response.routing_probabilities,
-        appliedFilters: response.applied_filters,
-        collectionResults: response.collection_results,
-        toolsUsed: response.tools_used,
-        toolCalls: response.tool_calls,
-        iterations: response.iterations,
-        agentTrace: response.agent_trace,
-        sources: response.retrieved_documents,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-      setLastResponsePayload(response as ChatResponse);
+      const finalMetadata = receivedMetadata || response.metadata;
+      setMessages((prev) => {
+        const existing = prev.find((message) => message.id === assistantMessageId);
+        if (existing) {
+          return prev.map((message) =>
+            message.id === assistantMessageId
+              ? finalMetadata
+                ? applyResponseMetadata(
+                    {
+                      ...message,
+                      content: message.content || response.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
+                    },
+                    finalMetadata,
+                    responseSessionId,
+                  )
+                : { ...message, content: message.content || response.answer, isStreaming: false }
+              : message,
+          );
+        }
+        return [
+          ...prev,
+          finalMetadata
+            ? applyResponseMetadata(
+                {
+                  id: assistantMessageId,
+                  role: 'assistant',
+                  content: response.answer || finalMetadata.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
+                  timestamp: new Date(),
+                  sessionId: responseSessionId,
+                },
+                finalMetadata,
+                responseSessionId,
+              )
+            : {
+                id: assistantMessageId,
+                role: 'assistant',
+                content: response.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
+                timestamp: new Date(),
+                sessionId: responseSessionId,
+              },
+        ];
+      });
+      if (finalMetadata) {
+        setLastResponsePayload(finalMetadata as ChatResponse);
+      }
+      clearPendingTurn(responseSessionId);
 
       // Refresh the sidebar conversation list
       if (resolvedIdentity.userId) {
@@ -256,13 +491,15 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       }
     } catch (error) {
       // Only show error in the session that initiated the request
-      if (isMountedRef.current && activeSessionIdRef.current === capturedSessionId) {
+      if (isMountedRef.current && isCurrentRequest()) {
         console.error('Failed to get response:', error);
+        clearPendingTurn(responseSessionId);
         const errorMessage: Message = {
           id: `error-${Date.now()}`,
           role: 'assistant',
           content: 'Xin lỗi, hệ thống đang gặp sự cố. Vui lòng thử lại sau ít phút.',
           timestamp: new Date(),
+          sessionId: responseSessionId,
         };
         setMessages((prev) => [...prev, errorMessage]);
       }

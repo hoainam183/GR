@@ -43,7 +43,7 @@ RAG_v2/
   retrieval/         Qdrant, ES, hybrid/multi-collection search, filters, resolver.
   embedding/         BGE-M3 and E5 embedders.
   reranking/         BGE cross-encoder reranker.
-  llm/               Gemini/LM Studio wrappers, prompts, self-eval.
+  llm/               DeepSeek/Gemini/LM Studio wrappers, prompts, self-eval.
   agent/             LangGraph agent, tools, planner-executor.
   models/            Mongo models, Motor client, MongoLogger.
   cache/             Optional Redis sessions, history, LLM cache, rate limits.
@@ -77,7 +77,7 @@ Each major directory above has a `MODULE.md` with module-specific contracts and 
 | Keyword store | Elasticsearch indexes named by collection |
 | Embeddings | BGE-M3 and multilingual E5 |
 | Reranker | BGE reranker cross-encoder |
-| Main LLM | Gemini through OpenAI-compatible endpoint by default |
+| Main LLM | DeepSeek `deepseek-v4-flash` through OpenAI-compatible endpoint by default |
 | Agent tool LLM | LM Studio/OpenAI-compatible local model |
 | Agent synthesis | Gemini, Ollama, or LM Studio depending on settings |
 | Persistence | MongoDB through Motor and `MongoLogger` |
@@ -765,7 +765,7 @@ Client asks question
   -> RetrievalService searches Qdrant + Elasticsearch
   -> BGE reranker selects grounded context
   -> Validity/reference post-processing
-  -> Gemini/agent synthesis answers
+  -> DeepSeek/agent synthesis answers
   -> Mongo/Redis persist logs, sessions, caches
   -> API maps response for web/mobile trace/debug UI
 ```

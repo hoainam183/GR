@@ -55,6 +55,16 @@ const TOGGLE_LABELS: Record<string, string> = {
 
 type ModelOption = { value: string; label: string };
 
+const LLM_PROVIDER_OPTIONS: ModelOption[] = [
+  { value: 'deepseek', label: 'DeepSeek' },
+  { value: 'gemini', label: 'Gemini' },
+  { value: 'lm_studio', label: 'LM Studio' },
+];
+
+const DEEPSEEK_MODEL_OPTIONS: ModelOption[] = [
+  { value: 'deepseek-v4-flash', label: 'DeepSeek V4 Flash' },
+];
+
 const GEMINI_MODEL_OPTIONS: ModelOption[] = [
   { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite' },
   { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
@@ -67,7 +77,14 @@ const AGENT_MODEL_OPTIONS: ModelOption[] = [
   ...GEMINI_MODEL_OPTIONS,
 ];
 
+function chatModelOptionsForProvider(provider: string) {
+  if (provider === 'deepseek') return DEEPSEEK_MODEL_OPTIONS;
+  if (provider === 'gemini') return GEMINI_MODEL_OPTIONS;
+  return [...DEEPSEEK_MODEL_OPTIONS, ...AGENT_MODEL_OPTIONS];
+}
+
 const API_KEY_PROVIDER_LABELS: Record<ApiKeyProvider, string> = {
+  deepseek: 'DeepSeek',
   google: 'Google',
   tavily: 'Tavily',
 };
@@ -366,6 +383,7 @@ export default function SystemTab() {
       .then((cfg) => {
         setLlmConfig(cfg);
         setLlmForm({
+          llm_provider: cfg.llm_provider,
           chat_model: cfg.chat_model,
           chat_temperature: String(cfg.chat_temperature),
           chat_max_tokens: String(cfg.chat_max_tokens),
@@ -436,10 +454,23 @@ export default function SystemTab() {
     }
   };
 
+  const handleLLMProviderChange = (llm_provider: string) => {
+    setLlmForm((prev) => {
+      const next = { ...prev, llm_provider };
+      const options = chatModelOptionsForProvider(llm_provider);
+      if (!options.some((option) => option.value === next.chat_model)) {
+        next.chat_model = options[0]?.value ?? next.chat_model;
+      }
+      return next;
+    });
+  };
+
   const handleLLMSave = async () => {
     setLlmSaving(true);
     try {
       const body: Record<string, unknown> = {};
+      if (llmForm.llm_provider && llmForm.llm_provider !== llmConfig?.llm_provider)
+        body.llm_provider = llmForm.llm_provider;
       if (llmForm.chat_model && llmForm.chat_model !== llmConfig?.chat_model)
         body.chat_model = llmForm.chat_model;
       if (llmForm.agent_model && llmForm.agent_model !== llmConfig?.agent_model)
@@ -465,6 +496,7 @@ export default function SystemTab() {
       setLlmConfig(cfg);
       setLlmForm((prev) => ({
         ...prev,
+        llm_provider: cfg.llm_provider,
         chat_model: cfg.chat_model,
         chat_temperature: String(cfg.chat_temperature),
         chat_max_tokens: String(cfg.chat_max_tokens),
@@ -778,11 +810,18 @@ export default function SystemTab() {
                 <Cpu className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Models</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <ModelSelectField
+                  id="llm-provider"
+                  label="Chat Provider"
+                  options={LLM_PROVIDER_OPTIONS}
+                  value={llmForm.llm_provider}
+                  onValueChange={handleLLMProviderChange}
+                />
                 <ModelSelectField
                   id="chat-model"
                   label="Chat Model"
-                  options={GEMINI_MODEL_OPTIONS}
+                  options={chatModelOptionsForProvider(llmForm.llm_provider)}
                   value={llmForm.chat_model}
                   onValueChange={(chat_model) => setLlmForm((p) => ({ ...p, chat_model }))}
                 />
@@ -864,6 +903,7 @@ export default function SystemTab() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="deepseek">DeepSeek</SelectItem>
                   <SelectItem value="google">Google</SelectItem>
                   <SelectItem value="tavily">Tavily</SelectItem>
                 </SelectContent>

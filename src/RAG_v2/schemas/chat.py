@@ -102,6 +102,14 @@ class AgentTracePayload(BaseModel):
     query: Optional[str] = None
     session_id: Optional[str] = None
     route: Optional[str] = None
+    execution_path: Optional[str] = None
+    complexity_subtype: Optional[str] = None
+    sub_questions: Optional[List[str]] = None
+    retrieval_plan: Optional[Dict[str, Any]] = None
+    decompose_trace: Optional[Dict[str, Any]] = None
+    planner_trace: Optional[Dict[str, Any]] = None
+    executor_results: Optional[List[Dict[str, Any]]] = None
+    synthesis_trace: Optional[Dict[str, Any]] = None
     iterations: Optional[int] = None
     tool_calls: Optional[List[AgentToolCall]] = None
     tool_names_sequence: Optional[List[str]] = None
@@ -131,6 +139,11 @@ class ChatResponse(BaseModel):
     llm_prompt: Optional[str] = None
     applied_filters: Optional[List[FilterInfo]] = None
     collection_results: Optional[List[CollectionResult]] = None
+    context_trace: Optional[Dict[str, Any]] = None
+    rerank_trace: Optional[Dict[str, Any]] = None
+    answer_quality_gate: Optional[Dict[str, Any]] = None
+    fusion_weights: Optional[Dict[str, Any]] = None
+    answer_status: Optional[str] = None
     # Agent + route telemetry
     mode: Optional[str] = None
     route: Optional[str] = None

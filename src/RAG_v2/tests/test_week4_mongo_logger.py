@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from datetime import datetime, timedelta, timezone
 
 from models.mongo_logger import MongoLogger
@@ -39,9 +40,49 @@ class _FakeAgentTraceCollection:
         return _FakeCursor(list(self.docs))
 
 
+class _FakeMongoCollection:
+    def __init__(self, docs: list[dict] | None = None):
+        self.docs = docs or []
+
+    def find_one_and_update(self, query: dict, update: dict, **_kwargs):
+        doc = next((item for item in self.docs if _matches(item, query)), None)
+        if doc is None:
+            return None
+        for key, value in update.get("$inc", {}).items():
+            doc[key] = doc.get(key, 0) + value
+        doc.update(update.get("$set", {}))
+        return doc
+
+    def update_one(self, query: dict, update: dict):
+        doc = next((item for item in self.docs if _matches(item, query)), None)
+        if doc is not None:
+            doc.update(update.get("$set", {}))
+            return type("Result", (), {"matched_count": 1})()
+        return type("Result", (), {"matched_count": 0})()
+
+    def insert_one(self, doc: dict):
+        self.docs.append(doc)
+        return {"inserted_id": "fake-id"}
+
+
+def _matches(doc: dict, query: dict) -> bool:
+    return all(doc.get(key) == value for key, value in query.items())
+
+
 def _make_logger_with_collection(collection: _FakeAgentTraceCollection) -> MongoLogger:
     logger_obj = MongoLogger.__new__(MongoLogger)
     logger_obj._agent_traces = collection
+    return logger_obj
+
+
+def _make_logger_for_turns() -> MongoLogger:
+    logger_obj = MongoLogger.__new__(MongoLogger)
+    logger_obj._sessions = _FakeMongoCollection(
+        [{"session_id": "session-1", "user_id": "user-1", "turn_count": 0}]
+    )
+    logger_obj._turns = _FakeMongoCollection()
+    logger_obj._query_logs = _FakeMongoCollection()
+    logger_obj.history_cache = None
     return logger_obj
 
 
@@ -113,3 +154,40 @@ def test_get_agent_stats_returns_empty_for_invalid_or_empty_input() -> None:
     logger_obj = _make_logger_with_collection(_FakeAgentTraceCollection(docs=[]))
     assert logger_obj.get_agent_stats(limit=100) == {}
     assert logger_obj.get_agent_stats(limit=0) == {}
+
+
+def test_log_turn_persists_debug_fields_with_capped_prompt_preview() -> None:
+    logger_obj = _make_logger_for_turns()
+    prompt = "x" * 4105
+
+    turn_id = logger_obj.log_turn(
+        "session-1",
+        "question",
+        {
+            "answer": "answer",
+            "intent": "rag",
+            "model_name": "fake",
+            "context_trace": {"context_docs_used": 2},
+            "rerank_trace": {"rerank_candidate_count": 5},
+            "answer_quality_gate": {"answer_status": "answered"},
+            "fusion_weights": {"vector": 0.7, "keyword": 0.3},
+            "answer_status": "answered",
+            "llm_prompt": prompt,
+        },
+    )
+
+    assert turn_id == 1
+    turn_doc = logger_obj._turns.docs[0]
+    query_log_doc = logger_obj._query_logs.docs[0]
+    expected_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+
+    for doc in (turn_doc, query_log_doc):
+        assert doc["context_trace"] == {"context_docs_used": 2}
+        assert doc["rerank_trace"] == {"rerank_candidate_count": 5}
+        assert doc["answer_quality_gate"] == {"answer_status": "answered"}
+        assert doc["fusion_weights"] == {"vector": 0.7, "keyword": 0.3}
+        assert doc["answer_status"] == "answered"
+        assert doc["llm_prompt_hash"] == expected_hash
+        assert doc["llm_prompt_preview"].endswith("\n...[truncated]")
+        assert len(doc["llm_prompt_preview"]) < len(prompt)
+        assert "llm_prompt" not in doc

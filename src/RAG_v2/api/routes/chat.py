@@ -453,13 +453,28 @@ async def chat_stream(
                     user_context=user_context_payload,
                 ):
                     loop.call_soon_threadsafe(queue.put_nowait, chunk)
+            except Exception as exc:
+                logger.error("/chat/stream producer failed: %s", exc, exc_info=True)
+                loop.call_soon_threadsafe(
+                    queue.put_nowait,
+                    {"type": "error", "error": str(exc)},
+                )
             finally:
                 loop.call_soon_threadsafe(queue.put_nowait, None)
 
         loop.run_in_executor(None, _produce)
+        producer_error = False
 
         while True:
             chunk = await queue.get()
+            if isinstance(chunk, dict) and chunk.get("type") == "error":
+                producer_error = True
+                yield (
+                    "data: "
+                    + json.dumps(chunk, ensure_ascii=False)
+                    + "\n\n"
+                )
+                continue
             if chunk is None:
                 sync_redis_session_from_mongo(
                     redis_session=redis_session,
@@ -467,46 +482,53 @@ async def chat_stream(
                     session_id=session_id,
                 )
                 # ── Emit metadata SSE event before done ──────────────────────
-                try:
-                    meta_payload: dict[str, Any] = {
-                        "type": "metadata",
-                        "mode": getattr(pipeline, "last_mode", "rag_v2"),
-                        "route": getattr(pipeline, "last_intent", "rag"),
-                        "intent": getattr(pipeline, "last_intent", "rag"),
-                        "num_sources": len(getattr(pipeline, "last_sources", [])),
-                        "retrieved_documents": getattr(pipeline, "last_sources", []),
-                        "timings_ms": getattr(pipeline, "last_timings", {}),
-                        "reflected_question": getattr(
-                            pipeline, "last_reflected_question", None
-                        ),
-                        "target_collections": getattr(
-                            pipeline, "last_target_collections", None
-                        ),
-                        "collection_scores": getattr(
-                            pipeline, "last_collection_scores", None
-                        ),
-                        "routing_probabilities": getattr(
-                            pipeline, "last_routing_probabilities", None
-                        ),
-                        "applied_filters": getattr(
-                            pipeline, "last_applied_filters", None
-                        ),
-                        "collection_results": getattr(
-                            pipeline, "last_collection_results", None
-                        ),
-                        "agent_trace": getattr(pipeline, "last_agent_trace", None),
-                        "tools_used": getattr(pipeline, "last_tools_used", []),
-                        "tool_calls": getattr(pipeline, "last_tool_calls", []),
-                        "iterations": getattr(pipeline, "last_iterations", 0),
-                        "turn_id": getattr(pipeline, "last_turn_id", None),
-                    }
-                    yield (
-                        "data: "
-                        + json.dumps(meta_payload, ensure_ascii=False)
-                        + "\n\n"
-                    )
-                except Exception as meta_err:
-                    logger.warning("Failed to emit metadata SSE event: %s", meta_err)
+                if not producer_error:
+                    try:
+                        meta_payload: dict[str, Any] = {
+                            "type": "metadata",
+                            "mode": getattr(pipeline, "last_mode", "rag_v2"),
+                            "route": getattr(pipeline, "last_intent", "rag"),
+                            "intent": getattr(pipeline, "last_intent", "rag"),
+                            "num_sources": len(getattr(pipeline, "last_sources", [])),
+                            "retrieved_documents": getattr(pipeline, "last_sources", []),
+                            "timings_ms": getattr(pipeline, "last_timings", {}),
+                            "reflected_question": getattr(
+                                pipeline, "last_reflected_question", None
+                            ),
+                            "target_collections": getattr(
+                                pipeline, "last_target_collections", None
+                            ),
+                            "collection_scores": getattr(
+                                pipeline, "last_collection_scores", None
+                            ),
+                            "routing_probabilities": getattr(
+                                pipeline, "last_routing_probabilities", None
+                            ),
+                            "applied_filters": getattr(
+                                pipeline, "last_applied_filters", None
+                            ),
+                            "collection_results": getattr(
+                                pipeline, "last_collection_results", None
+                            ),
+                            "context_trace": getattr(pipeline, "last_context_trace", None),
+                            "rerank_trace": getattr(pipeline, "last_rerank_trace", None),
+                            "answer_quality_gate": getattr(
+                                pipeline, "last_answer_quality_gate", None
+                            ),
+                            "fusion_weights": getattr(pipeline, "last_fusion_weights", None),
+                            "agent_trace": getattr(pipeline, "last_agent_trace", None),
+                            "tools_used": getattr(pipeline, "last_tools_used", []),
+                            "tool_calls": getattr(pipeline, "last_tool_calls", []),
+                            "iterations": getattr(pipeline, "last_iterations", 0),
+                            "turn_id": getattr(pipeline, "last_turn_id", None),
+                        }
+                        yield (
+                            "data: "
+                            + json.dumps(meta_payload, ensure_ascii=False)
+                            + "\n\n"
+                        )
+                    except Exception as meta_err:
+                        logger.warning("Failed to emit metadata SSE event: %s", meta_err)
                 # ── Done event ───────────────────────────────────────────────
                 yield (
                     "data: "

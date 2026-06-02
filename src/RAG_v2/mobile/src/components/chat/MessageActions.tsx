@@ -11,7 +11,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { RetrievedDocument } from '@rag/shared';
-import { createBookmark, getBookmarkByTurn, getFeedback, submitFeedback } from '@rag/shared';
+import {
+  createBookmark,
+  deleteBookmark,
+  getBookmarkByTurn,
+  getFeedback,
+  submitFeedback,
+} from '@rag/shared';
 import { apiClient } from '../../services/api';
 import { useAppTheme, type AppColors } from '../../theme/theme';
 
@@ -41,6 +47,7 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
   const [shared, setShared] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkId, setBookmarkId] = useState<string | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [selectedCategory, setSelectedCategory] =
     useState<FeedbackCategory>('incomplete');
@@ -56,7 +63,10 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
       .catch(() => {});
     getBookmarkByTurn(apiClient, sessionId, turnId)
       .then((existing) => {
-        if (!cancelled) setBookmarked(Boolean(existing));
+        if (!cancelled) {
+          setBookmarked(Boolean(existing));
+          setBookmarkId(existing?.id ?? null);
+        }
       })
       .catch(() => {});
     return () => {
@@ -125,12 +135,31 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
   };
 
   const handleBookmark = async () => {
-    if (!requireTurn('lưu') || bookmarked || !sessionId || !turnId) return;
+    if (!requireTurn('lưu') || !sessionId || !turnId) return;
+
+    if (bookmarked && bookmarkId) {
+      setBookmarked(false);
+      const previousId = bookmarkId;
+      setBookmarkId(null);
+      try {
+        await deleteBookmark(apiClient, previousId);
+      } catch {
+        setBookmarked(true);
+        setBookmarkId(previousId);
+        Alert.alert('Lỗi', 'Không thể bỏ lưu câu trả lời. Vui lòng thử lại.');
+      }
+      return;
+    }
+
+    if (bookmarked) return;
+
     setBookmarked(true);
     try {
-      await createBookmark(apiClient, { session_id: sessionId, turn_id: turnId, folder: 'Chung' });
+      const created = await createBookmark(apiClient, { session_id: sessionId, turn_id: turnId, folder: 'Chung' });
+      setBookmarkId(created.id);
     } catch {
       setBookmarked(false);
+      setBookmarkId(null);
       Alert.alert('Lỗi', 'Không thể lưu câu trả lời. Vui lòng thử lại.');
     }
   };

@@ -1,9 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ChatContainer from '@/components/chat/ChatContainer';
 import { ConversationSidebar } from '@/components/sidebar/ConversationSidebar';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -19,38 +25,20 @@ import {
 import { type UserPublic } from '@/services/authApi';
 import { ensureSession, logoutSession } from '@/services/authSession';
 import { getSessions } from '@/services/sessionApi';
-import { Activity, Bookmark, Moon, PanelLeft, Sun } from 'lucide-react';
+import { Activity, Bookmark, Loader2, LogOut, Moon, PanelLeft, Sun } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import HustLogo from '@/components/HustLogo';
 
 interface UserMenuProps {
   user: UserPublic;
-  onLogout: () => void;
+  onLogout: () => Promise<void> | void;
 }
 
 const userOwnerId = (user?: UserPublic | null): string | undefined =>
   user?._id ?? user?.email ?? user?.username ?? user?.student_id ?? undefined;
 
 const UserMenu = ({ user, onLogout }: UserMenuProps) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-    const keyHandler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    document.addEventListener('keydown', keyHandler);
-    return () => {
-      document.removeEventListener('mousedown', handler);
-      document.removeEventListener('keydown', keyHandler);
-    };
-  }, []);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const initials = user.full_name
     .split(' ')
@@ -60,19 +48,18 @@ const UserMenu = ({ user, onLogout }: UserMenuProps) => {
     .toUpperCase();
 
   return (
-    <div className="relative" ref={ref}>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
       <button
-        onClick={() => setOpen((value) => !value)}
         className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground ring-2 ring-primary/30 transition hover:ring-4 focus:outline-none focus-visible:ring-4 focus-visible:ring-ring"
         aria-label="User menu"
-        aria-expanded={open}
-        aria-haspopup="menu"
       >
         {initials}
       </button>
+      </DropdownMenuTrigger>
 
-      {open && (
-        <div className="absolute right-0 top-10 z-50 w-64 rounded-xl border border-border bg-card p-4 shadow-lg">
+      <DropdownMenuContent align="end" className="w-64 rounded-lg p-4">
+        <div>
           <div className="mb-3 border-b border-border pb-3">
             <p className="text-sm font-semibold text-foreground">{user.full_name}</p>
             {user.email && (
@@ -102,16 +89,21 @@ const UserMenu = ({ user, onLogout }: UserMenuProps) => {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onLogout}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-destructive transition hover:bg-destructive/10"
+          <DropdownMenuItem
+            className="cursor-pointer gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+            disabled={isLoggingOut}
+            onSelect={(event) => {
+              event.preventDefault();
+              setIsLoggingOut(true);
+              Promise.resolve(onLogout()).finally(() => setIsLoggingOut(false));
+            }}
           >
+            {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
             Đăng xuất
-          </button>
+          </DropdownMenuItem>
         </div>
-      )}
-    </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
@@ -219,11 +211,16 @@ const Index = () => {
   }, [isMobile, toggle]);
 
   const handleLogout = async () => {
-    await logoutSession();
-    setUser(null);
-    setMobileOpen(false);
-    queryClient.clear();
-    navigate('/login', { replace: true });
+    try {
+      await logoutSession();
+    } catch (error) {
+      console.warn('Logout request failed, clearing local session anyway:', error);
+    } finally {
+      setUser(null);
+      setMobileOpen(false);
+      queryClient.clear();
+      navigate('/login', { replace: true });
+    }
   };
 
   const openSidebar = () => {

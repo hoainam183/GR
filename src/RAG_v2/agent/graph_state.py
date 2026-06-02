@@ -41,6 +41,11 @@ class AgentGraphState(TypedDict):
     execution_path: str | None          # "planner" for current graph topology
     sub_questions: list[str] | None     # Decomposed sub-questions from complex query
     retrieval_plan: dict | None         # Planner output: {steps, needs_web, reasoning}
+    complexity_subtype: str | None      # Router subtype used to select execution path
+    decompose_trace: dict | None        # Trace-only decomposition metadata
+    planner_trace: dict | None          # Trace-only planner prompt/response metadata
+    executor_results: list[dict] | None # Trace-only executor per-step summaries
+    synthesis_trace: dict | None        # Trace-only synthesis prompt/context metadata
     user_context: dict | None           # {student_id, cohort, major, major_code, full_name}
     empty_result_count: int             # Tracks consecutive empty tool returns for retry logic
     top_k: int | None                   # Effective retrieval top_k supplied by the pipeline
