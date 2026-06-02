@@ -1,6 +1,6 @@
 # Module: `document_loader`
 
-Source-verified: 2026-05-20 from `document_loader/**/*.py` and `pipeline/document_pipeline.py`.
+Source-verified: 2026-06-02 from `document_loader/**/*.py`, `pipeline/document_pipeline.py`, and upload route discovery.
 
 ## Purpose
 
@@ -36,6 +36,27 @@ Admin upload pipeline uses converter names such as:
 ## Cleanup Contract
 
 `clean_markdown.py` removes common conversion noise, including table-of-contents style rows. Cleaned Markdown feeds chunkers and must preserve legal/article headings and tables as much as possible.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Upload["api/routes/upload.py or offline CLI"] --> Pipeline["pipeline/DocumentPipeline.convert_pdf"]
+  Pipeline --> Converter["BasePDFConverter"]
+  Converter --> PyMuPDF["PyMuPDF4LLMConverter"]
+  Converter --> Docling["DoclingConverter"]
+  PyMuPDF --> Markdown["converted Markdown"]
+  Docling --> Markdown
+  Markdown --> Storage["utils/LocalStorage"]
+  Storage --> Clean["clean_markdown.py"]
+  Clean --> Chunking["chunking strategies"]
+  Chunking --> Indexing["pipeline/scripts embedding + Qdrant/ES"]
+```
+
+External module boundaries:
+
+- `document_loader` converts and cleans; upload state, DB records, storage paths, chunking, and indexing are owned by `pipeline`, `models`, `utils`, and `chunking`.
+- Converter names are part of the admin API/UI contract and must remain aligned with `api/routes/upload.py`.
 
 ## Maintenance Notes
 

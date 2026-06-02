@@ -1,6 +1,6 @@
 # Module: `query`
 
-Source-verified: 2026-06-01 from `query/*.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, and GitNexus context for `QueryReflector`.
+Source-verified: 2026-06-02 from `query/*.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, `config/settings.py`, and GitNexus context for `QueryReflector`.
 
 ## Purpose
 
@@ -15,6 +15,7 @@ query/
   domain_classifier.py  Two-stage BGE-M3 + sklearn classifier.
   reflection.py         PII strip, profile merge, LLM rewrite, guardrails, entity extraction.
   decomposer.py         LLM subquery decomposition for multi-source/comparison queries.
+  signals.py            Accent-insensitive query-signal analysis shared by router/retrieval.
   structured_query.py   Text normalization and exclude-term parsing for retrieval.
   prompts.py            Domain classification and rewrite/decompose prompts.
   training_data.py      In-repo classifier training data.
@@ -27,6 +28,7 @@ query/
 ```text
 Raw question + history + user_context
   -> ComplexityRouter
+     -> analyze_query_signals()
      -> chitchat | simple | complex
   -> QueryRouter
      -> DomainClassifier
@@ -40,6 +42,33 @@ Raw question + history + user_context
      -> regex entity extraction
   -> retrieval filters/search query
 ```
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Client["api/routes/chat.py or eval runner"] --> Complexity["ComplexityRouter.route"]
+  Complexity --> Signals["signals.analyze_query_signals"]
+  Signals --> Tier["tier + subtype"]
+  Tier --> Decision["pipeline/RAGPipeline mode decision"]
+  Decision -->|simple RAG| Router["QueryRouter.route"]
+  Decision -->|complex| Agent["agent/ReActAgent via pipeline"]
+  Router --> Domain["DomainClassifier"]
+  Router -->|short low-confidence follow-up| HistoryPass["history-aware second pass"]
+  Router -->|weak confidence/margin| LLMTier["RAGPipeline._llm_domain_classify"]
+  Domain --> Selection["retrieval/CollectionSelector"]
+  LLMTier --> Selection
+  Selection --> Reflector["QueryReflector.reflect"]
+  Reflector --> Structured["structured_query.parse_structured_query"]
+  Structured --> Retrieval["retrieval/MultiCollectionSearch"]
+```
+
+External module boundaries:
+
+- Called by `pipeline/rag_pipeline.py` and `pipeline/flows.py`; it returns routing, reflection, entity, and structured-query artifacts, not retrieved documents.
+- Feeds `retrieval/collection_selector.py`, `retrieval/metadata_filters.py`, and `retrieval/elasticsearch_store.py` through domains, signals, entities, and exclude terms.
+- Uses LLM prompts through injected pipeline LLMs; provider construction stays in `llm`.
+- `evaluation/` and legacy `eval/` reuse router/signals behavior for routing and retrieval-quality checks.
 
 ## ComplexityRouter
 

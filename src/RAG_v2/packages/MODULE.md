@@ -1,6 +1,6 @@
 # Module: `packages`
 
-Source-verified: 2026-05-25 from `packages/shared/src/**` and root `package.json`.
+Source-verified: 2026-06-02 from `packages/shared/src/**`, root `package.json`, web/mobile clients, and backend API contracts.
 
 ## Purpose
 
@@ -58,6 +58,7 @@ packages/shared/src/
 - `/auth/login`
 - `/auth/register`
 - `/auth/me`
+- `/auth/refresh`
 - `/sessions`
 - `/sessions/me`
 - `/session`
@@ -70,6 +71,7 @@ packages/shared/src/
 - `/chat/suggest`
 - `/notifications`
 - `/notifications/subscribe`
+- `/notifications/unsubscribe`
 
 Keep these aligned with FastAPI routes.
 
@@ -83,6 +85,28 @@ If backend chat metadata changes, update:
 - `packages/shared/src/utils/normalize.ts`
 - web local `services/chatApi.ts`
 - mobile chat UI
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Backend["api + schemas"] --> Constants["utils/constants.ts API_PATHS"]
+  Backend --> Types["types/chat/auth/mobile.ts"]
+  Types --> Normalize["utils/normalize.ts"]
+  Constants --> APIHelpers["api/*Api.ts"]
+  APIHelpers --> Client["api/client.ts Axios factory"]
+  Client --> Web["frontend/chat-companion optional/local use"]
+  Client --> Mobile["mobile required shared client"]
+  Stores["stores/authStore + chatStore"] --> Mobile
+  Normalize --> Web
+  Normalize --> Mobile
+```
+
+External module boundaries:
+
+- `packages/shared` is client-side contract glue; it should not contain app-specific UI.
+- Backend route/schema changes require synchronized updates here plus web/mobile local services where they still exist.
+- Apps own token storage and base URLs; shared clients accept callbacks for token retrieval/refresh.
 
 ## Maintenance Notes
 

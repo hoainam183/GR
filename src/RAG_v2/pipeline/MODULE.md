@@ -1,6 +1,6 @@
 # Module: `pipeline`
 
-Source-verified: 2026-06-01 from `pipeline/*.py`, `api/routes/chat.py`, `api/routes/upload.py`, and GitNexus context for `RAGPipeline` and `DocumentPipeline`.
+Source-verified: 2026-06-02 from `pipeline/*.py`, `api/routes/chat.py`, `api/routes/upload.py`, `api/routes/admin_stats.py`, and GitNexus context for `RAGPipeline` and `DocumentPipeline`.
 
 ## Purpose
 
@@ -100,6 +100,37 @@ Typical returned modes:
 - `rag_v2`
 - `agent`
 - `rag_v2_fallback`
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  API["api/routes/chat.py"] --> Pipeline["RAGPipeline.query_v3/query/query_stream"]
+  Pipeline --> Complexity["query/ComplexityRouter"]
+  Complexity -->|chitchat| Chit["local chitchat handler"]
+  Complexity -->|simple| RAG["flows.rag_flow"]
+  Complexity -->|complex| Agent["agent/ReActAgent Planner-Executor"]
+  Agent -->|success| AgentDocs["agent docs + trace"]
+  Agent -->|disabled/error and fallback allowed| RAG
+  RAG --> Router["query/QueryRouter + QueryReflector"]
+  Router --> Retrieval["retrieval/RetrievalService"]
+  Retrieval --> Embed["embedding + Qdrant + ES"]
+  Retrieval --> Rerank["reranking/BGEReranker"]
+  Rerank --> Post["ValidityFilter + ReferenceResolver + parent context"]
+  Post --> Prompt["llm prompt/context formatting"]
+  Prompt --> LLM["llm/BaseLLM provider"]
+  LLM --> Quality["SelfEvaluator/Tavily fallback when enabled"]
+  Quality --> Logger["models/MongoLogger + cache/Redis"]
+  AgentDocs --> Logger
+  Logger --> Mapper["api/response_mapper.py"]
+```
+
+External module boundaries:
+
+- `api` owns HTTP/session/auth mapping; `pipeline` owns orchestration and returns dict-like runtime results.
+- `query` decides route/reflection/entities; `retrieval` owns stores/search; `llm` owns provider calls.
+- `agent` is used only for complex mode and receives shared retrieval runtime from this module.
+- `models` and `cache` persist turns/sessions/cache metadata; they should not alter retrieval/generation decisions.
 
 ## Classic RAG Flow
 

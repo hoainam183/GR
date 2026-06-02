@@ -1,6 +1,6 @@
 # Module: `routers`
 
-Source-verified: 2026-05-25 from `routers/auth.py` and `api/main.py`.
+Source-verified: 2026-06-02 from `routers/auth.py`, `auth/*.py`, `schemas/user.py`, `api/main.py`, and web/mobile auth clients.
 
 ## Purpose
 
@@ -45,6 +45,30 @@ Mounted under `/auth`:
   without putting credentials in the URL.
 - Manual web login sets the HttpOnly refresh cookie. Mobile login must send
   `client_type="mobile"` to receive the JSON `refresh_token`.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Client["web/mobile"] --> Router["/auth routes"]
+  Router -->|Microsoft| OAuth["auth/microsoft.py"]
+  OAuth --> Upsert["Mongo users upsert"]
+  Router -->|manual login/register| Password["auth/password.py"]
+  Password --> Upsert
+  Upsert --> Access["auth/jwt_handler.create_access_token"]
+  Upsert --> Refresh["auth/refresh_tokens.issue_refresh_token"]
+  Refresh --> CookieOrJSON["web HttpOnly cookie or mobile JSON refresh_token"]
+  Client -->|Bearer| Me["/auth/me and protected routes"]
+  Me --> CurrentUser["auth/jwt_handler.get_current_user"]
+  Router -->|logout/refresh| Rotate["refresh token rotate/revoke"]
+```
+
+External module boundaries:
+
+- Mounted by `api/main.py`; all route helpers and credential logic come from `auth`.
+- Request/response bodies are defined in `schemas/user.py`.
+- Refresh-token storage and user reads/writes go through `models/database.py`.
+- Redirect/cookie behavior must match `frontend` auth-session code and `mobile` SecureStore flow.
 
 ## Maintenance Notes
 

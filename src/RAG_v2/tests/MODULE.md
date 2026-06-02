@@ -1,6 +1,6 @@
 # Module: `tests`
 
-Source-verified: 2026-06-01 from `tests/*.py`, root test files, and pytest config.
+Source-verified: 2026-06-02 from `tests/*.py`, root test files, pytest config, and recent API/mobile/admin contract tests.
 
 ## Purpose
 
@@ -54,6 +54,26 @@ Use `-m "not integration"` for fast local checks that should not require externa
 - Keep RAGPipeline admin reload tests aligned with the current hot-swap contract; route cache is cleared on reload, but reflection no longer has a separate pipeline cache.
 - Prefer focused tests for doc-only changes only when there is parser/link/script impact.
 - For retrieval/model/service tests, be explicit about whether Qdrant/ES/Mongo/Redis/local models are required.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  CodeChange["code or contract change"] --> Focused["focused pytest files"]
+  Focused --> Unit["unit tests: query/retrieval/cache/auth"]
+  Focused --> Route["API route/contract tests"]
+  Focused --> Pipeline["pipeline/agent/RAG tests"]
+  Pipeline --> Regressions["conversation_regression_queries.jsonl replay when chat/RAG changed"]
+  Route --> MobileContracts["test_mobile_api_contracts.py"]
+  Unit --> EvalTests["evaluation tests"]
+  EvalTests --> EvalCLI["evaluation current/historical as needed"]
+```
+
+External module boundaries:
+
+- Tests describe expected behavior across all modules; they should not be treated as runtime dependencies.
+- Chat/RAG, auth, mobile/shared, retrieval/indexing, and admin upload changes should each run their focused contract set.
+- Live-service/model tests must be clearly marked or documented so local no-service runs remain possible.
 
 ## Useful Commands
 

@@ -1,6 +1,6 @@
 # Module: `retrieval`
 
-Source-verified: 2026-06-01 from every `retrieval/*.py` file, `config/settings.py`, `pipeline/flows.py`, and `agent/tool_adapters.py`.
+Source-verified: 2026-06-02 from every `retrieval/*.py` file, `config/settings.py`, `pipeline/flows.py`, `agent/tool_adapters.py`, and crawler/admin indexing integrations.
 
 ## Purpose
 
@@ -33,6 +33,9 @@ retrieval/
   multi_collection_search.py   Parallel global multi-collection search and fusion.
   metadata_filters.py          Per-collection filter extraction, major/cohort/date helpers, recency bonus.
   collection_selector.py       Domain → collection selection with confidence fallback.
+  query_expander.py            Multi-query expansion variants for recall-oriented searches.
+  hyde.py                      Optional HyDE fallback for low-recall retrieval.
+  parent_context.py            Parent chunk expansion after child retrieval/rerank.
   validity_filter.py           Drop superseded documents using data/document_lineage.json.
   reference_resolver.py        Resolve legal references such as Điều/Khoản.
   search_stsv.py               STSV hybrid search demo utility.
@@ -73,6 +76,40 @@ retrieval/
 6. Otherwise → truncate to `effective_top_k`.
 
 This service is created once by `RAGPipeline` and injected into agent tools via `tool_adapters.set_retrieval_service()`.
+
+---
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Caller["pipeline/flows.py or agent/tool_adapters.py"] --> Service["RetrievalService.search"]
+  Service --> Embed["embedding/BGE + E5 embed_query"]
+  Service --> Searcher["MultiCollectionSearch.search"]
+  Searcher --> Signals["query/signals.analyze_query_signals"]
+  Searcher --> Filters["metadata_filters.build_collection_filters"]
+  Filters --> ESFilter["Elasticsearch metadata pre-search"]
+  ESFilter --> IDFilter["Qdrant HasIdCondition + ES bool filter"]
+  Searcher --> Vector["QdrantStore.search named vectors"]
+  Searcher --> Keyword["ElasticsearchStore.keyword_search"]
+  Vector --> Fusion["global linear/RRF fusion + recency bonus"]
+  Keyword --> Fusion
+  Fusion --> Dedup["id/text dedup"]
+  Dedup --> Rerank["reranking/BGEReranker optional"]
+  Rerank --> Validity["ValidityFilter"]
+  Validity --> References["ReferenceResolver"]
+  References --> Parents["ParentContextExpander"]
+  Parents --> Caller
+  Dedup -. low recall .-> HyDE["HyDEExpander fallback"]
+```
+
+External module boundaries:
+
+- Receives routed collections/entities from `query` and `pipeline`; it does not decide chat mode or final answer wording.
+- Owns Qdrant/Elasticsearch access and returns normalized candidate dicts for `pipeline`, `agent`, `api/routes/retrieval.py`, and `evaluation`.
+- Consumes `embedding` and `reranking` instances built by `RetrievalService.from_settings()`.
+- Reads metadata/lineage conventions from `data/` and must stay aligned with `scripts`/`chunking` output fields.
+- Shares optional `tools/TavilySearchTool` only as runtime wiring; web-search decisions live in `pipeline` or `agent`.
 
 ---
 

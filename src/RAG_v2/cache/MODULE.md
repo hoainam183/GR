@@ -1,6 +1,6 @@
 # Module: `cache`
 
-Source-verified: 2026-05-20 from `cache/*.py` and `api/main.py`.
+Source-verified: 2026-06-02 from `cache/*.py`, `api/main.py`, `api/routes/admin_stats.py`, `scripts/auto_crawler.py`, and evaluation cache checks.
 
 ## Purpose
 
@@ -76,6 +76,9 @@ Expected behavior:
 - P2/post-retrieval cache, keyed by query plus retrieved document ids/model.
 
 Document-tag reverse index is used for invalidation after document updates.
+Admin LLM config changes can call `invalidate_all()` after a successful runtime
+reload. Crawler review indexing invalidates by staged crawler chunk/document ids
+after Qdrant/Elasticsearch indexing.
 
 Pipeline write contract:
 
@@ -91,6 +94,30 @@ Pipeline write contract:
 - RPD: `rate:day:{id}`
 
 `api/middleware/rate_limit.py` wraps it as FastAPI middleware. If Redis fails, requests are allowed and warnings are logged.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Lifespan["api/main.lifespan"] --> Manager["RedisManager"]
+  Manager --> Session["RedisSessionStore"]
+  Manager --> History["ConversationHistoryCache"]
+  Manager --> LLMCache["LLMResponseCache"]
+  Manager --> Rate["SlidingWindowRateLimiter"]
+  Session --> MongoLogger["models/MongoLogger dual-write/fallback"]
+  ChatRoutes["api/routes/chat.py"] --> Session
+  ChatRoutes --> History
+  Flows["pipeline/flows.py"] --> LLMCache
+  MongoLogger --> History
+  Admin["api/routes/admin_stats.py + scripts/auto_crawler.py"] --> Invalidate["cache invalidation"]
+  Rate --> Middleware["api/middleware/rate_limit.py"]
+```
+
+External module boundaries:
+
+- `cache` is optional and fail-soft; callers must continue through Mongo or uncached paths when Redis is unavailable.
+- Durable session/turn storage remains in `models/MongoLogger`; Redis accelerates session lists, history, response cache, and rate limits.
+- Cache invalidation is triggered by admin LLM reloads and crawler/document indexing after source content changes.
 
 ## Settings
 

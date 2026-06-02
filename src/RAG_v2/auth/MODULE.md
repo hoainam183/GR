@@ -1,6 +1,6 @@
 # Module: `auth`
 
-Source-verified: 2026-05-25 from `auth/*.py` and `routers/auth.py`.
+Source-verified: 2026-06-02 from `auth/*.py`, `routers/auth.py`, `schemas/user.py`, and web/mobile auth clients.
 
 ## Purpose
 
@@ -89,6 +89,28 @@ The router layer validates accepted HUST/SIS identity behavior and persists user
 - `require_superadmin()`: current user id must be in `SUPERADMIN_USER_IDS`.
 
 Superadmin is not a DB role; it is a configured overlay.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  AuthRouter["routers/auth.py"] --> Password["password hash/verify"]
+  AuthRouter --> OAuth["microsoft OAuth helpers"]
+  AuthRouter --> JWTCreate["jwt_handler.create_access_token"]
+  AuthRouter --> Refresh["refresh_tokens issue/rotate/revoke"]
+  Refresh --> MongoRefresh["models/database refresh_tokens"]
+  AuthRouter --> Users["models/database users"]
+  ClientRoutes["api/routes/*"] --> OptionalUser["get_optional_current_user"]
+  ProtectedRoutes["admin/session/profile routes"] --> CurrentUser["get_current_user"]
+  CurrentUser --> Users
+  CurrentUser --> RBAC["rbac require_admin/superadmin"]
+```
+
+External module boundaries:
+
+- HTTP request/response behavior lives in `routers/auth.py`; this module exposes reusable primitives and dependencies.
+- User and refresh-token documents are stored through `models/database.py`.
+- Web/mobile token lifecycle must stay aligned with `schemas/user.py`, `packages/shared`, `frontend`, and `mobile`.
 
 ## Maintenance Notes
 

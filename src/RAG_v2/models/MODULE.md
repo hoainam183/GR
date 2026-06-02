@@ -1,6 +1,6 @@
 # Module: `models`
 
-Source-verified: 2026-05-25 from `models/*.py`, `api/main.py`, and auth/admin route usage.
+Source-verified: 2026-06-02 from `models/*.py`, `api/main.py`, `api/routes/*.py`, auth/admin route usage, and crawler staging source.
 
 ## Purpose
 
@@ -64,10 +64,13 @@ Use this module for async route-level DB work.
 ## `system_config.py`
 
 Admin LLM overrides are a single Mongo document at `system_config/llm_config`.
-The persistence boundary whitelists the current SystemTab fields only:
-Google/Tavily keys, chat model tuning, agent model, and reflection model.
-Startup merges non-empty DB values over `.env` settings; absent or empty DB
-values leave environment/default settings intact.
+The persistence boundary whitelists the current SystemTab model/tuning fields
+only: LLM provider, chat model/temperature/max tokens, agent model, and
+reflection model. Managed API key rows are kept under `api_keys` for
+`deepseek`, `google`, and `tavily`; public admin responses expose fingerprints
+and active/inactive status, not raw secrets. Startup merges non-empty DB values
+over `.env` settings; absent or empty DB values leave environment/default
+settings intact.
 
 ## `mongo_logger.py`
 
@@ -116,6 +119,31 @@ uploaded -> converting -> converted -> cleaning -> cleaned
 It also stores collection, converter/chunker choices, file paths, chunk counts, indexed counts, audit entries, and error/status messages.
 
 `DocumentChunk` stores reviewable chunk content/metadata, selected state, strategy, and source document id.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Lifespan["api/main.lifespan"] --> Motor["database.get_database/create_indexes"]
+  Routes["api/routes/*"] --> Motor
+  Auth["routers/auth.py + auth refresh"] --> Users["users + refresh_tokens"]
+  Chat["api/routes/chat.py"] --> Logger["MongoLogger"]
+  Pipeline["pipeline/RAGPipeline"] --> Logger
+  Logger --> Sessions["sessions"]
+  Logger --> Turns["turns"]
+  Logger --> QueryLogs["query_logs"]
+  Logger --> AgentTraces["agent_traces"]
+  Upload["pipeline/DocumentPipeline"] --> Docs["documents + document_chunks"]
+  Crawler["scripts/auto_crawler"] --> CrawlDocs["crawler_runs + crawler_chunks"]
+  AdminConfig["api/routes/admin_stats.py"] --> Config["system_config/llm_config"]
+  MobileRoutes["bookmark/feedback/notification routes"] --> MobileDocs["bookmarks, feedback, notifications"]
+```
+
+External module boundaries:
+
+- Async route-level reads/writes use `database.py`; sync durable chat/session logging uses `MongoLogger`.
+- `models` define persistence shape but should not own chat routing, retrieval, generation, or frontend normalization.
+- Schema-facing changes must update `schemas`, `api` routes, web/mobile/shared TypeScript types, and tests.
 
 ## Maintenance Notes
 

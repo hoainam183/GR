@@ -1,6 +1,6 @@
 # Module: `llm`
 
-Source-verified: 2026-05-20 from `llm/*.py`, `config/settings.py`, and `pipeline/flows.py`.
+Source-verified: 2026-06-02 from `llm/*.py`, `config/settings.py`, `pipeline/flows.py`, and `agent/react_agent.py`.
 
 ## Purpose
 
@@ -34,12 +34,16 @@ generate_stream(query, context=None, history=None, mode="rag") -> Generator[str,
 `create_llm(settings)`:
 
 - Reads `settings.llm_provider`.
-- Lazy-imports `llm.gemini` or `llm.lm_studio`.
-- Builds provider with `settings.llm_api_key or settings.google_api_key`, `settings.chat_model`, temperature, max tokens.
+- Lazy-imports `llm.deepseek`, `llm.gemini`, or `llm.lm_studio`.
+- Builds provider with `settings.llm_api_key` first, then provider fallback:
+  `settings.deepseek_api_key` for DeepSeek and `settings.google_api_key` for
+  Gemini/other non-LM-Studio providers.
+- Passes `settings.chat_model`, temperature, and max tokens.
 - For `lm_studio`, passes `settings.lm_studio_base_url`.
 
 Known provider registry keys in code:
 
+- `deepseek`
 - `gemini`
 - `lm_studio`
 
@@ -93,11 +97,36 @@ Important current prompt behavior:
 
 Pipeline/Tavily behavior depends on both `self_eval_enabled` and fallback settings; self-eval failure alone is diagnostic unless the caller gates on it.
 
+## Module Flow
+
+```mermaid
+flowchart TD
+  Settings["config/Settings"] --> Factory["create_llm"]
+  Factory --> DeepSeek["DeepSeekLLM"]
+  Factory --> Gemini["GeminiLLM"]
+  Factory --> LMStudio["LMStudioLLM"]
+  Pipeline["pipeline/flows.py"] --> Prompt["prompts.build_rag_messages"]
+  Agent["agent/react_agent.py synthesis"] --> Provider["provider chat completion"]
+  Prompt --> Provider
+  Provider --> Answer["generated text or stream tokens"]
+  Pipeline --> SelfEval["SelfEvaluator.evaluate"]
+  SelfEval --> EvalPrompt["build_self_eval_messages"]
+  EvalPrompt --> Provider
+  SelfEval --> QualityGate["pipeline answer_quality_gate/Tavily decision"]
+```
+
+External module boundaries:
+
+- `llm` receives formatted query/context/history and returns text/stream chunks; retrieval and citation selection are owned by `pipeline`/`retrieval`.
+- Provider settings come from `config` and admin hot reload through `pipeline`.
+- Self-eval output informs `pipeline` quality/fallback decisions but does not directly call Tavily.
+
 ## Settings
 
 Main settings:
 
 - `llm_provider`
+- `deepseek_api_key`
 - `google_api_key`
 - `llm_api_key`
 - `chat_model`
@@ -106,6 +135,12 @@ Main settings:
 - `lm_studio_base_url`
 - `self_eval_enabled`
 - `self_eval_min_top_score`
+
+The main chat default is `llm_provider="deepseek"` with
+`chat_model="deepseek-v4-flash"`. Agent final synthesis is configured
+separately in `agent/react_agent.py` through `agent_synthesis_provider` and
+`agent_synthesis_model`; that path currently supports Gemini, Ollama, and an
+OpenAI-compatible local/LM-Studio-style endpoint.
 
 ## Maintenance Notes
 

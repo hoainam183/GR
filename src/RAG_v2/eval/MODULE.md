@@ -1,6 +1,6 @@
 # Module: `eval`
 
-Source-verified: 2026-05-20 from `eval/**/*.py` and `evaluation/MODULE.md`.
+Source-verified: 2026-06-02 from `eval/**/*.py`, `evaluation/MODULE.md`, and `api/routes/metrics.py`.
 
 ## Purpose
 
@@ -43,6 +43,24 @@ Use this as a supplement to source-id based current policy eval, not as the only
 ## Golden Dataset Contract
 
 `eval/golden_dataset.json` is read by `evaluation.two_layer_eval current`. Cases should include stable ids, query/question text, expected collections, and preferably expected source ids.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Golden["eval/golden_dataset.json"] --> Current["evaluation.two_layer_eval current"]
+  LegacyEval["eval/evaluator.py"] --> Pipeline["pipeline/RAGPipeline"]
+  RAGAS["eval/RAG/ragass_evaluator.py"] --> Pipeline
+  AgentEval["eval/agent/evaluate.py"] --> Agent["agent/ReActAgent via pipeline"]
+  Generators["eval/RAG generators"] --> Outputs["eval/RAG/outputs"]
+  Current --> Results["evaluation/results + Mongo dashboard"]
+```
+
+External module boundaries:
+
+- `eval` holds legacy/specialized assets; production regression gating lives in `evaluation`.
+- Full-RAG/RAGAS runners may instantiate `RAGPipeline`, so model/store prerequisites mirror runtime.
+- Generated outputs should not replace curated golden data without review.
 
 ## Maintenance Notes
 

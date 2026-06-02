@@ -1,6 +1,6 @@
 # Module: `frontend`
 
-Source-verified: 2026-05-25 from `frontend/chat-companion/src/**`, package files, and API contracts.
+Source-verified: 2026-06-02 from `frontend/chat-companion/src/**`, `packages/shared`, `api/routes/*.py`, and API contract queries.
 
 ## Purpose
 
@@ -102,9 +102,43 @@ Token behavior:
 
 `OverviewTab` uses compact metric cards, a usage band, and an operations summary panel rather than a loose page-level stat grid.
 
-`SystemTab` keeps LLM model fields as selects. The configured current model is injected as an option when it is outside the curated model list so admin saves do not accidentally discard runtime settings.
+`SystemTab` keeps LLM model fields as selects. The configured current model is injected as an option when it is outside the curated model list so admin saves do not accidentally discard runtime settings. API key management uses secret-free rows/fingerprints from `/admin/config/api-keys`; the form can submit new DeepSeek/Google/Tavily secrets, but the backend does not echo raw keys.
 
 Crawler status may include collection-level crawl summaries with bounded `saved_chunks` previews after a manual crawl. New crawler runs are staged for review in Mongo; `SystemTab` renders pending/indexed runs from `crawlerStatus.runs`, allows expanding a preview chunk to fetch/edit full content, and starts indexing through the per-run index endpoint. Article URLs in crawler previews should render as normal external links.
+
+Notification pages consume `/notifications*` user routes. Admin/system
+notification creation is exposed at `/admin/notifications` and
+`/admin/notifications/broadcast`; current backend auth for those endpoints is
+valid-user auth, not `require_admin`.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Browser["Browser"] --> App["App.tsx route table"]
+  App --> Guards["RequireAuth / RequireAdmin"]
+  Guards --> AuthSession["services/authSession.ts"]
+  AuthSession --> AuthAPI["/auth/*"]
+  App --> Chat["ChatContainer"]
+  Chat --> ChatAPI["services/chatApi.ts"]
+  ChatAPI --> Stream["/chat/stream SSE"]
+  ChatAPI --> ChatV3["/chat/v3"]
+  ChatV3 --> Normalize["normalizeV3Response"]
+  Stream --> Normalize
+  Normalize --> Trace["PipelineTrace/debug metadata"]
+  App --> Admin["AdminPage/SystemTab/DocumentReview"]
+  Admin --> AdminAPI["services/adminApi.ts"]
+  AdminAPI --> Upload["/admin/documents*"]
+  AdminAPI --> Config["/admin/config* + crawler endpoints"]
+  App --> MobileFeatures["bookmarks/notifications/eval/retrieval pages"]
+  MobileFeatures --> Backend["FastAPI API routes"]
+```
+
+External module boundaries:
+
+- The web app consumes backend contracts from `api`, `schemas`, and `packages/shared`; it should not duplicate backend business rules beyond UX guards.
+- Auth state uses backend refresh-cookie semantics; access tokens stay in memory.
+- Trace/admin views must track optional metadata fields from `api/response_mapper.py` and `schemas/chat.py`.
 
 ## Maintenance Notes
 

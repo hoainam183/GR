@@ -1,6 +1,6 @@
 # Module: `scripts`
 
-Source-verified: 2026-05-20 from `scripts/*.py` and GitNexus ingestion/indexing flow queries.
+Source-verified: 2026-06-02 from `scripts/*.py`, `api/routes/admin_stats.py`, `api/services/notification_delivery.py`, and GitNexus ingestion/indexing flow queries.
 
 ## Purpose
 
@@ -48,7 +48,21 @@ crawl official sources
 
 FastAPI lifespan may schedule this script daily when `crawler_enabled=True`.
 
-`AutoCrawlPipeline` no longer indexes chunks during default manual, scheduled, or CLI `all` runs. Per-pipeline summaries include `review_run_id`, `review_status`, edit/index booleans, and bounded `saved_chunks` previews for staged chunks. `index_staged_crawler_run()` is the approval path that reads edited Mongo chunks, indexes them, appends them to the chunk archive, invalidates cache, triggers post-index eval, and sends notifications.
+`AutoCrawlPipeline` no longer indexes chunks during default manual, scheduled,
+or CLI `all` runs. Per-pipeline summaries include `review_run_id`,
+`review_status`, edit/index booleans, and bounded `saved_chunks` previews for
+staged chunks. `index_staged_crawler_run()` is the approval path that reads
+edited Mongo chunks, indexes them, appends them to the chunk archive,
+invalidates cache by chunk/document ids, triggers post-index eval when enabled,
+and sends notifications.
+
+FastAPI admin crawler endpoints are the normal approval surface:
+
+- `POST /admin/crawler/trigger`
+- `GET /admin/crawler/status`
+- `GET /admin/crawler/runs/{run_id}/chunks`
+- `PATCH /admin/crawler/runs/{run_id}/chunks/{chunk_id}`
+- `POST /admin/crawler/runs/{run_id}/index`
 
 Supported crawler targets in source include:
 
@@ -70,6 +84,32 @@ GitNexus ingestion flows identify:
 - `index_kehoach.py:index_chunks() -> QdrantStore.index_documents()`
 - `index_quydinh.py:index_chunks() -> QdrantStore.index_documents()`
 - `index_stsv.py:index_chunks() -> QdrantStore.index_documents()`
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  CLI["manual CLI or APScheduler"] --> Crawler["auto_crawler.AutoCrawlPipeline"]
+  AdminAPI["api/routes/admin_stats.py"] --> Crawler
+  Crawler --> Fetch["official HUST pages"]
+  Fetch --> Chunk["ChunkProcessor + chunking"]
+  Chunk --> Stage["Mongo crawler_runs/crawler_chunks"]
+  Stage --> Review["frontend SystemTab review/edit"]
+  Review --> IndexApproval["index_staged_crawler_run"]
+  IndexApproval --> Embedding["embedding BGE/E5"]
+  Embedding --> Qdrant["Qdrant"]
+  IndexApproval --> ES["Elasticsearch"]
+  IndexApproval --> Archive["data chunk archive append"]
+  IndexApproval --> Cache["cache invalidation"]
+  IndexApproval --> Eval["evaluation.post_index"]
+  IndexApproval --> Notify["api/services/notification_delivery"]
+```
+
+External module boundaries:
+
+- Scripts may run outside FastAPI, but admin crawler review is normally driven by `api/routes/admin_stats.py` and frontend `SystemTab`.
+- Index scripts write retrieval stores and must preserve `data`/`retrieval` metadata contracts.
+- Notification, cache invalidation, and post-index eval are integrations; indexing should remain retryable if these fail-soft integrations fail.
 
 ## Metadata Maintenance
 

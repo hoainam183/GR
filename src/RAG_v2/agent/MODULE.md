@@ -1,6 +1,6 @@
 # Module: `agent`
 
-Source-verified: 2026-06-01 from `agent/*.py`, `pipeline/rag_pipeline.py`, and focused planner-executor tests.
+Source-verified: 2026-06-02 from `agent/*.py`, `pipeline/rag_pipeline.py`, `config/settings.py`, and focused planner-executor tests.
 
 ## Purpose
 
@@ -59,6 +59,37 @@ Planner-Executor behavior:
 - `_executor_node()` calls `execute_retrieval_plan()` with the pipeline-provided effective `top_k`, and optionally calls `web_search_for_executor()` for `needs_web`.
 - Empty retrieval texts are filtered before synthesis. If every retrieval step is empty, the agent returns a deterministic no-information answer without triggering fallback.
 - `_synthesize_node()` writes the final Vietnamese answer from non-empty tool results.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Pipeline["pipeline/RAGPipeline.query_agent"] --> InitDocs["init_agent_docs ContextVar"]
+  InitDocs --> Run["ReActAgent.run"]
+  Run --> Route["route_entry"]
+  Route -->|comparison or multi_source| Decompose["_decompose_node"]
+  Route -->|general or missing subtype| Planner["_planner_node"]
+  Decompose --> Planner
+  Planner --> Validate["_validate_plan"]
+  Validate -->|valid steps| Execute["_executor_node"]
+  Validate -->|invalid| ErrorState["state.error"]
+  Execute --> Adapter["tool_adapters.execute_retrieval_plan"]
+  Adapter --> Retrieval["retrieval/RetrievalService shared runtime"]
+  Adapter -->|needs_web| Tavily["tools/TavilySearchTool"]
+  Retrieval --> ToolResults["ToolResult + agent docs"]
+  Tavily --> ToolResults
+  ToolResults --> Synthesize["_synthesize_node"]
+  ErrorState --> PipelineFallback["pipeline fallback policy"]
+  Synthesize --> State["AgentState"]
+  State --> Mapper["api/response_mapper + Mongo agent_traces"]
+```
+
+External module boundaries:
+
+- Entry and fallback policy live in `pipeline`; `agent` returns `AgentState` and collected docs.
+- Retrieval and Tavily are injected from the shared `retrieval/RetrievalService`; the agent must not cold-load independent embedders/searchers.
+- Final API shape is owned by `api/response_mapper.py` and `schemas/chat.py`.
+- Prompts live in this module, but chat-model provider construction is shared with `llm`/settings.
 
 ## Legacy Tools
 

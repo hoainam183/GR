@@ -1,6 +1,6 @@
 # Module: `schemas`
 
-Source-verified: 2026-06-01 from `schemas/*.py`, `api/routes/*.py`, and `packages/shared`.
+Source-verified: 2026-06-02 from `schemas/*.py`, `api/routes/*.py`, `packages/shared`, and web/mobile API clients.
 
 ## Purpose
 
@@ -46,6 +46,11 @@ schemas/
 
 Authenticated routes should derive identity from JWT instead of trusting body identity.
 
+`ChatResponse` and trace fields must remain compatible with both normal
+`/chat/v3` responses and streaming metadata events. Agent traces are optional
+and may contain planner/executor tool-call records instead of legacy ReAct loop
+messages.
+
 ## Document Schemas
 
 `document.py` supports admin upload/review:
@@ -87,6 +92,27 @@ HttpOnly cookie instead of the JSON body.
 ## Constants
 
 `constants.py` contains route/mode constants and a legacy `CLARIFY_SENTINEL` kept for backward-compatible consumers. Current Planner-Executor code does not emit clarify tool output.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Client["frontend/mobile/shared clients"] --> Request["Pydantic request schemas"]
+  Request --> Routes["api/routes/* and routers/auth.py"]
+  Routes --> Pipeline["pipeline outputs"]
+  Pipeline --> Mapper["api/response_mapper.py"]
+  Mapper --> ChatSchemas["ChatResponse/RetrievedDocument/AgentTracePayload"]
+  Routes --> MobileSchemas["mobile bookmark/feedback/notification schemas"]
+  Routes --> UserSchemas["user auth/token/profile schemas"]
+  Routes --> DocumentSchemas["document upload/review schemas"]
+  ChatSchemas --> ClientTypes["packages/shared + frontend/mobile types"]
+```
+
+External module boundaries:
+
+- This is the backend API contract boundary; route and mapper changes should update schemas first or in the same change.
+- Frontend/mobile/shared clients mirror these shapes and depend on optional trace fields staying optional.
+- Persistence models in `models` may have extra internal fields that should not leak unless explicitly represented here.
 
 ## Maintenance Notes
 

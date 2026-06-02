@@ -1,6 +1,6 @@
 # Module: `embedding`
 
-Source-verified: 2026-05-20 from `embedding/*.py` and `retrieval/service.py`.
+Source-verified: 2026-06-02 from `embedding/*.py`, `retrieval/service.py`, `pipeline/flows.py`, `agent/tool_adapters.py`, and crawler review indexing.
 
 ## Purpose
 
@@ -54,6 +54,31 @@ E5 query/doc prefixes are handled in the concrete class. BGE-M3 currently uses d
 - `agent/tool_adapters.py` receives the same embedder instances through runtime injection.
 - `query/domain_classifier.py` uses BGE-M3 embeddings as logistic-regression features.
 - `pipeline/document_pipeline.py` lazily loads embedders for admin upload indexing.
+- `scripts.auto_crawler.index_staged_crawler_run()` can reuse the app
+  pipeline's warmed BGE/E5 embedders when admin-approved crawler chunks are
+  indexed.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Settings["config/Settings"] --> Service["retrieval/RetrievalService.from_settings"]
+  Service --> BGE["BGEm3Embedder"]
+  Service --> E5["E5MultilingualEmbedder"]
+  Query["runtime query"] --> BGE
+  Query --> E5
+  BGE --> Search["retrieval/MultiCollectionSearch"]
+  E5 --> Search
+  Docs["admin/crawler/index scripts"] --> BatchEmbed["embed_documents batches"]
+  BatchEmbed --> Qdrant["Qdrant named vectors bge_m3/e5"]
+  BGE --> Classifier["query/DomainClassifier features"]
+```
+
+External module boundaries:
+
+- `embedding` owns vector generation only; Qdrant upsert/search is in `retrieval` and indexing scripts.
+- Heavy model instances should be created once by `RetrievalService` or reused by crawler/admin indexing when possible.
+- Any model/dimension change affects Qdrant collections, scripts, retrieval, agent adapters, and eval baselines.
 
 ## Maintenance Notes
 

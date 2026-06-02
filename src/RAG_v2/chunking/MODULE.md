@@ -1,6 +1,6 @@
 # Module: `chunking`
 
-Source-verified: 2026-05-20 from `chunking/**/*.py`, `pipeline/document_pipeline.py`, and data/indexing docs.
+Source-verified: 2026-06-02 from `chunking/**/*.py`, `pipeline/document_pipeline.py`, `scripts/auto_crawler.py`, and data/indexing docs.
 
 ## Purpose
 
@@ -63,6 +63,27 @@ Chunks should include:
 - `level`/`chunk_type` for parent/header/child behavior
 
 Parent/header chunks can be stored for review but should not be indexed if `utils.chunk_indexing.is_indexable_chunk()` rejects them.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Source["PDF/Markdown/HTML/JSON"] --> Loader["document_loader or crawler"]
+  Loader --> Clean["cleaned Markdown/text"]
+  Clean --> Strategy["recursive/legal/kehoach/stsv chunker"]
+  Strategy --> Metadata["enrich_metadata.py"]
+  Metadata --> Review["pipeline/DocumentPipeline or crawler Mongo review"]
+  Review --> Policy["utils.chunk_indexing.is_indexable_chunk"]
+  Policy --> Indexers["scripts or DocumentPipeline embedding/indexing"]
+  Indexers --> Stores["Qdrant + Elasticsearch"]
+  Stores --> Runtime["retrieval metadata filters/search"]
+```
+
+External module boundaries:
+
+- `document_loader` produces Markdown/text; `chunking` turns it into chunks and metadata.
+- `pipeline/document_pipeline.py` and `scripts/auto_crawler.py` decide review/index lifecycle and persistence.
+- Metadata fields must remain compatible with `data/MODULE.md`, `retrieval/metadata_filters.py`, and evaluation labels.
 
 ## Maintenance Notes
 

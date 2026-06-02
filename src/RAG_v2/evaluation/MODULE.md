@@ -1,6 +1,6 @@
 # Module: `evaluation`
 
-Source-verified: 2026-06-01 from `evaluation/*.py`, `eval/`, `api/routes/metrics.py`, and GitNexus query results.
+Source-verified: 2026-06-02 from `evaluation/*.py`, `eval/`, `api/routes/metrics.py`, `scripts/auto_crawler.py`, and GitNexus query results.
 
 ## Purpose
 
@@ -183,6 +183,30 @@ It writes drafts under `evaluation/ground_truth_drafts/` and should not overwrit
 `GET /metrics/eval?suite=current_policy&limit=10` and `GET /metrics/eval?suite=historical_email&limit=10` return Mongo-backed eval runs when `mongo_logger` is available. If Mongo is unavailable, the route can fall back to JSON artifacts.
 
 Frontend route: `/eval`.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  CurrentCLI["two_layer_eval current"] --> CurrentData["eval/golden_dataset.json + labels"]
+  HistoricalCLI["two_layer_eval historical"] --> HistoricalData["clean_data/test_dataset.json"]
+  CurrentData --> RetrievalEval["evaluate_current_pipeline / RetrievalService"]
+  HistoricalData --> E2E["RAGPipeline.query_v3"]
+  SFT["evaluate_sft_backend.py"] --> LiveAPI["live /chat/v3 backend"]
+  RetrievalEval --> Store["eval_store Mongo/artifacts"]
+  E2E --> Judge["GeminiJudge optional"]
+  Judge --> Store
+  Store --> Metrics["api/routes/metrics.py /metrics/eval"]
+  Metrics --> Frontend["frontend EvalPage"]
+  Crawler["scripts/auto_crawler post-index"] --> PostIndex["post_index.py"]
+  PostIndex --> CurrentCLI
+```
+
+External module boundaries:
+
+- `evaluation` drives runtime modules under controlled settings; it should not silently change production indexes or admin config.
+- Dashboard data is served by `api/routes/metrics.py` and rendered by `frontend`.
+- Post-index eval is fail-soft and should report failures without blocking crawler indexing.
 
 ## Maintenance Notes
 

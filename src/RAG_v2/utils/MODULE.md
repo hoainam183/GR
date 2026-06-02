@@ -1,6 +1,6 @@
 # Module: `utils`
 
-Source-verified: 2026-05-20 from `utils/*.py`, `pipeline/document_pipeline.py`, and API routes.
+Source-verified: 2026-06-02 from `utils/*.py`, `pipeline/document_pipeline.py`, and API routes.
 
 ## Purpose
 
@@ -14,9 +14,33 @@ utils/
   tracing.py          RequestTrace and trace_stage timing helpers.
   chunk_indexing.py   is_indexable_chunk() policy for admin upload indexing.
   parse_hust_email.py Parse HUST/SIS-style email metadata.
+  terminology.py      HUST abbreviation/full-term expansion helpers.
+  vietnamese_segmenter.py Optional underthesea/dictionary segmentation for BM25 text.
   extract_questions.py Extract/normalize questions from text files.
   extract_text.py      Simple recursive text extraction helper.
 ```
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  UploadAPI["api/routes/upload.py"] --> Storage["LocalStorage"]
+  Storage --> DocPipeline["pipeline/DocumentPipeline"]
+  DocPipeline --> ChunkPolicy["is_indexable_chunk"]
+  ChunkPolicy --> Indexing["Qdrant + Elasticsearch indexing"]
+  ChatFlow["pipeline/rag_pipeline.py and flows.py"] --> Trace["RequestTrace / trace_stage"]
+  Trace --> Mapper["api/response_mapper.py"]
+  Mapper --> UI["frontend/mobile trace views"]
+  QueryText["query/retrieval text"] --> Terms["expand_academic_abbreviations"]
+  QueryText --> Segment["vietnamese_segmenter.segment_query"]
+  Segment --> ES["retrieval/ElasticsearchStore"]
+```
+
+External module boundaries:
+
+- `utils` is dependency-light glue; storage is used by admin upload, tracing by chat API/UI, and chunk policy by document indexing.
+- Text helpers feed `query`, `retrieval`, scripts, and tests, but should not own routing, generation, or persistence contracts.
+- If a helper starts requiring heavy runtime services, move it into the owning module instead of expanding `utils`.
 
 ## Storage
 

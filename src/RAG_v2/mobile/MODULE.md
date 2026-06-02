@@ -1,6 +1,6 @@
 # Module: `mobile`
 
-Source-verified: 2026-05-25 from `mobile/src/**`, `mobile/package.json`, and `packages/shared`.
+Source-verified: 2026-06-02 from `mobile/src/**`, `mobile/package.json`, `packages/shared`, and mobile API contract queries.
 
 ## Purpose
 
@@ -70,6 +70,37 @@ It sends POST requests to:
 and uses native EventSource events. If streaming fails before the first token, UI code can fall back to non-streaming `/chat/v3` through shared API helpers.
 
 `EXPO_PUBLIC_API_BASE_URL` is the preferred mobile API base. Fallback defaults are handled in `mobile/src/utils/constants.ts`.
+
+Notifications use authenticated `/notifications*` routes and Expo push
+subscriptions through `/notifications/subscribe` and
+`/notifications/unsubscribe`. The backend stores Expo push tokens in
+`notification_subscriptions` and sends push messages best-effort.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  App["Expo app"] --> Root["RootNavigator"]
+  Root -->|unauthenticated| AuthStack["AuthStack"]
+  Root -->|authenticated| Tabs["MainTabNavigator"]
+  AuthStack --> SharedAuth["packages/shared auth API"]
+  SharedAuth --> AuthRoutes["/auth/login/register/refresh/me"]
+  AuthRoutes --> SecureStore["SecureStore access + refresh tokens"]
+  Tabs --> Chat["Chat screens"]
+  Chat --> StreamHook["useStreamChat"]
+  StreamHook --> Stream["/chat/stream via react-native-sse"]
+  StreamHook -->|fallback| ChatV3["/chat/v3 shared API"]
+  Tabs --> Lookup["lookup/bookmarks/notifications/profile"]
+  Lookup --> SharedAPIs["packages/shared API helpers"]
+  SharedAPIs --> Backend["FastAPI routes"]
+  Notifications["notification screens"] --> ExpoPush["/notifications/subscribe"]
+```
+
+External module boundaries:
+
+- Mobile owns native navigation/storage/UX; API paths, normalized types, and store factories come from `packages/shared`.
+- Backend refresh-token rotation is authoritative; failed refresh clears SecureStore/auth state.
+- Streaming metadata and fallback responses must remain compatible with `schemas/chat.py` and shared normalizers.
 
 ## Storage
 

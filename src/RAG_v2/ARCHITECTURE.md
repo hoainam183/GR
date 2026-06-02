@@ -1,10 +1,10 @@
 # RAG v2 Architecture
 
-Source-verified: 2026-05-20 from source files, MODULE.md files, PROJECT_MEMORY.md, and GitNexus index `GR` (11919 symbols, 20221 relationships, 300 execution flows).
+Source-verified: 2026-06-02 from source files, `MODULE.md` files, `PROJECT_MEMORY.md`, and GitNexus index `GR` (16,920 nodes, 28,737 relationships, 300 execution flows).
 
 ## 1. System Goal
 
-`RAG_v2` is a HUST academic assistant. It answers student questions over internal academic sources and optionally uses official web search for fresh plan/deadline questions.
+`RAG_v2` is a HUST academic assistant. It answers student questions over internal academic sources and can optionally use official web search for fresh plan/deadline questions.
 
 Primary knowledge collections:
 
@@ -20,13 +20,14 @@ The system includes:
 
 - FastAPI backend.
 - Smart RAG pipeline.
-- LangGraph agent for complex/multi-source questions.
+- LangGraph Planner-Executor agent for complex/multi-source questions.
 - Qdrant + Elasticsearch hybrid retrieval.
 - MongoDB persistence.
-- Optional Redis cache/session/rate limit.
-- Admin document upload/indexing pipeline.
-- React web app.
-- Expo mobile app.
+- Optional Redis session/cache/history/rate-limit layer.
+- Admin document upload/review/indexing pipeline.
+- Admin crawler staging/review/indexing workflow.
+- React/Vite web app.
+- Expo/React Native mobile app.
 - Shared TypeScript package.
 - Offline evaluation/regression tooling.
 
@@ -35,17 +36,17 @@ The system includes:
 ```text
 RAG_v2/
   api/               FastAPI app, routes, response mapping, middleware.
-  auth/              JWT, OAuth, password, RBAC helpers.
+  auth/              JWT, refresh-token, password, OAuth, RBAC helpers.
   routers/           Auth HTTP router mounted under /auth.
   schemas/           Pydantic request/response contracts.
   pipeline/          RAGPipeline, RAG flows, DocumentPipeline.
-  query/             Complexity routing, domain routing, reflection, decomposer.
+  query/             Complexity routing, domain routing, reflection, decomposition.
   retrieval/         Qdrant, ES, hybrid/multi-collection search, filters, resolver.
-  embedding/         BGE-M3 and E5 embedders.
+  embedding/         BGE-M3 and multilingual E5 embedders.
   reranking/         BGE cross-encoder reranker.
   llm/               DeepSeek/Gemini/LM Studio wrappers, prompts, self-eval.
-  agent/             LangGraph agent, tools, planner-executor.
-  models/            Mongo models, Motor client, MongoLogger.
+  agent/             LangGraph Planner-Executor agent and retrieval/web adapters.
+  models/            Mongo models, Motor client, MongoLogger, system config.
   cache/             Optional Redis sessions, history, LLM cache, rate limits.
   chunking/          Offline/admin chunkers and metadata enrichment.
   document_loader/   PDF -> Markdown conversion and cleanup.
@@ -70,21 +71,34 @@ Each major directory above has a `MODULE.md` with module-specific contracts and 
 | --- | --- |
 | API | FastAPI in `api/main.py` |
 | Chat orchestration | `pipeline/rag_pipeline.py`, `pipeline/flows.py` |
-| Agent | LangGraph + LangChain StructuredTool in `agent/` |
+| Agent | LangGraph Planner-Executor in `agent/react_agent.py` |
 | Query routing | `query/complexity_router.py`, `query/router.py`, `query/domain_classifier.py` |
 | Query rewrite | `query/reflection.py` |
 | Vector store | Qdrant named vectors `bge_m3` and `e5` |
 | Keyword store | Elasticsearch indexes named by collection |
 | Embeddings | BGE-M3 and multilingual E5 |
 | Reranker | BGE reranker cross-encoder |
-| Main LLM | DeepSeek `deepseek-v4-flash` through OpenAI-compatible endpoint by default |
-| Agent tool LLM | LM Studio/OpenAI-compatible local model |
-| Agent synthesis | Gemini, Ollama, or LM Studio depending on settings |
+| Main LLM | DeepSeek `deepseek-v4-flash` by default |
+| Agent planner/synthesis | Gemini by default, with Ollama or LM Studio/OpenAI-compatible fallback |
 | Persistence | MongoDB through Motor and `MongoLogger` |
-| Cache | Redis optional |
+| Cache | Redis optional/fail-soft |
 | Web | React + Vite |
 | Mobile | Expo/React Native |
 | Shared TS | `packages/shared` |
+
+Important default settings in `config/settings.py`:
+
+| Setting | Default |
+| --- | --- |
+| `llm_provider` | `deepseek` |
+| `chat_model` | `deepseek-v4-flash` |
+| `agent_enabled` | `True` |
+| `agent_model` | `qwen2.5-7b-instruct` |
+| `agent_synthesis_provider` | `gemini` |
+| `agent_synthesis_model` | `gemini-3.1-flash-lite` |
+| `tavily_fallback_enabled` | `False` |
+| `redis_enabled` | `True` |
+| `crawler_enabled` | `True` |
 
 Local infrastructure defaults:
 
@@ -112,13 +126,16 @@ Startup sequence in `api/main.py:lifespan()`:
 
 1. Load `.env` from the RAG_v2 root.
 2. Build `Settings`.
-3. Initialize `MongoLogger` when `mongodb_enabled`.
-4. Initialize Redis manager/session/cache/history/rate limiter when Redis flags are enabled.
-5. Store settings and runtime resources in `app.state`.
-6. Build one `RAGPipeline` in an executor because model loading is heavy.
-7. Create Mongo indexes.
-8. Warm up the local agent LLM if available.
-9. Optionally schedule `scripts.auto_crawler` if `crawler_enabled`.
+3. Merge persisted admin LLM overrides from Mongo `system_config/llm_config` when available.
+4. Require `google_api_key` because Gemini-backed components may need it.
+5. Initialize `MongoLogger` when `mongodb_enabled`.
+6. Initialize Redis manager/session/cache/history/rate limiter when Redis flags are enabled.
+7. Store settings and runtime resources in `app.state`.
+8. Build one `RAGPipeline` in an executor because model loading is heavy.
+9. Create Mongo indexes.
+10. Check Mongo version for admin stats feature gating.
+11. Warm up the agent LLM if available.
+12. Optionally schedule `scripts.auto_crawler` if `crawler_enabled`.
 
 Shutdown:
 
@@ -129,8 +146,10 @@ Important singleton contract:
 
 ```text
 RAGPipeline creates one RetrievalService.
-Agent tools receive that same service via inject_from_retrieval_service().
+Agent adapters receive that same service through inject_from_retrieval_service().
 ```
+
+Current caveat: `RAGPipeline` stores the service as `_retrieval_service`; there is no public `service` or `retrieval_service` property in source.
 
 ## 5. Public HTTP Surface
 
@@ -138,6 +157,7 @@ Routers registered by `create_app()`:
 
 | Route | File | Purpose |
 | --- | --- | --- |
+| `GET /` | `api/main.py` | Basic service status. |
 | `POST /chat` | `api/routes/chat.py` | Non-streaming chat, mapped to `ChatResponse`. |
 | `POST /chat/v3` | `api/routes/chat.py` | Smart response with trace/debug metadata. |
 | `POST /api/chat/v3` | `api/routes/chat.py` | Alias of `/chat/v3`. |
@@ -148,25 +168,30 @@ Routers registered by `create_app()`:
 | `POST /retrieval/search` | `api/routes/retrieval.py` | Raw retrieval diagnostic endpoint. |
 | `POST /session` | `api/routes/session.py` | Create session. |
 | `GET /session/{session_id}` | `api/routes/session.py` | Session metadata and turns. |
-| `GET /sessions` | `api/routes/session.py` | Intended session list route. |
-| `GET /sessions/me` | `api/routes/session.py` | Intended authenticated session list route. |
+| `GET /sessions` | `api/routes/session.py` | Intended session list route from prefix `/session` + path `s`. |
+| `GET /sessions/me` | `api/routes/session.py` | Intended authenticated session list route from prefix `/session` + path `s/me`. |
 | `PATCH /session/{session_id}` | `api/routes/session.py` | Rename owned session. |
 | `DELETE /session/{session_id}` | `api/routes/session.py` | Hard delete owned session. |
 | `GET /metrics/usage` | `api/routes/metrics.py` | Usage metrics. |
 | `GET /metrics/eval` | `api/routes/metrics.py` | Eval dashboard payload. |
-| `/auth/*` | `routers/auth.py` | OAuth, manual auth, profile, admin create. |
+| `/auth/*` | `routers/auth.py` | OAuth, manual auth, refresh, profile, admin create. |
 | `/admin/documents*` | `api/routes/upload.py` | Admin document upload/review/index pipeline. |
+| `/admin/stats/*` | `api/routes/admin_stats.py` | Admin overview/users/query/agent/feedback/system stats. |
+| `/admin/users/{user_id}/status` | `api/routes/admin_stats.py` | Admin user activation toggle. |
+| `/admin/crawler/*` | `api/routes/admin_stats.py` | Manual crawl, staged chunk review, crawler indexing. |
+| `/admin/config*` | `api/routes/admin_stats.py` | Runtime toggles, LLM config, API key/env config. |
+| `/admin/notifications*` | `api/routes/notification_admin.py` | Admin notification creation/broadcast. |
 | `/bookmarks*` | `api/routes/bookmark.py` | Saved answers/folders. |
-| `/feedback*` | `api/routes/feedback.py` | Answer ratings/comments. |
+| `/bookmark-folders*` | `api/routes/bookmark.py` | Bookmark folders. |
+| `/feedback*` | `api/routes/feedback.py` | Answer ratings/comments/stats. |
 | `/lookup/*` | `api/routes/lookup.py` | Mobile quick lookup. |
 | `/notifications*` | `api/routes/notification.py` | User notification inbox/subscriptions. |
-| `/admin/notifications` | `api/routes/notification_admin.py` | Admin notification creation. |
 
 Auth:
 
 - `/auth` routes are mounted by `api/main.py` from `routers/auth.py`.
-- Admin upload routes use `auth.rbac.require_admin`.
-- Superadmin is configured by `SUPERADMIN_USER_IDS`, not a DB role.
+- Admin upload/stats/config/crawler routes use admin/superadmin guards where required.
+- Superadmin is configured by `SUPERADMIN_USER_IDS`, not a DB role alone.
 
 ## 6. Chat Request And Response Contract
 
@@ -181,6 +206,12 @@ session_id: str | None
 user_context: UserContext | None
 user_id: str | None
 ```
+
+Mode behavior:
+
+- `auto`: `RAGPipeline.query_v3()`.
+- `rag`: force classic RAG through `RAGPipeline.query()`.
+- `agent`: force agent path where supported. `/chat` returns 503 if agent is disabled; `/chat/v3` returns a RAG fallback payload with `agent_error`.
 
 If a valid Bearer token exists, chat/session routes derive identity and profile from the DB user. Body-supplied `user_id` and `user_context` are legacy/dev inputs and should not override authenticated identity.
 
@@ -198,12 +229,16 @@ Response fields can include:
 - `routing_probabilities`
 - `applied_filters`
 - `collection_results`
+- `context_trace`
+- `rerank_trace`
+- `answer_quality_gate`
+- `fusion_weights`
 - `timings_ms`
-- `request_trace`
 - `agent_trace`
 - `tools_used`
 - `tool_calls`
 - `iterations`
+- `error` / `agent_error`
 
 `api/response_mapper.py` normalizes pipeline/agent outputs into the API schema.
 
@@ -213,12 +248,13 @@ Streaming event contract:
 {"type":"session","session_id":"..."}
 {"type":"token","delta":"..."}
 {"type":"metadata", ...}
+{"type":"error","error":"..."}
 {"type":"done"}
 ```
 
 ## 7. Query Processing
 
-High-level flow:
+High-level flow for classic RAG:
 
 ```text
 raw question + history + profile
@@ -236,12 +272,13 @@ raw question + history + profile
 - `simple`
 - `complex`
 
-Complex subtypes:
+Current complex subtypes:
 
 - `comparison`
 - `multi_source`
-- `personal_check`
 - `general`
+
+The old `personal_check` subtype is intentionally removed. Personal-reference eligibility/graduation wording routes as `multi_source`, so it reaches the Planner-Executor when the agent is enabled.
 
 `DomainClassifier` is two-stage:
 
@@ -269,15 +306,42 @@ Generic/latest/freshness queries must not inherit major, cohort, or semester fro
 
 Primary class: `pipeline/rag_pipeline.py:RAGPipeline`.
 
+Construction builds:
+
+- `Settings`
+- one `RetrievalService.from_settings(settings)`
+- BGE/E5/searcher/reranker/Tavily aliases from that service
+- `QueryRouter`
+- `QueryReflector`
+- `QueryDecomposer`
+- `ComplexityRouter`
+- chat LLM through `llm.create_llm()`
+- optional `SelfEvaluator`
+- optional `ReActAgent`
+- `ValidityFilter`
+- `ReferenceResolver`
+- runtime LLM reload lock/cache state
+
 Smart entrypoint:
 
 ```text
 query_v3()
-  -> chitchat: direct/canned chitchat response
+  -> chitchat: local canned handler, no retrieval
   -> simple: classic query()
-  -> complex + multi_source/comparison: decomposed RAG
-  -> complex general/personal_check: agent, with classic RAG fallback
+  -> complex: query_agent()
+     -> comparison/multi_source: agent decompose -> planner -> executor -> synthesize
+     -> general/missing subtype: agent planner -> executor -> synthesize
+     -> fallback to classic RAG when agent is disabled/errors unless require_agent=True
 ```
+
+Typical returned modes:
+
+- `chitchat`
+- `rag_v2`
+- `agent`
+- `rag_v2_fallback`
+
+`_query_decomposed()` still exists as a legacy helper, but `query_v3()` no longer bypasses the agent for multi-source complex questions.
 
 Classic RAG flow in `pipeline/flows.py:rag_flow()`:
 
@@ -289,14 +353,18 @@ history trim
   -> BGE/E5 embed
   -> MultiCollectionSearch
   -> retry relaxed strategies if empty
-  -> dedup
-  -> BGE rerank
+  -> sibling expansion before rerank when enabled
+  -> BGE rerank with fallback to original question/raw fusion if needed
+  -> HyDE fallback when reranked recall is poor
   -> ValidityFilter
   -> ReferenceResolver
+  -> score-cliff pruning
+  -> parent context expansion
+  -> optional pre-generation Tavily enrichment
   -> context formatting
   -> LLM generate
+  -> optional self-eval / local retry / Tavily fallback
   -> cache/log metadata
-  -> optional self-eval/Tavily fallback
 ```
 
 Important behaviors:
@@ -304,8 +372,15 @@ Important behaviors:
 - List/enumeration queries can request larger context.
 - Kehoach freshness/dynamic routing can lock to `kehoach`.
 - Course-like queries bias retrieval fusion toward keyword matching.
+- Reranker calls receive configured thresholds and `reranker_min_top_k`.
 - Context-size errors can trigger reduced-context retry.
-- Streaming retrieves first, then streams tokens; it does not run post-generation self-eval/Tavily.
+- Cache writes are restricted to stable local answers: answered status, no no-info/no-source/self-eval-failed markers, no dynamic/stale-risk signal, and no web fallback.
+- Streaming runs retrieval first, can do pre-generation web enrichment, then streams tokens; it intentionally avoids post-generation self-eval/Tavily.
+
+Runtime LLM reload:
+
+- `prepare_llm_config_reload()` builds replacement chat LLM, reflector, decomposer, self-evaluator, agent, and Tavily references before Mongo persistence.
+- `commit_llm_config_reload()` hot-swaps the prepared runtime under a lock, clears route cache, updates the shared retrieval service settings/Tavily, and reinjects the service into agent adapters.
 
 ## 9. Retrieval
 
@@ -318,6 +393,7 @@ Runtime wrapper: `retrieval/service.py:RetrievalService`.
 - `MultiCollectionSearch`
 - optional reranker
 - optional Tavily tool
+- in-process raw search result cache
 
 Qdrant:
 
@@ -330,82 +406,92 @@ Elasticsearch:
 
 - index names match collection names
 - keyword search over text/title-style fields
-- metadata-only search resolves filtered ids for Qdrant conditions
+- metadata-only search resolves filtered ids for Qdrant `HasIdCondition`
+- fallback field resolution handles ID mismatches where possible
 
 Multi-collection search:
 
 ```text
-build metadata filters
+build collection metadata filters
   -> resolve ES metadata fallback chain
+  -> translate matching ids into Qdrant/ES filters
   -> parallel Qdrant vector + ES keyword search per collection
   -> global vector pool
   -> global keyword pool
-  -> min-max score normalization
-  -> weighted fusion
+  -> min-max linear fusion or RRF fusion
   -> kehoach recency bonus
-  -> dedup
+  -> text-level dedup
   -> top-k candidates
 ```
 
-Default fusion settings in source:
+Default retrieval settings in source:
 
-- `vector_weight=0.8`
-- `keyword_weight=0.2`
+| Setting | Default |
+| --- | --- |
+| `collections` | `["stsv", "quydinh", "kehoach", "ctdt"]` |
+| `top_k` | `5` |
+| `vector_top_k` | `50` |
+| `keyword_top_k` | `50` |
+| `raw_candidate_multiplier` | `4.0` |
+| `raw_candidate_min` | `20` |
+| `vector_weight` | `0.8` |
+| `keyword_weight` | `0.2` |
+| `parent_context_enabled` | `True` |
 
 Metadata filter behavior:
 
 | Collection | Filter logic |
 | --- | --- |
-| `ctdt` | major code/name with generic fallback |
-| `quydinh` | cohort/major applicability with null fallback |
-| `kehoach` | real posting-date filters or freshness sort |
-| `stsv` | no default prefilter |
+| `ctdt` | Major code/name with generic fallback. |
+| `quydinh` | Cohort/major applicability with null fallback. |
+| `kehoach` | Month/year/freshness filters or date-desc strategy. |
+| `stsv` | No default prefilter. |
 
 Post-retrieval:
 
 - `ValidityFilter` drops superseded docs from `data/document_lineage.json` where safe.
 - `ReferenceResolver` resolves same-document legal references such as `Dieu` and `Khoan`.
+- Parent context expansion can fetch parent chunks from Qdrant after rerank.
 
 ## 10. Agent
 
 Primary class: `agent/react_agent.py:ReActAgent`.
 
-The agent is used for complex queries when `agent_enabled=True`.
+The public class name remains `ReActAgent` for import compatibility, but the runtime graph is Planner-Executor. The old ReAct tool-binding loop and clarify tool path have been removed.
 
-Planner-executor path:
-
-```text
-comparison/multi_source
-  -> decompose
-  -> planner JSON
-  -> validate steps
-  -> parallel retrieval executor
-  -> synthesis LLM
-```
-
-ReAct path:
+Agent flow:
 
 ```text
-general complex
-  -> local tool-calling LLM
-  -> tools
-  -> loop until answer/clarify/error/max
-  -> synthesis fallback when needed
+RAGPipeline.query_agent()
+  -> init_agent_docs()
+  -> ReActAgent.run(query, history, user_context, complexity_subtype, top_k)
+     -> route_entry
+        -> comparison/multi_source: decompose -> planner
+        -> general/missing subtype: planner
+     -> validate plan
+     -> executor when plan is valid and has steps
+     -> optional web_search when plan.needs_web
+     -> synthesize
+  -> get_agent_docs()
+  -> API response mapper + Mongo agent trace
 ```
 
-LLM-bound tools:
+Planner-Executor behavior:
 
-| Tool | Purpose |
-| --- | --- |
-| `rag_search` | Search one logical collection. |
-| `web_search` | Tavily web search for fresh/missing data. |
-| `clarify_question` | Ask one clarification and stop. |
+- `_decompose_node()` uses the synthesis LLM only for `comparison` and `multi_source`.
+- `_planner_node()` asks for JSON retrieval steps.
+- `_validate_plan()` requires valid `query` and collection fields.
+- `_executor_node()` calls `execute_retrieval_plan()` with the effective `top_k`.
+- If every retrieval step is empty, the agent returns a deterministic no-information answer.
+- Planner invalid JSON, empty steps, or invalid collection sets `state.error`; `RAGPipeline.query_agent()` handles fallback policy.
 
-Adapter-only legacy tools:
+Direct legacy adapter tools still supported for tests/older callers:
 
+- `rag_search`
 - `multi_rag_search`
 - `compare_cohorts`
 - `compare_programs`
+- `web_search`
 
 Agent collection aliases:
 
@@ -421,14 +507,15 @@ Thread-safety:
 - per-request docs are stored in a ContextVar
 - agent RAG cache is lock-protected
 - reranker calls are serialized by `_RERANKER_LOCK`
+- retrieval plan steps run in a thread pool with copied contextvars
 
-## 11. Admin Document Pipeline
+## 11. Admin Document And Crawler Pipelines
 
-HTTP owner: `api/routes/upload.py`.
+Document HTTP owner: `api/routes/upload.py`.
 
-Pipeline owner: `pipeline/document_pipeline.py:DocumentPipeline`.
+Document pipeline owner: `pipeline/document_pipeline.py:DocumentPipeline`.
 
-Flow:
+Document upload flow:
 
 ```text
 admin upload PDF
@@ -463,6 +550,32 @@ utils.chunk_indexing.is_indexable_chunk()
 
 Parent/header chunks can remain in Mongo for review but should not consume retrieval slots.
 
+Crawler review owner: `scripts/auto_crawler.py` plus `api/routes/admin_stats.py`.
+
+Current crawler flow:
+
+```text
+crawl official sources
+  -> save JSON
+  -> chunk content
+  -> stage pending crawler_runs/crawler_chunks in Mongo
+  -> admin review/edit staged chunks
+  -> index_staged_crawler_run()
+  -> embed with BGE/E5
+  -> index Qdrant + Elasticsearch
+  -> append reviewed chunks to archive
+  -> invalidate LLM cache
+  -> trigger post-index eval
+  -> create notifications when applicable
+```
+
+Supported crawler targets in source include:
+
+- `kehoach`
+- `quydinh`
+
+Default manual/scheduled/CLI `all` crawler runs stage data for review; direct CLI indexing is disabled in favor of admin review/index endpoints.
+
 ## 12. Persistence And Cache
 
 Mongo access styles:
@@ -473,6 +586,7 @@ Mongo access styles:
 Core Mongo collections:
 
 - `users`
+- `refresh_tokens`
 - `sessions`
 - `turns`
 - `query_logs`
@@ -484,6 +598,9 @@ Core Mongo collections:
 - `feedback`
 - `notifications`
 - `notification_subscriptions`
+- `system_config`
+- `crawler_runs`
+- `crawler_chunks`
 
 Redis is optional and controlled by:
 
@@ -500,6 +617,7 @@ Redis keys:
 - `history:{sid}`
 - `llm_cache:{sha}`
 - `llm_cache:q:{sha}`
+- `llm_cache:stats`
 - `doc_cache_tag:{did}`
 - `rate:min:{id}`
 - `rate:day:{id}`
@@ -513,6 +631,7 @@ Auth modules:
 - `auth/jwt_handler.py`
 - `auth/microsoft.py`
 - `auth/password.py`
+- `auth/refresh_tokens.py`
 - `auth/rbac.py`
 - `routers/auth.py`
 - `schemas/user.py`
@@ -522,8 +641,17 @@ Supported auth:
 
 1. Microsoft OAuth under `/auth/login` and `/auth/callback`.
 2. Manual register/login.
-3. JWT-backed `/auth/me` and profile update.
-4. Superadmin-created admin accounts.
+3. Refresh-token rotation through `/auth/refresh`.
+4. JWT-backed `/auth/me` and profile update.
+5. Refresh-token revocation through `/auth/logout`.
+6. Superadmin-created admin accounts.
+
+Refresh-token contract:
+
+- Web receives refresh credentials as an HttpOnly cookie.
+- Mobile sends `client_type="mobile"` and receives `refresh_token` in JSON.
+- Refresh tokens are hashed in Mongo `refresh_tokens`.
+- Rotation detects reuse/revocation families through `auth/refresh_tokens.py`.
 
 Chat user context fields:
 
@@ -552,22 +680,24 @@ data/
 
 Offline ingestion paths:
 
-- `scripts/index_ctdt` style functionality is represented by domain-specific index scripts and chunk data.
+- domain-specific index scripts under `scripts/`
 - `scripts/index_kehoach.py`
 - `scripts/index_quydinh.py`
 - `scripts/index_stsv.py`
 - `scripts/index_to_es.py`
+- `scripts/index_parent_child.py`
 - `scripts/auto_crawler.py`
+- `scripts/update_data.py`
+- `scripts/update_metadata.py`
 
-Auto crawler flow:
+Standalone indexers generally:
 
 ```text
-crawl official source
-  -> save JSON
-  -> chunk
-  -> embed
-  -> index Qdrant + ES
-  -> retention cleanup
+load chunks
+  -> filter already-indexed chunks where implemented
+  -> embed in batches
+  -> upsert Qdrant named vectors
+  -> index Elasticsearch payload/text where supported
 ```
 
 `data/document_lineage.json` is the source for superseded/active document filtering.
@@ -576,7 +706,7 @@ crawl official source
 
 Owner: `tools/tavily_search.py`.
 
-Tavily is optional and created once in `RetrievalService` when key validation passes.
+Tavily is optional and created once in `RetrievalService` when key validation passes. `tavily_fallback_enabled` defaults to `False`.
 
 Non-streaming classic RAG can use Tavily in two stages:
 
@@ -597,7 +727,7 @@ tavily_fallback_enabled=True
 valid tavily_api_key
 ```
 
-Agent web search uses HUST official/extended domains and authoritative education domains.
+Agent web search uses the agent adapter path and is only invoked when the planner requests it.
 
 ## 16. Web App
 
@@ -610,8 +740,9 @@ Stack:
 - React Router
 - TanStack Query
 - shadcn/Radix UI
-- Axios and Fetch streaming
+- Axios and Fetch/ReadableStream for SSE
 - Tailwind CSS
+- local service/type modules plus available `@rag/shared`
 
 Routes:
 
@@ -629,14 +760,32 @@ Routes:
 - `/bookmarks`
 - `/notifications`
 
+Protected route behavior:
+
+- `RequireAuth`: chat/profile/bookmarks/notifications.
+- `RequireAdmin`: trace/retrieval/eval/admin/document review.
+- Unauthenticated direct navigation redirects to `/login?next=<path>`.
+- Non-admin users reaching admin routes redirect to `/chat`.
+
 Important web files:
 
+- `src/App.tsx`
 - `src/services/chatApi.ts`
+- `src/services/authSession.ts`
 - `src/services/adminApi.ts`
 - `src/components/chat/ChatContainer.tsx`
 - `src/components/sidebar/ConversationSidebar.tsx`
 - `src/components/trace/PipelineTrace.tsx`
 - `src/pages/DocumentReview.tsx`
+- `src/pages/AdminPage.tsx`
+
+Web auth behavior:
+
+- Access tokens are kept in memory only.
+- Legacy `localStorage.token` / `localStorage.access_token` are read once for migration and removed.
+- User cache remains in localStorage.
+- Refresh tokens are HttpOnly cookies set by the backend.
+- Axios and streaming fetch helpers refresh once on 401 and retry the original request once.
 
 ## 17. Mobile App
 
@@ -645,14 +794,24 @@ Path: `mobile`.
 Stack:
 
 - Expo SDK 54
-- React Native
-- React Navigation
+- React Native 0.81
+- React 19
+- React Navigation bottom tabs/native stacks
 - TanStack Query
 - Zustand
 - SecureStore
 - MMKV when native runtime supports it
 - `react-native-sse`
+- NativeWind/Tailwind-style styling
 - `@rag/shared`
+
+Root navigation:
+
+```text
+RootNavigator
+  -> AuthStack when unauthenticated
+  -> MainTabNavigator when authenticated
+```
 
 Main tabs:
 
@@ -662,9 +821,20 @@ Main tabs:
 - Notifications
 - Profile
 
-Streaming uses `/chat/stream`; non-streaming fallback uses `/chat/v3`.
+Chat stack:
 
-Mobile uses one access token. There is no backend refresh-token endpoint as of this snapshot.
+- Session list
+- Chat detail
+
+Mobile API/auth behavior:
+
+- `mobile/src/services/api.ts` injects access tokens and has single-flight refresh-on-401.
+- Mobile stores access and refresh tokens in SecureStore.
+- Login/register calls use `client_type="mobile"` to receive JSON refresh tokens.
+- `useStreamChat()` opens `/chat/stream` through `react-native-sse`.
+- If streaming fails before the first token, it refreshes/retries once and can fall back to non-streaming `/chat/v3`.
+
+Mobile no longer uses only one access token; it has a backend refresh-token flow.
 
 ## 18. Shared TypeScript Package
 
@@ -677,18 +847,45 @@ Exports:
 - chat/auth/mobile types
 - Zustand auth/chat store factories
 - response normalization utilities
+- profile options
 - API path constants
 
-Keep `packages/shared/src/utils/constants.ts` synchronized with FastAPI route paths.
+`packages/shared/src/utils/constants.ts` currently includes:
+
+- `/chat`
+- `/chat/v3`
+- `/chat/stream`
+- `/health`
+- `/auth/login`
+- `/auth/register`
+- `/auth/me`
+- `/auth/refresh`
+- `/sessions`
+- `/sessions/me`
+- `/session`
+- `/bookmarks`
+- `/bookmark-folders`
+- `/feedback`
+- `/lookup/ctdt`
+- `/lookup/regulations`
+- `/lookup/calendar`
+- `/lookup/compare`
+- `/chat/suggest`
+- `/notifications`
+- `/notifications/subscribe`
+
+Keep these paths synchronized with FastAPI route paths.
 
 ## 19. Evaluation
 
 Current evaluation framework: `evaluation/`.
 
-Two suites:
+Main suites:
 
 - Current policy eval: production retrieval against currently indexed documents.
 - Historical email eval: conversation/advisory behavior over historical context.
+- SFT/backend eval helpers for frontend-style API payload validation.
+- Post-index eval hooks after crawler indexing.
 
 Important commands:
 
@@ -730,9 +927,15 @@ Important groups:
 - reflection/domain routing
 - crawler schedule/retention
 - Redis/session/cache/history/rate-limit flags
-- superadmin/upload/CORS/API host and port
+- auth/admin/upload/CORS/API host and port
 
 Do not hard-code provider/model/host values when a setting exists.
+
+Admin LLM config:
+
+- `GET /admin/config/llm` returns effective runtime LLM settings with keys masked.
+- `PUT /admin/config/llm` prepares a pipeline reload, persists whitelisted overrides in Mongo, commits the prepared runtime, and invalidates Redis LLM answers when generation tuning changes.
+- Startup merges non-empty persisted values over `.env`/defaults.
 
 ## 21. Known Cautions
 
@@ -744,9 +947,9 @@ Do not hard-code provider/model/host values when a setting exists.
 
 4. `DocumentPipeline.chunk()` has had debug/output behavior under `data/quydinh/admin_upload`; verify before relying on this path in production.
 
-5. Redis features are inactive unless both `redis_enabled` and the relevant per-feature flags are true.
+5. Redis features are inactive unless both `redis_enabled` and the relevant per-feature flags are true, and should remain fail-soft.
 
-6. Agent ReAct LLM is schema-bound only to `rag_search`, `web_search`, and `clarify_question`. Do not assume legacy comparison tools are visible to the LLM.
+6. `ReActAgent` is now a Planner-Executor graph despite the legacy class name. Do not assume a graph-bound ReAct tool loop or `clarify_question` tool exists.
 
 7. Streaming chat does not run post-generation self-eval/Tavily fallback.
 
@@ -758,14 +961,14 @@ Do not hard-code provider/model/host values when a setting exists.
 Client asks question
   -> FastAPI resolves auth/session/user_context
   -> RAGPipeline.query_v3 smart-routes
-     -> chitchat: direct response
+     -> chitchat: direct local response
      -> simple: classic RAG
-     -> multi-source/comparison: decomposed RAG
-     -> complex: LangGraph agent with RAG fallback
+     -> complex: LangGraph Planner-Executor agent
+        -> fallback to classic RAG when allowed and agent fails/disabled
   -> RetrievalService searches Qdrant + Elasticsearch
   -> BGE reranker selects grounded context
-  -> Validity/reference post-processing
-  -> DeepSeek/agent synthesis answers
+  -> validity/reference/parent-context post-processing
+  -> DeepSeek classic RAG answer or agent synthesis answer
   -> Mongo/Redis persist logs, sessions, caches
   -> API maps response for web/mobile trace/debug UI
 ```

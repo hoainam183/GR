@@ -1,6 +1,6 @@
 # Module: `reranking`
 
-Source-verified: 2026-05-20 from `reranking/*.py`, `retrieval/service.py`, and tests.
+Source-verified: 2026-06-02 from `reranking/*.py`, `retrieval/service.py`, `pipeline/flows.py`, `agent/tool_adapters.py`, and tests.
 
 ## Purpose
 
@@ -54,6 +54,28 @@ Thresholds:
 - `pipeline/flows.py`: reranks classic RAG candidates.
 - `agent/tool_adapters.py`: reranks agent `rag_search` results, guarded by `_RERANKER_LOCK`.
 - `evaluation/evaluate_current_pipeline.py`: evaluates reranked top-k quality.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Candidates["retrieval candidates"] --> Pipeline["pipeline/flows.py"]
+  Candidates --> Agent["agent/tool_adapters.py"]
+  Pipeline --> Factory["create_reranker(settings)"]
+  Agent --> Factory
+  Factory --> BGE["BGEReranker"]
+  BGE --> Score["cross-encoder scores query/document pairs"]
+  Score --> Threshold["regular/table thresholds"]
+  Threshold --> TopK["top-k reranked docs"]
+  TopK --> Context["pipeline/agent context formatting"]
+  TopK --> Eval["evaluation retrieval metrics"]
+```
+
+External module boundaries:
+
+- Reranking consumes candidate dicts from `retrieval` and returns reordered candidate dicts; it does not retrieve or generate.
+- Threshold and top-k settings are owned by `config` and passed by `pipeline`/agent adapters.
+- Score field changes must stay aligned with `api/response_mapper.py`, trace UI, and eval scripts.
 
 ## Maintenance Notes
 

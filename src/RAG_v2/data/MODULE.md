@@ -1,6 +1,6 @@
 # Module: `data`
 
-Source-verified: 2026-05-20 from the `data/` tree, retrieval metadata filters, and indexing scripts.
+Source-verified: 2026-06-02 from the `data/` tree, retrieval metadata filters, crawler staging/indexing source, and indexing scripts.
 
 ## Purpose
 
@@ -25,12 +25,16 @@ data/
   stsv/                  Student-support handbook/articles and chunks.
 ```
 
-Current top-level counts observed on 2026-05-20:
+Top-level count snapshot from the previous full inventory:
 
 - `ctdt`: 113 files
 - `kehoach`: 7 files
 - `quydinh`: 74 files
 - `stsv`: 86 files
+
+Crawler output for `kehoach`/`quydinh` now stages new chunks in Mongo
+`crawler_runs` and `crawler_chunks` before appending reviewed chunks back to
+archive files during the admin-approved indexing step.
 
 ## Collection Semantics
 
@@ -106,6 +110,29 @@ Use it to mark old documents as superseded when a newer regulation replaces them
 - `document_loader/` converts PDFs to Markdown for chunking.
 - `pipeline/document_pipeline.py` writes admin-uploaded document artifacts under `uploads/`, not directly into curated `data/`.
 - `retrieval/metadata_filters.py` assumes the metadata fields listed above.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Raw["curated PDFs/JSON/Markdown"] --> Loader["document_loader/chunking/scripts"]
+  Loader --> Chunks["data/<collection> chunk files"]
+  Chunks --> IndexScripts["scripts/index_*.py"]
+  Chunks --> CrawlerArchive["auto_crawler reviewed archive append"]
+  Lineage["document_lineage.json"] --> Validity["retrieval/ValidityFilter"]
+  IndexScripts --> Embedding["embedding BGE/E5"]
+  Embedding --> Qdrant["Qdrant collections"]
+  IndexScripts --> ES["Elasticsearch indexes"]
+  Qdrant --> Retrieval["retrieval runtime"]
+  ES --> Retrieval
+  Retrieval --> Eval["evaluation current policy"]
+```
+
+External module boundaries:
+
+- `data` is a file/metadata contract, not runtime logic.
+- Runtime stores are Qdrant/Elasticsearch/Mongo; data files feed indexing and validity/freshness checks.
+- Changing metadata names requires updates in chunking, scripts, retrieval filters, API traces, and evaluation labels.
 
 ## Maintenance Notes
 

@@ -1,6 +1,6 @@
 # Module: `tools`
 
-Source-verified: 2026-05-20 from `tools/tavily_search.py`, `retrieval/service.py`, `pipeline/flows.py`, and `agent/tool_adapters.py`.
+Source-verified: 2026-06-02 from `tools/tavily_search.py`, `retrieval/service.py`, `pipeline/flows.py`, `agent/tool_adapters.py`, and `config/settings.py`.
 
 ## Purpose
 
@@ -74,6 +74,9 @@ That tool is shared by:
    - self-eval requests web search with `answer_status` of `insufficient` or `stale_risk`
 
 Both stages require `tavily_fallback_enabled=True`.
+The current default is `tavily_fallback_enabled=False`, so local retrieval and
+agent/planner paths run without external web fallback unless an admin/runtime
+configuration enables it.
 
 Streaming path does not run Tavily fallback to preserve streaming UX.
 
@@ -82,6 +85,28 @@ Streaming path does not run Tavily fallback to preserve streaming UX.
 The agent tool adapter calls Tavily when the local ReAct/planner path needs fresh data or local retrieval is insufficient. Agent web search uses HUST official/extended domains plus authoritative education domains.
 
 Tool output is formatted as a text ToolMessage and also appended to per-request agent docs for API/UI trace.
+
+## Module Flow
+
+```mermaid
+flowchart TD
+  Settings["config/Settings tavily_*"] --> Service["retrieval/RetrievalService.from_settings"]
+  Service --> Tavily["TavilySearchTool"]
+  RagFlow["pipeline/flows.py"] -->|pre/post generation fallback| Tavily
+  Agent["agent/tool_adapters.py"] -->|planner needs_web| Tavily
+  Tavily --> Cache["instance TTL cache"]
+  Tavily --> API["Tavily API"]
+  API --> Filter["domain filtering + result formatting"]
+  Filter --> Context["web context/source docs"]
+  Context --> RagFlow
+  Context --> Agent
+```
+
+External module boundaries:
+
+- `tools` only adapts Tavily; it does not decide when web fallback is allowed or synthesize final answers.
+- Callers must degrade gracefully when API key validation, network, or Tavily service errors occur.
+- Domain allowlists should remain aligned with HUST/education authority policy in `pipeline` and agent prompts.
 
 ## Settings
 
