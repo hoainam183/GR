@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import {
   createApiClient,
@@ -11,7 +11,6 @@ import {
   deleteNotification,
 } from '@rag/shared';
 import type { NotificationItem } from '@rag/shared';
-import { getStoredToken } from '@/services/authStorage';
 import { clearSession, ensureAccessToken, refreshSession } from '@/services/authSession';
 
 function getRelativeTime(dateStr: string): string {
@@ -30,7 +29,6 @@ function getRelativeTime(dateStr: string): string {
 }
 
 const NotificationsPage = () => {
-  const isAuthenticated = Boolean(getStoredToken());
   const navigate = useNavigate();
   const client = React.useMemo(
     () =>
@@ -48,7 +46,6 @@ const NotificationsPage = () => {
   const { data } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => listNotifications(client),
-    enabled: isAuthenticated,
     refetchInterval: 30_000,
   });
   const notifications = data?.notifications ?? [];
@@ -56,7 +53,6 @@ const NotificationsPage = () => {
   const { data: unreadData } = useQuery({
     queryKey: ['notifications-unread-count'],
     queryFn: () => getUnreadCount(client),
-    enabled: isAuthenticated,
     refetchInterval: 30_000,
   });
   const unreadCount = unreadData?.unread_count ?? 0;
@@ -79,8 +75,6 @@ const NotificationsPage = () => {
     mutationFn: (id: string) => deleteNotification(client, id),
     onSuccess: invalidate,
   });
-
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return (
     <div className="min-h-screen bg-background p-6 max-w-3xl mx-auto">

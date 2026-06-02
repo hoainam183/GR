@@ -114,6 +114,70 @@ def _save_json(data: list, path: Path) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+_TEXT_BLOCK_TAGS = {
+    "article",
+    "aside",
+    "blockquote",
+    "div",
+    "dl",
+    "dt",
+    "dd",
+    "figcaption",
+    "figure",
+    "footer",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "header",
+    "hr",
+    "ol",
+    "p",
+    "section",
+    "table",
+    "tbody",
+    "td",
+    "tfoot",
+    "th",
+    "thead",
+    "tr",
+    "ul",
+}
+
+
+def _normalize_extracted_text(text: str) -> str:
+    """Collapse noisy HTML whitespace without breaking inline emphasis text."""
+    text = text.replace("\xa0", " ")
+    text = re.sub(r"[ \t\r\f\v]+", " ", text)
+    text = re.sub(r"([“\"'(\[])\s+", r"\1", text)
+    text = re.sub(r"\s+([”\"')\],.;:!?])", r"\1", text)
+    text = re.sub(r" *\n+ *", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return "\n".join(line.strip() for line in text.splitlines() if line.strip())
+
+
+def _extract_readable_html_text(container: BeautifulSoup) -> str:
+    """Extract article text with line breaks only for structural HTML tags."""
+    clone = BeautifulSoup(str(container), "html.parser")
+    for tag in clone.find_all(["script", "style", "noscript"]):
+        tag.decompose()
+
+    for br in clone.find_all("br"):
+        br.replace_with("\n")
+
+    for li in clone.find_all("li"):
+        li.insert_before("\n- ")
+        li.append("\n")
+
+    for tag in clone.find_all(_TEXT_BLOCK_TAGS):
+        tag.insert_before("\n")
+        tag.append("\n")
+
+    return _normalize_extracted_text(clone.get_text(separator=" ", strip=False))
+
+
 # ═══════════════════════════════════════════════════════════════
 # 1. GenericCrawler — incremental web crawl
 # ═══════════════════════════════════════════════════════════════
@@ -249,8 +313,7 @@ class GenericCrawler:
         if h3_clone:
             h3_clone.decompose()
         self._resolve_links(clone)
-        lines = [l.strip() for l in clone.get_text(separator="\n").splitlines()]
-        content_text = "\n".join(l for l in lines if l)
+        content_text = _extract_readable_html_text(clone)
 
         return {
             "title_detail": title,

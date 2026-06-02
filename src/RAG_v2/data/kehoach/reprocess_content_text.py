@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -24,6 +25,63 @@ log = logging.getLogger(__name__)
 BASE_URL = "https://ctt.hust.edu.vn"
 INPUT_FILE = Path("output_full.json")
 OUTPUT_FILE = Path("output_full.json")  # overwrite in-place
+
+_TEXT_BLOCK_TAGS = {
+    "article",
+    "aside",
+    "blockquote",
+    "div",
+    "dl",
+    "dt",
+    "dd",
+    "figcaption",
+    "figure",
+    "footer",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "header",
+    "hr",
+    "ol",
+    "p",
+    "section",
+    "table",
+    "tbody",
+    "td",
+    "tfoot",
+    "th",
+    "thead",
+    "tr",
+    "ul",
+}
+
+
+def normalize_extracted_text(text: str) -> str:
+    text = text.replace("\xa0", " ")
+    text = re.sub(r"[ \t\r\f\v]+", " ", text)
+    text = re.sub(r"([“\"'(\[])\s+", r"\1", text)
+    text = re.sub(r"\s+([”\"')\],.;:!?])", r"\1", text)
+    text = re.sub(r" *\n+ *", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return "\n".join(line.strip() for line in text.splitlines() if line.strip())
+
+
+def extract_readable_html_text(container: BeautifulSoup) -> str:
+    clone = BeautifulSoup(str(container), "html.parser")
+    for tag in clone.find_all(["script", "style", "noscript"]):
+        tag.decompose()
+    for br in clone.find_all("br"):
+        br.replace_with("\n")
+    for li in clone.find_all("li"):
+        li.insert_before("\n- ")
+        li.append("\n")
+    for tag in clone.find_all(_TEXT_BLOCK_TAGS):
+        tag.insert_before("\n")
+        tag.append("\n")
+    return normalize_extracted_text(clone.get_text(separator=" ", strip=False))
 
 
 def resolve_links(container) -> None:
@@ -52,10 +110,7 @@ def reparse_content_text(content_html: str) -> str:
     if h3:
         h3.decompose()
     resolve_links(soup)
-    lines = [
-        line.strip() for line in soup.get_text(separator="\n").splitlines()
-    ]
-    return "\n".join(line for line in lines if line)
+    return extract_readable_html_text(soup)
 
 
 def main():

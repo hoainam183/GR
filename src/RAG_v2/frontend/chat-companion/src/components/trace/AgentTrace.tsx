@@ -5,6 +5,7 @@ import {
   Bot,
   CheckCircle2,
   Clock,
+  ListChecks,
   Route,
   Wrench,
   Search,
@@ -44,6 +45,108 @@ const resolveToolsUsed = (response: ChatV3Response): string[] => {
     return response.agent_trace.tool_names_sequence;
   }
   return [];
+};
+
+const traceList = (value: unknown): Array<Record<string, unknown>> =>
+  Array.isArray(value)
+    ? value.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object')
+    : [];
+
+const traceText = (value: unknown): string | null => {
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  return null;
+};
+
+const PlannerExecutorTrace = ({ response }: { response: ChatV3Response }) => {
+  const trace = response.agent_trace;
+  const plannerTrace = trace?.planner_trace ?? {};
+  const planSteps = traceList(
+    trace?.retrieval_plan?.steps ?? plannerTrace.steps,
+  );
+  const executorResults = traceList(trace?.executor_results);
+  const synthesisTrace = trace?.synthesis_trace ?? {};
+
+  if (!planSteps.length && !executorResults.length && !trace?.sub_questions?.length) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+        <ListChecks className="h-4 w-4 text-primary" />
+        Planner / Executor path
+      </div>
+
+      {trace?.sub_questions && trace.sub_questions.length > 0 && (
+        <div className="mb-3 rounded-md bg-muted/30 p-3">
+          <p className="mb-1 text-xs font-medium text-muted-foreground">Sub-questions</p>
+          <ol className="ml-4 list-decimal space-y-1 text-xs">
+            {trace.sub_questions.map((question, index) => (
+              <li key={`${question}-${index}`}>{question}</li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {planSteps.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">Planner queries</p>
+          {planSteps.map((step, index) => {
+            const query = traceText(step.query) ?? '(missing query)';
+            const collection = traceText(step.collection);
+            const topK = traceText(step.top_k);
+            const label = traceText(step.label);
+            return (
+              <div key={`${query}-${index}`} className="rounded-md border bg-muted/20 p-3 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">#{index + 1}</Badge>
+                  {label && <Badge variant="outline">{label}</Badge>}
+                  {collection && <Badge variant="outline">{collection}</Badge>}
+                  {topK && <Badge variant="outline">top_k {topK}</Badge>}
+                </div>
+                <p className="mt-2 whitespace-pre-wrap leading-relaxed">{query}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {executorResults.length > 0 && (
+        <div className="mt-3 space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">Executor results</p>
+          {executorResults.map((result, index) => {
+            const query = traceText(result.query);
+            const collection = traceText(result.collection);
+            const latency = typeof result.latency_ms === 'number' ? formatMs(result.latency_ms) : null;
+            const resultChars = traceText(result.result_chars);
+            const empty = result.empty_result === true;
+            return (
+              <div key={`${query ?? index}-${index}`} className="rounded-md border bg-muted/20 p-3 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">#{index + 1}</Badge>
+                  {collection && <Badge variant="outline">{collection}</Badge>}
+                  {latency && <Badge variant="outline">{latency}</Badge>}
+                  {resultChars && <Badge variant="outline">{resultChars} chars</Badge>}
+                  <Badge className={empty ? 'bg-amber-500/15 text-amber-700' : 'bg-emerald-500/15 text-emerald-700'} variant="outline">
+                    {empty ? 'empty' : 'has result'}
+                  </Badge>
+                </div>
+                {query && <p className="mt-2 whitespace-pre-wrap leading-relaxed">{query}</p>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {typeof synthesisTrace.context_chars === 'number' && (
+        <div className="mt-3 rounded-md bg-muted/30 p-3 text-xs text-muted-foreground">
+          Synthesis context: {synthesisTrace.context_chars} chars
+          {typeof synthesisTrace.answer_chars === 'number' && ` · answer ${synthesisTrace.answer_chars} chars`}
+        </div>
+      )}
+    </div>
+  );
 };
 
 const ToolCallCard = ({
@@ -164,6 +267,8 @@ export default function AgentTrace({ response, question }: AgentTraceProps) {
           <p className="text-xs text-muted-foreground">No tools were called in this run.</p>
         )}
       </div>
+
+      <PlannerExecutorTrace response={response} />
 
       <div className="rounded-xl border bg-card p-4">
         <div className="mb-2 flex items-center gap-2 text-sm font-semibold">

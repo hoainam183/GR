@@ -39,11 +39,11 @@ function NotificationRow({ item, onRead }: { item: NotificationItem; onRead: () 
         item.read ? '' : 'bg-primary/5'
       }`}
     >
-      <div className="flex gap-3">
-        <span className="text-lg shrink-0">{icon}</span>
+      <div className="grid grid-cols-[1.75rem_minmax(0,1fr)_0.5rem] gap-3">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-base">{icon}</span>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-foreground">{item.title}</p>
-          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{item.body}</p>
+          <p className="break-words text-sm font-semibold leading-snug text-foreground">{item.title}</p>
+          <p className="mt-1 line-clamp-3 break-words text-xs leading-relaxed text-muted-foreground">{item.body}</p>
 
           {links.length > 0 && (
             <div className="mt-1.5 space-y-0.5">
@@ -53,7 +53,7 @@ function NotificationRow({ item, onRead }: { item: NotificationItem; onRead: () 
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-xs text-primary hover:underline truncate"
+                  className="block truncate text-xs text-primary hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
                   🔗 {link.title}
@@ -62,9 +62,11 @@ function NotificationRow({ item, onRead }: { item: NotificationItem; onRead: () 
             </div>
           )}
 
-          <span className="text-[10px] text-muted-foreground mt-1 block">{timeAgo}</span>
+          <span className="mt-1.5 block text-[10px] text-muted-foreground">{timeAgo}</span>
         </div>
-        {!item.read && <span className="h-2 w-2 shrink-0 rounded-full bg-primary mt-1.5" />}
+        <span className="pt-1.5">
+          {!item.read && <span className="block h-2 w-2 rounded-full bg-primary" />}
+        </span>
       </div>
     </div>
   );
@@ -162,14 +164,14 @@ export function NotificationBell() {
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute right-0 top-10 z-50 w-80 sm:w-96 rounded-xl border shadow-lg bg-card overflow-hidden">
+        <div className="fixed right-3 top-14 z-[100] w-[calc(100vw-1.5rem)] max-w-sm overflow-hidden rounded-xl border bg-card shadow-2xl ring-1 ring-black/5 sm:right-6 sm:w-96">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b">
+          <div className="flex items-center justify-between gap-3 border-b bg-card px-4 py-3">
             <h3 className="font-semibold text-sm text-foreground">Thông báo</h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllRead.mutate()}
-                className="text-xs text-primary hover:underline font-medium"
+                className="shrink-0 text-xs font-medium text-primary hover:underline"
               >
                 Đọc tất cả
               </button>
@@ -177,7 +179,7 @@ export function NotificationBell() {
           </div>
 
           {/* Notification list */}
-          <div className="max-h-[400px] overflow-y-auto scrollbar-thin divide-y divide-border">
+          <div className="max-h-[min(420px,calc(100vh-8rem))] divide-y divide-border overflow-y-auto overscroll-contain scrollbar-thin">
             {notifications.map((item) => (
               <NotificationRow
                 key={item.id}
@@ -193,7 +195,7 @@ export function NotificationBell() {
           </div>
 
           {/* Footer */}
-          <div className="border-t px-4 py-2.5 text-center">
+          <div className="border-t bg-card px-4 py-2.5 text-center">
             <button
               onClick={() => {
                 navigate('/notifications');

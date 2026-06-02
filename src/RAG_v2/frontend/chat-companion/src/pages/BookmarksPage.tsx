@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { createApiClient, listBookmarks, listBookmarkFolders, deleteBookmark } from '@rag/shared';
 import type { Bookmark as BookmarkType, BookmarkFolder } from '@rag/shared';
-import { getStoredToken } from '@/services/authStorage';
 import { clearSession, ensureAccessToken, refreshSession } from '@/services/authSession';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -273,7 +272,6 @@ function BookmarkCard({
 
 // ─── Main page ─────────────────────────────────────────────────────────────
 const BookmarksPage = () => {
-  const isAuthenticated = Boolean(getStoredToken());
   const navigate = useNavigate();
   const client = React.useMemo(
     () =>
@@ -295,7 +293,6 @@ const BookmarksPage = () => {
   const { data: foldersData } = useQuery({
     queryKey: ['bookmark-folders'],
     queryFn: () => listBookmarkFolders(client),
-    enabled: isAuthenticated,
   });
   const folders: BookmarkFolder[] = foldersData ?? [];
 
@@ -306,7 +303,6 @@ const BookmarksPage = () => {
         folder: activeFolder || undefined,
         q: search || undefined,
       }),
-    enabled: isAuthenticated,
   });
   const bookmarks = data?.bookmarks ?? [];
   const total = data?.total ?? 0;
@@ -319,11 +315,6 @@ const BookmarksPage = () => {
       setDeleteTarget(null);
     },
   });
-
-  if (!isAuthenticated) {
-    navigate('/login', { replace: true });
-    return null;
-  }
 
   return (
     <div className="flex h-dvh flex-col bg-background">
