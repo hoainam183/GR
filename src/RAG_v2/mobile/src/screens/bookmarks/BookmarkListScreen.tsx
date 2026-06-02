@@ -38,6 +38,17 @@ type FolderEditor =
 
 const DEFAULT_FOLDER = 'Chung';
 
+const formatBookmarkDate = (value?: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+};
+
 const BookmarkListScreen = ({ navigation }: Props) => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
@@ -125,17 +136,18 @@ const BookmarkListScreen = ({ navigation }: Props) => {
 
   const bookmarks = data?.bookmarks ?? [];
   const busy = createFolder.isPending || renameFolder.isPending || removeFolder.isPending;
+  const activeFolderEntry = folders.find((folder) => folder.name === activeFolder);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>Đã lưu</Text>
-          {!!data?.total && <Text style={styles.headerCount}>{data.total} mục</Text>}
+          {typeof data?.total === 'number' && <Text style={styles.headerCount}>{data.total} mục</Text>}
         </View>
         <View style={styles.headerActions}>
           <Pressable style={styles.headerAction} onPress={() => setFolderEditor({ mode: 'create', name: '' })}>
-            <Ionicons name="folder-open-outline" size={21} color={colors.primary} />
+            <Ionicons name="add-circle-outline" size={22} color={colors.primary} />
           </Pressable>
           <Pressable style={styles.headerAction} onPress={() => refetch()}>
             <Ionicons name="refresh-outline" size={22} color={colors.mutedForeground} />
@@ -153,13 +165,19 @@ const BookmarkListScreen = ({ navigation }: Props) => {
           returnKeyType="search"
         />
         {!!searchQuery && (
-          <Pressable onPress={() => { setSearchQuery(''); setDebouncedQuery(''); }}>
+          <Pressable style={styles.clearSearchButton} onPress={() => { setSearchQuery(''); setDebouncedQuery(''); }}>
             <Ionicons name="close-circle" size={16} color={colors.mutedForeground} />
           </Pressable>
         )}
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.folderScroller}
+        contentContainerStyle={styles.chips}
+      >
         <Pressable style={[styles.chip, !activeFolder && styles.chipActive]} onPress={() => setActiveFolder(null)}>
+          <Ionicons name="albums-outline" size={14} color={!activeFolder ? colors.primary : colors.mutedForeground} />
           <Text style={[styles.chipText, !activeFolder && styles.chipTextActive]}>Tất cả</Text>
         </Pressable>
         {folders.map((folder) => {
@@ -175,26 +193,37 @@ const BookmarkListScreen = ({ navigation }: Props) => {
                 }
               }}
             >
+              <Ionicons name="folder-outline" size={14} color={active ? colors.primary : colors.mutedForeground} />
               <Text style={[styles.chipText, active && styles.chipTextActive]}>
                 {folder.name} ({folder.count})
               </Text>
-              {folder.name !== DEFAULT_FOLDER && (
-                <Pressable
-                  hitSlop={8}
-                  style={styles.chipAction}
-                  onPress={() => setFolderEditor({ mode: 'rename', originalName: folder.name, name: folder.name })}
-                >
-                  <Ionicons
-                    name="ellipsis-horizontal"
-                    size={14}
-                    color={active ? colors.primary : colors.mutedForeground}
-                  />
-                </Pressable>
-              )}
             </Pressable>
           );
         })}
       </ScrollView>
+      {activeFolder && (
+        <View style={styles.activeFolderPanel}>
+          <View style={styles.activeFolderText}>
+            <Text style={styles.activeFolderLabel}>Thư mục</Text>
+            <Text style={styles.activeFolderName} numberOfLines={1}>
+              {activeFolder} {typeof activeFolderEntry?.count === 'number' ? `(${activeFolderEntry.count})` : ''}
+            </Text>
+          </View>
+          {activeFolder !== DEFAULT_FOLDER && (
+            <View style={styles.activeFolderActions}>
+              <Pressable
+                style={styles.folderIconButton}
+                onPress={() => setFolderEditor({ mode: 'rename', originalName: activeFolder, name: activeFolder })}
+              >
+                <Ionicons name="create-outline" size={17} color={colors.primary} />
+              </Pressable>
+              <Pressable style={styles.folderIconButton} onPress={() => confirmDeleteFolder(activeFolder)}>
+                <Ionicons name="trash-outline" size={17} color={colors.destructive} />
+              </Pressable>
+            </View>
+          )}
+        </View>
+      )}
       {isLoading ? (
         <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : error ? (
@@ -211,14 +240,25 @@ const BookmarkListScreen = ({ navigation }: Props) => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={bookmarks.length ? styles.list : styles.empty}
           renderItem={({ item }) => (
-            <Pressable style={styles.card} onPress={() => navigation.navigate('BookmarkDetail', { bookmark: item })}>
+            <Pressable
+              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+              onPress={() => navigation.navigate('BookmarkDetail', { bookmark: item })}
+            >
               <View style={styles.iconBox}><Ionicons name="bookmark" size={18} color={colors.warning} /></View>
               <View style={styles.cardBody}>
-                <Text style={styles.question} numberOfLines={2}>{item.question}</Text>
-                <Text style={styles.preview} numberOfLines={2}>{item.answer_preview || item.answer_snapshot}</Text>
-                <Text style={styles.folder}>{item.folder || DEFAULT_FOLDER}</Text>
+                <View style={styles.cardTopRow}>
+                  <Text style={styles.question} numberOfLines={2}>{item.question}</Text>
+                  <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
+                </View>
+                <Text style={styles.preview} numberOfLines={3}>{item.answer_preview || item.answer_snapshot}</Text>
+                <View style={styles.metaRow}>
+                  <View style={styles.folderBadge}>
+                    <Ionicons name="folder-outline" size={12} color={colors.warning} />
+                    <Text style={styles.folder} numberOfLines={1}>{item.folder || DEFAULT_FOLDER}</Text>
+                  </View>
+                  <Text style={styles.dateText}>{formatBookmarkDate(item.created_at)}</Text>
+                </View>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
             </Pressable>
           )}
           ListEmptyComponent={
@@ -268,27 +308,39 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
   headerTitle: { color: colors.foreground, fontSize: 20, fontWeight: '700' },
   headerCount: { color: colors.mutedForeground, fontSize: 12, marginTop: 2 },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  headerAction: { padding: 6 },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, marginHorizontal: 16, marginTop: 12, paddingHorizontal: 12, borderRadius: 10, gap: 8 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  headerAction: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: colors.card },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, marginHorizontal: 16, marginTop: 12, paddingLeft: 12, paddingRight: 8, borderRadius: 10, gap: 8 },
   searchInput: { flex: 1, color: colors.foreground, fontSize: 14, paddingVertical: 10 },
+  clearSearchButton: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
+  folderScroller: { flexGrow: 0 },
   chips: { paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: colors.secondary, borderWidth: 1, borderColor: colors.border },
-  chipAction: { marginRight: -4, padding: 2 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 34, paddingHorizontal: 12, borderRadius: 10, backgroundColor: colors.secondary, borderWidth: 1, borderColor: colors.border },
   chipActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
   chipText: { color: colors.mutedForeground, fontSize: 12, fontWeight: '600' },
   chipTextActive: { color: colors.primary },
+  activeFolderPanel: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 16, marginBottom: 4, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 },
+  activeFolderText: { flex: 1, gap: 2 },
+  activeFolderLabel: { color: colors.mutedForeground, fontSize: 11, fontWeight: '700' },
+  activeFolderName: { color: colors.foreground, fontSize: 14, fontWeight: '700' },
+  activeFolderActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  folderIconButton: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 9, backgroundColor: colors.secondary },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   list: { padding: 16, gap: 10 },
-  empty: { flexGrow: 1 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 14 },
+  empty: { flexGrow: 1, padding: 16 },
+  card: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 14 },
+  cardPressed: { opacity: 0.86 },
   iconBox: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
   cardBody: { flex: 1, gap: 4 },
-  question: { color: colors.foreground, fontSize: 15, fontWeight: '600' },
+  cardTopRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  question: { flex: 1, color: colors.foreground, fontSize: 15, fontWeight: '700', lineHeight: 20 },
   preview: { color: colors.subtleForeground, fontSize: 13, lineHeight: 18 },
-  folder: { color: colors.warning, fontSize: 12, fontWeight: '600' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 3 },
+  folderBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, maxWidth: '68%', backgroundColor: colors.primarySoft, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  folder: { color: colors.warning, fontSize: 12, fontWeight: '700' },
+  dateText: { marginLeft: 'auto', color: colors.mutedForeground, fontSize: 11, fontWeight: '600' },
   modalOverlay: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.overlay, padding: 24 },
-  folderModal: { width: '100%', maxWidth: 360, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 16, padding: 18 },
+  folderModal: { width: '100%', maxWidth: 360, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 18 },
   modalTitle: { color: colors.foreground, fontSize: 17, fontWeight: '700', marginBottom: 12 },
   folderInput: { backgroundColor: colors.input, color: colors.foreground, borderWidth: 1, borderColor: colors.border, borderRadius: 10, fontSize: 14, paddingHorizontal: 12, paddingVertical: 10 },
   modalActions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },

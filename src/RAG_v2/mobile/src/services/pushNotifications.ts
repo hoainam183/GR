@@ -1,10 +1,11 @@
-import Constants from 'expo-constants';
-import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 import { getCache, setCache } from './offlineCache';
 
 const PUSH_TOKEN_CACHE_KEY = 'notifications:expo-push-token:v1';
 const PUSH_ENABLED_CACHE_KEY = 'notifications:push-enabled:v1';
+
+type NotificationsModule = typeof import('expo-notifications');
 
 export class PushPermissionDeniedError extends Error {
   constructor() {
@@ -12,6 +13,28 @@ export class PushPermissionDeniedError extends Error {
     this.name = 'PushPermissionDeniedError';
   }
 }
+
+export class PushNotificationsUnavailableError extends Error {
+  constructor() {
+    super('Push notifications require a development build on Android Expo Go.');
+    this.name = 'PushNotificationsUnavailableError';
+  }
+}
+
+export const isPushNotificationsSupported = (): boolean => {
+  if (Platform.OS === 'web') return false;
+  const isExpoGo =
+    Constants.executionEnvironment === ExecutionEnvironment.StoreClient ||
+    Constants.appOwnership === 'expo';
+  return !(Platform.OS === 'android' && isExpoGo);
+};
+
+const loadNotificationsModule = async (): Promise<NotificationsModule> => {
+  if (!isPushNotificationsSupported()) {
+    throw new PushNotificationsUnavailableError();
+  }
+  return import('expo-notifications');
+};
 
 export const getStoredPushToken = (): string | null =>
   getCache<string | null>(PUSH_TOKEN_CACHE_KEY) ?? null;
@@ -25,6 +48,8 @@ export const clearStoredPushRegistration = (): void => {
 };
 
 export const registerDeviceForPushNotifications = async (): Promise<string> => {
+  const Notifications = await loadNotificationsModule();
+
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'HUST Assistant',
