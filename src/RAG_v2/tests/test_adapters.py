@@ -362,3 +362,47 @@ class TestWebSearch:
         if result == "Khong tim thay thong tin tren web.":
             pytest.skip("Tavily returned no web content for this environment")
         assert len(result) > 100
+
+
+class TestFormatSearchResultsParentDedup:
+    """_format_search_results must deduplicate parent_context across children
+    sharing the same parent_id so parent text only appears once."""
+
+    def _child(self, idx: int, parent_id: str, parent_ctx: str) -> dict:
+        return {
+            "text": f"child body {idx}",
+            "metadata": {
+                "level": "child",
+                "parent_id": parent_id,
+                "parent_context": parent_ctx,
+                "title": f"Doc {idx}",
+            },
+        }
+
+    def test_two_children_same_parent_renders_parent_once(self):
+        docs = [
+            self._child(1, "p1", "Shared section body"),
+            self._child(2, "p1", "Shared section body"),
+            self._child(3, "p1", "Shared section body"),
+        ]
+        result = _format_search_results(docs, "ctdt")
+        assert result.count("Shared section body") == 1
+        assert "child body 1" in result
+
+    def test_different_parents_each_rendered_once(self):
+        docs = [
+            self._child(1, "p1", "Section one content"),
+            self._child(2, "p2", "Section two content"),
+        ]
+        result = _format_search_results(docs, "ctdt")
+        assert result.count("Section one content") == 1
+        assert result.count("Section two content") == 1
+
+    def test_no_parent_id_still_renders_context(self):
+        """parent_context with no parent_id (orphan) should still be rendered."""
+        doc = {
+            "text": "Orphan child",
+            "metadata": {"parent_context": "Orphan parent ctx", "title": "Doc"},
+        }
+        result = _format_search_results([doc], "ctdt")
+        assert "Orphan parent ctx" in result

@@ -1175,6 +1175,7 @@ def _format_context(
     parts: List[str] = []
     used = 0
     docs_used = 0
+    seen_parent_ids: Set[str] = set()  # C5: dedup parent context across children sharing same parent
     for i, doc in enumerate(documents, 1):
         meta = doc.get("metadata", {}) or {}
         title = meta.get("title") or meta.get("source") or "Tài liệu không rõ nguồn"
@@ -1198,12 +1199,18 @@ def _format_context(
         
         text = str(doc.get("text", "") or "").strip()
 
-        # C5: Prepend parent context for broader section context
+        # C5: Prepend parent context for broader section context.
+        # Dedup: only render parent text once even when multiple children share the same parent.
         parent_ctx = str((meta.get("parent_context") or "")).strip()
         parent_title = str(
             (meta.get("parent_title") or meta.get("parent_section_h2") or "")
         ).strip()
+        parent_id = str(meta.get("parent_id") or "").strip()
+        if parent_ctx and parent_id and parent_id in seen_parent_ids:
+            parent_ctx = ""  # already rendered for a previous sibling
         if parent_ctx:
+            if parent_id:
+                seen_parent_ids.add(parent_id)
             parent_header = (
                 f"[Ngữ cảnh section: {parent_title}]"
                 if parent_title

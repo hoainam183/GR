@@ -645,6 +645,7 @@ def _format_search_results(
     result_count = int(getattr(settings, "agent_search_result_count", 3) or 3)
     char_limit = int(getattr(settings, "agent_search_result_char_limit", 500) or 500)
     total_limit = int(getattr(settings, "agent_tool_result_limit", 0) or 0)
+    seen_parent_ids: set[str] = set()  # dedup parent context across children sharing same parent
 
     for index, item in enumerate(results[:result_count], 1):
         content = ""
@@ -670,9 +671,15 @@ def _format_search_results(
 
         content = " ".join(content.split())
 
-        # Include parent section context for broader understanding
+        # Include parent section context for broader understanding.
+        # Dedup: only render parent text once even when multiple children share the same parent.
         parent_ctx = str((metadata.get("parent_context") or "")).strip()
+        parent_id = str(metadata.get("parent_id") or "").strip()
+        if parent_ctx and parent_id and parent_id in seen_parent_ids:
+            parent_ctx = ""  # already rendered for a previous sibling
         if parent_ctx:
+            if parent_id:
+                seen_parent_ids.add(parent_id)
             parent_short = parent_ctx[:300] + "..." if len(parent_ctx) > 300 else parent_ctx
             parent_short = " ".join(parent_short.split())
             content = f"[Section] {parent_short}\n[Detail] {content}"

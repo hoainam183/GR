@@ -34,7 +34,7 @@ def _mock_heavy_deps():
         "qdrant_client", "qdrant_client.models",
         "elasticsearch", "elasticsearch.helpers",
         "redis",
-        "openai",
+        "openai", "openai.types", "openai.types.chat",
         "httpx",
         "joblib",
         "pydantic_settings",
@@ -42,6 +42,14 @@ def _mock_heavy_deps():
         "langchain_core", "langchain_core.tools",
         "langchain_google_genai",
         "underthesea",
+        "llm", "llm.base", "llm.chat_model", "llm.gemini",
+        "llm.openai_client", "llm.prompts", "llm.self_eval",
+        "cache", "cache.redis_cache",
+        "reranking", "reranking.cross_encoder", "reranking.base",
+        "embedding", "embedding.bge", "embedding.e5", "embedding.base",
+        "langgraph", "langgraph.graph", "langgraph.graph.message",
+        "langgraph.checkpoint", "langgraph.checkpoint.memory",
+        "langchain_core.messages", "langchain_core.messages.utils",
     ]
     sklearn_subs = [
         "sklearn", "sklearn.calibration", "sklearn.linear_model",
@@ -527,3 +535,156 @@ class TestDryRunIndexing:
 
         assert stats["files"] == 0
         assert stats["total_chunks"] == 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 7. Format Context — Parent Dedup in Renderer
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestFormatContextParentDedup:
+    """_format_context must render parent_context only once per parent_id,
+    even when multiple children sharing the same parent appear in the list."""
+
+    def _import_format_context(self):
+        from pipeline.flows import _format_context
+        return _format_context
+
+    def _child(self, idx: int, parent_id: str, parent_ctx: str, parent_title: str = "") -> dict:
+        return {
+            "text": f"Child text {idx}",
+            "metadata": {
+                "level": "child",
+                "parent_id": parent_id,
+                "parent_context": parent_ctx,
+                "parent_title": parent_title,
+                "title": f"Doc {idx}",
+            },
+        }
+
+    def test_single_child_renders_parent_once(self):
+        _format_context = self._import_format_context()
+        docs = [self._child(1, "p1", "Parent body text", "Section A")]
+        ctx = _format_context(docs)
+        assert ctx.count("Parent body text") == 1
+
+    def test_two_children_same_parent_renders_once(self):
+        _format_context = self._import_format_context()
+        docs = [
+            self._child(1, "p1", "Shared parent content", "Section A"),
+            self._child(2, "p1", "Shared parent content", "Section A"),
+        ]
+        ctx = _format_context(docs)
+        # Parent text must appear exactly once
+        assert ctx.count("Shared parent content") == 1
+        # Both children's own text must still appear
+        assert "Child text 1" in ctx
+        assert "Child text 2" in ctx
+
+    def test_three_children_same_parent_renders_once(self):
+        _format_context = self._import_format_context()
+        docs = [self._child(i, "p1", "Big parent body", "") for i in range(1, 4)]
+        ctx = _format_context(docs)
+        assert ctx.count("Big parent body") == 1
+
+    def test_different_parents_each_rendered_once(self):
+        _format_context = self._import_format_context()
+        docs = [
+            self._child(1, "p1", "Parent A content"),
+            self._child(2, "p1", "Parent A content"),
+            self._child(3, "p2", "Parent B content"),
+            self._child(4, "p2", "Parent B content"),
+        ]
+        ctx = _format_context(docs)
+        assert ctx.count("Parent A content") == 1
+        assert ctx.count("Parent B content") == 1
+
+    def test_no_parent_id_still_renders_context(self):
+        """parent_context with no parent_id (orphan) should still be rendered."""
+        _format_context = self._import_format_context()
+        doc = {
+            "text": "Orphan child",
+            "metadata": {
+                "parent_context": "Orphan parent ctx",
+                "title": "Doc",
+            },
+        }
+        ctx = _format_context([doc])
+        assert "Orphan parent ctx" in ctx
+
+    def test_budget_not_inflated_by_repeated_parent(self):
+        """Total context size should be smaller when dedup is active vs naive repeat."""
+        _format_context = self._import_format_context()
+        parent_text = "X" * 1000
+        docs = [self._child(i, "p1", parent_text) for i in range(1, 6)]
+        ctx = _format_context(docs)
+        # With dedup: parent appears once (1000 chars), not 5 times (5000 chars)
+        assert ctx.count(parent_text) == 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 8. Format Search Results — Parent Dedup in Agent Renderer
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestFormatSearchResultsParentDedup:
+    """_format_search_results (agent path) must deduplicate parent_context across
+    children sharing the same parent_id so parent text only appears once."""
+
+    def _import(self):
+        # Import tool_adapters.py directly by file path, bypassing agent/__init__.py
+        # which pulls in langgraph / langchain_openai and other heavy deps.
+        import importlib.util
+        import sys
+        from pathlib import Path
+        _MODULE_KEY = "_tool_adapters_isolated"
+        if _MODULE_KEY in sys.modules:
+            return sys.modules[_MODULE_KEY]._format_search_results
+        ta_path = Path(__file__).resolve().parent.parent / "agent" / "tool_adapters.py"
+        spec = importlib.util.spec_from_file_location(_MODULE_KEY, str(ta_path))
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[_MODULE_KEY] = mod  # register before exec so @dataclass can find it
+        spec.loader.exec_module(mod)  # type: ignore[union-attr]
+        return mod._format_search_results
+
+    def _child(self, idx: int, parent_id: str, parent_ctx: str) -> dict:
+        return {
+            "text": f"child body {idx}",
+            "metadata": {
+                "level": "child",
+                "parent_id": parent_id,
+                "parent_context": parent_ctx,
+                "title": f"Doc {idx}",
+            },
+        }
+
+    def test_two_children_same_parent_renders_once(self):
+        _format_search_results = self._import()
+        docs = [
+            self._child(1, "p1", "Shared section body"),
+            self._child(2, "p1", "Shared section body"),
+            self._child(3, "p1", "Shared section body"),
+        ]
+        result = _format_search_results(docs, "ctdt")
+        assert result.count("Shared section body") == 1
+        assert "child body 1" in result
+
+    def test_different_parents_each_rendered_once(self):
+        _format_search_results = self._import()
+        docs = [
+            self._child(1, "p1", "Section one content"),
+            self._child(2, "p2", "Section two content"),
+        ]
+        result = _format_search_results(docs, "ctdt")
+        assert result.count("Section one content") == 1
+        assert result.count("Section two content") == 1
+
+    def test_no_parent_id_still_renders_context(self):
+        """parent_context with no parent_id (orphan) should still be rendered."""
+        _format_search_results = self._import()
+        doc = {
+            "text": "Orphan child",
+            "metadata": {"parent_context": "Orphan parent ctx", "title": "Doc"},
+        }
+        result = _format_search_results([doc], "ctdt")
+        assert "Orphan parent ctx" in result
