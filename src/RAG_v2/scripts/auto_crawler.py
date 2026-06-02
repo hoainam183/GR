@@ -951,8 +951,6 @@ class AutoCrawlPipeline:
             links.append({
                 "title": title,
                 "url": url,
-                "source": str(chunk.get("source") or "").strip(),
-                "summary": str(chunk.get("content_preview") or "").strip(),
             })
             if len(links) >= limit:
                 break

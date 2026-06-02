@@ -26,7 +26,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
 
-from api.services.notification_delivery import broadcast_user_notification
 from auth.rbac import require_admin
 from models.crawler import (
     CRAWLER_EDITABLE_STATUSES,
@@ -829,9 +828,6 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
             "pipeline": pipeline_target,
             "completed_at": datetime.now(timezone.utc).isoformat(),
         }
-        # Send notifications to all users when crawl succeeds
-        if status in ("success", "pending_review"):
-            await _create_crawl_notifications(result, pipeline_target)
     except asyncio.TimeoutError:
         _last_manual_crawl = {
             "status": "timeout",
@@ -850,54 +846,6 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
         logger.error("Manual crawl failed: %s", e, exc_info=True)
     finally:
         _crawl_running = False
-
-
-async def _create_crawl_notifications(crawl_result: dict, pipeline_target: str):
-    """Insert notification for all users when crawl completes."""
-    try:
-        from models.database import get_motor_client, _get_settings
-        from scripts.auto_crawler import AutoCrawlPipeline
-
-        client = get_motor_client()
-        _, db_name = _get_settings()
-        db = client[db_name]
-
-        new_articles = crawl_result.get("new_articles", 0)
-        collection_name = crawl_result.get("collection", pipeline_target)
-        article_links = AutoCrawlPipeline._build_notification_article_links(
-            crawl_result.get("saved_chunks", [])
-        )
-
-        if not article_links:
-            logger.info(
-                "Skip crawl notification for pipeline '%s': no article links to show.",
-                pipeline_target,
-            )
-            return
-
-        article_count = int(new_articles or len(article_links))
-
-        result = await broadcast_user_notification(
-            db,
-            title="Bài viết mới đã được cập nhật",
-            body=(
-                f"Có {article_count} bài viết mới từ nguồn {collection_name}. "
-                "Mở thông báo để xem danh sách và liên kết."
-            ),
-            notification_type="crawler_update",
-            metadata={
-                "article_links": article_links,
-            },
-        )
-        logger.info(
-            "Created %d crawl notifications for pipeline '%s' (push sent=%d, push errors=%d)",
-            result["created_count"],
-            pipeline_target,
-            result.get("push_sent_count", 0),
-            result.get("push_error_count", 0),
-        )
-    except Exception as e:
-        logger.warning("Failed to create crawl notifications: %s", e, exc_info=True)
 
 
 def _do_crawl(crawl_pipeline, pipeline_target: str) -> dict:

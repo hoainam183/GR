@@ -110,15 +110,17 @@ const NotificationDetailScreen = ({ route, navigation }: Props) => {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.heroCard}>
-          <View style={styles.heroIcon}>
-            <Ionicons name="newspaper-outline" size={22} color={colors.primary} />
+        {links.length === 0 && (
+          <View style={styles.heroCard}>
+            <View style={styles.heroIcon}>
+              <Ionicons name="newspaper-outline" size={22} color={colors.primary} />
+            </View>
+            <View style={styles.heroBody}>
+              <Text style={styles.title}>{notification.title}</Text>
+              <Text style={styles.body}>{introText}</Text>
+            </View>
           </View>
-          <View style={styles.heroBody}>
-            <Text style={styles.title}>{notification.title}</Text>
-            <Text style={styles.body}>{introText}</Text>
-          </View>
-        </View>
+        )}
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -139,13 +141,7 @@ const NotificationDetailScreen = ({ route, navigation }: Props) => {
                   <Text style={styles.linkTitle} numberOfLines={2}>
                     {link.title?.trim() || 'Bài viết liên quan'}
                   </Text>
-                  {!!link.summary && (
-                    <Text style={styles.linkSummary} numberOfLines={2}>{link.summary}</Text>
-                  )}
-                  <View style={styles.linkMetaRow}>
-                    {!!link.source && <Text style={styles.linkSource}>{link.source}</Text>}
-                    <Text style={styles.linkUrl} numberOfLines={1}>{link.url}</Text>
-                  </View>
+                  <Text style={styles.linkUrl} numberOfLines={2}>{link.url}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
               </Pressable>
@@ -257,18 +253,6 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   },
   linkBody: { flex: 1, gap: 3 },
   linkTitle: { color: colors.foreground, fontSize: 14, fontWeight: '700' },
-  linkSummary: { color: colors.subtleForeground, fontSize: 13, lineHeight: 18 },
-  linkMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  linkSource: {
-    color: colors.primary,
-    backgroundColor: colors.primarySoft,
-    borderRadius: 6,
-    overflow: 'hidden',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    fontSize: 11,
-    fontWeight: '700',
-  },
   linkUrl: { flex: 1, color: colors.mutedForeground, fontSize: 12 },
   emptyArticles: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   emptyText: { color: colors.mutedForeground, fontSize: 13, lineHeight: 19 },

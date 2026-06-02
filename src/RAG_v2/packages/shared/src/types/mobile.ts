@@ -97,8 +97,6 @@ export interface NotificationItem {
     article_links?: Array<{
       title: string;
       url: string;
-      source?: string;
-      summary?: string;
     }>;
   } | null;
 }
