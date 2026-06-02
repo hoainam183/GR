@@ -828,6 +828,22 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
             "pipeline": pipeline_target,
             "completed_at": datetime.now(timezone.utc).isoformat(),
         }
+        if status in {"success", "pending_review"}:
+            try:
+                notification_result = await _create_crawl_notifications(
+                    result,
+                    pipeline_target,
+                )
+                target_user_ids = notification_result.get("target_user_ids") or []
+                _last_manual_crawl["notification"] = {
+                    key: value
+                    for key, value in notification_result.items()
+                    if key != "target_user_ids"
+                }
+                _last_manual_crawl["notification"]["target_user_count"] = len(target_user_ids)
+            except Exception as exc:
+                _last_manual_crawl["notification"] = {"error": str(exc)}
+                logger.warning("Failed to create manual crawl notifications", exc_info=True)
     except asyncio.TimeoutError:
         _last_manual_crawl = {
             "status": "timeout",
@@ -856,6 +872,112 @@ def _do_crawl(crawl_pipeline, pipeline_target: str) -> dict:
         return crawl_pipeline.run_quydinh()
     else:
         return crawl_pipeline.run()
+
+
+def _iter_crawl_summary_leaves(crawl_result: Any):
+    if isinstance(crawl_result, dict):
+        if "new_articles" in crawl_result or "saved_chunks" in crawl_result:
+            yield crawl_result
+            return
+        for value in crawl_result.values():
+            yield from _iter_crawl_summary_leaves(value)
+    elif isinstance(crawl_result, list):
+        for value in crawl_result:
+            yield from _iter_crawl_summary_leaves(value)
+
+
+def _safe_int(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _build_crawl_notification_summary(crawl_result: Any) -> dict[str, Any]:
+    summaries = list(_iter_crawl_summary_leaves(crawl_result))
+    saved_chunks: list[dict[str, Any]] = []
+    pipelines: list[str] = []
+    collections: list[str] = []
+
+    for summary in summaries:
+        pipeline = str(summary.get("pipeline") or "").strip()
+        collection = str(summary.get("collection") or "").strip()
+        if pipeline and pipeline not in pipelines:
+            pipelines.append(pipeline)
+        if collection and collection not in collections:
+            collections.append(collection)
+
+        chunks = summary.get("saved_chunks")
+        if isinstance(chunks, list):
+            saved_chunks.extend(chunk for chunk in chunks if isinstance(chunk, dict))
+
+    return {
+        "new_articles": sum(_safe_int(summary.get("new_articles")) for summary in summaries),
+        "saved_chunks": saved_chunks,
+        "pipelines": pipelines,
+        "collections": collections,
+    }
+
+
+def _build_crawl_notification_article_links(
+    saved_chunks: list[dict[str, Any]],
+    limit: int = 5,
+) -> list[dict[str, str]]:
+    links: list[dict[str, str]] = []
+    seen_urls: set[str] = set()
+    for chunk in saved_chunks:
+        metadata = chunk.get("metadata") if isinstance(chunk.get("metadata"), dict) else {}
+        url = str(chunk.get("url") or metadata.get("url") or "").strip()
+        if not url or url in seen_urls:
+            continue
+        seen_urls.add(url)
+        title = str(chunk.get("title") or metadata.get("title") or "").strip() or "Bài viết mới"
+        links.append({"title": title, "url": url})
+        if len(links) >= limit:
+            break
+    return links
+
+
+async def _create_crawl_notifications(
+    crawl_result: Any,
+    pipeline_target: str,
+) -> dict[str, Any]:
+    """Broadcast a manual crawl completion notification to all users."""
+    from api.services.notification_delivery import broadcast_user_notification
+    from models.database import _get_settings, get_motor_client
+
+    notification_summary = _build_crawl_notification_summary(crawl_result)
+    new_articles = notification_summary["new_articles"]
+    article_links = _build_crawl_notification_article_links(
+        notification_summary["saved_chunks"]
+    )
+    pipelines = notification_summary["pipelines"]
+    collections = notification_summary["collections"]
+    source_label = ", ".join(collections or pipelines) or pipeline_target
+
+    if new_articles == 0:
+        body = f"Crawl '{pipeline_target}' hoàn tất. Không có bài viết mới."
+    else:
+        body = (
+            f"Crawl '{pipeline_target}' hoàn tất. Có {new_articles} bài viết mới "
+            f"từ nguồn {source_label}."
+        )
+
+    _, db_name = _get_settings()
+    db = get_motor_client()[db_name]
+    return await broadcast_user_notification(
+        db,
+        title="Crawl dữ liệu đã hoàn tất",
+        body=body,
+        notification_type="crawler_update",
+        metadata={
+            "article_links": article_links,
+            "new_articles": new_articles,
+            "pipeline": pipeline_target,
+            "pipelines": pipelines,
+            "collections": collections,
+        },
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

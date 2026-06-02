@@ -258,6 +258,56 @@ async def test_crawler_status_returns_pending_previews():
     assert response["pending_runs"][0]["saved_chunks"][0]["content_preview"] == "Preview content"
 
 
+def test_crawl_notification_summary_counts_nested_all_result():
+    from api.routes.admin_stats import (
+        _build_crawl_notification_article_links,
+        _build_crawl_notification_summary,
+    )
+
+    crawl_result = {
+        "kehoach": {
+            "baiviet": {
+                "pipeline": "baiviet",
+                "collection": "kehoach",
+                "new_articles": 5,
+                "saved_chunks": [
+                    {"title": "Ke hoach A", "url": "https://example.test/a"},
+                ],
+            },
+            "kehoach_list": {
+                "pipeline": "kehoach_list",
+                "collection": "kehoach",
+                "new_articles": 3,
+                "saved_chunks": [],
+            },
+        },
+        "quydinh": {
+            "pipeline": "quydinh",
+            "collection": "quydinh",
+            "new_articles": 2,
+            "saved_chunks": [
+                {
+                    "metadata": {
+                        "title": "Quy dinh B",
+                        "url": "https://example.test/b",
+                    },
+                },
+            ],
+        },
+    }
+
+    summary = _build_crawl_notification_summary(crawl_result)
+    links = _build_crawl_notification_article_links(summary["saved_chunks"])
+
+    assert summary["new_articles"] == 10
+    assert summary["pipelines"] == ["baiviet", "kehoach_list", "quydinh"]
+    assert summary["collections"] == ["kehoach", "quydinh"]
+    assert links == [
+        {"title": "Ke hoach A", "url": "https://example.test/a"},
+        {"title": "Quy dinh B", "url": "https://example.test/b"},
+    ]
+
+
 @pytest.mark.anyio
 async def test_update_crawler_chunk_marks_edited():
     from api.routes.admin_stats import CrawlerChunkUpdateBody, update_crawler_run_chunk
