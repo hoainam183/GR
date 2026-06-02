@@ -856,28 +856,37 @@ async def _create_crawl_notifications(crawl_result: dict, pipeline_target: str):
     """Insert notification for all users when crawl completes."""
     try:
         from models.database import get_motor_client, _get_settings
+        from scripts.auto_crawler import AutoCrawlPipeline
+
         client = get_motor_client()
         _, db_name = _get_settings()
         db = client[db_name]
 
         new_articles = crawl_result.get("new_articles", 0)
-        new_chunks = crawl_result.get("new_chunks", 0)
         collection_name = crawl_result.get("collection", pipeline_target)
+        article_links = AutoCrawlPipeline._build_notification_article_links(
+            crawl_result.get("saved_chunks", [])
+        )
 
-        title = "📰 Dữ liệu mới đã được cập nhật"
-        body = f"Hệ thống vừa thu thập {new_articles} bài viết mới ({new_chunks} đoạn) từ nguồn '{collection_name}'."
-        if new_articles == 0:
-            body = f"Crawl '{collection_name}' hoàn tất. Không có bài viết mới."
+        if not article_links:
+            logger.info(
+                "Skip crawl notification for pipeline '%s': no article links to show.",
+                pipeline_target,
+            )
+            return
+
+        article_count = int(new_articles or len(article_links))
 
         result = await broadcast_user_notification(
             db,
-            title=title,
-            body=body,
+            title="Bài viết mới đã được cập nhật",
+            body=(
+                f"Có {article_count} bài viết mới từ nguồn {collection_name}. "
+                "Mở thông báo để xem danh sách và liên kết."
+            ),
             notification_type="crawler_update",
             metadata={
-                "pipeline": pipeline_target,
-                "new_articles": new_articles,
-                "new_chunks": new_chunks,
+                "article_links": article_links,
             },
         )
         logger.info(

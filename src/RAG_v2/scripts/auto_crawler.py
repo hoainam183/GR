@@ -938,6 +938,26 @@ class AutoCrawlPipeline:
             })
         return previews
 
+    @staticmethod
+    def _build_notification_article_links(saved_chunks: List[Dict], limit: int = 5) -> List[Dict[str, str]]:
+        links: List[Dict[str, str]] = []
+        seen_urls: set[str] = set()
+        for chunk in saved_chunks:
+            url = str(chunk.get("url") or "").strip()
+            if not url or url in seen_urls:
+                continue
+            seen_urls.add(url)
+            title = str(chunk.get("title") or "").strip() or "Bài viết mới"
+            links.append({
+                "title": title,
+                "url": url,
+                "source": str(chunk.get("source") or "").strip(),
+                "summary": str(chunk.get("content_preview") or "").strip(),
+            })
+            if len(links) >= limit:
+                break
+        return links
+
     def _stage_pending_review(
         self,
         *,
@@ -1070,34 +1090,30 @@ class AutoCrawlPipeline:
         pipeline_name = summary.get("pipeline", "unknown")
         new_articles = summary.get("new_articles", 0)
         saved_chunks = summary.get("saved_chunks", [])
+        article_links = AutoCrawlPipeline._build_notification_article_links(saved_chunks)
 
-        body_parts = [
-            f"Hệ thống vừa cập nhật {new_articles} bài viết mới từ nguồn {pipeline_name}."
-        ]
-        if saved_chunks:
-            body_parts.append("\nBài viết mới:")
-            for chunk in saved_chunks[:5]:
-                title = chunk.get("title", "")
-                url = chunk.get("url", "")
-                if title and url:
-                    body_parts.append(f"• {title}\n  {url}")
-                elif title:
-                    body_parts.append(f"• {title}")
+        if not article_links:
+            return {
+                "created_count": 0,
+                "target_user_ids": [],
+                "push_sent_count": 0,
+                "push_error_count": 0,
+                "skipped_reason": "no_article_links",
+            }
+
+        article_count = int(new_articles or len(article_links))
+        body = (
+            f"Có {article_count} bài viết mới từ nguồn {pipeline_name}. "
+            "Mở thông báo để xem danh sách và liên kết."
+        )
 
         return await broadcast_user_notification(
             db,
-            title="📚 Dữ liệu mới đã cập nhật",
-            body="\n".join(body_parts),
+            title="Bài viết mới đã được cập nhật",
+            body=body,
             notification_type="crawler_update",
             metadata={
-                "pipeline": pipeline_name,
-                "new_articles": new_articles,
-                "indexed": summary.get("indexed", 0),
-                "article_links": [
-                    {"title": c.get("title", ""), "url": c.get("url", "")}
-                    for c in saved_chunks[:5]
-                    if c.get("url")
-                ],
+                "article_links": article_links,
             },
         )
 

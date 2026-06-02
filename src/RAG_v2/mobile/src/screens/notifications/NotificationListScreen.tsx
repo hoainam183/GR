@@ -40,6 +40,7 @@ import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<NotificationStackParamList, 'NotificationList'>;
 type PushState = 'disabled' | 'enabled' | 'busy' | 'blocked' | 'unsupported';
+const URL_PATTERN = /https?:\/\/[^\s)]+/g;
 
 const formatNotificationDate = (value?: string) => {
   if (!value) return '';
@@ -53,7 +54,16 @@ const formatNotificationDate = (value?: string) => {
 };
 
 const getLinkCount = (item: NotificationItem) =>
-  item.metadata?.article_links?.filter((link) => link.url?.trim()).length ?? 0;
+  item.metadata?.article_links?.filter((link) => link.url?.trim()).length
+  || item.body.match(URL_PATTERN)?.length
+  || 0;
+
+const getNotificationLabel = (item: NotificationItem, linkCount: number) => {
+  if (item.type === 'crawler_update') {
+    return linkCount > 0 ? `${linkCount} bài viết mới` : 'Không có bài mới';
+  }
+  return 'Thông báo';
+};
 
 const NotificationListScreen = ({ navigation }: Props) => {
   const { colors } = useAppTheme();
@@ -222,6 +232,7 @@ const NotificationListScreen = ({ navigation }: Props) => {
           contentContainerStyle={notifications.length ? styles.list : styles.empty}
           renderItem={({ item }) => {
             const linkCount = getLinkCount(item);
+            const label = getNotificationLabel(item, linkCount);
             return (
               <Pressable
                 style={({ pressed }) => [
@@ -242,11 +253,11 @@ const NotificationListScreen = ({ navigation }: Props) => {
                   </View>
                   <Text style={styles.body} numberOfLines={3}>{item.body || 'Không có nội dung.'}</Text>
                   <View style={styles.cardFooter}>
-                    <Text style={styles.type}>{item.type}</Text>
+                    <Text style={styles.infoLabel}>{label}</Text>
                     {linkCount > 0 && (
                       <View style={styles.linkPill}>
-                        <Ionicons name="link-outline" size={12} color={colors.primary} />
-                        <Text style={styles.linkPillText}>{linkCount}</Text>
+                        <Ionicons name="open-outline" size={12} color={colors.primary} />
+                        <Text style={styles.linkPillText}>Mở link</Text>
                       </View>
                     )}
                     <Text style={styles.dateText}>{formatNotificationDate(item.created_at)}</Text>
@@ -295,7 +306,7 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   title: { flex: 1, color: colors.foreground, fontSize: 15, fontWeight: '700', lineHeight: 20 },
   body: { color: colors.subtleForeground, fontSize: 13, lineHeight: 19 },
   cardFooter: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
-  type: { color: colors.mutedForeground, fontSize: 12, fontWeight: '600', flexShrink: 1 },
+  infoLabel: { color: colors.mutedForeground, fontSize: 12, fontWeight: '600', flexShrink: 1 },
   linkPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: colors.primarySoft, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 7 },
   linkPillText: { color: colors.primary, fontSize: 11, fontWeight: '700' },
   dateText: { marginLeft: 'auto', color: colors.mutedForeground, fontSize: 11, fontWeight: '600' },

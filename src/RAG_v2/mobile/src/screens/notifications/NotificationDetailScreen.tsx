@@ -18,6 +18,8 @@ import { useAppTheme, type AppColors } from '../../theme/theme';
 type Props = NativeStackScreenProps<NotificationStackParamList, 'NotificationDetail'>;
 
 type Metadata = NonNullable<NotificationItem['metadata']>;
+type ArticleLink = NonNullable<Metadata['article_links']>[number];
+const URL_PATTERN = /https?:\/\/[^\s)]+/g;
 
 const formatDateTime = (value?: string) => {
   if (!value) return 'Không rõ thời gian';
@@ -32,27 +34,48 @@ const formatDateTime = (value?: string) => {
   });
 };
 
-const formatMetaValue = (value: unknown) => {
-  if (value === null || value === undefined || value === '') return 'Không có';
-  if (typeof value === 'number') return String(value);
-  if (typeof value === 'boolean') return value ? 'Có' : 'Không';
-  if (Array.isArray(value)) return `${value.length} mục`;
-  if (typeof value === 'object') return JSON.stringify(value);
-  return String(value);
+const normalizeBodyTitle = (line?: string) =>
+  (line ?? '').replace(/^[\s•\-]+/, '').trim();
+
+const getArticleLinksFromBody = (body: string): ArticleLink[] => {
+  const lines = body.split(/\r?\n/);
+  const links: ArticleLink[] = [];
+  const seenUrls = new Set<string>();
+
+  lines.forEach((line, index) => {
+    const urls = line.match(URL_PATTERN) ?? [];
+    urls.forEach((url) => {
+      if (seenUrls.has(url)) return;
+      seenUrls.add(url);
+      const previousTitle = normalizeBodyTitle(lines[index - 1]);
+      links.push({
+        title: previousTitle || 'Bài viết liên quan',
+        url,
+      });
+    });
+  });
+
+  return links;
 };
 
-const visibleMetadataEntries = (metadata?: Metadata | null) =>
-  Object.entries(metadata ?? {}).filter(([key]) => key !== 'article_links');
+const getArticleLinks = (notification: NotificationItem) => {
+  const metadataLinks = (notification.metadata?.article_links ?? []).filter((link) => link.url?.trim());
+  return metadataLinks.length ? metadataLinks : getArticleLinksFromBody(notification.body);
+};
 
-const getArticleLinks = (metadata?: Metadata | null) =>
-  (metadata?.article_links ?? []).filter((link) => link.url?.trim());
+const getIntroText = (notification: NotificationItem, links: ArticleLink[]) => {
+  if (links.length > 0) {
+    return `${links.length} bài viết mới đã được thu thập. Mở từng bài để xem nội dung gốc.`;
+  }
+  return notification.body || 'Lần cập nhật này không có bài viết mới để mở.';
+};
 
 const NotificationDetailScreen = ({ route, navigation }: Props) => {
   const { colors } = useAppTheme();
   const styles = createStyles(colors);
   const { notification } = route.params;
-  const links = getArticleLinks(notification.metadata);
-  const metadataEntries = visibleMetadataEntries(notification.metadata);
+  const links = getArticleLinks(notification);
+  const introText = getIntroText(notification, links);
 
   const openLink = async (url: string) => {
     try {
@@ -89,34 +112,17 @@ const NotificationDetailScreen = ({ route, navigation }: Props) => {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.heroCard}>
           <View style={styles.heroIcon}>
-            <Ionicons name="notifications-outline" size={22} color={colors.primary} />
+            <Ionicons name="newspaper-outline" size={22} color={colors.primary} />
           </View>
           <View style={styles.heroBody}>
-            <Text style={styles.type}>{notification.type}</Text>
             <Text style={styles.title}>{notification.title}</Text>
-            <Text style={styles.body}>{notification.body || 'Không có nội dung.'}</Text>
+            <Text style={styles.body}>{introText}</Text>
           </View>
         </View>
 
-        {metadataEntries.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Thông tin cập nhật</Text>
-            <View style={styles.metaGrid}>
-              {metadataEntries.map(([key, value]) => (
-                <View key={key} style={styles.metaItem}>
-                  <Text style={styles.metaLabel}>{key}</Text>
-                  <Text style={styles.metaValue} numberOfLines={2}>
-                    {formatMetaValue(value)}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Liên kết liên quan</Text>
+            <Text style={styles.sectionTitle}>Bài viết mới</Text>
             <Text style={styles.linkCount}>{links.length}</Text>
           </View>
           {links.length ? (
@@ -133,22 +139,26 @@ const NotificationDetailScreen = ({ route, navigation }: Props) => {
                   <Text style={styles.linkTitle} numberOfLines={2}>
                     {link.title?.trim() || 'Bài viết liên quan'}
                   </Text>
-                  <Text style={styles.linkUrl} numberOfLines={1}>{link.url}</Text>
+                  {!!link.summary && (
+                    <Text style={styles.linkSummary} numberOfLines={2}>{link.summary}</Text>
+                  )}
+                  <View style={styles.linkMetaRow}>
+                    {!!link.source && <Text style={styles.linkSource}>{link.source}</Text>}
+                    <Text style={styles.linkUrl} numberOfLines={1}>{link.url}</Text>
+                  </View>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
               </Pressable>
             ))
           ) : (
-            <Text style={styles.emptyText}>Không có liên kết đính kèm.</Text>
+            <View style={styles.emptyArticles}>
+              <Ionicons name="document-text-outline" size={22} color={colors.mutedForeground} />
+              <Text style={styles.emptyText}>
+                Lần cập nhật này không có bài viết mới để mở. Các thông báo mới sau khi crawl có bài viết sẽ hiển thị danh sách link tại đây.
+              </Text>
+            </View>
           )}
         </View>
-
-        {notification.related_doc_id ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tài liệu liên quan</Text>
-            <Text style={styles.relatedId}>{notification.related_doc_id}</Text>
-          </View>
-        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -199,7 +209,6 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     backgroundColor: colors.primarySoft,
   },
   heroBody: { flex: 1, gap: 6 },
-  type: { color: colors.primary, fontSize: 12, fontWeight: '700' },
   title: { color: colors.foreground, fontSize: 18, fontWeight: '700', lineHeight: 24 },
   body: { color: colors.subtleForeground, fontSize: 14, lineHeight: 21 },
   section: {
@@ -227,22 +236,9 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
-  metaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  metaItem: {
-    minWidth: '47%',
-    flex: 1,
-    backgroundColor: colors.cardMuted,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: 10,
-    gap: 4,
-  },
-  metaLabel: { color: colors.mutedForeground, fontSize: 11, fontWeight: '700' },
-  metaValue: { color: colors.foreground, fontSize: 14, fontWeight: '700' },
   linkCard: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 10,
     backgroundColor: colors.cardMuted,
     borderWidth: 1,
@@ -261,9 +257,21 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   },
   linkBody: { flex: 1, gap: 3 },
   linkTitle: { color: colors.foreground, fontSize: 14, fontWeight: '700' },
-  linkUrl: { color: colors.mutedForeground, fontSize: 12 },
+  linkSummary: { color: colors.subtleForeground, fontSize: 13, lineHeight: 18 },
+  linkMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  linkSource: {
+    color: colors.primary,
+    backgroundColor: colors.primarySoft,
+    borderRadius: 6,
+    overflow: 'hidden',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  linkUrl: { flex: 1, color: colors.mutedForeground, fontSize: 12 },
+  emptyArticles: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   emptyText: { color: colors.mutedForeground, fontSize: 13, lineHeight: 19 },
-  relatedId: { color: colors.subtleForeground, fontSize: 13, lineHeight: 19 },
 });
 
 export default NotificationDetailScreen;
