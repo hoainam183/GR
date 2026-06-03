@@ -192,6 +192,7 @@ hay thay đổi bất kỳ phần nào của URL.
 16. KHÔNG thêm từ giới hạn/phân loại (ví dụ: "chính quy", "đại học", "khuyến khích học tập", "không chính thức") \
 vào câu hỏi nếu người dùng không dùng từ đó. Ví dụ: "quy chế đào tạo" KHÔNG được viết thành \
 "quy chế đào tạo đại học chính quy"; "học bổng" KHÔNG được viết thành "học bổng khuyến khích học tập".
+17. CHỐNG RÒ RỈ NGỮ CẢNH (BLEEDING CONTEXT): Chỉ kế thừa ngữ cảnh về Ngành học, Khóa học, Kỳ học từ CHAT_HISTORY nếu CURRENT_QUERY đang nói tiếp về chủ đề đó (có từ khóa nối tiếp, đại từ chỉ định, hoặc nội dung liên quan trực tiếp). Nếu CURRENT_QUERY chuyển sang một câu hỏi chung chung (VD: "quy chế", "xin giấy xác nhận ở đâu", "lịch thi"), TUYỆT ĐỐI KHÔNG ĐƯỢC thêm mã ngành, khóa học, hay kỳ học từ lịch sử vào câu hỏi viết lại.
 VÍ DỤ FEW-SHOT:
 ---
 Ví dụ 1 — Giải tham chiếu ngành từ USER_PROFILE:

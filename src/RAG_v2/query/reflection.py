@@ -234,66 +234,6 @@ def _has_profile_dependent_signal(query: str) -> bool:
     )
 
 
-def _extract_academic_scope_tokens(text: str) -> set[str]:
-    """Extract explicit semester/year tokens that should not bleed from history."""
-    folded = _fold_vietnamese(text or "")
-    tokens: set[str] = set()
-
-    for match in re.finditer(r"\b(20\d{2})\s*[-/]\s*((?:20)?\d{2})\b", folded):
-        start = match.group(1)
-        end = match.group(2)
-        if len(end) == 2:
-            end = f"{start[:2]}{end}"
-        tokens.add(f"year:{start}-{end}")
-
-    for match in re.finditer(r"\b(20\d{2})([123])\b", folded):
-        tokens.add(f"term:{match.group(1)}{match.group(2)}")
-
-    for match in re.finditer(r"\b(20\d{2})\s*[\._/-]\s*([123])\b", folded):
-        tokens.add(f"term:{match.group(1)}{match.group(2)}")
-
-    semester_re = re.compile(
-        r"\b(?:hoc\s*)?(?:ky|ki)\s*([123]|he|h)\b"
-        r"|\bhk\s*([123])\b"
-        r"|\bsemester\s*([123])\b",
-        re.IGNORECASE,
-    )
-    for match in semester_re.finditer(folded):
-        value = next((group for group in match.groups() if group), "")
-        if value:
-            tokens.add(f"semester:{'he' if value in {'h', 'he'} else value}")
-
-    return tokens
-
-
-def _detect_injected_scope(query: str, rewritten: str) -> Optional[str]:
-    """Return the scoped entity type introduced by rewrite, if any."""
-    try:
-        from retrieval.metadata_filters import (  # noqa: PLC0415
-            _extract_major_code,
-            extract_cohort_codes,
-        )
-    except Exception:
-        _extract_major_code = None  # type: ignore[assignment]
-        extract_cohort_codes = None  # type: ignore[assignment]
-
-    if _extract_major_code is not None:
-        if not _extract_major_code(query) and _extract_major_code(rewritten):
-            return "major"
-
-    if extract_cohort_codes is not None:
-        query_cohorts = set(extract_cohort_codes(query))
-        rewritten_cohorts = set(extract_cohort_codes(rewritten))
-        if rewritten_cohorts - query_cohorts:
-            return "cohort"
-
-    query_terms = _extract_academic_scope_tokens(query)
-    rewritten_terms = _extract_academic_scope_tokens(rewritten)
-    if rewritten_terms - query_terms:
-        return "academic_term"
-
-    return None
-
 
 def _is_comparison_followup(query: str) -> bool:
     """Detect short comparison follow-ups that need topic inheritance."""
@@ -1093,27 +1033,7 @@ class QueryReflector:
                 profile=merged_profile or None,
             )
 
-        # Guardrail 2: generic/latest queries must not inherit scoped context.
-        # Profile/history injection is only valid when the user explicitly asks
-        # for their own programme/cohort/record. Without that signal, a query
-        # like "Lich dang ki hoc tap moi nhat?" must not become IT-E6/K67/20252
-        # specific because those facts appeared in profile or earlier turns.
-        if (
-            not deterministic_followup_applied
-            and not _has_profile_dependent_signal(query)
-        ):
-            injected_scope = _detect_injected_scope(query, rewritten)
-            if injected_scope:
-                logger.warning(
-                    "Reflection injected %s into generic query; reverting. "
-                    "Original: %r  Rewritten: %r",
-                    injected_scope,
-                    query[:80],
-                    rewritten[:80],
-                )
-                rewritten = query
-                reflection_guardrail_reverted = True
-                reflection_rejected_scope = injected_scope
+
 
         # Guardrail 3 — Expand bare major codes to include full names.
         # E.g. "IT1" → "IT1 (Khoa học máy tính)" so that vector/keyword
