@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Message, RetrievedDocument } from '@rag/shared';
@@ -12,9 +12,9 @@ interface Props {
   onShowSources?: (sources: RetrievedDocument[]) => void;
 }
 
-const MessageBubble = ({ message, onShowSources }: Props) => {
+const MessageBubble = React.memo(({ message, onShowSources }: Props) => {
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const isUser = message.role === 'user';
   const isStreaming = message.isStreaming ?? false;
 
@@ -25,7 +25,11 @@ const MessageBubble = ({ message, onShowSources }: Props) => {
           <Ionicons name="school" size={16} color={colors.primary} />
         </View>
       )}
-      <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}>
+      <View
+        style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}
+        accessibilityRole="text"
+        accessibilityLabel={`${isUser ? 'Bạn' : 'Trợ lý'}: ${message.content}`}
+      >
         {isUser ? (
           <Text style={styles.userText}>{message.content}</Text>
         ) : isStreaming ? (
@@ -60,7 +64,7 @@ const MessageBubble = ({ message, onShowSources }: Props) => {
       )}
     </View>
   );
-};
+});
 
 const createStyles = (colors: AppColors) =>
   StyleSheet.create({

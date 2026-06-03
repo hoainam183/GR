@@ -2,8 +2,9 @@
  * Network status banner — shows when the app is offline.
  */
 
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Text, StyleSheet } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import NetInfo from '@react-native-community/netinfo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,25 +12,24 @@ import { useAppTheme, type AppColors } from '../../theme/theme';
 
 const NetworkBanner = () => {
   const [isConnected, setIsConnected] = useState<boolean>(true);
-  const translateY = useState(new Animated.Value(-100))[0];
+  const translateY = useSharedValue(-100);
   const insets = useSafeAreaInsets();
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       const connected = (state.isConnected && state.isInternetReachable !== false) ?? false;
       setIsConnected(connected);
-
-      Animated.timing(translateY, {
-        toValue: connected ? -100 : 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      translateY.value = withTiming(connected ? -100 : 0, { duration: 300 });
     });
 
     return unsubscribe;
   }, [translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
 
   if (isConnected) return null;
 
@@ -37,11 +37,11 @@ const NetworkBanner = () => {
     <Animated.View
       style={[
         styles.container,
-        {
-          paddingTop: Math.max(insets.top, 20),
-          transform: [{ translateY }],
-        },
+        { paddingTop: Math.max(insets.top, 20) },
+        animatedStyle,
       ]}
+      accessibilityLiveRegion="assertive"
+      accessibilityLabel="Không có kết nối Internet"
     >
       <Ionicons name="wifi-outline" size={16} color={colors.primaryForeground} />
       <Text style={styles.text}>Không có kết nối Internet</Text>

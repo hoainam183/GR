@@ -2,7 +2,7 @@
  * Chat input — multiline text input with send button.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   View,
   TextInput,
@@ -12,6 +12,7 @@ import {
   type TextInputContentSizeChangeEventData,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useAppTheme, type AppColors } from '../../theme/theme';
 
 interface Props {
@@ -33,7 +34,7 @@ const ChatInput = ({
   onFocus,
 }: Props) => {
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [text, setText] = useState('');
   const [inputHeight, setInputHeight] = useState(MIN_INPUT_HEIGHT);
   const inputRef = useRef<TextInput>(null);
@@ -41,6 +42,7 @@ const ChatInput = ({
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed || disabled) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onSend(trimmed);
     setText('');
     setInputHeight(MIN_INPUT_HEIGHT);
@@ -75,11 +77,15 @@ const ChatInput = ({
           onContentSizeChange={handleContentSizeChange}
           returnKeyType="default"
           blurOnSubmit={false}
+          accessibilityLabel="Nhập câu hỏi"
         />
         <Pressable
           style={[styles.sendButton, canSend && styles.sendButtonActive]}
           onPress={handleSend}
           disabled={!canSend}
+          accessibilityLabel="Gửi"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !canSend }}
         >
           <Ionicons
             name="send"

@@ -2,7 +2,7 @@
  * Register screen — full registration form with student profile fields.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -13,9 +13,13 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../navigation/AuthStack';
 import {
@@ -32,116 +36,85 @@ import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
-interface FormData {
-  username: string;
-  password: string;
-  confirmPassword: string;
-  full_name: string;
-  student_id: string;
-  cohort: string;
-  major: string;
-  major_code: string;
-}
+const registerSchema = z.object({
+  username: z.string().min(3, 'Tên đăng nhập tối thiểu 3 ký tự'),
+  password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự'),
+  confirmPassword: z.string().min(1, 'Vui lòng xác nhận mật khẩu'),
+  full_name: z.string().min(1, 'Họ tên là bắt buộc'),
+  student_id: z.string().min(1, 'MSSV là bắt buộc'),
+  cohort: z.string().min(1, 'Vui lòng chọn khóa'),
+  major_code: z.string().min(1, 'Vui lòng chọn ngành'),
+}).refine((d) => d.password === d.confirmPassword, {
+  message: 'Mật khẩu xác nhận không khớp',
+  path: ['confirmPassword'],
+});
 
-interface FormErrors {
-  username?: string;
-  password?: string;
-  confirmPassword?: string;
-  full_name?: string;
-  student_id?: string;
-  cohort?: string;
-  major?: string;
-  api?: string;
-}
+type RegisterForm = z.infer<typeof registerSchema>;
 
 const RegisterScreen = ({ navigation }: Props) => {
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const setAuth = useAuthStore((s) => s.setAuth);
-  const [form, setForm] = useState<FormData>({
-    username: '',
-    password: '',
-    confirmPassword: '',
-    full_name: '',
-    student_id: '',
-    cohort: '',
-    major: '',
-    major_code: '',
-  });
   const [showPassword, setShowPassword] = useState(false);
   const [majorPickerOpen, setMajorPickerOpen] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
-  const selectedMajor = MAJOR_OPTIONS.find((option) => option.code === form.major_code);
+  const [apiError, setApiError] = useState<string | undefined>();
 
-  const updateField = (key: keyof FormData, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    // Clear field error on change
-    if (errors[key as keyof FormErrors]) {
-      setErrors((prev) => ({ ...prev, [key]: undefined }));
-    }
-  };
+  const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: '', password: '', confirmPassword: '',
+      full_name: '', student_id: '', cohort: '', major_code: '',
+    },
+  });
+
+  const selectedMajorCode = watch('major_code');
+  const selectedCohort = watch('cohort');
+  const selectedMajor = MAJOR_OPTIONS.find((o) => o.code === selectedMajorCode);
 
   const selectMajor = (option: MajorOption) => {
-    setForm((prev) => ({ ...prev, major: option.name, major_code: option.code }));
+    setValue('major_code', option.code, { shouldValidate: true });
     setMajorPickerOpen(false);
-    if (errors.major) setErrors((prev) => ({ ...prev, major: undefined }));
   };
 
-  const validate = (): boolean => {
-    const next: FormErrors = {};
-
-    if (!form.username.trim() || form.username.trim().length < 3)
-      next.username = 'Tên đăng nhập tối thiểu 3 ký tự';
-    if (!form.password || form.password.length < 8)
-      next.password = 'Mật khẩu tối thiểu 8 ký tự';
-    if (form.password !== form.confirmPassword)
-      next.confirmPassword = 'Mật khẩu xác nhận không khớp';
-    if (!form.full_name.trim())
-      next.full_name = 'Họ tên là bắt buộc';
-    if (!form.student_id.trim())
-      next.student_id = 'MSSV là bắt buộc';
-    if (!form.cohort)
-      next.cohort = 'Vui lòng chọn khóa';
-    if (!selectedMajor || form.major !== selectedMajor.name)
-      next.major = 'Vui lòng chọn ngành';
-
-    setErrors(next);
-    return Object.keys(next).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (!validate()) return;
-    const majorOption = selectedMajor;
+  const onSubmit = async (data: RegisterForm) => {
+    const majorOption = MAJOR_OPTIONS.find((o) => o.code === data.major_code);
     if (!majorOption) return;
     setLoading(true);
-    setErrors({});
+    setApiError(undefined);
+    let registrationSucceeded = false;
 
     try {
-      // Register the user
       await registerUser(apiClient, {
-        username: form.username.trim(),
-        password: form.password,
-        full_name: form.full_name.trim(),
-        student_id: form.student_id.trim(),
-        cohort: form.cohort,
+        username: data.username.trim(),
+        password: data.password,
+        full_name: data.full_name.trim(),
+        student_id: data.student_id.trim(),
+        cohort: data.cohort,
         major: majorOption.name,
         major_code: majorOption.code,
       });
+      registrationSucceeded = true;
 
       // Auto-login after registration
       const loginResult = await loginUser(apiClient, {
-        username: form.username.trim(),
-        password: form.password,
+        username: data.username.trim(),
+        password: data.password,
         client_type: 'mobile',
       });
 
-      // Persist auth
       await setToken(loginResult.access_token, loginResult.refresh_token ?? undefined);
       await setUserProfile(loginResult.user);
       setAuth(loginResult.access_token, loginResult.user, loginResult.refresh_token ?? null);
-      // Auth state change triggers RootNavigator to show MainTab
     } catch (err: unknown) {
+      if (registrationSucceeded) {
+        Alert.alert(
+          'Đăng ký thành công',
+          'Tài khoản đã được tạo. Vui lòng đăng nhập.',
+          [{ text: 'Đăng nhập', onPress: () => navigation.goBack() }],
+        );
+        return;
+      }
       let message = 'Đăng ký thất bại.';
       if (err && typeof err === 'object' && 'response' in err) {
         const detail = (
@@ -149,7 +122,7 @@ const RegisterScreen = ({ navigation }: Props) => {
         ).response?.data?.detail;
         if (typeof detail === 'string') message = detail;
       }
-      setErrors({ api: message });
+      setApiError(message);
     } finally {
       setLoading(false);
     }
@@ -178,81 +151,101 @@ const RegisterScreen = ({ navigation }: Props) => {
           </View>
 
           {/* API Error */}
-          {errors.api && (
+          {apiError && (
             <View style={styles.errorBox}>
               <Ionicons name="alert-circle" size={16} color={colors.destructive} />
-              <Text style={styles.errorText}>{errors.api}</Text>
+              <Text style={styles.errorText}>{apiError}</Text>
             </View>
           )}
 
           {/* Username */}
           <View style={styles.field}>
             <Text style={styles.label}>Tên đăng nhập *</Text>
-            <TextInput
-              style={[styles.input, errors.username && styles.inputError]}
-              value={form.username}
-              onChangeText={(v) => updateField('username', v)}
-              placeholder="Nhập tên đăng nhập"
-              placeholderTextColor={colors.mutedForeground}
-              autoCapitalize="none"
-              autoCorrect={false}
+            <Controller
+              control={control}
+              name="username"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={[styles.input, errors.username && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Nhập tên đăng nhập"
+                  placeholderTextColor={colors.mutedForeground}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  accessibilityLabel="Tên đăng nhập"
+                />
+              )}
             />
-            {errors.username && (
-              <Text style={styles.fieldError}>{errors.username}</Text>
-            )}
+            {errors.username && <Text style={styles.fieldError}>{errors.username.message}</Text>}
           </View>
 
           {/* Full Name */}
           <View style={styles.field}>
             <Text style={styles.label}>Họ và tên *</Text>
-            <TextInput
-              style={[styles.input, errors.full_name && styles.inputError]}
-              value={form.full_name}
-              onChangeText={(v) => updateField('full_name', v)}
-              placeholder="Nguyễn Văn A"
-              placeholderTextColor={colors.mutedForeground}
+            <Controller
+              control={control}
+              name="full_name"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={[styles.input, errors.full_name && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Nguyễn Văn A"
+                  placeholderTextColor={colors.mutedForeground}
+                  accessibilityLabel="Họ và tên"
+                />
+              )}
             />
-            {errors.full_name && (
-              <Text style={styles.fieldError}>{errors.full_name}</Text>
-            )}
+            {errors.full_name && <Text style={styles.fieldError}>{errors.full_name.message}</Text>}
           </View>
 
           {/* Student ID */}
           <View style={styles.field}>
             <Text style={styles.label}>MSSV *</Text>
-            <TextInput
-              style={[styles.input, errors.student_id && styles.inputError]}
-              value={form.student_id}
-              onChangeText={(v) => updateField('student_id', v)}
-              placeholder="20210001"
-              placeholderTextColor={colors.mutedForeground}
-              keyboardType="numeric"
+            <Controller
+              control={control}
+              name="student_id"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={[styles.input, errors.student_id && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="20210001"
+                  placeholderTextColor={colors.mutedForeground}
+                  keyboardType="numeric"
+                  accessibilityLabel="Mã số sinh viên"
+                />
+              )}
             />
-            {errors.student_id && (
-              <Text style={styles.fieldError}>{errors.student_id}</Text>
-            )}
+            {errors.student_id && <Text style={styles.fieldError}>{errors.student_id.message}</Text>}
           </View>
 
           {/* Password */}
           <View style={styles.field}>
             <Text style={styles.label}>Mật khẩu *</Text>
             <View style={styles.passwordWrapper}>
-              <TextInput
-                style={[
-                  styles.input,
-                  styles.passwordInput,
-                  errors.password && styles.inputError,
-                ]}
-                value={form.password}
-                onChangeText={(v) => updateField('password', v)}
-                placeholder="Tối thiểu 8 ký tự"
-                placeholderTextColor={colors.mutedForeground}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={[styles.input, styles.passwordInput, errors.password && styles.inputError]}
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="Tối thiểu 8 ký tự"
+                    placeholderTextColor={colors.mutedForeground}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    accessibilityLabel="Mật khẩu"
+                  />
+                )}
               />
               <Pressable
                 style={styles.eyeButton}
                 onPress={() => setShowPassword((v) => !v)}
+                accessibilityLabel={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                accessibilityRole="button"
               >
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
@@ -261,29 +254,29 @@ const RegisterScreen = ({ navigation }: Props) => {
                 />
               </Pressable>
             </View>
-            {errors.password && (
-              <Text style={styles.fieldError}>{errors.password}</Text>
-            )}
+            {errors.password && <Text style={styles.fieldError}>{errors.password.message}</Text>}
           </View>
 
           {/* Confirm Password */}
           <View style={styles.field}>
             <Text style={styles.label}>Xác nhận mật khẩu *</Text>
-            <TextInput
-              style={[
-                styles.input,
-                errors.confirmPassword && styles.inputError,
-              ]}
-              value={form.confirmPassword}
-              onChangeText={(v) => updateField('confirmPassword', v)}
-              placeholder="Nhập lại mật khẩu"
-              placeholderTextColor={colors.mutedForeground}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={[styles.input, errors.confirmPassword && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Nhập lại mật khẩu"
+                  placeholderTextColor={colors.mutedForeground}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  accessibilityLabel="Xác nhận mật khẩu"
+                />
+              )}
             />
-            {errors.confirmPassword && (
-              <Text style={styles.fieldError}>{errors.confirmPassword}</Text>
-            )}
+            {errors.confirmPassword && <Text style={styles.fieldError}>{errors.confirmPassword.message}</Text>}
           </View>
 
           {/* Cohort Picker */}
@@ -293,42 +286,33 @@ const RegisterScreen = ({ navigation }: Props) => {
               {COHORT_OPTIONS.map((cohort) => (
                 <Pressable
                   key={cohort}
-                  style={[
-                    styles.chip,
-                    form.cohort === cohort && styles.chipActive,
-                  ]}
-                  onPress={() => updateField('cohort', cohort)}
+                  style={[styles.chip, selectedCohort === cohort && styles.chipActive]}
+                  onPress={() => setValue('cohort', cohort, { shouldValidate: true })}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: selectedCohort === cohort }}
+                  accessibilityLabel={`Khóa ${cohort}`}
                 >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      form.cohort === cohort && styles.chipTextActive,
-                    ]}
-                  >
+                  <Text style={[styles.chipText, selectedCohort === cohort && styles.chipTextActive]}>
                     {cohort}
                   </Text>
                 </Pressable>
               ))}
             </View>
-            {errors.cohort && (
-              <Text style={styles.fieldError}>{errors.cohort}</Text>
-            )}
+            {errors.cohort && <Text style={styles.fieldError}>{errors.cohort.message}</Text>}
           </View>
 
           {/* Major Picker */}
           <View style={styles.field}>
             <Text style={styles.label}>Ngành *</Text>
             <Pressable
-              style={[styles.selectorButton, errors.major && styles.inputError]}
+              style={[styles.selectorButton, errors.major_code && styles.inputError]}
               onPress={() => setMajorPickerOpen(true)}
+              accessibilityLabel={selectedMajor ? selectedMajor.name : 'Chọn ngành học'}
+              accessibilityHint="Mở danh sách ngành"
+              accessibilityRole="button"
             >
               <View style={styles.selectorTextGroup}>
-                <Text
-                  style={[
-                    styles.selectorText,
-                    !selectedMajor && styles.selectorPlaceholder,
-                  ]}
-                >
+                <Text style={[styles.selectorText, !selectedMajor && styles.selectorPlaceholder]}>
                   {selectedMajor ? selectedMajor.name : 'Chọn ngành học'}
                 </Text>
                 {selectedMajor && (
@@ -342,38 +326,39 @@ const RegisterScreen = ({ navigation }: Props) => {
               transparent
               animationType="fade"
               onRequestClose={() => setMajorPickerOpen(false)}
+              accessibilityViewIsModal
             >
               <View style={styles.modalBackdrop}>
-                <Pressable
-                  style={StyleSheet.absoluteFill}
-                  onPress={() => setMajorPickerOpen(false)}
-                />
+                <Pressable style={StyleSheet.absoluteFill} onPress={() => setMajorPickerOpen(false)} />
                 <View style={styles.modalCard}>
                   <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Chọn ngành học</Text>
+                    <Text style={styles.modalTitle} accessibilityRole="header">Chọn ngành học</Text>
                     <Pressable
                       style={styles.modalCloseButton}
                       onPress={() => setMajorPickerOpen(false)}
+                      accessibilityLabel="Đóng"
+                      accessibilityRole="button"
                     >
                       <Ionicons name="close" size={22} color={colors.mutedForeground} />
                     </Pressable>
                   </View>
                   <ScrollView showsVerticalScrollIndicator={false}>
                     {MAJOR_OPTIONS.map((opt) => {
-                      const active = selectedMajor?.code === opt.code;
+                      const active = selectedMajorCode === opt.code;
                       return (
                         <Pressable
                           key={opt.code}
                           style={[styles.optionRow, active && styles.optionRowActive]}
                           onPress={() => selectMajor(opt)}
+                          accessibilityRole="radio"
+                          accessibilityState={{ selected: active }}
+                          accessibilityLabel={`${opt.name} - ${opt.code}`}
                         >
                           <View style={styles.optionTextGroup}>
                             <Text style={styles.optionCode}>{opt.code}</Text>
                             <Text style={styles.optionName}>{opt.name}</Text>
                           </View>
-                          {active && (
-                            <Ionicons name="checkmark" size={20} color={colors.primary} />
-                          )}
+                          {active && <Ionicons name="checkmark" size={20} color={colors.primary} />}
                         </Pressable>
                       );
                     })}
@@ -381,9 +366,7 @@ const RegisterScreen = ({ navigation }: Props) => {
                 </View>
               </View>
             </Modal>
-            {errors.major && (
-              <Text style={styles.fieldError}>{errors.major}</Text>
-            )}
+            {errors.major_code && <Text style={styles.fieldError}>{errors.major_code.message}</Text>}
           </View>
 
           {/* Info banner */}
@@ -397,8 +380,11 @@ const RegisterScreen = ({ navigation }: Props) => {
           {/* Submit */}
           <Pressable
             style={[styles.submitButton, loading && styles.submitDisabled]}
-            onPress={handleSubmit}
+            onPress={handleSubmit(onSubmit)}
             disabled={loading}
+            accessibilityLabel="Đăng ký"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: loading }}
           >
             {loading ? (
               <ActivityIndicator size="small" color={colors.primaryForeground} />

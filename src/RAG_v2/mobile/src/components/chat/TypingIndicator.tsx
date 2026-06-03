@@ -1,5 +1,13 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 import { useAppTheme, type AppColors } from '../../theme/theme';
 
 interface Props {
@@ -9,37 +17,56 @@ interface Props {
 const DOT_SIZE = 8;
 const DOT_SPACING = 6;
 
-const TypingIndicator = ({ phase = 'thinking' }: Props) => {
+const AnimatedDot = ({ delay }: { delay: number }) => {
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
-  const dot1 = useRef(new Animated.Value(0)).current;
-  const dot2 = useRef(new Animated.Value(0)).current;
-  const dot3 = useRef(new Animated.Value(0)).current;
+  const translateY = useSharedValue(0);
 
   useEffect(() => {
-    const bounce = (anim: Animated.Value, delay: number) =>
-      Animated.loop(
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.timing(anim, { toValue: -8, duration: 300, useNativeDriver: true }),
-          Animated.timing(anim, { toValue: 0, duration: 300, useNativeDriver: true }),
-        ]),
-      );
-    const animations = [bounce(dot1, 0), bounce(dot2, 150), bounce(dot3, 300)];
-    animations.forEach((animation) => animation.start());
-    return () => animations.forEach((animation) => animation.stop());
-  }, [dot1, dot2, dot3]);
+    translateY.value = withDelay(
+      delay,
+      withRepeat(
+        withSequence(
+          withTiming(-8, { duration: 300 }),
+          withTiming(0, { duration: 300 }),
+        ),
+        -1,
+        false,
+      ),
+    );
+    return () => { translateY.value = 0; };
+  }, [translateY, delay]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          width: DOT_SIZE,
+          height: DOT_SIZE,
+          borderRadius: DOT_SIZE / 2,
+          backgroundColor: colors.primary,
+          marginHorizontal: DOT_SPACING / 2,
+        },
+        animatedStyle,
+      ]}
+    />
+  );
+};
+
+const TypingIndicator = ({ phase = 'thinking' }: Props) => {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={styles.container}>
       <View style={styles.bubble}>
         <View style={styles.dotsRow}>
-          {[dot1, dot2, dot3].map((anim, index) => (
-            <Animated.View
-              key={index}
-              style={[styles.dot, { transform: [{ translateY: anim }] }]}
-            />
-          ))}
+          <AnimatedDot delay={0} />
+          <AnimatedDot delay={150} />
+          <AnimatedDot delay={300} />
         </View>
         <Text style={styles.label}>
           {phase === 'thinking' ? 'Đang suy nghĩ...' : 'Đang trả lời...'}
@@ -64,13 +91,7 @@ const createStyles = (colors: AppColors) =>
       borderTopLeftRadius: 4,
       gap: 10,
     },
-    dotsRow: { flexDirection: 'row', alignItems: 'center', gap: DOT_SPACING },
-    dot: {
-      width: DOT_SIZE,
-      height: DOT_SIZE,
-      borderRadius: DOT_SIZE / 2,
-      backgroundColor: colors.primary,
-    },
+    dotsRow: { flexDirection: 'row', alignItems: 'center' },
     label: { color: colors.mutedForeground, fontSize: 13, fontStyle: 'italic' },
   });
 

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
   Modal,
   Pressable,
   Share,
@@ -10,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import type { RetrievedDocument } from '@rag/shared';
 import {
   createBookmark,
@@ -18,6 +18,7 @@ import {
   getFeedback,
   submitFeedback,
 } from '@rag/shared';
+import * as Haptics from 'expo-haptics';
 import { apiClient } from '../../services/api';
 import { useAppTheme, type AppColors } from '../../theme/theme';
 
@@ -43,7 +44,7 @@ const CATEGORIES: Array<{
 
 const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: Props) => {
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
   const [shared, setShared] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
@@ -53,33 +54,37 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
     useState<FeedbackCategory>('incomplete');
   const [comment, setComment] = useState('');
 
+  // React Query — deduplicates requests; same queryKey across all MessageBubbles
+  // sharing a turn will hit cache instead of making N API calls.
+  const { data: existingFeedback } = useQuery({
+    queryKey: ['feedback', sessionId, turnId],
+    queryFn: () => getFeedback(apiClient, sessionId!, turnId!),
+    enabled: Boolean(sessionId && turnId),
+    staleTime: Infinity,
+  });
+
+  const { data: existingBookmark } = useQuery({
+    queryKey: ['bookmark-by-turn', sessionId, turnId],
+    queryFn: () => getBookmarkByTurn(apiClient, sessionId!, turnId!),
+    enabled: Boolean(sessionId && turnId),
+    staleTime: Infinity,
+  });
+
   useEffect(() => {
-    if (!sessionId || !turnId) return;
-    let cancelled = false;
-    getFeedback(apiClient, sessionId, turnId)
-      .then((existing) => {
-        if (!cancelled && existing?.rating) setFeedback(existing.rating);
-      })
-      .catch(() => {});
-    getBookmarkByTurn(apiClient, sessionId, turnId)
-      .then((existing) => {
-        if (!cancelled) {
-          setBookmarked(Boolean(existing));
-          setBookmarkId(existing?.id ?? null);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [sessionId, turnId]);
+    if (existingFeedback?.rating) setFeedback(existingFeedback.rating);
+  }, [existingFeedback]);
+
+  useEffect(() => {
+    setBookmarked(Boolean(existingBookmark));
+    setBookmarkId(existingBookmark?.id ?? null);
+  }, [existingBookmark]);
 
   const requireTurn = (action: string) => {
     if (sessionId && turnId) return true;
-    Alert.alert(
-      `Chưa thể ${action}`,
-      'Mở lại hội thoại sau khi câu trả lời được lưu vào lịch sử rồi thử lại.',
-    );
+    // Non-blocking info toast instead of Alert
+    import('react-native-toast-message').then(({ default: Toast }) => {
+      Toast.show({ type: 'info', text1: `Chưa thể ${action}`, text2: 'Câu trả lời chưa được lưu vào lịch sử.' });
+    });
     return false;
   };
 
@@ -95,6 +100,7 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
 
   const handleThumbsUp = async () => {
     if (!requireTurn('gửi đánh giá')) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const next = feedback === 'up' ? null : 'up';
     setFeedback(next);
     if (next !== 'up' || !sessionId || !turnId) return;
@@ -102,12 +108,15 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
       await submitFeedback(apiClient, { session_id: sessionId, turn_id: turnId, rating: 'up' });
     } catch {
       setFeedback(null);
-      Alert.alert('Lỗi', 'Không thể gửi đánh giá. Vui lòng thử lại.');
+      import('react-native-toast-message').then(({ default: Toast }) => {
+        Toast.show({ type: 'error', text1: 'Lỗi', text2: 'Không thể gửi đánh giá. Vui lòng thử lại.' });
+      });
     }
   };
 
   const handleThumbsDown = () => {
     if (!requireTurn('báo cáo')) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (feedback === 'down') {
       setFeedback(null);
       return;
@@ -130,12 +139,15 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
       setComment('');
     } catch {
       setFeedback(null);
-      Alert.alert('Lỗi', 'Không thể gửi báo cáo. Vui lòng thử lại.');
+      import('react-native-toast-message').then(({ default: Toast }) => {
+        Toast.show({ type: 'error', text1: 'Lỗi', text2: 'Không thể gửi báo cáo. Vui lòng thử lại.' });
+      });
     }
   };
 
   const handleBookmark = async () => {
     if (!requireTurn('lưu') || !sessionId || !turnId) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     if (bookmarked && bookmarkId) {
       setBookmarked(false);
@@ -146,7 +158,9 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
       } catch {
         setBookmarked(true);
         setBookmarkId(previousId);
-        Alert.alert('Lỗi', 'Không thể bỏ lưu câu trả lời. Vui lòng thử lại.');
+        import('react-native-toast-message').then(({ default: Toast }) => {
+          Toast.show({ type: 'error', text1: 'Lỗi', text2: 'Không thể bỏ lưu câu trả lời. Vui lòng thử lại.' });
+        });
       }
       return;
     }
@@ -160,7 +174,9 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
     } catch {
       setBookmarked(false);
       setBookmarkId(null);
-      Alert.alert('Lỗi', 'Không thể lưu câu trả lời. Vui lòng thử lại.');
+      import('react-native-toast-message').then(({ default: Toast }) => {
+        Toast.show({ type: 'error', text1: 'Lỗi', text2: 'Không thể lưu câu trả lời. Vui lòng thử lại.' });
+      });
     }
   };
 
@@ -169,7 +185,12 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
       <View style={styles.container}>
         {!!sources?.length && (
           <>
-            <Pressable style={styles.sourcesButton} onPress={() => onShowSources?.(sources)}>
+            <Pressable
+              style={styles.sourcesButton}
+              onPress={() => onShowSources?.(sources)}
+              accessibilityLabel={`Xem ${sources.length} nguồn tham khảo`}
+              accessibilityRole="button"
+            >
               <Ionicons name="document-text-outline" size={13} color={colors.primary} />
               <Text style={styles.sourcesText}>{sources.length} nguồn</Text>
             </Pressable>
@@ -180,6 +201,7 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
           icon={feedback === 'up' ? 'thumbs-up' : 'thumbs-up-outline'}
           color={feedback === 'up' ? colors.success : colors.mutedForeground}
           active={feedback === 'up'}
+          label="Hữu ích"
           onPress={handleThumbsUp}
           styles={styles}
         />
@@ -187,12 +209,15 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
           icon={feedback === 'down' ? 'thumbs-down' : 'thumbs-down-outline'}
           color={feedback === 'down' ? colors.destructive : colors.mutedForeground}
           active={feedback === 'down'}
+          label="Báo cáo vấn đề"
+          hint="Mở hộp thoại báo cáo"
           onPress={handleThumbsDown}
           styles={styles}
         />
         <ActionButton
           icon={shared ? 'checkmark' : 'share-social-outline'}
           color={shared ? colors.success : colors.mutedForeground}
+          label="Chia sẻ"
           onPress={handleShare}
           styles={styles}
         />
@@ -200,15 +225,21 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
           icon={bookmarked ? 'bookmark' : 'bookmark-outline'}
           color={bookmarked ? colors.warning : colors.mutedForeground}
           active={bookmarked}
+          label={bookmarked ? 'Bỏ lưu' : 'Lưu câu trả lời'}
           onPress={handleBookmark}
           styles={styles}
         />
       </View>
 
-      <Modal visible={showFeedbackModal} transparent animationType="fade">
+      <Modal
+        visible={showFeedbackModal}
+        transparent
+        animationType="fade"
+        accessibilityViewIsModal
+      >
         <Pressable style={styles.modalOverlay} onPress={() => setShowFeedbackModal(false)}>
           <Pressable style={styles.modalContent} onPress={() => {}}>
-            <Text style={styles.modalTitle}>Báo cáo câu trả lời</Text>
+            <Text style={styles.modalTitle} accessibilityRole="header">Báo cáo câu trả lời</Text>
             <Text style={styles.modalSubtitle}>
               Chọn vấn đề để gửi feedback cho câu trả lời này.
             </Text>
@@ -220,6 +251,9 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
                     key={category.key}
                     style={[styles.categoryChip, active && styles.categoryChipActive]}
                     onPress={() => setSelectedCategory(category.key)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: active }}
+                    accessibilityLabel={category.label}
                   >
                     <Ionicons
                       name={category.icon}
@@ -243,10 +277,20 @@ const MessageActions = ({ content, sources, sessionId, turnId, onShowSources }: 
               maxLength={1000}
             />
             <View style={styles.modalActions}>
-              <Pressable style={styles.cancelButton} onPress={() => setShowFeedbackModal(false)}>
+              <Pressable
+                style={styles.cancelButton}
+                onPress={() => setShowFeedbackModal(false)}
+                accessibilityLabel="Hủy báo cáo"
+                accessibilityRole="button"
+              >
                 <Text style={styles.cancelText}>Hủy</Text>
               </Pressable>
-              <Pressable style={styles.submitButton} onPress={submitNegativeFeedback}>
+              <Pressable
+                style={styles.submitButton}
+                onPress={submitNegativeFeedback}
+                accessibilityLabel="Gửi báo cáo"
+                accessibilityRole="button"
+              >
                 <Text style={styles.submitText}>Gửi</Text>
               </Pressable>
             </View>
@@ -261,12 +305,16 @@ const ActionButton = ({
   icon,
   color,
   active = false,
+  label,
+  hint,
   onPress,
   styles,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
   active?: boolean;
+  label: string;
+  hint?: string;
   onPress: () => void;
   styles: ReturnType<typeof createStyles>;
 }) => (
@@ -277,6 +325,11 @@ const ActionButton = ({
       pressed && styles.buttonPressed,
     ]}
     onPress={onPress}
+    accessibilityLabel={label}
+    accessibilityRole="button"
+    accessibilityState={{ selected: active }}
+    accessibilityHint={hint}
+    hitSlop={8}
   >
     <Ionicons name={icon} size={14} color={color} />
   </Pressable>
@@ -296,7 +349,7 @@ const createStyles = (colors: AppColors) =>
     },
     sourcesText: { color: colors.primary, fontSize: 11, fontWeight: '600' },
     divider: { width: 1, height: 16, backgroundColor: colors.border, marginHorizontal: 4 },
-    actionButton: { padding: 6, borderRadius: 6 },
+    actionButton: { padding: 12, borderRadius: 8 },
     actionActive: { backgroundColor: colors.secondary },
     buttonPressed: { opacity: 0.6 },
     modalOverlay: {

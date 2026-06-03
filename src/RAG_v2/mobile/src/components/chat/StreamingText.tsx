@@ -2,8 +2,15 @@
  * Streaming text display with cursor blink.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import MarkdownDisplay from './MarkdownDisplay';
 import { useAppTheme } from '../../theme/theme';
 
@@ -14,43 +21,33 @@ interface Props {
 
 const StreamingText = ({ content, isStreaming }: Props) => {
   const { colors } = useAppTheme();
-  const cursorOpacity = useRef(new Animated.Value(1)).current;
+  const opacity = useSharedValue(1);
 
   useEffect(() => {
     if (!isStreaming) {
-      cursorOpacity.setValue(0);
+      opacity.value = 0;
       return;
     }
-
-    const blink = Animated.loop(
-      Animated.sequence([
-        Animated.timing(cursorOpacity, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(cursorOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0, { duration: 500 }),
+        withTiming(1, { duration: 500 }),
+      ),
+      -1,
+      false,
     );
-    blink.start();
-    return () => blink.stop();
-  }, [isStreaming, cursorOpacity]);
+    return () => { opacity.value = 0; };
+  }, [isStreaming, opacity]);
+
+  const cursorStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    backgroundColor: colors.primary,
+  }));
 
   return (
     <View>
       <MarkdownDisplay content={content} />
-      {isStreaming && (
-        <Animated.View
-          style={[
-            styles.cursor,
-            { opacity: cursorOpacity, backgroundColor: colors.primary },
-          ]}
-        />
-      )}
+      {isStreaming && <Animated.View style={[styles.cursor, cursorStyle]} />}
     </View>
   );
 };

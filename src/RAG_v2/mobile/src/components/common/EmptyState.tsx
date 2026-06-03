@@ -2,7 +2,7 @@
  * A reusable empty state component for lists and screens.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme, type AppColors } from '../../theme/theme';
@@ -25,7 +25,7 @@ const EmptyState = ({
   style,
 }: Props) => {
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={[styles.container, style]}>
       <View style={styles.iconCircle}>
@@ -41,6 +41,8 @@ const EmptyState = ({
             pressed && styles.buttonPressed,
           ]}
           onPress={onAction}
+          accessibilityLabel={actionLabel}
+          accessibilityRole="button"
         >
           <Text style={styles.buttonText}>{actionLabel}</Text>
         </Pressable>

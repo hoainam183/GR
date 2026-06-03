@@ -2,11 +2,12 @@
  * Session list screen — shows chat history and allows starting new conversations.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
   FlatList,
+  Platform,
   Pressable,
   StyleSheet,
   RefreshControl,
@@ -15,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { ChatStackParamList } from '../../navigation/ChatStack';
 import type { Session } from '@rag/shared';
@@ -58,9 +60,13 @@ const formatDate = (isoString: string): string => {
   });
 };
 
+// Named separator component avoids creating a new function instance per render
+const separatorStyle = { height: 1, backgroundColor: '#e5e7eb', marginHorizontal: 20 };
+const SessionSeparator = () => <View style={separatorStyle} />;
+
 const SessionListScreen = ({ navigation }: Props) => {
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const resetChat = useChatStore((s) => s.reset);
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
@@ -89,6 +95,7 @@ const SessionListScreen = ({ navigation }: Props) => {
   }, [refetch]);
 
   const handleNewChat = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     resetChat();
     navigation.navigate('Chat', undefined);
   }, [navigation, resetChat]);
@@ -110,6 +117,8 @@ const SessionListScreen = ({ navigation }: Props) => {
           pressed && styles.sessionCardPressed,
         ]}
         onPress={() => handleOpenSession(item.session_id)}
+        accessibilityRole="button"
+        accessibilityLabel={`${getSessionTitle(item)}, ${formatDate(item.updated_at || item.created_at)}`}
       >
         <View style={styles.sessionIcon}>
           <Ionicons name="chatbubble-outline" size={20} color={colors.primary} />
@@ -167,6 +176,8 @@ const SessionListScreen = ({ navigation }: Props) => {
           onPress={() =>
             queryClient.invalidateQueries({ queryKey: ['sessions'] })
           }
+          accessibilityLabel="Làm mới"
+          accessibilityRole="button"
         >
           <Ionicons name="refresh-outline" size={22} color={colors.mutedForeground} />
         </Pressable>
@@ -199,7 +210,11 @@ const SessionListScreen = ({ navigation }: Props) => {
               colors={[colors.primary]}
             />
           }
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={SessionSeparator}
+          maxToRenderPerBatch={10}
+          windowSize={7}
+          removeClippedSubviews={Platform.OS === 'android'}
+          initialNumToRender={15}
         />
       )}
 
@@ -210,6 +225,8 @@ const SessionListScreen = ({ navigation }: Props) => {
           pressed && styles.fabPressed,
         ]}
         onPress={handleNewChat}
+        accessibilityLabel="Tạo hội thoại mới"
+        accessibilityRole="button"
       >
         <Ionicons name="add" size={28} color={colors.primaryForeground} />
       </Pressable>

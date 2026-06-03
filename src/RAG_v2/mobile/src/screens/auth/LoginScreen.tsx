@@ -1,8 +1,4 @@
-/**
- * Login screen — ported from web LoginPage.tsx to React Native.
- */
-
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,6 +11,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../navigation/AuthStack';
 import { useAuth } from '../../hooks/useAuth';
@@ -22,48 +21,39 @@ import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
+const loginSchema = z.object({
+  username: z.string().min(1, 'Tên đăng nhập là bắt buộc.'),
+  password: z.string().min(1, 'Mật khẩu là bắt buộc.'),
+});
+type LoginForm = z.infer<typeof loginSchema>;
+
 const LoginScreen = ({ navigation }: Props) => {
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { login } = useAuth();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{
-    username?: string;
-    password?: string;
-    api?: string;
-  }>({});
-  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [apiError, setApiError] = React.useState<string | undefined>();
 
-  const validate = () => {
-    const next: { username?: string; password?: string } = {};
-    if (!username.trim()) next.username = 'Tên đăng nhập là bắt buộc.';
-    if (!password) next.password = 'Mật khẩu là bắt buộc.';
-    setErrors(next);
-    return Object.keys(next).length === 0;
-  };
+  const { control, handleSubmit, formState: { errors } } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { username: '', password: '' },
+  });
 
-  const handleSubmit = async () => {
-    if (!validate()) return;
+  const onSubmit = async (data: LoginForm) => {
     setLoading(true);
-    setErrors({});
+    setApiError(undefined);
     try {
-      await login({ username, password });
-      // Auth state change triggers RootNavigator to show MainTabNavigator
+      await login({ username: data.username, password: data.password });
     } catch (err: unknown) {
       let message = 'Đăng nhập thất bại.';
-      if (
-        err &&
-        typeof err === 'object' &&
-        'response' in err
-      ) {
+      if (err && typeof err === 'object' && 'response' in err) {
         const detail = (
           err as { response?: { data?: { detail?: string } } }
         ).response?.data?.detail;
         if (typeof detail === 'string') message = detail;
       }
-      setErrors({ api: message });
+      setApiError(message);
     } finally {
       setLoading(false);
     }
@@ -92,29 +82,33 @@ const LoginScreen = ({ navigation }: Props) => {
           </View>
 
           {/* Error */}
-          {errors.api && (
+          {apiError && (
             <View style={styles.errorBox}>
-              <Text style={styles.errorText}>{errors.api}</Text>
+              <Text style={styles.errorText}>{apiError}</Text>
             </View>
           )}
 
           {/* Username */}
           <View style={styles.field}>
             <Text style={styles.label}>Tên đăng nhập</Text>
-            <TextInput
-              style={[
-                styles.input,
-                errors.username ? styles.inputError : null,
-              ]}
-              value={username}
-              onChangeText={setUsername}
-              placeholder="Nhập tên đăng nhập"
-              placeholderTextColor={colors.mutedForeground}
-              autoCapitalize="none"
-              autoCorrect={false}
+            <Controller
+              control={control}
+              name="username"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={[styles.input, errors.username ? styles.inputError : null]}
+                  value={value}
+                  onChangeText={(v) => { onChange(v); setApiError(undefined); }}
+                  placeholder="Nhập tên đăng nhập"
+                  placeholderTextColor={colors.mutedForeground}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  accessibilityLabel="Tên đăng nhập"
+                />
+              )}
             />
             {errors.username && (
-              <Text style={styles.fieldError}>{errors.username}</Text>
+              <Text style={styles.fieldError}>{errors.username.message}</Text>
             )}
           </View>
 
@@ -122,22 +116,31 @@ const LoginScreen = ({ navigation }: Props) => {
           <View style={styles.field}>
             <Text style={styles.label}>Mật khẩu</Text>
             <View style={styles.passwordWrapper}>
-              <TextInput
-                style={[
-                  styles.input,
-                  styles.passwordInput,
-                  errors.password ? styles.inputError : null,
-                ]}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="••••••••"
-                placeholderTextColor={colors.mutedForeground}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={[
+                      styles.input,
+                      styles.passwordInput,
+                      errors.password ? styles.inputError : null,
+                    ]}
+                    value={value}
+                    onChangeText={(v) => { onChange(v); setApiError(undefined); }}
+                    placeholder="••••••••"
+                    placeholderTextColor={colors.mutedForeground}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    accessibilityLabel="Mật khẩu"
+                  />
+                )}
               />
               <Pressable
                 style={styles.eyeButton}
                 onPress={() => setShowPassword((v) => !v)}
+                accessibilityLabel={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                accessibilityRole="button"
               >
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
@@ -147,15 +150,18 @@ const LoginScreen = ({ navigation }: Props) => {
               </Pressable>
             </View>
             {errors.password && (
-              <Text style={styles.fieldError}>{errors.password}</Text>
+              <Text style={styles.fieldError}>{errors.password.message}</Text>
             )}
           </View>
 
           {/* Submit */}
           <Pressable
             style={[styles.submitButton, loading && styles.submitDisabled]}
-            onPress={handleSubmit}
+            onPress={handleSubmit(onSubmit)}
             disabled={loading}
+            accessibilityLabel="Đăng nhập"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: loading }}
           >
             {loading ? (
               <ActivityIndicator size="small" color={colors.primaryForeground} />

@@ -18,6 +18,7 @@ import {
   lookupCompare,
   lookupCTDT,
   lookupRegulations,
+  COHORT_OPTIONS,
 } from '@rag/shared';
 import { apiClient } from '../../services/api';
 import { useProfile } from '../../hooks/useProfile';
@@ -34,14 +35,16 @@ const MODES: Array<{ key: Mode; label: string; icon: keyof typeof Ionicons.glyph
 
 const LookupScreen = () => {
   const { colors } = useAppTheme();
-  const styles = createStyles(colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { majorCode, user } = useProfile();
   const [mode, setMode] = useState<Mode>('ctdt');
   const [query, setQuery] = useState('');
+  const [cohort1, setCohort1] = useState(user?.cohort ?? 'K66');
+  const [cohort2, setCohort2] = useState('K68');
 
   const lookupKey = query.trim();
   const { data = [], isLoading, refetch } = useQuery({
-    queryKey: ['lookup', mode, lookupKey, majorCode, user?.cohort],
+    queryKey: ['lookup', mode, lookupKey, majorCode, user?.cohort, cohort1, cohort2],
     queryFn: async () => {
       if (mode === 'ctdt') {
         const result = await lookupCTDT(apiClient, lookupKey || majorCode || 'IT1', user?.cohort);
@@ -60,8 +63,8 @@ const LookupScreen = () => {
       }
       const compare = await lookupCompare(apiClient, {
         topic: lookupKey || 'ngoại ngữ',
-        cohort1: 'K66',
-        cohort2: 'K68',
+        cohort1,
+        cohort2,
       });
       return [
         {
@@ -115,8 +118,14 @@ const LookupScreen = () => {
           placeholderTextColor={colors.mutedForeground}
           returnKeyType="search"
           onSubmitEditing={() => refetch()}
+          accessibilityLabel="Tìm kiếm"
         />
-        <Pressable style={styles.searchButton} onPress={() => refetch()}>
+        <Pressable
+          style={styles.searchButton}
+          onPress={() => refetch()}
+          accessibilityLabel="Tìm kiếm"
+          accessibilityRole="button"
+        >
           <Ionicons name="arrow-forward" size={18} color={colors.primaryForeground} />
         </Pressable>
       </View>
@@ -140,6 +149,9 @@ const LookupScreen = () => {
               ]}
               onPress={() => setMode(item.key)}
               hitSlop={4}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={item.label}
             >
               <Ionicons
                 name={item.icon}
@@ -153,6 +165,36 @@ const LookupScreen = () => {
           );
         })}
       </ScrollView>
+
+      {/* Compare mode cohort selectors */}
+      {mode === 'compare' && (
+        <View style={styles.compareRow}>
+          {[
+            { label: 'Khóa 1', value: cohort1, onChange: setCohort1 },
+            { label: 'Khóa 2', value: cohort2, onChange: setCohort2 },
+          ].map(({ label, value, onChange }) => (
+            <View key={label} style={styles.cohortSelector}>
+              <Text style={styles.cohortLabel}>{label}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {COHORT_OPTIONS.map((c) => (
+                  <Pressable
+                    key={c}
+                    style={[styles.cohortChip, value === c && styles.cohortChipActive]}
+                    onPress={() => onChange(c)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: value === c }}
+                    accessibilityLabel={`${label} ${c}`}
+                  >
+                    <Text style={[styles.cohortChipText, value === c && styles.cohortChipTextActive]}>
+                      {c}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          ))}
+        </View>
+      )}
 
       {isLoading ? (
         <View style={styles.center}>
@@ -265,6 +307,26 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   },
   summary: { color: colors.subtleForeground, fontSize: 13, lineHeight: 19, marginTop: 8 },
   emptyText: { color: colors.mutedForeground, textAlign: 'center', marginTop: 40 },
+  compareRow: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+  },
+  cohortSelector: { flex: 1, gap: 4 },
+  cohortLabel: { color: colors.mutedForeground, fontSize: 12, fontWeight: '600' },
+  cohortChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: colors.secondary,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginRight: 6,
+  },
+  cohortChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  cohortChipText: { color: colors.mutedForeground, fontSize: 13, fontWeight: '600' },
+  cohortChipTextActive: { color: colors.primaryForeground },
 });
 
 export default LookupScreen;
