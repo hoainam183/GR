@@ -131,40 +131,72 @@ class BaseFilterExtractor(ABC):
 # Map major_code → canonical major_name (used for name-based fallback queries).
 # Add new programmes here together with an entry in MAJOR_PATTERNS.
 MAJOR_CODE_TO_NAME: Dict[str, str] = {
+    "BF-E12": "Kỹ thuật thực phẩm (Chương trình tiên tiến)",
+    "BF-E19": "Kỹ thuật sinh học (Chương trình tiên tiến)",
     "BF1": "Kỹ thuật Sinh học",
     "BF2": "Kỹ thuật Thực phẩm",
-    "BF-E12": "Kỹ thuật thực phẩm",
+    "CH-E11": "Kỹ thuật Hóa dược (Chương trình tiên tiến)",
+    "CH-E20": "Hóa học Mỹ phẩm (Chương trình tiên tiến)",
     "CH1": "Kỹ thuật Hóa học",
     "CH2": "Hóa học",
-    "CH-E11": "Kỹ thuật Hóa dược",
+    "ED2": "Công nghệ giáo dục",
+    "ED3": "Quản lý giáo dục",
+    "ED5": "Tâm lý học công nghiệp và tổ chức",
+    "EE-E18": "Hệ thống điện và năng lượng tái tạo (Chương trình tiên tiến)",
+    "EE-E8": "Kỹ thuật Điều khiển - Tự động hóa (Chương trình tiên tiến)",
+    "EE-EP": "Tin học công nghiệp và Tự động hóa (Chương trình Việt-Pháp PFIEV)",
     "EE1": "Kỹ thuật điện",
     "EE2": "Kỹ thuật Điều khiển - Tự động hóa",
-    "EE-E18": "Hệ thống điện và năng lượng tái tạo",
-    "EE-E8": "Kỹ thuật Điều khiển - Tự động hóa",
-    "EE-EP": "Tin học công nghiệp và Tự động hóa",
+    "EM-E13": "Phân tích kinh doanh (Chương trình tiên tiến)",
+    "EM-E14": "Logistics và Quản lý chuỗi cung ứng (Chương trình tiên tiến)",
+    "EM-E17": "Kế toán (Chương trình tiên tiến)",
+    "EM1": "Quản lý năng lượng",
+    "EM2": "Quản lý công nghiệp",
+    "EM3": "Quản trị kinh doanh",
+    "EM5": "Tài chính - Ngân hàng",
+    "ET-E16": "Truyền thông số và Kỹ thuật đa phương tiện (Chương trình tiên tiến)",
+    "ET-E4": "Kỹ thuật Điện tử - Viễn thông (Chương trình tiên tiến)",
+    "ET-E5": "Kỹ thuật Y sinh (Chương trình tiên tiến)",
+    "ET-E9": "Hệ thống nhúng thông minh và IoT (Chương trình tiên tiến)",
+    "ET-LUH": "Điện tử-Viễn thông - ĐH Leibniz Hannover (Đức)",
+    "ET1": "Điện tử và Viễn thông",
+    "ET2": "Kỹ thuật Y sinh",
     "EV1": "Kỹ thuật Môi trường",
     "EV2": "Quản lý Tài nguyên và Môi trường",
+    "FL1": "Tiếng Anh Khoa học Kỹ thuật và Công nghệ",
+    "FL2": "Tiếng Anh Chuyên nghiệp Quốc tế",
+    "FL3": "Tiếng Trung Khoa học và Công nghệ",
+    "FL4": "Tiếng Hàn Khoa học và Công nghệ",
     "HE1": "Kỹ thuật Nhiệt",
     "IT-E10": "Khoa học Dữ liệu và Trí tuệ Nhân tạo",
-    "IT-E15": "An toàn không gian số",
-    "IT-E6": "Công nghệ thông tin Việt - Nhật",
-    "IT-E7": "Công nghệ thông tin toàn cầu",
-    "IT-EP": "Công nghệ thông tin Việt Pháp",
-    "IT1": "Khoa học máy tính",
-    "IT2": "Kỹ thuật máy tính",
-    "ME1": "Kỹ thuật Cơ điện tử",
-    "ME2": "Kỹ thuật Cơ khí",
+    "IT-E15": "An toàn không gian số (Chương trình tiên tiến)",
+    "IT-E6": "Công nghệ thông tin (Việt-Nhật) (Chương trình tiên tiến)",
+    "IT-E7": "Công nghệ thông tin (Global ICT)",
+    "IT-EP": "Công nghệ thông tin (Việt-Pháp) (Chương trình tiên tiến)",
+    "IT1": "CNTT: Khoa học Máy tính",
+    "IT2": "CNTT: Kỹ thuật máy tính",
+    "ME-E1": "Kỹ thuật Cơ điện tử (Chương trình tiên tiến)",
     "ME-GU": "Cơ khí - Chế tạo máy - ĐH Griffith (Úc)",
     "ME-LUH": "Cơ điện tử - ĐH Leibniz Hannover (Đức)",
     "ME-NUT": "Cơ điện tử - ĐH Nagaoka (Nhật Bản)",
+    "ME1": "Kỹ thuật Cơ điện tử",
+    "ME2": "Kỹ thuật Cơ khí",
+    "MI-E22": "Khoa học tính toán cho các hệ thống thông minh (CTTT)",
     "MI1": "Toán - Tin",
     "MI2": "Hệ thống thông tin quản lý",
+    "MS-E3": "Khoa học và Kỹ thuật Vật liệu (Chương trình tiên tiến)",
     "MS1": "Kỹ thuật Vật liệu",
-    "MS2": "Kỹ thuật vi điện tử và công nghệ Nano",
+    "MS2": "Chương trình Kỹ thuật vi điện tử và công nghệ Nano",
     "MS3": "Công nghệ vật liệu polyme và compozit",
     "MS5": "Kỹ thuật in",
-    "MS-E3": "Khoa học và Kỹ thuật Vật liệu",
-    "TE-EP": "Cơ khí hàng không",
+    "PH1": "Vật lý kỹ thuật",
+    "PH2": "Kỹ thuật hạt nhân",
+    "PH3": "Vật lý Y khoa",
+    "TE-E2": "Kỹ thuật Ô tô (Chương trình tiên tiến)",
+    "TE-EP": "Cơ khí hàng không (Chương trình Việt - Pháp PFIEV)",
+    "TE1": "Kỹ thuật Ô tô",
+    "TE2": "Kỹ thuật Cơ khí động lực",
+    "TE3": "Kỹ thuật Hàng không",
     "TROY-IT": "Khoa học máy tính - ĐH Troy (Hoa Kỳ)",
     "TX1": "Công nghệ Dệt May",
 }
@@ -409,8 +441,8 @@ _DASH_TRANSLATION = str.maketrans(
         "\u2212": "-",  # minus sign
     }
 )
-_MAJOR_CODE_PREFIX_RE = r"IT|MI|ME|EE|EV|CH|BF|MS|HE|TE|TX|TROY"
-_MAJOR_CODE_SUFFIX_RE = r"E18|E15|E12|E11|E10|E8|E7|E6|E3|E1|EP|GU|LUH|NUT|IT|1|2|3|5"
+_MAJOR_CODE_PREFIX_RE = r"IT|MI|ME|EE|EV|CH|BF|MS|HE|TE|TX|TROY|ED|EM|ET|FL|PH"
+_MAJOR_CODE_SUFFIX_RE = r"E22|E20|E19|E18|E17|E16|E15|E14|E13|E12|E11|E10|E9|E8|E7|E6|E5|E4|E3|E2|E1|EP|GU|LUH|NUT|IT|1|2|3|4|5"
 _MAJOR_CODE_SEPARATOR_RE = r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*"
 _MAJOR_CODE_FUZZY_RE = re.compile(
     rf"\b({_MAJOR_CODE_PREFIX_RE}){_MAJOR_CODE_SEPARATOR_RE}({_MAJOR_CODE_SUFFIX_RE})\b",
@@ -500,6 +532,9 @@ def _extract_major_code(text: str) -> Optional[str]:
     normalised_text = _normalise_major_text(text)
     if _is_unknown_major(normalised_text):
         return None
+    explicit_codes = extract_major_codes(normalised_text)
+    if explicit_codes:
+        return explicit_codes[0]
     for pattern, code in MAJOR_PATTERNS:
         if re.search(pattern, normalised_text, re.IGNORECASE):
             return code
@@ -558,6 +593,10 @@ def _build_major_labels(major_code: str) -> List[str]:
     if major_name:
         labels.append(major_name)
         labels.extend(MAJOR_NAME_ALIAS_MAPPING.get(major_name, []))
+    for alias_name, aliases in MAJOR_NAME_ALIAS_MAPPING.items():
+        alias_values = [alias_name, *aliases]
+        if any(_normalise_major_text(value).casefold() == major_code.casefold() for value in alias_values):
+            labels.extend(alias_values)
 
     unique: List[str] = []
     seen: set[str] = set()
@@ -581,7 +620,7 @@ def _canonicalise_major_code_parts(prefix: str, suffix: str) -> str:
     """Convert regex major parts to canonical major code (e.g. MI+1 -> MI1)."""
     p = (prefix or "").upper()
     s = (suffix or "").upper()
-    return f"{p}{s}" if s in {"1", "2", "3", "5"} else f"{p}-{s}"
+    return f"{p}{s}" if s in {"1", "2", "3", "4", "5"} else f"{p}-{s}"
 
 
 def extract_major_codes(text: str) -> List[str]:
@@ -602,6 +641,94 @@ def extract_major_codes(text: str) -> List[str]:
         seen.add(key)
         out.append(code)
     return out
+
+
+_URL_RE = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
+
+
+def _major_name_query_variants(name: str) -> list[str]:
+    """Return practical name variants for code enrichment."""
+    variants = [name]
+    without_parentheses = re.sub(r"[()]", "", name)
+    if without_parentheses != name:
+        variants.append(re.sub(r"\s{2,}", " ", without_parentheses).strip())
+    without_program_note = re.sub(r"\s*\([^)]*chương trình[^)]*\)", "", name, flags=re.IGNORECASE)
+    if without_program_note != name:
+        variants.append(without_program_note.strip())
+        variants.append(re.sub(r"[()]", "", without_program_note).strip())
+    without_cttt_note = re.sub(r"\s*\(CTTT\)", "", name, flags=re.IGNORECASE)
+    if without_cttt_note != name:
+        variants.append(without_cttt_note.strip())
+    if ":" in name:
+        variants.append(name.split(":", 1)[1].strip())
+    return [v for v in dict.fromkeys(variants) if len(v) >= 4]
+
+
+def enrich_major_references_for_query(query: str) -> str:
+    """Add code/name pairs for HUST major references in retrieval queries.
+
+    Examples:
+      - ``IT1`` -> ``IT1 (CNTT: Khoa học Máy tính)``
+      - ``Khoa học máy tính`` -> ``Khoa học máy tính (IT1)``
+
+    The function is deterministic and intentionally conservative: URLs are
+    protected, already-expanded references are skipped, and short ambiguous
+    fragments such as plain ``CNTT`` are not expanded.
+    """
+    if not query:
+        return query
+
+    saved_urls: list[str] = []
+
+    def _stash_url(match: re.Match[str]) -> str:
+        placeholder = f"\x00URL{len(saved_urls)}\x00"
+        saved_urls.append(match.group(0))
+        return placeholder
+
+    result = _URL_RE.sub(_stash_url, query)
+    normalized_for_codes = _normalise_major_text(result)
+
+    for code in extract_major_codes(normalized_for_codes):
+        name = MAJOR_CODE_TO_NAME.get(code)
+        if not name:
+            continue
+        if re.search(rf"\b{re.escape(code)}\s*\(", result, re.IGNORECASE):
+            continue
+        if re.search(rf"\({re.escape(code)}\)", result, re.IGNORECASE):
+            continue
+        if name.casefold() in result.casefold():
+            continue
+        code_pattern = re.escape(code).replace(r"\-", r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*")
+        result = re.sub(
+            rf"\b{code_pattern}\b",
+            f"{code} ({name})",
+            result,
+            flags=re.IGNORECASE,
+        )
+
+    existing_codes = set(extract_major_codes(_normalise_major_text(result)))
+    for code, name in sorted(MAJOR_CODE_TO_NAME.items(), key=lambda item: len(item[1]), reverse=True):
+        if code in existing_codes:
+            continue
+        for variant in sorted(_major_name_query_variants(name), key=len, reverse=True):
+            if re.search(rf"{re.escape(variant)}\s*\(\s*{re.escape(code)}\s*\)", result, re.IGNORECASE):
+                break
+            pattern = rf"(?<![\w]){re.escape(variant)}(?![\w])"
+            if not re.search(pattern, result, re.IGNORECASE):
+                continue
+            result = re.sub(
+                pattern,
+                lambda match, c=code: f"{match.group(0)} ({c})",
+                result,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+            existing_codes.add(code)
+            break
+
+    for i, url in enumerate(saved_urls):
+        result = result.replace(f"\x00URL{i}\x00", url)
+    return result
 
 
 def _normalise_cohort_code(value: str) -> Optional[str]:

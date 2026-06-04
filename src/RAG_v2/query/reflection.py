@@ -383,66 +383,23 @@ _URL_RE = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
 
 
 def _expand_major_codes_in_query(query: str) -> str:
-    """Deterministically expand bare major codes to 'CODE (Full Name)' form.
+    """Deterministically expand major codes/names to paired references.
 
     E.g. ``"So sánh học phí giữa IT-E6 và IT1"``
     →    ``"So sánh học phí giữa IT-E6 (Công nghệ thông tin Việt - Nhật) và IT1 (Khoa học máy tính)"``
 
-    Expansion uses the authoritative ``MAJOR_CODE_TO_NAME`` dict — no LLM involved.
-    Only expands when the code is not already followed by '(...)', which prevents
-    double-expansion on subsequent calls.
-    URLs are protected via placeholder substitution so they are never mangled.
+    Expansion uses the authoritative major mapping — no LLM involved. It also
+    handles the reverse direction, e.g. ``"Khoa học máy tính"`` -> ``"Khoa học
+    máy tính (IT1)"``.
     """
     try:
-        from retrieval.metadata_filters import (
-            MAJOR_CODE_TO_NAME,
-            extract_major_codes,
-        )  # noqa: PLC0415
+        from retrieval.metadata_filters import enrich_major_references_for_query  # noqa: PLC0415
     except Exception:
         return query
 
-    # Protect URLs: replace them with placeholders before any substitution so
-    # that domain/path segments that look like major codes (e.g. "it1.hust.edu.vn")
-    # are never touched by the expansion regex.
-    _saved_urls: list[str] = []
-
-    def _stash_url(m: re.Match) -> str:  # type: ignore[type-arg]
-        placeholder = f"\x00URL{len(_saved_urls)}\x00"
-        _saved_urls.append(m.group(0))
-        return placeholder
-
-    protected = _URL_RE.sub(_stash_url, query)
-
-    codes = extract_major_codes(protected)
-    if not codes:
-        return query
-
-    result = protected
-    for code in codes:
-        name = MAJOR_CODE_TO_NAME.get(code)
-        if not name:
-            continue
-        # Skip if already expanded in either direction:
-        #   "IT-E6 (..."  — code followed by opening paren
-        #   "(IT-E6)"     — code is itself inside parens (name appeared before it)
-        #   name already present anywhere in the query
-        if re.search(rf"\b{re.escape(code)}\s*\(", result, re.IGNORECASE):
-            continue
-        if re.search(rf"\({re.escape(code)}\)", result, re.IGNORECASE):
-            continue
-        if name.casefold() in result.casefold():
-            continue
-        result = re.sub(
-            rf"\b{re.escape(code)}\b",
-            f"{code} ({name})",
-            result,
-        )
-    # Restore protected URLs
-    for i, url in enumerate(_saved_urls):
-        result = result.replace(f"\x00URL{i}\x00", url)
-
+    result = enrich_major_references_for_query(query)
     if result != query:
-        logger.debug("Major code expansion: %r → %r", query[:80], result[:80])
+        logger.debug("Major reference expansion: %r → %r", query[:80], result[:80])
     return result
 
 

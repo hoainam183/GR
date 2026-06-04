@@ -149,13 +149,13 @@ tôi", "nó", "đó"), ưu tiên giải tham chiếu theo thứ tự:
   - CHAT_HISTORY
   - Câu hỏi hiện tại
 2. Nếu USER_PROFILE có ngành:
-  - Bắt buộc thay "ngành của tôi" bằng mã ngành (hoặc tên ngành nếu đã có sẵn trong từ nguồn tin cậy).
-  - Không tự ý bổ sung tên ngành đầy đủ nếu chỉ có mã ngành.
+  - Bắt buộc thay "ngành của tôi" bằng mã ngành và/hoặc tên ngành từ nguồn tin cậy.
+  - Nếu biết cả mã ngành và tên ngành, giữ cả hai theo dạng "MÃ (Tên ngành)" hoặc "Tên ngành (MÃ)".
 3. Nếu câu hỏi chứa "môn này/ngành này/chương trình này", phải cố gắng thay bằng
   thực thể cụ thể gần nhất từ USER_PROFILE hoặc CHAT_HISTORY.
 4. Nếu CURRENT_QUERY đã nêu rõ ngành/mã ngành cụ thể (ví dụ: IT-E7, IT-E6, ITE6, ITE7):
   - Bắt buộc GIỮ NGUYÊN thực thể đó, KHÔNG thay bằng ngành từ USER_PROFILE/CHAT_HISTORY.
-  - TUYỆT ĐỐI KHÔNG tự ý suy diễn hoặc dịch các mã ngành (vd: ITE7, ITE6, IT1) thành tên gọi đầy đủ (vd: "Công nghệ thông tin") nếu không có căn cứ. Phải giữ nguyên mã ngành trong truy vấn.
+  - Nếu danh mục mã ngành/tên ngành tin cậy cung cấp được tên tương ứng, thêm tên ngành bên cạnh mã để tăng độ chính xác truy hồi. Không dùng tên ngành mơ hồ nếu không chắc.
 5. Nếu CURRENT_QUERY có cả tên ngành và mã ngành nhưng mâu thuẫn, ưu tiên mã ngành
   được nêu trong CURRENT_QUERY; không tạo tổ hợp tên ngành + mã ngành mâu thuẫn.
 6. Nếu không đủ thông tin để giải tham chiếu, KHÔNG bịa đặt. Giữ nguyên phần mơ hồ \
@@ -243,13 +243,13 @@ CÂU HỎI HIỆN TẠI: Điều kiện đạt học bổng là gì?
 STANDALONE QUERY: Điều kiện đạt học bổng là gì?
 
 ---
-Ví dụ 7 — Follow-up so sánh hai mã ngành: chỉ chuẩn hóa mã về dạng chuẩn, KHÔNG tự thêm tên đầy đủ:
+Ví dụ 7 — Follow-up so sánh hai mã ngành: chuẩn hóa mã và giữ tên ngành tương ứng khi biết chắc:
 USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt - Nhật (IT-E6), Khóa K68
 CHAT_HISTORY:
 - Người dùng: Học phần IT3080 trong chương trình IT-E6 thì thế nào?
 - Trợ lý: Trong chương trình IT-E6, học phần IT3080 (Mạng máy tính) là học phần cơ sở 3 tín chỉ.
 CÂU HỎI HIỆN TẠI: so sánh với ITE7
-STANDALONE QUERY: So sánh học phần IT3080 trong chương trình IT-E6 và IT-E7
+STANDALONE QUERY: So sánh học phần IT3080 trong chương trình IT-E6 (Công nghệ thông tin Việt-Nhật) và IT-E7 (Công nghệ thông tin Global ICT)
 
 ---
 Ví dụ 8 — So sánh với thực thể mới, tuyệt đối không rò rỉ thực thể cũ đã lỗi thời ở các lượt chat đầu:

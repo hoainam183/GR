@@ -90,6 +90,7 @@ export {
   sanitizeUserContext,
   normalizeV3Response,
   mapSourceToRetrieved,
+  normalizeRetrievedDocuments,
   API_PATHS,
   CLARIFY_SENTINEL,
 } from './utils';

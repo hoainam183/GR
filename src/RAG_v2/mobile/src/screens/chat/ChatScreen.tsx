@@ -22,7 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useStreamChat } from "../../hooks/useStreamChat";
 import { useProfile } from "../../hooks/useProfile";
 import { useChatStore } from "../../stores/chatStore";
-import { getSession, getSuggestedQuestions } from "@rag/shared";
+import { getSession, getSuggestedQuestions, normalizeRetrievedDocuments } from "@rag/shared";
 import { apiClient } from "../../services/api";
 import { CACHE_KEYS, getCache, setCache } from "../../services/offlineCache";
 import MessageBubble from "../../components/chat/MessageBubble";
@@ -93,7 +93,8 @@ const ChatScreen = ({ route, navigation }: Props) => {
           { id: "assistant-" + t.turn_id, role: "assistant" as const, content: t.answer,
             timestamp: new Date(t.timestamp), sessionId: sessionIdParam, turnId: t.turn_id,
             modelName: t.model_name, mode: t.mode, route: t.route ?? t.intent,
-            toolsUsed: t.tools_used, timingsMs: t.timings_ms, sources: t.sources },
+            toolsUsed: t.tools_used, timingsMs: t.timings_ms,
+            sources: normalizeRetrievedDocuments(t.sources) },
         ]);
         if (isMountedRef.current) {
           setMessages(loaded);
@@ -150,8 +151,9 @@ const ChatScreen = ({ route, navigation }: Props) => {
             },
             onMetadata: (meta: Partial<ChatV3Response>) => {
               if (!isMountedRef.current) return;
+              const sources = normalizeRetrievedDocuments(meta.retrieved_documents);
               updateMessage(assistantMessageId, { mode: meta.mode, route: meta.route ?? meta.intent,
-                modelName: meta.model_name, timingsMs: meta.timings_ms, sources: meta.retrieved_documents,
+                modelName: meta.model_name, timingsMs: meta.timings_ms, sources,
                 sessionId: meta.session_id || currentSessionId, turnId: meta.turn_id, isStreaming: false });
             },
             onDone: () => { if (!isMountedRef.current) return; updateMessage(assistantMessageId, { isStreaming: false }); setChatPhase("idle"); },

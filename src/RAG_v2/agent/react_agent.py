@@ -247,6 +247,19 @@ class ReActAgent:
             from retrieval.metadata_filters import extract_major_codes  # noqa: PLC0415
 
             query_lower = query.lower()
+            has_personal_major_ref = any(
+                ref in query_lower
+                for ref in [
+                    "ngành của tôi",
+                    "ngành tôi",
+                    "ngành học của tôi",
+                    "chương trình của tôi",
+                    "chương trình tôi",
+                    "nganh cua toi",
+                    "nganh toi",
+                    "chuong trinh cua toi",
+                ]
+            )
             has_comparison_keywords = any(
                 kw in query_lower
                 for kw in [
@@ -259,14 +272,22 @@ class ReActAgent:
                     "khac nhau",
                 ]
             )
-            if len(extract_major_codes(query)) < 2 and not has_comparison_keywords:
-                ctx_parts.append(f"Ma nganh: {user_context['major_code']}")
+            if (
+                len(extract_major_codes(query)) < 2
+                and (has_personal_major_ref or not has_comparison_keywords)
+            ):
+                major_hint = f"Ma nganh: {user_context['major_code']}"
+                if user_context.get("major"):
+                    major_hint += f" ({user_context['major']})"
+                ctx_parts.append(major_hint)
 
         return f"\nThong tin sinh vien: {', '.join(ctx_parts)}" if ctx_parts else ""
 
     def _decompose_node(self, state: AgentGraphState) -> dict[str, Any]:
         """Decompose comparison/multi-source queries before planning."""
-        query = state["query"]
+        from retrieval.metadata_filters import enrich_major_references_for_query  # noqa: PLC0415
+
+        query = enrich_major_references_for_query(state["query"])
         prompt = f"Query: {query}{self._user_context_hint(query, state.get('user_context'))}"
 
         t0 = time.perf_counter()
@@ -312,12 +333,18 @@ class ReActAgent:
 
     def _planner_node(self, state: AgentGraphState) -> dict[str, Any]:
         """Generate and validate a retrieval plan."""
-        sub_questions = state.get("sub_questions") or [state["query"]]
+        from retrieval.metadata_filters import enrich_major_references_for_query  # noqa: PLC0415
+
+        enriched_query = enrich_major_references_for_query(state["query"])
+        sub_questions = [
+            enrich_major_references_for_query(str(q))
+            for q in (state.get("sub_questions") or [state["query"]])
+        ]
         questions_str = "\n".join(f"- {q}" for q in sub_questions)
         prompt = (
-            f"Cau hoi goc: {state['query']}\n\n"
+            f"Cau hoi goc: {enriched_query}\n\n"
             f"Cau hoi con:\n{questions_str}"
-            f"{self._user_context_hint(state['query'], state.get('user_context'))}"
+            f"{self._user_context_hint(enriched_query, state.get('user_context'))}"
         )
 
         t0 = time.perf_counter()

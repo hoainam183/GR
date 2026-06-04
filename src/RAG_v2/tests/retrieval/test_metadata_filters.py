@@ -8,6 +8,7 @@ from retrieval.metadata_filters import (
     build_major_comparison_subqueries_for_retrieval,
     build_cohort_comparison_subqueries_for_retrieval,
     canonicalize_major_name,
+    enrich_major_references_for_query,
     extract_major_codes,
     extract_cohort_codes,
     strip_major_from_query_for_retrieval,
@@ -121,6 +122,26 @@ def test_extract_major_codes_dedups_and_preserves_order() -> None:
     assert extract_major_codes(query) == ["IT-E7", "IT-E6"]
 
 
+def test_enrich_major_references_expands_codes_to_names() -> None:
+    """Retrieval query should include major names for explicit major codes."""
+    query = "So sánh ngoại ngữ giữa IT1 và IT-E6"
+
+    enriched = enrich_major_references_for_query(query)
+
+    assert "IT1 (CNTT: Khoa học Máy tính)" in enriched
+    assert "IT-E6 (Công nghệ thông tin (Việt-Nhật)" in enriched
+
+
+def test_enrich_major_references_expands_names_to_codes() -> None:
+    """Retrieval query should include codes for explicit major names."""
+    query = "So sánh ngoại ngữ giữa Khoa học máy tính và Công nghệ thông tin Việt-Nhật"
+
+    enriched = enrich_major_references_for_query(query)
+
+    assert "Khoa học máy tính (IT1)" in enriched
+    assert "Công nghệ thông tin Việt-Nhật (IT-E6)" in enriched
+
+
 def test_extract_major_code_supports_all_indexed_ctdt_codes() -> None:
     """Every indexed CTDT major code should be recognised explicitly."""
     expected_codes = list(MAJOR_CODE_TO_NAME)
@@ -131,16 +152,12 @@ def test_extract_major_code_supports_all_indexed_ctdt_codes() -> None:
         assert _resolve_major_code(code, None) == code
 
 
-def test_resolve_major_code_preserves_direct_code_for_duplicate_names() -> None:
-    """Direct codes should not be remapped through duplicate canonical names."""
+def test_resolve_major_code_preserves_direct_code_for_similar_names() -> None:
+    """Direct codes should not be remapped through similar major names."""
     assert _resolve_major_code("generic", "EE2") == "EE2"
     assert _resolve_major_code("generic", "EE-E8") == "EE-E8"
     assert _resolve_major_code("generic", "BF2") == "BF2"
     assert _resolve_major_code("generic", "BF-E12") == "BF-E12"
-
-    duplicate_name = MAJOR_CODE_TO_NAME["EE2"]
-    assert duplicate_name == MAJOR_CODE_TO_NAME["EE-E8"]
-    assert _resolve_major_code("generic", duplicate_name) == "EE2"
 
 
 def test_extract_major_code_supports_new_dash_and_space_variants() -> None:

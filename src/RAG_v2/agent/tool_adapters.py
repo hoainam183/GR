@@ -11,6 +11,7 @@ from typing import Any
 
 from config.settings import Settings
 from retrieval.metadata_filters import (
+    enrich_major_references_for_query,
     extract_major_codes,
     strip_major_comparison_scaffold_for_retrieval,
     strip_major_from_query_for_retrieval,
@@ -286,7 +287,9 @@ def _rag_search(
     runtime = _get_runtime()
     effective_top_k = max(1, int(top_k if top_k is not None else runtime.settings.top_k))
 
-    raw_query = strip_personal_identifiers(query.strip())
+    raw_query = enrich_major_references_for_query(
+        strip_personal_identifiers(query.strip())
+    )
     major_codes = extract_major_codes(raw_query)
     effective_resolved_major = resolved_major
     if not effective_resolved_major and len(major_codes) == 1:

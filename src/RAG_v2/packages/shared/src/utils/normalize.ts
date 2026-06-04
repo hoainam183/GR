@@ -15,6 +15,15 @@ const asRecord = (value: unknown): Record<string, unknown> | undefined =>
     ? (value as Record<string, unknown>)
     : undefined;
 
+const asNumber = (value: unknown): number | undefined => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+};
+
 /**
  * Map a raw source object from the backend into a typed RetrievedDocument.
  */
@@ -22,21 +31,20 @@ export const mapSourceToRetrieved = (
   source: Record<string, unknown>,
   rank: number,
 ): RetrievedDocument => ({
-  rank,
-  content: typeof source.text === 'string' ? source.text : '',
-  score:
-    typeof source.rerank_score === 'number'
-      ? source.rerank_score
-      : typeof source.score === 'number'
-        ? source.score
-        : 0,
-  hybrid_score: typeof source.score === 'number' ? source.score : undefined,
-  rerank_score:
-    typeof source.rerank_score === 'number' ? source.rerank_score : undefined,
-  vector_score:
-    typeof source.vector_score === 'number' ? source.vector_score : undefined,
-  keyword_score:
-    typeof source.keyword_score === 'number' ? source.keyword_score : undefined,
+  rank: asNumber(source.rank) ?? rank,
+  content:
+    typeof source.content === 'string'
+      ? source.content
+      : typeof source.text === 'string'
+        ? source.text
+        : typeof source.chunk_text === 'string'
+          ? source.chunk_text
+          : '',
+  score: asNumber(source.rerank_score) ?? asNumber(source.score) ?? 0,
+  hybrid_score: asNumber(source.score),
+  rerank_score: asNumber(source.rerank_score),
+  vector_score: asNumber(source.vector_score),
+  keyword_score: asNumber(source.keyword_score),
   collection:
     typeof source.collection === 'string' ? source.collection : undefined,
   metadata:
@@ -44,6 +52,15 @@ export const mapSourceToRetrieved = (
       ? (source.metadata as Record<string, unknown>)
       : {},
 });
+
+export const normalizeRetrievedDocuments = (
+  sources: unknown,
+): RetrievedDocument[] =>
+  Array.isArray(sources)
+    ? sources.map((source, index) =>
+        mapSourceToRetrieved(asRecord(source) ?? {}, index + 1),
+      )
+    : [];
 
 /**
  * Normalize a raw /chat/v3 or metadata payload into a typed ChatV3Response.
@@ -53,11 +70,9 @@ export const normalizeV3Response = (
   fallbackSessionId?: string,
 ): ChatV3Response => {
   const retrievedDocs = Array.isArray(payload.retrieved_documents)
-    ? (payload.retrieved_documents as RetrievedDocument[])
+    ? normalizeRetrievedDocuments(payload.retrieved_documents)
     : Array.isArray(payload.sources)
-      ? (payload.sources as Record<string, unknown>[]).map((source, index) =>
-          mapSourceToRetrieved(source, index + 1),
-        )
+      ? normalizeRetrievedDocuments(payload.sources)
       : [];
 
   const toolsFromTrace =
