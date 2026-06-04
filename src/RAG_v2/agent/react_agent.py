@@ -64,6 +64,87 @@ def _trace_plan_step(step: dict[str, Any], top_k: int | None) -> dict[str, Any]:
     return traced
 
 
+_ENTITY_SCOPED_COLLECTIONS = frozenset({"quy_dinh", "chuong_trinh"})
+
+
+def _clean_plan_hint(value: Any) -> str | None:
+    text = str(value or "").strip()
+    return text or None
+
+
+def _single_extracted_entity(values: list[str]) -> str | None:
+    unique_values = []
+    for value in values:
+        if value not in unique_values:
+            unique_values.append(value)
+    return unique_values[0] if len(unique_values) == 1 else None
+
+
+def _normalise_plan_steps_for_entities(
+    steps: list[Any],
+    source_query: str,
+) -> tuple[list[Any], dict[str, Any]]:
+    """Preserve explicit major/cohort scope when planner emits generic steps."""
+    from retrieval.metadata_filters import (  # noqa: PLC0415
+        extract_cohort_codes,
+        extract_major_codes,
+    )
+
+    source_major = _single_extracted_entity(extract_major_codes(source_query))
+    source_cohort = _single_extracted_entity(extract_cohort_codes(source_query))
+    trace: dict[str, Any] = {
+        "applied": False,
+        "major_hint": source_major,
+        "cohort_hint": source_cohort,
+    }
+    if not source_major and not source_cohort:
+        return steps, trace
+
+    normalised_steps: list[Any] = []
+    changed = False
+    for raw_step in steps:
+        if not isinstance(raw_step, dict):
+            normalised_steps.append(raw_step)
+            continue
+
+        step = dict(raw_step)
+        query = str(step.get("query") or "").strip()
+        collection = str(step.get("collection") or "").strip()
+        step_major_codes = extract_major_codes(query)
+        step_cohort_codes = extract_cohort_codes(query)
+
+        if (
+            source_major
+            and not _clean_plan_hint(step.get("major_hint"))
+            and (not step_major_codes or source_major in step_major_codes)
+        ):
+            step["major_hint"] = source_major
+            changed = True
+
+        if (
+            source_cohort
+            and not _clean_plan_hint(step.get("cohort_hint"))
+            and (not step_cohort_codes or source_cohort in step_cohort_codes)
+        ):
+            step["cohort_hint"] = source_cohort
+            changed = True
+
+        if query and collection in _ENTITY_SCOPED_COLLECTIONS:
+            scoped_query = query
+            if source_major and not step_major_codes:
+                scoped_query = f"{scoped_query} ngành {source_major}"
+            if source_cohort and not step_cohort_codes:
+                scoped_query = f"{scoped_query} {source_cohort}"
+            if scoped_query != query:
+                step["query"] = " ".join(scoped_query.split())
+                changed = True
+
+        normalised_steps.append(step)
+
+    trace["applied"] = changed
+    return normalised_steps, trace
+
+
 def _parse_json_object(content: Any) -> dict[str, Any]:
     """Parse strict JSON object content, accepting optional markdown fences."""
     raw = _content_to_text(content).strip()
@@ -372,7 +453,10 @@ class ReActAgent:
         steps = plan.get("steps", [])
         if not isinstance(steps, list):
             steps = []
-        plan["steps"] = steps[:4]
+        plan["steps"], entity_hint_trace = _normalise_plan_steps_for_entities(
+            steps[:4],
+            enriched_query,
+        )
         elapsed_ms = (time.perf_counter() - t0) * 1000
         planner_trace = {
             "prompt_hash": _hash_text(prompt),
@@ -387,6 +471,8 @@ class ReActAgent:
                 if isinstance(step, dict)
             ],
         }
+        if entity_hint_trace.get("major_hint") or entity_hint_trace.get("cohort_hint"):
+            planner_trace["entity_hint_normalization"] = entity_hint_trace
 
         if not plan["steps"]:
             logger.warning("[Planner] Empty plan")

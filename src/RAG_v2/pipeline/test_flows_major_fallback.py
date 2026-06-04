@@ -945,3 +945,79 @@ def test_query_agent_infers_complexity_subtype_for_forced_agent() -> None:
     assert agent.last_complexity_subtype == "comparison"
     assert agent.last_top_k == 7
     pipeline.query.assert_not_called()
+
+
+def test_query_agent_reflects_followup_before_agent_run() -> None:
+    from pipeline.rag_pipeline import RAGPipeline
+
+    reflected = (
+        "Điều kiện ngoại ngữ để sinh viên chương trình Công nghệ thông tin "
+        "Việt - Nhật (IT-E6) khóa K67 tốt nghiệp là gì?"
+    )
+
+    class _State:
+        final_answer = "agent answer"
+        tool_call_history = []
+        tool_results = []
+        iteration = 0
+        error = None
+
+        def to_log_dict(self) -> dict[str, Any]:
+            return {
+                "query": reflected,
+                "session_id": "",
+                "route": "complex",
+                "iterations": 0,
+                "tool_calls": [],
+                "tool_names_sequence": [],
+                "final_answer_length": len(self.final_answer),
+                "error": None,
+            }
+
+    class _Agent:
+        model_name = "agent"
+
+        def __init__(self) -> None:
+            self.last_query: str | None = None
+
+        def run(self, query: str, **kwargs: Any) -> _State:
+            self.last_query = query
+            return _State()
+
+    agent = _Agent()
+    reflector = MagicMock()
+    reflector.reflect.return_value = {
+        "rewritten": reflected,
+        "prompt": "reflection prompt",
+    }
+
+    pipeline = RAGPipeline.__new__(RAGPipeline)
+    pipeline._llm_runtime_snapshot = MagicMock(
+        return_value=SimpleNamespace(
+            agent=agent,
+            cfg={"top_k": 5},
+            reflector=reflector,
+        )
+    )
+    pipeline._mongo_logger = None
+    pipeline.query = MagicMock()
+
+    result = RAGPipeline.query_agent(
+        pipeline,
+        "điều kiện ngoại ngữ để tôi tốt nghiệp",
+        history=[
+            {
+                "role": "user",
+                "content": "điều kiện ngoại ngữ để sinh viên ITE6 K67 tốt nghiệp",
+            },
+        ],
+        complexity_subtype="multi_source",
+    )
+
+    assert result["mode"] == "agent"
+    assert result["reflected_question"] == reflected
+    assert result["reflection_prompt"] == "reflection prompt"
+    assert agent.last_query == reflected
+    assert result["agent_trace"]["original_query"] == "điều kiện ngoại ngữ để tôi tốt nghiệp"
+    assert result["agent_trace"]["reflected_question"] == reflected
+    pipeline.query.assert_not_called()

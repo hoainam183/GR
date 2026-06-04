@@ -94,6 +94,38 @@ class TestPlannerExecutorFlow:
 
     @patch("agent.react_agent.execute_retrieval_plan")
     @patch(PATCH_CHAT)
+    def test_planner_preserves_reflected_major_and_cohort_scope(
+        self,
+        mock_chat_cls: MagicMock,
+        mock_execute_plan: MagicMock,
+    ) -> None:
+        mock_llm = MagicMock()
+        mock_chat_cls.return_value = mock_llm
+        mock_llm.invoke.side_effect = [
+            make_ai_answer(plan_payload()),
+            make_ai_answer("Sinh viên IT-E6 K67 cần đạt chuẩn ngoại ngữ phù hợp."),
+        ]
+        mock_execute_plan.return_value = [("quy_dinh", "IT-E6 K67: tieng Nhat N3")]
+
+        agent = ReActAgent(make_settings())
+        state = agent.run(
+            "Điều kiện ngoại ngữ để sinh viên chương trình Công nghệ thông tin "
+            "Việt - Nhật (IT-E6) khóa K67 tốt nghiệp là gì?",
+            complexity_subtype="general",
+            top_k=7,
+        )
+
+        assert state.error is None
+        executed_steps = mock_execute_plan.call_args.args[0]
+        step = executed_steps[0]
+        assert step["major_hint"] == "IT-E6"
+        assert step["cohort_hint"] == "K67"
+        assert "IT-E6" in step["query"]
+        assert "K67" in step["query"]
+        assert mock_execute_plan.call_args.kwargs["top_k"] == 7
+
+    @patch("agent.react_agent.execute_retrieval_plan")
+    @patch(PATCH_CHAT)
     def test_comparison_uses_decompose_then_planner(
         self,
         mock_chat_cls: MagicMock,

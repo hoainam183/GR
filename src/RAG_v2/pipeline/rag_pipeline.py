@@ -653,6 +653,9 @@ class RAGPipeline:
         runtime = self._llm_runtime_snapshot()
         agent = runtime.agent
         effective_top_k = top_k or runtime.cfg["top_k"]
+        reflected_question = question
+        reflection_prompt: Optional[str] = None
+        reflection_ms: Optional[float] = None
 
         if complexity_subtype is None:
             try:
@@ -682,7 +685,10 @@ class RAGPipeline:
             result["iterations"] = int(tool_info.get("iterations", 0) or 0)
 
             result["agent_trace"] = {
-                "query": question,
+                "query": reflected_question,
+                "original_query": question,
+                "reflected_question": reflected_question,
+                "reflection_prompt": reflection_prompt,
                 "session_id": session_id or "",
                 "route": route_label,
                 "iterations": int(tool_info.get("iterations", 0) or 0),
@@ -700,7 +706,14 @@ class RAGPipeline:
             )
             result["timings_ms"] = _merge_timings(
                 existing_timings,
-                {"agent_attempt_total": _elapsed_ms(agent_t0)},
+                {
+                    "agent_attempt_total": _elapsed_ms(agent_t0),
+                    **(
+                        {"reflection": reflection_ms}
+                        if reflection_ms is not None
+                        else {}
+                    ),
+                },
             )
             return result
 
@@ -712,13 +725,46 @@ class RAGPipeline:
             logger.warning("Agent unavailable, falling back to RAG v2")
             return _fallback_result("Agent is disabled")
 
+        reflector = getattr(runtime, "reflector", None)
+        if reflector is not None:
+            reflect_t0 = time.perf_counter()
+            try:
+                trimmed_for_reflect = history[-8:] if history else []
+                ref_result = reflector.reflect(
+                    question,
+                    chat_history=trimmed_for_reflect,
+                    user_context=user_context,
+                    user_profile=user_context,
+                )
+                reflection_prompt = (
+                    ref_result.get("prompt") if isinstance(ref_result, dict) else None
+                )
+                rewritten = (
+                    str(ref_result.get("rewritten") or "").strip()
+                    if isinstance(ref_result, dict)
+                    else ""
+                )
+                if rewritten and rewritten != question:
+                    reflected_question = rewritten
+                    logger.info(
+                        "[query_agent] Reflected: %r -> %r",
+                        question[:60],
+                        reflected_question[:100],
+                    )
+            except Exception as ref_exc:
+                logger.warning(
+                    "[query_agent] Reflection failed (%s), using original",
+                    ref_exc,
+                )
+            reflection_ms = _elapsed_ms(reflect_t0)
+
         from agent.tool_adapters import init_agent_docs, get_agent_docs
 
         init_agent_docs()  # Tạo context riêng cho request này (thread-safe)
 
         try:
             state = agent.run(
-                question,
+                reflected_question,
                 session_id=session_id or "",
                 history=history,
                 complexity_subtype=complexity_subtype,
@@ -735,6 +781,9 @@ class RAGPipeline:
 
         agent_trace = state.to_log_dict()
         agent_trace["latency_ms"] = _elapsed_ms(agent_t0)
+        agent_trace["original_query"] = question
+        agent_trace["reflected_question"] = reflected_question
+        agent_trace["reflection_prompt"] = reflection_prompt
         tool_calls = [tr.to_dict() for tr in state.tool_results]
 
         if (
@@ -765,8 +814,16 @@ class RAGPipeline:
             )
 
         agent_latency_ms = _elapsed_ms(agent_t0)
+        timings_ms = {
+            "agent_total": agent_latency_ms,
+            "pipeline_total": agent_latency_ms,
+        }
+        if reflection_ms is not None:
+            timings_ms["reflection"] = reflection_ms
         return {
             "question": question,
+            "reflected_question": reflected_question,
+            "reflection_prompt": reflection_prompt,
             "answer": state.final_answer or "",
             "mode": "agent",
             "route": route_label,
@@ -777,10 +834,7 @@ class RAGPipeline:
             "iterations": state.iteration,
             "agent_trace": agent_trace,
             "sources": get_agent_docs(),
-            "timings_ms": {
-                "agent_total": agent_latency_ms,
-                "pipeline_total": agent_latency_ms,
-            },
+            "timings_ms": timings_ms,
         }
 
     def query_v3(
@@ -1127,46 +1181,10 @@ class RAGPipeline:
             self.last_mode = "agent"
             self.last_intent = "complex"
 
-            # ── Step 0: Reflect the query using history before hitting the agent ──
-            # Elliptical follow-ups like "so sánh với ITE7" become fully standalone
-            # queries like "so sánh môn mạng máy tính giữa IT-E6 và IT-E7" so the
-            # local Qwen model has all context it needs to choose the right tool.
-            reflected_question = question
-            if runtime.reflector is not None:
-                reflect_t0 = time.perf_counter()
-                try:
-                    trimmed_for_reflect = history[-8:] if history else []
-                    ref_result = runtime.reflector.reflect(
-                        question,
-                        chat_history=trimmed_for_reflect,
-                        user_context=user_context,
-                        user_profile=user_context,
-                    )
-                    rewritten = ref_result.get("rewritten", "").strip()
-                    if rewritten and len(rewritten) > len(question):
-                        # Only use the rewritten query if it actually expanded the question
-                        reflected_question = rewritten
-                        logger.info(
-                            "[query_stream/agent] Reflected: %r -> %r",
-                            question[:60],
-                            reflected_question[:80],
-                        )
-                    else:
-                        logger.info(
-                            "[query_stream/agent] Reflection did not expand, keeping original"
-                        )
-                except Exception as ref_exc:
-                    logger.warning(
-                        "[query_stream/agent] Reflection failed (%s), using original",
-                        ref_exc,
-                    )
-                pipeline_timings["reflection"] = _elapsed_ms(reflect_t0)
-                self.last_reflected_question = reflected_question
-
             agent_t0 = time.perf_counter()
             try:
                 agent_result = self.query_agent(
-                    question=reflected_question,
+                    question=question,
                     history=history,
                     top_k=effective_top_k,
                     session_id=session_id,
@@ -1187,6 +1205,13 @@ class RAGPipeline:
                 self.last_iterations = int(agent_result.get("iterations") or 0)
                 self.last_sources = agent_result.get("sources") or []
                 self.last_intent = str(agent_result.get("route") or "complex")
+                self.last_reflected_question = agent_result.get("reflected_question")
+                agent_timings = agent_result.get("timings_ms")
+                if isinstance(agent_timings, dict) and isinstance(
+                    agent_timings.get("reflection"),
+                    (int, float),
+                ):
+                    pipeline_timings["reflection"] = agent_timings["reflection"]
                 pipeline_timings["agent_total"] = _elapsed_ms(agent_t0)
             except Exception as exc:
                 logger.warning(
