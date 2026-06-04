@@ -138,7 +138,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
       const historyForApi = messages.slice(-6).map((m) => ({ role: m.role, content: m.content }));
       try {
         await startStream(
-          { question: content, history: historyForApi, top_k: 5, session_id: capturedSessionId },
+          { question: content, history: historyForApi, top_k: 7, session_id: capturedSessionId },
           {
             onSessionId: (sid) => { if (!isMountedRef.current) return; currentSessionId = sid; setActiveSessionId(sid); },
             onToken: (delta) => {

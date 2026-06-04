@@ -385,7 +385,7 @@ const normalizeV3Response = (
 export const sendMessage = async (
   question: string,
   history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
-  topK: number = 5,
+  topK: number = 7,
   sessionId?: string,
   userContext?: UserContext,
   userId?: string,
@@ -416,7 +416,7 @@ const parseSseDataLines = (rawEvent: string): string => {
 export const sendMessageStream = async (
   question: string,
   history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
-  topK: number = 5,
+  topK: number = 7,
   sessionId?: string,
   userContext?: UserContext,
   userId?: string,
@@ -547,7 +547,7 @@ export const sendMessageStream = async (
 export const sendMessageV3 = async (
   question: string,
   history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
-  topK: number = 5,
+  topK: number = 7,
   mode: 'auto' | 'rag' | 'agent' = 'auto',
   sessionId?: string,
   userContext?: UserContext,
@@ -602,7 +602,7 @@ export const retrievalSearch = async (
   collections: string[] = ['ctdt'],
   resolvedMajor?: string,
   resolvedCohort?: string,
-  topK: number = 5,
+  topK: number = 7,
   rerank: boolean = true,
 ): Promise<RetrievalSearchResponse> => {
   try {

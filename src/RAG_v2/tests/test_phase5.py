@@ -48,7 +48,7 @@ class TestAPISchemas:
     def test_chat_request_defaults(self) -> None:
         from schemas.chat import ChatRequest
         req = ChatRequest(question="Xin chào")
-        assert req.top_k == 5
+        assert req.top_k == 7
         assert req.history is None
 
     def test_chat_request_with_history(self) -> None:

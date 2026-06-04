@@ -349,7 +349,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       const response = await sendMessageStream(
         content,
         historyForApi,
-        5,
+        7,
         capturedSessionId,
         explicitUserContext,
         explicitUserId,

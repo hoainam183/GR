@@ -132,7 +132,7 @@ class Settings(BaseSettings):
     )
 
     # --- Retrieval ---
-    top_k: int = 5
+    top_k: int = 7
     vector_top_k: int = 50
     keyword_top_k: int = 50
     vector_pool_k: int = 40
@@ -149,11 +149,11 @@ class Settings(BaseSettings):
 
     # --- Reranker ---
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
-    reranker_top_k: int = 5
+    reranker_top_k: int = 7
     # BGE reranker raw-logit threshold. Documents scoring below this are
     # dropped from the context. 0.0 is the natural decision boundary;
     # lower to -0.5 if you need more recall, raise to 0.5 for higher precision.
-    reranker_score_threshold: float = 0.0
+    reranker_score_threshold: float = -1.0
     # Table chunks use a relaxed threshold because cross-encoder typically gives
     # lower raw logits for tabular text. -1.0 keeps clearly relevant tables
     # (scores > -1.0) while dropping irrelevant/wrong-program tables that tend
@@ -163,7 +163,7 @@ class Settings(BaseSettings):
     # Keep at least this many top reranker-scored candidates even when all
     # scores fall below thresholds. This prevents retrieval from returning
     # top0 while preserving score ordering for answer context.
-    reranker_min_top_k: int = 5
+    reranker_min_top_k: int = 7
 
     # --- Router ---
     router_mode: str = "classifier"
@@ -197,8 +197,8 @@ class Settings(BaseSettings):
     # These also govern LLM response-cache bypass: dynamic/freshness queries
     # bypass the cache even when tavily_fallback_enabled=False, because their
     # answers can go stale regardless of whether web search is enabled.
-    web_fallback_on_dynamic: bool = True
-    web_fallback_on_no_info: bool = True
+    web_fallback_on_dynamic: bool = False
+    web_fallback_on_no_info: bool = False
     tavily_cache_ttl_seconds: int = 3600
     tavily_cache_maxsize: int = 200
 

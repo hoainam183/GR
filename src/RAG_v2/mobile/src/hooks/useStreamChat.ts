@@ -54,7 +54,7 @@ export const useStreamChat = () => {
             apiClient,
             request.question,
             request.history ?? [],
-            request.top_k ?? 5,
+            request.top_k ?? 7,
             request.mode ?? 'auto',
             request.session_id,
             request.user_context,
