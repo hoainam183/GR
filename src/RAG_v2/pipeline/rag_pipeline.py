@@ -488,6 +488,61 @@ class RAGPipeline:
             self._route_cache.popitem(last=False)
         return routed
 
+    def _reroute_reflected(
+        self,
+        reflected_query: str,
+        prior_routing: Optional[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Re-route the *reflected* (standalone) query for domain selection.
+
+        The pipeline-level route runs on the raw query plus verbatim history,
+        which lets a topic-heavy conversation bleed into domain selection — a
+        prior ctdt-heavy chat can push a scholarship query to ctdt. The
+        reflector has already resolved any legitimate follow-up context into a
+        standalone query, so routing it *without* history is bleed-free and
+        authoritative for the domain decision.
+
+        Intent stays ``"rag"`` (already branched upstream); only domain /
+        domains / confidence / probabilities are replaced. Tier-3 LLM fallback
+        now judges the standalone reflected query when confidence is low.
+
+        Called as a callback from ``rag_flow`` / ``rag_flow_stream`` after
+        reflection, so it never reorders the existing pipeline.
+        """
+        prior = dict(prior_routing or {})
+        if not reflected_query:
+            return prior
+        try:
+            rr = self._router.route(reflected_query)  # chat_history=None → no bleed
+        except Exception:
+            logger.warning(
+                "Reflected-query route failed; keeping pipeline routing",
+                exc_info=True,
+            )
+            return prior
+        # If the standalone query no longer looks like RAG, keep the upstream
+        # decision — we are already committed to the RAG flow.
+        if rr.get("intent") != "rag":
+            return prior
+        domains = rr.get("domains") or ([rr["domain"]] if rr.get("domain") else [])
+        merged = {
+            **prior,
+            "domain": rr.get("domain"),
+            "domains": domains,
+            "confidence": rr.get("confidence", 0.0),
+            "probabilities": rr.get("probabilities", {}),
+        }
+        merged.pop("tier3_override", None)
+        if _should_trigger_tier3(merged):
+            merged = self._llm_domain_classify(reflected_query, None, merged)
+        logger.info(
+            "Reflected-query reroute: %r → domains=%s conf=%.3f",
+            reflected_query[:80],
+            merged.get("domains"),
+            merged.get("confidence") or 0.0,
+        )
+        return merged
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -594,6 +649,7 @@ class RAGPipeline:
                 validity_filter=self._validity_filter,
                 reference_resolver=self._reference_resolver,
                 llm_cache=self._llm_cache,
+                reroute_reflected=self._reroute_reflected,
             )
         timings_ms = _merge_timings(pipeline_timings, result.get("timings_ms"))
         timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
@@ -1273,6 +1329,7 @@ class RAGPipeline:
                 timings_ms_out=flow_timings,
                 metadata_out=flow_metadata,
                 llm_cache=self._llm_cache,
+                reroute_reflected=self._reroute_reflected,
             )
             self.last_sources = reranked
             self.last_reflected_question = flow_metadata.get(

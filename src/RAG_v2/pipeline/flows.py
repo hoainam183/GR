@@ -1968,6 +1968,7 @@ def rag_flow(
     reference_resolver: Any | None = None,
     llm_cache: Optional[Any] = None,
     domain_subqueries: Optional[List[Dict[str, str]]] = None,
+    reroute_reflected: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """Full RAG flow: Reflect → Embed → Search → Rerank → Generate → SelfEval → (Tavily fallback).
 
@@ -2117,6 +2118,23 @@ def rag_flow(
             logger.info("Major fallback resolved: %s", resolved_major)
         if resolved_cohort:
             logger.info("Cohort fallback resolved: %s", resolved_cohort)
+
+    # Re-route on the reflected (standalone) query so a topic-heavy
+    # conversation cannot bleed into domain selection. The reflector has
+    # already baked any legitimate follow-up context into search_query, so
+    # routing it history-free is bleed-free. See RAGPipeline._reroute_reflected.
+    # Must run BEFORE effective_major / collection selection (both read
+    # routing_result).
+    if reroute_reflected is not None:
+        reroute_t0 = time.perf_counter()
+        try:
+            routing_result = reroute_reflected(search_query, routing_result)
+        except Exception:
+            logger.warning(
+                "Reflected-query reroute failed; keeping pipeline routing",
+                exc_info=True,
+            )
+        timings_ms["reflected_reroute"] = _elapsed_ms(reroute_t0)
 
     retrieval_query = search_query
 
@@ -2995,6 +3013,7 @@ def rag_flow_stream(
     timings_ms_out: Optional[Dict[str, float]] = None,
     metadata_out: Optional[Dict[str, Any]] = None,
     llm_cache: Optional[Any] = None,
+    reroute_reflected: Optional[Any] = None,
 ) -> tuple[Generator[str, None, None], List[Dict[str, Any]]]:
     """Streaming RAG flow — retrieval runs first, then generation is streamed.
 
@@ -3112,6 +3131,23 @@ def rag_flow_stream(
             logger.info("Major fallback resolved: %s", resolved_major)
         if resolved_cohort:
             logger.info("Cohort fallback resolved: %s", resolved_cohort)
+
+    # Re-route on the reflected (standalone) query so a topic-heavy
+    # conversation cannot bleed into domain selection. The reflector has
+    # already baked any legitimate follow-up context into search_query, so
+    # routing it history-free is bleed-free. See RAGPipeline._reroute_reflected.
+    # Must run BEFORE effective_major / collection selection (both read
+    # routing_result).
+    if reroute_reflected is not None:
+        reroute_t0 = time.perf_counter()
+        try:
+            routing_result = reroute_reflected(search_query, routing_result)
+        except Exception:
+            logger.warning(
+                "Reflected-query reroute failed; keeping pipeline routing",
+                exc_info=True,
+            )
+        timings_ms["reflected_reroute"] = _elapsed_ms(reroute_t0)
 
     retrieval_query = search_query
 

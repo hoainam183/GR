@@ -677,6 +677,51 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
         "Tiêu chuẩn xét học bổng khuyến khích và hướng dẫn nộp đơn",
         [LABEL_QUYDINH, LABEL_STSV],
     ),
+    # quydinh + stsv — học bổng: truy vấn tổng quan / khám phá (overview)
+    # Trước đây thiếu hẳn nhóm này: các câu hỏi chung chung về học bổng
+    # ("thông tin về học bổng", "có bao nhiêu loại học bổng") rơi vào vùng
+    # không xác định → xác suất khuếch tán, quydinh tụt dưới ngưỡng. Bổ sung để
+    # neo nhóm học bổng tổng quan về quydinh (+stsv), tránh lan sang ctdt.
+    (
+        "Thông tin về học bổng",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Có bao nhiêu loại học bổng",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Có những loại học bổng nào",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Các loại học bổng của trường",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Trường có những học bổng gì",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Giới thiệu về các chương trình học bổng",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Tổng quan về học bổng tại trường",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Học bổng gồm những gì",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Danh mục các học bổng dành cho sinh viên",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    (
+        "Các chương trình học bổng hiện có",
+        [LABEL_QUYDINH, LABEL_STSV],
+    ),
     # quydinh + kehoach
     (
         "Điều kiện phúc khảo bài thi và thời hạn nộp đơn",
