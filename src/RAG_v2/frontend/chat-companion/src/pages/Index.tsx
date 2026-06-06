@@ -232,7 +232,7 @@ const Index = () => {
   };
 
   const header = (
-    <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm">
+    <header className="relative z-[1100] shrink-0 border-b border-border bg-background/80 backdrop-blur-sm">
       <div className="flex h-14 items-center justify-between px-4 md:px-6">
         <div className="flex min-w-0 items-center gap-2">
           {user && (

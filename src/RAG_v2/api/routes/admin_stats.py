@@ -938,6 +938,35 @@ def _build_crawl_notification_article_links(
     return links
 
 
+_CRAWL_SOURCE_LABELS = {
+    "baiviet": "Kế hoạch",
+    "kehoach": "Kế hoạch",
+    "kehoach_list": "Kế hoạch",
+    "quydinh": "Quy định",
+}
+
+
+def _format_crawl_source_label(sources: list[str]) -> str:
+    labels: list[str] = []
+    for source in sources:
+        clean_source = source.strip()
+        if not clean_source:
+            continue
+        label = _CRAWL_SOURCE_LABELS.get(clean_source.lower(), clean_source)
+        if label not in labels:
+            labels.append(label)
+    return ", ".join(labels)
+
+
+def _build_crawl_notification_body(new_articles: int, source_label: str) -> str:
+    clean_source = source_label.strip()
+    if new_articles == 0:
+        return "Không có bài viết mới sau lần cập nhật dữ liệu."
+
+    source_suffix = f" từ nguồn {clean_source}" if clean_source else ""
+    return f"Có {new_articles} bài viết mới{source_suffix}."
+
+
 async def _create_crawl_notifications(
     crawl_result: Any,
     pipeline_target: str,
@@ -953,21 +982,14 @@ async def _create_crawl_notifications(
     )
     pipelines = notification_summary["pipelines"]
     collections = notification_summary["collections"]
-    source_label = ", ".join(collections or pipelines) or pipeline_target
-
-    if new_articles == 0:
-        body = f"Crawl '{pipeline_target}' hoàn tất. Không có bài viết mới."
-    else:
-        body = (
-            f"Crawl '{pipeline_target}' hoàn tất. Có {new_articles} bài viết mới "
-            f"từ nguồn {source_label}."
-        )
+    source_label = _format_crawl_source_label(collections or pipelines)
+    body = _build_crawl_notification_body(new_articles, source_label)
 
     _, db_name = _get_settings()
     db = get_motor_client()[db_name]
     return await broadcast_user_notification(
         db,
-        title="Crawl dữ liệu đã hoàn tất",
+        title="Cập nhật dữ liệu đã hoàn tất",
         body=body,
         notification_type="crawler_update",
         metadata={

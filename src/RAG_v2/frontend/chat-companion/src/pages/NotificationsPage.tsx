@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCheck, ExternalLink, Megaphone, Trash2 } from 'lucide-react';
 import {
   createApiClient,
   listNotifications,
@@ -12,6 +12,10 @@ import {
 } from '@rag/shared';
 import type { NotificationItem } from '@rag/shared';
 import { clearSession, ensureAccessToken, refreshSession } from '@/services/authSession';
+import {
+  getNotificationDisplayBody,
+  getNotificationDisplayTitle,
+} from '@/services/notificationDisplay';
 
 function getRelativeTime(dateStr: string): string {
   const now = Date.now();
@@ -97,8 +101,9 @@ const NotificationsPage = () => {
         {unreadCount > 0 && (
           <button
             onClick={() => markAllRead.mutate()}
-            className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
           >
+            <CheckCheck className="h-3.5 w-3.5" />
             Đọc tất cả
           </button>
         )}
@@ -109,37 +114,52 @@ const NotificationsPage = () => {
       ) : (
         <div className="space-y-2">
           {notifications.map((item) => {
-            const icon = item.type === 'crawler_update' ? '📚' : '📢';
+            const Icon = item.type === 'crawler_update' ? BookOpen : Megaphone;
+            const title = getNotificationDisplayTitle(item);
+            const body = getNotificationDisplayBody(item);
             const timeAgo = getRelativeTime(item.created_at);
             const links = item.metadata?.article_links ?? [];
+            const newArticles =
+              typeof item.metadata?.new_articles === 'number' ? item.metadata.new_articles : null;
 
             return (
               <div
                 key={item.id}
-                className={`rounded-xl border p-4 flex gap-3 items-start cursor-pointer transition-colors ${
+                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors hover:border-primary/30 hover:bg-muted/40 ${
                   item.read
                     ? 'border-border bg-card'
                     : 'border-primary/30 bg-primary/5'
                 }`}
                 onClick={() => { if (!item.read) markRead.mutate(item.id); }}
               >
-                <span className="text-lg shrink-0 mt-0.5">{icon}</span>
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{item.body}</p>
+                  <p className="text-sm font-semibold text-foreground">{title}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
+                  {newArticles !== null && (
+                    <span className="mt-2 inline-flex rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                      {newArticles} bài viết mới
+                    </span>
+                  )}
 
                   {links.length > 0 && (
-                    <div className="mt-2 space-y-1">
+                    <div className="mt-2 flex flex-col items-start gap-1.5">
                       {links.map((link, i) => (
                         <a
                           key={i}
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block text-xs text-primary hover:underline truncate"
-                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!item.read) markRead.mutate(item.id);
+                          }}
                         >
-                          🔗 {link.title}
+                          <ExternalLink className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{link.title}</span>
                         </a>
                       ))}
                     </div>
@@ -149,10 +169,11 @@ const NotificationsPage = () => {
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); deleteItem.mutate(item.id); }}
-                  className="shrink-0 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive text-xs"
-                  title="Xóa"
+                  className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  aria-label="Xóa thông báo"
+                  title="Xóa thông báo"
                 >
-                  ✕
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             );

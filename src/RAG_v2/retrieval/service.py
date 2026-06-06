@@ -225,8 +225,15 @@ class RetrievalService:
             List of result dicts with text, metadata, and scores.
         """
         effective_top_k = top_k or self.settings.top_k
-        # Tăng phễu hứng candidates lên gấp 8 lần top_k (trước đây là 4) để hạn chế rớt chunk khi rerank
-        raw_candidate_k = max(effective_top_k * 8, 40)
+        # Candidate pool fed to the reranker. Config-driven via
+        # ``raw_candidate_multiplier`` / ``raw_candidate_min`` so it matches the
+        # rag_flow hot path and is tunable without code changes; ``reranker_min_top_k``
+        # guards recall. Lowering the multiplier reduces rerank latency (BUG-5) but
+        # should be measurement-driven (a larger pool limits chunk drop on list
+        # queries — the reason this was historically 8×).
+        multiplier = max(float(getattr(self.settings, "raw_candidate_multiplier", 4.0)), 1.0)
+        min_pool = max(int(getattr(self.settings, "raw_candidate_min", 20)), 1)
+        raw_candidate_k = max(int(round(effective_top_k * multiplier)), min_pool)
         active_collections = collections or self.settings.collections
 
         # Multi-query expansion: search multiple query variants and merge

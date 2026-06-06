@@ -17,6 +17,7 @@ from query.signals import analyze_query_signals, extract_key_phrases, fold_vietn
 from reranking.base import BaseReranker
 from retrieval.collection_selector import CollectionSelector
 from retrieval.metadata_filters import (
+    MAJOR_CODE_TO_NAME,
     build_major_comparison_subqueries_for_retrieval,
     build_cohort_comparison_subqueries_for_retrieval,
     has_freshness_intent,
@@ -1746,6 +1747,80 @@ def _should_prepend_profile_note(question: str) -> bool:
     return bool(_PROFILE_DEPENDENT_QUERY_RE.search(_fold_vietnamese(question or "")))
 
 
+def _build_resolved_profile_note(
+    resolved_major: Optional[str],
+    resolved_cohort: Optional[str],
+    user_context: Optional[Dict[str, Any]],
+) -> str:
+    """Build the generation profile note from facts resolved during reflection.
+
+    Prefers the authenticated ``user_context`` (precise display name + code). When
+    that is absent (anonymous request) it falls back to the major/cohort that
+    reflection already resolved, so the LLM still learns the program it must
+    answer for. This is what stops the model from re-asking "which program?" after
+    reflection has already injected the major into the retrieval query.
+    """
+    note = _build_profile_note_from_user_context(user_context)
+    if note:
+        return note
+
+    parts: List[str] = []
+    if resolved_major:
+        major_text = MAJOR_CODE_TO_NAME.get(resolved_major, resolved_major)
+        if major_text and major_text != resolved_major:
+            major_text = f"{major_text} [{resolved_major}]"
+        parts.append(f"Ngành: {major_text}")
+    if resolved_cohort:
+        parts.append(f"Khoá: {resolved_cohort}")
+    if not parts:
+        return ""
+    return "Thông tin sinh viên: " + " | ".join(parts) + "."
+
+
+def _profile_note_for_generation(
+    question: str,
+    search_query: Optional[str],
+    routing_result: Optional[Dict[str, Any]],
+    resolved_major: Optional[str],
+    resolved_cohort: Optional[str],
+    resolved_user_major: Optional[str],
+    resolved_target_major: Optional[str],
+    user_context: Optional[Dict[str, Any]],
+    history: Optional[List[Dict[str, str]]],
+) -> str:
+    """Decide and build the profile note prepended to the generation context.
+
+    Topic-driven via ``query.profile_dependency``: inject the user's program/cohort
+    only when the answer depends on a profile attribute that resolves to the
+    authenticated profile (not a target named in the query). A legacy phrasing
+    check is kept as a floor so self-referential identity questions
+    ("ngành của tôi là gì") still surface the profile.
+
+    This is the consistency fix (BUG-1 / BUG-4): retrieval major-filtering and the
+    generation note now share one gate, so a major reflection already resolved is
+    never silently dropped — the model stops re-asking the program.
+    """
+    from query.profile_dependency import should_inject_profile_note  # noqa: PLC0415
+
+    user_major = resolved_user_major or (
+        (user_context or {}).get("major_code") or (user_context or {}).get("major")
+    )
+    inject = should_inject_profile_note(
+        question,
+        search_query,
+        routing_result,
+        user_major=user_major,
+        target_major=resolved_target_major,
+        cohort=resolved_cohort,
+    ) or _should_prepend_profile_note(question)
+    if not inject:
+        return ""
+    return (
+        _build_resolved_profile_note(resolved_major, resolved_cohort, user_context)
+        or _extract_session_profile(history)
+    )
+
+
 def _build_collection_scores(
     *,
     all_collections: Optional[List[str]],
@@ -1984,6 +2059,9 @@ def rag_flow(
     reflection_prompt: Optional[str] = None
     resolved_major: Optional[str] = None
     resolved_cohort: Optional[str] = None
+    # Major split (auth profile vs query target) for query.profile_dependency.
+    resolved_user_major: Optional[str] = None
+    resolved_target_major: Optional[str] = None
     if reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
@@ -1997,6 +2075,8 @@ def rag_flow(
             reflection_prompt = ref_result.get("prompt")
             entities = ref_result.get("entities") or {}
             resolved_major = entities.get("major_code") or entities.get("major_name")
+            resolved_user_major = entities.get("user_major_code")
+            resolved_target_major = entities.get("target_major_code")
             cohort_entity = entities.get("cohort")
             if cohort_entity is not None:
                 resolved_cohort = str(cohort_entity).strip() or None
@@ -2028,6 +2108,10 @@ def rag_flow(
             cohort_entity = fallback_entities.get("cohort")
             if cohort_entity is not None:
                 resolved_cohort = str(cohort_entity).strip() or None
+        if not resolved_user_major:
+            resolved_user_major = fallback_entities.get("user_major_code")
+        if not resolved_target_major:
+            resolved_target_major = fallback_entities.get("target_major_code")
 
         if resolved_major:
             logger.info("Major fallback resolved: %s", resolved_major)
@@ -2035,6 +2119,15 @@ def rag_flow(
             logger.info("Cohort fallback resolved: %s", resolved_cohort)
 
     retrieval_query = search_query
+
+    # Drop the major metadata filter for topics whose answer does not depend on the
+    # program (e.g. học bổng) so universal answers are not narrowed to one major.
+    # When major IS required, retrieval_major == resolved_major. See
+    # query.profile_dependency. Decided once here, reused for every sub-query.
+    from query.profile_dependency import effective_major_for_retrieval  # noqa: PLC0415
+    retrieval_major = effective_major_for_retrieval(
+        question, search_query, routing_result, resolved_major
+    )
 
     # 2. Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
@@ -2169,7 +2262,7 @@ def rag_flow(
         trace_piece: Dict[str, Any] = {}
         search_t0 = time.perf_counter()
         effective_resolved_major = (
-            resolved_major if use_outer_resolved_major else local_resolved_major
+            retrieval_major if use_outer_resolved_major else local_resolved_major
         )
         result_rows = searcher.search(
             query=local_query,
@@ -2585,12 +2678,17 @@ def rag_flow(
         trace_out=context_trace,
     )
     context = _merge_local_and_web_context(context, web_context_override)
-    profile_note = ""
-    if _should_prepend_profile_note(question):
-        profile_note = (
-            _build_profile_note_from_user_context(user_context)
-            or _extract_session_profile(history)
-        )
+    profile_note = _profile_note_for_generation(
+        question,
+        search_query,
+        routing_result,
+        resolved_major,
+        resolved_cohort,
+        resolved_user_major,
+        resolved_target_major,
+        user_context,
+        history,
+    )
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
     context_trace["full_context_chars"] = len(full_context)
     timings_ms["format_context"] = _elapsed_ms(context_t0)
@@ -2963,6 +3061,9 @@ def rag_flow_stream(
     search_query = question
     resolved_major: Optional[str] = None
     resolved_cohort: Optional[str] = None
+    # Major split (auth profile vs query target) for query.profile_dependency.
+    resolved_user_major: Optional[str] = None
+    resolved_target_major: Optional[str] = None
     if reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
@@ -2975,6 +3076,8 @@ def rag_flow_stream(
             search_query = ref_result.get("rewritten", question)
             entities = ref_result.get("entities") or {}
             resolved_major = entities.get("major_code") or entities.get("major_name")
+            resolved_user_major = entities.get("user_major_code")
+            resolved_target_major = entities.get("target_major_code")
             cohort_entity = entities.get("cohort")
             if cohort_entity is not None:
                 resolved_cohort = str(cohort_entity).strip() or None
@@ -3000,6 +3103,10 @@ def rag_flow_stream(
             cohort_entity = fallback_entities.get("cohort")
             if cohort_entity is not None:
                 resolved_cohort = str(cohort_entity).strip() or None
+        if not resolved_user_major:
+            resolved_user_major = fallback_entities.get("user_major_code")
+        if not resolved_target_major:
+            resolved_target_major = fallback_entities.get("target_major_code")
 
         if resolved_major:
             logger.info("Major fallback resolved: %s", resolved_major)
@@ -3007,6 +3114,15 @@ def rag_flow_stream(
             logger.info("Cohort fallback resolved: %s", resolved_cohort)
 
     retrieval_query = search_query
+
+    # Drop the major metadata filter for topics whose answer does not depend on the
+    # program (e.g. học bổng) so universal answers are not narrowed to one major.
+    # When major IS required, retrieval_major == resolved_major. See
+    # query.profile_dependency. Decided once here, reused for every sub-query.
+    from query.profile_dependency import effective_major_for_retrieval  # noqa: PLC0415
+    retrieval_major = effective_major_for_retrieval(
+        question, search_query, routing_result, resolved_major
+    )
 
     # Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
@@ -3130,7 +3246,7 @@ def rag_flow_stream(
 
         search_t0 = time.perf_counter()
         effective_resolved_major = (
-            resolved_major if use_outer_resolved_major else local_resolved_major
+            retrieval_major if use_outer_resolved_major else local_resolved_major
         )
         trace_piece: Dict[str, Any] = {}
         rows = searcher.search(
@@ -3449,12 +3565,17 @@ def rag_flow_stream(
         trace_out=context_trace,
     )
     context = _merge_local_and_web_context(context, web_context_override)
-    profile_note = ""
-    if _should_prepend_profile_note(question):
-        profile_note = (
-            _build_profile_note_from_user_context(user_context)
-            or _extract_session_profile(history)
-        )
+    profile_note = _profile_note_for_generation(
+        question,
+        search_query,
+        routing_result,
+        resolved_major,
+        resolved_cohort,
+        resolved_user_major,
+        resolved_target_major,
+        user_context,
+        history,
+    )
     full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
     context_trace["full_context_chars"] = len(full_context)
     timings_ms["format_context"] = _elapsed_ms(context_t0)

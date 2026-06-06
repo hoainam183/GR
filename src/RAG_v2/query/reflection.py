@@ -607,6 +607,14 @@ def _extract_entities(
     entities: Dict[str, Optional[str]] = {
         "major_code": None,
         "major_name": None,
+        # WHO the user IS — authenticated profile only, never overridden by the
+        # query/history (so a stray "em học Cơ điện tử" cannot rewrite it).
+        "user_major_code": None,
+        "user_major_name": None,
+        # WHAT major the question is ABOUT — explicit major named in the current
+        # query (e.g. "ngành IT-E7"). None when the query names no target major.
+        "target_major_code": None,
+        "target_major_name": None,
         "cohort": None,
         "year_of_study": None,
         "course_code": None,
@@ -619,22 +627,37 @@ def _extract_entities(
     profile = _normalise_profile_context(user_context)
 
     # ── major ─────────────────────────────────────────────────────────────────
-    # Priority 1: explicit major in the current query should override profile.
+    # Distinguish WHO the user is (``user_major_*`` — auth profile only, immutable)
+    # from WHAT major the question is about (``target_major_*`` — current query).
+    # ``major_code``/``major_name`` keep the historical resolved value and
+    # precedence (query → profile → history) for backward compatibility.
+    #
+    # user_major_* — authenticated profile ONLY. Never sourced from query/history,
+    # so a conversational "em học Cơ điện tử" cannot override the real major.
+    if profile:
+        code = profile.get("major_code")
+        name = profile.get("major")
+        if code:
+            entities["user_major_code"] = str(code)
+            entities["user_major_name"] = MAJOR_CODE_TO_NAME.get(str(code), name)
+        elif name:
+            entities["user_major_code"] = _extract_major_code(str(name))
+            entities["user_major_name"] = str(name)
+
+    # target_major_* — explicit major named in the CURRENT query (e.g. "ngành IT-E7").
     explicit_query_major = _extract_major_code(query)
+    if explicit_query_major:
+        entities["target_major_code"] = explicit_query_major
+        entities["target_major_name"] = MAJOR_CODE_TO_NAME.get(explicit_query_major)
+
+    # Priority 1: explicit major in the current query should override profile.
     if explicit_query_major:
         entities["major_code"] = explicit_query_major
         entities["major_name"] = MAJOR_CODE_TO_NAME.get(explicit_query_major)
     elif profile:
         # Priority 2: authenticated profile.
-        code = profile.get("major_code")
-        name = profile.get("major")
-        if code:
-            entities["major_code"] = str(code)
-            entities["major_name"] = MAJOR_CODE_TO_NAME.get(str(code), name)
-        elif name:
-            detected = _extract_major_code(str(name))
-            entities["major_code"] = detected
-            entities["major_name"] = str(name)
+        entities["major_code"] = entities["user_major_code"]
+        entities["major_name"] = entities["user_major_name"]
 
     if not entities["major_code"] and history:
         # Priority 3: user-stated session facts.

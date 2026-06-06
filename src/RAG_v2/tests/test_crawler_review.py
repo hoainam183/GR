@@ -308,6 +308,24 @@ def test_crawl_notification_summary_counts_nested_all_result():
     ]
 
 
+def test_crawl_notification_body_omits_pipeline_target():
+    from api.routes.admin_stats import (
+        _build_crawl_notification_body,
+        _format_crawl_source_label,
+    )
+
+    source_label = _format_crawl_source_label(["kehoach", "quydinh"])
+    assert source_label == "Kế hoạch, Quy định"
+
+    assert (
+        _build_crawl_notification_body(2, source_label)
+        == "Có 2 bài viết mới từ nguồn Kế hoạch, Quy định."
+    )
+    assert _build_crawl_notification_body(0, "all") == (
+        "Không có bài viết mới sau lần cập nhật dữ liệu."
+    )
+
+
 @pytest.mark.anyio
 async def test_update_crawler_chunk_marks_edited():
     from api.routes.admin_stats import CrawlerChunkUpdateBody, update_crawler_run_chunk

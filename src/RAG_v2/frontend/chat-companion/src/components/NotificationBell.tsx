@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bell } from 'lucide-react';
+import { ArrowRight, Bell, BookOpen, CheckCheck, ExternalLink, Megaphone } from 'lucide-react';
 import {
   createApiClient,
   listNotifications,
@@ -11,6 +11,10 @@ import {
 } from '@rag/shared';
 import type { NotificationItem } from '@rag/shared';
 import { ensureAccessToken, refreshSession, clearSession } from '@/services/authSession';
+import {
+  getNotificationDisplayBody,
+  getNotificationDisplayTitle,
+} from '@/services/notificationDisplay';
 
 function getRelativeTime(dateStr: string): string {
   const now = Date.now();
@@ -27,47 +31,83 @@ function getRelativeTime(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('vi-VN');
 }
 
-function NotificationRow({ item, onRead }: { item: NotificationItem; onRead: () => void }) {
-  const icon = item.type === 'crawler_update' ? '📚' : '📢';
+function NotificationRow({
+  item,
+  onRead,
+  onOpen,
+}: {
+  item: NotificationItem;
+  onRead: () => void;
+  onOpen: () => void;
+}) {
+  const Icon = item.type === 'crawler_update' ? BookOpen : Megaphone;
+  const title = getNotificationDisplayTitle(item);
+  const body = getNotificationDisplayBody(item);
   const timeAgo = getRelativeTime(item.created_at);
   const links = item.metadata?.article_links ?? [];
+  const newArticles =
+    typeof item.metadata?.new_articles === 'number' ? item.metadata.new_articles : null;
+
+  const markRead = () => {
+    if (!item.read) onRead();
+  };
+
+  const openNotification = () => {
+    markRead();
+    onOpen();
+  };
 
   return (
-    <div
-      onClick={onRead}
-      className={`px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors ${
-        item.read ? '' : 'bg-primary/5'
-      }`}
-    >
-      <div className="grid grid-cols-[1.75rem_minmax(0,1fr)_0.5rem] gap-3">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-base">{icon}</span>
+    <div className={`px-4 py-3 transition-colors ${item.read ? 'bg-card' : 'bg-primary/5'}`}>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={openNotification}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openNotification();
+          }
+        }}
+        className="grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)_0.5rem] gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        aria-label={`Xem thông báo: ${title}`}
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <Icon className="h-4 w-4" />
+        </span>
         <div className="min-w-0 flex-1">
-          <p className="break-words text-sm font-semibold leading-snug text-foreground">{item.title}</p>
-          <p className="mt-1 line-clamp-3 break-words text-xs leading-relaxed text-muted-foreground">{item.body}</p>
-
-          {links.length > 0 && (
-            <div className="mt-1.5 space-y-0.5">
-              {links.slice(0, 3).map((link, i) => (
-                <a
-                  key={i}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block truncate text-xs text-primary hover:underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  🔗 {link.title}
-                </a>
-              ))}
-            </div>
+          <p className="break-words text-sm font-semibold leading-snug text-foreground">{title}</p>
+          <p className="mt-1 line-clamp-2 break-words text-xs leading-relaxed text-muted-foreground">{body}</p>
+          {newArticles !== null && (
+            <span className="mt-2 inline-flex rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+              {newArticles} bài viết mới
+            </span>
           )}
-
-          <span className="mt-1.5 block text-[10px] text-muted-foreground">{timeAgo}</span>
         </div>
         <span className="pt-1.5">
           {!item.read && <span className="block h-2 w-2 rounded-full bg-primary" />}
         </span>
       </div>
+
+      {links.length > 0 && (
+        <div className="mt-2 ml-11 space-y-1">
+          {links.slice(0, 3).map((link, i) => (
+            <a
+              key={i}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              onClick={markRead}
+            >
+              <ExternalLink className="h-3 w-3 shrink-0" />
+              <span className="truncate">{link.title}</span>
+            </a>
+          ))}
+        </div>
+      )}
+
+      <span className="ml-11 mt-1.5 block text-[10px] text-muted-foreground">{timeAgo}</span>
     </div>
   );
 }
@@ -164,15 +204,16 @@ export function NotificationBell() {
 
       {/* Dropdown panel */}
       {open && (
-        <div className="fixed right-3 top-14 z-[100] w-[calc(100vw-1.5rem)] max-w-sm overflow-hidden rounded-xl border bg-card shadow-2xl ring-1 ring-black/5 sm:right-6 sm:w-96">
+        <div className="fixed right-3 top-14 z-[1000] w-[calc(100vw-1.5rem)] max-w-sm overflow-hidden rounded-xl border bg-card shadow-2xl ring-1 ring-black/5 sm:right-6 sm:w-96">
           {/* Header */}
           <div className="flex items-center justify-between gap-3 border-b bg-card px-4 py-3">
             <h3 className="font-semibold text-sm text-foreground">Thông báo</h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllRead.mutate()}
-                className="shrink-0 text-xs font-medium text-primary hover:underline"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
               >
+                <CheckCheck className="h-3.5 w-3.5" />
                 Đọc tất cả
               </button>
             )}
@@ -186,6 +227,10 @@ export function NotificationBell() {
                 item={item}
                 onRead={() => {
                   if (!item.read) markRead.mutate(item.id);
+                }}
+                onOpen={() => {
+                  navigate('/notifications');
+                  setOpen(false);
                 }}
               />
             ))}
@@ -201,9 +246,10 @@ export function NotificationBell() {
                 navigate('/notifications');
                 setOpen(false);
               }}
-              className="text-xs text-primary hover:underline font-medium"
+              className="inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
             >
-              Xem tất cả thông báo →
+              Xem tất cả thông báo
+              <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
