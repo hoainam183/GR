@@ -610,6 +610,8 @@ def _extract_entities(
         "cohort": None,
         "year_of_study": None,
         "course_code": None,
+        "course_name": None,        # display name of a catalog-matched course
+        "course_name_folded": None, # accent-folded name, used to locate it in text
         "semester": None,
         "academic_year": None,
     }
@@ -693,6 +695,19 @@ def _extract_entities(
             entities["course_code"] = mo.group(0).upper()
             break
 
+    # Fallback: no explicit code, but the query names a course AND the major is
+    # known → resolve the major-scoped course code from the catalog. Same name
+    # can map to different codes per program (IT3080 vs IT3080E), so this is
+    # always keyed by the resolved major. Skipped when major is unknown.
+    if entities["course_code"] is None and entities["major_code"]:
+        from query.course_catalog import lookup_course_code  # noqa: PLC0415
+
+        match = lookup_course_code(query, entities["major_code"])
+        if match:
+            entities["course_code"] = match["code"]
+            entities["course_name"] = match["name"]
+            entities["course_name_folded"] = match["name_folded"]
+
     # ── semester ──────────────────────────────────────────────────────────────
     # Captures:
     #   - Semester codes like "20241", "20242", "20243" (hè)
@@ -749,6 +764,89 @@ def _extract_entities(
                 break
 
     return entities
+
+
+_REGISTER_VERB_RE = re.compile(r"đăng\s*k[ýyíi]", re.IGNORECASE)
+_FOLDED_REGISTER_RE = re.compile(r"\bdang\s*k[yi]\b")
+
+
+def _preserve_curriculum_placement_verb(original: str, rewritten: str) -> str:
+    """Revert reflection that flips a curriculum-placement question into a
+    registration-timing one.
+
+    Observed failure: ``"môn X được HỌC vào kỳ mấy"`` + history containing a
+    course code → the reflector rewrote it to ``"…được ĐĂNG KÝ vào học kỳ mấy"``,
+    silently changing WHICH-semester-in-curriculum (ctdt) intent into
+    WHEN-registration (kehoach). That drift violates the "keep original meaning"
+    rule and steers retrieval/rerank toward schedule docs.
+
+    Rule (deterministic, narrow): only when the ORIGINAL query asks which
+    semester a course sits in (``curriculum_semester_intent``) AND the user did
+    NOT themselves write "đăng ký", strip any reflection-introduced "đăng ký"
+    verb back to "học". If the user genuinely wrote "đăng ký", leave it alone.
+    """
+    from .signals import analyze_query_signals, fold_vietnamese_text  # local import
+
+    if not analyze_query_signals(original).curriculum_semester_intent:
+        return rewritten
+    if _FOLDED_REGISTER_RE.search(fold_vietnamese_text(original)):
+        return rewritten  # user said "đăng ký" themselves → honour it
+    if not _REGISTER_VERB_RE.search(rewritten):
+        return rewritten
+    return _REGISTER_VERB_RE.sub("học", rewritten)
+
+
+def _fold_char(ch: str) -> str:
+    """Accent-fold a single char consistently with ``fold_vietnamese_text``."""
+    decomposed = unicodedata.normalize("NFD", ch)
+    base = "".join(c for c in decomposed if unicodedata.category(c) != "Mn")
+    base = base.replace("đ", "d").replace("Đ", "D")
+    return base.casefold()
+
+
+def _fold_with_index_map(text: str) -> tuple[str, List[int]]:
+    """Return (folded_text, src_index) where src_index[k] is the original index
+    of the original character that produced folded char k.
+
+    Lets us locate a folded course name inside ``text`` and map the match back to
+    original-string offsets for an in-place insertion.
+    """
+    folded_parts: List[str] = []
+    src_index: List[int] = []
+    for i, ch in enumerate(text):
+        folded = _fold_char(ch)
+        for fc in folded:
+            folded_parts.append(fc)
+            src_index.append(i)
+    return "".join(folded_parts), src_index
+
+
+def _inject_course_code(rewritten: str, entities: Dict[str, Optional[str]]) -> str:
+    """Insert the catalog-resolved course code after the course name in-place.
+
+    E.g. "...Mạng máy tính được học..." → "...Mạng máy tính (IT3080) được học...".
+    Only runs when a catalog-matched course (``course_name_folded`` + a derived
+    ``course_code``) is present and the code is not already in the text.
+    """
+    code = entities.get("course_code")
+    name_folded = entities.get("course_name_folded")
+    if not code or not name_folded:
+        return rewritten
+    if re.search(
+        r"(?<![A-Za-z0-9])" + re.escape(code) + r"(?![A-Za-z0-9])",
+        rewritten,
+        re.IGNORECASE,
+    ):
+        return rewritten  # code already present (e.g. user typed it)
+
+    folded, src_index = _fold_with_index_map(rewritten)
+    pattern = r"(?<![0-9a-z])" + re.escape(name_folded) + r"(?![0-9a-z])"
+    mo = re.search(pattern, folded)
+    if not mo:
+        return rewritten
+    last_folded_pos = mo.end() - 1
+    insert_at = src_index[last_folded_pos] + 1  # right after the last name char
+    return f"{rewritten[:insert_at]} ({code}){rewritten[insert_at:]}"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -982,6 +1080,15 @@ class QueryReflector:
                 )
                 rewritten = deterministic_followup
 
+        # Resolve entities once (major precedence: explicit query major >
+        # login profile > history) so guardrails below can reuse them. This is
+        # also where the catalog-derived course_code is populated.
+        entities = _extract_entities(
+            query,
+            user_context=merged_profile or None,
+            history=chat_history,
+        )
+
         # Guardrail 1: if user profile has a trusted major but references remain
         # unresolved, replace them deterministically.
         if _PERSONAL_REFS.search(rewritten):
@@ -990,7 +1097,16 @@ class QueryReflector:
                 profile=merged_profile or None,
             )
 
-
+        # Guardrail 2 — Preserve curriculum-placement intent: don't let the
+        # reflector silently turn "môn X được học vào kỳ mấy" into "…đăng ký…".
+        placement_candidate = rewritten
+        rewritten = _preserve_curriculum_placement_verb(query, rewritten)
+        if rewritten != placement_candidate:
+            logger.info(
+                "Reflection guardrail: reverted placement verb drift %r -> %r",
+                placement_candidate[:80],
+                rewritten[:80],
+            )
 
         # Guardrail 3 — Expand bare major codes to include full names.
         # E.g. "IT1" → "IT1 (Khoa học máy tính)" so that vector/keyword
@@ -1003,17 +1119,25 @@ class QueryReflector:
         rewritten = expand_academic_abbreviations(rewritten)
         terminology_expanded = rewritten != terminology_candidate
 
+        # Guardrail 4 — Inject the major-scoped course code for a course named in
+        # the query. E.g. for an IT-E6 student: "Mạng máy tính" → "Mạng máy tính
+        # (IT3080)"; for IT-E7 the same name resolves to IT3080E. Only fires when
+        # the major is known and the code is not already present (so user-typed
+        # codes are never duplicated). Deterministic; runs even in passthrough.
+        course_injected = _inject_course_code(rewritten=rewritten, entities=entities)
+        if course_injected != rewritten:
+            logger.info(
+                "Reflection guardrail: injected course code %r -> %r",
+                rewritten[:80],
+                course_injected[:80],
+            )
+            rewritten = course_injected
+
         logger.info(
             "Reflection: %r → %r (history_len=%d)",
             query[:60],
             rewritten[:60],
             len(chat_history) if chat_history else 0,
-        )
-
-        entities = _extract_entities(
-            query,
-            user_context=merged_profile or None,
-            history=chat_history,
         )
         logger.debug("Extracted entities: %s", entities)
 

@@ -278,7 +278,25 @@ Ví dụ 10 — Chương trình quốc tế ME-GU, tài liệu tiếng Anh:
 USER_PROFILE: (khong co)
 CHAT_HISTORY: (khong co)
 CÂU HỎI HIỆN TẠI: ME-GU học ngoại ngữ chính là gì
-STANDALONE QUERY: Chương trình đào tạo ME-GU yêu cầu ngoại ngữ (foreign language/English requirements) chính là gì?"""
+STANDALONE QUERY: Chương trình đào tạo ME-GU yêu cầu ngoại ngữ (foreign language/English requirements) chính là gì?
+
+---
+Ví dụ 11 — Bơm mã môn từ history NHƯNG GIỮ NGUYÊN động từ gốc (KHÔNG đổi "học" → "đăng ký"):
+USER_PROFILE: (khong co)
+CHAT_HISTORY:
+- Người dùng: môn mạng máy tính được đăng kí vào kì mấy
+- Trợ lý: Mình chưa tìm thấy. Học phần IT3080 Mạng máy tính thuộc khối cơ sở.
+CÂU HỎI HIỆN TẠI: môn mạng máy tính được học vào kì mấy
+STANDALONE QUERY: Học phần IT3080 Mạng máy tính được học vào học kỳ mấy?
+(LƯU Ý: câu gốc dùng "học" → giữ "học"; chỉ bổ sung mã IT3080, KHÔNG đổi thành "đăng ký".)
+
+---
+Ví dụ 12 — Câu hỏi vị trí kỳ học của môn: KHÔNG biến thành câu hỏi thời điểm mở đăng ký:
+USER_PROFILE: (khong co)
+CHAT_HISTORY: (khong co)
+CÂU HỎI HIỆN TẠI: môn Giải tích 1 nằm ở kỳ mấy
+STANDALONE QUERY: Học phần Giải tích 1 nằm ở học kỳ mấy trong chương trình đào tạo?
+(LƯU Ý: hỏi VỊ TRÍ trong kế hoạch học tập, KHÔNG phải "khi nào mở đăng ký".)"""
 
 REWRITE_WITH_HISTORY_TEMPLATE = """\
 ### INPUT

@@ -165,6 +165,20 @@ def augment_collections_for_query(
     ctdt_course_lookup = _is_ctdt_course_lookup(query, output)
     foreign_language_policy_lookup = _is_foreign_language_policy_lookup(query)
 
+    # "Môn X học/đăng ký vào kỳ mấy?" — semester placement lives in the standard
+    # study plan (ctdt), not in registration schedules (kehoach). When the query
+    # asks WHICH semester a course sits in and carries no schedule/deadline timing
+    # markers, ensure ctdt is searched and prioritized regardless of router output.
+    curriculum_semester_lookup = bool(
+        signals.curriculum_semester_intent
+        and not (
+            signals.schedule_intent
+            or signals.deadline_intent
+            or signals.announcement_intent
+            or signals.freshness
+        )
+    )
+
     needs_regulations = (
         signals.eligibility_check
         or signals.table_lookup
@@ -181,6 +195,9 @@ def augment_collections_for_query(
 
     if signals.multi_domain and signals.eligibility_check:
         output = _dedup([*output, "ctdt"])
+
+    if curriculum_semester_lookup:
+        output = _dedup(["ctdt", *output])
 
     return output
 

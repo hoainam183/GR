@@ -27,6 +27,7 @@ class QuerySignals:
     schedule_intent: bool = False
     deadline_intent: bool = False
     announcement_intent: bool = False
+    curriculum_semester_intent: bool = False
 
     def to_dict(self) -> Dict[str, bool]:
         """Return a plain dict suitable for route/search traces."""
@@ -117,6 +118,28 @@ _PROGRAM_PATTERNS = (
     r"\b(?:it|mi|et|em|ep|ee|ev|hs|fl|ba|ph|me|ms)-[a-z0-9]+\b",
 )
 
+# ── Curriculum semester placement ("môn X học/đăng ký vào kỳ mấy?") ───────────
+# Distinguishes WHICH-semester-in-curriculum (ctdt) from WHEN-registration-opens
+# (kehoach). The question must reference a course AND ask which semester, while
+# NOT carrying any "when does it open / schedule / deadline" time markers.
+_COURSE_REFERENCE_PATTERNS = (
+    r"\b(mon|hoc phan|mon hoc|hp)\b",
+    r"\b(?:it|mi|ee|et|me|ch|ph|ma|tl|fl|pe|ed|jp|em|bf|tex)\s*-?\s*\d{4}[a-z]?\b",
+)
+_SEMESTER_PLACEMENT_PATTERNS = (
+    r"\b(?:hoc\s*ky|hoc\s*ki|hki|hk|ky|ki)\s*(?:thu\s*)?(?:may|nao|bao nhieu)\b",
+    r"\b(?:may|thu may)\s*(?:hoc\s*ky|hoc\s*ki|ky|ki)\b",
+)
+# Markers that make the question a WHEN-registration / schedule query (→ kehoach),
+# which must SUPPRESS the curriculum-placement signal even if "kỳ mấy" appears.
+_WHEN_OPENING_PATTERNS = (
+    r"\b(khi nao|bao gio|luc nao|ngay nao|may gio|thoi gian|thoi diem)\b",
+    r"\b(lich|deadline|han\s+(?:dang ky|nop|cuoi)|het han|chot|mo cong)\b",
+    r"\b(mo|bat dau|ket thuc|dong)\s+(?:dang ky|dang ki|cong|lop)\b",
+    r"\bdot\s+(?:dang ky|dang ki|\d|mo lop)\b",
+    r"\b(con slot|con cho|con lop|con bao nhieu|con\s+\w+\s+lop)\b",
+)
+
 
 def analyze_query_signals(query: str) -> QuerySignals:
     """Analyze a user query into stable retrieval/routing traits."""
@@ -131,6 +154,16 @@ def analyze_query_signals(query: str) -> QuerySignals:
     schedule_intent = _matches_any(folded, _SCHEDULE_PATTERNS)
     deadline_intent = _matches_any(folded, _DEADLINE_PATTERNS)
     announcement_intent = _matches_any(folded, _ANNOUNCEMENT_PATTERNS)
+
+    # Curriculum semester placement: "môn X học/đăng ký vào kỳ mấy?" asks WHICH
+    # semester a course sits in the standard study plan (ctdt), not WHEN
+    # registration opens (kehoach). Requires a course reference + a which-semester
+    # question, and is suppressed by any WHEN-opening / schedule / deadline marker.
+    curriculum_semester_intent = bool(
+        _matches_any(folded, _COURSE_REFERENCE_PATTERNS)
+        and _matches_any(folded, _SEMESTER_PLACEMENT_PATTERNS)
+        and not _matches_any(folded, _WHEN_OPENING_PATTERNS)
+    )
 
     has_program_context = _matches_any(folded, _PROGRAM_PATTERNS)
     graduation_rule = bool(
@@ -154,6 +187,7 @@ def analyze_query_signals(query: str) -> QuerySignals:
         schedule_intent=schedule_intent,
         deadline_intent=deadline_intent,
         announcement_intent=announcement_intent,
+        curriculum_semester_intent=curriculum_semester_intent,
     )
 
 

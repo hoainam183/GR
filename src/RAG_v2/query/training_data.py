@@ -358,6 +358,24 @@ TRAINING_DATA: List[Tuple[str, str]] = [
     ("Deadline nộp báo cáo đồ án tốt nghiệp học kỳ 1", LABEL_KEHOACH),
     ("Khi nào đăng ký đề tài đồ án tốt nghiệp?", LABEL_KEHOACH),
     ("Thời gian xét duyệt đề tài đồ án là bao lâu?", LABEL_KEHOACH),
+    # ── kehoach — đăng ký học phần: thêm biến thể thực tế (chiếm 74.6%) ──────
+    ("Còn slot môn IT3080 không?", LABEL_KEHOACH),
+    ("Đăng ký được môn này chưa?", LABEL_KEHOACH),
+    ("Mở đăng ký tín chỉ chưa?", LABEL_KEHOACH),
+    ("Hệ thống đăng ký học phần mở lúc nào?", LABEL_KEHOACH),
+    ("Bao giờ tới lượt K68 đăng ký?", LABEL_KEHOACH),
+    ("Kỳ hè năm nay có mở đăng ký không và khi nào?", LABEL_KEHOACH),
+    ("Khi nào hết hạn rút môn?", LABEL_KEHOACH),
+    # ── ctdt — ĐATN nội dung (phân biệt với timeline ở trên) ─────────────────
+    ("Đồ án tốt nghiệp gồm mấy học phần?", LABEL_CTDT),
+    ("Cấu trúc học phần đồ án tốt nghiệp trong chương trình", LABEL_CTDT),
+    ("Đồ án tốt nghiệp nằm ở học kỳ nào của chương trình?", LABEL_CTDT),
+    ("Đồ án tốt nghiệp ngành KHMT có bao nhiêu tín chỉ và học vào kỳ mấy?", LABEL_CTDT),
+    # ── ctdt — học phần tương đương / thay thế (thêm mẫu) ────────────────────
+    ("Học phần nào tương đương với IT3080 trong chương trình mới?", LABEL_CTDT),
+    ("Bảng tra học phần thay thế ngành Cơ điện tử K67", LABEL_CTDT),
+    ("Môn Đại số tuyến tính cũ tương ứng học phần nào hiện nay?", LABEL_CTDT),
+    ("Danh mục học phần tương đương giữa K66 và K68", LABEL_CTDT),
     # ── stsv (sinh viên: thủ tục, KTX, bảo hiểm, thẻ SV) ──────────────────
     ("Thủ tục xin giấy xác nhận sinh viên", LABEL_STSV),
     ("Làm thẻ sinh viên ở đâu?", LABEL_STSV),
@@ -563,6 +581,20 @@ HARD_NEGATIVE_DATA: List[Tuple[str, str]] = [
     ("Kỳ này còn lớp IT4062E không?", LABEL_KEHOACH),  # WHEN/status → kehoach
     ("Môn Vật lý 1 mở lớp vào học kỳ nào trong năm?", LABEL_CTDT),
     ("Đợt đăng ký môn Vật lý 1 kỳ này khi nào?", LABEL_KEHOACH),
+    # ── "kỳ mấy của môn" — vị trí trong kế hoạch học tập (ctdt), KHÔNG phải
+    #    thời điểm mở đăng ký (kehoach). Động từ "học" hay "đăng ký" KHÔNG quyết
+    #    định domain — câu hỏi WHICH-semester luôn là ctdt.
+    ("Môn mạng máy tính được học vào kỳ mấy?", LABEL_CTDT),
+    ("Môn mạng máy tính đăng ký vào kỳ mấy?", LABEL_CTDT),
+    ("Học phần IT3080 nằm ở học kỳ nào trong chương trình?", LABEL_CTDT),
+    ("Môn Giải tích 1 học vào kỳ mấy theo kế hoạch học tập?", LABEL_CTDT),
+    ("Môn Triết học Mác-Lênin xếp vào học kỳ thứ mấy?", LABEL_CTDT),
+    ("Học phần Mạng máy tính thuộc kỳ học nào của ngành?", LABEL_CTDT),
+    ("Môn Vật lý đại cương đăng ký vào học kỳ mấy trong CTĐT?", LABEL_CTDT),
+    ("IT3080 học ở kỳ mấy?", LABEL_CTDT),
+    # giữ ranh giới: WHEN mở đăng ký vẫn là kehoach
+    ("Khi nào mở đăng ký môn mạng máy tính kỳ này?", LABEL_KEHOACH),
+    ("Bao giờ được đăng ký học phần IT3080?", LABEL_KEHOACH),
     ("Lập trình hướng đối tượng có mấy lớp học kỳ 2?", LABEL_KEHOACH),
     ("Lập trình hướng đối tượng thuộc khối kiến thức nào?", LABEL_CTDT),
     # ── kehoach ↔ ctdt — đồ án timeline vs. nội dung ───────────────────────
