@@ -31,6 +31,14 @@ const CATEGORY_LABELS: Record<string, string> = {
   outdated: 'Thông tin cũ',
 };
 
+const EMPTY_FEEDBACK_STATS: FeedbackStats = {
+  total: 0,
+  up: 0,
+  down: 0,
+  by_category: {},
+  recent_days: 30,
+};
+
 const feedbackMarkdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>,
@@ -96,9 +104,14 @@ export default function FeedbackTab() {
           limit,
         }),
       ]);
-      setStats(statsRes);
-      setFeedbacks(listRes.feedbacks);
-      setTotal(listRes.total);
+      setStats({
+        ...EMPTY_FEEDBACK_STATS,
+        recent_days: days,
+        ...(statsRes ?? {}),
+        by_category: statsRes?.by_category ?? {},
+      });
+      setFeedbacks(Array.isArray(listRes?.feedbacks) ? listRes.feedbacks : []);
+      setTotal(Number(listRes?.total) || 0);
     } catch {
       toast.error('Không thể tải dữ liệu feedback');
     } finally {
@@ -115,6 +128,8 @@ export default function FeedbackTab() {
   const responseRate = stats
     ? stats.total > 0 ? Math.round((stats.with_comment ?? 0) / stats.total * 100) : 0
     : null;
+  const categoryCounts = stats?.by_category ?? {};
+  const topics = Array.isArray(topicsData?.topics) ? topicsData.topics : [];
 
   if (loading && !stats) {
     return (
@@ -180,13 +195,13 @@ export default function FeedbackTab() {
       )}
 
       {/* Category breakdown */}
-      {stats && Object.keys(stats.by_category).length > 0 && (
+      {stats && Object.keys(categoryCounts).length > 0 && (
         <div className="p-4 rounded-xl border border-border bg-card shadow-sm">
           <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <BarChart2 className="h-4 w-4" /> Phân loại lý do 👎
           </p>
           <div className="flex flex-wrap gap-3">
-            {Object.entries(stats.by_category).map(([cat, count]) => (
+            {Object.entries(categoryCounts).map(([cat, count]) => (
               <div key={cat} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-sm">
                 <span className="font-medium">{CATEGORY_LABELS[cat] ?? cat}</span>
                 <span className="text-muted-foreground">({count})</span>
@@ -197,7 +212,7 @@ export default function FeedbackTab() {
       )}
 
       {/* Disliked topics table */}
-      {topicsData && topicsData.topics.length > 0 && (
+      {topics.length > 0 && (
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="text-sm font-semibold mb-3">Chủ đề bị đánh giá thấp</p>
           <div className="max-h-64 overflow-y-auto">
@@ -210,7 +225,7 @@ export default function FeedbackTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {topicsData.topics.map((topic, idx) => (
+                {topics.map((topic, idx) => (
                   <TableRow key={idx}>
                     <TableCell className="text-sm max-w-md truncate">{topic.question}</TableCell>
                     <TableCell>

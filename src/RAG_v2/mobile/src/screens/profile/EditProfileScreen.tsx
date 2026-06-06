@@ -41,8 +41,7 @@ const EditProfileScreen = () => {
   const styles = createStyles(colors);
   const navigation = useNavigation<Nav>();
   const { user } = useProfile();
-  const setAuth = useAuthStore((s) => s.setAuth);
-  const accessToken = useAuthStore((s) => s.accessToken);
+  const setUser = useAuthStore((s) => s.setUser);
 
   const [fullName, setFullName] = useState(user?.full_name ?? '');
   const [cohort, setCohort] = useState(user?.cohort ?? '');
@@ -90,11 +89,9 @@ const EditProfileScreen = () => {
       const response = await apiClient.patch(API_PATHS.AUTH_ME, body);
       const updatedUser = response.data;
 
-      // Update local state
-      if (accessToken) {
-        setAuth(accessToken, updatedUser);
-        await setUserProfile(updatedUser);
-      }
+      // Update local state — only the user object; tokens stay untouched.
+      setUser(updatedUser);
+      await setUserProfile(updatedUser);
 
       navigation.goBack();
     } catch (err: unknown) {
@@ -413,7 +410,7 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 18,
-    backgroundColor: 'rgba(0, 0, 0, 0.36)',
+    backgroundColor: colors.overlay,
   },
   modalCard: {
     maxHeight: '76%',

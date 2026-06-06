@@ -58,7 +58,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
       .finally(() => {
         setChecking(false);
       });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Show nothing only while the very first check is in flight AND there is
   // no cached user to render behind it.
@@ -87,7 +87,7 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
       .finally(() => {
         setChecking(false);
       });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   if (checking) return null;
   if (!user) return <Navigate to={loginRedirect(location.pathname, location.search)} replace />;
@@ -100,7 +100,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/chat" element={<RequireAuth><Index /></RequireAuth>} />

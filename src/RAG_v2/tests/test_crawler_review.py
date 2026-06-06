@@ -327,6 +327,29 @@ def test_crawl_notification_body_omits_pipeline_target():
 
 
 @pytest.mark.anyio
+async def test_manual_crawl_notification_skips_when_no_new_data():
+    from api.routes.admin_stats import _create_crawl_notifications
+
+    result = await _create_crawl_notifications(
+        {
+            "pipeline": "kehoach",
+            "collection": "kehoach",
+            "new_articles": 0,
+            "saved_chunks": [],
+        },
+        "kehoach",
+    )
+
+    assert result == {
+        "created_count": 0,
+        "target_user_ids": [],
+        "push_sent_count": 0,
+        "push_error_count": 0,
+        "skipped_reason": "no_new_crawl_data",
+    }
+
+
+@pytest.mark.anyio
 async def test_update_crawler_chunk_marks_edited():
     from api.routes.admin_stats import CrawlerChunkUpdateBody, update_crawler_run_chunk
 

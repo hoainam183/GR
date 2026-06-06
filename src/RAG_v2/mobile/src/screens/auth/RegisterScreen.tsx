@@ -41,7 +41,6 @@ const registerSchema = z.object({
   password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự'),
   confirmPassword: z.string().min(1, 'Vui lòng xác nhận mật khẩu'),
   full_name: z.string().min(1, 'Họ tên là bắt buộc'),
-  student_id: z.string().min(1, 'MSSV là bắt buộc'),
   cohort: z.string().min(1, 'Vui lòng chọn khóa'),
   major_code: z.string().min(1, 'Vui lòng chọn ngành'),
 }).refine((d) => d.password === d.confirmPassword, {
@@ -64,7 +63,7 @@ const RegisterScreen = ({ navigation }: Props) => {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: '', password: '', confirmPassword: '',
-      full_name: '', student_id: '', cohort: '', major_code: '',
+      full_name: '', cohort: '', major_code: '',
     },
   });
 
@@ -89,7 +88,6 @@ const RegisterScreen = ({ navigation }: Props) => {
         username: data.username.trim(),
         password: data.password,
         full_name: data.full_name.trim(),
-        student_id: data.student_id.trim(),
         cohort: data.cohort,
         major: majorOption.name,
         major_code: majorOption.code,
@@ -198,27 +196,6 @@ const RegisterScreen = ({ navigation }: Props) => {
               )}
             />
             {errors.full_name && <Text style={styles.fieldError}>{errors.full_name.message}</Text>}
-          </View>
-
-          {/* Student ID */}
-          <View style={styles.field}>
-            <Text style={styles.label}>MSSV *</Text>
-            <Controller
-              control={control}
-              name="student_id"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={[styles.input, errors.student_id && styles.inputError]}
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder="20210001"
-                  placeholderTextColor={colors.mutedForeground}
-                  keyboardType="numeric"
-                  accessibilityLabel="Mã số sinh viên"
-                />
-              )}
-            />
-            {errors.student_id && <Text style={styles.fieldError}>{errors.student_id.message}</Text>}
           </View>
 
           {/* Password */}
@@ -558,7 +535,7 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 18,
-    backgroundColor: 'rgba(0, 0, 0, 0.36)',
+    backgroundColor: colors.overlay,
   },
   modalCard: {
     maxHeight: '76%',

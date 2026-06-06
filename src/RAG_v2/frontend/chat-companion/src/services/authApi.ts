@@ -20,7 +20,7 @@ export interface RegisterRequest {
   username: string;
   password: string;
   full_name: string;
-  student_id: string;
+  student_id?: string;
   cohort: string;
   major: string;
   major_code: string;

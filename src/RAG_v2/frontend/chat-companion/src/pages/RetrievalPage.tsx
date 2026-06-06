@@ -20,6 +20,15 @@ import { Badge } from '@/components/ui/badge';
 
 const COLLECTIONS = ['ctdt', 'quydinh', 'stsv', 'kehoach', 'test'];
 
+const safeNumber = (value: unknown, fallback = 0): number =>
+  typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+
+const formatWeight = (value: unknown): string => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value.toFixed(2);
+  if (typeof value === 'string' && value.trim()) return value;
+  return '-';
+};
+
 export default function RetrievalPage() {
   const [query, setQuery] = useState('');
   const [selectedCollections, setSelectedCollections] = useState<string[]>(['ctdt']);
@@ -52,18 +61,32 @@ export default function RetrievalPage() {
       setTimeout(() => {
         resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
-    } catch (e: any) {
-      setError(e.message || 'Search failed');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Search failed');
     } finally {
       setIsLoading(false);
     }
   };
 
   const toggleCollection = (col: string) => {
-    setSelectedCollections(prev => 
+    setSelectedCollections(prev =>
       prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col]
     );
   };
+
+  const normalizedResult = result
+    ? {
+        latencyMs: safeNumber(result.latency_ms),
+        totalFound: safeNumber(result.total_found, Array.isArray(result.results) ? result.results.length : 0),
+        fusionWeights:
+          result.fusion_weights && typeof result.fusion_weights === 'object'
+            ? result.fusion_weights
+            : {},
+        appliedFilters: Array.isArray(result.applied_filters) ? result.applied_filters : [],
+        collectionResults: Array.isArray(result.collection_results) ? result.collection_results : [],
+        results: Array.isArray(result.results) ? result.results : [],
+      }
+    : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -191,26 +214,28 @@ export default function RetrievalPage() {
               </div>
             )}
 
-            {result && (
+            {normalizedResult && (
               <div ref={resultRef} className="space-y-6">
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="border rounded-xl bg-card p-3 space-y-1">
                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Latency</p>
-                    <p className="text-lg font-semibold text-primary">{result.latency_ms.toFixed(0)}ms</p>
+                    <p className="text-lg font-semibold text-primary">{normalizedResult.latencyMs.toFixed(0)}ms</p>
                   </div>
                   <div className="border rounded-xl bg-card p-3 space-y-1">
                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Total Docs</p>
-                    <p className="text-lg font-semibold">{result.total_found}</p>
+                    <p className="text-lg font-semibold">{normalizedResult.totalFound}</p>
                   </div>
                   <div className="border rounded-xl bg-card p-3 space-y-1">
                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Fusion</p>
-                    <p className="text-xs font-mono">V:{result.fusion_weights.vector} K:{result.fusion_weights.keyword}</p>
+                    <p className="text-xs font-mono">
+                      V:{formatWeight(normalizedResult.fusionWeights.vector)} K:{formatWeight(normalizedResult.fusionWeights.keyword)}
+                    </p>
                   </div>
                   <div className="border rounded-xl bg-card p-3 space-y-1">
                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Filters</p>
                     <div className="flex gap-1 flex-wrap">
-                      {result.applied_filters.map(f => (
+                      {normalizedResult.appliedFilters.map(f => (
                         <Badge key={f.collection} variant={f.applied ? "default" : "outline"} className="text-[9px] px-1 h-4">
                           {f.collection}:{f.applied ? '✓' : '✗'}
                         </Badge>
@@ -220,17 +245,17 @@ export default function RetrievalPage() {
                 </div>
 
                 {/* Filter Details */}
-                {result.applied_filters.some(f => f.applied) && (
+                {normalizedResult.appliedFilters.some(f => f.applied) && (
                   <div className="border rounded-xl bg-muted/30 p-4 space-y-2">
                     <h3 className="text-xs font-bold uppercase flex items-center gap-2">
                       <Filter className="w-3 h-3" /> Metadata Pre-filters Applied
                     </h3>
                     <div className="space-y-1">
-                      {result.applied_filters.filter(f => f.applied).map(f => (
+                      {normalizedResult.appliedFilters.filter(f => f.applied).map(f => (
                         <div key={f.collection} className="text-xs flex items-center gap-2">
                           <span className="font-semibold w-20">{f.collection}:</span>
                           <span className="text-muted-foreground">{f.filter_desc}</span>
-                          <Badge variant="secondary" className="ml-auto">{f.matched_ids} IDs</Badge>
+                          <Badge variant="secondary" className="ml-auto">{safeNumber(f.matched_ids)} IDs</Badge>
                         </div>
                       ))}
                     </div>
@@ -243,12 +268,12 @@ export default function RetrievalPage() {
                     <BarChart4 className="w-3 h-3" /> Raw Retrieval Counts
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {result.collection_results.map(cr => (
+                    {normalizedResult.collectionResults.map(cr => (
                       <div key={cr.collection} className="space-y-1">
                         <p className="text-[11px] font-semibold capitalize">{cr.collection}</p>
                         <div className="flex gap-2">
-                          <div className="text-[10px] bg-violet-500/10 text-violet-600 px-1.5 rounded">V: {cr.vector_count}</div>
-                          <div className="text-[10px] bg-amber-500/10 text-amber-600 px-1.5 rounded">K: {cr.keyword_count}</div>
+                          <div className="text-[10px] bg-violet-500/10 text-violet-600 px-1.5 rounded">V: {safeNumber(cr.vector_count)}</div>
+                          <div className="text-[10px] bg-amber-500/10 text-amber-600 px-1.5 rounded">K: {safeNumber(cr.keyword_count)}</div>
                         </div>
                       </div>
                     ))}
@@ -259,7 +284,7 @@ export default function RetrievalPage() {
                 <div className="space-y-3">
                   <h3 className="text-sm font-semibold">Retrieved Documents</h3>
                   <div className="space-y-3">
-                    {result.results.map((doc, i) => (
+                    {normalizedResult.results.map((doc, i) => (
                       <DocRow key={i} doc={doc} rank={i + 1} showRerank={rerank} />
                     ))}
                   </div>

@@ -133,7 +133,7 @@ class UserManualCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     password: str = Field(..., min_length=8)
     full_name: str = Field(..., min_length=1)
-    student_id: str = Field(..., min_length=1)
+    student_id: str = Field(default="")
     cohort: str = Field(..., min_length=1)
     major: str = Field(..., min_length=1)
     major_code: str = Field(default="")

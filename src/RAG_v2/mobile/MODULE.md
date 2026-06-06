@@ -15,7 +15,7 @@ Source-verified: 2026-06-05 from `mobile/App.tsx`, `mobile/index.ts`, `mobile/pa
 - `expo-secure-store` for tokens/profile; `react-native-mmkv` for non-sensitive offline cache
 - `react-native-sse` for `/chat/stream`; Axios (via `@rag/shared` `createApiClient`) for REST
 - `expo-notifications` for Expo push; `expo-haptics`; `react-native-toast-message`
-- Styling: React Native `StyleSheet` + a custom theme context (`src/theme/theme.tsx`). Note: `tailwind.config.ts` references `nativewind/preset`, but NativeWind is not an installed dependency, is not wired into `babel.config.js`, and no `className` styling is used — it is currently inert.
+- Styling: React Native `StyleSheet` + a custom theme context (`src/theme/theme.tsx`). NativeWind is not used: there is no `className` styling, no `nativewind` dependency, and no Tailwind config (the previously-inert `tailwind.config.ts` has been removed).
 
 ## File Map
 
@@ -26,7 +26,6 @@ mobile/
   app.json             Expo config (icons, splash, plugins: expo-secure-store, expo-notifications).
   package.json         Dependencies/scripts (start, android, ios, web, typecheck).
   babel.config.js      babel-preset-expo + react-native-worklets plugin.
-  tailwind.config.ts   NativeWind/Tailwind config (currently unused at runtime).
   tsconfig.json        TypeScript config.
   .env.example         Documents EXPO_PUBLIC_API_BASE_URL.
   MOBILE_PLAN.md       Planning notes (non-runtime).
@@ -139,8 +138,9 @@ External module boundaries:
 - On refresh failure or refresh-token reuse/expiry, clear SecureStore and auth state.
 - Keep `@rag/shared` types and API paths aligned with backend contracts.
 - Avoid storing sensitive data in MMKV/offline cache.
-- If real Tailwind/NativeWind styling is desired, install `nativewind` and wire its
-  babel plugin; today styling is StyleSheet + theme context only.
+- Styling is StyleSheet + theme context only. If Tailwind/NativeWind styling is
+  desired later, install `nativewind`, add a `tailwind.config.js`, and wire its
+  babel plugin.
 
 ## Useful Checks
 

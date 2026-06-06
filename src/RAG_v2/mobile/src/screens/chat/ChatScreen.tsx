@@ -107,7 +107,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
       .catch(() => {
         if (isMountedRef.current) {
           addMessage({ id: "error-" + Date.now(), role: "assistant",
-            content: "Khong the tai lich su hoi thoai. Vui long thu lai sau.",
+            content: "Không thể tải lịch sử hội thoại. Vui lòng thử lại sau.",
             timestamp: new Date(), error: "load_failed" });
         }
       });
@@ -125,7 +125,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
       const online = netInfo.isConnected !== false && netInfo.isInternetReachable !== false;
       if (!online) {
         addMessage({ id: "offline-" + Date.now(), role: "assistant",
-          content: "Ban can ket noi Internet de gui cau hoi moi.", timestamp: new Date(), error: "offline" });
+          content: "Bạn cần kết nối Internet để gửi câu hỏi mới.", timestamp: new Date(), error: "offline" });
         return;
       }
       addMessage({ id: "user-" + Date.now(), role: "user", content, timestamp: new Date() });
@@ -161,7 +161,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
               if (!isMountedRef.current) return;
               if (!hasReceivedFirstToken) {
                 addMessage({ id: assistantMessageId, role: "assistant",
-                  content: error || "Da xay ra loi. Vui long thu lai.", timestamp: new Date(), error });
+                  content: error || "Đã xảy ra lỗi. Vui lòng thử lại.", timestamp: new Date(), error });
               }
               setChatPhase("idle");
             },
@@ -170,7 +170,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
       } catch (error) {
         if (isMountedRef.current) {
           addMessage({ id: "error-" + Date.now(), role: "assistant",
-            content: error instanceof Error ? error.message : "Da xay ra loi. Vui long thu lai.",
+            content: error instanceof Error ? error.message : "Đã xảy ra lỗi. Vui lòng thử lại.",
             timestamp: new Date() });
           setChatPhase("idle");
         }
@@ -184,16 +184,17 @@ const ChatScreen = ({ route, navigation }: Props) => {
     ({ item }: { item: Message }) => <MessageBubble message={item} onShowSources={handleShowSources} />,
     [handleShowSources],
   );
-  const greeting = displayName ? "Xin chao, " + displayName + "!" : "Bat dau tro chuyen";
+  const greeting = displayName ? "Xin chào, " + displayName + "!" : "Bắt đầu trò chuyện";
   const renderEmptyState = () => (
     <View style={styles.emptyWrap}>
       <EmptyState icon="chatbubbles" title={greeting}
-        subtitle="Toi co the tu van ve quy che hoc tap, hoc bong va cac quy dinh cua BKHN." />
+        subtitle="Tôi có thể tư vấn về quy chế học tập, học bổng và các quy định của BKHN." />
       {!keyboardVisible && suggestions.length > 0 && (
         <ScrollView horizontal style={styles.suggestionScroll} showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.suggestionRow}>
           {suggestions.slice(0, 6).map((item) => (
-            <Pressable key={item.question} style={styles.suggestionChip}
+            <Pressable key={item.question}
+              style={[styles.suggestionChip, chatPhase !== "idle" && styles.suggestionChipDisabled]}
               onPress={() => handleSend(item.question)} disabled={chatPhase !== "idle"}>
               <Text style={styles.suggestionText} numberOfLines={1} ellipsizeMode="tail">
                 {item.question}
@@ -216,13 +217,13 @@ const ChatScreen = ({ route, navigation }: Props) => {
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <Pressable style={styles.headerBackButton} onPress={() => navigation.goBack()}
-          accessibilityLabel="Quay lai" accessibilityRole="button">
+          accessibilityLabel="Quay lại" accessibilityRole="button">
           <Ionicons name="chevron-back" size={24} color={colors.mutedForeground} />
         </Pressable>
         <Text style={styles.headerTitle} numberOfLines={1}>{headerTitle}</Text>
         <Pressable style={styles.headerAction}
           onPress={() => { reset(); navigation.replace("Chat", undefined); }}
-          accessibilityLabel="Tao hoi thoai moi" accessibilityRole="button">
+          accessibilityLabel="Tạo hội thoại mới" accessibilityRole="button">
           <Ionicons name="create-outline" size={22} color={colors.mutedForeground} />
         </Pressable>
       </View>
@@ -250,7 +251,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
       {showScrollDown && (
         <Pressable style={styles.scrollDownButton}
           onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
-          accessibilityLabel="Cuon xuong cuoi" accessibilityRole="button">
+          accessibilityLabel="Cuộn xuống cuối" accessibilityRole="button">
           <Ionicons name="chevron-down" size={20} color={colors.primaryForeground} />
         </Pressable>
       )}
@@ -274,6 +275,7 @@ const createStyles = (colors: AppColors) =>
     suggestionRow: { paddingHorizontal: 12, paddingTop: 2, paddingBottom: 10, gap: 8 },
     suggestionChip: { width: 156, height: 38, justifyContent: "center", backgroundColor: colors.card,
       borderWidth: 1, borderColor: colors.border, borderRadius: 19, paddingHorizontal: 12 },
+    suggestionChipDisabled: { opacity: 0.5 },
     suggestionText: { color: colors.foreground, fontSize: 12, lineHeight: 16, fontWeight: "500" },
     scrollDownButton: { position: "absolute", bottom: 80, right: 20, width: 40, height: 40,
       borderRadius: 20, backgroundColor: colors.primary, justifyContent: "center", alignItems: "center",

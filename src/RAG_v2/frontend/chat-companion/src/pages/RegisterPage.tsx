@@ -33,7 +33,6 @@ interface FormErrors {
   password?: string;
   confirmPassword?: string;
   fullName?: string;
-  studentId?: string;
   cohort?: string;
   major?: string;
   majorCode?: string;
@@ -48,7 +47,6 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [fullName, setFullName] = useState("");
-  const [studentId, setStudentId] = useState("");
   const [cohort, setCohort] = useState("");
   const [major, setMajor] = useState("");
   const [majorCode, setMajorCode] = useState("");
@@ -81,7 +79,6 @@ const RegisterPage = () => {
     if (!confirmPassword) next.confirmPassword = "Vui lòng xác nhận mật khẩu.";
     else if (confirmPassword !== password) next.confirmPassword = "Mật khẩu không khớp.";
     if (!fullName.trim()) next.fullName = "Họ và tên là bắt buộc.";
-    if (!studentId.trim()) next.studentId = "Mã số sinh viên là bắt buộc.";
     if (!cohort.trim()) next.cohort = "Khoá học là bắt buộc.";
     if (!selectedMajor || !major.trim() || major !== selectedMajor.name) {
       next.major = "Ngành học là bắt buộc.";
@@ -116,7 +113,6 @@ const RegisterPage = () => {
         username,
         password,
         full_name: fullName,
-        student_id: studentId,
         cohort,
         major,
         major_code: majorCode,
@@ -198,22 +194,6 @@ const RegisterPage = () => {
               className={errors.fullName ? "border-destructive focus-visible:ring-destructive" : ""}
             />
             {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
-          </div>
-
-          {/* Student ID */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="studentId" className="text-sm font-medium text-foreground">
-              Mã số sinh viên
-            </Label>
-            <Input
-              id="studentId"
-              type="text"
-              placeholder="vd: 20225653"
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
-              className={errors.studentId ? "border-destructive focus-visible:ring-destructive" : ""}
-            />
-            {errors.studentId && <p className="text-xs text-destructive">{errors.studentId}</p>}
           </div>
 
           {/* Major */}

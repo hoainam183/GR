@@ -60,9 +60,12 @@ const formatDate = (isoString: string): string => {
   });
 };
 
-// Named separator component avoids creating a new function instance per render
-const separatorStyle = { height: 1, backgroundColor: '#e5e7eb', marginHorizontal: 20 };
-const SessionSeparator = () => <View style={separatorStyle} />;
+// Named separator component avoids creating a new function instance per render.
+// Reads the active theme so the divider adapts to light/dark mode.
+const SessionSeparator = () => {
+  const { colors } = useAppTheme();
+  return <View style={{ height: 1, backgroundColor: colors.border, marginHorizontal: 20 }} />;
+};
 
 const SessionListScreen = ({ navigation }: Props) => {
   const { colors } = useAppTheme();
@@ -271,11 +274,6 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   },
   emptyList: {
     flexGrow: 1,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginHorizontal: 20,
   },
   // Session card
   sessionCard: {

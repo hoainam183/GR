@@ -972,14 +972,23 @@ async def _create_crawl_notifications(
     pipeline_target: str,
 ) -> dict[str, Any]:
     """Broadcast a manual crawl completion notification to all users."""
-    from api.services.notification_delivery import broadcast_user_notification
-    from models.database import _get_settings, get_motor_client
-
     notification_summary = _build_crawl_notification_summary(crawl_result)
     new_articles = notification_summary["new_articles"]
     article_links = _build_crawl_notification_article_links(
         notification_summary["saved_chunks"]
     )
+    if new_articles <= 0 and not article_links:
+        return {
+            "created_count": 0,
+            "target_user_ids": [],
+            "push_sent_count": 0,
+            "push_error_count": 0,
+            "skipped_reason": "no_new_crawl_data",
+        }
+
+    from api.services.notification_delivery import broadcast_user_notification
+    from models.database import _get_settings, get_motor_client
+
     pipelines = notification_summary["pipelines"]
     collections = notification_summary["collections"]
     source_label = _format_crawl_source_label(collections or pipelines)
