@@ -1,6 +1,6 @@
 # Module: `tools`
 
-Source-verified: 2026-06-02 from `tools/tavily_search.py`, `retrieval/service.py`, `pipeline/flows.py`, `agent/tool_adapters.py`, and `config/settings.py`.
+Source-verified: 2026-06-05 from `tools/__init__.py`, `tools/tavily_search.py`, and `config/settings.py`.
 
 ## Purpose
 
@@ -20,14 +20,21 @@ tools/
 
 Main responsibilities:
 
-- Lazy import the `tavily` package only when a tool instance is created.
-- Validate API keys with `is_valid_tavily_api_key()`.
-- Normalize `include_domains` and `exclude_domains` to bare domains.
-- Search Tavily with configured depth/max result count.
-- Filter and format result content.
-- Maintain an instance-level TTL cache.
-- Retry transient network/5xx errors with backoff.
-- Fail fast on invalid API key errors.
+- Lazy import the `tavily` package (`_load_tavily_client`) only when a tool instance is created; raises `RuntimeError` if `tavily-python` is missing.
+- Resolve the API key from the `api_key` arg or `TAVILY_API_KEY` env var. `is_valid_tavily_api_key()` (module-level helper) rejects empties and known placeholders (`your-key-here`, `change_me`, `tvly-xxx`, `your-`/`changeme` prefixes, …).
+- Normalize `include_domains` / `exclude_domains` and `default_include_domains` to bare hostnames (`_normalize_domains`).
+- Enforce a per-instance minimum interval between API calls (`_wait_for_rate_limit`, `DEFAULT_MIN_INTERVAL = 1.0s`).
+- Maintain a per-instance TTL cache (`_SimpleTTLCache`, default 200 entries / 3600s) guarded by an `RLock`; `search` results are cached, keyed on query + params + domains.
+- Retry transient failures with exponential backoff (`max_retries=3`, base `min_retry_delay=1.0s`); fail fast (no retry) on the Tavily `InvalidAPIKeyError`.
+
+### Methods
+
+- `search(query, max_results=None, search_depth="basic", include_answer=True, include_domains=None, exclude_domains=None) -> dict`:
+  calls Tavily search (`search_depth` accepts `"advanced" | "basic" | "fast" | "ultra-fast"`), parses results, applies `filter_results` (min content length 100), then re-ranks via `_rank_result_for_query`. Returns `{query, answer, results, context}` where `context` is a numbered text block.
+- `extract(urls, extract_depth="basic", query=None) -> dict`:
+  fetches/extracts content directly from specific URLs (bypasses the search index — useful for dynamic pages like `?kehoach=29237`). Returns `{results, failed_results, context}`.
+- `filter_results(...)` (staticmethod): drops short content, low Tavily score, site homepages, and (when `query_year` is set) stale results whose only years are older than `query_year - 1`.
+- `_rank_result_for_query` (classmethod): accent-folded deterministic re-ranking that boosts semester codes (`20xx[123]`), school-year ranges, summer-semester (`ky he`) hints, and "latest/moi nhat/recent" freshness signals.
 
 ## Domain Constants
 

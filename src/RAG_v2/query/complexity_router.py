@@ -45,7 +45,7 @@ _COMPLEX_PATTERN_SPECS: list[tuple[str, str]] = [
     # Two cohort codes mentioned in the same query (K65 … K70)
     (r"\bK\d{2,3}\b.{1,120}\bK\d{2,3}\b", "comparison"),
     # Two programme codes mentioned (IT-E6 … IT-E7, MI-E10 ...)
-    (r"\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH)-[A-Z0-9]+\b.{1,50}\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH)-[A-Z0-9]+\b", "comparison"),
+    (r"\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH|ME|CH|BF|MS|HE|TE|TX|TROY)\s*-?\s*(?:E\d{1,2}|EP|GU|LUH|NUT|IT|\d{1,2})\b.{1,80}\b(?:IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH|ME|CH|BF|MS|HE|TE|TX|TROY)\s*-?\s*(?:E\d{1,2}|EP|GU|LUH|NUT|IT|\d{1,2})\b", "comparison"),
     # Difference / similarity ONLY when paired with cohort / programme context
     (r"(khác nhau|khác biệt|giống nhau).{0,40}(K\d{2}|khóa|ngành|chương trình|học kỳ|quy định)", "comparison"),
     (r"(K\d{2}|khóa|ngành|chương trình).{0,40}(khác nhau|khác biệt|giống nhau)", "comparison"),
@@ -202,7 +202,7 @@ class ComplexityRouter:
         # 2. Signal-based overrides for broad/personal requests. These cover
         # variants like "điều kiện tốt nghiệp của tôi", where the personal
         # reference appears after the eligibility concept.
-        if q_lower.count("cho") >= 2:
+        if len(re.findall(r'\bcho\b', q_lower)) >= 2 and (re.search(r"\bvà\b", q_lower) or re.search(r"\bva\b", q_folded)):
             result = {
                 "tier": "complex",
                 "reason": "signals: repeated_request_connector",
@@ -211,7 +211,7 @@ class ComplexityRouter:
                 "query_signals": query_signals_dict,
             }
             logger.info(
-                "ComplexityRouter: %r â†’ %s/%s (%s)",
+                "ComplexityRouter: %r → %s/%s (%s)",
                 q[:60], result["tier"], result["complex_subtype"], result["reason"],
             )
             return result
@@ -289,20 +289,6 @@ class ComplexityRouter:
             result = {
                 "tier": "complex",
                 "reason": "signals: multi_step_connector",
-                "confidence": "high",
-                "complex_subtype": "general",
-                "query_signals": query_signals_dict,
-            }
-            logger.info(
-                "ComplexityRouter: %r â†’ %s/%s (%s)",
-                q[:60], result["tier"], result["complex_subtype"], result["reason"],
-            )
-            return result
-
-        if q_lower.count("cho") >= 2 and (" v" in q_lower or " va " in q_folded):
-            result = {
-                "tier": "complex",
-                "reason": "signals: repeated_request_connector",
                 "confidence": "high",
                 "complex_subtype": "general",
                 "query_signals": query_signals_dict,

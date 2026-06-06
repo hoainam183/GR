@@ -1,6 +1,6 @@
 # Module: `scripts`
 
-Source-verified: 2026-06-02 from `scripts/*.py`, `api/routes/admin_stats.py`, `api/services/notification_delivery.py`, and GitNexus ingestion/indexing flow queries.
+Source-verified: 2026-06-05 from `scripts/auto_crawler.py`, `scripts/index_kehoach.py`, `scripts/index_quydinh.py`, `scripts/index_stsv.py`, `scripts/index_parent_child.py`, `scripts/index_to_es.py`, `scripts/update_data.py`, `scripts/update_metadata.py`, `scripts/metadata_audit.py`, `scripts/setup_mongo_indexes.py`, `scripts/search_multi.py`, `scripts/download_models.py`, `scripts/__init__.py`.
 
 ## Purpose
 
@@ -10,16 +10,49 @@ Source-verified: 2026-06-02 from `scripts/*.py`, `api/routes/admin_stats.py`, `a
 
 ```text
 scripts/
-  auto_crawler.py         Crawl -> chunk -> embed -> Qdrant/ES index -> retention.
-  index_kehoach.py        Standalone indexing for kehoach chunks.
-  index_quydinh.py        Standalone indexing for quydinh chunks.
-  index_stsv.py           Standalone indexing for stsv chunks.
-  index_to_es.py          Reindex Qdrant collection payloads into Elasticsearch.
-  update_data.py          Ingest one document, sync metadata, trigger validity reload.
-  update_metadata.py      Bulk metadata update across existing Qdrant points.
-  setup_mongo_indexes.py  Ensure Mongo indexes for agent traces/logging.
-  search_multi.py         Local multi-collection search utility.
-  download_models.py      Model download helper.
+  auto_crawler.py         Crawl -> chunk -> stage (Mongo) -> review -> embed -> Qdrant/ES index -> retention.
+                          Run: `python -m scripts.auto_crawler [--pipeline kehoach|quydinh|all]
+                          [--module crawl|chunk|index|retention|all] [--dry]`. Scheduled by APScheduler
+                          when crawler_enabled=true.
+  index_kehoach.py        Index data/kehoach/chunks/kehoach_all_chunks.json into Qdrant collection
+                          `kehoach` (BGE-M3 + E5, idempotent/incremental). Params hardcoded in CONFIG.
+                          Run: `python scripts/index_kehoach.py [--reset]` (--reset drops collection first).
+  index_quydinh.py        Generic dir indexer: loads all *_chunks.json from CONFIG["chunks_dir"]
+                          (default data/ctdt/vatlieu/chunks_recursive_parent_child, collection `ctdt`),
+                          filters via utils.chunk_indexing.is_indexable_chunk, upserts to Qdrant
+                          (incremental). Params hardcoded in CONFIG. Run: `python scripts/index_quydinh.py`.
+  index_stsv.py           Index data/stsv/chunks/stsv_all_chunks.json into Qdrant (BGE-M3 + E5).
+                          CLI: `python scripts/index_stsv.py [--chunks-path ...] [--collection ...]
+                          [--qdrant-host ...] [--qdrant-port ...] [--batch-size ...]`.
+  index_parent_child.py   Index parent-child chunks (data/ctdt/* subfolders, data/quydinh admin_upload+olmocr)
+                          into Qdrant (all levels) and Elasticsearch (children only). CLI:
+                          `python scripts/index_parent_child.py --collection {ctdt|quydinh}
+                          [--subfolder ...] [--dry-run] [--skip-qdrant] [--skip-es] [--parents-only]`.
+  index_to_es.py          Re-index existing Qdrant collection payloads into Elasticsearch for BM25
+                          (scrolls Qdrant, skips parent/header levels, enriches course/semester metadata,
+                          runs a vi_analyzer smoke test). CLI: `python scripts/index_to_es.py
+                          [--collections stsv quydinh kehoach ctdt] [--recreate|--force]
+                          [--allow-analyzer-fallback] [--smoke-test-only]`.
+  update_data.py          Mock document ingest + metadata sync (delegates to update_metadata) + POST
+                          API validity-filter reload. CLI: `python scripts/update_data.py
+                          --doc PATH --collection NAME [--sync-metadata]` or `--metadata-only`
+                          [--target both|qdrant|elasticsearch] [--metadata-collection ...]
+                          [--dry-run] [--skip-reload].
+  update_metadata.py      Sync edited chunk-file metadata into Qdrant + Elasticsearch by point ID
+                          without re-embedding (collections/targets/overwrite hardcoded in CONFIG).
+                          CLI: `python scripts/update_metadata.py [--target ...] [--collection ...]
+                          [--dry-run]`.
+  metadata_audit.py       Scan data/ collections and report per-field fill rates + enrichment
+                          suggestions; writes a JSON report. Run: `python scripts/metadata_audit.py
+                          [--output PATH]`.
+  setup_mongo_indexes.py  Create MongoDB indexes on the `agent_traces` collection (session_id,
+                          created_at, tool_names_sequence). Run: `python scripts/setup_mongo_indexes.py
+                          [--uri ...] [--db ...]`.
+  search_multi.py         Local hybrid multi-collection search utility (config hardcoded at top of file).
+                          Run: `python scripts/search_multi.py`.
+  download_models.py      Pre-download E5, BGE-M3, and BGE reranker into the HF cache.
+                          Run once: `python scripts/download_models.py`.
+  __init__.py             Empty package marker.
 ```
 
 ## Auto Crawler
@@ -73,17 +106,25 @@ Supported crawler targets in source include:
 
 Standalone indexers generally:
 
-1. Load chunks from `data/.../chunks`.
-2. Filter already indexed chunks where implemented.
-3. Embed in batches.
-4. Upsert into Qdrant through `QdrantStore`.
-5. Index into Elasticsearch where the script supports dual indexing.
+1. Load chunks from `data/.../chunks` (single file or a directory glob).
+2. Filter already-indexed chunks via Qdrant `retrieve()` where implemented
+   (`index_kehoach`, `index_quydinh`). `index_stsv` and `index_parent_child`
+   rely on idempotent upsert instead.
+3. Embed in batches with BGE-M3 + E5.
+4. Upsert into Qdrant through `QdrantStore.index_documents()`.
+5. Index into Elasticsearch where the script supports dual indexing
+   (`index_parent_child` children only; `index_to_es` re-indexes from Qdrant).
 
-GitNexus ingestion flows identify:
+Notes on specific scripts:
 
-- `index_kehoach.py:index_chunks() -> QdrantStore.index_documents()`
-- `index_quydinh.py:index_chunks() -> QdrantStore.index_documents()`
-- `index_stsv.py:index_chunks() -> QdrantStore.index_documents()`
+- `index_quydinh.py` is a generic directory indexer despite its name — its
+  CONFIG defaults to `data/ctdt/vatlieu/chunks_recursive_parent_child` and
+  collection `ctdt`. Edit CONFIG to retarget another folder/collection.
+- `index_kehoach.py` and `index_quydinh.py` take parameters via the in-file
+  `CONFIG` dict, not CLI flags (`index_kehoach` exposes only `--reset`).
+- `index_stsv.py` and `index_parent_child.py` are fully CLI-driven.
+- `index_quydinh.py` and `index_stsv.py` define a `delete_collection()`
+  helper; `index_kehoach.py` runs it only via `--reset`.
 
 ## Module Flow
 
@@ -122,9 +163,17 @@ External module boundaries:
 
 `update_data.py`:
 
-- ingests a document path into a target collection
-- syncs metadata
-- can trigger validity reload through API
+- ingests a document path into a target collection (ingest body is currently a
+  mock/placeholder that logs the steps)
+- syncs metadata by delegating to `update_metadata.main()`
+- can trigger validity reload via `POST {API}/api/admin/reload-validity`
+
+`metadata_audit.py`:
+
+- scans every `data/<collection>/*.json` file (list- or single-doc shaped)
+- computes per-field fill rates and flags low-coverage IMPORTANT_FIELDS
+- prints a summary and writes a JSON report (default
+  `scripts/metadata_audit_report.json`)
 
 ## Maintenance Notes
 

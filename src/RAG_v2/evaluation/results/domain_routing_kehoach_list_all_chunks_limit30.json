@@ -1,0 +1,1798 @@
+{
+  "case_count": 30,
+  "thresholds": [
+    0.55
+  ],
+  "runs": [
+    {
+      "case_count": 30,
+      "confidence_threshold": 0.55,
+      "stages": {
+        "raw_classifier": {
+          "count": 30,
+          "top1_accuracy": 0.3,
+          "exact_set_accuracy": 0.2,
+          "set_precision": 0.2667,
+          "set_recall": 0.3333,
+          "set_f1": 0.2889,
+          "missing_domain_rate": 0.6667,
+          "extra_domain_rate": 0.8,
+          "kehoach_false_negative_rate": 0.6667,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.1667,
+              "expected_count": 0,
+              "predicted_count": 5
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 0.3333,
+              "f1": 0.5,
+              "missing_rate": 0.6667,
+              "extra_rate": 0.0,
+              "expected_count": 30,
+              "predicted_count": 10
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.5667,
+              "expected_count": 0,
+              "predicted_count": 17
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.1333,
+              "expected_count": 0,
+              "predicted_count": 4
+            }
+          },
+          "low_confidence_fallback_rate": 0.2333
+        },
+        "selector": {
+          "count": 30,
+          "top1_accuracy": 0.2667,
+          "exact_set_accuracy": 0.0333,
+          "set_precision": 0.1611,
+          "set_recall": 0.4,
+          "set_f1": 0.22,
+          "missing_domain_rate": 0.6,
+          "extra_domain_rate": 0.9667,
+          "kehoach_false_negative_rate": 0.6,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.3667,
+              "expected_count": 0,
+              "predicted_count": 11
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 0.4,
+              "f1": 0.5714,
+              "missing_rate": 0.6,
+              "extra_rate": 0.0,
+              "expected_count": 30,
+              "predicted_count": 12
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.8333,
+              "expected_count": 0,
+              "predicted_count": 25
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.9,
+              "expected_count": 0,
+              "predicted_count": 27
+            }
+          },
+          "low_confidence_fallback_rate": 0.2333
+        },
+        "final_pipeline": {
+          "count": 30,
+          "top1_accuracy": 0.2667,
+          "exact_set_accuracy": 0.2,
+          "set_precision": 0.2611,
+          "set_recall": 0.4,
+          "set_f1": 0.2922,
+          "missing_domain_rate": 0.6,
+          "extra_domain_rate": 0.8,
+          "kehoach_false_negative_rate": 0.6,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.3667,
+              "expected_count": 0,
+              "predicted_count": 11
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 0.4,
+              "f1": 0.5714,
+              "missing_rate": 0.6,
+              "extra_rate": 0.0,
+              "expected_count": 30,
+              "predicted_count": 12
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.7333,
+              "expected_count": 0,
+              "predicted_count": 22
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.7333,
+              "expected_count": 0,
+              "predicted_count": 22
+            }
+          },
+          "low_confidence_fallback_rate": 0.2333
+        },
+        "all_collections": {
+          "count": 30,
+          "top1_accuracy": 0.0,
+          "exact_set_accuracy": 0.0,
+          "set_precision": 0.25,
+          "set_recall": 1.0,
+          "set_f1": 0.4,
+          "missing_domain_rate": 0.0,
+          "extra_domain_rate": 1.0,
+          "kehoach_false_negative_rate": 0.0,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 30
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0,
+              "expected_count": 30,
+              "predicted_count": 30
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 30
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 30
+            }
+          },
+          "low_confidence_fallback_rate": 0.2333
+        }
+      },
+      "confidence_buckets": {
+        "0.00-0.35": {
+          "count": 4,
+          "top1_accuracy": 0.25,
+          "exact_set_accuracy": 0.0,
+          "set_precision": 0.125,
+          "set_recall": 0.5,
+          "set_f1": 0.2,
+          "missing_domain_rate": 0.5,
+          "extra_domain_rate": 1.0,
+          "kehoach_false_negative_rate": 0.5,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 4
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.6667,
+              "missing_rate": 0.5,
+              "extra_rate": 0.0,
+              "expected_count": 4,
+              "predicted_count": 2
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 4
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 4
+            }
+          }
+        },
+        "0.35-0.55": {
+          "count": 3,
+          "top1_accuracy": 0.0,
+          "exact_set_accuracy": 0.0,
+          "set_precision": 0.1667,
+          "set_recall": 0.6667,
+          "set_f1": 0.2667,
+          "missing_domain_rate": 0.3333,
+          "extra_domain_rate": 1.0,
+          "kehoach_false_negative_rate": 0.3333,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 3
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 0.6667,
+              "f1": 0.8,
+              "missing_rate": 0.3333,
+              "extra_rate": 0.0,
+              "expected_count": 3,
+              "predicted_count": 2
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 3
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 3
+            }
+          }
+        },
+        "0.55-0.75": {
+          "count": 3,
+          "top1_accuracy": 0.0,
+          "exact_set_accuracy": 0.0,
+          "set_precision": 0.0,
+          "set_recall": 0.0,
+          "set_f1": 0.0,
+          "missing_domain_rate": 1.0,
+          "extra_domain_rate": 1.0,
+          "kehoach_false_negative_rate": 1.0,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0,
+              "expected_count": 0,
+              "predicted_count": 0
+            },
+            "kehoach": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 1.0,
+              "extra_rate": 0.0,
+              "expected_count": 3,
+              "predicted_count": 0
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 3
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 3
+            }
+          }
+        },
+        "0.75-1.00": {
+          "count": 20,
+          "top1_accuracy": 0.35,
+          "exact_set_accuracy": 0.3,
+          "set_precision": 0.3417,
+          "set_recall": 0.4,
+          "set_f1": 0.3583,
+          "missing_domain_rate": 0.6,
+          "extra_domain_rate": 0.7,
+          "kehoach_false_negative_rate": 0.6,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.2,
+              "expected_count": 0,
+              "predicted_count": 4
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 0.4,
+              "f1": 0.5714,
+              "missing_rate": 0.6,
+              "extra_rate": 0.0,
+              "expected_count": 20,
+              "predicted_count": 8
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.6,
+              "expected_count": 0,
+              "predicted_count": 12
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.6,
+              "expected_count": 0,
+              "predicted_count": 12
+            }
+          }
+        }
+      },
+      "margin_buckets": {
+        "0.00-0.05": {
+          "count": 3,
+          "top1_accuracy": 0.3333,
+          "exact_set_accuracy": 0.3333,
+          "set_precision": 0.4444,
+          "set_recall": 0.6667,
+          "set_f1": 0.5,
+          "missing_domain_rate": 0.3333,
+          "extra_domain_rate": 0.6667,
+          "kehoach_false_negative_rate": 0.3333,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.3333,
+              "expected_count": 0,
+              "predicted_count": 1
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 0.6667,
+              "f1": 0.8,
+              "missing_rate": 0.3333,
+              "extra_rate": 0.0,
+              "expected_count": 3,
+              "predicted_count": 2
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.6667,
+              "expected_count": 0,
+              "predicted_count": 2
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.6667,
+              "expected_count": 0,
+              "predicted_count": 2
+            }
+          }
+        },
+        "0.05-0.15": {
+          "count": 3,
+          "top1_accuracy": 0.6667,
+          "exact_set_accuracy": 0.3333,
+          "set_precision": 0.5,
+          "set_recall": 1.0,
+          "set_f1": 0.6,
+          "missing_domain_rate": 0.0,
+          "extra_domain_rate": 0.6667,
+          "kehoach_false_negative_rate": 0.0,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.6667,
+              "expected_count": 0,
+              "predicted_count": 2
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0,
+              "expected_count": 3,
+              "predicted_count": 3
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.6667,
+              "expected_count": 0,
+              "predicted_count": 2
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.6667,
+              "expected_count": 0,
+              "predicted_count": 2
+            }
+          }
+        },
+        "0.15-0.30": {
+          "count": 3,
+          "top1_accuracy": 0.0,
+          "exact_set_accuracy": 0.0,
+          "set_precision": 0.0,
+          "set_recall": 0.0,
+          "set_f1": 0.0,
+          "missing_domain_rate": 1.0,
+          "extra_domain_rate": 1.0,
+          "kehoach_false_negative_rate": 1.0,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 3
+            },
+            "kehoach": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 1.0,
+              "extra_rate": 0.0,
+              "expected_count": 3,
+              "predicted_count": 0
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 3
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 3
+            }
+          }
+        },
+        "0.30-1.00": {
+          "count": 21,
+          "top1_accuracy": 0.2381,
+          "exact_set_accuracy": 0.1905,
+          "set_precision": 0.2381,
+          "set_recall": 0.3333,
+          "set_f1": 0.2603,
+          "missing_domain_rate": 0.6667,
+          "extra_domain_rate": 0.8095,
+          "kehoach_false_negative_rate": 0.6667,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.2381,
+              "expected_count": 0,
+              "predicted_count": 5
+            },
+            "kehoach": {
+              "precision": 1.0,
+              "recall": 0.3333,
+              "f1": 0.5,
+              "missing_rate": 0.6667,
+              "extra_rate": 0.0,
+              "expected_count": 21,
+              "predicted_count": 7
+            },
+            "quydinh": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.7143,
+              "expected_count": 0,
+              "predicted_count": 15
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.7143,
+              "expected_count": 0,
+              "predicted_count": 15
+            }
+          }
+        }
+      },
+      "cases": [
+        {
+          "id": "kehoach_list_simple_001",
+          "query": "Sinh viên nghỉ học dài hạn hoặc đình chỉ đã hoàn thành muốn trở lại học kỳ hè 20253 phải nộp hồ sơ trong khoảng thời gian nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": [
+              "kehoach",
+              "quydinh"
+            ],
+            "confidence": 0.9937410926014864,
+            "label": "kehoach",
+            "probabilities": {
+              "ctdt": 1.000389268190322e-08,
+              "kehoach": 0.9937410926014864,
+              "quydinh": 0.8595540554347655,
+              "stsv": 0.0016261243244396605
+            }
+          },
+          "raw_classifier": [
+            "kehoach",
+            "quydinh"
+          ],
+          "selector": [
+            "kehoach",
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "kehoach"
+          ],
+          "confidence": 0.9937,
+          "margin": 0.1342,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.05-0.15"
+        },
+        {
+          "id": "kehoach_list_simple_002",
+          "query": "Sinh viên muốn tiếp nhận trở lại học từ kỳ 1 năm học 2026-2027 (20261) phải nộp hồ sơ đến hạn nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": [
+              "kehoach"
+            ],
+            "confidence": 0.9800353523276285,
+            "label": "kehoach",
+            "probabilities": {
+              "ctdt": 2.248956308213053e-05,
+              "kehoach": 0.9800353523276285,
+              "quydinh": 0.08548732179573525,
+              "stsv": 0.0044948918840988054
+            }
+          },
+          "raw_classifier": [
+            "kehoach"
+          ],
+          "selector": [
+            "kehoach",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "kehoach"
+          ],
+          "confidence": 0.98,
+          "margin": 0.8945,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_003",
+          "query": "Sinh viên trở lại học từ kỳ hè 20253 hoặc kỳ 20261 có cần đăng ký học phần trước không?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.6084417912970728,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.002173882840380332,
+              "kehoach": 0.304953973252661,
+              "quydinh": 0.6084417912970728,
+              "stsv": 6.29968214925581e-05
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.6084,
+          "margin": 0.3035,
+          "confidence_bucket": "0.55-0.75",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_004",
+          "query": "Đơn xin tiếp nhận trở lại học từ kỳ hè 20253 hoặc kỳ 20261 được lấy ở đâu?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "stsv",
+            "domains": [
+              "stsv",
+              "kehoach"
+            ],
+            "confidence": 0.9887460591849623,
+            "label": "stsv",
+            "probabilities": {
+              "ctdt": 1.1705938091597919e-05,
+              "kehoach": 0.9622853917504618,
+              "quydinh": 1.168638663837476e-05,
+              "stsv": 0.9887460591849623
+            }
+          },
+          "raw_classifier": [
+            "stsv",
+            "kehoach"
+          ],
+          "selector": [
+            "stsv",
+            "quydinh",
+            "kehoach"
+          ],
+          "final_pipeline": [
+            "stsv",
+            "quydinh",
+            "kehoach"
+          ],
+          "confidence": 0.9887,
+          "margin": 0.0265,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.00-0.05"
+        },
+        {
+          "id": "kehoach_list_simple_005",
+          "query": "Sinh viên nộp đơn tiếp nhận trở lại học từ kỳ hè 20253 hoặc kỳ 20261 ở đâu và gặp ai?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": [
+              "kehoach",
+              "stsv"
+            ],
+            "confidence": 0.9719625188174678,
+            "label": "kehoach",
+            "probabilities": {
+              "ctdt": 1.4646950706713e-05,
+              "kehoach": 0.9719625188174678,
+              "quydinh": 3.807145785123672e-05,
+              "stsv": 0.9345616895029948
+            }
+          },
+          "raw_classifier": [
+            "kehoach",
+            "stsv"
+          ],
+          "selector": [
+            "kehoach",
+            "stsv",
+            "quydinh"
+          ],
+          "final_pipeline": [
+            "kehoach"
+          ],
+          "confidence": 0.972,
+          "margin": 0.0374,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.00-0.05"
+        },
+        {
+          "id": "kehoach_list_simple_006",
+          "query": "Vì sao sinh viên phải làm thủ tục nhập học đúng lịch khi muốn trở lại học từ kỳ hè 20253 hoặc kỳ 20261?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": [
+              "kehoach",
+              "quydinh"
+            ],
+            "confidence": 0.9001178562262403,
+            "label": "kehoach",
+            "probabilities": {
+              "ctdt": 2.6269161765470355e-05,
+              "kehoach": 0.9001178562262403,
+              "quydinh": 0.4719593779137323,
+              "stsv": 0.0006512238648484358
+            }
+          },
+          "raw_classifier": [
+            "kehoach",
+            "quydinh"
+          ],
+          "selector": [
+            "kehoach",
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "kehoach"
+          ],
+          "confidence": 0.9001,
+          "margin": 0.4282,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_007",
+          "query": "Lịch thi giữa kỳ 20252-AB và cuối kỳ 20252A được cập nhật vào ngày nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": [
+              "kehoach"
+            ],
+            "confidence": 0.9999427879098542,
+            "label": "kehoach",
+            "probabilities": {
+              "ctdt": 1.3594542182222315e-05,
+              "kehoach": 0.9999427879098542,
+              "quydinh": 0.0003291196849842533,
+              "stsv": 8.546315993767276e-06
+            }
+          },
+          "raw_classifier": [
+            "kehoach"
+          ],
+          "selector": [
+            "kehoach",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "kehoach"
+          ],
+          "confidence": 0.9999,
+          "margin": 0.9996,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_008",
+          "query": "Sinh viên cần xem lịch thi giữa kỳ 20252-AB và cuối kỳ 20252A ở đâu?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": [
+              "kehoach"
+            ],
+            "confidence": 0.9786042062362517,
+            "label": "kehoach",
+            "probabilities": {
+              "ctdt": 0.0002993096087003728,
+              "kehoach": 0.9786042062362517,
+              "quydinh": 0.00015850825332711186,
+              "stsv": 0.0028337848541649343
+            }
+          },
+          "raw_classifier": [
+            "kehoach"
+          ],
+          "selector": [
+            "kehoach"
+          ],
+          "final_pipeline": [
+            "kehoach"
+          ],
+          "confidence": 0.9786,
+          "margin": 0.9758,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_009",
+          "query": "Đối tượng chính được đăng ký học tích hợp chương trình kỹ sư chuyên sâu học kỳ 2025.2 là sinh viên khóa nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.8192310938052368,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.003866225583307866,
+              "kehoach": 0.07924912737036456,
+              "quydinh": 0.8192310938052368,
+              "stsv": 2.8771185212483692e-05
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.8192,
+          "margin": 0.74,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_010",
+          "query": "Sinh viên không thuộc đối tượng chuyển tiếp kỹ sư chuyên sâu có được đăng ký học phần kỹ sư để mở rộng kiến thức không?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.9971919089541516,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.1419986746253707,
+              "kehoach": 4.272127030296325e-05,
+              "quydinh": 0.9971919089541516,
+              "stsv": 1.1649138996840408e-05
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.9972,
+          "margin": 0.8552,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_011",
+          "query": "Form đăng ký học tích hợp kỹ sư chuyên sâu học kỳ 2025.2 mở trong khoảng thời gian nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": [
+              "kehoach"
+            ],
+            "confidence": 0.9990562429312236,
+            "label": "kehoach",
+            "probabilities": {
+              "ctdt": 7.533826712554563e-05,
+              "kehoach": 0.9990562429312236,
+              "quydinh": 0.009852481921712,
+              "stsv": 0.0002467374561062108
+            }
+          },
+          "raw_classifier": [
+            "kehoach"
+          ],
+          "selector": [
+            "kehoach",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "kehoach",
+            "stsv"
+          ],
+          "confidence": 0.9991,
+          "margin": 0.9892,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_012",
+          "query": "Điều kiện tín chỉ để sinh viên đăng ký học tích lũy trước tối đa 15 tín chỉ học phần kỹ sư chuyên sâu là gì?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.9992744732634561,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.0034807019035530402,
+              "kehoach": 0.00048505331173653176,
+              "quydinh": 0.9992744732634561,
+              "stsv": 5.5546879619014786e-05
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.9993,
+          "margin": 0.9958,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_013",
+          "query": "Sinh viên đăng ký học tích lũy trước kỹ sư chuyên sâu được đăng ký tối đa bao nhiêu tín chỉ và loại trừ học phần nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.9999856805245709,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.03178507416622282,
+              "kehoach": 0.00011045344177629161,
+              "quydinh": 0.9999856805245709,
+              "stsv": 3.7992128745516458e-06
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 1.0,
+          "margin": 0.9682,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_014",
+          "query": "Điều kiện để sinh viên đăng ký form học tích hợp chương trình kỹ sư chuyên sâu là gì?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.9947615734249085,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.03881724315779757,
+              "kehoach": 8.932756694009045e-05,
+              "quydinh": 0.9947615734249085,
+              "stsv": 0.0016369312200878899
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.9948,
+          "margin": 0.9559,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_015",
+          "query": "Sau khi đăng ký học tích hợp kỹ sư chuyên sâu thành công, sinh viên được cấp những gì?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.6775909124102256,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.015691820037456145,
+              "kehoach": 8.29841402153519e-05,
+              "quydinh": 0.6775909124102256,
+              "stsv": 0.04040860580266036
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.6776,
+          "margin": 0.6372,
+          "confidence_bucket": "0.55-0.75",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_016",
+          "query": "Trong đợt 2025.2, sinh viên dùng MSSV được đăng ký học tích lũy trước tối đa bao nhiêu tín chỉ học phần kỹ sư cho học kỳ 2026.1?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.9696069276322591,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.0028864729285303188,
+              "kehoach": 0.022128381291731,
+              "quydinh": 0.9696069276322591,
+              "stsv": 1.569595191289466e-05
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.9696,
+          "margin": 0.9475,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_017",
+          "query": "Điều kiện cấp mã số học viên kỹ sư tạm thời trong đợt đăng ký học tích hợp kỹ sư chuyên sâu 2025.2 là gì?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.42702449145313215,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.0008704220426080309,
+              "kehoach": 0.06499797562536859,
+              "quydinh": 0.42702449145313215,
+              "stsv": 0.0002834906265083292
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv",
+            "kehoach",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv",
+            "kehoach",
+            "ctdt"
+          ],
+          "confidence": 0.427,
+          "margin": 0.362,
+          "confidence_bucket": "0.35-0.55",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_018",
+          "query": "Khi đã được cấp MSHVKS, sinh viên dùng tài khoản nào để đăng ký tiếp các học phần kỹ sư?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "stsv",
+            "domains": [
+              "stsv"
+            ],
+            "confidence": 0.28491488462341236,
+            "label": "stsv",
+            "probabilities": {
+              "ctdt": 0.002649810316552915,
+              "kehoach": 0.01299761053772296,
+              "quydinh": 0.007698536280844665,
+              "stsv": 0.28491488462341236
+            }
+          },
+          "raw_classifier": [
+            "stsv"
+          ],
+          "selector": [
+            "stsv",
+            "quydinh",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "stsv",
+            "quydinh",
+            "ctdt"
+          ],
+          "confidence": 0.2849,
+          "margin": 0.2719,
+          "confidence_bucket": "0.00-0.35",
+          "margin_bucket": "0.15-0.30"
+        },
+        {
+          "id": "kehoach_list_simple_019",
+          "query": "Khi nào sinh viên được chuyển thành học viên kỹ sư chính thức?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.48580925244346435,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.48580925244346435,
+              "kehoach": 0.008705566186470389,
+              "quydinh": 0.03746133092055959,
+              "stsv": 4.812164470366796e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt",
+            "kehoach",
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "ctdt",
+            "kehoach",
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.4858,
+          "margin": 0.4483,
+          "confidence_bucket": "0.35-0.55",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_020",
+          "query": "Sinh viên đã được cấp MSHVKS có được dùng MSSV để đăng ký học phần kỹ sư không?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.6711394716286,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.011029158763216512,
+              "kehoach": 0.0007582493062173165,
+              "quydinh": 0.6711394716286,
+              "stsv": 0.003717275712539083
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.6711,
+          "margin": 0.6601,
+          "confidence_bucket": "0.55-0.75",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_021",
+          "query": "Tín chỉ tích lũy trước bậc kỹ sư có được tính vào chương trình cử nhân không?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt",
+              "quydinh"
+            ],
+            "confidence": 0.9558119687903942,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9558119687903942,
+              "kehoach": 0.00017340533273526432,
+              "quydinh": 0.9257223096747161,
+              "stsv": 7.565608609304059e-07
+            }
+          },
+          "raw_classifier": [
+            "ctdt",
+            "quydinh"
+          ],
+          "selector": [
+            "ctdt",
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "ctdt",
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.9558,
+          "margin": 0.0301,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.00-0.05"
+        },
+        {
+          "id": "kehoach_list_simple_022",
+          "query": "Sinh viên Elitech hoặc hợp tác quốc tế muốn học tiếp kỹ sư chuyên sâu sẽ học theo chương trình nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.999718921181088,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.999718921181088,
+              "kehoach": 2.850298811277295e-05,
+              "quydinh": 0.009150074672497082,
+              "stsv": 3.574814569056247e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9997,
+          "margin": 0.9906,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_023",
+          "query": "Học phí học phần bậc kỹ sư chuyên sâu được tính theo nguyên tắc nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.9999972739983597,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.013252915437106872,
+              "kehoach": 9.434532783755218e-07,
+              "quydinh": 0.9999972739983597,
+              "stsv": 3.2299061526458716e-05
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 1.0,
+          "margin": 0.9867,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_024",
+          "query": "Sinh viên cần xem khung chương trình đào tạo kỹ sư chuyên sâu ở đâu?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.8488347605420615,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.8488347605420615,
+              "kehoach": 2.8576620974470445e-05,
+              "quydinh": 0.07911782269580703,
+              "stsv": 0.0034555195223200984
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "quydinh",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "ctdt"
+          ],
+          "confidence": 0.8488,
+          "margin": 0.7697,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_025",
+          "query": "Sinh viên có thắc mắc về học tích hợp kỹ sư chuyên sâu học kỳ 2025.2 thì gửi câu hỏi qua đâu?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "stsv",
+            "domains": [
+              "stsv"
+            ],
+            "confidence": 0.8204186272179794,
+            "label": "stsv",
+            "probabilities": {
+              "ctdt": 0.0006097887811550906,
+              "kehoach": 0.0028947969930256208,
+              "quydinh": 0.013621562804728721,
+              "stsv": 0.8204186272179794
+            }
+          },
+          "raw_classifier": [
+            "stsv"
+          ],
+          "selector": [
+            "stsv",
+            "quydinh"
+          ],
+          "final_pipeline": [
+            "stsv",
+            "quydinh"
+          ],
+          "confidence": 0.8204,
+          "margin": 0.8068,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "kehoach_list_simple_026",
+          "query": "Muốn đăng ký học tích hợp kỹ sư chuyên sâu trên QLDT, sinh viên phải vào mục nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.2937906460341092,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.12993292842923304,
+              "kehoach": 0.0003570431927194207,
+              "quydinh": 0.2937906460341092,
+              "stsv": 0.03991252751624338
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv",
+            "ctdt"
+          ],
+          "confidence": 0.2938,
+          "margin": 0.1639,
+          "confidence_bucket": "0.00-0.35",
+          "margin_bucket": "0.15-0.30"
+        },
+        {
+          "id": "kehoach_list_simple_027",
+          "query": "Khi đủ điều kiện học tích hợp kỹ sư chuyên sâu, hệ thống QLDT sẽ hiển thị nút đăng ký nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": [
+              "kehoach"
+            ],
+            "confidence": 0.14869112353897296,
+            "label": "kehoach",
+            "probabilities": {
+              "ctdt": 0.012137038944696343,
+              "kehoach": 0.14869112353897296,
+              "quydinh": 0.035337735442191494,
+              "stsv": 0.0070770994124671836
+            }
+          },
+          "raw_classifier": [
+            "kehoach"
+          ],
+          "selector": [
+            "quydinh",
+            "kehoach",
+            "stsv",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "kehoach",
+            "stsv",
+            "ctdt"
+          ],
+          "confidence": 0.1487,
+          "margin": 0.1134,
+          "confidence_bucket": "0.00-0.35",
+          "margin_bucket": "0.05-0.15"
+        },
+        {
+          "id": "kehoach_list_simple_028",
+          "query": "Khi đăng ký học tích hợp kỹ sư chuyên sâu trên QLDT, sinh viên cần nhập các thông tin nào?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.4302210635123007,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.013075111627044158,
+              "kehoach": 0.0010546246164052388,
+              "quydinh": 0.4302210635123007,
+              "stsv": 0.18379703424839036
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv",
+            "ctdt"
+          ],
+          "confidence": 0.4302,
+          "margin": 0.2464,
+          "confidence_bucket": "0.35-0.55",
+          "margin_bucket": "0.15-0.30"
+        },
+        {
+          "id": "kehoach_list_simple_029",
+          "query": "Dấu hiệu nào cho biết đăng ký học tích hợp kỹ sư chuyên sâu đã thành công?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "kehoach",
+            "domains": [
+              "kehoach"
+            ],
+            "confidence": 0.13390717116681997,
+            "label": "kehoach",
+            "probabilities": {
+              "ctdt": 0.043339863879401794,
+              "kehoach": 0.13390717116681997,
+              "quydinh": 0.08255010577630938,
+              "stsv": 0.0009900708373830561
+            }
+          },
+          "raw_classifier": [
+            "kehoach"
+          ],
+          "selector": [
+            "kehoach",
+            "quydinh",
+            "stsv",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "kehoach",
+            "quydinh",
+            "stsv",
+            "ctdt"
+          ],
+          "confidence": 0.1339,
+          "margin": 0.0514,
+          "confidence_bucket": "0.00-0.35",
+          "margin_bucket": "0.05-0.15"
+        },
+        {
+          "id": "kehoach_list_simple_030",
+          "query": "Nếu chưa đủ điều kiện học tích hợp kỹ sư chuyên sâu, sinh viên có thể làm gì trên hệ thống?",
+          "source": "evaluation\\data\\kehoach_list_all_chunks_rag_eval_dataset_100.json",
+          "expected_domains": [
+            "kehoach"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh",
+              "ctdt"
+            ],
+            "confidence": 0.9893960022138945,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.6250686103941213,
+              "kehoach": 1.044655335859048e-05,
+              "quydinh": 0.9893960022138945,
+              "stsv": 0.00037381870101448007
+            }
+          },
+          "raw_classifier": [
+            "quydinh",
+            "ctdt"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv",
+            "ctdt"
+          ],
+          "confidence": 0.9894,
+          "margin": 0.3643,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        }
+      ]
+    }
+  ]
+}

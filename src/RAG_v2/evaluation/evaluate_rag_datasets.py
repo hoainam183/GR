@@ -1035,6 +1035,8 @@ def _route_retrieval_collections(
             domain=domain,
             domains=domains,
             confidence=float(routed.get("confidence", 0.0) or 0.0),
+            probabilities=routed.get("probabilities"),
+            query=query,
         )
         return list(collections or []), routed
     except Exception as exc:

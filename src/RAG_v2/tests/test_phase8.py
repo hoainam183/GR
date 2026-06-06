@@ -147,6 +147,97 @@ class TestCollectionSelector:
         )
         assert result == ["kehoach", "quydinh", "stsv", "ctdt"]
 
+    def test_low_confidence_schedule_signal_adds_kehoach(self) -> None:
+        from retrieval.collection_selector import CollectionSelector
+        selector = CollectionSelector()
+        result = selector.select(
+            domain="ctdt",
+            confidence=0.40,
+            query="lich dang ky hoc ky moi",
+            probabilities={"ctdt": 0.40, "kehoach": 0.25, "quydinh": 0.20},
+        )
+        assert result == ["ctdt", "kehoach", "quydinh", "stsv"]
+
+    def test_low_confidence_close_kehoach_probability_adds_kehoach(self) -> None:
+        from retrieval.collection_selector import CollectionSelector
+        selector = CollectionSelector()
+        result = selector.select(
+            domain="quydinh",
+            confidence=0.44,
+            query="dieu kien hoc bong",
+            probabilities={"quydinh": 0.44, "kehoach": 0.39, "stsv": 0.20},
+        )
+        assert result == ["quydinh", "stsv", "kehoach", "ctdt"]
+
+    def test_curriculum_study_plan_query_does_not_add_kehoach(self) -> None:
+        from retrieval.collection_selector import CollectionSelector
+        selector = CollectionSelector()
+        result = selector.select(
+            domain="ctdt",
+            confidence=0.40,
+            query="ke hoach hoc tap trong ctdt nganh cntt",
+            probabilities={"ctdt": 0.54, "kehoach": 0.10, "quydinh": 0.22},
+        )
+        assert result == ["ctdt", "quydinh", "stsv"]
+
+
+class TestKeHoachRouteLock:
+    def test_clear_single_kehoach_schedule_locks(self) -> None:
+        from pipeline.flows import _should_lock_kehoach_route
+
+        assert _should_lock_kehoach_route(
+            question="lich dang ky hoc ky moi nhat",
+            search_query="lich dang ky hoc ky moi nhat",
+            routing_result={
+                "domain": "kehoach",
+                "domains": ["kehoach"],
+                "confidence": 0.52,
+                "probabilities": {"kehoach": 0.52, "ctdt": 0.18},
+            },
+        ) is True
+
+    def test_curriculum_study_plan_query_does_not_lock(self) -> None:
+        from pipeline.flows import _should_lock_kehoach_route
+
+        assert _should_lock_kehoach_route(
+            question="ke hoach hoc tap trong ctdt nganh cntt",
+            search_query="ke hoach hoc tap trong ctdt nganh cntt",
+            routing_result={
+                "domain": "kehoach",
+                "domains": ["kehoach"],
+                "confidence": 0.70,
+                "probabilities": {"kehoach": 0.70, "ctdt": 0.20},
+            },
+        ) is False
+
+    def test_non_kehoach_top_probability_does_not_lock(self) -> None:
+        from pipeline.flows import _should_lock_kehoach_route
+
+        assert _should_lock_kehoach_route(
+            question="lich dang ky hoc chuong trinh thu hai",
+            search_query="lich dang ky hoc chuong trinh thu hai",
+            routing_result={
+                "domain": "quydinh",
+                "domains": ["quydinh", "kehoach"],
+                "confidence": 0.60,
+                "probabilities": {"quydinh": 0.60, "kehoach": 0.52},
+            },
+        ) is False
+
+    def test_policy_timing_phrase_does_not_lock_when_only_kehoach_returned(self) -> None:
+        from pipeline.flows import _should_lock_kehoach_route
+
+        assert _should_lock_kehoach_route(
+            question="khi nao sinh vien duoc dang ky hoc chuong trinh thu hai",
+            search_query="khi nao sinh vien duoc dang ky hoc chuong trinh thu hai",
+            routing_result={
+                "domain": "kehoach",
+                "domains": ["kehoach"],
+                "confidence": 0.40,
+                "probabilities": {"kehoach": 0.40, "quydinh": 0.38},
+            },
+        ) is False
+
 
 class TestMultiCollectionSearchFiltering:
     def test_search_all_collections_when_no_filter(self) -> None:

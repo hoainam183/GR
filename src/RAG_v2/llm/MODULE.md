@@ -1,101 +1,115 @@
 # Module: `llm`
 
-Source-verified: 2026-06-02 from `llm/*.py`, `config/settings.py`, `pipeline/flows.py`, and `agent/react_agent.py`.
+Source-verified: 2026-06-05 from `llm/__init__.py`, `llm/base.py`, `llm/deepseek.py`, `llm/gemini.py`, `llm/lm_studio.py`, `llm/chat_model.py`, `llm/self_eval.py`, and `llm/prompts.py`.
 
 ## Purpose
 
 `llm` wraps chat model providers, prompt construction, streaming generation, and answer self-evaluation. It exposes a small `BaseLLM` contract so the pipeline can call generation without knowing provider-specific details.
 
-The production default is DeepSeek `deepseek-v4-flash` through an OpenAI-compatible endpoint. Gemini and LM Studio remain supported providers.
+All three providers are OpenAI-compatible (they use the `openai` SDK `OpenAI` client against different base URLs). The factory default provider comes from `settings.llm_provider`; in code the production default is DeepSeek.
 
 ## File Map
 
 ```text
 llm/
-  __init__.py     Provider registry, lazy provider import, create_llm().
-  base.py         BaseLLM abstract interface.
-  deepseek.py     DeepSeekLLM via DeepSeek OpenAI-compatible API.
-  gemini.py       GeminiLLM via Google Generative Language OpenAI-compatible API.
-  lm_studio.py    LMStudioLLM via local OpenAI-compatible endpoint.
-  chat_model.py   Backward-compatible ChatModel export shim.
-  prompts.py      RAG, chitchat, and self-eval prompt builders.
+  __init__.py     Provider registry, _PROVIDER_MODULES map, register_llm decorator, create_llm() factory.
+  base.py         BaseLLM abstract interface (generate, generate_stream).
+  deepseek.py     DeepSeekLLM via DeepSeek OpenAI-compatible API; retry with backoff.
+  gemini.py       GeminiLLM via Google Generative Language OpenAI-compatible API; retry with backoff.
+  lm_studio.py    LMStudioLLM via local OpenAI-compatible endpoint; single attempt.
+  chat_model.py   Backward-compatible shim: re-exports GeminiLLM as ChatModel.
+  prompts.py      RAG, chitchat, and self-eval prompt strings and message builders.
   self_eval.py    SelfEvaluator JSON judge wrapper.
 ```
 
 ## Public API
 
-`BaseLLM` defines:
+`BaseLLM` (abstract, in `base.py`) defines a class attribute `model: str` and two abstract methods:
 
 ```python
 generate(query, context=None, history=None, mode="rag") -> str
 generate_stream(query, context=None, history=None, mode="rag") -> Generator[str, None, None]
 ```
 
-`create_llm(settings)`:
+`mode` is one of `"rag"`, `"chitchat"`, or `"self_eval"`.
+
+`create_llm(settings)` in `__init__.py`:
 
 - Reads `settings.llm_provider`.
-- Lazy-imports `llm.deepseek`, `llm.gemini`, or `llm.lm_studio`.
-- Builds provider with `settings.llm_api_key` first, then provider fallback:
-  `settings.deepseek_api_key` for DeepSeek and `settings.google_api_key` for
-  Gemini/other non-LM-Studio providers.
-- Passes `settings.chat_model`, temperature, and max tokens.
-- For `lm_studio`, passes `settings.lm_studio_base_url`.
+- If the provider is not yet in `_REGISTRY`, lazy-imports its module from `_PROVIDER_MODULES` (which triggers the `@register_llm` decorator). Raises `ValueError` for an unknown provider.
+- Resolves the API key as `settings.llm_api_key` first, else `settings.deepseek_api_key` when provider is `deepseek`, else `settings.google_api_key` for any other provider.
+- Passes `model=settings.chat_model`, `temperature=settings.chat_temperature`, `max_tokens=settings.chat_max_tokens`.
+- For `lm_studio` only, also passes `base_url=settings.lm_studio_base_url`.
 
-Known provider registry keys in code:
+`register_llm(name)` is a class decorator that registers a `BaseLLM` subclass under `name` in `_REGISTRY`.
 
-- `deepseek`
-- `gemini`
-- `lm_studio`
+Provider registry keys (`_PROVIDER_MODULES`):
+
+- `deepseek` → `llm.deepseek`
+- `gemini` → `llm.gemini`
+- `lm_studio` → `llm.lm_studio`
+
+`__init__.py` also re-exports `ChatModel` (from `chat_model.py`) and `SelfEvaluator` for backward compatibility. `__all__` = `BaseLLM`, `ChatModel`, `SelfEvaluator`, `register_llm`, `create_llm`.
 
 ## Provider Behavior
 
-`DeepSeekLLM`:
+All three providers implement `generate` and `generate_stream`, dispatch by `mode` through a private `_build_messages` that calls `build_chitchat_messages` (chitchat), `build_self_eval_messages` (self_eval), or `build_rag_messages` (rag/default), and use `OpenAI(...).chat.completions.create`.
 
-- Uses `https://api.deepseek.com`.
-- Reads `DEEPSEEK_API_KEY` or `LLM_API_KEY` fallback if no key is passed.
-- Supports full-response and streaming generation.
+`DeepSeekLLM` (`@register_llm("deepseek")`):
 
-`GeminiLLM`:
+- Base URL `https://api.deepseek.com`.
+- Defaults: `model="deepseek-v4-flash"`, `max_tokens=1500`, `temperature=0.0`.
+- Key resolution if `api_key` is None: `DEEPSEEK_API_KEY` then `LLM_API_KEY` env vars.
+- `generate` retries `RateLimitError` up to 3 attempts with exponential backoff (`2.0 * 2**attempt` seconds). Streaming does not retry.
 
-- Uses `OpenAI(api_key=..., base_url="https://generativelanguage.googleapis.com/v1beta/openai/")`.
-- Retries `RateLimitError` up to 3 attempts with exponential backoff.
-- Supports both non-streaming and streaming chat completions.
+`GeminiLLM` (`@register_llm("gemini")`):
 
-`LMStudioLLM`:
+- Base URL `https://generativelanguage.googleapis.com/v1beta/openai/`.
+- Defaults: `model="gemini-3.1-flash-lite"`, `max_tokens=1024`, `temperature=0.3`.
+- Key resolution if `api_key` is None: `GOOGLE_API_KEY` env var.
+- `generate` retries `RateLimitError` up to 3 attempts with exponential backoff (`2.0 * 2**attempt` seconds). Streaming does not retry.
 
-- Uses a local OpenAI-compatible endpoint, default `http://localhost:1234/v1`.
-- Has one attempt by default.
-- Supports non-streaming and streaming.
+`LMStudioLLM` (`@register_llm("lm_studio")`):
 
-All providers call `build_rag_messages()`, `build_chitchat_messages()`, or `build_self_eval_messages()` depending on `mode`.
+- Local OpenAI-compatible endpoint, constructor `base_url` default `http://localhost:1234/v1`.
+- Defaults: `model="qwen/qwen3-8b:2"`, `max_tokens=1024`, `temperature=0.0`.
+- Key resolution if `api_key` is None: `OPENAI_API_KEY` env var.
+- `_MAX_RETRIES = 1` (effectively a single attempt; no real backoff). Streaming does not retry.
+
+`chat_model.py` re-exports `GeminiLLM` as `ChatModel` for legacy callers.
 
 ## Prompt Contracts
 
-`prompts.py` owns:
+`prompts.py` owns the system prompts and message builders (all in Vietnamese, targeting HUST):
 
-- RAG grounding instructions.
-- Context/history formatting.
-- Chitchat prompt for non-retrieval responses.
-- Self-evaluation prompt.
+- `RAG_SYSTEM_PROMPT` — grounding rules; built once via `.format()` injecting `HUST_TERMINOLOGY_GLOSSARY_TEXT` from `utils.terminology`.
+- `RAG_USER_TEMPLATE` / `RAG_USER_WITH_HISTORY_TEMPLATE` — user content with/without history.
+- `CHITCHAT_SYSTEM_PROMPT`, `CHITCHAT_USER_TEMPLATE`, `CHITCHAT_USER_WITH_HISTORY_TEMPLATE`.
+- `SELF_EVAL_SYSTEM_PROMPT` — judge instructions with the glossary injected via `.replace()`; `SELF_EVAL_USER_TEMPLATE` formats `query`/`context`/`response`.
 
-Important current prompt behavior:
+Builders:
 
-- RAG answers must be grounded in supplied context.
-- If source context contains URLs, answers should use Markdown links instead of plain "tai day" text.
-- If context is in English for international/bilingual CTDT programs, answer should translate needed content into Vietnamese and preserve technical terms when useful.
-- Prompt builders trim/format history before sending to the provider.
+- `build_rag_messages(query, context, history=None)` — system + one user message; logs the assembled user content.
+- `build_chitchat_messages(query, history=None)`.
+- `build_self_eval_messages(user_content)` — system + the pre-formatted user content.
+- `_format_history(history)` — joins `{role, content}` dicts into `"Role: content"` lines.
+
+Key prompt behaviors enforced by `RAG_SYSTEM_PROMPT`:
+
+- Answer only from supplied context; otherwise state info not found.
+- Translate needed content to Vietnamese (keeping original terms in parentheses) when source is English.
+- Never use numbered citation markers (`[1]`, "Tài liệu 1", etc.); cite documents by natural name.
+- If context contains a URL, embed it as a Markdown link `[phrase](URL)` rather than bare text or bare URL; do not fabricate links.
 
 ## Self Evaluation
 
-`SelfEvaluator.evaluate(query, context, response)`:
+`SelfEvaluator(llm)` wraps a `BaseLLM` judge. `evaluate(query, context, response)`:
 
-- Builds a self-eval prompt.
-- Calls the configured LLM with `mode="self_eval"`.
-- Parses JSON, stripping Markdown fences if needed.
-- Returns `pass`, `relevance`, `faithfulness`, `completeness`, `answer_status`, `should_web_search`, `web_search_query`, and `reason`.
-- On parse failure, returns a fail result with `should_web_search=True`.
-
-Pipeline/Tavily behavior depends on both `self_eval_enabled` and fallback settings; self-eval failure alone is diagnostic unless the caller gates on it.
+- Formats `SELF_EVAL_USER_TEMPLATE` and calls `llm.generate(query=user_content, mode="self_eval")`.
+- Parses JSON via `_parse_evaluation`, first stripping Markdown code fences (`_strip_markdown_fences`).
+- Normalizes `answer_status` to one of `answered`/`insufficient`/`stale_risk`; derives `should_web_search` from the field or, if absent, from `not pass`.
+- Returns dict keys: `pass`, `relevance`, `faithfulness`, `completeness`, `answer_status`, `should_web_search`, `web_search_query`, `reason`, and `raw_response`.
+- On `JSONDecodeError`/`AttributeError`, returns a failing result with `should_web_search=True`.
 
 ## Module Flow
 
@@ -105,52 +119,37 @@ flowchart TD
   Factory --> DeepSeek["DeepSeekLLM"]
   Factory --> Gemini["GeminiLLM"]
   Factory --> LMStudio["LMStudioLLM"]
-  Pipeline["pipeline/flows.py"] --> Prompt["prompts.build_rag_messages"]
-  Agent["agent/react_agent.py synthesis"] --> Provider["provider chat completion"]
-  Prompt --> Provider
+  Pipeline["pipeline"] --> Prompt["prompts.build_rag_messages"]
+  Prompt --> Provider["provider chat completion"]
   Provider --> Answer["generated text or stream tokens"]
   Pipeline --> SelfEval["SelfEvaluator.evaluate"]
   SelfEval --> EvalPrompt["build_self_eval_messages"]
   EvalPrompt --> Provider
-  SelfEval --> QualityGate["pipeline answer_quality_gate/Tavily decision"]
+  SelfEval --> QualityGate["pipeline quality/web-search decision"]
 ```
 
 External module boundaries:
 
 - `llm` receives formatted query/context/history and returns text/stream chunks; retrieval and citation selection are owned by `pipeline`/`retrieval`.
-- Provider settings come from `config` and admin hot reload through `pipeline`.
-- Self-eval output informs `pipeline` quality/fallback decisions but does not directly call Tavily.
+- Provider settings come from `config`.
+- The only external import is `utils.terminology.HUST_TERMINOLOGY_GLOSSARY_TEXT` (in `prompts.py`).
+- Self-eval output informs `pipeline` quality/fallback decisions but does not directly call any web-search backend.
 
-## Settings
+## Settings consumed (via `create_llm`)
 
-Main settings:
-
-- `llm_provider`
-- `deepseek_api_key`
-- `google_api_key`
-- `llm_api_key`
-- `chat_model`
-- `chat_temperature`
-- `chat_max_tokens`
-- `lm_studio_base_url`
-- `self_eval_enabled`
-- `self_eval_min_top_score`
-
-The main chat default is `llm_provider="deepseek"` with
-`chat_model="deepseek-v4-flash"`. Agent final synthesis is configured
-separately in `agent/react_agent.py` through `agent_synthesis_provider` and
-`agent_synthesis_model`; that path currently supports Gemini, Ollama, and an
-OpenAI-compatible local/LM-Studio-style endpoint.
+- `llm_provider`, `llm_api_key`, `deepseek_api_key`, `google_api_key`
+- `chat_model`, `chat_temperature`, `chat_max_tokens`
+- `lm_studio_base_url` (only for the `lm_studio` provider)
 
 ## Maintenance Notes
 
-- Add new providers by updating `_PROVIDER_MODULES`, implementing `BaseLLM`, and registering with `@register_llm`.
-- Keep prompt contract updates synchronized with frontend/mobile rendering expectations and tests.
-- Do not place retrieval logic in this module; it receives already formatted context.
+- Add a provider by: adding it to `_PROVIDER_MODULES`, implementing `BaseLLM`, and decorating the class with `@register_llm("name")`.
+- Concrete providers must not read `Settings` directly; the factory passes credentials and params.
+- Keep prompt-contract changes (Markdown links, citation style) synchronized with frontend/mobile rendering expectations and tests.
+- Do not place retrieval logic in this module; it receives already-formatted context.
 
 ## Useful Checks
 
 ```bash
 python -m py_compile llm/*.py
-python -m pytest tests/test_phase7.py tests/test_phase8.py -q -m "not integration"
 ```

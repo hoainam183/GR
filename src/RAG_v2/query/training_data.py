@@ -531,6 +531,13 @@ HARD_NEGATIVE_DATA: List[Tuple[str, str]] = [
     # graduation: ctdt vs. quydinh
     ("Quy định số tín chỉ tích lũy để làm đồ án", LABEL_QUYDINH),
     ("Môn nào là tiên quyết của đồ án tốt nghiệp?", LABEL_CTDT),
+    # "when/register" wording that points to policy rules, not schedule notices
+    ("Khi nào sinh viên được đăng ký học chương trình thứ hai?", LABEL_QUYDINH),
+    ("Khi nào học viên thạc sĩ đăng ký đề tài luận văn?", LABEL_QUYDINH),
+    ("ĐHBK Hà Nội áp dụng mấy học kỳ chính trong năm?", LABEL_QUYDINH),
+    # "ke hoach hoc tap" is a curriculum/study-plan phrase inside CTDT
+    ("Kế hoạch học tập trong CTĐT ngành CNTT gồm những học phần nào?", LABEL_CTDT),
+    ("Kế hoạch học tập của chương trình đào tạo có bao nhiêu kỳ?", LABEL_CTDT),
     # kehoach vs. stsv (registrations with both when/where angles)
     ("Đăng ký KTX ở đâu?", LABEL_STSV),
     ("Lịch mở đăng ký KTX học kỳ tới", LABEL_KEHOACH),
@@ -606,6 +613,10 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
         [LABEL_KEHOACH, LABEL_CTDT],
     ),
     (
+        "Lịch đăng ký môn trong CTĐT ngành CNTT và số tín chỉ của môn đó",
+        [LABEL_KEHOACH, LABEL_CTDT],
+    ),
+    (
         "Khi nào đăng ký thực tập và điều kiện là gì?",
         [LABEL_KEHOACH, LABEL_CTDT],
     ),
@@ -643,6 +654,10 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
         "Quy trình đăng ký học lại và deadline đăng ký",
         [LABEL_QUYDINH, LABEL_KEHOACH],
     ),
+    (
+        "Thời hạn nộp đơn phúc khảo và quy định điểm phúc khảo",
+        [LABEL_QUYDINH, LABEL_KEHOACH],
+    ),
     # kehoach + stsv
     (
         "Thời gian đăng ký KTX học kỳ tới và thủ tục",
@@ -654,6 +669,10 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Lịch nhận bằng tốt nghiệp và cần mang giấy tờ gì?",
+        [LABEL_KEHOACH, LABEL_STSV],
+    ),
+    (
+        "Thông báo nhận học bổng và thủ tục nhận ở đâu",
         [LABEL_KEHOACH, LABEL_STSV],
     ),
     # ctdt + quydinh — đồ án / ĐATN

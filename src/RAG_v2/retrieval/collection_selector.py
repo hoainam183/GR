@@ -29,10 +29,78 @@ ALL_COLLECTIONS: List[str] = ["stsv", "quydinh", "kehoach", "ctdt"]
 MULTI_DOMAIN_FALLBACK: List[str] = ["quydinh", "stsv", "ctdt"]
 
 CONFIDENCE_THRESHOLD: float = 0.55  # Tier-1 calibration makes this meaningful
+KEHOACH_CLOSE_PROBABILITY_MARGIN: float = 0.10
 
 
 def _dedup(values: List[str]) -> List[str]:
     return list(dict.fromkeys(values))
+
+
+def _coerce_probabilities(
+    probabilities: Optional[Dict[str, Any]],
+) -> Dict[str, float]:
+    if not isinstance(probabilities, dict):
+        return {}
+    output: Dict[str, float] = {}
+    for domain, value in probabilities.items():
+        key = str(domain).strip().lower()
+        if not key:
+            continue
+        try:
+            output[key] = float(value)
+        except (TypeError, ValueError):
+            continue
+    return output
+
+
+def _top_probability(probabilities: Dict[str, float]) -> tuple[Optional[str], float]:
+    if not probabilities:
+        return None, 0.0
+    domain, score = max(probabilities.items(), key=lambda item: item[1])
+    return domain, score
+
+
+def _has_kehoach_routing_intent(signals: QuerySignals) -> bool:
+    return bool(
+        signals.freshness
+        or signals.schedule_intent
+        or signals.deadline_intent
+        or signals.announcement_intent
+    )
+
+
+def _should_add_kehoach_low_confidence(
+    *,
+    signals: QuerySignals,
+    probabilities: Dict[str, float],
+    active_domains: List[str],
+    confidence_threshold: float,
+) -> bool:
+    if "kehoach" in active_domains:
+        return False
+
+    top_domain, top_score = _top_probability(probabilities)
+    kehoach_score = probabilities.get("kehoach", 0.0)
+    kehoach_close_to_top = bool(
+        kehoach_score > 0.0
+        and top_score - kehoach_score <= KEHOACH_CLOSE_PROBABILITY_MARGIN
+    )
+    if kehoach_close_to_top:
+        return True
+
+    if not _has_kehoach_routing_intent(signals):
+        return False
+
+    if not probabilities:
+        return True
+
+    strong_non_kehoach = bool(
+        top_domain
+        and top_domain != "kehoach"
+        and top_score >= confidence_threshold
+        and top_score - kehoach_score > KEHOACH_CLOSE_PROBABILITY_MARGIN
+    )
+    return not strong_non_kehoach
 
 
 def _is_ctdt_course_lookup(query: str, collections: List[str]) -> bool:
@@ -150,6 +218,7 @@ class CollectionSelector:
         domains: Optional[List[str]] = None,
         query: Optional[str] = None,
         query_signals: Optional[Union[QuerySignals, Dict[str, Any]]] = None,
+        probabilities: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Return the list of collections to search.
 
@@ -162,6 +231,8 @@ class CollectionSelector:
                     of domain labels (backward-compatible overload).
             confidence: Calibrated classification confidence (0–1).
             domains: Explicit list of active domains (Tier-2 multi-label).
+            probabilities: Optional raw per-domain probabilities from the
+                           classifier. Used only for low-confidence widening.
 
         Returns:
             List of collection name strings (order preserved, duplicates removed).
@@ -178,6 +249,13 @@ class CollectionSelector:
         else:
             active_domains = []
 
+        signals = (
+            coerce_query_signals(query_signals)
+            if query_signals is not None
+            else analyze_query_signals(query or "")
+        )
+        probability_map = _coerce_probabilities(probabilities)
+
         if not active_domains:
             logger.info(
                 "CollectionSelector: no domain → searching all %d collections",
@@ -186,7 +264,7 @@ class CollectionSelector:
             return augment_collections_for_query(
                 query,
                 list(self.all_collections),
-                query_signals=query_signals,
+                query_signals=signals,
             )
 
         # Resolve each domain to its collection(s) and take the union.
@@ -212,6 +290,15 @@ class CollectionSelector:
                 if col not in seen:
                     seen.add(col)
                     broadened.append(col)
+            if _should_add_kehoach_low_confidence(
+                signals=signals,
+                probabilities=probability_map,
+                active_domains=active_domains,
+                confidence_threshold=self.confidence_threshold,
+            ) and "kehoach" not in seen:
+                insert_at = len(target) if target else 0
+                broadened.insert(insert_at, "kehoach")
+                seen.add("kehoach")
             if not broadened:
                 broadened = list(self.fallback_collections)
             logger.info(
@@ -225,7 +312,7 @@ class CollectionSelector:
             return augment_collections_for_query(
                 query,
                 broadened,
-                query_signals=query_signals,
+                query_signals=signals,
             )
 
         if not target:
@@ -237,7 +324,7 @@ class CollectionSelector:
             return augment_collections_for_query(
                 query,
                 list(self.all_collections),
-                query_signals=query_signals,
+                query_signals=signals,
             )
 
         logger.info(
@@ -249,5 +336,5 @@ class CollectionSelector:
         return augment_collections_for_query(
             query,
             target,
-            query_signals=query_signals,
+            query_signals=signals,
         )

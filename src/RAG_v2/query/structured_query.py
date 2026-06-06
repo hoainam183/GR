@@ -28,7 +28,7 @@ _COURSE_CODE_RE = re.compile(
     re.IGNORECASE,
 )
 _MAJOR_CODE_RE = re.compile(
-    r"\b(IT|MI)\s*-?\s*(E10|E15|E6|E7|EP|1|2)\b",
+    r"\b(IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH|ME|CH|BF|MS|HE|TE|TX|TROY)\s*-?\s*(E\d{1,2}|EP|GU|LUH|NUT|IT|\d{1,2})\b",
     re.IGNORECASE,
 )
 _COHORT_RE = re.compile(

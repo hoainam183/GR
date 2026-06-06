@@ -413,6 +413,7 @@ def run_evaluation(
                 domains=domains,
                 confidence=confidence,
                 query=question,
+                probabilities=routing_decision.get("probabilities"),
             )
             
         routing_time_ms = round((time.perf_counter() - t_start) * 1000, 2)

@@ -255,7 +255,7 @@ def _fold_vietnamese(text: str) -> str:
     without_marks = "".join(
         ch for ch in decomposed if unicodedata.category(ch) != "Mn"
     )
-    return without_marks.replace("đ", "d").replace("Đ", "d").lower()
+    return without_marks.replace("đ", "d").replace("Đ", "D").casefold()
 
 
 def _is_date_within_days(date_str: str, days: int) -> bool:
@@ -635,16 +635,64 @@ def _routing_top_domain(routing_result: Optional[Dict[str, Any]]) -> Optional[st
     return str(domain).strip().lower() if domain else None
 
 
+def _routing_probability_scores(
+    routing_result: Optional[Dict[str, Any]],
+) -> Dict[str, float]:
+    if not routing_result:
+        return {}
+    probabilities = routing_result.get("probabilities") or {}
+    if not isinstance(probabilities, dict):
+        return {}
+    scores: Dict[str, float] = {}
+    for domain, value in probabilities.items():
+        key = str(domain).strip().lower()
+        if not key:
+            continue
+        try:
+            scores[key] = float(value)
+        except (TypeError, ValueError):
+            continue
+    return scores
+
+
+def _has_non_kehoach_policy_lock_signal(combined_query: str) -> bool:
+    folded = _fold_vietnamese(combined_query)
+    return bool(
+        re.search(
+            r"\b("
+            r"chuong trinh thu hai|de tai luan van|hoc ky chinh|"
+            r"quy che|quy dinh|dieu kien|ctdt"
+            r")\b",
+            folded,
+        )
+    )
+
+
 def _should_lock_kehoach_route(
     *,
     question: str,
     search_query: str,
     routing_result: Optional[Dict[str, Any]],
 ) -> bool:
-    """Keep freshness/dynamic kehoach queries on kehoach despite low confidence."""
-    if not _has_textual_freshness_or_dynamic_intent(question, search_query):
-        return False
+    """Keep clear schedule/freshness kehoach queries on kehoach only."""
     if not routing_result:
+        return False
+
+    signals = analyze_query_signals(f"{question}\n{search_query}")
+    has_kehoach_intent = bool(
+        signals.freshness
+        or signals.schedule_intent
+        or signals.deadline_intent
+        or signals.announcement_intent
+    )
+    if not has_kehoach_intent:
+        return False
+    if (
+        not signals.freshness
+        and not signals.deadline_intent
+        and not signals.announcement_intent
+        and _has_non_kehoach_policy_lock_signal(f"{question}\n{search_query}")
+    ):
         return False
 
     domain = str(routing_result.get("domain") or "").strip().lower()
@@ -653,9 +701,23 @@ def _should_lock_kehoach_route(
         for item in (routing_result.get("domains") or [])
         if str(item).strip()
     ]
+    selected_domains = domains or ([domain] if domain else [])
+    only_kehoach = bool(selected_domains) and set(selected_domains) == {"kehoach"}
+    if only_kehoach:
+        return True
+
+    scores = _routing_probability_scores(routing_result)
+    if not scores:
+        return False
+
     top_domain = _routing_top_domain(routing_result)
-    only_kehoach = bool(domains) and set(domains) == {"kehoach"}
-    return only_kehoach or domain == "kehoach" or top_domain == "kehoach"
+    if top_domain != "kehoach":
+        return False
+
+    ordered = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+    kehoach_score = scores.get("kehoach", 0.0)
+    runner_up = ordered[1][1] if len(ordered) > 1 else 0.0
+    return kehoach_score - runner_up >= 0.20 or kehoach_score >= 0.65
 
 
 def _should_bypass_query_cache(
@@ -1987,6 +2049,7 @@ def rag_flow(
             confidence=confidence,
             domains=domains,
             query=search_query,
+            probabilities=routing_result.get("probabilities"),
         )
         if _should_lock_kehoach_route(
             question=question,
@@ -2957,6 +3020,7 @@ def rag_flow_stream(
             confidence=confidence,
             domains=domains,
             query=search_query,
+            probabilities=routing_result.get("probabilities"),
         )
         if _should_lock_kehoach_route(
             question=question,

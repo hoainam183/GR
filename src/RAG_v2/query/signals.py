@@ -24,6 +24,9 @@ class QuerySignals:
     procedural_support: bool = False
     multi_domain: bool = False
     freshness: bool = False
+    schedule_intent: bool = False
+    deadline_intent: bool = False
+    announcement_intent: bool = False
 
     def to_dict(self) -> Dict[str, bool]:
         """Return a plain dict suitable for route/search traces."""
@@ -52,8 +55,10 @@ def _matches_any(text: str, patterns: Iterable[str]) -> bool:
 
 
 _PERSONAL_PATTERNS = (
-    r"\b(toi|minh|em|cua toi|nganh cua toi|chuong trinh cua toi|sinh vien nhu toi)\b",
-    r"\b(hoc phan cua toi|diem cua toi|cpa cua toi|gpa cua toi)\b",
+    r"\b(?:cua\s+toi|cua\s+minh|cua\s+em)\b",
+    r"\b(?:nganh|chuong\s+trinh|hoc\s+phan|diem|cpa|gpa|khoa|truong)\s+(?:cua\s+)?(?:toi|minh|em)\b",
+    r"\b(?:toi|minh|em)\s+(?:hoc\s+nganh|la\s+sinh\s+vien)\b",
+    r"\bsinh\s+vien\s+nhu\s+(?:toi|minh|em)\b",
 )
 
 _ELIGIBILITY_PATTERNS = (
@@ -75,7 +80,7 @@ _TABLE_LOOKUP_PATTERNS = (
     r"\b(bang|khung|phu luc|muc|thang diem|quy doi|xep loai)\b",
     r"\b(diem ren luyen|diem cong|tin chi|hoc phi|muc thu|chuan)\b",
     r"\b(thoi luong|ma hoc phan|co ma|ma\s+la gi|danh cho ai|xep hoc)\b",
-    r"\b(hoc ky|ky)\s*\d+\b",
+    r"\b(?:mon|hoc\s+phan|chuong\s+trinh|khung|bang|dao\s+tao).{0,30}\b(?:hoc\s+ky|ky)\s*\d+\b",
     r"\b(thuoc nhom|nhom\s*(?:may|\d+)|bac\s*\d+(?:\.\d+)?)\b",
     r"\bfl\d{4}\b",
 )
@@ -89,6 +94,22 @@ _PROCEDURAL_PATTERNS = (
 _FRESHNESS_PATTERNS = (
     r"\b(moi nhat|gan day|hom nay|sap toi|hien nay|nam nay|ky moi|hoc ky moi)\b",
     r"\b(vua ban hanh|cap nhat|thong bao moi)\b",
+)
+
+_SCHEDULE_PATTERNS = (
+    r"\b(lich thi|lich hoc|lich dang ky|lich trinh|thoi khoa bieu|dot dang ky|dot mo lop|mo dang ky)\b",
+    r"\b(lich|thoi gian|khi nao|bao gio|luc nao|ngay nao|dot)\b.{0,50}\b(thi|hoc|dang ky|mo lop|nop|bao ve|nhan bang|phuc khao|ktx|hoc phi)\b",
+    r"\b(hoc ky|hoc ki|ky|ki)\s*(?:moi|toi|nay|he|sap toi|gan nhat|moi nhat)\b",
+)
+
+_DEADLINE_PATTERNS = (
+    r"\b(deadline|han|het han|thoi han|ngay cuoi|chot|dong cong|mo cong)\b",
+    r"\b(nop|dang ky|dong hoc phi|phuc khao).{0,40}\b(den khi nao|bao gio het han|het han|deadline|han)\b",
+)
+
+_ANNOUNCEMENT_PATTERNS = (
+    r"\b(thong bao|tin tuc|bai viet|danh sach|cong bo|ket qua|trieu tap|nhac lich)\b",
+    r"\bdanh sach.{0,30}\b(nhan|duoc nhan|sinh vien|hoc bong)\b",
 )
 
 _PROGRAM_PATTERNS = (
@@ -107,6 +128,9 @@ def analyze_query_signals(query: str) -> QuerySignals:
     table_lookup = _matches_any(folded, _TABLE_LOOKUP_PATTERNS)
     procedural_support = _matches_any(folded, _PROCEDURAL_PATTERNS)
     freshness = _matches_any(folded, _FRESHNESS_PATTERNS)
+    schedule_intent = _matches_any(folded, _SCHEDULE_PATTERNS)
+    deadline_intent = _matches_any(folded, _DEADLINE_PATTERNS)
+    announcement_intent = _matches_any(folded, _ANNOUNCEMENT_PATTERNS)
 
     has_program_context = _matches_any(folded, _PROGRAM_PATTERNS)
     graduation_rule = bool(
@@ -127,6 +151,9 @@ def analyze_query_signals(query: str) -> QuerySignals:
         procedural_support=procedural_support,
         multi_domain=multi_domain,
         freshness=freshness,
+        schedule_intent=schedule_intent,
+        deadline_intent=deadline_intent,
+        announcement_intent=announcement_intent,
     )
 
 

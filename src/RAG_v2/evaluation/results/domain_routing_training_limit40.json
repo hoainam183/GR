@@ -1,0 +1,1788 @@
+{
+  "case_count": 40,
+  "thresholds": [
+    0.55
+  ],
+  "runs": [
+    {
+      "case_count": 40,
+      "confidence_threshold": 0.55,
+      "stages": {
+        "raw_classifier": {
+          "count": 40,
+          "top1_accuracy": 0.95,
+          "exact_set_accuracy": 0.925,
+          "set_precision": 0.9375,
+          "set_recall": 0.95,
+          "set_f1": 0.9417,
+          "missing_domain_rate": 0.05,
+          "extra_domain_rate": 0.075,
+          "kehoach_false_negative_rate": 0.0,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 1.0,
+              "recall": 0.9487,
+              "f1": 0.9737,
+              "missing_rate": 0.0513,
+              "extra_rate": 0.0,
+              "expected_count": 39,
+              "predicted_count": 37
+            },
+            "kehoach": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0,
+              "expected_count": 0,
+              "predicted_count": 0
+            },
+            "quydinh": {
+              "precision": 0.25,
+              "recall": 1.0,
+              "f1": 0.4,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0769,
+              "expected_count": 1,
+              "predicted_count": 4
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0,
+              "expected_count": 0,
+              "predicted_count": 0
+            }
+          },
+          "low_confidence_fallback_rate": 0.0
+        },
+        "selector": {
+          "count": 40,
+          "top1_accuracy": 0.8,
+          "exact_set_accuracy": 0.75,
+          "set_precision": 0.8458,
+          "set_recall": 0.95,
+          "set_f1": 0.8792,
+          "missing_domain_rate": 0.05,
+          "extra_domain_rate": 0.25,
+          "kehoach_false_negative_rate": 0.0,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 1.0,
+              "recall": 0.9487,
+              "f1": 0.9737,
+              "missing_rate": 0.0513,
+              "extra_rate": 0.0,
+              "expected_count": 39,
+              "predicted_count": 37
+            },
+            "kehoach": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0,
+              "expected_count": 0,
+              "predicted_count": 0
+            },
+            "quydinh": {
+              "precision": 0.1,
+              "recall": 1.0,
+              "f1": 0.1818,
+              "missing_rate": 0.0,
+              "extra_rate": 0.2308,
+              "expected_count": 1,
+              "predicted_count": 10
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.1,
+              "expected_count": 0,
+              "predicted_count": 4
+            }
+          },
+          "low_confidence_fallback_rate": 0.0
+        },
+        "final_pipeline": {
+          "count": 40,
+          "top1_accuracy": 0.8,
+          "exact_set_accuracy": 0.75,
+          "set_precision": 0.8458,
+          "set_recall": 0.95,
+          "set_f1": 0.8792,
+          "missing_domain_rate": 0.05,
+          "extra_domain_rate": 0.25,
+          "kehoach_false_negative_rate": 0.0,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 1.0,
+              "recall": 0.9487,
+              "f1": 0.9737,
+              "missing_rate": 0.0513,
+              "extra_rate": 0.0,
+              "expected_count": 39,
+              "predicted_count": 37
+            },
+            "kehoach": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0,
+              "expected_count": 0,
+              "predicted_count": 0
+            },
+            "quydinh": {
+              "precision": 0.1,
+              "recall": 1.0,
+              "f1": 0.1818,
+              "missing_rate": 0.0,
+              "extra_rate": 0.2308,
+              "expected_count": 1,
+              "predicted_count": 10
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.1,
+              "expected_count": 0,
+              "predicted_count": 4
+            }
+          },
+          "low_confidence_fallback_rate": 0.0
+        },
+        "all_collections": {
+          "count": 40,
+          "top1_accuracy": 0.0,
+          "exact_set_accuracy": 0.0,
+          "set_precision": 0.25,
+          "set_recall": 1.0,
+          "set_f1": 0.4,
+          "missing_domain_rate": 0.0,
+          "extra_domain_rate": 1.0,
+          "kehoach_false_negative_rate": 0.0,
+          "kehoach_false_positive_rate": 1.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 0.975,
+              "recall": 1.0,
+              "f1": 0.9873,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 39,
+              "predicted_count": 40
+            },
+            "kehoach": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 40
+            },
+            "quydinh": {
+              "precision": 0.025,
+              "recall": 1.0,
+              "f1": 0.0488,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 1,
+              "predicted_count": 40
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 1.0,
+              "expected_count": 0,
+              "predicted_count": 40
+            }
+          },
+          "low_confidence_fallback_rate": 0.0
+        }
+      },
+      "confidence_buckets": {
+        "0.75-1.00": {
+          "count": 40,
+          "top1_accuracy": 0.8,
+          "exact_set_accuracy": 0.75,
+          "set_precision": 0.8458,
+          "set_recall": 0.95,
+          "set_f1": 0.8792,
+          "missing_domain_rate": 0.05,
+          "extra_domain_rate": 0.25,
+          "kehoach_false_negative_rate": 0.0,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 1.0,
+              "recall": 0.9487,
+              "f1": 0.9737,
+              "missing_rate": 0.0513,
+              "extra_rate": 0.0,
+              "expected_count": 39,
+              "predicted_count": 37
+            },
+            "kehoach": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0,
+              "expected_count": 0,
+              "predicted_count": 0
+            },
+            "quydinh": {
+              "precision": 0.1,
+              "recall": 1.0,
+              "f1": 0.1818,
+              "missing_rate": 0.0,
+              "extra_rate": 0.2308,
+              "expected_count": 1,
+              "predicted_count": 10
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.1,
+              "expected_count": 0,
+              "predicted_count": 4
+            }
+          }
+        }
+      },
+      "margin_buckets": {
+        "0.30-1.00": {
+          "count": 40,
+          "top1_accuracy": 0.8,
+          "exact_set_accuracy": 0.75,
+          "set_precision": 0.8458,
+          "set_recall": 0.95,
+          "set_f1": 0.8792,
+          "missing_domain_rate": 0.05,
+          "extra_domain_rate": 0.25,
+          "kehoach_false_negative_rate": 0.0,
+          "kehoach_false_positive_rate": 0.0,
+          "per_domain": {
+            "ctdt": {
+              "precision": 1.0,
+              "recall": 0.9487,
+              "f1": 0.9737,
+              "missing_rate": 0.0513,
+              "extra_rate": 0.0,
+              "expected_count": 39,
+              "predicted_count": 37
+            },
+            "kehoach": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.0,
+              "expected_count": 0,
+              "predicted_count": 0
+            },
+            "quydinh": {
+              "precision": 0.1,
+              "recall": 1.0,
+              "f1": 0.1818,
+              "missing_rate": 0.0,
+              "extra_rate": 0.2308,
+              "expected_count": 1,
+              "predicted_count": 10
+            },
+            "stsv": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "missing_rate": 0.0,
+              "extra_rate": 0.1,
+              "expected_count": 0,
+              "predicted_count": 4
+            }
+          }
+        }
+      },
+      "cases": [
+        {
+          "id": "training_0081",
+          "query": "Chương trình đào tạo ngành CNTT có bao nhiêu tín chỉ?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.999489629677717,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.999489629677717,
+              "kehoach": 0.00014730173452036013,
+              "quydinh": 0.027844984572585458,
+              "stsv": 4.291773516296789e-07
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9995,
+          "margin": 0.9716,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0082",
+          "query": "Ngành kỹ thuật điện tử học những môn gì?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9999974750206655,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9999974750206655,
+              "kehoach": 1.7868041084934571e-06,
+              "quydinh": 0.0002792460471277632,
+              "stsv": 0.0002516491526763952
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 1.0,
+          "margin": 0.9997,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0083",
+          "query": "Danh sách môn học ngành cơ khí",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9998762260014976,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9998762260014976,
+              "kehoach": 0.0018800480618595583,
+              "quydinh": 1.2248877396530023e-06,
+              "stsv": 0.00019926160009621876
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9999,
+          "margin": 0.998,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0084",
+          "query": "Đề cương môn Giải tích 1",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9904126309863938,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9904126309863938,
+              "kehoach": 0.0014517431922934719,
+              "quydinh": 0.0012395109416557504,
+              "stsv": 0.00023106373246019972
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9904,
+          "margin": 0.989,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0085",
+          "query": "Môn tiên quyết của Trí tuệ nhân tạo là gì?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9998446166676026,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9998446166676026,
+              "kehoach": 0.00011557018728756404,
+              "quydinh": 2.163350006051775e-06,
+              "stsv": 7.190061617162731e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9998,
+          "margin": 0.9997,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0086",
+          "query": "Tổng số tín chỉ ngành Tự động hóa",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9992559989443385,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9992559989443385,
+              "kehoach": 0.004558564480253529,
+              "quydinh": 5.663525613238272e-05,
+              "stsv": 2.223934945788651e-06
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9993,
+          "margin": 0.9947,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0087",
+          "query": "Khoa Điện có những ngành nào?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9999967416449219,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9999967416449219,
+              "kehoach": 1.2896252074340518e-05,
+              "quydinh": 1.3746331110489e-05,
+              "stsv": 8.43220070570679e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 1.0,
+          "margin": 0.9999,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0088",
+          "query": "Viện CNTT&TT đào tạo những chuyên ngành gì?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9998352205276809,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9998352205276809,
+              "kehoach": 0.0010690763837433064,
+              "quydinh": 0.00044080619086158714,
+              "stsv": 0.00507589366922057
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9998,
+          "margin": 0.9948,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0089",
+          "query": "Ngành nào thuộc viện Công nghệ thông tin?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9994798426603565,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9994798426603565,
+              "kehoach": 0.0003803620464145932,
+              "quydinh": 0.00012766224078814798,
+              "stsv": 0.00018896229292296435
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9995,
+          "margin": 0.9991,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0090",
+          "query": "Chương trình tiên tiến là gì?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9999660047474562,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9999660047474562,
+              "kehoach": 5.7825914423851556e-05,
+              "quydinh": 1.013674159875097e-05,
+              "stsv": 1.2424548687336746e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 1.0,
+          "margin": 0.9999,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0091",
+          "query": "Chương trình kỹ sư tài năng khác gì chương trình chuẩn?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9983930565264818,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9983930565264818,
+              "kehoach": 4.307077824752017e-07,
+              "quydinh": 0.02493519494279849,
+              "stsv": 3.6999761043093227e-06
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "quydinh",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "ctdt"
+          ],
+          "confidence": 0.9984,
+          "margin": 0.9735,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0092",
+          "query": "Lộ trình học ngành Khoa học máy tính",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9990788258982467,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9990788258982467,
+              "kehoach": 0.00018874218066430566,
+              "quydinh": 2.4845688762382554e-05,
+              "stsv": 0.0013044928366527117
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "quydinh",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "ctdt"
+          ],
+          "confidence": 0.9991,
+          "margin": 0.9978,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0093",
+          "query": "Có bao nhiêu tín chỉ tự chọn trong CTDT ngành CNTT?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9968502748790795,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9968502748790795,
+              "kehoach": 0.0017968066408323967,
+              "quydinh": 0.014818293505579198,
+              "stsv": 1.7522881375977587e-07
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9969,
+          "margin": 0.982,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0094",
+          "query": "Môn đồ án tốt nghiệp có bao nhiêu tín chỉ?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9991990623835124,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9991990623835124,
+              "kehoach": 9.336988340136594e-05,
+              "quydinh": 0.005524730288928773,
+              "stsv": 3.4262486345551356e-07
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "quydinh",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "ctdt"
+          ],
+          "confidence": 0.9992,
+          "margin": 0.9937,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0095",
+          "query": "Điều kiện làm đồ án tốt nghiệp là gì?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.9728093649452366,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.24660106968885914,
+              "kehoach": 8.222205148670533e-05,
+              "quydinh": 0.9728093649452366,
+              "stsv": 0.00022453768789544324
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.9728,
+          "margin": 0.7262,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0096",
+          "query": "Khi nào được đăng ký thực tập doanh nghiệp?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.8243942759443662,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.8243942759443662,
+              "kehoach": 0.06879452121307189,
+              "quydinh": 0.0025661247087942003,
+              "stsv": 0.0011679870691406488
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.8244,
+          "margin": 0.7556,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0097",
+          "query": "Chương trình đào tạo mới có thay đổi gì?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9674594501641745,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9674594501641745,
+              "kehoach": 2.293808243483638e-05,
+              "quydinh": 0.024328445040736925,
+              "stsv": 2.8801592203987066e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9675,
+          "margin": 0.9431,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0098",
+          "query": "Ngành an toàn thông tin học các môn nào?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.998587940860626,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.998587940860626,
+              "kehoach": 1.3446023583067333e-05,
+              "quydinh": 0.0007894705373865425,
+              "stsv": 0.0006546799917081712
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9986,
+          "margin": 0.9978,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0099",
+          "query": "Có chương trình liên kết quốc tế nào không?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9935109828485265,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9935109828485265,
+              "kehoach": 0.016555616391864855,
+              "quydinh": 3.1136582655031076e-05,
+              "stsv": 0.0005775381809027853
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9935,
+          "margin": 0.977,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0100",
+          "query": "Chương trình đào tạo ICT là gì?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9999175118205712,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9999175118205712,
+              "kehoach": 8.736253266844968e-06,
+              "quydinh": 0.001629270888063335,
+              "stsv": 9.773503981750516e-06
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9999,
+          "margin": 0.9983,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0101",
+          "query": "Khung chương trình K68 ngành CNTT",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9985437666970565,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9985437666970565,
+              "kehoach": 0.0019574072860712305,
+              "quydinh": 0.0035888324179011153,
+              "stsv": 0.0001687127565954561
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "quydinh",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "ctdt"
+          ],
+          "confidence": 0.9985,
+          "margin": 0.995,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0102",
+          "query": "Có bao nhiêu khoa/viện ở Bách Khoa?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9992815092605766,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9992815092605766,
+              "kehoach": 0.00030642054557049683,
+              "quydinh": 0.00010185489802612017,
+              "stsv": 7.402561728097134e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "quydinh",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "ctdt"
+          ],
+          "confidence": 0.9993,
+          "margin": 0.999,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0103",
+          "query": "Ngành nào có chương trình tiếng Anh?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9957360419469999,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9957360419469999,
+              "kehoach": 3.842198796991944e-05,
+              "quydinh": 0.0006774686507801779,
+              "stsv": 0.0001390546781913488
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9957,
+          "margin": 0.9951,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0104",
+          "query": "Đào tạo song ngành ở Bách Khoa như thế nào?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9930728709840136,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9930728709840136,
+              "kehoach": 1.6202275934623544e-06,
+              "quydinh": 0.020585784395675016,
+              "stsv": 7.315833452381333e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9931,
+          "margin": 0.9725,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0105",
+          "query": "Chuyển ngành có được không?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9811449530669619,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9811449530669619,
+              "kehoach": 9.541998658140218e-06,
+              "quydinh": 0.007652095123552392,
+              "stsv": 0.005125458205844074
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9811,
+          "margin": 0.9735,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0106",
+          "query": "Quy trình chuyển ngành",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9927225311654603,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9927225311654603,
+              "kehoach": 0.00039854118850809464,
+              "quydinh": 6.0845060772441845e-05,
+              "stsv": 0.02743602379643508
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9927,
+          "margin": 0.9653,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0107",
+          "query": "Học chuyển tiếp kỹ sư là gì?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.998820767932501,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.998820767932501,
+              "kehoach": 3.427982735272161e-05,
+              "quydinh": 8.703084845533386e-05,
+              "stsv": 0.0010938670541235048
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9988,
+          "margin": 0.9977,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0108",
+          "query": "Chương trình 180 tín chỉ kỹ sư",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9944273366817533,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9944273366817533,
+              "kehoach": 0.0003372244873729461,
+              "quydinh": 0.0023436566583331896,
+              "stsv": 7.239043819875804e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9944,
+          "margin": 0.9921,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0109",
+          "query": "Môn nào là bắt buộc cho sinh viên năm nhất?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9922601360310319,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9922601360310319,
+              "kehoach": 3.914753770518945e-07,
+              "quydinh": 0.02207568569035357,
+              "stsv": 0.0001387782086958107
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9923,
+          "margin": 0.9702,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0110",
+          "query": "Danh sách môn đại cương",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9984197477591619,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9984197477591619,
+              "kehoach": 0.0009721061058367647,
+              "quydinh": 1.2202483757248314e-05,
+              "stsv": 0.00014606660634411856
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9984,
+          "margin": 0.9974,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0111",
+          "query": "Có được học vượt không?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.985309313104193,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.985309313104193,
+              "kehoach": 0.0001061897918306237,
+              "quydinh": 0.01609000138712611,
+              "stsv": 0.0007134330114272858
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9853,
+          "margin": 0.9692,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0112",
+          "query": "Ngành Điện tử viễn thông có bao nhiêu chuyên ngành?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9999909662701604,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9999909662701604,
+              "kehoach": 0.00039185431604912564,
+              "quydinh": 1.0314262596384489e-05,
+              "stsv": 3.72698733403931e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "quydinh",
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "ctdt"
+          ],
+          "confidence": 1.0,
+          "margin": 0.9996,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0113",
+          "query": "Trường có đào tạo thạc sĩ không?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt",
+              "quydinh"
+            ],
+            "confidence": 0.937237532827124,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.937237532827124,
+              "kehoach": 1.7951675659611862e-07,
+              "quydinh": 0.4130195004326591,
+              "stsv": 0.009310436295439182
+            }
+          },
+          "raw_classifier": [
+            "ctdt",
+            "quydinh"
+          ],
+          "selector": [
+            "ctdt",
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "ctdt",
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.9372,
+          "margin": 0.5242,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0114",
+          "query": "Chương trình đào tạo thạc sĩ CNTT",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9993929563872052,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9993929563872052,
+              "kehoach": 4.662172260530551e-06,
+              "quydinh": 0.010773980830811008,
+              "stsv": 8.214833891488436e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9994,
+          "margin": 0.9886,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0115",
+          "query": "Điều kiện học song bằng",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.9998995280543178,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.02979615930303207,
+              "kehoach": 3.521380651328735e-07,
+              "quydinh": 0.9998995280543178,
+              "stsv": 0.0005822262386254112
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.9999,
+          "margin": 0.9701,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0116",
+          "query": "CTDT ngành vật liệu",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9992947563344177,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9992947563344177,
+              "kehoach": 0.0011913999295477156,
+              "quydinh": 2.8451393004979397e-06,
+              "stsv": 5.978825373621359e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9993,
+          "margin": 0.9981,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0117",
+          "query": "Số tín chỉ tối thiểu mỗi kỳ",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9237151546075877,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9237151546075877,
+              "kehoach": 0.002070793507351057,
+              "quydinh": 0.04506979993269297,
+              "stsv": 8.509024940638327e-07
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9237,
+          "margin": 0.8786,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0118",
+          "query": "Số tín chỉ tối đa được đăng ký mỗi kỳ",
+          "source": "training_data",
+          "expected_domains": [
+            "quydinh"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "quydinh",
+            "domains": [
+              "quydinh"
+            ],
+            "confidence": 0.962781356809624,
+            "label": "quydinh",
+            "probabilities": {
+              "ctdt": 0.010672825429390236,
+              "kehoach": 0.012104977331502701,
+              "quydinh": 0.962781356809624,
+              "stsv": 2.6204759665167773e-06
+            }
+          },
+          "raw_classifier": [
+            "quydinh"
+          ],
+          "selector": [
+            "quydinh",
+            "stsv"
+          ],
+          "final_pipeline": [
+            "quydinh",
+            "stsv"
+          ],
+          "confidence": 0.9628,
+          "margin": 0.9507,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0119",
+          "query": "Ngành cơ điện tử có triển vọng không?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9999340969297146,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9999340969297146,
+              "kehoach": 6.979400802764313e-05,
+              "quydinh": 0.00018541285591823948,
+              "stsv": 4.823702825363939e-05
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9999,
+          "margin": 0.9997,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        },
+        {
+          "id": "training_0120",
+          "query": "Năm nhất học những gì?",
+          "source": "training_data",
+          "expected_domains": [
+            "ctdt"
+          ],
+          "routing": {
+            "intent": "rag",
+            "domain": "ctdt",
+            "domains": [
+              "ctdt"
+            ],
+            "confidence": 0.9948735311929129,
+            "label": "ctdt",
+            "probabilities": {
+              "ctdt": 0.9948735311929129,
+              "kehoach": 2.5502192435234687e-06,
+              "quydinh": 0.0005008854857475434,
+              "stsv": 0.001813935192235759
+            }
+          },
+          "raw_classifier": [
+            "ctdt"
+          ],
+          "selector": [
+            "ctdt"
+          ],
+          "final_pipeline": [
+            "ctdt"
+          ],
+          "confidence": 0.9949,
+          "margin": 0.9931,
+          "confidence_bucket": "0.75-1.00",
+          "margin_bucket": "0.30-1.00"
+        }
+      ]
+    }
+  ]
+}

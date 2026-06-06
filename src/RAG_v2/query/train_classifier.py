@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     from embedding.bge_m3 import BGEm3Embedder
     from query.domain_classifier import DomainClassifier
     from query.training_data import get_training_data

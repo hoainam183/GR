@@ -1,76 +1,116 @@
 # Module: `eval`
 
-Source-verified: 2026-06-02 from `eval/**/*.py`, `evaluation/MODULE.md`, and `api/routes/metrics.py`.
+Source-verified: 2026-06-05 from `eval/__init__.py`, `eval/evaluator.py`, `eval/regression_tests.py`, `eval/golden_dataset.json`, `eval/agent/evaluate.py`, `eval/agent/question_sets/*.json`, `eval/data/*.jsonl`, `eval/RAG/*.py` (config, main_eval, evaluator, chunk_loader, llm_client, qa_generator, ragass_generator, ragass_evaluator, run_eval, run_ragass, dataset_generator, cluster_engine, llm_judge, tune_retrieval, demo_notebook), `eval/RAG/README.md`, plus cross-references in `evaluation/two_layer_eval.py`, `evaluation/search_strategy_benchmark.py`, `evaluation/evaluate_current_pipeline.py`, `evaluation/fusion_weight_sweep.py`, and `tests/test_two_layer_eval.py`.
 
 ## Purpose
 
-`eval` contains legacy and specialized evaluation assets. It complements the newer `evaluation/` module, which is the current two-layer offline evaluation framework.
+`eval` is the **legacy / specialized** evaluation harness. It is distinct from the newer `evaluation/` module (the current two-layer offline framework used for production current-policy and historical-email regression gating).
 
-Use `evaluation/` for production current-policy and historical-email regression gates. Use `eval/` for legacy golden data, RAGAS-style experiments, agent question sets, and older evaluator flows.
+`eval/` holds:
+- The curated **golden dataset** (`golden_dataset.json`) — still consumed by `evaluation/` as the current-policy current dataset.
+- Standalone routing/retrieval evaluator and retrieval regression tests.
+- An agent-vs-baseline comparison runner (`agent/`).
+- A self-contained **RAGAS** sub-package (`RAG/`) for synthetic QA-dataset generation and RAGAS scoring (faithfulness / answer_relevancy / context_precision / context_recall, plus hit_rate / MRR retrieval metrics).
+
+Use `evaluation/` for production regression gates. Use `eval/` for the golden dataset, RAGAS experiments, agent question sets, retrieval tuning, and older evaluator flows.
 
 ## File Map
 
 ```text
 eval/
-  golden_dataset.json        Default current-policy golden dataset used by evaluation/.
-  evaluator.py               Legacy routing/retrieval/agent evaluator.
+  __init__.py                "Week 4 benchmarking scripts" package marker.
+  golden_dataset.json        Curated routing/retrieval/agent test_cases; consumed by evaluation/ (current-policy).
+  evaluator.py               Standalone Evaluator over golden_dataset: routing (ComplexityRouter) + retrieval
+                             (collection + keyword hit) categories. CLI: python -m eval.evaluator --category ...
+  regression_tests.py        Plain-assert regression suite for pipeline.flows retrieval helpers
+                             (web-query enrichment, homepage filter, no-info patterns, freshness dates).
+  data/
+    ite6_dataset_test.jsonl  Small QA test set (question/ground_truth).
+    "sft_dataset (1).jsonl"  SFT-style dataset sample.
   agent/
-    evaluate.py              Agent-focused eval runner.
-    question_sets/*.json     Simple and complex agent question sets.
-    REPORT_TEMPLATE.md
-    results.json
-  RAG/
-    ragass_evaluator.py      RAGAS-style dataset/full-RAG evaluator.
-    run_eval.py              RAG eval runner.
-    dataset_generator.py     QA generation helpers.
-    qa_generator.py          QA generation.
-    ragass_generator.py      RAGAS dataset generation.
-    llm_client.py            LLM client abstraction for eval.
-    llm_judge.py             LLM judge helpers.
-    tune_retrieval.py        Retrieval tuning utilities.
-    outputs/                 Generated datasets/results.
+    evaluate.py              RAG-v2 baseline (pipeline.query) vs smart-route/agent (pipeline.query_v3) on the
+                             question sets; scores keyword overlap, route match, tool selection. NOTE: its hardcoded
+                             paths point at eval/question_sets/*.json and eval/results.json (root), but the files
+                             actually live under eval/agent/ below.
+    question_sets/
+      simple_questions.json  Simple-route question set (query/expected_keywords/route/tools).
+      complex_questions.json Complex-route question set.
+    results.json             Saved output of a prior agent/evaluate.py run.
+    REPORT_TEMPLATE.md       Markdown template for agent eval reports.
+  RAG/                       Self-contained RAGAS sub-package (own README + requirements).
+    README.md                Vietnamese usage guide for the RAGAS harness.
+    requirements.txt          ragas, datasets, langchain, openai, google-generativeai, sentence-transformers, sklearn...
+    config.py                EvalConfig + backend enum (LMSTUDIO / GEMINI / GEMINI_WITH_FALLBACK), QA + RAGAS params.
+    llm_client.py            Unified LLM client: LMStudioClient, GeminiClient, FallbackClient (Gemini→LMStudio on 429).
+    chunk_loader.py          Load/filter/stratified-sample chunks from chunk JSON into Chunk objects.
+    qa_generator.py          QAGenerator: LLM-generates factoid/multi_hop/comparative/procedural QA pairs (QADataset).
+    evaluator.py             RAGASEvaluator + SimpleAnswerGenerator: runs RAGAS metrics over a QADataset.
+    main_eval.py             Orchestrates generate→evaluate; batch/split-by-file mode with resumable progress JSON.
+    demo_notebook.py         Step-by-step script demo of the generate/evaluate flow (notebook substitute).
+    cluster_engine.py        ClusterEngine: BGE-M3 embed + KMeans clustering to find related chunk groups.
+    ragass_generator.py      Synthetic RAGAS dataset builder (single/multi/adversarial questions) → outputs/*.jsonl.
+    ragass_evaluator.py      RAGAS eval over the .jsonl dataset; dataset_validation or full_rag (RAGPipeline.query_v3).
+    run_ragass.py            Entry point chaining ragass_generator → ragass_evaluator (--step generate|eval|all).
+    run_eval.py              Retrieval+RAGAS runner over a .jsonl golden dataset via MultiCollectionSearch
+                             (hit_rate/MRR; full mode adds RAGAS via llm_judge).
+    dataset_generator.py     Synthetic QA generator that samples chunks directly from Qdrant collections.
+    llm_judge.py             LLMJudgeFactory: Gemini / LMStudio judge backends (RAGAS LLM + embeddings + generate).
+    tune_retrieval.py        Grid-search tuner for fusion (vector/keyword) weights via retrieval-only eval.
+    outputs/                 Generated QA datasets, RAGAS results, batch progress JSON, ragass_dataset.jsonl.
 ```
 
-## RAGAS Flow
+## RAGAS Sub-package (`RAG/`)
 
-`eval/RAG/ragass_evaluator.py` supports:
+Two related pipelines live here:
 
-- dataset validation using saved contexts
-- full RAG mode through `RAGPipeline.query_v3()`
+- **QA pipeline** (`main_eval.py` + `qa_generator.py` + `evaluator.py`): generates typed QA pairs from chunk JSON files and scores them with RAGAS. Supports LMStudio (Qwen3 8B), Gemini, or Gemini-with-LMStudio-fallback backends, and resumable per-file batch generation.
+- **RAGASS pipeline** (`run_ragass.py` → `ragass_generator.py` → `ragass_evaluator.py`): clusters chunks (`cluster_engine.py`) and produces single/multi/adversarial questions with `ground_truth_contexts`, then evaluates `context_recall`/`context_precision`. `ragass_evaluator.py` has two modes: `dataset_validation` (uses gold contexts) and `full_rag` (calls `RAGPipeline.query_v3()`).
 
-Use this as a supplement to source-id based current policy eval, not as the only production gate.
+`run_eval.py` / `dataset_generator.py` / `tune_retrieval.py` form a separate retrieval-focused track (hit_rate/MRR over a `.jsonl` dataset, plus fusion-weight tuning), using `MultiCollectionSearch` and `llm_judge.py`.
+
+Note: model identifiers in this sub-package (e.g. `gemini-3.1-flash-lite`, comments referencing "Gemini 2.5 Flash", `gemini-1.5-flash` default in `llm_judge.py`) reflect the code as written and are not validated here.
 
 ## Golden Dataset Contract
 
-`eval/golden_dataset.json` is read by `evaluation.two_layer_eval current`. Cases should include stable ids, query/question text, expected collections, and preferably expected source ids.
+`eval/golden_dataset.json` has top-level keys `_description`/`_version` and a `test_cases` list. Each case carries `id`, `category` (`routing` | `retrieval` | `agent`), `query`, and category-specific expectations (`expected_route`, `expected_collection`, `expected_keywords`, ...).
+
+It is read by `eval/evaluator.py` and, across the boundary, by `evaluation/` as the default current-policy dataset:
+- `evaluation/two_layer_eval.py` (`DEFAULT_CURRENT_DATASET`)
+- `evaluation/search_strategy_benchmark.py`, `evaluation/evaluate_current_pipeline.py`, `evaluation/fusion_weight_sweep.py`
 
 ## Module Flow
 
 ```mermaid
 flowchart TD
-  Golden["eval/golden_dataset.json"] --> Current["evaluation.two_layer_eval current"]
-  LegacyEval["eval/evaluator.py"] --> Pipeline["pipeline/RAGPipeline"]
-  RAGAS["eval/RAG/ragass_evaluator.py"] --> Pipeline
-  AgentEval["eval/agent/evaluate.py"] --> Agent["agent/ReActAgent via pipeline"]
-  Generators["eval/RAG generators"] --> Outputs["eval/RAG/outputs"]
-  Current --> Results["evaluation/results + Mongo dashboard"]
+  Golden["eval/golden_dataset.json"] --> LegacyEval["eval/evaluator.py (routing/retrieval)"]
+  Golden --> EvalModule["evaluation/* (current-policy gate)"]
+  Regression["eval/regression_tests.py"] --> Flows["pipeline/flows helpers"]
+  AgentEval["eval/agent/evaluate.py"] --> Pipeline["pipeline.query / query_v3"]
+  RagasGen["eval/RAG/ragass_generator.py"] --> Jsonl["eval/RAG/outputs/ragass_dataset.jsonl"]
+  Jsonl --> RagasEval["eval/RAG/ragass_evaluator.py"]
+  RagasEval -. full_rag .-> Pipeline
+  QAGen["eval/RAG/main_eval.py + qa_generator.py"] --> QAEval["eval/RAG/evaluator.py (RAGAS)"]
+  RunEval["eval/RAG/run_eval.py"] --> Search["retrieval/MultiCollectionSearch"]
 ```
 
 External module boundaries:
 
-- `eval` holds legacy/specialized assets; production regression gating lives in `evaluation`.
-- Full-RAG/RAGAS runners may instantiate `RAGPipeline`, so model/store prerequisites mirror runtime.
-- Generated outputs should not replace curated golden data without review.
+- `eval/golden_dataset.json` is shared with `evaluation/`; production regression gating lives in `evaluation`, not here.
+- `tests/test_two_layer_eval.py` imports `eval.RAG.ragass_evaluator.load_dataset`, so that loader is covered by the test suite.
+- Full-RAG/RAGAS runners instantiate `RAGPipeline`, so model/store prerequisites mirror runtime.
+- The `RAG/` sub-package has its own `requirements.txt` (ragas, datasets, langchain, openai, google-generativeai, sentence-transformers, scikit-learn).
 
 ## Maintenance Notes
 
-- Treat large files under `eval/RAG/outputs/` as generated artifacts.
-- Do not overwrite `golden_dataset.json` from generators without audit.
-- If adding production regression cases, update `evaluation/search_strategy_labels.jsonl` when source-id metrics need labels.
+- Treat everything under `eval/RAG/outputs/` as generated artifacts (QA datasets, RAGAS results, batch progress).
+- Do not overwrite `golden_dataset.json` from generators without review — it is the shared current-policy dataset.
+- `eval/agent/evaluate.py` references `eval/question_sets/` and `eval/results.json` while the real files sit under `eval/agent/`; treat those hardcoded paths as stale if running it.
+- Several `RAG/` modules use relative imports (`from .config import ...`) and so must be run as part of the `eval.RAG` package, not as loose scripts from inside the directory.
 
 ## Useful Checks
 
 ```bash
-python -m py_compile eval/evaluator.py eval/agent/*.py eval/RAG/*.py
+python -m py_compile eval/evaluator.py eval/regression_tests.py eval/agent/*.py eval/RAG/*.py
+python eval/regression_tests.py
 python -m pytest tests/test_two_layer_eval.py -q -m "not integration"
 ```

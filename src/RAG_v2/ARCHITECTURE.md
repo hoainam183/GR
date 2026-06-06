@@ -1,6 +1,8 @@
 # RAG v2 Architecture
 
-Source-verified: 2026-06-02 from source files, `MODULE.md` files, `PROJECT_MEMORY.md`, and GitNexus index `GR` (16,920 nodes, 28,737 relationships, 300 execution flows).
+Source-verified: 2026-06-05 from source files (whole-codebase read of backend, frontend, mobile, shared package, scripts, and eval), `MODULE.md` files, `PROJECT_MEMORY.md`, and GitNexus index `GR` (16,920 nodes, 28,737 relationships, 300 execution flows).
+
+> Reading order: sections 2–22 are the reference (exact contracts, defaults, file owners). **Section 23 is the Uber/Airbnb-style system design** — requirements, scale, C4 diagrams, request lifecycles, data model, scaling/bottlenecks, and trade-offs. Read section 23 first for the big picture, then drop into the reference sections for detail.
 
 ## 1. System Goal
 
@@ -285,7 +287,11 @@ The old `personal_check` subtype is intentionally removed. Personal-reference el
 1. intent: `chitchat`, `rag`, `tool_search`
 2. RAG domains: `ctdt`, `quydinh`, `kehoach`, `stsv`
 
-`QueryRouter` does a second pass with history only for short, low-confidence follow-up queries. Long self-contained queries should not be biased by old session domains.
+`QueryRouter` does a second pass with history only for short, low-confidence follow-up queries (confidence `< 0.65` and `< 6` words). Long self-contained queries should not be biased by old session domains.
+
+Tier-3 LLM domain fallback (`DOMAIN_CLASSIFICATION_PROMPT`) fires when classifier confidence is below the low-confidence ceiling (`~0.55`) or the top-two domain margin is narrow. The prompt is now Vietnamese with few-shot WHEN/CONTENT/CONDITION/PROCEDURE disambiguation examples and can override the predicted domains.
+
+`QuerySignals` (`query/signals.py`) extracts boolean intent signals that feed both complexity routing and collection augmentation: `personal_reference`, `eligibility_check`, `exact_policy_lookup`, `table_lookup`, `procedural_support`, `multi_domain`, `freshness`. Recent tuning broadened program-code coverage (e.g. `IT-E6`, `ME-GU`, `CH-LUH`, `…-NUT` in both `complexity_router` comparison patterns and `structured_query` major-code extraction), tightened the personal-reference regex (possessive `của tôi/mình/em` forms), and made the `cho … và …` repeated-request complex trigger require an explicit `và` connector.
 
 `QueryReflector`:
 
@@ -426,17 +432,26 @@ build collection metadata filters
 
 Default retrieval settings in source:
 
-| Setting | Default |
-| --- | --- |
-| `collections` | `["stsv", "quydinh", "kehoach", "ctdt"]` |
-| `top_k` | `5` |
-| `vector_top_k` | `50` |
-| `keyword_top_k` | `50` |
-| `raw_candidate_multiplier` | `4.0` |
-| `raw_candidate_min` | `20` |
-| `vector_weight` | `0.8` |
-| `keyword_weight` | `0.2` |
-| `parent_context_enabled` | `True` |
+| Setting | Default | Meaning |
+| --- | --- | --- |
+| `collections` | `["stsv", "quydinh", "kehoach", "ctdt"]` | Active domains. |
+| `top_k` | `7` | Final docs after rerank. |
+| `vector_top_k` | `50` | Per-collection vector pool. |
+| `keyword_top_k` | `50` | Per-collection keyword pool. |
+| `vector_pool_k` | `40` | Global vector pool after collection merge. |
+| `keyword_pool_k` | `40` | Global keyword pool after collection merge. |
+| `raw_candidate_multiplier` | `4.0` | Candidate fan-out factor. |
+| `raw_candidate_min` | `20` | Candidate floor. |
+| `vector_weight` | `0.8` | Fusion weight for dense. |
+| `keyword_weight` | `0.2` | Fusion weight for keyword. |
+| `reranker_top_k` / `reranker_min_top_k` | `7` / `7` | Rerank output / min floor. |
+| `context_doc_char_limit` | `2000` | Per-doc context cap. |
+| `context_total_char_budget` | `12000` | Default total context budget. |
+| `context_list_total_char_budget` | `24000` | Larger budget for list/enumeration queries. |
+| `parent_context_enabled` | `True` | C5 parent-child expansion. |
+| `hyde_enabled` | `True` | HyDE post-rerank fallback when recall is poor. |
+| `score_cliff_enabled` | `False` | B1 per-collection score-cliff pruning. |
+| `sibling_expansion_enabled` | `False` | C1 sibling-chunk expansion before rerank. |
 
 Metadata filter behavior:
 
@@ -601,6 +616,10 @@ Core Mongo collections:
 - `system_config`
 - `crawler_runs`
 - `crawler_chunks`
+- `eval_runs`
+- `eval_case_results`
+
+(18 collections total. `query_logs`, `agent_traces`, `eval_runs`, `eval_case_results` are written by `models/mongo_logger.py`; the rest are managed by the async Motor models and route handlers.)
 
 Redis is optional and controlled by:
 
@@ -972,3 +991,297 @@ Client asks question
   -> Mongo/Redis persist logs, sessions, caches
   -> API maps response for web/mobile trace/debug UI
 ```
+
+---
+
+# 23. System Design (Uber/Airbnb-style)
+
+This section presents `RAG_v2` the way a system-design write-up frames Uber or Airbnb: start from requirements and scale, draw the architecture top-down, walk the critical request paths, then reason about data, latency, scaling, failure, and trade-offs. Everything here is grounded in the source sections above.
+
+## 23.1 Problem Statement
+
+> Build a HUST academic assistant that answers a student's question over the university's own curriculum, regulations, schedules, and student-handbook corpora — accurately, with citations, in Vietnamese — across web and mobile, while letting admins keep the knowledge base fresh through document upload and automated crawling.
+
+The hard parts are the same shape as a marketplace: **a read-heavy, latency-sensitive query path** (the rider requesting a trip / a student asking a question) sitting on top of **a slower write/ingestion path** (driver onboarding / listing creation = admin document + crawler ingestion), with a **matching/ranking core** (dispatch / search ranking = hybrid retrieval + rerank) and **strict trust constraints** (don't hallucinate; cite official sources only).
+
+## 23.2 Requirements
+
+### Functional
+
+| # | Requirement | Where it lives |
+| --- | --- | --- |
+| F1 | Answer NL questions grounded in 4 official corpora (`ctdt`, `quydinh`, `kehoach`, `stsv`) with citations. | `RAGPipeline.query_v3` → classic RAG flow |
+| F2 | Handle complex/multi-source/comparison questions with planning + decomposition. | LangGraph Planner-Executor agent |
+| F3 | Stream answers token-by-token for responsiveness. | `/chat/stream` SSE |
+| F4 | Personalize using authenticated student profile (major, cohort, semester). | `UserContext` → `QueryReflector` |
+| F5 | Optionally fall back to official web search for fresh/dynamic questions. | Tavily pre/post-generation |
+| F6 | Admin upload → convert → clean → chunk → review → index lifecycle. | `DocumentPipeline` |
+| F7 | Automated crawl → stage → human review → index of official sources. | `scripts/auto_crawler.py` |
+| F8 | Auth (Microsoft OAuth + manual), sessions, history, bookmarks, feedback, notifications. | `auth/*`, route handlers |
+| F9 | Admin observability: usage/query/agent/feedback/eval dashboards + per-request trace. | `/admin/stats/*`, `/metrics/*`, trace UI |
+
+### Non-functional
+
+| Goal | Target / behavior |
+| --- | --- |
+| **Latency** | Chitchat near-instant; simple RAG p50 ≈ 2–4 s; complex/agent p50 ≈ 6–15 s; first streamed token < 3 s. |
+| **Accuracy / trust** | No ungrounded claims; cite official docs; supersession-aware (drop outdated regulations). |
+| **Availability** | Fail-soft: Redis/Tavily/agent degrade gracefully to classic RAG + Mongo. |
+| **Freshness** | Daily crawl; admin can hot-reload validity registry and LLM config without restart. |
+| **Cost** | Local embed/rerank/agent models; paid LLM (DeepSeek/Gemini) only on the generation/synthesis hop; answer cache to suppress repeats. |
+| **Security** | JWT access tokens (in-memory web / SecureStore mobile), rotating refresh tokens, RBAC admin guards, HUST-email gating. |
+
+## 23.3 Scale & Capacity (back-of-envelope)
+
+HUST ≈ 35k students. The load is **extremely peaky** — flat most of the year, then spikes hard during course-registration windows and exam/graduation periods (the academic analogue of Uber's Friday-night surge).
+
+| Quantity | Estimate | Reasoning |
+| --- | --- | --- |
+| Registered users | ~35k | student body |
+| Peak DAU | ~8k | registration week |
+| Peak QPS (chat) | ~5–15 req/s | 8k users × ~5 questions over a few busy hours, bursty |
+| Read:write ratio | ~1000:1 | queries vastly outnumber admin ingestion / crawls |
+| Corpus size | thousands of chunks across 4 domains | `data/*/chunks/*.json` |
+| Vector index | chunks × 2 named vectors × 1024-dim float | Qdrant `bge_m3` + `e5` |
+| Tokens / answer | input ~3–12k chars context, output ≤ 1500 tok | `context_total_char_budget`, `chat_max_tokens` |
+| Storage hot set | Mongo (sessions/turns/logs) + Qdrant + ES | all comfortably single-node at this scale |
+
+**Implication:** this is a *single-region, single-digit-QPS, read-heavy* system. The dominant cost is **not** request throughput — it's **per-request compute latency** (embedding + ANN search + cross-encoder rerank + LLM generation). So the design optimizes the *depth* of one request (caching, routing cheap paths away from expensive ones, pooling/serializing the GPU-bound reranker) rather than horizontal sharding.
+
+## 23.4 Architecture — C4 Context View
+
+```text
+                         ┌──────────────────────────────────────────────┐
+        Students         │                  CLIENTS                       │
+     ───────────────▶    │  Web SPA (React/Vite)   Mobile (Expo/RN)        │
+                         │      └──────────── @rag/shared ────────────┘   │
+                         └───────────────────────┬────────────────────────┘
+                                                 │ HTTPS / SSE  (JWT bearer)
+                                                 ▼
+                         ┌──────────────────────────────────────────────┐
+        Admins           │              FastAPI BACKEND (api/main.py)     │
+     ───────────────▶    │  auth · chat · session · admin · metrics       │
+                         │  RAGPipeline (singleton) · Planner-Executor     │
+                         └───┬───────┬───────┬───────┬───────┬────────────┘
+                             │       │       │       │       │
+              ┌──────────────┘   ┌───┘   ┌───┘   ┌───┘   └────────────┐
+              ▼                  ▼       ▼       ▼                     ▼
+        ┌──────────┐      ┌──────────┐ ┌──────┐ ┌───────┐      ┌──────────────┐
+        │  Qdrant  │      │Elastic-  │ │MongoDB│ │ Redis │      │  External    │
+        │ (vectors)│      │ search   │ │(state)│ │(cache)│      │  LLM / Web   │
+        │ bge_m3,e5│      │ (BM25)   │ │       │ │opt.   │      │ DeepSeek ·   │
+        └──────────┘      └──────────┘ └───────┘ └───────┘      │ Gemini ·     │
+                                                                 │ Tavily · MS  │
+        Local GPU/CPU models: BGE-M3, E5, BGE-reranker,          │ OAuth        │
+        local agent LLM (Qwen via LM Studio/Ollama)              └──────────────┘
+```
+
+## 23.5 Architecture — Container / Component View
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FastAPI app (one process, models loaded once into app.state)                  │
+│                                                                               │
+│  HTTP layer        api/routes/* ── response_mapper ── schemas (Pydantic)      │
+│  Auth              routers/auth + auth/{jwt,microsoft,password,refresh,rbac}  │
+│                                                                               │
+│  ┌─────────────────────── RAGPipeline (singleton) ────────────────────────┐  │
+│  │                                                                         │  │
+│  │  query_v3 (smart router)                                                │  │
+│  │     │                                                                   │  │
+│  │     ├─ chitchat ─▶ canned local handler (no retrieval)                  │  │
+│  │     │                                                                   │  │
+│  │     ├─ simple  ─▶ rag_flow() ──────────────┐                            │  │
+│  │     │                                       │                           │  │
+│  │     └─ complex ─▶ query_agent()             │                           │  │
+│  │                     │ ReActAgent            │                           │  │
+│  │                     │ (Planner-Executor)    │                           │  │
+│  │                     │  route▸decompose▸     │                           │  │
+│  │                     │  plan▸execute▸        │                           │  │
+│  │                     │  (web?)▸synthesize    │                           │  │
+│  │                     └──────────┬────────────┘                           │  │
+│  │  Query layer:                  │                                        │  │
+│  │   ComplexityRouter · QueryRouter · DomainClassifier · QuerySignals      │  │
+│  │   CollectionSelector · QueryReflector · QueryDecomposer · Structured…   │  │
+│  │                                │                                        │  │
+│  │                                ▼                                        │  │
+│  │  RetrievalService ──▶ MultiCollectionSearch                             │  │
+│  │     BGE-M3 + E5 embed ─▶ per-collection {Qdrant ANN ∥ ES BM25}          │  │
+│  │     ─▶ fusion (min-max / RRF) ─▶ BGE cross-encoder rerank               │  │
+│  │     ─▶ ValidityFilter ─▶ ReferenceResolver ─▶ parent-context expand     │  │
+│  │                                │                                        │  │
+│  │                                ▼                                        │  │
+│  │  LLM (DeepSeek classic / Gemini synthesis) ─▶ optional SelfEvaluator    │  │
+│  │                                                                         │  │
+│  └─────────────────────────────────────────────────────────────────────────┘
+│                                                                               │
+│  Ingestion (write path, off the hot path):                                    │
+│    DocumentPipeline   upload▸convert▸clean▸chunk▸review▸embed+index           │
+│    auto_crawler       crawl▸stage▸admin-review▸index_staged_crawler_run       │
+│                                                                               │
+│  Persistence/cache adapters: MongoLogger (sync) · Motor (async) · RedisMgr    │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key structural decision:** one heavyweight `RAGPipeline` is built at startup (it loads embedders, reranker, agent LLM client) and shared across all requests. It owns exactly one `RetrievalService`, which the agent adapters reuse via `inject_from_retrieval_service()` — no per-request model loading, no duplicate vector clients. This is the system's "stateful worker" equivalent of keeping the dispatch engine warm.
+
+## 23.6 The Hot Path — Chat Request Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant C as Client (web/mobile)
+    participant API as FastAPI /chat(.v3)
+    participant CR as ComplexityRouter
+    participant P as RAGPipeline
+    participant R as RetrievalService
+    participant Q as Qdrant
+    participant E as Elasticsearch
+    participant RR as BGE Reranker
+    participant L as LLM (DeepSeek)
+    participant M as Mongo / Redis
+
+    C->>API: POST /chat/v3 (question, JWT, session_id)
+    API->>API: resolve identity (JWT) + UserContext + history
+    API->>P: query_v3(question, profile, history)
+    P->>CR: route(question)
+    alt chitchat
+        CR-->>P: tier=chitchat
+        P-->>API: canned answer (no retrieval)
+    else simple
+        CR-->>P: tier=simple
+        P->>P: route ▸ select ▸ reflect ▸ entities ▸ filters
+        P->>R: hybrid search (BGE-M3 + E5 query)
+        par per collection
+            R->>Q: vector ANN (named vectors)
+            R->>E: BM25 keyword
+        end
+        R->>R: fuse (min-max/RRF) + kehoach recency
+        R->>RR: rerank candidates (serialized by lock)
+        R-->>P: validity ▸ reference ▸ parent-context
+        P->>L: generate (grounded context)
+        opt self-eval / web fallback enabled
+            P->>L: self-evaluate; maybe Tavily enrich
+        end
+        P-->>API: answer + trace
+    else complex
+        CR-->>P: tier=complex
+        P->>P: query_agent() → Planner-Executor
+        Note over P,R: decompose ▸ plan ▸ execute (parallel retrieval) ▸ synthesize
+        P-->>API: synthesized answer + agent_trace
+    end
+    API->>M: persist turn, query_log, agent_trace; cache stable answers
+    API-->>C: ChatResponse (answer, sources, route, timings, trace)
+```
+
+**Streaming variant (`/chat/stream`)** runs retrieval first, optionally does *pre*-generation web enrichment, then emits `session → token* → metadata → done`. It deliberately skips post-generation self-eval/Tavily so the token stream is never blocked.
+
+## 23.7 Latency Budget (simple RAG, warm process)
+
+```text
+  identity/session resolve         ~5–20 ms   (Mongo/Redis lookups)
+  routing + reflection             ~50–400 ms (classifier cheap; LLM reflect if needed)
+  embed query (BGE-M3 + E5)        ~20–80 ms  (GPU) / higher on CPU
+  Qdrant ANN ∥ ES BM25             ~30–120 ms (parallel per collection)
+  fusion + dedup                   ~5–20 ms
+  BGE cross-encoder rerank         ~100–500 ms (GPU-bound, SERIALIZED via _RERANKER_LOCK)
+  validity/reference/parent expand ~10–60 ms  (extra Qdrant fetch for parents)
+  LLM generation (DeepSeek)        ~1–3 s     (dominant; network + decode)
+  ─────────────────────────────────────────
+  persist/cache (async/after)      off critical path where possible
+```
+
+The two structural hot spots are the **reranker** (GPU-bound and globally serialized — see §10 `_RERANKER_LOCK`) and the **LLM generation hop** (external, network-bound). Everything in the query layer is engineered to *avoid reaching the expensive hops unnecessarily*: chitchat short-circuits before retrieval; the answer cache short-circuits before the LLM; routing keeps simple questions out of the multi-LLM agent.
+
+## 23.8 Data Model & Storage Choices
+
+Polyglot persistence, each store chosen for a distinct access pattern — the same instinct as Uber splitting trip state, geo-index, and analytics across different engines.
+
+| Store | Holds | Why this engine | Access pattern |
+| --- | --- | --- | --- |
+| **Qdrant** | chunk embeddings, 2 named vectors (`bge_m3`,`e5`) × 1024-dim, cosine; one collection per domain; payload metadata | purpose-built ANN with named vectors + payload filtering (`HasIdCondition`) | semantic recall per query |
+| **Elasticsearch** | per-collection BM25 index, Vietnamese analyzer (folding, stopwords, synonyms), field boosts | lexical/keyword recall + metadata-only filtering to resolve IDs | keyword recall + ID prefilter |
+| **MongoDB** | 18 collections: users, sessions, turns, query_logs, agent_traces, documents, document_chunks, feedback, notifications, crawler_runs/chunks, system_config, refresh_tokens, eval_runs/case_results, bookmarks, … | flexible document state, durable system-of-record, analytics aggregations | OLTP + dashboard aggregation |
+| **Redis** (optional, fail-soft) | sessions, conversation history, LLM answer cache (+doc tag reverse-index), sliding-window rate limits | low-latency ephemeral cache & counters | hot reads + invalidation |
+| **LocalStorage (disk)** | uploaded PDFs, converted markdown, `data/*` corpora, `document_lineage.json` | large blobs / curated corpus & lineage | ingestion-time |
+
+**Source-of-truth split:** Mongo is durable truth for state; Redis is a fail-soft accelerator (if Redis dies, sessions/history fall back to Mongo and caching/rate-limit is bypassed — never a hard failure). `data/document_lineage.json` is truth for supersession (the `ValidityFilter` drops outdated regulations so a 2023 rule never shadows its 2025 replacement).
+
+## 23.9 The Write/Ingestion Path (the "supply side")
+
+Two human-gated pipelines keep the knowledge base trustworthy. Both end at the same indexing primitive (embed → Qdrant + ES) but require **admin review before anything becomes retrievable** — the trust analogue of listing verification before a property goes live.
+
+```text
+ADMIN UPLOAD                         AUTO-CRAWLER
+  PDF                                  crawl ctt.hust.edu.vn (kehoach/quydinh/baiviet)
+   ▼ convert (docling/pymupdf4llm)      ▼ chunk
+  markdown                             stage → Mongo crawler_runs/crawler_chunks (PENDING)
+   ▼ clean                              ▼ admin review/edit  ◀── human gate
+  cleaned md                          index_staged_crawler_run()
+   ▼ chunk                             ▼ embed (BGE-M3+E5) → Qdrant + ES
+  Mongo document_chunks                ▼ append to archive · invalidate LLM cache
+   ▼ approve/select  ◀── human gate    ▼ post-index eval · notify users
+  embed_and_index() → Qdrant + ES
+  status: uploaded→…→indexed (rollback-capable)
+```
+
+Direct CLI crawler indexing is intentionally disabled; everything routes through the admin review/index endpoints. `is_indexable_chunk()` keeps parent/header chunks out of retrieval slots while still storing parents in Qdrant for post-rerank context expansion.
+
+## 23.10 Scaling Strategy & Bottlenecks
+
+Because load is single-digit QPS but compute-heavy, scaling is mostly **vertical + careful concurrency**, with clear horizontal seams when the peak arrives.
+
+| Bottleneck | Symptom at peak | Mitigation in code today | Next step to scale 10× |
+| --- | --- | --- | --- |
+| **Cross-encoder reranker** (GPU, `_RERANKER_LOCK` serialized) | rerank queue grows; tail latency spikes | single warm model, lock serializes GPU access, `reranker_min_top_k` floor | dedicate a rerank micro-service with a request queue + batching; multiple GPU replicas behind it |
+| **LLM generation hop** (external) | p95 dominated by DeepSeek/Gemini RTT | answer cache (`use_redis_cache`), streaming hides latency, temperature 0 for determinism/cacheability | provider failover, request hedging, semantic cache |
+| **Single FastAPI process holding the pipeline** | one process = one warm model set | models in `app.state`, heavy load in executor at startup | run N stateless API replicas, each with its own warm pipeline, behind a load balancer; externalize sessions to Redis (already supported) |
+| **Embedding throughput** (GPU/CPU) | embed latency on CPU-only hosts | query-embedding LRU cache (512), batch embed in ingestion | GPU host or batched embedding service |
+| **Qdrant / ES** | comfortable at this corpus size | per-collection isolation, parallel search | Qdrant replication/sharding, ES replicas — only needed at much larger corpora |
+| **Mongo aggregation for dashboards** | admin stats heavy queries | `$percentile` gated by server-version check; indexed fields | read replica / pre-aggregated metrics rollups |
+
+**Statelessness:** the API tier is *almost* stateless — the only per-process state is the warm model set (acceptable, replicate it) and the in-process retrieval/search caches (best-effort). Sessions, history, and rate limits already have a Redis-backed mode, so horizontal API scale-out mainly needs Redis turned on and sticky-less routing.
+
+## 23.11 Resilience & Failure Modes (fail-soft everywhere)
+
+| Dependency fails | System behavior |
+| --- | --- |
+| Redis down | Sessions/history → Mongo; LLM cache + rate limit bypassed. No hard failure. |
+| Tavily / web | Disabled by default; when on and failing, skipped — answer proceeds from internal corpus. |
+| Agent / local agent LLM | Complex path falls back to classic RAG (unless `require_agent=True`); `/chat` returns 503 only when agent explicitly forced and disabled, `/chat/v3` returns RAG fallback with `agent_error`. |
+| LLM provider error | Retries with backoff; context-size errors trigger reduced-context retry. |
+| Mongo down | Logging/persistence degrades; chat can still answer (state not durably saved). |
+| Reranker low recall | HyDE fallback re-queries with a hypothetical answer; fusion fallback to original/raw question. |
+| Stale/superseded docs | `ValidityFilter` + `document_lineage.json` exclude them. |
+
+Hot-reconfiguration without downtime: `prepare_llm_config_reload()` builds replacement runtime components, then `commit_llm_config_reload()` hot-swaps them under a lock and re-injects the shared retrieval service into agent adapters — admins retune models live.
+
+## 23.12 Security & Trust Design
+
+- **Identity:** Microsoft OAuth gated to `@sis.hust.edu.vn`, plus manual register/login. Authenticated identity always overrides body-supplied `user_id`/`user_context` (legacy/dev inputs).
+- **Tokens:** short-lived JWT access tokens — **in-memory only on web**, **SecureStore on mobile**; rotating refresh tokens hashed in Mongo with reuse/revocation family detection. Web gets the refresh token as an **HttpOnly cookie**; mobile gets it in **JSON** via `client_type="mobile"`. Both clients single-flight a refresh on 401 and retry once.
+- **Authorization:** `require_admin`/superadmin guards on admin upload/stats/config/crawler; superadmin set by `SUPERADMIN_USER_IDS`, not a DB role alone.
+- **Answer trust:** grounded-only generation, citations required, supersession filtering, and an optional self-eval quality gate — the product's core promise is "don't make things up about university rules."
+
+## 23.13 Key Trade-offs
+
+| Decision | Chosen | Rejected alternative | Why |
+| --- | --- | --- | --- |
+| Routing | Tiered complexity router (chitchat/simple/complex) gating an agent | Always-agent | Most questions are simple; routing keeps p50 low and cost down, reserving the multi-LLM agent for genuinely hard questions. |
+| Retrieval | Hybrid dense+lexical with per-collection then global fusion + cross-encoder rerank | Pure vector search | Vietnamese keyword/code matching (course/major codes) needs BM25; rerank fixes fusion ordering for grounding. |
+| Models | Local embed/rerank/agent + paid LLM only for final generation/synthesis | All-hosted-API | Cost control; the expensive paid hop is also the most cacheable. |
+| Ingestion | Human-in-the-loop review before indexing (upload + crawler) | Auto-index crawled data | Trust: official rules must not be silently wrong; review gate is the safety valve. |
+| Caching/sessions | Optional, fail-soft Redis over a durable Mongo source-of-truth | Redis-as-primary | Single-node simplicity with no hard dependency; correctness survives cache loss. |
+| Streaming | Retrieval-then-stream, no post-gen self-eval on stream | Full pipeline on stream | First-token latency matters more than post-hoc checks on the interactive path. |
+
+## 23.14 Mapping to the Uber/Airbnb mental model
+
+| Uber / Airbnb concept | This system |
+| --- | --- |
+| Rider request / guest search (read, latency-critical) | Student chat query (`/chat`, `/chat/stream`) |
+| Dispatch / search ranking core | Hybrid retrieval + cross-encoder rerank + fusion |
+| Surge pricing / demand spikes | Registration/exam-week query spikes (peaky, bursty) |
+| Driver onboarding / listing creation (write, verified) | Admin document pipeline + crawler review→index |
+| Trust & safety (verification, fraud) | Citation grounding, supersession filter, HUST-email gating, RBAC |
+| Trip state store / geo-index / analytics split | Mongo (state) + Qdrant/ES (index) + Redis (cache) + eval/stats |
+| Real-time updates | SSE token streaming + push notifications |
+| Multi-platform clients sharing logic | Web + mobile over the shared `@rag/shared` TS package |

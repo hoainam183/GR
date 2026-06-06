@@ -1,6 +1,6 @@
 # Module: `evaluation`
 
-Source-verified: 2026-06-02 from `evaluation/*.py`, `eval/`, `api/routes/metrics.py`, `scripts/auto_crawler.py`, and GitNexus query results.
+Source-verified: 2026-06-05 from `evaluation/__init__.py`, `eval_schemas.py`, `eval_store.py`, `two_layer_eval.py`, `evaluate_current_pipeline.py`, `evaluate_e2e_pipeline.py`, `evaluate_rag_datasets.py`, `evaluate_retrieval_custom.py`, `evaluate_retrieval.py`, `evaluate_llm_quality.py`, `evaluate_phase3.py`, `evaluate_hf_dataset.py`, `evaluate_sft_backend.py`, `rerun_incorrect_sft_backend.py`, `build_current_policy_ground_truth.py`, `search_strategy_benchmark.py`, `fusion_weight_sweep.py`, `compare_results.py`, `post_index.py`, `test_query.py`, the `data/`, `ground_truth_drafts/`, and `results/` subtrees (including `results/*/analyze_*.py`), plus `eval/`, `api/routes/metrics.py`, and `scripts/auto_crawler.py`.
 
 ## Purpose
 
@@ -19,11 +19,16 @@ Historical results must not be used as a production factual pass/fail gate when 
 
 ```text
 evaluation/
-  eval_schemas.py                    Shared dataclasses, loaders, judge parsing, freshness helpers.
+  __init__.py                        Package marker.
+  eval_schemas.py                    Shared dataclasses, loaders, judge-score parsing, freshness/superseded helpers.
   eval_store.py                      Mongo/artifact persistence and dashboard payloads.
   two_layer_eval.py                  Main CLI runner for current and historical suites.
   evaluate_current_pipeline.py       Retrieval eval on real production stack.
   evaluate_e2e_pipeline.py           Full query_v3 RAG eval with generation, judge, and tuning knobs.
+  evaluate_rag_datasets.py           Eval for evaluation/data items[] datasets vs retrieval + live chat.
+  evaluate_retrieval_custom.py       Custom JSON dataset retrieval eval (classifier+Tier-3 vs baseline routing).
+  fusion_weight_sweep.py             Sweep vector/keyword fusion weights to maximize nDCG/MRR/Recall.
+  compare_results.py                 Ad hoc compare of classifier vs E2E hit@5 (regressions/recoveries).
   build_current_policy_ground_truth.py Draft inventory/cases/labels/audit exports.
   post_index.py                      Fail-soft post-index eval trigger.
   search_strategy_benchmark.py       BM25/BGE/E5/hybrid/rerank benchmark.
@@ -33,8 +38,16 @@ evaluation/
   evaluate_hf_dataset.py             HuggingFace dataset eval utility.
   evaluate_sft_backend.py            Live /chat/v3 SFT runner with resumable JSONL artifacts.
   rerun_incorrect_sft_backend.py     Rerun SFT backend records previously judged incorrect.
-  results/                           JSON/CSV run artifacts.
+  test_query.py                      Manual RAGPipeline smoke runner (edit CONFIG queries; optional self-eval).
+  data/                              ~37 RAG eval datasets (items[] schema; per-doc *_30/_100/_200 and *_no_parent_evidence sets).
   ground_truth_drafts/               Draft current-policy cases and seed labels.
+  results/                           JSON/CSV/MD run artifacts. Subdirs: custom_eval/, e2e_custom_eval/, sft_backend_eval/.
+                                     Each holds per-dataset folders plus loose analyze_*.py aggregators
+                                     (e2e_custom_eval/analyze_hallucinations.py, sft_backend_eval/analyze_failures.py).
+  search_strategy_labels.jsonl       Relevance labels used by current/strategy eval.
+  search_strategy_results.json       Baseline strategy results read by current eval for warning gates.
+  search_strategy_report.md          Strategy benchmark report.
+  current_pipeline_results.json      Saved current-pipeline retrieval run.
 ```
 
 Related but outside this module:
@@ -98,8 +111,28 @@ Current eval reads baseline from `evaluation/search_strategy_results.json` and c
 ## E2E Pipeline Eval
 
 `evaluate_e2e_pipeline.py` evaluates `RAGPipeline.query_v3()` and writes
-`query_results.csv`, `summary.json`, and `report.md`. The report includes a
-`Run Config` section so tuning runs are attributable.
+`query_results.csv`, `summary.json`, and `report.md` per dataset under
+`results/e2e_custom_eval/<dataset>/`. The report includes a `Run Config`
+section so tuning runs are attributable. Default `--dataset` is the whole
+`evaluation/data/` directory (each file processed into its own subdir);
+default `--top-k` is 7.
+
+Dataset shape (`evaluation/data/*.json`): a top-level `items[]` array; each
+item has `id`, `question_type`, `question`, `gold_answer`, `evidence_chunk_ids`,
+`ground_truth_context`, `is_answerable`, `reasoning_required`, `difficulty`.
+Retrieval metrics (hit/precision/recall/MRR/nDCG @3/@5/@7) are computed by
+matching retrieved source ids against `evidence_chunk_ids`.
+
+Judges/LLM usage:
+
+- Faithfulness/grounding (`self_eval_faithfulness` = grounded /
+  partially_grounded / hallucinated, plus `self_eval_pass`) comes from
+  `llm.self_eval.SelfEvaluator` reusing the pipeline chat model.
+- Reference comparison (`ref_match` = correct / partial / incorrect with
+  `ref_match_reason`) is an LLM judge via an OpenAI-compatible client built
+  from `Settings.llm_provider` (gemini default base URL, also openai/lm_studio/
+  ollama), called at temperature 0.0.
+- `hyde_triggered` is recorded from pipeline timings.
 
 Useful tuning flags:
 
@@ -124,6 +157,29 @@ the Qdrant payload-filter fallback for empty `ctdt` ES index produced
 better than the pre-fix current run but still below the older `min_top_k_7`
 artifact, so investigate index sync and reranker latency before promoting wider
 candidate pools.
+
+## Custom-Dataset Retrieval Runners
+
+These operate on the `evaluation/data/` `items[]` datasets independently of the
+two-layer current/historical loaders:
+
+- `evaluate_retrieval_custom.py`: retrieval-only eval comparing local-classifier
+  routing (with dynamic Tier-3 Gemini fallback) against a no-routing baseline.
+  Metrics Hit/Recall/Precision/MRR/nDCG @{3,5,7} with breakdowns by question
+  type and difficulty; writes CSV/JSON/MD per `router_mode` plus a
+  `batch_summary_<mode>.json`. Outputs under `results/custom_eval/`.
+- `evaluate_rag_datasets.py`: evaluates the same datasets against retrieval
+  variants (`no_rerank`, `rerank`) and the live `/chat/v3` backend; outputs
+  under `results/rag_dataset_eval/`.
+- `fusion_weight_sweep.py`: sweeps `vector_weight`/`keyword_weight` over N steps
+  against `eval/golden_dataset.json` via `RetrievalService.search`, ranking by
+  `0.5*nDCG@10 + 0.3*MRR@10 + 0.2*Recall@50`; writes `fusion_sweep_results.json`.
+- `compare_results.py`: ad hoc diff of classifier vs E2E `hit@5` to list
+  regressions/recoveries/shared misses (paths are hardcoded for the ITE6 run).
+- `results/*/analyze_*.py`: standalone aggregators run from inside their result
+  dir — `e2e_custom_eval/analyze_hallucinations.py` rolls up grounding/ref-match/
+  retrieval/latency across all `query_results.csv`; `sft_backend_eval/analyze_failures.py`
+  mines `incorrect_results.json` traces for failure root causes.
 
 ## Historical Email Eval
 

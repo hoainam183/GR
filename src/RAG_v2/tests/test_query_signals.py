@@ -37,6 +37,24 @@ def test_broad_scholarship_words_do_not_imply_eligibility() -> None:
     assert signals.exact_policy_lookup is True
 
 
+def test_schedule_deadline_announcement_signals_are_accent_insensitive() -> None:
+    accented = analyze_query_signals("Lịch thi cuối kỳ mới nhất đã thông báo chưa?")
+    unaccented = analyze_query_signals("deadline nop hoc bong ky nay")
+
+    assert accented.schedule_intent is True
+    assert accented.announcement_intent is True
+    assert accented.freshness is True
+    assert unaccented.deadline_intent is True
+
+
+def test_curriculum_study_plan_phrase_is_not_schedule_intent() -> None:
+    signals = analyze_query_signals("kế hoạch học tập trong CTĐT ngành CNTT")
+
+    assert signals.schedule_intent is False
+    assert signals.deadline_intent is False
+    assert signals.announcement_intent is False
+
+
 def test_procedural_support_can_combine_with_exact_policy_lookup() -> None:
     signals = analyze_query_signals(
         "toi da tham gia hien mau nhung chua nhan duoc diem ren luyen"

@@ -17,12 +17,12 @@ Step 1 — Classify the user message into exactly ONE intent:
   not found in university documents (e.g. current weather, live news, web lookup).
 
 Step 2 — When intent is "rag", predict 1–3 relevant domains from:
-- **ctdt**: curriculum, courses, credits, majors, syllabi, degree programmes,
+- **ctdt**: curriculum, courses, semester mapping for courses (kì học của các môn học), credits, majors, syllabi, degree programmes,
   equivalent/substitute courses, capstone project (đồ án) content.
 - **quydinh**: regulations, policies, conditions, grading rules, scholarship
-  criteria, academic standing rules (GPA/CPA thresholds).
+  criteria, academic standing rules (GPA/CPA thresholds), foreign language requirements for cohorts (quy định về ngoại ngữ của các khóa).
 - **kehoach**: schedules, deadlines, course registration windows, exam timetables,
-  events, calendars, announcements, recipient lists (thông báo, danh sách nhận học bổng). Use this when the question is WHEN/timing-focused or about announcements/schedules.
+  events, calendars, articles/news (bài viết), announcements, recipient lists (thông báo, danh sách nhận học bổng). Use this when the question is WHEN/timing-focused or about announcements/schedules.
 - **stsv**: student procedures, dormitory, insurance, student ID, forms, support.
 
 Key disambiguation rules:
@@ -317,22 +317,28 @@ thay "của tôi/ngành của tôi/ngành này" bằng thực thể cụ thể."
 # ─── Domain Classification Prompt (Tier-3 LLM fallback) ───────────────────────
 
 DOMAIN_CLASSIFICATION_PROMPT = """\
-Classify the following Vietnamese university query into one or more domains.
+Bạn là hệ thống phân loại domain (nghiệp vụ) cho chatbot của trường Đại học.
+Nhiệm vụ của bạn là phân loại câu hỏi của sinh viên vào 1 đến 3 domain phù hợp nhất.
 
-Domain definitions:
-- ctdt: curriculum, courses, credits, majors, syllabi, degree programmes
-- quydinh: regulations, policies, conditions, scholarships, academic rules
-- kehoach: schedules, deadlines, registration dates, events, calendars
-- stsv: student procedures, dormitory, insurance, student ID cards, support
+Các domain hiện có:
+- ctdt (Chương trình đào tạo): thông tin ngành học, môn học, kì học của các môn học, tín chỉ, đề cương, môn học thay thế/tương đương, nội dung đồ án tốt nghiệp.
+- quydinh (Quy định): quy chế, chính sách, điều kiện tốt nghiệp, quy định đánh giá điểm, điều kiện học bổng, quy tắc học vụ (CPA/GPA), quy định về ngoại ngữ của các khóa.
+- kehoach (Kế hoạch): lịch trình, thời hạn (deadline), thời gian đăng ký tín chỉ, lịch thi, sự kiện, bài viết, thông báo, danh sách sinh viên.
+- stsv (Sổ tay sinh viên): thủ tục hành chính, ký túc xá, bảo hiểm, thẻ sinh viên, biểu mẫu, hỗ trợ sinh viên.
 
-Query: {query}
-Recent conversation context (may be empty): {context}
+Quy tắc phân loại (Disambiguation Rules):
+- Câu hỏi về THỜI GIAN/KHI NÀO (bao giờ, lịch, deadline) -> CHỌN 'kehoach'. Ví dụ: "Khi nào mở đăng ký môn X?" -> kehoach.
+- Câu hỏi về NỘI DUNG MÔN HỌC (học gì, thay thế môn nào) -> CHỌN 'ctdt'. Ví dụ: "Môn X học gì?" -> ctdt.
+- Câu hỏi về ĐIỀU KIỆN/QUY CHẾ (cần gì, bao nhiêu điểm) -> CHỌN 'quydinh'. Ví dụ: "Điều kiện nhận học bổng?" -> quydinh.
+- Câu hỏi về THỦ TỤC/GIẤY TỜ (nộp đơn ở đâu, làm lại thẻ) -> CHỌN 'stsv'. Ví dụ: "Nộp đơn TĐ ở đâu?" -> stsv.
 
-Return ONLY valid JSON with no extra text:
-{{"domains": ["domain1", ...], "confidence": "high|medium|low"}}
+Ví dụ (Few-shot):
+- Câu hỏi: "Điều kiện làm đồ án và deadline nộp hồ sơ?" -> {{"domains": ["quydinh", "kehoach"], "confidence": "high"}}
+- Câu hỏi: "Môn học thay thế cho Giải tích 1 là gì?" -> {{"domains": ["ctdt"], "confidence": "high"}}
+- Câu hỏi: "Xin cấp lại thẻ sinh viên bị mất như thế nào?" -> {{"domains": ["stsv"], "confidence": "high"}}
 
-Rules:
-- List only the domains that are clearly relevant.
-- Use 1–3 domains maximum.
-- "confidence" reflects how certain you are about the domain(s).
-- If the query is clearly about a single domain, list only that domain."""
+Câu hỏi: {query}
+Ngữ cảnh (có thể rỗng): {context}
+
+Trả về DUY NHẤT 1 chuỗi JSON hợp lệ, không có text nào khác:
+{{"domains": ["domain1", ...], "confidence": "high|medium|low"}}"""
