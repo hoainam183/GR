@@ -57,6 +57,14 @@ _FOREIGN_LANG_RE = re.compile(
 )
 # Graduation conditions depend on both program (major) and cohort (regulation year).
 _GRADUATION_RE = re.compile(r"\btot\s*nghiep\b|\bxet\s*tot\s*nghiep\b|\bra\s*truong\b")
+# Course/curriculum placement depends on the program/major.
+_COURSE_CURRICULUM_RE = re.compile(
+    r"\bmon(?:\s*hoc)?\b|\bhoc\s*phan\b|\bchuong\s*trinh\s*dao\s*tao\b"
+)
+# Registration/procedure questions about courses are schedule/support topics.
+_COURSE_REGISTRATION_RE = re.compile(
+    r"\bthu\s*tuc\b.*\bdang\s*ky\b|\bdang\s*ky\s*hoc\s*phan\b"
+)
 # Training regulations vary by cohort (K64 vs K65 follow different quy chế).
 _TRAINING_REG_RE = re.compile(r"\bquy\s*che\s*dao\s*tao\b|\bquy\s*che\b")
 
@@ -83,6 +91,7 @@ def required_attributes(
       * học bổng / trợ cấp                → ``set()`` (universal procedure)
       * ngoại ngữ / TOEIC / JLPT          → ``{"major"}``
       * tốt nghiệp / ra trường            → ``{"major", "cohort"}``
+      * môn / học phần / chương trình ĐT  → ``{"major"}``
       * quy chế đào tạo                   → ``{"cohort"}``
       * domain ``ctdt`` (curriculum)      → ``{"major"}``
       * domain ``kehoach`` / ``stsv``     → ``set()``
@@ -96,6 +105,10 @@ def required_attributes(
         return {"major"}
     if _GRADUATION_RE.search(text):
         return {"major", "cohort"}
+    if _COURSE_REGISTRATION_RE.search(text):
+        return set()
+    if _COURSE_CURRICULUM_RE.search(text):
+        return {"major"}
     if _TRAINING_REG_RE.search(text):
         return {"cohort"}
 

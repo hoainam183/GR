@@ -53,6 +53,10 @@ _COURSE_CODE_RE = re.compile(
     r"\b(?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?\b",
     re.IGNORECASE,
 )
+_ADJACENT_COURSE_CODE_RE = re.compile(
+    r"\s*\(\s*((?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?)\s*\)",
+    re.IGNORECASE,
+)
 _PROFILE_DEPENDENT_QUERY_RE = re.compile(
     r"\b(?:"
     r"(?:nganh|chuong\s*trinh|khoa|nam\s*thu|cpa|gpa|"
@@ -576,6 +580,28 @@ def _extract_profile_note(history: List[Dict[str, str]]) -> str:
     return "sinh vi\u00ean " + ", ".join(parts)
 
 
+def _apply_catalog_course_match(
+    entities: Dict[str, Optional[str]],
+    query_text: str,
+) -> bool:
+    """Populate course fields from the major-scoped catalog when unique."""
+    major_code = entities.get("major_code")
+    if not major_code:
+        return False
+
+    from query.course_catalog import lookup_course_code  # noqa: PLC0415
+
+    match = lookup_course_code(query_text, major_code)
+    if not match:
+        return False
+
+    entities["course_code"] = match.get("code")
+    entities["course_name"] = match.get("name")
+    entities["course_name_folded"] = match.get("name_folded")
+    entities["course_alias_folded"] = match.get("matched_alias_folded")
+    return bool(entities["course_code"])
+
+
 def _extract_entities(
     query: str,
     user_context: Optional[Dict[str, Any]] = None,
@@ -620,6 +646,7 @@ def _extract_entities(
         "course_code": None,
         "course_name": None,        # display name of a catalog-matched course
         "course_name_folded": None, # accent-folded name, used to locate it in text
+        "course_alias_folded": None, # matched shorthand alias, when different
         "semester": None,
         "academic_year": None,
     }
@@ -704,32 +731,21 @@ def _extract_entities(
             break
 
     # ── course_code ───────────────────────────────────────────────────────────
-    # Priority: current query first, then history (most-recent user turn first).
-    # This ensures follow-up queries like "Còn slot không?" resolve correctly
-    # when the course was mentioned in a prior turn.
-    course_sources = [query] + [
-        m.get("content", "")
-        for m in reversed(history or [])
-        if m.get("role") == "user"
-    ]
-    for text in course_sources:
-        mo = _COURSE_CODE_RE.search(text)
-        if mo:
-            entities["course_code"] = mo.group(0).upper()
-            break
-
-    # Fallback: no explicit code, but the query names a course AND the major is
-    # known → resolve the major-scoped course code from the catalog. Same name
-    # can map to different codes per program (IT3080 vs IT3080E), so this is
-    # always keyed by the resolved major. Skipped when major is unknown.
-    if entities["course_code"] is None and entities["major_code"]:
-        from query.course_catalog import lookup_course_code  # noqa: PLC0415
-
-        match = lookup_course_code(query, entities["major_code"])
-        if match:
-            entities["course_code"] = match["code"]
-            entities["course_name"] = match["name"]
-            entities["course_name_folded"] = match["name_folded"]
+    # Priority:
+    #   1. Explicit code in the current query.
+    #   2. Course name/alias in the current query, scoped by major.
+    #   3. History code fallback for short follow-ups such as "Còn slot không?".
+    mo = _COURSE_CODE_RE.search(query)
+    if mo:
+        entities["course_code"] = mo.group(0).upper()
+    elif not _apply_catalog_course_match(entities, query):
+        for msg in reversed(history or []):
+            if msg.get("role") != "user":
+                continue
+            mo = _COURSE_CODE_RE.search(msg.get("content", ""))
+            if mo:
+                entities["course_code"] = mo.group(0).upper()
+                break
 
     # ── semester ──────────────────────────────────────────────────────────────
     # Captures:
@@ -844,14 +860,38 @@ def _fold_with_index_map(text: str) -> tuple[str, List[int]]:
     return "".join(folded_parts), src_index
 
 
-def _inject_course_code(rewritten: str, entities: Dict[str, Optional[str]]) -> str:
+def _find_folded_phrase_span(
+    text: str,
+    phrase_folded: str,
+) -> Optional[tuple[int, int]]:
+    """Return original-string span for a folded phrase match."""
+    if not text or not phrase_folded:
+        return None
+
+    folded, src_index = _fold_with_index_map(text)
+    pattern = r"(?<![0-9a-z])" + re.escape(phrase_folded) + r"(?![0-9a-z])"
+    mo = re.search(pattern, folded)
+    if not mo:
+        return None
+
+    start = src_index[mo.start()]
+    end = src_index[mo.end() - 1] + 1
+    return start, end
+
+
+def _inject_course_code(
+    rewritten: str,
+    entities: Dict[str, Optional[str]],
+    *,
+    preserve_existing_codes: bool = False,
+) -> str:
     """Insert the catalog-resolved course code after the course name in-place.
 
     E.g. "...Mạng máy tính được học..." → "...Mạng máy tính (IT3080) được học...".
     Only runs when a catalog-matched course (``course_name_folded`` + a derived
     ``course_code``) is present and the code is not already in the text.
     """
-    code = entities.get("course_code")
+    code = (entities.get("course_code") or "").upper()
     name_folded = entities.get("course_name_folded")
     if not code or not name_folded:
         return rewritten
@@ -862,14 +902,60 @@ def _inject_course_code(rewritten: str, entities: Dict[str, Optional[str]]) -> s
     ):
         return rewritten  # code already present (e.g. user typed it)
 
-    folded, src_index = _fold_with_index_map(rewritten)
-    pattern = r"(?<![0-9a-z])" + re.escape(name_folded) + r"(?![0-9a-z])"
-    mo = re.search(pattern, folded)
-    if not mo:
+    course_name = entities.get("course_name") or ""
+    alias_folded = entities.get("course_alias_folded")
+    phrases: List[tuple[str, bool]] = []
+    seen_phrases: set[str] = set()
+    for phrase, is_alias in (
+        (name_folded, False),
+        (alias_folded, bool(alias_folded and alias_folded != name_folded)),
+    ):
+        if not phrase or phrase in seen_phrases:
+            continue
+        seen_phrases.add(phrase)
+        phrases.append((phrase, is_alias))
+
+    for phrase, is_alias in phrases:
+        span = _find_folded_phrase_span(rewritten, phrase)
+        if not span:
+            continue
+
+        start, end = span
+        adjacent = _ADJACENT_COURSE_CODE_RE.match(rewritten[end:])
+        if adjacent:
+            existing_code = adjacent.group(1).upper()
+            if existing_code == code:
+                return rewritten
+            if preserve_existing_codes:
+                return rewritten
+            if is_alias and course_name:
+                close_at = end + adjacent.end()
+                return f"{rewritten[:start]}{course_name} ({code}){rewritten[close_at:]}"
+            code_start = end + adjacent.start(1)
+            code_end = end + adjacent.end(1)
+            return f"{rewritten[:code_start]}{code}{rewritten[code_end:]}"
+
+        if preserve_existing_codes and _COURSE_CODE_RE.search(rewritten):
+            return rewritten
+        if is_alias and course_name:
+            return f"{rewritten[:start]}{course_name} ({code}){rewritten[end:]}"
+        return f"{rewritten[:end]} ({code}){rewritten[end:]}"
+
+    return rewritten
+
+
+def _preserve_explicit_course_code(rewritten: str, explicit_code: Optional[str]) -> str:
+    """Keep the course code typed by the user if the LLM rewrote it."""
+    if not explicit_code:
         return rewritten
-    last_folded_pos = mo.end() - 1
-    insert_at = src_index[last_folded_pos] + 1  # right after the last name char
-    return f"{rewritten[:insert_at]} ({code}){rewritten[insert_at:]}"
+    explicit_code = explicit_code.upper()
+    if re.search(
+        r"(?<![A-Za-z0-9])" + re.escape(explicit_code) + r"(?![A-Za-z0-9])",
+        rewritten,
+        re.IGNORECASE,
+    ):
+        return rewritten
+    return _COURSE_CODE_RE.sub(explicit_code, rewritten, count=1)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -987,6 +1073,12 @@ class QueryReflector:
         # call or the retrieval query.
         raw_query = query  # preserve for return value
         query = _strip_pii_and_noise(query)
+        explicit_course_code_match = _COURSE_CODE_RE.search(query)
+        user_typed_course_code = (
+            explicit_course_code_match.group(0).upper()
+            if explicit_course_code_match
+            else None
+        )
 
         context_with_major = _merge_user_major_into_context(
             user_context, user_major
@@ -1006,7 +1098,7 @@ class QueryReflector:
         )
         if chat_history and effective_history is None:
             logger.info(
-                "Reflection: history suppressed for generic freshness query %r",
+                "Reflection: history suppressed for standalone query %r",
                 query[:60],
             )
 
@@ -1018,7 +1110,6 @@ class QueryReflector:
         # expansion) are always applied regardless of this flag.
         _needs_llm_rewrite = bool(
             effective_history
-            or merged_profile
             or _has_profile_dependent_signal(query)
             or _is_comparison_followup(query)
             or _ANAPHORA_SIGNALS_RE.search(query)
@@ -1142,12 +1233,24 @@ class QueryReflector:
         rewritten = expand_academic_abbreviations(rewritten)
         terminology_expanded = rewritten != terminology_candidate
 
+        if user_typed_course_code:
+            rewritten = _preserve_explicit_course_code(
+                rewritten,
+                user_typed_course_code,
+            )
+        else:
+            _apply_catalog_course_match(entities, rewritten)
+
         # Guardrail 4 — Inject the major-scoped course code for a course named in
         # the query. E.g. for an IT-E6 student: "Mạng máy tính" → "Mạng máy tính
         # (IT3080)"; for IT-E7 the same name resolves to IT3080E. Only fires when
         # the major is known and the code is not already present (so user-typed
         # codes are never duplicated). Deterministic; runs even in passthrough.
-        course_injected = _inject_course_code(rewritten=rewritten, entities=entities)
+        course_injected = _inject_course_code(
+            rewritten=rewritten,
+            entities=entities,
+            preserve_existing_codes=bool(user_typed_course_code),
+        )
         if course_injected != rewritten:
             logger.info(
                 "Reflection guardrail: injected course code %r -> %r",
@@ -1211,13 +1314,7 @@ class QueryReflector:
     ) -> bool:
         """Return True when history context should be sent to the reflection LLM.
 
-        Generic freshness queries (mới nhất, hiện tại, gần đây …) without
-        personal-profile references, comparison signals, or anaphora should NOT
-        receive history.  This prevents academic-scope bleeding where a prior
-        assistant message (e.g. "kế hoạch 2025.2") causes the LLM to inject
-        stale semester/year tokens into an otherwise generic freshness query.
-
-        History IS used for:
+        History is opt-in, not a default. It is used for:
           - Queries with personal-profile references ("ngành của tôi", …)
           - Short comparison follow-ups ("so sánh với", "khác gì", …)
           - Queries with anaphoric references to prior context ("còn", "đó", …)
@@ -1225,6 +1322,7 @@ class QueryReflector:
         Examples that skip history:
           "Lịch trình học kỳ mới nhất?"
           "lịch đăng kí kì học mới nhất"
+          "môn hướng đối tượng được học vào kì mấy"
         """
         if not chat_history:
             return False
@@ -1243,7 +1341,7 @@ class QueryReflector:
         if _REFLECTION_FRESHNESS_ONLY_RE.search(_fold_vietnamese(query)):
             return False
 
-        return True
+        return False
 
     def _build_user_prompt(
         self,

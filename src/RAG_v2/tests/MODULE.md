@@ -1,6 +1,6 @@
 # Module: `tests`
 
-Source-verified: 2026-06-05 from `tests/*.py`, `tests/retrieval/*.py`, `tests/conversation_regression_queries.jsonl`, root `pytest.ini`, and root `conftest.py`.
+Source-verified: 2026-06-07 from `tests/*.py`, `tests/retrieval/*.py`, `tests/conversation_regression_queries.jsonl`, root `pytest.ini`, and root `conftest.py`.
 
 ## Purpose
 
@@ -42,6 +42,10 @@ tests/
   test_phase5.py                    Smoke checks: Settings import, API schemas, flows import, FastAPI app creation, pipeline syntax.
   test_phase7.py                    Phase 7 fixes: query reflection, self-evaluation activation, Tavily fallback, payload.pop fix, config sync (mocked pipeline).
   test_phase8.py                    Phase 8 collection-aware routing: CollectionSelector, MultiCollectionSearch active_collections filter, rag_flow routing integration, Settings fields.
+  test_course_catalog.py            query.course_catalog: major-scoped course-name and safe shorthand alias lookup.
+  test_decomposer.py                query.decomposer: prompt few-shot coverage for broad graduation-condition decomposition.
+  test_reflection_course_lookup.py  query.reflection: course alias injection, wrong-code correction, explicit-code preservation, profile-only LLM skip.
+  test_profile_dependency.py        query.profile_dependency: topic-driven major/cohort dependency and source selection.
   test_query_signals.py             query.signals.analyze_query_signals / extract_key_phrases: personal/eligibility/policy-lookup detection, accent insensitivity.
   test_rag_dataset_eval.py          evaluation.evaluate_rag_datasets: dataset adapter, validation/dup detection, ranking metrics, source-id extraction, retrieval/answer metrics, summary aggregation.
   test_rbac.py                      Role system & RBAC: JWT role claim, dependency guards, login role, admin/superadmin create, require-admin endpoint, backward compat. Requires MongoDB; @integration/@asyncio.

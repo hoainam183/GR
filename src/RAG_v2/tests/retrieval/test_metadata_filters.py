@@ -129,7 +129,8 @@ def test_enrich_major_references_expands_codes_to_names() -> None:
     enriched = enrich_major_references_for_query(query)
 
     assert "IT1 (CNTT: Khoa học Máy tính)" in enriched
-    assert "IT-E6 (Công nghệ thông tin (Việt-Nhật)" in enriched
+    assert "IT-E6 (Công nghệ thông tin Việt - Nhật)" in enriched
+    assert "Chương trình tiên tiến" not in enriched
 
 
 def test_enrich_major_references_expands_names_to_codes() -> None:
@@ -140,6 +141,16 @@ def test_enrich_major_references_expands_names_to_codes() -> None:
 
     assert "Khoa học máy tính (IT1)" in enriched
     assert "Công nghệ thông tin Việt-Nhật (IT-E6)" in enriched
+
+
+def test_enrich_major_references_keeps_bracketed_ite6_label_stable() -> None:
+    query = "Công nghệ thông tin (Việt-Nhật) [IT-E6] học ngoại ngữ gì?"
+
+    enriched = enrich_major_references_for_query(query)
+
+    assert enriched == query
+    assert "IT-E6 (Công nghệ thông tin" not in enriched
+    assert "Chương trình tiên tiến" not in enriched
 
 
 def test_extract_major_code_supports_all_indexed_ctdt_codes() -> None:

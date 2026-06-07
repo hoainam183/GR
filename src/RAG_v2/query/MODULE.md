@@ -1,6 +1,6 @@
 # Module: `query`
 
-Source-verified: 2026-06-05 from `query/complexity_router.py`, `query/router.py`, `query/domain_classifier.py`, `query/reflection.py`, `query/decomposer.py`, `query/signals.py`, `query/structured_query.py`, `query/prompts.py`, `query/training_data.py`, `query/train_classifier.py`, and `query/__init__.py`.
+Source-verified: 2026-06-07 from `query/complexity_router.py`, `query/router.py`, `query/domain_classifier.py`, `query/reflection.py`, `query/course_catalog.py`, `query/profile_dependency.py`, `query/decomposer.py`, `query/signals.py`, `query/structured_query.py`, `query/prompts.py`, `query/training_data.py`, `query/train_classifier.py`, and `query/__init__.py`.
 
 ## Purpose
 
@@ -14,6 +14,8 @@ query/
   router.py             QueryRouter (intent/domain) wrapping DomainClassifier or LLM mode.
   domain_classifier.py  Two-stage BGE-M3 + sklearn intent + multi-label domain classifier.
   reflection.py         PII strip, profile merge, LLM rewrite, guardrails, entity extraction.
+  course_catalog.py     Major-scoped course-name/alias -> course-code lookup.
+  profile_dependency.py Topic gate for whether major/cohort should affect retrieval/generation.
   decomposer.py         LLM subquery decomposition for multi-source/comparison queries.
   signals.py            QuerySignals + accent-insensitive analysis and phrase extraction.
   structured_query.py   Text normalization, code/cohort extraction, exclude-term parsing.
@@ -165,7 +167,7 @@ Major steps:
 1. `_strip_pii_and_noise()` — strips MSSV, personal intros, thanks, addressee noise (reverts if the result drops below 3 words).
 2. `_merge_user_major_into_context()` + `_merge_profile_context()` — normalize profile (`major`, `major_code`, `cohort`, `student_id`) and resolve any string profile note override.
 3. `_should_use_history_for_reflection()` — suppress history for generic freshness queries lacking personal/anaphora/comparison signals.
-4. Passthrough check `_needs_llm_rewrite` — skip the LLM call entirely unless there is effective history, a merged profile, a profile-dependent signal, a comparison follow-up, or an anaphora signal.
+4. Passthrough check `_needs_llm_rewrite` — skip the LLM call entirely unless there is effective history, a profile-dependent signal, a comparison follow-up, or an anaphora signal. Profile data alone is still used for deterministic entity extraction, but it does not trigger an LLM call.
 5. `_build_user_prompt()` + LLM rewrite (retry with backoff on 429/503).
 6. Deterministic comparison follow-up rewrite (`_rewrite_comparison_followup`) when applicable.
 7. Guardrail 1: `_enforce_major_reference_rewrite()` replaces residual personal major references using trusted profile data.
@@ -189,6 +191,8 @@ Current guardrail behavior:
 
 - Profile notes are injected only when the current query has a profile-dependent signal (`_has_profile_dependent_signal`).
 - Generic freshness/latest queries skip history and do not inherit `major_code`, `cohort`, or semester terms from profile/history.
+- Standalone course queries with a profile use deterministic catalog lookup without calling the reflection LLM. Shorthand aliases such as `môn hướng đối tượng` resolve only when unique for the active major.
+- If the reflection LLM invents an adjacent conflicting course code for a catalog-matched course, the deterministic guardrail replaces it with the major-scoped catalog code unless the user explicitly typed a course code.
 - Deterministic comparison follow-up rewrites are intentional and must not be reverted as hallucinations.
 - Bare major-code expansion is skipped for compact deterministic comparison rewrites.
 - The reflection LLM provider/model/temperature come from `Settings` (`reflection_provider`, `reflection_model`, `reflection_temperature`, `reflection_max_tokens`).
@@ -204,6 +208,7 @@ Current guardrail behavior:
 - Only collections in `VALID_COLLECTIONS = {ctdt, quydinh, kehoach, stsv}` are kept.
 - On non-JSON / no-valid-subqueries / LLM failure it falls back to `[{"query": query, "collection": ""}]`.
 - When exactly one valid subquery results, the `query` is reset to the verbatim original to prevent paraphrase drift (collection hint preserved).
+- Few-shot guidance includes broad personal graduation-condition queries, splitting foreign-language requirements, general graduation rules, and program-completion context into focused subqueries.
 
 ## Structured Query Helpers
 

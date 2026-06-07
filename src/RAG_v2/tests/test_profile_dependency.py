@@ -82,6 +82,12 @@ def test_no_pronoun_still_requires_major():
     assert "major" in required_attributes(q, q, _routing("quydinh"))
 
 
+def test_course_question_requires_major_without_routing_result():
+    q = "môn hướng đối tượng được học vào kì mấy"
+    assert required_attributes(q, q, None) == {"major"}
+    assert effective_major_for_retrieval(q, q, None, "IT-E6") == "IT-E6"
+
+
 def test_required_unknown_source_is_ask():
     """Required but neither target nor profile available → ask the user."""
     sources = resolve_sources({"major"}, user_major=None, target_major=None)

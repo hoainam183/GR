@@ -308,12 +308,12 @@ Only `kehoach` docs with a parseable `date_str` get it; added in both `linear` a
 
 ### Major Code Handling
 
-- `MAJOR_CODE_TO_NAME`: ~70 HUST programme codes → canonical names.
+- `MAJOR_CODE_TO_NAME`: ~70 HUST programme codes → canonical names. `IT-E6` is canonicalized as `Công nghệ thông tin Việt - Nhật` to match CTĐT metadata.
 - `MAJOR_PATTERNS`: ordered `(regex, code)` tuples.
 - `MAJOR_NAME_ALIAS_MAPPING`: canonical name → accepted aliases/codes.
 - `_normalise_major_text()` handles Unicode dashes and compact forms (`IT E10`, `IT–E10`, `ITE10` → `IT-E10`).
 - `_resolve_major_code()` priority: `resolved_major` (code → canonical-name alias → name→code → pattern) then query regex.
-- Public helpers: `extract_major_codes`, `extract_cohort_codes`, `canonicalize_major_name`, `enrich_major_references_for_query` (adds code/name pairs).
+- Public helpers: `extract_major_codes`, `extract_cohort_codes`, `canonicalize_major_name`, `enrich_major_references_for_query` (adds code/name pairs while leaving already bracketed references like `[IT-E6]` unchanged).
 
 ### Comparison & Query-Shaping Helpers
 

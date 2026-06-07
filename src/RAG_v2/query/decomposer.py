@@ -84,6 +84,32 @@ _DECOMPOSE_FEW_SHOT: List[Dict[str, str]] = [
     },
     {
         "role": "user",
+        "content": "Điều kiện để tôi tốt nghiệp",
+    },
+    {
+        "role": "assistant",
+        "content": json.dumps(
+            {
+                "subqueries": [
+                    {
+                        "query": "Điều kiện ngoại ngữ để tốt nghiệp là gì?",
+                        "collection": "quydinh",
+                    },
+                    {
+                        "query": "Điều kiện tốt nghiệp chung là gì?",
+                        "collection": "quydinh",
+                    },
+                    {
+                        "query": "Điều kiện hoàn thành chương trình đào tạo để tốt nghiệp là gì?",
+                        "collection": "ctdt",
+                    },
+                ]
+            },
+            ensure_ascii=False,
+        ),
+    },
+    {
+        "role": "user",
         "content": "Điều kiện xét học bổng khuyến khích học tập và nộp hồ sơ ở đâu?",
     },
     {
