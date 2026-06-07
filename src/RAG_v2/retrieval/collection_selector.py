@@ -199,6 +199,14 @@ def augment_collections_for_query(
     if curriculum_semester_lookup:
         output = _dedup(["ctdt", *output])
 
+    # Schedule / deadline / announcement / freshness questions live in kehoach.
+    # The low-confidence branch already adds it; mirror that here so a confident
+    # mis-route of a timing question (e.g. "lịch thi cuối kỳ khi nào" → quydinh)
+    # still searches kehoach. curriculum_semester_lookup requires these signals to
+    # be OFF, so "môn X kỳ mấy" stays in ctdt and is unaffected.
+    if _has_kehoach_routing_intent(signals) and not curriculum_semester_lookup:
+        output = _dedup([*output, "kehoach"])
+
     return output
 
 

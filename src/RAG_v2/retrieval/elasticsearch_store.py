@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 from elasticsearch import Elasticsearch, helpers
 
 from query.signals import analyze_query_signals, extract_key_phrases, fold_vietnamese_text
-from query.structured_query import build_es_must_not_clauses
+from query.structured_query import build_es_must_not_clauses, parse_structured_query
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ _KEYWORD_SEARCH_FIELDS = [
     "section_h2^1.4",
     "section_h3^1.3",
     "section_h4^1.1",
-    "course_name^1.4",
+    "course_name^1.8",
     "major_name^1.2",
     "semester^1.2",
     "section_context^1.0",
@@ -869,6 +869,15 @@ class ElasticsearchStore:
 
         if query_signals.table_lookup:
             should_clause.append({"term": {"has_table": {"value": True, "boost": 2.5}}})
+
+        # Exact course-code match. ``course_code`` is a keyword field, so it does
+        # not contribute via the free-text multi_match above; a dedicated terms
+        # clause lets queries like "môn IT2001" float the right course to the top.
+        structured = parse_structured_query(query)
+        if structured.course_codes:
+            should_clause.append(
+                {"terms": {"course_code": structured.course_codes, "boost": 8.0}}
+            )
 
         filter_clauses: List[Dict[str, Any]] = []
         if filters:

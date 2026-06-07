@@ -116,6 +116,14 @@ _FOLDED_SINGLE_FACT_RE: re.Pattern = re.compile(
     r"\b(bao nhieu|bao lau|bao lan|may|muc nao|muc diem|thang diem|can bao nhieu|nhom may)\b",
     re.IGNORECASE,
 )
+# Accent-insensitive fallback for the diacritic-only personal-eligibility pattern
+# in ``_COMPLEX_PATTERN_SPECS`` (the "tôi/mình/em … đủ điều kiện/được không" rule).
+# Without this, no-diacritic input (common on mobile) such as
+# "toi co du dieu kien tot nghiep khong" falls through to ``simple``.
+_FOLDED_PERSONAL_ABILITY_RE: re.Pattern = re.compile(
+    r"\b(toi|minh|em)\b.{0,80}\b(co the|du dieu kien|dat dieu kien|dat chuan|du chuan|duoc khong|co duoc)\b",
+    re.IGNORECASE,
+)
 
 
 def _is_single_fact_policy_lookup(
@@ -193,7 +201,7 @@ class ComplexityRouter:
                     "query_signals": query_signals_dict,
                 }
                 logger.info(
-                    "ComplexityRouter: %r → %s (%s)",
+                    "ComplexityRouter: %r -> %s (%s)",
                     q[:60], result["tier"], result["reason"],
                 )
                 return result
@@ -211,7 +219,7 @@ class ComplexityRouter:
                 "query_signals": query_signals_dict,
             }
             logger.info(
-                "ComplexityRouter: %r → %s/%s (%s)",
+                "ComplexityRouter: %r -> %s/%s (%s)",
                 q[:60], result["tier"], result["complex_subtype"], result["reason"],
             )
             return result
@@ -224,7 +232,7 @@ class ComplexityRouter:
                 "query_signals": query_signals_dict,
             }
             logger.info(
-                "ComplexityRouter: %r â†’ %s (%s)",
+                "ComplexityRouter: %r -> %s (%s)",
                 q[:60], result["tier"], result["reason"],
             )
             return result
@@ -238,7 +246,24 @@ class ComplexityRouter:
                 "query_signals": query_signals_dict,
             }
             logger.info(
-                "ComplexityRouter: %r → %s/%s (%s)",
+                "ComplexityRouter: %r -> %s/%s (%s)",
+                q[:60], result["tier"], result["complex_subtype"], result["reason"],
+            )
+            return result
+
+        # Accent-insensitive parity with the diacritic-only personal-eligibility
+        # rule in _COMPLEX_PATTERN_SPECS: bare pronoun + ability/eligibility wording
+        # (e.g. "toi co du dieu kien tot nghiep khong") must reach the agent path.
+        if _FOLDED_PERSONAL_ABILITY_RE.search(q_folded):
+            result = {
+                "tier": "complex",
+                "reason": "signals: folded_personal_eligibility",
+                "confidence": "high",
+                "complex_subtype": "multi_source",
+                "query_signals": query_signals_dict,
+            }
+            logger.info(
+                "ComplexityRouter: %r -> %s/%s (%s)",
                 q[:60], result["tier"], result["complex_subtype"], result["reason"],
             )
             return result
@@ -260,7 +285,7 @@ class ComplexityRouter:
                 "query_signals": query_signals_dict,
             }
             logger.info(
-                "ComplexityRouter: %r → %s/%s (%s)",
+                "ComplexityRouter: %r -> %s/%s (%s)",
                 q[:60], result["tier"], result["complex_subtype"], result["reason"],
             )
             return result
@@ -277,7 +302,7 @@ class ComplexityRouter:
                 "query_signals": query_signals_dict,
             }
             logger.info(
-                "ComplexityRouter: %r â†’ %s/%s (%s)",
+                "ComplexityRouter: %r -> %s/%s (%s)",
                 q[:60], result["tier"], result["complex_subtype"], result["reason"],
             )
             return result
@@ -294,7 +319,7 @@ class ComplexityRouter:
                 "query_signals": query_signals_dict,
             }
             logger.info(
-                "ComplexityRouter: %r â†’ %s/%s (%s)",
+                "ComplexityRouter: %r -> %s/%s (%s)",
                 q[:60], result["tier"], result["complex_subtype"], result["reason"],
             )
             return result
@@ -309,7 +334,7 @@ class ComplexityRouter:
                     "query_signals": query_signals_dict,
                 }
                 logger.info(
-                    "ComplexityRouter: %r → %s/%s (%s)",
+                    "ComplexityRouter: %r -> %s/%s (%s)",
                     q[:60], result["tier"], subtype, result["reason"],
                 )
                 return result
@@ -330,14 +355,14 @@ class ComplexityRouter:
                     "query_signals": query_signals_dict,
                 }
                 logger.info(
-                    "ComplexityRouter: %r → %s (%s)",
+                    "ComplexityRouter: %r -> %s (%s)",
                     q[:60], result["tier"], result["reason"],
                 )
                 return result
             else:
                 # Query dài nhưng single-topic → giữ simple (RAG đơn giản là đủ)
                 logger.info(
-                    "ComplexityRouter: %r → simple (word_count=%d but single_topic)",
+                    "ComplexityRouter: %r -> simple (word_count=%d but single_topic)",
                     q[:60], word_count,
                 )
 
@@ -350,7 +375,7 @@ class ComplexityRouter:
                 "query_signals": query_signals_dict,
             }
             logger.info(
-                "ComplexityRouter: %r → %s (%s)",
+                "ComplexityRouter: %r -> %s (%s)",
                 q[:60], result["tier"], result["reason"],
             )
             return result
@@ -365,7 +390,7 @@ class ComplexityRouter:
                 "query_signals": query_signals_dict,
             }
             logger.info(
-                "ComplexityRouter: %r → %s (%s)",
+                "ComplexityRouter: %r -> %s (%s)",
                 q[:60], result["tier"], result["reason"],
             )
             return result
@@ -377,7 +402,7 @@ class ComplexityRouter:
             "query_signals": query_signals_dict,
         }
         logger.info(
-            "ComplexityRouter: %r → %s (%s)",
+            "ComplexityRouter: %r -> %s (%s)",
             q[:60], result["tier"], result["reason"],
         )
         return result

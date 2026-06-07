@@ -200,6 +200,12 @@ class ReActAgent:
         self._tool_result_limit: int = int(
             getattr(settings, "agent_tool_result_limit", 1500)
         )
+        # When every plan step returns empty, retry once with major/cohort filters
+        # dropped before falling back to "không tìm thấy" — recovers complex
+        # questions whose filter was too narrow (e.g. wrong/missing cohort).
+        self._retry_on_empty: bool = bool(
+            getattr(settings, "agent_retry_on_empty", True)
+        )
         self._synthesis_llm = self._build_synthesis_llm(settings, lm_studio_url)
 
         self._graph = self._build_graph()
@@ -510,12 +516,38 @@ class ReActAgent:
 
         t0 = time.perf_counter()
         labeled_results = execute_retrieval_plan(steps, top_k=state.get("top_k"))
+
+        # Relax-and-retry: if every step came back empty AND at least one step
+        # carried a major/cohort filter, retry once without those filters. The
+        # filter being too narrow (e.g. a missing/wrong cohort) is a common cause
+        # of false "not found" answers on personal-eligibility questions.
+        retried_relaxed = False
+        if self._retry_on_empty and labeled_results and all(
+            _is_empty_result_text(result) for _, result in labeled_results
+        ):
+            relaxed_steps = self._relaxed_steps(steps)
+            if relaxed_steps is not None:
+                logger.info(
+                    "[Executor] All %d step(s) empty; retrying without major/cohort filters",
+                    len(steps),
+                )
+                relaxed_results = execute_retrieval_plan(
+                    relaxed_steps, top_k=state.get("top_k")
+                )
+                if any(
+                    not _is_empty_result_text(result) for _, result in relaxed_results
+                ):
+                    labeled_results = relaxed_results
+                    steps = relaxed_steps  # keep trace/args consistent with retry
+                    retried_relaxed = True
+
         elapsed_ms = (time.perf_counter() - t0) * 1000
         logger.info(
-            "[Executor] %d/%d steps completed in %.0fms",
+            "[Executor] %d/%d steps completed in %.0fms%s",
             len(labeled_results),
             len(steps),
             elapsed_ms,
+            " (relaxed retry)" if retried_relaxed else "",
         )
         executor_results = [
             {
@@ -580,6 +612,24 @@ class ReActAgent:
             "tool_call_history": new_history,
             "executor_results": executor_results,
         }
+
+    @staticmethod
+    def _relaxed_steps(steps: list[dict[str, Any]]) -> list[dict[str, Any]] | None:
+        """Return steps with major/cohort filters dropped, or ``None`` to skip.
+
+        Returns ``None`` when no step carried a major/cohort hint — there is
+        nothing to relax, so retrying would just repeat the identical search.
+        """
+        relaxed: list[dict[str, Any]] = []
+        changed = False
+        for step in steps:
+            new_step = dict(step)
+            if new_step.get("major_hint") or new_step.get("cohort_hint"):
+                new_step["major_hint"] = None
+                new_step["cohort_hint"] = None
+                changed = True
+            relaxed.append(new_step)
+        return relaxed if changed else None
 
     def _valid_plan_steps(self, steps: Any) -> list[dict[str, Any]]:
         """Return planner steps that are safe to execute."""

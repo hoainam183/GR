@@ -94,6 +94,73 @@ class TestPlannerExecutorFlow:
 
     @patch("agent.react_agent.execute_retrieval_plan")
     @patch(PATCH_CHAT)
+    def test_empty_results_retry_drops_major_cohort_filters(
+        self,
+        mock_chat_cls: MagicMock,
+        mock_execute_plan: MagicMock,
+    ) -> None:
+        hinted_plan = json.dumps(
+            {
+                "steps": [
+                    {
+                        "query": "dieu kien tot nghiep IT-E6 K67",
+                        "collection": "quy_dinh",
+                        "major_hint": "IT-E6",
+                        "cohort_hint": "K67",
+                        "label": "quy_dinh",
+                    }
+                ],
+                "needs_web": False,
+                "reasoning": "hinted",
+            }
+        )
+        mock_llm = MagicMock()
+        mock_chat_cls.return_value = mock_llm
+        mock_llm.invoke.side_effect = [
+            make_ai_answer(hinted_plan),
+            make_ai_answer("Dieu kien tot nghiep: GPA >= 2.0."),
+        ]
+        # First pass empty, relaxed retry returns a real result.
+        mock_execute_plan.side_effect = [
+            [("quy_dinh", "[khong tim thay ket qua]")],
+            [("quy_dinh", "GPA >= 2.0 va du tin chi.")],
+        ]
+
+        agent = ReActAgent(make_settings())
+        state = agent.run(
+            "Sinh vien IT-E6 K67 du dieu kien tot nghiep chua?",
+            complexity_subtype="general",
+        )
+
+        assert state.error is None
+        assert mock_execute_plan.call_count == 2
+        # The retry must drop the major/cohort filters.
+        retry_steps = mock_execute_plan.call_args_list[1].args[0]
+        assert retry_steps[0]["major_hint"] is None
+        assert retry_steps[0]["cohort_hint"] is None
+        # And the answer comes from synthesis, not the canned no-info fallback.
+        assert "khong tim thay" not in state.final_answer.lower()
+
+    @patch("agent.react_agent.execute_retrieval_plan")
+    @patch(PATCH_CHAT)
+    def test_empty_results_no_retry_when_no_filters(
+        self,
+        mock_chat_cls: MagicMock,
+        mock_execute_plan: MagicMock,
+    ) -> None:
+        mock_llm = MagicMock()
+        mock_chat_cls.return_value = mock_llm
+        mock_llm.invoke.side_effect = [make_ai_answer(plan_payload())]
+        # Empty result with no major/cohort filter → nothing to relax → no retry.
+        mock_execute_plan.return_value = [("quy_dinh", "[khong tim thay ket qua]")]
+
+        agent = ReActAgent(make_settings())
+        state = agent.run("Dieu kien tot nghiep la gi?", complexity_subtype="general")
+
+        assert mock_execute_plan.call_count == 1
+
+    @patch("agent.react_agent.execute_retrieval_plan")
+    @patch(PATCH_CHAT)
     def test_planner_preserves_reflected_major_and_cohort_scope(
         self,
         mock_chat_cls: MagicMock,

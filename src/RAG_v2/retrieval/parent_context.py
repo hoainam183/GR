@@ -120,7 +120,15 @@ class ParentContextExpander:
                 if include_parent_content:
                     parent_content = parent.get("text", "")
                     if len(parent_content) > self._max_parent_chars:
-                        parent_content = parent_content[: self._max_parent_chars] + "..."
+                        truncated = parent_content[: self._max_parent_chars]
+                        # Prefer cutting at a sentence/paragraph boundary so the
+                        # LLM does not receive a clause sliced mid-sentence.
+                        boundary = max(truncated.rfind(". "), truncated.rfind("\n"))
+                        if boundary >= self._max_parent_chars * 0.6:
+                            truncated = truncated[: boundary + 1]
+                        # Explicit marker so the LLM knows the content is incomplete
+                        # and avoids asserting the truncated text is the full rule.
+                        parent_content = truncated.rstrip() + "\n\n[… nội dung còn tiếp, xem tài liệu gốc …]"
                     enriched_meta["parent_context"] = parent_content
 
                 enriched_meta["parent_title"] = parent.get("metadata", {}).get(

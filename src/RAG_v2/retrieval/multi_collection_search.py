@@ -323,10 +323,18 @@ class MultiCollectionSearch:
         fusion_vector_weight, fusion_keyword_weight, fusion_reason = (
             self._resolve_fusion_weights(query)
         )
-        if exact_policy_mode and fusion_reason == "default":
+        if exact_policy_mode:
+            # Exact policy/code lookups want a strong keyword lean. Apply it even
+            # when a course-bias was already chosen: min/max only ever leans MORE
+            # toward keyword, so a query that is both course-like and exact-policy
+            # is no longer capped at the weaker course bias (vector 0.4/keyword 0.6).
             fusion_vector_weight = min(fusion_vector_weight, 0.1)
             fusion_keyword_weight = max(fusion_keyword_weight, 0.75)
-            fusion_reason = "exact_policy_keyword_bias"
+            fusion_reason = (
+                "exact_policy_keyword_bias"
+                if fusion_reason == "default"
+                else f"{fusion_reason}+exact_policy"
+            )
         if fusion_reason != "default":
             logger.info(
                 "Adaptive fusion weights: vector=%.2f keyword=%.2f (%s)",
