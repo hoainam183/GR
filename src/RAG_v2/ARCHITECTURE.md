@@ -444,7 +444,7 @@ Default retrieval settings in source:
 | `raw_candidate_min` | `20` | Candidate floor. |
 | `vector_weight` | `0.8` | Fusion weight for dense. |
 | `keyword_weight` | `0.2` | Fusion weight for keyword. |
-| `reranker_top_k` / `reranker_min_top_k` | `7` / `7` | Rerank output / min floor. |
+| `reranker_top_k` / `reranker_min_top_k` | `7` / `3` | Rerank output / min floor. |
 | `context_doc_char_limit` | `2000` | Per-doc context cap. |
 | `context_total_char_budget` | `12000` | Default total context budget. |
 | `context_list_total_char_budget` | `24000` | Larger budget for list/enumeration queries. |

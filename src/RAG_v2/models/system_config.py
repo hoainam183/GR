@@ -32,7 +32,10 @@ PERSISTABLE_LLM_FIELDS = frozenset(
         "chat_temperature",
         "chat_max_tokens",
         "agent_model",
+        "agent_synthesis_provider",
+        "agent_synthesis_model",
         "reflection_model",
+        "reflection_provider",
     }
 )
 

@@ -47,6 +47,11 @@ class DeepSeekLLM(BaseLLM):
             or os.environ.get("DEEPSEEK_API_KEY")
             or os.environ.get("LLM_API_KEY")
         )
+        if not resolved_key:
+            raise ValueError(
+                "DeepSeek API key is required when llm_provider='deepseek'. "
+                "Set DEEPSEEK_API_KEY or add and activate a DeepSeek key in Admin."
+            )
         self._client = OpenAI(api_key=resolved_key, base_url=_DEEPSEEK_BASE_URL)
 
     def generate(

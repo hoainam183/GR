@@ -58,7 +58,7 @@ Important defaults in `settings.py` as of this verification:
 | `vector_top_k` / `keyword_top_k` | `50` / `50` |
 | `vector_pool_k` / `keyword_pool_k` | `40` / `40` |
 | `vector_weight` / `keyword_weight` | `0.8` / `0.2` |
-| `reranker_top_k` / `reranker_min_top_k` | `7` / `7` |
+| `reranker_top_k` / `reranker_min_top_k` | `7` / `3` |
 | `reranker_score_threshold` / `_table_score_threshold` | `-1.0` / `-1.0` |
 | `router_mode` | `classifier` |
 | `self_eval_enabled` | `False` |

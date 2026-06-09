@@ -110,16 +110,34 @@ def test_filter_and_merge_keep_model_fields_outside_api_key_registry() -> None:
             "chat_model": "  new-chat  ",
             "google_api_key": "",
             "agent_enabled": False,
+            "agent_synthesis_provider": " gemini ",
+            "agent_synthesis_model": " gemini-3.1-flash-lite ",
+            "reflection_provider": " gemini ",
             "reflection_model": None,
         }
     )
     applied = merge_llm_config_into_settings(settings, filtered)
 
-    assert filtered == {"llm_provider": "deepseek", "chat_model": "new-chat"}
-    assert applied == ["llm_provider", "chat_model"]
+    assert filtered == {
+        "llm_provider": "deepseek",
+        "chat_model": "new-chat",
+        "agent_synthesis_provider": "gemini",
+        "agent_synthesis_model": "gemini-3.1-flash-lite",
+        "reflection_provider": "gemini",
+    }
+    assert applied == [
+        "llm_provider",
+        "chat_model",
+        "agent_synthesis_provider",
+        "agent_synthesis_model",
+        "reflection_provider",
+    ]
     assert settings.llm_provider == "deepseek"
     assert settings.chat_model == "new-chat"
     assert settings.agent_enabled is True
+    assert settings.agent_synthesis_provider == "gemini"
+    assert settings.agent_synthesis_model == "gemini-3.1-flash-lite"
+    assert settings.reflection_provider == "gemini"
 
 
 @pytest.mark.anyio
@@ -439,6 +457,55 @@ async def test_update_llm_config_switches_chat_generation_to_deepseek() -> None:
     assert pipeline.prepared_settings is not settings
     assert pipeline.prepared_settings.llm_provider == "deepseek"
     assert pipeline.commit_calls == 1
+    assert llm_cache.calls == 1
+
+
+@pytest.mark.anyio
+async def test_update_llm_config_keeps_reflection_and_agent_synthesis_on_gemini() -> None:
+    from api.routes.admin_stats import LLMConfigBody, update_llm_config
+
+    settings = _make_settings(
+        llm_provider="gemini",
+        chat_model="gemini-3.1-flash-lite",
+        agent_synthesis_provider="lm_studio",
+        agent_synthesis_model="qwen2.5-7b-instruct",
+        reflection_provider="lm_studio",
+        reflection_model="qwen2.5-7b-instruct",
+    )
+    pipeline = _FakePipeline()
+    llm_cache = _FakeLLMCache()
+    db = _FakeDB()
+
+    response = await update_llm_config(
+        _make_request(settings, pipeline, llm_cache),
+        LLMConfigBody(
+            llm_provider="deepseek",
+            deepseek_api_key="new-deepseek-key",
+            chat_model="deepseek-v4-flash",
+            agent_synthesis_provider="gemini",
+            agent_synthesis_model="gemini-3.1-flash-lite",
+            reflection_provider="gemini",
+            reflection_model="gemini-3.1-flash-lite",
+        ),
+        None,  # type: ignore[arg-type]
+        db,
+    )
+
+    assert response["ok"] is True
+    assert db.system_config.doc["llm_provider"] == "deepseek"
+    assert db.system_config.doc["chat_model"] == "deepseek-v4-flash"
+    assert db.system_config.doc["agent_synthesis_provider"] == "gemini"
+    assert db.system_config.doc["agent_synthesis_model"] == "gemini-3.1-flash-lite"
+    assert db.system_config.doc["reflection_provider"] == "gemini"
+    assert db.system_config.doc["reflection_model"] == "gemini-3.1-flash-lite"
+    assert settings.llm_provider == "deepseek"
+    assert settings.chat_model == "deepseek-v4-flash"
+    assert settings.agent_synthesis_provider == "gemini"
+    assert settings.agent_synthesis_model == "gemini-3.1-flash-lite"
+    assert settings.reflection_provider == "gemini"
+    assert settings.reflection_model == "gemini-3.1-flash-lite"
+    assert pipeline.prepared_settings.agent_synthesis_provider == "gemini"
+    assert pipeline.prepared_settings.reflection_provider == "gemini"
     assert llm_cache.calls == 1
 
 

@@ -159,15 +159,15 @@ class Settings(BaseSettings):
     # ~halving the low-relevance tail. Lower to 0.0 for more recall.
     reranker_score_threshold: float = 0.0
     # Table chunks use a relaxed threshold because cross-encoder typically gives
-    # lower raw logits for tabular text. 0.0 keeps moderately-relevant tables
-    # (valuable for schedule/credit lookups) while dropping clearly-negative
-    # noise. Re-calibrate separately if table answers regress.
-    reranker_table_score_threshold: float = 0.0
-    # Floor on returned docs when few pass the threshold. MUST be < reranker_top_k,
-    # otherwise the backfill always refills to top_k and the threshold has NO
-    # effect (it just re-adds the next-best below-threshold docs). 5 lets the
-    # threshold trim 1-2 weak docs while still giving the LLM enough context.
-    reranker_min_top_k: int = 5
+    # lower raw logits for tabular text. -1.0 keeps clearly relevant tables
+    # (scores > -1.0) while dropping irrelevant/wrong-program tables that tend
+    # to score below -1.0 (previously -5.0 was too permissive, allowing
+    # wrong-program table docs to pollute LLM context).
+    reranker_table_score_threshold: float = -1.0
+    # Keep at least this many top reranker-scored candidates even when all
+    # scores fall below thresholds. This prevents retrieval from returning
+    # top0 while preserving score ordering for answer context.
+    reranker_min_top_k: int = 3
 
     # --- Router ---
     router_mode: str = "classifier"

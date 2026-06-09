@@ -238,10 +238,13 @@ class LLMConfigBody(BaseModel):
     chat_max_tokens: int | None = None
     agent_enabled: bool | None = None
     agent_model: str | None = None
+    agent_synthesis_provider: str | None = None
+    agent_synthesis_model: str | None = None
     self_eval_enabled: bool | None = None
     tavily_fallback_enabled: bool | None = None
     tavily_api_key: str | None = None
     reflection_enabled: bool | None = None
+    reflection_provider: str | None = None
     reflection_model: str | None = None
 
 
@@ -1240,9 +1243,12 @@ async def get_llm_config(
         "chat_max_tokens": settings.chat_max_tokens,
         "agent_enabled": settings.agent_enabled,
         "agent_model": settings.agent_model,
+        "agent_synthesis_provider": settings.agent_synthesis_provider,
+        "agent_synthesis_model": settings.agent_synthesis_model,
         "self_eval_enabled": settings.self_eval_enabled,
         "tavily_fallback_enabled": settings.tavily_fallback_enabled,
         "reflection_enabled": settings.reflection_enabled,
+        "reflection_provider": settings.reflection_provider,
         "reflection_model": settings.reflection_model,
     }
 
@@ -1267,6 +1273,9 @@ async def _prepare_api_key_reload(
             pipeline.prepare_llm_config_reload,
             candidate_settings,
         )
+    except ValueError as exc:
+        logger.warning("API key runtime prepare failed for %s: %s", provider, exc)
+        raise HTTPException(400, str(exc)) from exc
     except Exception as exc:
         logger.warning("API key runtime prepare failed for %s", provider)
         raise HTTPException(400, "Unable to prepare API key runtime") from exc
@@ -1438,6 +1447,9 @@ async def update_llm_config(
             pipeline.prepare_llm_config_reload,
             candidate_settings,
         )
+    except ValueError as exc:
+        logger.warning("LLM config prepare failed: %s", exc, exc_info=True)
+        raise HTTPException(400, str(exc)) from exc
     except Exception as exc:
         logger.warning("LLM config prepare failed: %s", exc, exc_info=True)
         raise HTTPException(400, "Unable to prepare LLM config reload") from exc
@@ -1610,4 +1622,3 @@ async def update_env_config(
 
     logger.info("Admin updated env config: %s", list(updated.keys()))
     return {"ok": True, "updated": updated}
-

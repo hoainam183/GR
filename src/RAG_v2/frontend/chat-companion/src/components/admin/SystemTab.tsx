@@ -61,6 +61,12 @@ const LLM_PROVIDER_OPTIONS: ModelOption[] = [
   { value: 'lm_studio', label: 'LM Studio' },
 ];
 
+const AUX_PROVIDER_OPTIONS: ModelOption[] = [
+  { value: 'gemini', label: 'Gemini' },
+  { value: 'lm_studio', label: 'LM Studio' },
+  { value: 'ollama', label: 'Ollama' },
+];
+
 const DEEPSEEK_MODEL_OPTIONS: ModelOption[] = [
   { value: 'deepseek-v4-flash', label: 'DeepSeek V4 Flash' },
 ];
@@ -81,6 +87,11 @@ function chatModelOptionsForProvider(provider: string) {
   if (provider === 'deepseek') return DEEPSEEK_MODEL_OPTIONS;
   if (provider === 'gemini') return GEMINI_MODEL_OPTIONS;
   return [...DEEPSEEK_MODEL_OPTIONS, ...AGENT_MODEL_OPTIONS];
+}
+
+function auxModelOptionsForProvider(provider: string) {
+  if (provider === 'gemini') return GEMINI_MODEL_OPTIONS;
+  return AGENT_MODEL_OPTIONS;
 }
 
 const API_KEY_PROVIDER_LABELS: Record<ApiKeyProvider, string> = {
@@ -388,6 +399,9 @@ export default function SystemTab() {
           chat_temperature: String(cfg.chat_temperature),
           chat_max_tokens: String(cfg.chat_max_tokens),
           agent_model: cfg.agent_model,
+          agent_synthesis_provider: cfg.agent_synthesis_provider,
+          agent_synthesis_model: cfg.agent_synthesis_model,
+          reflection_provider: cfg.reflection_provider,
           reflection_model: cfg.reflection_model,
         });
       })
@@ -465,6 +479,28 @@ export default function SystemTab() {
     });
   };
 
+  const handleAgentProviderChange = (agent_synthesis_provider: string) => {
+    setLlmForm((prev) => {
+      const next = { ...prev, agent_synthesis_provider };
+      const options = auxModelOptionsForProvider(agent_synthesis_provider);
+      if (!options.some((option) => option.value === next.agent_synthesis_model)) {
+        next.agent_synthesis_model = options[0]?.value ?? next.agent_synthesis_model;
+      }
+      return next;
+    });
+  };
+
+  const handleReflectionProviderChange = (reflection_provider: string) => {
+    setLlmForm((prev) => {
+      const next = { ...prev, reflection_provider };
+      const options = auxModelOptionsForProvider(reflection_provider);
+      if (!options.some((option) => option.value === next.reflection_model)) {
+        next.reflection_model = options[0]?.value ?? next.reflection_model;
+      }
+      return next;
+    });
+  };
+
   const handleLLMSave = async () => {
     setLlmSaving(true);
     try {
@@ -475,6 +511,18 @@ export default function SystemTab() {
         body.chat_model = llmForm.chat_model;
       if (llmForm.agent_model && llmForm.agent_model !== llmConfig?.agent_model)
         body.agent_model = llmForm.agent_model;
+      if (
+        llmForm.agent_synthesis_provider
+        && llmForm.agent_synthesis_provider !== llmConfig?.agent_synthesis_provider
+      )
+        body.agent_synthesis_provider = llmForm.agent_synthesis_provider;
+      if (
+        llmForm.agent_synthesis_model
+        && llmForm.agent_synthesis_model !== llmConfig?.agent_synthesis_model
+      )
+        body.agent_synthesis_model = llmForm.agent_synthesis_model;
+      if (llmForm.reflection_provider && llmForm.reflection_provider !== llmConfig?.reflection_provider)
+        body.reflection_provider = llmForm.reflection_provider;
       if (llmForm.reflection_model && llmForm.reflection_model !== llmConfig?.reflection_model)
         body.reflection_model = llmForm.reflection_model;
       const temp = parseFloat(llmForm.chat_temperature);
@@ -501,6 +549,9 @@ export default function SystemTab() {
         chat_temperature: String(cfg.chat_temperature),
         chat_max_tokens: String(cfg.chat_max_tokens),
         agent_model: cfg.agent_model,
+        agent_synthesis_provider: cfg.agent_synthesis_provider,
+        agent_synthesis_model: cfg.agent_synthesis_model,
+        reflection_provider: cfg.reflection_provider,
         reflection_model: cfg.reflection_model,
       }));
     } catch {
@@ -810,7 +861,7 @@ export default function SystemTab() {
                 <Cpu className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Models</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <ModelSelectField
                   id="llm-provider"
                   label="Chat Provider"
@@ -826,16 +877,30 @@ export default function SystemTab() {
                   onValueChange={(chat_model) => setLlmForm((p) => ({ ...p, chat_model }))}
                 />
                 <ModelSelectField
+                  id="agent-provider"
+                  label="Agent Provider"
+                  options={AUX_PROVIDER_OPTIONS}
+                  value={llmForm.agent_synthesis_provider}
+                  onValueChange={handleAgentProviderChange}
+                />
+                <ModelSelectField
                   id="agent-model"
                   label="Agent Model"
-                  options={AGENT_MODEL_OPTIONS}
-                  value={llmForm.agent_model}
-                  onValueChange={(agent_model) => setLlmForm((p) => ({ ...p, agent_model }))}
+                  options={auxModelOptionsForProvider(llmForm.agent_synthesis_provider)}
+                  value={llmForm.agent_synthesis_model}
+                  onValueChange={(agent_synthesis_model) => setLlmForm((p) => ({ ...p, agent_synthesis_model }))}
+                />
+                <ModelSelectField
+                  id="reflection-provider"
+                  label="Reflection Provider"
+                  options={AUX_PROVIDER_OPTIONS}
+                  value={llmForm.reflection_provider}
+                  onValueChange={handleReflectionProviderChange}
                 />
                 <ModelSelectField
                   id="reflection-model"
                   label="Reflection Model"
-                  options={GEMINI_MODEL_OPTIONS}
+                  options={auxModelOptionsForProvider(llmForm.reflection_provider)}
                   value={llmForm.reflection_model}
                   onValueChange={(reflection_model) => setLlmForm((p) => ({ ...p, reflection_model }))}
                 />

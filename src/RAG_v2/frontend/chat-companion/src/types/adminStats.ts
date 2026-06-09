@@ -115,9 +115,12 @@ export interface LLMConfig {
   chat_max_tokens: number;
   agent_enabled: boolean;
   agent_model: string;
+  agent_synthesis_provider: string;
+  agent_synthesis_model: string;
   self_eval_enabled: boolean;
   tavily_fallback_enabled: boolean;
   reflection_enabled: boolean;
+  reflection_provider: string;
   reflection_model: string;
 }
 
@@ -130,6 +133,9 @@ export interface LLMConfigUpdateBody {
   chat_temperature?: number;
   chat_max_tokens?: number;
   agent_model?: string;
+  agent_synthesis_provider?: string;
+  agent_synthesis_model?: string;
+  reflection_provider?: string;
   reflection_model?: string;
 }
 
