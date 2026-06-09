@@ -295,8 +295,14 @@ def _rag_search(
     if not effective_resolved_major and len(major_codes) == 1:
         effective_resolved_major = major_codes[0]
 
+    # Only strip major keywords when the target collection has major_code
+    # metadata filtering (chuong_trinh/ctdt). Collections without major filtering
+    # (quydinh, kehoach, stsv) need major keywords preserved in the embedding
+    # to distinguish relevant chunks (e.g. PHỤ LỤC 7 vs PHỤ LỤC 5).
+    _MAJOR_FILTERABLE_COLLECTIONS = {"chuong_trinh"}
     retrieval_query = raw_query
-    if effective_resolved_major or len(major_codes) <= 1:
+    if (effective_resolved_major or len(major_codes) <= 1) and \
+            collection in _MAJOR_FILTERABLE_COLLECTIONS:
         retrieval_query = strip_major_from_query_for_retrieval(
             raw_query,
             resolved_major=effective_resolved_major,
@@ -372,6 +378,16 @@ def _rag_search(
                 top_k=effective_top_k,
                 **reranker_kwargs,
             )
+        if logger.isEnabledFor(logging.DEBUG):
+            for i, doc in enumerate(results[:3]):
+                meta = doc.get("metadata") or {}
+                logger.debug(
+                    "[_rag_search] Reranked #%d: rerank=%.4f col=%s h2=%.80s",
+                    i,
+                    doc.get("rerank_score", 0.0),
+                    qdrant_collection,
+                    str(meta.get("section_h2", meta.get("title", "")))[:80],
+                )
     else:
         results = results[:effective_top_k]
 

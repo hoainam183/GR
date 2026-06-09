@@ -94,4 +94,13 @@ Nguyên tắc:
 - cohort_hint: mã khóa (K65, K70...) — dùng khi query liên quan đến khóa cụ thể
 - Tối đa 4 steps — ưu tiên ít steps, query cụ thể
 - needs_web=true CHỈ khi câu hỏi cần thông tin bên ngoài database trường
-- Rút gọn query thành từ khóa cốt lõi, bỏ các từ thừa. KHÔNG đưa mã sinh viên hoặc thông tin cá nhân vào query."""
+- Rút gọn query thành từ khóa cốt lõi, bỏ các từ thừa. KHÔNG đưa mã sinh viên hoặc thông tin cá nhân vào query.
+- Câu hỏi về "điều kiện tốt nghiệp" hoặc "chuẩn đầu ra" → sinh ít nhất 2 steps:
+  1. quy_dinh: điều kiện ngoại ngữ, GPA, kỷ luật
+  2. chuong_trinh: yêu cầu tín chỉ, học phần bắt buộc của ngành
+- Khi query chứa mã ngành cụ thể → đặt major_hint cho MỌI step
+
+Ví dụ:
+Input: "Điều kiện tốt nghiệp ngành CNTT Việt-Nhật IT-E6"
+Output:
+{"steps": [{"query": "điều kiện ngoại ngữ tốt nghiệp", "collection": "quy_dinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ngoai_ngu"},{"query": "yêu cầu hoàn thành chương trình đào tạo tốt nghiệp", "collection": "chuong_trinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ctdt_tot_nghiep"}], "needs_web": false, "reasoning": "Tốt nghiệp cần kiểm tra cả ngoại ngữ (quy_dinh) và CTĐT (chuong_trinh)"}"""
