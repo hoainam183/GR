@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 from typing import Any, Dict, List, Optional
 
 import torch
@@ -62,6 +63,15 @@ class BGEReranker(BaseReranker):
         self.table_score_threshold = table_score_threshold
         self.last_stats: Dict[str, Any] = {}
 
+        # FlagReranker's tokenizer is NOT thread-safe — concurrent rerank() calls
+        # raise "Already borrowed" RuntimeError. The deployment runs a single
+        # uvicorn worker and pushes the pipeline onto a thread pool
+        # (anyio.to_thread.run_sync), so multiple threads can hit one shared
+        # reranker instance at once. Serialise at the source here so EVERY call
+        # path (rag_flow, RetrievalService, agent tool adapter) is protected
+        # without each call site needing to remember a lock.
+        self._lock = threading.Lock()
+
         device = _resolve_torch_device(device)
         self.device = device
 
@@ -81,6 +91,32 @@ class BGEReranker(BaseReranker):
     # ------------------------------------------------------------------
 
     def rerank(
+        self,
+        query: str,
+        documents: List[Dict[str, Any]],
+        top_k: Optional[int] = None,
+        score_threshold: Optional[float] = None,
+        table_score_threshold: Optional[float] = None,
+        min_top_k: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
+        """Thread-safe public entry point for reranking.
+
+        Serialises access to the non-thread-safe FlagReranker tokenizer (which
+        raises "Already borrowed" under concurrency) so callers on any thread —
+        ``rag_flow``, ``RetrievalService.search``, the agent tool adapter — are
+        protected automatically. The actual logic lives in ``_rerank_impl``.
+        """
+        with self._lock:
+            return self._rerank_impl(
+                query,
+                documents,
+                top_k=top_k,
+                score_threshold=score_threshold,
+                table_score_threshold=table_score_threshold,
+                min_top_k=min_top_k,
+            )
+
+    def _rerank_impl(
         self,
         query: str,
         documents: List[Dict[str, Any]],

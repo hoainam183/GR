@@ -53,9 +53,9 @@ _RAG_CACHE: dict[tuple, str] = {}
 _RAG_CACHE_MAX = 256
 _CACHE_LOCK = Lock()
 
-# BGE reranker tokenizer is not thread-safe ("Already borrowed" RuntimeError).
-# This lock serialises rerank() calls while still allowing parallel embedding + search.
-_RERANKER_LOCK = Lock()
+# NOTE: rerank() serialisation now lives inside BGEReranker.rerank (instance-level
+# self._lock), protecting every call path. The old module-level _RERANKER_LOCK was
+# removed to avoid double-locking.
 
 # ─── Per-request Agent Retrieved Documents ────────────────────────────────────
 # Dùng ContextVar để mỗi request/thread có danh sách docs riêng biệt.
@@ -371,13 +371,13 @@ def _rag_search(
             reranker_kwargs["table_score_threshold"] = (
                 runtime.settings.reranker_table_score_threshold
             )
-        with _RERANKER_LOCK:
-            results = runtime.reranker.rerank(
-                query=retrieval_query,
-                documents=results,
-                top_k=effective_top_k,
-                **reranker_kwargs,
-            )
+        # rerank() serialises internally via BGEReranker._lock — no outer lock needed.
+        results = runtime.reranker.rerank(
+            query=retrieval_query,
+            documents=results,
+            top_k=effective_top_k,
+            **reranker_kwargs,
+        )
         if logger.isEnabledFor(logging.DEBUG):
             for i, doc in enumerate(results[:3]):
                 meta = doc.get("metadata") or {}

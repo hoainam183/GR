@@ -521,7 +521,7 @@ Thread-safety:
 
 - per-request docs are stored in a ContextVar
 - agent RAG cache is lock-protected
-- reranker calls are serialized by `_RERANKER_LOCK`
+- reranker calls are serialized inside `BGEReranker.rerank` via instance-level `self._lock` (protects every call path)
 - retrieval plan steps run in a thread pool with copied contextvars
 
 ## 11. Admin Document And Crawler Pipelines
@@ -1179,18 +1179,21 @@ sequenceDiagram
 
 ```text
   identity/session resolve         ~5–20 ms   (Mongo/Redis lookups)
-  routing + reflection             ~50–400 ms (classifier cheap; LLM reflect if needed)
+  Tier-1 route + complexity        ~10–50 ms  (regex + calibrated classifier, cached)
+  query reflection                 ~1–3 s     (LLM rewrite to a standalone query; skippable)
+  reflected reroute (domain)       ~10–50 ms, +1–3 s if Tier-3 LLM escalates on low confidence
+                                              (canonical domain decision; raw-query Tier-3 removed)
   embed query (BGE-M3 + E5)        ~20–80 ms  (GPU) / higher on CPU
   Qdrant ANN ∥ ES BM25             ~30–120 ms (parallel per collection)
   fusion + dedup                   ~5–20 ms
-  BGE cross-encoder rerank         ~100–500 ms (GPU-bound, SERIALIZED via _RERANKER_LOCK)
+  BGE cross-encoder rerank         ~100–500 ms (GPU-bound, SERIALIZED via BGEReranker.rerank self._lock)
   validity/reference/parent expand ~10–60 ms  (extra Qdrant fetch for parents)
   LLM generation (DeepSeek)        ~1–3 s     (dominant; network + decode)
   ─────────────────────────────────────────
   persist/cache (async/after)      off critical path where possible
 ```
 
-The two structural hot spots are the **reranker** (GPU-bound and globally serialized — see §10 `_RERANKER_LOCK`) and the **LLM generation hop** (external, network-bound). Everything in the query layer is engineered to *avoid reaching the expensive hops unnecessarily*: chitchat short-circuits before retrieval; the answer cache short-circuits before the LLM; routing keeps simple questions out of the multi-LLM agent.
+The two structural hot spots are the **reranker** (GPU-bound and serialized inside `BGEReranker.rerank` via `self._lock`) and the **LLM generation hop** (external, network-bound). Everything in the query layer is engineered to *avoid reaching the expensive hops unnecessarily*: chitchat short-circuits before retrieval; the answer cache short-circuits before the LLM; routing keeps simple questions out of the multi-LLM agent.
 
 ## 23.8 Data Model & Storage Choices
 
@@ -1232,7 +1235,7 @@ Because load is single-digit QPS but compute-heavy, scaling is mostly **vertical
 
 | Bottleneck | Symptom at peak | Mitigation in code today | Next step to scale 10× |
 | --- | --- | --- | --- |
-| **Cross-encoder reranker** (GPU, `_RERANKER_LOCK` serialized) | rerank queue grows; tail latency spikes | single warm model, lock serializes GPU access, `reranker_min_top_k` floor | dedicate a rerank micro-service with a request queue + batching; multiple GPU replicas behind it |
+| **Cross-encoder reranker** (GPU, serialized via `BGEReranker.rerank` `self._lock`) | rerank queue grows; tail latency spikes | single warm model, instance lock serializes GPU access, `reranker_min_top_k` floor | dedicate a rerank micro-service with a request queue + batching; multiple GPU replicas behind it |
 | **LLM generation hop** (external) | p95 dominated by DeepSeek/Gemini RTT | answer cache (`use_redis_cache`), streaming hides latency, temperature 0 for determinism/cacheability | provider failover, request hedging, semantic cache |
 | **Single FastAPI process holding the pipeline** | one process = one warm model set | models in `app.state`, heavy load in executor at startup | run N stateless API replicas, each with its own warm pipeline, behind a load balancer; externalize sessions to Redis (already supported) |
 | **Embedding throughput** (GPU/CPU) | embed latency on CPU-only hosts | query-embedding LRU cache (512), batch embed in ingestion | GPU host or batched embedding service |

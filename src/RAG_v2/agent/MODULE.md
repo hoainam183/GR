@@ -147,7 +147,7 @@ Thread-safety rules:
 
 - Use `init_agent_docs()`/`get_agent_docs()`/`_append_agent_docs()` ContextVar helpers for per-request docs. Do not introduce global result lists.
 - `_RAG_CACHE` is an in-process FIFO cache (`_RAG_CACHE_MAX = 256`) keyed by (retrieval_query, collection, top_k, cohort, major) and protected by `_CACHE_LOCK`.
-- `_RERANKER_LOCK` serializes reranker access because tokenizer/runtime paths are not thread-safe.
+- Reranker serialization lives inside `BGEReranker.rerank` (instance-level `self._lock`), so every call path is protected. The old module-level `_RERANKER_LOCK` here was removed to avoid double-locking.
 - `execute_retrieval_plan()` runs plan steps in a thread pool (`max_workers = min(4, len(steps))`) using `contextvars.copy_context().run` per task so the docs ContextVar propagates.
 
 ## Retrieval Knobs

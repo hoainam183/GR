@@ -57,13 +57,15 @@ class LLMResponseCache:
         query: str,
         doc_ids: List[str],
         model: str,
+        profile: str = "",
     ) -> Optional[Dict[str, Any]]:
         """Retrieve a cached response if present.
 
         Increments hit_count on hit and auto-promotes to FAQ TTL if
-        the hit threshold is crossed.
+        the hit threshold is crossed. ``profile`` scopes the key to the asking
+        student's major|cohort to prevent cross-profile answer leaks.
         """
-        key = self._build_key(query, doc_ids, model)
+        key = self._build_key(query, doc_ids, model, profile)
         try:
             # Atomic fetch + increment hit count using pipeline
             pipe = self._r.pipeline()
@@ -102,14 +104,16 @@ class LLMResponseCache:
         model: str,
         answer: str,
         sources: List[Dict[str, Any]],
+        profile: str = "",
     ) -> None:
         """Cache a newly generated response.
 
         Also creates reverse-index tags (``doc_cache_tag:{doc_id}`` → Set)
         so that when a specific document is updated by the crawler, only
-        cache entries derived from that document are invalidated.
+        cache entries derived from that document are invalidated. ``profile``
+        scopes the key to the asking student's major|cohort.
         """
-        key = self._build_key(query, doc_ids, model)
+        key = self._build_key(query, doc_ids, model, profile)
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
         payload = {
@@ -221,23 +225,34 @@ class LLMResponseCache:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _build_key(query: str, doc_ids: List[str], model: str) -> str:
-        """Generate a deterministic SHA256 cache key from input params."""
+    def _build_key(query: str, doc_ids: List[str], model: str, profile: str = "") -> str:
+        """Generate a deterministic SHA256 cache key from input params.
+
+        ``profile`` (normalized major|cohort of the asking student) is mixed in so
+        that a profile-specific answer is never served to a student with a different
+        profile. Empty ``profile`` (anonymous / no profile) keeps the legacy key
+        space, so callers that pass nothing are unaffected.
+        """
         normalized_q = query.strip().lower()
         sorted_docs = sorted(str(d).strip() for d in doc_ids if d)
-        fingerprint = f"{normalized_q}||{','.join(sorted_docs)}||{model}"
+        fingerprint = f"{normalized_q}||{','.join(sorted_docs)}||{model}||{profile}"
         sha = hashlib.sha256(fingerprint.encode("utf-8")).hexdigest()
         return f"llm_cache:{sha}"
 
     @staticmethod
-    def _build_query_only_key(query: str, model: str) -> str:
-        """SHA256 cache key from normalized query + model only (no doc_ids).
+    def _build_query_only_key(query: str, model: str, profile: str = "") -> str:
+        """SHA256 cache key from normalized query + model (+ student profile).
 
         Used by the pre-retrieval cache path so identical queries hit the cache
         *before* reflection and retrieval run, saving 13-25 s per request.
+
+        ``profile`` (normalized major|cohort) MUST be included: this key has no
+        doc_ids, so without the profile a personal answer generated for one student
+        ("điều kiện tốt nghiệp của tôi") would be served verbatim to any other
+        student asking the same words — a cross-student data leak.
         """
         normalized_q = query.strip().lower()
-        fingerprint = f"llm_qcache:{normalized_q}||{model}"
+        fingerprint = f"llm_qcache:{normalized_q}||{model}||{profile}"
         sha = hashlib.sha256(fingerprint.encode("utf-8")).hexdigest()
         return f"llm_cache:q:{sha}"
 
@@ -249,15 +264,17 @@ class LLMResponseCache:
         self,
         query: str,
         model: str,
+        profile: str = "",
     ) -> Optional[Dict[str, Any]]:
         """Look up a cached response using only the normalized query + model.
 
         This check runs *before* reflection and retrieval, so a cache hit saves
         the full pipeline cost (~13-25 s).  TTL is shorter than the main cache
         (``_QUERY_CACHE_TTL`` = 5 min) because doc-level invalidation is not
-        tracked here.
+        tracked here. ``profile`` (major|cohort) scopes the key so a personal
+        answer is never returned to a student with a different profile.
         """
-        key = self._build_query_only_key(query, model)
+        key = self._build_query_only_key(query, model, profile)
         try:
             data = cast(dict, self._r.hgetall(key))
             if not data:
@@ -280,13 +297,15 @@ class LLMResponseCache:
         model: str,
         answer: str,
         sources: List[Dict[str, Any]],
+        profile: str = "",
     ) -> None:
         """Store a response in the pre-retrieval query-only cache.
 
         Does NOT create doc-level reverse-index tags; use :meth:`put` for
-        invalidation-aware caching after retrieval.
+        invalidation-aware caching after retrieval. ``profile`` (major|cohort)
+        scopes the key to the asking student.
         """
-        key = self._build_query_only_key(query, model)
+        key = self._build_query_only_key(query, model, profile)
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         payload = {
             "answer": answer,

@@ -404,7 +404,7 @@ Agent tools dùng runtime được inject từ `RetrievalService`, nên dùng ch
 
 - `ContextVar` cho docs theo từng request: `init_agent_docs()`, `get_agent_docs()`.
 - FIFO `_RAG_CACHE` 256 entries cho tool search.
-- `_RERANKER_LOCK` để serialize reranker calls vì tokenizer/runtime BGE reranker không thread-safe.
+- Serialize reranker calls bằng lock instance `self._lock` bên trong `BGEReranker.rerank` (mọi call path đều được bảo vệ) vì tokenizer BGE reranker không thread-safe.
 - PII stripping trước embedding.
 - Extract major/cohort từ query để truyền metadata hints vào retrieval.
 
