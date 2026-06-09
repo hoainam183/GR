@@ -1969,6 +1969,8 @@ def rag_flow(
     llm_cache: Optional[Any] = None,
     domain_subqueries: Optional[List[Dict[str, str]]] = None,
     reroute_reflected: Optional[Any] = None,
+    pre_ref_result: Optional[Dict[str, Any]] = None,
+    pre_reflection_ms: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Full RAG flow: Reflect → Embed → Search → Rerank → Generate → SelfEval → (Tavily fallback).
 
@@ -2063,7 +2065,26 @@ def rag_flow(
     # Major split (auth profile vs query target) for query.profile_dependency.
     resolved_user_major: Optional[str] = None
     resolved_target_major: Optional[str] = None
-    if reflector is not None:
+    if pre_ref_result is not None:
+        # Use pre-computed reflection from upstream (query_v3/query_stream)
+        search_query = pre_ref_result.get("rewritten", question)
+        reflection_prompt = pre_ref_result.get("prompt")
+        entities = pre_ref_result.get("entities") or {}
+        resolved_major = entities.get("major_code") or entities.get("major_name")
+        resolved_user_major = entities.get("user_major_code")
+        resolved_target_major = entities.get("target_major_code")
+        cohort_entity = entities.get("cohort")
+        if cohort_entity is not None:
+            resolved_cohort = str(cohort_entity).strip() or None
+        if pre_reflection_ms is not None:
+            timings_ms["reflection"] = pre_reflection_ms
+        logger.info(
+            "Using pre-reflected query: %r | major: %s | cohort: %s",
+            search_query[:80],
+            resolved_major,
+            resolved_cohort,
+        )
+    elif reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
             ref_result = reflector.reflect(
@@ -3014,6 +3035,8 @@ def rag_flow_stream(
     metadata_out: Optional[Dict[str, Any]] = None,
     llm_cache: Optional[Any] = None,
     reroute_reflected: Optional[Any] = None,
+    pre_ref_result: Optional[Dict[str, Any]] = None,
+    pre_reflection_ms: Optional[float] = None,
 ) -> tuple[Generator[str, None, None], List[Dict[str, Any]]]:
     """Streaming RAG flow — retrieval runs first, then generation is streamed.
 
@@ -3083,7 +3106,25 @@ def rag_flow_stream(
     # Major split (auth profile vs query target) for query.profile_dependency.
     resolved_user_major: Optional[str] = None
     resolved_target_major: Optional[str] = None
-    if reflector is not None:
+    if pre_ref_result is not None:
+        # Use pre-computed reflection from upstream (query_stream)
+        search_query = pre_ref_result.get("rewritten", question)
+        entities = pre_ref_result.get("entities") or {}
+        resolved_major = entities.get("major_code") or entities.get("major_name")
+        resolved_user_major = entities.get("user_major_code")
+        resolved_target_major = entities.get("target_major_code")
+        cohort_entity = entities.get("cohort")
+        if cohort_entity is not None:
+            resolved_cohort = str(cohort_entity).strip() or None
+        if pre_reflection_ms is not None:
+            timings_ms["reflection"] = pre_reflection_ms
+        logger.info(
+            "Using pre-reflected query (stream): %r | major: %s | cohort: %s",
+            search_query[:80],
+            resolved_major,
+            resolved_cohort,
+        )
+    elif reflector is not None:
         reflection_t0 = time.perf_counter()
         try:
             ref_result = reflector.reflect(

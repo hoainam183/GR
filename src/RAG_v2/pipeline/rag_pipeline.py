@@ -547,6 +547,47 @@ class RAGPipeline:
     # Public API
     # ------------------------------------------------------------------
 
+    def _run_reflection(
+        self,
+        question: str,
+        history: Optional[List[Dict[str, str]]],
+        user_context: Optional[Dict[str, Any]],
+        runtime: _PreparedLLMRuntime,
+    ) -> tuple:
+        """Run reflection and return (reflected_question, ref_result, reflection_ms).
+
+        Returns:
+            reflected_question: The rewritten query (or original if no reflector).
+            ref_result: Full dict from reflector.reflect() (None if skipped/failed).
+            reflection_ms: Elapsed time in ms (None if no reflector).
+        """
+        reflected_question = question
+        ref_result: Optional[Dict[str, Any]] = None
+        reflection_ms: Optional[float] = None
+        reflector = runtime.reflector
+        if reflector is not None:
+            reflect_t0 = time.perf_counter()
+            try:
+                trimmed = history[-8:] if history else []
+                ref_result = reflector.reflect(
+                    question,
+                    chat_history=trimmed,
+                    user_context=user_context,
+                    user_profile=user_context,
+                )
+                rewritten = (
+                    str(ref_result.get("rewritten") or "").strip()
+                    if isinstance(ref_result, dict)
+                    else ""
+                )
+                if rewritten and rewritten != question:
+                    reflected_question = rewritten
+            except Exception as exc:
+                logger.warning("Reflection failed (%s), using original", exc)
+                ref_result = None
+            reflection_ms = _elapsed_ms(reflect_t0)
+        return reflected_question, ref_result, reflection_ms
+
     def query(
         self,
         question: str,
@@ -554,6 +595,9 @@ class RAGPipeline:
         top_k: Optional[int] = None,
         session_id: Optional[str] = None,
         user_context: Optional[Dict[str, Any]] = None,
+        *,
+        pre_ref_result: Optional[Dict[str, Any]] = None,
+        pre_reflection_ms: Optional[float] = None,
     ) -> Dict[str, Any]:
         """Process a user question end-to-end (non-streaming).
 
@@ -650,6 +694,8 @@ class RAGPipeline:
                 reference_resolver=self._reference_resolver,
                 llm_cache=self._llm_cache,
                 reroute_reflected=self._reroute_reflected,
+                pre_ref_result=pre_ref_result,
+                pre_reflection_ms=pre_reflection_ms,
             )
         timings_ms = _merge_timings(pipeline_timings, result.get("timings_ms"))
         timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
@@ -695,6 +741,9 @@ class RAGPipeline:
         route_label: str = "complex",
         require_agent: bool = False,
         complexity_subtype: Optional[str] = None,
+        pre_reflected: Optional[str] = None,
+        pre_reflection_prompt: Optional[str] = None,
+        pre_reflection_ms: Optional[float] = None,
     ) -> Dict[str, Any]:
         """Force execution through the agent path.
 
@@ -704,6 +753,10 @@ class RAGPipeline:
         Args:
             complexity_subtype: Passed to ``agent.run()`` to choose planner
                 path shape ("comparison", "multi_source", "general").
+            pre_reflected: If provided, skip internal reflection and use this
+                as the reflected query (already computed upstream).
+            pre_reflection_prompt: The reflection prompt from upstream.
+            pre_reflection_ms: The reflection timing from upstream.
         """
         agent_t0 = time.perf_counter()
         runtime = self._llm_runtime_snapshot()
@@ -781,38 +834,48 @@ class RAGPipeline:
             logger.warning("Agent unavailable, falling back to RAG v2")
             return _fallback_result("Agent is disabled")
 
-        reflector = getattr(runtime, "reflector", None)
-        if reflector is not None:
-            reflect_t0 = time.perf_counter()
-            try:
-                trimmed_for_reflect = history[-8:] if history else []
-                ref_result = reflector.reflect(
-                    question,
-                    chat_history=trimmed_for_reflect,
-                    user_context=user_context,
-                    user_profile=user_context,
-                )
-                reflection_prompt = (
-                    ref_result.get("prompt") if isinstance(ref_result, dict) else None
-                )
-                rewritten = (
-                    str(ref_result.get("rewritten") or "").strip()
-                    if isinstance(ref_result, dict)
-                    else ""
-                )
-                if rewritten and rewritten != question:
-                    reflected_question = rewritten
-                    logger.info(
-                        "[query_agent] Reflected: %r -> %r",
-                        question[:60],
-                        reflected_question[:100],
+        # Use pre-computed reflection if available (from query_v3/query_stream)
+        if pre_reflected is not None:
+            reflected_question = pre_reflected
+            reflection_prompt = pre_reflection_prompt
+            reflection_ms = pre_reflection_ms
+            logger.info(
+                "[query_agent] Using pre-reflected: %r",
+                reflected_question[:100],
+            )
+        else:
+            reflector = getattr(runtime, "reflector", None)
+            if reflector is not None:
+                reflect_t0 = time.perf_counter()
+                try:
+                    trimmed_for_reflect = history[-8:] if history else []
+                    ref_result = reflector.reflect(
+                        question,
+                        chat_history=trimmed_for_reflect,
+                        user_context=user_context,
+                        user_profile=user_context,
                     )
-            except Exception as ref_exc:
-                logger.warning(
-                    "[query_agent] Reflection failed (%s), using original",
-                    ref_exc,
-                )
-            reflection_ms = _elapsed_ms(reflect_t0)
+                    reflection_prompt = (
+                        ref_result.get("prompt") if isinstance(ref_result, dict) else None
+                    )
+                    rewritten = (
+                        str(ref_result.get("rewritten") or "").strip()
+                        if isinstance(ref_result, dict)
+                        else ""
+                    )
+                    if rewritten and rewritten != question:
+                        reflected_question = rewritten
+                        logger.info(
+                            "[query_agent] Reflected: %r -> %r",
+                            question[:60],
+                            reflected_question[:100],
+                        )
+                except Exception as ref_exc:
+                    logger.warning(
+                        "[query_agent] Reflection failed (%s), using original",
+                        ref_exc,
+                    )
+                reflection_ms = _elapsed_ms(reflect_t0)
 
         from agent.tool_adapters import init_agent_docs, get_agent_docs
 
@@ -911,9 +974,21 @@ class RAGPipeline:
         Falls back to RAG v2 when agent is unavailable or fails.
         """
         runtime = self._llm_runtime_snapshot()
-        route_result = self.complexity_router.route(question)
+
+        # Step 1: Reflection FIRST — so routing sees the expanded query
+        reflected_question, ref_result, reflection_ms = self._run_reflection(
+            question, history, user_context, runtime,
+        )
+
+        # Step 2: Route on REFLECTED query
+        route_result = self.complexity_router.route(reflected_question)
         route = route_result["tier"]
         subtype = route_result.get("complex_subtype", "")
+        logger.info(
+            "[query_v3] Reflected: %r → route=%s",
+            reflected_question[:80],
+            route,
+        )
 
         if route == "chitchat":
             return {
@@ -935,6 +1010,8 @@ class RAGPipeline:
                 top_k=top_k,
                 session_id=session_id,
                 user_context=user_context,
+                pre_ref_result=ref_result,
+                pre_reflection_ms=reflection_ms,
             )
             result["mode"] = "rag_v2"
             result["route"] = route
@@ -944,6 +1021,9 @@ class RAGPipeline:
             result.setdefault("agent_trace", None)
             return result
 
+        reflection_prompt = (
+            ref_result.get("prompt") if isinstance(ref_result, dict) else None
+        )
         return self.query_agent(
             question=question,
             history=history,
@@ -953,6 +1033,9 @@ class RAGPipeline:
             route_label="complex",
             require_agent=False,
             complexity_subtype=subtype,
+            pre_reflected=reflected_question,
+            pre_reflection_prompt=reflection_prompt,
+            pre_reflection_ms=reflection_ms,
         )
 
     # ------------------------------------------------------------------
@@ -1178,13 +1261,25 @@ class RAGPipeline:
             history = self._mongo_logger.get_history(session_id)
             pipeline_timings["history_load"] = _elapsed_ms(load_t0)
 
-        # ── Tier-0: complexity routing (chitchat / simple / complex) ─────────
+        # ── Step 1: Reflection FIRST — so routing sees the expanded query ────
+        reflected_question, ref_result, reflection_ms = self._run_reflection(
+            question, history, user_context, runtime,
+        )
+        if reflection_ms is not None:
+            pipeline_timings["reflection"] = reflection_ms
+
+        # ── Step 2: Complexity routing on REFLECTED query ─────────────────────
         complexity_t0 = time.perf_counter()
-        complexity = self.complexity_router.route(question)
+        complexity = self.complexity_router.route(reflected_question)
         complexity_tier = complexity["tier"]
         complexity_subtype = complexity.get("complex_subtype")
         pipeline_timings["complexity_routing"] = _elapsed_ms(complexity_t0)
-        logger.info("ComplexityRouter: %r → %s", question[:60], complexity_tier)
+        logger.info(
+            "ComplexityRouter: %r (reflected from %r) → %s",
+            reflected_question[:60],
+            question[:40],
+            complexity_tier,
+        )
 
         # Initialise last_* defaults
         self.last_sources: List[Dict[str, Any]] = []
@@ -1237,6 +1332,9 @@ class RAGPipeline:
             self.last_mode = "agent"
             self.last_intent = "complex"
 
+            reflection_prompt = (
+                ref_result.get("prompt") if isinstance(ref_result, dict) else None
+            )
             agent_t0 = time.perf_counter()
             try:
                 agent_result = self.query_agent(
@@ -1248,6 +1346,9 @@ class RAGPipeline:
                     route_label="complex",
                     require_agent=False,
                     complexity_subtype=complexity.get("complex_subtype"),
+                    pre_reflected=reflected_question,
+                    pre_reflection_prompt=reflection_prompt,
+                    pre_reflection_ms=reflection_ms,
                 )
                 answer = agent_result.get("answer", "")
                 self.last_mode = str(agent_result.get("mode", "agent"))
@@ -1330,6 +1431,8 @@ class RAGPipeline:
                 metadata_out=flow_metadata,
                 llm_cache=self._llm_cache,
                 reroute_reflected=self._reroute_reflected,
+                pre_ref_result=ref_result,
+                pre_reflection_ms=reflection_ms,
             )
             self.last_sources = reranked
             self.last_reflected_question = flow_metadata.get(
