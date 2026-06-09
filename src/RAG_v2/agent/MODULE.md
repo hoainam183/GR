@@ -1,6 +1,6 @@
 # Module: `agent`
 
-Source-verified: 2026-06-05 from `agent/__init__.py`, `agent/react_agent.py`, `agent/tool_adapters.py`, `agent/graph_state.py`, `agent/state.py`, `agent/prompts.py`, `agent/lc_tools.py`, and `pipeline/rag_pipeline.py`.
+Source-verified: 2026-06-09 from `agent/__init__.py`, `agent/react_agent.py`, `agent/planning.py`, `agent/tool_adapters.py`, `agent/graph_state.py`, `agent/state.py`, `agent/prompts.py`, `agent/lc_tools.py`, and `pipeline/rag_pipeline.py`.
 
 ## Purpose
 
@@ -16,7 +16,8 @@ agent/
   graph_state.py    AgentGraphState TypedDict (LangGraph runtime state).
   state.py          AgentState and ToolResult dataclasses for logging/API.
   prompts.py        AGENT_SYSTEM_PROMPT, SYNTHESIS_PROMPT, DECOMPOSE_SYSTEM_PROMPT, PLANNER_SYSTEM_PROMPT.
-  react_agent.py    Planner-Executor graph: nodes, routing, plan validation, synthesis.
+  planning.py       Pure planner helpers: JSON parsing, trace previews, plan entity-scope normalization.
+  react_agent.py    Planner-Executor graph orchestration, routing, plan validation, executor/synthesis nodes.
   tool_adapters.py  Tool dispatcher, retrieval/web adapters, RAG cache, shared runtime, ContextVar docs.
   lc_tools.py       Thin legacy wrapper functions delegating to execute_tool(); not graph-bound.
 ```
@@ -63,11 +64,11 @@ Planner-Executor behavior:
 
 - `run()` sets `execution_path` to `"decompose"` when `complexity_subtype` is `comparison` or `multi_source`, otherwise `"planner"`. `_route_entry()` reads this field to pick the START edge.
 - `_decompose_node()` uses the synthesis LLM and `DECOMPOSE_SYSTEM_PROMPT`. Queries are enriched via `enrich_major_references_for_query()`. On failure it falls back to the original query (max 4 sub-questions).
-- `_planner_node()` asks for a JSON plan (`steps`, `needs_web`, `reasoning`) using `PLANNER_SYSTEM_PROMPT`, keeps at most 4 steps, and runs `_normalise_plan_steps_for_entities()` to re-inject single major/cohort scope when the planner emits generic steps for entity-scoped collections (`quy_dinh`, `chuong_trinh`).
-- JSON (optionally markdown-fenced) is parsed by `_parse_json_object()`; do not use naive backtick stripping.
+- `_planner_node()` asks for a JSON plan (`steps`, `needs_web`, `reasoning`) using `PLANNER_SYSTEM_PROMPT`, keeps at most 4 steps, and delegates JSON parsing / plan entity-scope normalization to `planning.py`.
+- JSON (optionally markdown-fenced) is parsed by `planning._parse_json_object()` through a compatibility wrapper in `react_agent.py`; do not use naive backtick stripping.
 - `_validate_plan()` requires non-empty steps where every step has a non-empty `query` and a `collection` in `_VALID_COLLECTIONS`. Invalid JSON, empty steps, or invalid collections set `state.error` (`planner_invalid_json` / `planner_empty_steps` / `planner_invalid_plan`); `RAGPipeline.query_agent()` owns the fallback policy.
 - `_after_planner()` routes to `synthesize` if `error` is set, otherwise to `executor` when the plan revalidates.
-- `_executor_node()` calls `execute_retrieval_plan()` with the pipeline-provided `top_k`, filters empty results, builds `ToolMessage`s, and optionally calls `web_search_for_executor()` when `needs_web` is set. If no tool messages survive it returns the deterministic no-information answer (`_NO_INFO_ANSWER`) without triggering fallback.
+- `_executor_node()` calls `execute_retrieval_plan()` with the pipeline-provided `top_k`, delegates relax-and-retry / trace building / `ToolMessage` construction to small helper methods, and optionally calls `web_search_for_executor()` when `needs_web` is set. If no tool messages survive it returns the deterministic no-information answer (`_NO_INFO_ANSWER`) without triggering fallback.
 - `_synthesize_node()` writes the final Vietnamese answer from non-empty tool messages using `SYNTHESIS_PROMPT`. If a `final_answer` was already set upstream it is passed through; on LLM failure it degrades to a truncated raw result.
 
 ## Module Flow
@@ -143,6 +144,8 @@ Agent-facing collection aliases (`COLLECTION_MAP`):
 
 `tool_adapters` owns an `_AdapterRuntime` dataclass with settings, BGE/E5 embedders, the searcher (`MultiCollectionSearch`), an optional reranker, and an optional Tavily tool. Runtime is normally injected via `inject_from_retrieval_service()` from the shared `RetrievalService` so eval/admin/runtime overrides propagate and heavy models load once. `_build_runtime()` is the lazy fallback; `set_runtime(None)` resets to lazy mode.
 
+`_rag_search()` is a thin orchestration shell around `_RagSearchRequest` helpers: input normalization, cache-key construction, embedding/search kwargs, rerank-or-trim, optional parent expansion, and formatting/cache write. `_format_web_results()` uses the injected runtime settings when present, otherwise direct `Settings()` for formatting limits so a formatter-only unit path does not cold-load embedders/searchers.
+
 Thread-safety rules:
 
 - Use `init_agent_docs()`/`get_agent_docs()`/`_append_agent_docs()` ContextVar helpers for per-request docs. Do not introduce global result lists.
@@ -180,6 +183,7 @@ Supported synthesis providers in code: `gemini`, `ollama`, or an LM Studio/OpenA
 
 - Before changing graph topology, update the topology description here and `tests/test_agent_langgraph.py`.
 - When adding adapter behavior, update `tool_adapters.py` and direct adapter tests.
+- Keep `planning.py` pure: no runtime/model loading, no retrieval calls, no ContextVar writes.
 - Do not reintroduce graph-bound tool schemas without also updating pipeline fallback policy, API trace expectations, and agent tests.
 - If changing public trace fields, update `api/response_mapper.py`, `schemas/chat.py`, frontend trace components, and this file.
 

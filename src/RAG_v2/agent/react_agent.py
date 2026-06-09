@@ -11,6 +11,15 @@ from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 
 from .graph_state import AgentGraphState
+from .planning import (
+    _content_to_text,
+    _hash_text,
+    _is_empty_result_text,
+    _normalise_plan_steps_for_entities as _normalise_plan_steps_impl,
+    _parse_json_object as _parse_json_object_impl,
+    _preview_text,
+    _trace_plan_step,
+)
 from .prompts import DECOMPOSE_SYSTEM_PROMPT, PLANNER_SYSTEM_PROMPT, SYNTHESIS_PROMPT
 from .state import AgentState, ToolResult
 from .tool_adapters import execute_retrieval_plan, web_search_for_executor
@@ -36,149 +45,26 @@ def _make_call_sig(tool_name: str, tool_args: dict[str, Any]) -> str:
     return f"{tool_name}:{args_hash}"
 
 
-def _content_to_text(content: Any) -> str:
-    if isinstance(content, list):
-        return "".join(str(item) for item in content)
-    return str(content or "")
-
-
-def _preview_text(value: Any, limit: int = 2000) -> str:
-    text = _content_to_text(value)
-    if len(text) <= limit:
-        return text
-    return text[:limit] + "\n...[truncated]"
-
-
-def _hash_text(value: Any) -> str:
-    return hashlib.sha256(_content_to_text(value).encode("utf-8")).hexdigest()
-
-
-def _trace_plan_step(step: dict[str, Any], top_k: int | None) -> dict[str, Any]:
-    traced = {
-        key: step.get(key)
-        for key in ("label", "query", "collection", "major_hint", "cohort_hint")
-        if step.get(key) is not None
-    }
-    if top_k is not None:
-        traced["top_k"] = top_k
-    return traced
-
-
-_ENTITY_SCOPED_COLLECTIONS = frozenset({"quy_dinh", "chuong_trinh"})
-
-
-def _clean_plan_hint(value: Any) -> str | None:
-    text = str(value or "").strip()
-    return text or None
-
-
-def _single_extracted_entity(values: list[str]) -> str | None:
-    unique_values = []
-    for value in values:
-        if value not in unique_values:
-            unique_values.append(value)
-    return unique_values[0] if len(unique_values) == 1 else None
-
-
 def _normalise_plan_steps_for_entities(
     steps: list[Any],
     source_query: str,
 ) -> tuple[list[Any], dict[str, Any]]:
     """Preserve explicit major/cohort scope when planner emits generic steps."""
-    from retrieval.metadata_filters import (  # noqa: PLC0415
-        extract_cohort_codes,
-        extract_major_codes,
-    )
-
-    all_source_majors = extract_major_codes(source_query)
-    all_source_cohorts = extract_cohort_codes(source_query)
-    source_major = _single_extracted_entity(all_source_majors)
-    source_cohort = _single_extracted_entity(all_source_cohorts)
-    # For comparison queries: source has 2+ majors/cohorts → use per-step hints
-    source_has_multiple_majors = len(all_source_majors) >= 2
-    source_has_multiple_cohorts = len(all_source_cohorts) >= 2
-    trace: dict[str, Any] = {
-        "applied": False,
-        "major_hint": source_major,
-        "cohort_hint": source_cohort,
-        "multi_major_mode": source_has_multiple_majors,
-    }
-    if (
-        not source_major
-        and not source_cohort
-        and not source_has_multiple_majors
-        and not source_has_multiple_cohorts
-    ):
-        return steps, trace
-
-    normalised_steps: list[Any] = []
-    changed = False
-    for raw_step in steps:
-        if not isinstance(raw_step, dict):
-            normalised_steps.append(raw_step)
-            continue
-
-        step = dict(raw_step)
-        query = str(step.get("query") or "").strip()
-        collection = str(step.get("collection") or "").strip()
-        step_major_codes = extract_major_codes(query)
-        step_cohort_codes = extract_cohort_codes(query)
-
-        if (
-            source_major
-            and not _clean_plan_hint(step.get("major_hint"))
-            and (not step_major_codes or source_major in step_major_codes)
-        ):
-            step["major_hint"] = source_major
-            changed = True
-
-        if (
-            source_cohort
-            and not _clean_plan_hint(step.get("cohort_hint"))
-            and (not step_cohort_codes or source_cohort in step_cohort_codes)
-        ):
-            step["cohort_hint"] = source_cohort
-            changed = True
-
-        if query and collection in _ENTITY_SCOPED_COLLECTIONS:
-            scoped_query = query
-            # Use per-step major_hint when source has multiple majors
-            step_major_to_inject = source_major
-            if not step_major_to_inject and source_has_multiple_majors:
-                step_major_to_inject = _clean_plan_hint(step.get("major_hint"))
-            if step_major_to_inject and not step_major_codes:
-                scoped_query = f"{scoped_query} ngành {step_major_to_inject}"
-            # Use per-step cohort_hint when source has multiple cohorts
-            step_cohort_to_inject = source_cohort
-            if not step_cohort_to_inject and source_has_multiple_cohorts:
-                step_cohort_to_inject = _clean_plan_hint(step.get("cohort_hint"))
-            if step_cohort_to_inject and not step_cohort_codes:
-                scoped_query = f"{scoped_query} {step_cohort_to_inject}"
-            if scoped_query != query:
-                step["query"] = " ".join(scoped_query.split())
-                changed = True
-
-        normalised_steps.append(step)
-
-    trace["applied"] = changed
-    return normalised_steps, trace
-
+    return _normalise_plan_steps_impl(steps, source_query)
 
 def _parse_json_object(content: Any) -> dict[str, Any]:
     """Parse strict JSON object content, accepting optional markdown fences."""
-    raw = _content_to_text(content).strip()
-    if raw.startswith("```"):
-        lines = raw.splitlines()
-        if lines and lines[0].strip().startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        raw = "\n".join(lines).strip()
+    return _parse_json_object_impl(content)
 
-    parsed = json.loads(raw)
-    if not isinstance(parsed, dict):
-        raise ValueError("planner response must be a JSON object")
-    return parsed
+
+def _non_empty_labeled_results(
+    labeled_results: list[tuple[str, str]],
+) -> list[tuple[int, str, str]]:
+    return [
+        (index, label, result)
+        for index, (label, result) in enumerate(labeled_results)
+        if not _is_empty_result_text(result)
+    ]
 
 
 def _is_empty_result_text(text: str) -> bool:
@@ -533,91 +419,31 @@ class ReActAgent:
                 "executor_results": [],
             }
 
-        t0 = time.perf_counter()
-        labeled_results = execute_retrieval_plan(steps, top_k=state.get("top_k"))
-
-        # Relax-and-retry: if every step came back empty AND at least one step
-        # carried a major/cohort filter, retry once without those filters. The
-        # filter being too narrow (e.g. a missing/wrong cohort) is a common cause
-        # of false "not found" answers on personal-eligibility questions.
-        retried_relaxed = False
-        if self._retry_on_empty and labeled_results and all(
-            _is_empty_result_text(result) for _, result in labeled_results
-        ):
-            relaxed_steps = self._relaxed_steps(steps)
-            if relaxed_steps is not None:
-                logger.info(
-                    "[Executor] All %d step(s) empty; retrying without major/cohort filters",
-                    len(steps),
-                )
-                relaxed_results = execute_retrieval_plan(
-                    relaxed_steps, top_k=state.get("top_k")
-                )
-                if any(
-                    not _is_empty_result_text(result) for _, result in relaxed_results
-                ):
-                    labeled_results = relaxed_results
-                    steps = relaxed_steps  # keep trace/args consistent with retry
-                    retried_relaxed = True
-
-        elapsed_ms = (time.perf_counter() - t0) * 1000
-        logger.info(
-            "[Executor] %d/%d steps completed in %.0fms%s",
-            len(labeled_results),
-            len(steps),
-            elapsed_ms,
-            " (relaxed retry)" if retried_relaxed else "",
+        steps, labeled_results, elapsed_ms, retried_relaxed = (
+            self._execute_steps_with_optional_relaxation(steps, state.get("top_k"))
         )
-        executor_results = [
-            {
-                **_trace_plan_step(
-                    steps[index] if index < len(steps) else {},
-                    state.get("top_k"),
-                ),
-                "label": label,
-                "result_chars": len(str(result or "")),
-                "empty_result": _is_empty_result_text(result),
-                "latency_ms": round(elapsed_ms / max(len(labeled_results), 1), 2),
-            }
-            for index, (label, result) in enumerate(labeled_results)
-        ]
-
+        self._log_executor_completion(
+            labeled_results,
+            steps,
+            elapsed_ms,
+            retried_relaxed,
+        )
+        executor_results = self._executor_result_trace(
+            steps,
+            labeled_results,
+            state.get("top_k"),
+            elapsed_ms,
+        )
         new_history = [f"planned_rag_search:{label}" for label, _ in labeled_results]
-        non_empty_results = [
-            (i, label, result)
-            for i, (label, result) in enumerate(labeled_results)
-            if not _is_empty_result_text(result)
-        ]
-
-        tool_messages: list[ToolMessage] = [
-            ToolMessage(
-                content=f"### {label}\n{result}"[: self._tool_result_limit],
-                tool_call_id=f"plan_{step_index}",
-                name="rag_search",
-            )
-            for step_index, label, result in non_empty_results
-        ]
+        tool_messages = self._rag_tool_messages(labeled_results)
 
         if plan.get("needs_web"):
-            web_result = web_search_for_executor(query=state["query"])
-            new_history.append("planned_web_search")
-            executor_results.append(
-                {
-                    "label": "web_search",
-                    "query": state["query"],
-                    "collection": "web",
-                    "result_chars": len(str(web_result or "")),
-                    "empty_result": _is_empty_result_text(web_result),
-                }
+            self._append_web_executor_result(
+                state["query"],
+                new_history,
+                executor_results,
+                tool_messages,
             )
-            if not _is_empty_result_text(web_result):
-                tool_messages.append(
-                    ToolMessage(
-                        content=web_result[: self._tool_result_limit],
-                        tool_call_id="plan_web",
-                        name="web_search",
-                    )
-                )
 
         if not tool_messages:
             return {
@@ -631,6 +457,119 @@ class ReActAgent:
             "tool_call_history": new_history,
             "executor_results": executor_results,
         }
+
+    def _execute_steps_with_optional_relaxation(
+        self,
+        steps: list[dict[str, Any]],
+        top_k: int | None,
+    ) -> tuple[list[dict[str, Any]], list[tuple[str, str]], float, bool]:
+        t0 = time.perf_counter()
+        labeled_results = execute_retrieval_plan(steps, top_k=top_k)
+        retried_relaxed = False
+        if self._should_retry_relaxed(labeled_results):
+            relaxed_steps = self._relaxed_steps(steps)
+            if relaxed_steps is not None:
+                relaxed_results = self._execute_relaxed_steps(relaxed_steps, top_k)
+                if any(
+                    not _is_empty_result_text(result) for _, result in relaxed_results
+                ):
+                    labeled_results = relaxed_results
+                    steps = relaxed_steps
+                    retried_relaxed = True
+
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        return steps, labeled_results, elapsed_ms, retried_relaxed
+
+    def _should_retry_relaxed(self, labeled_results: list[tuple[str, str]]) -> bool:
+        return (
+            self._retry_on_empty
+            and bool(labeled_results)
+            and all(_is_empty_result_text(result) for _, result in labeled_results)
+        )
+
+    @staticmethod
+    def _execute_relaxed_steps(
+        relaxed_steps: list[dict[str, Any]],
+        top_k: int | None,
+    ) -> list[tuple[str, str]]:
+        logger.info(
+            "[Executor] All %d step(s) empty; retrying without major/cohort filters",
+            len(relaxed_steps),
+        )
+        return execute_retrieval_plan(relaxed_steps, top_k=top_k)
+
+    @staticmethod
+    def _log_executor_completion(
+        labeled_results: list[tuple[str, str]],
+        steps: list[dict[str, Any]],
+        elapsed_ms: float,
+        retried_relaxed: bool,
+    ) -> None:
+        logger.info(
+            "[Executor] %d/%d steps completed in %.0fms%s",
+            len(labeled_results),
+            len(steps),
+            elapsed_ms,
+            " (relaxed retry)" if retried_relaxed else "",
+        )
+
+    @staticmethod
+    def _executor_result_trace(
+        steps: list[dict[str, Any]],
+        labeled_results: list[tuple[str, str]],
+        top_k: int | None,
+        elapsed_ms: float,
+    ) -> list[dict[str, Any]]:
+        return [
+            {
+                **_trace_plan_step(steps[index] if index < len(steps) else {}, top_k),
+                "label": label,
+                "result_chars": len(str(result or "")),
+                "empty_result": _is_empty_result_text(result),
+                "latency_ms": round(elapsed_ms / max(len(labeled_results), 1), 2),
+            }
+            for index, (label, result) in enumerate(labeled_results)
+        ]
+
+    def _rag_tool_messages(
+        self,
+        labeled_results: list[tuple[str, str]],
+    ) -> list[ToolMessage]:
+        return [
+            ToolMessage(
+                content=f"### {label}\n{result}"[: self._tool_result_limit],
+                tool_call_id=f"plan_{step_index}",
+                name="rag_search",
+            )
+            for step_index, label, result in _non_empty_labeled_results(labeled_results)
+        ]
+
+    def _append_web_executor_result(
+        self,
+        query: str,
+        new_history: list[str],
+        executor_results: list[dict[str, Any]],
+        tool_messages: list[ToolMessage],
+    ) -> None:
+        web_result = web_search_for_executor(query=query)
+        new_history.append("planned_web_search")
+        executor_results.append(
+            {
+                "label": "web_search",
+                "query": query,
+                "collection": "web",
+                "result_chars": len(str(web_result or "")),
+                "empty_result": _is_empty_result_text(web_result),
+            }
+        )
+        if not _is_empty_result_text(web_result):
+            tool_messages.append(
+                ToolMessage(
+                    content=web_result[: self._tool_result_limit],
+                    tool_call_id="plan_web",
+                    name="web_search",
+                )
+            )
 
     @staticmethod
     def _relaxed_steps(steps: list[dict[str, Any]]) -> list[dict[str, Any]] | None:

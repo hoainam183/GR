@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from contextvars import ContextVar
 from dataclasses import dataclass
 from threading import Lock
@@ -48,6 +48,8 @@ COLLECTION_MAP: dict[str, str] = {
 # In-memory FIFO cache keyed by (query, collection, top_k, cohort, major).
 # Avoids redundant Qdrant + reranker calls for frequently repeated queries.
 # Thread-safe: protected by _CACHE_LOCK.
+
+_MAJOR_FILTERABLE_COLLECTIONS = frozenset({"chuong_trinh"})
 
 _RAG_CACHE: dict[tuple, str] = {}
 _RAG_CACHE_MAX = 256
@@ -132,15 +134,22 @@ class _AdapterRuntime:
     tavily_tool: Any | None
 
 
+@dataclass(frozen=True)
+class _RagSearchRequest:
+    query: str
+    collection: str
+    qdrant_collection: str
+    top_k: int
+    raw_query: str
+    retrieval_query: str
+    cohort: str
+    resolved_major: str | None
+
+
 _RUNTIME: _AdapterRuntime | None = None
 _RUNTIME_LOCK = Lock()
 
 # ─── API key validation ───────────────────────────────────────────────────────
-
-# Known placeholder patterns that indicate the key has NOT been configured.
-_INVALID_KEY_PREFIXES: tuple[str, ...] = ("your-", "CHANGE", "tvly-xxx")
-_INVALID_KEY_EXACT: frozenset[str] = frozenset({"", "tvly-xxx", "CHANGE_ME"})
-
 
 def _is_valid_api_key(key: str) -> bool:
     """Return True only when *key* looks like a real, configured API key.
@@ -270,13 +279,14 @@ def execute_tool(tool_name: str, args: dict[str, Any]) -> str:
 # ─── Tool implementations ─────────────────────────────────────────────────────
 
 
-def _rag_search(
+def _build_rag_request(
     query: str,
     collection: str,
-    top_k: int | None = None,
-    resolved_cohort: str | None = None,
-    resolved_major: str | None = None,
-) -> str:
+    top_k: int | None,
+    resolved_cohort: str | None,
+    resolved_major: str | None,
+    runtime: _AdapterRuntime,
+) -> _RagSearchRequest | str:
     if not query or not query.strip():
         return "[Loi: Query rong]"
 
@@ -284,57 +294,87 @@ def _rag_search(
     if qdrant_collection is None:
         return f"[Loi: Collection '{collection}' khong hop le]"
 
-    runtime = _get_runtime()
     effective_top_k = max(1, int(top_k if top_k is not None else runtime.settings.top_k))
-
     raw_query = enrich_major_references_for_query(
         strip_personal_identifiers(query.strip())
     )
     major_codes = extract_major_codes(raw_query)
-    effective_resolved_major = resolved_major
-    if not effective_resolved_major and len(major_codes) == 1:
-        effective_resolved_major = major_codes[0]
-
-    # Only strip major keywords when the target collection has major_code
-    # metadata filtering (chuong_trinh/ctdt). Collections without major filtering
-    # (quydinh, kehoach, stsv) need major keywords preserved in the embedding
-    # to distinguish relevant chunks (e.g. PHỤ LỤC 7 vs PHỤ LỤC 5).
-    _MAJOR_FILTERABLE_COLLECTIONS = {"chuong_trinh"}
-    retrieval_query = raw_query
-    if (effective_resolved_major or len(major_codes) <= 1) and \
-            collection in _MAJOR_FILTERABLE_COLLECTIONS:
-        retrieval_query = strip_major_from_query_for_retrieval(
-            raw_query,
-            resolved_major=effective_resolved_major,
-        )
-
-    cohort = (resolved_cohort or _extract_cohort(raw_query) or "").upper()
-
-    # ── Cache lookup ──────────────────────────────────────────────────────────
-    cache_key = (
-        retrieval_query.lower(),
+    effective_major = _effective_major_hint(resolved_major, major_codes)
+    retrieval_query = _retrieval_query_for_collection(
+        raw_query,
         collection,
-        effective_top_k,
-        cohort,
-        (effective_resolved_major or "").upper(),
+        effective_major,
+        major_codes,
     )
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        logger.debug("[Cache] Hit: collection=%s query='%s'", collection, retrieval_query[:50])
-        return cached
+    cohort = (resolved_cohort or _extract_cohort(raw_query) or "").upper()
+    return _RagSearchRequest(
+        query=query,
+        collection=collection,
+        qdrant_collection=qdrant_collection,
+        top_k=effective_top_k,
+        raw_query=raw_query,
+        retrieval_query=retrieval_query,
+        cohort=cohort,
+        resolved_major=effective_major,
+    )
 
-    # ── Execute search ────────────────────────────────────────────────────────
-    raw_multiplier = max(float(getattr(runtime.settings, "raw_candidate_multiplier", 4.0)), 1.0)
-    raw_min = max(int(getattr(runtime.settings, "raw_candidate_min", 20)), 1)
-    raw_candidate_k = max(int(round(effective_top_k * raw_multiplier)), raw_min)
 
-    bge_vec = runtime.bge_embedder.embed_query(retrieval_query)
-    e5_vec = runtime.e5_embedder.embed_query(retrieval_query)
+def _effective_major_hint(
+    resolved_major: str | None,
+    major_codes: list[str],
+) -> str | None:
+    if resolved_major:
+        return resolved_major
+    return major_codes[0] if len(major_codes) == 1 else None
 
-    search_kwargs: dict[str, Any] = {
-        # ES keyword search uses raw_query to preserve "kỳ", quoted phrases,
-        # and other signals stripped from retrieval_query for vector embedding.
-        "query": raw_query,
+
+def _retrieval_query_for_collection(
+    raw_query: str,
+    collection: str,
+    resolved_major: str | None,
+    major_codes: list[str],
+) -> str:
+    if (
+        (resolved_major or len(major_codes) <= 1)
+        and collection in _MAJOR_FILTERABLE_COLLECTIONS
+    ):
+        return strip_major_from_query_for_retrieval(
+            raw_query,
+            resolved_major=resolved_major,
+        )
+    return raw_query
+
+
+def _rag_cache_key(request: _RagSearchRequest) -> tuple:
+    return (
+        request.retrieval_query.lower(),
+        request.collection,
+        request.top_k,
+        request.cohort,
+        (request.resolved_major or "").upper(),
+    )
+
+
+def _search_rag_candidates(
+    request: _RagSearchRequest,
+    runtime: _AdapterRuntime,
+) -> Any:
+    bge_vec = runtime.bge_embedder.embed_query(request.retrieval_query)
+    e5_vec = runtime.e5_embedder.embed_query(request.retrieval_query)
+    return runtime.searcher.search(
+        **_search_kwargs(request, runtime, bge_vec, e5_vec)
+    )
+
+
+def _search_kwargs(
+    request: _RagSearchRequest,
+    runtime: _AdapterRuntime,
+    bge_vec: Any,
+    e5_vec: Any,
+) -> dict[str, Any]:
+    raw_candidate_k = _raw_candidate_k(runtime.settings, request.top_k)
+    kwargs: dict[str, Any] = {
+        "query": request.raw_query,
         "bge_m3_query": bge_vec,
         "e5_query": e5_vec,
         "top_k": raw_candidate_k,
@@ -342,81 +382,133 @@ def _rag_search(
         "keyword_top_k": runtime.settings.keyword_top_k,
         "vector_pool_k": runtime.settings.vector_pool_k,
         "keyword_pool_k": runtime.settings.keyword_pool_k,
-        "active_collections": [qdrant_collection],
+        "active_collections": [request.qdrant_collection],
     }
-    if effective_resolved_major:
-        search_kwargs["resolved_major"] = effective_resolved_major
-    if cohort:
-        search_kwargs["resolved_cohort"] = cohort
+    if request.resolved_major:
+        kwargs["resolved_major"] = request.resolved_major
+    if request.cohort:
+        kwargs["resolved_cohort"] = request.cohort
+    return kwargs
 
-    results = runtime.searcher.search(**search_kwargs)
 
-    # Bypass reranker for curriculum tables because the reranker's semantic
-    # threshold tends to drop long tables when the query is very short.
-    # Check against raw_query (before major stripping) so we don't miss
-    # "kỳ" keywords that may have been stripped alongside major codes.
-    skip_rerank = False
-    curriculum_kw_check = raw_query.lower()
-    if collection == "chuong_trinh" and any(w in curriculum_kw_check for w in ["kỳ", "kì", "ky ", "ky\"", "chẵn", "lẻ", "đăng ký", "dang ky"]):
-        skip_rerank = True
+def _raw_candidate_k(settings: Settings, top_k: int) -> int:
+    raw_multiplier = max(float(getattr(settings, "raw_candidate_multiplier", 4.0)), 1.0)
+    raw_min = max(int(getattr(settings, "raw_candidate_min", 20)), 1)
+    return max(int(round(top_k * raw_multiplier)), raw_min)
 
-    if runtime.reranker is not None and not skip_rerank:
-        reranker_kwargs: dict[str, Any] = {}
-        min_top_k = int(getattr(runtime.settings, "reranker_min_top_k", 0) or 0)
-        if min_top_k > 0:
-            reranker_kwargs["min_top_k"] = min(min_top_k, effective_top_k)
-        if getattr(runtime.settings, "reranker_score_threshold", None) is not None:
-            reranker_kwargs["score_threshold"] = runtime.settings.reranker_score_threshold
-        if getattr(runtime.settings, "reranker_table_score_threshold", None) is not None:
-            reranker_kwargs["table_score_threshold"] = (
-                runtime.settings.reranker_table_score_threshold
-            )
-        # rerank() serialises internally via BGEReranker._lock — no outer lock needed.
-        results = runtime.reranker.rerank(
-            query=retrieval_query,
-            documents=results,
-            top_k=effective_top_k,
-            **reranker_kwargs,
+
+def _rerank_or_trim_results(
+    results: Any,
+    request: _RagSearchRequest,
+    runtime: _AdapterRuntime,
+) -> Any:
+    if runtime.reranker is None or _should_skip_rerank(request):
+        return results[: request.top_k]
+
+    reranked = runtime.reranker.rerank(
+        query=request.retrieval_query,
+        documents=results,
+        top_k=request.top_k,
+        **_reranker_kwargs(runtime.settings, request.top_k),
+    )
+    _log_top_reranked_results(reranked, request.qdrant_collection)
+    return reranked
+
+
+def _should_skip_rerank(request: _RagSearchRequest) -> bool:
+    curriculum_kw_check = request.raw_query.lower()
+    return request.collection == "chuong_trinh" and any(
+        word in curriculum_kw_check
+        for word in ["kỳ", "kì", "ky ", "ky\"", "chẵn", "lẻ", "đăng ký", "dang ky"]
+    )
+
+
+def _reranker_kwargs(settings: Settings, top_k: int) -> dict[str, Any]:
+    kwargs: dict[str, Any] = {}
+    min_top_k = int(getattr(settings, "reranker_min_top_k", 0) or 0)
+    if min_top_k > 0:
+        kwargs["min_top_k"] = min(min_top_k, top_k)
+    if getattr(settings, "reranker_score_threshold", None) is not None:
+        kwargs["score_threshold"] = settings.reranker_score_threshold
+    if getattr(settings, "reranker_table_score_threshold", None) is not None:
+        kwargs["table_score_threshold"] = settings.reranker_table_score_threshold
+    return kwargs
+
+
+def _log_top_reranked_results(results: Any, qdrant_collection: str) -> None:
+    if not logger.isEnabledFor(logging.DEBUG):
+        return
+    for index, doc in enumerate(results[:3]):
+        meta = doc.get("metadata") or {}
+        logger.debug(
+            "[_rag_search] Reranked #%d: rerank=%.4f col=%s h2=%.80s",
+            index,
+            doc.get("rerank_score", 0.0),
+            qdrant_collection,
+            str(meta.get("section_h2", meta.get("title", "")))[:80],
         )
-        if logger.isEnabledFor(logging.DEBUG):
-            for i, doc in enumerate(results[:3]):
-                meta = doc.get("metadata") or {}
-                logger.debug(
-                    "[_rag_search] Reranked #%d: rerank=%.4f col=%s h2=%.80s",
-                    i,
-                    doc.get("rerank_score", 0.0),
-                    qdrant_collection,
-                    str(meta.get("section_h2", meta.get("title", "")))[:80],
-                )
-    else:
-        results = results[:effective_top_k]
 
-    # Parent context expansion for agent (tight budget: 500 chars)
-    if getattr(runtime.settings, "parent_context_enabled", True):
-        try:
-            from retrieval.parent_context import ParentContextExpander
 
-            expander = ParentContextExpander(
-                qdrant_host=runtime.settings.qdrant_host,
-                qdrant_port=runtime.settings.qdrant_port,
-                max_parent_chars=getattr(runtime.settings, "parent_max_chars_agent", 500),
-            )
-            results = expander.expand_with_parents(results, qdrant_collection)
-        except Exception:
-            pass  # Graceful degradation — continue without parent
+def _expand_parent_context_if_enabled(
+    results: Any,
+    request: _RagSearchRequest,
+    settings: Settings,
+) -> Any:
+    if not getattr(settings, "parent_context_enabled", True):
+        return results
+    try:
+        from retrieval.parent_context import ParentContextExpander
 
-    # Accumulate for UI diagnostic logging (per-request, thread-safe)
+        expander = ParentContextExpander(
+            qdrant_host=settings.qdrant_host,
+            qdrant_port=settings.qdrant_port,
+            max_parent_chars=getattr(settings, "parent_max_chars_agent", 500),
+        )
+        return expander.expand_with_parents(results, request.qdrant_collection)
+    except Exception:
+        return results
+
+
+def _rag_search(
+    query: str,
+    collection: str,
+    top_k: int | None = None,
+    resolved_cohort: str | None = None,
+    resolved_major: str | None = None,
+) -> str:
+    runtime = _get_runtime()
+    request = _build_rag_request(
+        query=query,
+        collection=collection,
+        top_k=top_k,
+        resolved_cohort=resolved_cohort,
+        resolved_major=resolved_major,
+        runtime=runtime,
+    )
+    if isinstance(request, str):
+        return request
+
+    cache_key = _rag_cache_key(request)
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        logger.debug(
+            "[Cache] Hit: collection=%s query='%s'",
+            request.collection,
+            request.retrieval_query[:50],
+        )
+        return cached
+
+    results = _search_rag_candidates(request, runtime)
+    results = _rerank_or_trim_results(results, request, runtime)
+    results = _expand_parent_context_if_enabled(results, request, runtime.settings)
     _append_agent_docs(results)
 
     if not results:
         return "[Khong tim thay thong tin trong co so du lieu]"
 
-    formatted = _format_search_results(results, collection, runtime.settings)
-
-    # ── Cache write (skip system errors) ─────────────────────────────────────
+    formatted = _format_search_results(results, request.collection, runtime.settings)
     if not formatted.startswith("[Loi"):
         _cache_set(cache_key, formatted)
-
     return formatted
 
 
@@ -761,9 +853,9 @@ def _format_web_results(results: Any) -> str:
     # Accumulate for UI diagnostic logging (per-request, thread-safe)
     _append_agent_docs(all_results)
 
-    runtime = _get_runtime()
-    web_count = int(getattr(runtime.settings, "tavily_web_result_count", 3) or 3)
-    web_char_limit = int(getattr(runtime.settings, "tavily_web_content_char_limit", 1500) or 1500)
+    settings = _formatting_settings()
+    web_count = int(getattr(settings, "tavily_web_result_count", 3) or 3)
+    web_char_limit = int(getattr(settings, "tavily_web_content_char_limit", 1500) or 1500)
 
     chunks: list[str] = []
     for index, item in enumerate(all_results[:web_count], 1):
@@ -784,6 +876,12 @@ def _format_web_results(results: Any) -> str:
 
 
 # ─── Utility helpers ──────────────────────────────────────────────────────────
+
+
+def _formatting_settings() -> Settings:
+    if _RUNTIME is not None:
+        return _RUNTIME.settings
+    return Settings()
 
 
 def _extract_cohort(text: str) -> str | None:
