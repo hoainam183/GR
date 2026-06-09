@@ -94,13 +94,20 @@ Nguyên tắc:
 - cohort_hint: mã khóa (K65, K70...) — dùng khi query liên quan đến khóa cụ thể
 - Tối đa 4 steps — ưu tiên ít steps, query cụ thể
 - needs_web=true CHỈ khi câu hỏi cần thông tin bên ngoài database trường
-- Rút gọn query thành từ khóa cốt lõi, bỏ các từ thừa. KHÔNG đưa mã sinh viên hoặc thông tin cá nhân vào query.
+- KHÔNG đưa mã sinh viên hoặc thông tin cá nhân vào query.
+- ⚠️ QUAN TRỌNG: Với collection quy_dinh, PHẢI giữ tên ngành và mã ngành trong query (VD: "IT-E6", "Việt-Nhật", "CNTT Việt-Nhật"). Collection quy_dinh không lọc được theo mã ngành, nên query text là cách DUY NHẤT để tìm đúng quy định cho ngành cụ thể.
+- Với collection chuong_trinh: có thể rút gọn query vì collection này lọc được theo major_hint.
 - Câu hỏi về "điều kiện tốt nghiệp" hoặc "chuẩn đầu ra" → sinh ít nhất 2 steps:
   1. quy_dinh: điều kiện ngoại ngữ, GPA, kỷ luật
   2. chuong_trinh: yêu cầu tín chỉ, học phần bắt buộc của ngành
 - Khi query chứa mã ngành cụ thể → đặt major_hint cho MỌI step
 
-Ví dụ:
+Ví dụ 1 — Câu hỏi tốt nghiệp ngành cụ thể:
 Input: "Điều kiện tốt nghiệp ngành CNTT Việt-Nhật IT-E6"
 Output:
-{"steps": [{"query": "điều kiện ngoại ngữ tốt nghiệp", "collection": "quy_dinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ngoai_ngu"},{"query": "yêu cầu hoàn thành chương trình đào tạo tốt nghiệp", "collection": "chuong_trinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ctdt_tot_nghiep"}], "needs_web": false, "reasoning": "Tốt nghiệp cần kiểm tra cả ngoại ngữ (quy_dinh) và CTĐT (chuong_trinh)"}"""
+{"steps": [{"query": "điều kiện ngoại ngữ tốt nghiệp CNTT Việt-Nhật IT-E6", "collection": "quy_dinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ngoai_ngu"},{"query": "yêu cầu hoàn thành chương trình đào tạo tốt nghiệp", "collection": "chuong_trinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ctdt_tot_nghiep"}], "needs_web": false, "reasoning": "Tốt nghiệp cần kiểm tra cả ngoại ngữ (quy_dinh) và CTĐT (chuong_trinh)"}
+
+Ví dụ 2 — So sánh 2 ngành:
+Input: "So sánh ngoại ngữ giữa IT1 và IT-E6"
+Output:
+{"steps": [{"query": "chuẩn ngoại ngữ tốt nghiệp CNTT ICT IT1", "collection": "quy_dinh", "major_hint": "IT1", "cohort_hint": null, "label": "ngoai_ngu_IT1"},{"query": "chuẩn ngoại ngữ tốt nghiệp CNTT Việt-Nhật IT-E6", "collection": "quy_dinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ngoai_ngu_ITE6"}], "needs_web": false, "reasoning": "So sánh cần tìm ngoại ngữ riêng cho từng ngành"}"""

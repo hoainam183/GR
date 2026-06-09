@@ -90,14 +90,25 @@ def _normalise_plan_steps_for_entities(
         extract_major_codes,
     )
 
-    source_major = _single_extracted_entity(extract_major_codes(source_query))
-    source_cohort = _single_extracted_entity(extract_cohort_codes(source_query))
+    all_source_majors = extract_major_codes(source_query)
+    all_source_cohorts = extract_cohort_codes(source_query)
+    source_major = _single_extracted_entity(all_source_majors)
+    source_cohort = _single_extracted_entity(all_source_cohorts)
+    # For comparison queries: source has 2+ majors/cohorts → use per-step hints
+    source_has_multiple_majors = len(all_source_majors) >= 2
+    source_has_multiple_cohorts = len(all_source_cohorts) >= 2
     trace: dict[str, Any] = {
         "applied": False,
         "major_hint": source_major,
         "cohort_hint": source_cohort,
+        "multi_major_mode": source_has_multiple_majors,
     }
-    if not source_major and not source_cohort:
+    if (
+        not source_major
+        and not source_cohort
+        and not source_has_multiple_majors
+        and not source_has_multiple_cohorts
+    ):
         return steps, trace
 
     normalised_steps: list[Any] = []
@@ -131,10 +142,18 @@ def _normalise_plan_steps_for_entities(
 
         if query and collection in _ENTITY_SCOPED_COLLECTIONS:
             scoped_query = query
-            if source_major and not step_major_codes:
-                scoped_query = f"{scoped_query} ngành {source_major}"
-            if source_cohort and not step_cohort_codes:
-                scoped_query = f"{scoped_query} {source_cohort}"
+            # Use per-step major_hint when source has multiple majors
+            step_major_to_inject = source_major
+            if not step_major_to_inject and source_has_multiple_majors:
+                step_major_to_inject = _clean_plan_hint(step.get("major_hint"))
+            if step_major_to_inject and not step_major_codes:
+                scoped_query = f"{scoped_query} ngành {step_major_to_inject}"
+            # Use per-step cohort_hint when source has multiple cohorts
+            step_cohort_to_inject = source_cohort
+            if not step_cohort_to_inject and source_has_multiple_cohorts:
+                step_cohort_to_inject = _clean_plan_hint(step.get("cohort_hint"))
+            if step_cohort_to_inject and not step_cohort_codes:
+                scoped_query = f"{scoped_query} {step_cohort_to_inject}"
             if scoped_query != query:
                 step["query"] = " ".join(scoped_query.split())
                 changed = True
