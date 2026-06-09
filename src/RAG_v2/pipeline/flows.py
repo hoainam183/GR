@@ -3015,6 +3015,17 @@ def rag_flow(
     }
 
 
+def _chunk_cached_answer(answer: str, size: int = 60) -> Generator[str, None, None]:
+    """Split a cached answer into fixed-width pieces for progressive SSE rendering.
+
+    A cache hit otherwise yields the whole answer as one chunk, which renders
+    instantly with no streaming feel. Concatenating these pieces reproduces the
+    original answer byte-for-byte.
+    """
+    for i in range(0, len(answer), size):
+        yield answer[i : i + size]
+
+
 def rag_flow_stream(
     *,
     question: str,
@@ -3095,7 +3106,7 @@ def rag_flow_stream(
                     metadata_out["tool_calls"] = []
 
                 def _cached_stream_early() -> Generator[str, None, None]:
-                    yield _qcached["answer"]
+                    yield from _chunk_cached_answer(_qcached["answer"])
 
                 return _cached_stream_early(), _qcached["sources"]
 
@@ -3744,7 +3755,7 @@ def rag_flow_stream(
                     }
 
                 def _cached_stream() -> Generator[str, None, None]:
-                    yield cached["answer"]
+                    yield from _chunk_cached_answer(cached["answer"])
                     timings_ms["stream_first_token"] = 0.1
                     timings_ms["stream_generate"] = 0.1
                     timings_ms["flow_total"] = _elapsed_ms(flow_t0)
@@ -3752,21 +3763,55 @@ def rag_flow_stream(
 
                 return _cached_stream(), cached["sources"]
 
-    generate_stream = chat_model.generate_stream(
-        query=question, context=full_context, history=trimmed, mode="rag"
-    )
+    def _open_stream(ctx: str, hist) -> Generator[str, None, None]:
+        return chat_model.generate_stream(
+            query=question, context=ctx, history=hist, mode="rag"
+        )
+
     def _timed_stream() -> Generator[str, None, None]:
         stream_t0 = time.perf_counter()
         first_token_ms: Optional[float] = None
         generated_chars = 0
         full_cached_answer = []
 
-        for chunk in generate_stream:
+        # Open the stream + pull the first chunk inside a guard so a context
+        # overflow can be recovered with a reduced budget BEFORE any token is
+        # sent to the client (mirrors the non-streaming rag_flow recovery).
+        try:
+            iterator = _open_stream(full_context, trimmed)
+            pending = next(iterator, None)
+        except Exception as exc:
+            if not _is_context_length_error(exc):
+                raise
+            logger.warning(
+                "Stream context too long, retrying with reduced budget",
+                exc_info=True,
+            )
+            reduced_context = _format_context(
+                reranked[:2],
+                per_doc_char_limit=600,
+                total_char_budget=1500,
+            )
+            timings_ms["context_recovery"] = 1.0
+            try:
+                iterator = _open_stream(reduced_context, _trim_history(history, limit=3))
+                pending = next(iterator, None)
+            except Exception as retry_exc:
+                if _is_context_length_error(retry_exc):
+                    raise RuntimeError(
+                        "Ngữ cảnh hội thoại đang quá dài. "
+                        "Vui lòng bắt đầu phiên mới hoặc hỏi ngắn gọn hơn."
+                    ) from retry_exc
+                raise
+
+        chunk = pending
+        while chunk is not None:
             if first_token_ms is None:
                 first_token_ms = _elapsed_ms(stream_t0)
             generated_chars += len(chunk)
             full_cached_answer.append(chunk)
             yield chunk
+            chunk = next(iterator, None)
 
         timings_ms["stream_first_token"] = round(first_token_ms or 0.0, 2)
         timings_ms["stream_generate"] = _elapsed_ms(stream_t0)

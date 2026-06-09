@@ -108,6 +108,28 @@ def _elapsed_ms(start: float) -> float:
     return round((time.perf_counter() - start) * 1000, 2)
 
 
+def _chunk_for_stream(text: str, size: int = 24) -> Generator[str, None, None]:
+    """Split a finished answer into small pieces for animated delivery.
+
+    Used for answers computed synchronously (e.g. the agent path) so the UI
+    animates them in instead of dumping the whole block at once. Splits on
+    spaces so markdown tokens are not torn mid-word; newlines inside tokens
+    survive. Runs of multiple spaces collapse to a single space in the deltas.
+    """
+    if not text:
+        return
+    buf: List[str] = []
+    length = 0
+    for word in text.split(" "):
+        buf.append(word)
+        length += len(word) + 1
+        if length >= size:
+            yield " ".join(buf) + " "
+            buf, length = [], 0
+    if buf:
+        yield " ".join(buf)
+
+
 def _merge_timings(*timings: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """Merge timing dictionaries while preserving insertion order."""
     merged: Dict[str, Any] = {}
@@ -1235,7 +1257,8 @@ class RAGPipeline:
         top_k: Optional[int] = None,
         session_id: Optional[str] = None,
         user_context: Optional[Dict[str, Any]] = None,
-    ) -> Generator[str, None, None]:
+        metadata_out: Optional[Dict[str, Any]] = None,
+    ) -> Generator[Any, None, None]:
         """Stream the answer token-by-token.
 
         Routing:
@@ -1243,12 +1266,18 @@ class RAGPipeline:
           - complex    → LangGraph agent (answer delivered as a single chunk)
           - simple/rag → RAG v2 streaming pipeline
 
-        All metadata (mode, timings, reflected_question, etc.) is stored on
-        ``self.last_*`` attrs after the generator is exhausted, so the route
-        handler can read them to emit a ``metadata`` SSE event.
+        Metadata (mode, timings, reflected_question, etc.) is written to the
+        per-request ``metadata_out`` dict (if provided) as the final step of the
+        generator, so the route handler can read it to emit a ``metadata`` SSE
+        event WITHOUT racing on shared state. ``self.last_*`` attrs are still
+        populated for in-call Mongo logging, but the pipeline is a singleton —
+        callers must NOT read ``self.last_*`` after the generator returns when
+        concurrent requests are possible; use ``metadata_out`` instead.
 
         Yields:
-            Text chunks as they arrive from the LLM.
+            Text chunks as they arrive from the LLM. The ``complex`` branch may
+            also yield ``{"type": "status", ...}`` dicts (progress events) — the
+            route forwards these; only ``str`` chunks form the answer.
         """
         runtime = self._llm_runtime_snapshot()
         effective_top_k = top_k or runtime.cfg["top_k"]
@@ -1332,6 +1361,14 @@ class RAGPipeline:
             self.last_mode = "agent"
             self.last_intent = "complex"
 
+            # Progress event — agent.run() blocks for ~15-30s; without this the
+            # UI shows a frozen spinner the whole time.
+            yield {
+                "type": "status",
+                "stage": "retrieval",
+                "message": "Đang tìm kiếm tài liệu liên quan...",
+            }
+
             reflection_prompt = (
                 ref_result.get("prompt") if isinstance(ref_result, dict) else None
             )
@@ -1376,10 +1413,20 @@ class RAGPipeline:
                 )
                 answer = "Xin lỗi, có lỗi xảy ra khi xử lý câu hỏi. Vui lòng thử lại."
 
-            # Yield the full agent answer as a single chunk
+            # Chunk the finished agent answer so the UI animates it in instead
+            # of dumping the whole block. (True token-streaming of the agent's
+            # synthesis step is a future change — see plan follow-ups.)
             if answer:
+                yield {
+                    "type": "status",
+                    "stage": "synthesis",
+                    "message": "Đang tổng hợp câu trả lời...",
+                }
+                # Only the str answer feeds full_answer_chunks (it is "".join()-ed
+                # for logging below) — never append the status dicts.
                 full_answer_chunks.append(answer)
-                yield answer
+                for piece in _chunk_for_stream(answer):
+                    yield piece
 
         # ── Simple / RAG branch ───────────────────────────────────────────────
         else:
@@ -1511,3 +1558,34 @@ class RAGPipeline:
             self.last_turn_id = turn_id
         else:
             self.last_turn_id = None
+
+        # ── Per-request metadata export (avoids self.last_* cross-request race) ──
+        # The pipeline is a singleton; reading self.last_* in the route after the
+        # generator returns races with concurrent streams. Snapshot into the
+        # caller-owned dict here, as the final statement of the generator.
+        if metadata_out is not None:
+            metadata_out.update(
+                {
+                    "mode": self.last_mode,
+                    "route": self.last_intent,
+                    "intent": self.last_intent,
+                    "num_sources": len(self.last_sources),
+                    "retrieved_documents": self.last_sources,
+                    "timings_ms": self.last_timings,
+                    "reflected_question": self.last_reflected_question,
+                    "target_collections": self.last_target_collections,
+                    "collection_scores": self.last_collection_scores,
+                    "routing_probabilities": self.last_routing_probabilities,
+                    "applied_filters": self.last_applied_filters,
+                    "collection_results": self.last_collection_results,
+                    "context_trace": self.last_context_trace,
+                    "rerank_trace": self.last_rerank_trace,
+                    "answer_quality_gate": self.last_answer_quality_gate,
+                    "fusion_weights": self.last_fusion_weights,
+                    "agent_trace": self.last_agent_trace,
+                    "tools_used": self.last_tools_used,
+                    "tool_calls": self.last_tool_calls,
+                    "iterations": self.last_iterations,
+                    "turn_id": self.last_turn_id,
+                }
+            )

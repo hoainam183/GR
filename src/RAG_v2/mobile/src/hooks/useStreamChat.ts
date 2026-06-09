@@ -15,6 +15,7 @@ import { normalizeV3Response, cleanText, sendMessageV3 } from '@rag/shared';
 export interface StreamChatHandlers {
   onSessionId?: (sessionId: string) => void;
   onToken?: (delta: string) => void;
+  onStatus?: (status: { stage?: string; message: string }) => void;
   onMetadata?: (meta: Partial<ChatV3Response>) => void;
   onDone?: () => void;
   onError?: (error: string) => void;
@@ -90,6 +91,15 @@ export const useStreamChat = () => {
               receivedFirstToken = true;
               handlers.onToken?.(delta);
             }
+          } else if (type === 'status') {
+            const message =
+              typeof data.message === 'string' ? data.message : '';
+            if (message) {
+              handlers.onStatus?.({
+                stage: typeof data.stage === 'string' ? data.stage : undefined,
+                message,
+              });
+            }
           } else if (type === 'metadata') {
             const meta = normalizeV3Response(data, request.session_id);
             handlers.onMetadata?.(meta);
@@ -106,6 +116,8 @@ export const useStreamChat = () => {
             es.close();
           }
         } catch {
+          // Heartbeat comment frames (": ...") are not JSON and not tokens.
+          if (event.data.startsWith(':')) return;
           // Plain text token fallback
           receivedFirstToken = true;
           handlers.onToken?.(event.data);

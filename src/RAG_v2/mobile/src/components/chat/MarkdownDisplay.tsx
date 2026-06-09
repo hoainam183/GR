@@ -2,7 +2,7 @@
  * Markdown display — wraps react-native-markdown-display with app theme.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Markdown from 'react-native-markdown-display';
 import { StyleSheet } from 'react-native';
 import { useAppTheme, type AppColors } from '../../theme/theme';
@@ -13,7 +13,7 @@ interface Props {
 
 const MarkdownDisplay = ({ content }: Props) => {
   const { colors } = useAppTheme();
-  const markdownStyles = createMarkdownStyles(colors);
+  const markdownStyles = useMemo(() => createMarkdownStyles(colors), [colors]);
 
   return <Markdown style={markdownStyles}>{content}</Markdown>;
 };
@@ -138,4 +138,4 @@ const createMarkdownStyles = (colors: AppColors) => StyleSheet.create({
   },
 });
 
-export default MarkdownDisplay;
+export default React.memo(MarkdownDisplay);

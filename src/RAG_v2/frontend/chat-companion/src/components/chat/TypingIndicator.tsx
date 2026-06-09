@@ -1,8 +1,9 @@
 interface TypingIndicatorProps {
   phase?: 'thinking' | 'streaming';
+  label?: string;
 }
 
-const TypingIndicator = ({ phase = 'thinking' }: TypingIndicatorProps) => {
+const TypingIndicator = ({ phase = 'thinking', label }: TypingIndicatorProps) => {
   const isThinking = phase === 'thinking';
 
   return (
@@ -25,8 +26,14 @@ const TypingIndicator = ({ phase = 'thinking' }: TypingIndicatorProps) => {
       
       {isThinking ? (
         <div className="flex flex-col gap-2 rounded-2xl rounded-tl-sm bg-chat-assistant px-4 py-3 shadow-sm border border-border w-48">
-          <div className="h-4 w-full skeleton-thinking"></div>
-          <div className="h-4 w-3/4 skeleton-thinking"></div>
+          {label ? (
+            <span className="text-sm italic text-muted-foreground">{label}</span>
+          ) : (
+            <>
+              <div className="h-4 w-full skeleton-thinking"></div>
+              <div className="h-4 w-3/4 skeleton-thinking"></div>
+            </>
+          )}
         </div>
       ) : (
         <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-chat-assistant px-4 py-3 shadow-sm border border-border">

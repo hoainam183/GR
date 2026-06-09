@@ -23,6 +23,7 @@ export interface ResolvedChatIdentity {
 export interface ChatStreamHandlers {
   onSessionId?: (sessionId: string) => void;
   onToken?: (delta: string) => void;
+  onStatus?: (status: { stage?: string; message: string }) => void;
   onMetadata?: (meta: Partial<ChatV3Response>) => void;
   onDone?: () => void;
   onError?: (message: string) => void;
@@ -499,6 +500,15 @@ export const sendMessageStream = async (
           if (delta) {
             answer += delta;
             handlers.onToken?.(delta);
+          }
+        } else if (type === 'status') {
+          const message =
+            typeof parsed.message === 'string' ? parsed.message : '';
+          if (message) {
+            handlers.onStatus?.({
+              stage: typeof parsed.stage === 'string' ? parsed.stage : undefined,
+              message,
+            });
           }
         } else if (type === 'metadata') {
           // Parse the metadata payload using the same normalizer as V3 responses

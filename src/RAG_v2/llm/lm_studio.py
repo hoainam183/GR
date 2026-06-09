@@ -93,16 +93,46 @@ class LMStudioLLM(BaseLLM):
     ) -> Generator[str, None, None]:
         messages = self._build_messages(query, context, history, mode)
 
-        stream = self._client.chat.completions.create(
-            model=self.model,
-            messages=cast(List[ChatCompletionMessageParam], messages),
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            stream=True,
-        )
+        # Retry only the stream-open + first content chunk: once a token has been
+        # yielded to the client a partial stream cannot be safely replayed.
+        last_exc: Optional[Exception] = None
+        iterator = None
+        first_delta: Optional[str] = None
+        for attempt in range(_MAX_RETRIES):
+            try:
+                stream = self._client.chat.completions.create(
+                    model=self.model,
+                    messages=cast(List[ChatCompletionMessageParam], messages),
+                    temperature=self.temperature,
+                    max_tokens=self.max_tokens,
+                    stream=True,
+                )
+                iterator = iter(stream)
+                for first_chunk in iterator:
+                    delta = first_chunk.choices[0].delta.content
+                    if delta:
+                        first_delta = delta
+                        break
+                break
+            except RateLimitError as exc:
+                last_exc = exc
+                iterator = None
+                if attempt < _MAX_RETRIES - 1:
+                    logger.warning(
+                        "LMStudioLLM stream rate-limited [%s] (attempt %d/%d), retrying",
+                        mode,
+                        attempt + 1,
+                        _MAX_RETRIES,
+                    )
+                    time.sleep(_BASE_RETRY_DELAY)
+        else:
+            raise last_exc  # type: ignore[misc]
 
         total_len = 0
-        for chunk in stream:
+        if first_delta:
+            total_len += len(first_delta)
+            yield first_delta
+        for chunk in iterator or []:
             delta = chunk.choices[0].delta.content
             if delta:
                 total_len += len(delta)

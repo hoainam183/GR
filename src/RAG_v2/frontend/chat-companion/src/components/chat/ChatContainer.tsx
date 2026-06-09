@@ -155,6 +155,7 @@ const buildUserContextFromUser = (
 const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatPhase, setChatPhase] = useState<'idle' | 'thinking' | 'streaming'>('idle');
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [lastResponsePayload, setLastResponsePayload] = useState<ChatResponse | null>(null);
   // activeSessionId tracks the current session; initialised from the URL param
@@ -163,6 +164,9 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   const activeSessionIdRef = useRef<string | undefined>(sessionIdProp);
   // Guards async callbacks after component unmount (e.g. logout)
   const isMountedRef = useRef(true);
+  // Token batching (B3): buffer deltas, flush via rAF to cut re-renders per token.
+  const tokenBufferRef = useRef('');
+  const flushRafRef = useRef<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   // Set to true before calling navigate() from within handleSendMessage so the
@@ -210,7 +214,14 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   // Mark unmounted on cleanup
   useEffect(() => {
     isMountedRef.current = true;
-    return () => { isMountedRef.current = false; };
+    return () => {
+      isMountedRef.current = false;
+      if (flushRafRef.current !== null) {
+        cancelAnimationFrame(flushRafRef.current);
+        flushRafRef.current = null;
+      }
+      tokenBufferRef.current = '';
+    };
   }, []);
 
   const { showScrollButton, forceScrollToBottom } = useSmartScroll(
@@ -317,6 +328,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
 
     setMessages((prev) => [...prev, userMessage]);
     setChatPhase('thinking');
+    setStatusMessage(null);
     forceScrollToBottom();
 
     let responseSessionId = capturedSessionId;
@@ -324,6 +336,38 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
 
     const isCurrentRequest = () =>
       !capturedSessionId || activeSessionIdRef.current === capturedSessionId || activeSessionIdRef.current === responseSessionId;
+
+    // Flush buffered tokens into the assistant message in a single update.
+    const drainTokenBuffer = () => {
+      if (flushRafRef.current !== null) {
+        cancelAnimationFrame(flushRafRef.current);
+        flushRafRef.current = null;
+      }
+      const buffered = tokenBufferRef.current;
+      tokenBufferRef.current = '';
+      if (!buffered || !isMountedRef.current || !isCurrentRequest()) return;
+      setMessages((prev) => {
+        const existing = prev.find((message) => message.id === assistantMessageId);
+        if (!existing) {
+          return [
+            ...prev,
+            {
+              id: assistantMessageId,
+              role: 'assistant',
+              content: buffered,
+              timestamp: new Date(),
+              sessionId: responseSessionId,
+              isStreaming: true,
+            },
+          ];
+        }
+        return prev.map((message) =>
+          message.id === assistantMessageId
+            ? { ...message, content: `${message.content}${buffered}`, isStreaming: true }
+            : message,
+        );
+      });
+    };
 
     const persistPending = (sessionId: string) => {
       writePendingTurn({
@@ -375,34 +419,25 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
               queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
             }
           },
+          onStatus: (status) => {
+            if (!isMountedRef.current || !isCurrentRequest()) return;
+            setStatusMessage(status.message);
+          },
           onToken: (delta) => {
             if (!isMountedRef.current || !isCurrentRequest()) return;
             setChatPhase('streaming');
-            setMessages((prev) => {
-              const existing = prev.find((message) => message.id === assistantMessageId);
-              if (!existing) {
-                return [
-                  ...prev,
-                  {
-                    id: assistantMessageId,
-                    role: 'assistant',
-                    content: delta,
-                    timestamp: new Date(),
-                    sessionId: responseSessionId,
-                    isStreaming: true,
-                  },
-                ];
-              }
-              return prev.map((message) =>
-                message.id === assistantMessageId
-                  ? { ...message, content: `${message.content}${delta}`, isStreaming: true }
-                  : message,
-              );
-            });
+            setStatusMessage(null);
+            // Buffer the delta and flush on the next animation frame so a burst
+            // of tokens coalesces into a single React update.
+            tokenBufferRef.current += delta;
+            if (flushRafRef.current === null) {
+              flushRafRef.current = requestAnimationFrame(drainTokenBuffer);
+            }
           },
           onMetadata: (meta) => {
             receivedMetadata = meta;
             if (!isMountedRef.current || !isCurrentRequest()) return;
+            drainTokenBuffer();
             responseSessionId = meta.session_id || responseSessionId;
             setMessages((prev) =>
               prev.map((message) =>
@@ -425,6 +460,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             }
           },
           onError: () => {
+            drainTokenBuffer();
             clearPendingTurn(responseSessionId);
           },
         },
@@ -432,6 +468,9 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
 
       // Component was unmounted (e.g. logout) — bail out entirely
       if (!isMountedRef.current) return;
+
+      // Flush any tokens still buffered before applying final metadata.
+      drainTokenBuffer();
 
       responseSessionId = response.sessionId || responseSessionId;
       if (!isCurrentRequest()) {
@@ -490,6 +529,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
       }
     } catch (error) {
+      drainTokenBuffer();
       // Only show error in the session that initiated the request
       if (isMountedRef.current && isCurrentRequest()) {
         console.error('Failed to get response:', error);
@@ -515,6 +555,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
 
       if (isMountedRef.current && shouldClearLoading) {
         setChatPhase('idle');
+        setStatusMessage(null);
       }
     }
   };
@@ -586,7 +627,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} showDebug={true} />
             ))}
-            {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} />}
+            {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} label={statusMessage ?? undefined} />}
             <div ref={messagesEndRef} />
           </div>
         )}

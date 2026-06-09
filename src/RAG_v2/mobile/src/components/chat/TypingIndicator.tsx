@@ -12,6 +12,7 @@ import { useAppTheme, type AppColors } from '../../theme/theme';
 
 interface Props {
   phase?: 'thinking' | 'streaming';
+  label?: string;
 }
 
 const DOT_SIZE = 8;
@@ -56,7 +57,7 @@ const AnimatedDot = ({ delay }: { delay: number }) => {
   );
 };
 
-const TypingIndicator = ({ phase = 'thinking' }: Props) => {
+const TypingIndicator = ({ phase = 'thinking', label }: Props) => {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -69,7 +70,7 @@ const TypingIndicator = ({ phase = 'thinking' }: Props) => {
           <AnimatedDot delay={300} />
         </View>
         <Text style={styles.label}>
-          {phase === 'thinking' ? 'Đang suy nghĩ...' : 'Đang trả lời...'}
+          {label ?? (phase === 'thinking' ? 'Đang suy nghĩ...' : 'Đang trả lời...')}
         </Text>
       </View>
     </View>

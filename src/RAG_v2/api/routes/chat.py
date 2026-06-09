@@ -407,8 +407,13 @@ async def chat_stream(
 
         Emits JSON payloads as SSE ``data`` frames:
             - ``{"type":"session","session_id":"..."}``
+            - ``{"type":"status","stage":"...","message":"..."}`` (progress, agent path)
             - ``{"type":"token","delta":"..."}``
+            - ``{"type":"error","error":"..."}``
+            - ``{"type":"metadata", ...}``
             - ``{"type":"done"}``
+        Also emits ``: heartbeat`` SSE comment frames every ~15s of idle to keep
+        proxies/load balancers from closing the connection during long requests.
     """
     pipeline = getattr(request.app.state, "pipeline", None)
     if pipeline is None:
@@ -442,6 +447,9 @@ async def chat_stream(
 
         loop = asyncio.get_running_loop()  # S-4: fixed from deprecated get_event_loop()
         queue: asyncio.Queue = asyncio.Queue()
+        # Per-request metadata sink — avoids racing on the singleton pipeline's
+        # self.last_* attrs when concurrent streams run (see query_stream docstring).
+        request_metadata: dict[str, Any] = {}
 
         def _produce():
             try:
@@ -451,6 +459,7 @@ async def chat_stream(
                     top_k=body.top_k,
                     session_id=session_id,
                     user_context=user_context_payload,
+                    metadata_out=request_metadata,
                 ):
                     loop.call_soon_threadsafe(queue.put_nowait, chunk)
             except Exception as exc:
@@ -466,9 +475,35 @@ async def chat_stream(
         producer_error = False
 
         while True:
-            chunk = await queue.get()
+            # Client gone? Stop forwarding. NOTE: the _produce thread runs a
+            # synchronous generator that can't be force-killed mid-step, so any
+            # in-flight LLM/agent call still finishes in the background — but we
+            # stop draining the queue and free this response coroutine promptly.
+            if await request.is_disconnected():
+                logger.info("/chat/stream client disconnected; stopping forward")
+                break
+            try:
+                chunk = await asyncio.wait_for(queue.get(), timeout=15)
+            except asyncio.TimeoutError:
+                if await request.is_disconnected():
+                    logger.info(
+                        "/chat/stream client disconnected (idle); stopping"
+                    )
+                    break
+                # Heartbeat comment frame — ignored by SSE clients, keeps the
+                # connection alive through proxies during long agent runs.
+                yield ": heartbeat\n\n"
+                continue
             if isinstance(chunk, dict) and chunk.get("type") == "error":
                 producer_error = True
+                yield (
+                    "data: "
+                    + json.dumps(chunk, ensure_ascii=False)
+                    + "\n\n"
+                )
+                continue
+            if isinstance(chunk, dict) and chunk.get("type") == "status":
+                # Progress event (e.g. agent retrieval/synthesis stages).
                 yield (
                     "data: "
                     + json.dumps(chunk, ensure_ascii=False)
@@ -486,41 +521,41 @@ async def chat_stream(
                     try:
                         meta_payload: dict[str, Any] = {
                             "type": "metadata",
-                            "mode": getattr(pipeline, "last_mode", "rag_v2"),
-                            "route": getattr(pipeline, "last_intent", "rag"),
-                            "intent": getattr(pipeline, "last_intent", "rag"),
-                            "num_sources": len(getattr(pipeline, "last_sources", [])),
-                            "retrieved_documents": getattr(pipeline, "last_sources", []),
-                            "timings_ms": getattr(pipeline, "last_timings", {}),
-                            "reflected_question": getattr(
-                                pipeline, "last_reflected_question", None
+                            "mode": request_metadata.get("mode", "rag_v2"),
+                            "route": request_metadata.get("route", "rag"),
+                            "intent": request_metadata.get("intent", "rag"),
+                            "num_sources": request_metadata.get("num_sources", 0),
+                            "retrieved_documents": request_metadata.get(
+                                "retrieved_documents", []
                             ),
-                            "target_collections": getattr(
-                                pipeline, "last_target_collections", None
+                            "timings_ms": request_metadata.get("timings_ms", {}),
+                            "reflected_question": request_metadata.get(
+                                "reflected_question"
                             ),
-                            "collection_scores": getattr(
-                                pipeline, "last_collection_scores", None
+                            "target_collections": request_metadata.get(
+                                "target_collections"
                             ),
-                            "routing_probabilities": getattr(
-                                pipeline, "last_routing_probabilities", None
+                            "collection_scores": request_metadata.get(
+                                "collection_scores"
                             ),
-                            "applied_filters": getattr(
-                                pipeline, "last_applied_filters", None
+                            "routing_probabilities": request_metadata.get(
+                                "routing_probabilities"
                             ),
-                            "collection_results": getattr(
-                                pipeline, "last_collection_results", None
+                            "applied_filters": request_metadata.get("applied_filters"),
+                            "collection_results": request_metadata.get(
+                                "collection_results"
                             ),
-                            "context_trace": getattr(pipeline, "last_context_trace", None),
-                            "rerank_trace": getattr(pipeline, "last_rerank_trace", None),
-                            "answer_quality_gate": getattr(
-                                pipeline, "last_answer_quality_gate", None
+                            "context_trace": request_metadata.get("context_trace"),
+                            "rerank_trace": request_metadata.get("rerank_trace"),
+                            "answer_quality_gate": request_metadata.get(
+                                "answer_quality_gate"
                             ),
-                            "fusion_weights": getattr(pipeline, "last_fusion_weights", None),
-                            "agent_trace": getattr(pipeline, "last_agent_trace", None),
-                            "tools_used": getattr(pipeline, "last_tools_used", []),
-                            "tool_calls": getattr(pipeline, "last_tool_calls", []),
-                            "iterations": getattr(pipeline, "last_iterations", 0),
-                            "turn_id": getattr(pipeline, "last_turn_id", None),
+                            "fusion_weights": request_metadata.get("fusion_weights"),
+                            "agent_trace": request_metadata.get("agent_trace"),
+                            "tools_used": request_metadata.get("tools_used", []),
+                            "tool_calls": request_metadata.get("tool_calls", []),
+                            "iterations": request_metadata.get("iterations", 0),
+                            "turn_id": request_metadata.get("turn_id"),
                         }
                         yield (
                             "data: "
@@ -536,10 +571,13 @@ async def chat_stream(
                     + "\n\n"
                 )
                 break
+            if not isinstance(chunk, str):
+                # Defensive: only str chunks are answer tokens; drop anything else.
+                continue
             yield (
                 "data: "
                 + json.dumps(
-                    {"type": "token", "delta": str(chunk)},
+                    {"type": "token", "delta": chunk},
                     ensure_ascii=False,
                 )
                 + "\n\n"

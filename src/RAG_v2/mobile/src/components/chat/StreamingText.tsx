@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,7 +11,6 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import MarkdownDisplay from './MarkdownDisplay';
 import { useAppTheme } from '../../theme/theme';
 
 interface Props {
@@ -19,6 +18,10 @@ interface Props {
   isStreaming: boolean;
 }
 
+// While streaming we render plain Text (cheap) and append an inline blinking
+// cursor at the end of the text. MessageBubble swaps to MarkdownDisplay once
+// streaming finishes, so the markdown AST is parsed exactly once (on done)
+// instead of being rebuilt on every token.
 const StreamingText = ({ content, isStreaming }: Props) => {
   const { colors } = useAppTheme();
   const opacity = useSharedValue(1);
@@ -39,26 +42,31 @@ const StreamingText = ({ content, isStreaming }: Props) => {
     return () => { opacity.value = 0; };
   }, [isStreaming, opacity]);
 
-  const cursorStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    backgroundColor: colors.primary,
-  }));
+  const cursorStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
   return (
     <View>
-      <MarkdownDisplay content={content} />
-      {isStreaming && <Animated.View style={[styles.cursor, cursorStyle]} />}
+      <Text style={[styles.streamText, { color: colors.foreground }]}>
+        {content}
+        {isStreaming && (
+          <Animated.Text style={[styles.cursor, { color: colors.primary }, cursorStyle]}>
+            ▍
+          </Animated.Text>
+        )}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  streamText: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
   cursor: {
-    width: 2,
-    height: 18,
-    marginTop: -4,
-    borderRadius: 1,
+    fontSize: 15,
+    lineHeight: 22,
   },
 });
 
-export default StreamingText;
+export default React.memo(StreamingText);

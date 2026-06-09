@@ -46,12 +46,16 @@ const ChatScreen = ({ route, navigation }: Props) => {
   const netInfo = useNetInfo();
   const flatListRef = useRef<FlatList>(null);
   const isMountedRef = useRef(true);
+  // Token batching (B3): buffer deltas, flush ~50ms to cut re-renders per token.
+  const tokenBufferRef = useRef("");
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [selectedSources, setSelectedSources] = useState<RetrievedDocument[]>([]);
   const [sourcesVisible, setSourcesVisible] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [sessionTitle, setSessionTitle] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const insets = useSafeAreaInsets();
   const keyboardVerticalOffset = Platform.OS === "ios" ? insets.top + HEADER_HEIGHT : 0;
@@ -69,7 +73,12 @@ const ChatScreen = ({ route, navigation }: Props) => {
 
   useEffect(() => {
     isMountedRef.current = true;
-    return () => { isMountedRef.current = false; stopStream(); };
+    return () => {
+      isMountedRef.current = false;
+      if (flushTimerRef.current) { clearTimeout(flushTimerRef.current); flushTimerRef.current = null; }
+      tokenBufferRef.current = "";
+      stopStream();
+    };
   }, [stopStream]);
 
   useEffect(() => {
@@ -130,40 +139,60 @@ const ChatScreen = ({ route, navigation }: Props) => {
       }
       addMessage({ id: "user-" + Date.now(), role: "user", content, timestamp: new Date() });
       setChatPhase("thinking");
+      setStatusMessage(null);
       if (messages.length === 0 && !sessionTitle) {
         setSessionTitle(content.length > 40 ? content.slice(0, 40) + "..." : content);
       }
       const assistantMessageId = "assistant-" + Date.now();
       let hasReceivedFirstToken = false;
       const historyForApi = messages.slice(-6).map((m) => ({ role: m.role, content: m.content }));
+      // Flush buffered tokens into the message in one update.
+      const drainTokenBuffer = () => {
+        if (flushTimerRef.current) { clearTimeout(flushTimerRef.current); flushTimerRef.current = null; }
+        const buffered = tokenBufferRef.current;
+        tokenBufferRef.current = "";
+        if (buffered && isMountedRef.current) { appendToMessage(assistantMessageId, buffered); }
+      };
       try {
         await startStream(
           { question: content, history: historyForApi, top_k: 7, session_id: capturedSessionId },
           {
             onSessionId: (sid) => { if (!isMountedRef.current) return; currentSessionId = sid; setActiveSessionId(sid); },
+            onStatus: (s) => { if (isMountedRef.current) setStatusMessage(s.message); },
             onToken: (delta) => {
               if (!isMountedRef.current) return;
               if (!hasReceivedFirstToken) {
-                hasReceivedFirstToken = true; setChatPhase("streaming");
+                hasReceivedFirstToken = true; setChatPhase("streaming"); setStatusMessage(null);
                 addMessage({ id: assistantMessageId, role: "assistant", content: delta,
                   timestamp: new Date(), sessionId: currentSessionId, isStreaming: true });
-              } else { appendToMessage(assistantMessageId, delta); }
+                return;
+              }
+              // Buffer, then flush on a ~50ms timer to coalesce re-renders.
+              tokenBufferRef.current += delta;
+              if (flushTimerRef.current) return;
+              flushTimerRef.current = setTimeout(drainTokenBuffer, 50);
             },
             onMetadata: (meta: Partial<ChatV3Response>) => {
               if (!isMountedRef.current) return;
+              drainTokenBuffer();
               const sources = normalizeRetrievedDocuments(meta.retrieved_documents);
               updateMessage(assistantMessageId, { mode: meta.mode, route: meta.route ?? meta.intent,
                 modelName: meta.model_name, timingsMs: meta.timings_ms, sources,
                 sessionId: meta.session_id || currentSessionId, turnId: meta.turn_id, isStreaming: false });
             },
-            onDone: () => { if (!isMountedRef.current) return; updateMessage(assistantMessageId, { isStreaming: false }); setChatPhase("idle"); },
+            onDone: () => {
+              if (!isMountedRef.current) return;
+              drainTokenBuffer();
+              updateMessage(assistantMessageId, { isStreaming: false }); setChatPhase("idle"); setStatusMessage(null);
+            },
             onError: (error) => {
               if (!isMountedRef.current) return;
+              drainTokenBuffer();
               if (!hasReceivedFirstToken) {
                 addMessage({ id: assistantMessageId, role: "assistant",
                   content: error || "Đã xảy ra lỗi. Vui lòng thử lại.", timestamp: new Date(), error });
               }
-              setChatPhase("idle");
+              setChatPhase("idle"); setStatusMessage(null);
             },
           },
         );
@@ -173,6 +202,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
             content: error instanceof Error ? error.message : "Đã xảy ra lỗi. Vui lòng thử lại.",
             timestamp: new Date() });
           setChatPhase("idle");
+          setStatusMessage(null);
         }
       }
     },
@@ -239,7 +269,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
             removeClippedSubviews={Platform.OS === "android"} initialNumToRender={15}
             ListHeaderComponent={
               chatPhase !== "idle" && !messages[messages.length - 1]?.isStreaming
-                ? <TypingIndicator phase={chatPhase as "thinking" | "streaming"} />
+                ? <TypingIndicator phase={chatPhase as "thinking" | "streaming"} label={statusMessage ?? undefined} />
                 : null
             }
           />
