@@ -6,11 +6,15 @@ import logging
 import time
 from typing import Any, Dict, List, Optional
 
+from typing import Annotated
+
 import anyio
 import anyio.to_thread
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, ConfigDict, Field
 
+from auth.rbac import require_admin
+from models.user import UserDocument
 from schemas.chat import FilterInfo, CollectionResult, RetrievedDocument
 
 logger = logging.getLogger(__name__)
@@ -22,6 +26,8 @@ router = APIRouter(prefix="/retrieval", tags=["retrieval"])
 
 class RetrievalRequest(BaseModel):
     """Body for direct retrieval test."""
+    model_config = ConfigDict(extra="forbid")
+
     query: str = Field(..., min_length=1)
     collections: List[str] = Field(default=["ctdt"])
     resolved_major: Optional[str] = None
@@ -44,19 +50,31 @@ class RetrievalResponse(BaseModel):
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.post("/search", response_model=RetrievalResponse)
-async def retrieval_search(request: Request, body: RetrievalRequest) -> RetrievalResponse:
-    """Run retrieval search directly and return detailed doc list + trace."""
+async def retrieval_search(
+    request: Request,
+    body: RetrievalRequest,
+    _admin: Annotated[UserDocument, Depends(require_admin)],
+) -> RetrievalResponse:
+    """Run retrieval search directly and return detailed doc list + trace.
+
+    Diagnostic endpoint — admin-only. It reuses the pipeline's already-loaded
+    retrieval stack; it must NEVER build a fresh ``RetrievalService`` per request
+    (that would reload BGE-M3 + E5 + reranker → OOM / multi-second lag).
+    """
     pipeline = getattr(request.app.state, "pipeline", None)
     if pipeline is None:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")
 
-    # Access the shared service from the pipeline
-    service = getattr(pipeline, "service", None)
+    # Reuse the shared service from the pipeline. No per-request fallback that
+    # would reload models — if it's missing the pipeline is not ready (503).
+    service = getattr(pipeline, "retrieval_service", None) or getattr(
+        pipeline, "_retrieval_service", None
+    )
     if service is None:
-        # Fallback to creating a service if pipeline doesn't expose it (unlikely)
-        from retrieval.service import RetrievalService
-        from config.settings import Settings
-        service = RetrievalService.from_settings(Settings())
+        raise HTTPException(
+            status_code=503,
+            detail="Retrieval service not available on pipeline",
+        )
 
     t0 = time.perf_counter()
     

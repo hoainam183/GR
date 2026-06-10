@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 
 from bson import ObjectId
 from fastapi import (
@@ -20,6 +20,7 @@ from fastapi import (
     Form,
     HTTPException,
     Query,
+    Request,
     UploadFile,
     status,
 )
@@ -100,6 +101,45 @@ def _audit(action: str, user_id: str, details: dict | None = None) -> dict:
     """Create an audit log entry dict for ``$push``."""
     entry = AuditEntry(action=action, user_id=user_id, details=details)
     return entry.model_dump()
+
+
+def _invalidate_search_caches(app: Any, chunk_ids: list[str] | None = None) -> dict:
+    """Drop answer caches so newly (re)indexed content is served immediately.
+
+    Two cache layers can serve a *stale* answer right after an admin indexes or
+    deletes a document — the kind of thing that makes a live "upload, then ask
+    again" demo look broken:
+
+      1. The agent tool's in-memory RAG search cache (``tool_adapters._RAG_CACHE``).
+      2. The Redis LLM response cache, including the pre-retrieval *query-level*
+         cache (``llm_cache:q:*``) that has no doc-level reverse index and would
+         otherwise keep returning a "không tìm thấy" answer for up to 5 minutes.
+
+    ``invalidate_by_docs`` only covers the doc-tagged main cache, so it cannot
+    clear the query-level cache or pick up brand-new chunks. For a single-process
+    demo a full ``invalidate_all`` is the correct, simple choice; the only cost is
+    a few cache misses.
+
+    Returns a small status dict for logging / responses. Never raises.
+    """
+    result: dict[str, str] = {"agent_cache": "skipped", "llm_cache": "skipped"}
+    try:
+        from agent.tool_adapters import cache_clear
+
+        cache_clear()
+        result["agent_cache"] = "cleared"
+    except Exception:
+        logger.warning("Agent RAG cache clear failed", exc_info=True)
+
+    llm_cache = getattr(getattr(app, "state", None), "llm_cache", None)
+    if llm_cache is not None:
+        try:
+            removed = llm_cache.invalidate_all()
+            result["llm_cache"] = f"invalidated:{removed}"
+        except Exception:
+            logger.warning("LLM cache invalidation failed", exc_info=True)
+            result["llm_cache"] = "error"
+    return result
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -274,14 +314,17 @@ async def get_document(
 @router.delete("/documents/{doc_id}")
 async def delete_document(
     doc_id: str,
+    request: Request,
     user: Annotated[UserDocument, Depends(require_admin)],
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
     """Delete a document and clean up all associated data."""
     doc = await _get_doc_or_404(db, doc_id)
 
+    was_indexed = doc.get("status") == "indexed" and bool(doc.get("chunk_ids"))
+
     # Remove from vector stores (if indexed)
-    if doc.get("status") == "indexed" and doc.get("chunk_ids"):
+    if was_indexed:
         pipeline = _get_pipeline()
         await pipeline.delete_indexed_data(doc_id, doc["collection"])
 
@@ -296,6 +339,10 @@ async def delete_document(
 
     # Remove document record
     await db[DOCUMENTS_COLLECTION].delete_one({"_id": ObjectId(doc_id)})
+
+    # Drop stale answer caches so the deleted content stops being served.
+    if was_indexed:
+        _invalidate_search_caches(request.app)
 
     return {"detail": "Document deleted", "id": doc_id}
 
@@ -809,6 +856,7 @@ async def approve_chunks(
 @router.post("/documents/{doc_id}/index", status_code=status.HTTP_202_ACCEPTED)
 async def index_document(
     doc_id: str,
+    request: Request,
     user: Annotated[UserDocument, Depends(require_admin)],
     db: AsyncIOMotorDatabase = Depends(get_database),
     background_tasks: BackgroundTasks = BackgroundTasks(),
@@ -833,15 +881,19 @@ async def index_document(
         },
     )
 
-    background_tasks.add_task(_bg_index, doc_id, db)
+    background_tasks.add_task(_bg_index, doc_id, db, request.app)
 
     return {"doc_id": doc_id, "status": "embedding"}
 
 
-async def _bg_index(doc_id: str, db: AsyncIOMotorDatabase) -> None:
-    """Background: embed + index chunks via DocumentPipeline."""
+async def _bg_index(
+    doc_id: str, db: AsyncIOMotorDatabase, app: Any = None
+) -> None:
+    """Background: embed + index chunks, then invalidate stale answer caches."""
     pipeline = _get_pipeline()
     await pipeline.embed_and_index(doc_id, db)
+    if app is not None:
+        _invalidate_search_caches(app)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -852,6 +904,7 @@ async def _bg_index(doc_id: str, db: AsyncIOMotorDatabase) -> None:
 @router.post("/documents/{doc_id}/pipeline", status_code=status.HTTP_202_ACCEPTED)
 async def run_full_pipeline(
     doc_id: str,
+    request: Request,
     user: Annotated[UserDocument, Depends(require_admin)],
     db: AsyncIOMotorDatabase = Depends(get_database),
     background_tasks: BackgroundTasks = BackgroundTasks(),
@@ -873,15 +926,19 @@ async def run_full_pipeline(
         },
     )
 
-    background_tasks.add_task(_bg_full_pipeline, doc_id, db)
+    background_tasks.add_task(_bg_full_pipeline, doc_id, db, request.app)
 
     return {"doc_id": doc_id, "status": "converting"}
 
 
-async def _bg_full_pipeline(doc_id: str, db: AsyncIOMotorDatabase) -> None:
-    """Background: run all pipeline steps via DocumentPipeline."""
+async def _bg_full_pipeline(
+    doc_id: str, db: AsyncIOMotorDatabase, app: Any = None
+) -> None:
+    """Background: run all pipeline steps, then invalidate stale answer caches."""
     pipeline = _get_pipeline()
     await pipeline.run_full_pipeline(doc_id, db)
+    if app is not None:
+        _invalidate_search_caches(app)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -324,20 +324,19 @@ def create_app() -> FastAPI:
     app.include_router(admin_stats_router)
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
-    # Rate-limit middleware is registered as a startup callback because it
-    # needs the rate_limiter instance which is created during lifespan.
-    @app.on_event("startup")
-    async def _register_rate_limit_middleware():
-        limiter = getattr(app.state, "rate_limiter", None)
-        settings = getattr(app.state, "settings", None)
-        if limiter is not None and settings is not None:
-            from api.middleware.rate_limit import RateLimitMiddleware
-            app.add_middleware(
-                RateLimitMiddleware,
-                rate_limiter=limiter,
-                rpm=settings.rate_limit_rpm,
-                rpd=settings.rate_limit_rpd,
-            )
+    # Rate-limit middleware MUST be added at build time (Starlette forbids adding
+    # middleware after the app has started, and on_event startup hooks are ignored
+    # when a lifespan handler is set). The actual limiter instance is created later
+    # during lifespan; the middleware resolves it lazily from app.state per request
+    # and is a transparent pass-through while it is unavailable.
+    from api.middleware.rate_limit import RateLimitMiddleware
+
+    _default_settings = Settings()
+    app.add_middleware(
+        RateLimitMiddleware,
+        rpm=_default_settings.rate_limit_rpm,
+        rpd=_default_settings.rate_limit_rpd,
+    )
 
     @app.get("/")
     async def root():

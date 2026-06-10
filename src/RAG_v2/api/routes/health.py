@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
+from typing import Annotated
 
+from fastapi import APIRouter, Depends, HTTPException, Request
+
+from auth.rbac import require_admin
+from models.user import UserDocument
 from schemas.chat import HealthResponse
 
 router = APIRouter(tags=["health"])
@@ -33,8 +37,11 @@ async def health(request: Request) -> HealthResponse:
 
 
 @router.post("/api/admin/reload-validity")
-async def reload_validity(request: Request) -> dict[str, str]:
-    """Reload the ValidityFilter registry after a data update."""
+async def reload_validity(
+    request: Request,
+    _admin: Annotated[UserDocument, Depends(require_admin)],
+) -> dict[str, str]:
+    """Reload the ValidityFilter registry after a data update (admin-only)."""
     pipeline = getattr(request.app.state, "pipeline", None)
     if pipeline is None:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")

@@ -10,6 +10,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 from threading import RLock
+from types import SimpleNamespace
 from typing import Any, Dict, Generator, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -396,6 +397,16 @@ class RAGPipeline:
         )
 
         logger.info("RAG v2 Pipeline ready.")
+
+    @property
+    def retrieval_service(self) -> Any:
+        """The shared, already-loaded retrieval stack (embedders + searcher + reranker).
+
+        Exposed read-only so request handlers (e.g. ``/retrieval/search``) reuse
+        the singleton instead of building a second ``RetrievalService`` — which
+        would reload BGE-M3, E5 and the reranker per request (OOM / multi-second lag).
+        """
+        return self._retrieval_service
 
     # ------------------------------------------------------------------
     # Runtime LLM reload
@@ -1310,32 +1321,41 @@ class RAGPipeline:
             complexity_tier,
         )
 
-        # Initialise last_* defaults
-        self.last_sources: List[Dict[str, Any]] = []
-        self.last_intent: str = complexity_tier
-        self.last_timings: Dict[str, float] = {}
-        self.last_mode: str = complexity_tier
-        self.last_reflected_question: Optional[str] = None
-        self.last_target_collections: Optional[List[str]] = None
-        self.last_collection_scores: Optional[List[Dict[str, Any]]] = None
-        self.last_routing_probabilities: Optional[Dict[str, Any]] = None
-        self.last_applied_filters: Optional[Any] = None
-        self.last_collection_results: Optional[Any] = None
-        self.last_agent_trace: Optional[Dict[str, Any]] = None
-        self.last_tools_used: List[str] = []
-        self.last_tool_calls: List[Dict[str, Any]] = []
-        self.last_iterations: int = 0
-        self.last_context_trace: Optional[Dict[str, Any]] = None
-        self.last_rerank_trace: Optional[Dict[str, Any]] = None
-        self.last_answer_quality_gate: Optional[Dict[str, Any]] = None
-        self.last_fusion_weights: Optional[Dict[str, Any]] = None
+        # Request-local stream state. The pipeline is a singleton and this
+        # generator is driven concurrently for multiple users, so per-request
+        # data MUST live in a local object — writing it to ``self.last_*`` would
+        # let concurrent streams clobber each other's Mongo log + metadata.
+        # ``self.last_*`` is still mirrored from this object at the very end for
+        # backward compatibility (single-request tests / debugging), but it is
+        # no longer authoritative.
+        _st = SimpleNamespace(
+            last_sources=[],
+            last_intent=complexity_tier,
+            last_timings={},
+            last_mode=complexity_tier,
+            last_reflected_question=None,
+            last_target_collections=None,
+            last_collection_scores=None,
+            last_routing_probabilities=None,
+            last_applied_filters=None,
+            last_collection_results=None,
+            last_agent_trace=None,
+            last_tools_used=[],
+            last_tool_calls=[],
+            last_iterations=0,
+            last_context_trace=None,
+            last_rerank_trace=None,
+            last_answer_quality_gate=None,
+            last_fusion_weights=None,
+            last_turn_id=None,
+        )
 
         full_answer_chunks: List[str] = []
 
         # ── Chitchat branch ───────────────────────────────────────────────────
         if complexity_tier == "chitchat":
-            self.last_mode = "chitchat"
-            self.last_intent = "chitchat"
+            _st.last_mode = "chitchat"
+            _st.last_intent = "chitchat"
             stream_t0 = time.perf_counter()
             first_token_ms: Optional[float] = None
             for chunk in chitchat_flow_stream(
@@ -1358,8 +1378,8 @@ class RAGPipeline:
             complexity_tier == "complex"
             and runtime.agent is not None
         ):
-            self.last_mode = "agent"
-            self.last_intent = "complex"
+            _st.last_mode = "agent"
+            _st.last_intent = "complex"
 
             # Progress event — agent.run() blocks for ~15-30s; without this the
             # UI shows a frozen spinner the whole time.
@@ -1388,18 +1408,18 @@ class RAGPipeline:
                     pre_reflection_ms=reflection_ms,
                 )
                 answer = agent_result.get("answer", "")
-                self.last_mode = str(agent_result.get("mode", "agent"))
-                self.last_agent_trace = agent_result.get("agent_trace")
-                self.last_tools_used = list(
+                _st.last_mode = str(agent_result.get("mode", "agent"))
+                _st.last_agent_trace = agent_result.get("agent_trace")
+                _st.last_tools_used = list(
                     agent_result.get("tools_used") or []
                 )
-                self.last_tool_calls = list(
+                _st.last_tool_calls = list(
                     agent_result.get("tool_calls") or []
                 )
-                self.last_iterations = int(agent_result.get("iterations") or 0)
-                self.last_sources = agent_result.get("sources") or []
-                self.last_intent = str(agent_result.get("route") or "complex")
-                self.last_reflected_question = agent_result.get("reflected_question")
+                _st.last_iterations = int(agent_result.get("iterations") or 0)
+                _st.last_sources = agent_result.get("sources") or []
+                _st.last_intent = str(agent_result.get("route") or "complex")
+                _st.last_reflected_question = agent_result.get("reflected_question")
                 agent_timings = agent_result.get("timings_ms")
                 if isinstance(agent_timings, dict) and isinstance(
                     agent_timings.get("reflection"),
@@ -1431,7 +1451,7 @@ class RAGPipeline:
         # ── Simple / RAG branch ───────────────────────────────────────────────
         else:
             # Fall back to classic RAG v2 when complexity tier is simple or agent disabled
-            self.last_mode = "rag_v2"
+            _st.last_mode = "rag_v2"
             if (
                 complexity_tier == "complex"
                 and runtime.agent is None
@@ -1439,13 +1459,13 @@ class RAGPipeline:
                 logger.info(
                     "Agent disabled, falling back to RAG v2 for complex query"
                 )
-                self.last_mode = "rag_v2_fallback"
+                _st.last_mode = "rag_v2_fallback"
 
             route_t0 = time.perf_counter()
             routing = self._route_with_cache(question, history)
             pipeline_timings["routing"] = _elapsed_ms(route_t0)
             intent = routing.get("intent", "rag")
-            self.last_intent = intent
+            _st.last_intent = intent
 
             # Tier-3: LLM domain fallback for low-confidence RAG routing.
             # Skipped when one domain is already clearly dominant (see _should_trigger_tier3).
@@ -1481,27 +1501,27 @@ class RAGPipeline:
                 pre_ref_result=ref_result,
                 pre_reflection_ms=reflection_ms,
             )
-            self.last_sources = reranked
-            self.last_reflected_question = flow_metadata.get(
+            _st.last_sources = reranked
+            _st.last_reflected_question = flow_metadata.get(
                 "reflected_question"
             )
-            self.last_target_collections = flow_metadata.get(
+            _st.last_target_collections = flow_metadata.get(
                 "target_collections"
             )
-            self.last_collection_scores = flow_metadata.get("collection_scores")
-            self.last_routing_probabilities = flow_metadata.get(
+            _st.last_collection_scores = flow_metadata.get("collection_scores")
+            _st.last_routing_probabilities = flow_metadata.get(
                 "routing_probabilities"
             )
-            self.last_applied_filters = flow_metadata.get("applied_filters")
-            self.last_collection_results = flow_metadata.get(
+            _st.last_applied_filters = flow_metadata.get("applied_filters")
+            _st.last_collection_results = flow_metadata.get(
                 "collection_results"
             )
-            self.last_context_trace = flow_metadata.get("context_trace")
-            self.last_rerank_trace = flow_metadata.get("rerank_trace")
-            self.last_answer_quality_gate = flow_metadata.get("answer_quality_gate")
-            self.last_fusion_weights = flow_metadata.get("fusion_weights")
-            self.last_tools_used = list(flow_metadata.get("tools_used") or [])
-            self.last_tool_calls = list(flow_metadata.get("tool_calls") or [])
+            _st.last_context_trace = flow_metadata.get("context_trace")
+            _st.last_rerank_trace = flow_metadata.get("rerank_trace")
+            _st.last_answer_quality_gate = flow_metadata.get("answer_quality_gate")
+            _st.last_fusion_weights = flow_metadata.get("fusion_weights")
+            _st.last_tools_used = list(flow_metadata.get("tools_used") or [])
+            _st.last_tool_calls = list(flow_metadata.get("tool_calls") or [])
 
             for chunk in stream:
                 full_answer_chunks.append(chunk)
@@ -1509,13 +1529,13 @@ class RAGPipeline:
             pipeline_timings = _merge_timings(pipeline_timings, flow_timings)
             # Update collection scores after stream finishes (timings may have changed)
             if flow_metadata.get("collection_scores"):
-                self.last_collection_scores = flow_metadata.get(
+                _st.last_collection_scores = flow_metadata.get(
                     "collection_scores"
                 )
 
         timings_ms = _merge_timings(pipeline_timings)
         timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
-        self.last_timings = timings_ms
+        _st.last_timings = timings_ms
         _log_timings(f"query_stream({complexity_tier})", timings_ms)
 
         # Log to MongoDB after stream finishes (skip chitchat to reduce noise/cost)
@@ -1523,69 +1543,75 @@ class RAGPipeline:
             latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
             result = {
                 "answer": "".join(full_answer_chunks),
-                "intent": self.last_intent,
-                "route": self.last_intent,
-                "mode": self.last_mode,
-                "num_sources": len(self.last_sources),
-                "sources": self.last_sources,
+                "intent": _st.last_intent,
+                "route": _st.last_intent,
+                "mode": _st.last_mode,
+                "num_sources": len(_st.last_sources),
+                "sources": _st.last_sources,
                 "model_name": runtime.chat.model,
                 "timings_ms": timings_ms,
-                "target_collections": self.last_target_collections,
-                "collection_scores": self.last_collection_scores,
-                "routing_probabilities": self.last_routing_probabilities,
-                "applied_filters": self.last_applied_filters,
-                "collection_results": self.last_collection_results,
-                "context_trace": self.last_context_trace,
-                "rerank_trace": self.last_rerank_trace,
-                "answer_quality_gate": self.last_answer_quality_gate,
-                "fusion_weights": self.last_fusion_weights,
+                "target_collections": _st.last_target_collections,
+                "collection_scores": _st.last_collection_scores,
+                "routing_probabilities": _st.last_routing_probabilities,
+                "applied_filters": _st.last_applied_filters,
+                "collection_results": _st.last_collection_results,
+                "context_trace": _st.last_context_trace,
+                "rerank_trace": _st.last_rerank_trace,
+                "answer_quality_gate": _st.last_answer_quality_gate,
+                "fusion_weights": _st.last_fusion_weights,
                 "answer_status": (
-                    self.last_answer_quality_gate or {}
+                    _st.last_answer_quality_gate or {}
                 ).get("answer_status"),
-                "tools_used": self.last_tools_used,
-                "tool_calls": self.last_tool_calls,
-                "iterations": self.last_iterations,
-                "agent_trace": self.last_agent_trace,
+                "tools_used": _st.last_tools_used,
+                "tool_calls": _st.last_tool_calls,
+                "iterations": _st.last_iterations,
+                "agent_trace": _st.last_agent_trace,
             }
             turn_id = self._mongo_logger.log_turn(
                 session_id=session_id,
                 question=question,
                 result=result,
-                reflected_question=self.last_reflected_question,
+                reflected_question=_st.last_reflected_question,
                 latency_ms=latency_ms,
                 timings_ms=timings_ms,
             )
-            self.last_turn_id = turn_id
+            _st.last_turn_id = turn_id
         else:
-            self.last_turn_id = None
+            _st.last_turn_id = None
 
         # ── Per-request metadata export (avoids self.last_* cross-request race) ──
         # The pipeline is a singleton; reading self.last_* in the route after the
-        # generator returns races with concurrent streams. Snapshot into the
-        # caller-owned dict here, as the final statement of the generator.
+        # generator returns races with concurrent streams. All per-request data
+        # lives in the local ``_st`` namespace; snapshot it into the caller-owned
+        # dict here, as the final statement of the generator.
         if metadata_out is not None:
             metadata_out.update(
                 {
-                    "mode": self.last_mode,
-                    "route": self.last_intent,
-                    "intent": self.last_intent,
-                    "num_sources": len(self.last_sources),
-                    "retrieved_documents": self.last_sources,
-                    "timings_ms": self.last_timings,
-                    "reflected_question": self.last_reflected_question,
-                    "target_collections": self.last_target_collections,
-                    "collection_scores": self.last_collection_scores,
-                    "routing_probabilities": self.last_routing_probabilities,
-                    "applied_filters": self.last_applied_filters,
-                    "collection_results": self.last_collection_results,
-                    "context_trace": self.last_context_trace,
-                    "rerank_trace": self.last_rerank_trace,
-                    "answer_quality_gate": self.last_answer_quality_gate,
-                    "fusion_weights": self.last_fusion_weights,
-                    "agent_trace": self.last_agent_trace,
-                    "tools_used": self.last_tools_used,
-                    "tool_calls": self.last_tool_calls,
-                    "iterations": self.last_iterations,
-                    "turn_id": self.last_turn_id,
+                    "mode": _st.last_mode,
+                    "route": _st.last_intent,
+                    "intent": _st.last_intent,
+                    "num_sources": len(_st.last_sources),
+                    "retrieved_documents": _st.last_sources,
+                    "timings_ms": _st.last_timings,
+                    "reflected_question": _st.last_reflected_question,
+                    "target_collections": _st.last_target_collections,
+                    "collection_scores": _st.last_collection_scores,
+                    "routing_probabilities": _st.last_routing_probabilities,
+                    "applied_filters": _st.last_applied_filters,
+                    "collection_results": _st.last_collection_results,
+                    "context_trace": _st.last_context_trace,
+                    "rerank_trace": _st.last_rerank_trace,
+                    "answer_quality_gate": _st.last_answer_quality_gate,
+                    "fusion_weights": _st.last_fusion_weights,
+                    "agent_trace": _st.last_agent_trace,
+                    "tools_used": _st.last_tools_used,
+                    "tool_calls": _st.last_tool_calls,
+                    "iterations": _st.last_iterations,
+                    "turn_id": _st.last_turn_id,
                 }
             )
+
+        # Mirror request-local state onto the singleton for backward-compat
+        # (single-request tests / debugging). NOT authoritative under concurrency.
+        for _attr, _value in vars(_st).items():
+            setattr(self, _attr, _value)

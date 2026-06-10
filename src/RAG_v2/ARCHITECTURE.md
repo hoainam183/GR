@@ -1,6 +1,6 @@
 # RAG v2 Architecture
 
-Source-verified: 2026-06-05 from source files (whole-codebase read of backend, frontend, mobile, shared package, scripts, and eval), `MODULE.md` files, `PROJECT_MEMORY.md`, and GitNexus index `GR` (16,920 nodes, 28,737 relationships, 300 execution flows).
+Source-verified: 2026-06-09 from source files (whole-codebase read of backend, frontend, mobile, shared package, scripts, and eval), `MODULE.md` files, `PROJECT_MEMORY.md`, and GitNexus index `GR` (17,818 symbols, 30,104 relationships, 300 execution flows). This pass reflects the recent `refactor agent module` and `fix stream agent` commits: the agent is a Planner-Executor LangGraph graph, streaming now serves the chitchat and complex/agent tiers (not just simple RAG) and emits a `status` event, and the query layer added `course_catalog`/`profile_dependency` helpers.
 
 > Reading order: sections 2–22 are the reference (exact contracts, defaults, file owners). **Section 23 is the Uber/Airbnb-style system design** — requirements, scale, C4 diagrams, request lifecycles, data model, scaling/bottlenecks, and trade-offs. Read section 23 first for the big picture, then drop into the reference sections for detail.
 
@@ -42,7 +42,7 @@ RAG_v2/
   routers/           Auth HTTP router mounted under /auth.
   schemas/           Pydantic request/response contracts.
   pipeline/          RAGPipeline, RAG flows, DocumentPipeline.
-  query/             Complexity routing, domain routing, reflection, decomposition.
+  query/             Complexity routing, domain routing, reflection, decomposition, signals, structured-query/course-catalog/profile-dependency helpers.
   retrieval/         Qdrant, ES, hybrid/multi-collection search, filters, resolver.
   embedding/         BGE-M3 and multilingual E5 embedders.
   reranking/         BGE cross-encoder reranker.
@@ -94,13 +94,27 @@ Important default settings in `config/settings.py`:
 | --- | --- |
 | `llm_provider` | `deepseek` |
 | `chat_model` | `deepseek-v4-flash` |
+| `chat_max_tokens` | `1500` |
 | `agent_enabled` | `True` |
 | `agent_model` | `qwen2.5-7b-instruct` |
+| `agent_max_iterations` | `3` |
+| `agent_temperature` | `0.0` |
+| `agent_max_tokens` | `1200` |
 | `agent_synthesis_provider` | `gemini` |
 | `agent_synthesis_model` | `gemini-3.1-flash-lite` |
+| `agent_synthesis_temperature` | `0.2` |
+| `agent_synthesis_max_tokens` | `2500` |
+| `reflection_enabled` | `True` |
+| `reflection_provider` / `reflection_model` | `gemini` / `gemini-3.1-flash-lite` |
+| `domain_routing_enabled` | `True` |
+| `domain_confidence_threshold` | `0.65` |
+| `router_mode` | `classifier` |
+| `self_eval_enabled` | `False` |
 | `tavily_fallback_enabled` | `False` |
-| `redis_enabled` | `True` |
+| `rate_limit_enabled` / `rate_limit_rpm` / `rate_limit_rpd` | `True` / `20` / `200` |
+| `redis_enabled` (+ `use_redis_session/cache/history`) | `True` |
 | `crawler_enabled` | `True` |
+| `post_index_eval_enabled` | `True` |
 
 Local infrastructure defaults:
 
@@ -248,11 +262,15 @@ Streaming event contract:
 
 ```text
 {"type":"session","session_id":"..."}
+{"type":"status","stage":"...","message":"..."}   # progress, mainly on the agent path
 {"type":"token","delta":"..."}
 {"type":"metadata", ...}
 {"type":"error","error":"..."}
 {"type":"done"}
+: heartbeat                                        # SSE comment frame on idle, keeps proxies alive
 ```
+
+After the `fix stream agent` change, `/chat/stream` serves all three tiers: chitchat streams a canned answer, simple RAG streams tokens from `rag_flow_stream()`, and the complex/agent tier emits `status` progress, runs `query_agent()` synchronously, then chunks the synthesized answer for token-style animation. It still skips post-generation self-eval/Tavily on every streaming path.
 
 ## 7. Query Processing
 
@@ -291,7 +309,12 @@ The old `personal_check` subtype is intentionally removed. Personal-reference el
 
 Tier-3 LLM domain fallback (`DOMAIN_CLASSIFICATION_PROMPT`) fires when classifier confidence is below the low-confidence ceiling (`~0.55`) or the top-two domain margin is narrow. The prompt is now Vietnamese with few-shot WHEN/CONTENT/CONDITION/PROCEDURE disambiguation examples and can override the predicted domains.
 
-`QuerySignals` (`query/signals.py`) extracts boolean intent signals that feed both complexity routing and collection augmentation: `personal_reference`, `eligibility_check`, `exact_policy_lookup`, `table_lookup`, `procedural_support`, `multi_domain`, `freshness`. Recent tuning broadened program-code coverage (e.g. `IT-E6`, `ME-GU`, `CH-LUH`, `…-NUT` in both `complexity_router` comparison patterns and `structured_query` major-code extraction), tightened the personal-reference regex (possessive `của tôi/mình/em` forms), and made the `cho … và …` repeated-request complex trigger require an explicit `và` connector.
+`QuerySignals` (`query/signals.py`) is a frozen dataclass of 11 boolean intent signals that feed both complexity routing and collection augmentation: `personal_reference`, `eligibility_check`, `exact_policy_lookup`, `table_lookup`, `procedural_support`, `multi_domain` (derived), `freshness`, `schedule_intent`, `deadline_intent`, `announcement_intent`, and `curriculum_semester_intent` (asks which semester a course sits in, distinct from when registration opens). Recent tuning broadened program-code coverage (e.g. `IT-E6`, `ME-GU`, `CH-LUH`, `…-NUT` in both `complexity_router` comparison patterns and `structured_query` major-code extraction), tightened the personal-reference regex (possessive `của tôi/mình/em` forms), and made the `cho … và …` repeated-request complex trigger require an explicit `và` connector.
+
+Two newer query helpers support deterministic, profile-aware retrieval:
+
+- `query/course_catalog.py` loads the prebuilt `query/models/course_catalog.json` (produced by `scripts/build_course_catalog.py`) and resolves a course **name → code** scoped to a major's curriculum, because the same course name maps to different codes across programs (e.g. `IT3080` in `IT-E6` vs `IT3080E` in `IT-E7`). Reflection guardrails use it to inject the correct course code in place.
+- `query/profile_dependency.py` decides which profile attributes (`major`, `cohort`) a topic actually depends on (e.g. graduation needs both, scholarships need none) and provides the single shared `should_inject_profile_note()` / `effective_major_for_retrieval()` gates that replaced scattered pronoun regexes.
 
 `QueryReflector`:
 
@@ -328,7 +351,7 @@ Construction builds:
 - `ReferenceResolver`
 - runtime LLM reload lock/cache state
 
-Smart entrypoint:
+Smart entrypoint (`query_v3()` runs `QueryReflector` once up front, then complexity-routes on the reflected question and reuses that reflection across the simple/agent branches):
 
 ```text
 query_v3()
@@ -381,7 +404,7 @@ Important behaviors:
 - Reranker calls receive configured thresholds and `reranker_min_top_k`.
 - Context-size errors can trigger reduced-context retry.
 - Cache writes are restricted to stable local answers: answered status, no no-info/no-source/self-eval-failed markers, no dynamic/stale-risk signal, and no web fallback.
-- Streaming runs retrieval first, can do pre-generation web enrichment, then streams tokens; it intentionally avoids post-generation self-eval/Tavily.
+- Streaming (`query_stream()`) reflects and complexity-routes once, then branches like `query_v3`: chitchat streams a canned answer, simple RAG runs retrieval (with optional pre-generation web enrichment) and streams tokens, and complex emits `status` progress, runs the agent synchronously, and chunk-animates the synthesized answer. Every streaming path intentionally avoids post-generation self-eval/Tavily.
 
 Runtime LLM reload:
 
@@ -445,13 +468,18 @@ Default retrieval settings in source:
 | `vector_weight` | `0.8` | Fusion weight for dense. |
 | `keyword_weight` | `0.2` | Fusion weight for keyword. |
 | `reranker_top_k` / `reranker_min_top_k` | `7` / `3` | Rerank output / min floor. |
+| `reranker_score_threshold` | `0.0` | General-doc rerank cutoff (calibrated for full recall). |
+| `reranker_table_score_threshold` | `-1.0` | Relaxed cutoff for table chunks. |
 | `context_doc_char_limit` | `2000` | Per-doc context cap. |
 | `context_total_char_budget` | `12000` | Default total context budget. |
+| `context_total_char_budget_with_expansion` | `16000` | Budget when parent/sibling expansion is active. |
 | `context_list_total_char_budget` | `24000` | Larger budget for list/enumeration queries. |
-| `parent_context_enabled` | `True` | C5 parent-child expansion. |
-| `hyde_enabled` | `True` | HyDE post-rerank fallback when recall is poor. |
+| `parent_context_enabled` | `True` | C5 parent-child expansion (`parent_max_chars` 1500, `parent_max_chars_agent` 500). |
+| `hyde_enabled` | `True` | HyDE post-rerank fallback when recall is poor (`hyde_min_results` 3). |
 | `score_cliff_enabled` | `False` | B1 per-collection score-cliff pruning. |
 | `sibling_expansion_enabled` | `False` | C1 sibling-chunk expansion before rerank. |
+
+Fusion default: `MultiCollectionSearch` uses `linear` (per-pool min-max normalization with `vector_weight`/`keyword_weight` + kehoach recency bonus) as the default `fusion_mode`; `rrf` (reciprocal-rank fusion, `k=60`) is available but not the default. Elasticsearch uses a custom Vietnamese analyzer (CocCoc `vi_tokenizer` with ASCII-folding/synonym/stopword filters, BM25 `k1=1.5`, `b=0.5`).
 
 Metadata filter behavior:
 
@@ -491,14 +519,16 @@ RAGPipeline.query_agent()
   -> API response mapper + Mongo agent trace
 ```
 
+LangGraph topology (`react_agent.py`): `START -> _route_entry -> (_decompose_node?) -> _planner_node -> _after_planner -> (_executor_node?) -> _synthesize_node -> END`. `_route_entry` sends `comparison`/`multi_source` through `_decompose_node` first and everything else straight to the planner; `_after_planner` skips the executor and jumps to synthesis when the planner set an error or produced no steps. There is no standalone web-search node — `web_search_for_executor()` is called from inside `_executor_node` only when a plan step requests it.
+
 Planner-Executor behavior:
 
+- `ReActAgent.run(query, session_id, history, complexity_subtype, user_context, top_k)` is the entrypoint (`history` is accepted for compatibility but the current graph does not consume it).
 - `_decompose_node()` uses the synthesis LLM only for `comparison` and `multi_source`.
-- `_planner_node()` asks for JSON retrieval steps.
-- `_validate_plan()` requires valid `query` and collection fields.
-- `_executor_node()` calls `execute_retrieval_plan()` with the effective `top_k`.
+- `_planner_node()` asks for JSON retrieval steps; `_validate_plan()` requires a non-empty `steps` list where every step has a non-empty `query` and a `collection` in `{quy_dinh, chuong_trinh, ke_hoach, ho_tro_sv}`.
+- `_executor_node()` calls `execute_retrieval_plan()` with the effective `top_k`; steps run in a `ThreadPoolExecutor` (`max_workers=min(4, len(steps))`, 45 s per-step timeout) over copied contextvars.
 - If every retrieval step is empty, the agent returns a deterministic no-information answer.
-- Planner invalid JSON, empty steps, or invalid collection sets `state.error`; `RAGPipeline.query_agent()` handles fallback policy.
+- The planner sets `state.error` to `planner_invalid_json`, `planner_empty_steps`, or `planner_invalid_plan`; `RAGPipeline.query_agent()` handles the fallback policy.
 
 Direct legacy adapter tools still supported for tests/older callers:
 
@@ -584,12 +614,14 @@ crawl official sources
   -> create notifications when applicable
 ```
 
-Supported crawler targets in source include:
+Supported crawler targets in source:
 
-- `kehoach`
-- `quydinh`
+- `kehoach` (two sources: `DisplayListBaiViet` and `DisplayListKeHoach`; ~6-month retention).
+- `quydinh` (`DisplayQuyChe`; long retention, ~96 months).
 
 Default manual/scheduled/CLI `all` crawler runs stage data for review; direct CLI indexing is disabled in favor of admin review/index endpoints.
+
+`DocumentPipeline` exposes `convert_pdf()` / `clean()` / `chunk()` / `embed_and_index()` / `rollback()` (plus `run_full_pipeline()`); PDF conversion supports `pymupdf4llm` (default) and `docling`, selected per request, which also picks the matching hierarchical chunker.
 
 ## 12. Persistence And Cache
 
@@ -708,6 +740,8 @@ Offline ingestion paths:
 - `scripts/auto_crawler.py`
 - `scripts/update_data.py`
 - `scripts/update_metadata.py`
+- `scripts/build_course_catalog.py` (parses curriculum tables into `query/models/course_catalog.json`)
+- `scripts/download_models.py`, `scripts/setup_mongo_indexes.py`, `scripts/metadata_audit.py`, `scripts/search_multi.py` (utilities)
 
 Standalone indexers generally:
 
@@ -754,13 +788,13 @@ Path: `frontend/chat-companion`.
 
 Stack:
 
-- React 18
-- Vite
-- React Router
-- TanStack Query
+- React `18.3.1`
+- Vite `5.4.x`
+- React Router `6.x`
+- TanStack Query `5.x`
 - shadcn/Radix UI
-- Axios and Fetch/ReadableStream for SSE
-- Tailwind CSS
+- Axios for REST; native Fetch + `ReadableStream` for SSE streaming (no `react-native-sse` here)
+- Tailwind CSS `3.4.x`
 - local service/type modules plus available `@rag/shared`
 
 Routes:
@@ -812,16 +846,16 @@ Path: `mobile`.
 
 Stack:
 
-- Expo SDK 54
-- React Native 0.81
-- React 19
-- React Navigation bottom tabs/native stacks
+- Expo SDK `~54.0.35`
+- React Native `0.81.5`
+- React `19.1.0`
+- React Navigation bottom tabs/native stacks (`@react-navigation/*` v7)
 - TanStack Query
 - Zustand
 - SecureStore
-- MMKV when native runtime supports it
+- MMKV (`react-native-mmkv`) when native runtime supports it
 - `react-native-sse`
-- NativeWind/Tailwind-style styling
+- React Native `StyleSheet` + a custom theme context (`src/theme/theme.tsx`) — **not** NativeWind; the inert `mobile/tailwind.config.ts` has been deleted
 - `@rag/shared`
 
 Root navigation:
@@ -936,16 +970,21 @@ Central settings file: `config/settings.py`.
 Important groups:
 
 - providers and API keys
-- agent model/synthesis
+- agent model/synthesis/iterations/temperatures/token caps
 - Qdrant/Elasticsearch/Mongo/Redis hosts
 - collections
-- chat model
-- retrieval top-k/pools/weights/context budgets
-- reranker thresholds
+- chat model and `chat_max_tokens`
+- retrieval top-k/pools/weights/context budgets (incl. `context_total_char_budget_with_expansion`)
+- reranker thresholds (`reranker_score_threshold`, `reranker_table_score_threshold`)
+- expansion flags (parent/sibling/HyDE/score-cliff)
+- reflection (`reflection_enabled`/provider/model/temperature)
+- domain routing (`domain_routing_enabled`, `domain_confidence_threshold`, `router_mode`)
+- self-eval (`self_eval_enabled`, default off)
 - Tavily fallback/cache
-- reflection/domain routing
 - crawler schedule/retention
-- Redis/session/cache/history/rate-limit flags
+- rate limiting (`rate_limit_enabled`/`rate_limit_rpm`/`rate_limit_rpd`)
+- post-index eval (`post_index_eval_enabled`/command/max-cases)
+- Redis/session/cache/history flags
 - auth/admin/upload/CORS/API host and port
 
 Do not hard-code provider/model/host values when a setting exists.
@@ -1173,7 +1212,7 @@ sequenceDiagram
     API-->>C: ChatResponse (answer, sources, route, timings, trace)
 ```
 
-**Streaming variant (`/chat/stream`)** runs retrieval first, optionally does *pre*-generation web enrichment, then emits `session → token* → metadata → done`. It deliberately skips post-generation self-eval/Tavily so the token stream is never blocked.
+**Streaming variant (`/chat/stream`)** reflects and complexity-routes once, then serves whichever tier matches: chitchat streams a canned answer, simple RAG runs retrieval (with optional *pre*-generation web enrichment) and streams tokens, and complex emits `status` progress while the agent runs synchronously and its synthesized answer is chunk-animated. The frame sequence is `session → (status*) → token* → metadata → done`, with `: heartbeat` comments on idle. It deliberately skips post-generation self-eval/Tavily on every path so the token stream is never blocked.
 
 ## 23.7 Latency Budget (simple RAG, warm process)
 

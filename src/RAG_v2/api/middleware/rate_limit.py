@@ -3,6 +3,7 @@
 Only applies to chat endpoints that trigger LLM invocations:
     - POST /chat
     - POST /chat/v3
+    - POST /api/chat/v3
     - POST /chat/stream
 
 All other routes (health, sessions, metrics, auth) are exempt.
@@ -13,11 +14,21 @@ Rate-limit information is exposed via response headers:
     X-RateLimit-Limit-Day
     X-RateLimit-Remaining-Day
     Retry-After  (only on 429 responses)
+
+Registration note
+-----------------
+This middleware is registered unconditionally at app-build time. The actual
+``SlidingWindowRateLimiter`` instance is created during ``lifespan`` (it needs
+the Redis client), so the middleware resolves it lazily from ``app.state``
+*per request*. When Redis / the limiter is unavailable the middleware is a
+transparent pass-through. This avoids the broken pattern of calling
+``app.add_middleware`` from a startup hook — Starlette forbids adding
+middleware after the app has started, and ``on_event`` startup hooks do not
+even run when a ``lifespan`` handler is provided.
 """
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Optional
 
@@ -41,40 +52,49 @@ _RATE_LIMITED_PATHS = frozenset({
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Check rate limits before processing LLM-calling requests.
 
-    Extracts the user identifier from:
-      1. ``body.user_id`` (parsed from JSON body for POST requests)
-      2. ``X-Forwarded-For`` header (anonymous / fallback to IP)
+    The limiter is resolved from ``request.app.state.rate_limiter`` at dispatch
+    time, so it works correctly with the ``lifespan``-based startup that builds
+    the limiter after the middleware stack is assembled.
 
-    When the limit is exceeded, returns HTTP 429 with a ``Retry-After``
-    header and JSON body explaining the limit type and reset time.
+    Identity is derived from a trusted source only:
+      1. The ``sub`` claim of a valid ``Authorization: Bearer`` JWT (signed —
+         cannot be spoofed by the caller).
+      2. The ``X-Forwarded-For`` header (reverse proxy), first hop.
+      3. The direct client IP.
+
+    The request body is intentionally NOT read for identity: reading it in a
+    ``BaseHTTPMiddleware`` can dead-lock the downstream handler, and a
+    body-supplied ``user_id`` is trivially spoofable, defeating the limit.
 
     Parameters:
-        rate_limiter: A :class:`SlidingWindowRateLimiter` instance.
-        rpm: Requests per minute (for response headers).
-        rpd: Requests per day (for response headers).
+        rpm: Requests per minute (for response headers / fallback).
+        rpd: Requests per day (for response headers / fallback).
     """
 
     def __init__(
         self,
         app,
-        rate_limiter: SlidingWindowRateLimiter,
         rpm: int = 20,
         rpd: int = 200,
     ) -> None:
         super().__init__(app)
-        self._limiter = rate_limiter
         self._rpm = rpm
         self._rpd = rpd
 
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        # Only rate-limit LLM-calling endpoints
+        # Only rate-limit LLM-calling endpoints.
         if request.method != "POST" or request.url.path not in _RATE_LIMITED_PATHS:
             return await call_next(request)
 
-        identifier = await self._resolve_identifier(request)
-        result = self._limiter.check(identifier)
+        limiter = self._resolve_limiter(request)
+        if limiter is None:
+            # Redis / limiter unavailable — fail open (pass-through).
+            return await call_next(request)
+
+        identifier = self._resolve_identifier(request)
+        result = limiter.check(identifier)
 
         if not result.allowed:
             logger.warning(
@@ -99,13 +119,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-        # Process the request
+        # Process the request.
         response = await call_next(request)
 
-        # Record the request AFTER successful processing
-        self._limiter.record(identifier)
+        # Record the request AFTER successful processing.
+        limiter.record(identifier)
 
-        # Inject rate-limit headers into response
+        # Inject rate-limit headers into the response.
         response.headers["X-RateLimit-Limit-Minute"] = str(self._rpm)
         response.headers["X-RateLimit-Remaining-Minute"] = str(
             max(0, result.remaining_rpm - 1)  # -1 because we just recorded
@@ -121,32 +141,42 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     # Internal
     # ------------------------------------------------------------------
 
-    async def _resolve_identifier(self, request: Request) -> str:
-        """Extract user identifier for rate limiting.
+    @staticmethod
+    def _resolve_limiter(request: Request) -> Optional[SlidingWindowRateLimiter]:
+        """Fetch the live limiter from app state (built during lifespan)."""
+        return getattr(request.app.state, "rate_limiter", None)
+
+    @staticmethod
+    def _resolve_identifier(request: Request) -> str:
+        """Extract a trusted user identifier for rate limiting.
 
         Priority:
-          1. ``user_id`` from JSON body (authenticated user).
-          2. ``X-Forwarded-For`` header (reverse proxy).
-          3. Client IP from the connection (direct access).
+          1. ``sub`` claim from a valid Bearer JWT (authenticated user).
+          2. ``X-Forwarded-For`` first hop (reverse proxy).
+          3. Direct client IP.
 
-        Falls back to ``"anon"`` when nothing is available (should not happen).
+        Falls back to ``"ip:unknown"`` when nothing is available.
         """
-        # Try to get user_id from cached body
-        try:
-            body_bytes = await request.body()
-            if body_bytes:
-                body = json.loads(body_bytes)
-                user_id = body.get("user_id")
-                if user_id:
-                    return f"user:{user_id}"
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            pass
+        auth = request.headers.get("Authorization", "")
+        if auth.lower().startswith("bearer "):
+            token = auth[7:].strip()
+            try:
+                from auth.jwt_handler import verify_token
 
-        # Fall back to IP
+                payload = verify_token(token)
+                sub = payload.get("sub")
+                if sub:
+                    return f"user:{sub}"
+            except Exception:
+                # Invalid/expired token → fall through to IP-based limiting.
+                # The endpoint's own auth dependency (if any) still rejects it.
+                pass
+
         forwarded = request.headers.get("X-Forwarded-For")
         if forwarded:
             ip = forwarded.split(",")[0].strip()
-            return f"ip:{ip}"
+            if ip:
+                return f"ip:{ip}"
 
         client_ip = request.client.host if request.client else "unknown"
         return f"ip:{client_ip}"
