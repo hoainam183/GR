@@ -21,7 +21,7 @@ from .planning import (
     _trace_plan_step,
 )
 from .prompts import DECOMPOSE_SYSTEM_PROMPT, PLANNER_SYSTEM_PROMPT, SYNTHESIS_PROMPT
-from .state import AgentState, ToolResult
+from .state import AgentState, ToolResult, _CONTEXT_WINDOW_TOOL_LIMIT
 from .tool_adapters import execute_retrieval_plan, web_search_for_executor
 
 logger = logging.getLogger(__name__)
@@ -65,15 +65,6 @@ def _non_empty_labeled_results(
         for index, (label, result) in enumerate(labeled_results)
         if not _is_empty_result_text(result)
     ]
-
-
-def _is_empty_result_text(text: str) -> bool:
-    normalized = " ".join(str(text or "").casefold().split())
-    return (
-        not normalized
-        or normalized.startswith("[khong tim thay")
-        or normalized.startswith("khong tim thay")
-    )
 
 
 class ReActAgent:
@@ -759,6 +750,11 @@ class ReActAgent:
             state._log_tool_results.append(tr)
             iter_counter += 1
 
+        # Enforce the same context-window cap as AgentState.add_tool_result so the
+        # LLM-facing tool_results list cannot grow unbounded; _log_tool_results
+        # keeps the full, untruncated history for logging.
+        if len(state.tool_results) > _CONTEXT_WINDOW_TOOL_LIMIT:
+            state.tool_results = state.tool_results[-_CONTEXT_WINDOW_TOOL_LIMIT:]
         state.iteration = len(state.tool_call_history)
         return state
 

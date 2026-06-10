@@ -297,7 +297,11 @@ class RetrievalService:
         from retrieval.hyde import HyDEExpander
 
         effective_top_k = top_k or self.settings.top_k
-        raw_candidate_k = max(effective_top_k * 8, 40)
+        # Config-driven multiplier (matches the rag_flow hot path) so the HyDE
+        # candidate pool is tunable instead of a hardcoded 8x. The 40-result floor
+        # is kept to protect recall on small top_k / list queries.
+        multiplier = max(float(getattr(self.settings, "raw_candidate_multiplier", 4.0)), 1.0)
+        raw_candidate_k = max(int(round(effective_top_k * multiplier)), 40)
         active_collections = collections or self.settings.collections
 
         hyde = HyDEExpander(llm=llm, embedder=self.bge_embedder)

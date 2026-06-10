@@ -9,7 +9,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel, Field
 
 from api.services.notification_delivery import broadcast_user_notification
-from auth.jwt_handler import get_current_user
+from auth.rbac import require_admin
 from models.database import get_database
 from models.user import UserDocument
 
@@ -34,7 +34,7 @@ class BroadcastNotificationCreate(BaseModel):
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_notification(
     body: NotificationCreate,
-    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    _admin: Annotated[UserDocument, Depends(require_admin)],
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
 ) -> dict[str, Any]:
     """Create notifications for users subscribed to given topics (or all users)."""
@@ -52,7 +52,7 @@ async def create_notification(
 @router.post("/broadcast", status_code=status.HTTP_201_CREATED)
 async def broadcast_notification(
     body: BroadcastNotificationCreate,
-    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    _admin: Annotated[UserDocument, Depends(require_admin)],
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
 ) -> dict[str, Any]:
     """Broadcast a notification to ALL users in the system."""

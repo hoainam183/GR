@@ -477,10 +477,18 @@ class DocumentPipeline:
             # Dump chunks for debugging
             try:
                 import json
-                import os
-                dump_dir = "/Users/nam.nguyen/Documents/personal/GR/src/RAG_v2/data/quydinh/admin_upload"
-                os.makedirs(dump_dir, exist_ok=True)
-                dump_file = os.path.join(dump_dir, f"{doc_id}_{strategy}_chunks.json")
+                from pathlib import Path
+
+                # Project-relative path (RAG_v2/data/quydinh/admin_upload); no
+                # hardcoded per-developer absolute paths.
+                dump_dir = (
+                    Path(__file__).resolve().parent.parent
+                    / "data"
+                    / "quydinh"
+                    / "admin_upload"
+                )
+                dump_dir.mkdir(parents=True, exist_ok=True)
+                dump_file = dump_dir / f"{doc_id}_{strategy}_chunks.json"
                 with open(dump_file, "w", encoding="utf-8") as f:
                     json.dump(dump_chunks, f, ensure_ascii=False, indent=2)
                 logger.info("Dumped %d debug chunks to %s", len(dump_chunks), dump_file)

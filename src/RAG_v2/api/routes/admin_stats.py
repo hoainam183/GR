@@ -788,13 +788,16 @@ async def trigger_crawl(
         raise HTTPException(400, "Crawler is disabled in settings")
 
     now = time.time()
-    if _crawl_running:
-        raise HTTPException(409, "Crawl đang chạy, vui lòng đợi")
-    if now - _last_trigger_time < _CRAWL_COOLDOWN_SECONDS:
-        remaining = int(_CRAWL_COOLDOWN_SECONDS - (now - _last_trigger_time))
-        raise HTTPException(429, f"Vui lòng đợi {remaining}s trước khi trigger lại")
-
-    _last_trigger_time = now
+    # Atomically check-and-reserve the running slot so two concurrent triggers
+    # cannot both pass the guard and launch overlapping crawls.
+    with _crawl_lock:
+        if _crawl_running:
+            raise HTTPException(409, "Crawl đang chạy, vui lòng đợi")
+        if now - _last_trigger_time < _CRAWL_COOLDOWN_SECONDS:
+            remaining = int(_CRAWL_COOLDOWN_SECONDS - (now - _last_trigger_time))
+            raise HTTPException(429, f"Vui lòng đợi {remaining}s trước khi trigger lại")
+        _crawl_running = True
+        _last_trigger_time = now
 
     # Get crawl pipeline from app state
     pipe = request.app.state.pipeline
@@ -805,7 +808,14 @@ async def trigger_crawl(
         from scripts.auto_crawler import AutoCrawlPipeline
         crawl_pipeline = AutoCrawlPipeline(settings=settings, bge=bge, e5=e5)
     except ImportError:
+        with _crawl_lock:
+            _crawl_running = False
         raise HTTPException(500, "Auto-crawler module not available")
+    except Exception:
+        # Release the reserved slot if pipeline construction fails for any reason.
+        with _crawl_lock:
+            _crawl_running = False
+        raise
 
     # Launch background task
     asyncio.create_task(_run_crawl_with_timeout(crawl_pipeline, pipeline_target))
@@ -816,7 +826,7 @@ async def trigger_crawl(
 async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
     """Run crawl in background thread with timeout protection."""
     global _crawl_running, _last_manual_crawl
-    _crawl_running = True
+    # The running slot is reserved by the caller (trigger_crawl) under _crawl_lock.
     try:
         loop = asyncio.get_running_loop()
         future = loop.run_in_executor(
@@ -864,7 +874,8 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
         }
         logger.error("Manual crawl failed: %s", e, exc_info=True)
     finally:
-        _crawl_running = False
+        with _crawl_lock:
+            _crawl_running = False
 
 
 def _do_crawl(crawl_pipeline, pipeline_target: str) -> dict:

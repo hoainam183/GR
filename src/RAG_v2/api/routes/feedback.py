@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from auth.jwt_handler import get_current_user
+from auth.rbac import require_admin
 from models.database import (
     FEEDBACK_COLLECTION,
     SESSIONS_COLLECTION,
@@ -102,7 +103,7 @@ async def get_feedback(
 
 @router.get("/feedback/list")
 async def list_feedback(
-    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    _admin: Annotated[UserDocument, Depends(require_admin)],
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
     rating: Literal["up", "down", "all"] | None = Query(default=None),
     category: str | None = Query(default=None),
@@ -133,7 +134,7 @@ async def list_feedback(
 
 @router.get("/feedback/stats")
 async def get_feedback_stats(
-    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    _admin: Annotated[UserDocument, Depends(require_admin)],
     db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
     days: int = Query(default=30, ge=1, le=365),
 ) -> dict[str, Any]:

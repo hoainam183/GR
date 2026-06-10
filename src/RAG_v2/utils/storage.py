@@ -78,7 +78,11 @@ class LocalStorage(StorageBackend):
 
     async def read_text(self, path: str) -> str:
         """Read text from a relative path under base_dir."""
-        full_path = self.base_dir / path
+        base = self.base_dir.resolve()
+        full_path = (base / path).resolve()
+        # Reject path traversal (e.g. "../../etc/passwd") that escapes base_dir.
+        if not full_path.is_relative_to(base):
+            raise FileNotFoundError(f"File not found: {path}")
         if not full_path.is_file():
             raise FileNotFoundError(f"File not found: {path}")
         return full_path.read_text(encoding="utf-8")

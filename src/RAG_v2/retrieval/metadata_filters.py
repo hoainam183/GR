@@ -311,7 +311,10 @@ MAJOR_NAME_ALIAS_MAPPING: Dict[str, List[str]] = {
         "BF2",
     ],
     "Kỹ thuật thực phẩm": [
-        "Kỹ thuật thực phẩm",
+        # NOTE: the bare "Kỹ thuật thực phẩm" alias is intentionally omitted — it
+        # case-folds identically to BF2's "Kỹ thuật Thực phẩm" (standard programme),
+        # so it could never win the case-insensitive match here and only added
+        # ambiguity. Advanced programme stays reachable via the qualified alias / code.
         "Kỹ thuật thực phẩm tiên tiến",
         "BF-E12",
     ],
