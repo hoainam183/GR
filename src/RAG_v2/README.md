@@ -209,7 +209,7 @@ Các mode kết quả thường gặp:
 | `agent` | LangGraph agent thành công |
 | `rag_v2_fallback` | Agent bị tắt/lỗi, fallback về classic RAG |
 
-Lưu ý streaming: `query_stream()` route `complex` vào agent nếu agent enabled và phát answer agent như một chunk cuối; streaming không dùng self-eval/Tavily fallback để giữ semantics token stream.
+Lưu ý streaming: `query_stream()` route `complex` vào agent nếu agent enabled và phát answer agent như một chunk cuối; streaming có chạy Tavily fetch **pre-generation** (khi `tavily_fallback_enabled`) nhưng bỏ qua **post-generation** self-eval/Tavily để giữ semantics token stream.
 
 ---
 
@@ -429,7 +429,7 @@ data: {"type":"done"}
 
 Metadata cuối stream lấy từ `pipeline.last_*`, gồm `retrieved_documents`, `timings_ms`, `reflected_question`, `target_collections`, `collection_scores`, `routing_probabilities`, `applied_filters`, `collection_results`, `agent_trace`, `tools_used`, `iterations`, `turn_id`.
 
-Streaming không chạy self-eval/Tavily fallback.
+Streaming có chạy Tavily fetch pre-generation (khi bật), nhưng không chạy post-generation self-eval/Tavily fallback.
 
 ---
 

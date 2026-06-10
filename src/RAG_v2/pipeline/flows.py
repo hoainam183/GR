@@ -1447,10 +1447,15 @@ def _should_trigger_hyde(
 ) -> bool:
     """Decide whether HyDE second-pass retrieval should run.
 
-    Triggers ONLY when:
-      1. ``hyde_enabled`` config flag is True, AND
-      2. The best explicit rerank score is negative (all docs irrelevant)
-         or no documents survived the reranking.
+    Triggers when ``hyde_enabled`` is True AND retrieval recall looks poor:
+      1. No documents survived reranking, OR
+      2. The best explicit rerank score is negative (all docs irrelevant), OR
+      3. Fewer than ``hyde_min_results`` documents survived (sparse recall).
+
+    The ``hyde_confidence_threshold`` (mean-score) path of ``should_use_hyde``
+    is intentionally NOT used here: cross-encoder rerank scores are unnormalised
+    logits, so a fixed 0.3 mean threshold would fire on almost every query. It
+    stays a reserved rollout flag.
     """
     if not _cfg_bool(cfg, "hyde_enabled", False):
         return False
@@ -1460,6 +1465,15 @@ def _should_trigger_hyde(
         logger.info(
             "HyDE trigger: best rerank score=%.4f (negative or empty)",
             best if best is not None else -999.0
+        )
+        return True
+
+    min_results = _cfg_int(cfg, "hyde_min_results", 3)
+    if len(reranked) < min_results:
+        logger.info(
+            "HyDE trigger: only %d result(s) < hyde_min_results=%d",
+            len(reranked),
+            min_results,
         )
         return True
 
@@ -2629,6 +2643,8 @@ def rag_flow(
                 tavily_tool=tavily_tool,
                 max_results=_cfg_int(cfg, "tavily_max_results", 3),
                 search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
+                result_count=_cfg_int(cfg, "tavily_web_result_count", 3),
+                content_char_limit=_cfg_int(cfg, "tavily_web_content_char_limit", 1500),
             )
             timings_ms.update(search_info["timings"])
             web_fallback_sources = list(search_info.get("sources") or [])
@@ -2925,6 +2941,8 @@ def rag_flow(
                 search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
                 search_query=web_fallback_query,
                 local_context=local_context_for_fallback or None,
+                result_count=_cfg_int(cfg, "tavily_web_result_count", 3),
+                content_char_limit=_cfg_int(cfg, "tavily_web_content_char_limit", 1500),
             )
             timings_ms.update(fallback_result["timings"])
             if fallback_result["used"]:
@@ -3617,6 +3635,8 @@ def rag_flow_stream(
                 tavily_tool=tavily_tool,
                 max_results=_cfg_int(cfg, "tavily_max_results", 3),
                 search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
+                result_count=_cfg_int(cfg, "tavily_web_result_count", 3),
+                content_char_limit=_cfg_int(cfg, "tavily_web_content_char_limit", 1500),
             )
             timings_ms.update(search_info["timings"])
             web_sources = list(search_info.get("sources") or [])
@@ -3889,6 +3909,16 @@ def _tavily_results_to_docs(search_result: Dict[str, Any]) -> List[Dict[str, Any
     return docs
 
 
+def _extract_query_year(text: str) -> Optional[int]:
+    """Return the most recent academic year (20XX) mentioned in the query.
+
+    Used to drive Tavily's freshness filter so stale official pages from older
+    years are dropped. Returns None when the query mentions no year.
+    """
+    years = re.findall(r"\b(20\d{2})\b", _fold_vietnamese(text or ""))
+    return max(int(y) for y in years) if years else None
+
+
 def _tavily_search_context(
     *,
     query: str,
@@ -3896,6 +3926,9 @@ def _tavily_search_context(
     max_results: int = 3,
     search_depth: str = "basic",
     extract_urls: Optional[List[str]] = None,
+    result_count: Optional[int] = None,
+    content_char_limit: Optional[int] = None,
+    query_year: Optional[int] = None,
 ) -> Dict[str, Any]:
     """Search official HUST domains and return context, sources, timings.
 
@@ -3952,6 +3985,9 @@ def _tavily_search_context(
                 max_results=max_results,
                 search_depth=search_depth,
                 include_domains=HUST_OFFICIAL_DOMAINS,
+                result_count=result_count,
+                content_char_limit=content_char_limit,
+                query_year=query_year if query_year else _extract_query_year(tavily_query),
             )
             timings_ms["tavily_search"] = _elapsed_ms(search_t0)
 
@@ -4016,6 +4052,8 @@ def _tavily_fallback_result(
     search_depth: str = "basic",
     search_query: Optional[str] = None,
     local_context: Optional[str] = None,
+    result_count: Optional[int] = None,
+    content_char_limit: Optional[int] = None,
 ) -> Dict[str, Any]:
     """Use Tavily web search and return answer, timings, source docs, status."""
     fallback_t0 = time.perf_counter()
@@ -4024,6 +4062,8 @@ def _tavily_fallback_result(
         tavily_tool=tavily_tool,
         max_results=max_results,
         search_depth=search_depth,
+        result_count=result_count,
+        content_char_limit=content_char_limit,
     )
     timings_ms: Dict[str, float] = dict(search_info["timings"])
     web_context = str(search_info.get("context") or "")

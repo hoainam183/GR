@@ -6,9 +6,14 @@ a second-pass vector search.  The hypothesis embedding often captures the
 semantic space of relevant documents better than the raw question embedding.
 
 This module provides an optional fallback that integrates into the retrieval
-service — it is NOT called on every query.  It activates only when:
-  1. Initial retrieval returned fewer than ``min_results`` candidates, OR
-  2. Reranker mean score falls below ``confidence_threshold``.
+service — it is NOT called on every query.  The pipeline's active trigger
+(``pipeline.flows._should_trigger_hyde``) fires when reranking returns no
+documents, a negative best score, or fewer than ``hyde_min_results`` results.
+
+``should_use_hyde`` below is a self-contained helper that ALSO supports a
+mean-confidence threshold; the mean-score path is a reserved rollout flag and
+is intentionally not wired into the default pipeline (cross-encoder scores are
+unnormalised, so a fixed mean threshold would over-trigger).
 
 Usage::
 

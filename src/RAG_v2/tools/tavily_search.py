@@ -186,17 +186,26 @@ class TavilySearchTool:
         include_answer: bool = True,
         include_domains: Optional[List[str]] = None,
         exclude_domains: Optional[List[str]] = None,
+        result_count: Optional[int] = None,
+        content_char_limit: Optional[int] = None,
+        query_year: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Execute a web search and return structured results.
 
         Args:
             query: Search query string.
-            max_results: Override the default result count.
+            max_results: Override the default fetch-pool size sent to Tavily.
             search_depth: ``"basic"`` (fast) or ``"advanced"`` (deeper).
             include_answer: Ask Tavily to generate a short answer.
             include_domains: Restrict results to these domains.
                 Falls back to ``default_include_domains`` when *None*.
             exclude_domains: Exclude results from these domains.
+            result_count: If set, keep only the top N results after filtering
+                and ranking (final count, ``<= max_results``).
+            content_char_limit: If set, truncate each result's ``content`` to
+                this many characters before formatting the LLM context.
+            query_year: If set, drop results mentioning only years older than
+                ``query_year - 1`` (freshness filter via ``filter_results``).
 
         Returns:
             Dict with keys:
@@ -220,6 +229,9 @@ class TavilySearchTool:
             include_answer,
             tuple(effective_include or ()),
             tuple(effective_exclude or ()),
+            result_count,
+            content_char_limit,
+            query_year,
         )
         with self._cache_lock:
             cached = self._cache.get(cache_key)
@@ -253,11 +265,20 @@ class TavilySearchTool:
 
                 results = self._parse_results(response)
                 raw_count = len(results)
-                results = self.filter_results(results, min_content_length=100)
+                results = self.filter_results(
+                    results, min_content_length=100, query_year=query_year
+                )
                 results.sort(
                     key=lambda item: self._rank_result_for_query(query, item),
                     reverse=True,
                 )
+                if result_count is not None and result_count > 0:
+                    results = results[:result_count]
+                if content_char_limit is not None and content_char_limit > 0:
+                    for r in results:
+                        content = r.get("content", "")
+                        if len(content) > content_char_limit:
+                            r["content"] = content[:content_char_limit]
                 if raw_count != len(results):
                     logger.info(
                         "Tavily filter: %d → %d results",

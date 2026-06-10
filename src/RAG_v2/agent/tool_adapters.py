@@ -666,6 +666,13 @@ def _web_search(query: str) -> str:
     if runtime.tavily_tool is None:
         return "[Loi: Tavily chua duoc cau hinh API key]"
 
+    # Honour the master switch so web fallback policy is consistent with the
+    # classic RAG path (flows.py gates every Tavily call on this flag). Without
+    # this the agent would call Tavily purely on the planner's needs_web, making
+    # TAVILY_FALLBACK_ENABLED impossible to use as a single kill-switch.
+    if not getattr(runtime.settings, "tavily_fallback_enabled", False):
+        return "[Web fallback dang tat (TAVILY_FALLBACK_ENABLED=false)]"
+
     from tools.tavily_search import (
         EDU_AUTHORITATIVE_DOMAINS,
         HUST_EXTENDED_DOMAINS,
@@ -680,6 +687,10 @@ def _web_search(query: str) -> str:
             HUST_OFFICIAL_DOMAINS
             + HUST_EXTENDED_DOMAINS
             + EDU_AUTHORITATIVE_DOMAINS
+        ),
+        result_count=getattr(runtime.settings, "tavily_web_result_count", None),
+        content_char_limit=getattr(
+            runtime.settings, "tavily_web_content_char_limit", None
         ),
     )
     return _format_web_results(results)

@@ -85,7 +85,9 @@ The current default is `tavily_fallback_enabled=False`, so local retrieval and
 agent/planner paths run without external web fallback unless an admin/runtime
 configuration enables it.
 
-Streaming path does not run Tavily fallback to preserve streaming UX.
+Streaming path runs the **pre-generation** Tavily fetch (when `tavily_fallback_enabled`),
+injecting web context before tokens stream. It skips only the **post-generation**
+self-eval/Tavily quality gate to preserve streaming UX.
 
 ## Agent Web Search
 
