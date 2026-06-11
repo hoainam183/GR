@@ -40,7 +40,9 @@ from schemas.document import (
     CONVERTER_INFO,
     VALID_COLLECTIONS,
     VALID_CONVERTERS,
+    ChunkDeleteResponse,
     ChunkPreview,
+    ChunkUpdateRequest,
     ChunksResponse,
     CleanedContent,
     DocumentDetail,
@@ -56,6 +58,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 # Module-level singletons (lazy-initialised)
 _storage: LocalStorage | None = None
 _pipeline: "DocumentPipeline | None" = None
+EDITABLE_CHUNK_STATUSES = {"chunked", "failed"}
 
 
 def _get_storage() -> LocalStorage:
@@ -101,6 +104,55 @@ def _audit(action: str, user_id: str, details: dict | None = None) -> dict:
     """Create an audit log entry dict for ``$push``."""
     entry = AuditEntry(action=action, user_id=user_id, details=details)
     return entry.model_dump()
+
+
+def _serialize_chunk_preview(chunk: dict) -> dict:
+    """Serialize a staged document chunk for admin review."""
+    return ChunkPreview(
+        chunk_id=str(chunk["_id"]),
+        chunk_index=int(chunk.get("chunk_index", 0)),
+        content=str(chunk.get("content") or ""),
+        metadata=chunk.get("metadata", {}),
+        edited=bool(chunk.get("edited", False)),
+        updated_at=chunk.get("updated_at"),
+    ).model_dump()
+
+
+def _ensure_chunks_editable(doc: dict) -> None:
+    """Allow staged chunk edits only before indexing."""
+    if doc.get("status") not in EDITABLE_CHUNK_STATUSES:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot edit chunks in status '{doc.get('status')}'",
+        )
+
+
+async def _get_chunk_or_404(
+    db: AsyncIOMotorDatabase, doc_id: str, chunk_id: str
+) -> dict:
+    """Fetch a staged chunk belonging to a document or raise 404."""
+    if not ObjectId.is_valid(chunk_id):
+        raise HTTPException(status_code=400, detail="Invalid chunk ID")
+
+    chunk = await db[DOCUMENT_CHUNKS_COLLECTION].find_one(
+        {"_id": ObjectId(chunk_id), "document_id": ObjectId(doc_id)}
+    )
+    if chunk is None:
+        raise HTTPException(status_code=404, detail="Chunk not found")
+    return chunk
+
+
+async def _document_chunk_summary(
+    db: AsyncIOMotorDatabase, doc_id: str
+) -> tuple[int, list[str]]:
+    """Return current staged chunk count and sorted chunk IDs for a document."""
+    cursor = (
+        db[DOCUMENT_CHUNKS_COLLECTION]
+        .find({"document_id": ObjectId(doc_id)}, {"_id": 1})
+        .sort("chunk_index", 1)
+    )
+    chunk_ids = [str(chunk["_id"]) async for chunk in cursor]
+    return len(chunk_ids), chunk_ids
 
 
 def _invalidate_search_caches(app: Any, chunk_ids: list[str] | None = None) -> dict:
@@ -695,14 +747,7 @@ async def get_chunks(
     chunks = []
     sizes = []
     async for c in cursor:
-        chunks.append(
-            ChunkPreview(
-                chunk_id=str(c["_id"]),
-                chunk_index=c["chunk_index"],
-                content=c["content"],
-                metadata=c.get("metadata", {}),
-            )
-        )
+        chunks.append(ChunkPreview(**_serialize_chunk_preview(c)))
         sizes.append(len(c["content"]))
 
     # Compute stats from all chunks (not just this page)
@@ -728,6 +773,109 @@ async def get_chunks(
         strategy=strategy_filter or doc.get("chunking_strategy", "unknown"),
         stats=stats,
     ).model_dump()
+
+
+# PATCH /admin/documents/{id}/chunks/{chunk_id} - Edit staged chunk
+@router.patch(
+    "/documents/{doc_id}/chunks/{chunk_id}",
+    response_model=ChunkPreview,
+    status_code=status.HTTP_200_OK,
+)
+async def update_chunk(
+    doc_id: str,
+    chunk_id: str,
+    body: ChunkUpdateRequest,
+    user: Annotated[UserDocument, Depends(require_admin)],
+    db: AsyncIOMotorDatabase = Depends(get_database),
+):
+    """Update staged chunk content before indexing."""
+    doc = await _get_doc_or_404(db, doc_id)
+    _ensure_chunks_editable(doc)
+
+    chunk = await _get_chunk_or_404(db, doc_id, chunk_id)
+    now = datetime.now(timezone.utc)
+    original_content = str(chunk.get("original_content", chunk.get("content", "")))
+    edited = body.content != original_content
+    chunk_update: dict[str, Any] = {
+        "content": body.content,
+        "edited": edited,
+        "updated_at": now,
+    }
+    if "original_content" not in chunk:
+        chunk_update["original_content"] = str(chunk.get("content", ""))
+
+    await db[DOCUMENT_CHUNKS_COLLECTION].update_one(
+        {"_id": ObjectId(chunk_id), "document_id": ObjectId(doc_id)},
+        {"$set": chunk_update},
+    )
+    await db[DOCUMENTS_COLLECTION].update_one(
+        {"_id": ObjectId(doc_id)},
+        {
+            "$set": {"chunks_reviewed": False},
+            "$push": {
+                "audit_log": _audit(
+                    "update_chunk",
+                    str(user.id),
+                    {
+                        "chunk_id": chunk_id,
+                        "chunk_index": chunk.get("chunk_index"),
+                    },
+                )
+            },
+        },
+    )
+
+    updated = await _get_chunk_or_404(db, doc_id, chunk_id)
+    return _serialize_chunk_preview(updated)
+
+
+# DELETE /admin/documents/{id}/chunks/{chunk_id} - Delete staged chunk
+@router.delete(
+    "/documents/{doc_id}/chunks/{chunk_id}",
+    response_model=ChunkDeleteResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def delete_chunk(
+    doc_id: str,
+    chunk_id: str,
+    user: Annotated[UserDocument, Depends(require_admin)],
+    db: AsyncIOMotorDatabase = Depends(get_database),
+):
+    """Delete a staged chunk before indexing."""
+    doc = await _get_doc_or_404(db, doc_id)
+    _ensure_chunks_editable(doc)
+    chunk = await _get_chunk_or_404(db, doc_id, chunk_id)
+
+    await db[DOCUMENT_CHUNKS_COLLECTION].delete_one(
+        {"_id": ObjectId(chunk_id), "document_id": ObjectId(doc_id)}
+    )
+    remaining, remaining_ids = await _document_chunk_summary(db, doc_id)
+    await db[DOCUMENTS_COLLECTION].update_one(
+        {"_id": ObjectId(doc_id)},
+        {
+            "$set": {
+                "chunk_count": remaining,
+                "chunk_ids": remaining_ids,
+                "chunks_reviewed": False,
+            },
+            "$push": {
+                "audit_log": _audit(
+                    "delete_chunk",
+                    str(user.id),
+                    {
+                        "chunk_id": chunk_id,
+                        "chunk_index": chunk.get("chunk_index"),
+                    },
+                )
+            },
+        },
+    )
+
+    return {
+        "detail": "Chunk deleted",
+        "deleted_chunk_id": chunk_id,
+        "remaining_chunks": remaining,
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -806,6 +954,7 @@ async def select_chunk_strategy(
                 "chunking_strategy": strategy,
                 "chunk_count": remaining,
                 "chunk_ids": remaining_ids,
+                "chunks_reviewed": False,
             },
             "$push": {
                 "audit_log": _audit(
@@ -837,11 +986,18 @@ async def approve_chunks(
 ):
     """Mark chunks as reviewed/approved."""
     await _get_doc_or_404(db, doc_id)
+    chunk_count, chunk_ids = await _document_chunk_summary(db, doc_id)
+    if chunk_count == 0:
+        raise HTTPException(status_code=409, detail="No chunks to approve")
 
     await db[DOCUMENTS_COLLECTION].update_one(
         {"_id": ObjectId(doc_id)},
         {
-            "$set": {"chunks_reviewed": True},
+            "$set": {
+                "chunk_count": chunk_count,
+                "chunk_ids": chunk_ids,
+                "chunks_reviewed": True,
+            },
             "$push": {"audit_log": _audit("approve_chunks", str(user.id))},
         },
     )
@@ -870,13 +1026,24 @@ async def index_document(
             detail=f"Cannot index document in status '{doc['status']}'",
         )
 
-    if not doc.get("chunk_ids"):
+    chunk_count, chunk_ids = await _document_chunk_summary(db, doc_id)
+    if chunk_count == 0:
         raise HTTPException(status_code=409, detail="No chunks to index")
+    if not doc.get("chunks_reviewed", False):
+        raise HTTPException(
+            status_code=409,
+            detail="Chunks must be approved before indexing",
+        )
 
     await db[DOCUMENTS_COLLECTION].update_one(
         {"_id": ObjectId(doc_id)},
         {
-            "$set": {"status": "embedding", "error_message": None},
+            "$set": {
+                "status": "embedding",
+                "error_message": None,
+                "chunk_count": chunk_count,
+                "chunk_ids": chunk_ids,
+            },
             "$push": {"audit_log": _audit("index", str(user.id))},
         },
     )

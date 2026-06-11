@@ -4,6 +4,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Save, Check } from 'lucide-react';
 
+function apiErrorMessage(error: unknown, fallback: string): string {
+  const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+  return typeof detail === 'string' ? detail : fallback;
+}
+
 interface MarkdownEditorProps {
   content: string;
   onSave: (content: string) => Promise<void>;
@@ -25,8 +30,8 @@ export default function MarkdownEditor({ content, onSave, approved, title = 'Mar
     try {
       await onSave(value);
       toast.success(`${title} đã được lưu`);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || `Lưu ${title} thất bại`);
+    } catch (error: unknown) {
+      toast.error(apiErrorMessage(error, `Lưu ${title} thất bại`));
     } finally {
       setSaving(false);
     }

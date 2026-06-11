@@ -45,7 +45,8 @@ Consumers: `api/routes/chat.py` (ChatRequest/ChatResponse + constants), `api/rou
 - `DocumentUploadRequest` — `collection` (validated against `VALID_COLLECTIONS`), optional `chunking_strategy`, `metadata_overrides`.
 - `DocumentDetail` — full document metadata; `from_document()` builds it from a MongoDB dict.
 - `DocumentListResponse` — paginated documents (`documents`, `total`, `page`, `limit`).
-- `ChunkPreview` / `ChunksResponse` — chunk preview + paginated listing with `strategy` and `stats`.
+- `ChunkPreview` / `ChunksResponse` — chunk preview + paginated listing with `strategy`, edit state, and `stats`.
+- `ChunkUpdateRequest` / `ChunkDeleteResponse` — staged chunk edit/delete contracts; edit forbids extra fields and rejects blank content.
 - `MarkdownContent` / `CleanedContent` — single-`content` wrappers for review/edit.
 
 Module-level constants: `VALID_COLLECTIONS` (`ctdt`, `quydinh`, `kehoach`, `stsv`, `test`), `VALID_CONVERTERS` (`pymupdf4llm`, `docling`), `COLLECTION_CHUNKER_MAP`, and `CONVERTER_INFO` / `CHUNKER_INFO` listing metadata for the admin UI.

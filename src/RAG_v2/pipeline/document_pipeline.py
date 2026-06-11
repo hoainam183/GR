@@ -367,7 +367,11 @@ class DocumentPipeline:
                 db,
                 doc_id,
                 "chunking",
-                {"error_message": None, "chunking_strategy": strategy},
+                {
+                    "error_message": None,
+                    "chunking_strategy": strategy,
+                    "chunks_reviewed": False,
+                },
             )
 
             # Prefer cleaned content, fall back to markdown
@@ -510,6 +514,7 @@ class DocumentPipeline:
                 {
                     "chunk_count": len(chunk_ids),
                     "chunk_ids": chunk_ids,
+                    "chunks_reviewed": False,
                     "chunked_at": datetime.now(timezone.utc),
                 },
             )
@@ -539,6 +544,9 @@ class DocumentPipeline:
             doc = await self._get_doc(db, doc_id)
             if doc is None:
                 return
+
+            if not doc.get("chunks_reviewed", False):
+                raise ValueError("Chunks must be approved before indexing")
 
             await self._update_status(
                 db, doc_id, "embedding", {"error_message": None}
@@ -683,9 +691,9 @@ class DocumentPipeline:
         db: AsyncIOMotorDatabase,
         converter: str = "pymupdf4llm",
     ) -> None:
-        """Run convert → clean → chunk → embed+index sequentially.
+        """Run convert → clean → chunk sequentially.
 
-        Stops on first failure. Skips review gates (auto-pipeline mode).
+        Stops on first failure. Indexing waits for admin chunk approval.
         """
         # Step 1: Convert
         await self.convert_pdf(doc_id, db, converter=converter)
@@ -705,9 +713,6 @@ class DocumentPipeline:
         doc = await self._get_doc(db, doc_id)
         if doc is None or doc["status"] == "failed":
             return
-
-        # Step 4: Embed + Index
-        await self.embed_and_index(doc_id, db)
 
     # ------------------------------------------------------------------
     # Cleanup: delete indexed data from vector stores

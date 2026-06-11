@@ -5,6 +5,11 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Save } from 'lucide-react';
 
+function apiErrorMessage(error: unknown, fallback: string): string {
+  const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+  return typeof detail === 'string' ? detail : fallback;
+}
+
 interface MetadataFormProps {
   initial: Record<string, unknown>;
   onSave: (meta: Record<string, string>) => Promise<void>;
@@ -32,8 +37,8 @@ export default function MetadataForm({ initial, onSave }: MetadataFormProps) {
       if (dateStr) meta.date_str = dateStr;
       await onSave(meta);
       toast.success('Metadata đã lưu');
-    } catch (e: any) {
-      toast.error(e?.response?.data?.detail || 'Lưu metadata thất bại');
+    } catch (error: unknown) {
+      toast.error(apiErrorMessage(error, 'Lưu metadata thất bại'));
     } finally {
       setSaving(false);
     }

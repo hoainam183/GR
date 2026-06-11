@@ -12,6 +12,11 @@ import { Upload, X, FileText } from 'lucide-react';
 const MAX_SIZE_MB = 50;
 const COLLECTIONS: CollectionName[] = ['ctdt', 'quydinh', 'kehoach', 'stsv', 'test'];
 
+function apiErrorMessage(error: unknown, fallback: string): string {
+  const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+  return typeof detail === 'string' ? detail : fallback;
+}
+
 interface FileUploaderProps {
   onUploaded: (docs: DocumentDetail[]) => void;
 }
@@ -66,9 +71,8 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
       setFiles([]);
       setProgress(null);
       onUploaded(docs);
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || 'Upload thất bại';
-      toast.error(typeof msg === 'string' ? msg : 'Upload thất bại');
+    } catch (error: unknown) {
+      toast.error(apiErrorMessage(error, 'Upload thất bại'));
     } finally {
       setUploading(false);
     }

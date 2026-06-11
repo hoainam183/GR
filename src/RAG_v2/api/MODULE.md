@@ -163,9 +163,9 @@ Admin-only (`require_admin`), wraps a module-level `DocumentPipeline` singleton;
 
 - `POST /admin/documents` (201) upload PDFs; `GET /admin/documents` list; `GET /admin/documents/{id}` detail; `DELETE /admin/documents/{id}` delete + cleanup.
 - `POST /admin/documents/{id}/rollback` revert to previous state.
-- `POST /admin/documents/{id}/convert` (PDF→Markdown), `clean`, `chunk`, `index`, `pipeline` (full auto) — all background 202.
+- `POST /admin/documents/{id}/convert` (PDF→Markdown), `clean`, `chunk`, `index`, `pipeline` — background 202; `pipeline` stops at `chunked` so admin can review chunks before indexing.
 - `GET/PUT /admin/documents/{id}/markdown` and `/cleaned` review+approve.
-- `GET /admin/documents/{id}/chunks` (paginated), `GET .../chunk-strategies`, `POST .../chunks/select`, `PUT .../chunks` (approve).
+- `GET /admin/documents/{id}/chunks` (paginated), `PATCH/DELETE .../chunks/{chunk_id}` staged chunk content/delete review, `GET .../chunk-strategies`, `POST .../chunks/select`, `PUT .../chunks` (approve). `POST .../index` requires approved chunks.
 - `GET /admin/converters`, `GET /admin/chunkers` discovery.
 
 ## Admin Stats & Config (`routes/admin_stats.py`)

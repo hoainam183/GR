@@ -258,10 +258,10 @@ Main methods:
 - `convert_pdf(doc_id, db, converter="pymupdf4llm")` — PDF → markdown (`pymupdf4llm` or `docling`).
 - `clean(doc_id, db)` — clean converted markdown.
 - `chunk(doc_id, strategy, db)` — chunk via `_create_chunker`/`_run_chunker`; falls back
-  to `recursive` when `hierarchical`/`olmocr` yields 0 chunks; stores chunks in Mongo.
+  to `recursive` when `hierarchical`/`olmocr` yields 0 chunks; stores chunks in Mongo and resets `chunks_reviewed=false`.
 - `embed_and_index(doc_id, db)` — embed with BGE-M3 + E5, remap parent IDs, index into
-  Qdrant (parent+child) and ES (child/recursive/appendix only); triggers post-index eval.
-- `run_full_pipeline(doc_id, db, converter="pymupdf4llm")` — runs all steps sequentially, stopping on first failure.
+  Qdrant (parent+child) and ES (child/recursive/appendix only); requires approved chunks and triggers post-index eval.
+- `run_full_pipeline(doc_id, db, converter="pymupdf4llm")` — runs convert/clean/chunk sequentially, stopping on first failure and leaving indexing to the admin review gate.
 - `delete_indexed_data(doc_id, collection_name)` — remove from Qdrant + ES.
 - `rollback(doc_id, db)` — revert document one logical state back, cleaning artifacts.
 
@@ -269,7 +269,7 @@ Admin upload status lifecycle:
 
 ```text
 uploaded -> converting -> converted -> cleaning -> cleaned
--> chunking -> chunked -> embedding -> indexed
+-> chunking -> chunked -> approved chunks -> embedding -> indexed
 ```
 
 It writes: local files via `utils.storage.LocalStorage`, the `documents` and

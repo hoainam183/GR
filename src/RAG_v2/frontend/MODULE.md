@@ -81,7 +81,7 @@ Local services (`src/services/`):
 - `authSession.ts`: in-memory access-token session core — `ensureSession`, `ensureAccessToken`, `refreshSession` (single-flight), `applyTokenResponse`, `logoutSession`, `clearSession`, `getCurrentSessionUser`, the axios interceptor installer, and `authFetch` (credentialed fetch with 401 refresh+retry).
 - `authStorage.ts`: in-memory access token + expiry, legacy `localStorage.token`/`access_token` migration/cleanup; user object cached in localStorage.
 - `sessionApi.ts`: conversation session list/get/create/update/delete.
-- `adminApi.ts`: admin document pipeline (upload/list/detail/chunks/markdown actions) + config/crawler endpoints, via its own `adminClient` axios instance with auth interceptors.
+- `adminApi.ts`: admin document pipeline (upload/list/detail/chunks/markdown actions, staged chunk edit/delete/approve) + config/crawler endpoints, via its own `adminClient` axios instance with auth interceptors.
 
 Bookmarks and notifications do NOT have local service files — `BookmarksPage`, `NotificationsPage`, and `NotificationBell` call `@rag/shared` helpers (`createApiClient`, `listBookmarks`, `listBookmarkFolders`, `deleteBookmark`, notification calls) wired to local `authSession` token/refresh helpers.
 
@@ -107,7 +107,7 @@ Token behavior:
 - `SystemTab` keeps LLM model fields as selects (injects the configured current model when outside the curated list) and manages API keys via secret-free fingerprint rows from `/admin/config/api-keys`; the backend never echoes raw keys. Renders crawler pending/indexed runs from `crawlerStatus.runs` with per-run preview/edit and indexing.
 - Admin data fetching uses the shared `useAdminFetch` hook (loading/error/empty + toast on error) and `types/adminStats.ts`.
 
-`DocumentReview` (`/admin/documents/:id`) drives the upload-to-index pipeline (converter/chunker selection, markdown/chunk editing) via `adminApi.ts` and `types/admin.ts`, using `components/admin/` (FileUploader, MarkdownEditor, MetadataForm, ChunkViewer, PipelineProgress, DocumentList).
+`DocumentReview` (`/admin/documents/:id`) drives the upload-to-index pipeline (converter/chunker selection, markdown review, staged chunk edit/delete/approve, then index) via `adminApi.ts` and `types/admin.ts`, using `components/admin/` (FileUploader, MarkdownEditor, MetadataForm, ChunkViewer, PipelineProgress, DocumentList).
 
 Notification pages consume `/notifications*` user routes via `@rag/shared`.
 

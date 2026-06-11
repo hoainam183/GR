@@ -44,12 +44,23 @@ import type {
 import { CHUNKER_ALTERNATIVES } from '@/types/admin';
 import { ArrowLeft, Play, Zap, GitCompare, Check, RotateCcw } from 'lucide-react';
 
+type RetryingStep = PipelineStep['key'] | 'rollback';
+
+function apiErrorMessage(error: unknown, fallback: string): string {
+  const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+  return typeof detail === 'string' ? detail : fallback;
+}
+
+function apiStatus(error: unknown): number | undefined {
+  return (error as { response?: { status?: number } })?.response?.status;
+}
+
 export default function DocumentReview() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [doc, setDoc] = useState<DocumentDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [retrying, setRetrying] = useState<PipelineStep['key'] | null>(null);
+  const [retrying, setRetrying] = useState<RetryingStep | null>(null);
   const [mdContent, setMdContent] = useState<string | null>(null);
   const [cleanedContent, setCleanedContent] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -68,8 +79,8 @@ export default function DocumentReview() {
       const d = await getDocument(id);
       setDoc(d);
       return d;
-    } catch (err: any) {
-      if (err?.response?.status === 404) {
+    } catch (error: unknown) {
+      if (apiStatus(error) === 404) {
         toast.error('Tài liệu không tồn tại');
         navigate('/admin');
       }
@@ -159,13 +170,17 @@ export default function DocumentReview() {
       } else if (step === 'clean') {
         await triggerClean(id);
       } else if (step === 'index') {
+        if (doc && !doc.chunks_reviewed) {
+          toast.error('Duyệt chunks trước khi index');
+          return;
+        }
         await triggerIndex(id);
       }
       toast.success('Đang xử lý…');
       // Start polling
       setTimeout(fetchDoc, 1000);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || `Không thể chạy bước ${step}`);
+    } catch (error: unknown) {
+      toast.error(apiErrorMessage(error, `Không thể chạy bước ${step}`));
     } finally {
       setRetrying(null);
     }
@@ -189,15 +204,15 @@ export default function DocumentReview() {
       await triggerFullPipeline(id);
       toast.success('Pipeline tự động đã bắt đầu');
       setTimeout(fetchDoc, 1000);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Không thể chạy pipeline');
+    } catch (error: unknown) {
+      toast.error(apiErrorMessage(error, 'Không thể chạy pipeline'));
     }
   };
 
   const handleRollback = async () => {
     if (!id) return;
     if (!window.confirm('Bạn có chắc muốn rollback lại một bước? Dữ liệu của bước hiện tại/lỗi sẽ bị xóa và lùi về trạng thái trước đó.')) return;
-    setRetrying('rollback' as any);
+    setRetrying('rollback');
     try {
       await rollbackDocument(id);
       toast.success('Đã rollback lại một bước thành công');
@@ -208,8 +223,8 @@ export default function DocumentReview() {
         setViewingStrategy(undefined);
         await fetchDoc();
       }, 1000);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Rollback thất bại');
+    } catch (error: unknown) {
+      toast.error(apiErrorMessage(error, 'Rollback thất bại'));
     } finally {
       setRetrying(null);
     }
@@ -239,8 +254,8 @@ export default function DocumentReview() {
         await fetchDoc();
         await fetchChunkSets();
       }, 2000);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Chunk thất bại');
+    } catch (error: unknown) {
+      toast.error(apiErrorMessage(error, 'Chunk thất bại'));
     } finally {
       setRetrying(null);
     }
@@ -253,8 +268,8 @@ export default function DocumentReview() {
       toast.success(`Đã chọn strategy "${strategy}". Giữ ${result.kept_chunks} chunks, xóa ${result.deleted_chunks} chunks cũ.`);
       await fetchDoc();
       await fetchChunkSets();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Không thể chọn strategy');
+    } catch (error: unknown) {
+      toast.error(apiErrorMessage(error, 'Không thể chọn strategy'));
     }
   };
 
@@ -308,7 +323,7 @@ export default function DocumentReview() {
             </Button>
           )}
           {doc.status !== 'uploaded' && doc.status !== 'converting' && (
-            <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={handleRollback} disabled={retrying === 'rollback' as any}>
+            <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={handleRollback} disabled={retrying === 'rollback'}>
               <RotateCcw className="mr-1 h-4 w-4" /> Rollback
             </Button>
           )}
@@ -321,7 +336,11 @@ export default function DocumentReview() {
           <CardTitle className="text-base">Tiến trình Pipeline</CardTitle>
         </CardHeader>
         <CardContent>
-          <PipelineProgress document={doc} onRetry={handleTriggerStep} retrying={retrying} />
+          <PipelineProgress
+            document={doc}
+            onRetry={handleTriggerStep}
+            retrying={retrying === 'rollback' ? null : retrying}
+          />
         </CardContent>
       </Card>
 
@@ -493,6 +512,7 @@ export default function DocumentReview() {
               documentId={doc.id}
               approved={doc.chunks_reviewed}
               onApproved={fetchDoc}
+              onChanged={fetchDoc}
               strategy={viewingStrategy}
             />
           ) : (

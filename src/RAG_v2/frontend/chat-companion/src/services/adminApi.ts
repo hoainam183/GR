@@ -4,6 +4,7 @@ import { installAuthInterceptors } from '@/services/authSession';
 import type {
   DocumentDetail,
   DocumentListResponse,
+  ChunkPreview,
   ChunksResponse,
   MarkdownContent,
   CleanedContent,
@@ -150,6 +151,33 @@ export async function getChunks(
 
 export async function approveChunks(id: string): Promise<void> {
   await adminClient.put(`/admin/documents/${id}/chunks`, null, { headers: authHeaders() });
+}
+
+export async function updateDocumentChunk(
+  id: string,
+  chunkId: string,
+  content: string,
+): Promise<ChunkPreview> {
+  const { data } = await adminClient.patch<ChunkPreview>(
+    `/admin/documents/${id}/chunks/${chunkId}`,
+    { content },
+    { headers: authHeaders() },
+  );
+  return data;
+}
+
+export async function deleteDocumentChunk(
+  id: string,
+  chunkId: string,
+): Promise<{ deleted_chunk_id: string; remaining_chunks: number }> {
+  const { data } = await adminClient.delete<{
+    deleted_chunk_id: string;
+    remaining_chunks: number;
+  }>(
+    `/admin/documents/${id}/chunks/${chunkId}`,
+    { headers: authHeaders() },
+  );
+  return data;
 }
 
 // ──────────────────── Converter / Chunker listing ──────────────────

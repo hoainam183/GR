@@ -144,6 +144,8 @@ class ChunkPreview(BaseModel):
     chunk_index: int
     content: str
     metadata: dict = Field(default_factory=dict)
+    edited: bool = False
+    updated_at: Optional[datetime] = None
 
 
 class ChunksResponse(BaseModel):
@@ -155,6 +157,28 @@ class ChunksResponse(BaseModel):
     limit: int
     strategy: str
     stats: dict = Field(default_factory=dict)  # avg_size, min, max, etc.
+
+
+class ChunkUpdateRequest(BaseModel):
+    """Update payload for a staged document chunk."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    content: str = Field(min_length=1)
+
+    @field_validator("content")
+    @classmethod
+    def content_must_not_be_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Chunk content cannot be empty")
+        return value
+
+
+class ChunkDeleteResponse(BaseModel):
+    """Delete result for a staged document chunk."""
+
+    deleted_chunk_id: str
+    remaining_chunks: int
 
 
 class MarkdownContent(BaseModel):

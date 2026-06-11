@@ -88,6 +88,8 @@ export interface ChunkPreview {
   chunk_index: number;
   content: string;
   metadata: Record<string, unknown>;
+  edited?: boolean;
+  updated_at?: string | null;
 }
 
 export interface ChunksResponse {
