@@ -1,6 +1,6 @@
 [
   {
-    "id": "9eb473ef-696f-4ee0-95ec-37159215c496",
+    "id": "eab86ce8-9d33-4d48-9d54-580541cd64b1",
     "chunk_id": "chunk_0000",
     "readable_id": "chunk_0000",
     "content": "# ME-GU - Cooperation Training Program between Hanoi University of Science and Technology, Vietnam and Griffith University, Australia\n\n**Name of program:** Mechanical Machine Engineering (International cooperation academic programme)\n\n**Education level:** Engineer\n\n**Major:** Mechanical Engineering\n\n**Program codes:** 7520130 (Engineering)\n\n**Duration:** 5 years\n\n**Credits in total:** 159 credits",
@@ -30,7 +30,7 @@
     }
   },
   {
-    "id": "006906a7-b6a8-4dd2-a189-cf2cc337d4be",
+    "id": "ec310933-570f-4128-87aa-2a4df896bf3d",
     "chunk_id": "chunk_0001",
     "readable_id": "chunk_0001",
     "content": "## A. Program Goals\n\nUpon successful completion of the international cooperation training program in Mechanical Engineering, students will achieve:\n\n1. Basic knowledge and skills in mathematics and applied sciences in the fields of mechanics, electricity-electronics, control, and information technology to meet the acquisition of specialized knowledge; Having specialized knowledge to operate, maintain, calculate and design mechanical systems; solve mechanical technical issues.\n2. Personal and professional skills suitable to an interdisciplinary working environment, international integration and adapting to the industrial revolution 4.0; can start a business.\n3. Effective communication and teamwork skills in a professional environment and in the community.\n4. The ability to formulate ideas, design, implement and operate the system in the context of business and society.",
@@ -61,7 +61,7 @@
     }
   },
   {
-    "id": "637ff5e7-642b-4bfe-a19d-24bf8c845076",
+    "id": "72119571-bc78-41a9-9059-c9b2fbc8e416",
     "chunk_id": "chunk_0002",
     "readable_id": "chunk_0002",
     "content": "## A. Program Goals\n\nUpon successful completion of the international cooperation training program in Mechanical Engineering, students will achieve:\n\n1. Basic knowledge and skills in mathematics and applied sciences in the fields of mechanics, electricity-electronics, control, and information technology to meet the acquisition of specialized knowledge; Having specialized knowledge to operate, maintain, calculate and design mechanical systems; solve mechanical technical issues.\n2. Personal and professional skills suitable to an interdisciplinary working environment, international integration and adapting to the industrial revolution 4.0; can start a business.\n3. Effective communication and teamwork skills in a professional environment and in the community.\n4. The ability to formulate ideas, design, implement and operate the system in the context of business and society.",
@@ -79,7 +79,7 @@
       "total_chunks": 29,
       "chunk_size": 880,
       "has_table": false,
-      "parent_id": "006906a7-b6a8-4dd2-a189-cf2cc337d4be",
+      "parent_id": "ec310933-570f-4128-87aa-2a4df896bf3d",
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,
@@ -91,7 +91,7 @@
     }
   },
   {
-    "id": "474e3832-4ac4-4ea9-9c9f-b51c9871c9cc",
+    "id": "4a8391e7-339f-477b-99c4-689e159efa8b",
     "chunk_id": "chunk_0003",
     "readable_id": "chunk_0003",
     "content": "## B. Program Learning Outcomes\n\nOn successful completion of the programme, students will have the following knowledge and ability:\n\n**1. Broad professional knowledge** to adapt well to jobs related to the mechanical engineering field; focusing on the ability to apply basic knowledge and core knowledge of the field in combination with the ability to use modern tools to operate mechanical engineering systems/processes/products:\n\n- 1.1 The ability to apply knowledge of mathematics and basic science to design and calculate mechanical systems / processes / products.\n- 1.2 The ability to apply the background knowledge of the field to perform an analysis on mechanical systems / processes / products.\n- 1.3 The ability to apply core knowledge of the field, combined with the capability to exploit and use modern methods and tools to participate in the design and evaluation of mechanical engineering systems / processes / products.\n- 1.4 The ability to apply core knowledge of the field to explore, design, develop, and lead the operation of mechanical production systems/processes.\n\n**2. Professional skills and personal qualities** needed to succeed in the career:\n\n- 2.1 Skills in detecting, analyzing and solving problems in mechanical engineering field.\n- 2.2 Skills in systematic and critical thinking.\n- 2.3 Dynamism, seriousness, and perseverance.\n- 2.4 The ability to experiment, explore knowledge, and conduct research and development.\n- 2.5 Ethics and professional responsibilities.\n- 2.6 An understanding of contemporary issues and lifelong learning.\n\n**3. Social skills** needed to work effectively in multidisciplinary teams and in an international environment:\n\n- 3.1 Skills in collaboration, organization, and teamwork.\n- 3.2 Communication skills through writing, presentation, discussion, effectively using modern tools and media.\n- 3.3 Skills in using English at work according to the regulations of the university.\n\n**4. The ability to participate in the design / construction / development** of mechanical systems / processes / products / technical solutions in fields of mechanical engineering in current social and environmental context:\n\n- 4.1 The awareness of the close relationship and the influence of technology solutions in mechanical engineering to economical, social, and environmental factors in a globalized world.\n- 4.2 The ability to identify problems and to form ideas of technical solutions; the ability to participate in project settings related to mechanical engineering.\n- 4.3 The ability to design mechanical systems / processes / products / solutions.\n- 4.4 Ability to implement / manufacture / exploit mechanical systems / processes / products / technical solutions.\n\n**5. Political qualities, a sense of service to the people, and good health** to meet the requirements of the national construction and defense:\n\n- 5.1 Political theoretical qualifications under the general regulations program of the Ministry of Education and Training.\n- 5.2 Physical education certificate and certificate of national defense and security according to the regular for the general Bachelor program from the Ministry of Education and Training.",
@@ -122,7 +122,7 @@
     }
   },
   {
-    "id": "374db0b2-3fd3-49ed-a55a-64e0b391cf1d",
+    "id": "85842824-b3a8-4e85-a595-0f460db31301",
     "chunk_id": "chunk_0004",
     "readable_id": "chunk_0004",
     "content": "## B. Program Learning Outcomes\n\nOn successful completion of the programme, students will have the following knowledge and ability:\n\n**1. Broad professional knowledge** to adapt well to jobs related to the mechanical engineering field; focusing on the ability to apply basic knowledge and core knowledge of the field in combination with the ability to use modern tools to operate mechanical engineering systems/processes/products:",
@@ -140,7 +140,7 @@
       "total_chunks": 29,
       "chunk_size": 430,
       "has_table": false,
-      "parent_id": "474e3832-4ac4-4ea9-9c9f-b51c9871c9cc",
+      "parent_id": "4a8391e7-339f-477b-99c4-689e159efa8b",
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,
@@ -152,7 +152,7 @@
     }
   },
   {
-    "id": "e45e9585-a413-4199-8f49-975ab8d8d7a5",
+    "id": "1f052b1f-b5ec-4db2-b3ac-d6320fb2167a",
     "chunk_id": "chunk_0005",
     "readable_id": "chunk_0005",
     "content": "## B. Program Learning Outcomes\n\n- 1.1 The ability to apply knowledge of mathematics and basic science to design and calculate mechanical systems / processes / products.\n- 1.2 The ability to apply the background knowledge of the field to perform an analysis on mechanical systems / processes / products.\n- 1.3 The ability to apply core knowledge of the field, combined with the capability to exploit and use modern methods and tools to participate in the design and evaluation of mechanical engineering systems / processes / products.\n- 1.4 The ability to apply core knowledge of the field to explore, design, develop, and lead the operation of mechanical production systems/processes.\n\n**2. Professional skills and personal qualities** needed to succeed in the career:",
@@ -170,7 +170,7 @@
       "total_chunks": 29,
       "chunk_size": 769,
       "has_table": false,
-      "parent_id": "474e3832-4ac4-4ea9-9c9f-b51c9871c9cc",
+      "parent_id": "4a8391e7-339f-477b-99c4-689e159efa8b",
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,
@@ -182,7 +182,7 @@
     }
   },
   {
-    "id": "f5f84a8b-2366-400d-a02f-48b236488134",
+    "id": "b540e702-3d51-47f3-91a2-9a9c138d4a8b",
     "chunk_id": "chunk_0006",
     "readable_id": "chunk_0006",
     "content": "## B. Program Learning Outcomes\n\n- 2.1 Skills in detecting, analyzing and solving problems in mechanical engineering field.\n- 2.2 Skills in systematic and critical thinking.\n- 2.3 Dynamism, seriousness, and perseverance.\n- 2.4 The ability to experiment, explore knowledge, and conduct research and development.\n- 2.5 Ethics and professional responsibilities.\n- 2.6 An understanding of contemporary issues and lifelong learning.\n\n**3. Social skills** needed to work effectively in multidisciplinary teams and in an international environment:\n\n- 3.1 Skills in collaboration, organization, and teamwork.\n- 3.2 Communication skills through writing, presentation, discussion, effectively using modern tools and media.\n- 3.3 Skills in using English at work according to the regulations of the university.\n\n**4. The ability to participate in the design / construction / development** of mechanical systems / processes / products / technical solutions in fields of mechanical engineering in current social and environmental context:",
@@ -200,7 +200,7 @@
       "total_chunks": 29,
       "chunk_size": 1024,
       "has_table": false,
-      "parent_id": "474e3832-4ac4-4ea9-9c9f-b51c9871c9cc",
+      "parent_id": "4a8391e7-339f-477b-99c4-689e159efa8b",
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,
@@ -212,7 +212,7 @@
     }
   },
   {
-    "id": "622b4c98-bb15-408e-b0b8-8cadd2c2d7fe",
+    "id": "57326d73-faac-4260-8aac-9850878d3f68",
     "chunk_id": "chunk_0007",
     "readable_id": "chunk_0007",
     "content": "## B. Program Learning Outcomes\n\n- 4.1 The awareness of the close relationship and the influence of technology solutions in mechanical engineering to economical, social, and environmental factors in a globalized world.\n- 4.2 The ability to identify problems and to form ideas of technical solutions; the ability to participate in project settings related to mechanical engineering.\n- 4.3 The ability to design mechanical systems / processes / products / solutions.\n- 4.4 Ability to implement / manufacture / exploit mechanical systems / processes / products / technical solutions.\n\n**5. Political qualities, a sense of service to the people, and good health** to meet the requirements of the national construction and defense:\n\n- 5.1 Political theoretical qualifications under the general regulations program of the Ministry of Education and Training.\n- 5.2 Physical education certificate and certificate of national defense and security according to the regular for the general Bachelor program from the Ministry of Education and Training.",
@@ -230,7 +230,7 @@
       "total_chunks": 29,
       "chunk_size": 1040,
       "has_table": false,
-      "parent_id": "474e3832-4ac4-4ea9-9c9f-b51c9871c9cc",
+      "parent_id": "4a8391e7-339f-477b-99c4-689e159efa8b",
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,
@@ -242,7 +242,7 @@
     }
   },
   {
-    "id": "ad0d9d10-3311-49dc-9328-129ecbde77fe",
+    "id": "ad31321e-2fe1-4af7-bcfe-1347bde35602",
     "chunk_id": "chunk_0008",
     "readable_id": "chunk_0008",
     "content": "## C. General Program Structure\n\n| Professional Component | Credits | Note |\n|---|---|---|\n| **General Education** | **50** | |\n| Mathematics and basic sciences | 31 | Major oriented |\n| Law and politics | 13 | In accordance with regulations of Vietnam Ministry of Education and Training |\n| Physical Education / Military Education (Military Education is for Vietnamese students only) | - | In accordance with regulations of Vietnam Ministry of Education and Training |\n| English | 6 | 02 basic English courses |\n| **Professional Education** | **109** | |\n| Basic and Core of Engineering (Transfer Credits with Griffith) | 38 | |\n| Basic and Core of Engineering (Studying in HUST) | 19 | |\n| Major Oriented | 26 | |\n| Elective Module | 12 | Elective module provides specialized knowledge oriented towards different concentrations. |\n| Engineering Practicum | 2 | Scheduled for third year or above |\n| Graduation Internship | 3 | |\n| Graduation Thesis | 9 | Topic must be relevant to major, and knowledge gained during engineering practicum |",
@@ -273,7 +273,7 @@
     }
   },
   {
-    "id": "75a5871e-7afb-4b30-bdd1-7fc7bfee17d3",
+    "id": "40afc9a2-b0c6-41ab-885d-145f1dae8fe6",
     "chunk_id": "chunk_0009",
     "readable_id": "chunk_0009",
     "content": "## C. General Program Structure\n\n| Professional Component | Credits | Note |\n|---|---|---|\n| **General Education** | **50** | |\n| Mathematics and basic sciences | 31 | Major oriented |\n| Law and politics | 13 | In accordance with regulations of Vietnam Ministry of Education and Training |\n| Physical Education / Military Education (Military Education is for Vietnamese students only) | - | In accordance with regulations of Vietnam Ministry of Education and Training |\n| English | 6 | 02 basic English courses |\n| **Professional Education** | **109** | |\n| Basic and Core of Engineering (Transfer Credits with Griffith) | 38 | |\n| Basic and Core of Engineering (Studying in HUST) | 19 | |\n| Major Oriented | 26 | |\n| Elective Module | 12 | Elective module provides specialized knowledge oriented towards different concentrations. |\n| Engineering Practicum | 2 | Scheduled for third year or above |\n| Graduation Internship | 3 | |\n| Graduation Thesis | 9 | Topic must be relevant to major, and knowledge gained during engineering practicum |",
@@ -291,7 +291,7 @@
       "total_chunks": 29,
       "chunk_size": 1041,
       "has_table": true,
-      "parent_id": "ad0d9d10-3311-49dc-9328-129ecbde77fe",
+      "parent_id": "ad31321e-2fe1-4af7-bcfe-1347bde35602",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -303,7 +303,7 @@
     }
   },
   {
-    "id": "1becf47d-8257-446c-8229-93bce67c5fc3",
+    "id": "b4a6f17f-5dac-4722-803e-8f85a1143a92",
     "chunk_id": "chunk_0010",
     "readable_id": "chunk_0010",
     "content": "## D. Transfer Requirements\n\n- A minimum overall band score of 6.5 on IELTS (Academic) with no sub-score of less than 6.0\n- OR a minimum score of 575 on TOEFL\n- OR an internet-based (iBT) TOEFL score of 79 (no sub-score less than 19)\n- OR no score less than 3+ in each skill of the ISLPR (conducted by ISLPR Language Services only)\n- OR a minimum overall score of 176 (no score less than 169) on C1 Advanced (formerly Cambridge Certificate in Advanced English) or C2 Proficiency (formerly Cambridge Certificate of Proficiency in English)\n- OR an overall score of 58 in the Pearson Test of English (Academic) with no score less than 50.\n\nEnglish test results must be no more than two years old. Applicants should refer to the following University procedure for further information.\n\n**Useful Links:**\n- International Scholarships and Finance: https://www.griffith.edu.au/international/scholarships-finance\n- Mapping with Griffith: https://app.griffith.edu.au/creditprecedent/credit_detail.php?pk1=89017\n- Course for Engineering (Bachelor): https://www.griffith.edu.au/study/degrees/bachelor-of-engineering-honours1546?location=intl&level=pgrd&pathway=nsl",
@@ -334,7 +334,7 @@
     }
   },
   {
-    "id": "cfcbda41-adca-47bd-8b1d-ac1ee28dac37",
+    "id": "e0855805-4b99-4d18-a5cb-8ebe909e12f8",
     "chunk_id": "chunk_0011",
     "readable_id": "chunk_0011",
     "content": "## D. Transfer Requirements\n\n- A minimum overall band score of 6.5 on IELTS (Academic) with no sub-score of less than 6.0\n- OR a minimum score of 575 on TOEFL\n- OR an internet-based (iBT) TOEFL score of 79 (no sub-score less than 19)\n- OR no score less than 3+ in each skill of the ISLPR (conducted by ISLPR Language Services only)\n- OR a minimum overall score of 176 (no score less than 169) on C1 Advanced (formerly Cambridge Certificate in Advanced English) or C2 Proficiency (formerly Cambridge Certificate of Proficiency in English)\n- OR an overall score of 58 in the Pearson Test of English (Academic) with no score less than 50.\n\nEnglish test results must be no more than two years old. Applicants should refer to the following University procedure for further information.",
@@ -352,7 +352,7 @@
       "total_chunks": 29,
       "chunk_size": 780,
       "has_table": false,
-      "parent_id": "1becf47d-8257-446c-8229-93bce67c5fc3",
+      "parent_id": "b4a6f17f-5dac-4722-803e-8f85a1143a92",
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,
@@ -364,7 +364,7 @@
     }
   },
   {
-    "id": "ef3d00d7-f4ac-40ec-bc60-c6133e636698",
+    "id": "612d4a36-2ee3-47d9-a4bb-58a33d3afe2f",
     "chunk_id": "chunk_0012",
     "readable_id": "chunk_0012",
     "content": "## D. Transfer Requirements\n\n**Useful Links:**\n- International Scholarships and Finance: https://www.griffith.edu.au/international/scholarships-finance\n- Mapping with Griffith: https://app.griffith.edu.au/creditprecedent/credit_detail.php?pk1=89017\n- Course for Engineering (Bachelor): https://www.griffith.edu.au/study/degrees/bachelor-of-engineering-honours1546?location=intl&level=pgrd&pathway=nsl",
@@ -382,7 +382,7 @@
       "total_chunks": 29,
       "chunk_size": 400,
       "has_table": false,
-      "parent_id": "1becf47d-8257-446c-8229-93bce67c5fc3",
+      "parent_id": "b4a6f17f-5dac-4722-803e-8f85a1143a92",
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,
@@ -394,7 +394,7 @@
     }
   },
   {
-    "id": "7d130df6-6b8a-4cd9-8575-0df2e2646ae0",
+    "id": "bf53768a-6b3f-431e-8940-c499d8c0f18b",
     "chunk_id": "chunk_0013",
     "readable_id": "chunk_0013",
     "content": "## E. Employment Opportunities after Graduation\n\n- Students have the opportunity to find employment immediately after graduation with an average salary of 10 to 20 million VND/month.\n- Students who graduate in Australia will be awarded a degree by Griffith University and are allowed to work in Australia for a minimum of 2 years.\n\n*Source: Australian Government Job Outlook*\n\n**Typical job positions include:**\n\n- Design engineers, managers, and operators at domestic and international factories, enterprises, and corporations in the field of mechanical engineering.\n- Lecturers, researchers at universities, research institutes, and government agencies.\n- Pursue postgraduate studies and research at universities in Vietnam and abroad.",
@@ -425,7 +425,7 @@
     }
   },
   {
-    "id": "4bc6b7bc-e6ff-4ef7-8b0d-537fb55ddb9b",
+    "id": "602975b3-1e19-4f41-b968-6e6d2245aa6a",
     "chunk_id": "chunk_0014",
     "readable_id": "chunk_0014",
     "content": "## E. Employment Opportunities after Graduation\n\n- Students have the opportunity to find employment immediately after graduation with an average salary of 10 to 20 million VND/month.\n- Students who graduate in Australia will be awarded a degree by Griffith University and are allowed to work in Australia for a minimum of 2 years.\n\n*Source: Australian Government Job Outlook*\n\n**Typical job positions include:**\n\n- Design engineers, managers, and operators at domestic and international factories, enterprises, and corporations in the field of mechanical engineering.\n- Lecturers, researchers at universities, research institutes, and government agencies.\n- Pursue postgraduate studies and research at universities in Vietnam and abroad.",
@@ -443,7 +443,7 @@
       "total_chunks": 29,
       "chunk_size": 737,
       "has_table": false,
-      "parent_id": "7d130df6-6b8a-4cd9-8575-0df2e2646ae0",
+      "parent_id": "bf53768a-6b3f-431e-8940-c499d8c0f18b",
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,
@@ -455,7 +455,7 @@
     }
   },
   {
-    "id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+    "id": "cec29eb1-817e-4a01-b5db-c997e961b085",
     "chunk_id": "chunk_0015",
     "readable_id": "chunk_0015",
     "content": "## F. Curriculum Schedule\n\n### Political Theory and General Law (13 credits / 18.4 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 1 | SSH1111Q | Philosophy of Marxism and Leninism | 3(3-0-0-6) | 3 | 4.25 | 2 |\n| 2 | SSH1121Q | Political Economics of Marxism and Leninism | 2(2-0-0-4) | 2 | 2.83 | 3 |\n| 3 | SSH1131Q | Scientific Socialism | 2(2-0-0-4) | 2 | 2.83 | 4 |\n| 4 | SSH1050Q | Ho Chi Minh Ideology | 2(2-0-0-4) | 2 | 2.83 | 5 |\n| 5 | SSH1130Q | History of Vietnamese Communist Party | 2(2-0-0-4) | 2 | 2.83 | 6 |\n| 6 | EM1170Q | Introduction to the Legal Environment | 2(2-0-0-4) | 2 | 2.83 | 6 |\n\n### Physical Education (5 credits / 9.17 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 7 | PE1010Q | Physical Education A | 1(0-2-0-2) | (1) | 1.83 | 1 |\n| 8 | PE1020Q | Physical Education B | 1(0-2-0-2) | (1) | 1.83 | 2 |\n| 9 | PE1030Q | Physical Education C | 1(0-2-0-2) | (1) | 1.83 | 3 |\n| 10 | PE2010Q | Physical Education D | 1(0-2-0-2) | (1) | 1.83 | 4 |\n| 11 | PE2020Q | Physical Education E | 1(0-2-0-2) | (1) | 1.83 | 5 |\n\n### Civil Service Education (11 credits / 14.58 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 12 | MIL1110Q | Vietnam Communist Party's Direction on the National Defense | 3(3-0-0-6) | (3) | 4.25 | 1 |\n| 13 | MIL1120Q | Introduction to the National Defense | 2(2-0-0-4) | (2) | 2.83 | 2 |\n| 14 | MIL1130Q | General Military Education | 2(2-0-0-4) | (2) | 2.83 | 3 |\n| 15 | MIL1140Q | Infantry Combat Techniques and Tactics | 4(3-2-0-8) | (4) | 6.08 | 4 |\n\n### English (6 credits / 9.34 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 16 | QT1231 | English 3 (B2.1) | 3(2-2-0-6) | 3 | 4.67 | 1 |\n| 17 | QT1241 | English 4 (B2.2) | 3(2-2-0-6) | 3 | 4.67 | 2 |\n\n### Mathematics and Basic Sciences (31 credits / 48.09 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 18 | MI1110Q | Calculus I | 4(3-2-0-8) | 4 | 6.08 | 1 |\n| 19 | MI1120Q | Calculus II | 3(2-2-0-6) | 3 | 4.67 | 2 |\n| 20 | MI1130Q | Calculus III | 3(2-2-0-6) | 3 | 4.67 | 3 |\n| 21 | MI1140Q | Algebra | 4(3-2-0-8) | 4 | 6.08 | 1 |\n| 22 | EM1010Q | Introduction to Management | 2(2-1-0-4) | 2 | 3.25 | 2 |\n| 23 | PH1110Q | Physics I | 3(2-1-1-6) | 3 | 4.67 | 1 |\n| 24 | PH1120Q | Physics II | 3(2-1-1-6) | 3 | 4.67 | 2 |\n| 25 | IT1110Q | Introduction to Informatics | 4(3-1-1-8) | 4 | 6.08 | 1 |\n| 26 | QT1811 | Computing and Programming with MATLAB | 3(2-1-1-6) | 3 | 4.67 | 3 |\n| 27 | ME2116Q | Presentation Techniques | 2(2-1-0-4) | 2 | 3.25 | 5 |\n\n### Basic and Core of Engineering - Transfer Credits with Griffith (38 credits / 58.11 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 28 | ME2011Q | Engineering Graphics I | 3(3-1-0-6) | 3 | 4.67 | 3 |\n| 29 | ME2012Q | Engineering Graphics II | 3(3-1-0-6) | 3 | 4.67 | 4 |\n| 30 | ET2012Q | Electronic Engineering | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 31 | ME2110Q | Introduction to Mechanical Engineering | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 32 | ME2140Q | Engineering Mechanics I | 3(2-2-0-4) | 3 | 3.67 | 3 |\n| 33 | ME3010Q | Engineering Mechanics II | 3(2-2-0-4) | 3 | 3.67 | 4 |\n| 34 | ME3040Q | Strength of Materials 1 | 2(2-0-1-4) | 2 | 3.25 | 3 |\n| 35 | ME3050Q | Strength of Materials 2 | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 36 | ME3060Q | Theory of Machinery | 3(3-0-1-6) | 3 | 4.67 | 3 |\n| 37 | ME2823Q | Introductory Mechanical Engineering | 2(2-0-1-4) | 2 | 3.25 | 2 |\n| 38 | ME3090Q | Machine Element Design | 3(3-0-1-6) | 3 | 4.67 | 4 |\n| 39 | MSE3100Q | Materials Science | 2(2-1-0-4) | 2 | 3.25 | 2 |\n| 40 | HE2010Q | Thermal Engineering | 2(2-0-0-4) | 2 | 2.83 | 4 |\n| 41 | ME3110Q | Plastic and Composite Materials | 2(2-0-1-4) | 2 | 3.25 | 3 |\n| 42 | QT2207 (ME2207Q) | Mechanical Engineering Design | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 43 | QT2208 (ME2208Q) | Creative Engineering | 2(2-0-1-4) | 2 | 3.25 | 8 |\n\n### Basic and Core of Engineering - Study at HUST (19 credits / 31.51 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 44 | EE2012Q | Fundamentals of Electrical Engineering | 2(2-1-0-4) | 2 | 3.25 | 5 |\n| 45 | TE3600Q | Hydrodynamics | 2(2-1-0-4) | 2 | 3.25 | 6 |\n| 46 | ME3070Q | Measurement Techniques | 3(3-0-1-6) | 3 | 4.67 | 5 |\n| 47 | ME4212Q | Principle of Metal Cutting | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 48 | ME4222Q | Cutting Tool Design | 2(2-0-1-4) | 2 | 3.25 | 6 |\n| 49 | ME3130Q | Project in Machine Details | 2(0-0-4-4) | 2 | 3.67 | 5 |\n| 50 | ME4062Q | Machine Tools | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 51 | ME3140Q | Safety and Environmental Engineering | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 52 | ME3811Q | Workshop Practice on CNC Machine | 2(0-0-4-4) | 2 | 3.67 | 5 |\n\n### Specialized Knowledge of Engineering - Study at HUST (26 credits / 41.68 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 53 | ME3170Q | Manufacturing Technology | 4(4-0-1-8) | 4 | 6.08 | 6 |\n| 54 | ME4022Q | Workpiece Fabrication | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 55 | ME4811Q | CNC Processing Techniques | 3(1-1-2-4) | 3 | 3.67 | 7 |\n| 56 | ME4032Q | Jig and Fixture | 2(2-1-0-4) | 2 | 3.25 | 7 |\n| 57 | ME4232Q | Project in Cutting Tool | 2(0-0-4-4) | 2 | 3.67 | 7 |\n| 58 | ME4192Q | Machine-Tool Design | 2(2-0-1-4) | 2 | 3.25 | 7 |\n| 59 | ME4282Q | CNC Machines and Industrial Robots | 2(2-0-1-4) | 2 | 3.25 | 7 |\n| 60 | ME4562Q | Project in Machine Design | 2(0-0-4-4) | 2 | 3.67 | 8 |\n| 61 | ME4833Q | Project in Mechanical Technology | 2(0-0-4-4) | 2 | 3.67 | 9 |\n| 62 | ME2822Q | Control Systems | 3(3-1-0-6) | 3 | 4.67 | 8 |\n| 63 | EE3059Q | Sensors and Signal Conditioning | 2(2-1-0-4) | 2 | 3.25 | 6 |\n\n### Elective Courses (12 credits / 19.5 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 64 | ME4112Q | Manufacturing Automation | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 65 | ME4093Q | Laser Engineering | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 66 | ME4314Q | CAD/CAM | 2(2-1-0-4) | 2 | 3.25 | 9 |\n| 67 | ME4452Q | Tribology | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 68 | ME4245Q | Modeling and Numerical Simulation of Forming Process | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 69 | ME4972Q | Lubrication Technology | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 70 | ME4132Q | Mechanical Manufacturing Management | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 71 | ME4242Q | Shaping Technology | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 72 | ME4115Q | Mould Design and Fabrication | 3(3-1-0-6) | 3 | 4.67 | 7 |\n| 73 | ME4223Q | Computer Interfacing and Mechanical Device Control | 3(3-1-0-6) | 3 | 4.67 | 7 |\n| 74 | ME4163Q | Automatic Measurement in Mechanical Engineering | 2(2-1-0-4) | 2 | 3.25 | 9 |\n| 75 | ME4472Q | Methods of Interpretation of Experimental Data | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 76 | ME4421Q | Manufacturing Technology of Plastic Product | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 77 | ME4372Q | Mold Technology | 2(2-0-1-4) | 2 | 3.25 | 6 |\n| 78 | ME4182Q | Automation of Hydraulic-Pneumatic Systems for Machines | 2(2-1-0-4) | 2 | 3.25 | 7 |\n\n### Engineering Practicum and Graduation Thesis (14 credits / 26.5 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 79 | ME4439Q | Engineering Practicum | 2(0-0-6-4) | 2 | 4.5 | 7 |\n| 80 | ME5011Q | Engineering Internship | 3(0-0-6-6) | 3 | 5.5 | 9 |\n| 81 | ME5111Q | Graduation Project | 9(0-0-18-18) | 9 | 16.5 | 10 |\n\n**Total credits: 159 (276.88 ECTs)**",
@@ -486,7 +486,7 @@
     }
   },
   {
-    "id": "8d17b86f-290a-436f-b764-823a1e15ec38",
+    "id": "c281aa1b-5218-43e1-8d27-6aa3c6a8e43e",
     "chunk_id": "chunk_0016",
     "readable_id": "chunk_0016",
     "content": "## F. Curriculum Schedule\n\n### Political Theory and General Law (13 credits / 18.4 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 1 | SSH1111Q | Philosophy of Marxism and Leninism | 3(3-0-0-6) | 3 | 4.25 | 2 |\n| 2 | SSH1121Q | Political Economics of Marxism and Leninism | 2(2-0-0-4) | 2 | 2.83 | 3 |\n| 3 | SSH1131Q | Scientific Socialism | 2(2-0-0-4) | 2 | 2.83 | 4 |\n| 4 | SSH1050Q | Ho Chi Minh Ideology | 2(2-0-0-4) | 2 | 2.83 | 5 |\n| 5 | SSH1130Q | History of Vietnamese Communist Party | 2(2-0-0-4) | 2 | 2.83 | 6 |\n| 6 | EM1170Q | Introduction to the Legal Environment | 2(2-0-0-4) | 2 | 2.83 | 6 |",
@@ -504,7 +504,7 @@
       "total_chunks": 29,
       "chunk_size": 670,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -516,7 +516,7 @@
     }
   },
   {
-    "id": "0723620e-a539-41e4-8cd7-49abf04ec030",
+    "id": "512818c0-d338-4ca5-a922-c1b963076787",
     "chunk_id": "chunk_0017",
     "readable_id": "chunk_0017",
     "content": "### Physical Education (5 credits / 9.17 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 7 | PE1010Q | Physical Education A | 1(0-2-0-2) | (1) | 1.83 | 1 |\n| 8 | PE1020Q | Physical Education B | 1(0-2-0-2) | (1) | 1.83 | 2 |\n| 9 | PE1030Q | Physical Education C | 1(0-2-0-2) | (1) | 1.83 | 3 |\n| 10 | PE2010Q | Physical Education D | 1(0-2-0-2) | (1) | 1.83 | 4 |\n| 11 | PE2020Q | Physical Education E | 1(0-2-0-2) | (1) | 1.83 | 5 |\n\n### Civil Service Education (11 credits / 14.58 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 12 | MIL1110Q | Vietnam Communist Party's Direction on the National Defense | 3(3-0-0-6) | (3) | 4.25 | 1 |\n| 13 | MIL1120Q | Introduction to the National Defense | 2(2-0-0-4) | (2) | 2.83 | 2 |\n| 14 | MIL1130Q | General Military Education | 2(2-0-0-4) | (2) | 2.83 | 3 |\n| 15 | MIL1140Q | Infantry Combat Techniques and Tactics | 4(3-2-0-8) | (4) | 6.08 | 4 |",
@@ -534,7 +534,7 @@
       "total_chunks": 29,
       "chunk_size": 1019,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -546,7 +546,7 @@
     }
   },
   {
-    "id": "19fd143d-f9cf-4e4a-bce4-8d6cd8e7f106",
+    "id": "942cd34e-aa30-45e1-8dbe-94d015647be3",
     "chunk_id": "chunk_0018",
     "readable_id": "chunk_0018",
     "content": "### English (6 credits / 9.34 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 16 | QT1231 | English 3 (B2.1) | 3(2-2-0-6) | 3 | 4.67 | 1 |\n| 17 | QT1241 | English 4 (B2.2) | 3(2-2-0-6) | 3 | 4.67 | 2 |",
@@ -564,7 +564,7 @@
       "total_chunks": 29,
       "chunk_size": 265,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -576,7 +576,7 @@
     }
   },
   {
-    "id": "1761b862-251a-44ec-b38e-5e982a9d69a5",
+    "id": "60868f47-63a7-4d4a-8b54-5bf5eaa2f307",
     "chunk_id": "chunk_0019",
     "readable_id": "chunk_0019",
     "content": "### Mathematics and Basic Sciences (31 credits / 48.09 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 18 | MI1110Q | Calculus I | 4(3-2-0-8) | 4 | 6.08 | 1 |\n| 19 | MI1120Q | Calculus II | 3(2-2-0-6) | 3 | 4.67 | 2 |\n| 20 | MI1130Q | Calculus III | 3(2-2-0-6) | 3 | 4.67 | 3 |\n| 21 | MI1140Q | Algebra | 4(3-2-0-8) | 4 | 6.08 | 1 |\n| 22 | EM1010Q | Introduction to Management | 2(2-1-0-4) | 2 | 3.25 | 2 |\n| 23 | PH1110Q | Physics I | 3(2-1-1-6) | 3 | 4.67 | 1 |\n| 24 | PH1120Q | Physics II | 3(2-1-1-6) | 3 | 4.67 | 2 |\n| 25 | IT1110Q | Introduction to Informatics | 4(3-1-1-8) | 4 | 6.08 | 1 |\n| 26 | QT1811 | Computing and Programming with MATLAB | 3(2-1-1-6) | 3 | 4.67 | 3 |\n| 27 | ME2116Q | Presentation Techniques | 2(2-1-0-4) | 2 | 3.25 | 5 |",
@@ -594,7 +594,7 @@
       "total_chunks": 29,
       "chunk_size": 815,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -606,7 +606,7 @@
     }
   },
   {
-    "id": "0f451029-39ee-4e28-9c7b-f6566d29f412",
+    "id": "c3300f94-f57a-4fc7-bb6c-021bc8a94563",
     "chunk_id": "chunk_0020",
     "readable_id": "chunk_0020",
     "content": "### Basic and Core of Engineering - Transfer Credits with Griffith (38 credits / 58.11 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 28 | ME2011Q | Engineering Graphics I | 3(3-1-0-6) | 3 | 4.67 | 3 |\n| 29 | ME2012Q | Engineering Graphics II | 3(3-1-0-6) | 3 | 4.67 | 4 |\n| 30 | ET2012Q | Electronic Engineering | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 31 | ME2110Q | Introduction to Mechanical Engineering | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 32 | ME2140Q | Engineering Mechanics I | 3(2-2-0-4) | 3 | 3.67 | 3 |\n| 33 | ME3010Q | Engineering Mechanics II | 3(2-2-0-4) | 3 | 3.67 | 4 |\n| 34 | ME3040Q | Strength of Materials 1 | 2(2-0-1-4) | 2 | 3.25 | 3 |\n| 35 | ME3050Q | Strength of Materials 2 | 2(2-0-1-4) | 2 | 3.25 | 4 |\n| 36 | ME3060Q | Theory of Machinery | 3(3-0-1-6) | 3 | 4.67 | 3 |\n| 37 | ME2823Q | Introductory Mechanical Engineering | 2(2-0-1-4) | 2 | 3.25 | 2 |\n| 38 | ME3090Q | Machine Element Design | 3(3-0-1-6) | 3 | 4.67 | 4 |\n| 39 | MSE3100Q | Materials Science | 2(2-1-0-4) | 2 | 3.25 | 2 |",
@@ -624,7 +624,7 @@
       "total_chunks": 29,
       "chunk_size": 1064,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -636,7 +636,7 @@
     }
   },
   {
-    "id": "07d3f8c4-f7a4-4630-a461-ce8d54ae858b",
+    "id": "f10f0991-e168-4a9d-808e-c74dd7f1c83e",
     "chunk_id": "chunk_0021",
     "readable_id": "chunk_0021",
     "content": "### Basic and Core of Engineering - Transfer Credits with Griffith (38 credits / 58.11 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 40 | HE2010Q | Thermal Engineering | 2(2-0-0-4) | 2 | 2.83 | 4 |\n| 41 | ME3110Q | Plastic and Composite Materials | 2(2-0-1-4) | 2 | 3.25 | 3 |\n| 42 | QT2207 (ME2207Q) | Mechanical Engineering Design | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 43 | QT2208 (ME2208Q) | Creative Engineering | 2(2-0-1-4) | 2 | 3.25 | 8 |",
@@ -654,7 +654,7 @@
       "total_chunks": 29,
       "chunk_size": 505,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -666,7 +666,7 @@
     }
   },
   {
-    "id": "3399555e-f4f9-4d2e-8a31-a834544c0584",
+    "id": "af094ae8-8ace-4534-ab84-be63ca7c5e64",
     "chunk_id": "chunk_0022",
     "readable_id": "chunk_0022",
     "content": "### Basic and Core of Engineering - Study at HUST (19 credits / 31.51 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 44 | EE2012Q | Fundamentals of Electrical Engineering | 2(2-1-0-4) | 2 | 3.25 | 5 |\n| 45 | TE3600Q | Hydrodynamics | 2(2-1-0-4) | 2 | 3.25 | 6 |\n| 46 | ME3070Q | Measurement Techniques | 3(3-0-1-6) | 3 | 4.67 | 5 |\n| 47 | ME4212Q | Principle of Metal Cutting | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 48 | ME4222Q | Cutting Tool Design | 2(2-0-1-4) | 2 | 3.25 | 6 |\n| 49 | ME3130Q | Project in Machine Details | 2(0-0-4-4) | 2 | 3.67 | 5 |\n| 50 | ME4062Q | Machine Tools | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 51 | ME3140Q | Safety and Environmental Engineering | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 52 | ME3811Q | Workshop Practice on CNC Machine | 2(0-0-4-4) | 2 | 3.67 | 5 |",
@@ -684,7 +684,7 @@
       "total_chunks": 29,
       "chunk_size": 836,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -696,7 +696,7 @@
     }
   },
   {
-    "id": "9816d593-564a-4db5-b361-711e712579f3",
+    "id": "e5e1f268-07e5-45b7-b0ef-51305a17ca97",
     "chunk_id": "chunk_0023",
     "readable_id": "chunk_0023",
     "content": "### Specialized Knowledge of Engineering - Study at HUST (26 credits / 41.68 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 53 | ME3170Q | Manufacturing Technology | 4(4-0-1-8) | 4 | 6.08 | 6 |\n| 54 | ME4022Q | Workpiece Fabrication | 2(2-0-1-4) | 2 | 3.25 | 5 |\n| 55 | ME4811Q | CNC Processing Techniques | 3(1-1-2-4) | 3 | 3.67 | 7 |\n| 56 | ME4032Q | Jig and Fixture | 2(2-1-0-4) | 2 | 3.25 | 7 |\n| 57 | ME4232Q | Project in Cutting Tool | 2(0-0-4-4) | 2 | 3.67 | 7 |\n| 58 | ME4192Q | Machine-Tool Design | 2(2-0-1-4) | 2 | 3.25 | 7 |\n| 59 | ME4282Q | CNC Machines and Industrial Robots | 2(2-0-1-4) | 2 | 3.25 | 7 |\n| 60 | ME4562Q | Project in Machine Design | 2(0-0-4-4) | 2 | 3.67 | 8 |\n| 61 | ME4833Q | Project in Mechanical Technology | 2(0-0-4-4) | 2 | 3.67 | 9 |\n| 62 | ME2822Q | Control Systems | 3(3-1-0-6) | 3 | 4.67 | 8 |\n| 63 | EE3059Q | Sensors and Signal Conditioning | 2(2-1-0-4) | 2 | 3.25 | 6 |",
@@ -714,7 +714,7 @@
       "total_chunks": 29,
       "chunk_size": 978,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -726,7 +726,7 @@
     }
   },
   {
-    "id": "11908186-e4c3-45af-a954-67bed393e3dc",
+    "id": "d077e0b6-8ac3-47b5-964d-f38e0fb671d4",
     "chunk_id": "chunk_0024",
     "readable_id": "chunk_0024",
     "content": "### Elective Courses (12 credits / 19.5 ECTs)\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 64 | ME4112Q | Manufacturing Automation | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 65 | ME4093Q | Laser Engineering | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 66 | ME4314Q | CAD/CAM | 2(2-1-0-4) | 2 | 3.25 | 9 |\n| 67 | ME4452Q | Tribology | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 68 | ME4245Q | Modeling and Numerical Simulation of Forming Process | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 69 | ME4972Q | Lubrication Technology | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 70 | ME4132Q | Mechanical Manufacturing Management | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 71 | ME4242Q | Shaping Technology | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 72 | ME4115Q | Mould Design and Fabrication | 3(3-1-0-6) | 3 | 4.67 | 7 |\n| 73 | ME4223Q | Computer Interfacing and Mechanical Device Control | 3(3-1-0-6) | 3 | 4.67 | 7 |\n| 74 | ME4163Q | Automatic Measurement in Mechanical Engineering | 2(2-1-0-4) | 2 | 3.25 | 9 |",
@@ -744,7 +744,7 @@
       "total_chunks": 29,
       "chunk_size": 985,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -756,7 +756,7 @@
     }
   },
   {
-    "id": "0a6c80e8-2e0a-449f-ae2f-2f581f80cdb4",
+    "id": "33233685-b870-4a24-9cb0-941426927fd4",
     "chunk_id": "chunk_0025",
     "readable_id": "chunk_0025",
     "content": "### Elective Courses (12 credits / 19.5 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 75 | ME4472Q | Methods of Interpretation of Experimental Data | 2(2-1-0-4) | 2 | 3.25 | 8 |\n| 76 | ME4421Q | Manufacturing Technology of Plastic Product | 2(2-0-1-4) | 2 | 3.25 | 8 |\n| 77 | ME4372Q | Mold Technology | 2(2-0-1-4) | 2 | 3.25 | 6 |\n| 78 | ME4182Q | Automation of Hydraulic-Pneumatic Systems for Machines | 2(2-1-0-4) | 2 | 3.25 | 7 |",
@@ -774,7 +774,7 @@
       "total_chunks": 29,
       "chunk_size": 499,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -786,7 +786,7 @@
     }
   },
   {
-    "id": "e82f51cd-5352-4c06-859e-5767175aed6b",
+    "id": "85712079-15a3-4200-86be-ea4db9b1a80e",
     "chunk_id": "chunk_0026",
     "readable_id": "chunk_0026",
     "content": "### Engineering Practicum and Graduation Thesis (14 credits / 26.5 ECTs)\n\n| No | Course ID | Course Title | Workload | Credits | ECTs | Semester |\n|---|---|---|---|---|---|---|\n| 79 | ME4439Q | Engineering Practicum | 2(0-0-6-4) | 2 | 4.5 | 7 |\n| 80 | ME5011Q | Engineering Internship | 3(0-0-6-6) | 3 | 5.5 | 9 |\n| 81 | ME5111Q | Graduation Project | 9(0-0-18-18) | 9 | 16.5 | 10 |\n\n**Total credits: 159 (276.88 ECTs)**",
@@ -804,7 +804,7 @@
       "total_chunks": 29,
       "chunk_size": 420,
       "has_table": true,
-      "parent_id": "df21bd36-60a5-4685-a3c8-892f6f44c544",
+      "parent_id": "cec29eb1-817e-4a01-b5db-c997e961b085",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -816,7 +816,7 @@
     }
   },
   {
-    "id": "dc6adb60-2a87-4991-9258-97a5f7262eeb",
+    "id": "0da0f225-a232-46f6-9963-398b35d09414",
     "chunk_id": "chunk_0027",
     "readable_id": "chunk_0027",
     "content": "## G. Program Director\n\n- **Name:** Dr. Nguyen Thi Ngoc Huyen\n- **Email:** huyen.nguyenthingoc@hust.edu.vn\n- **Phone Number:** 0988 778 190",
@@ -847,7 +847,7 @@
     }
   },
   {
-    "id": "39fde702-f75b-48fe-b9d3-8f4a57d3fdc8",
+    "id": "bd568056-a030-4e09-91d9-8c29ca3f02af",
     "chunk_id": "chunk_0028",
     "readable_id": "chunk_0028",
     "content": "## G. Program Director\n\n- **Name:** Dr. Nguyen Thi Ngoc Huyen\n- **Email:** huyen.nguyenthingoc@hust.edu.vn\n- **Phone Number:** 0988 778 190",
@@ -865,7 +865,7 @@
       "total_chunks": 29,
       "chunk_size": 139,
       "has_table": false,
-      "parent_id": "dc6adb60-2a87-4991-9258-97a5f7262eeb",
+      "parent_id": "0da0f225-a232-46f6-9963-398b35d09414",
       "chunk_type": "text",
       "effective_date": null,
       "expiry_date": null,

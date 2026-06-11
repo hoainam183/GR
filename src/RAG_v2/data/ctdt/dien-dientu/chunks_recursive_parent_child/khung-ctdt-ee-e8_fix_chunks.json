@@ -1,6 +1,6 @@
 [
   {
-    "id": "0347076e-4e81-4e31-928a-3d4d8dd1bc8a",
+    "id": "3a407801-94d2-4c33-be2e-399b7405f7c9",
     "chunk_id": "chunk_0000",
     "readable_id": "chunk_0000",
     "content": "# KHUNG CHƯƠNG TRÌNH ĐÀO TẠO TIÊN TIẾN KỸ THUẬT ĐIỀU KHIỂN & TỰ ĐỘNG HÓA (EE-E8)\n\n---",
@@ -30,7 +30,7 @@
     }
   },
   {
-    "id": "40bf2622-1830-488a-82e8-8294747375ea",
+    "id": "8b6613d6-b1f4-446f-be2d-4194f3b937e4",
     "chunk_id": "chunk_0001",
     "readable_id": "chunk_0001",
     "content": "## Khối kiến thức đại cương\n\n### Lý luận chính trị (13 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác - Lênin | 3(2-1-0-6) | 3 |\n| 2 | SSH1121 | Kinh tế chính trị Mác - Lênin | 2(2-0-0-4) | 4 |\n| 3 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 5 |\n| 4 | SSH1141 | Lịch sử Đảng cộng sản Việt Nam | 2(2-0-0-4) | 6 |\n| 5 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 7 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 1 |\n| 7 | MIL1210 | Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam | | |\n| 8 | MIL1220 | Công tác quốc phòng và an ninh | | |\n| 9 | MIL1230 | Quân sự chung | | |\n| 10 | MIL1240 | Kỹ thuật chiến đấu bộ binh và chiến thuật | | |\n\n### Toán và khoa học cơ bản (29 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 11 | MI1016 | Giải tích I | 4(3-2-0-8) | 1 |\n| 12 | MI1036 | Đại số | 4(3-2-0-8) | 1 |\n| 13 | MI1026 | Giải tích II | 4(3-2-0-8) | 2 |\n| 14 | PH1016 | Vật lý đại cương I | 4(2-2-1-8) | 2 |\n| 15 | IT1016 | Tin học đại cương | 3(2-1-2-6) | 2 |\n| 16 | PH1026 | Vật lý đại cương II | 4(2-2-1-8) | 3 |\n| 17 | MI1046 | Phương trình vi phân và chuỗi | 3(2-2-0-6) | 2 |\n| 18 | MI2036 | Xác suất thống kê và tín hiệu ngẫu nhiên | 3(3-1-0-6) | 3 |\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 19 | FL1141 | Practical Grammar for Writing | 3(1-4-0-6) | 1 |\n| 20 | FL1142 | Communication Skills I | 3(1-4-0-6) | 1 |\n| 21 | FL1143 | Working with Texts 1 | 3(1-4-0-6) | 1 |\n| 22 | FL1144 | Listening | 3(2-2-0-6) | 1 |\n| 23 | FL1145 | Speaking | 2(1-3-0-4) | 1 |\n| 24 | FL1146 | Reading | 2(1-2-0-4) | 1 |\n| 25 | FL1147 | Writing | 3(2-2-0-6) | 1 |\n| 26 | FL1148 | Foundation Writing | 2(1-2-0-4) | 1 |\n| 27 | FL1149 | English Communication Skills 2 | 3(2-2-0-6) | 1 |\n| 28 | FL1150 | Working with Text 2 | 2(1-2-0-4) | 1 |\n| 29 | FL1120 | IELTS Listening 1 | 2(2-1-0-4) | 2 |\n| 30 | FL1121 | IELTS Speaking 1 | 1(1-1-0-4) | 2 |\n| 31 | FL1122 | IELTS Reading 1 | 1(1-1-0-4) | 2 |\n| 32 | FL1123 | IELTS Writing 1 | 2(2-1-0-4) | 2 |\n| 33 | FL1124 | IELTS Listening 2 | 2(2-1-0-4) | 1 |\n| 34 | FL1125 | IELTS Speaking 2 | 1(1-1-0-4) | 1 |\n| 35 | FL1126 | IELTS Reading 2 | 1(1-1-0-4) | 2 |\n| 36 | FL1127 | IELTS Writing 2 | 2(2-1-0-4) | 2 |\n\n### Kiến thức bổ trợ - chọn 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 37 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | - |\n| 38 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) | 6 |\n| 39 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(1-1-0-4) | - |\n| 40 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) | 6 |\n| 41 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | 7 |\n| | ME3124 | Thiết kế quảng bá sản phẩm | 2(1-2-0-4) | - |\n| 42 | ME3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) | - |\n\n---",
@@ -61,7 +61,7 @@
     }
   },
   {
-    "id": "0eb2d48e-85b8-4b42-983a-60763df2310c",
+    "id": "bd891d62-7d99-48ce-bfbd-998e03eb03d9",
     "chunk_id": "chunk_0002",
     "readable_id": "chunk_0002",
     "content": "## Khối kiến thức đại cương\n\n### Lý luận chính trị (13 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác - Lênin | 3(2-1-0-6) | 3 |\n| 2 | SSH1121 | Kinh tế chính trị Mác - Lênin | 2(2-0-0-4) | 4 |\n| 3 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 5 |\n| 4 | SSH1141 | Lịch sử Đảng cộng sản Việt Nam | 2(2-0-0-4) | 6 |\n| 5 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 7 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 1 |\n| 7 | MIL1210 | Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam | | |\n| 8 | MIL1220 | Công tác quốc phòng và an ninh | | |\n| 9 | MIL1230 | Quân sự chung | | |\n| 10 | MIL1240 | Kỹ thuật chiến đấu bộ binh và chiến thuật | | |",
@@ -79,7 +79,7 @@
       "total_chunks": 14,
       "chunk_size": 725,
       "has_table": true,
-      "parent_id": "40bf2622-1830-488a-82e8-8294747375ea",
+      "parent_id": "8b6613d6-b1f4-446f-be2d-4194f3b937e4",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -91,7 +91,7 @@
     }
   },
   {
-    "id": "c07e871a-ba11-4981-ae1b-4ebba30b0bb5",
+    "id": "cd8b553c-64e1-498c-904c-5d9082358a12",
     "chunk_id": "chunk_0003",
     "readable_id": "chunk_0003",
     "content": "### Toán và khoa học cơ bản (29 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 11 | MI1016 | Giải tích I | 4(3-2-0-8) | 1 |\n| 12 | MI1036 | Đại số | 4(3-2-0-8) | 1 |\n| 13 | MI1026 | Giải tích II | 4(3-2-0-8) | 2 |\n| 14 | PH1016 | Vật lý đại cương I | 4(2-2-1-8) | 2 |\n| 15 | IT1016 | Tin học đại cương | 3(2-1-2-6) | 2 |\n| 16 | PH1026 | Vật lý đại cương II | 4(2-2-1-8) | 3 |\n| 17 | MI1046 | Phương trình vi phân và chuỗi | 3(2-2-0-6) | 2 |\n| 18 | MI2036 | Xác suất thống kê và tín hiệu ngẫu nhiên | 3(3-1-0-6) | 3 |",
@@ -109,7 +109,7 @@
       "total_chunks": 14,
       "chunk_size": 548,
       "has_table": true,
-      "parent_id": "40bf2622-1830-488a-82e8-8294747375ea",
+      "parent_id": "8b6613d6-b1f4-446f-be2d-4194f3b937e4",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -121,7 +121,7 @@
     }
   },
   {
-    "id": "3d4341e2-1bb8-4a40-aeeb-cf4298574268",
+    "id": "ba006b52-0f9c-4680-aba6-739c9051c484",
     "chunk_id": "chunk_0004",
     "readable_id": "chunk_0004",
     "content": "### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 19 | FL1141 | Practical Grammar for Writing | 3(1-4-0-6) | 1 |\n| 20 | FL1142 | Communication Skills I | 3(1-4-0-6) | 1 |\n| 21 | FL1143 | Working with Texts 1 | 3(1-4-0-6) | 1 |\n| 22 | FL1144 | Listening | 3(2-2-0-6) | 1 |\n| 23 | FL1145 | Speaking | 2(1-3-0-4) | 1 |\n| 24 | FL1146 | Reading | 2(1-2-0-4) | 1 |\n| 25 | FL1147 | Writing | 3(2-2-0-6) | 1 |\n| 26 | FL1148 | Foundation Writing | 2(1-2-0-4) | 1 |\n| 27 | FL1149 | English Communication Skills 2 | 3(2-2-0-6) | 1 |\n| 28 | FL1150 | Working with Text 2 | 2(1-2-0-4) | 1 |\n| 29 | FL1120 | IELTS Listening 1 | 2(2-1-0-4) | 2 |\n| 30 | FL1121 | IELTS Speaking 1 | 1(1-1-0-4) | 2 |\n| 31 | FL1122 | IELTS Reading 1 | 1(1-1-0-4) | 2 |\n| 32 | FL1123 | IELTS Writing 1 | 2(2-1-0-4) | 2 |\n| 33 | FL1124 | IELTS Listening 2 | 2(2-1-0-4) | 1 |\n| 34 | FL1125 | IELTS Speaking 2 | 1(1-1-0-4) | 1 |",
@@ -139,7 +139,7 @@
       "total_chunks": 14,
       "chunk_size": 934,
       "has_table": true,
-      "parent_id": "40bf2622-1830-488a-82e8-8294747375ea",
+      "parent_id": "8b6613d6-b1f4-446f-be2d-4194f3b937e4",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -151,7 +151,7 @@
     }
   },
   {
-    "id": "3a3efa22-2d63-4939-a2c3-086db8794882",
+    "id": "46880070-04d4-43cc-832c-4b6aad82e464",
     "chunk_id": "chunk_0005",
     "readable_id": "chunk_0005",
     "content": "### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 35 | FL1126 | IELTS Reading 2 | 1(1-1-0-4) | 2 |\n| 36 | FL1127 | IELTS Writing 2 | 2(2-1-0-4) | 2 |\n\n### Kiến thức bổ trợ - chọn 6 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 37 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | - |\n| 38 | EM1010 | Quản trị học đại cương | 2(2-1-0-4) | 6 |\n| 39 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(1-1-0-4) | - |\n| 40 | ED3220 | Kỹ năng mềm | 2(1-2-0-4) | 6 |\n| 41 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | 7 |\n| | ME3124 | Thiết kế quảng bá sản phẩm | 2(1-2-0-4) | - |\n| 42 | ME3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) | - |\n\n---",
@@ -169,7 +169,7 @@
       "total_chunks": 14,
       "chunk_size": 743,
       "has_table": true,
-      "parent_id": "40bf2622-1830-488a-82e8-8294747375ea",
+      "parent_id": "8b6613d6-b1f4-446f-be2d-4194f3b937e4",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -181,7 +181,7 @@
     }
   },
   {
-    "id": "a8084f02-9438-4021-923f-4b78092bebde",
+    "id": "48d11e59-53d7-4612-b524-9ce6664c245a",
     "chunk_id": "chunk_0006",
     "readable_id": "chunk_0006",
     "content": "## Kiến thức chuyên ngành\n\n### Cơ sở và cốt lõi ngành (49 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 43 | EE1026E | Nhập môn Kỹ thuật điều khiển và tự động hóa (Intoduction to Electrical Engineering) | 4(3-1-1-8) | 3 |\n| 44 | EE3706E | Mạch tuyến tính 1 (Linear Circuit I) | 4(3-1-1-8) | 3 |\n| 45 | EE2001E *(Mã mới)* | Tín hiệu và hệ thống (Signals and Systems) | 3(3-0-1-6) | 3 |\n| 46 | EE2110E | Thiết kế điện tử (Electronics Design) | 3(3-0-1-6) | 4 |\n| 47 | EE3140E | Máy điện (Electric Machines I) | 3(3-0-1-6) | 4 |\n| 48 | EE3020E | Mạch tuyến tính II (Linear Circuit II) | 3(3-1-0-6) | 4 |\n| 49 | EE3030E | Nguyên lý trường điện từ (Fundamentals of Electromagnetic Field Theory) | 3(3-0-1-6) | 3 |\n| 50 | EE2023 | Technical Writing and Presentation | 3(2-2-0-6) | 5 |\n| 51 | EE3288E | Lý thuyết điều khiển tuyến tính (Linear Control System) | 3(3-1-0-6) | 4 |\n| 52 | EE2130E | Thiết kế hệ thống số (Digital System Design) | 3(3-0-1-6) | 4 |\n| 53 | EE3110E | Kỹ thuật đo lường (Measurement and Instrumentation Principles) | 3(3-0-1-6) | 5 |\n| 54 | EE3490E | Kỹ thuật lập trình (Programming Techniques) | 3(2-2-0-6) | 4 |\n| 55 | EE3480E | Vi xử lý và kiến trúc máy tính (Microprocessor) | 3(3-0-1-6) | 5 |\n| 56 | EE3810E | Đồ án I (Project I) | 2(0-0-4-4) | 6 |\n| 57 | EE3410E | Điện tử công suất (Power Electronics) | 3(3-0-1-6) | 5 |\n| 58 | EE3821E | Đồ án II (Project II) | 2(0-0-4-8) | 7 |\n| 59 | EE3423E | Hệ thống cung cấp điện | 3(3-1-0-6) | 7 |\n\n### Chuyên ngành bắt buộc (21 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 60 | EE4221E | Điều khiển logic và PLC (Logic Control and PLC) | 3(3-0-1-6) | 5 |\n| 61 | EE4435E | Hệ thống điều khiển số (Digital Control System) | 3(3-1-0-6) | 6 |\n| 62 | EE4430E | Mô hình hóa và mô phỏng hệ thống điều khiển | 3(3-0-0-6) | 6 |\n| 63 | EE3550E | Điều khiển quá trình (Process Control) | 3(3-1-0-6) | 7 |\n| 64 | EE3510E | Truyền động điện (Electric Drives) | 3(3-0-1-6) | 6 |\n| 65 | EE3601E *(Mã mới)* | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 7 |\n| 66 | EE4401E | Thiết kế hệ điều khiển nhúng (Design of Embedded Control Systems) | 3(2-2-0-6) | 7 |\n\n### Thực tập và đồ án - lựa chọn 8 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 67 | EE3910E | Thực tập kỹ thuật (Technical Internship) | 2(0-0-4-4) | 8 |\n| 68 | EE4900E | Đồ án tốt nghiệp Cử nhân (Bachelor Thesis) | 6(0-0-12-12) | 8 |\n| 69 | EE4922E | Đồ án nghiên cứu Cử nhân (Bachelor Graduate Thesis) | 8(0-0-16-32) | 8 |\n\n**Tổng tín chỉ bậc cử nhân: 132**  \n*(Phân bổ theo kỳ: K1=15, K2=17, K3=20, K4=20, K5=17, K6=17, K7=18, K8=8)*\n\n---",
@@ -212,7 +212,7 @@
     }
   },
   {
-    "id": "1a346e37-8c43-4601-bbb0-ff08e6fd9bb6",
+    "id": "5f185e56-c16c-4037-bea8-a04deee2a6dc",
     "chunk_id": "chunk_0007",
     "readable_id": "chunk_0007",
     "content": "## Kiến thức chuyên ngành\n### Cơ sở và cốt lõi ngành (49 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 43 | EE1026E | Nhập môn Kỹ thuật điều khiển và tự động hóa (Intoduction to Electrical Engineering) | 4(3-1-1-8) | 3 |\n| 44 | EE3706E | Mạch tuyến tính 1 (Linear Circuit I) | 4(3-1-1-8) | 3 |\n| 45 | EE2001E *(Mã mới)* | Tín hiệu và hệ thống (Signals and Systems) | 3(3-0-1-6) | 3 |\n| 46 | EE2110E | Thiết kế điện tử (Electronics Design) | 3(3-0-1-6) | 4 |\n| 47 | EE3140E | Máy điện (Electric Machines I) | 3(3-0-1-6) | 4 |\n| 48 | EE3020E | Mạch tuyến tính II (Linear Circuit II) | 3(3-1-0-6) | 4 |\n| 49 | EE3030E | Nguyên lý trường điện từ (Fundamentals of Electromagnetic Field Theory) | 3(3-0-1-6) | 3 |\n| 50 | EE2023 | Technical Writing and Presentation | 3(2-2-0-6) | 5 |\n| 51 | EE3288E | Lý thuyết điều khiển tuyến tính (Linear Control System) | 3(3-1-0-6) | 4 |\n| 52 | EE2130E | Thiết kế hệ thống số (Digital System Design) | 3(3-0-1-6) | 4 |\n| 53 | EE3110E | Kỹ thuật đo lường (Measurement and Instrumentation Principles) | 3(3-0-1-6) | 5 |",
@@ -230,7 +230,7 @@
       "total_chunks": 14,
       "chunk_size": 1082,
       "has_table": true,
-      "parent_id": "a8084f02-9438-4021-923f-4b78092bebde",
+      "parent_id": "48d11e59-53d7-4612-b524-9ce6664c245a",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -242,7 +242,7 @@
     }
   },
   {
-    "id": "bc7c7bdf-f475-4809-9506-00300126174a",
+    "id": "4bda10c5-0f49-4a98-898c-8a16630589be",
     "chunk_id": "chunk_0008",
     "readable_id": "chunk_0008",
     "content": "### Cơ sở và cốt lõi ngành (49 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 54 | EE3490E | Kỹ thuật lập trình (Programming Techniques) | 3(2-2-0-6) | 4 |\n| 55 | EE3480E | Vi xử lý và kiến trúc máy tính (Microprocessor) | 3(3-0-1-6) | 5 |\n| 56 | EE3810E | Đồ án I (Project I) | 2(0-0-4-4) | 6 |\n| 57 | EE3410E | Điện tử công suất (Power Electronics) | 3(3-0-1-6) | 5 |\n| 58 | EE3821E | Đồ án II (Project II) | 2(0-0-4-8) | 7 |\n| 59 | EE3423E | Hệ thống cung cấp điện | 3(3-1-0-6) | 7 |",
@@ -260,7 +260,7 @@
       "total_chunks": 14,
       "chunk_size": 518,
       "has_table": true,
-      "parent_id": "a8084f02-9438-4021-923f-4b78092bebde",
+      "parent_id": "48d11e59-53d7-4612-b524-9ce6664c245a",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -272,7 +272,7 @@
     }
   },
   {
-    "id": "82d01f04-c44f-4071-be17-00f4549fc012",
+    "id": "9ef0a942-2f65-4dcb-981b-67ce083c4c46",
     "chunk_id": "chunk_0009",
     "readable_id": "chunk_0009",
     "content": "### Chuyên ngành bắt buộc (21 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 60 | EE4221E | Điều khiển logic và PLC (Logic Control and PLC) | 3(3-0-1-6) | 5 |\n| 61 | EE4435E | Hệ thống điều khiển số (Digital Control System) | 3(3-1-0-6) | 6 |\n| 62 | EE4430E | Mô hình hóa và mô phỏng hệ thống điều khiển | 3(3-0-0-6) | 6 |\n| 63 | EE3550E | Điều khiển quá trình (Process Control) | 3(3-1-0-6) | 7 |\n| 64 | EE3510E | Truyền động điện (Electric Drives) | 3(3-0-1-6) | 6 |\n| 65 | EE3601E *(Mã mới)* | Hệ thống đo và điều khiển công nghiệp | 3(3-0-1-6) | 7 |\n| 66 | EE4401E | Thiết kế hệ điều khiển nhúng (Design of Embedded Control Systems) | 3(2-2-0-6) | 7 |\n\n### Thực tập và đồ án - lựa chọn 8 tín chỉ\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 67 | EE3910E | Thực tập kỹ thuật (Technical Internship) | 2(0-0-4-4) | 8 |\n| 68 | EE4900E | Đồ án tốt nghiệp Cử nhân (Bachelor Thesis) | 6(0-0-12-12) | 8 |\n| 69 | EE4922E | Đồ án nghiên cứu Cử nhân (Bachelor Graduate Thesis) | 8(0-0-16-32) | 8 |\n\n**Tổng tín chỉ bậc cử nhân: 132**  \n*(Phân bổ theo kỳ: K1=15, K2=17, K3=20, K4=20, K5=17, K6=17, K7=18, K8=8)*\n\n---",
@@ -290,7 +290,7 @@
       "total_chunks": 14,
       "chunk_size": 1164,
       "has_table": true,
-      "parent_id": "a8084f02-9438-4021-923f-4b78092bebde",
+      "parent_id": "48d11e59-53d7-4612-b524-9ce6664c245a",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -302,7 +302,7 @@
     }
   },
   {
-    "id": "be77d6f3-cd5d-4037-b219-b31b88262be0",
+    "id": "0faf5704-1608-47ce-b676-69e990f54260",
     "chunk_id": "chunk_0010",
     "readable_id": "chunk_0010",
     "content": "## Bậc thạc sĩ\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 70 | SS6013 | Triết học | 3(3-0-0-6) | 9 |\n\n### Kiến thức ngành mở rộng - 12 tín chỉ (công nhận từ khối tự chọn định hướng cử nhân)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 71 | DX6000 | Đồ án đề xuất (Dành cho sinh viên không học chương trình tích hợp) | 6(0-0-12-12) | 9 |\n| 72 | EExxxx | Bổ sung 6 tín chỉ từ khối tự chọn cử nhân | 6 | 9 |\n\n### Mô đun điều khiển, tự động hóa - Cơ sở ngành nâng cao (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 73 | EE6312E | Phân tích và điều khiển hệ phi tuyến (Analysis and Control of Nonlinear Systems) | 3(3-1-0-6) | 9 |\n| 74 | EE6543E | Cảm biến và xử lý tín hiệu đo (Sensor and Conditioning) | 2(2-1-0-4) | 9 |\n| 75 | EE6503E | Xử lý tín hiệu số (Digital Signal Processing) | 2(2-1-0-4) | 10 |\n| 76 | EE6551E | Điện tử công suất nâng cao (Advanced Power Electronics) | 2(2-1-0-4) | 9 |\n| 77 | EE6010E | Seminar 1 | 3(0-0-6-6) | 9 |\n| 78 | EE6020E | Seminar 2 | 3(0-0-6-6) | 10 |\n\n### Mô đun điều khiển, tự động hóa - Định hướng nghiên cứu (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 79 | EE6532E | Tối ưu hóa và điều khiển tối ưu (Optimization and Optimal Control) | 3(3-1-0-6) | 10 |\n| 80 | EE6022E | Điều khiển quá trình nâng cao (Advanced Process Control) | 3(2-2-0-6) | 9 |\n| 81 | EE6445E | Điều khiển mờ và mạng nơ ron (Fuzzy Control and Neural Networks) | 3(3-1-0-6) | 10 |\n| 82 | EE6446E | Hệ thống cảm biến thông minh (Smart Sensor Systems) | 3(3-1-0-6) | 10 |\n| 83 | EE6426E | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) | 10 |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 84 | EE6001E | Luận văn tốt nghiệp | 15(0-0-30-50) | 11 |",
@@ -333,7 +333,7 @@
     }
   },
   {
-    "id": "5f30eb9a-ff4b-472b-917c-dc9629ae466f",
+    "id": "80c7e6c4-4e2e-4ef2-996a-b2f2dff289de",
     "chunk_id": "chunk_0011",
     "readable_id": "chunk_0011",
     "content": "## Bậc thạc sĩ\n\n### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 70 | SS6013 | Triết học | 3(3-0-0-6) | 9 |\n\n### Kiến thức ngành mở rộng - 12 tín chỉ (công nhận từ khối tự chọn định hướng cử nhân)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 71 | DX6000 | Đồ án đề xuất (Dành cho sinh viên không học chương trình tích hợp) | 6(0-0-12-12) | 9 |\n| 72 | EExxxx | Bổ sung 6 tín chỉ từ khối tự chọn cử nhân | 6 | 9 |",
@@ -351,7 +351,7 @@
       "total_chunks": 14,
       "chunk_size": 489,
       "has_table": true,
-      "parent_id": "be77d6f3-cd5d-4037-b219-b31b88262be0",
+      "parent_id": "0faf5704-1608-47ce-b676-69e990f54260",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -363,7 +363,7 @@
     }
   },
   {
-    "id": "0c71b739-843b-4dc1-a746-e7e3c611d207",
+    "id": "9e124ca7-f9d8-422d-9b4d-05d3550fab3a",
     "chunk_id": "chunk_0012",
     "readable_id": "chunk_0012",
     "content": "### Mô đun điều khiển, tự động hóa - Cơ sở ngành nâng cao (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 73 | EE6312E | Phân tích và điều khiển hệ phi tuyến (Analysis and Control of Nonlinear Systems) | 3(3-1-0-6) | 9 |\n| 74 | EE6543E | Cảm biến và xử lý tín hiệu đo (Sensor and Conditioning) | 2(2-1-0-4) | 9 |\n| 75 | EE6503E | Xử lý tín hiệu số (Digital Signal Processing) | 2(2-1-0-4) | 10 |\n| 76 | EE6551E | Điện tử công suất nâng cao (Advanced Power Electronics) | 2(2-1-0-4) | 9 |\n| 77 | EE6010E | Seminar 1 | 3(0-0-6-6) | 9 |\n| 78 | EE6020E | Seminar 2 | 3(0-0-6-6) | 10 |",
@@ -381,7 +381,7 @@
       "total_chunks": 14,
       "chunk_size": 615,
       "has_table": true,
-      "parent_id": "be77d6f3-cd5d-4037-b219-b31b88262be0",
+      "parent_id": "0faf5704-1608-47ce-b676-69e990f54260",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -393,7 +393,7 @@
     }
   },
   {
-    "id": "a3190c51-cb57-43c2-b524-8b9a126b37b2",
+    "id": "8a069a92-dc1e-4758-ab95-0e7d31e6f415",
     "chunk_id": "chunk_0013",
     "readable_id": "chunk_0013",
     "content": "### Mô đun điều khiển, tự động hóa - Định hướng nghiên cứu (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 79 | EE6532E | Tối ưu hóa và điều khiển tối ưu (Optimization and Optimal Control) | 3(3-1-0-6) | 10 |\n| 80 | EE6022E | Điều khiển quá trình nâng cao (Advanced Process Control) | 3(2-2-0-6) | 9 |\n| 81 | EE6445E | Điều khiển mờ và mạng nơ ron (Fuzzy Control and Neural Networks) | 3(3-1-0-6) | 10 |\n| 82 | EE6446E | Hệ thống cảm biến thông minh (Smart Sensor Systems) | 3(3-1-0-6) | 10 |\n| 83 | EE6426E | Điều khiển nguồn năng lượng tái tạo sử dụng bộ biến đổi điện tử công suất | 3(3-0-0-6) | 10 |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 84 | EE6001E | Luận văn tốt nghiệp | 15(0-0-30-50) | 11 |",
@@ -411,7 +411,7 @@
       "total_chunks": 14,
       "chunk_size": 804,
       "has_table": true,
-      "parent_id": "be77d6f3-cd5d-4037-b219-b31b88262be0",
+      "parent_id": "0faf5704-1608-47ce-b676-69e990f54260",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,

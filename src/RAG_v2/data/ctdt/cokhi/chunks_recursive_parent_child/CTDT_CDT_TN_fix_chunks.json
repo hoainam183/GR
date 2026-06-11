@@ -1,6 +1,6 @@
 [
   {
-    "id": "5c176681-9e30-4302-a13d-0ede30f349f6",
+    "id": "23a6c20e-afc3-4a0c-9bf3-aa8ff9e255ba",
     "chunk_id": "chunk_0000",
     "readable_id": "chunk_0000",
     "content": "## Danh mục học phần và kế hoạch học tập cho chương trình tài năng\n\n### Lý luận chính trị + Pháp luật đại cương (13 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác-Lênin | 3(2-1-0-6) | 1 |\n| 2 | SSH1121 | Kinh tế chính trị Mác-Lênin | 2(2-0-0-4) | 2 |\n| 3 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 4 |\n| 4 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 4 |\n| 5 | SSH1141 | Lịch sử Đảng Cộng sản Việt Nam | 2(2-0-0-4) | 4 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 1 |\n\n### Giáo dục thể chất (5 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 7 | PE1010 | Lý luận thể dục thể thao | 1(0-0-2-0) |\n| 8 | PE1020 | Bơi lội | 1(0-0-2-0) |\n| 9 | PE1030 | Tự chọn thể dục 1 | 1(0-0-2-0) |\n| 10 | PE2010 | Tự chọn thể dục 2 | 1(0-0-2-0) |\n| 11 | PE2020 | Tự chọn thể dục 3 | 1(0-0-2-0) |\n\n### Giáo dục Quốc phòng – An ninh (165 tiết)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK(CKC) | 0(3-2-0-8) |\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 15 | FL1100 | Tiếng Anh I | 3(0-6-0-6) | 1 |\n| 16 | FL1101 | Tiếng Anh II | 3(0-6-0-6) | 2 |\n\n### Toán và Khoa học cơ bản (32 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 17 | MI1111 | Giải tích I | 4(3-2-0-8) | 1 |\n| 18 | MI1121 | Giải tích II | 3(2-2-0-6) | 2 |\n| 19 | MI1131 | Giải tích III | 3(2-2-0-6) | 3 |\n| 20 | MI1141 | Đại số | 4(3-2-0-8) | 1 |\n| 21 | ME2030 | Cơ khí đại cương | 2(2-1-0-4) | 3 |\n| 22 | PH1110 | Vật lý đại cương I | 3(2-1-1-6) | 2 |\n| 23 | PH1120 | Vật lý đại cương II | 3(2-1-1-6) | 3 |\n| 24 | IT1110 | Tin học đại cương | 4(3-1-1-8) | 2 |\n| 25 | MI2110 | Phương pháp tính và Matlab | 3(2-0-2-6) | 4 |\n| 26 | ME2011 | Đồ họa kỹ thuật I | 3(3-1-0-6) | 3 |\n\n### Cơ sở và cốt lõi ngành (47 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 27 | ME2201 | Đồ họa kỹ thuật II | 2(2-1-0-4) | 4 |\n| 28 | ME2100 | Nhập môn Cơ điện tử | 3(2-1-1-6) | 5 |\n| 29 | EE2012 | Kỹ thuật điện | 2(2-1-0-4) | 4 |\n| 30 | ET2012 | Kỹ thuật điện tử | 2(2-1-0-4) | 4 |\n| 31 | ME2112 | Cơ học kỹ thuật I | 2(2-1-0-4) | 3 |\n| 32 | ME2101 | Sức bền vật liệu I | 2(2-1-0-4) | 3 |\n| 33 | ME2211 | Cơ học kỹ thuật II | 3(2-2-0-6) | 4 |\n| 34 | ME2202 | Sức bền vật liệu II | 2(2-1-0-4) | 4 |\n| 35 | ME2203 | Nguyên lý máy | 2(3-0-1-6) | 5 |\n| 36 | EE3359 | LT Điều khiển tự động | 3(3-1-0-6) | 5 |\n| 37 | MSE2228 | Vật liệu học | 2(2-0-1-4) | 5 |\n| 38 | ME3101 | Chi tiết máy | 2(2-0-1-4) | 6 |\n| 39 | ME3072 | Kỹ thuật đo | 2(2-0-1-4) | 6 |\n| 40 | IT3011 | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 5 |\n| 41 | ME3205 | Công nghệ chế tạo máy | 3(3-0-1-6) | 6 |\n| 42 | ME3209 | Robotics | 3(3-1-0-6) | 6 |\n| 43 | HE2012 | Kỹ thuật nhiệt | 2(2-0-1-4) | 5 |\n| 44 | ME3213 | Kỹ thuật lập trình trong CĐT | 3(2-2-0-6) | 6 |\n| 45 | TE3600 | Kỹ thuật thủy khí | 2(2-1-0-4) | 6 |\n| 46 | ME3215 | Cơ sở Máy CNC | 3(3-0-1-6) | 6 |\n\n### Kiến thức bổ trợ xã hội (9 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 47 | EM1010 | Quản trị học đại cương | 2(2-0-0-4) | - |\n| 48 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) | - |\n| 49 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | - |\n| 50 | ED3220 | Kỹ năng mềm | 3(2-2-0-6) | - |\n| 51 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | - |\n| 52 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) | - |\n| 53 | ME2021 | Technical Writing and Presentation | 3(2-2-0-6) | 7 |\n\n### Môđun: Robot và Hệ thống cơ điện tử thông minh (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 53 | IT4162 | Vi xử lý | 2(2-1-0-4) | 7 |\n| 54 | ME4511 | Cảm biến và xử lý tín hiệu | 2(2-1-0-4) | 5 |\n| 55 | ME4604 | Thực tập xưởng HTCĐTTM | 2(0-0-4-4) | 4 |\n| 56 | ME4181 | Phương pháp phần tử hữu hạn | 2(2-1-0-4) | 5 |\n| 57 | ME4506 | ĐA TK HT Cơ khí-CĐTTM | 3(0-0-6-6) | 7 |\n| 58 | ME4508 | Giao diện người máy | 2(2-1-0-4) | 7 |\n| 59 | ME4509 | Xử lý ảnh trong CĐT | 2(2-1-0-4) | 7 |\n| 60 | EE4829 | Điều khiển nối mạng | 2(2-1-0-4) | 7 |\n\n### Đồ án nghiên cứu khoa học (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 61 | ME4996 | Đồ án nghiên cứu | 8(0-0-16-16) | 8 |\n\n**Tổng số tín chỉ toàn phần: 132**\n\n---",
@@ -31,7 +31,7 @@
     }
   },
   {
-    "id": "05e45f3b-a6c8-4836-ab60-2203c596e1c5",
+    "id": "db3d32e5-5860-4d88-a26c-604d1ca86deb",
     "chunk_id": "chunk_0001",
     "readable_id": "chunk_0001",
     "content": "## Danh mục học phần và kế hoạch học tập cho chương trình tài năng\n\n### Lý luận chính trị + Pháp luật đại cương (13 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 1 | SSH1111 | Triết học Mác-Lênin | 3(2-1-0-6) | 1 |\n| 2 | SSH1121 | Kinh tế chính trị Mác-Lênin | 2(2-0-0-4) | 2 |\n| 3 | SSH1151 | Tư tưởng Hồ Chí Minh | 2(2-0-0-4) | 4 |\n| 4 | SSH1131 | Chủ nghĩa xã hội khoa học | 2(2-0-0-4) | 4 |\n| 5 | SSH1141 | Lịch sử Đảng Cộng sản Việt Nam | 2(2-0-0-4) | 4 |\n| 6 | EM1170 | Pháp luật đại cương | 2(2-0-0-4) | 1 |\n\n### Giáo dục thể chất (5 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 7 | PE1010 | Lý luận thể dục thể thao | 1(0-0-2-0) |\n| 8 | PE1020 | Bơi lội | 1(0-0-2-0) |\n| 9 | PE1030 | Tự chọn thể dục 1 | 1(0-0-2-0) |\n| 10 | PE2010 | Tự chọn thể dục 2 | 1(0-0-2-0) |\n| 11 | PE2020 | Tự chọn thể dục 3 | 1(0-0-2-0) |",
@@ -49,7 +49,7 @@
       "total_chunks": 11,
       "chunk_size": 880,
       "has_table": true,
-      "parent_id": "5c176681-9e30-4302-a13d-0ede30f349f6",
+      "parent_id": "23a6c20e-afc3-4a0c-9bf3-aa8ff9e255ba",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -61,7 +61,7 @@
     }
   },
   {
-    "id": "52cfeeab-946f-465f-b06e-668a6f1346c4",
+    "id": "aa2a37ec-a413-4991-b171-855b6de73e32",
     "chunk_id": "chunk_0002",
     "readable_id": "chunk_0002",
     "content": "### Giáo dục Quốc phòng – An ninh (165 tiết)\n\n| TT | Mã số | Tên học phần | Tín chỉ |\n|---|---|---|---|\n| 12 | MIL1110 | Đường lối quân sự của Đảng | 0(3-0-0-6) |\n| 13 | MIL1120 | Công tác quốc phòng, an ninh | 0(3-0-0-6) |\n| 14 | MIL1130 | QS chung và chiến thuật, kỹ thuật bắn súng tiểu liên AK(CKC) | 0(3-2-0-8) |\n\n### Tiếng Anh (6 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 15 | FL1100 | Tiếng Anh I | 3(0-6-0-6) | 1 |\n| 16 | FL1101 | Tiếng Anh II | 3(0-6-0-6) | 2 |",
@@ -79,7 +79,7 @@
       "total_chunks": 11,
       "chunk_size": 506,
       "has_table": true,
-      "parent_id": "5c176681-9e30-4302-a13d-0ede30f349f6",
+      "parent_id": "23a6c20e-afc3-4a0c-9bf3-aa8ff9e255ba",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -91,7 +91,7 @@
     }
   },
   {
-    "id": "f7581e02-5c0f-43aa-b220-67dfc4726cd7",
+    "id": "b495add0-8ed1-4e4a-a4c6-52579cfcc1f4",
     "chunk_id": "chunk_0003",
     "readable_id": "chunk_0003",
     "content": "### Toán và Khoa học cơ bản (32 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 17 | MI1111 | Giải tích I | 4(3-2-0-8) | 1 |\n| 18 | MI1121 | Giải tích II | 3(2-2-0-6) | 2 |\n| 19 | MI1131 | Giải tích III | 3(2-2-0-6) | 3 |\n| 20 | MI1141 | Đại số | 4(3-2-0-8) | 1 |\n| 21 | ME2030 | Cơ khí đại cương | 2(2-1-0-4) | 3 |\n| 22 | PH1110 | Vật lý đại cương I | 3(2-1-1-6) | 2 |\n| 23 | PH1120 | Vật lý đại cương II | 3(2-1-1-6) | 3 |\n| 24 | IT1110 | Tin học đại cương | 4(3-1-1-8) | 2 |\n| 25 | MI2110 | Phương pháp tính và Matlab | 3(2-0-2-6) | 4 |\n| 26 | ME2011 | Đồ họa kỹ thuật I | 3(3-1-0-6) | 3 |",
@@ -109,7 +109,7 @@
       "total_chunks": 11,
       "chunk_size": 623,
       "has_table": true,
-      "parent_id": "5c176681-9e30-4302-a13d-0ede30f349f6",
+      "parent_id": "23a6c20e-afc3-4a0c-9bf3-aa8ff9e255ba",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -121,7 +121,7 @@
     }
   },
   {
-    "id": "3523d27e-3f3a-4637-abb2-7ad1d2392123",
+    "id": "b82f27fe-f1ff-4a3a-950d-c80762348e8b",
     "chunk_id": "chunk_0004",
     "readable_id": "chunk_0004",
     "content": "### Cơ sở và cốt lõi ngành (47 tín chỉ)\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 27 | ME2201 | Đồ họa kỹ thuật II | 2(2-1-0-4) | 4 |\n| 28 | ME2100 | Nhập môn Cơ điện tử | 3(2-1-1-6) | 5 |\n| 29 | EE2012 | Kỹ thuật điện | 2(2-1-0-4) | 4 |\n| 30 | ET2012 | Kỹ thuật điện tử | 2(2-1-0-4) | 4 |\n| 31 | ME2112 | Cơ học kỹ thuật I | 2(2-1-0-4) | 3 |\n| 32 | ME2101 | Sức bền vật liệu I | 2(2-1-0-4) | 3 |\n| 33 | ME2211 | Cơ học kỹ thuật II | 3(2-2-0-6) | 4 |\n| 34 | ME2202 | Sức bền vật liệu II | 2(2-1-0-4) | 4 |\n| 35 | ME2203 | Nguyên lý máy | 2(3-0-1-6) | 5 |\n| 36 | EE3359 | LT Điều khiển tự động | 3(3-1-0-6) | 5 |\n| 37 | MSE2228 | Vật liệu học | 2(2-0-1-4) | 5 |\n| 38 | ME3101 | Chi tiết máy | 2(2-0-1-4) | 6 |\n| 39 | ME3072 | Kỹ thuật đo | 2(2-0-1-4) | 6 |\n| 40 | IT3011 | Cấu trúc dữ liệu và thuật toán | 2(2-1-0-4) | 5 |\n| 41 | ME3205 | Công nghệ chế tạo máy | 3(3-0-1-6) | 6 |\n| 42 | ME3209 | Robotics | 3(3-1-0-6) | 6 |\n| 43 | HE2012 | Kỹ thuật nhiệt | 2(2-0-1-4) | 5 |",
@@ -139,7 +139,7 @@
       "total_chunks": 11,
       "chunk_size": 999,
       "has_table": true,
-      "parent_id": "5c176681-9e30-4302-a13d-0ede30f349f6",
+      "parent_id": "23a6c20e-afc3-4a0c-9bf3-aa8ff9e255ba",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -151,7 +151,7 @@
     }
   },
   {
-    "id": "5764952f-bacc-48f7-a460-d735f07a2e93",
+    "id": "4c8a631e-acd5-4d60-b31a-dba6bd15d80c",
     "chunk_id": "chunk_0005",
     "readable_id": "chunk_0005",
     "content": "### Cơ sở và cốt lõi ngành (47 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 44 | ME3213 | Kỹ thuật lập trình trong CĐT | 3(2-2-0-6) | 6 |\n| 45 | TE3600 | Kỹ thuật thủy khí | 2(2-1-0-4) | 6 |\n| 46 | ME3215 | Cơ sở Máy CNC | 3(3-0-1-6) | 6 |",
@@ -169,7 +169,7 @@
       "total_chunks": 11,
       "chunk_size": 273,
       "has_table": true,
-      "parent_id": "5c176681-9e30-4302-a13d-0ede30f349f6",
+      "parent_id": "23a6c20e-afc3-4a0c-9bf3-aa8ff9e255ba",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -181,7 +181,7 @@
     }
   },
   {
-    "id": "730d59f3-f50a-4476-bffe-7c08b3059cb9",
+    "id": "c516db5e-72df-4269-aa2d-89567bd0945f",
     "chunk_id": "chunk_0006",
     "readable_id": "chunk_0006",
     "content": "### Kiến thức bổ trợ xã hội (9 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 47 | EM1010 | Quản trị học đại cương | 2(2-0-0-4) | - |\n| 48 | EM1180 | Văn hóa kinh doanh và tinh thần khởi nghiệp | 2(2-1-0-4) | - |\n| 49 | ED3280 | Tâm lý học ứng dụng | 2(1-2-0-4) | - |\n| 50 | ED3220 | Kỹ năng mềm | 3(2-2-0-6) | - |\n| 51 | ET3262 | Tư duy công nghệ và thiết kế kỹ thuật | 2(1-2-0-4) | - |\n| 52 | TEX3123 | Thiết kế mỹ thuật công nghiệp | 2(1-2-0-4) | - |\n| 53 | ME2021 | Technical Writing and Presentation | 3(2-2-0-6) | 7 |",
@@ -199,7 +199,7 @@
       "total_chunks": 11,
       "chunk_size": 555,
       "has_table": true,
-      "parent_id": "5c176681-9e30-4302-a13d-0ede30f349f6",
+      "parent_id": "23a6c20e-afc3-4a0c-9bf3-aa8ff9e255ba",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -211,7 +211,7 @@
     }
   },
   {
-    "id": "26ce8008-7959-4b79-91a9-77830db327a1",
+    "id": "3963852b-fe39-40bf-9909-809cf1e2745e",
     "chunk_id": "chunk_0007",
     "readable_id": "chunk_0007",
     "content": "### Môđun: Robot và Hệ thống cơ điện tử thông minh (17 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 53 | IT4162 | Vi xử lý | 2(2-1-0-4) | 7 |\n| 54 | ME4511 | Cảm biến và xử lý tín hiệu | 2(2-1-0-4) | 5 |\n| 55 | ME4604 | Thực tập xưởng HTCĐTTM | 2(0-0-4-4) | 4 |\n| 56 | ME4181 | Phương pháp phần tử hữu hạn | 2(2-1-0-4) | 5 |\n| 57 | ME4506 | ĐA TK HT Cơ khí-CĐTTM | 3(0-0-6-6) | 7 |\n| 58 | ME4508 | Giao diện người máy | 2(2-1-0-4) | 7 |\n| 59 | ME4509 | Xử lý ảnh trong CĐT | 2(2-1-0-4) | 7 |\n| 60 | EE4829 | Điều khiển nối mạng | 2(2-1-0-4) | 7 |\n\n### Đồ án nghiên cứu khoa học (8 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 61 | ME4996 | Đồ án nghiên cứu | 8(0-0-16-16) | 8 |\n\n**Tổng số tín chỉ toàn phần: 132**\n\n---",
@@ -229,7 +229,7 @@
       "total_chunks": 11,
       "chunk_size": 786,
       "has_table": true,
-      "parent_id": "5c176681-9e30-4302-a13d-0ede30f349f6",
+      "parent_id": "23a6c20e-afc3-4a0c-9bf3-aa8ff9e255ba",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -241,7 +241,7 @@
     }
   },
   {
-    "id": "cac6f023-9636-434e-b4ce-f6cd9e281891",
+    "id": "da3c7498-93ec-4e3e-8b34-9837830fc06d",
     "chunk_id": "chunk_0008",
     "readable_id": "chunk_0008",
     "content": "## Chương trình đào tạo bậc thạc sĩ\n\n### Tín chỉ công nhận theo chương trình tích hợp – Kiến thức ngành rộng (12 tín chỉ)\n\n#### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 62 | SS6010 | Triết học | 3(2,5-1-0-6) | 9 |\n| 63 | FL6010 | Tiếng Anh | Tự học | |\n\n#### Báo cáo chuyên đề\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 64 | ME6008 | Seminar 1 | 3(3-0-0-6) | 10 |\n| 65 | ME6996 | Seminar 2 | 3(3-0-0-6) | 10 |\n\n### Kiến thức cơ sở bắt buộc (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 66 | ME5510 | Tự động hóa thủy khí | 3(3-0-1-6) | 9 |\n| 67 | ME5511 | Thiết kế hệ thống CĐT | 2(2-1-0-4) | 9 |\n| 68 | ME5512 | ĐA Thiết kế hệ thống CĐT | 3(3-0-1-6) | 9 |\n| 69 | IT3083 | Mạng máy tính | 2(2-1-0-4) | 9 |\n| 70 | EE6868 | Động cơ điện và điều khiển | 3(3-0-1-6) | 9 |\n| 71 | IT4735 | Internet vạn vật và ứng dụng | 2(2-1-0-4) | 9 |\n\n### Kiến thức theo định hướng Hệ thống cơ điện tử thông minh (Học viên phải chọn tối thiểu 10 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 72 | ME6613 | Hệ thống vi cơ điện tử | 2(2-1-0-4) | 10 |\n| 73 | ME6605 | Hệ điều hành Robot ROS | 2(2-1-0-4) | 10 |\n| 74 | EE6122 | Hệ thống giám sát và điều khiển thời gian thực | 2(2-1-0-4) | 10 |\n| 75 | ME6606 | FPGAs | 2(2-1-0-4) | 10 |\n| 76 | ME6615 | Hệ thống CĐT thông minh | 2(2-1-0-4) | 10 |\n| 77 | ME5667 | Trí tuệ nhân tạo trong Robot | 2(2-1-0-4) | 10 |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| | LV6001 | Đề cương tốt nghiệp | 3 | 11 |\n| 78 | LV6001 | Luận văn tốt nghiệp | 12 | 11 |\n\n**Tổng số tín chỉ toàn phần: 181**",
@@ -272,7 +272,7 @@
     }
   },
   {
-    "id": "6df3cdea-e2a7-46f0-b27e-00d7eb2d480b",
+    "id": "b98b1fea-6b84-4784-b6c8-8d77bf8fd929",
     "chunk_id": "chunk_0009",
     "readable_id": "chunk_0009",
     "content": "## Chương trình đào tạo bậc thạc sĩ\n\n### Tín chỉ công nhận theo chương trình tích hợp – Kiến thức ngành rộng (12 tín chỉ)\n\n#### Kiến thức chung (3 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 62 | SS6010 | Triết học | 3(2,5-1-0-6) | 9 |\n| 63 | FL6010 | Tiếng Anh | Tự học | |\n\n#### Báo cáo chuyên đề\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 64 | ME6008 | Seminar 1 | 3(3-0-0-6) | 10 |\n| 65 | ME6996 | Seminar 2 | 3(3-0-0-6) | 10 |\n\n### Kiến thức cơ sở bắt buộc (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 66 | ME5510 | Tự động hóa thủy khí | 3(3-0-1-6) | 9 |\n| 67 | ME5511 | Thiết kế hệ thống CĐT | 2(2-1-0-4) | 9 |\n| 68 | ME5512 | ĐA Thiết kế hệ thống CĐT | 3(3-0-1-6) | 9 |\n| 69 | IT3083 | Mạng máy tính | 2(2-1-0-4) | 9 |\n| 70 | EE6868 | Động cơ điện và điều khiển | 3(3-0-1-6) | 9 |\n| 71 | IT4735 | Internet vạn vật và ứng dụng | 2(2-1-0-4) | 9 |",
@@ -290,7 +290,7 @@
       "total_chunks": 11,
       "chunk_size": 952,
       "has_table": true,
-      "parent_id": "cac6f023-9636-434e-b4ce-f6cd9e281891",
+      "parent_id": "da3c7498-93ec-4e3e-8b34-9837830fc06d",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,
@@ -302,7 +302,7 @@
     }
   },
   {
-    "id": "7970d2a3-1cfb-4153-9929-7026c571837a",
+    "id": "d7acd222-e4d5-433b-a043-7d0988ca1f7a",
     "chunk_id": "chunk_0010",
     "readable_id": "chunk_0010",
     "content": "### Kiến thức theo định hướng Hệ thống cơ điện tử thông minh (Học viên phải chọn tối thiểu 10 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| 72 | ME6613 | Hệ thống vi cơ điện tử | 2(2-1-0-4) | 10 |\n| 73 | ME6605 | Hệ điều hành Robot ROS | 2(2-1-0-4) | 10 |\n| 74 | EE6122 | Hệ thống giám sát và điều khiển thời gian thực | 2(2-1-0-4) | 10 |\n| 75 | ME6606 | FPGAs | 2(2-1-0-4) | 10 |\n| 76 | ME6615 | Hệ thống CĐT thông minh | 2(2-1-0-4) | 10 |\n| 77 | ME5667 | Trí tuệ nhân tạo trong Robot | 2(2-1-0-4) | 10 |\n\n### Luận văn tốt nghiệp (15 tín chỉ)\n\n| TT | Mã số | Tên học phần | Tín chỉ | Kỳ |\n|---|---|---|---|---|\n| | LV6001 | Đề cương tốt nghiệp | 3 | 11 |\n| 78 | LV6001 | Luận văn tốt nghiệp | 12 | 11 |\n\n**Tổng số tín chỉ toàn phần: 181**",
@@ -320,7 +320,7 @@
       "total_chunks": 11,
       "chunk_size": 772,
       "has_table": true,
-      "parent_id": "cac6f023-9636-434e-b4ce-f6cd9e281891",
+      "parent_id": "da3c7498-93ec-4e3e-8b34-9837830fc06d",
       "chunk_type": "mixed",
       "effective_date": null,
       "expiry_date": null,

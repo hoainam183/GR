@@ -34,6 +34,12 @@ def parse_legal_document_structure(markdown_text: str) -> List[Dict]:
     current_clause_lines = []
     current_depth = 0  # Track depth: 0=clause (1., 2.), 1=sub-clause (a), b))
 
+    # Phần mở đầu của một Điều: nội dung nằm trong Điều nhưng TRƯỚC khoản số đầu
+    # tiên, hoặc các điểm a)/b) thuộc một Điều không có khoản số. Trước đây phần
+    # này bị bỏ âm thầm (mất nội dung) vì code chỉ giữ dòng khi current_clause_num
+    # khác None.
+    current_article_intro_lines: List[str] = []
+
     lines = markdown_text.split("\n")
 
     def save_current_clause():
@@ -71,6 +77,39 @@ def parse_legal_document_structure(markdown_text: str) -> List[Dict]:
 
         chunks.append({"content": content, "metadata": metadata})
 
+    def save_article_intro():
+        """Lưu phần mở đầu của Điều hiện tại (nội dung trước khoản số đầu tiên).
+
+        Tránh mất nội dung của các Điều chỉ có đoạn văn / chỉ có điểm a) b) mà
+        không có khoản số.
+        """
+        if not current_article_intro_lines:
+            return
+
+        content = "\n".join(current_article_intro_lines).strip()
+        if not content:
+            return
+
+        hierarchy_parts = []
+        if current_chapter:
+            hierarchy_parts.append(current_chapter)
+        if current_article:
+            hierarchy_parts.append(current_article)
+
+        metadata = {
+            "doc_type": "legal_document",
+            "level": "article_intro",
+            "title": current_title,
+            "chapter": current_chapter,
+            "chapter_full": current_chapter_full,
+            "article": current_article,
+            "article_full": current_article_full,
+            "clause": None,
+            "chunk_size": len(content),
+            "hierarchy_path": " > ".join(hierarchy_parts),
+        }
+        chunks.append({"content": content, "metadata": metadata})
+
     for line in lines:
         line_stripped = line.strip()
 
@@ -87,6 +126,10 @@ def parse_legal_document_structure(markdown_text: str) -> List[Dict]:
                 save_current_clause()
                 current_clause_lines = []
                 current_clause_num = None
+            # Flush phần mở đầu của Điều trước đó (nếu có) để không mất nội dung.
+            if current_article_intro_lines:
+                save_article_intro()
+                current_article_intro_lines = []
             current_title = line_stripped.replace("##", "").strip()
             current_depth = 0
             continue
@@ -98,6 +141,10 @@ def parse_legal_document_structure(markdown_text: str) -> List[Dict]:
                 save_current_clause()
                 current_clause_lines = []
                 current_clause_num = None
+            # Flush phần mở đầu của Điều trước đó (nếu có) để không mất nội dung.
+            if current_article_intro_lines:
+                save_article_intro()
+                current_article_intro_lines = []
 
             current_chapter_full = line_stripped.replace("#", "").strip()
             # Extract chapter number: "CHƯƠNG I" -> "I"
@@ -121,6 +168,10 @@ def parse_legal_document_structure(markdown_text: str) -> List[Dict]:
                 save_current_clause()
                 current_clause_lines = []
                 current_clause_num = None
+            # Flush phần mở đầu của Điều trước đó (nếu có) để không mất nội dung.
+            if current_article_intro_lines:
+                save_article_intro()
+                current_article_intro_lines = []
 
             current_article_full = line_stripped.replace("##", "").strip()
             # Extract article number and title: "Điều 1. Phạm vi..." -> "Điều 1"
@@ -137,6 +188,11 @@ def parse_legal_document_structure(markdown_text: str) -> List[Dict]:
         # Pattern: dòng bắt đầu với số và dấu chấm, hoặc "- a)" cho các danh sách con
         clause_match = re.match(r"^(\d+)\.\s+", line_stripped)
         if clause_match:
+            # Flush phần mở đầu của Điều (nội dung trước khoản số đầu tiên) để
+            # giữ đúng thứ tự: intro đứng trước các khoản.
+            if current_article_intro_lines:
+                save_article_intro()
+                current_article_intro_lines = []
             # Save previous clause
             if current_clause_num is not None:
                 save_current_clause()
@@ -150,10 +206,15 @@ def parse_legal_document_structure(markdown_text: str) -> List[Dict]:
         # Detect Sub-clause (a), b), c), ...)
         # These lines often start with "- a)", "- b)" or directly with "a)"
         subclause_match = re.match(r"^[-–]?\s*([a-z][\))])\s+", line_stripped)
-        if subclause_match and current_clause_num is not None:
-            # Part of current clause, add to it
-            current_clause_lines.append(line_stripped)
-            current_depth = 1
+        if subclause_match:
+            if current_clause_num is not None:
+                # Part of current clause, add to it
+                current_clause_lines.append(line_stripped)
+                current_depth = 1
+            elif current_article is not None:
+                # Điểm a)/b) thuộc Điều không có khoản số → giữ vào phần mở đầu
+                # thay vì bỏ đi.
+                current_article_intro_lines.append(line_stripped)
             continue
 
         # Table detection (line starting with | or containing table structure)
@@ -163,16 +224,24 @@ def parse_legal_document_structure(markdown_text: str) -> List[Dict]:
         ):
             if current_clause_num is not None:
                 current_clause_lines.append(line_stripped)
+            elif current_article is not None:
+                current_article_intro_lines.append(line_stripped)
             continue
 
         # Content continuation of current clause
         # This handles multi-line clauses
         if current_clause_num is not None and line_stripped:
             current_clause_lines.append(line_stripped)
+        elif current_article is not None and line_stripped:
+            # Đoạn mở đầu của Điều (trước khoản số đầu tiên) — trước đây bị bỏ.
+            current_article_intro_lines.append(line_stripped)
 
     # Save last clause
     if current_clause_num is not None:
         save_current_clause()
+    # Flush phần mở đầu còn lại của Điều cuối (Điều chỉ có đoạn văn, không khoản).
+    if current_article_intro_lines:
+        save_article_intro()
 
     return chunks
 

@@ -337,6 +337,48 @@ class RecursiveChunker:
             )
             return sub_splitter.split_text(content)
 
+    def _hard_resplit(self, content: str) -> List[str]:
+        """
+        Fallback split bảo đảm KHÔNG còn mảnh nào vượt chunk_size.
+
+        Dùng khi _split_oversized_chunk không tách nổi một đoạn — điển hình
+        là section có NHIỀU bảng nhỏ phân tách bằng nhãn **in đậm** (không
+        phải heading markdown). Khi đó _split_single_section chỉ bắt được bảng
+        đầu tiên rồi dồn toàn bộ phần còn lại vào một "suffix" khổng lồ.
+
+        Strategy:
+        1. Bảo vệ bảng nhỏ (≤ chunk_size) bằng placeholder để không cắt giữa bảng.
+        2. Re-split theo ranh giới đoạn/dòng bằng text_splitter (chunk_overlap=0).
+        3. Khôi phục bảng; mảnh nào vẫn > ngưỡng và chứa bảng (1 bảng đơn quá
+           lớn) thì tách tiếp theo rows. Bảo đảm hội tụ.
+        """
+        table_map: Dict[str, str] = {}
+        processing = content
+        if self.protect_tables:
+            processing, table_map = self._protect_tables_in_text(content)
+
+        pieces = self.text_splitter.split_text(processing)
+        oversized_threshold = int(self.chunk_size * 1.3)
+
+        result: List[str] = []
+        for piece in pieces:
+            if table_map:
+                piece = self._restore_tables(piece, table_map)
+            piece = piece.strip()
+            if not piece:
+                continue
+            # Một bảng đơn lớn hơn chunk_size sống sót qua bước protect →
+            # tách theo rows để không còn mảnh quá khổ.
+            if len(piece) > oversized_threshold and self._detect_table_in_chunk(
+                piece
+            ):
+                result.extend(
+                    t for t in self._split_table_by_rows(piece) if t.strip()
+                )
+            else:
+                result.append(piece)
+        return result
+
     def _inject_section_context(self, chunks: List[Dict]) -> List[Dict]:
         """
         Với chunk không có heading nào trong content (chỉ có table rows),
@@ -739,6 +781,162 @@ class RecursiveChunker:
 
         return chunks
 
+    @staticmethod
+    def _is_heading_only(content: str) -> bool:
+        """True nếu content chỉ gồm (các) dòng heading, không có thân nội dung."""
+        body = [
+            l
+            for l in content.split("\n")
+            if l.strip() and not l.strip().startswith("#")
+        ]
+        return len(body) == 0
+
+    def _merge_heading_only_chunks(self, chunks: List[Dict]) -> List[Dict]:
+        """
+        Gộp các chunk chỉ chứa heading (không có thân nội dung) vào chunk kế tiếp.
+
+        Khi RecursiveCharacterTextSplitter cắt ngay sau một heading, hoặc khi một
+        section chỉ có tiêu đề rồi tới section con, sinh ra chunk như
+        "## 1. Mục tiêu đào tạo" đứng một mình — embedding của nó vô nghĩa và làm
+        nhiễu retrieval. Gộp tiến vào chunk sau (hoặc lùi vào chunk trước nếu là
+        chunk cuối). Heading đứng một mình duy nhất (vd tiêu đề tài liệu) được giữ.
+        """
+        result: List[Dict] = []
+        for chunk in chunks:
+            if result and self._is_heading_only(result[-1]["content"]):
+                prev = result.pop()
+                chunk["content"] = (
+                    prev["content"].rstrip() + "\n\n" + chunk["content"]
+                )
+                chunk["metadata"]["chunk_size"] = len(chunk["content"])
+                chunk["metadata"]["has_table"] = (
+                    prev["metadata"].get("has_table", False)
+                    or chunk["metadata"].get("has_table", False)
+                )
+                for key in [
+                    "section_h1",
+                    "section_h2",
+                    "section_h3",
+                    "section_h4",
+                ]:
+                    if prev["metadata"].get(key) and not chunk["metadata"].get(
+                        key
+                    ):
+                        chunk["metadata"][key] = prev["metadata"][key]
+            result.append(chunk)
+
+        if len(result) > 1 and self._is_heading_only(result[-1]["content"]):
+            last = result.pop()
+            result[-1]["content"] = (
+                result[-1]["content"].rstrip() + "\n\n" + last["content"]
+            )
+            result[-1]["metadata"]["chunk_size"] = len(result[-1]["content"])
+
+        return result
+
+    def _split_into_blocks(
+        self, content: str, max_chars: int
+    ) -> List[Dict]:
+        """
+        Tách content thành các block ≤ max_chars theo ranh giới đoạn (\\n\\n),
+        không cắt giữa bảng (dòng bảng phân tách bằng \\n, không phải \\n\\n).
+
+        Dùng khi một H2/H3 section quá lớn nhưng KHÔNG có heading con để làm
+        parent — thay vì truncate (mất dữ liệu), tách thành nhiều parent tuần tự.
+
+        Returns: list of {"text": block_text, "offset": vị_trí_trong_content}.
+        """
+        parts = content.split("\n\n")
+        blocks: List[Dict] = []
+        buf_parts: List[str] = []
+        buf_len = 0
+        buf_start = 0
+        offset = 0
+
+        for part in parts:
+            part_offset = offset
+            offset += len(part) + 2  # +2 cho "\n\n" đã bị split bỏ
+            if not part.strip():
+                continue
+            add_len = len(part) + (2 if buf_parts else 0)
+            if buf_parts and buf_len + add_len > max_chars:
+                blocks.append(
+                    {"text": "\n\n".join(buf_parts), "offset": buf_start}
+                )
+                buf_parts = [part]
+                buf_len = len(part)
+                buf_start = part_offset
+            else:
+                if not buf_parts:
+                    buf_start = part_offset
+                buf_parts.append(part)
+                buf_len += add_len
+
+        if buf_parts:
+            blocks.append(
+                {"text": "\n\n".join(buf_parts), "offset": buf_start}
+            )
+
+        return blocks
+
+    def _build_parent_with_children(
+        self,
+        content: str,
+        doc_title: Optional[str],
+        headings: List[Dict],
+        source: str,
+        abs_start: int,
+    ) -> List[Dict]:
+        """
+        Tạo 1 parent (toàn bộ content, an toàn cắt tại parent_chunk_max_chars) +
+        các child split từ content. Trả về list [parent, *children].
+
+        Section metadata của parent lấy từ heading bao phủ vị trí abs_start,
+        nên dùng được cho cả H2-parent, H3-parent lẫn parent-block.
+        """
+        truncated = self._truncate_content(content, self.parent_chunk_max_chars)
+        ctx = self._find_section_for_position(abs_start, headings)
+
+        parent = {
+            "id": str(uuid.uuid4()),
+            "chunk_id": "",
+            "readable_id": "",
+            "content": truncated,
+            "metadata": {
+                "doc_type": "curriculum",
+                "level": "parent",
+                "doc_title": doc_title,
+                "source": source,
+                "section_h1": ctx.get("h1"),
+                "section_h2": ctx.get("h2"),
+                "section_h3": ctx.get("h3"),
+                "section_h4": ctx.get("h4"),
+                "hierarchy_path": self._build_section_path(ctx),
+                "chunk_index": 0,
+                "total_chunks": 0,
+                "chunk_size": len(truncated),
+                "chunk_type": "parent",
+                "has_table": self._detect_table_in_chunk(truncated),
+                "parent_id": None,
+                "child_count": 0,
+                "effective_date": None,
+                "expiry_date": None,
+                "applicable_cohort": None,
+                "applicable_major": None,
+                "document_type": "curriculum",
+            },
+        }
+
+        children = self._split_text_to_chunks(
+            content, doc_title, headings, source, pos_offset=abs_start
+        )
+        parent["metadata"]["child_count"] = len(children)
+        for cc in children:
+            cc["metadata"]["parent_id"] = parent["id"]
+            self._set_chunk_type(cc)
+
+        return [parent] + children
+
     def _split_text_to_chunks(
         self,
         text: str,
@@ -864,6 +1062,16 @@ class RecursiveChunker:
         for chunk in chunks:
             if chunk["metadata"]["chunk_size"] > oversized_threshold:
                 sub_contents = self._split_oversized_chunk(chunk["content"])
+                # Bảo đảm không còn mảnh nào vượt ngưỡng: _split_oversized_chunk
+                # có thể dồn nhiều bảng (phân tách bằng nhãn **in đậm**) vào một
+                # mảnh suffix khổng lồ → re-split bằng fallback hội tụ.
+                flattened: List[str] = []
+                for sc in sub_contents:
+                    if len(sc.strip()) > oversized_threshold:
+                        flattened.extend(self._hard_resplit(sc))
+                    else:
+                        flattened.append(sc)
+                sub_contents = flattened
                 for sub_content in sub_contents:
                     sub_content = sub_content.strip()
                     if not sub_content:
@@ -976,6 +1184,11 @@ class RecursiveChunker:
             )
         chunks = merged
 
+        # Gộp chunk chỉ-heading (không có thân nội dung) vào chunk kế tiếp,
+        # tránh chunk rỗng nghĩa (vd "## 1. Mục tiêu đào tạo" đứng một mình)
+        # làm nhiễu index và sinh embedding vô nghĩa.
+        chunks = self._merge_heading_only_chunks(chunks)
+
         # Deduplicate duplicate headings introduced by merging
         for chunk in chunks:
             original = chunk["content"]
@@ -1047,16 +1260,26 @@ class RecursiveChunker:
             # từ nội dung section (không phải toàn bộ document)
             for section in h2_sections:
                 section_content = section["content"]
+                abs_start = section["start_pos"]
 
-                # Kiểm tra nếu H2 section quá lớn → fallback về H3 làm parent
-                if len(section_content) > self.parent_chunk_max_chars:
-                    h3_sections = self._extract_h3_sections(section_content)
-                else:
-                    h3_sections = []
+                # Section vừa kích thước → 1 parent = cả section (hành vi gốc)
+                if len(section_content) <= self.parent_chunk_max_chars:
+                    result_chunks.extend(
+                        self._build_parent_with_children(
+                            section_content,
+                            doc_title,
+                            headings,
+                            source,
+                            abs_start,
+                        )
+                    )
+                    continue
+
+                # Section quá lớn → ưu tiên tách theo H3 làm parent
+                h3_sections = self._extract_h3_sections(section_content)
 
                 if h3_sections:
-                    # --- Fallback: dùng H3 làm parent thay cho H2 ---
-                    # Preamble trong H2 (text trước H3 đầu tiên)
+                    # Preamble trong H2 (text trước H3 đầu tiên) → orphan children
                     h3_preamble_end = h3_sections[0]["start_pos"]
                     h2_preamble = section_content[:h3_preamble_end].strip()
                     if h2_preamble:
@@ -1065,7 +1288,7 @@ class RecursiveChunker:
                             doc_title,
                             headings,
                             source,
-                            pos_offset=section["start_pos"],
+                            pos_offset=abs_start,
                         )
                         for cc in orphan_preamble:
                             cc["metadata"].setdefault("parent_id", None)
@@ -1073,120 +1296,74 @@ class RecursiveChunker:
                         result_chunks.extend(orphan_preamble)
 
                     for h3_section in h3_sections:
-                        h3_abs_start = (
-                            section["start_pos"] + h3_section["start_pos"]
-                        )
+                        h3_abs_start = abs_start + h3_section["start_pos"]
                         h3_content = h3_section["content"]
-                        truncated_h3 = self._truncate_content(
-                            h3_content, self.parent_chunk_max_chars
-                        )
-                        h3_ctx = self._find_section_for_position(
-                            h3_abs_start, headings
-                        )
-                        h3_hierarchy = self._build_section_path(h3_ctx)
-                        h3_has_table = self._detect_table_in_chunk(truncated_h3)
-
-                        h3_parent = {
-                            "id": str(uuid.uuid4()),
-                            "chunk_id": "",
-                            "readable_id": "",
-                            "content": truncated_h3,
-                            "metadata": {
-                                "doc_type": "curriculum",
-                                "level": "parent",
-                                "doc_title": doc_title,
-                                "source": source,
-                                "section_h1": h3_ctx.get("h1"),
-                                "section_h2": h3_ctx.get("h2"),
-                                "section_h3": h3_ctx.get("h3"),
-                                "section_h4": None,
-                                "hierarchy_path": h3_hierarchy,
-                                "chunk_index": 0,
-                                "total_chunks": 0,
-                                "chunk_size": len(truncated_h3),
-                                "chunk_type": "parent",
-                                "has_table": h3_has_table,
-                                "parent_id": None,
-                                "child_count": 0,
-                                "effective_date": None,
-                                "expiry_date": None,
-                                "applicable_cohort": None,
-                                "applicable_major": None,
-                                "document_type": "curriculum",
-                            },
-                        }
-
-                        h3_children = self._split_text_to_chunks(
-                            h3_content,
-                            doc_title,
-                            headings,
-                            source,
-                            pos_offset=h3_abs_start,
-                        )
-                        h3_parent["metadata"]["child_count"] = len(h3_children)
-                        for cc in h3_children:
-                            cc["metadata"]["parent_id"] = h3_parent["id"]
-                            self._set_chunk_type(cc)
-
-                        result_chunks.append(h3_parent)
-                        result_chunks.extend(h3_children)
+                        # H3 vẫn quá lớn → tách block tuần tự (không truncate)
+                        if len(h3_content) > self.parent_chunk_max_chars:
+                            for blk in self._split_into_blocks(
+                                h3_content, self.parent_chunk_max_chars
+                            ):
+                                result_chunks.extend(
+                                    self._build_parent_with_children(
+                                        blk["text"],
+                                        doc_title,
+                                        headings,
+                                        source,
+                                        h3_abs_start + blk["offset"],
+                                    )
+                                )
+                        else:
+                            result_chunks.extend(
+                                self._build_parent_with_children(
+                                    h3_content,
+                                    doc_title,
+                                    headings,
+                                    source,
+                                    h3_abs_start,
+                                )
+                            )
 
                 else:
-                    # --- Hành vi gốc: dùng H2 làm parent ---
-                    truncated_content = self._truncate_content(
+                    # Không có H3 để làm parent → tách section thành nhiều parent
+                    # block tuần tự thay vì truncate (tránh mất dữ liệu ở parent).
+                    for blk in self._split_into_blocks(
                         section_content, self.parent_chunk_max_chars
-                    )
-                    section_ctx = self._find_section_for_position(
-                        section["start_pos"], headings
-                    )
-                    hierarchy_path = self._build_section_path(section_ctx)
-                    has_table = self._detect_table_in_chunk(truncated_content)
+                    ):
+                        result_chunks.extend(
+                            self._build_parent_with_children(
+                                blk["text"],
+                                doc_title,
+                                headings,
+                                source,
+                                abs_start + blk["offset"],
+                            )
+                        )
 
-                    parent = {
-                        "id": str(uuid.uuid4()),
-                        "chunk_id": "",
-                        "readable_id": "",
-                        "content": truncated_content,
-                        "metadata": {
-                            "doc_type": "curriculum",
-                            "level": "parent",
-                            "doc_title": doc_title,
-                            "source": source,
-                            "section_h1": section_ctx.get("h1"),
-                            "section_h2": section_ctx.get("h2"),
-                            "section_h3": None,
-                            "section_h4": None,
-                            "hierarchy_path": hierarchy_path,
-                            "chunk_index": 0,
-                            "total_chunks": 0,
-                            "chunk_size": len(truncated_content),
-                            "chunk_type": "parent",
-                            "has_table": has_table,
-                            "parent_id": None,
-                            "child_count": 0,
-                            "effective_date": None,
-                            "expiry_date": None,
-                            "applicable_cohort": None,
-                            "applicable_major": None,
-                            "document_type": "curriculum",
-                        },
-                    }
-
-                    # Split NỘI DUNG section → children luôn nhỏ hơn parent
-                    children = self._split_text_to_chunks(
-                        section_content,
-                        doc_title,
-                        headings,
-                        source,
-                        pos_offset=section["start_pos"],
+        # Loại các chunk chỉ-heading còn sót ở cấp document (orphan/child đứng
+        # một mình giữa các section, vd tiêu đề tài liệu hay H2 rỗng thân).
+        # Không động tới parent. Heading vẫn còn trong metadata của chunk lân cận
+        # nên không mất thông tin truy hồi. Giảm child_count của parent tương ứng.
+        kept: List[Dict] = []
+        dropped_parent_ids: Dict[str, int] = {}
+        for chunk in result_chunks:
+            if chunk["metadata"].get("level") != "parent" and self._is_heading_only(
+                chunk["content"]
+            ):
+                pid = chunk["metadata"].get("parent_id")
+                if pid:
+                    dropped_parent_ids[pid] = dropped_parent_ids.get(pid, 0) + 1
+                continue
+            kept.append(chunk)
+        if dropped_parent_ids:
+            for chunk in kept:
+                pid = chunk["id"]
+                if pid in dropped_parent_ids:
+                    chunk["metadata"]["child_count"] = max(
+                        0,
+                        chunk["metadata"].get("child_count", 0)
+                        - dropped_parent_ids[pid],
                     )
-                    parent["metadata"]["child_count"] = len(children)
-                    for cc in children:
-                        cc["metadata"]["parent_id"] = parent["id"]
-                        self._set_chunk_type(cc)
-
-                    result_chunks.append(parent)
-                    result_chunks.extend(children)
+        result_chunks = kept
 
         # Re-index tất cả chunks
         for idx, chunk in enumerate(result_chunks):
