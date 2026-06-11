@@ -200,10 +200,23 @@ async def get_session(
 @router.get("s", summary="List sessions for a user")
 async def list_sessions(
     request: Request,
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
     user_id: str = Query(..., description="User ID to filter sessions"),
     limit: int = Query(50, ge=1, le=200),
 ):
-    """Return sessions owned by *user_id*, newest first."""
+    """Return sessions owned by *user_id*, newest first.
+
+    The caller may only list their own sessions: ``user_id`` must match one of
+    the authenticated user's identifiers (id / email / username / student_id).
+    This prevents an IDOR where any caller could read another user's sessions
+    (and the question titles within) by guessing a user id.
+    """
+    if user_id not in _user_owner_aliases(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="You can only list your own sessions.",
+        )
+
     redis_session = getattr(request.app.state, "redis_session", None)
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
 

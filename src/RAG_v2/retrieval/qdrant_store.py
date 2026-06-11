@@ -232,23 +232,23 @@ class QdrantStore:
         bge_scores = [v["bge_score"] for v in combined.values() if v["bge_score"] > 0]
         e5_scores = [v["e5_score"] for v in combined.values() if v["e5_score"] > 0]
 
-        if bge_scores:
-            bge_max, bge_min = max(bge_scores), min(bge_scores)
-            bge_range = bge_max - bge_min if bge_max != bge_min else 1.0
-            bge_offset = bge_min if bge_max != bge_min else bge_max - 1.0
-        else:
-            bge_range = bge_offset = 1.0
-
-        if e5_scores:
-            e5_max, e5_min = max(e5_scores), min(e5_scores)
-            e5_range = e5_max - e5_min if e5_max != e5_min else 1.0
-            e5_offset = e5_min if e5_max != e5_min else e5_max - 1.0
-        else:
-            e5_range = e5_offset = 1.0
+        # Max-normalization per model (NOT min-max): keep relative magnitude and
+        # avoid zeroing out the lowest-scoring doc in a model. A doc not retrieved
+        # by a model keeps 0 contribution for that model (its score is 0).
+        bge_max = max(bge_scores) if bge_scores else 1.0
+        e5_max = max(e5_scores) if e5_scores else 1.0
 
         for item in combined.values():
-            norm_bge = (item["bge_score"] - bge_offset) / bge_range if item["bge_score"] > 0 else 0.0
-            norm_e5 = (item["e5_score"] - e5_offset) / e5_range if item["e5_score"] > 0 else 0.0
+            norm_bge = (
+                item["bge_score"] / bge_max
+                if item["bge_score"] > 0 and bge_max > 0
+                else 0.0
+            )
+            norm_e5 = (
+                item["e5_score"] / e5_max
+                if item["e5_score"] > 0 and e5_max > 0
+                else 0.0
+            )
             item["score"] = bge_weight * norm_bge + e5_weight * norm_e5
 
         ranked = sorted(

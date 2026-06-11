@@ -1754,6 +1754,23 @@ def _build_profile_note_from_user_context(
     return " | ".join(parts) if parts else ""
 
 
+def _build_cache_profile(user_context: Optional[Dict[str, Any]]) -> str:
+    """Normalized ``major|cohort`` scope for answer-cache keys.
+
+    Without this scope the query-only cache (no doc_ids) would serve a personal
+    answer generated for one student ("điều kiện tốt nghiệp của tôi") verbatim to
+    any other student asking the same words — a cross-student data leak. An empty
+    string (anonymous / no profile) keeps the legacy key space.
+    """
+    if not user_context:
+        return ""
+    major = (
+        user_context.get("major_code") or user_context.get("major") or ""
+    ).strip().lower()
+    cohort = (user_context.get("cohort") or "").strip().lower()
+    return f"{major}|{cohort}" if (major or cohort) else ""
+
+
 def _should_prepend_profile_note(question: str) -> bool:
     """Return True only when the question explicitly depends on user profile."""
     if _EXPLICIT_MAJOR_CODE_RE.search(question or "") is not None:
@@ -2025,12 +2042,17 @@ def rag_flow(
     # Check before reflection + retrieval to save the full ~13-25 s pipeline
     # cost for repeated identical queries.  Only fires when the cache backend
     # exposes get_by_query (LLMResponseCache with Redis).
+    # Profile scope (major|cohort) so a personal answer is never served to a
+    # student with a different profile — see _build_cache_profile.
+    cache_profile = _build_cache_profile(user_context)
     if (
         llm_cache is not None
         and not bypass_query_cache
         and hasattr(llm_cache, "get_by_query")
     ):
-        _qcached = llm_cache.get_by_query(question, chat_model.model)
+        _qcached = llm_cache.get_by_query(
+            question, chat_model.model, profile=cache_profile
+        )
         if _qcached is not None:
             if _answer_has_no_info_signal(str(_qcached.get("answer", ""))):
                 timings_ms["query_cache_ignored_no_info"] = 1.0
@@ -2660,7 +2682,9 @@ def rag_flow(
 
     if llm_cache is not None and not dynamic_web_query and not pre_web_fallback_reasons:
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
-        cached = llm_cache.get(question, doc_ids, chat_model.model)
+        cached = llm_cache.get(
+            question, doc_ids, chat_model.model, profile=cache_profile
+        )
         if cached is not None:
             if _answer_has_no_info_signal(str(cached.get("answer", ""))):
                 timings_ms["llm_cache_ignored_no_info"] = 1.0
@@ -2969,7 +2993,10 @@ def rag_flow(
     )
     if llm_cache is not None and cache_final_answer:
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
-        llm_cache.put(question, doc_ids, chat_model.model, answer, reranked)
+        llm_cache.put(
+            question, doc_ids, chat_model.model, answer, reranked,
+            profile=cache_profile,
+        )
 
     if (
         llm_cache is not None
@@ -2979,7 +3006,9 @@ def rag_flow(
         and not dynamic_web_query
         and not answer_quality_gate["should_web_search"]
     ):
-        llm_cache.put_by_query(question, chat_model.model, answer, reranked)
+        llm_cache.put_by_query(
+            question, chat_model.model, answer, reranked, profile=cache_profile
+        )
     timings_ms["retrieval_total"] = round(
         timings_ms.get("embed_bge", 0.0)
         + timings_ms.get("embed_e5", 0.0)
@@ -3089,12 +3118,17 @@ def rag_flow_stream(
         timings_ms["query_cache_bypassed"] = 1.0
 
     # ── Pre-retrieval query cache (P0 — stream variant) ──────────────────────
+    # Profile scope (major|cohort) so a personal answer is never served to a
+    # student with a different profile — see _build_cache_profile.
+    cache_profile = _build_cache_profile(user_context)
     if (
         llm_cache is not None
         and not bypass_query_cache
         and hasattr(llm_cache, "get_by_query")
     ):
-        _qcached = llm_cache.get_by_query(question, chat_model.model)
+        _qcached = llm_cache.get_by_query(
+            question, chat_model.model, profile=cache_profile
+        )
         if _qcached is not None:
             if _answer_has_no_info_signal(str(_qcached.get("answer", ""))):
                 timings_ms["query_cache_ignored_no_info"] = 1.0
@@ -3752,7 +3786,9 @@ def rag_flow_stream(
         and not web_fallback_reasons
     ):
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
-        cached = llm_cache.get(question, doc_ids, chat_model.model)
+        cached = llm_cache.get(
+            question, doc_ids, chat_model.model, profile=cache_profile
+        )
         if cached is not None:
             if _answer_has_no_info_signal(str(cached.get("answer", ""))):
                 timings_ms["llm_cache_ignored_no_info"] = 1.0
@@ -3858,6 +3894,7 @@ def rag_flow_stream(
                 chat_model.model,
                 stream_answer,
                 reranked,
+                profile=cache_profile,
             )
 
         # Also populate the pre-retrieval query-only cache.
@@ -3869,7 +3906,10 @@ def rag_flow_stream(
             and not web_fallback_used
             and not web_fallback_reasons
         ):
-            llm_cache.put_by_query(question, chat_model.model, stream_answer, reranked)
+            llm_cache.put_by_query(
+                question, chat_model.model, stream_answer, reranked,
+                profile=cache_profile,
+            )
 
     return _timed_stream(), reranked
 

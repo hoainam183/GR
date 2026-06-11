@@ -701,8 +701,11 @@ def web_search_for_executor(query: str) -> str:
 
     Tách riêng để react_agent có thể import ở top-level (thay vì runtime import
     private function), đảm bảo encapsulation và dễ mock trong tests.
+
+    Strip mã SV / identifier cá nhân trước khi gửi ra dịch vụ web bên thứ ba
+    (Tavily) — tránh rò rỉ PII, nhất quán với nhánh RAG.
     """
-    return _web_search(query=query)
+    return _web_search(query=strip_personal_identifiers(query))
 
 
 # ─── Planner-Executor helpers (Phase 1 refactor) ─────────────────────────────

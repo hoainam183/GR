@@ -1,6 +1,6 @@
 # Module: `retrieval`
 
-Source-verified: 2026-06-05 from every `retrieval/*.py` file (`__init__.py`, `base.py`, `service.py`, `qdrant_store.py`, `elasticsearch_store.py`, `hybrid_search.py`, `multi_collection_search.py`, `metadata_filters.py`, `collection_selector.py`, `query_expander.py`, `hyde.py`, `parent_context.py`, `validity_filter.py`, `reference_resolver.py`, `search_stsv.py`, `index_stsv_to_es.py`, `config.py`), plus `config/settings.py` and `pipeline/rag_pipeline.py` integration points.
+Source-verified: 2026-06-10 from every `retrieval/*.py` file (`__init__.py`, `base.py`, `service.py`, `qdrant_store.py`, `elasticsearch_store.py`, `hybrid_search.py`, `multi_collection_search.py`, `metadata_filters.py`, `collection_selector.py`, `query_expander.py`, `hyde.py`, `parent_context.py`, `validity_filter.py`, `reference_resolver.py`, `search_stsv.py`, `index_stsv_to_es.py`, `config.py`), plus routing integration points in `query/router.py`, `query/complexity_router.py`, `query/signals.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, `config/settings.py`, and `tools/tavily_search.py`.
 
 ## Purpose
 
@@ -18,6 +18,78 @@ Source-verified: 2026-06-05 from every `retrieval/*.py` file (`__init__.py`, `ba
 - **Cross-reference resolution** — detects Vietnamese legal references (Điều/Khoản) and injects same-document chunks (pipeline-invoked).
 - **Collection selection** — maps domain classification + query signals to target collections with confidence-aware fallback.
 - **`RetrievalService`** — shared singleton wrapping all infrastructure, with a TTL search cache, multi-query and HyDE paths, injected into both pipeline and agent tools.
+
+---
+
+## Routing Boundary
+
+Routing is split across `query`, `pipeline`, and `retrieval`; `retrieval` owns only collection selection and metadata-scoped search.
+
+### End-to-End Classic RAG Route
+
+```text
+Chat/API request
+  -> RAGPipeline.query_v3/query_stream
+  -> ComplexityRouter.route(query)
+       - chitchat: canned/LLM chitchat flow, no retrieval
+       - simple: classic RAG flow
+       - complex: planner/agent path, with fallback to classic RAG when allowed
+  -> QueryRouter.route(query, chat_history)
+       - default mode: local DomainClassifier, not LLM
+       - returns intent, primary domain, domains, confidence, probabilities
+  -> optional Tier-3 LLM domain fallback
+       - only when confidence < 0.55 and top-vs-second margin < 0.25
+  -> optional QueryReflector
+       - rewrites follow-up queries and extracts entities before retrieval
+  -> RAGPipeline._reroute_reflected(search_query)
+       - reroutes the reflected standalone query without history to reduce topic bleed
+  -> CollectionSelector.select(...)
+       - deterministic domain/probability/query-signal to collection mapping
+  -> pipeline `_should_lock_kehoach_route(...)`
+       - may force target_collections = ["kehoach"] for clear schedule/freshness routes
+  -> MultiCollectionSearch.search(active_collections=target_collections)
+       - metadata filters, vector+keyword search, global fusion
+```
+
+### Upstream Query Routing Details
+
+`ComplexityRouter` (`query/complexity_router.py`) is the first route gate:
+
+- `chitchat` is matched by hardcoded greeting/acknowledgement/identity/thanks/bye regexes and does not enter retrieval.
+- `simple` is the default route when no complex signal is found.
+- Single-fact policy/table lookups stay `simple` when they have lookup signals (`bao nhieu`, `may`, `muc nao`, `diem ren luyen`, table/code signals, etc.) and do not look comparative/multi-topic. This is why one-shot questions such as "co bao nhieu ..." should not automatically require an agent.
+- `complex` is triggered by hardcoded comparison, multi-source, personal eligibility, repeated request connector, multi-step connector, multiple-question, long multi-topic, or high conjunction-count patterns. Complex routes go to the planner/agent path when available.
+
+`QueryRouter` (`query/router.py`) is the domain/intent classifier:
+
+- Valid intents are `chitchat`, `rag`, `tool_search`; fallback intent is `rag`.
+- Valid RAG domains are `ctdt`, `quydinh`, `kehoach`, `stsv`.
+- Default mode is `classifier`, which uses `DomainClassifier`; `llm` mode exists but is not the production default.
+- The classifier route is two-pass: pass 1 classifies the raw query. Pass 2 prepends up to the last 5 history messages only when raw confidence `< 0.65` and the query has fewer than 6 words; the history-augmented result is kept only if its confidence is higher.
+- The route result supplies `domain`, `domains`, `confidence`, `label`, and `probabilities`; `CollectionSelector` consumes these values later.
+
+### Does Routing Need an LLM?
+
+Normal local routing does **not** require an LLM:
+
+- `ComplexityRouter` is regex/signal/heuristic based.
+- `QueryRouter` defaults to `router_mode="classifier"` and uses `DomainClassifier`.
+- `CollectionSelector` is deterministic.
+- `metadata_filters.build_collection_filters()` is deterministic.
+- `MultiCollectionSearch` routing/filtering/fusion is deterministic.
+
+LLM usage is optional and upstream of retrieval:
+
+- `QueryRouter(mode="llm")` exists, but the production default is `classifier`.
+- Tier-3 domain fallback calls the chat LLM only for low-confidence classifier output without a dominant top domain (`confidence < 0.55`, margin `< 0.25`).
+- `QueryReflector` uses the configured reflection LLM when `reflection_enabled=True` to rewrite follow-ups and extract entities before collection selection.
+- Agent/planner mode uses LLMs for complex queries, but it still calls retrieval tools underneath.
+- HyDE uses an LLM only if the HyDE fallback path is enabled and triggered after low-recall reranking.
+- Tavily web search is a post-retrieval fallback/augmentation path, not the local collection router.
+
+### Routing Settings Caveat
+
+`Settings.domain_confidence_threshold` exists and defaults to `0.65`, but the classic `rag_flow` module-level selector is instantiated as `_collection_selector = CollectionSelector()` and therefore uses the selector default `CONFIDENCE_THRESHOLD = 0.55`. Changing `domain_confidence_threshold` alone does not currently change production collection selection unless the selector construction is also wired to that setting.
 
 ---
 
@@ -72,7 +144,7 @@ Tavily calls are made through the pipeline/agent tool layer; `RetrievalService` 
 ### `search()` internals
 
 1. `effective_top_k = top_k or settings.top_k`.
-2. `raw_candidate_k = max(effective_top_k × 8, 40)` (over-fetch funnel before rerank).
+2. `raw_candidate_k = max(round(effective_top_k * settings.raw_candidate_multiplier), settings.raw_candidate_min)`; defaults are multiplier `4.0` and minimum `20` (over-fetch funnel before rerank).
 3. `active_collections = collections or settings.collections`.
 4. If `use_multi_query and entities`: build up to 3 variants with `MultiQueryExpander`; if >1 variant → `_search_multi_query` (per-variant search, merge+dedup by id, rerank merged pool with variant[0]).
 5. Otherwise `_search_single`:
@@ -248,10 +320,24 @@ final = vector_weight × 1/(rrf_k + v_rank) + keyword_weight × 1/(rrf_k + k_ran
 | `keyword_top_k` | **50** | 20 | ES candidates per collection (raised to ≥120 in exact-policy mode) |
 | `vector_pool_k` | **40** | 15 | Global vector pool after dedup |
 | `keyword_pool_k` | **40** | 15 | Global keyword pool after dedup (≥80 in exact-policy mode) |
-| `top_k` | **7** | 10 | Final results (before reranking; `×8` over-fetch min 40 in service) |
+| `top_k` | **7** | 10 | Final results before reranking |
+| `raw_candidate_multiplier` | **4.0** | — | Candidate over-fetch multiplier before rerank (`effective_top_k * multiplier`) |
+| `raw_candidate_min` | **20** | — | Minimum candidate pool before rerank |
 | `collections` | `["stsv", "quydinh", "kehoach", "ctdt"]` | — | Active collections |
 
 > The Settings values are what run in production; `create_retriever()` passes `vector_weight`/`keyword_weight` from settings. Per-call `vector_top_k`/pool_k/etc. come from `RetrievalService`.
+
+### Rerank Runtime Defaults
+
+`rag_flow` passes reranker controls through `_reranker_kwargs(cfg, top_k_value)`:
+
+| Setting | Default | Meaning |
+|---------|---------|---------|
+| `reranker_score_threshold` | **0.0** | Minimum regular chunk score kept by the BGE reranker |
+| `reranker_table_score_threshold` | **-1.0** | Relaxed score threshold for chunks with `metadata.has_table` |
+| `reranker_min_top_k` | **3** | Keep at least this many best scored docs, capped by `top_k`, even if below threshold |
+
+`low_retrieval_confidence` in the web-fallback gate is not a separate configured threshold. It is set when `rag_flow` has to use `rerank_raw_fallback`: first rerank produced no docs or only negative-score docs, retrying with the original question still failed the same quality check, and the flow fell back to raw top-K by fusion score.
 
 ### Convenience accessors
 
@@ -345,6 +431,7 @@ DOMAIN_TO_COLLECTIONS = {
 ALL_COLLECTIONS       = ["stsv", "quydinh", "kehoach", "ctdt"]
 MULTI_DOMAIN_FALLBACK = ["quydinh", "stsv", "ctdt"]
 CONFIDENCE_THRESHOLD  = 0.55
+KEHOACH_CLOSE_PROBABILITY_MARGIN = 0.10
 ```
 
 ### Selection Logic
@@ -352,6 +439,7 @@ CONFIDENCE_THRESHOLD  = 0.55
 - No active domains → all collections.
 - Active domains, confidence ≥ 0.55 → union of mapped collections (order preserved, deduped).
 - Active domains, confidence < 0.55 → mapped collections first, then broadened with `MULTI_DOMAIN_FALLBACK`.
+- Low-confidence `kehoach` widening is special-cased: if `kehoach` is not already active, it is inserted when either its probability is within `0.10` of the top domain, or the query has freshness/schedule/deadline/announcement intent and no strong non-`kehoach` top domain (`top_score >= 0.55` and margin over `kehoach` > `0.10`).
 - Unknown domain labels are skipped with a warning; all-unknown → all collections.
 
 ### Query-Signal Augmentation
@@ -362,6 +450,45 @@ Every return path passes through `augment_collections_for_query(query, collectio
 - `eligibility_check` / `table_lookup` / `exact_policy_lookup` signals → prepend `quydinh`, **unless** the query is a focused CTDT course/credit lookup (`_is_ctdt_course_lookup`: course-like and not rule-like).
 - `procedural_support` → append `stsv`.
 - `multi_domain` + `eligibility_check` → append `ctdt`.
+- `curriculum_semester_intent` without schedule/deadline/announcement/freshness signals → prepend `ctdt` (course semester placement lives in the standard study plan, not `kehoach`).
+- Freshness/schedule/deadline/announcement intent → append `kehoach`, unless suppressed by the curriculum-semester rule above.
+
+### Pipeline-Side Route Guards
+
+After `CollectionSelector.select()`, `pipeline/flows.py` applies additional deterministic route guards:
+
+- `_should_lock_kehoach_route(...)` can force `target_collections = ["kehoach"]` for clear freshness/schedule/deadline/announcement queries. It returns true when selected domains are only `kehoach`, or when the highest probability domain is `kehoach` and either `kehoach_score - runner_up >= 0.20` or `kehoach_score >= 0.65`.
+- The `kehoach` lock is suppressed for some non-`kehoach` policy-lock terms (`chuong trinh thu hai`, `de tai luan van`, `hoc ky chinh`, `quy che`, `quy dinh`, `dieu kien`, `ctdt`) unless the query has explicit freshness/deadline/announcement intent.
+- `_should_strip_major_for_retrieval(...)` strips a resolved major from the retrieval query when metadata filters can cover it. It does **not** strip the major if `quydinh` is in `target_collections`, because `quydinh` relies on lexical/semantic major cues rather than `major_code` filtering.
+
+### Hardcoded Routing And Fallback Rules
+
+The current hardcoded routing surface is:
+
+- Domain labels are fixed to `ctdt`, `quydinh`, `kehoach`, `stsv`.
+- Domain-to-collection overlap is hardcoded: `quydinh` also searches `stsv`; `stsv` also searches `quydinh`.
+- Low-confidence fallback is hardcoded to `["quydinh", "stsv", "ctdt"]`; `kehoach` is intentionally excluded unless timing/freshness signals or close probabilities justify it.
+- Collection selector confidence is hardcoded at `0.55` in production because `flows.py` constructs `CollectionSelector()` without passing `Settings.domain_confidence_threshold`.
+- Tier-3 LLM domain fallback thresholds are hardcoded in `pipeline/rag_pipeline.py`: confidence `< 0.55` and dominant-domain margin `< 0.25`.
+- Query signals are regex-driven in `query/signals.py`; they are deterministic and shared by complexity routing, collection selection, and search-time fusion.
+- Metadata routing is hardcoded per collection: `ctdt` uses major code/name, `quydinh` uses applicable cohort, `kehoach` uses `date_str`/freshness, `stsv` has no extractor.
+- `MultiCollectionSearch` hardcodes exact-policy/table lookup widening (`keyword_top_k >= 120`, `keyword_pool_k >= 80`) and keyword-heavy weights (`vector <= 0.1`, `keyword >= 0.75`).
+- Course-like queries hardcode a milder keyword bias (`vector <= 0.4`, `keyword >= 0.6`).
+- Procedural-support queries hardcode at least one `stsv` evidence doc in the final fused list when possible.
+- Parent chunks are always excluded from vector and keyword retrieval via `level != parent`.
+- Local retrieval fallback in `rag_flow` retries with the `quydinh` metadata filter disabled, then all collections, when routed collections return no candidates.
+- Tavily is not a collection router. It is triggered after retrieval/rerank by pre/post-generation gates such as no sources, freshness/dynamic risk, raw rerank fallback (`low_retrieval_confidence`), no-info answer patterns, or self-eval web requests, and only when `tavily_fallback_enabled=True`.
+
+### Tavily Web Fallback Boundary
+
+Tavily is wired through `RetrievalService.tavily_tool` but called from `pipeline/flows.py`, not from `RetrievalService.search()` or `CollectionSelector`.
+
+- `_build_pre_generation_web_decision(...)` can request web context for `no_sources`, freshness/dynamic risk without acceptable local evidence, or `low_retrieval_confidence` (set when rerank falls back to raw candidates).
+- `_build_answer_quality_gate(...)` can request web context after answer generation for no-info answers, no sources, or a structured self-eval request with `answer_status` in `insufficient`/`stale_risk`.
+- `_build_web_search_query(question, search_query)` is deterministic: it starts from the reflected search query when available, adds `HUST` context if missing, and appends academic-year / registration / notice terms for freshness and planning queries.
+- `_tavily_search_context(...)` restricts normal search to `HUST_OFFICIAL_DOMAINS`: `hust.edu.vn`, `sis.hust.edu.vn`, `ctt.hust.edu.vn`, `ctsv.hust.edu.vn`, `sv-ctt.hust.edu.vn`, `soict.hust.edu.vn`.
+- Runtime defaults: `tavily_fallback_enabled=False`, `tavily_max_results=5`, `tavily_web_result_count=3`, `tavily_web_content_char_limit=1500`, `tavily_search_depth="basic"`, `web_fallback_dynamic_collections=["kehoach"]`.
+- `TavilySearchTool.search()` filters results, ranks them for the query, keeps only `result_count`, truncates each result's `content` to `content_char_limit`, formats a compact context string, and caches by query/domain/depth/result limits.
 
 ---
 
@@ -387,7 +514,7 @@ Every return path passes through `augment_collections_for_query(query, collectio
 ## Query Expansion & HyDE
 
 - `MultiQueryExpander(max_variants=3, clamped 2–4).expand(query, entities)` → up to 3 variants: original, entity-focused (entity values + topic words), topic-only (entities stripped). Entity keys: `major_code`, `cohort`, `course_code`, `academic_year`, `semester`.
-- `HyDEExpander(llm, embedder, prompt_template=None, max_hypothesis_len=800)`: `generate_hypothesis()` (Vietnamese HUST prompt, falls back to raw query on empty/error) and `generate_embedding()`. `should_use_hyde(results, reranker_stats, min_results=3, confidence_threshold=0.3)` triggers when too few results or low reranker mean score. Config constants in `config.py` (`HYDE_ENABLED=False`, `HYDE_MIN_RESULTS=3`, `HYDE_CONFIDENCE_THRESHOLD=0.3`).
+- `HyDEExpander(llm, embedder, prompt_template=None, max_hypothesis_len=800)`: `generate_hypothesis()` (Vietnamese HUST prompt, falls back to raw query on empty/error) and `generate_embedding()`. `should_use_hyde(results, reranker_stats, min_results=3, confidence_threshold=0.3)` triggers when too few results or low reranker mean score. Runtime settings currently default to `hyde_enabled=True`, `hyde_min_results=3`, `hyde_confidence_threshold=0.3`; `retrieval/config.py` still exposes legacy constants (`HYDE_ENABLED=False`, `HYDE_MIN_RESULTS=3`, `HYDE_CONFIDENCE_THRESHOLD=0.3`) for older direct imports.
 
 ---
 

@@ -54,8 +54,12 @@ def _should_trigger_tier3(routing: Dict[str, Any]) -> bool:
 
     Example: kehoach=0.531, ctdt=0.180 → margin=0.351 > 0.25 → skip Tier-3.
     """
-    confidence = routing.get("confidence") or 1.0
-    if confidence >= _LLM_FALLBACK_THRESHOLD:
+    # NOTE: distinguish "no confidence reported" (None) from a genuine low score.
+    # `routing.get("confidence") or 1.0` would turn both None and 0.0 into 1.0,
+    # silently disabling Tier-3 exactly when it is most needed (e.g. the LLM
+    # router returns confidence=None). Only skip on a real high-confidence score.
+    confidence = routing.get("confidence")
+    if confidence is not None and confidence >= _LLM_FALLBACK_THRESHOLD:
         return False
 
     probs: Dict[str, float] = routing.get("probabilities") or {}
@@ -515,6 +519,11 @@ class RAGPipeline:
                 return dict(payload)
             del self._route_cache[key]
         routed = self._router.route(question, chat_history=history)
+        # Tier-3 LLM domain fallback runs *before* caching, so a cache hit reuses
+        # the enriched routing instead of re-invoking the ~12 s LLM call on every
+        # repeat of a low-confidence query.
+        if routed.get("intent", "rag") == "rag" and _should_trigger_tier3(routed):
+            routed = self._llm_domain_classify(question, history, routed)
         self._route_cache[key] = (now, dict(routed))
         self._route_cache.move_to_end(key)
         while len(self._route_cache) > _ROUTE_CACHE_MAX_SIZE:
@@ -675,14 +684,8 @@ class RAGPipeline:
         trace.set_metadata("intent", intent)
         logger.info("Routing decision: intent=%s", intent)
 
-        # Tier-3: LLM domain fallback for low-confidence RAG routing.
-        # Skipped when one domain is already clearly dominant (see _should_trigger_tier3).
-        if intent == "rag" and _should_trigger_tier3(routing):
-            with trace.stage("tier3_domain_fallback"):
-                routing = self._llm_domain_classify(question, history, routing)
-            pipeline_timings["tier3_domain_fallback"] = trace.stages.get(
-                "tier3_domain_fallback", 0.0
-            )
+        # Tier-3 LLM domain fallback already ran inside _route_with_cache (so its
+        # result is cached and not recomputed on every repeat).
 
         if intent == "chitchat":
             with trace.stage("chitchat_flow"):
@@ -1192,9 +1195,14 @@ class RAGPipeline:
             raw = chat.generate(query=prompt, mode="chitchat")
 
             import json as _json
+            import re as _re
 
-            # Strip markdown fences if present
-            clean = raw.strip().strip("```json").strip("```").strip()
+            # Extract the first JSON object. NOTE: the old
+            # `raw.strip("```json").strip("```")` stripped *character sets* (a
+            # Python footgun), not substrings, so valid JSON was often mangled
+            # and silently dropped into the except branch — disabling Tier-3.
+            _match = _re.search(r"\{.*\}", raw, _re.DOTALL)
+            clean = _match.group(0) if _match else raw.strip()
             parsed = _json.loads(clean)
 
             raw_domains = parsed.get("domains") or []
@@ -1467,14 +1475,8 @@ class RAGPipeline:
             intent = routing.get("intent", "rag")
             _st.last_intent = intent
 
-            # Tier-3: LLM domain fallback for low-confidence RAG routing.
-            # Skipped when one domain is already clearly dominant (see _should_trigger_tier3).
-            if intent == "rag" and _should_trigger_tier3(routing):
-                fallback_t0 = time.perf_counter()
-                routing = self._llm_domain_classify(question, history, routing)
-                pipeline_timings["tier3_domain_fallback"] = _elapsed_ms(
-                    fallback_t0
-                )
+            # Tier-3 LLM domain fallback already ran inside _route_with_cache (so
+            # its result is cached and not recomputed on every repeat).
 
             flow_cfg = {**runtime.cfg, "top_k": effective_top_k}
             flow_timings: Dict[str, float] = {}

@@ -927,34 +927,20 @@ class MultiCollectionSearch:
         semantic-vs-keyword trade-off.
         """
         # --- Normalisation bounds (pools are already sorted desc) ---
-        if vector_pool:
-            v_max = vector_pool[0]["score"]
-            v_min = vector_pool[-1]["score"]
-            if v_max != v_min:
-                v_range = v_max - v_min
-            else:
-                # Single-item or all-same-score pool: treat as max relevance (1.0)
-                v_range = 1.0
-                v_min = v_max - 1.0
-        else:
-            v_min = v_range = 1.0
-
-        if keyword_pool:
-            k_max = keyword_pool[0]["score"]
-            k_min = keyword_pool[-1]["score"]
-            if k_max != k_min:
-                k_range = k_max - k_min
-            else:
-                # Single-item or all-same-score pool: treat as max relevance (1.0)
-                k_range = 1.0
-                k_min = k_max - 1.0
-        else:
-            k_min = k_range = 1.0
+        # Max-normalization (NOT min-max): scale the two heterogeneous score
+        # ranges (cosine vs BM25) into a comparable [0, 1] band while PRESERVING
+        # relative magnitude. Min-max forced the lowest doc in each pool to 0, so
+        # a relevant doc that was merely last in its pool — or present in only one
+        # pool and that pool's minimum — got a fused score of 0 and silently
+        # dropped out of the ranking. Pools are pre-sorted descending, so [0] is
+        # the max.
+        v_max = vector_pool[0]["score"] if vector_pool else 1.0
+        k_max = keyword_pool[0]["score"] if keyword_pool else 1.0
 
         combined: Dict[str, Dict[str, Any]] = {}
 
         for item in vector_pool:
-            norm_v = (item["score"] - v_min) / v_range
+            norm_v = item["score"] / v_max if v_max > 0 else 0.0
             doc_id = item["id"]
             combined[doc_id] = {
                 **item,
@@ -965,7 +951,7 @@ class MultiCollectionSearch:
             }
 
         for item in keyword_pool:
-            norm_k = (item["score"] - k_min) / k_range
+            norm_k = item["score"] / k_max if k_max > 0 else 0.0
             doc_id = item["id"]
             if doc_id in combined:
                 combined[doc_id]["keyword_score"] = item["score"]
@@ -1048,11 +1034,17 @@ class MultiCollectionSearch:
                     "keyword_rrf": keyword_rrf,
                 }
 
+        # Scale the recency nudge to the RRF magnitude. RRF scores live in
+        # ~[0, 1/(rrf_k+1)] (≈0.016 for k=60), whereas kehoach_recency_bonus (up
+        # to 0.05) is calibrated for the [0,1] linear-fusion scale. Adding it raw
+        # here would dwarf relevance and push every recent doc to the top, so we
+        # rescale it to stay a ~5% nudge in this mode too.
+        _rrf_scale = 1.0 / (self.rrf_k + 1)
         for entry in combined.values():
             entry["score"] = (
                 entry["vector_rrf"]
                 + entry["keyword_rrf"]
-                + kehoach_recency_bonus(entry)
+                + kehoach_recency_bonus(entry) * _rrf_scale
             )
 
         ranked = sorted(combined.values(), key=lambda x: x["score"], reverse=True)

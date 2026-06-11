@@ -204,10 +204,8 @@ def build_rag_messages(
             query=query,
         )
 
-    # Thêm log ở đây để check nội dung
-    logger.info("=== RAG USER CONTENT ===")
-    logger.info(user_content)
-    logger.info("========================")
+    # Không log nội dung đầy đủ (chứa tài liệu + lịch sử + có thể PII của SV).
+    logger.debug("RAG user_content built (len=%d chars)", len(user_content))
     messages.append({"role": "user", "content": user_content})
     
     return messages
