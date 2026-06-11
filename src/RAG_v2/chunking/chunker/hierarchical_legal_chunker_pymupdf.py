@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional
 import re
+import uuid
 
 
 class ArticleLegalChunkerPyMuPDF:
@@ -292,10 +293,13 @@ class ArticleLegalChunkerPyMuPDF:
             },
         }
 
-        # Create child chunks - FIXED: No duplicates
-        child_chunks = []
+        # Create child chunks. Every article MUST yield ≥1 child: search runs
+        # on children only (parents are excluded from results by the
+        # `must_not level=parent` filter and skipped by ES), so a parent
+        # without any child would be unreachable. This mirrors
+        # RecursiveChunker / ArticleLevelLegalChunker.
+        child_chunks: List[Dict] = []
 
-        # Only create children if article is large enough to split
         if article["size"] > self.split_threshold:
             # Large article - split into multiple children
             if has_table:
@@ -306,7 +310,26 @@ class ArticleLegalChunkerPyMuPDF:
                 child_chunks = self._split_article_into_children(
                     content, article
                 )
-        # Else: Small/medium article - no children (avoid duplicates)
+        else:
+            # Small/medium article - 1 child = whole article. child==parent
+            # content is intended: search hits the child, then expands to the
+            # parent for broader context.
+            child_chunks = [
+                {
+                    "content": content,
+                    "metadata": {
+                        "doc_type": "legal_document",
+                        "level": "child",
+                        "chapter": article["chapter"],
+                        "chapter_full": article["chapter_full"] or "",
+                        "article": article["article"],
+                        "article_full": article["article_full"] or "",
+                        "chunk_size": article["size"],
+                        "has_table": has_table,
+                        "source_format": "pymupdf4llm",
+                    },
+                }
+            ]
 
         return parent_chunk, child_chunks
 
@@ -516,12 +539,36 @@ class ArticleLegalChunkerPyMuPDF:
     # POST-PROCESSING
     # ========================================================================
 
+    def _parent_key(self, meta: Dict, idx: int) -> str:
+        """Build the chapter/article key used to match a child to its parent."""
+        id_parts = []
+        if meta.get("chapter"):
+            id_parts.append(f"c{meta['chapter']}")
+        if meta.get("article"):
+            article_num = re.search(r"\d+", meta["article"])
+            if article_num:
+                id_parts.append(f"a{article_num.group()}")
+        return "_".join(id_parts) if id_parts else f"parent_{idx}"
+
     def add_chunk_ids(self, chunks: List[Dict]) -> List[Dict]:
-        """Add sequential and readable IDs to chunks with parent-child tracking"""
-        parent_counter = {}
-        child_counter = {}
+        """Assign IDs and wire parent-child links.
+
+        Emits the SAME schema as ``RecursiveChunker`` so the indexing pipeline
+        (``document_pipeline.embed_and_index``) can link children to parents
+        and ``ParentContextExpander`` can fetch parent context:
+        - every chunk gets a stable uuid ``id``
+        - parent/header → ``metadata.parent_id = None``
+        - child → ``metadata.parent_id`` = the parent's uuid ``id``
+
+        ``readable_id``/``chunk_id`` are kept for debugging only; the pipeline
+        keys off ``id`` and ``metadata.parent_id``.
+        """
+        parent_id_by_key: Dict[str, str] = {}  # parent_key → parent uuid id
+        parent_chunk_by_key: Dict[str, Dict] = {}  # parent_key → parent chunk
+        child_counter: Dict[str, int] = {}
 
         for idx, chunk in enumerate(chunks):
+            chunk["id"] = str(uuid.uuid4())
             chunk["chunk_id"] = idx
 
             meta = chunk["metadata"]
@@ -529,44 +576,31 @@ class ArticleLegalChunkerPyMuPDF:
 
             if level == "header":
                 chunk["readable_id"] = "header"
-                chunk["parent_id"] = None
+                meta["parent_id"] = None
 
             elif level == "parent":
-                id_parts = []
-                if meta.get("chapter"):
-                    id_parts.append(f"c{meta['chapter']}")
-                if meta.get("article"):
-                    article_num = re.search(r"\d+", meta["article"])
-                    if article_num:
-                        id_parts.append(f"a{article_num.group()}")
-
-                parent_id = "_".join(id_parts) if id_parts else f"parent_{idx}"
-                chunk["readable_id"] = f"parent_{parent_id}"
-                chunk["parent_id"] = None
-
-                parent_counter[parent_id] = chunk["readable_id"]
-                child_counter[parent_id] = 0
+                key = self._parent_key(meta, idx)
+                chunk["readable_id"] = f"parent_{key}"
+                meta["parent_id"] = None
+                meta["child_count"] = 0
+                parent_id_by_key[key] = chunk["id"]
+                parent_chunk_by_key[key] = chunk
+                child_counter[key] = 0
 
             elif level == "child":
-                id_parts = []
-                if meta.get("chapter"):
-                    id_parts.append(f"c{meta['chapter']}")
-                if meta.get("article"):
-                    article_num = re.search(r"\d+", meta["article"])
-                    if article_num:
-                        id_parts.append(f"a{article_num.group()}")
-
-                parent_key = "_".join(id_parts) if id_parts else f"parent_{idx}"
-
-                parent_id = parent_counter.get(
-                    parent_key, f"parent_{parent_key}"
-                )
-
-                child_num = child_counter.get(parent_key, 0)
-                child_counter[parent_key] = child_num + 1
-
-                chunk["readable_id"] = f"child_{parent_key}_c{child_num}"
-                chunk["parent_id"] = parent_id
+                key = self._parent_key(meta, idx)
+                child_num = child_counter.get(key, 0)
+                child_counter[key] = child_num + 1
+                chunk["readable_id"] = f"child_{key}_c{child_num}"
+                # Link to the parent uuid emitted above. None when no matching
+                # parent exists — the child stays indexable, just without
+                # parent-context expansion (mirrors RecursiveChunker orphans).
+                meta["parent_id"] = parent_id_by_key.get(key)
+                parent = parent_chunk_by_key.get(key)
+                if parent is not None:
+                    parent["metadata"]["child_count"] = (
+                        parent["metadata"].get("child_count", 0) + 1
+                    )
 
         return chunks
 
