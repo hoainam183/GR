@@ -1,6 +1,15 @@
 # RAG v2 Architecture
 
-Source-verified: 2026-06-09 from source files (whole-codebase read of backend, frontend, mobile, shared package, scripts, and eval), `MODULE.md` files, `PROJECT_MEMORY.md`, and GitNexus index `GR` (17,818 symbols, 30,104 relationships, 300 execution flows). This pass reflects the recent `refactor agent module` and `fix stream agent` commits: the agent is a Planner-Executor LangGraph graph, streaming now serves the chitchat and complex/agent tiers (not just simple RAG) and emits a `status` event, and the query layer added `course_catalog`/`profile_dependency` helpers.
+Source-verified: 2026-06-12 from source files (whole-codebase read of backend, frontend, mobile, shared package, scripts, and eval) and the per-module `MODULE.md`/`PROJECT_MEMORY.md` docs. This pass reflects commits through `fix admin upload`/`fix mupdf`/`fix chunking`/`fix tavily & HyDE`/`fix 11/6` (HEAD `21a1175e`) on top of the earlier `refactor agent module` and `fix stream agent` work. Net behavioral deltas since the 2026-06-09 pass:
+
+- `RAGPipeline` now exposes a public read-only `retrieval_service` property (resolves the prior "no public service property" cautions for `/retrieval/search` and the auto-crawler reuse check).
+- Hybrid fusion switched from **min-max** to **max-normalization** in both the global `MultiCollectionSearch` linear fusion and the in-Qdrant dual-vector (BGE/E5) fusion, so a relevant doc that is merely last in a pool (or present in only one pool) is no longer zeroed out; the RRF-mode `kehoach` recency bonus is rescaled to the RRF magnitude.
+- Answer-cache keys are now scoped by a `major|cohort` profile so a personal answer is never served to a different student (cross-student data-leak fix); applies to both query-only and doc-id caches on streaming and non-streaming paths.
+- Tier-3 LLM domain fallback now runs inside `_route_with_cache` (cached, not recomputed per repeat), with hardened `confidence is None` handling and regex-based JSON extraction.
+- Streaming request state moved off `self.last_*` into a request-local `SimpleNamespace` (concurrency-safe; `self.last_*` is mirrored only for single-request debugging).
+- HyDE post-rerank fallback now also triggers on sparse recall (`< hyde_min_results`), not just negative/empty rerank; the mean-score `hyde_confidence_threshold` path stays reserved/unused.
+- Admin ingestion: `embed_and_index()` hard-requires `chunks_reviewed=True`, `run_full_pipeline()` stops after chunking (no auto-index), the chunk debug dump uses a project-relative path, and new staged-chunk edit (`PATCH`) / delete (`DELETE`) endpoints exist.
+- `LocalStorage.read_text()` rejects path traversal; the agent is a Planner-Executor LangGraph graph; the query layer carries the `course_catalog`/`profile_dependency` helpers.
 
 > Reading order: sections 2–22 are the reference (exact contracts, defaults, file owners). **Section 23 is the Uber/Airbnb-style system design** — requirements, scale, C4 diagrams, request lifecycles, data model, scaling/bottlenecks, and trade-offs. Read section 23 first for the big picture, then drop into the reference sections for detail.
 
@@ -165,7 +174,7 @@ RAGPipeline creates one RetrievalService.
 Agent adapters receive that same service through inject_from_retrieval_service().
 ```
 
-Current caveat: `RAGPipeline` stores the service as `_retrieval_service`; there is no public `service` or `retrieval_service` property in source.
+`RAGPipeline` stores the service as `_retrieval_service` and now exposes it through a public read-only `retrieval_service` property. Request handlers resolve it with `getattr(pipeline, "retrieval_service", None) or getattr(pipeline, "_retrieval_service", None)` (`api/routes/retrieval.py`, `lookup.py`, `admin_stats.py`) and the `api/main.py` auto-crawler reuse check (`hasattr(pipe, "retrieval_service")`) now succeeds, so they all share the singleton instead of cold-loading a second `RetrievalService`.
 
 ## 5. Public HTTP Surface
 
@@ -307,7 +316,7 @@ The old `personal_check` subtype is intentionally removed. Personal-reference el
 
 `QueryRouter` does a second pass with history only for short, low-confidence follow-up queries (confidence `< 0.65` and `< 6` words). Long self-contained queries should not be biased by old session domains.
 
-Tier-3 LLM domain fallback (`DOMAIN_CLASSIFICATION_PROMPT`) fires when classifier confidence is below the low-confidence ceiling (`~0.55`) or the top-two domain margin is narrow. The prompt is now Vietnamese with few-shot WHEN/CONTENT/CONDITION/PROCEDURE disambiguation examples and can override the predicted domains.
+Tier-3 LLM domain fallback (`DOMAIN_CLASSIFICATION_PROMPT`) fires when classifier confidence is below the low-confidence ceiling (`< 0.55`) **and** the top-two domain margin is narrow (`< 0.25`). It now runs **inside `_route_with_cache()`** (before the route is cached), so a repeated low-confidence query reuses the enriched routing instead of paying the ~12 s LLM call again. `_should_trigger_tier3()` distinguishes "no confidence reported" (`None`) from a genuine high score so it does not silently disable itself when the router returns `confidence=None`, and `_llm_domain_classify()` extracts the first `{...}` JSON object via regex (the old `strip("```json")` stripped character sets, mangling valid JSON). The prompt is Vietnamese with few-shot WHEN/CONTENT/CONDITION/PROCEDURE disambiguation examples and can override the predicted domains only when valid `RAG_LABELS` are returned.
 
 `QuerySignals` (`query/signals.py`) is a frozen dataclass of 11 boolean intent signals that feed both complexity routing and collection augmentation: `personal_reference`, `eligibility_check`, `exact_policy_lookup`, `table_lookup`, `procedural_support`, `multi_domain` (derived), `freshness`, `schedule_intent`, `deadline_intent`, `announcement_intent`, and `curriculum_semester_intent` (asks which semester a course sits in, distinct from when registration opens). Recent tuning broadened program-code coverage (e.g. `IT-E6`, `ME-GU`, `CH-LUH`, `…-NUT` in both `complexity_router` comparison patterns and `structured_query` major-code extraction), tightened the personal-reference regex (possessive `của tôi/mình/em` forms), and made the `cho … và …` repeated-request complex trigger require an explicit `và` connector.
 
@@ -404,7 +413,9 @@ Important behaviors:
 - Reranker calls receive configured thresholds and `reranker_min_top_k`.
 - Context-size errors can trigger reduced-context retry.
 - Cache writes are restricted to stable local answers: answered status, no no-info/no-source/self-eval-failed markers, no dynamic/stale-risk signal, and no web fallback.
+- Answer-cache keys (both the query-only `get_by_query`/`put_by_query` cache and the doc-id `get`/`put` cache) are scoped by a normalized `major|cohort` profile (`_build_cache_profile`). Without this scope a profile-dependent answer (e.g. "điều kiện tốt nghiệp của tôi") generated for one student could be served verbatim to another — a cross-student data leak. Anonymous/no-profile requests use an empty scope (legacy key space).
 - Streaming (`query_stream()`) reflects and complexity-routes once, then branches like `query_v3`: chitchat streams a canned answer, simple RAG runs retrieval (with optional pre-generation web enrichment) and streams tokens, and complex emits `status` progress, runs the agent synchronously, and chunk-animates the synthesized answer. Every streaming path intentionally avoids post-generation self-eval/Tavily.
+- Streaming per-request state lives in a request-local `SimpleNamespace` (`_st`) rather than `self.last_*`, because `RAGPipeline` is a singleton driven concurrently for many users; writing to `self.last_*` would let concurrent streams clobber each other's Mongo log and `metadata` SSE payload. The local state is snapshotted into the caller-owned `metadata_out` dict as the generator's final step, and only mirrored onto `self.last_*` afterward for single-request tests/debugging (not authoritative under concurrency).
 
 Runtime LLM reload:
 
@@ -447,7 +458,7 @@ build collection metadata filters
   -> parallel Qdrant vector + ES keyword search per collection
   -> global vector pool
   -> global keyword pool
-  -> min-max linear fusion or RRF fusion
+  -> max-normalized linear fusion (default) or RRF fusion
   -> kehoach recency bonus
   -> text-level dedup
   -> top-k candidates
@@ -475,11 +486,11 @@ Default retrieval settings in source:
 | `context_total_char_budget_with_expansion` | `16000` | Budget when parent/sibling expansion is active. |
 | `context_list_total_char_budget` | `24000` | Larger budget for list/enumeration queries. |
 | `parent_context_enabled` | `True` | C5 parent-child expansion (`parent_max_chars` 1500, `parent_max_chars_agent` 500). |
-| `hyde_enabled` | `True` | HyDE post-rerank fallback when recall is poor (`hyde_min_results` 3). |
+| `hyde_enabled` | `True` | HyDE post-rerank fallback. Triggers when no docs survive rerank, the best explicit rerank score is negative, **or** fewer than `hyde_min_results` (3) docs survive. The mean-score `hyde_confidence_threshold` (0.3) path is reserved/unused because raw cross-encoder logits are unnormalized. `RetrievalService.search_with_hyde()` sizes its candidate pool from `raw_candidate_multiplier` (with a 40 floor). |
 | `score_cliff_enabled` | `False` | B1 per-collection score-cliff pruning. |
 | `sibling_expansion_enabled` | `False` | C1 sibling-chunk expansion before rerank. |
 
-Fusion default: `MultiCollectionSearch` uses `linear` (per-pool min-max normalization with `vector_weight`/`keyword_weight` + kehoach recency bonus) as the default `fusion_mode`; `rrf` (reciprocal-rank fusion, `k=60`) is available but not the default. Elasticsearch uses a custom Vietnamese analyzer (CocCoc `vi_tokenizer` with ASCII-folding/synonym/stopword filters, BM25 `k1=1.5`, `b=0.5`).
+Fusion default: `MultiCollectionSearch` uses `linear` as the default `fusion_mode`. Linear fusion **max-normalizes** each pool independently (`norm = score / pool_max`, with a doc absent from a pool contributing `0` for that pool) and combines `vector_weight × norm_vec + keyword_weight × norm_kw + kehoach_recency_bonus`. This replaced the older min-max normalization, which forced the lowest-scoring doc in each pool to `0` and silently dropped relevant docs that were merely last in a pool or present in only one pool. The same max-normalization (per model) is applied to the in-Qdrant BGE/E5 dual-vector fusion in `qdrant_store.py`. `rrf` (reciprocal-rank fusion, `k=60`) is available but not the default; in RRF mode the `kehoach` recency bonus is rescaled by `1/(rrf_k+1)` so it stays a ~5% nudge instead of dwarfing the small RRF scores. Elasticsearch uses a custom Vietnamese analyzer (CocCoc `vi_tokenizer` with ASCII-folding/synonym/stopword filters, BM25 `k1=1.5`, `b=0.5`).
 
 Metadata filter behavior:
 
@@ -507,19 +518,19 @@ Agent flow:
 ```text
 RAGPipeline.query_agent()
   -> init_agent_docs()
-  -> ReActAgent.run(query, history, user_context, complexity_subtype, top_k)
+  -> ReActAgent.run(query, session_id, history, complexity_subtype, user_context, top_k)
      -> route_entry
         -> comparison/multi_source: decompose -> planner
         -> general/missing subtype: planner
      -> validate plan
      -> executor when plan is valid and has steps
-     -> optional web_search when plan.needs_web
+     -> optional Tavily web search inside executor when plan.needs_web
      -> synthesize
   -> get_agent_docs()
   -> API response mapper + Mongo agent trace
 ```
 
-LangGraph topology (`react_agent.py`): `START -> _route_entry -> (_decompose_node?) -> _planner_node -> _after_planner -> (_executor_node?) -> _synthesize_node -> END`. `_route_entry` sends `comparison`/`multi_source` through `_decompose_node` first and everything else straight to the planner; `_after_planner` skips the executor and jumps to synthesis when the planner set an error or produced no steps. There is no standalone web-search node — `web_search_for_executor()` is called from inside `_executor_node` only when a plan step requests it.
+LangGraph topology (`react_agent.py`): `START -> _route_entry -> (_decompose_node?) -> _planner_node -> _after_planner -> (_executor_node?) -> _synthesize_node -> END`. `_route_entry` sends `comparison`/`multi_source` through `_decompose_node` first and everything else straight to the planner; `_after_planner` skips the executor and jumps to synthesis when the planner set an error or produced no steps. There is no standalone web-search node and no graph-bound LangChain tool loop.
 
 Planner-Executor behavior:
 
@@ -527,16 +538,17 @@ Planner-Executor behavior:
 - `_decompose_node()` uses the synthesis LLM only for `comparison` and `multi_source`.
 - `_planner_node()` asks for JSON retrieval steps; `_validate_plan()` requires a non-empty `steps` list where every step has a non-empty `query` and a `collection` in `{quy_dinh, chuong_trinh, ke_hoach, ho_tro_sv}`.
 - `_executor_node()` calls `execute_retrieval_plan()` with the effective `top_k`; steps run in a `ThreadPoolExecutor` (`max_workers=min(4, len(steps))`, 45 s per-step timeout) over copied contextvars.
-- If every retrieval step is empty, the agent returns a deterministic no-information answer.
+- `execute_retrieval_plan()` is the main runtime adapter path. Each plan step is equivalent to a planned RAG search over one agent-facing collection, with optional `major_hint` and `cohort_hint`.
+- If `plan.needs_web` is true, `_executor_node()` calls `web_search_for_executor()` after local retrieval. That wrapper strips personal identifiers before calling Tavily and only succeeds when a valid Tavily key exists and `tavily_fallback_enabled` is true.
+- If all local retrieval steps are empty, the agent can retry once with major/cohort filters relaxed (`agent_retry_on_empty`, default true). If no `ToolMessage` is produced after retry/web handling, it returns a deterministic no-information answer instead of triggering another agent loop.
 - The planner sets `state.error` to `planner_invalid_json`, `planner_empty_steps`, or `planner_invalid_plan`; `RAGPipeline.query_agent()` handles the fallback policy.
 
-Direct legacy adapter tools still supported for tests/older callers:
+Runtime adapter surface:
 
-- `rag_search`
-- `multi_rag_search`
-- `compare_cohorts`
-- `compare_programs`
-- `web_search`
+- Planner emits JSON retrieval steps; executor calls `execute_retrieval_plan()`.
+- Each retrieval step runs one planned RAG search against an agent-facing collection, with optional `major_hint` and `cohort_hint`.
+- Optional web search is not a graph tool. `_executor_node()` calls `web_search_for_executor()` directly when `plan.needs_web` is true.
+- `tool_adapters.execute_tool()` and `agent/lc_tools.py` remain only for tests/backward compatibility with older direct callers; they are not part of the main chat flow.
 
 Agent collection aliases:
 
@@ -623,6 +635,14 @@ Default manual/scheduled/CLI `all` crawler runs stage data for review; direct CL
 
 `DocumentPipeline` exposes `convert_pdf()` / `clean()` / `chunk()` / `embed_and_index()` / `rollback()` (plus `run_full_pipeline()`); PDF conversion supports `pymupdf4llm` (default) and `docling`, selected per request, which also picks the matching hierarchical chunker.
 
+Review gate is now enforced in code:
+
+- `chunk()` (re)stages chunks and resets `chunks_reviewed=False`.
+- Admins can edit a staged chunk (`PATCH /admin/documents/{doc_id}/chunks/{chunk_id}`, body `ChunkUpdateRequest`) or remove one (`DELETE /admin/documents/{doc_id}/chunks/{chunk_id}` → `ChunkDeleteResponse`); approval sets `chunks_reviewed=True`.
+- `embed_and_index()` raises `ValueError("Chunks must be approved before indexing")` unless `chunks_reviewed` is true.
+- `run_full_pipeline()` now runs only convert → clean → chunk and **stops** (it no longer auto-indexes); indexing always waits for the admin approval gate.
+- The chunk debug dump writes to a **project-relative** path (`RAG_v2/data/quydinh/admin_upload`) instead of a hardcoded per-developer absolute path (failure is caught and non-fatal).
+
 ## 12. Persistence And Cache
 
 Mongo access styles:
@@ -666,8 +686,8 @@ Redis keys:
 - `session:{sid}`
 - `user_sessions:{uid}`
 - `history:{sid}`
-- `llm_cache:{sha}`
-- `llm_cache:q:{sha}`
+- `llm_cache:{sha}` (the `sha` folds in the asking student's `major|cohort` profile so personal answers are not shared across profiles)
+- `llm_cache:q:{sha}` (pre-retrieval query-only cache; profile is part of the `sha` too)
 - `llm_cache:stats`
 - `doc_cache_tag:{did}`
 - `rate:min:{id}`
@@ -779,6 +799,8 @@ Both stages require:
 tavily_fallback_enabled=True
 valid tavily_api_key
 ```
+
+Both stages now forward the configured `tavily_web_result_count` and `tavily_web_content_char_limit` into the search, and the pre-generation search derives a `query_year` (the latest `20XX` mentioned in the query, via `_extract_query_year`) so Tavily's freshness filter drops stale official pages from older academic years. Searches are restricted to `HUST_OFFICIAL_DOMAINS`.
 
 Agent web search uses the agent adapter path and is only invoked when the planner requests it.
 
@@ -997,21 +1019,23 @@ Admin LLM config:
 
 ## 21. Known Cautions
 
-1. `api/routes/retrieval.py` reads `getattr(pipeline, "service", None)`, while `RAGPipeline` stores the shared retrieval service as `_retrieval_service`. Without a public property, `/retrieval/search` can cold-load a new `RetrievalService`.
+1. `RAGPipeline` now exposes a public `retrieval_service` property, and `/retrieval/search`, `lookup.py`, `admin_stats.py`, plus the `api/main.py` auto-crawler reuse check all resolve it via `retrieval_service`/`_retrieval_service`, so the shared singleton is reused (no per-request cold-load). Note: `api/MODULE.md` still describes the old `getattr(pipeline, "service", None)` behavior and is stale on this point.
 
-2. `api/main.py` auto-crawler reuse checks `hasattr(pipe, "retrieval_service")`, but `RAGPipeline` currently does not expose that property.
+2. `api/routes/session.py` intends `/sessions` and `/sessions/me` by combining router prefix `/session` with route paths `"s"` and `"s/me"`. Keep route behavior covered by tests because this shape is easy to break.
 
-3. `api/routes/session.py` intends `/sessions` and `/sessions/me` by combining router prefix `/session` with route paths `"s"` and `"s/me"`. Keep route behavior covered by tests because this shape is easy to break.
+3. `DocumentPipeline.chunk()` still writes a debug chunk dump, but now to a project-relative `data/quydinh/admin_upload` path (no hardcoded absolute path); the dump failure is caught and non-fatal.
 
-4. `DocumentPipeline.chunk()` has had debug/output behavior under `data/quydinh/admin_upload`; verify before relying on this path in production.
+4. Redis features are inactive unless both `redis_enabled` and the relevant per-feature flags are true, and should remain fail-soft.
 
-5. Redis features are inactive unless both `redis_enabled` and the relevant per-feature flags are true, and should remain fail-soft.
+5. `ReActAgent` is now a Planner-Executor graph despite the legacy class name. Do not assume a graph-bound ReAct tool loop or `clarify_question` tool exists.
 
-6. `ReActAgent` is now a Planner-Executor graph despite the legacy class name. Do not assume a graph-bound ReAct tool loop or `clarify_question` tool exists.
+6. Streaming chat does not run post-generation self-eval/Tavily fallback. Streaming per-request state lives in a request-local namespace; `self.last_*` is mirrored only for single-request debugging and is not authoritative under concurrency.
 
-7. Streaming chat does not run post-generation self-eval/Tavily fallback.
+7. Answer caches are profile-scoped (`major|cohort`). When debugging cache behavior, remember an anonymous request and a profiled request use different keys for the same question.
 
-8. Root `README.md` may lag behind `PROJECT_MEMORY.md`, `MODULE.md`, and this file for current runtime behavior.
+8. Linear/dual-vector fusion uses max-normalization (not min-max). When changing scoring, re-run the retrieval/eval benchmarks because magnitude is now preserved.
+
+9. Root `README.md` and some `MODULE.md` files may lag behind `PROJECT_MEMORY.md` and this file for current runtime behavior.
 
 ## 22. High-Level Mental Model
 
@@ -1146,7 +1170,7 @@ HUST ≈ 35k students. The load is **extremely peaky** — flat most of the year
 │  │                                ▼                                        │  │
 │  │  RetrievalService ──▶ MultiCollectionSearch                             │  │
 │  │     BGE-M3 + E5 embed ─▶ per-collection {Qdrant ANN ∥ ES BM25}          │  │
-│  │     ─▶ fusion (min-max / RRF) ─▶ BGE cross-encoder rerank               │  │
+│  │     ─▶ fusion (max-norm / RRF) ─▶ BGE cross-encoder rerank              │  │
 │  │     ─▶ ValidityFilter ─▶ ReferenceResolver ─▶ parent-context expand     │  │
 │  │                                │                                        │  │
 │  │                                ▼                                        │  │
@@ -1194,7 +1218,7 @@ sequenceDiagram
             R->>Q: vector ANN (named vectors)
             R->>E: BM25 keyword
         end
-        R->>R: fuse (min-max/RRF) + kehoach recency
+        R->>R: fuse (max-norm/RRF) + kehoach recency
         R->>RR: rerank candidates (serialized by lock)
         R-->>P: validity ▸ reference ▸ parent-context
         P->>L: generate (grounded context)
@@ -1303,6 +1327,7 @@ Hot-reconfiguration without downtime: `prepare_llm_config_reload()` builds repla
 - **Tokens:** short-lived JWT access tokens — **in-memory only on web**, **SecureStore on mobile**; rotating refresh tokens hashed in Mongo with reuse/revocation family detection. Web gets the refresh token as an **HttpOnly cookie**; mobile gets it in **JSON** via `client_type="mobile"`. Both clients single-flight a refresh on 401 and retry once.
 - **Authorization:** `require_admin`/superadmin guards on admin upload/stats/config/crawler; superadmin set by `SUPERADMIN_USER_IDS`, not a DB role alone.
 - **Answer trust:** grounded-only generation, citations required, supersession filtering, and an optional self-eval quality gate — the product's core promise is "don't make things up about university rules."
+- **Data isolation:** answer caches are keyed with the asking student's `major|cohort` profile so a personalized answer is never served to a different student; `LocalStorage.read_text()` resolves and rejects path-traversal inputs that escape its base directory; admin document ingestion cannot index chunks until `chunks_reviewed=True`.
 
 ## 23.13 Key Trade-offs
 

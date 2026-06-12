@@ -164,7 +164,7 @@ Thresholds: `MULTI_LABEL_THRESHOLD = 0.35` (a domain is active above this; argma
 
 Major steps:
 
-1. `_strip_pii_and_noise()` — strips MSSV, personal intros, thanks, addressee noise (reverts if the result drops below 3 words).
+1. `_strip_pii_and_noise()` — strips MSSV, personal intros, thanks, addressee noise (reverts if the result drops below 3 words). `_PERSONAL_INTRO_RE` only strips genuine *name* introductions ("Tôi là Phạm Nhật Anh"): case-insensitivity is scoped to the pronoun/`là` lead-in via `(?i:...)` (so name tokens still require real capitalization), and a negative lookahead after `là` skips academic/identity descriptors (`sinh viên`, `ngành`, `khóa`, …). This preserves self-declared profile facts such as "tôi là sinh viên ngành IT1" so the major survives for entity extraction/retrieval instead of being stripped to garbage.
 2. `_merge_user_major_into_context()` + `_merge_profile_context()` — normalize profile (`major`, `major_code`, `cohort`, `student_id`) and resolve any string profile note override.
 3. `_should_use_history_for_reflection()` — suppress history for generic freshness queries lacking personal/anaphora/comparison signals.
 4. Passthrough check `_needs_llm_rewrite` — skip the LLM call entirely unless there is effective history, a profile-dependent signal, a comparison follow-up, or an anaphora signal. Profile data alone is still used for deterministic entity extraction, but it does not trigger an LLM call.
@@ -190,6 +190,7 @@ Entity priority: explicit current-query signal → `user_context` → conversati
 Current guardrail behavior:
 
 - Profile notes are injected only when the current query has a profile-dependent signal (`_has_profile_dependent_signal`).
+- `profile_dependency.required_attributes` treats tuition (`học phí`/`mức học phí`) as `{"major"}` because amounts differ by program (IT-E6 vs IT1); the scholarship/fee-waiver rule is checked first so `miễn giảm học phí` stays universal (`set()`).
 - Generic freshness/latest queries skip history and do not inherit `major_code`, `cohort`, or semester terms from profile/history.
 - Standalone course queries with a profile use deterministic catalog lookup without calling the reflection LLM. Shorthand aliases such as `môn hướng đối tượng` resolve only when unique for the active major.
 - If the reflection LLM invents an adjacent conflicting course code for a catalog-matched course, the deterministic guardrail replaces it with the major-scoped catalog code unless the user explicitly typed a course code.

@@ -38,6 +38,7 @@ evaluation/
   evaluate_hf_dataset.py             HuggingFace dataset eval utility.
   evaluate_sft_backend.py            Live /chat/v3 SFT runner with resumable JSONL artifacts.
   rerun_incorrect_sft_backend.py     Rerun SFT backend records previously judged incorrect.
+  rerun_hallucinated_frontend.py     In-process rerun of hallucinated E2E queries with frontend (production) config.
   test_query.py                      Manual RAGPipeline smoke runner (edit CONFIG queries; optional self-eval).
   data/                              ~37 RAG eval datasets (items[] schema; per-doc *_30/_100/_200 and *_no_parent_evidence sets).
   ground_truth_drafts/               Draft current-policy cases and seed labels.
@@ -144,10 +145,13 @@ python -m evaluation.evaluate_e2e_pipeline --dataset ... --enable-agent
 python -m evaluation.evaluate_e2e_pipeline --dataset ... --disable-decomposer --disable-reflection --disable-complexity-router
 ```
 
-For chunk-id datasets, the runner disables ValidityFilter, agent, and
-Tavily/web fallback by default so retrieved sources remain comparable to
-`evidence_chunk_ids`. Use `--enable-agent` only for intentional Planner-Executor
-evaluation; the chunk-id eval defaults are not production routing defaults. The
+For chunk-id datasets, the runner keeps ValidityFilter enabled but disables the
+agent and Tavily/web fallback by default, and overrides reranker thresholds
+(`reranker_score_threshold=-1.0`, `reranker_min_top_k=top_k`) so retrieved
+sources remain comparable to `evidence_chunk_ids`. These eval-only overrides are
+NOT production routing defaults (production: agent enabled,
+`reranker_score_threshold=0.0`, `reranker_min_top_k=3`). Use `--enable-agent`
+only for intentional Planner-Executor evaluation. The
 run config and active ablations in reports reflect the actual toggles. The ITE6
 no-parent-evidence comparison indicates
 `top_k=7` with `reranker_min_top_k=7` is the best historical report among the
@@ -157,6 +161,33 @@ the Qdrant payload-filter fallback for empty `ctdt` ES index produced
 better than the pre-fix current run but still below the older `min_top_k_7`
 artifact, so investigate index sync and reranker latency before promoting wider
 candidate pools.
+
+## Rerun Hallucinated Queries (Frontend Config)
+
+`rerun_hallucinated_frontend.py` re-runs the queries collected in
+`results/e2e_custom_eval/hallucinated_queries.csv` through the *production
+frontend* pipeline instead of the E2E eval config. It reuses
+`evaluate_e2e_pipeline.build_evaluation_runtime()` (plain `Settings()`) and
+deliberately skips every `evaluate_e2e_pipeline.main()` override, so the runtime
+matches `api/main.py` / `/chat/v3` (mode=auto): agent ENABLED,
+`reranker_score_threshold=0.0`, `reranker_min_top_k=3`, ValidityFilter on, HyDE
+on, Tavily/web fallback off, `top_k=7`, and no LLM cache (so answers are fresh,
+not the previously cached hallucination).
+
+The hallucinated CSV has no `evidence_chunk_ids`, so the runner re-joins each
+row against `evaluation/data/<dataset>.json` (stripping the `__<ablation>` suffix
+the E2E runner appends to folder names) to recover them for hit/recall/nDCG
+@{3,5,7}. Outputs go to `results/e2e_custom_eval/rerun_frontend/<timestamp>/`
+(`rerun_results.csv` with `prev_*` vs `new_*` faithfulness/ref_match and a
+`recovered` flag, plus `summary.json` with recovery rates and the resolved run
+config). Faithfulness uses `SelfEvaluator`; reference comparison uses the same
+LLM judge as the E2E eval.
+
+```bash
+python -m evaluation.rerun_hallucinated_frontend                 # all rows, timestamped output
+python -m evaluation.rerun_hallucinated_frontend --sample-n 5    # smoke test
+python -m evaluation.rerun_hallucinated_frontend --top-k 7 --no-timestamp
+```
 
 ## Custom-Dataset Retrieval Runners
 
