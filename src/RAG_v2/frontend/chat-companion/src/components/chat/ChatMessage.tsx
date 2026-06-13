@@ -3,7 +3,7 @@ import type { ChatV3Response, Message, RetrievedDocument } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Bot, ChevronDown, ChevronUp, FileText, User } from 'lucide-react';
+import { Bot, ChevronDown, ChevronUp, ExternalLink, FileText, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { DocRow } from '../trace/DocRow';
 import MessageActionsWeb from './MessageActionsWeb';
@@ -76,6 +76,31 @@ const normalizeSourceForDisplay = (
       : 0,
 });
 
+// Build a "Điều 14, tr. 12–13" style locator line from whatever the
+// metadata happens to expose, so students can verify against the source.
+const citationLocator = (
+  metadata: Record<string, unknown> | undefined,
+): string | undefined => {
+  const article = metadataText(metadata, ['dieu', 'article', 'section', 'muc', 'chuong']);
+  const page = metadataText(metadata, [
+    'page',
+    'page_number',
+    'page_start',
+    'pages',
+    'page_label',
+  ]);
+  const parts: string[] = [];
+  if (article) parts.push(/^\d/.test(article) ? `Điều ${article}` : article);
+  if (page) parts.push(/^\d/.test(page) ? `tr. ${page}` : page);
+  return parts.length > 0 ? parts.join(', ') : undefined;
+};
+
+// Find a link to the original document (CTT article or downloadable file).
+const citationLink = (
+  metadata: Record<string, unknown> | undefined,
+): string | undefined =>
+  metadataText(metadata, ['url', 'source_url', 'link', 'href', 'file_url', 'pdf_url']);
+
 function FriendlySourceCard({
   source,
   index,
@@ -98,17 +123,20 @@ function FriendlySourceCard({
       'file_name',
       'filename',
     ]) || `Nguồn ${index + 1}`;
+  const locator = citationLocator(source.metadata);
+  const link = citationLink(source.metadata);
   const content = normalizeText(sourceText(source));
   const excerpt = content
     ? truncateText(content, open ? 900 : 260)
     : 'Không có đoạn trích hiển thị.';
 
   return (
-    <div className="rounded-lg border border-border bg-background/80 p-3">
+    <div className="overflow-hidden rounded-lg border border-border border-l-[3px] border-l-primary bg-background/80 p-3">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-start gap-3 text-left"
+        aria-expanded={open}
+        className="flex w-full items-start gap-3 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
           <FileText className="h-3.5 w-3.5" />
@@ -121,9 +149,10 @@ function FriendlySourceCard({
             <Badge variant="secondary" className="max-w-full truncate text-[10px] font-medium">
               {collectionLabel}
             </Badge>
-            <span className="text-[10px] text-muted-foreground">
-              Nguồn {index + 1}
-            </span>
+            {locator && (
+              <span className="font-mono text-[10px] text-muted-foreground">{locator}</span>
+            )}
+            <span className="text-[10px] text-muted-foreground">Nguồn {index + 1}</span>
           </span>
         </span>
         {open ? (
@@ -135,6 +164,17 @@ function FriendlySourceCard({
       <p className="mt-2 break-words text-xs leading-relaxed text-muted-foreground">
         {excerpt}
       </p>
+      {link && (
+        <a
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+        >
+          <ExternalLink className="h-3 w-3" />
+          Xem tài liệu gốc
+        </a>
+      )}
     </div>
   );
 }
@@ -532,6 +572,11 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
         {/* Sources Display */}
         {showSources && hasSources && (
           <div className="mt-3 space-y-2 border-t border-border pt-3">
+            {!showDebug && (
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Nguồn tham khảo
+              </p>
+            )}
             {message.sources?.map((source, index) => {
               const displaySource = normalizeSourceForDisplay(source, index);
               return (

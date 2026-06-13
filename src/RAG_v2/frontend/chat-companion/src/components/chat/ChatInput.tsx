@@ -7,9 +7,26 @@ interface ChatInputProps {
   disabled?: boolean;
 }
 
+const PLACEHOLDERS = [
+  'Hỏi về học phí, lịch thi, quy chế…',
+  'Điều kiện xét tốt nghiệp là gì?',
+  'Các loại học bổng hiện có?',
+  'Thủ tục đăng ký học lại?',
+];
+
 const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
   const [input, setInput] = useState('');
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Rotate the placeholder hint while the field is empty (DESIGN §5.5).
+  useEffect(() => {
+    if (input) return;
+    const id = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % PLACEHOLDERS.length);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [input]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +62,8 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Nhập câu hỏi của bạn..."
+        placeholder={PLACEHOLDERS[placeholderIndex]}
+        aria-label="Nhập câu hỏi"
         disabled={disabled}
         rows={1}
         className="max-h-[120px] min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
@@ -54,7 +72,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
         type="submit"
         size="icon"
         disabled={!input.trim() || disabled}
-        className="h-10 w-10 shrink-0 rounded-xl transition-all hover:scale-105 disabled:opacity-40"
+        className="h-10 w-10 shrink-0 rounded-full transition-all hover:scale-105 disabled:opacity-40"
       >
         <Send className="h-4 w-4" />
         <span className="sr-only">Gửi tin nhắn</span>

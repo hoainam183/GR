@@ -15,6 +15,7 @@ import {
   Bot,
   CalendarDays,
   GraduationCap,
+  RotateCcw,
   ScrollText,
   type LucideIcon,
 } from 'lucide-react';
@@ -309,7 +310,11 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     };
   }, [sessionIdProp, queryClient, resolvedIdentity.userId]);
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (
+    content: string,
+    options: { isRetry?: boolean } = {},
+  ) => {
+    const { isRetry = false } = options;
     // Snapshot the session at call time — this is the "owner" of this request.
     // All async callbacks check this against the current session before mutating state.
     const capturedSessionId = activeSessionId;
@@ -317,16 +322,18 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     const userMessageId = `user-${startedAt.getTime()}`;
     const assistantMessageId = `assistant-${startedAt.getTime()}`;
 
-    // Add user message
-    const userMessage: Message = {
-      id: userMessageId,
-      role: 'user',
-      content,
-      timestamp: startedAt,
-      sessionId: capturedSessionId,
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    // Add user message (on retry the original user bubble is still on screen,
+    // so we skip echoing the question a second time).
+    if (!isRetry) {
+      const userMessage: Message = {
+        id: userMessageId,
+        role: 'user',
+        content,
+        timestamp: startedAt,
+        sessionId: capturedSessionId,
+      };
+      setMessages((prev) => [...prev, userMessage]);
+    }
     setChatPhase('thinking');
     setStatusMessage(null);
     forceScrollToBottom();
@@ -537,11 +544,17 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         const errorMessage: Message = {
           id: `error-${Date.now()}`,
           role: 'assistant',
-          content: 'Xin lỗi, hệ thống đang gặp sự cố. Vui lòng thử lại sau ít phút.',
+          content: 'Không gửi được tin nhắn. Vui lòng kiểm tra kết nối và thử lại.',
           timestamp: new Date(),
           sessionId: responseSessionId,
+          isError: true,
+          retryQuestion: content,
         };
-        setMessages((prev) => [...prev, errorMessage]);
+        // Drop any partial/streaming assistant bubble before showing the error.
+        setMessages((prev) => [
+          ...prev.filter((message) => message.id !== assistantMessageId),
+          errorMessage,
+        ]);
       }
     } finally {
       // Only clear the loading indicator for the session that set it.
@@ -559,6 +572,24 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       }
     }
   };
+
+  const handleRetry = (question: string, errorMessageId: string) => {
+    setMessages((prev) => prev.filter((message) => message.id !== errorMessageId));
+    handleSendMessage(question, { isRetry: true });
+  };
+
+  const lastMessage = messages[messages.length - 1];
+  const showFollowUps =
+    chatPhase === 'idle' &&
+    lastMessage?.role === 'assistant' &&
+    !lastMessage.isStreaming &&
+    !lastMessage.isError;
+  const followUpChips = [
+    'Học phí kỳ này',
+    'Lịch thi cuối kỳ',
+    'Điều kiện tốt nghiệp',
+    'Học bổng KKHT',
+  ];
 
   const greeting = user ? `Xin chào, ${user.full_name.split(' ').pop()}!` : 'Bắt đầu trò chuyện';
   const suggestions: Array<{ icon: LucideIcon; label: string; query: string }> = [
@@ -590,6 +621,10 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       <div
         ref={messagesContainerRef}
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-thin p-3 sm:p-4 md:p-6"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        aria-label="Lịch sử hội thoại"
       >
         {isLoadingHistory ? (
           <div className="flex h-full items-center justify-center">
@@ -624,10 +659,46 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
           </div>
         ) : (
           <div className="mx-auto w-full max-w-3xl space-y-4">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} showDebug={true} />
-            ))}
+            {messages.map((message) =>
+              message.isError ? (
+                <div
+                  key={message.id}
+                  role="alert"
+                  className="flex items-start gap-2 sm:gap-3"
+                >
+                  <div className="rounded-2xl rounded-tl-sm border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
+                    <p>{message.content}</p>
+                    {message.retryQuestion && (
+                      <button
+                        type="button"
+                        onClick={() => handleRetry(message.retryQuestion!, message.id)}
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-md font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Thử lại
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <ChatMessage key={message.id} message={message} showDebug={isAdmin} />
+              ),
+            )}
             {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} label={statusMessage ?? undefined} />}
+            {showFollowUps && (
+              <div className="flex flex-wrap gap-2 pl-10 sm:pl-11" aria-label="Gợi ý câu hỏi tiếp theo">
+                {followUpChips.map((chip) => (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => handleSendMessage(chip)}
+                    className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -655,16 +726,19 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       <div className="relative z-20 shrink-0 overscroll-contain border-t border-border bg-background/90 p-3 backdrop-blur-sm sm:p-4 md:p-6">
         <div className="mx-auto w-full max-w-3xl">
           <ChatInput onSend={handleSendMessage} disabled={chatPhase !== 'idle'} />
-          <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
-            <summary className="cursor-pointer select-none text-muted-foreground">
-              Debug runtime info
-            </summary>
-            <pre className="mt-2 max-h-56 overflow-auto rounded bg-background p-2 text-[11px] text-foreground">
-              {JSON.stringify(debugPayload, null, 2)}
-            </pre>
-          </details>
-          <p className="mt-2 text-center text-xs text-muted-foreground">
-            Nhấn Enter để gửi, Shift + Enter để xuống dòng.
+          {isAdmin && (
+            <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
+              <summary className="cursor-pointer select-none text-muted-foreground">
+                Debug runtime info
+              </summary>
+              <pre className="mt-2 max-h-56 overflow-auto rounded bg-background p-2 text-[11px] text-foreground">
+                {JSON.stringify(debugPayload, null, 2)}
+              </pre>
+            </details>
+          )}
+          <p className="mt-2 text-center text-[11px] leading-relaxed text-muted-foreground">
+            Thông tin do AI tổng hợp từ tài liệu, quy chế và thông báo của Nhà trường, có thể chưa
+            đầy đủ. Vui lòng đối chiếu văn bản gốc.
           </p>
         </div>
       </div>

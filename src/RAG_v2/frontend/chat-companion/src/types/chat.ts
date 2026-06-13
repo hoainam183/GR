@@ -23,6 +23,10 @@ export interface Message {
   agentError?: string;
   agentTrace?: AgentTracePayload | null;
   isStreaming?: boolean;
+  /** Local-only flag: this assistant bubble represents a send failure with a retry affordance. */
+  isError?: boolean;
+  /** The user question to resend when the user taps "Thử lại" on an error bubble. */
+  retryQuestion?: string;
 }
 
 export interface UserContext {
