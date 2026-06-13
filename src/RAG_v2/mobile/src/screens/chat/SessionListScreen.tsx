@@ -336,7 +336,7 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     shadowRadius: 8,
   },
   fabPressed: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryPressed,
     transform: [{ scale: 0.95 }],
   },
 });

@@ -1,0 +1,31 @@
+Fetching 30 files:   0%|          | 0/30 [00:00<?, ?it/s]Fetching 30 files: 100%|██████████| 30/30 [00:00<?, ?it/s]
+Calibrating on 12 labelled queries (pool=14)
+You're using a XLMRobertaTokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+You're using a XLMRobertaTokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+  [1/12] 1 relevant in pool | Sinh viên đại học chính quy văn bằng thứ nhất tại Đại h
+  [2/12] 1 relevant in pool | Quy định xét học bổng khuyến khích học tập tại Đại học 
+  [3/12] 0 relevant in pool | Sinh viên chương trình cử nhân tại Đại học Bách khoa Hà
+  [4/12] 1 relevant in pool | Chương trình kỹ sư dành cho người đã tốt nghiệp cử nhân
+  [5/12] 1 relevant in pool | Quy định ngoại ngữ áp dụng từ K68 của Đại học Bách khoa
+  [6/12] 1 relevant in pool | Sinh viên K68 thuộc chương trình có chuẩn đầu ra là tiế
+  [7/12] 1 relevant in pool | Sinh viên chương trình Công nghệ thông tin Việt-Nhật họ
+  [8/12] 1 relevant in pool | Chương trình Công nghệ thông tin Việt-Nhật có khối lượn
+  [9/12] 1 relevant in pool | Sinh viên ngành Kỹ thuật máy tính bậc cử nhân học trong
+  [10/12] 1 relevant in pool | Sinh viên tốt nghiệp chương trình Cử nhân Kỹ thuật máy 
+  [11/12] 1 relevant in pool | Sinh viên ngành Kỹ thuật Cơ khí được trang bị năng lực 
+  [12/12] 1 relevant in pool | Chương trình đào tạo ngành Kỹ thuật Cơ khí được phát tr
+
+=== RELEVANT score percentiles === {'n': 11, 'min': 1.392, 'p10': 2.773, 'p25': 3.182, 'median': 5.137, 'p75': 6.685, 'max': 7.474}
+=== IRRELEVANT score percentiles === {'n': 157, 'p50': -2.381, 'p75': -0.241, 'p90': 2.087, 'p95': 2.899, 'max': 5.117}
+=== threshold grid (recall_rel / precision / kept) ===
+  t= -1.0  recall=1.000  precision=0.175  kept=63
+  t= -0.5  recall=1.000  precision=0.190  kept=58
+  t=  0.0  recall=1.000  precision=0.239  kept=46
+  t=  0.5  recall=1.000  precision=0.268  kept=41
+  t=  1.0  recall=1.000  precision=0.324  kept=34
+  t=  1.5  recall=0.909  precision=0.357  kept=28
+  t=  2.0  recall=0.909  precision=0.370  kept=27
+  t=  2.5  recall=0.909  precision=0.476  kept=21
+  t=  3.0  recall=0.818  precision=0.529  kept=17
+
+Saved -> D:\GR\src\RAG_v2\evaluation\reranker_calib_results.json

@@ -20,6 +20,7 @@ export interface AppColors {
   mutedForeground: string;
   subtleForeground: string;
   primary: string;
+  primaryPressed: string;
   primaryForeground: string;
   primarySoft: string;
   secondary: string;
@@ -35,52 +36,57 @@ export interface AppColors {
   tabBar: string;
 }
 
+// HUST / Cổng thông tin đào tạo identity per DESIGN.md §2.
+// Red (--bk-red) is an *accent* — used for primary actions, the user bubble,
+// avatars, the FAB and citation accents — not as a wide background.
 const lightColors: AppColors = {
-  background: '#fafafa',
-  canvas: '#f3f4f6',
-  card: '#ffffff',
+  background: '#ffffff', // --surface: header & input bar
+  canvas: '#f5f6f8', // --surface-alt: page / conversation area
+  card: '#ffffff', // --surface
   cardMuted: '#f8fafc',
-  foreground: '#161a1f',
-  mutedForeground: '#6b7280',
+  foreground: '#1f2328', // --ink
+  mutedForeground: '#5b6470', // --ink-soft
   subtleForeground: '#475569',
-  primary: '#3b82f6',
+  primary: '#c02430', // --bk-red
+  primaryPressed: '#9a1b26', // --bk-red-dark
   primaryForeground: '#ffffff',
-  primarySoft: '#eff6ff',
+  primarySoft: '#fbeaec', // --bk-red-tint
   secondary: '#f3f4f6',
-  border: '#e5e7eb',
+  border: '#e3e6ea', // --border
   input: '#ffffff',
-  destructive: '#ef4444',
-  destructiveSoft: '#fee2e2',
-  success: '#16a34a',
-  warning: '#d97706',
-  overlay: 'rgba(15, 23, 42, 0.42)',
-  chatUser: '#eff6ff',
-  chatAssistant: '#ffffff',
+  destructive: '#c0392b', // --error
+  destructiveSoft: '#fbeaec',
+  success: '#1e7f4e', // --success
+  warning: '#b7791f', // --warning
+  overlay: 'rgba(31, 35, 40, 0.42)',
+  chatUser: '#c02430', // user bubble = --bk-red (white text)
+  chatAssistant: '#ffffff', // bot bubble = --surface
   tabBar: '#ffffff',
 };
 
 const darkColors: AppColors = {
-  background: '#171b22',
-  canvas: '#171b22',
-  card: '#1c2028',
-  cardMuted: '#1f242b',
-  foreground: '#fafafa',
-  mutedForeground: '#9ca3af',
+  background: '#15171a',
+  canvas: '#15171a',
+  card: '#1f2226',
+  cardMuted: '#23272c',
+  foreground: '#e8eaed',
+  mutedForeground: '#9aa3ad',
   subtleForeground: '#cbd5e1',
-  primary: '#3b82f6',
+  primary: '#e5535e', // --bk-red lifted for dark-mode contrast
+  primaryPressed: '#c83d49',
   primaryForeground: '#ffffff',
-  primarySoft: '#1e3a5f',
+  primarySoft: '#3a2024',
   secondary: '#252a33',
   border: '#2d333d',
-  input: '#1f242b',
-  destructive: '#ef4444',
-  destructiveSoft: '#451a1a',
-  success: '#22c55e',
-  warning: '#f59e0b',
+  input: '#1f2226',
+  destructive: '#e5535e',
+  destructiveSoft: '#3a2024',
+  success: '#36b37e',
+  warning: '#e0a13c',
   overlay: 'rgba(0, 0, 0, 0.58)',
-  chatUser: '#1e3a5f',
-  chatAssistant: '#1f242b',
-  tabBar: '#1c2028',
+  chatUser: '#e5535e',
+  chatAssistant: '#1f2226',
+  tabBar: '#1f2226',
 };
 
 const THEME_CACHE_KEY = 'appearance:theme:v1';

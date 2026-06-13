@@ -1,102 +1,214 @@
 # Module: `embedding`
 
-Source-verified: 2026-06-05 from `embedding/__init__.py`, `embedding/base.py`, `embedding/bge_m3.py`, `embedding/e5_multilingual.py`, `embedding/ensemble.py`, `embedding/test_embedding.py`, plus consumer review (`config/settings.py`, `retrieval/service.py`, `pipeline/flows.py`, `agent/tool_adapters.py`).
+Source-verified: 2026-06-12 from `embedding/__init__.py`, `embedding/base.py`, `embedding/bge_m3.py`, `embedding/e5_multilingual.py`, `embedding/ensemble.py`, `embedding/test_embedding.py`.
 
 ## Purpose
 
-`embedding` converts text into vectors for semantic retrieval and classification. It provides a common `BaseEmbedder` interface plus concrete BGE-M3 and E5-multilingual implementations, and an ensemble wrapper.
+`embedding` converts text into dense (and optionally sparse) vectors for semantic retrieval and classification. It provides a common `BaseEmbedder` abstract interface, two concrete implementations (BGE-M3 via `FlagEmbedding`, E5-multilingual via `sentence-transformers`), and a weighted ensemble wrapper.
 
-Runtime retrieval usually uses BGE and E5 separately, then fuses scores in Qdrant/MultiCollectionSearch. `EnsembleEmbedder` exists for weighted-vector averaging but is not the main production retrieval path.
+In production retrieval, BGE and E5 are instantiated separately and their scores fused in Qdrant multi-collection search. `EnsembleEmbedder` is available but is **not the main production retrieval path**.
+
+Boundaries: this module owns vector generation only. Qdrant upsert/search lives in `retrieval`; indexing scripts live in `pipeline` and `scripts`.
 
 ## File Map
 
 ```text
 embedding/
-  __init__.py         Lazy factory (create_embedder) + lazy/backward-compatible exports via __getattr__.
-  base.py             BaseEmbedder abstract interface (embed/embed_query/embed_documents/dimension).
-  bge_m3.py           BGEm3Embedder over BAAI/bge-m3 via FlagEmbedding; dense + sparse; query LRU cache.
-  e5_multilingual.py  E5MultilingualEmbedder over intfloat/multilingual-e5-large via sentence-transformers; query/passage prefixes; query LRU cache.
-  ensemble.py         EnsembleEmbedder — L2-normalized weighted average of multiple embedders.
-  test_embedding.py   Manual smoke script (skips under pytest); embeds Vietnamese samples, checks dims/cosine.
+  __init__.py         Lazy factory (create_embedder) + lazy exports via module-level __getattr__.
+  base.py             BaseEmbedder ABC: embed / embed_query / embed_documents / dimension.
+  bge_m3.py           BGEm3Embedder over BAAI/bge-m3 via FlagEmbedding; dense + sparse; LRU query cache.
+                      Also defines _EmbeddingCache and _resolve_torch_device (local copies).
+  e5_multilingual.py  E5MultilingualEmbedder over intfloat/multilingual-e5-large via sentence-transformers;
+                      query/passage prefixes; normalizes embeddings; LRU query cache.
+                      Also defines _EmbeddingCache and _resolve_torch_device (local copies — duplicated).
+  ensemble.py         EnsembleEmbedder — weighted average of multiple BaseEmbedder instances, L2-normalized.
+  test_embedding.py   Manual smoke script (auto-skips under pytest); loads BGE-M3 + E5, checks dims/cosine.
 ```
 
 ## Public API
 
-`BaseEmbedder` (ABC) defines:
+### `BaseEmbedder` (ABC) — `base.py`
 
 ```python
-embed(texts: list[str]) -> list[list[float]]
-embed_query(text: str) -> list[float]
-embed_documents(texts: list[str]) -> list[list[float]]
-dimension -> int            # property
+class BaseEmbedder(ABC):
+    def embed(self, texts: List[str]) -> List[List[float]]: ...
+    def embed_query(self, text: str) -> List[float]: ...
+    def embed_documents(self, texts: List[str]) -> List[List[float]]: ...
+
+    @property
+    def dimension(self) -> int: ...
 ```
 
-`embedding.__init__` supports:
+### `create_embedder` — `__init__.py`
 
-- `create_embedder(settings)` — dispatches on `settings.embedding_provider` (`"bge_m3"`, `"e5"`, `"ensemble"`); raises `ValueError` on unknown provider. `"ensemble"` builds `EnsembleEmbedder([BGEm3Embedder(), E5MultilingualEmbedder()])` with default (equal) weights.
-- lazy `BGEm3Embedder`, `E5MultilingualEmbedder`, `EnsembleEmbedder` (resolved via module `__getattr__`).
+```python
+def create_embedder(settings: Settings) -> BaseEmbedder
+```
 
-Lazy exports avoid importing heavy ML dependencies (`torch`, `FlagEmbedding`, `sentence_transformers`) unless a concrete embedder is requested.
+Dispatches on `settings.embedding_provider`:
+
+| Value | Returns |
+|---|---|
+| `"bge_m3"` | `BGEm3Embedder()` with defaults |
+| `"e5"` | `E5MultilingualEmbedder()` with defaults |
+| `"ensemble"` | `EnsembleEmbedder([BGEm3Embedder(), E5MultilingualEmbedder()])` — equal weights (0.5 each) |
+| anything else | raises `ValueError` |
+
+Lazy `__getattr__` in `__init__.py` defers importing `torch`, `FlagEmbedding`, and `sentence_transformers` until a concrete class is actually accessed.
 
 ## Models
 
-| Class | Model (as written) | Vector dim | Notes |
-| --- | --- | --- | --- |
-| `BGEm3Embedder` | `BAAI/bge-m3` (`DEFAULT_MODEL`) | 1024 | Dense via `embed*`; sparse lexical weights via `encode_sparse`; both via `encode_all`. |
-| `E5MultilingualEmbedder` | `intfloat/multilingual-e5-large` (`DEFAULT_MODEL`) | 1024 | Adds `query: ` / `passage: ` prefixes; normalizes embeddings. |
-| `EnsembleEmbedder` | configured child embedders | child dim (must match) | Weighted average, then L2-normalized; equal weights if none given. |
+| Class | Model identifier (`DEFAULT_MODEL`) | Vector dim | Backend |
+|---|---|---|---|
+| `BGEm3Embedder` | `"BAAI/bge-m3"` | 1024 | `FlagEmbedding.BGEM3FlagModel` |
+| `E5MultilingualEmbedder` | `"intfloat/multilingual-e5-large"` | 1024 | `sentence_transformers.SentenceTransformer` |
+| `EnsembleEmbedder` | configured child embedders | must match child dim | weighted `np.tensordot` + L2-norm |
 
-### Embedder behavior details
+## `BGEm3Embedder` — `bge_m3.py`
 
-- **Device**: both concrete embedders call `_resolve_torch_device` → CUDA, else Apple MPS, else CPU. BGE uses `use_fp16` only on CUDA; E5 uses `torch.float16` on CUDA else `float32`.
-- **Batching**: both default `batch_size=32`, `max_length=512` (E5 sets `model.max_seq_length`).
-- **Caching**: each concrete embedder holds a private `_EmbeddingCache` (thread-noted LRU, `maxsize=512`, SHA-256 key) used by `embed_query` only; `embed`/`embed_documents` are uncached. `EnsembleEmbedder` has no cache of its own but delegates to children.
-- **BGE-M3 outputs**: `embed`/`embed_query`/`embed_documents` return dense vectors (`return_dense=True`); `encode_sparse` returns `list[dict[int, float]]` token-weight maps; `encode_all` returns `{"dense_vecs", "lexical_weights"}`. ColBERT vectors are never requested (`return_colbert_vecs=False`).
-- **E5 prefixes**: `embed_query` prepends `query: `, `embed_documents` prepends `passage: `; raw `embed` applies no prefix (caller's responsibility).
+```python
+class BGEm3Embedder(BaseEmbedder):
+    DEFAULT_MODEL = "BAAI/bge-m3"
+
+    def __init__(
+        self,
+        model_name: str = DEFAULT_MODEL,
+        use_fp16: bool = True,
+        device: Optional[str] = None,
+        batch_size: int = 32,
+        max_length: int = 512,
+    ) -> None: ...
+
+    # BaseEmbedder interface
+    def embed(self, texts: List[str]) -> List[List[float]]: ...          # dense, no cache
+    def embed_query(self, text: str) -> List[float]: ...                  # dense, LRU-cached
+    def embed_documents(self, texts: List[str]) -> List[List[float]]: ... # dense, no cache
+
+    # BGE-M3 extras
+    def encode_sparse(self, texts: List[str]) -> List[Dict[int, float]]: ...
+    def encode_all(self, texts: List[str]) -> Dict[str, object]: ...
+```
+
+**Device / precision:**
+- `_resolve_torch_device(device)` → CUDA → MPS → CPU (local copy in this file).
+- `use_fp16` is forced to `False` unless device is `"cuda"`. The constructor parameter default is `True` but it is overridden at runtime on non-CUDA devices.
+- MPS and CPU always run in fp32.
+
+**Encoding details:**
+- `embed` / `embed_query` / `embed_documents` all call `_encode_dense`: `return_dense=True`, `return_sparse=False`, `return_colbert_vecs=False`.
+- `encode_sparse`: `return_dense=False`, `return_sparse=True`; returns `output["lexical_weights"]` — a `List[Dict[int, float]]` (token-id → weight map).
+- `encode_all`: both `return_dense=True` and `return_sparse=True`; returns `{"dense_vecs": List[List[float]], "lexical_weights": List[Dict[int, float]]}`. Converts `dense_vecs` from `np.ndarray` to list explicitly.
+- ColBERT vectors (`return_colbert_vecs`) are never requested.
+
+**Cache:**
+- Private `_query_cache = _EmbeddingCache(maxsize=512)` — used by `embed_query` only.
+- `embed` and `embed_documents` are uncached.
+- Cache key: SHA-256 of UTF-8 encoded text.
+- `_EmbeddingCache` is an `OrderedDict`-based LRU; exposes `.stats` property (`hits`, `misses`, `size`).
+
+## `E5MultilingualEmbedder` — `e5_multilingual.py`
+
+```python
+class E5MultilingualEmbedder(BaseEmbedder):
+    DEFAULT_MODEL  = "intfloat/multilingual-e5-large"
+    QUERY_PREFIX   = "query: "
+    PASSAGE_PREFIX = "passage: "
+
+    def __init__(
+        self,
+        model_name: str = DEFAULT_MODEL,
+        device: Optional[str] = None,
+        batch_size: int = 32,
+        max_length: int = 512,
+    ) -> None: ...
+```
+
+**Prefix behavior:**
+- `embed_query(text)` → prepends `"query: "` → caches result under the **unprefixed** text.
+- `embed_documents(texts)` → prepends `"passage: "` to every text; no cache.
+- `embed(texts)` → **no prefix added**; caller is responsible. Bypasses cache.
+
+**Device / dtype:**
+- Same `_resolve_torch_device` logic as BGE (local copy — duplicated in this file).
+- `dtype = torch.float16` if `device == "cuda"`, else `torch.float32`. Passed as `model_kwargs={"low_cpu_mem_usage": True, "dtype": dtype}`.
+- `model.max_seq_length = max_length` set after construction.
+
+**Encoding:**
+- `_encode` calls `SentenceTransformer.encode(..., normalize_embeddings=True, show_progress_bar=False)` → outputs are L2-normalized.
+- Returns `embeddings.tolist()`.
+
+**Cache:** same `_EmbeddingCache(maxsize=512)` pattern as BGE.
+
+> **Gotcha:** `_EmbeddingCache` and `_resolve_torch_device` are **copy-pasted** into both `bge_m3.py` and `e5_multilingual.py`. They are not shared from a common utility. Any bug fix or resize must be applied in both files.
+
+## `EnsembleEmbedder` — `ensemble.py`
+
+```python
+class EnsembleEmbedder(BaseEmbedder):
+    def __init__(
+        self,
+        embedders: List[BaseEmbedder],
+        weights: Optional[List[float]] = None,
+    ) -> None: ...
+```
+
+- Raises `ValueError` if `embedders` is empty.
+- Raises `ValueError` if child embedder dimensions differ.
+- `weights=None` → equal weights (`1/n` each). Custom weights are normalized to sum to 1.
+- Weights stored as `np.array(..., dtype=np.float64)`.
+
+**Computation:**
+- `embed_query`: `np.dot(weights, vectors)` → L2-normalize.
+- `embed` / `embed_documents`: `_weighted_average(method, texts)` → `np.tensordot(weights, all_vecs, axes=([0],[0]))` → L2-normalize each row.
+- No cache at the ensemble level; delegates to child `embed_query` / `embed_documents` which have their own caches.
 
 ## Integration Points
 
-- `config/settings.py` provides `embedding_provider` consumed by `create_embedder`; also references BGE sparse encoding.
-- `retrieval/service.py` constructs BGE and E5 once through `RetrievalService.from_settings()`.
-- `pipeline/flows.py` uses BGE/E5 query embeddings before multi-collection search.
-- `agent/tool_adapters.py` receives the same embedder instances through runtime injection.
-- `query/domain_classifier.py` uses BGE-M3 embeddings as logistic-regression features.
-- `pipeline/document_pipeline.py` lazily loads embedders for admin upload indexing.
-- `scripts.auto_crawler.index_staged_crawler_run()` can reuse the app pipeline's warmed BGE/E5 embedders when admin-approved crawler chunks are indexed.
+- `config/settings.py` — exposes `embedding_provider`; consumed by `create_embedder`.
+- `retrieval/service.py` — constructs BGE and E5 once via `RetrievalService.from_settings()`.
+- `pipeline/flows.py` — calls BGE/E5 query embeddings before multi-collection Qdrant search.
+- `agent/tool_adapters.py` — receives embedder instances via runtime injection.
+- `query/domain_classifier.py` — uses BGE-M3 dense embeddings as logistic-regression features.
+- `pipeline/document_pipeline.py` — lazily loads embedders for admin-upload indexing.
+- `scripts.auto_crawler` — reuses warmed BGE/E5 instances when indexing approved crawler chunks.
 
 ## Module Flow
 
 ```mermaid
 flowchart TD
-  Settings["config/Settings"] --> Factory["embedding.create_embedder"]
-  Factory --> BGE["BGEm3Embedder"]
-  Factory --> E5["E5MultilingualEmbedder"]
-  Factory --> Ens["EnsembleEmbedder"]
+  Settings["config/Settings\n(embedding_provider)"] --> Factory["embedding.create_embedder"]
+  Factory -->|"bge_m3"| BGE["BGEm3Embedder\nBAAI/bge-m3\ndim=1024"]
+  Factory -->|"e5"| E5["E5MultilingualEmbedder\nmultilingual-e5-large\ndim=1024"]
+  Factory -->|"ensemble"| Ens["EnsembleEmbedder\nweighted avg + L2-norm"]
+  BGE --> Ens
+  E5 --> Ens
   Query["runtime query"] --> BGE
   Query --> E5
-  BGE --> Search["retrieval/MultiCollectionSearch"]
+  BGE --> Search["retrieval / MultiCollectionSearch"]
   E5 --> Search
-  Docs["admin/crawler/index scripts"] --> BatchEmbed["embed_documents batches"]
-  BatchEmbed --> Qdrant["Qdrant named vectors bge_m3/e5"]
-  BGE --> Classifier["query/DomainClassifier features"]
+  BGE --> Classifier["query/DomainClassifier\n(dense features)"]
+  Docs["admin / crawler indexing"] --> BatchEmbed["embed_documents batches"]
+  BatchEmbed --> Qdrant["Qdrant named vectors\nbge_m3 + e5"]
 ```
-
-External module boundaries:
-
-- `embedding` owns vector generation only; Qdrant upsert/search lives in `retrieval` and indexing scripts.
-- Heavy model instances should be created once by `RetrievalService` or reused by crawler/admin indexing when possible.
-- Any model/dimension change affects Qdrant collections, scripts, retrieval, agent adapters, and eval baselines.
 
 ## Maintenance Notes
 
-- Keep vector dimensions (1024) aligned with Qdrant named vectors `bge_m3` and `e5`.
-- The query LRU cache assumes deterministic embeddings per text; clear/resize via `_EmbeddingCache(maxsize=...)` if model or prefixes change.
-- Do not import concrete embedders in lightweight modules unless the model is actually needed — rely on the lazy factory/`__getattr__`.
-- If changing model names or dimensions, update Qdrant collection setup, indexing scripts, retrieval docs, and evaluation baselines.
+- Vector dimensions are hardcoded to `1024` in both `BGEm3Embedder._dimension` and `E5MultilingualEmbedder._dimension`. Any model swap must update these and the matching Qdrant collection configs.
+- `_EmbeddingCache` and `_resolve_torch_device` are duplicated in `bge_m3.py` and `e5_multilingual.py`. Consider extracting to a shared `_utils.py` to avoid drift.
+- LRU cache only covers `embed_query`; repeated document batches (e.g., re-indexing) are not cached. This is intentional — document sets are large and non-repetitive.
+- The `use_fp16=True` default in `BGEm3Embedder.__init__` is misleading: it is silently overridden to `False` on non-CUDA devices. MPS and CPU always run fp32.
+- `EnsembleEmbedder` weights are re-normalized to sum to 1. Passing `weights=[0.6, 0.4]` (already summing to 1) is safe; passing unnormalized values is also safe.
+- `test_embedding.py` expects similar-pair cosine ≥ 0.70 and dissimilar-pair < 0.70 as sanity thresholds. These are smoke-test heuristics, not hard model contracts.
 
 ## Useful Checks
 
 ```bash
-python -m py_compile embedding/*.py
-python embedding/test_embedding.py   # manual model smoke test (loads BGE-M3 + E5; skipped under pytest)
+# Syntax check all files
+python -m py_compile src/RAG_v2/embedding/base.py src/RAG_v2/embedding/bge_m3.py \
+    src/RAG_v2/embedding/e5_multilingual.py src/RAG_v2/embedding/ensemble.py \
+    src/RAG_v2/embedding/__init__.py
+
+# Manual smoke test — loads both models, checks dims + cosine similarity
+# (auto-skipped under pytest; run directly)
+python src/RAG_v2/embedding/test_embedding.py
 ```

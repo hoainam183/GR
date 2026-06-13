@@ -156,7 +156,11 @@ const LoginScreen = ({ navigation }: Props) => {
 
           {/* Submit */}
           <Pressable
-            style={[styles.submitButton, loading && styles.submitDisabled]}
+            style={({ pressed }) => [
+              styles.submitButton,
+              pressed && styles.submitPressed,
+              loading && styles.submitDisabled,
+            ]}
             onPress={handleSubmit(onSubmit)}
             disabled={loading}
             accessibilityLabel="Đăng nhập"
@@ -289,6 +293,9 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 8,
+  },
+  submitPressed: {
+    backgroundColor: colors.primaryPressed,
   },
   submitDisabled: {
     opacity: 0.7,

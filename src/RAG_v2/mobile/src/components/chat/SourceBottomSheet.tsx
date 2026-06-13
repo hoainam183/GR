@@ -135,6 +135,9 @@ const createStyles = (colors: AppColors) =>
       marginTop: 8,
       borderWidth: 1,
       borderColor: colors.border,
+      // DESIGN §5.2: citation card has a 3px red left accent.
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primary,
     },
     sourceHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
     rank: { color: colors.primary, fontSize: 13, fontWeight: '700' },

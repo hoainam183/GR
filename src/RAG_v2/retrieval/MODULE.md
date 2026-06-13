@@ -1,12 +1,12 @@
 # Module: `retrieval`
 
-Source-verified: 2026-06-10 from every `retrieval/*.py` file (`__init__.py`, `base.py`, `service.py`, `qdrant_store.py`, `elasticsearch_store.py`, `hybrid_search.py`, `multi_collection_search.py`, `metadata_filters.py`, `collection_selector.py`, `query_expander.py`, `hyde.py`, `parent_context.py`, `validity_filter.py`, `reference_resolver.py`, `search_stsv.py`, `index_stsv_to_es.py`, `config.py`), plus routing integration points in `query/router.py`, `query/complexity_router.py`, `query/signals.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, `config/settings.py`, and `tools/tavily_search.py`.
+Source-verified: 2026-06-12 from every `retrieval/*.py` file (`__init__.py`, `base.py`, `service.py`, `qdrant_store.py`, `elasticsearch_store.py`, `hybrid_search.py`, `multi_collection_search.py`, `metadata_filters.py`, `collection_selector.py`, `query_expander.py`, `hyde.py`, `parent_context.py`, `validity_filter.py`, `reference_resolver.py`, `search_stsv.py`, `index_stsv_to_es.py`, `config.py`), plus routing integration points in `query/router.py`, `query/complexity_router.py`, `query/signals.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, `config/settings.py`, and `tools/tavily_search.py`.
 
 ## Purpose
 
 `retrieval` owns the entire document search stack:
 
-- **Vector search** — Qdrant with dual named BGE-M3 + E5 vectors, batched in one round-trip and fused via per-model min-max-normalised weighting.
+- **Vector search** — Qdrant with dual named BGE-M3 + E5 vectors, batched in one round-trip and fused via per-model max-normalised weighting.
 - **Keyword search** — Elasticsearch BM25 with a CocCoc Vietnamese-tokenizer analyzer (synonyms, stopwords, ASCII-folding), custom BM25 similarity, phrase boosting and a fuzzy fallback pass.
 - **Metadata pre-filtering** — per-collection ES filter fallback chains that constrain both Qdrant (`HasIdCondition`) and ES keyword search.
 - **Multi-collection fusion** — parallel per-collection search → global pooling → score normalisation → weighted fusion (linear or RRF).
@@ -111,9 +111,9 @@ retrieval/
   parent_context.py            ParentContextExpander — attach parent chunk content to child results.
   validity_filter.py           ValidityFilter — drop superseded documents using data/document_lineage.json.
   reference_resolver.py        ReferenceResolver — resolve legal references such as Điều/Khoản.
-  search_stsv.py               Standalone hybrid-search demo (uses HybridSearch directly).
-  index_stsv_to_es.py          ES indexing utility (scroll Qdrant → bulk-index to ES); COLLECTION/ES_INDEX default to "quydinh".
-  config.py                    HyDE fallback config constants (mirrored in config/settings.py).
+  search_stsv.py               Standalone hybrid-search demo (uses HybridSearch directly; COLLECTION hardcoded to "stsv").
+  index_stsv_to_es.py          ES indexing utility (scroll Qdrant → bulk-index to ES); despite the filename, COLLECTION/ES_INDEX default to "quydinh".
+  config.py                    HyDE fallback config constants (mirrored in config/settings.py; HYDE_ENABLED defaults to False here).
 ```
 
 ---
@@ -144,15 +144,21 @@ Tavily calls are made through the pipeline/agent tool layer; `RetrievalService` 
 ### `search()` internals
 
 1. `effective_top_k = top_k or settings.top_k`.
-2. `raw_candidate_k = max(round(effective_top_k * settings.raw_candidate_multiplier), settings.raw_candidate_min)`; defaults are multiplier `4.0` and minimum `20` (over-fetch funnel before rerank).
+2. `multiplier = max(float(raw_candidate_multiplier), 1.0)` (default `4.0`); `min_pool = max(int(raw_candidate_min), 1)` (default `20`); `raw_candidate_k = max(round(effective_top_k * multiplier), min_pool)`.
 3. `active_collections = collections or settings.collections`.
-4. If `use_multi_query and entities`: build up to 3 variants with `MultiQueryExpander`; if >1 variant → `_search_multi_query` (per-variant search, merge+dedup by id, rerank merged pool with variant[0]).
+4. If `use_multi_query and entities`: build up to 3 variants with `MultiQueryExpander`; if >1 variant → `_search_multi_query` (per-variant budget = `raw_candidate_k // len(variants)`, min 10; merge+dedup by id; rerank merged pool with variant[0]).
 5. Otherwise `_search_single`:
    - Check `_search_cache` keyed by (query, collections, resolved_major, resolved_cohort). On miss, embed both vectors and call `searcher.search()` with `vector_top_k`/`keyword_top_k`/`vector_pool_k`/`keyword_pool_k` from settings, then cache the **pre-rerank** results.
    - If `rerank` and reranker exists → `reranker.rerank(query, documents, top_k=effective_top_k)`. Else truncate to `effective_top_k`.
    - If `settings.parent_context_enabled` → `_expand_parent_context()` enriches child results with parent content (grouped per collection).
 
 `RetrievalService` is created once by `RAGPipeline` (`from_settings`) and injected into agent tools via `tool_adapters.set_retrieval_service()`.
+
+### `search_with_hyde()` internals
+
+- `raw_candidate_k = max(round(effective_top_k * multiplier), 40)` — floor is 40, not `min_pool`, to protect recall on small top_k / list queries.
+- BGE vector comes from the hypothesis embedding; E5 uses the original query directly.
+- No reranking — caller is responsible for reranking the merged pool.
 
 ---
 
@@ -202,25 +208,26 @@ External module boundaries:
 - **Search params**: `hnsw_ef=128, exact=False`.
 - **Per-vector over-fetch**: `per_vector_k = min(top_k × 2, 100)`.
 - **Batched search**: both named-vector queries run in a single `query_batch_points` round-trip, then `_fuse_results()` combines them.
-- **Dual-vector fusion** (within Qdrant): per-model min-max normalisation of bge/e5 scores, then `fused = bge_weight × norm_bge + e5_weight × norm_e5` (default weights `0.5/0.5`). Single/identical-score pools normalise to `0.0` (offset = max−1, range = 1.0).
+- **Dual-vector fusion** (within Qdrant): per-model **max-normalisation** of bge/e5 scores (divide by per-model max, not min-max), then `fused = bge_weight × norm_bge + e5_weight × norm_e5` (default weights `0.5/0.5`). A doc not retrieved by a model keeps contribution 0; docs with score 0 are treated as absent. The max is the largest raw score in that model's result set (1.0 if empty).
 - Result dicts: `{"id", "text", "metadata", "score", "bge_score", "e5_score"}`.
-- Other helpers: `index_documents`, `get_by_ids`, `get_by_metadata` (returns `collection` too), `update_metadata_by_ids` / `_batch` / `_by_filter`, `delete_by_metadata`, `count`, `delete_collection`.
+- Other helpers: `index_documents`, `get_by_ids`, `get_by_metadata` (returns `collection` too), `update_metadata_by_ids`, `update_metadata_batch`, `update_metadata_by_filter`, `delete_by_metadata`, `count`, `delete_collection`.
 
 ### Elasticsearch (`ElasticsearchStore`)
 
 - Index name matches collection name; `DEFAULT_INDEX = "stsv"`. Connection is verified with `ping()` (raises `ConnectionError` on failure).
-- **Analyzer** (`vietnamese_analyzer`): CocCoc `vi_tokenizer` when the plugin is present, else `standard` tokenizer fallback. Filter chain: `lowercase`, `vietnamese_synonym` (Vietnamese academic synonym list), `vietnamese_stop` (Vietnamese stopwords), `vietnamese_ascii_folding` (asciifolding, `preserve_original`). `_index_uses_vi_tokenizer()` detects plugin mode on existing indices; `uses_vietnamese_plugin` flag drives Python-side segmentation fallback in `keyword_search`. `INDEX_SETTINGS` is exported for legacy callers/tests.
+- **Analyzer** (`vietnamese_analyzer`): CocCoc `vi_tokenizer` when the plugin is present, else `standard` tokenizer fallback. Filter chain: `lowercase`, `vietnamese_synonym` (Vietnamese academic synonym list), `vietnamese_stop` (Vietnamese stopwords), `vietnamese_ascii_folding` (asciifolding, `preserve_original`). `_index_uses_vi_tokenizer()` detects plugin mode on existing indices; `uses_vietnamese_plugin` flag drives Python-side segmentation fallback in `keyword_search`. `INDEX_SETTINGS` is exported for legacy callers/tests (built with `use_vietnamese_plugin=True`).
+- **Note**: `_make_settings(use_icu=True)` is a backward-compatible wrapper — `use_icu=True` maps to `vi_tokenizer` path, `use_icu=False` maps to `standard` fallback.
 - **Similarity**: custom BM25 `custom_bm25` (`k1=1.5, b=0.5`); shards=1, replicas=0.
 - **Text fields** (custom analyzer; `+keyword` subfield where noted): `search_text`, `text`, `title`(+kw), `doc_title`(+kw), `hierarchy_path`(+kw), `section_context`(+kw), `section_h1..h4`(+kw), `course_name`(+kw), `semester`(+kw), `major_name`(+kw).
 - **Keyword fields**: `type_doc`, `time_create`, `item_label`, `major_code`, `applicable_cohort`, `applicable_major`, `date_str`, `document_type`, `course_code`, `level`, `chunk_id`, `readable_id`, `parent_id`, `collection`, `source_file`.
 - **Integer/boolean fields**: `doc_id`, `chunk_index`, `total_chunks`, `chunk_size` (int); `has_links`, `has_table` (bool).
 - **`search_text`** is auto-built at index time (`_build_search_text`) from text + selected metadata, with Markdown/table cleanup and accent-folded dedup, unless already provided.
 - **`keyword_search`** (the main keyword path used by `MultiCollectionSearch`):
-  - `must`: `multi_match` (best_fields, OR) over `_KEYWORD_SEARCH_FIELDS` (boosted: `search_text^3`, `title^2`, `doc_title^1.8`, `text^1.6`, `hierarchy_path^1.5`, `section_h1/h2^1.4`, `section_h3^1.3`, `section_h4^1.1`, `course_name^1.4`, `major_name^1.2`, `semester^1.2`, `section_context^1`, `item_label^1`).
-  - `should`: optional segmented-query boost (×1.5, fallback mode only), per-key-phrase `match_phrase` boosts across text/heading fields (generic policy phrases get lower boost), and a `has_table` boost when `table_lookup` signal is set.
+  - `must`: `multi_match` (best_fields, OR) over `_KEYWORD_SEARCH_FIELDS` (boosted: `search_text^3`, `title^2`, `doc_title^1.8`, `text^1.6`, `hierarchy_path^1.5`, `section_h1^1.4`, `section_h2^1.4`, `section_h3^1.3`, `section_h4^1.1`, `course_name^1.8`, `major_name^1.2`, `semester^1.2`, `section_context^1`, `item_label^1`).
+  - `should`: optional segmented-query boost (×1.5, fallback mode only), per-key-phrase `match_phrase` boosts across text/heading fields (generic policy phrases get lower boost of 1.5; non-generic top-3 get boost 10, rest 5), `has_table` term boost (2.5) when `table_lookup` signal set, and a `terms` on `course_code` (boost 8.0) when structured query contains course codes.
   - `must_not`: structured-query exclusion clauses (`build_es_must_not_clauses`) **plus `{"term": {"level": "parent"}}`** so parent chunks are never keyword hits.
   - `filter`: optional caller-supplied filter dict.
-  - Scores are bumped ×1.2 for table hits when `table_lookup` is set; results carry `_keyword_search_mode` and `_keyword_table_lookup_hit` in metadata.
+  - Scores bumped ×1.2 for table hits when `table_lookup` is set; results carry `_keyword_search_mode` and `_keyword_table_lookup_hit` in metadata.
   - **Fuzzy fallback**: if exact pass returns nothing (or fewer than `top_k` and not in exact-policy/table mode), a second `multi_match` with `fuzziness=AUTO` runs and results are merged (`_merge_keyword_results`).
   - Returns `{"id", "text", "metadata", "score"}`.
 - **Metadata-only search** (`metadata_filter_search`): wraps the supplied query in `{bool:{filter:[...]}}` (no scoring, `source=False`) and returns matching `_id` strings (default cap 1000).
@@ -284,21 +291,26 @@ search(query, bge_m3_query, e5_query, ...active_collections, fusion_mode="linear
 
 #### Mode `"linear"` (default)
 
-Min-max normalise each pool independently, then:
+**Max-normalise** each pool independently (divide each score by the pool maximum, not min-max). This preserves relative magnitude and avoids setting the lowest-scoring doc to zero:
 
 ```
-final = vector_weight × norm_vec + keyword_weight × norm_kw + kehoach_recency_bonus(doc)
+v_max = vector_pool[0]["score"]   # pool is pre-sorted descending
+k_max = keyword_pool[0]["score"]
+norm_vec = score / v_max
+norm_kw  = score / k_max
+final = vector_weight * norm_vec + keyword_weight * norm_kw + kehoach_recency_bonus(doc)
 ```
 
-Single/identical-score pools treat range as `1.0` (min = max − 1.0). After fusion, results are text-deduplicated (identical stripped text dropped).
+After fusion, results are text-deduplicated (identical stripped text dropped).
 
 #### Mode `"rrf"`
 
 ```
-final = vector_weight × 1/(rrf_k + v_rank) + keyword_weight × 1/(rrf_k + k_rank) + kehoach_recency_bonus(doc)
+final = vector_weight × 1/(rrf_k + v_rank) + keyword_weight × 1/(rrf_k + k_rank)
+      + kehoach_recency_bonus(doc) × (1 / (rrf_k + 1))
 ```
 
-`rrf_k` defaults to `60`. Same text-level dedup applies.
+`rrf_k` defaults to `60`. The recency bonus is **rescaled** by `1/(rrf_k+1)` (≈0.016 for k=60) so it stays a ~5% nudge relative to RRF magnitude rather than dominating. Same text-level dedup applies.
 
 ### Adaptive Fusion Weights
 
@@ -306,7 +318,7 @@ final = vector_weight × 1/(rrf_k + v_rank) + keyword_weight × 1/(rrf_k + k_ran
 
 - **Course-like queries** (course-code regex `\b(IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?\b`, or hints `môn`, `môn học`, `học phần`, `tín chỉ`, `tiên quyết`, `song hành`, `khối lượng`, …, accented/unaccented) → `vector = min(default, 0.4)`, `keyword = max(default, 0.6)`, reason `course_query_keyword_bias`.
 - Otherwise configured defaults (reason `default`).
-- **Exact-policy mode + default reason** then overrides further: `vector = min(vector, 0.1)`, `keyword = max(keyword, 0.75)`, reason `exact_policy_keyword_bias`.
+- **Exact-policy mode** then applies on top of whichever reason was chosen: `vector = min(vector, 0.1)`, `keyword = max(keyword, 0.75)`, reason updated to `exact_policy_keyword_bias` (or `{prior}+exact_policy` if a course bias was already active).
 
 ### Default Parameters
 
@@ -343,6 +355,8 @@ final = vector_weight × 1/(rrf_k + v_rank) + keyword_weight × 1/(rrf_k + k_ran
 
 `collection_names`, `qdrant_stores` (name → `QdrantStore`), `collection_counts()` (per-collection qdrant/es doc counts), and `get_by_metadata(collection, filters, limit)` for sibling lookups.
 
+**Caution**: `get_by_metadata` calls `hybrid.qdrant.get_by_metadata()` (the attribute is `hybrid.qdrant`, not `hybrid.qdrant_store`).
+
 ### Tracing
 
 When `trace_out` is supplied, it is populated with: `filters` (per-collection applied/matched_ids/filter_desc), `collection_counts`, `fusion_weights` (vector/keyword/reason/mode), `structured_query`, `query_signals`, `candidate_pool_sizes` (vector/keyword pool + effective keyword top_k/pool_k), `pinned_keyword_hits`, and `excluded_counts`.
@@ -362,7 +376,8 @@ Dataclass with `metadata_es_queries` (ordered ES filter-only fallback chain) and
 ```text
 1. build_collection_filters(query, collections, resolved_major, resolved_cohort)
    → per-collection CollectionFilter via registered extractor (or empty).
-   → freshness intent + collection in {"kehoach","quydinh"} + empty filter ⇒ sort_by_date_desc=True.
+   → freshness intent + collection in {"kehoach", "quydinh"} + empty filter
+     + not already sort_by_date_desc ⇒ sort_by_date_desc=True.
 2. MultiCollectionSearch._resolve_filter_with_fallback() tries each ES query in order;
    first returning ≥1 doc ID (after resolve_chunk_ids_for_qdrant) wins.
 3. Winning IDs → Qdrant HasIdCondition + ES filter clause.
@@ -371,10 +386,12 @@ Dataclass with `metadata_es_queries` (ordered ES filter-only fallback chain) and
    applicable_major, date_str, course_code).
 ```
 
+**Note**: `_DATE_STR_FRESHNESS_COLLECTIONS = {"kehoach", "quydinh"}` — both collections receive `sort_by_date_desc=True` on freshness intent when their filter is otherwise empty.
+
 ### Per-Collection Filter Logic
 
-- **`ctdt` — `CtdtFilterExtractor`** (key `major_code`): chain = exact `major_code` → fuzzy `major_name` match (no null) → `major_code` exact OR missing (generic chunks). Empty filter when no major signal.
-- **`quydinh` — `QuyDinhFilterExtractor`** (key `applicable_cohort`): chain = `applicable_cohort` term(s) OR missing. Cohort priority: query text → `resolved_cohort` → `resolved_major`. Empty when no cohort signal.
+- **`ctdt` — `CtdtFilterExtractor`** (key `major_code`): chain = exact `major_code` (`_term_any_mapping`) → fuzzy `major_name` match (`_match_only`, no null fallback) → `major_code` exact OR missing (generic chunks, `_null_or_term`). Empty filter when no major signal.
+- **`quydinh` — `QuyDinhFilterExtractor`** (key `applicable_cohort`): chain = `applicable_cohort` term(s) OR missing (`_null_or_terms`). Cohort priority: query text → `resolved_cohort` → `resolved_major`. Empty when no cohort signal.
 - **`kehoach` — `KeHoachFilterExtractor`** (key `date_str`): explicit month/year → `date_str` wildcard (`*/M/YYYY` or `*/YYYY`); academic terms (`2025.2`, `20252`, `2025-2`) and school years (`2025-2026`, `năm học 2025-2026`) stripped before parsing. Else freshness intent → `sort_by_date_desc=True`. Else empty (recency bonus still applies).
 - **`stsv`** — no extractor registered.
 
@@ -390,23 +407,23 @@ KEHOACH_RECENCY_DECAY_DAYS = 365
 ratio = max(0, 1 - age_days / 365); bonus = ratio × 0.05
 ```
 
-Only `kehoach` docs with a parseable `date_str` get it; added in both `linear` and `rrf` fusion.
+Only `kehoach` docs with a parseable `date_str` get it; added in both `linear` and `rrf` fusion (in `rrf` mode the bonus is rescaled by `1/(rrf_k+1)` before adding).
 
 ### Major Code Handling
 
-- `MAJOR_CODE_TO_NAME`: ~70 HUST programme codes → canonical names. `IT-E6` is canonicalized as `Công nghệ thông tin Việt - Nhật` to match CTĐT metadata.
+- `MAJOR_CODE_TO_NAME`: ~70 HUST programme codes → canonical names.
 - `MAJOR_PATTERNS`: ordered `(regex, code)` tuples.
 - `MAJOR_NAME_ALIAS_MAPPING`: canonical name → accepted aliases/codes.
 - `_normalise_major_text()` handles Unicode dashes and compact forms (`IT E10`, `IT–E10`, `ITE10` → `IT-E10`).
 - `_resolve_major_code()` priority: `resolved_major` (code → canonical-name alias → name→code → pattern) then query regex.
-- Public helpers: `extract_major_codes`, `extract_cohort_codes`, `canonicalize_major_name`, `enrich_major_references_for_query` (adds code/name pairs while leaving already bracketed references like `[IT-E6]` unchanged).
+- Public helpers: `extract_major_codes`, `extract_cohort_codes`, `canonicalize_major_name`, `enrich_major_references_for_query` (adds code/name pairs while leaving already bracketed references like `[IT-E6]` unchanged), `expand_major_in_query_for_reranking` (replaces codes with full names to help the cross-encoder).
 
 ### Comparison & Query-Shaping Helpers
 
 - `build_cohort_comparison_subqueries_for_retrieval()` and `build_major_comparison_subqueries_for_retrieval()` split compare queries into per-cohort / per-(query,code) subqueries (require ≥2 entities + compare hint).
 - `strip_cohort_comparison_scaffold_for_retrieval()` / `strip_major_comparison_scaffold_for_retrieval()` remove compare scaffolding.
-- `strip_major_from_query_for_retrieval()` removes major mentions once metadata filtering covers them.
-- `expand_major_in_query_for_reranking()` replaces codes with full names to help the cross-encoder.
+- `strip_major_from_query_for_retrieval()` removes major mentions once metadata filtering covers them; returns original if stripped query < 2 words or only generic words remain.
+- `expand_major_in_query_for_reranking()` replaces codes with full names for the cross-encoder.
 
 ### Adding a New Collection Filter
 
@@ -494,7 +511,7 @@ Tavily is wired through `RetrievalService.tavily_tool` but called from `pipeline
 
 ## Validity Filter
 
-`ValidityFilter` loads `data/document_lineage.json` (relative to the project root) and builds `_superseded_ids` (status `superseded`) and `_superseded_patterns` (lowercased filename stems). `filter(results, min_results=2)` drops chunks whose `source`/`title` matches a superseded pattern (substring), but returns the original list if filtering would leave fewer than `min_results`. `reload()` hot-reloads. Invoked by `RAGPipeline`, not by `RetrievalService.search()`.
+`ValidityFilter` loads `data/document_lineage.json` (path: `Path(__file__).resolve().parent.parent / "data" / "document_lineage.json"`) and builds `_superseded_ids` (status `superseded`) and `_superseded_patterns` (lowercased filename stems). `filter(results, min_results=2)` drops chunks whose `source`/`title` matches a superseded pattern (substring), but returns the original list if filtering would leave fewer than `min_results`. `reload()` hot-reloads. Invoked by `RAGPipeline`, not by `RetrievalService.search()`.
 
 ---
 
@@ -508,19 +525,21 @@ Tavily is wired through `RetrievalService.tavily_tool` but called from `pipeline
   2. Semantic fallback — `RetrievalService.search()` with `rerank=True` on the source collection, filtered to the same document and article heading.
 - **Limits**: `max_refs_per_chunk=2`, `max_total_refs=3`, `scroll_page_size=128`, `scroll_max_points=500`.
 - **Dedup**: by `{collection}/{id}` keys, raw `id`, and first-200-char text. Resolved chunks marked `_cross_reference=True`, `_referenced_from`, `_reference`.
+- **Note**: `_qdrant_store(collection)` resolves via `service.searcher.qdrant_stores` (property dict, not a method call).
 
 ---
 
 ## Query Expansion & HyDE
 
 - `MultiQueryExpander(max_variants=3, clamped 2–4).expand(query, entities)` → up to 3 variants: original, entity-focused (entity values + topic words), topic-only (entities stripped). Entity keys: `major_code`, `cohort`, `course_code`, `academic_year`, `semester`.
-- `HyDEExpander(llm, embedder, prompt_template=None, max_hypothesis_len=800)`: `generate_hypothesis()` (Vietnamese HUST prompt, falls back to raw query on empty/error) and `generate_embedding()`. `should_use_hyde(results, reranker_stats, min_results=3, confidence_threshold=0.3)` triggers when too few results or low reranker mean score. Runtime settings currently default to `hyde_enabled=True`, `hyde_min_results=3`, `hyde_confidence_threshold=0.3`; `retrieval/config.py` still exposes legacy constants (`HYDE_ENABLED=False`, `HYDE_MIN_RESULTS=3`, `HYDE_CONFIDENCE_THRESHOLD=0.3`) for older direct imports.
+- `HyDEExpander(llm, embedder, prompt_template=None, max_hypothesis_len=800)`: `generate_hypothesis()` (Vietnamese HUST prompt, falls back to raw query on empty/error) and `generate_embedding()`. `should_use_hyde(results, reranker_stats, min_results=3, confidence_threshold=0.3)` triggers when too few results or low reranker mean score (`reranker_stats["rerank_score_mean"]`).
+- **config.py constants** (`HYDE_ENABLED=False`, `HYDE_MIN_RESULTS=3`, `HYDE_CONFIDENCE_THRESHOLD=0.3`) are legacy constants for older direct imports; production settings live in `config/settings.py` (`hyde_enabled=True` in settings, overriding `config.py`'s `False`).
 
 ---
 
 ## Parent Context
 
-`ParentContextExpander(qdrant_host, qdrant_port, max_parent_chars=3000)` (the service passes `settings.parent_max_chars`, default 1500). `expand_with_parents(results, collection)` collects `parent_id` for results with `level=="child"`, fetches parents from Qdrant, and attaches `parent_context` (truncated), `parent_title` (parent `hierarchy_path`), and `parent_section_h2` to each child's metadata. Qdrant client is lazily created.
+`ParentContextExpander(qdrant_host, qdrant_port, max_parent_chars=3000)` (the service passes `settings.parent_max_chars`, default 1500). `expand_with_parents(results, collection, include_parent_content=True)` collects `parent_id` for results with `level=="child"`, fetches parents from Qdrant, and attaches `parent_context` (truncated at a sentence/paragraph boundary when over limit, with `[… nội dung còn tiếp …]` marker), `parent_title` (parent `hierarchy_path`), and `parent_section_h2` to each child's metadata. Qdrant client is lazily created.
 
 ---
 
@@ -550,6 +569,8 @@ Tavily is wired through `RetrievalService.tavily_tool` but called from `pipeline
 - If a Qdrant collection is populated but its ES index is empty, `_resolve_filter_with_fallback()` still applies exact Qdrant payload filters; do not remove this without fixing the indexing sync.
 - `_search_cache` caches **pre-rerank** results for 180s; clear/disable it when debugging fusion or filter changes.
 - `date_str` is a keyword `"D/M/YYYY"` (not a native date field) — sorting requires Python-side parsing.
+- Fusion uses **max-normalisation** (divide by pool max), not min-max. The lowest-scoring doc in a pool retains a non-zero contribution. Do not confuse with true min-max in comments or docs.
+- The `kehoach` recency bonus in RRF mode is multiplied by `1/(rrf_k+1)` before addition; in linear mode it is added raw. Keep these consistent when changing fusion modes.
 - When changing fusion/scoring, re-run the search/eval benchmarks.
 
 ---

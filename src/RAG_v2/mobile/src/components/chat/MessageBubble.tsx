@@ -75,7 +75,7 @@ const createStyles = (colors: AppColors) =>
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: colors.secondary,
+      backgroundColor: colors.primarySoft,
       borderWidth: 1,
       borderColor: colors.border,
       justifyContent: 'center',
@@ -94,7 +94,7 @@ const createStyles = (colors: AppColors) =>
     bubble: { maxWidth: '82%', padding: 14, borderRadius: 18, borderWidth: 1 },
     bubbleUser: {
       backgroundColor: colors.chatUser,
-      borderColor: colors.border,
+      borderColor: colors.chatUser,
       borderBottomRightRadius: 4,
     },
     bubbleAssistant: {
@@ -102,7 +102,7 @@ const createStyles = (colors: AppColors) =>
       borderColor: colors.border,
       borderBottomLeftRadius: 4,
     },
-    userText: { color: colors.foreground, fontSize: 15, lineHeight: 22 },
+    userText: { color: colors.primaryForeground, fontSize: 15, lineHeight: 22 },
     metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 8 },
     badge: {
       backgroundColor: colors.secondary,

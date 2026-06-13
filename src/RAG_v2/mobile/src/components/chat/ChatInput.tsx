@@ -2,7 +2,7 @@
  * Chat input — multiline text input with send button.
  */
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -26,10 +26,18 @@ interface Props {
 const MAX_INPUT_HEIGHT = 120;
 const MIN_INPUT_HEIGHT = 44;
 
+// DESIGN §5.5: placeholder xoay vòng theo chủ đề sinh viên hay hỏi.
+const ROTATING_PLACEHOLDERS = [
+  'Hỏi về học phí, lịch thi, quy chế…',
+  'Thủ tục đăng ký học lại?',
+  'Điều kiện xét học bổng KKHT?',
+  'Lịch nộp học phí kỳ này?',
+];
+
 const ChatInput = ({
   onSend,
   disabled = false,
-  placeholder = 'Hỏi gì đó...',
+  placeholder,
   bottomInset = 0,
   onFocus,
 }: Props) => {
@@ -37,7 +45,22 @@ const ChatInput = ({
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [text, setText] = useState('');
   const [inputHeight, setInputHeight] = useState(MIN_INPUT_HEIGHT);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const inputRef = useRef<TextInput>(null);
+
+  // Rotate the hint only while the field is empty; a fixed `placeholder` prop
+  // (if supplied by the caller) always wins.
+  useEffect(() => {
+    if (placeholder || text.length > 0) return;
+    const timer = setInterval(
+      () => setPlaceholderIndex((i) => (i + 1) % ROTATING_PLACEHOLDERS.length),
+      3500,
+    );
+    return () => clearInterval(timer);
+  }, [placeholder, text.length]);
+
+  const activePlaceholder =
+    placeholder ?? ROTATING_PLACEHOLDERS[placeholderIndex];
 
   const handleSend = () => {
     const trimmed = text.trim();
@@ -69,7 +92,7 @@ const ChatInput = ({
           style={[styles.input, { height: inputHeight }]}
           value={text}
           onChangeText={setText}
-          placeholder={placeholder}
+          placeholder={activePlaceholder}
           placeholderTextColor={colors.mutedForeground}
           multiline
           editable={!disabled}

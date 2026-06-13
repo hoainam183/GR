@@ -214,15 +214,15 @@ const ChatScreen = ({ route, navigation }: Props) => {
     ({ item }: { item: Message }) => <MessageBubble message={item} onShowSources={handleShowSources} />,
     [handleShowSources],
   );
-  const greeting = displayName ? "Xin chào, " + displayName + "!" : "Bắt đầu trò chuyện";
+  const greeting = displayName ? "Chào bạn, " + displayName + "!" : "Chào bạn!";
   const renderEmptyState = () => (
     <View style={styles.emptyWrap}>
       <EmptyState icon="chatbubbles" title={greeting}
-        subtitle="Tôi có thể tư vấn về quy chế học tập, học bổng và các quy định của BKHN." />
+        subtitle="Mình là Trợ lý CTT của Đại học Bách khoa Hà Nội. Mình giúp bạn tra cứu thông báo, kế hoạch học tập, học phí, quy chế và biểu mẫu. Bạn cần gì hôm nay?" />
       {!keyboardVisible && suggestions.length > 0 && (
         <ScrollView horizontal style={styles.suggestionScroll} showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.suggestionRow}>
-          {suggestions.slice(0, 6).map((item) => (
+          {suggestions.slice(0, 4).map((item) => (
             <Pressable key={item.question}
               style={[styles.suggestionChip, chatPhase !== "idle" && styles.suggestionChipDisabled]}
               onPress={() => handleSend(item.question)} disabled={chatPhase !== "idle"}>
@@ -274,6 +274,11 @@ const ChatScreen = ({ route, navigation }: Props) => {
             }
           />
         )}
+        {!keyboardVisible && (
+          <Text style={styles.disclaimer} numberOfLines={2}>
+            Thông tin do AI tổng hợp từ tài liệu, quy chế và thông báo của Nhà trường, có thể chưa đầy đủ. Vui lòng đối chiếu văn bản gốc.
+          </Text>
+        )}
         <ChatInput onSend={handleSend} onFocus={() => setKeyboardVisible(true)}
           bottomInset={insets.bottom}
           disabled={chatPhase !== "idle" || netInfo.isConnected === false || netInfo.isInternetReachable === false} />
@@ -307,6 +312,8 @@ const createStyles = (colors: AppColors) =>
       borderWidth: 1, borderColor: colors.border, borderRadius: 19, paddingHorizontal: 12 },
     suggestionChipDisabled: { opacity: 0.5 },
     suggestionText: { color: colors.foreground, fontSize: 12, lineHeight: 16, fontWeight: "500" },
+    disclaimer: { color: colors.mutedForeground, fontSize: 11, lineHeight: 15,
+      textAlign: "center", paddingHorizontal: 24, paddingTop: 6, paddingBottom: 2 },
     scrollDownButton: { position: "absolute", bottom: 80, right: 20, width: 40, height: 40,
       borderRadius: 20, backgroundColor: colors.primary, justifyContent: "center", alignItems: "center",
       elevation: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 2 },

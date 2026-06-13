@@ -65,5 +65,4 @@ src/RAG_v2/scratch.py
 src/RAG_v2/test_pipeline*.py
 src/RAG_v2/agent_implementation_plan
 src/RAG_v2/retrieval_test_result.json
-src/RAG_v2/Baocao/
 src/RAG_v2/.pytest_cache/
