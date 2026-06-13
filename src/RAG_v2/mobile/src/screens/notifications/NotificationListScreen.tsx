@@ -58,11 +58,29 @@ const getLinkCount = (item: NotificationItem) =>
   || item.body.match(URL_PATTERN)?.length
   || 0;
 
-const getNotificationLabel = (item: NotificationItem, linkCount: number) => {
+// Hide crawler/system housekeeping notifications that carry no user value
+// (e.g. "Crawl 'all' hoàn tất", "Không có bài viết mới"). A crawler update is
+// only worth showing when it actually brought in new documents (links > 0).
+const isUserRelevant = (item: NotificationItem) => {
+  if (item.type === 'crawler_update') return getLinkCount(item) > 0;
+  return true;
+};
+
+// Re-label crawler updates with student-facing text instead of the raw
+// pipeline status that gets stored on the backend.
+const getDisplayContent = (item: NotificationItem, linkCount: number) => {
   if (item.type === 'crawler_update') {
-    return linkCount > 0 ? `${linkCount} bài viết mới` : 'Không có bài mới';
+    const titles = (item.metadata?.article_links ?? [])
+      .map((link) => link.title?.trim())
+      .filter((title): title is string => Boolean(title) && title !== 'Bài viết liên quan');
+    return {
+      title: linkCount === 1 ? 'Có 1 tài liệu mới' : `Có ${linkCount} tài liệu mới`,
+      body: titles.length
+        ? titles.join('\n')
+        : 'Nhấn để xem các bài viết mới được cập nhật.',
+    };
   }
-  return 'Thông báo';
+  return { title: item.title, body: item.body || 'Không có nội dung.' };
 };
 
 const NotificationListScreen = ({ navigation }: Props) => {
@@ -84,8 +102,11 @@ const NotificationListScreen = ({ navigation }: Props) => {
     queryFn: () => getUnreadCount(apiClient),
     staleTime: 30_000,
   });
-  const notifications = data?.notifications ?? [];
-  const unreadCount = unreadData?.unread_count ?? 0;
+  const notifications = (data?.notifications ?? []).filter(isUserRelevant);
+  // Count unread from the items the user can actually see, so the header badge
+  // never claims more unread than the list shows after filtering noise.
+  const visibleUnread = notifications.filter((item) => !item.read).length;
+  const unreadCount = Math.min(unreadData?.unread_count ?? 0, visibleUnread);
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ['notifications'] });
     queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
@@ -232,7 +253,7 @@ const NotificationListScreen = ({ navigation }: Props) => {
           contentContainerStyle={notifications.length ? styles.list : styles.empty}
           renderItem={({ item }) => {
             const linkCount = getLinkCount(item);
-            const label = getNotificationLabel(item, linkCount);
+            const { title, body } = getDisplayContent(item, linkCount);
             return (
               <Pressable
                 style={({ pressed }) => [
@@ -248,12 +269,11 @@ const NotificationListScreen = ({ navigation }: Props) => {
                 </View>
                 <View style={styles.cardBody}>
                   <View style={styles.cardHeader}>
-                    <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
+                    <Text style={styles.title} numberOfLines={2}>{title}</Text>
                     <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} />
                   </View>
-                  <Text style={styles.body} numberOfLines={3}>{item.body || 'Không có nội dung.'}</Text>
+                  <Text style={styles.body} numberOfLines={3}>{body}</Text>
                   <View style={styles.cardFooter}>
-                    <Text style={styles.infoLabel}>{label}</Text>
                     {linkCount > 0 && (
                       <View style={styles.linkPill}>
                         <Ionicons name="open-outline" size={12} color={colors.primary} />
@@ -306,7 +326,6 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
   title: { flex: 1, color: colors.foreground, fontSize: 15, fontWeight: '700', lineHeight: 20 },
   body: { color: colors.subtleForeground, fontSize: 13, lineHeight: 19 },
   cardFooter: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
-  infoLabel: { color: colors.mutedForeground, fontSize: 12, fontWeight: '600', flexShrink: 1 },
   linkPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: colors.primarySoft, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 7 },
   linkPillText: { color: colors.primary, fontSize: 11, fontWeight: '700' },
   dateText: { marginLeft: 'auto', color: colors.mutedForeground, fontSize: 11, fontWeight: '600' },

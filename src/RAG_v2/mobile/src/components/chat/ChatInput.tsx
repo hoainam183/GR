@@ -82,7 +82,10 @@ const ChatInput = ({
   };
 
   const canSend = text.trim().length > 0 && !disabled;
-  const containerPaddingBottom = Math.max(8, bottomInset);
+  // Hug the bottom edge: keep just enough clearance for the gesture pill rather
+  // than the full safe-area inset (which left the bar floating too high).
+  const containerPaddingBottom =
+    bottomInset > 0 ? Math.max(8, Math.round(bottomInset * 0.5)) : 8;
 
   return (
     <View style={[styles.container, { paddingBottom: containerPaddingBottom }]}>

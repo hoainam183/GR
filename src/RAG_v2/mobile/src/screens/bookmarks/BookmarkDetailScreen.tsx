@@ -16,6 +16,7 @@ import type { BookmarkStackParamList } from '../../navigation/BookmarkStack';
 import { updateBookmark, deleteBookmark } from '@rag/shared';
 import { apiClient } from '../../services/api';
 import MarkdownDisplay from '../../components/chat/MarkdownDisplay';
+import { friendlyCollection, stripMarkdown } from '../../utils/sourceText';
 import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Props = NativeStackScreenProps<BookmarkStackParamList, 'BookmarkDetail'>;
@@ -129,17 +130,12 @@ const BookmarkDetailScreen = ({ route, navigation }: Props) => {
                   <Text style={styles.sourceRank}>#{source.rank}</Text>
                   {source.collection && (
                     <View style={styles.collectionBadge}>
-                      <Text style={styles.collectionText}>{source.collection}</Text>
+                      <Text style={styles.collectionText}>{friendlyCollection(source.collection)}</Text>
                     </View>
                   )}
-                  {source.score > 0 && (
-                    <Text style={styles.scoreText}>
-                      {(source.score * 100).toFixed(0)}%
-                    </Text>
-                  )}
                 </View>
-                <Text style={styles.sourceContent} numberOfLines={4}>
-                  {source.content}
+                <Text style={styles.sourceContent} numberOfLines={6}>
+                  {stripMarkdown(source.content)}
                 </Text>
               </View>
             ))}
@@ -237,7 +233,6 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     borderRadius: 4,
   },
   collectionText: { color: colors.primary, fontSize: 10, fontWeight: '600' },
-  scoreText: { color: colors.mutedForeground, fontSize: 11 },
   sourceContent: { color: colors.subtleForeground, fontSize: 13, lineHeight: 19 },
 });
 

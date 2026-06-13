@@ -22,6 +22,7 @@ import {
 } from '@rag/shared';
 import { apiClient } from '../../services/api';
 import { useProfile } from '../../hooks/useProfile';
+import { friendlyCollection, toPlainPreview } from '../../utils/sourceText';
 import { useAppTheme, type AppColors } from '../../theme/theme';
 
 type Mode = 'ctdt' | 'regulations' | 'calendar' | 'compare';
@@ -93,11 +94,11 @@ const LookupScreen = () => {
           {item.title}
         </Text>
         {item.collection ? (
-          <Text style={styles.badge}>{item.collection}</Text>
+          <Text style={styles.badge}>{friendlyCollection(item.collection)}</Text>
         ) : null}
       </View>
       <Text style={styles.summary} numberOfLines={5}>
-        {item.summary}
+        {toPlainPreview(item.summary)}
       </Text>
     </View>
   );
