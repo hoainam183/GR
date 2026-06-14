@@ -1354,10 +1354,22 @@ class RAGPipeline:
             # default and let the downstream flow handle it — no planner.
             return "simple", None
 
-        if self._count_active_domains(routing) < 2:
+        # A graduation/eligibility-with-program query spans curriculum (ctdt)
+        # AND regulations (quydinh) by nature, but the multi-label classifier
+        # sometimes ranks the second collection just under MULTI_LABEL_THRESHOLD
+        # (observed in production: "điều kiện tốt nghiệp của IT-E6" → ctdt 0.951,
+        # quydinh 0.300), so only one collection clears the bar and the query is
+        # cut to ``simple`` before the judge ever runs. The deterministic
+        # ``multi_domain`` signal (signals.py: graduation/eligibility + program
+        # context, entity-agnostic, no major enumeration) lets such borderline
+        # queries reach the Tier-2 judge anyway. The judge still rules simple vs
+        # complex, so Tier-0's "defer to ML/LLM" contract is preserved.
+        signals = t0.get("query_signals") or {}
+        spans_two_collections = self._count_active_domains(routing) >= 2
+        if not (spans_two_collections or signals.get("multi_domain")):
             return "simple", None
 
-        # Tier 2 — borderline (≥2 active collections): let the LLM judge.
+        # Tier 2 — borderline: let the LLM judge.
         verdict = self._classify_complexity_llm(reflected_question, routing)
         return verdict["tier"], verdict.get("subtype")
 

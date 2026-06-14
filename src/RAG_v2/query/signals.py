@@ -55,6 +55,23 @@ def _matches_any(text: str, patterns: Iterable[str]) -> bool:
     return any(re.search(pattern, text) for pattern in patterns)
 
 
+# Vietnamese accent folding collapses "mấy" (how many) and "máy" (machine,
+# e.g. "máy tính" = computer) to the same token "may". A how-many lookup must
+# not be triggered by a major name like "Khoa học Máy tính". We detect the
+# how-many sense by counting folded "may" hits and subtracting those explained
+# by accented "máy"; no-diacritic input (mobile) still works because its "máy"
+# count is 0.
+_FOLDED_MAY_RE = re.compile(r"\bmay\b")
+_MACHINE_ACCENTED_RE = re.compile(r"\bmáy\b", re.IGNORECASE)
+
+
+def _has_how_many_token(query: str, folded: str) -> bool:
+    """Return True only for the "mấy" (how many) sense, not "máy" (machine)."""
+    folded_hits = len(_FOLDED_MAY_RE.findall(folded))
+    machine_hits = len(_MACHINE_ACCENTED_RE.findall(query))
+    return folded_hits > machine_hits
+
+
 _PERSONAL_PATTERNS = (
     r"\b(?:cua\s+toi|cua\s+minh|cua\s+em)\b",
     r"\b(?:nganh|chuong\s+trinh|hoc\s+phan|diem|cpa|gpa|khoa|truong)\s+(?:cua\s+)?(?:toi|minh|em)\b",
@@ -71,9 +88,11 @@ _ELIGIBILITY_PATTERNS = (
     r"\b(?:hoc bong|mien giam).{0,30}\b(?:du dieu kien|dat dieu kien|duoc xet)\b",
 )
 
+# NOTE: bare "may" (how many) is handled accent-aware via _has_how_many_token,
+# NOT listed here, so "máy" (machine) in major names does not false-trigger.
 _EXACT_LOOKUP_PATTERNS = (
-    r"\b(bao nhieu|may|muc nao|muc diem|thang diem|can bao nhieu)\b",
-    r"\b(duoc bao nhieu|duoc may|cong bao nhieu|tinh bao nhieu)\b",
+    r"\b(bao nhieu|muc nao|muc diem|thang diem|can bao nhieu)\b",
+    r"\b(duoc bao nhieu|cong bao nhieu|tinh bao nhieu)\b",
     r"\b(diem ren luyen|diem cong|tin chi|hoc phi|muc thu|xep loai|quy doi)\b",
 )
 
@@ -147,7 +166,9 @@ def analyze_query_signals(query: str) -> QuerySignals:
 
     personal_reference = _matches_any(folded, _PERSONAL_PATTERNS)
     eligibility_check = _matches_any(folded, _ELIGIBILITY_PATTERNS)
-    exact_policy_lookup = _matches_any(folded, _EXACT_LOOKUP_PATTERNS)
+    exact_policy_lookup = _matches_any(folded, _EXACT_LOOKUP_PATTERNS) or _has_how_many_token(
+        query, folded
+    )
     table_lookup = _matches_any(folded, _TABLE_LOOKUP_PATTERNS)
     procedural_support = _matches_any(folded, _PROCEDURAL_PATTERNS)
     freshness = _matches_any(folded, _FRESHNESS_PATTERNS)
