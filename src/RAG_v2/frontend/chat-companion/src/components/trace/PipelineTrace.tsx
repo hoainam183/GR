@@ -10,6 +10,7 @@ import {
   Cpu,
   Search,
   ArrowDownUp,
+  FlaskConical,
   Sparkles,
   ShieldCheck,
   Clock,
@@ -153,6 +154,9 @@ export default function PipelineTrace({ response, question }: Props) {
   const hasSelfEval = !!t['self_eval'];
   const selfEvalSkipped = !!t['self_eval_skipped'];
   const hasTavily = !!t['tavily_total'];
+  const hasHyde = !!t['hyde'] || !!t['hyde_triggered'];
+  const hydeFailed = !!t['hyde_failed'];
+  const hydeNewCandidates = t['hyde_new_candidates'] ?? 0;
 
   // Animate layers in with a stagger
   const [visibleCount, setVisibleCount] = useState(0);
@@ -513,6 +517,49 @@ export default function PipelineTrace({ response, question }: Props) {
 
       <ConnectorArrow visible={isVisible(9)} />
 
+      {/* ── LAYER 7.5: HyDE Second-Pass (conditional) ──────── */}
+      <LayerCard
+        icon={<FlaskConical className="w-4 h-4" />}
+        title="HyDE Second-Pass Retrieval"
+        status={hasHyde ? 'triggered' : 'skipped'}
+        timing={t['hyde']}
+        badge={
+          hasHyde ? (
+            <span className="text-xs text-muted-foreground">
+              {hydeFailed ? 'failed' : `+${hydeNewCandidates} candidate${hydeNewCandidates === 1 ? '' : 's'}`}
+            </span>
+          ) : undefined
+        }
+        defaultOpen={false}
+        visible={isVisible(9)}
+      >
+        {hydeFailed ? (
+          <div className="flex items-center gap-2 text-amber-600 text-xs font-medium">
+            <XCircle className="w-4 h-4" />
+            HyDE second-pass failed — kept the original reranked results.
+          </div>
+        ) : hasHyde ? (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              Low recall after rerank → generated a hypothetical answer, re-embedded it (BGE-M3),
+              and searched again. New candidates are merged into the pool and re-ranked.
+            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="secondary" className="text-xs">
+                +{hydeNewCandidates} new candidate{hydeNewCandidates === 1 ? '' : 's'}
+              </Badge>
+              <TimingBadge ms={t['hyde']} />
+            </div>
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-xs">
+            Skipped — retrieval recall was sufficient (rerank scores above threshold).
+          </p>
+        )}
+      </LayerCard>
+
+      <ConnectorArrow visible={isVisible(9)} />
+
       {/* ── LAYER 8: LLM Generation ────────────────────── */}
       <LayerCard
         icon={<Sparkles className="w-4 h-4" />}
@@ -637,6 +684,7 @@ function TotalsBar({ timings, intent }: { timings: Record<string, number>; inten
     { key: 'embed_bge', label: 'Embed', color: 'bg-pink-400' },
     { key: 'search', label: 'Search', color: 'bg-amber-400' },
     { key: 'rerank', label: 'Rerank', color: 'bg-orange-400' },
+    { key: 'hyde', label: 'HyDE', color: 'bg-rose-400' },
     { key: 'generate', label: 'Generate', color: 'bg-green-400' },
     { key: 'self_eval', label: 'Self-eval', color: 'bg-teal-400' },
   ].filter((s) => !!timings[s.key]);
