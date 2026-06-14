@@ -12,6 +12,7 @@ from langgraph.graph import END, START, StateGraph
 
 from .graph_state import AgentGraphState
 from .planning import (
+    ResolvedScope,
     _content_to_text,
     _hash_text,
     _is_empty_result_text,
@@ -19,6 +20,7 @@ from .planning import (
     _parse_json_object as _parse_json_object_impl,
     _preview_text,
     _trace_plan_step,
+    resolve_entity_scope,
 )
 from .prompts import PLANNER_SYSTEM_PROMPT, SYNTHESIS_PROMPT
 from .state import AgentState, ToolResult, _CONTEXT_WINDOW_TOOL_LIMIT
@@ -48,9 +50,11 @@ def _make_call_sig(tool_name: str, tool_args: dict[str, Any]) -> str:
 def _normalise_plan_steps_for_entities(
     steps: list[Any],
     source_query: str,
+    user_context: dict[str, Any] | None = None,
 ) -> tuple[list[Any], dict[str, Any]]:
-    """Preserve explicit major/cohort scope when planner emits generic steps."""
-    return _normalise_plan_steps_impl(steps, source_query)
+    """Ground major/cohort scope to the resolved entity scope (query-first,
+    profile-fallback when ``user_context`` is supplied)."""
+    return _normalise_plan_steps_impl(steps, source_query, user_context)
 
 def _parse_json_object(content: Any) -> dict[str, Any]:
     """Parse strict JSON object content, accepting optional markdown fences."""
@@ -217,53 +221,26 @@ class ReActAgent:
 
         return self._to_agent_state(result, query, session_id)
 
-    def _user_context_hint(self, query: str, user_context: dict[str, Any] | None) -> str:
-        if not user_context:
-            return ""
+    @staticmethod
+    def _scope_prompt_hint(scope: "ResolvedScope") -> str:
+        """Advisory prompt hint stating the resolved entity scope.
 
+        Only advisory: the resolved major/cohort is enforced deterministically by
+        the step grounding in ``_normalise_plan_steps_for_entities``, so this hint
+        merely steers the LLM toward producing aligned query text. In comparison
+        (multi-major) mode ``scope.major`` is ``None`` and no major is forced.
+        """
         ctx_parts: list[str] = []
-        if user_context.get("cohort"):
-            ctx_parts.append(f"Khoa sinh vien: {user_context['cohort']}")
-
-        if user_context.get("major_code"):
-            from retrieval.metadata_filters import extract_major_codes  # noqa: PLC0415
-
-            query_lower = query.lower()
-            has_personal_major_ref = any(
-                ref in query_lower
-                for ref in [
-                    "ngành của tôi",
-                    "ngành tôi",
-                    "ngành học của tôi",
-                    "chương trình của tôi",
-                    "chương trình tôi",
-                    "nganh cua toi",
-                    "nganh toi",
-                    "chuong trinh cua toi",
-                ]
-            )
-            has_comparison_keywords = any(
-                kw in query_lower
-                for kw in [
-                    "so sánh",
-                    "khác gì",
-                    "khác nhau",
-                    "với",
-                    "so sanh",
-                    "khac gi",
-                    "khac nhau",
-                ]
-            )
-            if (
-                len(extract_major_codes(query)) < 2
-                and (has_personal_major_ref or not has_comparison_keywords)
-            ):
-                major_hint = f"Ma nganh: {user_context['major_code']}"
-                if user_context.get("major"):
-                    major_hint += f" ({user_context['major']})"
-                ctx_parts.append(major_hint)
-
-        return f"\nThong tin sinh vien: {', '.join(ctx_parts)}" if ctx_parts else ""
+        if scope.major:
+            ctx_parts.append(f"Ma nganh: {scope.major}")
+        if scope.cohort:
+            ctx_parts.append(f"Khoa sinh vien: {scope.cohort}")
+        if not ctx_parts:
+            return ""
+        return (
+            "\nThong tin ap dung cho moi step (dung dung ma nay, KHONG doi sang "
+            f"ma khac): {', '.join(ctx_parts)}"
+        )
 
     @staticmethod
     def _subtype_hint(complexity_subtype: str | None) -> str:
@@ -290,10 +267,16 @@ class ReActAgent:
         from retrieval.metadata_filters import enrich_major_references_for_query  # noqa: PLC0415
 
         enriched_query = enrich_major_references_for_query(state["query"])
+        user_context = state.get("user_context")
+        # Resolve the authoritative entity scope ONCE (query-first, profile
+        # fallback). It drives both the planner prompt (advisory) and the
+        # deterministic step grounding below — so correctness no longer depends
+        # on the LLM copying the right major from the prompt.
+        scope = resolve_entity_scope(enriched_query, user_context)
         prompt = (
             f"Cau hoi: {enriched_query}"
             f"{self._subtype_hint(state.get('complexity_subtype'))}"
-            f"{self._user_context_hint(enriched_query, state.get('user_context'))}"
+            f"{self._scope_prompt_hint(scope)}"
         )
 
         t0 = time.perf_counter()
@@ -324,6 +307,7 @@ class ReActAgent:
         plan["steps"], entity_hint_trace = _normalise_plan_steps_for_entities(
             steps[:4],
             enriched_query,
+            user_context,
         )
         elapsed_ms = (time.perf_counter() - t0) * 1000
         planner_trace = {

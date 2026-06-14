@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from dataclasses import dataclass
 from typing import Any
 
 _ENTITY_SCOPED_COLLECTIONS = frozenset({"quy_dinh", "chuong_trinh"})
@@ -49,33 +50,98 @@ def _single_extracted_entity(values: list[str]) -> str | None:
     return unique_values[0] if len(unique_values) == 1 else None
 
 
-def _normalise_plan_steps_for_entities(
-    steps: list[Any],
+# Comparison wording that must SUPPRESS the profile fallback: a comparison
+# question ("so sánh ngành của tôi với IT1") should not have the profile major
+# forced onto every step. Kept folded/diacritic-insensitive to match mobile input.
+_COMPARISON_KEYWORDS: tuple[str, ...] = (
+    "so sánh",
+    "khác gì",
+    "khác nhau",
+    "so sanh",
+    "khac gi",
+    "khac nhau",
+)
+
+
+@dataclass(frozen=True)
+class ResolvedScope:
+    """Authoritative entity scope for a planner run (query-first, profile-fallback)."""
+
+    major: str | None = None
+    cohort: str | None = None
+    multi_major: bool = False
+    multi_cohort: bool = False
+
+
+def resolve_entity_scope(
     source_query: str,
-) -> tuple[list[Any], dict[str, Any]]:
-    """Preserve explicit major/cohort scope when planner emits generic steps."""
+    user_context: dict[str, Any] | None = None,
+) -> ResolvedScope:
+    """Resolve the authoritative major/cohort scope for a planner run.
+
+    Resolution is deterministic and does NOT depend on the planner LLM:
+
+    1. If the (reflected) query names exactly one major → use it.
+    2. If it names ≥2 majors → comparison mode: no single major, steps keep
+       their own scope (``multi_major=True``).
+    3. Otherwise fall back to the user profile (``user_context["major_code"]``),
+       unless the query carries comparison wording.
+
+    Cohort is resolved symmetrically against ``user_context["cohort"]``.
+    """
     from retrieval.metadata_filters import (  # noqa: PLC0415
         extract_cohort_codes,
         extract_major_codes,
     )
 
-    all_source_majors = extract_major_codes(source_query)
-    all_source_cohorts = extract_cohort_codes(source_query)
-    source_major = _single_extracted_entity(all_source_majors)
-    source_cohort = _single_extracted_entity(all_source_cohorts)
-    source_has_multiple_majors = len(all_source_majors) >= 2
-    source_has_multiple_cohorts = len(all_source_cohorts) >= 2
+    query_majors = extract_major_codes(source_query)
+    query_cohorts = extract_cohort_codes(source_query)
+    multi_major = len(query_majors) >= 2
+    multi_cohort = len(query_cohorts) >= 2
+
+    folded = (source_query or "").casefold()
+    is_comparison = any(keyword in folded for keyword in _COMPARISON_KEYWORDS)
+    profile = user_context or {}
+
+    major = _single_extracted_entity(query_majors)
+    if major is None and not multi_major and not is_comparison:
+        major = _clean_plan_hint(profile.get("major_code"))
+
+    cohort = _single_extracted_entity(query_cohorts)
+    if cohort is None and not multi_cohort and not is_comparison:
+        cohort = _clean_plan_hint(profile.get("cohort"))
+
+    return ResolvedScope(
+        major=major,
+        cohort=cohort,
+        multi_major=multi_major,
+        multi_cohort=multi_cohort,
+    )
+
+
+def _normalise_plan_steps_for_entities(
+    steps: list[Any],
+    source_query: str,
+    user_context: dict[str, Any] | None = None,
+) -> tuple[list[Any], dict[str, Any]]:
+    """Ground each step's major/cohort scope to the resolved entity scope.
+
+    The scope is resolved once via :func:`resolve_entity_scope` (query-first,
+    profile-fallback) so the steps are authoritative regardless of what the
+    planner LLM emitted — passing ``user_context`` enables the profile fallback.
+    """
+    scope = resolve_entity_scope(source_query, user_context)
     trace: dict[str, Any] = {
         "applied": False,
-        "major_hint": source_major,
-        "cohort_hint": source_cohort,
-        "multi_major_mode": source_has_multiple_majors,
+        "major_hint": scope.major,
+        "cohort_hint": scope.cohort,
+        "multi_major_mode": scope.multi_major,
     }
     if (
-        not source_major
-        and not source_cohort
-        and not source_has_multiple_majors
-        and not source_has_multiple_cohorts
+        not scope.major
+        and not scope.cohort
+        and not scope.multi_major
+        and not scope.multi_cohort
     ):
         return steps, trace
 
@@ -84,10 +150,10 @@ def _normalise_plan_steps_for_entities(
     for raw_step in steps:
         step, step_changed = _normalise_plan_step_for_entities(
             raw_step,
-            source_major,
-            source_cohort,
-            source_has_multiple_majors,
-            source_has_multiple_cohorts,
+            scope.major,
+            scope.cohort,
+            scope.multi_major,
+            scope.multi_cohort,
         )
         normalised_steps.append(step)
         changed = changed or step_changed
