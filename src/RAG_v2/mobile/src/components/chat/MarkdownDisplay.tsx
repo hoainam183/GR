@@ -11,11 +11,21 @@ interface Props {
   content: string;
 }
 
+// The LLM sometimes emits broken links (empty/relative/`#`) when it has no real
+// URL. Returning false from onLinkPress for those blocks the navigation so a tap
+// does nothing instead of opening a garbage destination.
+const isSafeExternalUrl = (url: string): boolean =>
+  /^(https?:|mailto:)/i.test(url.trim());
+
 const MarkdownDisplay = ({ content }: Props) => {
   const { colors } = useAppTheme();
   const markdownStyles = useMemo(() => createMarkdownStyles(colors), [colors]);
 
-  return <Markdown style={markdownStyles}>{content}</Markdown>;
+  return (
+    <Markdown style={markdownStyles} onLinkPress={isSafeExternalUrl}>
+      {content}
+    </Markdown>
+  );
 };
 
 const createMarkdownStyles = (colors: AppColors) => StyleSheet.create({

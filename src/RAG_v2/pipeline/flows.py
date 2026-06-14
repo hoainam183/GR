@@ -1309,6 +1309,87 @@ def _format_context(
     return context
 
 
+# ─── Kehoach source-link footer ─────────────────────────────────────────────
+# kehoach (notification) docs always carry a real URL in metadata, but the LLM
+# does not reliably embed it. When the answer actually references such a doc, we
+# deterministically append a verifiable link footer so the user can open the
+# original notice.
+
+_KEHOACH_LINK_HEADER = "**Nguồn thông báo:**"
+# A title counts as "mentioned" when the answer shares at least this fraction of
+# the title's adjacent word-pairs (bigrams). Bigrams are far more discriminative
+# than single words, which the kehoach titles share heavily ("học kỳ", "năm học").
+_TITLE_MENTION_MIN_BIGRAM_OVERLAP = 0.5
+# Vietnamese titles use space-separated syllables; need enough to form bigrams.
+_TITLE_MENTION_MIN_TOKENS = 4
+_MATCH_NORMALIZE_RE = re.compile(r"[^0-9a-zà-ỹ]+")
+
+
+def _normalize_for_match(text: str) -> str:
+    """Lowercase, drop punctuation, collapse whitespace for fuzzy matching."""
+    lowered = unicodedata.normalize("NFC", text).lower()
+    return _MATCH_NORMALIZE_RE.sub(" ", lowered).strip()
+
+
+def _bigrams(tokens: List[str]) -> Set[str]:
+    return {f"{a} {b}" for a, b in zip(tokens, tokens[1:])}
+
+
+def _title_mentioned(answer_norm: str, answer_bigrams: Set[str], title: str) -> bool:
+    """True when ``title`` is referenced in the (normalized) answer text."""
+    title_norm = _normalize_for_match(title)
+    if not title_norm:
+        return False
+    if title_norm in answer_norm:
+        return True
+    title_tokens = title_norm.split()
+    if len(title_tokens) < _TITLE_MENTION_MIN_TOKENS:
+        return False  # too short to bigram-match; substring already failed
+    title_bigrams = _bigrams(title_tokens)
+    if not title_bigrams:
+        return False
+    overlap = len(title_bigrams & answer_bigrams) / len(title_bigrams)
+    return overlap >= _TITLE_MENTION_MIN_BIGRAM_OVERLAP
+
+
+def _kehoach_links_footer(answer: str, sources: List[Dict[str, Any]]) -> str:
+    """Return a Markdown link footer for kehoach docs the answer references.
+
+    Idempotent: a doc whose URL already appears in ``answer`` is skipped, so the
+    footer is never duplicated (e.g. when the LLM already embedded the link, or
+    on a cache hit where the answer was stored with the footer).
+    """
+    if not answer or not sources:
+        return ""
+    answer_norm = _normalize_for_match(answer)
+    answer_bigrams = _bigrams(answer_norm.split())
+    seen_urls: Set[str] = set()
+    links: List[str] = []
+    for doc in sources:
+        meta = doc.get("metadata") or {}
+        collection = doc.get("collection") or meta.get("collection") or meta.get("source")
+        if collection != "kehoach":
+            continue
+        url = str(meta.get("url") or "").strip()
+        if not url.startswith(("http://", "https://")):
+            continue
+        if url in answer or url in seen_urls:
+            continue
+        title = str(meta.get("title") or "").strip()
+        if not title or not _title_mentioned(answer_norm, answer_bigrams, title):
+            continue
+        seen_urls.add(url)
+        links.append(f"- [{title}]({url})")
+    if not links:
+        return ""
+    return f"\n\n{_KEHOACH_LINK_HEADER}\n" + "\n".join(links)
+
+
+def _append_kehoach_source_links(answer: str, sources: List[Dict[str, Any]]) -> str:
+    """Append the kehoach link footer to ``answer`` (no-op when none apply)."""
+    return answer + _kehoach_links_footer(answer, sources)
+
+
 def _cfg_int(cfg: Dict[str, Any], key: str, default: int) -> int:
     """Read an integer config value with a safe fallback."""
     try:
@@ -2063,7 +2144,9 @@ def rag_flow(
                 timings_ms["flow_total"] = _elapsed_ms(flow_t0)
                 return {
                     "question": question,
-                    "answer": _qcached["answer"],
+                    "answer": _append_kehoach_source_links(
+                        _qcached["answer"], _qcached["sources"]
+                    ),
                     "sources": _qcached["sources"],
                     "num_sources": len(_qcached["sources"]),
                     "intent": "rag",
@@ -2696,7 +2779,9 @@ def rag_flow(
                 timings_ms["flow_total"] = _elapsed_ms(flow_t0)
                 return {
                     "question": question,
-                    "answer": cached["answer"],
+                    "answer": _append_kehoach_source_links(
+                        cached["answer"], cached["sources"]
+                    ),
                     "sources": cached["sources"],
                     "num_sources": len(cached["sources"]),
                     "intent": "rag",
@@ -2993,6 +3078,8 @@ def rag_flow(
         web_fallback_used=web_fallback_used,
         web_fallback_reasons=pre_web_fallback_reasons,
     )
+    # Attach verifiable kehoach links before caching so cache + response agree.
+    answer = _append_kehoach_source_links(answer, reranked)
     if llm_cache is not None and cache_final_answer:
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
         llm_cache.put(
@@ -3160,7 +3247,11 @@ def rag_flow_stream(
                     metadata_out["tool_calls"] = []
 
                 def _cached_stream_early() -> Generator[str, None, None]:
-                    yield from _chunk_cached_answer(_qcached["answer"])
+                    yield from _chunk_cached_answer(
+                        _append_kehoach_source_links(
+                            _qcached["answer"], _qcached["sources"]
+                        )
+                    )
 
                 return _cached_stream_early(), _qcached["sources"]
 
@@ -3813,7 +3904,9 @@ def rag_flow_stream(
                     }
 
                 def _cached_stream() -> Generator[str, None, None]:
-                    yield from _chunk_cached_answer(cached["answer"])
+                    yield from _chunk_cached_answer(
+                        _append_kehoach_source_links(cached["answer"], cached["sources"])
+                    )
                     timings_ms["stream_first_token"] = 0.1
                     timings_ms["stream_generate"] = 0.1
                     timings_ms["flow_total"] = _elapsed_ms(flow_t0)
@@ -3878,6 +3971,13 @@ def rag_flow_stream(
         _log_timings("rag_flow_stream", timings_ms)
 
         stream_answer = "".join(full_cached_answer)
+
+        # Append verifiable kehoach links once the full answer is known, and
+        # fold them into stream_answer so the cached copy stays consistent.
+        kehoach_footer = _kehoach_links_footer(stream_answer, reranked)
+        if kehoach_footer:
+            yield kehoach_footer
+            stream_answer += kehoach_footer
 
         # Cache newly generated stream response (Phase 2)
         cache_stream_answer = _should_cache_final_answer(
