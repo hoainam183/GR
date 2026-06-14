@@ -180,6 +180,13 @@ function FriendlySourceCard({
   );
 }
 
+// The LLM sometimes emits broken links (empty `()`, `#`, or relative paths)
+// when it has no real URL. The browser resolves those relative to the current
+// page (/chat), so clicking just reloads the chat. Only treat genuine external
+// URLs as clickable; otherwise render the label as plain text.
+const isSafeExternalUrl = (href: string | undefined): href is string =>
+  typeof href === 'string' && /^(https?:|mailto:)/i.test(href.trim());
+
 const markdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>,
@@ -204,11 +211,14 @@ const markdownComponents: Components = {
   blockquote: ({ children }) => (
     <blockquote className="border-l-4 border-primary pl-3 italic my-2">{children}</blockquote>
   ),
-  a: ({ children, href }) => (
-    <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
-      {children}
-    </a>
-  ),
+  a: ({ children, href }) =>
+    isSafeExternalUrl(href) ? (
+      <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    ) : (
+      <>{children}</>
+    ),
 };
 
 const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {

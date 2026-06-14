@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import logging
+import re
 from typing import Dict, List, Optional
 
 from utils.terminology import HUST_TERMINOLOGY_GLOSSARY_TEXT
@@ -35,11 +36,14 @@ TRÍCH DẪN:
 - Ngắn gọn, đi thẳng vào trọng tâm. Dùng bullet points khi liệt kê.
 - Ưu tiên thông tin năm học/học kỳ hiện tại.
 - KHÔNG bắt đầu bằng "Chào bạn [tên]," trừ tin nhắn đầu hoặc khi sinh viên chào trước.
-- Nếu tài liệu có chứa đường link (URL), BẮT BUỘC phải đưa đường link đó vào câu trả lời.
-- KHÔNG để lộ nguyên đường link URL ra ngoài (ví dụ không viết: https://...). Thay vào đó, BẮT BUỘC phải gắn link vào cụm từ phù hợp (ví dụ: "tại đây", "xem chi tiết") dưới dạng Markdown link: `[cụm từ](URL)`.
-- Tuyệt đối KHÔNG viết "tại đây", "xem tại đây", hoặc "xem chi tiết tại đây" dưới dạng chữ thường nếu không gắn Markdown link ngay trên cụm đó.
-- NẾU URL có chứa khoảng trắng hoặc ký tự đặc biệt có thể làm đứt link, hãy đảm bảo link nằm trọn vẹn trong dấu `()`. Tốt nhất là thay khoảng trắng trong URL bằng `%20`.
-- Nếu tài liệu ghi "tại đây" nhưng KHÔNG CÓ URL kèm theo, hãy thay bằng tên nguồn cụ thể như "trên trang Phòng Đào tạo (ctt.hust.edu.vn)" và không tạo link giả.
+- LINK chỉ được tạo khi tài liệu tham khảo CÓ SẴN một URL thật, tức là một dòng \
+bắt đầu bằng "URL: http..." hoặc một đường dẫn http(s):// xuất hiện ngay trong nội dung tài liệu.
+- Khi có URL thật như trên, gắn nó vào cụm từ phù hợp ("tại đây", "xem chi tiết") dưới dạng \
+Markdown link `[cụm từ](URL)`, và đảm bảo URL nằm trọn vẹn trong dấu `()` (thay khoảng trắng bằng `%20`).
+- TUYỆT ĐỐI KHÔNG bịa link: không tạo Markdown link rỗng `[...]()`, không dùng `#`, \
+không dùng đường dẫn tương đối (ví dụ `/chat`), và không đoán/ghép URL nếu tài liệu không cung cấp.
+- Nếu tài liệu nhắc "tại đây" / "xem chi tiết" nhưng KHÔNG có URL thật kèm theo, hãy viết \
+dạng chữ thường KHÔNG gắn link, hoặc nêu tên nguồn cụ thể như "trên trang Phòng Đào tạo (ctt.hust.edu.vn)".
 
 HỘI THOẠI:
 - Dùng thông tin sinh viên đã cung cấp trong lịch sử (tên, khóa, ngành) để trả lời \
@@ -164,10 +168,22 @@ SELF_EVAL_USER_TEMPLATE = """\
 # ─── Message-Assembly Helpers ───────────────────────────────────────────────────
 
 
+# Markdown link `[text](url)` → keep only `text`. Avoids leaking prior-turn
+# links (often stale or malformed) back into the prompt, which made the model
+# copy them into new answers.
+_MARKDOWN_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]*\)")
+
+
+def _strip_markdown_links(text: str) -> str:
+    """Replace Markdown links in ``text`` with their visible label only."""
+    return _MARKDOWN_LINK_RE.sub(r"\1", text)
+
+
 def _format_history(history: List[Dict[str, str]]) -> str:
-    """Format chat history into a readable string."""
+    """Format chat history into a readable string (Markdown links stripped)."""
     return "\n".join(
-        f"{msg['role'].capitalize()}: {msg['content']}" for msg in history
+        f"{msg['role'].capitalize()}: {_strip_markdown_links(msg['content'])}"
+        for msg in history
     )
 
 

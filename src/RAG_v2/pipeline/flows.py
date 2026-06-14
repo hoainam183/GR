@@ -1251,13 +1251,15 @@ def _format_context(
             meta_parts.append(f"Ngành: {meta['major_name']}")
         if meta.get("applicable_cohort"):
             meta_parts.append(f"Khóa: {meta['applicable_cohort']}")
-        # For kehoach docs: include posting date and URL so the LLM can cite
-        # the newest source and the user can verify freshness.
-        if doc.get("collection") == "kehoach":
-            if meta.get("date_str"):
-                meta_parts.append(f"Ngày đăng: {meta['date_str']}")
-            if meta.get("url"):
-                meta_parts.append(f"URL: {meta['url']}")
+        # Posting date is kehoach-specific (freshness signal for notifications).
+        if doc.get("collection") == "kehoach" and meta.get("date_str"):
+            meta_parts.append(f"Ngày đăng: {meta['date_str']}")
+        # Expose a real source URL for ANY doc that has one (kehoach, web/Tavily,
+        # etc.) so the LLM can cite a verifiable link. Only inject genuine http(s)
+        # URLs — never relative/placeholder values that would render as a /chat link.
+        url = str(meta.get("url") or "").strip()
+        if url.startswith(("http://", "https://")):
+            meta_parts.append(f"URL: {url}")
         meta_str = f" [{', '.join(meta_parts)}]" if meta_parts else ""
         
         text = str(doc.get("text", "") or "").strip()
