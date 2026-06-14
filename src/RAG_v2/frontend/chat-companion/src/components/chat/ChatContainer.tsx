@@ -685,7 +685,9 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
                   </div>
                 </div>
               ) : (
-                <ChatMessage key={message.id} message={message} showDebug={isAdmin} />
+                // DEBUG: trace shown for ALL users while debugging the pipeline.
+                // Revert to `showDebug={isAdmin}` to re-gate behind the admin role.
+                <ChatMessage key={message.id} message={message} showDebug={true} />
               ),
             )}
             {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} label={statusMessage ?? undefined} />}
