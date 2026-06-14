@@ -112,8 +112,12 @@ _FOLDED_COMPARISON_RE: re.Pattern = re.compile(
     r"\b(so sanh|so voi|khac nhau|khac biet|giong nhau)\b",
     re.IGNORECASE,
 )
+# Bare "may" (how many) is intentionally omitted: it collides with "máy"
+# (machine) after accent folding, so the how-many sense is detected via
+# ``query_signals.exact_policy_lookup`` (accent-aware) instead. "nhom may"
+# (which group) is kept — "máy" does not follow "nhóm".
 _FOLDED_SINGLE_FACT_RE: re.Pattern = re.compile(
-    r"\b(bao nhieu|bao lau|bao lan|may|muc nao|muc diem|thang diem|can bao nhieu|nhom may)\b",
+    r"\b(bao nhieu|bao lau|bao lan|muc nao|muc diem|thang diem|can bao nhieu|nhom may)\b",
     re.IGNORECASE,
 )
 # Accent-insensitive fallback for the diacritic-only personal-eligibility pattern
