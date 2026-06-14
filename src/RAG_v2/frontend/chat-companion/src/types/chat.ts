@@ -3,6 +3,8 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  /** For assistant turns: the original user question that produced this answer (drives the trace's User Query layer). */
+  question?: string;
   sessionId?: string;
   turnId?: number;
   modelName?: string;

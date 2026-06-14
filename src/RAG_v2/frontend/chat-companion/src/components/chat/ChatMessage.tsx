@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import type { ChatV3Response, Message, RetrievedDocument } from '@/types/chat';
+import React, { useMemo, useState } from 'react';
+import type { ChatResponse, ChatV3Response, Message, RetrievedDocument } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { DocRow } from '../trace/DocRow';
 import MessageActionsWeb from './MessageActionsWeb';
 import AgentTrace from '../trace/AgentTrace';
+import PipelineTrace from '../trace/PipelineTrace';
 
 interface ChatMessageProps {
   message: Message;
@@ -271,6 +272,44 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
         agent_trace: message.agentTrace,
       }
     : null;
+
+  // RAG-path trace (reflection → routing → embed → retrieval → rerank → HyDE →
+  // generation → Tavily self-eval). Mirrors the /trace console so admins see the
+  // full pipeline on /chat. Memoised so PipelineTrace's stagger animation does
+  // not restart on unrelated re-renders (e.g. toggling sources). Agent-mode
+  // turns are covered by AgentTrace above instead.
+  const pipelineQuestion =
+    message.question || message.reflectedQuestion || agentTraceQuestion;
+  const pipelineResponse: ChatResponse | null = useMemo(() => {
+    if (!showDebug || isUser || message.mode === 'agent' || message.isStreaming) {
+      return null;
+    }
+    const hasPipelineData =
+      Boolean(message.timingsMs && Object.keys(message.timingsMs).length > 0) ||
+      (message.sources?.length ?? 0) > 0;
+    if (!hasPipelineData) {
+      return null;
+    }
+    return {
+      question: message.question || message.reflectedQuestion || '',
+      answer: message.content,
+      retrieved_documents: message.sources ?? [],
+      num_documents: message.sources?.length ?? 0,
+      model_name: message.modelName ?? 'rag_v2',
+      intent: message.route ?? 'rag',
+      target_collections: message.targetCollections,
+      collection_scores: message.collectionScores,
+      reflected_question: message.reflectedQuestion,
+      timings_ms: message.timingsMs,
+      session_id: message.sessionId ?? '',
+      turn_id: message.turnId,
+      routing_probabilities: message.routingProbabilities,
+      applied_filters: message.appliedFilters,
+      collection_results: message.collectionResults,
+      mode: message.mode,
+      route: message.route,
+    };
+  }, [showDebug, isUser, message]);
 
   const timingEntries = Object.entries(message.timingsMs ?? {}).filter(
     ([, value]) => Number.isFinite(value)
@@ -554,6 +593,17 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
             </summary>
             <div className="mt-3">
               <AgentTrace response={agentTraceResponse} question={agentTraceQuestion} />
+            </div>
+          </details>
+        )}
+
+        {pipelineResponse && (
+          <details className="mt-3 rounded-lg border border-border bg-background/70 p-3">
+            <summary className="cursor-pointer select-none text-xs font-semibold text-primary">
+              Pipeline trace
+            </summary>
+            <div className="mt-3">
+              <PipelineTrace response={pipelineResponse} question={pipelineQuestion} />
             </div>
           </details>
         )}

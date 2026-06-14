@@ -69,6 +69,7 @@ const messagesFromTurns = (turns: Turn[], sessionId: string): Message[] =>
       role: 'assistant' as const,
       content: t.answer,
       timestamp: parseUtcDate(t.timestamp),
+      question: t.question,
       sessionId,
       turnId: t.turn_id,
       modelName: t.model_name,
@@ -453,6 +454,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
                       {
                         ...message,
                         content: message.content || meta.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
+                        question: content,
                       },
                       meta,
                       responseSessionId,
@@ -495,6 +497,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
                     {
                       ...message,
                       content: message.content || response.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
+                      question: content,
                     },
                     finalMetadata,
                     responseSessionId,
@@ -513,6 +516,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
                   content: response.answer || finalMetadata.answer || 'Tôi chưa có câu trả lời cho câu hỏi này.',
                   timestamp: new Date(),
                   sessionId: responseSessionId,
+                  question: content,
                 },
                 finalMetadata,
                 responseSessionId,
