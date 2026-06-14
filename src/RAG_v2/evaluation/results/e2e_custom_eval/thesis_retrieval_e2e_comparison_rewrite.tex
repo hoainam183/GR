@@ -1,0 +1,141 @@
+\subsection{So sánh đánh giá retrieval rời rạc và đánh giá end-to-end}
+
+Trong đồ án này, kết quả thực nghiệm được đọc từ hai nhóm artifact chính:
+\texttt{evaluation/results/custom\_eval} và
+\texttt{evaluation/results/e2e\_custom\_eval}. Hai nhóm này không đo cùng một
+đối tượng chất lượng, vì vậy cần tách rõ khi diễn giải.
+
+Nhóm \texttt{custom\_eval} dùng script
+\texttt{evaluate\_retrieval\_custom.py} để đánh giá riêng tầng truy hồi. Với mỗi
+câu hỏi, script chạy router classifier, chọn collection bằng
+\texttt{CollectionSelector}, lấy ứng viên bằng hybrid search
+Qdrant--Elasticsearch, rerank bằng cross-encoder và tính Hit, Precision,
+Recall, MRR, nDCG dựa trên tập \texttt{evidence\_chunk\_ids} trong dataset.
+Nhóm này không sinh câu trả lời cuối cùng, do đó không có các metric về
+faithfulness, completeness hay mức khớp với đáp án vàng.
+
+Ngược lại, nhóm \texttt{e2e\_custom\_eval} dùng script
+\texttt{evaluate\_e2e\_pipeline.py} để gọi trực tiếp
+\texttt{RAGPipeline.query\_v3()}. Đây là entrypoint của luồng hỏi đáp
+end-to-end, bao gồm routing, reflection, chọn collection, hybrid retrieval,
+reranking, lọc hiệu lực văn bản, mở rộng parent context và generation. Sau khi
+có câu trả lời, evaluator vừa tính lại các metric retrieval trên danh sách
+source cuối cùng, vừa dùng \texttt{SelfEvaluator} để đánh giá relevance,
+faithfulness và completeness, đồng thời dùng một LLM judge để so sánh câu trả
+lời sinh ra với \texttt{gold\_answer}.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3.2cm}|p{4.8cm}|p{6.1cm}|}
+\hline
+\textbf{Nhóm đánh giá} & \textbf{Đối tượng đo} & \textbf{Ý nghĩa chính} \\
+\hline
+\texttt{custom\_eval} & Retrieval rời rạc, chưa sinh câu trả lời. & Đo khả năng đưa đúng chunk vàng vào top-K; phù hợp để chẩn đoán router, hybrid search và reranker. \\
+\hline
+\texttt{e2e\_custom\_eval} & Toàn bộ pipeline RAG có sinh câu trả lời. & Đo chất lượng trả lời cuối cùng, gồm mức bám context, độ đầy đủ và mức khớp đáp án vàng; retrieval chỉ là một phần trong luồng này. \\
+\hline
+\end{tabular}
+\caption{Khác biệt giữa hai nhóm artifact đánh giá}
+\end{table}
+
+Với dataset \texttt{ITE6\_rag\_evaluation\_dataset\_no\_parent\_evidence}, hai
+nhóm artifact có cùng 26 câu hỏi nên có thể đối chiếu trực tiếp. Bảng dưới cho
+thấy chất lượng retrieval của hai cách chạy tương đối gần nhau ở Hit@5, trong
+khi run end-to-end có thêm các chỉ số chất lượng câu trả lời.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{4.9cm}|r|r|r|r|r|}
+\hline
+\textbf{Run} & \textbf{Hit@5} & \textbf{Recall@5} & \textbf{MRR@5} & \textbf{nDCG@5} & \textbf{Latency TB} \\
+\hline
+\texttt{custom\_eval/ITE6} & 73,08\% & 68,59\% & 62,31\% & 62,76\% & 4.375,3 ms \\
+\hline
+\texttt{e2e\_custom\_eval/ITE6\_\_min\_top\_k\_7\_hyde} & 73,08\% & 71,15\% & 54,81\% & 57,95\% & 10.701,2 ms \\
+\hline
+\end{tabular}
+\caption{So sánh retrieval trên cùng dataset ITE6}
+\end{table}
+
+Ở run end-to-end của ITE6, mặc dù MRR@5 và nDCG@5 thấp hơn run retrieval rời
+rạc, chất lượng câu trả lời vẫn ở mức tốt: answer relevance đạt 100,00\%,
+faithfulness đạt 84,62\%, completeness đạt 88,46\% và tỷ lệ khớp đúng với đáp
+án tham chiếu đạt 80,77\%. Điều này cho thấy thứ hạng chunk vàng theo
+\texttt{evidence\_chunk\_ids} không phải lúc nào cũng phản ánh đầy đủ chất
+lượng câu trả lời cuối cùng.
+
+Nguyên nhân chính nằm ở cách xây dựng ground truth hiện tại. Dataset đánh giá
+được sinh theo từng file chunk trong \texttt{data/}: với mỗi file chunk, hệ
+thống sinh ra một file dataset tương ứng và gán \texttt{evidence\_chunk\_ids}
+từ chính file nguồn đó. Tuy nhiên, trong kho tri thức thực tế, cùng một thông
+tin học vụ có thể xuất hiện ở nhiều file khác nhau, hoặc được diễn đạt lại
+trong các văn bản liên quan thuộc cùng collection hay collection khác. Vì vậy,
+một câu trả lời vẫn có thể được grounding tốt từ context đúng nhưng context đó
+không trùng với danh sách chunk vàng đã gán trong dataset. Khi đó Hit@K,
+Recall@K, MRR@K hoặc nDCG@K có thể bị đánh thấp, dù câu trả lời thực tế vẫn
+faithful và đúng với nội dung cần trả lời.
+
+Ngoài ra, trong luồng end-to-end, parent context được dùng để làm giàu ngữ cảnh
+cho LLM sau bước rerank. Theo cài đặt trong
+\texttt{evaluate\_e2e\_pipeline.py}, parent expansion không chèn thêm chunk
+parent vào danh sách ranked chunks và không thay đổi thứ tự kết quả truy hồi.
+Do đó, parent context có thể cải thiện grounding và completeness của câu trả
+lời, nhưng không trực tiếp làm tăng các metric dựa trên so khớp
+\texttt{evidence\_chunk\_ids}. Đây là một giới hạn quan trọng khi diễn giải
+retrieval metrics trong hệ thống RAG có mở rộng ngữ cảnh.
+
+\subsection{Kết quả tổng hợp được sử dụng trong báo cáo}
+
+Để bảng tổng hợp phản ánh cấu hình ổn định của hệ thống, báo cáo chính chỉ sử
+dụng các run có đủ artifact \texttt{summary.json}, được chạy với cấu hình
+\texttt{min\_top\_k\_7}, và loại khỏi bảng chính các lô có chất lượng generation
+thấp hoặc không đại diện cho cấu hình cuối. Cụ thể, nhóm tổng hợp chọn các run
+có faithfulness tối thiểu 80\% và tỷ lệ \texttt{ref\_match=correct} tối thiểu
+75\%. Các artifact còn lại vẫn có giá trị để phân tích lỗi, nhưng không được
+dùng làm số liệu đại diện trong bảng kết quả chính.
+
+Với tiêu chí trên, nhóm end-to-end được báo cáo gồm 27 run, tổng cộng 876 câu
+hỏi. Kết quả retrieval đạt Hit@5 = 89,16\%, Recall@5 = 86,64\%, MRR@5 =
+78,10\% và nDCG@5 = 79,07\%. Quan trọng hơn, các metric chất lượng câu trả lời
+đạt mức cao: relevance = 99,77\%, faithfulness = 89,61\%, completeness =
+94,29\%, hallucination rate = 6,62\%, và tỷ lệ trả lời đúng hoàn toàn so với
+đáp án vàng đạt 87,79\%.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{5.1cm}|r|}
+\hline
+\textbf{Metric end-to-end chọn lọc} & \textbf{Giá trị} \\
+\hline
+Số run / số câu hỏi & 27 run / 876 câu \\
+\hline
+Hit@5 / Recall@5 & 89,16\% / 86,64\% \\
+\hline
+MRR@5 / nDCG@5 & 78,10\% / 79,07\% \\
+\hline
+Answer relevance & 99,77\% \\
+\hline
+Faithfulness & 89,61\% \\
+\hline
+Completeness & 94,29\% \\
+\hline
+Hallucination rate & 6,62\% \\
+\hline
+Ref match correct & 87,79\% \\
+\hline
+\end{tabular}
+\caption{Kết quả end-to-end trên nhóm artifact ổn định dùng cho báo cáo chính}
+\end{table}
+
+Từ các kết quả trên, có thể kết luận rằng các metric retrieval nên được xem là
+metric chẩn đoán chất lượng truy hồi theo chunk-id, không nên xem là thước đo
+duy nhất của chất lượng hệ thống. Trong bối cảnh dữ liệu học vụ có nhiều văn
+bản trùng lặp hoặc bổ sung lẫn nhau, faithfulness, completeness và reference
+match phản ánh sát hơn chất lượng người dùng nhận được ở đầu ra cuối cùng. Đây
+cũng là lý do báo cáo ưu tiên đánh giá cao các metric end-to-end, đặc biệt là
+faithfulness và mức khớp đáp án vàng, đồng thời ghi nhận giới hạn của bộ
+ground-truth retrieval hiện tại như một điểm cần cải thiện trong các vòng đánh
+giá sau.

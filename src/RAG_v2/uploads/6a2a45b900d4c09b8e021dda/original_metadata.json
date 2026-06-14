@@ -1,0 +1,6008 @@
+{
+  "schema_name": "DoclingDocument",
+  "version": "1.8.0",
+  "name": "original",
+  "origin": {
+    "mimetype": "application/pdf",
+    "binary_hash": 15395173216068174461,
+    "filename": "original.pdf"
+  },
+  "furniture": {
+    "self_ref": "#/furniture",
+    "children": [],
+    "content_layer": "furniture",
+    "name": "_root_",
+    "label": "unspecified"
+  },
+  "body": {
+    "self_ref": "#/body",
+    "children": [
+      {
+        "$ref": "#/texts/0"
+      },
+      {
+        "$ref": "#/texts/1"
+      },
+      {
+        "$ref": "#/texts/2"
+      },
+      {
+        "$ref": "#/texts/3"
+      },
+      {
+        "$ref": "#/texts/4"
+      },
+      {
+        "$ref": "#/texts/5"
+      },
+      {
+        "$ref": "#/texts/6"
+      },
+      {
+        "$ref": "#/texts/7"
+      },
+      {
+        "$ref": "#/groups/0"
+      },
+      {
+        "$ref": "#/texts/11"
+      },
+      {
+        "$ref": "#/texts/12"
+      },
+      {
+        "$ref": "#/texts/13"
+      },
+      {
+        "$ref": "#/texts/14"
+      },
+      {
+        "$ref": "#/texts/15"
+      },
+      {
+        "$ref": "#/texts/16"
+      },
+      {
+        "$ref": "#/texts/17"
+      },
+      {
+        "$ref": "#/groups/1"
+      },
+      {
+        "$ref": "#/texts/19"
+      },
+      {
+        "$ref": "#/groups/2"
+      },
+      {
+        "$ref": "#/texts/26"
+      },
+      {
+        "$ref": "#/texts/27"
+      },
+      {
+        "$ref": "#/texts/28"
+      },
+      {
+        "$ref": "#/texts/29"
+      },
+      {
+        "$ref": "#/groups/3"
+      },
+      {
+        "$ref": "#/texts/32"
+      },
+      {
+        "$ref": "#/texts/33"
+      },
+      {
+        "$ref": "#/groups/4"
+      },
+      {
+        "$ref": "#/texts/36"
+      },
+      {
+        "$ref": "#/texts/37"
+      },
+      {
+        "$ref": "#/groups/5"
+      },
+      {
+        "$ref": "#/texts/50"
+      },
+      {
+        "$ref": "#/groups/6"
+      },
+      {
+        "$ref": "#/texts/56"
+      },
+      {
+        "$ref": "#/groups/7"
+      },
+      {
+        "$ref": "#/texts/58"
+      },
+      {
+        "$ref": "#/groups/8"
+      },
+      {
+        "$ref": "#/texts/60"
+      },
+      {
+        "$ref": "#/texts/61"
+      },
+      {
+        "$ref": "#/groups/9"
+      },
+      {
+        "$ref": "#/texts/71"
+      },
+      {
+        "$ref": "#/texts/72"
+      },
+      {
+        "$ref": "#/texts/73"
+      },
+      {
+        "$ref": "#/groups/10"
+      },
+      {
+        "$ref": "#/texts/88"
+      },
+      {
+        "$ref": "#/texts/89"
+      },
+      {
+        "$ref": "#/groups/11"
+      },
+      {
+        "$ref": "#/texts/91"
+      },
+      {
+        "$ref": "#/groups/12"
+      },
+      {
+        "$ref": "#/texts/99"
+      },
+      {
+        "$ref": "#/groups/13"
+      },
+      {
+        "$ref": "#/texts/102"
+      },
+      {
+        "$ref": "#/texts/103"
+      },
+      {
+        "$ref": "#/texts/104"
+      },
+      {
+        "$ref": "#/groups/14"
+      },
+      {
+        "$ref": "#/texts/107"
+      },
+      {
+        "$ref": "#/texts/108"
+      },
+      {
+        "$ref": "#/texts/109"
+      },
+      {
+        "$ref": "#/texts/110"
+      },
+      {
+        "$ref": "#/texts/111"
+      },
+      {
+        "$ref": "#/groups/15"
+      },
+      {
+        "$ref": "#/groups/16"
+      },
+      {
+        "$ref": "#/texts/115"
+      },
+      {
+        "$ref": "#/texts/116"
+      },
+      {
+        "$ref": "#/texts/117"
+      },
+      {
+        "$ref": "#/texts/118"
+      },
+      {
+        "$ref": "#/texts/119"
+      },
+      {
+        "$ref": "#/texts/120"
+      },
+      {
+        "$ref": "#/texts/121"
+      },
+      {
+        "$ref": "#/texts/122"
+      },
+      {
+        "$ref": "#/groups/17"
+      },
+      {
+        "$ref": "#/tables/0"
+      },
+      {
+        "$ref": "#/texts/126"
+      },
+      {
+        "$ref": "#/texts/127"
+      },
+      {
+        "$ref": "#/texts/128"
+      },
+      {
+        "$ref": "#/texts/129"
+      },
+      {
+        "$ref": "#/texts/130"
+      },
+      {
+        "$ref": "#/texts/131"
+      },
+      {
+        "$ref": "#/texts/132"
+      },
+      {
+        "$ref": "#/texts/133"
+      },
+      {
+        "$ref": "#/texts/134"
+      }
+    ],
+    "content_layer": "body",
+    "name": "_root_",
+    "label": "unspecified"
+  },
+  "groups": [
+    {
+      "self_ref": "#/groups/0",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/8"
+        },
+        {
+          "$ref": "#/texts/9"
+        },
+        {
+          "$ref": "#/texts/10"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/1",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/18"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/2",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/20"
+        },
+        {
+          "$ref": "#/texts/21"
+        },
+        {
+          "$ref": "#/texts/22"
+        },
+        {
+          "$ref": "#/texts/23"
+        },
+        {
+          "$ref": "#/texts/24"
+        },
+        {
+          "$ref": "#/texts/25"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/3",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/30"
+        },
+        {
+          "$ref": "#/texts/31"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/4",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/34"
+        },
+        {
+          "$ref": "#/texts/35"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/5",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/38"
+        },
+        {
+          "$ref": "#/texts/39"
+        },
+        {
+          "$ref": "#/texts/40"
+        },
+        {
+          "$ref": "#/texts/41"
+        },
+        {
+          "$ref": "#/texts/42"
+        },
+        {
+          "$ref": "#/texts/43"
+        },
+        {
+          "$ref": "#/texts/44"
+        },
+        {
+          "$ref": "#/texts/45"
+        },
+        {
+          "$ref": "#/texts/46"
+        },
+        {
+          "$ref": "#/texts/47"
+        },
+        {
+          "$ref": "#/texts/48"
+        },
+        {
+          "$ref": "#/texts/49"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/6",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/51"
+        },
+        {
+          "$ref": "#/texts/52"
+        },
+        {
+          "$ref": "#/texts/53"
+        },
+        {
+          "$ref": "#/texts/54"
+        },
+        {
+          "$ref": "#/texts/55"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/7",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/57"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/8",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/59"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/9",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/62"
+        },
+        {
+          "$ref": "#/texts/63"
+        },
+        {
+          "$ref": "#/texts/64"
+        },
+        {
+          "$ref": "#/texts/65"
+        },
+        {
+          "$ref": "#/texts/66"
+        },
+        {
+          "$ref": "#/texts/67"
+        },
+        {
+          "$ref": "#/texts/68"
+        },
+        {
+          "$ref": "#/texts/69"
+        },
+        {
+          "$ref": "#/texts/70"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/10",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/74"
+        },
+        {
+          "$ref": "#/texts/75"
+        },
+        {
+          "$ref": "#/texts/76"
+        },
+        {
+          "$ref": "#/texts/77"
+        },
+        {
+          "$ref": "#/texts/78"
+        },
+        {
+          "$ref": "#/texts/79"
+        },
+        {
+          "$ref": "#/texts/80"
+        },
+        {
+          "$ref": "#/texts/81"
+        },
+        {
+          "$ref": "#/texts/82"
+        },
+        {
+          "$ref": "#/texts/83"
+        },
+        {
+          "$ref": "#/texts/84"
+        },
+        {
+          "$ref": "#/texts/85"
+        },
+        {
+          "$ref": "#/texts/86"
+        },
+        {
+          "$ref": "#/texts/87"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/11",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/90"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/12",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/92"
+        },
+        {
+          "$ref": "#/texts/93"
+        },
+        {
+          "$ref": "#/texts/94"
+        },
+        {
+          "$ref": "#/texts/95"
+        },
+        {
+          "$ref": "#/texts/96"
+        },
+        {
+          "$ref": "#/texts/97"
+        },
+        {
+          "$ref": "#/texts/98"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/13",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/100"
+        },
+        {
+          "$ref": "#/texts/101"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/14",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/105"
+        },
+        {
+          "$ref": "#/texts/106"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/15",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/112"
+        },
+        {
+          "$ref": "#/texts/113"
+        }
+      ],
+      "content_layer": "body",
+      "name": "group",
+      "label": "key_value_area"
+    },
+    {
+      "self_ref": "#/groups/16",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/114"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    },
+    {
+      "self_ref": "#/groups/17",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [
+        {
+          "$ref": "#/texts/123"
+        },
+        {
+          "$ref": "#/texts/124"
+        },
+        {
+          "$ref": "#/texts/125"
+        }
+      ],
+      "content_layer": "body",
+      "name": "list",
+      "label": "list"
+    }
+  ],
+  "texts": [
+    {
+      "self_ref": "#/texts/0",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 95.55,
+            "t": 780.036,
+            "r": 265.6,
+            "b": 755.836,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            55
+          ]
+        }
+      ],
+      "orig": "B Ộ GIÁO D ỤC VÀ ĐÀO TẠ O ĐẠ I H Ọ C BÁCH KHOA HÀ N Ộ I",
+      "text": "B Ộ GIÁO D ỤC VÀ ĐÀO TẠ O ĐẠ I H Ọ C BÁCH KHOA HÀ N Ộ I"
+    },
+    {
+      "self_ref": "#/texts/1",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 291.13,
+            "t": 779.844,
+            "r": 544.47,
+            "b": 754.836,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            74
+          ]
+        }
+      ],
+      "orig": "C Ộ NG HOÀ XÃ H Ộ I CH Ủ NGHĨA VIỆ T NAM Độ c l ậ p - T ự do - H ạ nh phúc",
+      "text": "C Ộ NG HOÀ XÃ H Ộ I CH Ủ NGHĨA VIỆ T NAM Độ c l ậ p - T ự do - H ạ nh phúc"
+    },
+    {
+      "self_ref": "#/texts/2",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 276.13,
+            "t": 721.178,
+            "r": 347.042,
+            "b": 709.402,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            9
+          ]
+        }
+      ],
+      "orig": "QUY ĐỊ NH",
+      "text": "QUY ĐỊ NH",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/3",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 166.33,
+            "t": 705.251,
+            "r": 457.408,
+            "b": 679.316,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            108
+          ]
+        }
+      ],
+      "orig": "V ề vi ệ c qu ả n lý và xét, c ấ p h ọ c b ổ ng Tr ần Đại Nghĩa c ho sinh viên Đạ i h ọ c Bách khoa Hà N ộ i",
+      "text": "V ề vi ệ c qu ả n lý và xét, c ấ p h ọ c b ổ ng Tr ần Đại Nghĩa c ho sinh viên Đạ i h ọ c Bách khoa Hà N ộ i",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/4",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 85.275,
+            "t": 675.722,
+            "r": 541.47,
+            "b": 634.513,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            215
+          ]
+        }
+      ],
+      "orig": "( Văn bả n h ợ p nh ấ t Quy định đượ c ban hành theo Quy ết đị nh s ố 5847 / QĐ -ĐHBK ngày 19/7/2023 và Quy ết đị nh s ửa đổ i b ổ sung s ố 7232/QĐ -ĐHBK ngày 06/7/2025 c ủ a Giám đố c Đạ i h ọ c Bách khoa Hà N ộ i)",
+      "text": "( Văn bả n h ợ p nh ấ t Quy định đượ c ban hành theo Quy ết đị nh s ố 5847 / QĐ -ĐHBK ngày 19/7/2023 và Quy ết đị nh s ửa đổ i b ổ sung s ố 7232/QĐ -ĐHBK ngày 06/7/2025 c ủ a Giám đố c Đạ i h ọ c Bách khoa Hà N ộ i)"
+    },
+    {
+      "self_ref": "#/texts/5",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 226.6,
+            "t": 610.044,
+            "r": 400.18,
+            "b": 585.036,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            31
+          ]
+        }
+      ],
+      "orig": "Chương I NH ỮNG QUY ĐỊ NH CHUNG",
+      "text": "Chương I NH ỮNG QUY ĐỊ NH CHUNG",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/6",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 574.971,
+            "r": 304.642,
+            "b": 564.036,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            40
+          ]
+        }
+      ],
+      "orig": "Điề u 1. M ục đích c ủ a H ọ c b ổ ng Tr",
+      "text": "Điề u 1. M ục đích c ủ a H ọ c b ổ ng Tr",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/7",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 304.63,
+            "t": 574.971,
+            "r": 377.638,
+            "b": 564.036,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            12
+          ]
+        }
+      ],
+      "orig": "ần Đại Nghĩa",
+      "text": "ần Đại Nghĩa",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/8",
+      "parent": {
+        "$ref": "#/groups/0"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 85.025,
+            "t": 554.429,
+            "r": 541.97,
+            "b": 513.216,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            289
+          ]
+        }
+      ],
+      "orig": "1.  Th ự c  hi ệ n  trách  nhi ệ m c ủa  Đạ i  h ọ c  Bách  khoa  Hà  N ộ i (sau  đây  viế t  t ắ t  là ĐHBK Hà Nộ i  ho ặ c Đạ i  h ọ c) đố i  v ớ i  xã h ộ i trong công tác đào tạ o ngu ồ n nhân l ự c ch ất lượ ng cao ph ụ c v ụ cho quá trình công nghi ệ p hóa, hi ện đạ i hóa đất nướ c.",
+      "text": " Th ự c  hi ệ n  trách  nhi ệ m c ủa  Đạ i  h ọ c  Bách  khoa  Hà  N ộ i (sau  đây  viế t  t ắ t  là ĐHBK Hà Nộ i  ho ặ c Đạ i  h ọ c) đố i  v ớ i  xã h ộ i trong công tác đào tạ o ngu ồ n nhân l ự c ch ất lượ ng cao ph ụ c v ụ cho quá trình công nghi ệ p hóa, hi ện đạ i hóa đất nướ c.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/9",
+      "parent": {
+        "$ref": "#/groups/0"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 85.025,
+            "t": 503.409,
+            "r": 541.924,
+            "b": 477.216,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            157
+          ]
+        }
+      ],
+      "orig": "2. H ỗ tr ợ cho nh ữ ng sinh viên có hoàn c ảnh khó khăn, có ý chí, nghị l ực vươn lên trong h ọ c t ậ p; sinh viên g ặ p các tai n ạ n, r ủi ro độ t xu ấ t.",
+      "text": "H ỗ tr ợ cho nh ữ ng sinh viên có hoàn c ảnh khó khăn, có ý chí, nghị l ực vươn lên trong h ọ c t ậ p; sinh viên g ặ p các tai n ạ n, r ủi ro độ t xu ấ t.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/10",
+      "parent": {
+        "$ref": "#/groups/0"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 467.639,
+            "r": 434.17,
+            "b": 456.446,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            70
+          ]
+        }
+      ],
+      "orig": "3. Thu hút nh ữ ng h ọ c sinh xu ấ t s ắ c vào h ọ c t ạ i ĐHBK Hà N ộ",
+      "text": "Thu hút nh ữ ng h ọ c sinh xu ấ t s ắ c vào h ọ c t ạ i ĐHBK Hà N ộ",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/11",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 446.431,
+            "r": 246.078,
+            "b": 435.496,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            25
+          ]
+        }
+      ],
+      "orig": "Điều 2. Đối tượ ng áp d ụ",
+      "text": "Điều 2. Đối tượ ng áp d ụ",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/12",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 246.1,
+            "t": 446.431,
+            "r": 263.1,
+            "b": 435.496,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            2
+          ]
+        }
+      ],
+      "orig": "ng",
+      "text": "ng",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/13",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 85.025,
+            "t": 425.639,
+            "r": 519.22,
+            "b": 399.446,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            141
+          ]
+        }
+      ],
+      "orig": "Quy đị nh này áp d ụng đố i v ớ i s inh viên đạ i h ọ c hình th ức đào tạ o chính quy b ằ ng th ứ nh ấ t đang họ c t ậ p t ạ i ĐHBK Hà N ộ i.",
+      "text": "Quy đị nh này áp d ụng đố i v ớ i s inh viên đạ i h ọ c hình th ức đào tạ o chính quy b ằ ng th ứ nh ấ t đang họ c t ậ p t ạ i ĐHBK Hà N ộ i."
+    },
+    {
+      "self_ref": "#/texts/14",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 389.681,
+            "r": 266.612,
+            "b": 378.746,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            32
+          ]
+        }
+      ],
+      "orig": "Điề u 3. Ngu ồ n H ọ c b ổ ng Tr",
+      "text": "Điề u 3. Ngu ồ n H ọ c b ổ ng Tr",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/15",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 266.63,
+            "t": 389.681,
+            "r": 339.618,
+            "b": 378.746,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            12
+          ]
+        }
+      ],
+      "orig": "ần Đại Nghĩa",
+      "text": "ần Đại Nghĩa",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/16",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 368.859,
+            "r": 400.67,
+            "b": 357.666,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            59
+          ]
+        }
+      ],
+      "orig": "H ọ c b ổ ng Tr ần Đại Nghĩa đượ c hình thành t ừ các ngu ồ",
+      "text": "H ọ c b ổ ng Tr ần Đại Nghĩa đượ c hình thành t ừ các ngu ồ"
+    },
+    {
+      "self_ref": "#/texts/17",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 400.67,
+            "t": 368.859,
+            "r": 437.92,
+            "b": 357.666,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            6
+          ]
+        }
+      ],
+      "orig": "n sau:",
+      "text": "n sau:"
+    },
+    {
+      "self_ref": "#/texts/18",
+      "parent": {
+        "$ref": "#/groups/1"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 85.025,
+            "t": 347.859,
+            "r": 532.97,
+            "b": 321.66599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            98
+          ]
+        }
+      ],
+      "orig": "1. Trích t ừ ngu ồ n kinh phí h ợ p pháp c ủ a ĐHBK Hà N ộ i  do Giám đố c Đạ i  h ọ quy ết đị nh.",
+      "text": "Trích t ừ ngu ồ n kinh phí h ợ p pháp c ủ a ĐHBK Hà N ộ i  do Giám đố c Đạ i  h ọ quy ết đị nh.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/19",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 519.72,
+            "t": 425.639,
+            "r": 541.963,
+            "b": 414.446,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            3
+          ]
+        }
+      ],
+      "orig": "văn",
+      "text": "văn"
+    },
+    {
+      "self_ref": "#/texts/20",
+      "parent": {
+        "$ref": "#/groups/2"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 532.97,
+            "t": 347.859,
+            "r": 541.97,
+            "b": 336.666,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "c",
+      "text": "c",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/21",
+      "parent": {
+        "$ref": "#/groups/2"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 311.8589999999999,
+            "r": 513.98,
+            "b": 300.66599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            82
+          ]
+        }
+      ],
+      "orig": "2. S ự đóng góp củ a các cán b ộ , viên ch ứ c , người lao độ ng c ủ a ĐHBK Hà N ộ",
+      "text": "S ự đóng góp củ a các cán b ộ , viên ch ứ c , người lao độ ng c ủ a ĐHBK Hà N ộ",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/22",
+      "parent": {
+        "$ref": "#/groups/2"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 513.97,
+            "t": 311.8589999999999,
+            "r": 523.97,
+            "b": 300.66599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            2
+          ]
+        }
+      ],
+      "orig": "i.",
+      "text": "i.",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/23",
+      "parent": {
+        "$ref": "#/groups/2"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 291.08899999999994,
+            "r": 486.45,
+            "b": 279.89599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            74
+          ]
+        }
+      ],
+      "orig": "3. S ự đóng góp củ a các th ế h ệ sinh viên và c ự u sinh viên ĐHBK Hà N ộ",
+      "text": "S ự đóng góp củ a các th ế h ệ sinh viên và c ự u sinh viên ĐHBK Hà N ộ",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/24",
+      "parent": {
+        "$ref": "#/groups/2"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 270.07899999999995,
+            "r": 388.442,
+            "b": 258.88599999999997,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            61
+          ]
+        }
+      ],
+      "orig": "4. Tài tr ợ t ừ các t ổ ch ứ c, doanh nghi ệ p và các nhà h ả",
+      "text": "Tài tr ợ t ừ các t ổ ch ứ c, doanh nghi ệ p và các nhà h ả",
+      "enumerated": true,
+      "marker": "4."
+    },
+    {
+      "self_ref": "#/texts/25",
+      "parent": {
+        "$ref": "#/groups/2"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 388.42,
+            "t": 270.07899999999995,
+            "r": 455.2,
+            "b": 258.88599999999997,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            11
+          ]
+        }
+      ],
+      "orig": "o tâm khác.",
+      "text": "o tâm khác.",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/26",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 248.88099999999997,
+            "r": 373.412,
+            "b": 237.94600000000003,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            55
+          ]
+        }
+      ],
+      "orig": "Điề u 4. Nguyên t ắ c ho ạt độ ng c ủ a H ọ c b ổ ng Tr",
+      "text": "Điề u 4. Nguyên t ắ c ho ạt độ ng c ủ a H ọ c b ổ ng Tr",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/27",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 373.4,
+            "t": 248.88099999999997,
+            "r": 446.408,
+            "b": 237.94600000000003,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            12
+          ]
+        }
+      ],
+      "orig": "ần Đại Nghĩa",
+      "text": "ần Đại Nghĩa",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/28",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 228.08899999999994,
+            "r": 402.192,
+            "b": 216.89599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            59
+          ]
+        }
+      ],
+      "orig": "H ọ c b ổ ng Tr ần Đại Nghĩa hoạt độ ng trên các nguyên t ắ",
+      "text": "H ọ c b ổ ng Tr ần Đại Nghĩa hoạt độ ng trên các nguyên t ắ"
+    },
+    {
+      "self_ref": "#/texts/29",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 402.17,
+            "t": 228.08899999999994,
+            "r": 435.42,
+            "b": 216.89599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            6
+          ]
+        }
+      ],
+      "orig": "c sau:",
+      "text": "c sau:"
+    },
+    {
+      "self_ref": "#/texts/30",
+      "parent": {
+        "$ref": "#/groups/3"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 85.025,
+            "t": 207.05899999999997,
+            "r": 541.879,
+            "b": 181.11599999999999,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            108
+          ]
+        }
+      ],
+      "orig": "1.  Các kho ản đóng góp cho H ọ c b ổ ng Tr ần Đại Nghĩa là  t ự nguy ệ n,  không vì m ục đích lợ i nhu ậ n.",
+      "text": " Các kho ản đóng góp cho H ọ c b ổ ng Tr ần Đại Nghĩa là  t ự nguy ệ n,  không vì m ục đích lợ i nhu ậ n.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/31",
+      "parent": {
+        "$ref": "#/groups/3"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 85.025,
+            "t": 171.30899999999997,
+            "r": 538.47,
+            "b": 145.11599999999999,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            187
+          ]
+        }
+      ],
+      "orig": "2. Ho ạt độ ng xét, c ấ p h ọ c b ổng đượ c th ự c hi ệ n công khai, minh m ạ ch và tuân th ủ theo các quy đị nh hi ệ n hành v ề qu ả n lý tài chính c ủa Nhà nướ c và c ủ a ĐHBK Hà N ộ i.",
+      "text": "Ho ạt độ ng xét, c ấ p h ọ c b ổng đượ c th ự c hi ệ n công khai, minh m ạ ch và tuân th ủ theo các quy đị nh hi ệ n hành v ề qu ả n lý tài chính c ủa Nhà nướ c và c ủ a ĐHBK Hà N ộ i.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/32",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 133.3,
+            "t": 135.101,
+            "r": 490.56,
+            "b": 94.39099999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            94
+          ]
+        }
+      ],
+      "orig": "Chương II TIÊU CHU Ẩ N, NGUYÊN T Ắ C VÀ H Ồ SƠ ĐĂNG KÝ, XÉT C Ấ P H Ọ C B Ổ NG TR ẦN ĐẠI NGHĨA",
+      "text": "Chương II TIÊU CHU Ẩ N, NGUYÊN T Ắ C VÀ H Ồ SƠ ĐĂNG KÝ, XÉT C Ấ P H Ọ C B Ổ NG TR ẦN ĐẠI NGHĨA",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/33",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 113.3,
+            "t": 84.32600000000002,
+            "r": 463.918,
+            "b": 73.39099999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            67
+          ]
+        }
+      ],
+      "orig": "Điề u 5. Tiêu chu ẩ n được đăng ký xét H ọ c b ổ ng Tr ần Đại Nghĩa",
+      "text": "Điề u 5. Tiêu chu ẩ n được đăng ký xét H ọ c b ổ ng Tr ần Đại Nghĩa"
+    },
+    {
+      "self_ref": "#/texts/34",
+      "parent": {
+        "$ref": "#/groups/4"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 486.45,
+            "t": 291.08899999999994,
+            "r": 496.2,
+            "b": 279.89599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            2
+          ]
+        }
+      ],
+      "orig": "i.",
+      "text": "i.",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/35",
+      "parent": {
+        "$ref": "#/groups/4"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 1,
+          "bbox": {
+            "l": 434.17,
+            "t": 467.639,
+            "r": 443.95,
+            "b": 456.446,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            2
+          ]
+        }
+      ],
+      "orig": "i.",
+      "text": "i.",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/36",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 308.88,
+            "t": 803.036,
+            "r": 317.88,
+            "b": 792.704,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "2",
+      "text": "2"
+    },
+    {
+      "self_ref": "#/texts/37",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 773.979,
+            "r": 541.97,
+            "b": 733.036,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            285
+          ]
+        }
+      ],
+      "orig": "Sinh viên có hoàn c ả nh kinh  t ế gia  đình  đặ c  bi ệt  khó  khăn  ( h ộ nghèo,  h ộ c ậ n nghèo ho ặ c h ộ có hoàn c ả nh kinh t ế đặ c bi ệt khó khăn khác), sinh viên g ặ p các tai n ạ n, r ủi ro độ t xu ấ t thu ộc các đối tượ ng sau được đăng ký xét Họ c b ổ ng Tr ần Đại Nghĩa :",
+      "text": "Sinh viên có hoàn c ả nh kinh  t ế gia  đình  đặ c  bi ệt  khó  khăn  ( h ộ nghèo,  h ộ c ậ n nghèo ho ặ c h ộ có hoàn c ả nh kinh t ế đặ c bi ệt khó khăn khác), sinh viên g ặ p các tai n ạ n, r ủi ro độ t xu ấ t thu ộc các đối tượ ng sau được đăng ký xét Họ c b ổ ng Tr ần Đại Nghĩa :"
+    },
+    {
+      "self_ref": "#/texts/38",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 723.209,
+            "r": 538.73,
+            "b": 697.016,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            153
+          ]
+        }
+      ],
+      "orig": "1.  Sinh viên m ớ i  trúng  tuy ể n vào ĐHBK Hà Nộ i  ( đang trong  th ờ i  gian  h ọ c  k ỳ m ộ t năm thứ nh ấ t) đạ t m ộ t trong các điề u ki ệ n sau:",
+      "text": " Sinh viên m ớ i  trúng  tuy ể n vào ĐHBK Hà Nộ i  ( đang trong  th ờ i  gian  h ọ c  k ỳ m ộ t năm thứ nh ấ t) đạ t m ộ t trong các điề u ki ệ n sau:",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/39",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 687.209,
+            "r": 541.97,
+            "b": 646.266,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            221
+          ]
+        }
+      ],
+      "orig": "a) Là thành viên độ i  tuy ể n d ự thi  Olympic qu ố c t ế ho ặc đoạ t  gi ả i  nh ấ t/  nhì/ ba k ỳ thi h ọ c sinh gi ỏ i c ấ p t ỉ nh tr ở lên các môn h ọ c thu ộ c t ổ h ợ p xét tuy ển vào ĐHBK Hà N ội đúng ngành họ c;",
+      "text": "Là thành viên độ i  tuy ể n d ự thi  Olympic qu ố c t ế ho ặc đoạ t  gi ả i  nh ấ t/  nhì/ ba k ỳ thi h ọ c sinh gi ỏ i c ấ p t ỉ nh tr ở lên các môn h ọ c thu ộ c t ổ h ợ p xét tuy ển vào ĐHBK Hà N ội đúng ngành họ c;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/40",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 636.429,
+            "r": 542.002,
+            "b": 595.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            195
+          ]
+        }
+      ],
+      "orig": "b) Đạt điể m cao trong k ỳ thi  tuy ể n,  xét  tuy ể n  vào ĐHBK Hà N ộ i  (c ăn cứ vào điể m chu ẩ n trúng tuy ển hàng năm, Đạ i h ọ c s ẽ công b ố m ức điể m đạt điề u ki ệ n xét h ọ c b ổ ng).",
+      "text": "Đạt điể m cao trong k ỳ thi  tuy ể n,  xét  tuy ể n  vào ĐHBK Hà N ộ i  (c ăn cứ vào điể m chu ẩ n trúng tuy ển hàng năm, Đạ i h ọ c s ẽ công b ố m ức điể m đạt điề u ki ệ n xét h ọ c b ổ ng).",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/41",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 585.429,
+            "r": 477.2,
+            "b": 574.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            81
+          ]
+        }
+      ],
+      "orig": "2. Sinh viên khác (t ừ h ọ c k ỳ 2 tr ở đi) đạt đồ ng th ời các điề u ki ệ n sau:",
+      "text": "Sinh viên khác (t ừ h ọ c k ỳ 2 tr ở đi) đạt đồ ng th ời các điề u ki ệ n sau:",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/42",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 564.679,
+            "r": 496.45,
+            "b": 553.486,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            84
+          ]
+        }
+      ],
+      "orig": "a) Đang trong thờ i gian h ọ c t ậ p theo thi ế t k ế chương trình đào tạ o chu ẩ n;",
+      "text": "Đang trong thờ i gian h ọ c t ậ p theo thi ế t k ế chương trình đào tạ o chu ẩ n;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/43",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 543.659,
+            "r": 438.99,
+            "b": 532.466,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            72
+          ]
+        }
+      ],
+      "orig": "b) Điể m h ọ c t ậ p trung bình c ủ a h ọ c k ỳ li ền trước (GPA) ≥ 2,0;",
+      "text": "Điể m h ọ c t ậ p trung bình c ủ a h ọ c k ỳ li ền trước (GPA) ≥ 2,0;",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/44",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 522.659,
+            "r": 350.617,
+            "b": 511.466,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            54
+          ]
+        }
+      ],
+      "orig": "c) Điể m rèn luy ệ n c ủ a h ọ c k ỳ li ền trước ≥ 65.",
+      "text": "Điể m rèn luy ệ n c ủ a h ọ c k ỳ li ền trước ≥ 65.",
+      "enumerated": true,
+      "marker": "c)"
+    },
+    {
+      "self_ref": "#/texts/45",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 501.659,
+            "r": 541.97,
+            "b": 475.466,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            106
+          ]
+        }
+      ],
+      "orig": "3. Sinh viên có hoàn c ả nh kinh t ế gia đình khó khăn do g ặ p các tai n ạ n, r ủi ro độ t xu ấ t, g ồ m:",
+      "text": "Sinh viên có hoàn c ả nh kinh t ế gia đình khó khăn do g ặ p các tai n ạ n, r ủi ro độ t xu ấ t, g ồ m:",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/46",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 465.889,
+            "r": 300.63,
+            "b": 454.696,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            39
+          ]
+        }
+      ],
+      "orig": "a) Sinh viên m ắ c b ệ nh hi ể m nghèo;",
+      "text": "Sinh viên m ắ c b ệ nh hi ể m nghèo;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/47",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 444.889,
+            "r": 539.22,
+            "b": 433.696,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            95
+          ]
+        }
+      ],
+      "orig": "b) Sinh viên g ặ p tai n ạ n ở m ức độ n ặ ng và ph ải điề u tr ị dài ngày trong b ệ nh vi ệ n;",
+      "text": "Sinh viên g ặ p tai n ạ n ở m ức độ n ặ ng và ph ải điề u tr ị dài ngày trong b ệ nh vi ệ n;",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/48",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 423.889,
+            "r": 432.17,
+            "b": 412.696,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            73
+          ]
+        }
+      ],
+      "orig": "c) Gia đình sinh viên g ặ p thiên tai, d ị ch b ệ nh ho ặ c h ỏ a ho ạ n.",
+      "text": "Gia đình sinh viên g ặ p thiên tai, d ị ch b ệ nh ho ặ c h ỏ a ho ạ n.",
+      "enumerated": true,
+      "marker": "c)"
+    },
+    {
+      "self_ref": "#/texts/49",
+      "parent": {
+        "$ref": "#/groups/5"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 402.889,
+            "r": 459.2,
+            "b": 391.696,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            74
+          ]
+        }
+      ],
+      "orig": "4. Các trườ ng h ợp đặ c bi ệ t khác do Giám đố c Đạ i h ọ c quy ết đị nh.",
+      "text": "Các trườ ng h ợp đặ c bi ệ t khác do Giám đố c Đạ i h ọ c quy ết đị nh.",
+      "enumerated": true,
+      "marker": "4."
+    },
+    {
+      "self_ref": "#/texts/50",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 381.901,
+            "r": 410.888,
+            "b": 370.966,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            61
+          ]
+        }
+      ],
+      "orig": "Điề u 6. Nguyên t ắ c xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa",
+      "text": "Điề u 6. Nguyên t ắ c xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/51",
+      "parent": {
+        "$ref": "#/groups/6"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 361.109,
+            "r": 541.98,
+            "b": 319.91599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            237
+          ]
+        }
+      ],
+      "orig": "1. H ọ c b ổ ng Tr ần Đại Nghĩa đượ c xét, c ấ p theo h ọ c k ỳ đố i v ới các trườ ng h ợ p quy đị nh t ạ i kho ả n 1 và kho ả n 2 Điề u 5; xét c ấp thường xuyên đố i v ới các trườ ng h ợ p quy đị nh t ạ i kho ả n 3 và kho ả n 4 Điề u 5.",
+      "text": "H ọ c b ổ ng Tr ần Đại Nghĩa đượ c xét, c ấ p theo h ọ c k ỳ đố i v ới các trườ ng h ợ p quy đị nh t ạ i kho ả n 1 và kho ả n 2 Điề u 5; xét c ấp thường xuyên đố i v ới các trườ ng h ợ p quy đị nh t ạ i kho ả n 3 và kho ả n 4 Điề u 5.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/52",
+      "parent": {
+        "$ref": "#/groups/6"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 310.1089999999999,
+            "r": 541.911,
+            "b": 284.14599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            139
+          ]
+        }
+      ],
+      "orig": "2. Không xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa cho nh ữ ng sinh viên không đăng ký h ọ c t ậ p t ạ i th ời điể m xét, c ấ p h ọ c b ổ ng.",
+      "text": "Không xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa cho nh ữ ng sinh viên không đăng ký h ọ c t ậ p t ạ i th ời điể m xét, c ấ p h ọ c b ổ ng.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/53",
+      "parent": {
+        "$ref": "#/groups/6"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 274.33899999999994,
+            "r": 541.97,
+            "b": 248.13599999999997,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            137
+          ]
+        }
+      ],
+      "orig": "3. Không xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa cho nh ững sinh viên đang trong thờ i gian b ị k ỷ lu ậ t t ừ m ứ c c ả nh cáo tr ở lên.",
+      "text": "Không xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa cho nh ững sinh viên đang trong thờ i gian b ị k ỷ lu ậ t t ừ m ứ c c ả nh cáo tr ở lên.",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/54",
+      "parent": {
+        "$ref": "#/groups/6"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 238.33899999999994,
+            "r": 541.992,
+            "b": 197.36599999999999,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            257
+          ]
+        }
+      ],
+      "orig": "4. Không xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa cho nh ững sinh viên đã đượ c nh ậ n h ọ c b ổ ng khuy ế n khích h ọ c t ậ p ho ặ c h ọ c b ổ ng tài tr ợ (tr ừ h ọ c b ổ ng dướ i  d ạ ng khóa h ọ c) trong h ọ c k ỳ xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa .",
+      "text": "Không xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa cho nh ững sinh viên đã đượ c nh ậ n h ọ c b ổ ng khuy ế n khích h ọ c t ậ p ho ặ c h ọ c b ổ ng tài tr ợ (tr ừ h ọ c b ổ ng dướ i  d ạ ng khóa h ọ c) trong h ọ c k ỳ xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa .",
+      "enumerated": true,
+      "marker": "4."
+    },
+    {
+      "self_ref": "#/texts/55",
+      "parent": {
+        "$ref": "#/groups/6"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 187.55899999999997,
+            "r": 541.954,
+            "b": 146.36599999999999,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            228
+          ]
+        }
+      ],
+      "orig": "5.  Không xét,  c ấ p  H ọ c  b ổ ng Tr ần  Đại  Nghĩa cho  sinh  viên  di ệ n  ch ế độ chính sách đượ c mi ễ n, gi ả m h ọ c phí theo quy đị nh c ủa Nhà nướ c thu ộc các đối tượ ng quy đị nh t ạ i kho ả n 1 và kho ản 2 Điề u 5.",
+      "text": " Không xét,  c ấ p  H ọ c  b ổ ng Tr ần  Đại  Nghĩa cho  sinh  viên  di ệ n  ch ế độ chính sách đượ c mi ễ n, gi ả m h ọ c phí theo quy đị nh c ủa Nhà nướ c thu ộc các đối tượ ng quy đị nh t ạ i kho ả n 1 và kho ản 2 Điề u 5.",
+      "enumerated": true,
+      "marker": "5."
+    },
+    {
+      "self_ref": "#/texts/56",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 113.3,
+            "t": 136.351,
+            "r": 328.368,
+            "b": 125.41599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            43
+          ]
+        }
+      ],
+      "orig": "Điề u 7. M ứ c H ọ c b ổ ng Tr ần Đại Nghĩa",
+      "text": "Điề u 7. M ứ c H ọ c b ổ ng Tr ần Đại Nghĩa",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/57",
+      "parent": {
+        "$ref": "#/groups/7"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 2,
+          "bbox": {
+            "l": 85.025,
+            "t": 115.78899999999999,
+            "r": 541.97,
+            "b": 74.59100000000001,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            242
+          ]
+        }
+      ],
+      "orig": "1.  Đối  tượng  quy  đị nh  t ạ i  kho ả n  1  và  kho ản  2  Điề u  5:  H ọ c  b ổ ng  có  2  m ứ c tương ứ ng b ằ ng 50% và 100% h ọ c phí c ủ a các h ọ c ph ần trong chương trình đào tạ o c ủ a h ọ c k ỳ l ấy điể m xét, c ấ p H ọ c b ổ ng.",
+      "text": " Đối  tượng  quy  đị nh  t ạ i  kho ả n  1  và  kho ản  2  Điề u  5:  H ọ c  b ổ ng  có  2  m ứ c tương ứ ng b ằ ng 50% và 100% h ọ c phí c ủ a các h ọ c ph ần trong chương trình đào tạ o c ủ a h ọ c k ỳ l ấy điể m xét, c ấ p H ọ c b ổ ng.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/58",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 308.88,
+            "t": 803.036,
+            "r": 317.88,
+            "b": 792.704,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "3",
+      "text": "3"
+    },
+    {
+      "self_ref": "#/texts/59",
+      "parent": {
+        "$ref": "#/groups/8"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 773.979,
+            "r": 541.932,
+            "b": 747.786,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            172
+          ]
+        }
+      ],
+      "orig": "2. Đối tượ ng quy đị nh t ạ i kho ả n 3 và kho ả n 4 Điề u 5: H ọ c b ổ ng có 2 m ức tương ứ ng 5.000.000 đồ ng (năm triệu đồ ng) và 10 .000.000 đồ ng (mườ i tri ệu đồ ng).",
+      "text": "Đối tượ ng quy đị nh t ạ i kho ả n 3 và kho ả n 4 Điề u 5: H ọ c b ổ ng có 2 m ức tương ứ ng 5.000.000 đồ ng (năm triệu đồ ng) và 10 .000.000 đồ ng (mườ i tri ệu đồ ng).",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/60",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 738.021,
+            "r": 355.162,
+            "b": 727.086,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            50
+          ]
+        }
+      ],
+      "orig": "Điề u 8. H ồ sơ đăng ký xét, c ấ p H ọ c b ổ ng Tr",
+      "text": "Điề u 8. H ồ sơ đăng ký xét, c ấ p H ọ c b ổ ng Tr",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/61",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 355.15,
+            "t": 738.021,
+            "r": 428.408,
+            "b": 727.086,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            12
+          ]
+        }
+      ],
+      "orig": "ần Đại Nghĩa",
+      "text": "ần Đại Nghĩa",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/62",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 717.209,
+            "r": 538.714,
+            "b": 691.016,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            179
+          ]
+        }
+      ],
+      "orig": "1. Sinh viên thu ộc đối tượ ng quy đị nh t ạ i kho ả n 1 và kho ản 2 Điề u 5: Đăng ký xét, c ấ p H ọ c b ổ ng b ằ ng hình th ứ c tr ự c tuy ế n và n ộ p đầy đủ các gi ấ y t ờ sau:",
+      "text": "Sinh viên thu ộc đối tượ ng quy đị nh t ạ i kho ả n 1 và kho ản 2 Điề u 5: Đăng ký xét, c ấ p H ọ c b ổ ng b ằ ng hình th ứ c tr ự c tuy ế n và n ộ p đầy đủ các gi ấ y t ờ sau:",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/63",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 681.209,
+            "r": 541.97,
+            "b": 655.016,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            131
+          ]
+        }
+      ],
+      "orig": "a) Đơn đăng ký xét , c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa (theo m ẫ u) có xác nh ậ n c ủ a địa phương nơi gia đình sinh viên cư trú ;",
+      "text": "Đơn đăng ký xét , c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa (theo m ẫ u) có xác nh ậ n c ủ a địa phương nơi gia đình sinh viên cư trú ;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/64",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 645.459,
+            "r": 541.903,
+            "b": 604.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            199
+          ]
+        }
+      ],
+      "orig": "b) H ồ sơ minh chứ ng hoàn c ả nh kinh t ế gia đình khó khă n: Gi ấ y ch ứ ng nh ậ n h ộ nghèo / c ậ n nghèo ho ặ c các gi ấ y t ờ minh ch ứ ng hoàn c ả nh kinh t ế gia đình khó khăn khác (n ế u có);",
+      "text": "H ồ sơ minh chứ ng hoàn c ả nh kinh t ế gia đình khó khă n: Gi ấ y ch ứ ng nh ậ n h ộ nghèo / c ậ n nghèo ho ặ c các gi ấ y t ờ minh ch ứ ng hoàn c ả nh kinh t ế gia đình khó khăn khác (n ế u có);",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/65",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 594.429,
+            "r": 309.507,
+            "b": 583.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            40
+          ]
+        }
+      ],
+      "orig": "c) B ả n sao Th ẻ căn cướ c/Th ẻ căn cướ",
+      "text": "B ả n sao Th ẻ căn cướ c/Th ẻ căn cướ",
+      "enumerated": true,
+      "marker": "c)"
+    },
+    {
+      "self_ref": "#/texts/66",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 309.63,
+            "t": 594.429,
+            "r": 372.65,
+            "b": 583.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            11
+          ]
+        }
+      ],
+      "orig": "c công dân.",
+      "text": "c công dân.",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/67",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 573.429,
+            "r": 454.222,
+            "b": 562.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            72
+          ]
+        }
+      ],
+      "orig": "2. Sinh viên thu ộc đối tượng quy đị nh t ạ i kho ả n 3 và kho ả n 4 Điề",
+      "text": "Sinh viên thu ộc đối tượng quy đị nh t ạ i kho ả n 3 và kho ả n 4 Điề",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/68",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 454.2,
+            "t": 573.429,
+            "r": 477.45,
+            "b": 562.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            4
+          ]
+        }
+      ],
+      "orig": "u 5:",
+      "text": "u 5:",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/69",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 552.659,
+            "r": 541.88,
+            "b": 526.466,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            140
+          ]
+        }
+      ],
+      "orig": "a) Văn bả n đề ngh ị xét h ỗ tr ợ cho sinh viên g ặ p r ủi ro độ t xu ấ t c ủa các cơ quan, t ổ ch ứ c, cá nhân trong và ngoài ĐHBK Hà Nộ i;",
+      "text": "Văn bả n đề ngh ị xét h ỗ tr ợ cho sinh viên g ặ p r ủi ro độ t xu ấ t c ủa các cơ quan, t ổ ch ứ c, cá nhân trong và ngoài ĐHBK Hà Nộ i;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/70",
+      "parent": {
+        "$ref": "#/groups/9"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 516.659,
+            "r": 442.7,
+            "b": 505.466,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            73
+          ]
+        }
+      ],
+      "orig": "b) H ồ sơ minh chứ ng sinh viên g ặ p các tai n ạ n, r ủi ro độ t xu ấ t.",
+      "text": "H ồ sơ minh chứ ng sinh viên g ặ p các tai n ạ n, r ủi ro độ t xu ấ t.",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/71",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 242.1,
+            "t": 495.451,
+            "r": 372.071,
+            "b": 469.516,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            33
+          ]
+        }
+      ],
+      "orig": "Chương III T Ổ CH Ứ C TH Ự C HI Ệ",
+      "text": "Chương III T Ổ CH Ứ C TH Ự C HI Ệ",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/72",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 459.681,
+            "r": 309.994,
+            "b": 448.746,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            38
+          ]
+        }
+      ],
+      "orig": "Điề u 9. Trách nhi ệ m c ủa các đơn vị",
+      "text": "Điề u 9. Trách nhi ệ m c ủa các đơn vị",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/73",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 309.88,
+            "t": 459.681,
+            "r": 367.9,
+            "b": 448.746,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            9
+          ]
+        }
+      ],
+      "orig": "liên quan",
+      "text": "liên quan",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/74",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 438.889,
+            "r": 348.4,
+            "b": 427.696,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            43
+          ]
+        }
+      ],
+      "orig": "1. Phòng/Ban ch ức năng Công tác sinh viên:",
+      "text": "Phòng/Ban ch ức năng Công tác sinh viên:",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/75",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 417.889,
+            "r": 455.2,
+            "b": 406.696,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            77
+          ]
+        }
+      ],
+      "orig": "a) Là đơn vị đầ u m ố i ti ế p nh ậ n h ồ sơ đăng ký xét, c ấ p h ọ c b ổ ng;",
+      "text": "Là đơn vị đầ u m ố i ti ế p nh ậ n h ồ sơ đăng ký xét, c ấ p h ọ c b ổ ng;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/76",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 396.889,
+            "r": 377.65,
+            "b": 385.696,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            60
+          ]
+        }
+      ],
+      "orig": "b) Ch ủ trì th ẩm đị nh h ồ sơ đăng ký xét , c ấ p h ọ c b ổ",
+      "text": "Ch ủ trì th ẩm đị nh h ồ sơ đăng ký xét , c ấ p h ọ c b ổ",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/77",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 377.65,
+            "t": 396.889,
+            "r": 397.42,
+            "b": 385.696,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            3
+          ]
+        }
+      ],
+      "orig": "ng;",
+      "text": "ng;",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/78",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 376.109,
+            "r": 541.97,
+            "b": 349.916,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            122
+          ]
+        }
+      ],
+      "orig": "c) T ổ ng h ợ p và trình h ồ sơ sinh viên đăng ký xét họ c b ổ ng lên H ội đồ ng xét, c ấ p h ọ c b ổ ng Tr ần Đại Nghĩa ;",
+      "text": "T ổ ng h ợ p và trình h ồ sơ sinh viên đăng ký xét họ c b ổ ng lên H ội đồ ng xét, c ấ p h ọ c b ổ ng Tr ần Đại Nghĩa ;",
+      "enumerated": true,
+      "marker": "c)"
+    },
+    {
+      "self_ref": "#/texts/79",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 340.109,
+            "r": 516.48,
+            "b": 328.91599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            90
+          ]
+        }
+      ],
+      "orig": "d) Ph ố i h ợ p v ới các đơn vị liên quan làm th ủ t ụ c c ấ p h ọ c b ổ ng cho sinh viên.",
+      "text": "Ph ố i h ợ p v ới các đơn vị liên quan làm th ủ t ụ c c ấ p h ọ c b ổ ng cho sinh viên.",
+      "enumerated": true,
+      "marker": "d)"
+    },
+    {
+      "self_ref": "#/texts/80",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 319.1089999999999,
+            "r": 541.97,
+            "b": 292.91599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            142
+          ]
+        }
+      ],
+      "orig": "2. Phòng/Ban ch ức năng Đào tạ o: Cung c ấ p k ế t qu ả h ọ c t ậ p c ủa sinh viên đủ điề u ki ệ n v ề h ọ c l ự c để xét, c ấ p h ọ c b ổ ng.",
+      "text": "Phòng/Ban ch ức năng Đào tạ o: Cung c ấ p k ế t qu ả h ọ c t ậ p c ủa sinh viên đủ điề u ki ệ n v ề h ọ c l ự c để xét, c ấ p h ọ c b ổ ng.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/81",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 283.33899999999994,
+            "r": 352.15,
+            "b": 272.14599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            45
+          ]
+        }
+      ],
+      "orig": "3. Phòng/Ban ch ức năng Tài chính - K ế toán:",
+      "text": "Phòng/Ban ch ức năng Tài chính - K ế toán:",
+      "enumerated": true,
+      "marker": "3."
+    },
+    {
+      "self_ref": "#/texts/82",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 113.3,
+            "t": 262.33899999999994,
+            "r": 450.676,
+            "b": 251.14599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            74
+          ]
+        }
+      ],
+      "orig": "a) Là đơn vị tr ự c ti ế p qu ả n lý kinh phí H ọ c b ổ ng Tr ần Đại Nghĩa",
+      "text": "Là đơn vị tr ự c ti ế p qu ả n lý kinh phí H ọ c b ổ ng Tr ần Đại Nghĩa",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/83",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 450.7,
+            "t": 262.33899999999994,
+            "r": 457.7,
+            "b": 251.14599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": ";",
+      "text": ";",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/84",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 241.32899999999995,
+            "r": 541.97,
+            "b": 215.14599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            117
+          ]
+        }
+      ],
+      "orig": "b) Đị nh k ỳ th ố ng kê, báo cáo H ội đồ ng xét, c ấ p H ọ c b ổ ng v ề s ố dư ngu ồ n H ọ c b ổ ng Tr ần Đại Nghĩa ;",
+      "text": "Đị nh k ỳ th ố ng kê, báo cáo H ội đồ ng xét, c ấ p H ọ c b ổ ng v ề s ố dư ngu ồ n H ọ c b ổ ng Tr ần Đại Nghĩa ;",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/85",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 205.30899999999997,
+            "r": 541.97,
+            "b": 179.36599999999999,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            132
+          ]
+        }
+      ],
+      "orig": "c) Ph ố i h ợ p v ớ i Phòng/Ban ch ức năng Công tác sinh viên làm các th ủ t ụ c c ấ p h ọ c b ổng cho sinh viên đượ c h ọ c b ổ ng;",
+      "text": "Ph ố i h ợ p v ớ i Phòng/Ban ch ức năng Công tác sinh viên làm các th ủ t ụ c c ấ p h ọ c b ổng cho sinh viên đượ c h ọ c b ổ ng;",
+      "enumerated": true,
+      "marker": "c)"
+    },
+    {
+      "self_ref": "#/texts/86",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 169.55899999999997,
+            "r": 541.601,
+            "b": 143.36599999999999,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            99
+          ]
+        }
+      ],
+      "orig": "d) C ông khai các khoản đóng góp và thực hiện chế độ kế toán, thống kê theo quy định của pháp luật.",
+      "text": "C ông khai các khoản đóng góp và thực hiện chế độ kế toán, thống kê theo quy định của pháp luật.",
+      "enumerated": true,
+      "marker": "d)"
+    },
+    {
+      "self_ref": "#/texts/87",
+      "parent": {
+        "$ref": "#/groups/10"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 85.025,
+            "t": 133.55899999999997,
+            "r": 541.973,
+            "b": 62.59100000000001,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            436
+          ]
+        }
+      ],
+      "orig": "4. Phòng/Ban ch ức năng Truy ề n thông và Qu ả n tr ị t hương hiệ u: Có trách nhi ệ m truy ề n thông, qu ả ng bá H ọ c b ổ ng Tr ần Đại Nghĩa rộng rãi đế n các sinh viên ti ềm năng (thí sinh có ý định đăng ký thi  tuy ể n, xét tuy ể n vào ĐHBK Hà N ộ i ),  sinh viên đang h ọ c t ậ p t ạ i ĐHBK Hà N ộ i, các t ổ ch ứ c, cá nhân là đố i tác c ủ a ĐHBK Hà N ộ i và xã h ộ i thông qua các kênh thông tin chính th ố ng c ủ a ĐHBK Hà N ộ i.",
+      "text": "Phòng/Ban ch ức năng Truy ề n thông và Qu ả n tr ị t hương hiệ u: Có trách nhi ệ m truy ề n thông, qu ả ng bá H ọ c b ổ ng Tr ần Đại Nghĩa rộng rãi đế n các sinh viên ti ềm năng (thí sinh có ý định đăng ký thi  tuy ể n, xét tuy ể n vào ĐHBK Hà N ộ i ),  sinh viên đang h ọ c t ậ p t ạ i ĐHBK Hà N ộ i, các t ổ ch ứ c, cá nhân là đố i tác c ủ a ĐHBK Hà N ộ i và xã h ộ i thông qua các kênh thông tin chính th ố ng c ủ a ĐHBK Hà N ộ i.",
+      "enumerated": true,
+      "marker": "4."
+    },
+    {
+      "self_ref": "#/texts/88",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 3,
+          "bbox": {
+            "l": 372.15,
+            "t": 480.451,
+            "r": 384.92,
+            "b": 469.516,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "N",
+      "text": "N",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/89",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 308.88,
+            "t": 803.036,
+            "r": 317.88,
+            "b": 792.704,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "4",
+      "text": "4"
+    },
+    {
+      "self_ref": "#/texts/90",
+      "parent": {
+        "$ref": "#/groups/11"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 85.025,
+            "t": 773.979,
+            "r": 541.975,
+            "b": 718.036,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            292
+          ]
+        }
+      ],
+      "orig": "5.  Các  đơn  vị liên  quan  khác:  Phòng/Ban  ch ức  năng H ợ p  tác đố i  ngo ại,  Văn phòng C ự u sinh viên, các Trườ ng/Vi ệ n/Khoa đào tạo và các đơn vị có liên quan khác trong ĐHBK Hà N ộ i  có trách nhi ệ m qu ả ng bá và thu hút các ngu ồ n tài tr ợ cho H ọ c b ổ ng Tr ần Đạ i N ghĩa.",
+      "text": " Các  đơn  vị liên  quan  khác:  Phòng/Ban  ch ức  năng H ợ p  tác đố i  ngo ại,  Văn phòng C ự u sinh viên, các Trườ ng/Vi ệ n/Khoa đào tạo và các đơn vị có liên quan khác trong ĐHBK Hà N ộ i  có trách nhi ệ m qu ả ng bá và thu hút các ngu ồ n tài tr ợ cho H ọ c b ổ ng Tr ần Đạ i N ghĩa.",
+      "enumerated": true,
+      "marker": "5."
+    },
+    {
+      "self_ref": "#/texts/91",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 113.3,
+            "t": 708.001,
+            "r": 405.888,
+            "b": 697.066,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            60
+          ]
+        }
+      ],
+      "orig": "Điề u 10. H ội đồ ng xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa",
+      "text": "Điề u 10. H ội đồ ng xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/92",
+      "parent": {
+        "$ref": "#/groups/12"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 85.025,
+            "t": 687.209,
+            "r": 541.964,
+            "b": 661.016,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            163
+          ]
+        }
+      ],
+      "orig": "1. H ội đồ ng xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa đượ c thành l ậ p theo quy ết đị nh c ủ a Giám đố c Đạ i h ọ c, có trách nhi ệ m giúp Giám đố c trong vi ệ c:",
+      "text": "H ội đồ ng xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa đượ c thành l ậ p theo quy ết đị nh c ủ a Giám đố c Đạ i h ọ c, có trách nhi ệ m giúp Giám đố c trong vi ệ c:",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/93",
+      "parent": {
+        "$ref": "#/groups/12"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 113.3,
+            "t": 651.459,
+            "r": 444.7,
+            "b": 640.266,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            68
+          ]
+        }
+      ],
+      "orig": "a) Xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa trên cơ sở Quy đị nh này;",
+      "text": "Xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa trên cơ sở Quy đị nh này;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/94",
+      "parent": {
+        "$ref": "#/groups/12"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 85.025,
+            "t": 630.429,
+            "r": 541.97,
+            "b": 604.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            110
+          ]
+        }
+      ],
+      "orig": "b) Đề xu ấ t s ửa đổ i, b ổ sung q uy đị nh v ề vi ệ c qu ả n lý và xét, c ấ p H ọ c b ổ ng Tr ầ n Đại Nghĩa .",
+      "text": "Đề xu ấ t s ửa đổ i, b ổ sung q uy đị nh v ề vi ệ c qu ả n lý và xét, c ấ p H ọ c b ổ ng Tr ầ n Đại Nghĩa .",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/95",
+      "parent": {
+        "$ref": "#/groups/12"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 113.3,
+            "t": 594.429,
+            "r": 454.2,
+            "b": 583.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            71
+          ]
+        }
+      ],
+      "orig": "2) Thành viên H ội đồ ng xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa g ồ m:",
+      "text": "Thành viên H ội đồ ng xét, c ấ p H ọ c b ổ ng Tr ần Đại Nghĩa g ồ m:",
+      "enumerated": true,
+      "marker": "2)"
+    },
+    {
+      "self_ref": "#/texts/96",
+      "parent": {
+        "$ref": "#/groups/12"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 113.3,
+            "t": 573.429,
+            "r": 524.97,
+            "b": 562.236,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            85
+          ]
+        }
+      ],
+      "orig": "a) Ch ủ t ị ch H ội đồ ng: Là Phó Giám đố c Đạ i h ọ c ph ụ trách công tác sinh viên;",
+      "text": "Ch ủ t ị ch H ội đồ ng: Là Phó Giám đố c Đạ i h ọ c ph ụ trách công tác sinh viên;",
+      "enumerated": true,
+      "marker": "a)"
+    },
+    {
+      "self_ref": "#/texts/97",
+      "parent": {
+        "$ref": "#/groups/12"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 113.3,
+            "t": 552.659,
+            "r": 532.97,
+            "b": 541.466,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            80
+          ]
+        }
+      ],
+      "orig": "b) Thườ ng tr ự c H ội đồng: Là Trưở ng Phòng/Ban ch ức năng Công tác sinh viên;",
+      "text": "Thườ ng tr ự c H ội đồng: Là Trưở ng Phòng/Ban ch ức năng Công tác sinh viên;",
+      "enumerated": true,
+      "marker": "b)"
+    },
+    {
+      "self_ref": "#/texts/98",
+      "parent": {
+        "$ref": "#/groups/12"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 85.025,
+            "t": 531.659,
+            "r": 541.97,
+            "b": 490.466,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            271
+          ]
+        }
+      ],
+      "orig": "c)  Các  thành  viên  khác  c ủ a  H ội  đồng  là  đạ i  di ện  các  đơn  vị :  Phòng/Ban ch ứ c năng Công tác s inh viên, Đào tạ o, Tài chính - K ế toán, Đoàn Thanh niên C ộ ng s ả n H ồ Chí Minh, H ộ i Sinh viên ĐHBK Hà N ộ i và đạ i di ện các đơn vị có liên quan khác.",
+      "text": " Các  thành  viên  khác  c ủ a  H ội  đồng  là  đạ i  di ện  các  đơn  vị :  Phòng/Ban ch ứ c năng Công tác s inh viên, Đào tạ o, Tài chính - K ế toán, Đoàn Thanh niên C ộ ng s ả n H ồ Chí Minh, H ộ i Sinh viên ĐHBK Hà N ộ i và đạ i di ện các đơn vị có liên quan khác.",
+      "enumerated": true,
+      "marker": "c)"
+    },
+    {
+      "self_ref": "#/texts/99",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 113.3,
+            "t": 480.451,
+            "r": 284.38,
+            "b": 469.516,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            33
+          ]
+        }
+      ],
+      "orig": "Điều 11. Khen thưở ng, k ỷ lu ậ t",
+      "text": "Điều 11. Khen thưở ng, k ỷ lu ậ t",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/100",
+      "parent": {
+        "$ref": "#/groups/13"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 85.025,
+            "t": 459.889,
+            "r": 541.97,
+            "b": 418.696,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            212
+          ]
+        }
+      ],
+      "orig": "1. Nh ữ ng t ổ ch ứ c, cá nhân trong và ngoài ĐHBK Hà Nộ i có nhi ều đóng góp cho ho ạt độ ng gây d ự ng và phát tri ể n ngu ồ n H ọ c b ổ ng Tr ần Đại Nghĩa s ẽ đượ c Giám đố c ĐHBK Hà Nộ i xem xét khen thưở ng.",
+      "text": "Nh ữ ng t ổ ch ứ c, cá nhân trong và ngoài ĐHBK Hà Nộ i có nhi ều đóng góp cho ho ạt độ ng gây d ự ng và phát tri ể n ngu ồ n H ọ c b ổ ng Tr ần Đại Nghĩa s ẽ đượ c Giám đố c ĐHBK Hà Nộ i xem xét khen thưở ng.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/101",
+      "parent": {
+        "$ref": "#/groups/13"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 85.025,
+            "t": 408.889,
+            "r": 541.926,
+            "b": 382.946,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            138
+          ]
+        }
+      ],
+      "orig": "2. Nh ững đơn vị , cá nhân thu ộ c ĐHBK Hà Nộ i vi ph ạm quy đị nh này, tùy theo tính ch ấ t, m ức độ vi ph ạ m s ẽ b ị x ử lý k ỷ lu ậ t.",
+      "text": "Nh ững đơn vị , cá nhân thu ộ c ĐHBK Hà Nộ i vi ph ạm quy đị nh này, tùy theo tính ch ấ t, m ức độ vi ph ạ m s ẽ b ị x ử lý k ỷ lu ậ t.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/102",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 280.38,
+            "t": 372.901,
+            "r": 343.495,
+            "b": 361.966,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            9
+          ]
+        }
+      ],
+      "orig": "Chương IV",
+      "text": "Chương IV",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/103",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 234.6,
+            "t": 357.901,
+            "r": 392.18,
+            "b": 346.966,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            22
+          ]
+        }
+      ],
+      "orig": "ĐIỀ U KHO Ả N THI HÀNH",
+      "text": "ĐIỀ U KHO Ả N THI HÀNH",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/104",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 113.3,
+            "t": 336.901,
+            "r": 279.13,
+            "b": 325.966,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            32
+          ]
+        }
+      ],
+      "orig": "Điề u 12. Điề u kho ả n thi hành",
+      "text": "Điề u 12. Điề u kho ả n thi hành",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/105",
+      "parent": {
+        "$ref": "#/groups/14"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 85.025,
+            "t": 316.1089999999999,
+            "r": 541.97,
+            "b": 290.16599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            157
+          ]
+        }
+      ],
+      "orig": "1. Quy đị nh này có hi ệ u l ự c k ể t ừ ngày ký quy ết đị nh ban hành, nh ững quy đị nh trước đây trái v ớ i Q uy đị nh này không còn hi ệ u l ự c thi hành.",
+      "text": "Quy đị nh này có hi ệ u l ự c k ể t ừ ngày ký quy ết đị nh ban hành, nh ững quy đị nh trước đây trái v ớ i Q uy đị nh này không còn hi ệ u l ự c thi hành.",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/106",
+      "parent": {
+        "$ref": "#/groups/14"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 4,
+          "bbox": {
+            "l": 85.025,
+            "t": 280.33899999999994,
+            "r": 541.97,
+            "b": 219.64599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            299
+          ]
+        }
+      ],
+      "orig": "2. Trong quá trình triển khai thực hiện Quy định này, nếu có vướng mắc, Trưởng các đơn vị và cá nhân có liên quan kịp thời báo cáo Giám đốc thông qua Phòng/Ban chức năng Công tác sinh viên để đề xuất sửa đổi, bổ sung cho phù hợp với tình hình thực tiễn của ĐHBK Hà Nội và các quy định của pháp luật.",
+      "text": "Trong quá trình triển khai thực hiện Quy định này, nếu có vướng mắc, Trưởng các đơn vị và cá nhân có liên quan kịp thời báo cáo Giám đốc thông qua Phòng/Ban chức năng Công tác sinh viên để đề xuất sửa đổi, bổ sung cho phù hợp với tình hình thực tiễn của ĐHBK Hà Nội và các quy định của pháp luật.",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/107",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "furniture",
+      "label": "page_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 308.88,
+            "t": 803.036,
+            "r": 317.88,
+            "b": 792.704,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            1
+          ]
+        }
+      ],
+      "orig": "5",
+      "text": "5"
+    },
+    {
+      "self_ref": "#/texts/108",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 119.3,
+            "t": 773.698,
+            "r": 504.08,
+            "b": 761.922,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            55
+          ]
+        }
+      ],
+      "orig": "M ẪU ĐƠN ĐĂNG KÝ XÉT, CẤ P H Ọ C B Ổ NG TR ẦN ĐẠI NGHĨA",
+      "text": "M ẪU ĐƠN ĐĂNG KÝ XÉT, CẤ P H Ọ C B Ổ NG TR ẦN ĐẠI NGHĨA",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/109",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 176.08,
+            "t": 730.771,
+            "r": 404.091,
+            "b": 704.816,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            66
+          ]
+        }
+      ],
+      "orig": "C Ộ NG HOÀ XÃ H Ộ I CH Ủ NGHĨA VIỆ Độ c l ậ p -T ự do -H ạ nh phúc",
+      "text": "C Ộ NG HOÀ XÃ H Ộ I CH Ủ NGHĨA VIỆ Độ c l ậ p -T ự do -H ạ nh phúc",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/110",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 404.17,
+            "t": 730.771,
+            "r": 450.7,
+            "b": 719.836,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            5
+          ]
+        }
+      ],
+      "orig": "T NAM",
+      "text": "T NAM",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/111",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "section_header",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 139.05,
+            "t": 686.001,
+            "r": 484.3,
+            "b": 675.066,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            50
+          ]
+        }
+      ],
+      "orig": "ĐƠN ĐĂNG KÝ XÉT, CẤ P H Ọ C B Ổ NG TR ẦN ĐẠI NGHĨA",
+      "text": "ĐƠN ĐĂNG KÝ XÉT, CẤ P H Ọ C B Ổ NG TR ẦN ĐẠI NGHĨA",
+      "level": 1
+    },
+    {
+      "self_ref": "#/texts/112",
+      "parent": {
+        "$ref": "#/groups/15"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 176.58,
+            "t": 654.902,
+            "r": 215.066,
+            "b": 642.848,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            6
+          ]
+        }
+      ],
+      "orig": "Kính g",
+      "text": "Kính g"
+    },
+    {
+      "self_ref": "#/texts/113",
+      "parent": {
+        "$ref": "#/groups/15"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 215.1,
+            "t": 654.902,
+            "r": 447.2,
+            "b": 642.848,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            43
+          ]
+        }
+      ],
+      "orig": "ửi: Giám đốc Đạ i h ọ c Bách khoa Hà N ộ i.",
+      "text": "ửi: Giám đốc Đạ i h ọ c Bách khoa Hà N ộ i."
+    },
+    {
+      "self_ref": "#/texts/114",
+      "parent": {
+        "$ref": "#/groups/16"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 619.721,
+            "r": 212.85,
+            "b": 608.786,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            23
+          ]
+        }
+      ],
+      "orig": "1. Thông tin sinh viên:",
+      "text": "Thông tin sinh viên:",
+      "enumerated": true,
+      "marker": "1."
+    },
+    {
+      "self_ref": "#/texts/115",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 598.929,
+            "r": 101.05,
+            "b": 587.736,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            3
+          ]
+        }
+      ],
+      "orig": "H ọ",
+      "text": "H ọ"
+    },
+    {
+      "self_ref": "#/texts/116",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 101.05,
+            "t": 598.929,
+            "r": 512.48,
+            "b": 587.736,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            105
+          ]
+        }
+      ],
+      "orig": "và tên.                                                    ; Ngày sinh:        /        /         ; MSSV:",
+      "text": "và tên.                                                    ; Ngày sinh:        /        /         ; MSSV:"
+    },
+    {
+      "self_ref": "#/texts/117",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 577.929,
+            "r": 185.05,
+            "b": 566.736,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            5
+          ]
+        }
+      ],
+      "orig": "Khóa:",
+      "text": "Khóa:"
+    },
+    {
+      "self_ref": "#/texts/118",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 185.08,
+            "t": 577.929,
+            "r": 273.13,
+            "b": 566.736,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            15
+          ]
+        }
+      ],
+      "orig": "; Trườ ng/Khoa:",
+      "text": "; Trườ ng/Khoa:"
+    },
+    {
+      "self_ref": "#/texts/119",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 556.939,
+            "r": 174.33,
+            "b": 545.746,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            17
+          ]
+        }
+      ],
+      "orig": "Gi ớ i tính: Nam:",
+      "text": "Gi ớ i tính: Nam:"
+    },
+    {
+      "self_ref": "#/texts/120",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "checkbox_unselected",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 193.08,
+            "t": 556.939,
+            "r": 216.146,
+            "b": 545.746,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            3
+          ]
+        }
+      ],
+      "orig": "N ữ",
+      "text": "N ữ"
+    },
+    {
+      "self_ref": "#/texts/121",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "checkbox_unselected",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 216.1,
+            "t": 556.939,
+            "r": 280.88,
+            "b": 545.746,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            16
+          ]
+        }
+      ],
+      "orig": ":      ; Dân t ộ",
+      "text": ":      ; Dân t ộ"
+    },
+    {
+      "self_ref": "#/texts/122",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 535.909,
+            "r": 197.58,
+            "b": 524.716,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            22
+          ]
+        }
+      ],
+      "orig": "H ộ kh ẩu thườ ng trú:",
+      "text": "H ộ kh ẩu thườ ng trú:"
+    },
+    {
+      "self_ref": "#/texts/123",
+      "parent": {
+        "$ref": "#/groups/17"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 517.951,
+            "r": 210.841,
+            "b": 507.016,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            23
+          ]
+        }
+      ],
+      "orig": "2. Hoàn c ảnh gia đình:",
+      "text": "Hoàn c ảnh gia đình:",
+      "enumerated": true,
+      "marker": "2."
+    },
+    {
+      "self_ref": "#/texts/124",
+      "parent": {
+        "$ref": "#/groups/17"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 497.159,
+            "r": 502.98,
+            "b": 485.966,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            100
+          ]
+        }
+      ],
+      "orig": "2.1. Thông tin các thành viên trong gia đình ( ch ỉ kê khai v ề b ố , m ẹ , anh, ch ị , em ru ộ t) :",
+      "text": "2.1. Thông tin các thành viên trong gia đình ( ch ỉ kê khai v ề b ố , m ẹ , anh, ch ị , em ru ộ t) :",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/125",
+      "parent": {
+        "$ref": "#/groups/17"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "list_item",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 282.08899999999994,
+            "r": 522.97,
+            "b": 270.89599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            93
+          ]
+        }
+      ],
+      "orig": "2.2. Trình bày tóm t ắ t nh ữ ng khó khăn mà gia đình đang gặ p ph ả i ( không quá 200 t ừ ):",
+      "text": "2.2. Trình bày tóm t ắ t nh ữ ng khó khăn mà gia đình đang gặ p ph ả i ( không quá 200 t ừ ):",
+      "enumerated": false,
+      "marker": ""
+    },
+    {
+      "self_ref": "#/texts/126",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 261.07899999999995,
+            "r": 540.22,
+            "b": 249.88599999999997,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            139
+          ]
+        }
+      ],
+      "orig": "...........................................................................................................................................",
+      "text": "..........................................................................................................................................."
+    },
+    {
+      "self_ref": "#/texts/127",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 240.08899999999994,
+            "r": 540.22,
+            "b": 228.89599999999996,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            139
+          ]
+        }
+      ],
+      "orig": "...........................................................................................................................................",
+      "text": "..........................................................................................................................................."
+    },
+    {
+      "self_ref": "#/texts/128",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 85.025,
+            "t": 222.10199999999998,
+            "r": 541.97,
+            "b": 196.11300000000006,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            134
+          ]
+        }
+      ],
+      "orig": "Em cam đoan những thông tin trên là đúng sự th ậ t,  n ế u  sai  em  xin  hoàn  toàn  ch ị u trách nhi ệ m. Em xin chân thành c ảm ơn.",
+      "text": "Em cam đoan những thông tin trên là đúng sự th ậ t,  n ế u  sai  em  xin  hoàn  toàn  ch ị u trách nhi ệ m. Em xin chân thành c ảm ơn."
+    },
+    {
+      "self_ref": "#/texts/129",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 97.3,
+            "t": 189.101,
+            "r": 310.38,
+            "b": 148.16599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            108
+          ]
+        }
+      ],
+      "orig": "Xác nh ậ n c ủa UBND xã/ phường nơi sinh viên đăng ký hộ kh ẩu thườ ng trú v ề hoàn c ảnh gia đình sinh viên",
+      "text": "Xác nh ậ n c ủa UBND xã/ phường nơi sinh viên đăng ký hộ kh ẩu thườ ng trú v ề hoàn c ảnh gia đình sinh viên"
+    },
+    {
+      "self_ref": "#/texts/130",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 334.65,
+            "t": 192.322,
+            "r": 534.47,
+            "b": 181.11300000000006,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            49
+          ]
+        }
+      ],
+      "orig": "Ngày ........ tháng ........ . năm 20.... .......",
+      "text": "Ngày ........ tháng ........ . năm 20.... ......."
+    },
+    {
+      "self_ref": "#/texts/131",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 408.67,
+            "t": 177.101,
+            "r": 460.15,
+            "b": 166.16599999999994,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            9
+          ]
+        }
+      ],
+      "orig": "Sinh viên",
+      "text": "Sinh viên"
+    },
+    {
+      "self_ref": "#/texts/132",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 380.15,
+            "t": 162.322,
+            "r": 492.2,
+            "b": 151.11300000000006,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            22
+          ]
+        }
+      ],
+      "orig": "(Ký và ghi rõ h ọ tên)",
+      "text": "(Ký và ghi rõ h ọ tên)"
+    },
+    {
+      "self_ref": "#/texts/133",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 280.88,
+            "t": 556.939,
+            "r": 382.375,
+            "b": 545.746,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            29
+          ]
+        }
+      ],
+      "orig": "c:                        ; S",
+      "text": "c:                        ; S"
+    },
+    {
+      "self_ref": "#/texts/134",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "text",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 382.42,
+            "t": 556.939,
+            "r": 457.95,
+            "b": 545.746,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            14
+          ]
+        }
+      ],
+      "orig": "ố ĐT liên hệ :",
+      "text": "ố ĐT liên hệ :"
+    }
+  ],
+  "pictures": [],
+  "tables": [
+    {
+      "self_ref": "#/tables/0",
+      "parent": {
+        "$ref": "#/body"
+      },
+      "children": [],
+      "content_layer": "body",
+      "label": "table",
+      "prov": [
+        {
+          "page_no": 5,
+          "bbox": {
+            "l": 78.48768615722656,
+            "t": 470.7637023925781,
+            "r": 533.345703125,
+            "b": 291.30047607421875,
+            "coord_origin": "BOTTOMLEFT"
+          },
+          "charspan": [
+            0,
+            0
+          ]
+        }
+      ],
+      "captions": [],
+      "references": [],
+      "footnotes": [],
+      "data": {
+        "table_cells": [
+          {
+            "bbox": {
+              "l": 85.275,
+              "t": 384.673,
+              "r": 99.862,
+              "b": 393.925,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 0,
+            "end_row_offset_idx": 1,
+            "start_col_offset_idx": 0,
+            "end_col_offset_idx": 1,
+            "text": "TT",
+            "column_header": true,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 116.55,
+              "t": 384.673,
+              "r": 161.9,
+              "b": 393.925,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 0,
+            "end_row_offset_idx": 1,
+            "start_col_offset_idx": 1,
+            "end_col_offset_idx": 2,
+            "text": "H ọ và tên",
+            "column_header": true,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 182.83,
+              "t": 378.423,
+              "r": 205.479,
+              "b": 400.425,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 0,
+            "end_row_offset_idx": 1,
+            "start_col_offset_idx": 2,
+            "end_col_offset_idx": 3,
+            "text": "Năm sinh",
+            "column_header": true,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 223.35,
+              "t": 378.423,
+              "r": 263.484,
+              "b": 400.425,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 0,
+            "end_row_offset_idx": 1,
+            "start_col_offset_idx": 3,
+            "end_col_offset_idx": 4,
+            "text": "Quan h ệ v ớ i SV",
+            "column_header": true,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 295.63,
+              "t": 384.673,
+              "r": 354.766,
+              "b": 393.925,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 0,
+            "end_row_offset_idx": 1,
+            "start_col_offset_idx": 4,
+            "end_col_offset_idx": 5,
+            "text": "Ngh ề nghi ệ p",
+            "column_header": true,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 385.92,
+              "t": 384.673,
+              "r": 444.584,
+              "b": 393.925,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 0,
+            "end_row_offset_idx": 1,
+            "start_col_offset_idx": 5,
+            "end_col_offset_idx": 6,
+            "text": "Nơi làm việ c",
+            "column_header": true,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 466.45,
+              "t": 378.423,
+              "r": 518.045,
+              "b": 400.425,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 0,
+            "end_row_offset_idx": 1,
+            "start_col_offset_idx": 6,
+            "end_col_offset_idx": 7,
+            "text": "H ộ kh ẩ u thườ ng trú",
+            "column_header": true,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 88.55,
+              "t": 409.997,
+              "r": 96.8,
+              "b": 419.468,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 1,
+            "end_row_offset_idx": 2,
+            "start_col_offset_idx": 0,
+            "end_col_offset_idx": 1,
+            "text": "1.",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 111.3,
+              "t": 409.997,
+              "r": 167.53,
+              "b": 432.218,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 1,
+            "end_row_offset_idx": 2,
+            "start_col_offset_idx": 1,
+            "end_col_offset_idx": 2,
+            "text": "Nguy ễn Văn A",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 221.35,
+              "t": 409.997,
+              "r": 247.234,
+              "b": 419.468,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 1,
+            "end_row_offset_idx": 2,
+            "start_col_offset_idx": 3,
+            "end_col_offset_idx": 4,
+            "text": "B ố đẻ",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 276.38,
+              "t": 409.997,
+              "r": 354.15,
+              "b": 419.468,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 1,
+            "end_row_offset_idx": 2,
+            "start_col_offset_idx": 4,
+            "end_col_offset_idx": 5,
+            "text": "Làm nông nghi ệ p",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 456.7,
+              "t": 409.997,
+              "r": 515.187,
+              "b": 419.468,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 1,
+            "end_row_offset_idx": 2,
+            "start_col_offset_idx": 6,
+            "end_col_offset_idx": 7,
+            "text": "Thôn..., xã,...",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 88.55,
+              "t": 441.747,
+              "r": 96.8,
+              "b": 451.218,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 2,
+            "end_row_offset_idx": 3,
+            "start_col_offset_idx": 0,
+            "end_col_offset_idx": 1,
+            "text": "2.",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 111.3,
+              "t": 441.747,
+              "r": 164.388,
+              "b": 463.968,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 2,
+            "end_row_offset_idx": 3,
+            "start_col_offset_idx": 1,
+            "end_col_offset_idx": 2,
+            "text": "Nguy ễ n Th ị B",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 221.35,
+              "t": 441.747,
+              "r": 249.234,
+              "b": 451.218,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 2,
+            "end_row_offset_idx": 3,
+            "start_col_offset_idx": 3,
+            "end_col_offset_idx": 4,
+            "text": "M ẹ đẻ",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 276.38,
+              "t": 441.747,
+              "r": 324.373,
+              "b": 451.218,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 2,
+            "end_row_offset_idx": 3,
+            "start_col_offset_idx": 4,
+            "end_col_offset_idx": 5,
+            "text": "Công nhân",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 456.7,
+              "t": 441.747,
+              "r": 467.7,
+              "b": 451.218,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 2,
+            "end_row_offset_idx": 3,
+            "start_col_offset_idx": 6,
+            "end_col_offset_idx": 7,
+            "text": "....",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 88.55,
+              "t": 473.527,
+              "r": 96.8,
+              "b": 482.998,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 3,
+            "end_row_offset_idx": 4,
+            "start_col_offset_idx": 0,
+            "end_col_offset_idx": 1,
+            "text": "3.",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 111.3,
+              "t": 473.527,
+              "r": 167.53,
+              "b": 495.748,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 3,
+            "end_row_offset_idx": 4,
+            "start_col_offset_idx": 1,
+            "end_col_offset_idx": 2,
+            "text": "Nguy ễn Văn C",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 221.35,
+              "t": 473.527,
+              "r": 260.908,
+              "b": 482.998,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 3,
+            "end_row_offset_idx": 4,
+            "start_col_offset_idx": 3,
+            "end_col_offset_idx": 4,
+            "text": "Anh ru ộ t",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 276.38,
+              "t": 473.527,
+              "r": 302.871,
+              "b": 482.998,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 3,
+            "end_row_offset_idx": 4,
+            "start_col_offset_idx": 4,
+            "end_col_offset_idx": 5,
+            "text": "K ỹ sư",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 456.7,
+              "t": 473.527,
+              "r": 467.7,
+              "b": 482.998,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 3,
+            "end_row_offset_idx": 4,
+            "start_col_offset_idx": 6,
+            "end_col_offset_idx": 7,
+            "text": "....",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 88.55,
+              "t": 505.527,
+              "r": 96.8,
+              "b": 514.998,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 4,
+            "end_row_offset_idx": 5,
+            "start_col_offset_idx": 0,
+            "end_col_offset_idx": 1,
+            "text": "4.",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 111.3,
+              "t": 505.277,
+              "r": 164.388,
+              "b": 527.498,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 4,
+            "end_row_offset_idx": 5,
+            "start_col_offset_idx": 1,
+            "end_col_offset_idx": 2,
+            "text": "Nguy ễ n Th ị D",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 221.35,
+              "t": 505.527,
+              "r": 257.158,
+              "b": 514.998,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 4,
+            "end_row_offset_idx": 5,
+            "start_col_offset_idx": 3,
+            "end_col_offset_idx": 4,
+            "text": "Em ru ộ t",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 276.38,
+              "t": 505.527,
+              "r": 348.15,
+              "b": 514.998,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 4,
+            "end_row_offset_idx": 5,
+            "start_col_offset_idx": 4,
+            "end_col_offset_idx": 5,
+            "text": "H ọc sinh trườ ng",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 456.7,
+              "t": 505.527,
+              "r": 481.45,
+              "b": 514.998,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 4,
+            "end_row_offset_idx": 5,
+            "start_col_offset_idx": 6,
+            "end_col_offset_idx": 7,
+            "text": ".........",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 88.55,
+              "t": 537.277,
+              "r": 96.8,
+              "b": 546.748,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 5,
+            "end_row_offset_idx": 6,
+            "start_col_offset_idx": 0,
+            "end_col_offset_idx": 1,
+            "text": "5.",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 111.3,
+              "t": 537.277,
+              "r": 119.55,
+              "b": 546.748,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 5,
+            "end_row_offset_idx": 6,
+            "start_col_offset_idx": 1,
+            "end_col_offset_idx": 2,
+            "text": "...",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 221.35,
+              "t": 537.277,
+              "r": 226.85,
+              "b": 546.748,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 5,
+            "end_row_offset_idx": 6,
+            "start_col_offset_idx": 3,
+            "end_col_offset_idx": 4,
+            "text": "..",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 276.38,
+              "t": 537.277,
+              "r": 303.88,
+              "b": 546.748,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 5,
+            "end_row_offset_idx": 6,
+            "start_col_offset_idx": 4,
+            "end_col_offset_idx": 5,
+            "text": "..........",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          },
+          {
+            "bbox": {
+              "l": 456.7,
+              "t": 537.277,
+              "r": 473.2,
+              "b": 546.748,
+              "coord_origin": "TOPLEFT"
+            },
+            "row_span": 1,
+            "col_span": 1,
+            "start_row_offset_idx": 5,
+            "end_row_offset_idx": 6,
+            "start_col_offset_idx": 6,
+            "end_col_offset_idx": 7,
+            "text": "......",
+            "column_header": false,
+            "row_header": false,
+            "row_section": false,
+            "fillable": false
+          }
+        ],
+        "num_rows": 6,
+        "num_cols": 7,
+        "grid": [
+          [
+            {
+              "bbox": {
+                "l": 85.275,
+                "t": 384.673,
+                "r": 99.862,
+                "b": 393.925,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "TT",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 116.55,
+                "t": 384.673,
+                "r": 161.9,
+                "b": 393.925,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "H ọ và tên",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 182.83,
+                "t": 378.423,
+                "r": 205.479,
+                "b": 400.425,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "Năm sinh",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 223.35,
+                "t": 378.423,
+                "r": 263.484,
+                "b": 400.425,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "Quan h ệ v ớ i SV",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 295.63,
+                "t": 384.673,
+                "r": 354.766,
+                "b": 393.925,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 4,
+              "end_col_offset_idx": 5,
+              "text": "Ngh ề nghi ệ p",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 385.92,
+                "t": 384.673,
+                "r": 444.584,
+                "b": 393.925,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 5,
+              "end_col_offset_idx": 6,
+              "text": "Nơi làm việ c",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 466.45,
+                "t": 378.423,
+                "r": 518.045,
+                "b": 400.425,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 6,
+              "end_col_offset_idx": 7,
+              "text": "H ộ kh ẩ u thườ ng trú",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            }
+          ],
+          [
+            {
+              "bbox": {
+                "l": 88.55,
+                "t": 409.997,
+                "r": 96.8,
+                "b": 419.468,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "1.",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 111.3,
+                "t": 409.997,
+                "r": 167.53,
+                "b": 432.218,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "Nguy ễn Văn A",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 221.35,
+                "t": 409.997,
+                "r": 247.234,
+                "b": 419.468,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "B ố đẻ",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 276.38,
+                "t": 409.997,
+                "r": 354.15,
+                "b": 419.468,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 4,
+              "end_col_offset_idx": 5,
+              "text": "Làm nông nghi ệ p",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 5,
+              "end_col_offset_idx": 6,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 456.7,
+                "t": 409.997,
+                "r": 515.187,
+                "b": 419.468,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 6,
+              "end_col_offset_idx": 7,
+              "text": "Thôn..., xã,...",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            }
+          ],
+          [
+            {
+              "bbox": {
+                "l": 88.55,
+                "t": 441.747,
+                "r": 96.8,
+                "b": 451.218,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "2.",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 111.3,
+                "t": 441.747,
+                "r": 164.388,
+                "b": 463.968,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "Nguy ễ n Th ị B",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 221.35,
+                "t": 441.747,
+                "r": 249.234,
+                "b": 451.218,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "M ẹ đẻ",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 276.38,
+                "t": 441.747,
+                "r": 324.373,
+                "b": 451.218,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 4,
+              "end_col_offset_idx": 5,
+              "text": "Công nhân",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 5,
+              "end_col_offset_idx": 6,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 456.7,
+                "t": 441.747,
+                "r": 467.7,
+                "b": 451.218,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 6,
+              "end_col_offset_idx": 7,
+              "text": "....",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            }
+          ],
+          [
+            {
+              "bbox": {
+                "l": 88.55,
+                "t": 473.527,
+                "r": 96.8,
+                "b": 482.998,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 3,
+              "end_row_offset_idx": 4,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "3.",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 111.3,
+                "t": 473.527,
+                "r": 167.53,
+                "b": 495.748,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 3,
+              "end_row_offset_idx": 4,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "Nguy ễn Văn C",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 3,
+              "end_row_offset_idx": 4,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 221.35,
+                "t": 473.527,
+                "r": 260.908,
+                "b": 482.998,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 3,
+              "end_row_offset_idx": 4,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "Anh ru ộ t",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 276.38,
+                "t": 473.527,
+                "r": 302.871,
+                "b": 482.998,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 3,
+              "end_row_offset_idx": 4,
+              "start_col_offset_idx": 4,
+              "end_col_offset_idx": 5,
+              "text": "K ỹ sư",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 3,
+              "end_row_offset_idx": 4,
+              "start_col_offset_idx": 5,
+              "end_col_offset_idx": 6,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 456.7,
+                "t": 473.527,
+                "r": 467.7,
+                "b": 482.998,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 3,
+              "end_row_offset_idx": 4,
+              "start_col_offset_idx": 6,
+              "end_col_offset_idx": 7,
+              "text": "....",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            }
+          ],
+          [
+            {
+              "bbox": {
+                "l": 88.55,
+                "t": 505.527,
+                "r": 96.8,
+                "b": 514.998,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 4,
+              "end_row_offset_idx": 5,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "4.",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 111.3,
+                "t": 505.277,
+                "r": 164.388,
+                "b": 527.498,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 4,
+              "end_row_offset_idx": 5,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "Nguy ễ n Th ị D",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 4,
+              "end_row_offset_idx": 5,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 221.35,
+                "t": 505.527,
+                "r": 257.158,
+                "b": 514.998,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 4,
+              "end_row_offset_idx": 5,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "Em ru ộ t",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 276.38,
+                "t": 505.527,
+                "r": 348.15,
+                "b": 514.998,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 4,
+              "end_row_offset_idx": 5,
+              "start_col_offset_idx": 4,
+              "end_col_offset_idx": 5,
+              "text": "H ọc sinh trườ ng",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 4,
+              "end_row_offset_idx": 5,
+              "start_col_offset_idx": 5,
+              "end_col_offset_idx": 6,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 456.7,
+                "t": 505.527,
+                "r": 481.45,
+                "b": 514.998,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 4,
+              "end_row_offset_idx": 5,
+              "start_col_offset_idx": 6,
+              "end_col_offset_idx": 7,
+              "text": ".........",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            }
+          ],
+          [
+            {
+              "bbox": {
+                "l": 88.55,
+                "t": 537.277,
+                "r": 96.8,
+                "b": 546.748,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 5,
+              "end_row_offset_idx": 6,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "5.",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 111.3,
+                "t": 537.277,
+                "r": 119.55,
+                "b": 546.748,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 5,
+              "end_row_offset_idx": 6,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "...",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 5,
+              "end_row_offset_idx": 6,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 221.35,
+                "t": 537.277,
+                "r": 226.85,
+                "b": 546.748,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 5,
+              "end_row_offset_idx": 6,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "..",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 276.38,
+                "t": 537.277,
+                "r": 303.88,
+                "b": 546.748,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 5,
+              "end_row_offset_idx": 6,
+              "start_col_offset_idx": 4,
+              "end_col_offset_idx": 5,
+              "text": "..........",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 5,
+              "end_row_offset_idx": 6,
+              "start_col_offset_idx": 5,
+              "end_col_offset_idx": 6,
+              "text": "",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 456.7,
+                "t": 537.277,
+                "r": 473.2,
+                "b": 546.748,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 5,
+              "end_row_offset_idx": 6,
+              "start_col_offset_idx": 6,
+              "end_col_offset_idx": 7,
+              "text": "......",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            }
+          ]
+        ]
+      },
+      "annotations": []
+    }
+  ],
+  "key_value_items": [],
+  "form_items": [],
+  "pages": {
+    "1": {
+      "size": {
+        "width": 595.25,
+        "height": 842.0
+      },
+      "page_no": 1
+    },
+    "2": {
+      "size": {
+        "width": 595.25,
+        "height": 842.0
+      },
+      "page_no": 2
+    },
+    "3": {
+      "size": {
+        "width": 595.25,
+        "height": 842.0
+      },
+      "page_no": 3
+    },
+    "4": {
+      "size": {
+        "width": 595.25,
+        "height": 842.0
+      },
+      "page_no": 4
+    },
+    "5": {
+      "size": {
+        "width": 595.25,
+        "height": 842.0
+      },
+      "page_no": 5
+    }
+  }
+}
