@@ -20,7 +20,7 @@ from .planning import (
     _preview_text,
     _trace_plan_step,
 )
-from .prompts import DECOMPOSE_SYSTEM_PROMPT, PLANNER_SYSTEM_PROMPT, SYNTHESIS_PROMPT
+from .prompts import PLANNER_SYSTEM_PROMPT, SYNTHESIS_PROMPT
 from .state import AgentState, ToolResult, _CONTEXT_WINDOW_TOOL_LIMIT
 from .tool_adapters import execute_retrieval_plan, web_search_for_executor
 
@@ -71,9 +71,12 @@ class ReActAgent:
     """
     Planner-Executor agent with the legacy ReActAgent public name.
 
-    The ReAct tool loop has been removed. The graph is now:
+    The ReAct tool loop and the separate decompose node have been removed. The
+    planner now handles both query break-down (comparison / multi-aspect) and
+    collection routing in a single LLM call; ``complexity_subtype`` is passed as
+    a prompt hint instead of gating a decompose pre-step. The graph is now:
 
-    START -> route_entry -> decompose? -> planner -> executor? -> synthesize -> END
+    START -> planner -> executor? -> synthesize -> END
     """
 
     _VALID_COLLECTIONS: frozenset[str] = frozenset(
@@ -168,12 +171,6 @@ class ReActAgent:
         top_k: int | None = None,
     ) -> AgentState:
         """Execute Planner-Executor and return an AgentState for pipeline logging."""
-        execution_path = (
-            "decompose"
-            if complexity_subtype in {"comparison", "multi_source"}
-            else "planner"
-        )
-
         initial_state: AgentGraphState = {
             "messages": [],
             "query": query,
@@ -184,7 +181,7 @@ class ReActAgent:
             "max_iterations": self.max_iterations,
             "final_answer": None,
             "error": None,
-            "execution_path": execution_path,
+            "execution_path": "planner",
             "sub_questions": None,
             "retrieval_plan": None,
             "complexity_subtype": complexity_subtype,
@@ -197,7 +194,9 @@ class ReActAgent:
             "top_k": top_k,
         }
 
-        logger.info("[Agent] Starting query: '%s...' (path=%s)", query[:80], execution_path)
+        logger.info(
+            "[Agent] Starting query: '%s...' (subtype=%s)", query[:80], complexity_subtype
+        )
         run_start = time.perf_counter()
         try:
             result = self._graph.invoke(initial_state)
@@ -266,67 +265,34 @@ class ReActAgent:
 
         return f"\nThong tin sinh vien: {', '.join(ctx_parts)}" if ctx_parts else ""
 
-    def _decompose_node(self, state: AgentGraphState) -> dict[str, Any]:
-        """Decompose comparison/multi-source queries before planning."""
-        from retrieval.metadata_filters import enrich_major_references_for_query  # noqa: PLC0415
+    @staticmethod
+    def _subtype_hint(complexity_subtype: str | None) -> str:
+        """Steer the single planner call by the router-provided complexity subtype.
 
-        query = enrich_major_references_for_query(state["query"])
-        prompt = f"Query: {query}{self._user_context_hint(query, state.get('user_context'))}"
-
-        t0 = time.perf_counter()
-        try:
-            response = self._synthesis_llm.invoke(
-                [
-                    SystemMessage(content=DECOMPOSE_SYSTEM_PROMPT),
-                    HumanMessage(content=prompt),
-                ]
+        Replaces the old decompose pre-step: instead of a separate LLM call to
+        split the query, the planner is told what shape to expect so it emits the
+        right multi-step plan in one pass.
+        """
+        if complexity_subtype == "comparison":
+            return (
+                "\n[Goi y] Day la cau SO SANH — tach thanh cac step rieng cho tung "
+                "doi tuong (nganh/khoa), cung collection, khac major_hint/cohort_hint."
             )
-            parsed = _parse_json_object(response.content)
-            raw_sub_questions = parsed.get("sub_questions", [query])
-            if not isinstance(raw_sub_questions, list):
-                raw_sub_questions = [query]
-            sub_questions = [
-                str(item).strip()
-                for item in raw_sub_questions[:4]
-                if str(item).strip()
-            ] or [query]
-            elapsed_ms = (time.perf_counter() - t0) * 1000
-            logger.info(
-                "[Decompose] %d sub-questions in %.0fms: %s",
-                len(sub_questions),
-                elapsed_ms,
-                parsed.get("reasoning", ""),
+        if complexity_subtype == "multi_source":
+            return (
+                "\n[Goi y] Cau nay can thong tin tu NHIEU nguon — sinh step cho tung "
+                "khia canh va collection lien quan."
             )
-            trace = {
-                "sub_questions": sub_questions,
-                "reasoning": _preview_text(parsed.get("reasoning", ""), 1000),
-                "raw_response_preview": _preview_text(response.content, 1500),
-                "latency_ms": round(elapsed_ms, 2),
-            }
-        except Exception as exc:
-            logger.warning("[Decompose] Failed (%s), using original query", exc)
-            sub_questions = [query]
-            trace = {
-                "sub_questions": sub_questions,
-                "error": str(exc),
-                "latency_ms": round((time.perf_counter() - t0) * 1000, 2),
-            }
-
-        return {"sub_questions": sub_questions, "decompose_trace": trace}
+        return ""
 
     def _planner_node(self, state: AgentGraphState) -> dict[str, Any]:
-        """Generate and validate a retrieval plan."""
+        """Generate and validate a retrieval plan (break-down + routing in one call)."""
         from retrieval.metadata_filters import enrich_major_references_for_query  # noqa: PLC0415
 
         enriched_query = enrich_major_references_for_query(state["query"])
-        sub_questions = [
-            enrich_major_references_for_query(str(q))
-            for q in (state.get("sub_questions") or [state["query"]])
-        ]
-        questions_str = "\n".join(f"- {q}" for q in sub_questions)
         prompt = (
-            f"Cau hoi goc: {enriched_query}\n\n"
-            f"Cau hoi con:\n{questions_str}"
+            f"Cau hoi: {enriched_query}"
+            f"{self._subtype_hint(state.get('complexity_subtype'))}"
             f"{self._user_context_hint(enriched_query, state.get('user_context'))}"
         )
 
@@ -428,7 +394,10 @@ class ReActAgent:
         new_history = [f"planned_rag_search:{label}" for label, _ in labeled_results]
         tool_messages = self._rag_tool_messages(labeled_results)
 
-        if plan.get("needs_web"):
+        # Web is a fallback, not an always-on companion: only reach out when the
+        # RAG steps produced nothing usable, so a planner-set needs_web does not
+        # waste a Tavily call (and dilute synthesis) when the DB already answered.
+        if plan.get("needs_web") and not tool_messages:
             self._append_web_executor_result(
                 state["query"],
                 new_history,
@@ -437,8 +406,13 @@ class ReActAgent:
             )
 
         if not tool_messages:
+            # A valid plan that returns nothing (even after relax-retry + web)
+            # signals the pipeline to fall back to classic RAG, which has other
+            # recall paths (HyDE/expansion). final_answer stays as a safety-net
+            # for callers that suppress the fallback.
             return {
                 "final_answer": _NO_INFO_ANSWER,
+                "error": "agent_no_results",
                 "tool_call_history": new_history,
                 "executor_results": executor_results,
             }
@@ -611,9 +585,6 @@ class ReActAgent:
             return False
         return True
 
-    def _route_entry(self, state: AgentGraphState) -> Literal["decompose", "planner"]:
-        return "decompose" if state.get("execution_path") == "decompose" else "planner"
-
     def _after_planner(self, state: AgentGraphState) -> Literal["executor", "synthesize"]:
         if state.get("error"):
             return "synthesize"
@@ -666,17 +637,11 @@ class ReActAgent:
     def _build_graph(self) -> Any:
         graph = StateGraph(AgentGraphState)  # type: ignore
 
-        graph.add_node("decompose", self._decompose_node)
         graph.add_node("planner", self._planner_node)
         graph.add_node("executor", self._executor_node)
         graph.add_node("synthesize", self._synthesize_node)
 
-        graph.add_conditional_edges(
-            START,
-            self._route_entry,
-            {"decompose": "decompose", "planner": "planner"},
-        )
-        graph.add_edge("decompose", "planner")
+        graph.add_edge(START, "planner")
         graph.add_conditional_edges(
             "planner",
             self._after_planner,
