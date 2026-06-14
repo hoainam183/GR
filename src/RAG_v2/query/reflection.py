@@ -106,13 +106,17 @@ _MSSV_RE = re.compile(
 )
 # Personal introduction: "Em là Phạm Nhật Anh", "Tôi là X Y Z"
 # Matches 1–5 capitalised Vietnamese name tokens after "là"
+# The lead-in (pronoun + "là") is case-insensitive, but the name tokens must
+# stay capital-initial: requiring an uppercase first letter is what distinguishes
+# a real proper-noun introduction ("Tôi là Phạm Nhật Anh") from an ordinary
+# question ("học phí của tôi là bao nhiêu"). A global re.IGNORECASE would make the
+# uppercase classes match lowercase too and wrongly strip the latter to "học phí của".
 _PERSONAL_INTRO_RE = re.compile(
-    r"\b(?:em|tôi|mình)\s+là\s+"
+    r"(?i:\b(?:em|tôi|mình)\s+là\s+)"
     r"(?:[A-ZÀÁẠẢÃĂẮẰẶẲẴÂẤẦẬẨẪĐÈÉẸẺẼÊẾỀỆỂỄÌÍỊỈĨÒÓỌỎÕÔỐỒỘỔỖƠỚỜỢỞỠÙÚỤỦŨƯỨỪỰỬỮỲÝỴỶỸ]"
     r"[a-zàáạảãăắằặẳẵâấầậẩẫđèéẹẻẽêếềệểễìíịỉĩòóọỏõôốồộổỗơớờợởỡùúụủũưứừựửữỳýỵỷỹ]{0,20}"
     r"(?:\s+[A-ZÀÁẠẢÃĂẮẰẶẲẴÂẤẦẬẨẪĐÈÉẸẺẼÊẾỀỆỂỄÌÍỊỈĨÒÓỌỎÕÔỐỒỘỔỖƠỚỜỢỞỠÙÚỤỦŨƯỨỪỰỬỮỲÝỴỶỸ]"
     r"[a-zàáạảãăắằặẳẵâấầậẩẫđèéẹẻẽêếềệểễìíịỉĩòóọỏõôốồộổỗơớờợởỡùúụủũưứừựửữỳýỵỷỹ]{0,20}){0,4})",
-    re.IGNORECASE,
 )
 # Thanks / closing: "em xin cảm ơn", "Cảm ơn ban cố vấn a"
 _THANKS_RE = re.compile(
