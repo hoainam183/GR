@@ -360,3 +360,42 @@ Ngữ cảnh (có thể rỗng): {context}
 
 Trả về DUY NHẤT 1 chuỗi JSON hợp lệ, không có text nào khác:
 {{"domains": ["domain1", ...], "confidence": "high|medium|low"}}"""
+
+
+# ─── Complexity Classification Prompt (Tier-2 LLM judge) ──────────────────────
+# Only invoked for borderline queries (the ML classifier marked ≥2 collections
+# active). Decides whether the query should go to the Planner-Executor agent
+# (``complex``) or stay on the single-shot RAG path (``simple``). The judgment is
+# about INFORMATION NEEDS, never about which major/ngành is named — so it
+# generalises to any program without code changes.
+
+COMPLEXITY_CLASSIFICATION_PROMPT = """\
+Bạn là bộ định tuyến độ phức tạp cho chatbot học vụ của một trường Đại học.
+Một câu hỏi đã được bộ phân loại đánh giá là CÓ THỂ chạm tới nhiều mảng tài liệu.
+Hãy quyết định nên xử lý câu hỏi bằng đường nào:
+
+- "simple": chỉ cần MỘT lượt truy xuất với MỘT ý hỏi. Một sự thật/quy định/giá trị
+  đơn lẻ, dù có nhắc tên ngành/khóa. Ví dụ: "Học phí ngành KHMT là bao nhiêu?",
+  "Môn Giải tích 1 có mấy tín chỉ?".
+- "complex": câu hỏi GỘP nhiều nhu cầu thông tin riêng biệt, mỗi nhu cầu cần một
+  truy vấn diễn đạt khác nhau, HOẶC cần so sánh, HOẶC cần nhiều bước suy luận.
+  Khi đó nên tách thành các câu hỏi con cho từng mảng tài liệu.
+  Lưu ý: câu hỏi về ĐIỀU KIỆN TỐT NGHIỆP / ĐỦ ĐIỀU KIỆN thường là "complex" vì
+  phải gộp quy định (ngoại ngữ, kỷ luật, CPA) VÀ chương trình đào tạo (tín chỉ,
+  môn bắt buộc) — bất kể câu hỏi nêu ngành nào.
+
+subtype (chỉ khi "complex"):
+- "comparison": so sánh A với B (hai ngành/khóa/quy định).
+- "multi_source": cần dữ liệu từ ≥2 mảng tài liệu (vd điều kiện tốt nghiệp).
+- "general": nhiều bước / mơ hồ / nhiều câu hỏi trong một.
+
+Ví dụ:
+- "Điều kiện tốt nghiệp của ngành KHMT?" -> {{"complexity": "complex", "subtype": "multi_source", "reason": "gộp quy định + CTĐT"}}
+- "So sánh chương trình IT1 và IT2?" -> {{"complexity": "complex", "subtype": "comparison", "reason": "so sánh hai ngành"}}
+- "Học phí kỳ này bao nhiêu?" -> {{"complexity": "simple", "subtype": null, "reason": "một sự thật đơn lẻ"}}
+
+Câu hỏi: {query}
+Mảng tài liệu mà bộ phân loại cho là liên quan: {domains}
+
+Trả về DUY NHẤT 1 chuỗi JSON hợp lệ, không có text nào khác:
+{{"complexity": "simple|complex", "subtype": "comparison|multi_source|general|null", "reason": "..."}}"""

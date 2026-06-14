@@ -179,7 +179,9 @@ class ComplexityRouter:
         Returns:
             Dict with keys:
 
-            - ``tier``: ``"chitchat"`` | ``"simple"`` | ``"complex"``
+            - ``tier``: ``"chitchat"`` | ``"simple"`` | ``"complex"`` | ``"unknown"``
+              (``"unknown"`` = no decisive Tier-0 signal; the pipeline resolves it
+              via the ML multi-label classifier and an LLM judge)
             - ``reason``: human-readable explanation of the routing decision
             - ``confidence``: ``"high"`` (pattern match) or ``"medium"`` (heuristic)
             - ``complex_subtype`` (only when tier=complex):
@@ -268,27 +270,15 @@ class ComplexityRouter:
             )
             return result
 
-        graduation_multi_source = bool(
-            re.search(r"\b(tot nghiep|xet tot nghiep|dieu kien)\b", q_folded)
-            and re.search(r"\b(nganh|chuong trinh|ctdt|quy dinh|tin chi|mon|hoc phan)\b", q_folded)
-        )
-        if (
-            query_signals.multi_domain
-            and query_signals.eligibility_check
-            and graduation_multi_source
-        ):
-            result = {
-                "tier": "complex",
-                "reason": "signals: eligibility query needs multiple domains",
-                "confidence": "high",
-                "complex_subtype": "multi_source",
-                "query_signals": query_signals_dict,
-            }
-            logger.info(
-                "ComplexityRouter: %r -> %s/%s (%s)",
-                q[:60], result["tier"], result["complex_subtype"], result["reason"],
-            )
-            return result
+        # NOTE: The old graduation/eligibility multi-source gate lived here. It
+        # re-derived a *narrower* program-context regex than ``signals.py`` and
+        # had to enumerate program/major tokens — so a bare major code like
+        # "IT1" slipped through to ``simple`` while "của tôi" did not. That entity
+        # enumeration is an anti-pattern (every new major needed a regex edit), so
+        # the multi-collection decision is now made data-drivenly by the pipeline's
+        # tiered complexity decision (ML multi-label domains + LLM on borderline).
+        # Queries that reach the fall-through below return ``tier="unknown"`` so
+        # ``RAGPipeline._decide_complexity`` can apply Tier-1/Tier-2.
 
         if (
             _FOLDED_COMPARISON_RE.search(q_folded)
@@ -395,10 +385,15 @@ class ComplexityRouter:
             )
             return result
 
+        # Fall-through: cheap Tier-0 patterns saw no decisive signal. Return
+        # ``"unknown"`` (not ``"simple"``) so the pipeline escalates to the
+        # ML multi-label classifier (Tier 1) and, only when ≥2 collections are
+        # active, the LLM judge (Tier 2). Callers that want a hard tier (e.g.
+        # ``route_tier``) treat ``"unknown"`` as ``"simple"``.
         result = {
-            "tier": "simple",
-            "reason": "default: no complex signals detected",
-            "confidence": "high",
+            "tier": "unknown",
+            "reason": "default: no decisive Tier-0 signal — defer to ML/LLM tiers",
+            "confidence": "low",
             "query_signals": query_signals_dict,
         }
         logger.info(
@@ -410,6 +405,9 @@ class ComplexityRouter:
     def route_tier(self, query: str) -> str:
         """Return just the tier string (``'chitchat'``, ``'simple'``, ``'complex'``).
 
-        Backwards-compatible convenience method.
+        Backwards-compatible convenience method. The internal ``"unknown"`` tier
+        (Tier-0 saw no decisive signal) collapses to ``"simple"`` here, since
+        this helper has no access to the ML/LLM tiers that resolve it.
         """
-        return self.route(query)["tier"]
+        tier = self.route(query)["tier"]
+        return "simple" if tier == "unknown" else tier

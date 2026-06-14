@@ -28,7 +28,11 @@ from config.settings import Settings
 from llm import BaseLLM, create_llm
 from llm.self_eval import SelfEvaluator
 from query.decomposer import QueryDecomposer
-from query.prompts import DOMAIN_CLASSIFICATION_PROMPT
+from query.domain_classifier import MULTI_LABEL_THRESHOLD
+from query.prompts import (
+    COMPLEXITY_CLASSIFICATION_PROMPT,
+    DOMAIN_CLASSIFICATION_PROMPT,
+)
 from query.reflection import QueryReflector
 from query.router import QueryRouter
 from query.training_data import RAG_LABELS
@@ -1016,10 +1020,10 @@ class RAGPipeline:
             question, history, user_context, runtime,
         )
 
-        # Step 2: Route on REFLECTED query
-        route_result = self.complexity_router.route(reflected_question)
-        route = route_result["tier"]
-        subtype = route_result.get("complex_subtype", "")
+        # Step 2: Tiered complexity decision on the REFLECTED query
+        # (Tier 0 regex → Tier 1 ML multi-label → Tier 2 LLM on borderline).
+        route, subtype = self._decide_complexity(reflected_question, history)
+        subtype = subtype or ""
         logger.info(
             "[query_v3] Reflected: %r → route=%s",
             reflected_question[:80],
@@ -1032,7 +1036,7 @@ class RAGPipeline:
                 "answer": self._handle_chitchat(question),
                 "mode": "chitchat",
                 "route": "chitchat",
-                "route_reason": route_result.get("reason", ""),
+                "route_reason": "tier0:chitchat",
                 "tools_used": [],
                 "tool_calls": [],
                 "iterations": 0,
@@ -1243,6 +1247,120 @@ class RAGPipeline:
             )
             return current_routing
 
+    # ------------------------------------------------------------------
+    # Tiered complexity decision (simple vs complex / planner)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _count_active_domains(routing: Dict[str, Any]) -> int:
+        """Count RAG collections the classifier marks active (prob ≥ threshold).
+
+        This is the entity-agnostic "spans multiple collections" signal — it
+        comes from the trained multi-label classifier, so a new major never
+        needs a code change. Distinct from ``_should_trigger_tier3`` (which
+        measures the top-2 *margin*): a query can have a dominant top domain yet
+        still activate a second collection (e.g. ctdt 0.998 + quydinh 0.661).
+        """
+        probs = routing.get("probabilities") or {}
+        return sum(1 for p in probs.values() if p >= MULTI_LABEL_THRESHOLD)
+
+    def _classify_complexity_llm(
+        self,
+        question: str,
+        routing: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """Tier-2: ask the LLM whether a borderline query needs the planner.
+
+        Only invoked when the classifier marked ≥2 collections active, so the
+        cost is bounded to genuinely multi-collection queries. Judges information
+        needs (decomposition / comparison / multi-step), never which major is
+        named — so it generalises to any program. Falls back to ``simple`` on any
+        error.
+
+        Returns ``{"tier": "simple"|"complex", "subtype": str|None}``.
+        """
+        try:
+            chat = self._llm_runtime_snapshot().chat
+            domains = routing.get("domains") or list(
+                (routing.get("probabilities") or {}).keys()
+            )
+            prompt = COMPLEXITY_CLASSIFICATION_PROMPT.format(
+                query=question,
+                domains=", ".join(domains) or "(none)",
+            )
+            raw = chat.generate(query=prompt, mode="chitchat")
+
+            import json as _json
+            import re as _re
+
+            _match = _re.search(r"\{.*\}", raw, _re.DOTALL)
+            parsed = _json.loads(_match.group(0) if _match else raw.strip())
+
+            complexity = str(parsed.get("complexity", "simple")).strip().lower()
+            if complexity != "complex":
+                return {"tier": "simple", "subtype": None}
+
+            subtype = parsed.get("subtype")
+            if subtype not in {"comparison", "multi_source", "general"}:
+                subtype = "multi_source"
+            logger.info(
+                "Tier-2 complexity: %r (domains=%s) -> complex/%s (%s)",
+                question[:60], domains, subtype, parsed.get("reason", ""),
+            )
+            return {"tier": "complex", "subtype": subtype}
+        except Exception as exc:
+            logger.warning(
+                "Tier-2 complexity LLM failed (%s); defaulting to simple", exc
+            )
+            return {"tier": "simple", "subtype": None}
+
+    def _decide_complexity(
+        self,
+        reflected_question: str,
+        history: Optional[List[Dict[str, str]]],
+    ) -> tuple[str, Optional[str]]:
+        """Decide simple vs complex via a 3-tier, entity-agnostic pipeline.
+
+        Tier 0 — cheap deterministic patterns (``ComplexityRouter``): chitchat,
+            single-fact lookups, pronoun-based eligibility, explicit comparison.
+            Decisive unless it returns ``"unknown"``.
+        Tier 1 — the trained multi-label domain classifier on the standalone
+            reflected query (bleed-free, no Tier-3 LLM). <2 active collections →
+            ``simple``.
+        Tier 2 — LLM judge, only when ≥2 collections are active.
+
+        Returns ``(tier, complex_subtype)`` where tier ∈ {chitchat, simple,
+        complex}. Never returns ``"unknown"``.
+        """
+        t0 = self.complexity_router.route(reflected_question)
+        tier0 = t0["tier"]
+        if tier0 != "unknown":
+            return tier0, t0.get("complex_subtype")
+
+        # Tier 1 — ML multi-label on the standalone query (chat_history omitted →
+        # no conversation bleed, matching _reroute_reflected). Base classifier
+        # only: this must stay cheap and must NOT trigger the ~12 s Tier-3 LLM.
+        try:
+            routing = self._router.route(reflected_question)
+        except Exception:
+            logger.warning(
+                "Complexity Tier-1 routing failed; defaulting to simple",
+                exc_info=True,
+            )
+            return "simple", None
+
+        if routing.get("intent") != "rag":
+            # Non-RAG (chitchat / tool_search): keep parity with the prior
+            # default and let the downstream flow handle it — no planner.
+            return "simple", None
+
+        if self._count_active_domains(routing) < 2:
+            return "simple", None
+
+        # Tier 2 — borderline (≥2 active collections): let the LLM judge.
+        verdict = self._classify_complexity_llm(reflected_question, routing)
+        return verdict["tier"], verdict.get("subtype")
+
     def _handle_chitchat(self, question: str) -> str:
         """Simple chitchat replies without retrieval cost."""
         q = question.strip().lower()
@@ -1318,9 +1436,9 @@ class RAGPipeline:
 
         # ── Step 2: Complexity routing on REFLECTED query ─────────────────────
         complexity_t0 = time.perf_counter()
-        complexity = self.complexity_router.route(reflected_question)
-        complexity_tier = complexity["tier"]
-        complexity_subtype = complexity.get("complex_subtype")
+        complexity_tier, complexity_subtype = self._decide_complexity(
+            reflected_question, history
+        )
         pipeline_timings["complexity_routing"] = _elapsed_ms(complexity_t0)
         logger.info(
             "ComplexityRouter: %r (reflected from %r) → %s",
@@ -1410,7 +1528,7 @@ class RAGPipeline:
                     user_context=user_context,
                     route_label="complex",
                     require_agent=False,
-                    complexity_subtype=complexity.get("complex_subtype"),
+                    complexity_subtype=complexity_subtype,
                     pre_reflected=reflected_question,
                     pre_reflection_prompt=reflection_prompt,
                     pre_reflection_ms=reflection_ms,
