@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from typing import Any
 
 _ENTITY_SCOPED_COLLECTIONS = frozenset({"quy_dinh", "chuong_trinh"})
@@ -115,12 +116,12 @@ def _normalise_plan_step_for_entities(
     collection = str(step.get("collection") or "").strip()
     step_major_codes = extract_major_codes(query)
     step_cohort_codes = extract_cohort_codes(query)
-    changed = _inject_missing_hints(
+    changed = _ground_step_hints(
         step,
         source_major,
         source_cohort,
-        step_major_codes,
-        step_cohort_codes,
+        source_has_multiple_majors,
+        source_has_multiple_cohorts,
     )
     scoped_query = _scoped_query_for_entity_collection(
         query,
@@ -139,26 +140,34 @@ def _normalise_plan_step_for_entities(
     return step, changed
 
 
-def _inject_missing_hints(
+def _ground_step_hints(
     step: dict[str, Any],
     source_major: str | None,
     source_cohort: str | None,
-    step_major_codes: list[str],
-    step_cohort_codes: list[str],
+    source_has_multiple_majors: bool,
+    source_has_multiple_cohorts: bool,
 ) -> bool:
+    """Force a step's entity hints to match the source query's scope.
+
+    The reflected source query is authoritative for entity scope. The planner
+    LLM sometimes copies a major/cohort from its few-shot examples instead of
+    the question (observed: ``major_hint="IT-E6"`` / ``cohort_hint="K67"`` for
+    an "IT1" question). For each entity dimension the source names unambiguously
+    we force that exact value — overriding a contradicting one; for a dimension
+    the source does not name, a planner-invented hint is dropped. Multi-entity
+    comparison queries (≥2 majors/cohorts) are left untouched so each step keeps
+    its own scope.
+    """
     changed = False
     if (
-        source_major
-        and not _clean_plan_hint(step.get("major_hint"))
-        and (not step_major_codes or source_major in step_major_codes)
+        not source_has_multiple_majors
+        and _clean_plan_hint(step.get("major_hint")) != source_major
     ):
         step["major_hint"] = source_major
         changed = True
-
     if (
-        source_cohort
-        and not _clean_plan_hint(step.get("cohort_hint"))
-        and (not step_cohort_codes or source_cohort in step_cohort_codes)
+        not source_has_multiple_cohorts
+        and _clean_plan_hint(step.get("cohort_hint")) != source_cohort
     ):
         step["cohort_hint"] = source_cohort
         changed = True
@@ -180,19 +189,59 @@ def _scoped_query_for_entity_collection(
         return query
 
     scoped_query = query
-    step_major_to_inject = source_major
-    if not step_major_to_inject and source_has_multiple_majors:
-        step_major_to_inject = _clean_plan_hint(step.get("major_hint"))
-    if step_major_to_inject and not step_major_codes:
-        scoped_query = f"{scoped_query} ngành {step_major_to_inject}"
 
-    step_cohort_to_inject = source_cohort
-    if not step_cohort_to_inject and source_has_multiple_cohorts:
-        step_cohort_to_inject = _clean_plan_hint(step.get("cohort_hint"))
-    if step_cohort_to_inject and not step_cohort_codes:
-        scoped_query = f"{scoped_query} {step_cohort_to_inject}"
+    # Major dimension. ``quy_dinh`` has no metadata filter, so the code in the
+    # query text is the only routing signal — a contradicting major the planner
+    # copied from an example must be rewritten, not just appended.
+    if source_major and not source_has_multiple_majors:
+        scoped_query = _reconcile_entity_code(
+            scoped_query, step_major_codes, source_major, prefix="ngành "
+        )
+    elif source_has_multiple_majors:
+        step_major = _clean_plan_hint(step.get("major_hint"))
+        if step_major and not step_major_codes:
+            scoped_query = f"{scoped_query} ngành {step_major}"
+
+    # Cohort dimension (same reasoning).
+    if source_cohort and not source_has_multiple_cohorts:
+        scoped_query = _reconcile_entity_code(
+            scoped_query, step_cohort_codes, source_cohort, prefix=""
+        )
+    elif source_has_multiple_cohorts:
+        step_cohort = _clean_plan_hint(step.get("cohort_hint"))
+        if step_cohort and not step_cohort_codes:
+            scoped_query = f"{scoped_query} {step_cohort}"
 
     return " ".join(scoped_query.split())
+
+
+def _reconcile_entity_code(
+    text: str,
+    found_codes: list[str],
+    desired: str,
+    prefix: str,
+) -> str:
+    """Make *text* reference exactly *desired* for one entity dimension.
+
+    Replaces any code in *found_codes* that contradicts *desired* (a major the
+    planner copied from a few-shot example), and appends *desired* when the text
+    names no code for this dimension or the replacement missed a variant.
+    """
+    if not found_codes:
+        return f"{text} {prefix}{desired}"
+    result = text
+    for code in found_codes:
+        if code.casefold() == desired.casefold():
+            continue
+        result = re.sub(
+            rf"(?<![0-9A-Za-z-]){re.escape(code)}(?![0-9A-Za-z-])",
+            desired,
+            result,
+            flags=re.IGNORECASE,
+        )
+    if desired.casefold() not in result.casefold():
+        result = f"{result} {prefix}{desired}"
+    return result
 
 
 def _parse_json_object(content: Any) -> dict[str, Any]:

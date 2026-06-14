@@ -42,8 +42,9 @@ Output format (JSON):
 Nguyên tắc:
 - Câu hỏi nhiều khía cạnh → mỗi khía cạnh 1 step, chọn đúng collection (kể cả khi câu hỏi KHÔNG liệt kê rõ từng khía cạnh — tự suy ra các khía cạnh cần kiểm tra).
 - So sánh A vs B → 2 steps cùng collection, khác filter hint
-- major_hint: mã ngành (IT-E6, IT-E7, IT1...) — dùng khi query liên quan đến ngành cụ thể
-- cohort_hint: mã khóa (K65, K70...) — dùng khi query liên quan đến khóa cụ thể
+- major_hint: mã ngành (vd IT1, IT-E6, IT-E7...) — dùng khi query liên quan đến ngành cụ thể
+- cohort_hint: mã khóa (vd K65, K70...) — dùng khi query liên quan đến khóa cụ thể
+- ⚠️ TUYỆT ĐỐI: major_hint, cohort_hint VÀ mọi mã ngành/khóa trong query PHẢI sao chép CHÍNH XÁC từ câu hỏi của sinh viên. KHÔNG được lấy mã từ các ví dụ bên dưới, KHÔNG đổi sang ngành khác, KHÔNG tự bịa. Nếu câu hỏi nói "IT1" thì mọi step dùng "IT1" (không phải IT-E6). Nếu câu hỏi KHÔNG nêu mã khóa (Kxx) → cohort_hint = null. Nếu KHÔNG nêu mã ngành → major_hint = null.
 - Tối đa 4 steps — ưu tiên ít steps, query cụ thể
 - needs_web=true CHỈ khi câu hỏi cần thông tin bên ngoài database trường
 - KHÔNG đưa mã sinh viên hoặc thông tin cá nhân vào query.
@@ -54,10 +55,10 @@ Nguyên tắc:
   2. chuong_trinh: yêu cầu tín chỉ, học phần bắt buộc của ngành
 - Khi query chứa mã ngành cụ thể → đặt major_hint cho MỌI step
 
-Ví dụ 1 — Câu hỏi tốt nghiệp ngành cụ thể:
-Input: "Điều kiện tốt nghiệp ngành CNTT Việt-Nhật IT-E6"
+Ví dụ 1 — Câu hỏi tốt nghiệp ngành cụ thể (lưu ý: mã ngành trong output = mã ngành trong input, KHÔNG đổi):
+Input: "Điều kiện tốt nghiệp ngành Khoa học Máy tính IT1"
 Output:
-{"steps": [{"query": "điều kiện ngoại ngữ tốt nghiệp CNTT Việt-Nhật IT-E6", "collection": "quy_dinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ngoai_ngu"},{"query": "yêu cầu hoàn thành chương trình đào tạo tốt nghiệp", "collection": "chuong_trinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ctdt_tot_nghiep"}], "needs_web": false, "reasoning": "Tốt nghiệp cần kiểm tra cả ngoại ngữ (quy_dinh) và CTĐT (chuong_trinh)"}
+{"steps": [{"query": "điều kiện ngoại ngữ GPA kỷ luật tốt nghiệp ngành Khoa học Máy tính IT1", "collection": "quy_dinh", "major_hint": "IT1", "cohort_hint": null, "label": "ngoai_ngu"},{"query": "yêu cầu hoàn thành chương trình đào tạo tốt nghiệp", "collection": "chuong_trinh", "major_hint": "IT1", "cohort_hint": null, "label": "ctdt_tot_nghiep"}], "needs_web": false, "reasoning": "Tốt nghiệp cần kiểm tra cả ngoại ngữ (quy_dinh) và CTĐT (chuong_trinh)"}
 
 Ví dụ 2 — So sánh 2 ngành:
 Input: "So sánh ngoại ngữ giữa IT1 và IT-E6"

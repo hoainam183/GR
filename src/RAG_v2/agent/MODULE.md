@@ -6,7 +6,7 @@ Source-verified: 2026-06-12 from `agent/__init__.py`, `agent/react_agent.py`, `a
 
 `agent` is the agentic RAG layer used by `RAGPipeline.query_agent()` for complex questions. It does not expose HTTP routes directly. The public caller is the pipeline, which converts the final `AgentState` into API metadata, retrieved documents, Mongo traces, and UI debug payloads.
 
-The public class name remains `ReActAgent` for import compatibility, but the runtime graph is now Planner-Executor only. The old LangGraph tool-binding loop and clarify tool path have been removed.
+The public class name remains `ReActAgent` for import compatibility, but the runtime graph is now Planner-Executor only. The old LangGraph tool-binding loop and clarify tool path have been removed. The separate decompose node has also been removed: the planner now does both query break-down (comparison / multi-aspect) and collection routing in a single LLM call, and `complexity_subtype` is passed as a planner prompt hint instead of gating a decompose pre-step.
 
 ## File Map
 
@@ -15,9 +15,9 @@ agent/
   __init__.py       Public exports for state, adapters, prompts, and ReActAgent.
   graph_state.py    AgentGraphState TypedDict (LangGraph runtime state).
   state.py          AgentState and ToolResult dataclasses for logging/API.
-  prompts.py        AGENT_SYSTEM_PROMPT, SYNTHESIS_PROMPT, DECOMPOSE_SYSTEM_PROMPT, PLANNER_SYSTEM_PROMPT.
+  prompts.py        SYNTHESIS_PROMPT, PLANNER_SYSTEM_PROMPT.
   planning.py       Pure planner helpers: JSON parsing, trace previews, plan entity-scope normalization.
-  react_agent.py    Planner-Executor graph orchestration, routing, plan validation, executor/synthesis nodes.
+  react_agent.py    Planner-Executor graph orchestration, subtype hint, plan validation, executor/synthesis nodes.
   tool_adapters.py  Tool dispatcher, retrieval/web adapters, RAG cache, shared runtime, ContextVar docs.
   lc_tools.py       Thin legacy wrapper functions delegating to execute_tool(); not graph-bound.
 ```
@@ -31,7 +31,7 @@ agent/
 - `execute_tool()`, `execute_retrieval_plan()`, `web_search_for_executor()`
 - `set_runtime()`, `cache_clear()`
 - `init_agent_docs()`, `get_agent_docs()`
-- `AGENT_SYSTEM_PROMPT`, `SYNTHESIS_PROMPT`, `DECOMPOSE_SYSTEM_PROMPT`, `PLANNER_SYSTEM_PROMPT`
+- `SYNTHESIS_PROMPT`, `PLANNER_SYSTEM_PROMPT`
 
 `tool_adapters.inject_from_retrieval_service()` is an important runtime hook even though it is not in `__all__`. `RAGPipeline.__init__()` calls it after building the shared `RetrievalService`.
 
@@ -56,10 +56,7 @@ agent.run(
 RAGPipeline.query_agent()
   -> init_agent_docs()                       (per-request ContextVar)
   -> ReActAgent.run(query, session_id, history, complexity_subtype, user_context, top_k)
-     -> route_entry (from execution_path)
-        -> comparison/multi_source: decompose -> planner
-        -> general/other subtype: planner
-     -> planner builds + validates a JSON retrieval plan
+     -> planner builds + validates a JSON retrieval plan (START -> planner)
      -> executor when the plan is valid and has steps; else synthesize
      -> synthesize
   -> state.to_log_dict() -> Mongo agent_traces
@@ -68,13 +65,13 @@ RAGPipeline.query_agent()
 
 Planner-Executor node behavior:
 
-- `run()` sets `execution_path` to `"decompose"` when `complexity_subtype` is `"comparison"` or `"multi_source"`, otherwise `"planner"`. `_route_entry()` reads this field to pick the START edge.
-- `_decompose_node()` uses `_synthesis_llm` and `DECOMPOSE_SYSTEM_PROMPT`. The query is enriched via `enrich_major_references_for_query()` before prompting. On failure it falls back to the original query; sub-questions are capped at 4.
-- `_planner_node()` asks for a JSON plan (`steps`, `needs_web`, `reasoning`) using `PLANNER_SYSTEM_PROMPT`, keeps at most 4 steps, and delegates JSON parsing / entity-scope normalization to `planning.py` helpers.
+- The graph is `START -> planner -> executor? -> synthesize -> END`. There is no decompose node and no `route_entry`; `execution_path` is always `"planner"` (kept on state for log compatibility).
+- `_subtype_hint()` turns `complexity_subtype` into a short Vietnamese instruction appended to the planner prompt (`comparison` -> split per entity; `multi_source` -> step per aspect/collection). This replaces the old decompose pre-step at zero extra LLM cost.
+- `_planner_node()` asks for a JSON plan (`steps`, `needs_web`, `reasoning`) using `PLANNER_SYSTEM_PROMPT` + the subtype hint, keeps at most 4 steps, and delegates JSON parsing / entity-scope normalization to `planning.py` helpers. The planner does its own multi-aspect break-down (e.g. "điều kiện tốt nghiệp" -> quy_dinh + chuong_trinh steps) per its prompt rules.
 - JSON (optionally markdown-fenced) is parsed by `planning._parse_json_object()` through a thin compatibility wrapper in `react_agent.py`; do not use naive backtick stripping.
 - `_validate_plan()` requires non-empty steps where every step has a non-empty `query` and a `collection` in `_VALID_COLLECTIONS`. Invalid JSON, empty steps, or invalid collections set `state.error` (`planner_invalid_json` / `planner_empty_steps` / `planner_invalid_plan`); `RAGPipeline.query_agent()` owns the fallback policy.
 - `_after_planner()` routes to `"synthesize"` if `error` is set, otherwise to `"executor"` when the plan re-validates.
-- `_executor_node()` calls `execute_retrieval_plan()` with the pipeline-provided `top_k`. When all steps return empty and `_retry_on_empty` is `True` (default), it calls `_relaxed_steps()` to drop `major_hint`/`cohort_hint` filters and retries once via `execute_retrieval_plan()`. If the relaxed retry yields results those replace the original. Web search is appended when `needs_web` is set. If no non-empty tool messages survive, it sets `final_answer = _NO_INFO_ANSWER` without triggering a fallback.
+- `_executor_node()` calls `execute_retrieval_plan()` with the pipeline-provided `top_k`. When all steps return empty and `_retry_on_empty` is `True` (default), it calls `_relaxed_steps()` to drop `major_hint`/`cohort_hint` filters and retries once via `execute_retrieval_plan()`. If the relaxed retry yields results those replace the original. Web search is appended only when `needs_web` is set **and** the RAG steps produced no usable messages (web is a fallback, not an always-on companion). If no non-empty tool messages survive even after relax-retry + web, it sets `final_answer = _NO_INFO_ANSWER` **and** `error = "agent_no_results"`, so `RAGPipeline.query_agent()` falls back to classic RAG instead of dead-ending the user.
 - `_synthesize_node()` writes the final Vietnamese answer from non-empty `ToolMessage` content using `SYNTHESIS_PROMPT`. If `final_answer` was already set upstream it is passed through; on LLM failure it degrades to a truncated raw result.
 
 ## Module Flow
@@ -82,11 +79,8 @@ Planner-Executor node behavior:
 ```mermaid
 flowchart TD
   Pipeline["pipeline/RAGPipeline.query_agent"] --> InitDocs["init_agent_docs ContextVar"]
-  InitDocs --> Run["ReActAgent.run"]
-  Run --> Route["_route_entry"]
-  Route -->|decompose path| Decompose["_decompose_node"]
-  Route -->|planner path| Planner["_planner_node"]
-  Decompose --> Planner
+  InitDocs --> Run["ReActAgent.run (subtype hint)"]
+  Run --> Planner["_planner_node (break-down + routing)"]
   Planner --> After["_after_planner"]
   After -->|valid steps| Execute["_executor_node"]
   After -->|error or no steps| Synthesize["_synthesize_node"]
@@ -94,7 +88,7 @@ flowchart TD
   Execute -->|all empty + retry_on_empty| Relax["_relaxed_steps (drop major/cohort filters)"]
   Relax --> Adapter
   Adapter --> Retrieval["retrieval/RetrievalService shared runtime"]
-  Execute -->|needs_web| Tavily["web_search_for_executor → _web_search"]
+  Execute -->|needs_web AND rag empty| Tavily["web_search_for_executor → _web_search"]
   Retrieval --> ToolMsgs["ToolMessage + agent docs"]
   Tavily --> ToolMsgs
   ToolMsgs --> Synthesize
