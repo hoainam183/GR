@@ -175,6 +175,9 @@ class ReActAgent:
         top_k: int | None = None,
     ) -> AgentState:
         """Execute Planner-Executor and return an AgentState for pipeline logging."""
+        from pipeline.flows import _trim_history  # noqa: PLC0415  (lazy: avoid pipeline->agent cycle)
+
+        trimmed_history = _trim_history(history)
         initial_state: AgentGraphState = {
             "messages": [],
             "query": query,
@@ -194,6 +197,7 @@ class ReActAgent:
             "executor_results": None,
             "synthesis_trace": None,
             "user_context": user_context,
+            "history": trimmed_history,
             "empty_result_count": 0,
             "top_k": top_k,
         }
@@ -262,6 +266,22 @@ class ReActAgent:
             )
         return ""
 
+    @staticmethod
+    def _history_prompt_block(history: list[dict[str, str]] | None) -> str:
+        """Format prior turns as a labelled context block for planner/synthesis.
+
+        Reuses ``_format_history`` (strips stale Markdown links) and returns ""
+        when there is no history so single-turn prompts stay unchanged.
+        """
+        if not history:
+            return ""
+        from llm.prompts import _format_history  # noqa: PLC0415
+
+        return (
+            "Lich su hoi thoai truoc do (chi de tham khao ngu canh, "
+            f"khong phai cau hoi hien tai):\n{_format_history(history)}\n\n"
+        )
+
     def _planner_node(self, state: AgentGraphState) -> dict[str, Any]:
         """Generate and validate a retrieval plan (break-down + routing in one call)."""
         from retrieval.metadata_filters import enrich_major_references_for_query  # noqa: PLC0415
@@ -274,6 +294,7 @@ class ReActAgent:
         # on the LLM copying the right major from the prompt.
         scope = resolve_entity_scope(enriched_query, user_context)
         prompt = (
+            f"{self._history_prompt_block(state.get('history'))}"
             f"Cau hoi: {enriched_query}"
             f"{self._subtype_hint(state.get('complexity_subtype'))}"
             f"{self._scope_prompt_hint(scope)}"
@@ -593,7 +614,10 @@ class ReActAgent:
             return {"final_answer": _PLANNER_ERROR_ANSWER if state.get("error") else _NO_INFO_ANSWER}
 
         context = "\n\n---\n\n".join(tool_contents)
-        prompt = f"Cau hoi: {state['query']}\n\nThong tin tim duoc:\n{context}"
+        prompt = (
+            f"{self._history_prompt_block(state.get('history'))}"
+            f"Cau hoi: {state['query']}\n\nThong tin tim duoc:\n{context}"
+        )
         t0 = time.perf_counter()
         try:
             response = self._synthesis_llm.invoke(

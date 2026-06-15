@@ -47,5 +47,6 @@ class AgentGraphState(TypedDict):
     executor_results: list[dict] | None # Trace-only executor per-step summaries
     synthesis_trace: dict | None        # Trace-only synthesis prompt/context metadata
     user_context: dict | None           # {student_id, cohort, major, major_code, full_name}
+    history: list[dict[str, str]] | None # Trimmed conversation history ({role, content}) for prompt context
     empty_result_count: int             # Tracks consecutive empty tool returns for retry logic
     top_k: int | None                   # Effective retrieval top_k supplied by the pipeline
