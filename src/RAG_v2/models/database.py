@@ -50,6 +50,7 @@ SYSTEM_CONFIG_COLLECTION: str = "system_config"
 REFRESH_TOKENS_COLLECTION: str = "refresh_tokens"
 CRAWLER_RUNS_COLLECTION: str = "crawler_runs"
 CRAWLER_CHUNKS_COLLECTION: str = "crawler_chunks"
+EXAM_SCHEDULES_COLLECTION: str = "exam_schedules"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -351,3 +352,20 @@ async def create_indexes() -> None:
         name="run_id_chunk_index",
     )
     logger.info("Indexes ensured on crawler review collections")
+
+    # ── exam_schedules collection ────────────────────────────────────────────
+    exam_schedules = db[EXAM_SCHEDULES_COLLECTION]
+    await safe_create(exam_schedules, [("subject_code", ASCENDING)], name="subject_code_asc")
+    await safe_create(exam_schedules, [("exam_date", ASCENDING)], name="exam_date_asc")
+    await safe_create(exam_schedules, [("source_file", ASCENDING)], name="source_file_asc")
+    await safe_create(
+        exam_schedules,
+        [("source_file", ASCENDING), ("row_index", ASCENDING)],
+        unique=True,
+        name="source_file_row_unique",
+    )
+    logger.info(
+        "Indexes ensured on collection '%s': subject_code_asc, exam_date_asc, "
+        "source_file_asc, source_file_row_unique",
+        EXAM_SCHEDULES_COLLECTION,
+    )

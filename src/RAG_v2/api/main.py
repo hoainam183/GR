@@ -277,6 +277,7 @@ def create_app() -> FastAPI:
     from .routes.metrics import router as metrics_router
     from .routes.retrieval import router as retrieval_router
     from .routes.upload import router as upload_router
+    from .routes.exam_schedules import router as exam_schedules_router
     from .routes.bookmark import router as bookmark_router
     from .routes.feedback import router as feedback_router
     from .routes.lookup import router as lookup_router
@@ -316,6 +317,7 @@ def create_app() -> FastAPI:
     app.include_router(metrics_router)
     app.include_router(retrieval_router)
     app.include_router(upload_router)
+    app.include_router(exam_schedules_router)
     app.include_router(bookmark_router)
     app.include_router(feedback_router)
     app.include_router(lookup_router)

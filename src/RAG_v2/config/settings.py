@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 from typing import List
 
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 logger = logging.getLogger(__name__)
@@ -282,6 +283,43 @@ class Settings(BaseSettings):
     # --- Admin / Document Upload ---
     superadmin_user_ids: str = ""  # comma-separated MongoDB ObjectIds
     upload_dir: str = "uploads"
+
+    # --- Exam schedule (lịch thi) — structured PDF/Excel ingestion ---
+    # Exam schedules are tabular, not prose: they are parsed into a dedicated
+    # Mongo collection + ES index and queried with structured filters instead of
+    # vector search. See services/exam_schedule_parser.py.
+    exam_schedule_es_index: str = "exam_schedules"
+    exam_schedule_search_top_k: int = 20
+    # Two-digit years in the "Ngày" column (e.g. "9/5/26") map to 2000 + yy.
+    exam_schedule_two_digit_year_pivot: int = 2000
+    # strptime formats tried (in order) for the "Ngày" column. "%d/%m/%Y" also
+    # parses non-zero-padded values like "9/5/2026".
+    exam_schedule_date_formats: List[str] = Field(
+        default_factory=lambda: ["%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d", "%d/%m/%y"]
+    )
+    # Folded Excel/PDF header → canonical field. Keys are accent-/case-folded via
+    # query.signals.fold_vietnamese_text so matching is robust to diacritics.
+    exam_schedule_column_map: dict[str, str] = Field(
+        default_factory=lambda: {
+            "ma lop qt": "mgmt_class_code",
+            "ma hp": "subject_code",
+            "ten hoc phan": "subject_name",
+            "ghi chu": "note",
+            "nhom": "group",
+            "tuan thi": "exam_week",
+            "thu": "weekday",
+            "ngay": "exam_date",
+            "kip thi": "exam_session",
+            "phong thi": "exam_room",
+            "sl": "student_count",
+            "dot": "exam_batch",
+            "ma lop thi": "exam_class_code",
+        }
+    )
+    # Optional "Kíp thi" → display start-time fallback. The PDF banner's legend
+    # ("Kíp 1 (7h00) …") is parsed at ingest and takes precedence over this.
+    exam_schedule_kip_time_map: dict[str, str] = Field(default_factory=dict)
+
     max_upload_size_mb: int = 50
     max_upload_batch: int = 5
 

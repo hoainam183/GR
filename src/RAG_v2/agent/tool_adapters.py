@@ -40,9 +40,20 @@ def strip_personal_identifiers(query: str) -> str:
 COLLECTION_MAP: dict[str, str] = {
     "quy_dinh":     "quydinh",   # quy định học vụ, học bổng, kỷ luật, tốt nghiệp
     "chuong_trinh": "ctdt",      # chương trình đào tạo, môn học, tín chỉ
-    "ke_hoach":     "kehoach",   # lịch đăng ký, lịch thi, deadline, kế hoạch học kỳ
+    "ke_hoach":     "kehoach",   # lịch đăng ký, deadline, kế hoạch học kỳ
     "ho_tro_sv":    "stsv",      # hỗ trợ sinh viên: biểu mẫu, giấy tờ, thuê nhà, tìm việc
 }
+
+# Exam schedules (lịch thi) are NOT a Qdrant collection — they live in a
+# dedicated Mongo collection + ES index and are queried via structured filters.
+# Steps with this collection are dispatched to _exam_schedule_search, bypassing
+# the vector-search path entirely (and must NOT be added to COLLECTION_MAP).
+EXAM_COLLECTION = "lich_thi"
+
+# Subject code (Mã HP), e.g. "CH1012"; date token, e.g. "9/5/2026".
+_SUBJECT_CODE_RE = re.compile(r"\b[A-Za-z]{2}\d{3,4}\b")
+_DATE_TOKEN_RE = re.compile(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b")
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 # ─── Simple RAG search cache ─────────────────────────────────────────────────
 # In-memory FIFO cache keyed by (query, collection, top_k, cohort, major).
@@ -132,6 +143,7 @@ class _AdapterRuntime:
     searcher: Any
     reranker: Any | None
     tavily_tool: Any | None
+    exam_es_store: Any | None = None
 
 
 @dataclass(frozen=True)
@@ -164,6 +176,27 @@ def _is_valid_api_key(key: str) -> bool:
     return is_valid_tavily_api_key(key)
 
 
+def _build_exam_es_store(settings: Settings) -> Any | None:
+    """Build the exam-schedule ES store from settings, or None when ES is down.
+
+    The exam index is independent of the document index and not exposed by the
+    RetrievalService, so it is constructed fresh here. A failed connection
+    degrades gracefully: the tool reports that the store is unavailable rather
+    than crashing the agent.
+    """
+    try:
+        from retrieval.exam_schedule_store import ExamScheduleESStore
+
+        return ExamScheduleESStore(
+            host=settings.elasticsearch_host,
+            port=settings.elasticsearch_port,
+            index_name=getattr(settings, "exam_schedule_es_index", "exam_schedules"),
+        )
+    except Exception:
+        logger.warning("Exam ES store unavailable for agent tool", exc_info=True)
+        return None
+
+
 def _build_runtime() -> _AdapterRuntime:
     from embedding import BGEm3Embedder, E5MultilingualEmbedder
     from reranking import create_reranker
@@ -192,6 +225,7 @@ def _build_runtime() -> _AdapterRuntime:
         searcher=searcher,
         reranker=reranker,
         tavily_tool=tavily_tool,
+        exam_es_store=_build_exam_es_store(settings),
     )
 
 
@@ -234,6 +268,7 @@ def inject_from_retrieval_service(retrieval_service: Any) -> None:
         searcher=retrieval_service.searcher,
         reranker=retrieval_service.reranker,
         tavily_tool=retrieval_service.tavily_tool or tavily_tool,
+        exam_es_store=_build_exam_es_store(settings),
     )
     set_runtime(runtime)
     logger.info("[ToolAdapters] Runtime injected from RetrievalService (shared models)")
@@ -260,6 +295,7 @@ def execute_tool(tool_name: str, args: dict[str, Any]) -> str:
         "compare_cohorts": _compare_cohorts,
         "compare_programs": _compare_programs,
         "web_search": _web_search,
+        "exam_schedule_search": _exam_schedule_search,
     }
     adapter = dispatch.get(tool_name)
     if adapter is None:
@@ -708,6 +744,116 @@ def web_search_for_executor(query: str) -> str:
     return _web_search(query=strip_personal_identifiers(query))
 
 
+# ─── Exam-schedule (lịch thi) structured search ───────────────────────────────
+
+
+def _to_es_date(value: str | None) -> str | None:
+    """Coerce a date filter to ISO ``yyyy-MM-dd`` for the ES date field."""
+    if not value:
+        return None
+    if _ISO_DATE_RE.match(value):
+        return value
+    from utils.vn_datetime import normalize_exam_date
+
+    parsed, _ = normalize_exam_date(value)
+    return parsed.strftime("%Y-%m-%d") if parsed else value
+
+
+def _extract_exam_filters(query: str) -> tuple[str | None, str | None, str | None]:
+    """Derive (subject_code, subject_name, exam_date_iso) from a free-text query."""
+    cleaned = strip_personal_identifiers(query or "")
+    code_match = _SUBJECT_CODE_RE.search(cleaned)
+    subject_code = code_match.group(0).upper() if code_match else None
+
+    exam_date_iso: str | None = None
+    date_match = _DATE_TOKEN_RE.search(cleaned)
+    if date_match:
+        exam_date_iso = _to_es_date(date_match.group(0))
+
+    # Without a code, fall back to BM25 over subject_name/search_text using the
+    # whole (PII-stripped) question — the analyzer drops stopwords like "thi".
+    subject_name = None if subject_code else (cleaned or None)
+    return subject_code, subject_name, exam_date_iso
+
+
+def _format_exam_results(rows: list[dict[str, Any]]) -> str:
+    """Render exam rows as one compact Vietnamese line per slot."""
+    if not rows:
+        return "[Khong tim thay lich thi phu hop]"
+
+    lines: list[str] = []
+    for index, row in enumerate(rows, 1):
+        code = row.get("subject_code", "")
+        name = row.get("subject_name", "")
+        head = f"{code} — {name}" if name else code
+
+        when_parts = [
+            part
+            for part in (row.get("weekday", ""), row.get("exam_date_str", ""))
+            if part
+        ]
+        when = " ".join(when_parts)
+        if row.get("exam_session"):
+            session = row["exam_session"]
+            if row.get("start_time"):
+                session += f" ({row['start_time']})"
+            when = f"{when}, {session}" if when else session
+
+        segments = [f"[{index}] {head}"]
+        if when:
+            segments.append(when)
+        if row.get("exam_room"):
+            segments.append(f"Phòng {row['exam_room']}")
+        if row.get("group"):
+            segments.append(f"Nhóm {row['group']}")
+        if row.get("exam_batch"):
+            segments.append(f"Đợt {row['exam_batch']}")
+        lines.append(" | ".join(segments))
+    return "\n".join(lines)
+
+
+def _exam_schedule_search(
+    query: str = "",
+    subject_code: str | None = None,
+    subject_name: str | None = None,
+    exam_date: str | None = None,
+    exam_room: str | None = None,
+    group: str | None = None,
+    top_k: int | None = None,
+) -> str:
+    """Structured lookup against the exam-schedule ES index (no vector search)."""
+    runtime = _get_runtime()
+    store = runtime.exam_es_store
+    if store is None:
+        return "[Loi: Kho du lieu lich thi chua san sang]"
+
+    # When the planner/agent passes no structured filters, mine them from the
+    # raw query (subject code regex + date token + BM25 subject-name fallback).
+    if not any((subject_code, subject_name, exam_date, exam_room, group)):
+        subject_code, subject_name, exam_date = _extract_exam_filters(query)
+    else:
+        exam_date = _to_es_date(exam_date)
+
+    if not any((subject_code, subject_name, exam_date, exam_room, group)):
+        return "[Loi: Khong xac dinh duoc mon/ngay thi tu cau hoi]"
+
+    limit = int(
+        top_k
+        if top_k is not None
+        else getattr(runtime.settings, "exam_schedule_search_top_k", 20)
+    )
+    rows = store.search(
+        subject_code=subject_code,
+        subject_name=subject_name,
+        exam_date=exam_date,
+        exam_room=exam_room,
+        group=group,
+        limit=limit,
+    )
+    _append_agent_docs(rows)
+    return _format_exam_results(rows)
+
+
 # ─── Planner-Executor helpers (Phase 1 refactor) ─────────────────────────────
 
 
@@ -728,13 +874,22 @@ def execute_retrieval_plan(
     results: list[tuple[str, str] | None] = [None] * len(steps)
 
     def _run(i: int, step: dict[str, Any]) -> None:
-        result = _rag_search(
-            query=step.get("query", ""),
-            collection=step.get("collection", ""),
-            top_k=top_k,
-            resolved_cohort=step.get("cohort_hint"),
-            resolved_major=step.get("major_hint"),
-        )
+        if step.get("collection") == EXAM_COLLECTION:
+            # Structured lookup — bypass vector search entirely.
+            result = _exam_schedule_search(
+                query=step.get("query", ""),
+                subject_code=step.get("subject_code"),
+                exam_date=step.get("exam_date"),
+                top_k=top_k,
+            )
+        else:
+            result = _rag_search(
+                query=step.get("query", ""),
+                collection=step.get("collection", ""),
+                top_k=top_k,
+                resolved_cohort=step.get("cohort_hint"),
+                resolved_major=step.get("major_hint"),
+            )
         label = step.get("label") or step.get("collection", f"step_{i}")
         results[i] = (label, result)
 
