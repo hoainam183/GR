@@ -12,6 +12,7 @@ import type {
   ChunkerOption,
   ChunkStrategySummary,
   ExamScheduleUploadResponse,
+  ExamScheduleSummary,
 } from '@/types/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -74,6 +75,15 @@ export async function uploadExamSchedule(
         if (onProgress && e.total) onProgress(Math.round((e.loaded * 100) / e.total));
       },
     },
+  );
+  return data;
+}
+
+/** Snapshot of the exam_schedules MongoDB collection (verification after upload). */
+export async function getExamScheduleSummary(): Promise<ExamScheduleSummary> {
+  const { data } = await adminClient.get<ExamScheduleSummary>(
+    '/admin/exam-schedules/summary',
+    { headers: authHeaders() },
   );
   return data;
 }

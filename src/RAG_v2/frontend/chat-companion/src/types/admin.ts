@@ -148,3 +148,18 @@ export interface ExamScheduleUploadResponse {
   records_indexed: number;
   report: ParseReport;
 }
+
+/** Per-source statistics shown in the DB-status panel. */
+export interface ExamScheduleSourceSummary {
+  source_file: string;
+  row_count: number;
+  latest_uploaded_at: string | null;
+}
+
+/** Snapshot of the exam_schedules collection. */
+export interface ExamScheduleSummary {
+  total_rows: number;
+  distinct_subjects: number;
+  distinct_exam_dates: number;
+  sources: ExamScheduleSourceSummary[];
+}

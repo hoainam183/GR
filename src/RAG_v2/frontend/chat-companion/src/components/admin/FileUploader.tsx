@@ -1,13 +1,31 @@
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { uploadDocuments, uploadExamSchedule } from '@/services/adminApi';
+import {
+  uploadDocuments,
+  uploadExamSchedule,
+  getExamScheduleSummary,
+} from '@/services/adminApi';
 import { COLLECTION_CHUNKER_MAP, CHUNKER_ALTERNATIVES } from '@/types/admin';
-import type { CollectionName, DocumentDetail, UploadKind } from '@/types/admin';
+import type {
+  CollectionName,
+  DocumentDetail,
+  UploadKind,
+  ExamScheduleUploadResponse,
+  ExamScheduleSummary,
+} from '@/types/admin';
 import { toast } from 'sonner';
-import { Upload, X, FileText } from 'lucide-react';
+import {
+  Upload,
+  X,
+  FileText,
+  CheckCircle2,
+  AlertTriangle,
+  Database,
+  RefreshCw,
+} from 'lucide-react';
 
 const MAX_SIZE_MB = 50;
 const COLLECTIONS: CollectionName[] = ['ctdt', 'quydinh', 'kehoach', 'stsv', 'test'];
@@ -35,9 +53,33 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
   const [strategy, setStrategy] = useState<string>('');
   const [progress, setProgress] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [examResult, setExamResult] = useState<ExamScheduleUploadResponse | null>(null);
+  const [dbSummary, setDbSummary] = useState<ExamScheduleSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   const isExam = kind === 'exam_schedule';
   const maxFiles = isExam ? 1 : 5;
+
+  const refreshDbSummary = useCallback(async () => {
+    setSummaryLoading(true);
+    setSummaryError(null);
+    try {
+      const summary = await getExamScheduleSummary();
+      setDbSummary(summary);
+    } catch (error: unknown) {
+      setSummaryError(apiErrorMessage(error, 'Không tải được trạng thái database'));
+    } finally {
+      setSummaryLoading(false);
+    }
+  }, []);
+
+  // Fetch DB snapshot the first time admin switches to exam-schedule mode.
+  useEffect(() => {
+    if (isExam && dbSummary === null && !summaryLoading && summaryError === null) {
+      void refreshDbSummary();
+    }
+  }, [isExam, dbSummary, summaryLoading, summaryError, refreshDbSummary]);
 
   const isAcceptedFile = (f: File): boolean => {
     if (isExam) {
@@ -76,6 +118,7 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
     setKind(next);
     setFiles([]);
     setProgress(null);
+    setExamResult(null);
     if (next === 'exam_schedule') {
       setCollection('');
       setStrategy('');
@@ -95,7 +138,9 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
     setProgress(0);
     try {
       if (isExam) {
+        setExamResult(null);
         const report = await uploadExamSchedule(files[0], setProgress);
+        setExamResult(report);
         toast.success(
           `Lịch thi: ${report.parsed} dòng đã import` +
             (report.skipped ? `, bỏ qua ${report.skipped}` : '') +
@@ -103,8 +148,9 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
         );
         setFiles([]);
         setProgress(null);
-        // No DocumentDetail produced — keep the document list as-is.
         onUploaded([]);
+        // Verify by re-reading the DB snapshot.
+        void refreshDbSummary();
       } else {
         const docs = await uploadDocuments(
           files,
@@ -224,6 +270,181 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
       <Button onClick={handleUpload} disabled={uploading || files.length === 0}>
         {uploading ? 'Đang upload...' : 'Upload'}
       </Button>
+
+      {/* Result card — only for exam schedule, persists until next upload / kind switch */}
+      {isExam && examResult && <ExamResultCard result={examResult} />}
+
+      {/* DB status panel — only for exam schedule */}
+      {isExam && (
+        <ExamDbStatusPanel
+          summary={dbSummary}
+          loading={summaryLoading}
+          error={summaryError}
+          onRefresh={refreshDbSummary}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────── Result card ───────────────────────────
+
+function ExamResultCard({ result }: { result: ExamScheduleUploadResponse }) {
+  const hasSkipped = result.skipped > 0;
+  const success = result.parsed > 0;
+  return (
+    <div
+      className={`rounded-md border p-3 text-sm ${
+        success
+          ? 'border-emerald-500/40 bg-emerald-500/5'
+          : 'border-amber-500/40 bg-amber-500/5'
+      }`}
+    >
+      <div className="flex items-center gap-2 font-medium">
+        {success ? (
+          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+        ) : (
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+        )}
+        <span>
+          {success
+            ? `Đã import ${result.parsed} dòng từ "${result.source_file}"`
+            : `Không có dòng hợp lệ nào trong "${result.source_file}" — dữ liệu cũ được giữ nguyên`}
+        </span>
+      </div>
+      <ul className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground sm:grid-cols-4">
+        <li>Parsed: <span className="font-medium text-foreground">{result.parsed}</span></li>
+        <li>Skipped: <span className="font-medium text-foreground">{result.skipped}</span></li>
+        <li>ES indexed: <span className="font-medium text-foreground">{result.records_indexed}</span></li>
+        <li>
+          Replaced:{' '}
+          <span className="font-medium text-foreground">
+            {result.replaced_existing ? 'Có' : 'Không'}
+          </span>
+        </li>
+      </ul>
+      {hasSkipped && (
+        <details className="mt-2 text-xs">
+          <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+            Xem {result.report.skipped_rows.length} dòng bị bỏ qua
+          </summary>
+          <ul className="mt-1 max-h-40 overflow-y-auto rounded bg-background/60 p-2 font-mono">
+            {result.report.skipped_rows.slice(0, 50).map((row) => (
+              <li key={row.row_index}>
+                row #{row.row_index}: {row.reason}
+              </li>
+            ))}
+            {result.report.skipped_rows.length > 50 && (
+              <li className="italic text-muted-foreground">
+                ... còn {result.report.skipped_rows.length - 50} dòng nữa
+              </li>
+            )}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────── DB status panel ───────────────────────────
+
+function formatDateTime(value: string | null): string {
+  if (!value) return '—';
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? value : d.toLocaleString('vi-VN');
+}
+
+function ExamDbStatusPanel({
+  summary,
+  loading,
+  error,
+  onRefresh,
+}: {
+  summary: ExamScheduleSummary | null;
+  loading: boolean;
+  error: string | null;
+  onRefresh: () => void | Promise<void>;
+}) {
+  return (
+    <div className="rounded-md border p-3 text-sm">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="flex items-center gap-2 font-medium">
+          <Database className="h-4 w-4" />
+          <span>Trạng thái database lịch thi</span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => void onRefresh()}
+          disabled={loading}
+          className="h-7 gap-1"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+          <span className="text-xs">Làm mới</span>
+        </Button>
+      </div>
+
+      {error && <p className="text-xs text-destructive">{error}</p>}
+
+      {!error && loading && !summary && (
+        <p className="text-xs text-muted-foreground">Đang tải...</p>
+      )}
+
+      {summary && (
+        <>
+          <ul className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+            <li className="rounded bg-muted/40 p-2">
+              <div className="text-base font-semibold text-foreground">
+                {summary.total_rows.toLocaleString('vi-VN')}
+              </div>
+              <div>Tổng số dòng</div>
+            </li>
+            <li className="rounded bg-muted/40 p-2">
+              <div className="text-base font-semibold text-foreground">
+                {summary.distinct_subjects.toLocaleString('vi-VN')}
+              </div>
+              <div>Mã học phần</div>
+            </li>
+            <li className="rounded bg-muted/40 p-2">
+              <div className="text-base font-semibold text-foreground">
+                {summary.distinct_exam_dates.toLocaleString('vi-VN')}
+              </div>
+              <div>Ngày thi</div>
+            </li>
+          </ul>
+
+          {summary.sources.length === 0 ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Chưa có file lịch thi nào trong database.
+            </p>
+          ) : (
+            <div className="mt-2 overflow-hidden rounded border">
+              <table className="w-full text-xs">
+                <thead className="bg-muted/40 text-muted-foreground">
+                  <tr>
+                    <th className="px-2 py-1 text-left font-medium">File nguồn</th>
+                    <th className="px-2 py-1 text-right font-medium">Số dòng</th>
+                    <th className="px-2 py-1 text-left font-medium">Cập nhật lần cuối</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.sources.map((src) => (
+                    <tr key={src.source_file} className="border-t">
+                      <td className="truncate px-2 py-1" title={src.source_file}>
+                        {src.source_file}
+                      </td>
+                      <td className="px-2 py-1 text-right font-mono">
+                        {src.row_count.toLocaleString('vi-VN')}
+                      </td>
+                      <td className="px-2 py-1">{formatDateTime(src.latest_uploaded_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

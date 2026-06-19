@@ -6,6 +6,8 @@ contract can evolve independently of the persisted shape.
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -34,6 +36,28 @@ class ExamScheduleUploadResponse(BaseModel):
     replaced_existing: bool  # True when prior rows for source_file were removed
     records_indexed: int  # docs written to Elasticsearch
     report: ParseReport
+
+
+class ExamScheduleSourceSummary(BaseModel):
+    """Per-source-file statistics in the current DB state."""
+
+    source_file: str
+    row_count: int
+    latest_uploaded_at: datetime | None = None
+
+
+class ExamScheduleSummary(BaseModel):
+    """Snapshot of the ``exam_schedules`` Mongo collection.
+
+    Returned by ``GET /admin/exam-schedules/summary`` so admins can verify a
+    just-uploaded file actually landed in the database, independent of the
+    upload response.
+    """
+
+    total_rows: int
+    distinct_subjects: int
+    distinct_exam_dates: int
+    sources: list[ExamScheduleSourceSummary] = Field(default_factory=list)
 
 
 class ExamScheduleQuery(BaseModel):
