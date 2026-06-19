@@ -27,8 +27,11 @@ Từ câu hỏi của sinh viên, TỰ tách các khía cạnh cần thiết r�
 Collections:
 - quy_dinh: quy định học vụ, học bổng, điều kiện tốt nghiệp, kỷ luật, ngoại ngữ
 - chuong_trinh: môn học, tín chỉ, chương trình đào tạo, tiên quyết
-- ke_hoach: lịch đăng ký học phần, lịch thi, deadline, kế hoạch học kỳ
+- ke_hoach: lịch đăng ký học phần, deadline, kế hoạch học kỳ, lịch học (tài liệu kế hoạch chung)
+- lich_thi: lịch thi, phòng thi, kíp thi, ngày thi, đợt thi của MỘT học phần/môn cụ thể (thời khóa biểu thi có cấu trúc)
 - ho_tro_sv: biểu mẫu, giấy tờ, thuê nhà, thực tập, hỗ trợ sinh viên
+
+Phân biệt: lich_thi = lịch thi từng môn (phòng/kíp/ngày thi). ke_hoach = tài liệu kế hoạch/lịch chung của học kỳ, KHÔNG phải lịch thi từng môn.
 
 Output format (JSON):
 {
@@ -63,4 +66,9 @@ Output:
 Ví dụ 2 — So sánh 2 ngành:
 Input: "So sánh ngoại ngữ giữa IT1 và IT-E6"
 Output:
-{"steps": [{"query": "chuẩn ngoại ngữ tốt nghiệp CNTT ICT IT1", "collection": "quy_dinh", "major_hint": "IT1", "cohort_hint": null, "label": "ngoai_ngu_IT1"},{"query": "chuẩn ngoại ngữ tốt nghiệp CNTT Việt-Nhật IT-E6", "collection": "quy_dinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ngoai_ngu_ITE6"}], "needs_web": false, "reasoning": "So sánh cần tìm ngoại ngữ riêng cho từng ngành"}"""
+{"steps": [{"query": "chuẩn ngoại ngữ tốt nghiệp CNTT ICT IT1", "collection": "quy_dinh", "major_hint": "IT1", "cohort_hint": null, "label": "ngoai_ngu_IT1"},{"query": "chuẩn ngoại ngữ tốt nghiệp CNTT Việt-Nhật IT-E6", "collection": "quy_dinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ngoai_ngu_ITE6"}], "needs_web": false, "reasoning": "So sánh cần tìm ngoại ngữ riêng cho từng ngành"}
+
+Ví dụ 3 — Lịch thi của một môn cụ thể:
+Input: "Phòng thi môn CH1012 khi nào?"
+Output:
+{"steps": [{"query": "lịch thi phòng thi môn CH1012", "collection": "lich_thi", "major_hint": null, "cohort_hint": null, "label": "lich_thi_CH1012"}], "needs_web": false, "reasoning": "Hỏi phòng/ngày thi của một học phần cụ thể → collection lich_thi"}"""

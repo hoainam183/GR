@@ -112,6 +112,14 @@ _FOLDED_COMPARISON_RE: re.Pattern = re.compile(
     r"\b(so sanh|so voi|khac nhau|khac biet|giong nhau)\b",
     re.IGNORECASE,
 )
+# Exam-schedule (lịch thi) fast-path. Kept SPECIFIC so "lịch học" / "lịch đăng
+# ký" (academic-calendar, routed to ke_hoach) do NOT match. These route to the
+# Planner-Executor, which emits a structured lich_thi step.
+_FOLDED_EXAM_RE: re.Pattern = re.compile(
+    r"\b(lich thi|phong thi|kip thi|ngay thi|thi mon|mon thi|ma lop thi|dot thi"
+    r"|thi ngay|thi khi nao|thi vao|thi hom nao|thi luc nao)\b",
+    re.IGNORECASE,
+)
 # Bare "may" (how many) is intentionally omitted: it collides with "máy"
 # (machine) after accent folding, so the how-many sense is detected via
 # ``query_signals.exact_policy_lookup`` (accent-aware) instead. "nhom may"
@@ -211,6 +219,23 @@ class ComplexityRouter:
                     q[:60], result["tier"], result["reason"],
                 )
                 return result
+
+        # 1b. Exam-schedule fast-path — route lịch thi questions to the agent so
+        # the planner emits a structured lich_thi step (checked before the
+        # single-fact gate, which would otherwise send "phòng thi môn X" to RAG).
+        if _FOLDED_EXAM_RE.search(q_folded):
+            result = {
+                "tier": "complex",
+                "reason": "signals: exam_schedule_lookup",
+                "confidence": "high",
+                "complex_subtype": "general",
+                "query_signals": query_signals_dict,
+            }
+            logger.info(
+                "ComplexityRouter: %r -> %s/%s (%s)",
+                q[:60], result["tier"], result["complex_subtype"], result["reason"],
+            )
+            return result
 
         # 2. Complex signals — regex patterns with subtype tagging
         # 2. Signal-based overrides for broad/personal requests. These cover

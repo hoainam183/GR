@@ -84,7 +84,7 @@ class ReActAgent:
     """
 
     _VALID_COLLECTIONS: frozenset[str] = frozenset(
-        {"quy_dinh", "chuong_trinh", "ke_hoach", "ho_tro_sv"}
+        {"quy_dinh", "chuong_trinh", "ke_hoach", "ho_tro_sv", "lich_thi"}
     )
 
     def __init__(self, settings: Any) -> None:

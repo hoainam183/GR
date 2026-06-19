@@ -30,13 +30,22 @@ class TestSimple:
     def test_course_question(self) -> None:
         assert router.route_tier("Môn Toán cao cấp 1 có bao nhiêu tín chỉ?") == "simple"
 
-    def test_schedule_question(self) -> None:
-        assert router.route_tier("Lịch thi học kỳ 1 khi nào?") == "simple"
+    def test_exam_schedule_question_routes_to_agent(self) -> None:
+        # "lịch thi" is now an exam-schedule signal: it routes to the
+        # Planner-Executor (complex/general) so the planner can emit a
+        # structured lich_thi step, rather than the generic ke_hoach RAG path.
+        result = router.route("Lịch thi học kỳ 1 khi nào?")
+        assert result["tier"] == "complex"
+        assert result["reason"] == "signals: exam_schedule_lookup"
 
 
-    def test_general_graduation_conditions_stays_simple(self) -> None:
+    def test_general_graduation_question_defers_to_ml_tiers(self) -> None:
+        # Tier-0 no longer hard-codes a graduation gate (it had to enumerate
+        # program tokens). It now returns "unknown" so the pipeline's ML
+        # multi-label classifier + LLM judge decide. The eligibility signal is
+        # still surfaced for downstream use.
         result = router.route("điều kiện tốt nghiệp bao gồm những gì")
-        assert result["tier"] == "simple"
+        assert result["tier"] == "unknown"
         assert result["query_signals"]["eligibility_check"] is True
 
     def test_exact_policy_lookup_stays_simple_with_signals(self) -> None:
@@ -84,10 +93,15 @@ class TestComplex:
         assert result["tier"] == "complex"
         assert result["complex_subtype"] == "multi_source"
 
-    def test_graduation_program_rule_is_multi_source(self) -> None:
-        result = router.route("điều kiện tốt nghiệp ngành IT-E6 theo chương trình đào tạo")
-        assert result["tier"] == "complex"
-        assert result["complex_subtype"] == "multi_source"
+    def test_graduation_program_rule_defers_to_ml_tiers(self) -> None:
+        # Previously a regex gate forced complex/multi_source here, but it had to
+        # enumerate program tokens — so a bare major code like "IT1" slipped
+        # through. Tier-0 now defers ("unknown"); the multi_source decision is
+        # made by RAGPipeline._decide_complexity (see test_complexity_tiers.py).
+        result = router.route(
+            "điều kiện tốt nghiệp ngành IT-E6 theo chương trình đào tạo"
+        )
+        assert result["tier"] == "unknown"
 
 
 class TestRealUseCases:
@@ -114,6 +128,36 @@ class TestRealUseCases:
         assert router.route_tier(q) == "complex"
 
 
+class TestMayMachineVsHowMany:
+    """Regression: "máy" (machine) must not be read as "mấy" (how many).
+
+    The major-name expansion adds "Khoa học Máy tính"; after accent folding
+    "máy" → "may" used to trip the single-fact lookup gate and short-circuit a
+    graduation query to ``simple`` before the ML/LLM tiers could see it.
+    """
+
+    def test_machine_name_does_not_trigger_single_fact(self) -> None:
+        result = router.route(
+            "điều kiện tốt nghiệp của IT1 (CNTT: Khoa học Máy tính)"
+        )
+        assert result["query_signals"]["exact_policy_lookup"] is False
+        assert result["tier"] == "unknown"  # defers to ML/LLM tiers
+
+    def test_how_many_with_diacritics_still_detected(self) -> None:
+        result = router.route("Môn Xử lý tín hiệu số có mấy tín chỉ?")
+        assert result["query_signals"]["exact_policy_lookup"] is True
+        assert result["tier"] == "simple"
+
+    def test_how_many_without_diacritics_still_detected(self) -> None:
+        # Mobile input without diacritics: "may" == "mấy" (no "máy" present).
+        result = router.route("tot nghiep can may tin chi")
+        assert result["query_signals"]["exact_policy_lookup"] is True
+
+    def test_machine_and_how_many_together_detected(self) -> None:
+        result = router.route("máy tính có mấy loại")
+        assert result["query_signals"]["exact_policy_lookup"] is True
+
+
 class TestRouteDict:
     """Test that route() returns structured dict with confidence."""
 
@@ -125,7 +169,17 @@ class TestRouteDict:
         assert "reason" in result
 
     def test_simple_route_confidence(self) -> None:
-        result = router.route("Lịch thi học kỳ 1 khi nào?")
+        # A decisive single-fact lookup is classified at Tier-0 (no ML/LLM need).
+        result = router.route("Môn Xử lý tín hiệu số có mấy tín chỉ?")
         assert result["tier"] == "simple"
         assert result["confidence"] == "high"
+
+    def test_undecided_query_returns_unknown_tier(self) -> None:
+        # Queries with no decisive Tier-0 signal defer to the ML/LLM tiers.
+        # (Avoids exam-schedule wording, which now has its own Tier-0 signal.)
+        query = "Thông tin về ký túc xá như thế nào?"
+        result = router.route(query)
+        assert result["tier"] == "unknown"
+        # route_tier() collapses "unknown" → "simple" for backward compatibility.
+        assert router.route_tier(query) == "simple"
 
