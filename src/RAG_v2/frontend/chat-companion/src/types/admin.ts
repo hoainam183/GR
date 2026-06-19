@@ -123,3 +123,28 @@ export const PIPELINE_STEPS: PipelineStep[] = [
   { key: 'chunk', label: 'Chia chunk', runningStatus: 'chunking', doneStatus: 'chunked' },
   { key: 'index', label: 'Nhúng & Lưu trữ', runningStatus: 'embedding', doneStatus: 'indexed' },
 ];
+
+/** Upload "kind" chosen by admin. Routes the form to the right backend pipeline. */
+export type UploadKind = 'document' | 'exam_schedule';
+
+/** Response from POST /admin/exam-schedules (schemas/exam_schedule.py). */
+export interface SkippedRow {
+  row_index: number;
+  reason: string;
+}
+
+export interface ParseReport {
+  total_rows: number;
+  valid_rows: number;
+  skipped_rows: SkippedRow[];
+}
+
+export interface ExamScheduleUploadResponse {
+  source_file: string;
+  parsed: number;
+  skipped: number;
+  invalid: number;
+  replaced_existing: boolean;
+  records_indexed: number;
+  report: ParseReport;
+}

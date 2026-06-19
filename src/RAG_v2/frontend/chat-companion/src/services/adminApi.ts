@@ -11,6 +11,7 @@ import type {
   ConverterOption,
   ChunkerOption,
   ChunkStrategySummary,
+  ExamScheduleUploadResponse,
 } from '@/types/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -49,6 +50,31 @@ export async function uploadDocuments(
       if (onProgress && e.total) onProgress(Math.round((e.loaded * 100) / e.total));
     },
   });
+  return data;
+}
+
+/**
+ * Upload an exam-schedule file (PDF/XLSX) — bypasses the chunk/embed pipeline.
+ * The backend parses it into structured rows and replaces prior rows in
+ * Mongo + Elasticsearch idempotently. Single file per request.
+ */
+export async function uploadExamSchedule(
+  file: File,
+  onProgress?: (pct: number) => void,
+): Promise<ExamScheduleUploadResponse> {
+  const form = new FormData();
+  form.append('file', file);
+
+  const { data } = await adminClient.post<ExamScheduleUploadResponse>(
+    '/admin/exam-schedules',
+    form,
+    {
+      headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (e) => {
+        if (onProgress && e.total) onProgress(Math.round((e.loaded * 100) / e.total));
+      },
+    },
+  );
   return data;
 }
 
