@@ -875,12 +875,13 @@ def execute_retrieval_plan(
 
     def _run(i: int, step: dict[str, Any]) -> None:
         if step.get("collection") == EXAM_COLLECTION:
-            # Structured lookup — bypass vector search entirely.
+            # Structured DB lookup — return all matching rows; do NOT cap by the
+            # chat-level top_k (which is sized for vector retrieval).
             result = _exam_schedule_search(
                 query=step.get("query", ""),
                 subject_code=step.get("subject_code"),
                 exam_date=step.get("exam_date"),
-                top_k=top_k,
+                top_k=None,
             )
         else:
             result = _rag_search(

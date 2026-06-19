@@ -289,7 +289,9 @@ class Settings(BaseSettings):
     # Mongo collection + ES index and queried with structured filters instead of
     # vector search. See services/exam_schedule_parser.py.
     exam_schedule_es_index: str = "exam_schedules"
-    exam_schedule_search_top_k: int = 20
+    # Exam schedule is a structured DB lookup, not vector retrieval — cap is set
+    # high enough to effectively return every matching row for normal queries.
+    exam_schedule_search_top_k: int = 500
     # Two-digit years in the "Ngày" column (e.g. "9/5/26") map to 2000 + yy.
     exam_schedule_two_digit_year_pivot: int = 2000
     # strptime formats tried (in order) for the "Ngày" column. "%d/%m/%Y" also

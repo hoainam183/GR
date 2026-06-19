@@ -12,6 +12,7 @@ Blocking Elasticsearch calls use the sync client and are offloaded with
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Any
 
 import anyio
@@ -121,3 +122,67 @@ async def ingest_exam_schedule(
         records_indexed=records_indexed,
         report=report,
     )
+
+
+async def delete_exam_schedule_source(
+    *,
+    source_file: str,
+    settings: Any,
+    db: AsyncIOMotorDatabase,
+    es_store: ExamScheduleESStore | None = None,
+) -> dict[str, int]:
+    """Remove all exam-schedule rows for ``source_file`` from Mongo, ES, and disk.
+
+    Returns counts so the caller (HTTP endpoint) can surface a useful response.
+    Missing rows in either store are not an error — delete is idempotent.
+    """
+    collection = db[EXAM_SCHEDULES_COLLECTION]
+
+    # Collect the on-disk file ids first so we can clean up after row removal.
+    disk_doc_ids: set[str] = set()
+    async for doc in collection.find(
+        {"source_file": source_file},
+        projection={"source_doc_id": 1},
+    ):
+        doc_id = doc.get("source_doc_id")
+        if doc_id:
+            disk_doc_ids.add(str(doc_id))
+
+    mongo_deleted = (
+        await collection.delete_many({"source_file": source_file})
+    ).deleted_count
+
+    store = es_store if es_store is not None else get_exam_es_store(settings)
+    es_deleted = 0
+    if store is not None:
+        es_deleted = await anyio.to_thread.run_sync(
+            store.delete_by_source_file, source_file
+        )
+
+    files_deleted = await anyio.to_thread.run_sync(
+        _delete_disk_files, settings.upload_dir, disk_doc_ids
+    )
+
+    return {
+        "mongo_deleted": int(mongo_deleted),
+        "es_deleted": int(es_deleted),
+        "files_deleted": int(files_deleted),
+    }
+
+
+def _delete_disk_files(upload_dir: str, doc_ids: set[str]) -> int:
+    """Best-effort removal of ``uploads/exam_schedules/{doc_id}.*`` files."""
+    if not doc_ids:
+        return 0
+    base = Path(upload_dir) / "exam_schedules"
+    if not base.exists():
+        return 0
+    deleted = 0
+    for doc_id in doc_ids:
+        for path in base.glob(f"{doc_id}.*"):
+            try:
+                path.unlink()
+                deleted += 1
+            except OSError as exc:
+                logger.warning("Failed to delete exam file %s: %s", path, exc)
+    return deleted
