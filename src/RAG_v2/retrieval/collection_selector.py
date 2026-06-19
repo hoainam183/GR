@@ -108,13 +108,21 @@ def _is_ctdt_course_lookup(query: str, collections: List[str]) -> bool:
     if "ctdt" not in collections:
         return False
     folded = fold_vietnamese_text(query)
+
+    # "tín chỉ" có hai nghĩa: khối lượng môn học (ctdt) và đơn vị tính học phí
+    # (quydinh). Khi query mang ngữ cảnh học phí/mức thu, đây KHÔNG phải tra cứu
+    # chương trình đào tạo — để quydinh được augment vào collections.
+    fee_context = bool(
+        re.search(r"\b(hoc phi|muc thu|dong tien|tien hoc)\b", folded)
+    )
+
     course_like = bool(
         re.search(r"\b(mon|hoc phan|ma hoc phan|tin chi|tien quyet|song hanh)\b", folded)
     )
     rule_like = bool(
         re.search(r"\b(tot nghiep|xet tot nghiep|dieu kien|quy dinh|diem ren luyen)\b", folded)
     )
-    return course_like and not rule_like
+    return course_like and not rule_like and not fee_context
 
 
 def _is_foreign_language_policy_lookup(query: str) -> bool:
