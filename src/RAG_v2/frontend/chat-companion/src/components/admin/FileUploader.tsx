@@ -7,6 +7,7 @@ import {
   uploadDocuments,
   uploadExamSchedule,
   getExamScheduleSummary,
+  deleteExamScheduleSource,
 } from '@/services/adminApi';
 import { COLLECTION_CHUNKER_MAP, CHUNKER_ALTERNATIVES } from '@/types/admin';
 import type {
@@ -25,6 +26,7 @@ import {
   AlertTriangle,
   Database,
   RefreshCw,
+  Trash2,
 } from 'lucide-react';
 
 const MAX_SIZE_MB = 50;
@@ -73,6 +75,25 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
       setSummaryLoading(false);
     }
   }, []);
+
+  const handleDeleteSource = useCallback(
+    async (sourceFile: string) => {
+      const ok = window.confirm(
+        `Xoá toàn bộ lịch thi từ "${sourceFile}"?\nHành động này không thể hoàn tác.`,
+      );
+      if (!ok) return;
+      try {
+        const result = await deleteExamScheduleSource(sourceFile);
+        toast.success(
+          `Đã xoá ${result.mongo_deleted} dòng (ES: ${result.es_deleted}, file: ${result.files_deleted})`,
+        );
+        await refreshDbSummary();
+      } catch (error: unknown) {
+        toast.error(apiErrorMessage(error, 'Xoá lịch thi thất bại'));
+      }
+    },
+    [refreshDbSummary],
+  );
 
   // Fetch DB snapshot the first time admin switches to exam-schedule mode.
   useEffect(() => {
@@ -281,6 +302,7 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
           loading={summaryLoading}
           error={summaryError}
           onRefresh={refreshDbSummary}
+          onDelete={handleDeleteSource}
         />
       )}
     </div>
@@ -359,11 +381,13 @@ function ExamDbStatusPanel({
   loading,
   error,
   onRefresh,
+  onDelete,
 }: {
   summary: ExamScheduleSummary | null;
   loading: boolean;
   error: string | null;
   onRefresh: () => void | Promise<void>;
+  onDelete: (sourceFile: string) => void | Promise<void>;
 }) {
   return (
     <div className="rounded-md border p-3 text-sm">
@@ -425,6 +449,7 @@ function ExamDbStatusPanel({
                     <th className="px-2 py-1 text-left font-medium">File nguồn</th>
                     <th className="px-2 py-1 text-right font-medium">Số dòng</th>
                     <th className="px-2 py-1 text-left font-medium">Cập nhật lần cuối</th>
+                    <th className="px-2 py-1 text-right font-medium w-10"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -437,6 +462,18 @@ function ExamDbStatusPanel({
                         {src.row_count.toLocaleString('vi-VN')}
                       </td>
                       <td className="px-2 py-1">{formatDateTime(src.latest_uploaded_at)}</td>
+                      <td className="px-2 py-1 text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                          title="Xoá lịch thi này"
+                          onClick={() => void onDelete(src.source_file)}
+                          disabled={loading}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

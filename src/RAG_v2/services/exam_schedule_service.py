@@ -111,7 +111,9 @@ async def ingest_exam_schedule(
     records_indexed = 0
     if store is not None:
         es_docs = [r.to_es() for r in records]
-        records_indexed = await anyio.to_thread.run_sync(store.index_records, es_docs)
+        records_indexed = await anyio.to_thread.run_sync(
+            store.index_records, es_docs
+        )
 
     return ExamScheduleUploadResponse(
         source_file=source_file,

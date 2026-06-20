@@ -88,6 +88,26 @@ export async function getExamScheduleSummary(): Promise<ExamScheduleSummary> {
   return data;
 }
 
+/**
+ * Delete all exam-schedule rows uploaded from ``sourceFile``.
+ * Idempotent on the backend; returns the counts removed from Mongo / ES / disk.
+ */
+export async function deleteExamScheduleSource(
+  sourceFile: string,
+): Promise<{
+  detail: string;
+  source_file: string;
+  mongo_deleted: number;
+  es_deleted: number;
+  files_deleted: number;
+}> {
+  const { data } = await adminClient.delete('/admin/exam-schedules', {
+    headers: authHeaders(),
+    params: { source_file: sourceFile },
+  });
+  return data;
+}
+
 export async function listDocuments(
   page = 1,
   limit = 20,
