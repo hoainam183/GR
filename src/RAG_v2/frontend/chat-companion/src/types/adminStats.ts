@@ -205,6 +205,7 @@ export interface CrawlerCollectionResult {
   review_status?: string;
   can_edit?: boolean;
   can_index?: boolean;
+  can_delete?: boolean;
   new_articles: number;
   new_chunks: number;
   indexed: number;
@@ -234,6 +235,13 @@ export interface CrawlerIndexResponse {
   ok: boolean;
   run_id: string;
   status: string;
+}
+
+export interface CrawlerDeleteResponse {
+  ok: boolean;
+  run_id: string;
+  deleted_articles: number;
+  deleted_chunks: number;
 }
 
 // ─── EP10: Crawler status ─────────────────────────────────

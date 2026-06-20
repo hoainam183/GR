@@ -172,6 +172,7 @@ def _serialize_crawler_run(
         "review_status": status,
         "can_edit": status in CRAWLER_EDITABLE_STATUSES,
         "can_index": status in CRAWLER_INDEXABLE_STATUSES,
+        "can_delete": status in CRAWLER_DELETABLE_STATUSES,
         "new_articles": int(doc.get("new_articles") or 0),
         "new_chunks": int(doc.get("new_chunks") or 0),
         "indexed": int(doc.get("indexed") or 0),
@@ -1455,9 +1456,11 @@ async def delete_crawler_run(
             f"Only runs with status {sorted(CRAWLER_DELETABLE_STATUSES)} can be deleted",
         )
 
-    chunk_docs = await db[CRAWLER_CHUNKS_COLLECTION].find(
-        {"run_id": run_id}, {"metadata.baiviet_id": 1}
-    ).to_list(length=None)
+    chunk_docs = (
+        await db[CRAWLER_CHUNKS_COLLECTION]
+        .find({"run_id": run_id}, {"metadata.baiviet_id": 1})
+        .to_list(length=None)
+    )
 
     baiviet_ids: set[int] = set()
     for doc in chunk_docs:

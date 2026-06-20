@@ -9,7 +9,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from models.user import PyObjectId
 
-
 CRAWLER_STATUS_PENDING_REVIEW = "pending_review"
 CRAWLER_STATUS_INDEXING = "indexing"
 CRAWLER_STATUS_INDEXED = "indexed"
@@ -35,7 +34,9 @@ def crawler_utc_now() -> datetime:
 class CrawlerRun(BaseModel):
     """A staged crawler run waiting for admin review/index approval."""
 
-    model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(
+        populate_by_name=True, arbitrary_types_allowed=True
+    )
 
     id: Optional[PyObjectId] = Field(default=None, alias="_id")
     run_id: str
@@ -63,7 +64,9 @@ class CrawlerRun(BaseModel):
 class CrawlerChunk(BaseModel):
     """A single staged crawler chunk whose content can be reviewed."""
 
-    model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(
+        populate_by_name=True, arbitrary_types_allowed=True
+    )
 
     id: Optional[PyObjectId] = Field(default=None, alias="_id")
     run_id: str

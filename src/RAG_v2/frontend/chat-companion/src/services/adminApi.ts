@@ -314,6 +314,7 @@ import type {
   CrawlerRunChunksResponse,
   CrawlerChunkDetail,
   CrawlerIndexResponse,
+  CrawlerDeleteResponse,
   ConfigToggleResponse,
   LLMConfig,
   LLMConfigUpdateBody,
@@ -436,6 +437,14 @@ export async function indexCrawlerRun(runId: string): Promise<CrawlerIndexRespon
   const { data } = await adminClient.post<CrawlerIndexResponse>(
     `/admin/crawler/runs/${runId}/index`,
     null,
+    { headers: authHeaders() },
+  );
+  return data;
+}
+
+export async function deleteCrawlerRun(runId: string): Promise<CrawlerDeleteResponse> {
+  const { data } = await adminClient.delete<CrawlerDeleteResponse>(
+    `/admin/crawler/runs/${runId}`,
     { headers: authHeaders() },
   );
   return data;

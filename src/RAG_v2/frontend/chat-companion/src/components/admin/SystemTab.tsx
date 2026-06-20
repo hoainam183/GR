@@ -15,7 +15,7 @@ import EmptyState from './EmptyState';
 import { useAdminFetch } from '@/hooks/useAdminFetch';
 import {
   getSystemStats, triggerCrawler, getCrawlerStatus,
-  getCrawlerRunChunks, updateCrawlerRunChunk, indexCrawlerRun,
+  getCrawlerRunChunks, updateCrawlerRunChunk, indexCrawlerRun, deleteCrawlerRun,
   toggleConfig, getLLMConfig, updateLLMConfig,
   activateApiKey, createApiKey, getApiKeys,
   getEnvConfig, updateEnvConfig,
@@ -33,7 +33,7 @@ import type {
 } from '@/types/adminStats';
 import {
   Settings, Loader2, PlayCircle, CheckCircle2, XCircle, Save, Key, Cpu, Database,
-  Plus, RefreshCw, ChevronDown, ChevronRight, ExternalLink,
+  Plus, RefreshCw, ChevronDown, ChevronRight, ExternalLink, Trash2,
 } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
@@ -377,6 +377,7 @@ export default function SystemTab() {
   const [loadingRunId, setLoadingRunId] = useState<string | null>(null);
   const [savingChunkKey, setSavingChunkKey] = useState<string | null>(null);
   const [indexingRunId, setIndexingRunId] = useState<string | null>(null);
+  const [deletingRunId, setDeletingRunId] = useState<string | null>(null);
   const [runChunks, setRunChunks] = useState<Record<string, CrawlerChunkDetail[]>>({});
   const [chunkDrafts, setChunkDrafts] = useState<Record<string, string>>({});
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -698,6 +699,20 @@ export default function SystemTab() {
       toast.error('KhÃ´ng thá»ƒ index run');
     } finally {
       setIndexingRunId(null);
+    }
+  };
+
+  const handleDeleteCrawlerRun = async (runId: string) => {
+    if (!confirm('Xác nhận xóa crawl run này? Dữ liệu sẽ bị xóa khỏi JSON và MongoDB.')) return;
+    setDeletingRunId(runId);
+    try {
+      const res = await deleteCrawlerRun(runId);
+      toast.success(`Đã xóa: ${res.deleted_articles} bài, ${res.deleted_chunks} chunks`);
+      await refreshCrawlerStatus();
+    } catch {
+      toast.error('Không thể xóa crawl run');
+    } finally {
+      setDeletingRunId(null);
     }
   };
 
@@ -1127,6 +1142,8 @@ export default function SystemTab() {
               const status = result.review_status || result.status;
               const canIndex = Boolean(runId && result.can_index && !crawlerStatus?.is_running);
               const isIndexing = status === 'indexing' || indexingRunId === runId;
+              const canDelete = Boolean(runId && result.can_delete);
+              const isDeleting = deletingRunId === runId;
               const isIndexed = status === 'indexed';
               const sectionKey = runId || `${result.collection}-${result.pipeline}-${status}`;
               const isRunExpanded = expandedIndexedRuns.has(sectionKey);
@@ -1186,6 +1203,18 @@ export default function SystemTab() {
                       >
                         {isIndexing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Database className="h-3.5 w-3.5" />}
                         Index
+                      </Button>
+                    )}
+                    {runId && canDelete && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2 text-destructive hover:bg-destructive/10"
+                        disabled={isDeleting}
+                        onClick={() => handleDeleteCrawlerRun(runId)}
+                      >
+                        {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                        Xóa
                       </Button>
                     )}
                   </div>
