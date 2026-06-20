@@ -374,7 +374,13 @@ class KeHoachChunker:
             pos = m.end()
         pieces.extend(self._protect_split(text[pos:]))
 
-        result = [p for p in pieces if len(p.strip()) >= MIN_CHUNK_SIZE]
+        # Giữ mọi mảnh đủ dài HOẶC có chứa bảng — bảng nhỏ (vd 1 hàng ở cuối)
+        # tuyệt đối KHÔNG được loại như mảnh vụn, nếu không sẽ mất data bảng.
+        result = [
+            p
+            for p in pieces
+            if len(p.strip()) >= MIN_CHUNK_SIZE or has_markdown_table(p)
+        ]
         return result or [text]
 
     def _build_chunks(
@@ -387,13 +393,14 @@ class KeHoachChunker:
 
         for text, section_label in segments:
             text = text.strip()
-            if len(text) < MIN_CHUNK_SIZE:
+            if len(text) < MIN_CHUNK_SIZE and not has_markdown_table(text):
                 continue
 
             heading = self._section_heading(text, section_label)
             for piece in self._split_text_table_aware(text, heading):
                 piece = piece.strip()
-                if len(piece) < MIN_CHUNK_SIZE:
+                # Không bỏ mảnh chứa bảng dù ngắn (tránh mất data bảng ở cuối).
+                if len(piece) < MIN_CHUNK_SIZE and not has_markdown_table(piece):
                     continue
                 content = (
                     f"{context_prefix}\n{piece}".strip()
