@@ -116,6 +116,15 @@ def _save_json(data: list, path: Path) -> None:
     )
 
 
+# Tăng số này MỖI KHI logic clean (HTML→text) hoặc chunk thay đổi. Lần crawl kế
+# tiếp sẽ tự re-process (re-extract + re-chunk) các bài đã crawl CÓ BẢNG mà version
+# xử lý chưa khớp → áp dụng fix cho dữ liệu cũ. Bài đã ở version hiện tại được bỏ
+# qua → idempotent, không stage trùng ở các lần crawl sau.
+#   v1: clean HTML table → Markdown
+#   v2: chunk table-aware (không cắt giữa bảng, không mất bảng nhỏ ở cuối)
+PROCESSING_VERSION = 2
+
+
 def _content_has_markdown_table(text: str) -> bool:
     """True nếu text đã chứa ít nhất một dòng bảng Markdown ``| ... |``."""
     for line in (text or "").splitlines():
@@ -1043,6 +1052,11 @@ class AutoCrawlPipeline:
 
             summary["new_articles"] = len(all_new_articles)
 
+            # Bài mới crawl được đóng dấu version hiện tại để lần crawl sau không
+            # bị auto-heal xử lý lại (tránh stage trùng).
+            for art in all_new_articles:
+                art["processing_version"] = PROCESSING_VERSION
+
             # Step 1b: Auto-heal — bài CŨ có <table> nhưng content_text chưa phải
             # Markdown (crawl trước khi có fix). Crawl tăng dần bỏ qua ID đã biết
             # nên cần bước này để tự sửa. Idempotent: bỏ qua bài đã là Markdown,
@@ -1132,10 +1146,14 @@ class AutoCrawlPipeline:
 
     @staticmethod
     def _heal_stale_table_articles(articles: List[Dict]) -> List[Dict]:
-        """Sửa tại chỗ content_text cho bài có ``<table`` nhưng chưa là Markdown.
+        """Re-process bài có bảng khi logic clean/chunk đổi (theo PROCESSING_VERSION).
 
-        Trả về danh sách bài đã sửa. Idempotent: bài đã có bảng Markdown được bỏ
-        qua → an toàn để chạy mỗi lần crawl mà không stage trùng.
+        Một bài có ``<table`` được chọn để re-process nếu ``processing_version`` của
+        nó != ``PROCESSING_VERSION`` HOẶC content_text chưa phải Markdown. Khi chọn:
+        re-extract content_text từ content_html (áp dụng fix clean mới nhất) + đóng
+        dấu version. Bài đã ở version hiện tại được BỎ QUA → idempotent, không stage
+        trùng mỗi lần crawl. Lưu ý: dù content_text không đổi, bài vẫn được trả về để
+        _build_chunks re-chunk bằng logic mới (vd table-aware).
         """
         healed: List[Dict] = []
         for art in articles:
@@ -1143,12 +1161,18 @@ class AutoCrawlPipeline:
             if "<table" not in content_html.lower():
                 continue
             content_text = art.get("content_text") or ""
-            if _content_has_markdown_table(content_text):
+            up_to_date = art.get(
+                "processing_version"
+            ) == PROCESSING_VERSION and _content_has_markdown_table(
+                content_text
+            )
+            if up_to_date:
                 continue
             new_text = GenericCrawler._rederive_content_text(content_html)
-            if new_text and new_text != content_text:
+            if new_text:
                 art["content_text"] = new_text
-                healed.append(art)
+            art["processing_version"] = PROCESSING_VERSION
+            healed.append(art)
         return healed
 
     # ── Reprocess: fix bài đã crawl từ content_html đã lưu ────────
@@ -1186,6 +1210,7 @@ class AutoCrawlPipeline:
             new_text = GenericCrawler._rederive_content_text(content_html)
             if new_text and new_text != art.get("content_text"):
                 art["content_text"] = new_text
+            art["processing_version"] = PROCESSING_VERSION
             targets.append(art)
 
         summary: Dict[str, Any] = {
