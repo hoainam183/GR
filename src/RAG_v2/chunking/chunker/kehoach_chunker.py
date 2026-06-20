@@ -46,6 +46,15 @@ from typing import Dict, List, Optional, Tuple
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+from .markdown_table import (
+    fix_mid_table_chunks,
+    has_markdown_table,
+    protect_tables,
+    restore_tables,
+    split_table_by_rows,
+)
+from .markdown_table import _RE_TABLE_BLOCK as _TABLE_BLOCK_RE
+
 
 # ─────────────────────────────────────────────
 # Tuning constants
@@ -61,57 +70,6 @@ _RECURSIVE_SEPS = ["\n\n", "\n", ". ", ", ", " ", ""]
 
 # Numbered items at line start: "1.", "2.", …, "12."
 _RE_NUMBERED = re.compile(r"(?m)^\d{1,2}\.\s+\S")
-
-# Markdown table separator row, e.g. "|---|---|" hoặc "| :- | -: |"
-_RE_TABLE_SEP = re.compile(r"^\|[\s\-|:]+\|$")
-
-
-# ─────────────────────────────────────────────
-# Markdown table helpers (đồng bộ recursive_chunker.py:122–174)
-# ─────────────────────────────────────────────
-
-
-def _has_md_table(text: str) -> bool:
-    """True nếu text chứa ít nhất một dòng bảng Markdown ``| ... |``."""
-    for line in text.splitlines():
-        s = line.strip()
-        if s.startswith("|") and "|" in s[1:]:
-            return True
-    return False
-
-
-def _starts_mid_table(text: str) -> bool:
-    """True nếu chunk bắt đầu giữa bảng (dòng đầu là row nhưng thiếu separator)."""
-    lines = [ln for ln in text.strip().splitlines() if ln.strip()]
-    if not lines or not lines[0].strip().startswith("|"):
-        return False
-    if len(lines) < 2:
-        return True
-    return not _RE_TABLE_SEP.match(lines[1].strip())
-
-
-def _find_table_header(text: str) -> Optional[str]:
-    """Tìm cặp (header + separator) của bảng cuối trong text, hoặc None."""
-    lines = text.splitlines()
-    for i in range(len(lines) - 1, 0, -1):
-        if _RE_TABLE_SEP.match(lines[i].strip()) and lines[
-            i - 1
-        ].strip().startswith("|"):
-            return lines[i - 1] + "\n" + lines[i]
-    return None
-
-
-def _fix_mid_table_chunks(chunks: List[Dict]) -> List[Dict]:
-    """Chèn lại header+separator cho chunk bị cắt giữa bảng (mất header)."""
-    for i in range(1, len(chunks)):
-        content = chunks[i]["content"]
-        if _starts_mid_table(content):
-            header = _find_table_header(chunks[i - 1]["content"])
-            if header:
-                chunks[i]["content"] = header + "\n" + content
-                chunks[i]["metadata"]["chunk_size"] = len(chunks[i]["content"])
-    return chunks
-
 
 # ─────────────────────────────────────────────
 # Internal helper
@@ -268,12 +226,12 @@ class KeHoachChunker:
 
         raw_segments = self._segment(content)
         chunks = self._build_chunks(raw_segments, base_meta, context_prefix)
-        chunks = _fix_mid_table_chunks(chunks)
+        chunks = fix_mid_table_chunks(chunks)
 
         total = len(chunks)
         for c in chunks:
             c["metadata"]["total_chunks"] = total
-            c["metadata"]["has_table"] = _has_md_table(c["content"])
+            c["metadata"]["has_table"] = has_markdown_table(c["content"])
 
         return chunks
 
@@ -340,13 +298,7 @@ class KeHoachChunker:
                 return []
             combined = "\n\n".join(group_buf)
             label = group_labels[0] if len(group_labels) == 1 else None
-            # If the combined text still exceeds chunk_size → split further
-            if len(combined) > self.chunk_size:
-                sub_segs: List[Tuple[str, Optional[str]]] = []
-                for piece in self._splitter.split_text(combined):
-                    if len(piece) >= MIN_CHUNK_SIZE:
-                        sub_segs.append((piece, label))
-                return sub_segs
+            # Không tách ở đây — _build_chunks tách table-aware để không cắt bảng.
             return [(combined, label)]
 
         for label, item_text in parsed:
@@ -355,16 +307,11 @@ class KeHoachChunker:
                 continue
 
             if len(item_text) > self.long_item_threshold:
-                # Flush pending short group first
+                # Flush pending short group first; mục dài giữ nguyên, để
+                # _build_chunks tách (bảo toàn bảng).
                 segments.extend(_flush_group())
                 group_buf, group_labels = [], []
-                # Long item → potentially further split
-                if len(item_text) > self.chunk_size:
-                    for piece in self._splitter.split_text(item_text):
-                        if len(piece) >= MIN_CHUNK_SIZE:
-                            segments.append((piece, label or None))
-                else:
-                    segments.append((item_text, label or None))
+                segments.append((item_text, label or None))
             else:
                 group_buf.append(item_text)
                 group_labels.append(label)
@@ -379,6 +326,57 @@ class KeHoachChunker:
     # Chunk construction
     # ──────────────────────────────────────────
 
+    @staticmethod
+    def _section_heading(text: str, label: Optional[str]) -> str:
+        """Dòng tiêu đề/dẫn nhập của segment, để gắn vào mảnh bảng (self-contained)."""
+        for line in text.splitlines():
+            s = line.strip()
+            if s and not s.startswith("|"):
+                return s[:120]
+        return f"Mục {label}" if label else ""
+
+    def _protect_split(self, text: str) -> List[str]:
+        """Tách văn xuôi; bảo vệ bảng nhỏ (≤ chunk_size) khỏi bị cắt giữa hàng."""
+        text = text.strip()
+        if not text:
+            return []
+        if len(text) <= self.chunk_size:
+            return [text]
+        protected, table_map = protect_tables(text, self.chunk_size)
+        return [
+            restore_tables(piece, table_map)
+            for piece in self._splitter.split_text(protected)
+        ]
+
+    def _split_text_table_aware(
+        self, text: str, heading_prefix: str = ""
+    ) -> List[str]:
+        """Tách text mà KHÔNG cắt giữa bảng.
+
+        - Bảng ≤ chunk_size: giữ nguyên (atomic, kèm prose xung quanh nếu vừa).
+        - Bảng > chunk_size: tách theo HÀNG, mỗi mảnh lặp lại header + heading.
+        - Văn xuôi: tách bằng RecursiveCharacterTextSplitter.
+        """
+        text = text.strip()
+        if len(text) <= self.chunk_size:
+            return [text]
+
+        pieces: List[str] = []
+        pos = 0
+        for m in _TABLE_BLOCK_RE.finditer(text):
+            table = m.group(0)
+            if len(table) <= self.chunk_size:
+                continue  # bảng nhỏ → _protect_split giữ nguyên cùng ngữ cảnh
+            pieces.extend(self._protect_split(text[pos : m.start()]))
+            pieces.extend(
+                split_table_by_rows(table, self.chunk_size, heading_prefix)
+            )
+            pos = m.end()
+        pieces.extend(self._protect_split(text[pos:]))
+
+        result = [p for p in pieces if len(p.strip()) >= MIN_CHUNK_SIZE]
+        return result or [text]
+
     def _build_chunks(
         self,
         segments: List[Tuple[str, Optional[str]]],
@@ -387,49 +385,31 @@ class KeHoachChunker:
     ) -> List[Dict]:
         chunks: List[Dict] = []
 
-        for idx, (text, section_label) in enumerate(segments):
+        for text, section_label in segments:
             text = text.strip()
             if len(text) < MIN_CHUNK_SIZE:
                 continue
 
-            # For plain-text (label None, single segment), run through
-            # recursive splitter if it exceeds chunk_size
-            if section_label is None and len(text) > self.chunk_size:
-                sub_pieces = self._splitter.split_text(text)
-                for sub_idx, piece in enumerate(sub_pieces):
-                    piece = piece.strip()
-                    if len(piece) < MIN_CHUNK_SIZE:
-                        continue
-                    content = (
-                        f"{context_prefix}\n{piece}".strip()
-                        if context_prefix
-                        else piece
-                    )
-                    chunks.append(
-                        self._make_chunk(
-                            content,
-                            {
-                                **base_meta,
-                                "section_label": None,
-                                "chunk_index": len(chunks),
-                            },
-                        )
-                    )
-                continue
-
-            content = (
-                f"{context_prefix}\n{text}".strip() if context_prefix else text
-            )
-            chunks.append(
-                self._make_chunk(
-                    content,
-                    {
-                        **base_meta,
-                        "section_label": section_label,
-                        "chunk_index": len(chunks),
-                    },
+            heading = self._section_heading(text, section_label)
+            for piece in self._split_text_table_aware(text, heading):
+                piece = piece.strip()
+                if len(piece) < MIN_CHUNK_SIZE:
+                    continue
+                content = (
+                    f"{context_prefix}\n{piece}".strip()
+                    if context_prefix
+                    else piece
                 )
-            )
+                chunks.append(
+                    self._make_chunk(
+                        content,
+                        {
+                            **base_meta,
+                            "section_label": section_label,
+                            "chunk_index": len(chunks),
+                        },
+                    )
+                )
 
         # Ensure at least 1 chunk even for empty content
         if not chunks:
