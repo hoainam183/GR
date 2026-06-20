@@ -28,6 +28,7 @@ from pydantic import BaseModel
 
 from auth.rbac import require_admin
 from models.crawler import (
+    CRAWLER_DELETABLE_STATUSES,
     CRAWLER_EDITABLE_STATUSES,
     CRAWLER_INDEXABLE_STATUSES,
     CRAWLER_STATUS_INDEX_FAILED,
@@ -1436,6 +1437,106 @@ async def _index_crawler_run_background(
             run_id,
             exc_info=True,
         )
+
+
+@router.delete("/crawler/runs/{run_id}")
+async def delete_crawler_run(
+    run_id: str,
+    _user: Annotated[UserDocument, Depends(require_admin)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+):
+    """Delete a pending_review crawler run from MongoDB and JSON files."""
+    run_doc = await db[CRAWLER_RUNS_COLLECTION].find_one({"run_id": run_id})
+    if not run_doc:
+        raise HTTPException(404, "Crawler run not found")
+    if run_doc.get("status") not in CRAWLER_DELETABLE_STATUSES:
+        raise HTTPException(
+            409,
+            f"Only runs with status {sorted(CRAWLER_DELETABLE_STATUSES)} can be deleted",
+        )
+
+    chunk_docs = await db[CRAWLER_CHUNKS_COLLECTION].find(
+        {"run_id": run_id}, {"metadata.baiviet_id": 1}
+    ).to_list(length=None)
+
+    baiviet_ids: set[int] = set()
+    for doc in chunk_docs:
+        bid = (doc.get("metadata") or {}).get("baiviet_id")
+        if bid is not None:
+            baiviet_ids.add(int(bid))
+
+    deleted_articles = 0
+    deleted_chunks = 0
+    if baiviet_ids:
+        deleted_articles, deleted_chunks = _remove_from_json_files(
+            output_file=run_doc.get("output_file", ""),
+            chunks_file=run_doc.get("chunks_file", ""),
+            baiviet_ids=baiviet_ids,
+        )
+
+    await db[CRAWLER_CHUNKS_COLLECTION].delete_many({"run_id": run_id})
+    await db[CRAWLER_RUNS_COLLECTION].delete_one({"run_id": run_id})
+
+    logger.info(
+        "Deleted crawler run %s: %d articles, %d chunks from JSON, %d mongo chunks",
+        run_id,
+        deleted_articles,
+        deleted_chunks,
+        len(chunk_docs),
+    )
+    return {
+        "ok": True,
+        "run_id": run_id,
+        "deleted_articles": deleted_articles,
+        "deleted_chunks": deleted_chunks,
+    }
+
+
+def _remove_from_json_files(
+    output_file: str, chunks_file: str, baiviet_ids: set[int]
+) -> tuple[int, int]:
+    """Remove articles and chunks matching baiviet_ids from JSON files.
+
+    Returns (removed_articles_count, removed_chunks_count).
+    """
+    import json
+    from pathlib import Path
+
+    removed_articles = 0
+    removed_chunks = 0
+
+    if output_file:
+        path = Path(output_file)
+        if path.exists():
+            articles = json.loads(path.read_text(encoding="utf-8"))
+            kept = [
+                a for a in articles if a.get("baiviet_id") not in baiviet_ids
+            ]
+            removed_articles = len(articles) - len(kept)
+            if removed_articles > 0:
+                path.write_text(
+                    json.dumps(kept, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+
+    if chunks_file:
+        path = Path(chunks_file)
+        if path.exists():
+            chunks = json.loads(path.read_text(encoding="utf-8"))
+            kept = [
+                c
+                for c in chunks
+                if (c.get("metadata") or {}).get("baiviet_id")
+                not in baiviet_ids
+            ]
+            removed_chunks = len(chunks) - len(kept)
+            if removed_chunks > 0:
+                path.write_text(
+                    json.dumps(kept, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+
+    return removed_articles, removed_chunks
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
