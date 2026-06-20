@@ -310,6 +310,20 @@ class GenericCrawler:
             else:
                 a.replace_with(text)
 
+    @staticmethod
+    def _rederive_content_text(content_html: str) -> str:
+        """Trích content_text từ HTML của container (bỏ h3, resolve link, bảng→MD).
+
+        Dùng chung cho cả crawl mới (``_parse_detail``) lẫn reprocess bài đã lưu
+        (từ ``content_html`` trong JSON) — đảm bảo cùng một logic làm sạch.
+        """
+        clone = BeautifulSoup(content_html, "html.parser")
+        h3_clone = clone.select_one("h3")
+        if h3_clone:
+            h3_clone.decompose()
+        GenericCrawler._resolve_links(clone)
+        return _extract_readable_html_text(clone)
+
     def _parse_detail(self, html: str) -> Dict:
         soup = BeautifulSoup(html, "html.parser")
         container = soup.select_one("div.col-md-9.col-xs-12")
@@ -330,13 +344,7 @@ class GenericCrawler:
             date_detail = dt.get_text(strip=True)
 
         content_html = str(container)
-
-        clone = BeautifulSoup(content_html, "html.parser")
-        h3_clone = clone.select_one("h3")
-        if h3_clone:
-            h3_clone.decompose()
-        self._resolve_links(clone)
-        content_text = _extract_readable_html_text(clone)
+        content_text = self._rederive_content_text(content_html)
 
         return {
             "title_detail": title,
@@ -897,6 +905,47 @@ class AutoCrawlPipeline:
         quydinh = self.run_quydinh(backfill=backfill)
         return {"kehoach": kehoach, "quydinh": quydinh}
 
+    # ── Reprocess dispatcher (fix bài đã crawl, không gọi mạng) ───
+
+    def reprocess(
+        self,
+        pipeline_target: str = "kehoach",
+        only_tables: bool = True,
+        baiviet_ids: Optional[Set[int]] = None,
+    ) -> Dict[str, Any]:
+        """Re-extract + re-stage bài đã crawl (theo target). Không crawl mạng."""
+        results: Dict[str, Any] = {}
+        if pipeline_target in ("kehoach", "all"):
+            results["baiviet"] = self.reprocess_existing(
+                pipeline_name="baiviet",
+                output_file=BAIVIET_OUTPUT_FILE,
+                chunks_file=BAIVIET_CHUNKS_FILE,
+                collection="kehoach",
+                source_label="kehoach",
+                only_tables=only_tables,
+                baiviet_ids=baiviet_ids,
+            )
+            results["kehoach_list"] = self.reprocess_existing(
+                pipeline_name="kehoach_list",
+                output_file=KEHOACH_LIST_OUTPUT_FILE,
+                chunks_file=KEHOACH_LIST_CHUNKS_FILE,
+                collection="kehoach",
+                source_label="kehoach",
+                only_tables=only_tables,
+                baiviet_ids=baiviet_ids,
+            )
+        if pipeline_target in ("quydinh", "all"):
+            results["quydinh"] = self.reprocess_existing(
+                pipeline_name="quydinh",
+                output_file=QUYDINH_OUTPUT_FILE,
+                chunks_file=QUYDINH_CHUNKS_FILE,
+                collection="quydinh",
+                source_label="quydinh",
+                only_tables=only_tables,
+                baiviet_ids=baiviet_ids,
+            )
+        return results
+
     # ── Internal: generic single-pipeline runner ──────────────
 
     def _run_single_pipeline(
@@ -1028,6 +1077,104 @@ class AutoCrawlPipeline:
         summary["elapsed_seconds"] = round(elapsed, 1)
 
         self._notify(summary)
+        return summary
+
+    # ── Reprocess: fix bài đã crawl từ content_html đã lưu ────────
+
+    def reprocess_existing(
+        self,
+        *,
+        pipeline_name: str,
+        output_file: Path,
+        chunks_file: Path,
+        collection: str,
+        source_label: str,
+        only_tables: bool = True,
+        baiviet_ids: Optional[Set[int]] = None,
+    ) -> Dict[str, Any]:
+        """Trích lại content_text từ content_html đã lưu rồi stage để admin duyệt.
+
+        Khắc phục các bài viết đã crawl TRƯỚC khi có fix bảng→Markdown: crawl tăng
+        dần bỏ qua ID đã biết nên không tự xử lý lại. Hàm này KHÔNG gọi mạng — chỉ
+        đọc ``content_html`` trong JSON, re-extract (bảng→Markdown), re-chunk và
+        stage pending review. ``only_tables`` giới hạn vào bài có ``<table``;
+        ``baiviet_ids`` giới hạn vào danh sách ID cụ thể (vd để test 1 bài).
+        """
+        start_time = datetime.now()
+        articles = _load_json(output_file)
+        targets: List[Dict] = []
+        for art in articles:
+            content_html = art.get("content_html")
+            if not content_html:
+                continue
+            if baiviet_ids and art.get("baiviet_id") not in baiviet_ids:
+                continue
+            if only_tables and "<table" not in content_html.lower():
+                continue
+            new_text = GenericCrawler._rederive_content_text(content_html)
+            if new_text and new_text != art.get("content_text"):
+                art["content_text"] = new_text
+            targets.append(art)
+
+        summary: Dict[str, Any] = {
+            "pipeline": pipeline_name,
+            "collection": collection,
+            "started_at": start_time.isoformat(),
+            "status": "success",
+            "new_articles": len(targets),
+            "new_chunks": 0,
+            "indexed": 0,
+            "expired_removed": 0,
+            "saved_chunks": [],
+            "errors": [],
+            "reprocess": True,
+        }
+
+        if not targets:
+            logger.info("Reprocess [%s]: không có bài nào khớp.", pipeline_name)
+            summary["elapsed_seconds"] = round(
+                (datetime.now() - start_time).total_seconds(), 1
+            )
+            return summary
+
+        # Lưu lại content_text đã sửa vào JSON nguồn.
+        _save_json(articles, output_file)
+
+        chunker = ChunkProcessor(
+            source_label=source_label, chunks_file=chunks_file
+        )
+        new_chunks = chunker.chunk_articles(targets)
+        summary["new_chunks"] = len(new_chunks)
+
+        if new_chunks:
+            run_id = self._stage_pending_review(
+                pipeline_name=pipeline_name,
+                collection=collection,
+                source_label=source_label,
+                output_file=output_file,
+                chunks_file=chunks_file,
+                new_chunks=new_chunks,
+                summary=summary,
+            )
+            summary["status"] = "pending_review"
+            summary["review_run_id"] = run_id
+            summary["review_status"] = "pending_review"
+            summary["can_edit"] = True
+            summary["can_index"] = True
+            summary["saved_chunks"] = self._build_saved_chunk_preview(
+                new_chunks
+            )
+            logger.info(
+                "Reprocess [%s]: staged %d chunks (run %s) cho %d bài.",
+                pipeline_name,
+                len(new_chunks),
+                run_id,
+                len(targets),
+            )
+
+        summary["elapsed_seconds"] = round(
+            (datetime.now() - start_time).total_seconds(), 1
+        )
         return summary
 
     @staticmethod

@@ -19,7 +19,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -918,8 +918,16 @@ async def trigger_crawl(
         False,
         description="Quét lại toàn bộ cửa sổ retention (bỏ qua early-stop khi gặp bài đã có); dùng khi mở rộng crawler_retention_months để backfill bài cũ.",
     ),
+    reprocess: bool = Query(
+        False,
+        description="Không crawl mạng — trích lại content_text từ content_html đã lưu (sửa bảng→Markdown cho bài đã crawl) rồi stage để duyệt. Crawl tăng dần bỏ qua bài đã có nên cần chế độ này để sửa bài cũ.",
+    ),
+    baiviet_id: Optional[int] = Query(
+        None,
+        description="Chỉ reprocess đúng 1 bài (baiviet_id / kehoach id). Bỏ trống = mọi bài có bảng.",
+    ),
 ):
-    """Manually trigger a crawl pipeline run."""
+    """Manually trigger a crawl pipeline run (or a reprocess of stored HTML)."""
     global _crawl_running, _last_trigger_time, _last_manual_crawl
 
     settings = request.app.state.settings
@@ -973,19 +981,33 @@ async def trigger_crawl(
 
     # Launch background task
     asyncio.create_task(
-        _run_crawl_with_timeout(crawl_pipeline, pipeline_target, backfill)
+        _run_crawl_with_timeout(
+            crawl_pipeline,
+            pipeline_target,
+            backfill,
+            reprocess=reprocess,
+            baiviet_id=baiviet_id,
+        )
     )
 
+    mode = "Reprocess" if reprocess else "Crawl"
     return {
         "ok": True,
-        "message": f"Crawl '{pipeline_target}' started (backfill={backfill})",
+        "message": f"{mode} '{pipeline_target}' started (backfill={backfill}, reprocess={reprocess})",
         "timeout_seconds": _CRAWL_TIMEOUT_SECONDS,
         "backfill": backfill,
+        "reprocess": reprocess,
+        "baiviet_id": baiviet_id,
     }
 
 
 async def _run_crawl_with_timeout(
-    crawl_pipeline, pipeline_target: str, backfill: bool = False
+    crawl_pipeline,
+    pipeline_target: str,
+    backfill: bool = False,
+    *,
+    reprocess: bool = False,
+    baiviet_id: Optional[int] = None,
 ):
     """Run crawl in background thread with timeout protection."""
     global _crawl_running, _last_manual_crawl
@@ -998,6 +1020,8 @@ async def _run_crawl_with_timeout(
             crawl_pipeline,
             pipeline_target,
             backfill,
+            reprocess,
+            baiviet_id,
         )
         result = await asyncio.wait_for(future, timeout=_CRAWL_TIMEOUT_SECONDS)
         status = _crawl_result_status(result)
@@ -1054,9 +1078,19 @@ async def _run_crawl_with_timeout(
 
 
 def _do_crawl(
-    crawl_pipeline, pipeline_target: str, backfill: bool = False
+    crawl_pipeline,
+    pipeline_target: str,
+    backfill: bool = False,
+    reprocess: bool = False,
+    baiviet_id: Optional[int] = None,
 ) -> dict:
     """Sync function that runs in thread."""
+    if reprocess:
+        ids = {baiviet_id} if baiviet_id is not None else None
+        return crawl_pipeline.reprocess(
+            pipeline_target=pipeline_target,
+            baiviet_ids=ids,
+        )
     if pipeline_target == "kehoach":
         return crawl_pipeline.run_kehoach(backfill=backfill)
     elif pipeline_target == "quydinh":
