@@ -62,6 +62,56 @@ _RECURSIVE_SEPS = ["\n\n", "\n", ". ", ", ", " ", ""]
 # Numbered items at line start: "1.", "2.", …, "12."
 _RE_NUMBERED = re.compile(r"(?m)^\d{1,2}\.\s+\S")
 
+# Markdown table separator row, e.g. "|---|---|" hoặc "| :- | -: |"
+_RE_TABLE_SEP = re.compile(r"^\|[\s\-|:]+\|$")
+
+
+# ─────────────────────────────────────────────
+# Markdown table helpers (đồng bộ recursive_chunker.py:122–174)
+# ─────────────────────────────────────────────
+
+
+def _has_md_table(text: str) -> bool:
+    """True nếu text chứa ít nhất một dòng bảng Markdown ``| ... |``."""
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith("|") and "|" in s[1:]:
+            return True
+    return False
+
+
+def _starts_mid_table(text: str) -> bool:
+    """True nếu chunk bắt đầu giữa bảng (dòng đầu là row nhưng thiếu separator)."""
+    lines = [ln for ln in text.strip().splitlines() if ln.strip()]
+    if not lines or not lines[0].strip().startswith("|"):
+        return False
+    if len(lines) < 2:
+        return True
+    return not _RE_TABLE_SEP.match(lines[1].strip())
+
+
+def _find_table_header(text: str) -> Optional[str]:
+    """Tìm cặp (header + separator) của bảng cuối trong text, hoặc None."""
+    lines = text.splitlines()
+    for i in range(len(lines) - 1, 0, -1):
+        if _RE_TABLE_SEP.match(lines[i].strip()) and lines[
+            i - 1
+        ].strip().startswith("|"):
+            return lines[i - 1] + "\n" + lines[i]
+    return None
+
+
+def _fix_mid_table_chunks(chunks: List[Dict]) -> List[Dict]:
+    """Chèn lại header+separator cho chunk bị cắt giữa bảng (mất header)."""
+    for i in range(1, len(chunks)):
+        content = chunks[i]["content"]
+        if _starts_mid_table(content):
+            header = _find_table_header(chunks[i - 1]["content"])
+            if header:
+                chunks[i]["content"] = header + "\n" + content
+                chunks[i]["metadata"]["chunk_size"] = len(chunks[i]["content"])
+    return chunks
+
 
 # ─────────────────────────────────────────────
 # Internal helper
@@ -218,10 +268,12 @@ class KeHoachChunker:
 
         raw_segments = self._segment(content)
         chunks = self._build_chunks(raw_segments, base_meta, context_prefix)
+        chunks = _fix_mid_table_chunks(chunks)
 
         total = len(chunks)
         for c in chunks:
             c["metadata"]["total_chunks"] = total
+            c["metadata"]["has_table"] = _has_md_table(c["content"])
 
         return chunks
 

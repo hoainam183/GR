@@ -72,15 +72,10 @@ _TEXT_BLOCK_TAGS = {
     "ol",
     "p",
     "section",
-    "table",
-    "tbody",
-    "td",
-    "tfoot",
-    "th",
-    "thead",
-    "tr",
     "ul",
 }
+# Thẻ bảng cố ý không nằm ở đây — được chuyển sang Markdown bởi
+# replace_tables_with_markdown() để giữ cấu trúc bảng.
 
 
 def normalize_extracted_text(text: str) -> str:
@@ -94,9 +89,16 @@ def normalize_extracted_text(text: str) -> str:
 
 
 def extract_readable_html_text(container: BeautifulSoup) -> str:
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from utils.html_table_markdown import replace_tables_with_markdown
+
     clone = BeautifulSoup(str(container), "html.parser")
     for tag in clone.find_all(["script", "style", "noscript"]):
         tag.decompose()
+    replace_tables_with_markdown(clone)
     for br in clone.find_all("br"):
         br.replace_with("\n")
     for li in clone.find_all("li"):

@@ -13,7 +13,11 @@ from embedding.base import BaseEmbedder
 from llm.base import BaseLLM
 from llm.prompts import build_rag_messages
 from llm.self_eval import SelfEvaluator
-from query.signals import analyze_query_signals, extract_key_phrases, fold_vietnamese_text
+from query.signals import (
+    analyze_query_signals,
+    extract_key_phrases,
+    fold_vietnamese_text,
+)
 from reranking.base import BaseReranker
 from retrieval.collection_selector import CollectionSelector
 from retrieval.metadata_filters import (
@@ -83,8 +87,8 @@ _LIST_QUERY_RE = re.compile(
     r"\b(?:các|tất\s+cả|danh\s*sách|liệt\s*kê|những|bao\s+gồm\s+những|toàn\s+bộ|hết)\b",
     re.IGNORECASE,
 )
-_LIST_TOP_K_MULTIPLIER = 2   # double top_k for list queries
-_LIST_TOP_K_MAX = 12         # cap to avoid excessive reranking latency
+_LIST_TOP_K_MULTIPLIER = 2  # double top_k for list queries
+_LIST_TOP_K_MAX = 12  # cap to avoid excessive reranking latency
 
 _WEB_FALLBACK_DEFAULT_DYNAMIC_COLLECTIONS = ("kehoach",)
 _WEB_FALLBACK_NO_INFO_PATTERNS = (
@@ -270,10 +274,10 @@ def _is_date_within_days(date_str: str, days: int) -> bool:
 
 # ── B1: Per-collection score cliff ────────────────────────────────────────────
 _CLIFF_MIN_GAP_BY_COLLECTION = {
-    "kehoach": 0.5,    # Tight clusters → smaller gap is significant
-    "ctdt":    2.0,    # Wide spreads → need larger gap
-    "quydinh": 1.5,    # Moderate spreads
-    "stsv":    1.5,    # Moderate
+    "kehoach": 0.5,  # Tight clusters → smaller gap is significant
+    "ctdt": 2.0,  # Wide spreads → need larger gap
+    "quydinh": 1.5,  # Moderate spreads
+    "stsv": 1.5,  # Moderate
 }
 _CLIFF_MIN_GAP_DEFAULT = 1.5
 _CLIFF_MIN_KEEP_PER_COLL = 1
@@ -318,7 +322,12 @@ def _apply_score_cliff_per_collection(
             logger.info(
                 "Score cliff [%s] at pos %d (gap=%.2f, min_gap=%.1f), "
                 "keeping %d/%d docs",
-                coll, best_cut, max_gap_val, min_gap, best_cut, len(docs),
+                coll,
+                best_cut,
+                max_gap_val,
+                min_gap,
+                best_cut,
+                len(docs),
             )
         kept.extend(docs[:best_cut])
 
@@ -333,6 +342,7 @@ def _apply_score_cliff_per_collection(
 
 
 # ── C4: Routing confidence candidate pool increase ────────────────────────────
+
 
 def _resolve_candidate_pool(
     cfg: Dict[str, Any],
@@ -351,7 +361,9 @@ def _resolve_candidate_pool(
         expanded = base_pool * 2
         logger.info(
             "Low routing confidence (%.3f) → expanding candidate pool %d → %d",
-            routing_confidence, base_pool, expanded,
+            routing_confidence,
+            base_pool,
+            expanded,
         )
         return expanded
 
@@ -386,6 +398,7 @@ def _reranker_kwargs(
 
 # ── C5: Parent context expansion (post-rerank) ───────────────────────────────
 
+
 def _expand_parent_context_post_rerank(
     reranked: List[Dict[str, Any]],
     cfg: Dict[str, Any],
@@ -403,7 +416,8 @@ def _expand_parent_context_post_rerank(
     # Quick check: any child with parent_id?
     has_parent = any(
         r.get("metadata", {}).get("parent_id")
-        and str(r.get("metadata", {}).get("level", "child")).strip().lower() == "child"
+        and str(r.get("metadata", {}).get("level", "child")).strip().lower()
+        == "child"
         for r in reranked
     )
     if not has_parent:
@@ -423,9 +437,8 @@ def _expand_parent_context_post_rerank(
         # Group by collection for batch fetch
         collection_groups: Dict[str, List[int]] = {}
         for idx, r in enumerate(reranked):
-            coll = (
-                r.get("collection", "")
-                or r.get("metadata", {}).get("collection", "")
+            coll = r.get("collection", "") or r.get("metadata", {}).get(
+                "collection", ""
             )
             if coll:
                 collection_groups.setdefault(coll, []).append(idx)
@@ -446,6 +459,7 @@ def _expand_parent_context_post_rerank(
 
 
 # ── C1: Sibling chunk expansion ──────────────────────────────────────────────
+
 
 def _expand_with_siblings_pre_rerank(
     candidates: List[Dict[str, Any]],
@@ -509,14 +523,19 @@ def _expand_with_siblings_pre_rerank(
 
             siblings = searcher.get_by_metadata(
                 collection=collection,
-                filters={"metadata.source": source, "metadata.chunk_index": target_idx},
+                filters={
+                    "metadata.source": source,
+                    "metadata.chunk_index": target_idx,
+                },
                 limit=1,
             )
             for sib in siblings:
                 sib_id = str(sib.get("id", ""))
                 if sib_id and sib_id not in existing_ids:
                     sib["_expansion_source"] = str(doc.get("id", ""))
-                    sib["score"] = doc.get("score", 0.0) * 0.5  # Lower initial score
+                    sib["score"] = (
+                        doc.get("score", 0.0) * 0.5
+                    )  # Lower initial score
                     new_siblings.append(sib)
                     existing_ids.add(sib_id)
                     added += 1
@@ -554,7 +573,9 @@ def _should_cache_final_answer(
         return False
     if answer_quality_gate.get("should_web_search"):
         return False
-    if answer_quality_gate.get("no_info") or answer_quality_gate.get("no_sources"):
+    if answer_quality_gate.get("no_info") or answer_quality_gate.get(
+        "no_sources"
+    ):
         return False
     if answer_quality_gate.get("self_eval_failed"):
         return False
@@ -610,15 +631,21 @@ def _is_dynamic_web_query(
     return bool(_WEB_FALLBACK_DYNAMIC_QUERY_RE.search(folded))
 
 
-def _has_textual_freshness_or_dynamic_intent(question: str, search_query: str) -> bool:
+def _has_textual_freshness_or_dynamic_intent(
+    question: str, search_query: str
+) -> bool:
     """Return True when the current text asks for fresh/dynamic information."""
     combined = f"{question}\n{search_query}"
     if has_freshness_intent(combined):
         return True
-    return bool(_WEB_FALLBACK_DYNAMIC_QUERY_RE.search(_fold_vietnamese(combined)))
+    return bool(
+        _WEB_FALLBACK_DYNAMIC_QUERY_RE.search(_fold_vietnamese(combined))
+    )
 
 
-def _routing_top_domain(routing_result: Optional[Dict[str, Any]]) -> Optional[str]:
+def _routing_top_domain(
+    routing_result: Optional[Dict[str, Any]],
+) -> Optional[str]:
     """Return the highest-probability domain, falling back to primary domain."""
     if not routing_result:
         return None
@@ -703,7 +730,9 @@ def _should_lock_kehoach_route(
         if str(item).strip()
     ]
     selected_domains = domains or ([domain] if domain else [])
-    only_kehoach = bool(selected_domains) and set(selected_domains) == {"kehoach"}
+    only_kehoach = bool(selected_domains) and set(selected_domains) == {
+        "kehoach"
+    }
     if only_kehoach:
         return True
 
@@ -760,7 +789,10 @@ def _build_web_search_query(question: str, search_query: str) -> str:
             start_year = end_year - 1
             extras.extend([f"{start_year}3", f"{start_year}-{end_year}"])
 
-    has_freshness = any(token in folded for token in ("moi nhat", "latest", "recent", "hien tai"))
+    has_freshness = any(
+        token in folded
+        for token in ("moi nhat", "latest", "recent", "hien tai")
+    )
 
     # ── Academic year injection ──────────────────────────────
     if has_freshness:
@@ -774,10 +806,16 @@ def _build_web_search_query(question: str, search_query: str) -> str:
                 ay_start, ay_end = current_year - 1, current_year
 
             # Transition period: "năm học mới/tới" in July+ → next AY
-            wants_next_year = any(kw in folded for kw in (
-                "nam hoc moi", "nam hoc toi",
-                "ky toi", "ki toi", "hoc ky toi",
-            ))
+            wants_next_year = any(
+                kw in folded
+                for kw in (
+                    "nam hoc moi",
+                    "nam hoc toi",
+                    "ky toi",
+                    "ki toi",
+                    "hoc ky toi",
+                )
+            )
             if wants_next_year and now.month >= 7:
                 ay_start, ay_end = current_year, current_year + 1
 
@@ -788,10 +826,19 @@ def _build_web_search_query(question: str, search_query: str) -> str:
     # terms so Tavily finds the official registration notice rather than generic pages.
     has_registration = any(
         token in folded
-        for token in ("dang ki", "dang ky", "ke hoach hoc", "lich dang", "lich trinh")
+        for token in (
+            "dang ki",
+            "dang ky",
+            "ke hoach hoc",
+            "lich dang",
+            "lich trinh",
+        )
     )
     if has_registration and has_freshness:
-        if "dang ky ke hoach" not in folded and "ke hoach hoc tap" not in folded:
+        if (
+            "dang ky ke hoach" not in folded
+            and "ke hoach hoc tap" not in folded
+        ):
             extras.append("đăng ký kế hoạch học tập")
 
     # ── Content-type signal ──────────────────────────────────
@@ -832,7 +879,8 @@ def _build_pre_generation_web_decision(
     best_local_score = _best_explicit_rerank_score(reranked)
     high_local_confidence = (
         best_local_score is not None
-        and best_local_score >= _cfg_float(cfg, "web_bypass_min_local_score", 0.5)
+        and best_local_score
+        >= _cfg_float(cfg, "web_bypass_min_local_score", 0.5)
     )
     reasons: List[str] = []
     if no_sources:
@@ -844,7 +892,8 @@ def _build_pre_generation_web_decision(
     # fallback for: no sources, low/no reranker confidence, or explicit dynamic
     # queries without local evidence.
     local_kehoach_docs = [
-        d for d in reranked
+        d
+        for d in reranked
         if isinstance(d, dict) and d.get("collection") == "kehoach"
     ]
     freshness_acceptable_local = bool(local_kehoach_docs) and (
@@ -854,8 +903,10 @@ def _build_pre_generation_web_decision(
     # ── C3: Freshness date_str validation ──────────────────────────
     # If kehoach docs exist but none have date_str, we can't verify freshness
     # → conservative: allow Tavily (don't suppress)
-    if freshness_acceptable_local and freshness_query and _cfg_bool(
-        cfg, "freshness_tavily_check_enabled", False
+    if (
+        freshness_acceptable_local
+        and freshness_query
+        and _cfg_bool(cfg, "freshness_tavily_check_enabled", False)
     ):
         dates = [
             d.get("metadata", {}).get("date_str")
@@ -881,7 +932,11 @@ def _build_pre_generation_web_decision(
 
     if freshness_query and not freshness_acceptable_local:
         reasons.append("freshness_query")
-    if dynamic_query and not high_local_confidence and _cfg_bool(cfg, "web_fallback_on_dynamic", True):
+    if (
+        dynamic_query
+        and not high_local_confidence
+        and _cfg_bool(cfg, "web_fallback_on_dynamic", True)
+    ):
         reasons.append("dynamic_query")
     if low_retrieval_confidence:
         reasons.append("low_retrieval_confidence")
@@ -917,10 +972,9 @@ def _build_answer_quality_gate(
     pre_web_fallback_used: bool = False,
 ) -> Dict[str, Any]:
     """Decide whether local RAG needs official web fallback."""
-    no_info = (
-        _cfg_bool(cfg, "web_fallback_on_no_info", True)
-        and _answer_has_no_info_signal(answer)
-    )
+    no_info = _cfg_bool(
+        cfg, "web_fallback_on_no_info", True
+    ) and _answer_has_no_info_signal(answer)
     no_sources = len(reranked) == 0
     dynamic_query = _is_dynamic_web_query(
         question=question,
@@ -930,10 +984,17 @@ def _build_answer_quality_gate(
         cfg=cfg,
     )
     freshness_query = has_freshness_intent(f"{question}\n{search_query}")
-    eval_failed = bool(eval_result is not None and not eval_result.get("pass", True))
+    eval_failed = bool(
+        eval_result is not None and not eval_result.get("pass", True)
+    )
     eval_wants_web = bool(eval_result and eval_result.get("should_web_search"))
-    eval_status = str(eval_result.get("answer_status") or "") if eval_result else ""
-    eval_web_request = eval_wants_web and eval_status in {"insufficient", "stale_risk"}
+    eval_status = (
+        str(eval_result.get("answer_status") or "") if eval_result else ""
+    )
+    eval_web_request = eval_wants_web and eval_status in {
+        "insufficient",
+        "stale_risk",
+    }
     local_exact_policy_evidence = _has_local_exact_policy_evidence(
         question=question,
         search_query=search_query,
@@ -967,7 +1028,9 @@ def _build_answer_quality_gate(
     if eval_wants_web:
         informational_notes.append("self_eval_requested_web")
     if suppress_eval_web_request:
-        informational_notes.append("self_eval_web_suppressed_local_exact_policy")
+        informational_notes.append(
+            "self_eval_web_suppressed_local_exact_policy"
+        )
     if dynamic_query:
         informational_notes.append("dynamic_query")
     if freshness_query:
@@ -1076,7 +1139,10 @@ def _has_local_exact_policy_evidence(
             ]
         )
         folded_haystack = fold_vietnamese_text(haystack)
-        if any(fold_vietnamese_text(phrase) in folded_haystack for phrase in evidence_phrases):
+        if any(
+            fold_vietnamese_text(phrase) in folded_haystack
+            for phrase in evidence_phrases
+        ):
             return True
 
     return False
@@ -1127,7 +1193,9 @@ def _dedup_retrieval_candidates(
         if not doc_id:
             continue
         prev = best_by_id.get(doc_id)
-        if prev is None or _safe_float(item.get("score")) > _safe_float(prev.get("score")):
+        if prev is None or _safe_float(item.get("score")) > _safe_float(
+            prev.get("score")
+        ):
             best_by_id[doc_id] = item
 
     ranked = sorted(
@@ -1170,7 +1238,9 @@ def _merge_search_trace(
         for collection, count_info in incoming_counts.items():
             if not isinstance(count_info, dict):
                 continue
-            row = merged_counts.setdefault(collection, {"vector": 0, "keyword": 0})
+            row = merged_counts.setdefault(
+                collection, {"vector": 0, "keyword": 0}
+            )
             row["vector"] = int(_safe_float(row.get("vector"))) + int(
                 _safe_float(count_info.get("vector"))
             )
@@ -1186,7 +1256,9 @@ def _merge_search_trace(
             events.append(incoming_weights)
 
 
-def _order_with_siblings(reranked: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _order_with_siblings(
+    reranked: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
     """Order docs: originals in rerank order first, then siblings grouped by parent.
 
     This prevents the lost-in-the-middle effect where siblings at intermediate
@@ -1207,9 +1279,7 @@ def _order_with_siblings(reranked: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     for doc in originals:
         doc_id = str(doc.get("id", ""))
         siblings = sibling_map.pop(doc_id, [])
-        siblings.sort(
-            key=lambda s: s.get("metadata", {}).get("chunk_index", 0)
-        )
+        siblings.sort(key=lambda s: s.get("metadata", {}).get("chunk_index", 0))
         sibling_section.extend(siblings)
 
     # Orphan siblings (parent cut by cliff)
@@ -1238,11 +1308,15 @@ def _format_context(
     parts: List[str] = []
     used = 0
     docs_used = 0
-    seen_parent_ids: Set[str] = set()  # C5: dedup parent context across children sharing same parent
+    seen_parent_ids: Set[str] = (
+        set()
+    )  # C5: dedup parent context across children sharing same parent
     for i, doc in enumerate(documents, 1):
         meta = doc.get("metadata", {}) or {}
-        title = meta.get("title") or meta.get("source") or "Tài liệu không rõ nguồn"
-        
+        title = (
+            meta.get("title") or meta.get("source") or "Tài liệu không rõ nguồn"
+        )
+
         # Inject metadata into document header so the LLM is aware of the program/major context
         meta_parts = []
         if meta.get("major_code"):
@@ -1261,7 +1335,7 @@ def _format_context(
         if url.startswith(("http://", "https://")):
             meta_parts.append(f"URL: {url}")
         meta_str = f" [{', '.join(meta_parts)}]" if meta_parts else ""
-        
+
         text = str(doc.get("text", "") or "").strip()
 
         # C5: Prepend parent context for broader section context.
@@ -1285,11 +1359,15 @@ def _format_context(
 
         # Siblings get reduced per-doc limit (C2: 70/30 budget split)
         effective_limit = (
-            sibling_per_doc_limit if doc.get("_expansion_source") else per_doc_char_limit
+            sibling_per_doc_limit
+            if doc.get("_expansion_source")
+            else per_doc_char_limit
         )
         # When parent context is prepended, allow more chars per doc
         if parent_ctx:
-            effective_limit = min(effective_limit + 1500, per_doc_char_limit + 1500)
+            effective_limit = min(
+                effective_limit + 1500, per_doc_char_limit + 1500
+            )
         if len(text) > effective_limit:
             text = text[:effective_limit] + "\u2026"  # ellipsis
         chunk = f"--- Văn bản: {title}{meta_str}\n{text}"
@@ -1335,7 +1413,9 @@ def _bigrams(tokens: List[str]) -> Set[str]:
     return {f"{a} {b}" for a, b in zip(tokens, tokens[1:])}
 
 
-def _title_mentioned(answer_norm: str, answer_bigrams: Set[str], title: str) -> bool:
+def _title_mentioned(
+    answer_norm: str, answer_bigrams: Set[str], title: str
+) -> bool:
     """True when ``title`` is referenced in the (normalized) answer text."""
     title_norm = _normalize_for_match(title)
     if not title_norm:
@@ -1367,7 +1447,11 @@ def _kehoach_links_footer(answer: str, sources: List[Dict[str, Any]]) -> str:
     links: List[str] = []
     for doc in sources:
         meta = doc.get("metadata") or {}
-        collection = doc.get("collection") or meta.get("collection") or meta.get("source")
+        collection = (
+            doc.get("collection")
+            or meta.get("collection")
+            or meta.get("source")
+        )
         if collection != "kehoach":
             continue
         url = str(meta.get("url") or "").strip()
@@ -1376,7 +1460,9 @@ def _kehoach_links_footer(answer: str, sources: List[Dict[str, Any]]) -> str:
         if url in answer or url in seen_urls:
             continue
         title = str(meta.get("title") or "").strip()
-        if not title or not _title_mentioned(answer_norm, answer_bigrams, title):
+        if not title or not _title_mentioned(
+            answer_norm, answer_bigrams, title
+        ):
             continue
         seen_urls.add(url)
         links.append(f"- [{title}]({url})")
@@ -1385,7 +1471,9 @@ def _kehoach_links_footer(answer: str, sources: List[Dict[str, Any]]) -> str:
     return f"\n\n{_KEHOACH_LINK_HEADER}\n" + "\n".join(links)
 
 
-def _append_kehoach_source_links(answer: str, sources: List[Dict[str, Any]]) -> str:
+def _append_kehoach_source_links(
+    answer: str, sources: List[Dict[str, Any]]
+) -> str:
     """Append the kehoach link footer to ``answer`` (no-op when none apply)."""
     return answer + _kehoach_links_footer(answer, sources)
 
@@ -1547,7 +1635,7 @@ def _should_trigger_hyde(
     if not reranked or (best is not None and best < 0.0):
         logger.info(
             "HyDE trigger: best rerank score=%.4f (negative or empty)",
-            best if best is not None else -999.0
+            best if best is not None else -999.0,
         )
         return True
 
@@ -1655,7 +1743,10 @@ def _hyde_fallback_post_rerank(
         return reranked
 
     except Exception:
-        logger.warning("HyDE fallback failed, continuing with original results", exc_info=True)
+        logger.warning(
+            "HyDE fallback failed, continuing with original results",
+            exc_info=True,
+        )
         timings_ms["hyde"] = _elapsed_ms(hyde_t0)
         timings_ms["hyde_failed"] = 1.0
         return reranked
@@ -1759,18 +1850,25 @@ def _extract_session_profile_dict(
 
     profile: Dict[str, str] = {}
     user_messages = [
-        m.get("content", "") for m in history
+        m.get("content", "")
+        for m in history
         if m.get("role") == "user" and m.get("content")
     ]
 
     for text in user_messages:
         t = text.lower()
         if not profile.get("nganh"):
-            m = re.search(r"(?:h\u1ecdc ng\u00e0nh|ng\u00e0nh|chuy\u00ean ng\u00e0nh)\s+([^\.,\n]{2,30})", t)
+            m = re.search(
+                r"(?:h\u1ecdc ng\u00e0nh|ng\u00e0nh|chuy\u00ean ng\u00e0nh)\s+([^\.,\n]{2,30})",
+                t,
+            )
             if m:
                 profile["nganh"] = m.group(1).strip()
         if not profile.get("nam"):
-            m = re.search(r"sinh vi\u00ean n\u0103m\s*(\d)|n\u0103m\s*(\d)\b|n\u0103m th\u1ee9\s*(\d)", t)
+            m = re.search(
+                r"sinh vi\u00ean n\u0103m\s*(\d)|n\u0103m\s*(\d)\b|n\u0103m th\u1ee9\s*(\d)",
+                t,
+            )
             if m:
                 profile["nam"] = next(g for g in m.groups() if g)
         if not profile.get("khoa"):
@@ -1778,7 +1876,9 @@ def _extract_session_profile_dict(
             if m:
                 profile["khoa"] = next(g for g in m.groups() if g)
         if not profile.get("gpa"):
-            m = re.search(r"\b(?:cpa|gpa)\s*(?:l\u00e0|=|:)?\s*(\d+[\.,]\d+)\b", t)
+            m = re.search(
+                r"\b(?:cpa|gpa)\s*(?:l\u00e0|=|:)?\s*(\d+[\.,]\d+)\b", t
+            )
             if m:
                 profile["gpa"] = m.group(1).replace(",", ".")
 
@@ -1848,8 +1948,10 @@ def _build_cache_profile(user_context: Optional[Dict[str, Any]]) -> str:
     if not user_context:
         return ""
     major = (
-        user_context.get("major_code") or user_context.get("major") or ""
-    ).strip().lower()
+        (user_context.get("major_code") or user_context.get("major") or "")
+        .strip()
+        .lower()
+    )
     cohort = (user_context.get("cohort") or "").strip().lower()
     return f"{major}|{cohort}" if (major or cohort) else ""
 
@@ -1858,7 +1960,9 @@ def _should_prepend_profile_note(question: str) -> bool:
     """Return True only when the question explicitly depends on user profile."""
     if _EXPLICIT_MAJOR_CODE_RE.search(question or "") is not None:
         return False
-    return bool(_PROFILE_DEPENDENT_QUERY_RE.search(_fold_vietnamese(question or "")))
+    return bool(
+        _PROFILE_DEPENDENT_QUERY_RE.search(_fold_vietnamese(question or ""))
+    )
 
 
 def _build_resolved_profile_note(
@@ -1914,10 +2018,13 @@ def _profile_note_for_generation(
     generation note now share one gate, so a major reflection already resolved is
     never silently dropped — the model stops re-asking the program.
     """
-    from query.profile_dependency import should_inject_profile_note  # noqa: PLC0415
+    from query.profile_dependency import (
+        should_inject_profile_note,
+    )  # noqa: PLC0415
 
     user_major = resolved_user_major or (
-        (user_context or {}).get("major_code") or (user_context or {}).get("major")
+        (user_context or {}).get("major_code")
+        or (user_context or {}).get("major")
     )
     inject = should_inject_profile_note(
         question,
@@ -1929,10 +2036,9 @@ def _profile_note_for_generation(
     ) or _should_prepend_profile_note(question)
     if not inject:
         return ""
-    return (
-        _build_resolved_profile_note(resolved_major, resolved_cohort, user_context)
-        or _extract_session_profile(history)
-    )
+    return _build_resolved_profile_note(
+        resolved_major, resolved_cohort, user_context
+    ) or _extract_session_profile(history)
 
 
 def _build_collection_scores(
@@ -2191,7 +2297,9 @@ def rag_flow(
         search_query = pre_ref_result.get("rewritten", question)
         reflection_prompt = pre_ref_result.get("prompt")
         entities = pre_ref_result.get("entities") or {}
-        resolved_major = entities.get("major_code") or entities.get("major_name")
+        resolved_major = entities.get("major_code") or entities.get(
+            "major_name"
+        )
         resolved_user_major = entities.get("user_major_code")
         resolved_target_major = entities.get("target_major_code")
         cohort_entity = entities.get("cohort")
@@ -2217,7 +2325,9 @@ def rag_flow(
             search_query = ref_result.get("rewritten", question)
             reflection_prompt = ref_result.get("prompt")
             entities = ref_result.get("entities") or {}
-            resolved_major = entities.get("major_code") or entities.get("major_name")
+            resolved_major = entities.get("major_code") or entities.get(
+                "major_name"
+            )
             resolved_user_major = entities.get("user_major_code")
             resolved_target_major = entities.get("target_major_code")
             cohort_entity = entities.get("cohort")
@@ -2230,23 +2340,25 @@ def rag_flow(
                 resolved_cohort,
             )
         except Exception:
-            logger.warning("Reflection failed, using original query", exc_info=True)
+            logger.warning(
+                "Reflection failed, using original query", exc_info=True
+            )
         timings_ms["reflection"] = _elapsed_ms(reflection_t0)
 
     # Deterministic fallback: always recover major/cohort metadata even if
     # reflection fails or does not return entities.
     if not resolved_major or not resolved_cohort:
         from query.reflection import _extract_entities  # noqa: PLC0415
+
         fallback_entities = _extract_entities(
             question,
             user_context=user_context,
             history=history,
         )
         if not resolved_major:
-            resolved_major = (
-                fallback_entities.get("major_code")
-                or fallback_entities.get("major_name")
-            )
+            resolved_major = fallback_entities.get(
+                "major_code"
+            ) or fallback_entities.get("major_name")
         if not resolved_cohort:
             cohort_entity = fallback_entities.get("cohort")
             if cohort_entity is not None:
@@ -2284,7 +2396,10 @@ def rag_flow(
     # program (e.g. học bổng) so universal answers are not narrowed to one major.
     # When major IS required, retrieval_major == resolved_major. See
     # query.profile_dependency. Decided once here, reused for every sub-query.
-    from query.profile_dependency import effective_major_for_retrieval  # noqa: PLC0415
+    from query.profile_dependency import (
+        effective_major_for_retrieval,
+    )  # noqa: PLC0415
+
     retrieval_major = effective_major_for_retrieval(
         question, search_query, routing_result, resolved_major
     )
@@ -2373,7 +2488,9 @@ def rag_flow(
     routing_confidence = float(
         routing_result.get("confidence", 1.0) if routing_result else 1.0
     )
-    raw_candidate_k = _resolve_candidate_pool(cfg, top_k_value, routing_confidence)
+    raw_candidate_k = _resolve_candidate_pool(
+        cfg, top_k_value, routing_confidence
+    )
     major_compare_plan = build_major_comparison_subqueries_for_retrieval(
         search_query
     )
@@ -2400,7 +2517,9 @@ def rag_flow(
         if len(stripped.split()) >= 2:
             rerank_query = stripped
     elif compare_subqueries:
-        stripped = strip_cohort_comparison_scaffold_for_retrieval(retrieval_query)
+        stripped = strip_cohort_comparison_scaffold_for_retrieval(
+            retrieval_query
+        )
         if len(stripped.split()) >= 2:
             rerank_query = stripped
 
@@ -2434,7 +2553,9 @@ def rag_flow(
         trace_piece: Dict[str, Any] = {}
         search_t0 = time.perf_counter()
         effective_resolved_major = (
-            retrieval_major if use_outer_resolved_major else local_resolved_major
+            retrieval_major
+            if use_outer_resolved_major
+            else local_resolved_major
         )
         result_rows = searcher.search(
             query=local_query,
@@ -2472,9 +2593,7 @@ def rag_flow(
             sq_collections: Optional[List[str]] = (
                 [sq_collection] if sq_collection else target_collections
             )
-            raw_results_buffer.extend(
-                _search_once(sq_query, sq_collections)
-            )
+            raw_results_buffer.extend(_search_once(sq_query, sq_collections))
     elif major_compare_plan:
         for subquery, subquery_major in major_compare_plan:
             raw_results_buffer.extend(
@@ -2510,7 +2629,9 @@ def rag_flow(
         logger.info(
             "Comparison subqueries returned no candidates; retrying original query."
         )
-        fallback_compare_query = search_query if major_compare_plan else retrieval_query
+        fallback_compare_query = (
+            search_query if major_compare_plan else retrieval_query
+        )
         raw_results = _dedup_retrieval_candidates(
             _search_once(
                 fallback_compare_query,
@@ -2552,7 +2673,9 @@ def rag_flow(
         )
 
     if not raw_results and (compare_subqueries or major_compare_plan):
-        compare_source_query = search_query if major_compare_plan else retrieval_query
+        compare_source_query = (
+            search_query if major_compare_plan else retrieval_query
+        )
         relaxed_query = (
             strip_major_comparison_scaffold_for_retrieval(search_query)
             if major_compare_plan
@@ -2601,8 +2724,10 @@ def rag_flow(
 
     # 5. Rerank
     rerank_t0 = time.perf_counter()
-    
-    rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
+
+    rerank_query = expand_major_in_query_for_reranking(
+        rerank_query, resolved_major
+    )
     if reranker is not None:
         reranked = reranker.rerank(
             query=rerank_query,
@@ -2636,7 +2761,11 @@ def rag_flow(
             logger.info(
                 "Reranker gave no positive-score candidates (best=%.3f, n=%d). "
                 "Retrying rerank with original question.",
-                _best_rerank_score if _best_rerank_score is not None else -999.0,
+                (
+                    _best_rerank_score
+                    if _best_rerank_score is not None
+                    else -999.0
+                ),
                 len(raw_results),
             )
             reranked = reranker.rerank(
@@ -2745,7 +2874,9 @@ def rag_flow(
         cfg=cfg,
         low_retrieval_confidence=bool(timings_ms.get("rerank_raw_fallback")),
     )
-    web_fallback_query = str(pre_web_decision.get("web_search_query") or search_query)
+    web_fallback_query = str(
+        pre_web_decision.get("web_search_query") or search_query
+    )
     pre_web_fallback_reasons = list(pre_web_decision.get("reasons") or [])
     if pre_web_decision.get("freshness_query"):
         timings_ms["freshness_query"] = 1.0
@@ -2761,9 +2892,13 @@ def rag_flow(
                 query=web_fallback_query,
                 tavily_tool=tavily_tool,
                 max_results=_cfg_int(cfg, "tavily_max_results", 3),
-                search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
+                search_depth=str(
+                    cfg.get("tavily_search_depth", "basic") or "basic"
+                ),
                 result_count=_cfg_int(cfg, "tavily_web_result_count", 3),
-                content_char_limit=_cfg_int(cfg, "tavily_web_content_char_limit", 1500),
+                content_char_limit=_cfg_int(
+                    cfg, "tavily_web_content_char_limit", 1500
+                ),
             )
             timings_ms.update(search_info["timings"])
             web_fallback_sources = list(search_info.get("sources") or [])
@@ -2777,7 +2912,11 @@ def rag_flow(
         else:
             timings_ms["tavily_skipped"] = 1.0
 
-    if llm_cache is not None and not dynamic_web_query and not pre_web_fallback_reasons:
+    if (
+        llm_cache is not None
+        and not dynamic_web_query
+        and not pre_web_fallback_reasons
+    ):
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
         cached = llm_cache.get(
             question, doc_ids, chat_model.model, profile=cache_profile
@@ -2827,7 +2966,6 @@ def rag_flow(
                     "cache_hit": True,
                 }
 
-
     # 6. Format context — inject profile so user facts survive trimming.
     #    Priority 1: use authenticated user_context (precise, always present).
     #    Priority 2: fall back to regex scan of history.
@@ -2842,7 +2980,8 @@ def rag_flow(
     context_documents = reranked
     if web_context_override:
         context_documents = [
-            doc for doc in reranked
+            doc
+            for doc in reranked
             if str(doc.get("collection") or "").lower() != "web"
         ]
     # C2: Reorder so siblings appear after their parents
@@ -2867,7 +3006,9 @@ def rag_flow(
         user_context,
         history,
     )
-    full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
+    full_context = (
+        f"{profile_note}\n\n---\n\n{context}" if profile_note else context
+    )
     context_trace["full_context_chars"] = len(full_context)
     timings_ms["format_context"] = _elapsed_ms(context_t0)
 
@@ -2934,7 +3075,9 @@ def rag_flow(
         "self_eval_min_top_score",
         _SELF_EVAL_SCORE_THRESHOLD,
     )
-    run_self_eval = self_evaluator is not None and top_score < self_eval_threshold
+    run_self_eval = (
+        self_evaluator is not None and top_score < self_eval_threshold
+    )
     eval_result: Optional[Dict[str, Any]] = None
     if run_self_eval and self_evaluator is not None:
         self_eval_t0 = time.perf_counter()
@@ -3020,7 +3163,9 @@ def rag_flow(
                 retry_gate_t0
             )
             answer_quality_gate["local_evidence_retry_used"] = True
-            logger.info("Retried generation with strong local evidence before Tavily")
+            logger.info(
+                "Retried generation with strong local evidence before Tavily"
+            )
         except Exception:
             timings_ms["local_evidence_retry_failed"] = 1.0
             logger.warning(
@@ -3037,7 +3182,9 @@ def rag_flow(
         pre_web_decision.get("freshness_query")
     )
     web_fallback_query = str(
-        answer_quality_gate.get("web_search_query") or web_fallback_query or search_query
+        answer_quality_gate.get("web_search_query")
+        or web_fallback_query
+        or search_query
     )
     timings_ms[f"answer_status_{answer_quality_gate['answer_status']}"] = 1.0
     if answer_quality_gate["should_web_search"]:
@@ -3061,18 +3208,24 @@ def rag_flow(
                 chat_model=chat_model,
                 history=trimmed,
                 max_results=tavily_max_results,
-                search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
+                search_depth=str(
+                    cfg.get("tavily_search_depth", "basic") or "basic"
+                ),
                 search_query=web_fallback_query,
                 local_context=local_context_for_fallback or None,
                 result_count=_cfg_int(cfg, "tavily_web_result_count", 3),
-                content_char_limit=_cfg_int(cfg, "tavily_web_content_char_limit", 1500),
+                content_char_limit=_cfg_int(
+                    cfg, "tavily_web_content_char_limit", 1500
+                ),
             )
             timings_ms.update(fallback_result["timings"])
             if fallback_result["used"]:
                 answer = str(fallback_result["answer"])
                 web_fallback_used = True
                 timings_ms["web_fallback_used"] = 1.0
-                web_fallback_sources = list(fallback_result.get("sources") or [])
+                web_fallback_sources = list(
+                    fallback_result.get("sources") or []
+                )
                 if web_fallback_sources:
                     # Intentional prepend: the answer was replaced with web-based content,
                     # so web sources ARE the primary evidence for the new answer.
@@ -3080,7 +3233,9 @@ def rag_flow(
                     reranked = web_fallback_sources + reranked
         else:
             timings_ms["tavily_skipped"] = 1.0
-            logger.info("AnswerQualityGate requested web fallback, but Tavily is disabled")
+            logger.info(
+                "AnswerQualityGate requested web fallback, but Tavily is disabled"
+            )
 
     cache_final_answer = _should_cache_final_answer(
         answer=answer,
@@ -3095,7 +3250,11 @@ def rag_flow(
     if llm_cache is not None and cache_final_answer:
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
         llm_cache.put(
-            question, doc_ids, chat_model.model, answer, reranked,
+            question,
+            doc_ids,
+            chat_model.model,
+            answer,
+            reranked,
             profile=cache_profile,
         )
 
@@ -3143,7 +3302,9 @@ def rag_flow(
         "rerank_trace": rerank_trace,
         "answer_status": answer_quality_gate["answer_status"],
         "answer_quality_gate": answer_quality_gate,
-        "tools_used": ["tavily_search"] if timings_ms.get("tavily_search") else [],
+        "tools_used": (
+            ["tavily_search"] if timings_ms.get("tavily_search") else []
+        ),
         "tool_calls": (
             [
                 {
@@ -3163,7 +3324,9 @@ def rag_flow(
     }
 
 
-def _chunk_cached_answer(answer: str, size: int = 60) -> Generator[str, None, None]:
+def _chunk_cached_answer(
+    answer: str, size: int = 60
+) -> Generator[str, None, None]:
     """Split a cached answer into fixed-width pieces for progressive SSE rendering.
 
     A cache hit otherwise yields the whole answer as one chunk, which renders
@@ -3203,7 +3366,9 @@ def rag_flow_stream(
         A tuple of (text_chunk_generator, reranked_sources).
     """
     flow_t0 = time.perf_counter()
-    timings_ms: Dict[str, Any] = timings_ms_out if timings_ms_out is not None else {}
+    timings_ms: Dict[str, Any] = (
+        timings_ms_out if timings_ms_out is not None else {}
+    )
 
     step_t0 = time.perf_counter()
     trimmed = _trim_history(history)
@@ -3278,7 +3443,9 @@ def rag_flow_stream(
         # Use pre-computed reflection from upstream (query_stream)
         search_query = pre_ref_result.get("rewritten", question)
         entities = pre_ref_result.get("entities") or {}
-        resolved_major = entities.get("major_code") or entities.get("major_name")
+        resolved_major = entities.get("major_code") or entities.get(
+            "major_name"
+        )
         resolved_user_major = entities.get("user_major_code")
         resolved_target_major = entities.get("target_major_code")
         cohort_entity = entities.get("cohort")
@@ -3303,30 +3470,34 @@ def rag_flow_stream(
             )
             search_query = ref_result.get("rewritten", question)
             entities = ref_result.get("entities") or {}
-            resolved_major = entities.get("major_code") or entities.get("major_name")
+            resolved_major = entities.get("major_code") or entities.get(
+                "major_name"
+            )
             resolved_user_major = entities.get("user_major_code")
             resolved_target_major = entities.get("target_major_code")
             cohort_entity = entities.get("cohort")
             if cohort_entity is not None:
                 resolved_cohort = str(cohort_entity).strip() or None
         except Exception:
-            logger.warning("Reflection failed, using original query", exc_info=True)
+            logger.warning(
+                "Reflection failed, using original query", exc_info=True
+            )
         timings_ms["reflection"] = _elapsed_ms(reflection_t0)
 
     # Deterministic fallback: always recover major/cohort metadata even if
     # reflection fails or does not return entities.
     if not resolved_major or not resolved_cohort:
         from query.reflection import _extract_entities  # noqa: PLC0415
+
         fallback_entities = _extract_entities(
             question,
             user_context=user_context,
             history=history,
         )
         if not resolved_major:
-            resolved_major = (
-                fallback_entities.get("major_code")
-                or fallback_entities.get("major_name")
-            )
+            resolved_major = fallback_entities.get(
+                "major_code"
+            ) or fallback_entities.get("major_name")
         if not resolved_cohort:
             cohort_entity = fallback_entities.get("cohort")
             if cohort_entity is not None:
@@ -3364,7 +3535,10 @@ def rag_flow_stream(
     # program (e.g. học bổng) so universal answers are not narrowed to one major.
     # When major IS required, retrieval_major == resolved_major. See
     # query.profile_dependency. Decided once here, reused for every sub-query.
-    from query.profile_dependency import effective_major_for_retrieval  # noqa: PLC0415
+    from query.profile_dependency import (
+        effective_major_for_retrieval,
+    )  # noqa: PLC0415
+
     retrieval_major = effective_major_for_retrieval(
         question, search_query, routing_result, resolved_major
     )
@@ -3442,7 +3616,9 @@ def rag_flow_stream(
     routing_confidence_stream = float(
         routing_result.get("confidence", 1.0) if routing_result else 1.0
     )
-    raw_candidate_k = _resolve_candidate_pool(cfg, top_k_value, routing_confidence_stream)
+    raw_candidate_k = _resolve_candidate_pool(
+        cfg, top_k_value, routing_confidence_stream
+    )
     major_compare_plan = build_major_comparison_subqueries_for_retrieval(
         search_query
     )
@@ -3469,7 +3645,9 @@ def rag_flow_stream(
         if len(stripped.split()) >= 2:
             rerank_query = stripped
     elif compare_subqueries:
-        stripped = strip_cohort_comparison_scaffold_for_retrieval(retrieval_query)
+        stripped = strip_cohort_comparison_scaffold_for_retrieval(
+            retrieval_query
+        )
         if len(stripped.split()) >= 2:
             rerank_query = stripped
 
@@ -3500,7 +3678,9 @@ def rag_flow_stream(
 
         search_t0 = time.perf_counter()
         effective_resolved_major = (
-            retrieval_major if use_outer_resolved_major else local_resolved_major
+            retrieval_major
+            if use_outer_resolved_major
+            else local_resolved_major
         )
         trace_piece: Dict[str, Any] = {}
         rows = searcher.search(
@@ -3551,7 +3731,9 @@ def rag_flow_stream(
         logger.info(
             "Comparison subqueries returned no candidates (stream); retrying original query."
         )
-        fallback_compare_query = search_query if major_compare_plan else retrieval_query
+        fallback_compare_query = (
+            search_query if major_compare_plan else retrieval_query
+        )
         raw_results = _dedup_retrieval_candidates(
             _search_once(
                 fallback_compare_query,
@@ -3593,7 +3775,9 @@ def rag_flow_stream(
         )
 
     if not raw_results and (compare_subqueries or major_compare_plan):
-        compare_source_query = search_query if major_compare_plan else retrieval_query
+        compare_source_query = (
+            search_query if major_compare_plan else retrieval_query
+        )
         relaxed_query = (
             strip_major_comparison_scaffold_for_retrieval(search_query)
             if major_compare_plan
@@ -3635,8 +3819,10 @@ def rag_flow_stream(
         timings_ms["sibling_expansion_count"] = float(siblings_added)
 
     rerank_t0 = time.perf_counter()
-    
-    rerank_query = expand_major_in_query_for_reranking(rerank_query, resolved_major)
+
+    rerank_query = expand_major_in_query_for_reranking(
+        rerank_query, resolved_major
+    )
     if reranker is not None:
         reranked = reranker.rerank(
             query=rerank_query,
@@ -3666,7 +3852,11 @@ def rag_flow_stream(
             logger.info(
                 "Stream: reranker gave no positive-score candidates (best=%.3f). "
                 "Retrying with original question.",
-                _best_rerank_score_s if _best_rerank_score_s is not None else -999.0,
+                (
+                    _best_rerank_score_s
+                    if _best_rerank_score_s is not None
+                    else -999.0
+                ),
             )
             reranked = reranker.rerank(
                 query=question,
@@ -3769,7 +3959,9 @@ def rag_flow_stream(
         cfg=cfg,
         low_retrieval_confidence=bool(timings_ms.get("rerank_raw_fallback")),
     )
-    web_fallback_query = str(web_decision.get("web_search_query") or search_query)
+    web_fallback_query = str(
+        web_decision.get("web_search_query") or search_query
+    )
     web_fallback_reasons: List[str] = list(web_decision.get("reasons") or [])
     if web_decision.get("freshness_query"):
         timings_ms["freshness_query"] = 1.0
@@ -3782,9 +3974,13 @@ def rag_flow_stream(
                 query=web_fallback_query,
                 tavily_tool=tavily_tool,
                 max_results=_cfg_int(cfg, "tavily_max_results", 3),
-                search_depth=str(cfg.get("tavily_search_depth", "basic") or "basic"),
+                search_depth=str(
+                    cfg.get("tavily_search_depth", "basic") or "basic"
+                ),
                 result_count=_cfg_int(cfg, "tavily_web_result_count", 3),
-                content_char_limit=_cfg_int(cfg, "tavily_web_content_char_limit", 1500),
+                content_char_limit=_cfg_int(
+                    cfg, "tavily_web_content_char_limit", 1500
+                ),
             )
             timings_ms.update(search_info["timings"])
             web_sources = list(search_info.get("sources") or [])
@@ -3807,7 +4003,8 @@ def rag_flow_stream(
     context_documents = reranked
     if web_context_override:
         context_documents = [
-            doc for doc in reranked
+            doc
+            for doc in reranked
             if str(doc.get("collection") or "").lower() != "web"
         ]
     # C2: Reorder so siblings appear after their parents (streaming)
@@ -3832,7 +4029,9 @@ def rag_flow_stream(
         user_context,
         history,
     )
-    full_context = f"{profile_note}\n\n---\n\n{context}" if profile_note else context
+    full_context = (
+        f"{profile_note}\n\n---\n\n{context}" if profile_note else context
+    )
     context_trace["full_context_chars"] = len(full_context)
     timings_ms["format_context"] = _elapsed_ms(context_t0)
     timings_ms["retrieval_total"] = round(
@@ -3853,7 +4052,9 @@ def rag_flow_stream(
             routing_result=routing_result,
         )
         metadata_out["applied_filters"] = search_trace.get("filters")
-        metadata_out["collection_results"] = search_trace.get("collection_counts")
+        metadata_out["collection_results"] = search_trace.get(
+            "collection_counts"
+        )
         metadata_out["fusion_weights"] = search_trace.get("fusion_weights")
         metadata_out["context_trace"] = context_trace
         metadata_out["rerank_trace"] = rerank_trace
@@ -3870,7 +4071,8 @@ def rag_flow_stream(
                 web_decision.get("freshness_query")
             ),
             "no_sources": "no_sources" in web_fallback_reasons,
-            "low_retrieval_confidence": "low_retrieval_confidence" in web_fallback_reasons,
+            "low_retrieval_confidence": "low_retrieval_confidence"
+            in web_fallback_reasons,
         }
         metadata_out["tools_used"] = (
             ["tavily_search"] if timings_ms.get("tavily_search") else []
@@ -3907,7 +4109,9 @@ def rag_flow_stream(
             if _answer_has_no_info_signal(str(cached.get("answer", ""))):
                 timings_ms["llm_cache_ignored_no_info"] = 1.0
             else:
-                logger.info("LLM cache HIT (stream) for query: %r", question[:80])
+                logger.info(
+                    "LLM cache HIT (stream) for query: %r", question[:80]
+                )
                 timings_ms["llm_cache_hit"] = 1.0
                 if metadata_out is not None:
                     metadata_out["rerank_trace"] = {
@@ -3926,7 +4130,9 @@ def rag_flow_stream(
 
                 def _cached_stream() -> Generator[str, None, None]:
                     yield from _chunk_cached_answer(
-                        _append_kehoach_source_links(cached["answer"], cached["sources"])
+                        _append_kehoach_source_links(
+                            cached["answer"], cached["sources"]
+                        )
                     )
                     timings_ms["stream_first_token"] = 0.1
                     timings_ms["stream_generate"] = 0.1
@@ -3966,7 +4172,9 @@ def rag_flow_stream(
             )
             timings_ms["context_recovery"] = 1.0
             try:
-                iterator = _open_stream(reduced_context, _trim_history(history, limit=3))
+                iterator = _open_stream(
+                    reduced_context, _trim_history(history, limit=3)
+                )
                 pending = next(iterator, None)
             except Exception as retry_exc:
                 if _is_context_length_error(retry_exc):
@@ -4010,7 +4218,9 @@ def rag_flow_stream(
             web_fallback_reasons=web_fallback_reasons,
         )
         if llm_cache is not None and cache_stream_answer:
-            doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
+            doc_ids = [
+                str(doc.get("id", "")) for doc in reranked if doc.get("id")
+            ]
             llm_cache.put(
                 question,
                 doc_ids,
@@ -4030,7 +4240,10 @@ def rag_flow_stream(
             and not web_fallback_reasons
         ):
             llm_cache.put_by_query(
-                question, chat_model.model, stream_answer, reranked,
+                question,
+                chat_model.model,
+                stream_answer,
+                reranked,
                 profile=cache_profile,
             )
 
@@ -4042,7 +4255,9 @@ def rag_flow_stream(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-def _tavily_results_to_docs(search_result: Dict[str, Any]) -> List[Dict[str, Any]]:
+def _tavily_results_to_docs(
+    search_result: Dict[str, Any],
+) -> List[Dict[str, Any]]:
     """Convert Tavily results into source docs compatible with response mapping."""
     docs: List[Dict[str, Any]] = []
     for idx, item in enumerate(search_result.get("results", []) or [], 1):
@@ -4150,7 +4365,11 @@ def _tavily_search_context(
                 include_domains=HUST_OFFICIAL_DOMAINS,
                 result_count=result_count,
                 content_char_limit=content_char_limit,
-                query_year=query_year if query_year else _extract_query_year(tavily_query),
+                query_year=(
+                    query_year
+                    if query_year
+                    else _extract_query_year(tavily_query)
+                ),
             )
             timings_ms["tavily_search"] = _elapsed_ms(search_t0)
 
@@ -4204,6 +4423,8 @@ def _tavily_search_context(
             "sources": [],
             "used": False,
         }
+
+
 def _tavily_fallback_result(
     *,
     question: str,

@@ -138,15 +138,11 @@ _TEXT_BLOCK_TAGS = {
     "ol",
     "p",
     "section",
-    "table",
-    "tbody",
-    "td",
-    "tfoot",
-    "th",
-    "thead",
-    "tr",
     "ul",
 }
+# NB: thẻ bảng (table/tbody/tr/td/th/thead/tfoot) CỐ Ý không nằm ở đây — chúng
+# được chuyển sang Markdown bởi replace_tables_with_markdown() trước vòng lặp
+# block-tag, nếu để vào đây sẽ bị chèn \n làm vỡ cấu trúc bảng.
 
 
 def _normalize_extracted_text(text: str) -> str:
@@ -161,10 +157,19 @@ def _normalize_extracted_text(text: str) -> str:
 
 
 def _extract_readable_html_text(container: BeautifulSoup) -> str:
-    """Extract article text with line breaks only for structural HTML tags."""
+    """Extract article text: bảng → Markdown, xuống dòng cho thẻ block."""
+    import sys
+
+    sys.path.insert(0, str(PROJECT_ROOT))
+    from utils.html_table_markdown import replace_tables_with_markdown
+
     clone = BeautifulSoup(str(container), "html.parser")
     for tag in clone.find_all(["script", "style", "noscript"]):
         tag.decompose()
+
+    # Chuyển bảng sang Markdown TRƯỚC khi xử lý <br>/<li>/block-tag, để bóc
+    # các <table> ra khỏi cây — parser bảng tự đọc text bên trong từng ô.
+    replace_tables_with_markdown(clone)
 
     for br in clone.find_all("br"):
         br.replace_with("\n")
