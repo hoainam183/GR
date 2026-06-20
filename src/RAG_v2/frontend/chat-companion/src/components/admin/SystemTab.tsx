@@ -373,6 +373,7 @@ export default function SystemTab() {
   const [crawlTarget, setCrawlTarget] = useState('all');
   const [triggering, setTriggering] = useState(false);
   const [expandedChunkKey, setExpandedChunkKey] = useState<string | null>(null);
+  const [expandedIndexedRuns, setExpandedIndexedRuns] = useState<Set<string>>(new Set());
   const [loadingRunId, setLoadingRunId] = useState<string | null>(null);
   const [savingChunkKey, setSavingChunkKey] = useState<string | null>(null);
   const [indexingRunId, setIndexingRunId] = useState<string | null>(null);
@@ -1126,23 +1127,47 @@ export default function SystemTab() {
               const status = result.review_status || result.status;
               const canIndex = Boolean(runId && result.can_index && !crawlerStatus?.is_running);
               const isIndexing = status === 'indexing' || indexingRunId === runId;
+              const isIndexed = status === 'indexed';
+              const sectionKey = runId || `${result.collection}-${result.pipeline}-${status}`;
+              const isRunExpanded = expandedIndexedRuns.has(sectionKey);
 
               return (
               <section
-                key={runId || `${result.collection}-${result.pipeline}-${status}`}
+                key={sectionKey}
                 className="rounded-lg border border-border bg-background p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-foreground">{result.collection}</p>
-                      <Badge variant={result.status === 'success' ? 'default' : 'destructive'}>
-                        {result.pipeline}
-                      </Badge>
+                  <div className="flex items-start gap-2">
+                    {isIndexed && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 w-6 p-0 mt-0.5"
+                        onClick={() => setExpandedIndexedRuns((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(sectionKey)) next.delete(sectionKey);
+                          else next.add(sectionKey);
+                          return next;
+                        })}
+                      >
+                        {isRunExpanded ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-foreground">{result.collection}</p>
+                        <Badge variant={result.status === 'success' ? 'default' : 'destructive'}>
+                          {result.pipeline}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {result.new_articles} bài mới, {result.new_chunks} chunks tạo, {result.indexed} chunks đã index
+                      </p>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {result.new_articles} bài mới, {result.new_chunks} chunks tạo, {result.indexed} chunks đã index
-                    </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={status === 'indexed' ? 'default' : status === 'index_failed' ? 'destructive' : 'secondary'}>
@@ -1166,6 +1191,8 @@ export default function SystemTab() {
                   </div>
                 </div>
 
+                {(!isIndexed || isRunExpanded) && (
+                  <>
                 {result.saved_chunks.length > 0 ? (
                   <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg border border-border">
                     {result.saved_chunks.map((chunk) => {
@@ -1280,6 +1307,8 @@ export default function SystemTab() {
                   <p className="mt-3 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
                     Lần crawl này không index chunk mới cho collection này.
                   </p>
+                )}
+                  </>
                 )}
               </section>
               );
