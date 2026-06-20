@@ -237,7 +237,7 @@ evaluating impact.
 | `crawler_schedule_hour` | `int` | `2` | Hour of daily run |
 | `crawler_schedule_minute` | `int` | `0` | |
 | `crawler_delay` | `float` | `1.0` | Seconds between requests |
-| `crawler_retention_months` | `int` | `6` | |
+| `crawler_retention_months` | `int` | `12` | |
 | `crawler_tags` | `str` | `"ĐTĐH:%C4%90T%C4%90H"` | Comma-sep `Name:encoded` pairs |
 
 ### Offline evaluation

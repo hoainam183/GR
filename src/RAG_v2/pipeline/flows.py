@@ -2292,7 +2292,19 @@ def rag_flow(
     # 2. Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
     routing_probabilities: Optional[Dict[str, Any]] = None
-    if routing_result:
+    if cfg.get("find_all", False):
+        routing_t0 = time.perf_counter()
+        target_collections = list(cfg.get("collections") or [])
+        routing_probabilities = (
+            routing_result.get("probabilities") if routing_result else None
+        )
+        logger.info(
+            "find_all=true → bypassing routing, searching all collections: %s",
+            target_collections,
+        )
+        timings_ms["collection_routing"] = _elapsed_ms(routing_t0)
+        timings_ms["find_all_override"] = 1.0
+    elif routing_result:
         routing_t0 = time.perf_counter()
         domain = routing_result.get("domain")
         domains = routing_result.get("domains") or ([domain] if domain else [])
@@ -3359,7 +3371,16 @@ def rag_flow_stream(
 
     # Collection-aware routing (Phase 8 — Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
-    if routing_result:
+    if cfg.get("find_all", False):
+        routing_t0 = time.perf_counter()
+        target_collections = list(cfg.get("collections") or [])
+        logger.info(
+            "find_all=true (stream) → bypassing routing, searching all collections: %s",
+            target_collections,
+        )
+        timings_ms["collection_routing"] = _elapsed_ms(routing_t0)
+        timings_ms["find_all_override"] = 1.0
+    elif routing_result:
         routing_t0 = time.perf_counter()
         domain = routing_result.get("domain")
         domains = routing_result.get("domains") or ([domain] if domain else [])

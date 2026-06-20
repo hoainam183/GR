@@ -177,6 +177,7 @@ def _settings_to_cfg(settings: Settings) -> Dict[str, Any]:
     """Convert a ``Settings`` instance to the legacy cfg dict expected by flows."""
     return {
         "collections": settings.collections,
+        "find_all": settings.find_all,
         "qdrant_host": settings.qdrant_host,
         "qdrant_port": settings.qdrant_port,
         "es_host": settings.elasticsearch_host,
@@ -526,7 +527,9 @@ class RAGPipeline:
         # Tier-3 LLM domain fallback runs *before* caching, so a cache hit reuses
         # the enriched routing instead of re-invoking the ~12 s LLM call on every
         # repeat of a low-confidence query.
-        if routed.get("intent", "rag") == "rag" and _should_trigger_tier3(routed):
+        if routed.get("intent", "rag") == "rag" and _should_trigger_tier3(
+            routed
+        ):
             routed = self._llm_domain_classify(question, history, routed)
         self._route_cache[key] = (now, dict(routed))
         self._route_cache.move_to_end(key)
@@ -559,7 +562,9 @@ class RAGPipeline:
         if not reflected_query:
             return prior
         try:
-            rr = self._router.route(reflected_query)  # chat_history=None → no bleed
+            rr = self._router.route(
+                reflected_query
+            )  # chat_history=None → no bleed
         except Exception:
             logger.warning(
                 "Reflected-query route failed; keeping pipeline routing",
@@ -570,7 +575,9 @@ class RAGPipeline:
         # decision — we are already committed to the RAG flow.
         if rr.get("intent") != "rag":
             return prior
-        domains = rr.get("domains") or ([rr["domain"]] if rr.get("domain") else [])
+        domains = rr.get("domains") or (
+            [rr["domain"]] if rr.get("domain") else []
+        )
         merged = {
             **prior,
             "domain": rr.get("domain"),
@@ -810,9 +817,13 @@ class RAGPipeline:
             try:
                 inferred = self.complexity_router.route(question)
                 if inferred.get("tier") == "complex":
-                    complexity_subtype = inferred.get("complex_subtype") or "general"
+                    complexity_subtype = (
+                        inferred.get("complex_subtype") or "general"
+                    )
             except Exception:
-                logger.debug("Failed to infer agent complexity subtype", exc_info=True)
+                logger.debug(
+                    "Failed to infer agent complexity subtype", exc_info=True
+                )
 
         def _fallback_result(
             agent_error: str, tool_payload: Optional[Dict[str, Any]] = None
@@ -896,7 +907,9 @@ class RAGPipeline:
                         user_profile=user_context,
                     )
                     reflection_prompt = (
-                        ref_result.get("prompt") if isinstance(ref_result, dict) else None
+                        ref_result.get("prompt")
+                        if isinstance(ref_result, dict)
+                        else None
                     )
                     rewritten = (
                         str(ref_result.get("rewritten") or "").strip()
@@ -1017,7 +1030,10 @@ class RAGPipeline:
 
         # Step 1: Reflection FIRST — so routing sees the expanded query
         reflected_question, ref_result, reflection_ms = self._run_reflection(
-            question, history, user_context, runtime,
+            question,
+            history,
+            user_context,
+            runtime,
         )
 
         # Step 2: Tiered complexity decision on the REFLECTED query
@@ -1305,7 +1321,10 @@ class RAGPipeline:
                 subtype = "multi_source"
             logger.info(
                 "Tier-2 complexity: %r (domains=%s) -> complex/%s (%s)",
-                question[:60], domains, subtype, parsed.get("reason", ""),
+                question[:60],
+                domains,
+                subtype,
+                parsed.get("reason", ""),
             )
             return {"tier": "complex", "subtype": subtype}
         except Exception as exc:
@@ -1441,7 +1460,10 @@ class RAGPipeline:
 
         # ── Step 1: Reflection FIRST — so routing sees the expanded query ────
         reflected_question, ref_result, reflection_ms = self._run_reflection(
-            question, history, user_context, runtime,
+            question,
+            history,
+            user_context,
+            runtime,
         )
         if reflection_ms is not None:
             pipeline_timings["reflection"] = reflection_ms
@@ -1512,10 +1534,7 @@ class RAGPipeline:
             pipeline_timings["stream_generate"] = _elapsed_ms(stream_t0)
 
         # ── Complex branch → agent ────────────────────────────────────────────
-        elif (
-            complexity_tier == "complex"
-            and runtime.agent is not None
-        ):
+        elif complexity_tier == "complex" and runtime.agent is not None:
             _st.last_mode = "agent"
             _st.last_intent = "complex"
 
@@ -1528,7 +1547,9 @@ class RAGPipeline:
             }
 
             reflection_prompt = (
-                ref_result.get("prompt") if isinstance(ref_result, dict) else None
+                ref_result.get("prompt")
+                if isinstance(ref_result, dict)
+                else None
             )
             agent_t0 = time.perf_counter()
             try:
@@ -1548,16 +1569,14 @@ class RAGPipeline:
                 answer = agent_result.get("answer", "")
                 _st.last_mode = str(agent_result.get("mode", "agent"))
                 _st.last_agent_trace = agent_result.get("agent_trace")
-                _st.last_tools_used = list(
-                    agent_result.get("tools_used") or []
-                )
-                _st.last_tool_calls = list(
-                    agent_result.get("tool_calls") or []
-                )
+                _st.last_tools_used = list(agent_result.get("tools_used") or [])
+                _st.last_tool_calls = list(agent_result.get("tool_calls") or [])
                 _st.last_iterations = int(agent_result.get("iterations") or 0)
                 _st.last_sources = agent_result.get("sources") or []
                 _st.last_intent = str(agent_result.get("route") or "complex")
-                _st.last_reflected_question = agent_result.get("reflected_question")
+                _st.last_reflected_question = agent_result.get(
+                    "reflected_question"
+                )
                 agent_timings = agent_result.get("timings_ms")
                 if isinstance(agent_timings, dict) and isinstance(
                     agent_timings.get("reflection"),
@@ -1590,10 +1609,7 @@ class RAGPipeline:
         else:
             # Fall back to classic RAG v2 when complexity tier is simple or agent disabled
             _st.last_mode = "rag_v2"
-            if (
-                complexity_tier == "complex"
-                and runtime.agent is None
-            ):
+            if complexity_tier == "complex" and runtime.agent is None:
                 logger.info(
                     "Agent disabled, falling back to RAG v2 for complex query"
                 )
@@ -1650,7 +1666,9 @@ class RAGPipeline:
             )
             _st.last_context_trace = flow_metadata.get("context_trace")
             _st.last_rerank_trace = flow_metadata.get("rerank_trace")
-            _st.last_answer_quality_gate = flow_metadata.get("answer_quality_gate")
+            _st.last_answer_quality_gate = flow_metadata.get(
+                "answer_quality_gate"
+            )
             _st.last_fusion_weights = flow_metadata.get("fusion_weights")
             _st.last_tools_used = list(flow_metadata.get("tools_used") or [])
             _st.last_tool_calls = list(flow_metadata.get("tool_calls") or [])
@@ -1691,9 +1709,9 @@ class RAGPipeline:
                 "rerank_trace": _st.last_rerank_trace,
                 "answer_quality_gate": _st.last_answer_quality_gate,
                 "fusion_weights": _st.last_fusion_weights,
-                "answer_status": (
-                    _st.last_answer_quality_gate or {}
-                ).get("answer_status"),
+                "answer_status": (_st.last_answer_quality_gate or {}).get(
+                    "answer_status"
+                ),
                 "tools_used": _st.last_tools_used,
                 "tool_calls": _st.last_tool_calls,
                 "iterations": _st.last_iterations,

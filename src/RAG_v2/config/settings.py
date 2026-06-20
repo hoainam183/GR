@@ -125,6 +125,11 @@ class Settings(BaseSettings):
 
     # --- Collections ---
     collections: List[str] = ["stsv", "quydinh", "kehoach", "ctdt"]
+    # When True, bypass collection routing and run hybrid search across ALL
+    # collections in `collections`. Useful for debugging or when a query
+    # is known to span multiple domains. When False (default), the pipeline
+    # routes to the collection(s) chosen by the classifier / selector.
+    find_all: bool = False
 
     # --- Chat Model (answer generation) ---
     # ✅ DEEPSEEK: main answer generation — most important quality point
@@ -233,7 +238,7 @@ class Settings(BaseSettings):
     crawler_schedule_hour: int = 2
     crawler_schedule_minute: int = 0
     crawler_delay: float = 1.0
-    crawler_retention_months: int = 6
+    crawler_retention_months: int = 12
     crawler_tags: str = "ĐTĐH:%C4%90T%C4%90H"  # comma-sep "Name:encoded,..."
 
     # --- Redis ---

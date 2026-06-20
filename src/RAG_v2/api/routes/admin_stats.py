@@ -71,8 +71,11 @@ async def check_mongo_version(db: AsyncIOMotorDatabase):
         info = await db.command("buildInfo")
         major = int(info["versionArray"][0])
         _MONGO_SUPPORTS_PERCENTILE = major >= 7
-        logger.info("MongoDB version %s — $percentile support: %s",
-                    info.get("version"), _MONGO_SUPPORTS_PERCENTILE)
+        logger.info(
+            "MongoDB version %s — $percentile support: %s",
+            info.get("version"),
+            _MONGO_SUPPORTS_PERCENTILE,
+        )
     except Exception:
         _MONGO_SUPPORTS_PERCENTILE = False
 
@@ -100,7 +103,10 @@ def _jsonify_datetime(value: Any) -> Any:
 def _has_pending_review(value: Any) -> bool:
     if isinstance(value, dict):
         status = value.get("review_status") or value.get("status")
-        if status in {CRAWLER_STATUS_PENDING_REVIEW, CRAWLER_STATUS_INDEX_FAILED}:
+        if status in {
+            CRAWLER_STATUS_PENDING_REVIEW,
+            CRAWLER_STATUS_INDEX_FAILED,
+        }:
             return True
         return any(_has_pending_review(item) for item in value.values())
     if isinstance(value, list):
@@ -126,7 +132,9 @@ def _crawl_result_status(result: Any) -> str:
     return "success"
 
 
-def _serialize_crawler_chunk(doc: dict[str, Any], *, include_content: bool = True) -> dict[str, Any]:
+def _serialize_crawler_chunk(
+    doc: dict[str, Any], *, include_content: bool = True
+) -> dict[str, Any]:
     metadata = doc.get("metadata") or {}
     content = str(doc.get("content") or "")
     payload = {
@@ -150,7 +158,9 @@ def _serialize_crawler_chunk(doc: dict[str, Any], *, include_content: bool = Tru
     return payload
 
 
-def _serialize_crawler_run(doc: dict[str, Any], saved_chunks: list[dict[str, Any]]) -> dict[str, Any]:
+def _serialize_crawler_run(
+    doc: dict[str, Any], saved_chunks: list[dict[str, Any]]
+) -> dict[str, Any]:
     status = str(doc.get("status") or "unknown")
     return {
         "review_run_id": str(doc.get("run_id") or ""),
@@ -209,10 +219,7 @@ async def _list_crawler_runs(
         .limit(limit)
     )
     docs = await cursor.to_list(length=limit)
-    return [
-        await _crawler_run_with_preview(db, doc)
-        for doc in docs
-    ]
+    return [await _crawler_run_with_preview(db, doc) for doc in docs]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -280,15 +287,20 @@ async def get_overview_stats(
     now = datetime.now(timezone.utc)
     seven_days_ago = now - timedelta(days=7)
 
-    total_users, total_sessions, total_queries, active_users_7d, total_feedback, avg_satisfaction = (
-        await asyncio.gather(
-            db.users.count_documents({}),
-            db.sessions.count_documents({}),
-            db.query_logs.count_documents({}),
-            db.users.count_documents({"last_login_at": {"$gte": seven_days_ago}}),
-            db.feedback.count_documents({}),
-            _get_satisfaction_rate(db),
-        )
+    (
+        total_users,
+        total_sessions,
+        total_queries,
+        active_users_7d,
+        total_feedback,
+        avg_satisfaction,
+    ) = await asyncio.gather(
+        db.users.count_documents({}),
+        db.sessions.count_documents({}),
+        db.query_logs.count_documents({}),
+        db.users.count_documents({"last_login_at": {"$gte": seven_days_ago}}),
+        db.feedback.count_documents({}),
+        _get_satisfaction_rate(db),
     )
 
     return {
@@ -304,11 +316,13 @@ async def get_overview_stats(
 async def _get_satisfaction_rate(db: AsyncIOMotorDatabase) -> float | None:
     """Calculate satisfaction rate as % of 'up' ratings."""
     pipeline = [
-        {"$group": {
-            "_id": None,
-            "total": {"$sum": 1},
-            "up": {"$sum": {"$cond": [{"$eq": ["$rating", "up"]}, 1, 0]}},
-        }},
+        {
+            "$group": {
+                "_id": None,
+                "total": {"$sum": 1},
+                "up": {"$sum": {"$cond": [{"$eq": ["$rating", "up"]}, 1, 0]}},
+            }
+        },
     ]
     result = await db.feedback.aggregate(pipeline).to_list(1)
     if not result or result[0]["total"] == 0:
@@ -347,7 +361,14 @@ async def get_admin_users(
 
     # Sort direction
     sort_dir = -1 if order == "desc" else 1
-    allowed_sorts = {"created_at", "last_login_at", "full_name", "email", "session_count", "query_count"}
+    allowed_sorts = {
+        "created_at",
+        "last_login_at",
+        "full_name",
+        "email",
+        "session_count",
+        "query_count",
+    }
     if sort_by not in allowed_sorts:
         sort_by = "created_at"
 
@@ -361,49 +382,66 @@ async def get_admin_users(
     pipeline.append({"$addFields": {"_id_str": {"$toString": "$_id"}}})
 
     # Lookup session count
-    pipeline.append({
-        "$lookup": {
-            "from": "sessions",
-            "localField": "_id_str",
-            "foreignField": "user_id",
-            "pipeline": [{"$count": "n"}],
-            "as": "_sessions",
+    pipeline.append(
+        {
+            "$lookup": {
+                "from": "sessions",
+                "localField": "_id_str",
+                "foreignField": "user_id",
+                "pipeline": [{"$count": "n"}],
+                "as": "_sessions",
+            }
         }
-    })
+    )
 
     # Lookup query count
-    pipeline.append({
-        "$lookup": {
-            "from": "query_logs",
-            "localField": "_id_str",
-            "foreignField": "user_id",
-            "pipeline": [{"$count": "n"}],
-            "as": "_queries",
+    pipeline.append(
+        {
+            "$lookup": {
+                "from": "query_logs",
+                "localField": "_id_str",
+                "foreignField": "user_id",
+                "pipeline": [{"$count": "n"}],
+                "as": "_queries",
+            }
         }
-    })
+    )
 
     # Compute counts
-    pipeline.append({
-        "$addFields": {
-            "session_count": {"$ifNull": [{"$first": "$_sessions.n"}, 0]},
-            "query_count": {"$ifNull": [{"$first": "$_queries.n"}, 0]},
+    pipeline.append(
+        {
+            "$addFields": {
+                "session_count": {"$ifNull": [{"$first": "$_sessions.n"}, 0]},
+                "query_count": {"$ifNull": [{"$first": "$_queries.n"}, 0]},
+            }
         }
-    })
+    )
 
     # Clean up temp fields
-    pipeline.append({"$project": {"_id_str": 0, "_sessions": 0, "_queries": 0, "password_hash": 0}})
+    pipeline.append(
+        {
+            "$project": {
+                "_id_str": 0,
+                "_sessions": 0,
+                "_queries": 0,
+                "password_hash": 0,
+            }
+        }
+    )
 
     # Use $facet for pagination + total count
-    pipeline.append({
-        "$facet": {
-            "data": [
-                {"$sort": {sort_by: sort_dir}},
-                {"$skip": (page - 1) * limit},
-                {"$limit": limit},
-            ],
-            "total": [{"$count": "count"}],
+    pipeline.append(
+        {
+            "$facet": {
+                "data": [
+                    {"$sort": {sort_by: sort_dir}},
+                    {"$skip": (page - 1) * limit},
+                    {"$limit": limit},
+                ],
+                "total": [{"$count": "count"}],
+            }
         }
-    })
+    )
 
     result = await db.users.aggregate(pipeline).to_list(1)
     if not result:
@@ -443,10 +481,17 @@ async def get_user_breakdown(
     # Daily registrations
     reg_pipeline = [
         {"$match": {"created_at": {"$gte": cutoff}}},
-        {"$group": {
-            "_id": {"$dateToString": {"date": "$created_at", "format": "%Y-%m-%d"}},
-            "count": {"$sum": 1},
-        }},
+        {
+            "$group": {
+                "_id": {
+                    "$dateToString": {
+                        "date": "$created_at",
+                        "format": "%Y-%m-%d",
+                    }
+                },
+                "count": {"$sum": 1},
+            }
+        },
         {"$sort": {"_id": 1}},
     ]
 
@@ -457,7 +502,9 @@ async def get_user_breakdown(
 
     return {
         "by_role": {r["_id"]: r["count"] for r in roles if r["_id"]},
-        "registrations": [{"date": r["_id"], "count": r["count"]} for r in registrations],
+        "registrations": [
+            {"date": r["_id"], "count": r["count"]} for r in registrations
+        ],
     }
 
 
@@ -480,10 +527,17 @@ async def get_query_analytics(
     # Daily query volume
     volume_pipeline = [
         {"$match": base_match},
-        {"$group": {
-            "_id": {"$dateToString": {"date": "$timestamp", "format": "%Y-%m-%d"}},
-            "count": {"$sum": 1},
-        }},
+        {
+            "$group": {
+                "_id": {
+                    "$dateToString": {
+                        "date": "$timestamp",
+                        "format": "%Y-%m-%d",
+                    }
+                },
+                "count": {"$sum": 1},
+            }
+        },
         {"$sort": {"_id": 1}},
     ]
 
@@ -494,11 +548,20 @@ async def get_query_analytics(
     }
     if _MONGO_SUPPORTS_PERCENTILE:
         latency_group["p95_ms"] = {
-            "$percentile": {"input": "$latency_ms", "p": [0.95], "method": "approximate"}
+            "$percentile": {
+                "input": "$latency_ms",
+                "p": [0.95],
+                "method": "approximate",
+            }
         }
 
     latency_pipeline = [
-        {"$match": {**base_match, "latency_ms": {"$exists": True, "$ne": None}}},
+        {
+            "$match": {
+                **base_match,
+                "latency_ms": {"$exists": True, "$ne": None},
+            }
+        },
         {"$group": latency_group},
         {"$sort": {"_id": 1}},
     ]
@@ -530,13 +593,17 @@ async def get_query_analytics(
         {"$count": "count"},
     ]
 
-    volume, latency, routes, modes, top_questions, errors = await asyncio.gather(
-        db.query_logs.aggregate(volume_pipeline).to_list(365),
-        db.query_logs.aggregate(latency_pipeline).to_list(365),
-        db.query_logs.aggregate(route_pipeline).to_list(20),
-        db.query_logs.aggregate(mode_pipeline).to_list(10),
-        db.query_logs.aggregate(top_q_pipeline).to_list(top_questions_limit),
-        db.query_logs.aggregate(error_pipeline).to_list(1),
+    volume, latency, routes, modes, top_questions, errors = (
+        await asyncio.gather(
+            db.query_logs.aggregate(volume_pipeline).to_list(365),
+            db.query_logs.aggregate(latency_pipeline).to_list(365),
+            db.query_logs.aggregate(route_pipeline).to_list(20),
+            db.query_logs.aggregate(mode_pipeline).to_list(10),
+            db.query_logs.aggregate(top_q_pipeline).to_list(
+                top_questions_limit
+            ),
+            db.query_logs.aggregate(error_pipeline).to_list(1),
+        )
     )
 
     # Process latency (p95 is array from $percentile)
@@ -551,12 +618,23 @@ async def get_query_analytics(
     return {
         "volume": [{"date": v["_id"], "count": v["count"]} for v in volume],
         "latency": [
-            {"date": l["_id"], "avg_ms": l.get("avg_ms"), "p95_ms": l.get("p95_ms")}
+            {
+                "date": l["_id"],
+                "avg_ms": l.get("avg_ms"),
+                "p95_ms": l.get("p95_ms"),
+            }
             for l in latency
         ],
-        "by_route": [{"route": r["_id"] or "unknown", "count": r["count"]} for r in routes],
-        "by_mode": [{"mode": m["_id"] or "unknown", "count": m["count"]} for m in modes],
-        "top_questions": [{"question": q["_id"], "count": q["count"]} for q in top_questions],
+        "by_route": [
+            {"route": r["_id"] or "unknown", "count": r["count"]}
+            for r in routes
+        ],
+        "by_mode": [
+            {"mode": m["_id"] or "unknown", "count": m["count"]} for m in modes
+        ],
+        "top_questions": [
+            {"question": q["_id"], "count": q["count"]} for q in top_questions
+        ],
         "error_count": errors[0]["count"] if errors else 0,
     }
 
@@ -579,19 +657,47 @@ async def get_agent_analytics(
     # Overall agent stats
     stats_pipeline = [
         {"$match": base_match},
-        {"$group": {
-            "_id": None,
-            "total_calls": {"$sum": 1},
-            "avg_iterations": {"$avg": "$iterations"},
-            "errors": {"$sum": {"$cond": [{"$ne": [{"$ifNull": ["$error", None]}, None]}, 1, 0]}},
-            "tavily_uses": {"$sum": {"$cond": [{"$in": ["web_search", {"$ifNull": ["$tool_names_sequence", []]}]}, 1, 0]}},
-        }},
+        {
+            "$group": {
+                "_id": None,
+                "total_calls": {"$sum": 1},
+                "avg_iterations": {"$avg": "$iterations"},
+                "errors": {
+                    "$sum": {
+                        "$cond": [
+                            {"$ne": [{"$ifNull": ["$error", None]}, None]},
+                            1,
+                            0,
+                        ]
+                    }
+                },
+                "tavily_uses": {
+                    "$sum": {
+                        "$cond": [
+                            {
+                                "$in": [
+                                    "web_search",
+                                    {"$ifNull": ["$tool_names_sequence", []]},
+                                ]
+                            },
+                            1,
+                            0,
+                        ]
+                    }
+                },
+            }
+        },
     ]
 
     # Tool frequency
     tool_pipeline = [
         {"$match": base_match},
-        {"$unwind": {"path": "$tool_names_sequence", "preserveNullAndEmptyArrays": False}},
+        {
+            "$unwind": {
+                "path": "$tool_names_sequence",
+                "preserveNullAndEmptyArrays": False,
+            }
+        },
         {"$group": {"_id": "$tool_names_sequence", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
     ]
@@ -599,10 +705,17 @@ async def get_agent_analytics(
     # Daily usage
     daily_pipeline = [
         {"$match": base_match},
-        {"$group": {
-            "_id": {"$dateToString": {"date": "$created_at", "format": "%Y-%m-%d"}},
-            "count": {"$sum": 1},
-        }},
+        {
+            "$group": {
+                "_id": {
+                    "$dateToString": {
+                        "date": "$created_at",
+                        "format": "%Y-%m-%d",
+                    }
+                },
+                "count": {"$sum": 1},
+            }
+        },
         {"$sort": {"_id": 1}},
     ]
 
@@ -617,10 +730,20 @@ async def get_agent_analytics(
 
     return {
         "total_calls": total_calls,
-        "avg_iterations": round(s.get("avg_iterations", 0), 1) if s.get("avg_iterations") else 0,
-        "error_rate": round(s.get("errors", 0) / total_calls * 100, 1) if total_calls > 0 else 0,
+        "avg_iterations": (
+            round(s.get("avg_iterations", 0), 1)
+            if s.get("avg_iterations")
+            else 0
+        ),
+        "error_rate": (
+            round(s.get("errors", 0) / total_calls * 100, 1)
+            if total_calls > 0
+            else 0
+        ),
         "tavily_triggers": s.get("tavily_uses", 0),
-        "tool_frequency": [{"tool": t["_id"], "count": t["count"]} for t in tools],
+        "tool_frequency": [
+            {"tool": t["_id"], "count": t["count"]} for t in tools
+        ],
         "daily_usage": [{"date": d["_id"], "count": d["count"]} for d in daily],
     }
 
@@ -642,11 +765,13 @@ async def get_feedback_topics(
 
     pipeline = [
         {"$match": {"rating": "down", "created_at": {"$gte": cutoff}}},
-        {"$group": {
-            "_id": {"question": "$question", "category": "$category"},
-            "count": {"$sum": 1},
-            "last_at": {"$max": "$created_at"},
-        }},
+        {
+            "$group": {
+                "_id": {"question": "$question", "category": "$category"},
+                "count": {"$sum": 1},
+                "last_at": {"$max": "$created_at"},
+            }
+        },
         {"$sort": {"count": -1}},
         {"$limit": limit},
     ]
@@ -659,7 +784,9 @@ async def get_feedback_topics(
                 "question": r["_id"]["question"],
                 "category": r["_id"].get("category"),
                 "count": r["count"],
-                "last_at": r["last_at"].isoformat() if r.get("last_at") else None,
+                "last_at": (
+                    r["last_at"].isoformat() if r.get("last_at") else None
+                ),
             }
             for r in results
         ],
@@ -715,8 +842,12 @@ async def get_system_stats(
         },
         "mongo_status": getattr(request.app.state, "mongo_status", "unknown"),
         "redis_status": getattr(request.app.state, "redis_status", "unknown"),
-        "documents_by_status": {d["_id"]: d["count"] for d in doc_status if d["_id"]},
-        "documents_by_collection": {d["_id"]: d["count"] for d in doc_collections if d["_id"]},
+        "documents_by_status": {
+            d["_id"]: d["count"] for d in doc_status if d["_id"]
+        },
+        "documents_by_collection": {
+            d["_id"]: d["count"] for d in doc_collections if d["_id"]
+        },
         "cache": cache_info,
         "crawler": {
             "enabled": settings.crawler_enabled,
@@ -744,7 +875,9 @@ async def toggle_user_status(
 
     # Prevent self-deactivation
     if str(current_user.id) == user_id and not body.is_active:
-        raise HTTPException(400, "Không thể vô hiệu hóa tài khoản của chính mình")
+        raise HTTPException(
+            400, "Không thể vô hiệu hóa tài khoản của chính mình"
+        )
 
     result = await db.users.update_one(
         {"_id": ObjectId(user_id)},
@@ -755,7 +888,9 @@ async def toggle_user_status(
             },
             "$push": {
                 "audit_log": {
-                    "action": "deactivate" if not body.is_active else "activate",
+                    "action": (
+                        "deactivate" if not body.is_active else "activate"
+                    ),
                     "by": str(current_user.id),
                     "at": datetime.now(timezone.utc),
                 }
@@ -779,6 +914,10 @@ async def trigger_crawl(
     request: Request,
     _user: Annotated[UserDocument, Depends(require_admin)],
     pipeline_target: str = Query("all", regex="^(all|kehoach|quydinh)$"),
+    backfill: bool = Query(
+        False,
+        description="Quét lại toàn bộ cửa sổ retention (bỏ qua early-stop khi gặp bài đã có); dùng khi mở rộng crawler_retention_months để backfill bài cũ.",
+    ),
 ):
     """Manually trigger a crawl pipeline run."""
     global _crawl_running, _last_trigger_time, _last_manual_crawl
@@ -794,18 +933,33 @@ async def trigger_crawl(
         if _crawl_running:
             raise HTTPException(409, "Crawl đang chạy, vui lòng đợi")
         if now - _last_trigger_time < _CRAWL_COOLDOWN_SECONDS:
-            remaining = int(_CRAWL_COOLDOWN_SECONDS - (now - _last_trigger_time))
-            raise HTTPException(429, f"Vui lòng đợi {remaining}s trước khi trigger lại")
+            remaining = int(
+                _CRAWL_COOLDOWN_SECONDS - (now - _last_trigger_time)
+            )
+            raise HTTPException(
+                429, f"Vui lòng đợi {remaining}s trước khi trigger lại"
+            )
         _crawl_running = True
         _last_trigger_time = now
 
     # Get crawl pipeline from app state
     pipe = request.app.state.pipeline
-    bge = getattr(getattr(pipe, "retrieval_service", None) or getattr(pipe, "_retrieval_service", None), "bge_embedder", None)
-    e5 = getattr(getattr(pipe, "retrieval_service", None) or getattr(pipe, "_retrieval_service", None), "e5_embedder", None)
+    bge = getattr(
+        getattr(pipe, "retrieval_service", None)
+        or getattr(pipe, "_retrieval_service", None),
+        "bge_embedder",
+        None,
+    )
+    e5 = getattr(
+        getattr(pipe, "retrieval_service", None)
+        or getattr(pipe, "_retrieval_service", None),
+        "e5_embedder",
+        None,
+    )
 
     try:
         from scripts.auto_crawler import AutoCrawlPipeline
+
         crawl_pipeline = AutoCrawlPipeline(settings=settings, bge=bge, e5=e5)
     except ImportError:
         with _crawl_lock:
@@ -818,12 +972,21 @@ async def trigger_crawl(
         raise
 
     # Launch background task
-    asyncio.create_task(_run_crawl_with_timeout(crawl_pipeline, pipeline_target))
+    asyncio.create_task(
+        _run_crawl_with_timeout(crawl_pipeline, pipeline_target, backfill)
+    )
 
-    return {"ok": True, "message": f"Crawl '{pipeline_target}' started", "timeout_seconds": _CRAWL_TIMEOUT_SECONDS}
+    return {
+        "ok": True,
+        "message": f"Crawl '{pipeline_target}' started (backfill={backfill})",
+        "timeout_seconds": _CRAWL_TIMEOUT_SECONDS,
+        "backfill": backfill,
+    }
 
 
-async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
+async def _run_crawl_with_timeout(
+    crawl_pipeline, pipeline_target: str, backfill: bool = False
+):
     """Run crawl in background thread with timeout protection."""
     global _crawl_running, _last_manual_crawl
     # The running slot is reserved by the caller (trigger_crawl) under _crawl_lock.
@@ -831,14 +994,20 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
         loop = asyncio.get_running_loop()
         future = loop.run_in_executor(
             _crawl_executor,
-            _do_crawl, crawl_pipeline, pipeline_target,
+            _do_crawl,
+            crawl_pipeline,
+            pipeline_target,
+            backfill,
         )
         result = await asyncio.wait_for(future, timeout=_CRAWL_TIMEOUT_SECONDS)
         status = _crawl_result_status(result)
         _last_manual_crawl = {
-            **(result if isinstance(result, dict) else {"details": str(result)}),
+            **(
+                result if isinstance(result, dict) else {"details": str(result)}
+            ),
             "status": status,
             "pipeline": pipeline_target,
+            "backfill": backfill,
             "completed_at": datetime.now(timezone.utc).isoformat(),
         }
         if status in {"success", "pending_review"}:
@@ -847,16 +1016,22 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
                     result,
                     pipeline_target,
                 )
-                target_user_ids = notification_result.get("target_user_ids") or []
+                target_user_ids = (
+                    notification_result.get("target_user_ids") or []
+                )
                 _last_manual_crawl["notification"] = {
                     key: value
                     for key, value in notification_result.items()
                     if key != "target_user_ids"
                 }
-                _last_manual_crawl["notification"]["target_user_count"] = len(target_user_ids)
+                _last_manual_crawl["notification"]["target_user_count"] = len(
+                    target_user_ids
+                )
             except Exception as exc:
                 _last_manual_crawl["notification"] = {"error": str(exc)}
-                logger.warning("Failed to create manual crawl notifications", exc_info=True)
+                logger.warning(
+                    "Failed to create manual crawl notifications", exc_info=True
+                )
     except asyncio.TimeoutError:
         _last_manual_crawl = {
             "status": "timeout",
@@ -878,14 +1053,16 @@ async def _run_crawl_with_timeout(crawl_pipeline, pipeline_target: str):
             _crawl_running = False
 
 
-def _do_crawl(crawl_pipeline, pipeline_target: str) -> dict:
+def _do_crawl(
+    crawl_pipeline, pipeline_target: str, backfill: bool = False
+) -> dict:
     """Sync function that runs in thread."""
     if pipeline_target == "kehoach":
-        return crawl_pipeline.run_kehoach()
+        return crawl_pipeline.run_kehoach(backfill=backfill)
     elif pipeline_target == "quydinh":
-        return crawl_pipeline.run_quydinh()
+        return crawl_pipeline.run_quydinh(backfill=backfill)
     else:
-        return crawl_pipeline.run()
+        return crawl_pipeline.run(backfill=backfill)
 
 
 def _iter_crawl_summary_leaves(crawl_result: Any):
@@ -923,10 +1100,14 @@ def _build_crawl_notification_summary(crawl_result: Any) -> dict[str, Any]:
 
         chunks = summary.get("saved_chunks")
         if isinstance(chunks, list):
-            saved_chunks.extend(chunk for chunk in chunks if isinstance(chunk, dict))
+            saved_chunks.extend(
+                chunk for chunk in chunks if isinstance(chunk, dict)
+            )
 
     return {
-        "new_articles": sum(_safe_int(summary.get("new_articles")) for summary in summaries),
+        "new_articles": sum(
+            _safe_int(summary.get("new_articles")) for summary in summaries
+        ),
         "saved_chunks": saved_chunks,
         "pipelines": pipelines,
         "collections": collections,
@@ -940,12 +1121,19 @@ def _build_crawl_notification_article_links(
     links: list[dict[str, str]] = []
     seen_urls: set[str] = set()
     for chunk in saved_chunks:
-        metadata = chunk.get("metadata") if isinstance(chunk.get("metadata"), dict) else {}
+        metadata = (
+            chunk.get("metadata")
+            if isinstance(chunk.get("metadata"), dict)
+            else {}
+        )
         url = str(chunk.get("url") or metadata.get("url") or "").strip()
         if not url or url in seen_urls:
             continue
         seen_urls.add(url)
-        title = str(chunk.get("title") or metadata.get("title") or "").strip() or "Bài viết mới"
+        title = (
+            str(chunk.get("title") or metadata.get("title") or "").strip()
+            or "Bài viết mới"
+        )
         links.append({"title": title, "url": url})
         if len(links) >= limit:
             break
@@ -1041,8 +1229,12 @@ async def get_crawler_status(
         CRAWLER_STATUS_INDEXING,
         CRAWLER_STATUS_INDEX_FAILED,
     ]
-    pending_runs = await _list_crawler_runs(db, statuses=pending_statuses, limit=20)
-    indexed_runs = await _list_crawler_runs(db, statuses=[CRAWLER_STATUS_INDEXED], limit=10)
+    pending_runs = await _list_crawler_runs(
+        db, statuses=pending_statuses, limit=20
+    )
+    indexed_runs = await _list_crawler_runs(
+        db, statuses=[CRAWLER_STATUS_INDEXED], limit=10
+    )
     return {
         "is_running": _crawl_running,
         "last_result": _last_manual_crawl,
@@ -1073,7 +1265,10 @@ async def get_crawler_run_chunks(
     return {
         "run": _serialize_crawler_run(
             run_doc,
-            [_serialize_crawler_chunk(doc, include_content=False) for doc in chunk_docs[:5]],
+            [
+                _serialize_crawler_chunk(doc, include_content=False)
+                for doc in chunk_docs[:5]
+            ],
         ),
         "chunks": [_serialize_crawler_chunk(doc) for doc in chunk_docs],
     }
@@ -1098,10 +1293,12 @@ async def update_crawler_run_chunk(
     if not content.strip():
         raise HTTPException(400, "Chunk content cannot be empty")
 
-    chunk_doc = await db[CRAWLER_CHUNKS_COLLECTION].find_one({
-        "run_id": run_id,
-        "chunk_id": chunk_id,
-    })
+    chunk_doc = await db[CRAWLER_CHUNKS_COLLECTION].find_one(
+        {
+            "run_id": run_id,
+            "chunk_id": chunk_id,
+        }
+    )
     if not chunk_doc:
         raise HTTPException(404, "Crawler chunk not found")
 
@@ -1109,20 +1306,24 @@ async def update_crawler_run_chunk(
     edited = content != str(chunk_doc.get("original_content") or "")
     await db[CRAWLER_CHUNKS_COLLECTION].update_one(
         {"run_id": run_id, "chunk_id": chunk_id},
-        {"$set": {
-            "content": content,
-            "edited": edited,
-            "updated_at": now,
-        }},
+        {
+            "$set": {
+                "content": content,
+                "edited": edited,
+                "updated_at": now,
+            }
+        },
     )
     await db[CRAWLER_RUNS_COLLECTION].update_one(
         {"run_id": run_id},
         {"$set": {"updated_at": now}},
     )
-    updated = await db[CRAWLER_CHUNKS_COLLECTION].find_one({
-        "run_id": run_id,
-        "chunk_id": chunk_id,
-    })
+    updated = await db[CRAWLER_CHUNKS_COLLECTION].find_one(
+        {
+            "run_id": run_id,
+            "chunk_id": chunk_id,
+        }
+    )
     return _serialize_crawler_chunk(updated or chunk_doc)
 
 
@@ -1143,11 +1344,13 @@ async def index_crawler_run(
     now = datetime.now(timezone.utc)
     result = await db[CRAWLER_RUNS_COLLECTION].update_one(
         {"run_id": run_id, "status": {"$in": list(CRAWLER_INDEXABLE_STATUSES)}},
-        {"$set": {
-            "status": CRAWLER_STATUS_INDEXING,
-            "updated_at": now,
-            "error_message": None,
-        }},
+        {
+            "$set": {
+                "status": CRAWLER_STATUS_INDEXING,
+                "updated_at": now,
+                "error_message": None,
+            }
+        },
     )
     if result.matched_count == 0:
         raise HTTPException(409, "Crawler run is already being indexed")
@@ -1158,15 +1361,18 @@ async def index_crawler_run(
     )
 
     bge, e5 = _get_pipeline_embedders(request)
-    asyncio.create_task(_index_crawler_run_background(request.app.state.settings, run_id, bge, e5))
+    asyncio.create_task(
+        _index_crawler_run_background(
+            request.app.state.settings, run_id, bge, e5
+        )
+    )
     return {"ok": True, "run_id": run_id, "status": CRAWLER_STATUS_INDEXING}
 
 
 def _get_pipeline_embedders(request: Request) -> tuple[Any, Any]:
     pipe = request.app.state.pipeline
-    retrieval_service = (
-        getattr(pipe, "retrieval_service", None)
-        or getattr(pipe, "_retrieval_service", None)
+    retrieval_service = getattr(pipe, "retrieval_service", None) or getattr(
+        pipe, "_retrieval_service", None
     )
     return (
         getattr(retrieval_service, "bge_embedder", None),
@@ -1174,7 +1380,9 @@ def _get_pipeline_embedders(request: Request) -> tuple[Any, Any]:
     )
 
 
-async def _index_crawler_run_background(settings, run_id: str, bge=None, e5=None) -> None:
+async def _index_crawler_run_background(
+    settings, run_id: str, bge=None, e5=None
+) -> None:
     try:
         from scripts.auto_crawler import index_staged_crawler_run
 
@@ -1189,7 +1397,11 @@ async def _index_crawler_run_background(settings, run_id: str, bge=None, e5=None
         )
         logger.info("Crawler review run %s indexed successfully.", run_id)
     except Exception:
-        logger.error("Crawler review run %s failed during indexing.", run_id, exc_info=True)
+        logger.error(
+            "Crawler review run %s failed during indexing.",
+            run_id,
+            exc_info=True,
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1198,8 +1410,12 @@ async def _index_crawler_run_background(settings, run_id: str, bge=None, e5=None
 
 # Whitelist of boolean settings that admin can toggle at runtime
 _TOGGLEABLE_KEYS = {
-    "agent_enabled", "self_eval_enabled", "tavily_fallback_enabled",
-    "crawler_enabled", "reflection_enabled", "domain_routing_enabled",
+    "agent_enabled",
+    "self_eval_enabled",
+    "tavily_fallback_enabled",
+    "crawler_enabled",
+    "reflection_enabled",
+    "domain_routing_enabled",
     "rate_limit_enabled",
 }
 
@@ -1212,7 +1428,10 @@ async def toggle_config(
 ):
     """Toggle a boolean system configuration at runtime."""
     if body.key not in _TOGGLEABLE_KEYS:
-        raise HTTPException(400, f"Key '{body.key}' is not toggleable. Allowed: {sorted(_TOGGLEABLE_KEYS)}")
+        raise HTTPException(
+            400,
+            f"Key '{body.key}' is not toggleable. Allowed: {sorted(_TOGGLEABLE_KEYS)}",
+        )
 
     settings = request.app.state.settings
     if not hasattr(settings, body.key):
@@ -1285,7 +1504,9 @@ async def _prepare_api_key_reload(
             candidate_settings,
         )
     except ValueError as exc:
-        logger.warning("API key runtime prepare failed for %s: %s", provider, exc)
+        logger.warning(
+            "API key runtime prepare failed for %s: %s", provider, exc
+        )
         raise HTTPException(400, str(exc)) from exc
     except Exception as exc:
         logger.warning("API key runtime prepare failed for %s", provider)
@@ -1304,7 +1525,11 @@ def _commit_api_key_reload(
         candidate_settings,
         prepared_runtime,
     )
-    setattr(request.app.state.settings, field_name, getattr(candidate_settings, field_name))
+    setattr(
+        request.app.state.settings,
+        field_name,
+        getattr(candidate_settings, field_name),
+    )
     return rebuilt
 
 
@@ -1321,7 +1546,8 @@ async def get_api_keys(
     fallback_providers = [
         provider
         for provider, field_name in API_KEY_SETTING_FIELDS.items()
-        if provider not in managed_providers and getattr(settings, field_name, "")
+        if provider not in managed_providers
+        and getattr(settings, field_name, "")
     ]
     return {"keys": keys, "fallback_providers": fallback_providers}
 
@@ -1368,13 +1594,17 @@ async def create_managed_api_key(
             provider,
         )
     except Exception as exc:
-        logger.error("API key persisted but runtime reload failed", exc_info=True)
+        logger.error(
+            "API key persisted but runtime reload failed", exc_info=True
+        )
         raise HTTPException(
             500,
             "API key persisted but runtime reload failed",
         ) from exc
 
-    logger.info("Admin created and activated managed %s API key %s", provider, key["id"])
+    logger.info(
+        "Admin created and activated managed %s API key %s", provider, key["id"]
+    )
     return {"ok": True, "key": key, "rebuilt": rebuilt}
 
 
@@ -1405,7 +1635,9 @@ async def activate_managed_api_key(
     except ApiKeyRegistryError as exc:
         raise HTTPException(400, str(exc)) from exc
     except Exception as exc:
-        logger.error("Failed to activate managed %s API key", provider, exc_info=True)
+        logger.error(
+            "Failed to activate managed %s API key", provider, exc_info=True
+        )
         raise HTTPException(503, "Failed to activate API key") from exc
 
     try:
@@ -1416,7 +1648,10 @@ async def activate_managed_api_key(
             provider,
         )
     except Exception as exc:
-        logger.error("API key activation persisted but runtime reload failed", exc_info=True)
+        logger.error(
+            "API key activation persisted but runtime reload failed",
+            exc_info=True,
+        )
         raise HTTPException(
             500,
             "API key activation persisted but runtime reload failed",
@@ -1490,9 +1725,13 @@ async def update_llm_config(
         merge_llm_config_into_settings(settings, updates)
         for provider in api_key_inputs:
             field_name = API_KEY_SETTING_FIELDS[provider]
-            setattr(settings, field_name, getattr(candidate_settings, field_name))
+            setattr(
+                settings, field_name, getattr(candidate_settings, field_name)
+            )
     except Exception as exc:
-        logger.error("Pipeline LLM reload failed after persist: %s", exc, exc_info=True)
+        logger.error(
+            "Pipeline LLM reload failed after persist: %s", exc, exc_info=True
+        )
         raise HTTPException(
             500,
             "LLM config persisted but runtime reload failed",
@@ -1511,7 +1750,9 @@ async def update_llm_config(
                 llm_cache.invalidate_all,
             )
         except Exception:
-            logger.warning("Failed to invalidate LLM response cache", exc_info=True)
+            logger.warning(
+                "Failed to invalidate LLM response cache", exc_info=True
+            )
 
     updated: dict[str, Any] = {}
     for field_name, value in updates.items():
@@ -1538,31 +1779,131 @@ async def update_llm_config(
 
 _ENV_CONFIG_WHITELIST: dict[str, dict[str, Any]] = {
     # Retrieval
-    "top_k": {"type": "int", "label": "Top K (final)", "description": "Số documents cuối cùng sau reranking", "category": "Retrieval"},
-    "vector_top_k": {"type": "int", "label": "Vector Top K", "description": "Số kết quả vector search mỗi collection", "category": "Retrieval"},
-    "keyword_top_k": {"type": "int", "label": "Keyword Top K", "description": "Số kết quả keyword search mỗi collection", "category": "Retrieval"},
-    "vector_weight": {"type": "float", "label": "Vector Weight", "description": "Trọng số vector trong RRF fusion (0-1)", "category": "Retrieval"},
-    "keyword_weight": {"type": "float", "label": "Keyword Weight", "description": "Trọng số keyword trong RRF fusion (0-1)", "category": "Retrieval"},
-    "reranker_top_k": {"type": "int", "label": "Reranker Top K", "description": "Số documents giữ lại sau reranking", "category": "Retrieval"},
-    "reranker_score_threshold": {"type": "float", "label": "Reranker Threshold", "description": "Ngưỡng điểm reranker (raw logit)", "category": "Retrieval"},
+    "top_k": {
+        "type": "int",
+        "label": "Top K (final)",
+        "description": "Số documents cuối cùng sau reranking",
+        "category": "Retrieval",
+    },
+    "vector_top_k": {
+        "type": "int",
+        "label": "Vector Top K",
+        "description": "Số kết quả vector search mỗi collection",
+        "category": "Retrieval",
+    },
+    "keyword_top_k": {
+        "type": "int",
+        "label": "Keyword Top K",
+        "description": "Số kết quả keyword search mỗi collection",
+        "category": "Retrieval",
+    },
+    "vector_weight": {
+        "type": "float",
+        "label": "Vector Weight",
+        "description": "Trọng số vector trong RRF fusion (0-1)",
+        "category": "Retrieval",
+    },
+    "keyword_weight": {
+        "type": "float",
+        "label": "Keyword Weight",
+        "description": "Trọng số keyword trong RRF fusion (0-1)",
+        "category": "Retrieval",
+    },
+    "reranker_top_k": {
+        "type": "int",
+        "label": "Reranker Top K",
+        "description": "Số documents giữ lại sau reranking",
+        "category": "Retrieval",
+    },
+    "reranker_score_threshold": {
+        "type": "float",
+        "label": "Reranker Threshold",
+        "description": "Ngưỡng điểm reranker (raw logit)",
+        "category": "Retrieval",
+    },
     # Crawler
-    "crawler_schedule_hour": {"type": "int", "label": "Giờ crawl", "description": "Giờ tự động crawl (0-23)", "category": "Crawler"},
-    "crawler_schedule_minute": {"type": "int", "label": "Phút crawl", "description": "Phút tự động crawl (0-59)", "category": "Crawler"},
-    "crawler_delay": {"type": "float", "label": "Delay (giây)", "description": "Delay giữa các request crawl", "category": "Crawler"},
-    "crawler_retention_months": {"type": "int", "label": "Retention (tháng)", "description": "Số tháng giữ lại dữ liệu crawl", "category": "Crawler"},
+    "crawler_schedule_hour": {
+        "type": "int",
+        "label": "Giờ crawl",
+        "description": "Giờ tự động crawl (0-23)",
+        "category": "Crawler",
+    },
+    "crawler_schedule_minute": {
+        "type": "int",
+        "label": "Phút crawl",
+        "description": "Phút tự động crawl (0-59)",
+        "category": "Crawler",
+    },
+    "crawler_delay": {
+        "type": "float",
+        "label": "Delay (giây)",
+        "description": "Delay giữa các request crawl",
+        "category": "Crawler",
+    },
+    "crawler_retention_months": {
+        "type": "int",
+        "label": "Retention (tháng)",
+        "description": "Số tháng giữ lại dữ liệu crawl",
+        "category": "Crawler",
+    },
     # Rate Limit
-    "rate_limit_rpm": {"type": "int", "label": "RPM", "description": "Requests tối đa mỗi phút", "category": "Rate Limit"},
-    "rate_limit_rpd": {"type": "int", "label": "RPD", "description": "Requests tối đa mỗi ngày", "category": "Rate Limit"},
+    "rate_limit_rpm": {
+        "type": "int",
+        "label": "RPM",
+        "description": "Requests tối đa mỗi phút",
+        "category": "Rate Limit",
+    },
+    "rate_limit_rpd": {
+        "type": "int",
+        "label": "RPD",
+        "description": "Requests tối đa mỗi ngày",
+        "category": "Rate Limit",
+    },
     # Chat
-    "chat_temperature": {"type": "float", "label": "Temperature", "description": "Nhiệt độ sampling (0-2)", "category": "Chat"},
-    "chat_max_tokens": {"type": "int", "label": "Max Tokens", "description": "Số token tối đa cho câu trả lời", "category": "Chat"},
-    "context_doc_char_limit": {"type": "int", "label": "Doc Char Limit", "description": "Giới hạn ký tự mỗi document context", "category": "Chat"},
+    "chat_temperature": {
+        "type": "float",
+        "label": "Temperature",
+        "description": "Nhiệt độ sampling (0-2)",
+        "category": "Chat",
+    },
+    "chat_max_tokens": {
+        "type": "int",
+        "label": "Max Tokens",
+        "description": "Số token tối đa cho câu trả lời",
+        "category": "Chat",
+    },
+    "context_doc_char_limit": {
+        "type": "int",
+        "label": "Doc Char Limit",
+        "description": "Giới hạn ký tự mỗi document context",
+        "category": "Chat",
+    },
     # Self Eval
-    "self_eval_min_top_score": {"type": "float", "label": "Min Top Score", "description": "Ngưỡng score tối thiểu để skip self-eval", "category": "Self Eval"},
+    "self_eval_min_top_score": {
+        "type": "float",
+        "label": "Min Top Score",
+        "description": "Ngưỡng score tối thiểu để skip self-eval",
+        "category": "Self Eval",
+    },
     # Tavily
-    "tavily_max_results": {"type": "int", "label": "Max Results", "description": "Số kết quả Tavily fetch", "category": "Tavily"},
-    "tavily_web_result_count": {"type": "int", "label": "Web Result Count", "description": "Số kết quả Tavily giữ lại", "category": "Tavily"},
-    "tavily_search_depth": {"type": "str", "label": "Search Depth", "description": "Mức độ tìm kiếm: basic (1 credit) / advanced (2 credits)", "category": "Tavily"},
+    "tavily_max_results": {
+        "type": "int",
+        "label": "Max Results",
+        "description": "Số kết quả Tavily fetch",
+        "category": "Tavily",
+    },
+    "tavily_web_result_count": {
+        "type": "int",
+        "label": "Web Result Count",
+        "description": "Số kết quả Tavily giữ lại",
+        "category": "Tavily",
+    },
+    "tavily_search_depth": {
+        "type": "str",
+        "label": "Search Depth",
+        "description": "Mức độ tìm kiếm: basic (1 credit) / advanced (2 credits)",
+        "category": "Tavily",
+    },
 }
 
 SYSTEM_CONFIG_COLLECTION = "system_config"
@@ -1582,14 +1923,16 @@ async def get_env_config(
     items = []
     for key, meta in _ENV_CONFIG_WHITELIST.items():
         value = getattr(settings, key, None)
-        items.append({
-            "key": key,
-            "value": value,
-            "type": meta["type"],
-            "label": meta["label"],
-            "description": meta["description"],
-            "category": meta["category"],
-        })
+        items.append(
+            {
+                "key": key,
+                "value": value,
+                "type": meta["type"],
+                "label": meta["label"],
+                "description": meta["description"],
+                "category": meta["category"],
+            }
+        )
     return {"configs": items}
 
 
@@ -1618,7 +1961,9 @@ async def update_env_config(
             else:
                 value = str(value)
         except (ValueError, TypeError):
-            raise HTTPException(400, f"Invalid type for '{key}': expected {meta['type']}")
+            raise HTTPException(
+                400, f"Invalid type for '{key}': expected {meta['type']}"
+            )
 
         setattr(settings, key, value)
         updated[key] = value
@@ -1627,7 +1972,12 @@ async def update_env_config(
     if updated:
         await db[SYSTEM_CONFIG_COLLECTION].update_one(
             {"_id": "env_config"},
-            {"$set": {"configs": updated, "updated_at": datetime.now(timezone.utc)}},
+            {
+                "$set": {
+                    "configs": updated,
+                    "updated_at": datetime.now(timezone.utc),
+                }
+            },
             upsert=True,
         )
 

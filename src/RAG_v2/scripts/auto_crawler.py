@@ -111,7 +111,9 @@ def _load_json(path: Path) -> list:
 
 def _save_json(data: list, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 _TEXT_BLOCK_TAGS = {
@@ -206,6 +208,7 @@ class GenericCrawler:
         delay: float = 1.0,
         tags: Optional[Dict[str, str]] = None,
         max_age_months: Optional[int] = None,
+        backfill: bool = False,
     ):
         self.list_path = list_path
         self.id_param = id_param
@@ -214,6 +217,9 @@ class GenericCrawler:
         self.delay = delay
         self.tags = tags or {"ĐTĐH": "%C4%90T%C4%90H"}
         self.max_age_months = max_age_months
+        # When True, skip already-known IDs but keep scanning until cutoff_date
+        # (used to backfill historical articles after widening retention window).
+        self.backfill = backfill
         self._session = requests.Session()
         self._session.headers.update(HEADERS)
 
@@ -234,7 +240,9 @@ class GenericCrawler:
     def _build_list_url(self, tag_encoded: str, page: int = 1) -> str:
         return f"{BASE_URL}{self.list_path}?tag={tag_encoded}&page={page}"
 
-    def _parse_list_page(self, soup: BeautifulSoup, category: str) -> List[Dict]:
+    def _parse_list_page(
+        self, soup: BeautifulSoup, category: str
+    ) -> List[Dict]:
         articles: List[Dict] = []
         for li in soup.select("li.serviceContent"):
             a_tag = li.select_one("a.contentTitle")
@@ -249,7 +257,9 @@ class GenericCrawler:
                 if b_tag:
                     tag_text = b_tag.get_text(strip=True).strip("[]")
                     b_tag.decompose()
-                title_text = title_p.get_text(separator=" ").strip().strip('"').strip()
+                title_text = (
+                    title_p.get_text(separator=" ").strip().strip('"').strip()
+                )
 
             href = a_tag["href"]
             href_str = href[0] if isinstance(href, list) else href
@@ -261,15 +271,19 @@ class GenericCrawler:
             except (KeyError, ValueError, IndexError):
                 pass
 
-            articles.append({
-                "baiviet_id": article_id,
-                "url": urljoin(BASE_URL, href_str),
-                "title": title_text,
-                "category": category,
-                "tag_in_title": tag_text,
-                "date_str": date_tag.get_text(strip=True) if date_tag else None,
-                "source_list_path": self.list_path,
-            })
+            articles.append(
+                {
+                    "baiviet_id": article_id,
+                    "url": urljoin(BASE_URL, href_str),
+                    "title": title_text,
+                    "category": category,
+                    "tag_in_title": tag_text,
+                    "date_str": (
+                        date_tag.get_text(strip=True) if date_tag else None
+                    ),
+                    "source_list_path": self.list_path,
+                }
+            )
         return articles
 
     # ── Detail parsing (reused from crawl_detail.py) ──────────
@@ -295,8 +309,12 @@ class GenericCrawler:
         soup = BeautifulSoup(html, "html.parser")
         container = soup.select_one("div.col-md-9.col-xs-12")
         if not container:
-            return {"title_detail": None, "date_detail": None,
-                    "content_text": None, "content_html": None}
+            return {
+                "title_detail": None,
+                "date_detail": None,
+                "content_text": None,
+                "content_html": None,
+            }
 
         h3 = container.select_one("h3")
         title = h3.get_text(strip=True) if h3 else None
@@ -343,7 +361,9 @@ class GenericCrawler:
 
         new_articles: List[Dict] = []
         for category, tag_encoded in self.tags.items():
-            found = self._crawl_tag_incremental(tag_encoded, category, existing_ids)
+            found = self._crawl_tag_incremental(
+                tag_encoded, category, existing_ids
+            )
             new_articles.extend(found)
 
         if not new_articles:
@@ -353,8 +373,12 @@ class GenericCrawler:
         # Crawl details
         logger.info("Crawling details for %d new articles …", len(new_articles))
         for i, art in enumerate(new_articles):
-            logger.info("  [%d/%d] baiviet_id=%s", i + 1, len(new_articles),
-                        art.get("baiviet_id"))
+            logger.info(
+                "  [%d/%d] baiviet_id=%s",
+                i + 1,
+                len(new_articles),
+                art.get("baiviet_id"),
+            )
             self._crawl_article_detail(art)
             time.sleep(self.delay)
 
@@ -370,11 +394,13 @@ class GenericCrawler:
         """Crawl pages until we hit an already-known baiviet_id or exceed max_age_months."""
         page = 1
         new_arts: List[Dict] = []
-        
+
         cutoff_date = None
         if self.max_age_months:
-            cutoff_date = datetime.now() - timedelta(days=self.max_age_months * 30)
-            
+            cutoff_date = datetime.now() - timedelta(
+                days=self.max_age_months * 30
+            )
+
         while True:
             url = self._build_list_url(tag_encoded, page)
             logger.info("[%s] Fetching page %d …", category, page)
@@ -391,9 +417,12 @@ class GenericCrawler:
             for item in items:
                 bid = item.get("baiviet_id")
                 if bid and bid in existing_ids:
+                    if self.backfill:
+                        # Skip known article but keep walking back in time.
+                        continue
                     found_existing = True
                     break
-                    
+
                 # Check cutoff date
                 if cutoff_date:
                     dt = _parse_vn_date(item.get("date_str", ""))
@@ -406,9 +435,13 @@ class GenericCrawler:
             if found_existing:
                 logger.info("[%s] Hit existing article — stopping.", category)
                 break
-                
+
             if hit_cutoff:
-                logger.info("[%s] Hit article older than %d months — stopping.", category, self.max_age_months)
+                logger.info(
+                    "[%s] Hit article older than %d months — stopping.",
+                    category,
+                    self.max_age_months,
+                )
                 break
 
             page += 1
@@ -422,8 +455,12 @@ class GenericCrawler:
         existing = _load_json(self.output_file)
         merged = new_articles + existing
         _save_json(merged, self.output_file)
-        logger.info("Saved %d articles (total %d) to %s",
-                    len(new_articles), len(merged), self.output_file)
+        logger.info(
+            "Saved %d articles (total %d) to %s",
+            len(new_articles),
+            len(merged),
+            self.output_file,
+        )
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -442,10 +479,16 @@ class ChunkProcessor:
         Path to the aggregate chunks JSON file for this source.
     """
 
-    def __init__(self, source_label: str = "kehoach", chunks_file: Path = BAIVIET_CHUNKS_FILE):
+    def __init__(
+        self,
+        source_label: str = "kehoach",
+        chunks_file: Path = BAIVIET_CHUNKS_FILE,
+    ):
         import sys
+
         sys.path.insert(0, str(PROJECT_ROOT))
         from chunking.chunker.kehoach_chunker import KeHoachChunker
+
         self._chunker = KeHoachChunker()
         self._source_label = source_label
         self._chunks_file = chunks_file
@@ -458,21 +501,37 @@ class ChunkProcessor:
                 # Override source label and preserve source_list_path
                 for c in chunks:
                     c["metadata"]["source"] = self._source_label
-                    if "source_list_path" not in c["metadata"] and "source_list_path" in art:
-                        c["metadata"]["source_list_path"] = art["source_list_path"]
+                    if (
+                        "source_list_path" not in c["metadata"]
+                        and "source_list_path" in art
+                    ):
+                        c["metadata"]["source_list_path"] = art[
+                            "source_list_path"
+                        ]
                 all_chunks.extend(chunks)
             except Exception as e:
-                logger.warning("Chunk failed for baiviet_id=%s: %s",
-                               art.get("baiviet_id"), e)
-        logger.info("Produced %d chunks from %d articles.", len(all_chunks), len(articles))
+                logger.warning(
+                    "Chunk failed for baiviet_id=%s: %s",
+                    art.get("baiviet_id"),
+                    e,
+                )
+        logger.info(
+            "Produced %d chunks from %d articles.",
+            len(all_chunks),
+            len(articles),
+        )
         return all_chunks
 
     def save_chunks(self, new_chunks: List[Dict]) -> None:
         existing = _load_json(self._chunks_file)
         merged = existing + new_chunks
         _save_json(merged, self._chunks_file)
-        logger.info("Saved %d new chunks (total %d) to %s.",
-                    len(new_chunks), len(merged), self._chunks_file)
+        logger.info(
+            "Saved %d new chunks (total %d) to %s.",
+            len(new_chunks),
+            len(merged),
+            self._chunks_file,
+        )
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -495,6 +554,7 @@ class DualIndexer:
         e5=None,
     ):
         import sys
+
         sys.path.insert(0, str(PROJECT_ROOT))
 
         from retrieval.qdrant_store import QdrantStore
@@ -506,19 +566,23 @@ class DualIndexer:
         # Reuse embedders if provided, else create new
         if bge is None:
             from embedding.bge_m3 import BGEm3Embedder
+
             logger.info("Loading BGE-M3 embedder …")
             bge = BGEm3Embedder()
         if e5 is None:
             from embedding.e5_multilingual import E5MultilingualEmbedder
+
             logger.info("Loading E5-multilingual embedder …")
             e5 = E5MultilingualEmbedder()
 
         self._bge = bge
         self._e5 = e5
-        self._qdrant = QdrantStore(host=qdrant_host, port=qdrant_port,
-                                   collection_name=collection)
-        self._es = ElasticsearchStore(host=es_host, port=es_port,
-                                      index_name=collection)
+        self._qdrant = QdrantStore(
+            host=qdrant_host, port=qdrant_port, collection_name=collection
+        )
+        self._es = ElasticsearchStore(
+            host=es_host, port=es_port, index_name=collection
+        )
 
     def index_chunks(self, chunks: List[Dict]) -> int:
         """Embed and upsert chunks. Returns count of newly indexed chunks."""
@@ -533,7 +597,7 @@ class DualIndexer:
 
         indexed = 0
         for start in range(0, total, self.batch_size):
-            batch = new_chunks[start: start + self.batch_size]
+            batch = new_chunks[start : start + self.batch_size]
             texts = [c["content"] for c in batch]
             ids = [c["chunk_id"] for c in batch]
             metas = [c.get("metadata", {}) for c in batch]
@@ -543,8 +607,11 @@ class DualIndexer:
 
             # Qdrant
             self._qdrant.index_documents(
-                texts=texts, bge_m3_vectors=bge_vecs,
-                e5_vectors=e5_vecs, metadatas=metas, ids=ids,
+                texts=texts,
+                bge_m3_vectors=bge_vecs,
+                e5_vectors=e5_vecs,
+                metadatas=metas,
+                ids=ids,
             )
 
             # Elasticsearch — enrich metadata
@@ -573,10 +640,12 @@ class DualIndexer:
         ids = [c["chunk_id"] for c in chunks]
         existing: set = set()
         for start in range(0, len(ids), 100):
-            batch_ids = ids[start: start + 100]
+            batch_ids = ids[start : start + 100]
             results = self._qdrant.client.retrieve(
                 collection_name=self._qdrant.collection_name,
-                ids=batch_ids, with_payload=False, with_vectors=False,
+                ids=batch_ids,
+                with_payload=False,
+                with_vectors=False,
             )
             existing.update(str(r.id) for r in results)
         new = [c for c in chunks if c["chunk_id"] not in existing]
@@ -595,11 +664,17 @@ class DualIndexer:
         try:
             self._qdrant.client.delete(
                 collection_name=self._qdrant.collection_name,
-                points_selector=Filter(must=[
-                    FieldCondition(key="baiviet_id", match=MatchAny(any=baiviet_ids))
-                ]),
+                points_selector=Filter(
+                    must=[
+                        FieldCondition(
+                            key="baiviet_id", match=MatchAny(any=baiviet_ids)
+                        )
+                    ]
+                ),
             )
-            logger.info("Qdrant: deleted points for %d baiviet_ids.", len(baiviet_ids))
+            logger.info(
+                "Qdrant: deleted points for %d baiviet_ids.", len(baiviet_ids)
+            )
             deleted += 1
         except Exception as e:
             logger.error("Qdrant delete failed: %s", e)
@@ -612,7 +687,9 @@ class DualIndexer:
                     body={"query": {"term": {"baiviet_id": bid}}},
                     refresh=True,
                 )
-            logger.info("ES: deleted docs for %d baiviet_ids.", len(baiviet_ids))
+            logger.info(
+                "ES: deleted docs for %d baiviet_ids.", len(baiviet_ids)
+            )
             deleted += 1
         except Exception as e:
             logger.error("ES delete failed: %s", e)
@@ -650,8 +727,11 @@ class RetentionManager:
 
     def cleanup(self, indexer: Optional[DualIndexer] = None) -> int:
         cutoff = datetime.now() - timedelta(days=self.months * 30)
-        logger.info("Retention cutoff: %s (%d months)", cutoff.strftime("%Y-%m-%d"),
-                     self.months)
+        logger.info(
+            "Retention cutoff: %s (%d months)",
+            cutoff.strftime("%Y-%m-%d"),
+            self.months,
+        )
 
         # 1. Find expired IDs from output_full.json
         articles = _load_json(self.output_file)
@@ -670,8 +750,11 @@ class RetentionManager:
             logger.info("No expired articles to remove.")
             return 0
 
-        logger.info("Removing %d expired articles (older than %s).",
-                     len(expired_ids), cutoff.strftime("%Y-%m-%d"))
+        logger.info(
+            "Removing %d expired articles (older than %s).",
+            len(expired_ids),
+            cutoff.strftime("%Y-%m-%d"),
+        )
 
         # 2. Remove from JSON
         _save_json(kept, self.output_file)
@@ -679,8 +762,11 @@ class RetentionManager:
         # 3. Remove from chunks file
         chunks = _load_json(self.chunks_file)
         expired_set = set(expired_ids)
-        new_chunks = [c for c in chunks
-                      if c.get("metadata", {}).get("baiviet_id") not in expired_set]
+        new_chunks = [
+            c
+            for c in chunks
+            if c.get("metadata", {}).get("baiviet_id") not in expired_set
+        ]
         removed_chunks = len(chunks) - len(new_chunks)
         _save_json(new_chunks, self.chunks_file)
         logger.info("Removed %d chunks from file.", removed_chunks)
@@ -726,7 +812,7 @@ class AutoCrawlPipeline:
 
     # ── Pipeline: KeHoach (BaiViet) ───────────────────────────
 
-    def run_baiviet(self) -> Dict[str, Any]:
+    def run_baiviet(self, backfill: bool = False) -> Dict[str, Any]:
         """Crawl BaiViet → collection kehoach."""
         return self._run_single_pipeline(
             pipeline_name="baiviet",
@@ -742,14 +828,14 @@ class AutoCrawlPipeline:
             collection="kehoach",
             source_label="kehoach",
             retention_months=(
-                self._settings.crawler_retention_months
-                if self._settings else 6
+                self._settings.crawler_retention_months if self._settings else 6
             ),
+            backfill=backfill,
         )
 
     # ── Pipeline: KeHoach (ListKeHoach) ────────────────────────
 
-    def run_kehoach_list(self) -> Dict[str, Any]:
+    def run_kehoach_list(self, backfill: bool = False) -> Dict[str, Any]:
         """Crawl ListKeHoach → collection kehoach."""
         return self._run_single_pipeline(
             pipeline_name="kehoach_list",
@@ -765,21 +851,21 @@ class AutoCrawlPipeline:
             collection="kehoach",
             source_label="kehoach",
             retention_months=(
-                self._settings.crawler_retention_months
-                if self._settings else 6
+                self._settings.crawler_retention_months if self._settings else 6
             ),
+            backfill=backfill,
         )
 
-    def run_kehoach(self) -> Dict[str, Any]:
+    def run_kehoach(self, backfill: bool = False) -> Dict[str, Any]:
         """Backward compatibility: run both BaiViet and ListKeHoach."""
         return {
-            "baiviet": self.run_baiviet(),
-            "kehoach_list": self.run_kehoach_list()
+            "baiviet": self.run_baiviet(backfill=backfill),
+            "kehoach_list": self.run_kehoach_list(backfill=backfill),
         }
 
     # ── Pipeline: QuyDinh ─────────────────────────────────────
 
-    def run_quydinh(self) -> Dict[str, Any]:
+    def run_quydinh(self, backfill: bool = False) -> Dict[str, Any]:
         """Crawl QuyChe → collection quydinh (8-year retention)."""
         return self._run_single_pipeline(
             pipeline_name="quydinh",
@@ -795,14 +881,15 @@ class AutoCrawlPipeline:
             collection="quydinh",
             source_label="quydinh",
             retention_months=self.QUYDINH_RETENTION_MONTHS,
+            backfill=backfill,
         )
 
     # ── Run all ───────────────────────────────────────────────
 
-    def run(self) -> Dict[str, Any]:
+    def run(self, backfill: bool = False) -> Dict[str, Any]:
         """Execute both pipelines. Returns combined summary."""
-        kehoach = self.run_kehoach()
-        quydinh = self.run_quydinh()
+        kehoach = self.run_kehoach(backfill=backfill)
+        quydinh = self.run_quydinh(backfill=backfill)
         return {"kehoach": kehoach, "quydinh": quydinh}
 
     # ── Internal: generic single-pipeline runner ──────────────
@@ -816,6 +903,7 @@ class AutoCrawlPipeline:
         collection: str,
         source_label: str,
         retention_months: int,
+        backfill: bool = False,
     ) -> Dict[str, Any]:
         start_time = datetime.now()
         summary: Dict[str, Any] = {
@@ -829,10 +917,17 @@ class AutoCrawlPipeline:
             "expired_removed": 0,
             "saved_chunks": [],
             "errors": [],
+            "backfill": backfill,
         }
 
         logger.info("=" * 60)
-        logger.info("PIPELINE [%s] STARTED at %s", pipeline_name, start_time.isoformat())
+        logger.info(
+            "PIPELINE [%s] STARTED at %s (backfill=%s, retention=%d months)",
+            pipeline_name,
+            start_time.isoformat(),
+            backfill,
+            retention_months,
+        )
         logger.info("=" * 60)
 
         try:
@@ -851,6 +946,7 @@ class AutoCrawlPipeline:
                     delay=delay,
                     tags=tags,
                     max_age_months=retention_months,
+                    backfill=backfill,
                 )
                 logger.info("  Crawling from %s …", cfg["label"])
                 new_arts = crawler.crawl_new()
@@ -877,7 +973,11 @@ class AutoCrawlPipeline:
                 summary["new_chunks"] = len(new_chunks)
 
                 if new_chunks:
-                    logger.info("Staging %d chunks for admin review [%s].", len(new_chunks), pipeline_name)
+                    logger.info(
+                        "Staging %d chunks for admin review [%s].",
+                        len(new_chunks),
+                        pipeline_name,
+                    )
                     run_id = self._stage_pending_review(
                         pipeline_name=pipeline_name,
                         collection=collection,
@@ -892,12 +992,19 @@ class AutoCrawlPipeline:
                     summary["review_status"] = "pending_review"
                     summary["can_edit"] = True
                     summary["can_index"] = True
-                    summary["saved_chunks"] = self._build_saved_chunk_preview(new_chunks)
-                    logger.info("Crawler run %s is pending admin review.", run_id)
+                    summary["saved_chunks"] = self._build_saved_chunk_preview(
+                        new_chunks
+                    )
+                    logger.info(
+                        "Crawler run %s is pending admin review.", run_id
+                    )
 
             # Step 4: Retention
-            logger.info("─── STEP 4: Retention [%s] (%d months) ───",
-                        pipeline_name, retention_months)
+            logger.info(
+                "─── STEP 4: Retention [%s] (%d months) ───",
+                pipeline_name,
+                retention_months,
+            )
             retention = RetentionManager(
                 months=retention_months,
                 output_file=output_file,
@@ -919,27 +1026,35 @@ class AutoCrawlPipeline:
         return summary
 
     @staticmethod
-    def _build_saved_chunk_preview(chunks: List[Dict], limit: int = 5) -> List[Dict[str, Any]]:
+    def _build_saved_chunk_preview(
+        chunks: List[Dict], limit: int = 5
+    ) -> List[Dict[str, Any]]:
         previews: List[Dict[str, Any]] = []
         for chunk in chunks[:limit]:
             metadata = chunk.get("metadata") or {}
             content = " ".join(str(chunk.get("content") or "").split())
             section_label = metadata.get("section_label")
-            previews.append({
-                "chunk_id": str(chunk.get("chunk_id") or ""),
-                "title": str(metadata.get("title") or ""),
-                "source": str(metadata.get("source") or ""),
-                "url": str(metadata.get("url") or ""),
-                "section_label": str(section_label) if section_label is not None else "",
-                "content_preview": content[:280],
-                "content_length": len(str(chunk.get("content") or "")),
-                "edited": bool(chunk.get("edited", False)),
-                "index_status": str(chunk.get("index_status") or "pending"),
-            })
+            previews.append(
+                {
+                    "chunk_id": str(chunk.get("chunk_id") or ""),
+                    "title": str(metadata.get("title") or ""),
+                    "source": str(metadata.get("source") or ""),
+                    "url": str(metadata.get("url") or ""),
+                    "section_label": (
+                        str(section_label) if section_label is not None else ""
+                    ),
+                    "content_preview": content[:280],
+                    "content_length": len(str(chunk.get("content") or "")),
+                    "edited": bool(chunk.get("edited", False)),
+                    "index_status": str(chunk.get("index_status") or "pending"),
+                }
+            )
         return previews
 
     @staticmethod
-    def _build_notification_article_links(saved_chunks: List[Dict], limit: int = 5) -> List[Dict[str, str]]:
+    def _build_notification_article_links(
+        saved_chunks: List[Dict], limit: int = 5
+    ) -> List[Dict[str, str]]:
         links: List[Dict[str, str]] = []
         seen_urls: set[str] = set()
         for chunk in saved_chunks:
@@ -948,10 +1063,12 @@ class AutoCrawlPipeline:
                 continue
             seen_urls.add(url)
             title = str(chunk.get("title") or "").strip() or "Bài viết mới"
-            links.append({
-                "title": title,
-                "url": url,
-            })
+            links.append(
+                {
+                    "title": title,
+                    "url": url,
+                }
+            )
             if len(links) >= limit:
                 break
         return links
@@ -973,7 +1090,10 @@ class AutoCrawlPipeline:
             raise RuntimeError("Crawler review staging requires MongoDB")
 
         from models.crawler import CRAWLER_STATUS_PENDING_REVIEW
-        from models.database import CRAWLER_CHUNKS_COLLECTION, CRAWLER_RUNS_COLLECTION
+        from models.database import (
+            CRAWLER_CHUNKS_COLLECTION,
+            CRAWLER_RUNS_COLLECTION,
+        )
 
         run_id = f"{pipeline_name}-{uuid.uuid4().hex}"
         now = datetime.now(timezone.utc)
@@ -1003,22 +1123,26 @@ class AutoCrawlPipeline:
                 content = str(chunk.get("content") or "")
                 chunk_id = str(chunk.get("chunk_id") or f"{run_id}:{index}")
                 metadata = dict(chunk.get("metadata") or {})
-                chunk_docs.append({
-                    "run_id": run_id,
-                    "chunk_id": chunk_id,
-                    "chunk_index": index,
-                    "content": content,
-                    "original_content": content,
-                    "metadata": metadata,
-                    "edited": False,
-                    "index_status": "pending",
-                    "created_at": now,
-                    "updated_at": now,
-                })
+                chunk_docs.append(
+                    {
+                        "run_id": run_id,
+                        "chunk_id": chunk_id,
+                        "chunk_index": index,
+                        "content": content,
+                        "original_content": content,
+                        "metadata": metadata,
+                        "edited": False,
+                        "index_status": "pending",
+                        "created_at": now,
+                        "updated_at": now,
+                    }
+                )
 
             db[CRAWLER_RUNS_COLLECTION].insert_one(run_doc)
             db[CRAWLER_CHUNKS_COLLECTION].insert_many(chunk_docs)
-            logger.info("Staged crawler run %s with %d chunks.", run_id, len(chunk_docs))
+            logger.info(
+                "Staged crawler run %s with %d chunks.", run_id, len(chunk_docs)
+            )
             return run_id
         finally:
             client.close()
@@ -1039,7 +1163,9 @@ class AutoCrawlPipeline:
     def _notify(summary: Dict[str, Any]) -> None:
         pipeline = summary.get("pipeline", "unknown")
         status = summary["status"]
-        icon = "✅" if status in {"success", "pending_review", "indexed"} else "❌"
+        icon = (
+            "✅" if status in {"success", "pending_review", "indexed"} else "❌"
+        )
         msg = (
             f"\n{'=' * 60}\n"
             f"{icon} PIPELINE [{pipeline}] {status.upper()}\n"
@@ -1074,12 +1200,18 @@ class AutoCrawlPipeline:
                     result.get("push_error_count", 0),
                 )
             except Exception:
-                logger.warning("Failed to create user notifications", exc_info=True)
+                logger.warning(
+                    "Failed to create user notifications", exc_info=True
+                )
 
     @staticmethod
-    async def _create_user_notifications(summary: Dict[str, Any]) -> Dict[str, Any]:
+    async def _create_user_notifications(
+        summary: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Broadcast notification cho tất cả users khi có dữ liệu mới."""
-        from api.services.notification_delivery import broadcast_user_notification
+        from api.services.notification_delivery import (
+            broadcast_user_notification,
+        )
         from models.database import _get_settings, get_motor_client
 
         _, db_name = _get_settings()
@@ -1088,7 +1220,9 @@ class AutoCrawlPipeline:
         pipeline_name = summary.get("pipeline", "unknown")
         new_articles = summary.get("new_articles", 0)
         saved_chunks = summary.get("saved_chunks", [])
-        article_links = AutoCrawlPipeline._build_notification_article_links(saved_chunks)
+        article_links = AutoCrawlPipeline._build_notification_article_links(
+            saved_chunks
+        )
 
         if not article_links:
             return {
@@ -1116,7 +1250,9 @@ class AutoCrawlPipeline:
         )
 
 
-def index_staged_crawler_run(settings, run_id: str, bge=None, e5=None) -> Dict[str, Any]:
+def index_staged_crawler_run(
+    settings, run_id: str, bge=None, e5=None
+) -> Dict[str, Any]:
     """Index a reviewed crawler run from Mongo into Qdrant/ES."""
     if not getattr(settings, "mongodb_enabled", True):
         raise RuntimeError("Crawler review indexing requires MongoDB")
@@ -1127,7 +1263,10 @@ def index_staged_crawler_run(settings, run_id: str, bge=None, e5=None) -> Dict[s
         CRAWLER_STATUS_INDEXING,
         CRAWLER_STATUS_PENDING_REVIEW,
     )
-    from models.database import CRAWLER_CHUNKS_COLLECTION, CRAWLER_RUNS_COLLECTION
+    from models.database import (
+        CRAWLER_CHUNKS_COLLECTION,
+        CRAWLER_RUNS_COLLECTION,
+    )
 
     client = MongoClient(settings.mongodb_uri)
     try:
@@ -1149,18 +1288,27 @@ def index_staged_crawler_run(settings, run_id: str, bge=None, e5=None) -> Dict[s
         now = datetime.now(timezone.utc)
         runs.update_one(
             {"run_id": run_id},
-            {"$set": {
-                "status": CRAWLER_STATUS_INDEXING,
-                "updated_at": now,
-                "error_message": None,
-            }},
+            {
+                "$set": {
+                    "status": CRAWLER_STATUS_INDEXING,
+                    "updated_at": now,
+                    "error_message": None,
+                }
+            },
         )
         chunks_collection.update_many(
             {"run_id": run_id},
-            {"$set": {"index_status": CRAWLER_STATUS_INDEXING, "updated_at": now}},
+            {
+                "$set": {
+                    "index_status": CRAWLER_STATUS_INDEXING,
+                    "updated_at": now,
+                }
+            },
         )
 
-        chunk_docs = list(chunks_collection.find({"run_id": run_id}).sort("chunk_index", 1))
+        chunk_docs = list(
+            chunks_collection.find({"run_id": run_id}).sort("chunk_index", 1)
+        )
         chunks = [
             {
                 "chunk_id": str(doc.get("chunk_id") or ""),
@@ -1176,7 +1324,9 @@ def index_staged_crawler_run(settings, run_id: str, bge=None, e5=None) -> Dict[s
 
         try:
             pipeline = AutoCrawlPipeline(settings=settings, bge=bge, e5=e5)
-            indexer = pipeline._make_indexer(collection=str(run_doc["collection"]))
+            indexer = pipeline._make_indexer(
+                collection=str(run_doc["collection"])
+            )
             indexed = indexer.index_chunks(chunks)
 
             chunks_file = Path(str(run_doc["chunks_file"]))
@@ -1186,34 +1336,45 @@ def index_staged_crawler_run(settings, run_id: str, bge=None, e5=None) -> Dict[s
             indexed_at = datetime.now(timezone.utc)
             runs.update_one(
                 {"run_id": run_id},
-                {"$set": {
-                    "status": CRAWLER_STATUS_INDEXED,
-                    "indexed": indexed,
-                    "indexed_at": indexed_at,
-                    "updated_at": indexed_at,
-                    "error_message": None,
-                }},
+                {
+                    "$set": {
+                        "status": CRAWLER_STATUS_INDEXED,
+                        "indexed": indexed,
+                        "indexed_at": indexed_at,
+                        "updated_at": indexed_at,
+                        "error_message": None,
+                    }
+                },
             )
             chunks_collection.update_many(
                 {"run_id": run_id},
-                {"$set": {"index_status": CRAWLER_STATUS_INDEXED, "updated_at": indexed_at}},
+                {
+                    "$set": {
+                        "index_status": CRAWLER_STATUS_INDEXED,
+                        "updated_at": indexed_at,
+                    }
+                },
             )
 
             summary = dict(run_doc.get("summary") or {})
-            summary.update({
-                "pipeline": run_doc.get("pipeline", "unknown"),
-                "collection": run_doc.get("collection", ""),
-                "status": CRAWLER_STATUS_INDEXED,
-                "review_run_id": run_id,
-                "review_status": CRAWLER_STATUS_INDEXED,
-                "can_edit": False,
-                "can_index": False,
-                "new_articles": run_doc.get("new_articles", 0),
-                "new_chunks": run_doc.get("new_chunks", len(chunks)),
-                "indexed": indexed,
-                "saved_chunks": AutoCrawlPipeline._build_saved_chunk_preview(chunks),
-                "indexed_at": indexed_at.isoformat(),
-            })
+            summary.update(
+                {
+                    "pipeline": run_doc.get("pipeline", "unknown"),
+                    "collection": run_doc.get("collection", ""),
+                    "status": CRAWLER_STATUS_INDEXED,
+                    "review_run_id": run_id,
+                    "review_status": CRAWLER_STATUS_INDEXED,
+                    "can_edit": False,
+                    "can_index": False,
+                    "new_articles": run_doc.get("new_articles", 0),
+                    "new_chunks": run_doc.get("new_chunks", len(chunks)),
+                    "indexed": indexed,
+                    "saved_chunks": AutoCrawlPipeline._build_saved_chunk_preview(
+                        chunks
+                    ),
+                    "indexed_at": indexed_at.isoformat(),
+                }
+            )
             _invalidate_crawler_cache(settings, chunks)
             _trigger_crawler_post_index_eval(settings, summary)
             AutoCrawlPipeline._notify(summary)
@@ -1222,15 +1383,22 @@ def index_staged_crawler_run(settings, run_id: str, bge=None, e5=None) -> Dict[s
             failed_at = datetime.now(timezone.utc)
             runs.update_one(
                 {"run_id": run_id},
-                {"$set": {
-                    "status": CRAWLER_STATUS_INDEX_FAILED,
-                    "updated_at": failed_at,
-                    "error_message": str(exc),
-                }},
+                {
+                    "$set": {
+                        "status": CRAWLER_STATUS_INDEX_FAILED,
+                        "updated_at": failed_at,
+                        "error_message": str(exc),
+                    }
+                },
             )
             chunks_collection.update_many(
                 {"run_id": run_id},
-                {"$set": {"index_status": CRAWLER_STATUS_INDEX_FAILED, "updated_at": failed_at}},
+                {
+                    "$set": {
+                        "index_status": CRAWLER_STATUS_INDEX_FAILED,
+                        "updated_at": failed_at,
+                    }
+                },
             )
             raise
     finally:
@@ -1239,7 +1407,9 @@ def index_staged_crawler_run(settings, run_id: str, bge=None, e5=None) -> Dict[s
 
 def _invalidate_crawler_cache(settings, chunks: List[Dict[str, Any]]) -> None:
     try:
-        if getattr(settings, "redis_enabled", False) and getattr(settings, "use_redis_cache", False):
+        if getattr(settings, "redis_enabled", False) and getattr(
+            settings, "use_redis_cache", False
+        ):
             from cache.llm_cache import LLMResponseCache
             from cache.redis_client import RedisManager
 
@@ -1253,7 +1423,9 @@ def _invalidate_crawler_cache(settings, chunks: List[Dict[str, Any]]) -> None:
                 len(chunk_ids),
             )
     except Exception:
-        logger.warning("Failed to invalidate LLM cache during crawler index", exc_info=True)
+        logger.warning(
+            "Failed to invalidate LLM cache during crawler index", exc_info=True
+        )
 
 
 def _trigger_crawler_post_index_eval(settings, summary: Dict[str, Any]) -> None:
@@ -1266,7 +1438,10 @@ def _trigger_crawler_post_index_eval(settings, summary: Dict[str, Any]) -> None:
             collection=str(summary.get("collection") or ""),
         )
     except Exception:
-        logger.warning("Failed to trigger post-index eval during crawler index", exc_info=True)
+        logger.warning(
+            "Failed to trigger post-index eval during crawler index",
+            exc_info=True,
+        )
 
 
 # ───────────────────────────────────────────────────────────────
@@ -1276,6 +1451,7 @@ def _trigger_crawler_post_index_eval(settings, summary: Dict[str, Any]) -> None:
 if __name__ == "__main__":
     import sys as _sys
     import argparse
+
     _sys.path.insert(0, str(PROJECT_ROOT))
 
     logging.basicConfig(
@@ -1289,14 +1465,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Auto-Crawler Pipeline (KeHoach + QuyDinh)"
     )
-    parser.add_argument("--dry", action="store_true", help="Dry run (no saving/indexing)")
     parser.add_argument(
-        "--pipeline", choices=["kehoach", "quydinh", "all"],
-        default="all", help="Which pipeline to run (default: all)",
+        "--dry", action="store_true", help="Dry run (no saving/indexing)"
     )
     parser.add_argument(
-        "--module", choices=["crawl", "chunk", "index", "retention", "all"],
-        default="all", help="Run a specific module or the entire pipeline",
+        "--pipeline",
+        choices=["kehoach", "quydinh", "all"],
+        default="all",
+        help="Which pipeline to run (default: all)",
+    )
+    parser.add_argument(
+        "--module",
+        choices=["crawl", "chunk", "index", "retention", "all"],
+        default="all",
+        help="Run a specific module or the entire pipeline",
     )
     args = parser.parse_args()
 
@@ -1313,7 +1495,11 @@ if __name__ == "__main__":
                 "source_label": "quydinh",
                 "retention_months": AutoCrawlPipeline.QUYDINH_RETENTION_MONTHS,
                 "crawlers": [
-                    {"list_path": LIST_PATH_QUYCHE, "id_param": "baiviet", "label": "QuyChe"},
+                    {
+                        "list_path": LIST_PATH_QUYCHE,
+                        "id_param": "baiviet",
+                        "label": "QuyChe",
+                    },
                 ],
             }
         elif name == "baiviet":
@@ -1324,7 +1510,11 @@ if __name__ == "__main__":
                 "source_label": "kehoach",
                 "retention_months": settings.crawler_retention_months,
                 "crawlers": [
-                    {"list_path": LIST_PATH_BAIVIET, "id_param": "baiviet", "label": "BaiViet"},
+                    {
+                        "list_path": LIST_PATH_BAIVIET,
+                        "id_param": "baiviet",
+                        "label": "BaiViet",
+                    },
                 ],
             }
         else:  # kehoach_list
@@ -1335,15 +1525,18 @@ if __name__ == "__main__":
                 "source_label": "kehoach",
                 "retention_months": settings.crawler_retention_months,
                 "crawlers": [
-                    {"list_path": LIST_PATH_KEHOACH, "id_param": "kehoach", "label": "ListKeHoach"},
+                    {
+                        "list_path": LIST_PATH_KEHOACH,
+                        "id_param": "kehoach",
+                        "label": "ListKeHoach",
+                    },
                 ],
             }
 
     base_pipelines = (
-        ["kehoach", "quydinh"] if args.pipeline == "all"
-        else [args.pipeline]
+        ["kehoach", "quydinh"] if args.pipeline == "all" else [args.pipeline]
     )
-    
+
     pipelines_to_run = []
     for p in base_pipelines:
         if p == "kehoach":
@@ -1365,14 +1558,21 @@ if __name__ == "__main__":
                         delay=settings.crawler_delay,
                     )
                     arts = crawler.crawl_new()
-                    logger.info("[%s/%s] Would process %d new articles.",
-                                pname, cr["label"], len(arts))
+                    logger.info(
+                        "[%s/%s] Would process %d new articles.",
+                        pname,
+                        cr["label"],
+                        len(arts),
+                    )
         else:
             for pname in pipelines_to_run:
                 runner = getattr(pipeline, f"run_{pname}")
                 result = runner()
-                logger.info("Result [%s]: %s", pname,
-                            json.dumps(result, ensure_ascii=False, indent=2))
+                logger.info(
+                    "Result [%s]: %s",
+                    pname,
+                    json.dumps(result, ensure_ascii=False, indent=2),
+                )
 
     elif args.module == "crawl":
         for pname in pipelines_to_run:
@@ -1391,8 +1591,12 @@ if __name__ == "__main__":
                 arts = crawler.crawl_new()
                 if not args.dry and arts:
                     crawler.save_to_file(arts)
-                logger.info("[%s/%s] Crawl completed. Found %d new articles.",
-                            pname, cr["label"], len(arts))
+                logger.info(
+                    "[%s/%s] Crawl completed. Found %d new articles.",
+                    pname,
+                    cr["label"],
+                    len(arts),
+                )
 
     elif args.module == "chunk":
         for pname in pipelines_to_run:
@@ -1406,8 +1610,12 @@ if __name__ == "__main__":
             chunks = chunker.chunk_articles(arts)
             if not args.dry and chunks:
                 _save_json(chunks, cfg["chunks_file"])
-            logger.info("[%s] Chunk completed. Produced %d chunks from %d articles.",
-                        pname, len(chunks), len(arts))
+            logger.info(
+                "[%s] Chunk completed. Produced %d chunks from %d articles.",
+                pname,
+                len(chunks),
+                len(arts),
+            )
 
     elif args.module == "index":
         for pname in pipelines_to_run:
@@ -1421,8 +1629,11 @@ if __name__ == "__main__":
     elif args.module == "retention":
         for pname in pipelines_to_run:
             cfg = _get_pipeline_config(pname)
-            logger.info("Running ONLY RETENTION module [%s] (%d months)...",
-                        pname, cfg["retention_months"])
+            logger.info(
+                "Running ONLY RETENTION module [%s] (%d months)...",
+                pname,
+                cfg["retention_months"],
+            )
             retention = RetentionManager(
                 months=cfg["retention_months"],
                 output_file=cfg["output_file"],
@@ -1431,7 +1642,10 @@ if __name__ == "__main__":
             if not args.dry:
                 indexer = pipeline._make_indexer(collection=cfg["collection"])
                 expired = retention.cleanup(indexer=indexer)
-                logger.info("[%s] Retention completed. Removed %d expired articles.",
-                            pname, expired)
+                logger.info(
+                    "[%s] Retention completed. Removed %d expired articles.",
+                    pname,
+                    expired,
+                )
             else:
                 logger.info("[%s] Retention skipped (dry run).", pname)

@@ -20,28 +20,29 @@ from retrieval.metadata_filters import (
 logger = logging.getLogger(__name__)
 
 # ─── Personal Identifier stripping ──────────────────────────────────────────────
-_STUDENT_ID_RE = re.compile(r'\b\d{8}\b')
+_STUDENT_ID_RE = re.compile(r"\b\d{8}\b")
 _STUDENT_ID_PREFIX_RE = re.compile(
-    r'(mã\s*sv|mssv|sinh\s*viên\s*mã?)\s*:?\s*\d+',
-    re.IGNORECASE
+    r"(mã\s*sv|mssv|sinh\s*viên\s*mã?)\s*:?\s*\d+", re.IGNORECASE
 )
+
 
 def strip_personal_identifiers(query: str) -> str:
     """Xóa mã sinh viên và các identifier cá nhân khỏi retrieval query."""
-    q = _STUDENT_ID_PREFIX_RE.sub('', query)
-    q = _STUDENT_ID_RE.sub('', q)
-    q = re.sub(r',\s*,', ',', q)
-    q = re.sub(r'\s{2,}', ' ', q).strip().strip(',').strip()
+    q = _STUDENT_ID_PREFIX_RE.sub("", query)
+    q = _STUDENT_ID_RE.sub("", q)
+    q = re.sub(r",\s*,", ",", q)
+    q = re.sub(r"\s{2,}", " ", q).strip().strip(",").strip()
     return q
+
 
 # ─── Collection name mapping ──────────────────────────────────────────────────
 # Agent-facing collection names → real Qdrant collection names.
 
 COLLECTION_MAP: dict[str, str] = {
-    "quy_dinh":     "quydinh",   # quy định học vụ, học bổng, kỷ luật, tốt nghiệp
-    "chuong_trinh": "ctdt",      # chương trình đào tạo, môn học, tín chỉ
-    "ke_hoach":     "kehoach",   # lịch đăng ký, deadline, kế hoạch học kỳ
-    "ho_tro_sv":    "stsv",      # hỗ trợ sinh viên: biểu mẫu, giấy tờ, thuê nhà, tìm việc
+    "quy_dinh": "quydinh",  # quy định học vụ, học bổng, kỷ luật, tốt nghiệp
+    "chuong_trinh": "ctdt",  # chương trình đào tạo, môn học, tín chỉ
+    "ke_hoach": "kehoach",  # lịch đăng ký, deadline, kế hoạch học kỳ
+    "ho_tro_sv": "stsv",  # hỗ trợ sinh viên: biểu mẫu, giấy tờ, thuê nhà, tìm việc
 }
 
 # Exam schedules (lịch thi) are NOT a Qdrant collection — they live in a
@@ -135,6 +136,8 @@ def cache_clear() -> None:
 
 _COHORT_RE = re.compile(r"\bK\d{2,3}\b", re.IGNORECASE)
 _COHORT_TOKEN_RE = re.compile(r"^\s*K?(\d{2,3})\s*$", re.IGNORECASE)
+
+
 @dataclass
 class _AdapterRuntime:
     settings: Settings
@@ -163,6 +166,7 @@ _RUNTIME_LOCK = Lock()
 
 # ─── API key validation ───────────────────────────────────────────────────────
 
+
 def _is_valid_api_key(key: str) -> bool:
     """Return True only when *key* looks like a real, configured API key.
 
@@ -190,10 +194,14 @@ def _build_exam_es_store(settings: Settings) -> Any | None:
         return ExamScheduleESStore(
             host=settings.elasticsearch_host,
             port=settings.elasticsearch_port,
-            index_name=getattr(settings, "exam_schedule_es_index", "exam_schedules"),
+            index_name=getattr(
+                settings, "exam_schedule_es_index", "exam_schedules"
+            ),
         )
     except Exception:
-        logger.warning("Exam ES store unavailable for agent tool", exc_info=True)
+        logger.warning(
+            "Exam ES store unavailable for agent tool", exc_info=True
+        )
         return None
 
 
@@ -255,6 +263,7 @@ def inject_from_retrieval_service(retrieval_service: Any) -> None:
     tavily_tool = None
     if _is_valid_api_key(tavily_key):
         from tools.tavily_search import TavilySearchTool
+
         tavily_tool = TavilySearchTool(
             api_key=tavily_key,
             cache_maxsize=settings.tavily_cache_maxsize,
@@ -271,7 +280,9 @@ def inject_from_retrieval_service(retrieval_service: Any) -> None:
         exam_es_store=_build_exam_es_store(settings),
     )
     set_runtime(runtime)
-    logger.info("[ToolAdapters] Runtime injected from RetrievalService (shared models)")
+    logger.info(
+        "[ToolAdapters] Runtime injected from RetrievalService (shared models)"
+    )
 
 
 def _get_runtime() -> _AdapterRuntime:
@@ -330,7 +341,9 @@ def _build_rag_request(
     if qdrant_collection is None:
         return f"[Loi: Collection '{collection}' khong hop le]"
 
-    effective_top_k = max(1, int(top_k if top_k is not None else runtime.settings.top_k))
+    effective_top_k = max(
+        1, int(top_k if top_k is not None else runtime.settings.top_k)
+    )
     raw_query = enrich_major_references_for_query(
         strip_personal_identifiers(query.strip())
     )
@@ -371,9 +384,8 @@ def _retrieval_query_for_collection(
     major_codes: list[str],
 ) -> str:
     if (
-        (resolved_major or len(major_codes) <= 1)
-        and collection in _MAJOR_FILTERABLE_COLLECTIONS
-    ):
+        resolved_major or len(major_codes) <= 1
+    ) and collection in _MAJOR_FILTERABLE_COLLECTIONS:
         return strip_major_from_query_for_retrieval(
             raw_query,
             resolved_major=resolved_major,
@@ -428,7 +440,9 @@ def _search_kwargs(
 
 
 def _raw_candidate_k(settings: Settings, top_k: int) -> int:
-    raw_multiplier = max(float(getattr(settings, "raw_candidate_multiplier", 4.0)), 1.0)
+    raw_multiplier = max(
+        float(getattr(settings, "raw_candidate_multiplier", 4.0)), 1.0
+    )
     raw_min = max(int(getattr(settings, "raw_candidate_min", 20)), 1)
     return max(int(round(top_k * raw_multiplier)), raw_min)
 
@@ -455,7 +469,16 @@ def _should_skip_rerank(request: _RagSearchRequest) -> bool:
     curriculum_kw_check = request.raw_query.lower()
     return request.collection == "chuong_trinh" and any(
         word in curriculum_kw_check
-        for word in ["kỳ", "kì", "ky ", "ky\"", "chẵn", "lẻ", "đăng ký", "dang ky"]
+        for word in [
+            "kỳ",
+            "kì",
+            "ky ",
+            'ky"',
+            "chẵn",
+            "lẻ",
+            "đăng ký",
+            "dang ky",
+        ]
     )
 
 
@@ -467,7 +490,9 @@ def _reranker_kwargs(settings: Settings, top_k: int) -> dict[str, Any]:
     if getattr(settings, "reranker_score_threshold", None) is not None:
         kwargs["score_threshold"] = settings.reranker_score_threshold
     if getattr(settings, "reranker_table_score_threshold", None) is not None:
-        kwargs["table_score_threshold"] = settings.reranker_table_score_threshold
+        kwargs["table_score_threshold"] = (
+            settings.reranker_table_score_threshold
+        )
     return kwargs
 
 
@@ -536,13 +561,17 @@ def _rag_search(
 
     results = _search_rag_candidates(request, runtime)
     results = _rerank_or_trim_results(results, request, runtime)
-    results = _expand_parent_context_if_enabled(results, request, runtime.settings)
+    results = _expand_parent_context_if_enabled(
+        results, request, runtime.settings
+    )
     _append_agent_docs(results)
 
     if not results:
         return "[Khong tim thay thong tin trong co so du lieu]"
 
-    formatted = _format_search_results(results, request.collection, runtime.settings)
+    formatted = _format_search_results(
+        results, request.collection, runtime.settings
+    )
     if not formatted.startswith("[Loi"):
         _cache_set(cache_key, formatted)
     return formatted
@@ -570,6 +599,7 @@ def _multi_rag_search(queries: list[dict[str, Any]]) -> str:
     if not parts:
         return "Khong tim thay thong tin tu cac nguon duoc yeu cau."
     return "\n\n---\n\n".join(parts)
+
 
 def _topic_with_course_focus(topic: str, course_keyword: str | None) -> str:
     raw_topic = (topic or "").strip()
@@ -620,11 +650,15 @@ def _compare_cohorts(
     # Parallel search — halves latency for the two independent retrievals.
     with ThreadPoolExecutor(max_workers=2) as pool:
         future_a = pool.submit(
-            _rag_search, query=query_a, collection=collection,
+            _rag_search,
+            query=query_a,
+            collection=collection,
             resolved_cohort=resolved_cohort_a,
         )
         future_b = pool.submit(
-            _rag_search, query=query_b, collection=collection,
+            _rag_search,
+            query=query_b,
+            collection=collection,
             resolved_cohort=resolved_cohort_b,
         )
         result_a = future_a.result(timeout=45)
@@ -676,11 +710,15 @@ def _compare_programs(
     # Parallel search — halves latency for the two independent retrievals.
     with ThreadPoolExecutor(max_workers=2) as pool:
         future_a = pool.submit(
-            _rag_search, query=query_a, collection=collection,
+            _rag_search,
+            query=query_a,
+            collection=collection,
             resolved_major=resolved_major_a,
         )
         future_b = pool.submit(
-            _rag_search, query=query_b, collection=collection,
+            _rag_search,
+            query=query_b,
+            collection=collection,
             resolved_major=resolved_major_b,
         )
         result_a = future_a.result(timeout=45)
@@ -759,7 +797,9 @@ def _to_es_date(value: str | None) -> str | None:
     return parsed.strftime("%Y-%m-%d") if parsed else value
 
 
-def _extract_exam_filters(query: str) -> tuple[str | None, str | None, str | None]:
+def _extract_exam_filters(
+    query: str,
+) -> tuple[str | None, str | None, str | None]:
     """Derive (subject_code, subject_name, exam_date_iso) from a free-text query."""
     cleaned = strip_personal_identifiers(query or "")
     code_match = _SUBJECT_CODE_RE.search(cleaned)
@@ -924,9 +964,13 @@ def _format_search_results(
 
     chunks: list[str] = []
     result_count = int(getattr(settings, "agent_search_result_count", 3) or 3)
-    char_limit = int(getattr(settings, "agent_search_result_char_limit", 500) or 500)
+    char_limit = int(
+        getattr(settings, "agent_search_result_char_limit", 500) or 500
+    )
     total_limit = int(getattr(settings, "agent_tool_result_limit", 0) or 0)
-    seen_parent_ids: set[str] = set()  # dedup parent context across children sharing same parent
+    seen_parent_ids: set[str] = (
+        set()
+    )  # dedup parent context across children sharing same parent
 
     for index, item in enumerate(results[:result_count], 1):
         content = ""
@@ -961,7 +1005,11 @@ def _format_search_results(
         if parent_ctx:
             if parent_id:
                 seen_parent_ids.add(parent_id)
-            parent_short = parent_ctx[:300] + "..." if len(parent_ctx) > 300 else parent_ctx
+            parent_short = (
+                parent_ctx[:300] + "..."
+                if len(parent_ctx) > 300
+                else parent_ctx
+            )
             parent_short = " ".join(parent_short.split())
             content = f"[Section] {parent_short}\n[Detail] {content}"
 
@@ -1025,7 +1073,9 @@ def _format_web_results(results: Any) -> str:
 
     settings = _formatting_settings()
     web_count = int(getattr(settings, "tavily_web_result_count", 3) or 3)
-    web_char_limit = int(getattr(settings, "tavily_web_content_char_limit", 1500) or 1500)
+    web_char_limit = int(
+        getattr(settings, "tavily_web_content_char_limit", 1500) or 1500
+    )
 
     chunks: list[str] = []
     for index, item in enumerate(all_results[:web_count], 1):
