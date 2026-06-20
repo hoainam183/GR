@@ -4,98 +4,60 @@ Chuyển các thẻ ``<table>`` HTML thành bảng Markdown để giữ cấu tr
 clean nội dung crawl (kehoach / baiviet). Nhờ vậy retrieval (embedding + BM25)
 giữ được liên kết hàng/cột thay vì làm phẳng từng ô thành dòng rời rạc.
 
-Core (`HTMLTableParser`, `convert_table_to_markdown`) được hợp nhất từ
-``data/quydinh/olmocr/convert_html_to_markdown_tables.py`` (vốn chỉ dùng cho
-quydinh). Bản tại đây là nguồn dùng chung; file quydinh giữ nguyên để không phá
-luồng chạy standalone của ``batch_convert.py``.
+Việc parse ô dùng BeautifulSoup (``get_text(separator=" ")``) để chịu được HTML
+"bẩn" do dán từ Word (nhiều ``<span class="MsoNormal">``, ``<o:p>``, ``<b>``,
+``&nbsp;`` lồng nhau). Engine dựng grid + xử lý rowspan/colspan
+(``convert_table_to_markdown``) được hợp nhất từ
+``data/quydinh/olmocr/convert_html_to_markdown_tables.py``.
 
-Đồng bộ định dạng bảng Markdown với ``recursive_chunker``/``olmocr`` (``|...|``)
+Định dạng bảng Markdown (``|...|``) đồng bộ với ``recursive_chunker``/``olmocr``
 nên các bước chunk có sẵn (``has_table``, fix mid-table) áp dụng được.
 """
 
 from __future__ import annotations
 
-from html.parser import HTMLParser
+import re
 from typing import Dict, List
 
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Tag
+
+_WS_RE = re.compile(r"\s+")
 
 
-class HTMLTableParser(HTMLParser):
-    """Parser đọc một ``<table>`` HTML và trích dữ liệu từng ô."""
+def _cell_text(cell: Tag) -> str:
+    """Lấy text sạch của một ô: gộp mọi block/inline con, chuẩn hoá khoảng trắng."""
+    text = cell.get_text(separator=" ")
+    text = text.replace("\xa0", " ")
+    # Bỏ ký tự "|" để không phá cột Markdown.
+    text = text.replace("|", "/")
+    return _WS_RE.sub(" ", text).strip()
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.tables: List[List[List[Dict]]] = []
-        self.current_table: List[List[Dict]] = []
-        self.current_row: List[Dict] = []
-        self.current_cell: List[str] = []
-        self.in_table = False
-        self.in_row = False
-        self.in_cell = False
-        self.cell_type: str | None = None  # 'th' | 'td'
-        self.cell_attrs: Dict[str, str] = {}
 
-    def handle_starttag(self, tag, attrs):
-        attrs_dict = dict(attrs)
-
-        if tag == "table":
-            self.in_table = True
-            self.current_table = []
-
-        elif tag == "tr" and self.in_table:
-            self.in_row = True
-            self.current_row = []
-
-        elif tag in ["th", "td"] and self.in_row:
-            self.in_cell = True
-            self.cell_type = tag
-            self.current_cell = []
-            self.cell_attrs = attrs_dict
-
-        elif tag == "br" and self.in_cell:
-            self.current_cell.append(" ")
-
-        elif tag == "b" and self.in_cell:
-            self.current_cell.append("**")
-
-    def handle_endtag(self, tag):
-        if tag == "table" and self.in_table:
-            if self.current_table:
-                self.tables.append(self.current_table)
-            self.in_table = False
-            self.current_table = []
-
-        elif tag == "tr" and self.in_row:
-            if self.current_row:
-                self.current_table.append(self.current_row)
-            self.in_row = False
-            self.current_row = []
-
-        elif tag in ["th", "td"] and self.in_cell:
-            cell_text = " ".join("".join(self.current_cell).split()).strip()
-            colspan = int(self.cell_attrs.get("colspan", 1) or 1)
-            rowspan = int(self.cell_attrs.get("rowspan", 1) or 1)
-
-            self.current_row.append(
+def _table_data_from_soup(table: Tag) -> List[List[Dict]]:
+    """Trích dữ liệu bảng từ một thẻ ``<table>`` (đã loại bảng lồng)."""
+    rows: List[List[Dict]] = []
+    for tr in table.find_all("tr"):
+        cells: List[Dict] = []
+        for cell in tr.find_all(["th", "td"]):
+            try:
+                colspan = max(1, int(cell.get("colspan", 1) or 1))
+            except (TypeError, ValueError):
+                colspan = 1
+            try:
+                rowspan = max(1, int(cell.get("rowspan", 1) or 1))
+            except (TypeError, ValueError):
+                rowspan = 1
+            cells.append(
                 {
-                    "text": cell_text,
-                    "type": self.cell_type,
+                    "text": _cell_text(cell),
+                    "type": cell.name,
                     "colspan": colspan,
                     "rowspan": rowspan,
                 }
             )
-
-            self.in_cell = False
-            self.current_cell = []
-            self.cell_attrs = {}
-
-        elif tag == "b" and self.in_cell:
-            self.current_cell.append("**")
-
-    def handle_data(self, data):
-        if self.in_cell:
-            self.current_cell.append(data)
+        if cells:
+            rows.append(cells)
+    return rows
 
 
 def convert_table_to_markdown(
@@ -107,7 +69,8 @@ def convert_table_to_markdown(
     """Chuyển dữ liệu bảng đã parse sang Markdown, xử lý rowspan/colspan.
 
     Args:
-        table_data: dữ liệu bảng từ :class:`HTMLTableParser`.
+        table_data: dữ liệu bảng (list các hàng, mỗi ô là dict
+            ``{text, type, colspan, rowspan}``).
         fill_rowspan: nếu True, lặp giá trị ô gộp xuống mọi dòng bị span
             (mỗi dòng tự chứa đủ ngữ cảnh → tốt cho retrieval).
         fill_empty_from_above: nếu True, lấp ô trống ở các cột đầu bằng giá
@@ -264,13 +227,9 @@ def convert_table_to_markdown(
     return "\n".join(md_lines)
 
 
-def _render_table(table_html: str) -> str:
-    """Parse một fragment ``<table>...</table>`` → Markdown (rỗng nếu fail)."""
-    parser = HTMLTableParser()
-    parser.feed(table_html)
-    if not parser.tables:
-        return ""
-    return convert_table_to_markdown(parser.tables[0])
+def table_to_markdown(table: Tag) -> str:
+    """Render một thẻ ``<table>`` (BeautifulSoup) thành Markdown ('' nếu rỗng)."""
+    return convert_table_to_markdown(_table_data_from_soup(table))
 
 
 def replace_tables_with_markdown(soup: BeautifulSoup) -> int:
@@ -279,11 +238,13 @@ def replace_tables_with_markdown(soup: BeautifulSoup) -> int:
     Bọc Markdown trong ``\\n...\\n`` để bước normalize giữ mỗi dòng bảng
     riêng biệt. Trả về số bảng đã chuyển. Bảng không parse được sẽ giữ nguyên
     (để vòng xử lý block-tag phía sau vẫn bóc được text thô).
+
+    Xử lý từ trong ra ngoài (``reversed``) để bảng lồng nhau được chuyển trước,
+    không bị bảng cha nuốt theo.
     """
     converted = 0
-    # Xử lý từ trong ra ngoài để bảng lồng nhau không bị nuốt theo bảng cha.
     for table in reversed(soup.find_all("table")):
-        markdown = _render_table(str(table))
+        markdown = table_to_markdown(table)
         if not markdown:
             continue
         table.replace_with(NavigableString("\n" + markdown + "\n"))
