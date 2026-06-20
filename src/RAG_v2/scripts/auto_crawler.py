@@ -116,6 +116,41 @@ def _save_json(data: list, path: Path) -> None:
     )
 
 
+def _content_has_markdown_table(text: str) -> bool:
+    """True nếu text đã chứa ít nhất một dòng bảng Markdown ``| ... |``."""
+    for line in (text or "").splitlines():
+        s = line.strip()
+        if s.startswith("|") and "|" in s[1:]:
+            return True
+    return False
+
+
+def _dedupe_articles_by_id(articles: List[Dict]) -> List[Dict]:
+    """Khử trùng bài viết theo ``baiviet_id`` (giữ lần xuất hiện đầu — bài mới)."""
+    seen: Set[int] = set()
+    out: List[Dict] = []
+    for art in articles:
+        bid = art.get("baiviet_id")
+        if bid is not None:
+            if bid in seen:
+                continue
+            seen.add(bid)
+        out.append(art)
+    return out
+
+
+def _distinct_baiviet_ids(chunks: List[Dict]) -> List[int]:
+    """Các ``baiviet_id`` khác nhau xuất hiện trong metadata của chunks."""
+    seen: Set[int] = set()
+    ids: List[int] = []
+    for chunk in chunks:
+        bid = (chunk.get("metadata") or {}).get("baiviet_id")
+        if bid is not None and bid not in seen:
+            seen.add(bid)
+            ids.append(bid)
+    return ids
+
+
 _TEXT_BLOCK_TAGS = {
     "article",
     "aside",
@@ -1008,22 +1043,36 @@ class AutoCrawlPipeline:
 
             summary["new_articles"] = len(all_new_articles)
 
-            if all_new_articles:
-                # Save raw data (single output file per pipeline)
-                # Use a temporary GenericCrawler just for saving
-                saver = GenericCrawler(
-                    output_file=output_file,
-                    source_label=source_label,
+            # Step 1b: Auto-heal — bài CŨ có <table> nhưng content_text chưa phải
+            # Markdown (crawl trước khi có fix). Crawl tăng dần bỏ qua ID đã biết
+            # nên cần bước này để tự sửa. Idempotent: bỏ qua bài đã là Markdown,
+            # nên không stage trùng ở các lần crawl sau.
+            existing_articles = _load_json(output_file)
+            reprocessed = self._heal_stale_table_articles(existing_articles)
+            summary["reprocessed_articles"] = len(reprocessed)
+            if reprocessed:
+                logger.info(
+                    "Auto-heal [%s]: sửa bảng cho %d bài đã crawl.",
+                    pipeline_name,
+                    len(reprocessed),
                 )
-                saver.save_to_file(all_new_articles)
 
-                # Step 2: Chunk
+            # Lưu raw: gộp bài mới (prepend) + bài cũ (đã heal), khử trùng theo ID.
+            if all_new_articles or reprocessed:
+                merged = _dedupe_articles_by_id(
+                    all_new_articles + existing_articles
+                )
+                _save_json(merged, output_file)
+
+            # Step 2: Chunk (bài mới + bài đã heal) → stage 1 run để admin duyệt.
+            to_process = all_new_articles + reprocessed
+            if to_process:
                 logger.info("─── STEP 2: Chunk [%s] ───", pipeline_name)
                 chunker = ChunkProcessor(
                     source_label=source_label,
                     chunks_file=chunks_file,
                 )
-                new_chunks = chunker.chunk_articles(all_new_articles)
+                new_chunks = chunker.chunk_articles(to_process)
                 summary["new_chunks"] = len(new_chunks)
 
                 if new_chunks:
@@ -1078,6 +1127,29 @@ class AutoCrawlPipeline:
 
         self._notify(summary)
         return summary
+
+    # ── Auto-heal: dùng trong crawl pipeline (idempotent) ─────────
+
+    @staticmethod
+    def _heal_stale_table_articles(articles: List[Dict]) -> List[Dict]:
+        """Sửa tại chỗ content_text cho bài có ``<table`` nhưng chưa là Markdown.
+
+        Trả về danh sách bài đã sửa. Idempotent: bài đã có bảng Markdown được bỏ
+        qua → an toàn để chạy mỗi lần crawl mà không stage trùng.
+        """
+        healed: List[Dict] = []
+        for art in articles:
+            content_html = art.get("content_html") or ""
+            if "<table" not in content_html.lower():
+                continue
+            content_text = art.get("content_text") or ""
+            if _content_has_markdown_table(content_text):
+                continue
+            new_text = GenericCrawler._rederive_content_text(content_html)
+            if new_text and new_text != content_text:
+                art["content_text"] = new_text
+                healed.append(art)
+        return healed
 
     # ── Reprocess: fix bài đã crawl từ content_html đã lưu ────────
 
@@ -1479,10 +1551,26 @@ def index_staged_crawler_run(
             indexer = pipeline._make_indexer(
                 collection=str(run_doc["collection"])
             )
+
+            # Idempotent: xoá chunk cũ của cùng baiviet_id trước khi index lại
+            # (reprocess/re-index sinh chunk_id mới ≠ id cũ → nếu không xoá sẽ
+            # trùng bài trong Qdrant/ES và trong file archive).
+            baiviet_ids = _distinct_baiviet_ids(chunks)
+            if baiviet_ids and hasattr(indexer, "delete_by_baiviet_ids"):
+                indexer.delete_by_baiviet_ids(baiviet_ids)
+
             indexed = indexer.index_chunks(chunks)
 
             chunks_file = Path(str(run_doc["chunks_file"]))
             archived = _load_json(chunks_file)
+            if baiviet_ids:
+                id_set = set(baiviet_ids)
+                archived = [
+                    c
+                    for c in archived
+                    if (c.get("metadata") or {}).get("baiviet_id")
+                    not in id_set
+                ]
             _save_json(archived + chunks, chunks_file)
 
             indexed_at = datetime.now(timezone.utc)

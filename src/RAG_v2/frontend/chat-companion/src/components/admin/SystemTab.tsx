@@ -372,7 +372,6 @@ export default function SystemTab() {
   const [crawlerStatus, setCrawlerStatus] = useState<CrawlerStatus | null>(null);
   const [crawlTarget, setCrawlTarget] = useState('all');
   const [triggering, setTriggering] = useState(false);
-  const [reprocessId, setReprocessId] = useState('');
   const [expandedChunkKey, setExpandedChunkKey] = useState<string | null>(null);
   const [loadingRunId, setLoadingRunId] = useState<string | null>(null);
   const [savingChunkKey, setSavingChunkKey] = useState<string | null>(null);
@@ -609,17 +608,11 @@ export default function SystemTab() {
     }
   };
 
-  const handleTrigger = async (reprocess = false) => {
+  const handleTrigger = async () => {
     setTriggering(true);
     try {
-      const trimmedId = reprocessId.trim();
-      const baivietId = trimmedId ? Number(trimmedId) : undefined;
-      await triggerCrawler(crawlTarget, { reprocess, baivietId });
-      toast.success(
-        reprocess
-          ? 'Đã khởi động reprocess (sửa bảng từ HTML đã lưu)'
-          : 'Đã khởi động crawl',
-      );
+      await triggerCrawler(crawlTarget);
+      toast.success('Đã khởi động crawl');
       await refreshCrawlerStatus();
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
@@ -1069,7 +1062,7 @@ export default function SystemTab() {
             </SelectContent>
           </Select>
           <Button
-            onClick={() => handleTrigger(false)}
+            onClick={handleTrigger}
             disabled={triggering || crawlerStatus?.is_running}
             className="gap-2"
           >
@@ -1078,22 +1071,6 @@ export default function SystemTab() {
             ) : (
               <><PlayCircle className="h-4 w-4" /> Chạy Crawl</>
             )}
-          </Button>
-          <input
-            type="number"
-            value={reprocessId}
-            onChange={(e) => setReprocessId(e.target.value)}
-            placeholder="ID (tùy chọn)"
-            className="h-9 w-[130px] rounded-md border border-border bg-background px-3 text-sm"
-          />
-          <Button
-            variant="outline"
-            onClick={() => handleTrigger(true)}
-            disabled={triggering || crawlerStatus?.is_running}
-            title="Trích lại nội dung từ HTML đã lưu để sửa bảng thành Markdown (không crawl mạng). Để trống ID = mọi bài có bảng."
-            className="gap-2"
-          >
-            <PlayCircle className="h-4 w-4" /> Sửa bảng (reprocess)
           </Button>
           {data.crawler.enabled && (
             <span className="text-xs text-muted-foreground">

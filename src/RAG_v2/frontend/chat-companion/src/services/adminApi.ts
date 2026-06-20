@@ -395,30 +395,11 @@ export async function toggleUserStatus(userId: string, isActive: boolean): Promi
   return data;
 }
 
-export interface TriggerCrawlerOptions {
-  backfill?: boolean;
-  /** Re-extract content_text from stored HTML (fix tables → Markdown) without re-crawling. */
-  reprocess?: boolean;
-  /** Limit reprocess to a single article id (baiviet/kehoach). */
-  baivietId?: number;
-}
-
-export async function triggerCrawler(
-  pipeline: string = 'all',
-  options: TriggerCrawlerOptions = {},
-): Promise<CrawlerTriggerResponse> {
-  const params: Record<string, string | number | boolean> = {
-    pipeline_target: pipeline,
-  };
-  if (options.backfill) params.backfill = true;
-  if (options.reprocess) params.reprocess = true;
-  if (options.baivietId !== undefined && !Number.isNaN(options.baivietId)) {
-    params.baiviet_id = options.baivietId;
-  }
+export async function triggerCrawler(pipeline: string = 'all'): Promise<CrawlerTriggerResponse> {
   const { data } = await adminClient.post<CrawlerTriggerResponse>(
     '/admin/crawler/trigger',
     null,
-    { headers: authHeaders(), params },
+    { headers: authHeaders(), params: { pipeline_target: pipeline } },
   );
   return data;
 }
