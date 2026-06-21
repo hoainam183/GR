@@ -37,18 +37,27 @@ _INT_RE = re.compile(r"\d+")
 # Banner line, e.g. "Kíp 1 (7h00) - Kíp 2 (9h30) - Kíp 3 (12h30) - Kíp 4 (15h00)".
 _KIP_BANNER_RE = re.compile(r"kip\s*(\d+)\s*\(\s*(\d{1,2})\s*h\s*(\d{0,2})")
 
+# Folded header → canonical field. The schedule ships in two column-naming
+# layouts that mean the same thing; both are aliased here so a single normalised
+# schema serves both (a column absent from a file simply stays at its default).
+# Layout B: "Mã lớp QT / Mã HP / Tuần thi / Ngày / SL / Mã lớp thi (CK)".
+# Layout A: "Mã lớp / Mã học phần / Tuần / Ngày thi / Số lượng / Mã lớp thi".
 _DEFAULT_COLUMN_MAP: dict[str, str] = {
     "ma lop qt": "mgmt_class_code",
+    "ma lop": "mgmt_class_code",  # layout A
     "ma hp": "subject_code",
+    "ma hoc phan": "subject_code",  # layout A
     "ten hoc phan": "subject_name",
     "ghi chu": "note",
     "nhom": "group",
     "tuan thi": "exam_week",
+    "tuan": "exam_week",  # layout A
     "thu": "weekday",
-    "ngay": "exam_date",
+    "ngay": "exam_date",  # also prefix-matches layout A's "Ngày thi"
     "kip thi": "exam_session",
     "phong thi": "exam_room",
     "sl": "student_count",
+    "so luong": "student_count",  # layout A
     "dot": "exam_batch",
     "ma lop thi": "exam_class_code",
 }
@@ -71,16 +80,20 @@ def _match_header_field(folded: str, column_map: dict[str, str]) -> str | None:
     """Map a folded header cell to a field, tolerating trailing noise.
 
     PDF extraction can append stray text to a header cell (e.g. the ``CK``
-    prefix of the next column bleeds into ``"Mã lớp thi"`` → ``"ma lop thi ck"``).
-    So accept an exact match or a ``key + " "`` prefix match. The trailing space
-    keeps ``ma lop qt`` and ``ma lop thi`` from colliding.
+    suffix of the next column bleeds into ``"Mã lớp thi"`` → ``"ma lop thi ck"``).
+    So accept an exact match, or a ``key + " "`` prefix match. When several keys
+    prefix-match (e.g. both ``ma lop`` and ``ma lop thi`` match ``ma lop thi ck``)
+    the longest key wins, so the most specific column is chosen.
     """
     if folded in column_map:
         return column_map[folded]
-    for key, field in column_map.items():
-        if folded.startswith(key + " "):
-            return field
-    return None
+    best_key: str | None = None
+    for key in column_map:
+        if not folded.startswith(key + " "):
+            continue
+        if best_key is None or len(key) > len(best_key):
+            best_key = key
+    return column_map[best_key] if best_key is not None else None
 
 
 def _find_header(
@@ -91,6 +104,10 @@ def _find_header(
 
     The header is the first row whose folded cells match at least
     ``_MIN_HEADER_MATCHES`` known headers — this skips title banners above it.
+
+    Raises ``ValueError`` if such a header row is found but has no subject-code
+    column: without it every data row is dropped as ``no_subject`` and the
+    upload would silently store nothing. Failing loudly surfaces a 400 instead.
     """
     for row_index, cells in enumerate(rows):
         col_field: dict[int, str] = {}
@@ -99,6 +116,11 @@ def _find_header(
             if field is not None and col_index not in col_field:
                 col_field[col_index] = field
         if len(col_field) >= _MIN_HEADER_MATCHES:
+            if "subject_code" not in col_field.values():
+                raise ValueError(
+                    "Exam-schedule header found but no subject-code column "
+                    "(expected 'Mã HP' / 'Mã học phần')"
+                )
             return row_index, col_field
     return None
 

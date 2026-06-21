@@ -305,20 +305,27 @@ class Settings(BaseSettings):
         default_factory=lambda: ["%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d", "%d/%m/%y"]
     )
     # Folded Excel/PDF header → canonical field. Keys are accent-/case-folded via
-    # query.signals.fold_vietnamese_text so matching is robust to diacritics.
+    # query.signals.fold_vietnamese_text so matching is robust to diacritics. The
+    # schedule ships in two column-naming layouts (e.g. "Mã HP"/"Mã học phần",
+    # "Tuần thi"/"Tuần", "SL"/"Số lượng"); both are aliased to one field so a
+    # single schema serves both. Keep in sync with parser._DEFAULT_COLUMN_MAP.
     exam_schedule_column_map: dict[str, str] = Field(
         default_factory=lambda: {
             "ma lop qt": "mgmt_class_code",
+            "ma lop": "mgmt_class_code",
             "ma hp": "subject_code",
+            "ma hoc phan": "subject_code",
             "ten hoc phan": "subject_name",
             "ghi chu": "note",
             "nhom": "group",
             "tuan thi": "exam_week",
+            "tuan": "exam_week",
             "thu": "weekday",
             "ngay": "exam_date",
             "kip thi": "exam_session",
             "phong thi": "exam_room",
             "sl": "student_count",
+            "so luong": "student_count",
             "dot": "exam_batch",
             "ma lop thi": "exam_class_code",
         }
