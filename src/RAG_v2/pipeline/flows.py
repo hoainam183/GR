@@ -1,4 +1,4 @@
-"""Pipeline Flows — chitchat and RAG flow definitions."""
+﻿"""Pipeline Flows â€” chitchat and RAG flow definitions."""
 
 from __future__ import annotations
 
@@ -35,42 +35,51 @@ logger = logging.getLogger(__name__)
 
 _collection_selector = CollectionSelector()
 
-# ── Answer post-processing: strip markdown links ──────────────────────────────
-# Safety net: LLMs sometimes generate inline links despite prompt instructions.
-# Strip them so the frontend only shows links via FriendlySourceCard components.
-_MARKDOWN_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]*\)")
-_RAW_URL_RE = re.compile(r"(?<!\()(https?://\S+)")
+# â”€â”€ Answer post-processing: strip raw URLs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Markdown links [text](url) are KEPT â€” the frontend renders them as clickable
+# hyperlinks with the URL hidden behind anchor text. Only naked/raw URLs are
+# stripped so users never see an ugly bare URL in the response.
+_RAW_URL_RE = re.compile(r"(?<!\()(?<!\[)(https?://\S+)")
 
 
-def _strip_answer_links(answer: str) -> str:
-    """Remove markdown links and raw URLs from LLM answer text.
+def _strip_raw_urls(answer: str) -> str:
+    """Remove raw URLs from LLM answer while preserving markdown links.
 
-    Preserves the visible label text from markdown links and removes raw URLs
-    that would clutter the response. The frontend displays source documents
-    with proper link buttons via FriendlySourceCard.
+    Markdown links `[text](url)` pass through unchanged â€” they render as
+    clickable anchor text with the URL hidden. Only standalone raw URLs
+    (not inside markdown link syntax) are removed.
     """
-    # [label](url) → label
-    result = _MARKDOWN_LINK_RE.sub(r"\1", answer)
-    # Remove standalone raw URLs (not already inside parentheses)
-    result = _RAW_URL_RE.sub("", result)
-    # Clean up leftover artifacts like empty parentheses or double spaces
-    result = re.sub(r"\(\s*\)", "", result)
-    result = re.sub(r"  +", " ", result)
-    return result.strip()
+    # First, protect markdown links by temporarily replacing them
+    import re as _re
+    links: list[str] = []
+
+    def _save_link(m: _re.Match) -> str:
+        links.append(m.group(0))
+        return f"\x00LINK{len(links) - 1}\x00"
+
+    protected = re.compile(r"\[([^\]]+)\]\([^)]*\)").sub(_save_link, answer)
+    # Strip raw URLs from unprotected text
+    cleaned = _RAW_URL_RE.sub("", protected)
+    # Restore markdown links
+    for i, link in enumerate(links):
+        cleaned = cleaned.replace(f"\x00LINK{i}\x00", link)
+    # Clean double spaces
+    cleaned = re.sub(r"  +", " ", cleaned)
+    return cleaned.strip()
 
 
-# Personal-pronoun pattern removed — entity extraction is now handled by QueryReflector._extract_entities
+# Personal-pronoun pattern removed â€” entity extraction is now handled by QueryReflector._extract_entities
 
-# ── History budget ──────────────────────────────────────────────────────────────
+# â”€â”€ History budget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _DEFAULT_HISTORY_LIMIT = 8
 _HISTORY_MESSAGE_CHAR_LIMIT = 400  # chars per message before truncation
 _HISTORY_TOTAL_CHAR_BUDGET = 2000  # total chars across all kept messages
 
-# ── Context budget ─────────────────────────────────────────────────────────────
+# â”€â”€ Context budget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _DEFAULT_CONTEXT_DOC_CHAR_LIMIT = 1500  # chars per retrieved chunk
 _DEFAULT_CONTEXT_TOTAL_CHAR_BUDGET = 8000  # total context chars sent to LLM
 
-# ── Self-eval ──────────────────────────────────────────────────────────────────
+# â”€â”€ Self-eval â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # BGE reranker scores are raw logits, not probabilities. The high default avoids
 # skipping self-eval for logits like 5.25 that would dwarf a probability threshold.
 _SELF_EVAL_SCORE_THRESHOLD = 100.0  # run self-eval only when top score < this
@@ -78,7 +87,7 @@ _SELF_EVAL_MAX_DOCS = 2
 _SELF_EVAL_DOC_CHAR_LIMIT = 600
 _SELF_EVAL_TOTAL_CHAR_BUDGET = 1800
 
-# ── Context-length error markers (shared across providers) ─────────────────────
+# â”€â”€ Context-length error markers (shared across providers) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _CTX_ERROR_MARKERS = (
     "context length",
     "maximum context length",
@@ -106,9 +115,9 @@ _PROFILE_DEPENDENT_QUERY_RE = re.compile(
 )
 
 # Detect "list-all" queries: asking to enumerate multiple items.
-# Examples: "các học phần tiếng nhật", "tất cả môn bắt buộc", "danh sách học phần"
+# Examples: "cÃ¡c há»c pháº§n tiáº¿ng nháº­t", "táº¥t cáº£ mÃ´n báº¯t buá»™c", "danh sÃ¡ch há»c pháº§n"
 _LIST_QUERY_RE = re.compile(
-    r"\b(?:các|tất\s+cả|danh\s*sách|liệt\s*kê|những|bao\s+gồm\s+những|toàn\s+bộ|hết)\b",
+    r"\b(?:cÃ¡c|táº¥t\s+cáº£|danh\s*sÃ¡ch|liá»‡t\s*kÃª|nhá»¯ng|bao\s+gá»“m\s+nhá»¯ng|toÃ n\s+bá»™|háº¿t)\b",
     re.IGNORECASE,
 )
 _LIST_TOP_K_MULTIPLIER = 2  # double top_k for list queries
@@ -116,7 +125,7 @@ _LIST_TOP_K_MAX = 12  # cap to avoid excessive reranking latency
 
 _WEB_FALLBACK_DEFAULT_DYNAMIC_COLLECTIONS = ("kehoach",)
 _WEB_FALLBACK_NO_INFO_PATTERNS = (
-    # ── Existing (8) ──────────────────────────────────────
+    # â”€â”€ Existing (8) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "toi khong tim thay thong tin nay trong tai lieu hien co",
     "khong tim thay thong tin",
     "khong co thong tin",
@@ -125,7 +134,7 @@ _WEB_FALLBACK_NO_INFO_PATTERNS = (
     "khong du thong tin",
     "tai lieu hien co khong",
     "chua tim thay",
-    # ── Rephrase variants (11) ────────────────────────────
+    # â”€â”€ Rephrase variants (11) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     "khong the xac nhan",
     "chua duoc cap nhat",
     "khong nam trong tai lieu",
@@ -162,9 +171,9 @@ _WEB_FALLBACK_DYNAMIC_QUERY_RE = re.compile(
 )
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Helper
-# ═══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def _elapsed_ms(start: float) -> float:
@@ -195,8 +204,8 @@ def _log_timings(flow_name: str, timings_ms: Dict[str, Any]) -> None:
 def _resolve_top_k(base_top_k: int, query: str) -> int:
     """Return an effective top_k, scaled up for list/enumerate queries.
 
-    When the user asks to enumerate multiple items ("các học phần",
-    "tất cả môn", "danh sách", …) a single topic can span many chunks.
+    When the user asks to enumerate multiple items ("cÃ¡c há»c pháº§n",
+    "táº¥t cáº£ mÃ´n", "danh sÃ¡ch", â€¦) a single topic can span many chunks.
     Doubling top_k (capped at _LIST_TOP_K_MAX) prevents truncating the
     result set before the LLM sees all relevant items.
     """
@@ -205,7 +214,7 @@ def _resolve_top_k(base_top_k: int, query: str) -> int:
         effective = min(scaled, _LIST_TOP_K_MAX)
         if effective > base_top_k:
             logger.info(
-                "List query detected — top_k scaled %d → %d",
+                "List query detected â€” top_k scaled %d â†’ %d",
                 base_top_k,
                 effective,
             )
@@ -284,7 +293,7 @@ def _fold_vietnamese(text: str) -> str:
     without_marks = "".join(
         ch for ch in decomposed if unicodedata.category(ch) != "Mn"
     )
-    return without_marks.replace("đ", "d").replace("Đ", "D").casefold()
+    return without_marks.replace("Ä‘", "d").replace("Ä", "D").casefold()
 
 
 def _is_date_within_days(date_str: str, days: int) -> bool:
@@ -296,10 +305,10 @@ def _is_date_within_days(date_str: str, days: int) -> bool:
         return False
 
 
-# ── B1: Per-collection score cliff ────────────────────────────────────────────
+# â”€â”€ B1: Per-collection score cliff â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _CLIFF_MIN_GAP_BY_COLLECTION = {
-    "kehoach": 0.5,  # Tight clusters → smaller gap is significant
-    "ctdt": 2.0,  # Wide spreads → need larger gap
+    "kehoach": 0.5,  # Tight clusters â†’ smaller gap is significant
+    "ctdt": 2.0,  # Wide spreads â†’ need larger gap
     "quydinh": 1.5,  # Moderate spreads
     "stsv": 1.5,  # Moderate
 }
@@ -365,7 +374,7 @@ def _apply_score_cliff_per_collection(
     return kept
 
 
-# ── C4: Routing confidence candidate pool increase ────────────────────────────
+# â”€â”€ C4: Routing confidence candidate pool increase â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _resolve_candidate_pool(
@@ -384,7 +393,7 @@ def _resolve_candidate_pool(
     ):
         expanded = base_pool * 2
         logger.info(
-            "Low routing confidence (%.3f) → expanding candidate pool %d → %d",
+            "Low routing confidence (%.3f) â†’ expanding candidate pool %d â†’ %d",
             routing_confidence,
             base_pool,
             expanded,
@@ -420,7 +429,7 @@ def _reranker_kwargs(
     return kwargs
 
 
-# ── C5: Parent context expansion (post-rerank) ───────────────────────────────
+# â”€â”€ C5: Parent context expansion (post-rerank) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _expand_parent_context_post_rerank(
@@ -429,7 +438,7 @@ def _expand_parent_context_post_rerank(
 ) -> List[Dict[str, Any]]:
     """Expand child results with parent chunk context (AFTER rerank).
 
-    Best practice order: Search children → Rerank → Expand parent → Format.
+    Best practice order: Search children â†’ Rerank â†’ Expand parent â†’ Format.
     Parent expansion is a READ operation (fetch by ID), not a search operation.
     """
     if not _cfg_bool(cfg, "parent_context_enabled", True):
@@ -482,7 +491,7 @@ def _expand_parent_context_post_rerank(
     return reranked
 
 
-# ── C1: Sibling chunk expansion ──────────────────────────────────────────────
+# â”€â”€ C1: Sibling chunk expansion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _expand_with_siblings_pre_rerank(
@@ -496,13 +505,13 @@ def _expand_with_siblings_pre_rerank(
     """Expand top candidates with sibling chunks BEFORE reranking.
 
     Only expands the top N candidates by fusion score. Siblings are looked up
-    by (source, chunk_index ± window) in the same collection.
+    by (source, chunk_index Â± window) in the same collection.
 
     Args:
         candidates: Raw search results (pre-rerank).
         searcher: MultiCollectionSearch instance with get_by_metadata().
         expand_top_n: Only expand top N candidates.
-        window: ±N sibling offset (default ±1).
+        window: Â±N sibling offset (default Â±1).
         max_expansion: Max total siblings to add.
 
     Returns:
@@ -818,18 +827,18 @@ def _build_web_search_query(question: str, search_query: str) -> str:
         for token in ("moi nhat", "latest", "recent", "hien tai")
     )
 
-    # ── Academic year injection ──────────────────────────────
+    # â”€â”€ Academic year injection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if has_freshness:
         if not re.search(r"\b20\d{2}\b", folded):
             now = datetime.now()
             current_year = now.year
-            # HUST academic year: Aug → Jul
+            # HUST academic year: Aug â†’ Jul
             if now.month >= 8:
                 ay_start, ay_end = current_year, current_year + 1
             else:
                 ay_start, ay_end = current_year - 1, current_year
 
-            # Transition period: "năm học mới/tới" in July+ → next AY
+            # Transition period: "nÄƒm há»c má»›i/tá»›i" in July+ â†’ next AY
             wants_next_year = any(
                 kw in folded
                 for kw in (
@@ -843,8 +852,8 @@ def _build_web_search_query(question: str, search_query: str) -> str:
             if wants_next_year and now.month >= 7:
                 ay_start, ay_end = current_year, current_year + 1
 
-            extras.append(f"năm học {ay_start}-{ay_end}")
-        extras.append("CTT ĐHBKHN")
+            extras.append(f"nÄƒm há»c {ay_start}-{ay_end}")
+        extras.append("CTT ÄHBKHN")
 
     # For registration-specific freshness queries, add key HUST academic-planning
     # terms so Tavily finds the official registration notice rather than generic pages.
@@ -863,12 +872,12 @@ def _build_web_search_query(question: str, search_query: str) -> str:
             "dang ky ke hoach" not in folded
             and "ke hoach hoc tap" not in folded
         ):
-            extras.append("đăng ký kế hoạch học tập")
+            extras.append("Ä‘Äƒng kÃ½ káº¿ hoáº¡ch há»c táº­p")
 
-    # ── Content-type signal ──────────────────────────────────
+    # â”€â”€ Content-type signal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if any(kw in folded for kw in ("lich", "ke hoach", "thong bao", "dang ky")):
         if "thong bao" not in folded and "ke hoach" not in folded:
-            extras.append("thông báo kế hoạch")
+            extras.append("thÃ´ng bÃ¡o káº¿ hoáº¡ch")
 
     for extra in extras:
         if extra and extra.lower() not in web_query.lower():
@@ -924,9 +933,9 @@ def _build_pre_generation_web_decision(
         high_local_confidence or best_local_score is None
     )
 
-    # ── C3: Freshness date_str validation ──────────────────────────
+    # â”€â”€ C3: Freshness date_str validation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # If kehoach docs exist but none have date_str, we can't verify freshness
-    # → conservative: allow Tavily (don't suppress)
+    # â†’ conservative: allow Tavily (don't suppress)
     if (
         freshness_acceptable_local
         and freshness_query
@@ -1105,7 +1114,7 @@ def _has_local_exact_policy_evidence(
 
     This prevents a conservative self-eval miss from replacing strong local
     table evidence with weaker web search snippets for questions like
-    "hiến máu được mấy điểm rèn luyện".
+    "hiáº¿n mÃ¡u Ä‘Æ°á»£c máº¥y Ä‘iá»ƒm rÃ¨n luyá»‡n".
     """
     if not reranked:
         return False
@@ -1190,18 +1199,18 @@ def _merge_local_and_web_context(local_context: str, web_context: str) -> str:
         return local_context
     if not local_context:
         return (
-            f"## web_live_context (Tavily / nguồn web chính thức)\n"
+            f"## web_live_context (Tavily / nguá»“n web chÃ­nh thá»©c)\n"
             f"{web_context}"
         )
     return (
-        f"## Nguồn Cơ Sở Dữ Liệu Nội Bộ (ưu tiên date_str khi có)\n"
+        f"## Nguá»“n CÆ¡ Sá»Ÿ Dá»¯ Liá»‡u Ná»™i Bá»™ (Æ°u tiÃªn date_str khi cÃ³)\n"
         f"{local_context}\n\n---\n\n"
-        f"## web_live_context (Tavily / nguồn web chính thức)\n"
+        f"## web_live_context (Tavily / nguá»“n web chÃ­nh thá»©c)\n"
         f"{web_context}\n\n"
-        f"Lưu ý: Ưu tiên Nguồn Cơ Sở Dữ Liệu Nội Bộ cho các câu hỏi về quy chế, "
-        f"chương trình đào tạo và điều kiện tốt nghiệp — đây là nguồn chính xác "
-        f"và cụ thể nhất. Chỉ dùng web_live_context khi nguồn nội bộ không có "
-        f"thông tin hoặc cần xác nhận dữ liệu thời gian thực (lịch thi, thông báo mới)."
+        f"LÆ°u Ã½: Æ¯u tiÃªn Nguá»“n CÆ¡ Sá»Ÿ Dá»¯ Liá»‡u Ná»™i Bá»™ cho cÃ¡c cÃ¢u há»i vá» quy cháº¿, "
+        f"chÆ°Æ¡ng trÃ¬nh Ä‘Ã o táº¡o vÃ  Ä‘iá»u kiá»‡n tá»‘t nghiá»‡p â€” Ä‘Ã¢y lÃ  nguá»“n chÃ­nh xÃ¡c "
+        f"vÃ  cá»¥ thá»ƒ nháº¥t. Chá»‰ dÃ¹ng web_live_context khi nguá»“n ná»™i bá»™ khÃ´ng cÃ³ "
+        f"thÃ´ng tin hoáº·c cáº§n xÃ¡c nháº­n dá»¯ liá»‡u thá»i gian thá»±c (lá»‹ch thi, thÃ´ng bÃ¡o má»›i)."
     )
 
 
@@ -1338,23 +1347,25 @@ def _format_context(
     for i, doc in enumerate(documents, 1):
         meta = doc.get("metadata", {}) or {}
         title = (
-            meta.get("title") or meta.get("source") or "Tài liệu không rõ nguồn"
+            meta.get("title") or meta.get("source") or "TÃ i liá»‡u khÃ´ng rÃµ nguá»“n"
         )
 
         # Inject metadata into document header so the LLM is aware of the program/major context
         meta_parts = []
         if meta.get("major_code"):
-            meta_parts.append(f"Mã ngành: {meta['major_code']}")
+            meta_parts.append(f"MÃ£ ngÃ nh: {meta['major_code']}")
         if meta.get("major_name"):
-            meta_parts.append(f"Ngành: {meta['major_name']}")
+            meta_parts.append(f"NgÃ nh: {meta['major_name']}")
         if meta.get("applicable_cohort"):
-            meta_parts.append(f"Khóa: {meta['applicable_cohort']}")
+            meta_parts.append(f"KhÃ³a: {meta['applicable_cohort']}")
         # Posting date is kehoach-specific (freshness signal for notifications).
         if doc.get("collection") == "kehoach" and meta.get("date_str"):
-            meta_parts.append(f"Ngày đăng: {meta['date_str']}")
-        # NOTE: URLs are no longer injected into context. The frontend displays
-        # source links via dedicated FriendlySourceCard components, providing
-        # better UX than inline markdown links in the answer text.
+            meta_parts.append(f"NgÃ y Ä‘Äƒng: {meta['date_str']}")
+        # Expose a real source URL so the LLM can cite it as a Markdown link
+        # [anchor text](URL). Only inject genuine http(s) URLs.
+        url = str(meta.get("url") or "").strip()
+        if url.startswith(("http://", "https://")):
+            meta_parts.append(f"URL: {url}")
         meta_str = f" [{', '.join(meta_parts)}]" if meta_parts else ""
 
         text = str(doc.get("text", "") or "").strip()
@@ -1372,11 +1383,11 @@ def _format_context(
             if parent_id:
                 seen_parent_ids.add(parent_id)
             parent_header = (
-                f"[Ngữ cảnh section: {parent_title}]"
+                f"[Ngá»¯ cáº£nh section: {parent_title}]"
                 if parent_title
-                else "[Ngữ cảnh section]"
+                else "[Ngá»¯ cáº£nh section]"
             )
-            text = f"{parent_header}\n{parent_ctx}\n\n[Chi tiết]\n{text}"
+            text = f"{parent_header}\n{parent_ctx}\n\n[Chi tiáº¿t]\n{text}"
 
         # Siblings get reduced per-doc limit (C2: 70/30 budget split)
         effective_limit = (
@@ -1391,7 +1402,7 @@ def _format_context(
             )
         if len(text) > effective_limit:
             text = text[:effective_limit] + "\u2026"  # ellipsis
-        chunk = f"--- Văn bản: {title}{meta_str}\n{text}"
+        chunk = f"--- VÄƒn báº£n: {title}{meta_str}\n{text}"
         separator_cost = 7 if parts else 0  # len("\n\n---\n\n")
         if used + len(chunk) + separator_cost > total_char_budget:
             break
@@ -1408,20 +1419,20 @@ def _format_context(
     return context
 
 
-# ─── Kehoach source-link footer ─────────────────────────────────────────────
+# â”€â”€â”€ Kehoach source-link footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # kehoach (notification) docs always carry a real URL in metadata, but the LLM
 # does not reliably embed it. When the answer actually references such a doc, we
 # deterministically append a verifiable link footer so the user can open the
 # original notice.
 
-_KEHOACH_LINK_HEADER = "**Nguồn thông báo:**"
+_KEHOACH_LINK_HEADER = "**Nguá»“n thÃ´ng bÃ¡o:**"
 # A title counts as "mentioned" when the answer shares at least this fraction of
 # the title's adjacent word-pairs (bigrams). Bigrams are far more discriminative
-# than single words, which the kehoach titles share heavily ("học kỳ", "năm học").
+# than single words, which the kehoach titles share heavily ("há»c ká»³", "nÄƒm há»c").
 _TITLE_MENTION_MIN_BIGRAM_OVERLAP = 0.5
 # Vietnamese titles use space-separated syllables; need enough to form bigrams.
 _TITLE_MENTION_MIN_TOKENS = 4
-_MATCH_NORMALIZE_RE = re.compile(r"[^0-9a-zà-ỹ]+")
+_MATCH_NORMALIZE_RE = re.compile(r"[^0-9a-zÃ -á»¹]+")
 
 
 def _normalize_for_match(text: str) -> str:
@@ -1633,7 +1644,7 @@ def _best_explicit_rerank_score(
     return max(scores) if scores else None
 
 
-# ── HyDE post-rerank fallback ─────────────────────────────────────────────────
+# â”€â”€ HyDE post-rerank fallback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _should_trigger_hyde(
@@ -1914,10 +1925,10 @@ def _extract_session_profile(history: Optional[List[Dict[str, str]]]) -> str:
     """Scan full conversation history for user-stated facts (major, year, GPA).
 
     Returns a compact note like:
-        "Thông tin sinh viên: ngành CNTT, năm 3, CPA=2.4."
+        "ThÃ´ng tin sinh viÃªn: ngÃ nh CNTT, nÄƒm 3, CPA=2.4."
     or empty string when nothing useful is found.
 
-    This allows the LLM to answer personal questions (\"tôi học ngành gì?\") even
+    This allows the LLM to answer personal questions (\"tÃ´i há»c ngÃ nh gÃ¬?\") even
     after the original turn has been trimmed from the context window.
     """
     profile = _extract_session_profile_dict(history)
@@ -1941,23 +1952,23 @@ def _build_profile_note_from_user_context(
     user_context: Optional[Dict[str, Any]],
 ) -> str:
     """Build a compact profile note from the authenticated user's profile dict.
-    Used only inside the reflector prompt — NOT for post-reflection bracketing.
+    Used only inside the reflector prompt â€” NOT for post-reflection bracketing.
     """
     if not user_context:
         return ""
 
     parts: List[str] = []
     if user_context.get("full_name"):
-        parts.append(f"Sinh viên: {user_context['full_name']}")
+        parts.append(f"Sinh viÃªn: {user_context['full_name']}")
     if user_context.get("student_id"):
-        parts.append(f"Mã SV: {user_context['student_id']}")
+        parts.append(f"MÃ£ SV: {user_context['student_id']}")
     if user_context.get("major"):
         major_note = user_context["major"]
         if user_context.get("major_code"):
             major_note += f" [{user_context['major_code']}]"
-        parts.append(f"Ngành: {major_note}")
+        parts.append(f"NgÃ nh: {major_note}")
     if user_context.get("cohort"):
-        parts.append(f"Khoá: {user_context['cohort']}")
+        parts.append(f"KhoÃ¡: {user_context['cohort']}")
 
     return " | ".join(parts) if parts else ""
 
@@ -1966,8 +1977,8 @@ def _build_cache_profile(user_context: Optional[Dict[str, Any]]) -> str:
     """Normalized ``major|cohort`` scope for answer-cache keys.
 
     Without this scope the query-only cache (no doc_ids) would serve a personal
-    answer generated for one student ("điều kiện tốt nghiệp của tôi") verbatim to
-    any other student asking the same words — a cross-student data leak. An empty
+    answer generated for one student ("Ä‘iá»u kiá»‡n tá»‘t nghiá»‡p cá»§a tÃ´i") verbatim to
+    any other student asking the same words â€” a cross-student data leak. An empty
     string (anonymous / no profile) keeps the legacy key space.
     """
     if not user_context:
@@ -2012,12 +2023,12 @@ def _build_resolved_profile_note(
         major_text = MAJOR_CODE_TO_NAME.get(resolved_major, resolved_major)
         if major_text and major_text != resolved_major:
             major_text = f"{major_text} [{resolved_major}]"
-        parts.append(f"Ngành: {major_text}")
+        parts.append(f"NgÃ nh: {major_text}")
     if resolved_cohort:
-        parts.append(f"Khoá: {resolved_cohort}")
+        parts.append(f"KhoÃ¡: {resolved_cohort}")
     if not parts:
         return ""
-    return "Thông tin sinh viên: " + " | ".join(parts) + "."
+    return "ThÃ´ng tin sinh viÃªn: " + " | ".join(parts) + "."
 
 
 def _profile_note_for_generation(
@@ -2037,11 +2048,11 @@ def _profile_note_for_generation(
     only when the answer depends on a profile attribute that resolves to the
     authenticated profile (not a target named in the query). A legacy phrasing
     check is kept as a floor so self-referential identity questions
-    ("ngành của tôi là gì") still surface the profile.
+    ("ngÃ nh cá»§a tÃ´i lÃ  gÃ¬") still surface the profile.
 
     This is the consistency fix (BUG-1 / BUG-4): retrieval major-filtering and the
     generation note now share one gate, so a major reflection already resolved is
-    never silently dropped — the model stops re-asking the program.
+    never silently dropped â€” the model stops re-asking the program.
     """
     from query.profile_dependency import (
         should_inject_profile_note,
@@ -2123,9 +2134,9 @@ def _build_collection_scores(
     return scores
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Chitchat Flow
-# ═══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def chitchat_flow(
@@ -2134,7 +2145,7 @@ def chitchat_flow(
     history: Optional[List[Dict[str, str]]],
     chat_model: BaseLLM,
 ) -> Dict[str, Any]:
-    """Router → Chat Model → response (no retrieval).
+    """Router â†’ Chat Model â†’ response (no retrieval).
 
     Args:
         question: The user message.
@@ -2189,9 +2200,9 @@ def chitchat_flow_stream(
     )
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # RAG Flow
-# ═══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def rag_flow(
@@ -2217,7 +2228,7 @@ def rag_flow(
     pre_ref_result: Optional[Dict[str, Any]] = None,
     pre_reflection_ms: Optional[float] = None,
 ) -> Dict[str, Any]:
-    """Full RAG flow: Reflect → Embed → Search → Rerank → Generate → SelfEval → (Tavily fallback).
+    """Full RAG flow: Reflect â†’ Embed â†’ Search â†’ Rerank â†’ Generate â†’ SelfEval â†’ (Tavily fallback).
 
     Args:
         question: Raw user question.
@@ -2231,7 +2242,7 @@ def rag_flow(
         self_evaluator: ``SelfEvaluator`` (or *None* to skip).
         tavily_tool: ``TavilySearchTool`` (or *None* to skip).
         cfg: Pipeline config dict with retrieval params.
-        user_context: Authenticated user profile (major, cohort, student_id …).
+        user_context: Authenticated user profile (major, cohort, student_id â€¦).
 
     Returns:
         Dict with ``answer``, ``sources``, ``intent``, etc.
@@ -2252,12 +2263,12 @@ def rag_flow(
     if bypass_query_cache:
         timings_ms["query_cache_bypassed"] = 1.0
 
-    # ── Pre-retrieval query cache (P0) ───────────────────────────────────────
+    # â”€â”€ Pre-retrieval query cache (P0) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Check before reflection + retrieval to save the full ~13-25 s pipeline
     # cost for repeated identical queries.  Only fires when the cache backend
     # exposes get_by_query (LLMResponseCache with Redis).
     # Profile scope (major|cohort) so a personal answer is never served to a
-    # student with a different profile — see _build_cache_profile.
+    # student with a different profile â€” see _build_cache_profile.
     cache_profile = _build_cache_profile(user_context)
     if (
         llm_cache is not None
@@ -2275,7 +2286,7 @@ def rag_flow(
                 timings_ms["flow_total"] = _elapsed_ms(flow_t0)
                 return {
                     "question": question,
-                    "answer": _strip_answer_links(_qcached["answer"]),
+                    "answer": _strip_raw_urls(_qcached["answer"]),
                     "sources": _qcached["sources"],
                     "num_sources": len(_qcached["sources"]),
                     "intent": "rag",
@@ -2307,7 +2318,7 @@ def rag_flow(
                     },
                 }
 
-    # 1. Reflection — rewrite query + extract entities
+    # 1. Reflection â€” rewrite query + extract entities
     search_query = question
     reflection_prompt: Optional[str] = None
     resolved_major: Optional[str] = None
@@ -2416,7 +2427,7 @@ def rag_flow(
     retrieval_query = search_query
 
     # Drop the major metadata filter for topics whose answer does not depend on the
-    # program (e.g. học bổng) so universal answers are not narrowed to one major.
+    # program (e.g. há»c bá»•ng) so universal answers are not narrowed to one major.
     # When major IS required, retrieval_major == resolved_major. See
     # query.profile_dependency. Decided once here, reused for every sub-query.
     from query.profile_dependency import (
@@ -2427,7 +2438,7 @@ def rag_flow(
         question, search_query, routing_result, resolved_major
     )
 
-    # 2. Collection-aware routing (Phase 8 — Tier 2 multi-domain)
+    # 2. Collection-aware routing (Phase 8 â€” Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
     routing_probabilities: Optional[Dict[str, Any]] = None
     if cfg.get("find_all", False):
@@ -2437,7 +2448,7 @@ def rag_flow(
             routing_result.get("probabilities") if routing_result else None
         )
         logger.info(
-            "find_all=true → bypassing routing, searching all collections: %s",
+            "find_all=true â†’ bypassing routing, searching all collections: %s",
             target_collections,
         )
         timings_ms["collection_routing"] = _elapsed_ms(routing_t0)
@@ -2467,7 +2478,7 @@ def rag_flow(
             )
         routing_probabilities = routing_result.get("probabilities")
         logger.info(
-            "Domains: %s (conf=%.3f) → searching collections: %s",
+            "Domains: %s (conf=%.3f) â†’ searching collections: %s",
             domains,
             confidence,
             target_collections,
@@ -2729,7 +2740,7 @@ def rag_flow(
 
     logger.info("Retrieved %d raw candidates", len(raw_results))
 
-    # 4.5 Sibling chunk expansion (C1) — BEFORE rerank
+    # 4.5 Sibling chunk expansion (C1) â€” BEFORE rerank
     if _cfg_bool(cfg, "sibling_expansion_enabled", False) and raw_results:
         expansion_t0 = time.perf_counter()
         pre_expansion_count = len(raw_results)
@@ -2838,7 +2849,7 @@ def rag_flow(
             top_k_value,
         )
 
-    # 5.05 HyDE post-rerank fallback — second-pass retrieval for low-recall
+    # 5.05 HyDE post-rerank fallback â€” second-pass retrieval for low-recall
     if _should_trigger_hyde(reranked, reranker, cfg):
         reranked = _hyde_fallback_post_rerank(
             reranked=reranked,
@@ -2878,12 +2889,12 @@ def rag_flow(
         timings_ms["cliff_triggered"] = 1.0 if cliff_dropped > 0 else 0.0
         timings_ms["cliff_dropped_count"] = float(cliff_dropped)
 
-    # 5.4 Parent context expansion (C5) — fetch parent by ID after rerank
+    # 5.4 Parent context expansion (C5) â€” fetch parent by ID after rerank
     parent_t0 = time.perf_counter()
     reranked = _expand_parent_context_post_rerank(reranked, cfg)
     timings_ms["parent_expansion"] = _elapsed_ms(parent_t0)
 
-    # ── LLM Response Cache Check (Phase 2) ─────────────────────────
+    # â”€â”€ LLM Response Cache Check (Phase 2) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     web_fallback_used = False
     pre_web_fallback_used = False
     web_fallback_sources: List[Dict[str, Any]] = []
@@ -2953,7 +2964,7 @@ def rag_flow(
                 timings_ms["flow_total"] = _elapsed_ms(flow_t0)
                 return {
                     "question": question,
-                    "answer": _strip_answer_links(cached["answer"]),
+                    "answer": _strip_raw_urls(cached["answer"]),
                     "sources": cached["sources"],
                     "num_sources": len(cached["sources"]),
                     "intent": "rag",
@@ -2987,7 +2998,7 @@ def rag_flow(
                     "cache_hit": True,
                 }
 
-    # 6. Format context — inject profile so user facts survive trimming.
+    # 6. Format context â€” inject profile so user facts survive trimming.
     #    Priority 1: use authenticated user_context (precise, always present).
     #    Priority 2: fall back to regex scan of history.
     context_t0 = time.perf_counter()
@@ -3076,15 +3087,15 @@ def rag_flow(
         except Exception as retry_exc:
             if _is_context_length_error(retry_exc):
                 raise RuntimeError(
-                    "Ngữ cảnh hội thoại đang quá dài. "
-                    "Vui lòng bắt đầu phiên mới hoặc hỏi ngắn gọn hơn."
+                    "Ngá»¯ cáº£nh há»™i thoáº¡i Ä‘ang quÃ¡ dÃ i. "
+                    "Vui lÃ²ng báº¯t Ä‘áº§u phiÃªn má»›i hoáº·c há»i ngáº¯n gá»n hÆ¡n."
                 ) from retry_exc
             raise
     if recovered:
         timings_ms["context_recovery"] = 1.0
     timings_ms["generate"] = _elapsed_ms(generate_t0)
 
-    # 8. Self-evaluation — only when retrieval confidence is low.
+    # 8. Self-evaluation â€” only when retrieval confidence is low.
     # Saves 11-20s per query when retrieval already found a relevant chunk.
     top_score = 0.0
     if reranked:
@@ -3304,7 +3315,7 @@ def rag_flow(
 
     return {
         "question": question,
-        "answer": _strip_answer_links(answer),
+        "answer": _strip_raw_urls(answer),
         "sources": reranked,
         "num_sources": len(reranked),
         "intent": "rag",
@@ -3382,7 +3393,7 @@ def rag_flow_stream(
     pre_ref_result: Optional[Dict[str, Any]] = None,
     pre_reflection_ms: Optional[float] = None,
 ) -> tuple[Generator[str, None, None], List[Dict[str, Any]]]:
-    """Streaming RAG flow — retrieval runs first, then generation is streamed.
+    """Streaming RAG flow â€” retrieval runs first, then generation is streamed.
 
     Returns:
         A tuple of (text_chunk_generator, reranked_sources).
@@ -3405,9 +3416,9 @@ def rag_flow_stream(
     if bypass_query_cache:
         timings_ms["query_cache_bypassed"] = 1.0
 
-    # ── Pre-retrieval query cache (P0 — stream variant) ──────────────────────
+    # â”€â”€ Pre-retrieval query cache (P0 â€” stream variant) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Profile scope (major|cohort) so a personal answer is never served to a
-    # student with a different profile — see _build_cache_profile.
+    # student with a different profile â€” see _build_cache_profile.
     cache_profile = _build_cache_profile(user_context)
     if (
         llm_cache is not None
@@ -3447,7 +3458,7 @@ def rag_flow_stream(
 
                 def _cached_stream_early() -> Generator[str, None, None]:
                     yield from _chunk_cached_answer(
-                        _strip_answer_links(_qcached["answer"])
+                        _strip_raw_urls(_qcached["answer"])
                     )
 
                 return _cached_stream_early(), _qcached["sources"]
@@ -3552,7 +3563,7 @@ def rag_flow_stream(
     retrieval_query = search_query
 
     # Drop the major metadata filter for topics whose answer does not depend on the
-    # program (e.g. học bổng) so universal answers are not narrowed to one major.
+    # program (e.g. há»c bá»•ng) so universal answers are not narrowed to one major.
     # When major IS required, retrieval_major == resolved_major. See
     # query.profile_dependency. Decided once here, reused for every sub-query.
     from query.profile_dependency import (
@@ -3563,13 +3574,13 @@ def rag_flow_stream(
         question, search_query, routing_result, resolved_major
     )
 
-    # Collection-aware routing (Phase 8 — Tier 2 multi-domain)
+    # Collection-aware routing (Phase 8 â€” Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
     if cfg.get("find_all", False):
         routing_t0 = time.perf_counter()
         target_collections = list(cfg.get("collections") or [])
         logger.info(
-            "find_all=true (stream) → bypassing routing, searching all collections: %s",
+            "find_all=true (stream) â†’ bypassing routing, searching all collections: %s",
             target_collections,
         )
         timings_ms["collection_routing"] = _elapsed_ms(routing_t0)
@@ -3622,7 +3633,7 @@ def rag_flow_stream(
     if dynamic_web_query:
         timings_ms["dynamic_web_query"] = 1.0
 
-    # ── Populate metadata_out early (pre-generation) so caller can read it ──────
+    # â”€â”€ Populate metadata_out early (pre-generation) so caller can read it â”€â”€â”€â”€â”€â”€
     # The search_trace dict is mutated later; we update metadata_out after rerank.
     if metadata_out is not None:
         metadata_out["reflected_question"] = search_query
@@ -3671,7 +3682,7 @@ def rag_flow_stream(
         if len(stripped.split()) >= 2:
             rerank_query = stripped
 
-    # Embed → Search → Rerank
+    # Embed â†’ Search â†’ Rerank
     search_trace: Dict[str, Any] = {}
 
     def _search_once(
@@ -3822,7 +3833,7 @@ def rag_flow_stream(
                     top_k=raw_candidate_k,
                 )
 
-    # 4.5 Sibling chunk expansion (C1) — BEFORE rerank (streaming flow)
+    # 4.5 Sibling chunk expansion (C1) â€” BEFORE rerank (streaming flow)
     if _cfg_bool(cfg, "sibling_expansion_enabled", False) and raw_results:
         expansion_t0 = time.perf_counter()
         pre_expansion_count = len(raw_results)
@@ -3924,7 +3935,7 @@ def rag_flow_stream(
             top_k_value,
         )
 
-    # 5.05 HyDE post-rerank fallback — second-pass retrieval for low-recall
+    # 5.05 HyDE post-rerank fallback â€” second-pass retrieval for low-recall
     if _should_trigger_hyde(reranked, reranker, cfg):
         reranked = _hyde_fallback_post_rerank(
             reranked=reranked,
@@ -3964,7 +3975,7 @@ def rag_flow_stream(
         timings_ms["cliff_triggered"] = 1.0 if cliff_dropped > 0 else 0.0
         timings_ms["cliff_dropped_count"] = float(cliff_dropped)
 
-    # 5.4 Parent context expansion (C5) — fetch parent by ID after rerank
+    # 5.4 Parent context expansion (C5) â€” fetch parent by ID after rerank
     parent_t0 = time.perf_counter()
     reranked = _expand_parent_context_post_rerank(reranked, cfg)
     timings_ms["parent_expansion"] = _elapsed_ms(parent_t0)
@@ -4063,7 +4074,7 @@ def rag_flow_stream(
         2,
     )
 
-    # ── Final metadata update (post-rerank, pre-stream) ──────────────────────────
+    # â”€â”€ Final metadata update (post-rerank, pre-stream) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if metadata_out is not None:
         metadata_out["num_sources"] = len(reranked)
         metadata_out["collection_scores"] = _build_collection_scores(
@@ -4114,7 +4125,7 @@ def rag_flow_stream(
             else []
         )
 
-    # ── LLM Response Cache Check (Phase 2 - Stream) ─────────────────
+    # â”€â”€ LLM Response Cache Check (Phase 2 - Stream) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (
         llm_cache is not None
         and not dynamic_web_query
@@ -4150,7 +4161,7 @@ def rag_flow_stream(
 
                 def _cached_stream() -> Generator[str, None, None]:
                     yield from _chunk_cached_answer(
-                        _strip_answer_links(cached["answer"])
+                        _strip_raw_urls(cached["answer"])
                     )
                     timings_ms["stream_first_token"] = 0.1
                     timings_ms["stream_generate"] = 0.1
@@ -4197,8 +4208,8 @@ def rag_flow_stream(
             except Exception as retry_exc:
                 if _is_context_length_error(retry_exc):
                     raise RuntimeError(
-                        "Ngữ cảnh hội thoại đang quá dài. "
-                        "Vui lòng bắt đầu phiên mới hoặc hỏi ngắn gọn hơn."
+                        "Ngá»¯ cáº£nh há»™i thoáº¡i Ä‘ang quÃ¡ dÃ i. "
+                        "Vui lÃ²ng báº¯t Ä‘áº§u phiÃªn má»›i hoáº·c há»i ngáº¯n gá»n hÆ¡n."
                     ) from retry_exc
                 raise
 
@@ -4264,9 +4275,9 @@ def rag_flow_stream(
     return _timed_stream(), reranked
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tavily Fallback
-# ═══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def _tavily_results_to_docs(
@@ -4352,7 +4363,7 @@ def _tavily_search_context(
         web_context = ""
         tavily_sources: List[Dict[str, Any]] = []
 
-        # ── Path A: caller supplied specific URLs → extract directly ──────
+        # â”€â”€ Path A: caller supplied specific URLs â†’ extract directly â”€â”€â”€â”€â”€â”€
         if extract_urls:
             extract_t0 = time.perf_counter()
             extract_result = tavily_tool.extract(
@@ -4364,12 +4375,12 @@ def _tavily_search_context(
             web_context = str(extract_result.get("context") or "")
             tavily_sources = _tavily_results_to_docs(extract_result)
             logger.info(
-                "Tavily extract: %d URL(s) → context_len=%d",
+                "Tavily extract: %d URL(s) â†’ context_len=%d",
                 len(extract_urls),
                 len(web_context),
             )
 
-        # ── Path B: normal keyword search ─────────────────────────────────
+        # â”€â”€ Path B: normal keyword search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         else:
             search_t0 = time.perf_counter()
             search_result = tavily_tool.search(
@@ -4402,7 +4413,7 @@ def _tavily_search_context(
             web_context = str(search_result.get("context") or "")
             tavily_sources = _tavily_results_to_docs(search_result)
 
-            # ── Path B2: search found URLs but empty content → extract top URL
+            # â”€â”€ Path B2: search found URLs but empty content â†’ extract top URL
             if not web_context and search_result.get("results"):
                 top_url = str(search_result["results"][0].get("url", ""))
                 if top_url:
@@ -4470,7 +4481,7 @@ def _tavily_fallback_result(
     # still useful for notices/deadlines and should be allowed to regenerate.
     if not web_context:
         return {
-            "answer": _strip_answer_links(answer),
+            "answer": _strip_raw_urls(answer),
             "timings": timings_ms,
             "sources": tavily_sources,
             "used": False,
@@ -4491,7 +4502,7 @@ def _tavily_fallback_result(
         timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
         logger.info("Tavily fallback generated %d chars", len(new_answer))
         return {
-            "answer": _strip_answer_links(new_answer),
+            "answer": _strip_raw_urls(new_answer),
             "timings": timings_ms,
             "sources": tavily_sources,
             "used": True,
@@ -4503,7 +4514,7 @@ def _tavily_fallback_result(
         )
         timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
         return {
-            "answer": _strip_answer_links(answer),
+            "answer": _strip_raw_urls(answer),
             "timings": timings_ms,
             "sources": tavily_sources,
             "used": False,

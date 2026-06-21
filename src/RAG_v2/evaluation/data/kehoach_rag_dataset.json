@@ -1,0 +1,775 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "kehoach_list_all_chunks.json",
+  "total_questions": 50,
+  "distribution": {
+    "simple": 38,
+    "multi_hop": 12
+  },
+  "items": [
+    {
+      "id": "kehoach_list_all_chunks_simple_001",
+      "question_type": "simple",
+      "question": "Thời hạn nhận hồ sơ tiếp nhận trở lại học từ kỳ hè năm học 2025-2026 (20253) là từ ngày nào đến ngày nào?",
+      "gold_answer": "Từ ngày 05/05/2026 đến ngày 30/06/2026.",
+      "evidence_chunk_ids": [
+        "1c439f64-e234-44b2-9d7c-b416ba23fd81"
+      ],
+      "ground_truth_context": [
+        "Vào học tiếp từ kỳ hè năm học 2025-2026 (20253): từ 05/05/2026 đến 30/06/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_002",
+      "question_type": "simple",
+      "question": "Thời hạn nhận hồ sơ tiếp nhận trở lại học từ kỳ 1 năm học 2026-2027 (20261) là từ ngày nào đến ngày nào?",
+      "gold_answer": "Từ ngày 05/05/2026 đến ngày 15/08/2026.",
+      "evidence_chunk_ids": [
+        "1c439f64-e234-44b2-9d7c-b416ba23fd81"
+      ],
+      "ground_truth_context": [
+        "Vào học tiếp từ kỳ 1 năm học 2026-2027 (20261): từ 05/05/2026 đến 15/08/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên tiếp nhận trở lại học từ kỳ hè 20253 và 20261 nộp đơn gặp ai tại Ban Đào tạo?",
+      "gold_answer": "Gặp chuyên viên Nguyễn Kim Huệ tại Ban Đào tạo (Tầng 1 nhà C1).",
+      "evidence_chunk_ids": [
+        "93f509f0-fab2-47b8-b53a-ecb613d7f719"
+      ],
+      "ground_truth_context": [
+        "Nơi nhận đơn: Ban Đào tạo (Tầng 1 nhà C1) gặp chuyên viên Nguyễn Kim Huệ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_004",
+      "question_type": "simple",
+      "question": "Sinh viên tiếp nhận trở lại học từ kỳ hè 20253 có cần đăng ký học phần không?",
+      "gold_answer": "Không, sinh viên chỉ đăng ký lớp học trong đợt đăng ký điều chỉnh online trên hệ thống, không cần đăng ký học phần.",
+      "evidence_chunk_ids": [
+        "1c439f64-e234-44b2-9d7c-b416ba23fd81"
+      ],
+      "ground_truth_context": [
+        "SV đăng ký lớp học trong đợt đăng ký điều chỉnh, online trên hệ thống đăng ký lớp. (không cần đăng ký học phần)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_005",
+      "question_type": "simple",
+      "question": "Lịch thi giữa kỳ 20252-AB và cuối kỳ 20252A được cập nhật vào ngày nào?",
+      "gold_answer": "Cập nhật ngày 28/04/2026.",
+      "evidence_chunk_ids": [
+        "dffb1d14-3ce4-46a8-bac7-a8ae45e2bda5"
+      ],
+      "ground_truth_context": [
+        "LỊCH THI GIỮA KỲ 20252-AB VÀ CUỐI KỲ 20252A XEM CHI TIẾT TẠI ĐÂY (CẬP NHẬT NGÀY 28.04.2026)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_006",
+      "question_type": "simple",
+      "question": "Mốc thời gian đăng ký form tích hợp chương trình Kỹ sư chuyên sâu (KSCS) học kỳ 2025.2 là từ ngày nào đến ngày nào?",
+      "gold_answer": "Từ ngày 27/04/2026 đến ngày 18/05/2026.",
+      "evidence_chunk_ids": [
+        "31da81f9-f4c7-4885-8b1e-bdd90d3b06d8"
+      ],
+      "ground_truth_context": [
+        "Mốc thời gian đăng ký form tích hợp KSCS từ 27/04/2026 đến 18/05/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_007",
+      "question_type": "simple",
+      "question": "Điều kiện tín chỉ tích lũy tối thiểu để sinh viên được đăng ký học tích lũy trước các học phần bậc kỹ sư chuyên sâu là bao nhiêu?",
+      "gold_answer": "Tổng số tín chỉ tích lũy cộng với tín chỉ đang học tại kỳ hiện tại của các học phần bậc cử nhân phải đạt từ 115 TC trở lên.",
+      "evidence_chunk_ids": [
+        "68f47a69-4fab-4911-bed5-882f06e12595"
+      ],
+      "ground_truth_context": [
+        "Tổng số của {Số tín chỉ tích lũy + Số tín chỉ đang học tại kỳ hiện tại} của các HP bậc cử nhân đạt từ 115 TC trở lên"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_008",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký học tích lũy trước các học phần bậc kỹ sư chuyên sâu được tối đa bao nhiêu tín chỉ?",
+      "gold_answer": "Tối đa 15 tín chỉ học phần bậc kỹ sư chuyên sâu (trừ các học phần Đồ án chuyên ngành KS, Thực tập KS và Đồ án tốt nghiệp KS).",
+      "evidence_chunk_ids": [
+        "68f47a69-4fab-4911-bed5-882f06e12595"
+      ],
+      "ground_truth_context": [
+        "SV đăng ký học tích lũy trước tối đa 15TC học phần bậc kỹ sư chuyên sâu (trừ các học phần Đồ án chuyên ngành KS, Thực tập KS và Đồ án tốt nghiệp KS)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_009",
+      "question_type": "simple",
+      "question": "Sau khi đăng ký học tích hợp KSCS thành công, sinh viên được cấp gì?",
+      "gold_answer": "Sinh viên được cấp Mã số học viên kỹ sư (MSHVKS) và email học viên kỹ sư.",
+      "evidence_chunk_ids": [
+        "68f47a69-4fab-4911-bed5-882f06e12595"
+      ],
+      "ground_truth_context": [
+        "SV đăng ký thành công được cấp Mã số học viên kỹ sư (MSHVKS) và email học viên KS."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_010",
+      "question_type": "simple",
+      "question": "Học phí các học phần bậc Kỹ sư chuyên sâu được tính như thế nào so với bậc cử nhân?",
+      "gold_answer": "Học phí các học phần bậc KSCS được tính theo học phí bậc cử nhân của chương trình đào tạo chuẩn tương ứng, mức học phí trong và ngoài CTĐT là như nhau.",
+      "evidence_chunk_ids": [
+        "d4df1842-6745-454b-a0b3-e3437844092a"
+      ],
+      "ground_truth_context": [
+        "Học phí các học phần bậc KSCS được tính theo học phí bậc cử nhân của CTĐT chuẩn tương ứng, mức học phí đối với học phần trong và ngoài CTĐT là như nhau."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_011",
+      "question_type": "simple",
+      "question": "Sinh viên có thắc mắc về đăng ký học tích hợp Kỹ sư chuyên sâu HK 2025.2 điền thông tin vào form nào?",
+      "gold_answer": "Điền vào form tại: https://forms.office.com/r/GFDh5G9CVj",
+      "evidence_chunk_ids": [
+        "fa09ee88-19b1-43ab-accd-1c66e25cde3d"
+      ],
+      "ground_truth_context": [
+        "Sinh viên có thắc mắc, câu hỏi vui lòng điền thông tin vào form sau: https://forms.office.com/r/GFDh5G9CVj"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký học tích hợp KSCS biết mình đăng ký thành công bằng cách nào?",
+      "gold_answer": "Đăng ký là thành công khi sinh viên nhận được email xác nhận từ hệ thống.",
+      "evidence_chunk_ids": [
+        "d6dba542-0a9d-4633-b043-66da6a04f9f7"
+      ],
+      "ground_truth_context": [
+        "Chú ý: Đăng ký là thành công khi sinh viên nhận được email xác nhận từ hệ thống."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_013",
+      "question_type": "simple",
+      "question": "Khi nào sinh viên chuyển từ học viên kỹ sư tạm thời sang học viên kỹ sư chính thức?",
+      "gold_answer": "Khi sinh viên được công nhận tốt nghiệp cử nhân và đã được cấp MSHVKS tạm thời, sẽ được chuyển thành học viên kỹ sư chính thức. Lúc này MSSV sẽ bị thu hồi.",
+      "evidence_chunk_ids": [
+        "537104a4-ac96-4f5d-b661-57b76d224f9f"
+      ],
+      "ground_truth_context": [
+        "Sinh viên được công nhận tốt nghiệp cử nhân và đã được cấp MHVKS (tạm thời) sẽ được chuyển thành học viên kỹ sư chính thức (Chú ý: MSSV sẽ bị thu hồi, MHVKS được sử dụng duy nhất để đăng ký học tập)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_014",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình Elitech muốn học lên bậc Kỹ sư chuyên sâu thì học theo chương trình nào?",
+      "gold_answer": "Sinh viên chương trình Elitech sẽ học theo chương trình kỹ sư chuẩn tương ứng, bằng kỹ sư chuyên sâu được cấp sẽ theo CTĐT chuẩn.",
+      "evidence_chunk_ids": [
+        "d4df1842-6745-454b-a0b3-e3437844092a"
+      ],
+      "ground_truth_context": [
+        "Sinh viên các chương trình đào tạo Elitech và Hợp tác quốc tế, nếu muốn học tiếp lên bậc KSCS sẽ học theo chương trình kỹ sư chuẩn tương ứng. Bằng kỹ sư chuyên sâu được cấp sẽ theo CTĐT chuẩn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_015",
+      "question_type": "simple",
+      "question": "Sinh viên muốn hủy đăng ký học tích hợp KSCS thực hiện thế nào?",
+      "gold_answer": "Sinh viên vào 'Học tích hợp' → 'Kỹ sư chuyên sâu' → chọn 'Hủy đăng ký học' → Xác nhận hủy. Hệ thống sẽ thực hiện hủy kết quả đăng ký.",
+      "evidence_chunk_ids": [
+        "df545ded-5fb6-419c-a8c8-c7b884313388"
+      ],
+      "ground_truth_context": [
+        "Đối với những sinh viên đã đăng ký ở Bước 2, nếu muốn hủy nguyện vọng SV chọn 'Học tích hợp' → 'Kỹ sư chuyên sâu' màn hình đăng ký xuất hiện, sinh viên chọn 'Hủy đăng ký học' → Xác nhận hủy → Hệ thống sẽ thực hiện hủy kết quả đăng ký."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_016",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký học tích hợp KSCS trên hệ thống nào và chọn mục gì?",
+      "gold_answer": "Sinh viên đăng nhập vào hệ thống qldt.hust.edu.vn → chọn 'Học tích hợp' → chọn 'Kỹ sư chuyên sâu'.",
+      "evidence_chunk_ids": [
+        "16304296-b629-4e77-a006-fcfa8c5ff984"
+      ],
+      "ground_truth_context": [
+        "Bước 1: Sinh viên dùng tài khoản của mình đăng nhập vào hệ thống qldt.hust.edu.vn --> chọn 'Học tích hợp' --> chọn 'Kỹ sư chuyên sâu'"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_017",
+      "question_type": "simple",
+      "question": "Học kỳ hè 2025-2026 (20253) được tổ chức để giúp sinh viên khóa nào trở về trước học lại những học phần chưa đạt?",
+      "gold_answer": "Giúp sinh viên các khóa K69 trở về trước học lại những học phần chưa đạt.",
+      "evidence_chunk_ids": [
+        "73c8ed9f-1d83-4f3d-84d1-1d94237c98f1"
+      ],
+      "ground_truth_context": [
+        "Nhà trường sẽ tổ chức học kỳ hè 2025-2026 để giúp cho sinh viên các khoá K69 trở về trước học lại những học phần chưa đạt."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_018",
+      "question_type": "simple",
+      "question": "Đăng ký học học kỳ hè có bắt buộc không và sinh viên phải đóng bao nhiêu phần trăm học phí?",
+      "gold_answer": "Việc đăng ký hoàn toàn tự nguyện. Tất cả sinh viên đăng ký đều phải đóng 100% học phí theo quy định.",
+      "evidence_chunk_ids": [
+        "73c8ed9f-1d83-4f3d-84d1-1d94237c98f1"
+      ],
+      "ground_truth_context": [
+        "Việc đăng ký học học kỳ hè là do sinh viên hoàn toàn tự nguyện; tất cả sinh viên đăng ký học học kỳ hè đều phải đóng 100% học phí với mức học phí theo quy định"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_019",
+      "question_type": "simple",
+      "question": "Số tín chỉ tối đa và tối thiểu khi đăng ký học kỳ 1 năm học 2026-2027 (20261) là bao nhiêu?",
+      "gold_answer": "Tối đa 24 TC, tối thiểu 12 TC. Sinh viên bị cảnh cáo học tập mức 2, mức 3 thì tối đa 14 TC.",
+      "evidence_chunk_ids": [
+        "ee4cb4f0-dd8d-4992-ab6c-2f862607f3a4"
+      ],
+      "ground_truth_context": [
+        "Khối lượng đăng ký tối đa 24TC, tối thiểu 12TC (Lưu ý: với sinh viên bị cảnh cáo học tập mức 2, mức 3 tối đa14TC)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_020",
+      "question_type": "simple",
+      "question": "Thời gian đăng ký học phần cho học kỳ 1 năm học 2026-2027 (20261) kết thúc vào ngày nào?",
+      "gold_answer": "Kết thúc lúc 16h ngày 27/4/2026.",
+      "evidence_chunk_ids": [
+        "ee4cb4f0-dd8d-4992-ab6c-2f862607f3a4"
+      ],
+      "ground_truth_context": [
+        "Đăng ký học phần: từ 10h00 ngày 16/3/2026 đến 16h ngày 27/4/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_021",
+      "question_type": "simple",
+      "question": "Sinh viên tra cứu Chương trình đào tạo (CTĐT) của mình để đăng ký đúng mã học phần theo hướng dẫn ra sao?",
+      "gold_answer": "Bước 1: Vào cổng thông tin đào tạo https://ctt.hust.edu.vn; Bước 2: Đăng nhập → Chương trình đào tạo sinh viên; Bước 3: Xem kỳ chuẩn mở của học phần theo CTĐT để đăng ký đúng mã.",
+      "evidence_chunk_ids": [
+        "01767ec8-1d15-45bf-b0fe-1a493a77a92d"
+      ],
+      "ground_truth_context": [
+        "Bước 1: Vào cổng thông tin đào tạo https://ctt.hust.edu.vn. Bước 2: Đăng nhập vào hệ thống --> Chương trình đào tạo sinh viên. Bước 3: Xem kỳ chuẩn mở của học phần theo Chương trình đào tạo của mình để đăng ký đúng mã học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_022",
+      "question_type": "simple",
+      "question": "Sinh viên tra cứu học phí kỳ 2 năm học 2025-2026 đợt 1 từ ngày nào?",
+      "gold_answer": "Từ ngày 10/03/2026.",
+      "evidence_chunk_ids": [
+        "e1b96950-4abe-44d7-8793-4770473aaff9"
+      ],
+      "ground_truth_context": [
+        "Sinh viên tra cứu học phí học kỳ 2 năm học 2025-2026 từ ngày 10/03/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_023",
+      "question_type": "simple",
+      "question": "Thời gian đóng học phí kỳ 2 năm học 2025-2026 đợt 1 là từ ngày nào đến ngày nào?",
+      "gold_answer": "Từ ngày 10/03/2026 đến hết ngày 22/03/2026.",
+      "evidence_chunk_ids": [
+        "e1b96950-4abe-44d7-8793-4770473aaff9"
+      ],
+      "ground_truth_context": [
+        "Sẽ bắt đầu đóng học phí từ ngày 10/03/2026 đến hết ngày 22/03/2026."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_024",
+      "question_type": "simple",
+      "question": "Khi liên hệ hỏi về học phí kỳ 2 năm 2025-2026 đợt 1, sinh viên dùng email gì và tiêu đề email ghi như thế nào?",
+      "gold_answer": "Dùng email trường cấp, tiêu đề ghi: 'Học phí 2025.2 Đợt 1 – Mã số SV'.",
+      "evidence_chunk_ids": [
+        "7e1d6d82-d580-415f-bde3-7c5af8f5c3db"
+      ],
+      "ground_truth_context": [
+        "Các em sử dụng email trường cấp khi liên hệ để xác thực được người gửi. Tiêu đề email ghi như sau: 'Học phí 2025.2 Đợt 1 – Mã số SV'."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_025",
+      "question_type": "simple",
+      "question": "Học phí kỳ 2 năm 2025-2026 đợt 1 chưa tính đối với sinh viên nào?",
+      "gold_answer": "Chưa tính đối với sinh viên đang bị cảnh báo mức 3 lần thứ hai liên tiếp tính đến kỳ 20251, sinh viên bị quá thời gian học tập cho phép và học phần ĐATN.",
+      "evidence_chunk_ids": [
+        "7e1d6d82-d580-415f-bde3-7c5af8f5c3db"
+      ],
+      "ground_truth_context": [
+        "Học phí đợt 1 tạm thời chưa tính đối với các sinh viên đang bị cảnh báo mức 3 lần thứ hai liên tiếp tính đến kỳ 20251, các sinh viên bị quá thời gian học tập cho phép và học phần ĐATN."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_026",
+      "question_type": "simple",
+      "question": "Thời gian mở đăng ký xét tốt nghiệp đợt 2025.1 tại Bách khoa Hà Nội là từ ngày nào đến ngày nào?",
+      "gold_answer": "Từ ngày 03/3/2026 đến hết ngày 15/3/2026.",
+      "evidence_chunk_ids": [
+        "e9d1b659-7668-495a-837a-a307673b6987"
+      ],
+      "ground_truth_context": [
+        "Thời gian mở đăng ký: từ ngày 03/3/2026 đến hết ngày 15/3/2026."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_027",
+      "question_type": "simple",
+      "question": "Đối với đăng ký tốt nghiệp đợt 2025.1, có giới hạn số lần sinh viên vào đăng ký không?",
+      "gold_answer": "Không giới hạn số lần, chỉ khóa đăng ký khi hết hạn (hết ngày 15/3/2026) hoặc khi đã đăng ký thành công.",
+      "evidence_chunk_ids": [
+        "e9d1b659-7668-495a-837a-a307673b6987"
+      ],
+      "ground_truth_context": [
+        "Không giới hạn số lần sinh viên vào đăng ký, chỉ khóa việc đăng ký khi hết hạn (hết ngày 15/3/2026) hoặc khi đã đăng ký thành công."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_028",
+      "question_type": "simple",
+      "question": "Sinh viên có sai sót về thông tin họ tên, ngày sinh trên văn bằng tốt nghiệp liên hệ ai để sửa?",
+      "gold_answer": "Liên hệ chuyên viên Lê Minh Thuyết, email: thuyet.leminh@hust.edu.vn",
+      "evidence_chunk_ids": [
+        "2cd329b9-a791-4429-8290-3865105bb0c7"
+      ],
+      "ground_truth_context": [
+        "Nếu có bất cứ sai sót nào thì cần liên hệ với chuyên viên Lê Minh Thuyết (email: thuyet.leminh@hust.edu.vn) để được hướng dẫn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_029",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký tốt nghiệp đợt 2025.1 thực hiện từ tài khoản nào?",
+      "gold_answer": "Từ tài khoản học tập cá nhân (tài khoản Cổng thông tin – CTT).",
+      "evidence_chunk_ids": [
+        "e9d1b659-7668-495a-837a-a307673b6987"
+      ],
+      "ground_truth_context": [
+        "Sinh viên có mong muốn tốt nghiệp cần đăng ký xét tốt nghiệp từ tài khoản học tập của cá nhân (tài khoản Cổng thông tin, viết tắt là CTT)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_030",
+      "question_type": "simple",
+      "question": "Sinh viên có thắc mắc về lịch thi môn Tin học đại cương kỳ 20251 liên hệ ai?",
+      "gold_answer": "Liên hệ cô Nguyễn Thanh Nguyệt, email: nguyetnt@soict.hust.edu.vn",
+      "evidence_chunk_ids": [
+        "5c83760d-ffa6-4966-b24a-0d8f5b4ff1d6"
+      ],
+      "ground_truth_context": [
+        "mọi thắc mắc sinh viên liên hệ với cô Nguyễn Thanh Nguyệt (email: nguyetnt@soict.hust.edu.vn)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_031",
+      "question_type": "simple",
+      "question": "Lịch thi giữa kỳ 20251 có một số lớp đổi phòng từ D6-407 sang phòng nào?",
+      "gold_answer": "Đổi sang phòng C1-302.",
+      "evidence_chunk_ids": [
+        "fafcfe1a-6605-4bd8-9f42-862ce2185f6c"
+      ],
+      "ground_truth_context": [
+        "DANH SÁCH LỚP THI GIỮA KỲ 20251 ĐỔI PHÒNG TỪ D6-407 SANG C1-302"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_032",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký lớp kỳ 2 năm học 2025-2026 trực tuyến tại địa chỉ nào?",
+      "gold_answer": "Tại https://qldt.hust.edu.vn/students",
+      "evidence_chunk_ids": [
+        "4b47550b-72d9-4bf8-9f13-b34e3e09d1d0"
+      ],
+      "ground_truth_context": [
+        "Sinh viên đăng ký trực tuyến tại địa chỉ: https://qldt.hust.edu.vn/students"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_033",
+      "question_type": "simple",
+      "question": "Khối lượng tín chỉ đăng ký tối đa kỳ 2 năm 2025-2026 với sinh viên chương trình Elitech là bao nhiêu?",
+      "gold_answer": "Tối đa 28 TC, tối thiểu 12 TC. Sinh viên bị cảnh cáo học tập mức 3 của Elitech thì tối đa 18 TC, tối thiểu 8 TC.",
+      "evidence_chunk_ids": [
+        "a322d3d8-c196-4f90-b364-7af1d199a361"
+      ],
+      "ground_truth_context": [
+        "Sinh viên chương trình Elitech: tối đa 28 TC, tối thiểu 12 TC. Đối với sinh viên bị cảnh cáo học tập mức 3: Chương trình Elitech: tối đa 18 TC, tối thiểu 8 TC."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_034",
+      "question_type": "simple",
+      "question": "Đợt đăng ký lớp chính thức kỳ 2 năm học 2025-2026 (20252) bắt đầu từ khi nào?",
+      "gold_answer": "Từ 16h00 ngày 30/12/2025 đến 16h00 ngày 12/01/2026.",
+      "evidence_chunk_ids": [
+        "f82fc24b-1cc0-4f65-966b-6c65f7dbbf71"
+      ],
+      "ground_truth_context": [
+        "Đăng ký chính thức: từ 16h00 ngày 30/12/2025 đến 16h00 ngày 12/01/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_035",
+      "question_type": "simple",
+      "question": "Lớp học kỳ 2 năm 2025-2026 có bao nhiêu sinh viên sẽ bị hủy và bao nhiêu sinh viên mới được duy trì?",
+      "gold_answer": "Lớp có ít hơn 5 sinh viên sẽ bị hủy. Lớp có trên 20 sinh viên sẽ được duy trì. Lớp từ 5-19 sinh viên sẽ được xem xét từng trường hợp.",
+      "evidence_chunk_ids": [
+        "ff4fa62d-7f66-4c03-be95-0500ac5d489f"
+      ],
+      "ground_truth_context": [
+        "Các lớp có số lượng sinh viên đăng ký lớn hơn 20 sẽ được duy trì. Các lớp có số lượng ít hơn 5 sẽ bị hủy. Lớp có từ 5-19 sinh viên sẽ được xem xét từng trường hợp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_036",
+      "question_type": "simple",
+      "question": "Sinh viên rút học phần kỳ 2 năm 2025-2026 trong bao nhiêu tuần đầu của lớp 16 tuần có thể làm đơn xin rút?",
+      "gold_answer": "Trong 7 tuần đầu đối với lớp học 16 tuần, sinh viên có thể làm đơn xin rút học phần.",
+      "evidence_chunk_ids": [
+        "ff4fa62d-7f66-4c03-be95-0500ac5d489f"
+      ],
+      "ground_truth_context": [
+        "Rút học phần: trong 7 tuần đầu đối với lớp học 16 tuần, sinh viên có thể làm đơn xin rút học phần"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_037",
+      "question_type": "simple",
+      "question": "Hệ thống đăng ký lớp kỳ 2 năm 2025-2026 được bảo trì mỗi ngày vào khung giờ nào?",
+      "gold_answer": "Từ 00h00 đến 02h00 sáng hàng ngày.",
+      "evidence_chunk_ids": [
+        "f82fc24b-1cc0-4f65-966b-6c65f7dbbf71"
+      ],
+      "ground_truth_context": [
+        "Hệ thống sẽ được bảo trì hàng ngày từ 00h00 đến 02h00 sáng hàng ngày."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_simple_038",
+      "question_type": "simple",
+      "question": "Sinh viên có thắc mắc về miễn giảm chế độ chính sách học phí kỳ 1 năm 2025-2026 liên hệ ai?",
+      "gold_answer": "Gửi tới Ban Công tác sinh viên qua email: ngoc.ngoanh@hust.edu.vn hoặc liên hệ trực tiếp tại phòng C1-104, số điện thoại 0243.869.3108.",
+      "evidence_chunk_ids": [
+        "cbb7b664-3e22-4b2f-a413-23ea67cd2f6d"
+      ],
+      "ground_truth_context": [
+        "Các thắc mắc về miễn giảm chế độ chính sách: gửi tới Ban Công tác sinh viên qua địa chỉ email: ngoc.ngoanh@hust.edu.vn hoặc liên hệ trực tiếp tại phòng C1-104 hoặc qua số điện thoại: 0243.869.3108"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_047",
+      "question_type": "multi_hop",
+      "question": "Sinh viên bị đình chỉ (đã hoàn thành) muốn trở lại học từ kỳ hè 20253 cần nộp hồ sơ trong thời gian nào và gặp ai tại Ban Đào tạo?",
+      "gold_answer": "Nộp hồ sơ từ 05/05/2026 đến 30/06/2026. Nộp tại Ban Đào tạo (Tầng 1 nhà C1), gặp chuyên viên Nguyễn Kim Huệ.",
+      "evidence_chunk_ids": [
+        "1c439f64-e234-44b2-9d7c-b416ba23fd81",
+        "93f509f0-fab2-47b8-b53a-ecb613d7f719"
+      ],
+      "ground_truth_context": [
+        "Vào học tiếp từ kỳ hè năm học 2025-2026 (20253): từ 05/05/2026 đến 30/06/2026",
+        "Nơi nhận đơn: Ban Đào tạo (Tầng 1 nhà C1) gặp chuyên viên Nguyễn Kim Huệ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_048",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn đăng ký học tích hợp Kỹ sư chuyên sâu 2025.2 cần có điều kiện gì và đăng ký trên hệ thống nào?",
+      "gold_answer": "Điều kiện: Tổng tín chỉ tích lũy từ 115 TC trở lên và đã/đang làm ĐATN cử nhân. Đăng ký trên hệ thống qldt.hust.edu.vn, mục 'Học tích hợp' → 'Kỹ sư chuyên sâu'.",
+      "evidence_chunk_ids": [
+        "537104a4-ac96-4f5d-b661-57b76d224f9f",
+        "16304296-b629-4e77-a006-fcfa8c5ff984"
+      ],
+      "ground_truth_context": [
+        "Tổng số tín chỉ tích lũy đạt từ 115 TC trở lên + Đã làm ĐATN cử nhân hoặc đang làm ĐATN cử nhân tại kỳ 2025.2",
+        "Sinh viên dùng tài khoản của mình đăng nhập vào hệ thống qldt.hust.edu.vn --> chọn 'Học tích hợp' --> chọn 'Kỹ sư chuyên sâu'"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_049",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đăng ký lớp kỳ 2 năm 2025-2026 dùng tài khoản gì để đăng nhập và thời gian đăng ký chính thức là khi nào?",
+      "gold_answer": "Đăng nhập bằng tài khoản email Office 365 do Đại học cấp. Đăng ký chính thức từ 16h00 ngày 30/12/2025 đến 16h00 ngày 12/01/2026.",
+      "evidence_chunk_ids": [
+        "4b47550b-72d9-4bf8-9f13-b34e3e09d1d0",
+        "f82fc24b-1cc0-4f65-966b-6c65f7dbbf71"
+      ],
+      "ground_truth_context": [
+        "Tên đăng nhập: địa chỉ email Office 365 do Đại học cấp cho sinh viên.",
+        "Đăng ký chính thức: từ 16h00 ngày 30/12/2025 đến 16h00 ngày 12/01/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_050",
+      "question_type": "multi_hop",
+      "question": "Sinh viên chương trình chuẩn bị cảnh cáo học tập mức 3 đăng ký lớp kỳ 2 năm 2025-2026 được tối đa bao nhiêu TC và sau khi rút học phần phải đảm bảo tối thiểu bao nhiêu TC?",
+      "gold_answer": "Sinh viên chuẩn bị cảnh cáo mức 3 đăng ký tối đa 14 TC, tối thiểu 8 TC. Sau khi rút học phần, số tín chỉ còn lại phải đảm bảo tối thiểu theo quy định (8 TC).",
+      "evidence_chunk_ids": [
+        "a322d3d8-c196-4f90-b364-7af1d199a361",
+        "ff4fa62d-7f66-4c03-be95-0500ac5d489f"
+      ],
+      "ground_truth_context": [
+        "Chương trình chuẩn: tối đa 14 TC, tối thiểu 8 TC.",
+        "Số tín chỉ sau khi rút phải đảm bảo tối thiểu quy định"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_051",
+      "question_type": "multi_hop",
+      "question": "Học phí kỳ 2 năm 2025-2026 được tính theo mấy đợt và sinh viên cần kiểm tra điều gì ở đợt 2?",
+      "gold_answer": "Học phí tính theo 2 đợt: đợt 1 tính sơ bộ, đợt 2 tính lại chính xác. Ở đợt 2 sinh viên cần kiểm tra tổng số học phí có đúng không và các học phần đang tính ngoài CTĐT có đúng không.",
+      "evidence_chunk_ids": [
+        "e1b96950-4abe-44d7-8793-4770473aaff9"
+      ],
+      "ground_truth_context": [
+        "Học phí của mỗi học kỳ được tính toán theo 02 đợt: Đợt 1 sẽ tính toán sơ bộ học phí cần đóng, sau đó Đợt 2 sẽ tính lại chính xác học phí của học kỳ. Do vậy các em cần lưu ý xem lại số học phí khi có thông báo đóng Đợt 2."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_052",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đăng ký tốt nghiệp đợt 2025.1 cần kiểm tra điểm ở đâu và nếu có thắc mắc về GD QP-AN liên hệ ai?",
+      "gold_answer": "Điểm chính thức phải kiểm tra trong tài khoản CTT (điểm trên QLĐT chỉ là tạm thời). Thắc mắc về GD QP-AN liên hệ chuyên viên Trần Lê Hùng, email: hung.tranle@hust.edu.vn",
+      "evidence_chunk_ids": [
+        "c708e8d8-c11d-4917-aad8-fae5958c4a69",
+        "2cd329b9-a791-4429-8290-3865105bb0c7"
+      ],
+      "ground_truth_context": [
+        "Chỉ đăng ký xét tốt nghiệp khi đã có đủ điểm trong bảng kết quả học tập cá nhân trên CTT (lưu ý điểm xem trên QLĐT chỉ là nhập tạm thời, điểm trong tài khoản CTT mới là điểm chính thức)",
+        "Nếu có thắc mắc về mục này sẽ liên hệ chuyên viên Trần Lê Hùng (email: hung.tranle@hust.edu.vn) để cập nhật điều kiện hoàn thành GD QP-AN và GDTC."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_053",
+      "question_type": "multi_hop",
+      "question": "Sinh viên K70 muốn biết mình học GDQP-AN vào tuần nào trong kỳ hè 20253 cần theo dõi thông tin ở đâu?",
+      "gold_answer": "Sinh viên cần theo dõi thông báo tiếp theo trên hệ thống quản lý đào tạo và email cá nhân để cập nhật địa điểm học và yêu cầu cụ thể. Một số lớp học tuần 46-48 (20/7-7/8), một số lớp học tuần 49-51 (10/8-28/8), một số lớp sẽ thông báo sau (năm học 2026-2027).",
+      "evidence_chunk_ids": [
+        "628ff697-7a0b-4d76-8956-5c70a699d2ae",
+        "308d6786-c486-453f-98a5-822dd6585a52"
+      ],
+      "ground_truth_context": [
+        "Tuần 46-48 (20/07/2026 - 07/08/2026): danh sách các lớp...",
+        "Sinh viên thường xuyên theo dõi các thông báo tiếp theo trên hệ thống quản lý đào tạo và email cá nhân để cập nhật địa điểm học và các yêu cầu cụ thể đối với môn học GDQP-AN."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_054",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đăng ký lớp kỳ 2 năm 2025-2026 không hoàn thành học phí sẽ bị xử lý thế nào và muốn mở thêm lớp cần làm gì?",
+      "gold_answer": "Sinh viên chưa hoàn thành học phí sẽ bị tạm ngừng truy cập hệ thống đăng ký. Muốn mở thêm lớp cần làm đơn gửi Trường/Khoa phụ trách chậm nhất ngày 26/01/2026.",
+      "evidence_chunk_ids": [
+        "e3d51467-3247-40c3-81ec-a42aaa119380",
+        "ff4fa62d-7f66-4c03-be95-0500ac5d489f"
+      ],
+      "ground_truth_context": [
+        "Sinh viên chưa hoàn thành học phí theo thông báo trước đó sẽ bị tạm ngừng truy cập hệ thống đăng ký.",
+        "Sinh viên có nhu cầu mở thêm lớp cần làm đơn gửi Trường/Khoa phụ trách chậm nhất ngày 26/01/2026."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_055",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đã được cấp MSHVKS khi đăng ký lớp kỳ 2 năm 2025-2026 dùng tài khoản nào và tối đa bao nhiêu TC kỹ sư?",
+      "gold_answer": "Sinh viên đã được cấp MSHVKS dùng tài khoản MSHVKS (không dùng MSSV) để đăng ký lớp học phần kỹ sư, không giới hạn 15TC.",
+      "evidence_chunk_ids": [
+        "e3d51467-3247-40c3-81ec-a42aaa119380"
+      ],
+      "ground_truth_context": [
+        "SV đã được cấp mã số kỹ sư thì dùng tài khoản này để đăng ký các lớp học phần kỹ sư (không dùng MSSV). SV đủ điều kiện đăng ký học tích lũy trước chương trình kỹ sư và chưa đủ điều kiện được cấp mã kỹ sư, thì dùng tài khoản MSSV đăng ký học tích lũy trước tối đa 15TC bậc KS."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_056",
+      "question_type": "multi_hop",
+      "question": "Sinh viên học phần KSCS đang tích lũy trước bằng MSSV, nếu trong thời gian đó đăng ký xét tốt nghiệp cử nhân thành công thì kết quả học tập KSCS có được công nhận không?",
+      "gold_answer": "Không, nếu sinh viên đang học tích lũy trước bằng MSSV mà được công nhận tốt nghiệp cử nhân trong khi đó, kết quả học tập sẽ không được công nhận vào chương trình kỹ sư.",
+      "evidence_chunk_ids": [
+        "d4df1842-6745-454b-a0b3-e3437844092a"
+      ],
+      "ground_truth_context": [
+        "Trong khi đang học tích lũy trước các học phần bậc kỹ sư đã được đăng ký bằng MSSV từ đầu học kỳ, nếu sinh viên thực hiện đăng ký và được xét công nhận tốt nghiệp cử nhân, kết quả học tập sẽ không được công nhận vào chương trình kỹ sư."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_057",
+      "question_type": "multi_hop",
+      "question": "Học phí kỳ 1 năm 2025-2026 đợt 2 sai sót về học phần tính ngoài CTĐT ảnh hưởng đến quyền lợi gì của sinh viên?",
+      "gold_answer": "Định mức học phí trong và ngoài CTĐT là như nhau, nhưng nếu chưa chính xác sẽ ảnh hưởng đến tiền học bổng khuyến khích học tập của kỳ sau.",
+      "evidence_chunk_ids": [
+        "3e93d330-05c5-41ce-9144-9ef4c01d3e7b"
+      ],
+      "ground_truth_context": [
+        "Định mức học phí với học phần trong và ngoài CTĐT là như nhau, tuy nhiên nếu chưa chính xác sẽ ảnh hưởng đến tiền học bổng khuyến khích học tập của kỳ sau."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "kehoach_list_all_chunks_multi_hop_058",
+      "question_type": "multi_hop",
+      "question": "Đăng ký lớp điều chỉnh kỳ 2 năm 2025-2026 dành cho đối tượng nào và diễn ra trong thời gian nào?",
+      "gold_answer": "Dành cho toàn bộ sinh viên, kể cả sinh viên chưa đăng ký học phần. Diễn ra từ 09h00 ngày 14/01/2026 đến 16h00 ngày 26/01/2026.",
+      "evidence_chunk_ids": [
+        "d4407f7a-078f-4476-bc9c-1e2efbdd1491"
+      ],
+      "ground_truth_context": [
+        "Đăng ký điều chỉnh: dành cho toàn bộ sinh viên, kể cả sinh viên chưa đăng ký học phần. 09h 14/01/2026 - 16h 17/1/2026..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

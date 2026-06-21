@@ -1,0 +1,471 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "5__Quy_định_QLSV_nước_ngoài_2023_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_001",
+      "question_type": "simple",
+      "question": "Quyết định 5777/QĐ-ĐHBK về quản lý sinh viên nước ngoài tại Đại học Bách khoa Hà Nội được ban hành vào ngày tháng năm nào?",
+      "gold_answer": "Ngày 18 tháng 7 năm 2023.",
+      "evidence_chunk_ids": [
+        "56b2f15f-466c-40f3-9ec2-b29c81b15872"
+      ],
+      "ground_truth_context": [
+        "Địa danh: Hà Nội, ngày 18 tháng 7 năm 2023"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_002",
+      "question_type": "simple",
+      "question": "Lưu học sinh Hiệp định tại Đại học Bách khoa Hà Nội là những đối tượng nào?",
+      "gold_answer": "Là sinh viên nước ngoài được tiếp nhận học tập dài hạn tại Đại học Bách khoa Hà Nội theo các Hiệp định, thỏa thuận của Chính phủ Việt Nam với các đối tác nước ngoài.",
+      "evidence_chunk_ids": [
+        "07c0b91d-2e67-46fa-89d7-313c05fd4a6d"
+      ],
+      "ground_truth_context": [
+        "Lưu học sinh Hiệp định: Là sinh viên nước ngoài được tiếp nhận học tập dài hạn tại ĐHBK Hà Nội theo các Hiệp định, thỏa thuận của Chính phủ Việt Nam với các đối tác nước ngoài;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_003",
+      "question_type": "simple",
+      "question": "Lưu học sinh ngoài Hiệp định tại Đại học Bách khoa Hà Nội là những đối tượng nào?",
+      "gold_answer": "Là sinh viên nước ngoài được tiếp nhận học tập dài hạn hoặc học tích lũy tín chỉ (từ 1 học kỳ trở lên) theo thỏa thuận, hợp đồng đào tạo ký kết giữa Đại học Bách khoa Hà Nội với cá nhân sinh viên hoặc các tổ chức, cá nhân gửi đào tạo, tài trợ học bổng.",
+      "evidence_chunk_ids": [
+        "8fbc8520-f66a-4849-a64e-b3e5086459f2"
+      ],
+      "ground_truth_context": [
+        "Lưu học sinh ngoài Hiệp định: Là sinh viên nước ngoài được tiếp nhận học tập dài hạn hoặc học tích lũy tín chỉ (từ 1 học kỳ trở lên) tại ĐHBK Hà Nội theo thỏa thuận, hợp đồng đào tạo ký kết giữa ĐHBK Hà Nội với cá nhân sinh viên hoặc các tổ chức, cá nhân gửi đào tạo, tài trợ học bổng cho sinh viên;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_004",
+      "question_type": "simple",
+      "question": "Lưu học sinh trao đổi tại Đại học Bách khoa Hà Nội là những đối tượng nào?",
+      "gold_answer": "Là người học nước ngoài đến thực tập, nghiên cứu, trao đổi theo các thỏa thuận, dự án, chương trình hợp tác của Đại học Bách khoa Hà Nội hoặc các đơn vị thuộc/trực thuộc.",
+      "evidence_chunk_ids": [
+        "8fbc8520-f66a-4849-a64e-b3e5086459f2"
+      ],
+      "ground_truth_context": [
+        "Lưu học sinh trao đổi: Là người học nước ngoài đến thực tập, nghiên cứu, trao đổi theo các thỏa thuận, dự án, chương trình hợp tác của ĐHBK Hà Nội hoặc các đơn vị thuộc/trực thuộc ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_005",
+      "question_type": "simple",
+      "question": "Hồ sơ quản lý lưu học sinh học tập dài hạn tại Đại học Bách khoa Hà Nội cần có những giấy tờ gì?",
+      "gold_answer": "Gồm: lý lịch tóm tắt có dán ảnh (1 bản); quyết định tiếp nhận của Đại học (1 bản); bản sao hộ chiếu có thị thực nhập cảnh còn thời hạn (1 bản); bản sao bảo hiểm y tế còn hiệu lực; ảnh 4x6cm chụp không quá 6 tháng (4 ảnh); các văn bản, quyết định liên quan (nếu có).",
+      "evidence_chunk_ids": [
+        "8502405d-fb25-42ca-9d31-770bc2d5e0a4"
+      ],
+      "ground_truth_context": [
+        "Hồ sơ LHS học tập dài hạn... gồm các giấy tờ sau: Lý lịch tóm tắt có dán ảnh (theo mẫu): 1 bản; Quyết định tiếp nhận của ĐHBK Hà Nội: 1 bản; Bản sao hộ chiếu có thị thực nhập cảnh Việt Nam còn thời hạn: 1 bản; Bản sao bảo hiểm y tế có giá trị trong thời hạn LHS thực hiện trao đổi tại ĐHBK Hà Nội; Ảnh cỡ 4x6 cm (chụp không quá 6 tháng tính đến ngày nộp hồ sơ): 4 ảnh; Các văn bản, quyết định liên quan trực tiếp đến LHS (nếu có)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_006",
+      "question_type": "simple",
+      "question": "Lưu học sinh tại Đại học Bách khoa Hà Nội có được xét cấp học bổng không?",
+      "gold_answer": "Có, lưu học sinh được xét/đăng ký xét cấp các loại học bổng dành cho sinh viên Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "40828341-95ce-4b09-b4aa-6a90ba4643b1"
+      ],
+      "ground_truth_context": [
+        "Được xét/đăng ký xét cấp các loại học bổng dành cho sinh viên ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_007",
+      "question_type": "simple",
+      "question": "Lưu học sinh tại Đại học Bách khoa Hà Nội được hỗ trợ các thủ tục gì liên quan đến thị thực nhập cảnh?",
+      "gold_answer": "Được hỗ trợ làm các thủ tục cấp, gia hạn, thay đổi thị thực nhập cảnh phù hợp với kế hoạch học tập tại Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "40828341-95ce-4b09-b4aa-6a90ba4643b1"
+      ],
+      "ground_truth_context": [
+        "Được hỗ trợ làm các thủ tục cấp/gia hạn/thay đổi thị thực nhập cảnh phù hợp với kế hoạch học tập tại ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_008",
+      "question_type": "simple",
+      "question": "Tập thể lưu học sinh cùng một nước tại Đại học Bách khoa Hà Nội có thể chọn ai để làm đầu mối liên hệ với Đại học?",
+      "gold_answer": "Tập thể lưu học sinh cùng một nước được cử đại diện làm đầu mối liên hệ với Đại học để giải quyết những việc có liên quan đến tập thể lưu học sinh nước mình.",
+      "evidence_chunk_ids": [
+        "40828341-95ce-4b09-b4aa-6a90ba4643b1"
+      ],
+      "ground_truth_context": [
+        "Tập thể LHS cùng một nước được cử đại diện làm đầu mối liên hệ với Đại học để giải quyết những việc có liên quan đến tập thể LHS nước mình."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_009",
+      "question_type": "simple",
+      "question": "Lưu học sinh tại Đại học Bách khoa Hà Nội có bắt buộc phải có bảo hiểm y tế không và cần đăng ký khám chữa bệnh ở đâu?",
+      "gold_answer": "Có, lưu học sinh bắt buộc phải có bảo hiểm y tế và đăng ký khám, chữa bệnh tại một trong các bệnh viện tại Hà Nội hoặc Trung tâm Y tế của Đại học Bách khoa Hà Nội trong toàn bộ quá trình học tập.",
+      "evidence_chunk_ids": [
+        "44f35944-3bf7-4ddb-84fc-e1570e33919f"
+      ],
+      "ground_truth_context": [
+        "Bắt buộc phải có bảo hiểm y tế và đăng ký khám, chữa bệnh tại một trong các bệnh viện tại Hà Nội hoặc Trung tâm Y tế của ĐHBK Hà Nội trong toàn bộ quá trình học tập tại ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_010",
+      "question_type": "simple",
+      "question": "Lưu học sinh tại Đại học Bách khoa Hà Nội có trách nhiệm gì về việc đóng học phí?",
+      "gold_answer": "Phải đóng học phí đầy đủ, đúng hạn theo quy định hiện hành của Đại học Bách khoa Hà Nội đối với lưu học sinh.",
+      "evidence_chunk_ids": [
+        "44f35944-3bf7-4ddb-84fc-e1570e33919f"
+      ],
+      "ground_truth_context": [
+        "Đóng học phí đầy đủ, đúng hạn theo quy định hiện hành của ĐHBK Hà Nội đối với Lưu học sinh."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_011",
+      "question_type": "simple",
+      "question": "Lưu học sinh Hiệp định và ngoài Hiệp định tại Bách khoa Hà Nội đăng ký thông tin cư trú với đơn vị nào?",
+      "gold_answer": "Đăng ký với Phòng/Ban chức năng Công tác sinh viên.",
+      "evidence_chunk_ids": [
+        "441faaac-c820-44f6-bbf4-6db6579e5960"
+      ],
+      "ground_truth_context": [
+        "LHS Hiệp định và ngoài Hiệp định đăng ký với Phòng/Ban chức năng Công tác sinh viên; LHS trao đổi đăng ký với Phòng/Ban chức năng Hợp tác đối ngoại"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_012",
+      "question_type": "simple",
+      "question": "Lưu học sinh trao đổi tại Bách khoa Hà Nội đăng ký thông tin cư trú với đơn vị nào?",
+      "gold_answer": "Đăng ký với Phòng/Ban chức năng Hợp tác đối ngoại.",
+      "evidence_chunk_ids": [
+        "441faaac-c820-44f6-bbf4-6db6579e5960"
+      ],
+      "ground_truth_context": [
+        "LHS trao đổi đăng ký với Phòng/Ban chức năng Hợp tác đối ngoại"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_013",
+      "question_type": "simple",
+      "question": "Lưu học sinh cần cấp, gia hạn hoặc thay đổi thị thực nhập cảnh gửi hồ sơ đến đơn vị nào tại Bách khoa?",
+      "gold_answer": "LHS Hiệp định và LHS ngoài Hiệp định gửi đến Phòng/Ban chức năng Công tác sinh viên. LHS trao đổi gửi đến Phòng/Ban chức năng Hợp tác đối ngoại.",
+      "evidence_chunk_ids": [
+        "7b92ab2b-5cc3-4278-8e44-abc1733a4c13"
+      ],
+      "ground_truth_context": [
+        "LHS có nhu cầu cấp, gia hạn hoặc thay đổi thị thực nhập cảnh... cần chuẩn bị hồ sơ theo mẫu quy định gửi Phòng/Ban chức năng Công tác sinh viên (đối với LHS Hiệp định và LHS ngoài Hiệp định) và Phòng/Ban chức năng Hợp tác đối ngoại (đối với LHS trao đổi)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_014",
+      "question_type": "simple",
+      "question": "Lưu học sinh có phải tự trả lệ phí cấp, gia hạn thị thực nhập cảnh không?",
+      "gold_answer": "Có, lưu học sinh phải trả lệ phí cấp, gia hạn/thay đổi thị thực theo quy định hiện hành của Nhà nước Việt Nam.",
+      "evidence_chunk_ids": [
+        "7b92ab2b-5cc3-4278-8e44-abc1733a4c13"
+      ],
+      "ground_truth_context": [
+        "LHS phải trả lệ phí cấp, gia hạn/thay đổi thị thực theo quy định hiện hành của Nhà nước Việt Nam."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_015",
+      "question_type": "simple",
+      "question": "Lưu học sinh Hiệp định tại Bách khoa muốn kéo dài thời gian đào tạo cần có điều kiện gì?",
+      "gold_answer": "Phải có ý kiến đồng ý bằng văn bản của phía gửi đào tạo và được Đại học Bách khoa Hà Nội chấp thuận bằng văn bản.",
+      "evidence_chunk_ids": [
+        "b213a748-d470-4615-a5c4-b0c057f9b5fb"
+      ],
+      "ground_truth_context": [
+        "LHS Hiệp định: Khi cần kéo dài thời gian đào tạo phải có ý kiến đồng ý bằng văn bản của phía gửi đào tạo và được ĐHBK Hà Nội chấp thuận bằng văn bản;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_016",
+      "question_type": "simple",
+      "question": "Lưu học sinh Hiệp định tại Bách khoa muốn chuyển ngành học cần những điều kiện gì?",
+      "gold_answer": "Phải được phía gửi đào tạo đồng ý bằng văn bản, Đại học Bách khoa Hà Nội chấp thuận và ban hành quyết định cho phép chuyển ngành. Nếu chuyển cơ sở giáo dục thì còn cần thêm văn bản đồng ý của cơ sở tiếp nhận.",
+      "evidence_chunk_ids": [
+        "7536260a-73f1-4306-88eb-33822beb25a0"
+      ],
+      "ground_truth_context": [
+        "LHS Hiệp định: Chỉ được chuyển ngành học, chuyển cơ sở giáo dục khi được phía gửi đào tạo đồng ý bằng văn bản, ĐHBK Hà Nội chấp thuận và ban hành quyết định cho phép chuyển ngành học/chuyển cơ sở giáo dục (đối với trường hợp chuyển cơ sở giáo dục thì phải có văn bản đồng ý của cơ sở giáo dục nơi tiếp nhận);"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_017",
+      "question_type": "simple",
+      "question": "Lưu học sinh vi phạm kỷ luật tại Đại học Bách khoa Hà Nội có thể bị xử lý theo những hình thức nào?",
+      "gold_answer": "Tùy mức độ vi phạm: (a) khiển trách; (b) cảnh cáo; (c) buộc thôi học và trả về nước; (d) đề nghị cơ quan chức năng xử lý theo pháp luật Việt Nam.",
+      "evidence_chunk_ids": [
+        "f724ba64-2b4e-4d8f-a8c0-26fd38e480da"
+      ],
+      "ground_truth_context": [
+        "LHS vi phạm kỷ luật, tùy theo mức độ vi phạm sẽ bị xử lý kỷ luật theo các hình thức sau: a) Khiển trách; b) Cảnh cáo; c) Buộc thôi học và trả về nước; d) Đề nghị các cơ quan chức năng xử lý theo quy định của pháp luật Việt Nam."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_018",
+      "question_type": "simple",
+      "question": "Lưu học sinh Hiệp định bị đề nghị buộc thôi học thì quy trình xử lý kỷ luật tại Đại học Bách khoa Hà Nội có gì khác biệt?",
+      "gold_answer": "Đối với LHS Hiệp định, Đại học Bách khoa Hà Nội phải báo cáo và xin ý kiến Bộ Giáo dục và Đào tạo trước khi ra quyết định xử lý (buộc thôi học hoặc đề nghị cơ quan chức năng xử lý).",
+      "evidence_chunk_ids": [
+        "f724ba64-2b4e-4d8f-a8c0-26fd38e480da"
+      ],
+      "ground_truth_context": [
+        "Đối với LHS Hiệp định: ĐHBK Hà Nội sẽ báo cáo, xin ý kiến Bộ Giáo dục và Đào tạo trước khi ra quyết định xử lý;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_019",
+      "question_type": "simple",
+      "question": "Phòng/Ban chức năng Công tác sinh viên tại Bách khoa Hà Nội có trách nhiệm gì trong việc phổ biến quy định cho lưu học sinh?",
+      "gold_answer": "Chủ trì tổ chức phổ biến các quy định, quy chế, nội quy của Đại học Bách khoa Hà Nội cho lưu học sinh.",
+      "evidence_chunk_ids": [
+        "cc5b955a-00f1-409c-8ad2-98be4c63abf2"
+      ],
+      "ground_truth_context": [
+        "Chủ trì tổ chức phổ biến các quy định, quy chế, nội quy của ĐHBK Hà Nội cho LHS."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_020",
+      "question_type": "simple",
+      "question": "Phòng/Ban chức năng Công tác sinh viên có trách nhiệm gì đối với cơ sở dữ liệu lưu học sinh của Bộ Giáo dục?",
+      "gold_answer": "Có trách nhiệm cập nhật vào hệ thống cơ sở dữ liệu điện tử quản lý lưu học sinh của Bộ Giáo dục và Đào tạo.",
+      "evidence_chunk_ids": [
+        "cc5b955a-00f1-409c-8ad2-98be4c63abf2"
+      ],
+      "ground_truth_context": [
+        "Cập nhật vào hệ thống cơ sở dữ liệu điện tử quản lý LHS của Bộ Giáo dục và Đào tạo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_021",
+      "question_type": "simple",
+      "question": "Đoàn Thanh niên và Hội Sinh viên Đại học Bách khoa Hà Nội có vai trò gì trong việc hỗ trợ lưu học sinh?",
+      "gold_answer": "Phối hợp tổ chức các hoạt động giao lưu văn hóa, văn nghệ, thể thao, CLB sinh viên quốc tế; và lựa chọn sinh viên Việt Nam tham gia giúp đỡ lưu học sinh trong quá trình học tập và sinh hoạt.",
+      "evidence_chunk_ids": [
+        "eae73c72-1c1a-4d1f-bd07-3daa45a5a2c5"
+      ],
+      "ground_truth_context": [
+        "Phối hợp với Phòng/Ban chức năng Công tác sinh viên, Phòng/Ban chức năng Hợp tác đối ngoại tổ chức các hoạt động giao lưu văn hoá, văn nghệ thể thao, CLB sinh viên quốc tế... Lựa chọn sinh viên Việt Nam tham gia giúp đỡ LHS trong quá trình học tập và sinh hoạt tại ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_multi_hop_022",
+      "question_type": "multi_hop",
+      "question": "Lưu học sinh trao đổi đến Bách khoa Hà Nội cần nộp hồ sơ gồm những gì và đơn vị nào tiếp nhận và quản lý hồ sơ đó?",
+      "gold_answer": "Hồ sơ gồm: bản sao hộ chiếu có thị thực còn thời hạn, bản sao bảo hiểm y tế còn hiệu lực, và các văn bản liên quan (nếu có). Phòng/Ban chức năng Hợp tác đối ngoại lập và quản lý hồ sơ lưu học sinh trao đổi.",
+      "evidence_chunk_ids": [
+        "8502405d-fb25-42ca-9d31-770bc2d5e0a4",
+        "c3010287-ac02-4981-87c1-dd549b118b8c"
+      ],
+      "ground_truth_context": [
+        "Hồ sơ LHS trao đổi... gồm các giấy tờ sau: Bản sao hộ chiếu có thị thực nhập cảnh Việt Nam còn thời hạn: 1 bản; Bản sao bảo hiểm y tế có giá trị trong thời hạn LHS thực hiện trao đổi tại ĐHBK Hà Nội; Các văn bản, quyết định khác liên quan trực tiếp đến LHS trao đổi (nếu có)",
+        "Lập và quản lý hồ sơ LHS trao đổi như quy định tại khoản 2, Điều 2."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_multi_hop_023",
+      "question_type": "multi_hop",
+      "question": "Lưu học sinh Hiệp định tại Bách khoa muốn tạm ngừng học tập cần những điều kiện gì và ai có thẩm quyền quyết định?",
+      "gold_answer": "Phải có ý kiến đồng ý của phía gửi đào tạo. Đại học Bách khoa Hà Nội chấp thuận và ban hành quyết định cho lưu học sinh tạm ngừng học tập.",
+      "evidence_chunk_ids": [
+        "b213a748-d470-4615-a5c4-b0c057f9b5fb"
+      ],
+      "ground_truth_context": [
+        "LHS Hiệp định: Trong quá trình học tập, LHS muốn tạm ngừng học tập thì phải có ý kiến đồng ý của phía gửi đào tạo, được ĐHBK Hà Nội chấp thuận và ban hành quyết định cho LHS tạm ngừng học tập;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_multi_hop_024",
+      "question_type": "multi_hop",
+      "question": "So sánh trách nhiệm đăng ký cư trú của lưu học sinh Hiệp định và lưu học sinh trao đổi tại Đại học Bách khoa Hà Nội khác nhau như thế nào?",
+      "gold_answer": "LHS Hiệp định (và ngoài Hiệp định) đăng ký thông tin cư trú với Phòng/Ban Công tác sinh viên. LHS trao đổi đăng ký với Phòng/Ban Hợp tác đối ngoại. Cả hai nhóm đều phải khai báo tạm trú tại nơi cư trú và thông báo khi có thay đổi.",
+      "evidence_chunk_ids": [
+        "441faaac-c820-44f6-bbf4-6db6579e5960"
+      ],
+      "ground_truth_context": [
+        "Phải đăng ký thông tin cư trú, kế hoạch học tập, trao đổi và thông báo khi có bất kỳ sự thay đổi nào liên quan tới vấn đề cư trú tại Việt Nam với Đại học (LHS Hiệp định và ngoài Hiệp định đăng ký với Phòng/Ban chức năng Công tác sinh viên; LHS trao đổi đăng ký với Phòng/Ban chức năng Hợp tác đối ngoại)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_multi_hop_025",
+      "question_type": "multi_hop",
+      "question": "Lưu học sinh ngoài Hiệp định bị vi phạm kỷ luật mức buộc thôi học thì ai có thẩm quyền quyết định và có cần hỏi ý kiến Bộ GD&ĐT không?",
+      "gold_answer": "Giám đốc Đại học Bách khoa Hà Nội quyết định, và không cần báo cáo xin ý kiến Bộ GD&ĐT (khác với LHS Hiệp định phải hỏi Bộ trước).",
+      "evidence_chunk_ids": [
+        "f724ba64-2b4e-4d8f-a8c0-26fd38e480da"
+      ],
+      "ground_truth_context": [
+        "Đối với LHS ngoài Hiệp định và LHS trao đổi: Giám đốc ĐHBK Hà Nội quyết định."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_multi_hop_026",
+      "question_type": "multi_hop",
+      "question": "Phòng/Ban chức năng Hợp tác đối ngoại tại Bách khoa Hà Nội có những trách nhiệm gì đối với lưu học sinh trao đổi về thị thực và văn hóa?",
+      "gold_answer": "Tổ chức và hỗ trợ các đơn vị tổ chức chương trình giao lưu, trao đổi văn hóa; hỗ trợ thủ tục cấp, gia hạn, sửa đổi thị thực nhập cảnh cho lưu học sinh; và lập/quản lý hồ sơ lưu học sinh trao đổi.",
+      "evidence_chunk_ids": [
+        "c3010287-ac02-4981-87c1-dd549b118b8c"
+      ],
+      "ground_truth_context": [
+        "Tổ chức và hỗ trợ các đơn vị liên quan tổ chức các chương trình giao lưu, trao đổi văn hóa cho LHS; thủ tục cấp, gia hạn, sửa đổi thị thực nhập cảnh phục vụ cho việc học tập của LHS. Lập và quản lý hồ sơ LHS trao đổi như quy định tại khoản 2, Điều 2."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_multi_hop_027",
+      "question_type": "multi_hop",
+      "question": "Lưu học sinh đại học tại Bách khoa gặp vấn đề về học tập được hỗ trợ qua những kênh nào?",
+      "gold_answer": "Được tư vấn chương trình đào tạo, lập kế hoạch học tập, hỗ trợ bổ sung kiến thức (quyền lợi). Đơn vị đào tạo bố trí giảng viên cố vấn học tập và hướng dẫn thực tập. Phòng/Ban Đào tạo quản lý và hỗ trợ đề nghị đăng ký học tập, chuyển ngành. Phòng/Ban CTSV chủ trì phối hợp tổ chức lớp phụ đạo (nếu có yêu cầu).",
+      "evidence_chunk_ids": [
+        "40828341-95ce-4b09-b4aa-6a90ba4643b1",
+        "b1e8d640-e43e-4899-9f7a-7270e787cdc6",
+        "65c7e1a5-89f4-47ea-a498-2185a19b3302"
+      ],
+      "ground_truth_context": [
+        "Được tư vấn về chương trình đào tạo, lập kế hoạch học tập, hỗ trợ bổ sung kiến thức trong quá trình học tập.",
+        "Bố trí giảng viên cố vấn học tập, hướng dẫn thực tập, nghiên cứu, phụ đạo cho LHS học các chuyên ngành do đơn vị quản lý.",
+        "Quản lý, hỗ trợ LHS về học tập; phối hợp với các đơn vị đào tạo tiếp nhận và hỗ trợ giải quyết các đề nghị về đăng ký học tập, chuyển ngành học..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_multi_hop_028",
+      "question_type": "multi_hop",
+      "question": "Lưu học sinh nước ngoài đang học tại Bách khoa gặp vấn đề phát sinh chưa được quy định trong văn bản cần liên hệ với ai để giải quyết?",
+      "gold_answer": "Các đơn vị gửi vấn đề đến Phòng/Ban chức năng Công tác sinh viên để tổng hợp báo cáo Giám đốc Đại học giải quyết. Đồng thời Phòng/Ban CTSV cũng là đầu mối chính phối hợp giải quyết các vấn đề liên quan đến LHS Hiệp định và LHS ngoài Hiệp định.",
+      "evidence_chunk_ids": [
+        "0a9c56d2-4505-4148-8cfc-1d951401b768",
+        "d0804d84-445e-4c11-aec8-95d591df8edd"
+      ],
+      "ground_truth_context": [
+        "Các vấn đề phát sinh, vướng mắc trong quá trình thực hiện chưa quy định tại văn bản này, các đơn vị gửi Phòng/Ban chức năng Công tác sinh viên tổng hợp báo cáo Giám đốc Đại học để giải quyết.",
+        "Chủ trì phối hợp với các đơn vị liên quan trong và ngoài ĐHBK Hà Nội cung cấp thông tin và giải quyết các vấn đề liên quan tới LHS Hiệp định và LHS ngoài Hiệp định."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_multi_hop_029",
+      "question_type": "multi_hop",
+      "question": "Lưu học sinh nước ngoài có thành tích xuất sắc tại Bách khoa Hà Nội được khen thưởng như thế nào và ai quyết định?",
+      "gold_answer": "LHS có thành tích xuất sắc trong học tập, nghiên cứu hoặc hoạt động hữu nghị được xem xét khen thưởng theo quy định hiện hành của Đại học. Phòng/Ban CTSV có trách nhiệm đề xuất khen thưởng và phối hợp tổ chức lễ khen thưởng.",
+      "evidence_chunk_ids": [
+        "f724ba64-2b4e-4d8f-a8c0-26fd38e480da",
+        "cc5b955a-00f1-409c-8ad2-98be4c63abf2"
+      ],
+      "ground_truth_context": [
+        "LHS có thành tích xuất sắc trong học tập, nghiên cứu, hoạt động hữu nghị được xem xét khen thưởng theo quy định hiện hành của ĐHBK Hà Nội.",
+        "Phối hợp với các đơn vị liên quan hỗ trợ LHS theo nhiệm vụ được giao."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "5__Quy_dinh_QLSV_nuoc_ngoai_2023_simple_030",
+      "question_type": "simple",
+      "question": "Phòng/Ban chức năng Đào tạo tại Bách khoa Hà Nội có trách nhiệm gì trong việc hỗ trợ lưu học sinh sau đại học?",
+      "gold_answer": "Hỗ trợ lưu học sinh sau đại học các vấn đề về thủ tục hành chính; chủ trì phối hợp với Phòng/Ban Công tác sinh viên và các đơn vị đào tạo tổ chức các lớp học phụ đạo ngoài giờ cho lưu học sinh (nếu có yêu cầu và điều kiện thực tế cho phép).",
+      "evidence_chunk_ids": [
+        "65c7e1a5-89f4-47ea-a498-2185a19b3302"
+      ],
+      "ground_truth_context": [
+        "Hỗ trợ LHS sau đại học các vấn đề về thủ tục hành chính; chủ trì, phối hợp với Phòng/Ban chức năng Công tác sinh viên và các đơn vị đào tạo tổ chức các lớp học phụ đạo ngoài giờ cho LHS (nếu có yêu cầu và trong điều kiện thực tế cho phép)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    }
+  ]
+}

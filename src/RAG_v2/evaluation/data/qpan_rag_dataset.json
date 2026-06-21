@@ -1,0 +1,467 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_001",
+      "question_type": "simple",
+      "question": "Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH do cơ quan nào ban hành và quy định về vấn đề gì?",
+      "gold_answer": "Do Bộ Giáo dục và Đào tạo cùng Bộ Lao động, Thương binh và Xã hội ban hành. Quy định tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học.",
+      "evidence_chunk_ids": [
+        "08d0e430-3330-43f5-8c28-ab3347dbccdf"
+      ],
+      "ground_truth_context": [
+        "Cơ quan ban hành: Bộ Giáo dục và Đào tạo – Bộ Lao động, Thương binh và Xã hội. Nội dung: Quy định tổ chức dạy, học và đánh giá kết quả học tập môn học Giáo dục quốc phòng và an ninh trong các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_002",
+      "question_type": "simple",
+      "question": "Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH có hiệu lực thi hành từ ngày nào?",
+      "gold_answer": "Có hiệu lực thi hành kể từ ngày 23 tháng 10 năm 2015.",
+      "evidence_chunk_ids": [
+        "1edf2db3-b901-4141-a927-e23a677a4b6c"
+      ],
+      "ground_truth_context": [
+        "Thông tư liên tịch này có hiệu lực thi hành kể từ ngày 23 tháng 10 năm 2015."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_003",
+      "question_type": "simple",
+      "question": "Thông tư liên tịch 18/2015 thay thế những văn bản quy phạm pháp luật nào trước đó về GDQP&AN?",
+      "gold_answer": "Thay thế Thông tư số 40/2012/TT-BGDĐT ngày 19/11/2012 của Bộ GD&ĐT và Quyết định số 63/2008/QĐ-BLĐTBXH ngày 25/11/2008 của Bộ LĐ-TB&XH về tổ chức dạy, học và đánh giá kết quả môn GDQP&AN.",
+      "evidence_chunk_ids": [
+        "1edf2db3-b901-4141-a927-e23a677a4b6c"
+      ],
+      "ground_truth_context": [
+        "Thông tư liên tịch này thay thế những quy định về tổ chức dạy, học và đánh giá kết quả học tập môn học GDQP&AN... ban hành kèm theo Thông tư số 40/2012/TT-BGDĐT ngày 19 tháng 11 năm 2012... Quyết định số 63/2008/QĐ-BLĐTBXH ngày 25 tháng 11 năm 2008"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_004",
+      "question_type": "simple",
+      "question": "Thông tư liên tịch 18/2015 áp dụng đối với những loại cơ sở giáo dục nào?",
+      "gold_answer": "Áp dụng với các cơ sở giáo dục nghề nghiệp và cơ sở giáo dục đại học, gồm: trường trung cấp, trường cao đẳng, trường đại học, học viện, đại học vùng, đại học Quốc gia, trung tâm GDQP&AN; cùng các tổ chức, cá nhân có liên quan.",
+      "evidence_chunk_ids": [
+        "03c9a959-4ba4-412c-b20c-72a8165cfcab"
+      ],
+      "ground_truth_context": [
+        "Thông tư này áp dụng đối với các cơ sở giáo dục nghề nghiệp, cơ sở giáo dục đại học, gồm: trường trung cấp, trường cao đẳng, trường đại học, học viện, đại học vùng, đại học Quốc gia, trung tâm GDQP&AN (sau đây gọi chung là cơ sở giáo dục); tổ chức, cá nhân có liên quan."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_005",
+      "question_type": "simple",
+      "question": "Môn học GDQP&AN có vị trí như thế nào trong chương trình giáo dục tại các cơ sở giáo dục?",
+      "gold_answer": "GDQP&AN là nội dung cơ bản trong việc xây dựng nền quốc phòng toàn dân, an ninh nhân dân, là môn học chính khóa thuộc chương trình giáo dục của các cơ sở giáo dục.",
+      "evidence_chunk_ids": [
+        "927dd722-b363-4d76-8e60-008ce78d898e"
+      ],
+      "ground_truth_context": [
+        "GDQP&AN là nội dung cơ bản trong việc xây dựng nền quốc phòng toàn dân, an ninh nhân dân, là môn học chính khóa thuộc chương trình giáo dục của các cơ sở giáo dục."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_006",
+      "question_type": "simple",
+      "question": "Môn học GDQP&AN trang bị cho sinh viên những kiến thức gì?",
+      "gold_answer": "Trang bị kiến thức cơ bản về nền quốc phòng toàn dân, an ninh nhân dân; quan điểm của Đảng, chính sách pháp luật nhà nước về quốc phòng - an ninh; truyền thống chống ngoại xâm, lực lượng vũ trang, nghệ thuật quân sự Việt Nam; kiến thức về phòng thủ dân sự, kỹ năng quân sự; sẵn sàng thực hiện nghĩa vụ quân sự bảo vệ Tổ quốc.",
+      "evidence_chunk_ids": [
+        "927dd722-b363-4d76-8e60-008ce78d898e"
+      ],
+      "ground_truth_context": [
+        "Môn học GDQP&AN trang bị cho học sinh, sinh viên những hiểu biết cơ bản về nền quốc phòng toàn dân, an ninh nhân dân, quan điểm của Đảng, chính sách, pháp luật của nhà nước về quốc phòng và an ninh; truyền thống chống ngoại xâm của dân tộc, lực lượng vũ trang nhân dân và nghệ thuật quân sự Việt Nam; xây dựng nền quốc phòng toàn dân, an ninh nhân dân, lực lượng vũ trang nhân dân; có kiến thức cơ bản, cần thiết về phòng thủ dân sự, kỹ năng quân sự; sẵn sàng thực hiện nghĩa vụ quân sự bảo vệ Tổ quốc."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_007",
+      "question_type": "simple",
+      "question": "Theo Thông tư liên tịch 18/2015, giáo viên dạy GDQP&AN phải mặc trang phục như thế nào khi giảng dạy?",
+      "gold_answer": "Khi giảng dạy tại giảng đường hoặc trên thao trường phải mặc trang phục GDQP&AN theo quy định. Giáo viên, giảng viên là sĩ quan quân đội, công an biệt phái phải mặc theo Điều lệnh quân đội, công an nhân dân.",
+      "evidence_chunk_ids": [
+        "12ba5d70-d4c5-42c9-a41e-715480b304f8"
+      ],
+      "ground_truth_context": [
+        "Giáo viên, giảng viên dạy GDQP&AN khi giảng dạy tại giảng đường hoặc trên thao trường phải mang mặc trang phục GDQP&AN theo quy định; giáo viên, giảng viên là sĩ quan quân đội, công an biệt phái phải mang mặc theo Điều lệnh quân đội, công an nhân dân."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_008",
+      "question_type": "simple",
+      "question": "Dạy, học GDQP&AN phải đảm bảo những nguyên tắc gì theo Điều 3 Thông tư liên tịch 18/2015?",
+      "gold_answer": "Phải đảm bảo tính toàn diện, có trọng tâm trọng điểm; kết hợp lý luận và thực tiễn, lý thuyết và thực hành; phù hợp quy chế đào tạo từng trình độ; gắn với giáo dục ý thức tổ chức kỷ luật, tinh thần tập thể; gắn kết với giáo dục thực tế, kỹ năng thực hành và hoạt động ngoại khóa.",
+      "evidence_chunk_ids": [
+        "12ba5d70-d4c5-42c9-a41e-715480b304f8"
+      ],
+      "ground_truth_context": [
+        "Dạy, học môn học GDQP&AN phải bảo đảm tính toàn diện, có trọng tâm, trọng điểm bằng các hình thức phù hợp; kết hợp giữa lý luận và thực tiễn, giữa lý thuyết và thực hành; phù hợp với quy chế tổ chức đào tạo của từng trình độ; phải gắn liền với giáo dục ý thức tổ chức kỷ luật, tinh thần tập thể; dạy, học môn học GDQP&AN tại các cơ sở giáo dục phải gắn kết với giáo dục thực tế, kỹ năng thực hành và hoạt động ngoại khóa."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên nào được miễn toàn bộ môn học GDQP&AN theo Thông tư liên tịch 18/2015?",
+      "gold_answer": "Ba đối tượng được miễn: (a) sinh viên có giấy chứng nhận sĩ quan dự bị hoặc bằng tốt nghiệp do trường quân đội, công an cấp; (b) sinh viên đã có chứng chỉ GDQP&AN tương ứng với trình độ đào tạo; (c) sinh viên là người nước ngoài.",
+      "evidence_chunk_ids": [
+        "f8a15b5a-4da9-49dc-a892-e25e30f955b6"
+      ],
+      "ground_truth_context": [
+        "Đối tượng được miễn học môn học GDQP&AN: a) Học sinh, sinh viên có giấy chứng nhận sĩ quan dự bị hoặc bằng tốt nghiệp do các trường quân đội, công an cấp; b) Học sinh, sinh viên đã có chứng chỉ GDQP&AN tương ứng với trình độ đào tạo; c) Học sinh, sinh viên là người nước ngoài."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên được miễn học một số học phần trong chương trình GDQP&AN khi nào?",
+      "gold_answer": "Khi có giấy xác nhận kết quả học tập các học phần, nội dung đó đạt từ 5 điểm trở lên theo thang điểm 10.",
+      "evidence_chunk_ids": [
+        "f8a15b5a-4da9-49dc-a892-e25e30f955b6"
+      ],
+      "ground_truth_context": [
+        "Đối tượng được miễn học, miễn thi học phần, nội dung trong chương trình GDQP&AN, gồm: học sinh, sinh viên có giấy xác nhận kết quả học tập các học phần, nội dung đó đạt từ 5 điểm trở lên theo thang điểm 10."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_011",
+      "question_type": "simple",
+      "question": "Sinh viên nào được miễn các nội dung thực hành kỹ năng quân sự trong GDQP&AN?",
+      "gold_answer": "Ba đối tượng: (a) sinh viên là người khuyết tật có giấy xác nhận; (b) sinh viên không đủ sức khỏe hoặc mắc bệnh lý thuộc diện miễn nghĩa vụ quân sự; (c) sinh viên đã hoàn thành nghĩa vụ quân sự, công an nhân dân.",
+      "evidence_chunk_ids": [
+        "f8a15b5a-4da9-49dc-a892-e25e30f955b6"
+      ],
+      "ground_truth_context": [
+        "Đối tượng được miễn học, các nội dung thực hành kỹ năng quân sự: a) Học sinh, sinh viên là người khuyết tật, có giấy xác nhận khuyết tật theo quy định...; b) Học sinh, sinh viên không đủ sức khỏe về thể lực hoặc mắc những bệnh lý thuộc diện miễn làm nghĩa vụ quân sự...; c) Học sinh, sinh viên đã hoàn thành nghĩa vụ quân sự, công an nhân dân."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên nữ đang mang thai có được tạm hoãn học GDQP&AN không, và ai có thẩm quyền xét tạm hoãn?",
+      "gold_answer": "Có, sinh viên nữ đang mang thai hoặc trong thời gian nghỉ chế độ thai sản được tạm hoãn. Giám đốc, hiệu trưởng các cơ sở giáo dục có thẩm quyền xét tạm hoãn.",
+      "evidence_chunk_ids": [
+        "c3120733-3886-44a0-b45f-bd96cd2f1232"
+      ],
+      "ground_truth_context": [
+        "Đối tượng được tạm hoãn học môn học GDQP&AN: b) Học sinh, sinh viên là nữ đang mang thai hoặc trong thời gian nghỉ chế độ thai sản theo quy định hiện hành. Giám đốc, hiệu trưởng các cơ sở giáo dục xem xét tạm hoãn học môn học GDQP&AN cho các đối tượng quy định..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_013",
+      "question_type": "simple",
+      "question": "Sau khi hết thời gian tạm hoãn học GDQP&AN, cơ sở giáo dục phải làm gì đối với sinh viên?",
+      "gold_answer": "Hết thời gian tạm hoãn, các cơ sở giáo dục bố trí cho học sinh, sinh viên vào học các lớp phù hợp để hoàn thành chương trình.",
+      "evidence_chunk_ids": [
+        "c3120733-3886-44a0-b45f-bd96cd2f1232"
+      ],
+      "ground_truth_context": [
+        "Hết thời gian tạm hoãn, các cơ sở giáo dục bố trí cho học sinh, sinh viên vào học các lớp phù hợp để hoàn thành chương trình."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_014",
+      "question_type": "simple",
+      "question": "Giảng viên GDQP&AN là sĩ quan quân đội biệt phái được quản lý như thế nào theo Thông tư liên tịch 18/2015?",
+      "gold_answer": "Do cơ quan, đơn vị biệt phái sĩ quan và các trường quản lý theo quy định của Chính phủ về biệt phái sĩ quan quân đội, công an.",
+      "evidence_chunk_ids": [
+        "2ed31f4b-7260-46ec-8e25-5deba83736d3"
+      ],
+      "ground_truth_context": [
+        "Giảng viên GDQP&AN là sĩ quan quân đội biệt phái do cơ quan, đơn vị biệt phái sĩ quan và các trường quản lý theo quy định của Chính phủ về biệt phái sĩ quan quân đội, công an."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_015",
+      "question_type": "simple",
+      "question": "Cơ sở giáo dục có khoa hoặc bộ môn GDQP&AN cần có những cơ sở vật chất gì để thực hiện nhiệm vụ GDQP&AN?",
+      "gold_answer": "Phải có phòng học chuyên dùng, thao trường tổng hợp; có đủ cơ sở vật chất, thiết bị dạy học GDQP&AN theo quy định về danh mục thiết bị dạy học tối thiểu môn GDQP&AN.",
+      "evidence_chunk_ids": [
+        "bae4b92c-3738-4703-9dc0-7fb18ac2194b"
+      ],
+      "ground_truth_context": [
+        "Các cơ sở giáo dục có trung tâm, khoa hoặc bộ môn GDQP&AN thực hiện nhiệm vụ GDQP&AN phải có phòng học chuyên dùng, thao trường tổng hợp; có đủ cơ sở vật chất, thiết bị dạy học GDQP&AN theo quy định hiện hành về danh mục thiết bị dạy học tối thiểu môn học GDQP&AN."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_016",
+      "question_type": "simple",
+      "question": "Lớp học lý thuyết GDQP&AN được phép ghép tối đa bao nhiêu người và lớp thực hành tối đa bao nhiêu người?",
+      "gold_answer": "Lớp học lý thuyết ghép không quá 150 người; lớp học thực hành không quá 40 người.",
+      "evidence_chunk_ids": [
+        "cf2ea3f2-4eb4-40c8-b63d-45b52d63fec8"
+      ],
+      "ground_truth_context": [
+        "Lớp học lý thuyết nếu bố trí lớp ghép phải phù hợp với phương pháp dạy học và điều kiện cụ thể của các cơ sở giáo dục, nhưng không quá 150 người; lớp học thực hành không quá 40 người."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_017",
+      "question_type": "simple",
+      "question": "Khi tổ chức dạy thực hành kỹ thuật, chiến thuật, thuốc nổ và bắn đạn thật trong GDQP&AN, cơ sở giáo dục phải làm gì?",
+      "gold_answer": "Phải hợp đồng với cơ quan quân sự địa phương, đơn vị quân đội, công an để bảo đảm tuyệt đối an toàn về người, vũ khí, trang thiết bị.",
+      "evidence_chunk_ids": [
+        "cf2ea3f2-4eb4-40c8-b63d-45b52d63fec8"
+      ],
+      "ground_truth_context": [
+        "Các cơ sở giáo dục tổ chức dạy, học thực hành kỹ thuật, chiến thuật, thuốc nổ và bắn đạn thật phải hợp đồng với cơ quan quân sự địa phương, đơn vị quân đội, công an để bảo đảm tuyệt đối an toàn về người, vũ khí, trang thiết bị."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_018",
+      "question_type": "simple",
+      "question": "Sinh viên cần đạt điểm trung bình chung môn học GDQP&AN bao nhiêu để được cấp chứng chỉ?",
+      "gold_answer": "Sinh viên cần đạt điểm trung bình chung môn học từ 5 điểm trở lên theo thang điểm 10.",
+      "evidence_chunk_ids": [
+        "792599e8-b757-4677-abca-5eeee2bd9a9c"
+      ],
+      "ground_truth_context": [
+        "Sinh viên có điểm trung bình chung môn học đạt từ 5 điểm trở lên (theo thang điểm 10) được cấp chứng chỉ GDQP&AN."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_019",
+      "question_type": "simple",
+      "question": "Ai có thẩm quyền cấp chứng chỉ GDQP&AN cho sinh viên tại các cơ sở giáo dục đại học?",
+      "gold_answer": "Giám đốc, hiệu trưởng các cơ sở giáo dục được tổ chức dạy, học GDQP&AN có thẩm quyền cấp chứng chỉ GDQP&AN.",
+      "evidence_chunk_ids": [
+        "792599e8-b757-4677-abca-5eeee2bd9a9c"
+      ],
+      "ground_truth_context": [
+        "Thẩm quyền cấp chứng chỉ GDQP&AN: a) Giám đốc, hiệu trưởng các cơ sở giáo dục được tổ chức dạy, học GDQP&AN thì có thẩm quyền cấp chứng chỉ GDQP&AN; b) Giám đốc trung tâm GDQP&AN cấp chứng chỉ GDQP&AN theo quy định về liên kết GDQP&AN."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_020",
+      "question_type": "simple",
+      "question": "Bộ Giáo dục và Đào tạo có trách nhiệm gì trong việc tổ chức đào tạo, bồi dưỡng đội ngũ giảng viên GDQP&AN?",
+      "gold_answer": "Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ LĐ-TB&XH và các cơ quan liên quan tổ chức đào tạo, bồi dưỡng, tập huấn cho đội ngũ cán bộ quản lý, giáo viên, giảng viên GDQP&AN trong các cơ sở giáo dục.",
+      "evidence_chunk_ids": [
+        "18a4c8c6-9bd7-43d9-bd56-b160866e4f2c"
+      ],
+      "ground_truth_context": [
+        "Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội và các cơ quan liên quan tổ chức đào tạo, bồi dưỡng, tập huấn cho đội ngũ cán bộ quản lý, giáo viên, giảng viên GDQP&AN trong các cơ sở giáo dục."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_021",
+      "question_type": "simple",
+      "question": "Trách nhiệm của cơ sở giáo dục trong công tác GDQP&AN theo Điều 13 là gì?",
+      "gold_answer": "Chủ động xây dựng kế hoạch tổ chức dạy, học, đánh giá kết quả môn học GDQP&AN và thực hiện chế độ báo cáo theo quy định.",
+      "evidence_chunk_ids": [
+        "47c2be76-dc8c-4175-b8ed-41159ce70426"
+      ],
+      "ground_truth_context": [
+        "Chủ động xây dựng kế hoạch tổ chức dạy, học, đánh giá kết quả môn học GDQP&AN và thực hiện chế độ báo cáo theo quy định."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_simple_022",
+      "question_type": "simple",
+      "question": "Khi gặp vướng mắc trong quá trình tổ chức thực hiện Thông tư liên tịch 18/2015, các đơn vị cần phản ánh về đâu?",
+      "gold_answer": "Cần phản ánh kịp thời về Bộ Giáo dục và Đào tạo và Bộ Lao động - Thương binh và Xã hội để xem xét, giải quyết.",
+      "evidence_chunk_ids": [
+        "854b7e9d-aa64-4499-a464-5d0cb6966af9"
+      ],
+      "ground_truth_context": [
+        "Trong quá trình tổ chức thực hiện, nếu có những vấn đề vướng mắc, cần phản ánh kịp thời về Bộ Giáo dục và Đào tạo, Bộ Lao động - Thương binh và Xã hội để xem xét, giải quyết."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_multi_hop_023",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đã từng phục vụ trong quân đội muốn xin miễn học GDQP&AN tại trường đại học cần đáp ứng điều kiện gì và ai có thẩm quyền xét duyệt?",
+      "gold_answer": "Sinh viên đã hoàn thành nghĩa vụ quân sự được miễn các nội dung thực hành kỹ năng quân sự (theo Điều 4 khoản 3c). Giám đốc, hiệu trưởng cơ sở giáo dục có thẩm quyền xét tạm hoãn; còn việc cấp chứng chỉ GDQP&AN thuộc thẩm quyền của Giám đốc/Hiệu trưởng cơ sở giáo dục.",
+      "evidence_chunk_ids": [
+        "f8a15b5a-4da9-49dc-a892-e25e30f955b6",
+        "c3120733-3886-44a0-b45f-bd96cd2f1232"
+      ],
+      "ground_truth_context": [
+        "Học sinh, sinh viên đã hoàn thành nghĩa vụ quân sự, công an nhân dân.",
+        "Giám đốc, hiệu trưởng các cơ sở giáo dục xem xét tạm hoãn học môn học GDQP&AN cho các đối tượng quy định..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_multi_hop_024",
+      "question_type": "multi_hop",
+      "question": "Sinh viên bị điểm GDQP&AN dưới 5 có được cấp chứng chỉ không? Nếu không, sinh viên cần làm gì theo quy định?",
+      "gold_answer": "Không, sinh viên phải đạt điểm trung bình chung từ 5/10 trở lên mới được cấp chứng chỉ. Nếu chưa đạt, sinh viên phải học lại để hoàn thành chương trình theo kế hoạch mà cơ sở giáo dục bố trí.",
+      "evidence_chunk_ids": [
+        "792599e8-b757-4677-abca-5eeee2bd9a9c",
+        "9c51f844-989e-4df2-96c5-254225055dc9"
+      ],
+      "ground_truth_context": [
+        "Sinh viên có điểm trung bình chung môn học đạt từ 5 điểm trở lên (theo thang điểm 10) được cấp chứng chỉ GDQP&AN.",
+        "Đánh giá kết quả học tập GDQP&AN đối với học sinh, sinh viên thực hiện theo quy định hiện hành về quy chế đào tạo của từng trình độ đào tạo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_multi_hop_025",
+      "question_type": "multi_hop",
+      "question": "Lớp học GDQP&AN tại đại học được tổ chức như thế nào và quy mô lớp học lý thuyết và thực hành có giới hạn gì?",
+      "gold_answer": "Các cơ sở giáo dục đại học có khoa, bộ môn GDQP&AN tổ chức dạy học tập trung theo kế hoạch đào tạo. Lớp lý thuyết ghép không quá 150 người; lớp thực hành không quá 40 người.",
+      "evidence_chunk_ids": [
+        "cf2ea3f2-4eb4-40c8-b63d-45b52d63fec8"
+      ],
+      "ground_truth_context": [
+        "Các cơ sở giáo dục đại học có khoa, bộ môn GDQP&AN tổ chức dạy, học tập trung theo kế hoạch đào tạo của cơ sở. Lớp học lý thuyết nếu bố trí lớp ghép... không quá 150 người; lớp học thực hành không quá 40 người."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_multi_hop_026",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đã học GDQP&AN tại trường trước đó nhưng chỉ đạt điểm 6/10 ở một học phần có được miễn học phần đó khi chuyển trường không?",
+      "gold_answer": "Có, sinh viên được miễn học, miễn thi học phần đó vì đã có giấy xác nhận kết quả học tập đạt từ 5 điểm trở lên theo thang điểm 10.",
+      "evidence_chunk_ids": [
+        "f8a15b5a-4da9-49dc-a892-e25e30f955b6"
+      ],
+      "ground_truth_context": [
+        "Đối tượng được miễn học, miễn thi học phần, nội dung trong chương trình GDQP&AN, gồm: học sinh, sinh viên có giấy xác nhận kết quả học tập các học phần, nội dung đó đạt từ 5 điểm trở lên theo thang điểm 10."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_multi_hop_027",
+      "question_type": "multi_hop",
+      "question": "Bộ GD&ĐT có những trách nhiệm gì liên quan đến công tác thanh tra, kiểm tra GDQP&AN theo Thông tư liên tịch 18/2015?",
+      "gold_answer": "Bộ GD&ĐT chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ LĐ-TB&XH tổ chức thanh tra, kiểm tra công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý và các trung tâm GDQP&AN.",
+      "evidence_chunk_ids": [
+        "18a4c8c6-9bd7-43d9-bd56-b160866e4f2c"
+      ],
+      "ground_truth_context": [
+        "Chủ trì, phối hợp với Bộ Quốc phòng, Bộ Công an, Bộ Lao động - Thương binh và Xã hội tổ chức thanh tra, kiểm tra công tác GDQP&AN trong các cơ sở giáo dục thuộc thẩm quyền quản lý, các trung tâm GDQP&AN."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_multi_hop_028",
+      "question_type": "multi_hop",
+      "question": "Sinh viên khuyết tật học tại đại học được miễn những phần nào trong môn GDQP&AN và cần giấy tờ gì để chứng minh?",
+      "gold_answer": "Được miễn các nội dung thực hành kỹ năng quân sự. Cần có giấy xác nhận khuyết tật theo quy định của pháp luật về người khuyết tật.",
+      "evidence_chunk_ids": [
+        "f8a15b5a-4da9-49dc-a892-e25e30f955b6"
+      ],
+      "ground_truth_context": [
+        "Học sinh, sinh viên là người khuyết tật, có giấy xác nhận khuyết tật theo quy định của pháp luật về người khuyết tật;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_multi_hop_029",
+      "question_type": "multi_hop",
+      "question": "Thông tư liên tịch 18/2015 quy định về cơ sở vật chất và về cách tổ chức dạy bắn đạn thật như thế nào nhằm đảm bảo an toàn?",
+      "gold_answer": "Cơ sở giáo dục phải có phòng học chuyên dùng, thao trường tổng hợp và đủ thiết bị theo danh mục tối thiểu. Khi tổ chức dạy bắn đạn thật phải hợp đồng với cơ quan quân sự địa phương, đơn vị quân đội, công an để bảo đảm tuyệt đối an toàn về người, vũ khí, trang thiết bị.",
+      "evidence_chunk_ids": [
+        "bae4b92c-3738-4703-9dc0-7fb18ac2194b",
+        "cf2ea3f2-4eb4-40c8-b63d-45b52d63fec8"
+      ],
+      "ground_truth_context": [
+        "Các cơ sở giáo dục có trung tâm, khoa hoặc bộ môn GDQP&AN... phải có phòng học chuyên dùng, thao trường tổng hợp; có đủ cơ sở vật chất, thiết bị dạy học GDQP&AN theo quy định hiện hành",
+        "Các cơ sở giáo dục tổ chức dạy, học thực hành kỹ thuật, chiến thuật, thuốc nổ và bắn đạn thật phải hợp đồng với cơ quan quân sự địa phương, đơn vị quân đội, công an để bảo đảm tuyệt đối an toàn"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "01_1_2015_TT_Lien_tich_QD_danh_gia_QP-AN_multi_hop_030",
+      "question_type": "multi_hop",
+      "question": "Sinh viên là người nước ngoài đang học tại Đại học Bách khoa Hà Nội có phải học GDQP&AN không, theo Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH?",
+      "gold_answer": "Không, sinh viên là người nước ngoài được miễn toàn bộ môn học GDQP&AN. Quy định này nằm tại Điều 4, khoản 1, điểm c của Thông tư liên tịch 18/2015/TTLT-BGDĐT-BLĐTBXH.",
+      "evidence_chunk_ids": [
+        "f8a15b5a-4da9-49dc-a892-e25e30f955b6"
+      ],
+      "ground_truth_context": [
+        "Đối tượng được miễn học môn học GDQP&AN: c) Học sinh, sinh viên là người nước ngoài."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    }
+  ]
+}

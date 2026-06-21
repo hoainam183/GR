@@ -1,0 +1,469 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "chuan_tieng_anh_k63_k64_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "chunks_001_simple_001",
+      "question_type": "simple",
+      "question": "Quy định này áp dụng cho sinh viên khóa nào?",
+      "gold_answer": "K63 và K64",
+      "evidence_chunk_ids": [
+        "43dc8f77-a8cb-4250-9ff4-57163f5c21de"
+      ],
+      "ground_truth_context": [
+        "K63 và K64"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_002",
+      "question_type": "simple",
+      "question": "Những đối tượng nào không áp dụng quy định này?",
+      "gold_answer": "Ngành Ngôn ngữ Anh, ELITECH và SV nước ngoài",
+      "evidence_chunk_ids": [
+        "43dc8f77-a8cb-4250-9ff4-57163f5c21de"
+      ],
+      "ground_truth_context": [
+        "Ngành Ngôn ngữ Anh, ELITECH và SV nước ngoài"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên đạt điều kiện nào được miễn 2 học phần tiếng Anh cơ bản?",
+      "gold_answer": "Đạt điểm thi hoặc có chứng chỉ quốc tế phù hợp",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e"
+      ],
+      "ground_truth_context": [
+        "Đạt điểm thi hoặc có chứng chỉ quốc tế phù hợp"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_004",
+      "question_type": "simple",
+      "question": "Học phần tiếng Anh cơ bản có tính vào GPA không?",
+      "gold_answer": "Không",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e"
+      ],
+      "ground_truth_context": [
+        "Không"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_005",
+      "question_type": "simple",
+      "question": "Chưa hoàn thành tiếng Anh cơ bản có được thi chứng chỉ nội bộ không?",
+      "gold_answer": "Không",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e"
+      ],
+      "ground_truth_context": [
+        "Không"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_006",
+      "question_type": "simple",
+      "question": "Trượt học phần tiếng Anh cơ bản phải làm gì?",
+      "gold_answer": "Đăng ký học lại",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e"
+      ],
+      "ground_truth_context": [
+        "Đăng ký học lại"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_007",
+      "question_type": "simple",
+      "question": "Sinh viên được thi chứng chỉ nội bộ bao nhiêu lần?",
+      "gold_answer": "Nhiều lần",
+      "evidence_chunk_ids": [
+        "a518a642-cf7f-46f9-bb00-97a3d6f9de7a"
+      ],
+      "ground_truth_context": [
+        "Nhiều lần"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_008",
+      "question_type": "simple",
+      "question": "Kết quả thi nội bộ có giá trị bao lâu?",
+      "gold_answer": "2 năm",
+      "evidence_chunk_ids": [
+        "a518a642-cf7f-46f9-bb00-97a3d6f9de7a"
+      ],
+      "ground_truth_context": [
+        "2 năm"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_009",
+      "question_type": "simple",
+      "question": "TOEIC bao nhiêu được cấp chứng nhận nội bộ?",
+      "gold_answer": "500",
+      "evidence_chunk_ids": [
+        "a518a642-cf7f-46f9-bb00-97a3d6f9de7a"
+      ],
+      "ground_truth_context": [
+        "500"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_010",
+      "question_type": "simple",
+      "question": "Chuẩn tiếng Anh từ 64 tín chỉ là bao nhiêu TOEIC?",
+      "gold_answer": "350",
+      "evidence_chunk_ids": [
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "350"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_011",
+      "question_type": "simple",
+      "question": "Chuẩn tiếng Anh từ 96 tín chỉ là bao nhiêu TOEIC?",
+      "gold_answer": "450",
+      "evidence_chunk_ids": [
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "450"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_012",
+      "question_type": "simple",
+      "question": "Điều kiện nhận đồ án tốt nghiệp về TOEIC là gì?",
+      "gold_answer": "TOEIC 500",
+      "evidence_chunk_ids": [
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "TOEIC 500"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_013",
+      "question_type": "simple",
+      "question": "Chuẩn tiếng Anh đầu ra là bao nhiêu TOEIC?",
+      "gold_answer": "500",
+      "evidence_chunk_ids": [
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "500"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_014",
+      "question_type": "simple",
+      "question": "Không đạt chuẩn theo trình độ bị hạn chế thế nào?",
+      "gold_answer": "Tối đa 14 TC",
+      "evidence_chunk_ids": [
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "Tối đa 14 TC"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_015",
+      "question_type": "simple",
+      "question": "Chứng chỉ được công nhận nếu cấp bởi tổ chức nào?",
+      "gold_answer": "ETS, British Council, ESOL, IDP",
+      "evidence_chunk_ids": [
+        "fb559e62-7fd5-415c-860a-ca19d9c5a5fd"
+      ],
+      "ground_truth_context": [
+        "ETS, British Council, ESOL, IDP"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_016",
+      "question_type": "simple",
+      "question": "Ai thẩm định trường hợp chứng chỉ khác?",
+      "gold_answer": "Trung tâm Ngoại ngữ",
+      "evidence_chunk_ids": [
+        "fb559e62-7fd5-415c-860a-ca19d9c5a5fd"
+      ],
+      "ground_truth_context": [
+        "Trung tâm Ngoại ngữ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_017",
+      "question_type": "simple",
+      "question": "Chứng chỉ dùng xét tốt nghiệp phải như thế nào?",
+      "gold_answer": "Còn hiệu lực",
+      "evidence_chunk_ids": [
+        "fb559e62-7fd5-415c-860a-ca19d9c5a5fd"
+      ],
+      "ground_truth_context": [
+        "Còn hiệu lực"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_018",
+      "question_type": "simple",
+      "question": "Hoàn thành 2 học phần tiếng Anh cơ bản tương ứng mốc nào?",
+      "gold_answer": "0-63 tín chỉ",
+      "evidence_chunk_ids": [
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "0-63 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_019",
+      "question_type": "simple",
+      "question": "Sinh viên được công nhận điểm thi nội bộ nào?",
+      "gold_answer": "Điểm cao nhất",
+      "evidence_chunk_ids": [
+        "a518a642-cf7f-46f9-bb00-97a3d6f9de7a"
+      ],
+      "ground_truth_context": [
+        "Điểm cao nhất"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_020",
+      "question_type": "simple",
+      "question": "Chứng nhận nội bộ có hiệu lực bao lâu?",
+      "gold_answer": "2 năm",
+      "evidence_chunk_ids": [
+        "a518a642-cf7f-46f9-bb00-97a3d6f9de7a"
+      ],
+      "ground_truth_context": [
+        "2 năm"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_021",
+      "question_type": "simple",
+      "question": "Điểm thi học phần tiếng Anh cơ bản dùng làm gì?",
+      "gold_answer": "Điều kiện hoàn thành chương trình",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e"
+      ],
+      "ground_truth_context": [
+        "Điều kiện hoàn thành chương trình"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_022",
+      "question_type": "simple",
+      "question": "Trường dùng căn cứ nào để phân loại trình độ?",
+      "gold_answer": "Điểm tiếng Anh THPT",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e"
+      ],
+      "ground_truth_context": [
+        "Điểm tiếng Anh THPT"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_multihop_001",
+      "question_type": "multi_hop",
+      "question": "Điều kiện nhận đồ án và chuẩn đầu ra có điểm chung gì?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e",
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_002",
+      "question_type": "multi_hop",
+      "question": "Nếu chưa hoàn thành tiếng Anh cơ bản thì ảnh hưởng thế nào?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e",
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_003",
+      "question_type": "multi_hop",
+      "question": "Điều kiện miễn học và hoàn thành chương trình là gì?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e",
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_004",
+      "question_type": "multi_hop",
+      "question": "Chuẩn theo tín chỉ ảnh hưởng đăng ký học thế nào?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e",
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_005",
+      "question_type": "multi_hop",
+      "question": "Điều kiện công nhận tốt nghiệp bằng chứng chỉ là gì?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e",
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_006",
+      "question_type": "multi_hop",
+      "question": "Thi nội bộ nhiều lần được tính thế nào?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e",
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_007",
+      "question_type": "multi_hop",
+      "question": "Mối liên hệ giữa chuẩn đầu ra và đồ án?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e",
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên cần đáp ứng gì để tốt nghiệp đúng tiến độ?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "c788754c-50b2-4f77-b454-da84817e116e",
+        "92d8e047-8bb5-4660-93e7-681e3804d5ee"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

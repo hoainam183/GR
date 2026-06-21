@@ -1,0 +1,1533 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "baiviet_all_chunks.json",
+  "total_questions": 100,
+  "distribution": {
+    "simple": 75,
+    "multi_hop": 25
+  },
+  "items": [
+    {
+      "id": "baiviet_all_chunks_simple_001",
+      "question_type": "simple",
+      "question": "Hội thảo online của chương trình tham quan tuyển dụng Goertek Vina diễn ra lúc mấy giờ và vào ngày nào?",
+      "gold_answer": "Hội thảo online diễn ra lúc 20h00 ngày 12/05/2026.",
+      "evidence_chunk_ids": [
+        "0fe3aa2d-cda5-4fa5-844a-ba73e3823030"
+      ],
+      "ground_truth_context": [
+        "[Chương trình tham quan tuyển dụng của công ty Goertek Vina tại Bắc Ninh]\n1. Hội thảo online:\n- Thời gian: 20h00 ngày 12/05/2026\n- Nội dung: Giới thiệu công ty, các vị trí tuyển dụng, trả lời thắc mắc của sinh viên"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_002",
+      "question_type": "simple",
+      "question": "Chương trình tham quan nhà máy và phỏng vấn tuyển dụng của Goertek Vina bắt đầu lúc mấy giờ và ở đâu?",
+      "gold_answer": "Tham quan bắt đầu lúc 7h00 ngày 15/05/2026 tại Nhà máy Goertek Vina tại Bắc Ninh.",
+      "evidence_chunk_ids": [
+        "ac83efd7-3854-4b11-bf72-007309dd45f3"
+      ],
+      "ground_truth_context": [
+        "2. Tham quan nhà máy và phỏng vấn sinh viên\n- Thời gian: 7h00 ngày 15/05/2026\n- Địa điểm: Nhà máy Goertek Vina tại Bắc Ninh"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_003",
+      "question_type": "simple",
+      "question": "Chương trình tham quan tuyển dụng Goertek Vina tuyển tối đa bao nhiêu người?",
+      "gold_answer": "Chương trình tuyển tối đa 20 người.",
+      "evidence_chunk_ids": [
+        "95265f14-adf1-48a6-b3f2-ebd68f57364c"
+      ],
+      "ground_truth_context": [
+        ": 20 người\nVị trí tuyển dụng..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_004",
+      "question_type": "simple",
+      "question": "Lương thử việc tại Goertek Vina bằng bao nhiêu phần trăm lương chính thức và ước tính khoảng bao nhiêu tiền?",
+      "gold_answer": "Lương thử việc bằng 85% lương chính thức, khoảng 9,2 triệu VND, chưa bao gồm tăng ca và các khoản trợ cấp.",
+      "evidence_chunk_ids": [
+        "95265f14-adf1-48a6-b3f2-ebd68f57364c"
+      ],
+      "ground_truth_context": [
+        "Lương thử việc: Bằng 85% lương chính thức (khoảng 9,2 triệu VND), chưa bao gồm tăng ca và các khoản trợ cấp"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_005",
+      "question_type": "simple",
+      "question": "Goertek Vina được thành lập năm nào và ở đâu tại Việt Nam?",
+      "gold_answer": "Goertek Vina được thành lập năm 2019 tại KCN Quế Võ, phường Nam Sơn, TP Bắc Ninh, tỉnh Bắc Ninh.",
+      "evidence_chunk_ids": [
+        "53ba4f6f-e628-4b9e-8bea-5bc519a42e18"
+      ],
+      "ground_truth_context": [
+        "Công ty TNHH khoa học kỹ thuật Goertek Vina... được thành lập năm 2019 tại KCN Quế Võ, phường Nam Sơn, TP Bắc Ninh, tỉnh Bắc Ninh."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_006",
+      "question_type": "simple",
+      "question": "Chế độ nghỉ phép theo giờ tại Goertek Vina là bao nhiêu lần mỗi tháng và mỗi lần mấy tiếng?",
+      "gold_answer": "Mỗi tháng nghỉ 2 lần, mỗi lần 2 tiếng và vẫn hưởng lương.",
+      "evidence_chunk_ids": [
+        "a54f5383-ff21-47b8-917d-dca19357acbb"
+      ],
+      "ground_truth_context": [
+        "Nghỉ phép theo giờ (mỗi tháng nghỉ 2 lần 2 tiếng vẫn hưởng lương)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_007",
+      "question_type": "simple",
+      "question": "Chương trình 'Tuyển dụng cán bộ nguồn 2027' của Goertek Vina nhắm đến sinh viên tốt nghiệp trước thời điểm nào?",
+      "gold_answer": "Sinh viên tốt nghiệp trước tháng 8 năm 2027.",
+      "evidence_chunk_ids": [
+        "dca512e6-269b-4ad8-be4c-c8d64cb607b2"
+      ],
+      "ground_truth_context": [
+        "Tốt nghiệp trước tháng 8 năm 2027"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_008",
+      "question_type": "simple",
+      "question": "Hạn nộp báo danh cho chương trình tuyển dụng cán bộ nguồn 2027 của Goertek Vina là khi nào?",
+      "gold_answer": "Hạn báo danh đến hết ngày 10 tháng 05 năm 2026.",
+      "evidence_chunk_ids": [
+        "82921303-6af6-42a8-a257-9978315c71d8"
+      ],
+      "ground_truth_context": [
+        "Thời gian báo danh: đến hết ngày 10 tháng 05 năm 2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_009",
+      "question_type": "simple",
+      "question": "Chương trình đào tạo cán bộ nguồn Goertek Vina kéo dài bao lâu và dự kiến diễn ra từ khi nào đến khi nào?",
+      "gold_answer": "Chương trình kéo dài 1 học kỳ tại trung tâm đào tạo Goertek Việt Nam, dự kiến từ tháng 02 đến tháng 06/2027.",
+      "evidence_chunk_ids": [
+        "22ac7873-a3a0-47ac-b591-59009531051a"
+      ],
+      "ground_truth_context": [
+        "Thời gian tham gia: 1 Học kỳ tại trung tâm đào tạo công nghệ kỹ thuật Goertek Việt Nam (dự kiến từ 02-06/2027)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_010",
+      "question_type": "simple",
+      "question": "Tổng chỉ tiêu đào tạo sĩ quan dự bị năm 2026 tại Đại học Bách khoa Hà Nội là bao nhiêu?",
+      "gold_answer": "Tổng chỉ tiêu đào tạo sĩ quan dự bị năm 2026 là 08 chỉ tiêu.",
+      "evidence_chunk_ids": [
+        "4ece021b-66c9-4c9a-919f-6cb4245d0f2b"
+      ],
+      "ground_truth_context": [
+        "Tổng chỉ tiêu đào tạo SQDB năm 2026 là 08 chỉ tiêu thuộc các ngành sau"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_011",
+      "question_type": "simple",
+      "question": "Điều kiện về tuổi đời khi tham gia đào tạo sĩ quan dự bị năm 2026 là gì?",
+      "gold_answer": "Nam sinh viên có tuổi đời không quá 30, đã tốt nghiệp đại học trong năm 2026.",
+      "evidence_chunk_ids": [
+        "fae1f043-8818-4139-8bfd-b8635fe0ba62"
+      ],
+      "ground_truth_context": [
+        "Nam sinh viên có đủ điều kiện về chính trị, sức khỏe, tuổi đời không quá 30, đã tốt nghiệp đại học trong năm 2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký dự tuyển đào tạo sĩ quan dự bị năm 2026 tại Bách khoa Hà Nội ở đâu?",
+      "gold_answer": "Sinh viên đăng ký dự tuyển tại: https://forms.office.com/r/qXinuKawwy",
+      "evidence_chunk_ids": [
+        "d46e5b39-9f11-429f-b62c-820091adcdcb"
+      ],
+      "ground_truth_context": [
+        "Sinh viên đăng ký dự tuyển tại đây: https://forms.office.com/r/qXinuKawwy"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_013",
+      "question_type": "simple",
+      "question": "Sinh viên được tuyển đào tạo sĩ quan dự bị có quyền lợi gì trong thời gian đào tạo?",
+      "gold_answer": "Được hưởng chế độ ăn hàng ngày như học viên đào tạo sĩ quan cấp phân đội, được mượn và cấp quân trang.",
+      "evidence_chunk_ids": [
+        "84cb6275-ff1f-4877-988a-55232610062c"
+      ],
+      "ground_truth_context": [
+        "Được hưởng chế độ ăn hàng ngày như đối với học viên đào tạo sĩ quan cấp phân đội kể từ ngày có mặt tại cơ sở đào tạo cho đến khi kết thúc khoá đào tạo; Được mượn, cấp quân trang"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_014",
+      "question_type": "simple",
+      "question": "Địa điểm làm việc của Công ty TNHH DAIZO TEC tại Hà Nội ở đâu?",
+      "gold_answer": "Tầng 15, tòa nhà VIT, 519 Kim Mã, phường Ngọc Khánh, quận Ba Đình, Hà Nội.",
+      "evidence_chunk_ids": [
+        "acb5ce40-efa5-46f2-a93d-914d91287e15"
+      ],
+      "ground_truth_context": [
+        "Địa điểm làm việc: tầng 15, tòa nhà VIT, 519 Kim Mã, phường Ngọc Khánh, quận Ba Đình, Hà Nội"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_015",
+      "question_type": "simple",
+      "question": "Hạn cuối nộp hồ sơ ứng tuyển vào DAIZO TEC là ngày nào?",
+      "gold_answer": "Hạn cuối gửi hồ sơ là ngày 06/05/2026 (theo nội dung trong chunk).",
+      "evidence_chunk_ids": [
+        "b3da5b88-7cdb-49f3-a44a-ec96880cd880"
+      ],
+      "ground_truth_context": [
+        "Hạn cuối gửi hồ sơ: 06/05/20..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_016",
+      "question_type": "simple",
+      "question": "DAIZO TEC chuyên về lĩnh vực gì và là công ty con của tập đoàn nào?",
+      "gold_answer": "DAIZO TEC chuyên thiết kế bản vẽ tàu biển, là công ty con của Công ty cổ phần Đóng tàu OSHIMA – Nhật Bản.",
+      "evidence_chunk_ids": [
+        "dc9b6e38-0e01-4e8e-9cde-ba8ee47d3022"
+      ],
+      "ground_truth_context": [
+        "tại Hà Nội chuyên về thiết kế bản vẽ tàu biển (sử dụng các phần mềm CAD 2D và 3D chuyên dụng), là công ty con của Công ty cổ phần Đóng tàu OSHIMA - Nhật Bản."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên ứng tuyển vào DAIZO TEC cần gửi hồ sơ đến địa chỉ email nào?",
+      "gold_answer": "Sinh viên gửi hồ sơ đến email: p-linh@ma.osy.co.jp",
+      "evidence_chunk_ids": [
+        "b3da5b88-7cdb-49f3-a44a-ec96880cd880"
+      ],
+      "ground_truth_context": [
+        "tới e-mail: p-linh@ma.osy.co.jp"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_018",
+      "question_type": "simple",
+      "question": "Kết quả đánh giá điều kiện xét học bổng KKHT kỳ 2025.2 được xem ở đâu?",
+      "gold_answer": "Sinh viên xem kết quả theo hướng dẫn tại: https://bit.ly/3IR1XuL",
+      "evidence_chunk_ids": [
+        "3d17ef49-f15b-4846-b700-7b48a37dcd56"
+      ],
+      "ground_truth_context": [
+        "Hiện tại đã có kết quả đánh giá điều kiện để được xét học bổng KKHT kỳ 2025.2; để xem kết quả, em thực hiện theo hướng dẫn trong thông báo sau: https://bit.ly/3IR1XuL"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_019",
+      "question_type": "simple",
+      "question": "Kết quả đánh giá điều kiện xét học bổng KKHT kỳ 2025.2 thông báo điều gì với sinh viên?",
+      "gold_answer": "Đây chỉ là kết quả đánh giá sinh viên đủ điều kiện hoặc không đủ điều kiện được xét học bổng, chưa phải kết quả xét học bổng chính thức.",
+      "evidence_chunk_ids": [
+        "cd2f5755-2ee3-4964-825e-133cee1d4fed"
+      ],
+      "ground_truth_context": [
+        "Đây chỉ là kết quả đánh giá sinh viên đủ điều kiện hoặc không đủ điều kiện ĐƯỢC XÉT học bổng kỳ 2025.2."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_020",
+      "question_type": "simple",
+      "question": "Lễ tốt nghiệp đợt tháng 5/2026 của Đại học Bách khoa Hà Nội tổ chức ở đâu?",
+      "gold_answer": "Lễ tốt nghiệp tổ chức tại Hội trường C2 – Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "0b7bab66-af9b-4aa4-b1b1-4b7327c72776"
+      ],
+      "ground_truth_context": [
+        "Lễ tốt nghiệp dự kiến tổ chức tại Hội trường C2 – Đại học Bách khoa Hà Nội"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_021",
+      "question_type": "simple",
+      "question": "Hạn đăng ký dự lễ tốt nghiệp tháng 5/2026 là khi nào?",
+      "gold_answer": "Hạn đăng ký đến hết ngày 03/5/2026.",
+      "evidence_chunk_ids": [
+        "cec4b36d-ae57-4b08-91aa-25edc17234d3"
+      ],
+      "ground_truth_context": [
+        "Đăng ký dự Lễ tốt nghiệp tại đây... đến hết ngày 03/5/2026."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_022",
+      "question_type": "simple",
+      "question": "Sinh viên cần có mặt lúc mấy giờ vào buổi sáng ngày lễ tốt nghiệp tháng 5/2026 để mượn lễ phục?",
+      "gold_answer": "Buổi sáng có mặt lúc 7h00, buổi chiều lúc 13h00 tại Quảng trường Trần Đại Nghĩa để mượn lễ phục.",
+      "evidence_chunk_ids": [
+        "872767b3-b72f-4fe8-855e-f47f2a0ea8b1"
+      ],
+      "ground_truth_context": [
+        "Có mặt đúng giờ vào ngày Lễ tốt nghiệp (buổi sáng: 7h00; buổi chiều: 13h00) để mượn lễ phục tốt nghiệp tại Quảng trường Trần Đại Nghĩa"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_023",
+      "question_type": "simple",
+      "question": "Buổi chiều ngày 09/5/2026, chương trình lễ tốt nghiệp chính thức bắt đầu lúc mấy giờ?",
+      "gold_answer": "Chương trình lễ tốt nghiệp chính thức bắt đầu lúc 14h00.",
+      "evidence_chunk_ids": [
+        "3d3c0347-65fd-4c9b-b3fa-15f0a7505e6a"
+      ],
+      "ground_truth_context": [
+        "14h00-17h30 - Chương trình Lễ tốt nghiệp chính thức bắt đầu"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_024",
+      "question_type": "simple",
+      "question": "Job Fair 2026 tại Đại học Bách khoa Hà Nội diễn ra vào ngày nào và ở đâu?",
+      "gold_answer": "Job Fair 2026 diễn ra vào Chủ Nhật, ngày 19/4/2026 tại Hội trường C2, Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "c7231541-9cfd-40fe-b795-c457f23ea9cd"
+      ],
+      "ground_truth_context": [
+        "Thời gian: Chủ Nhật, ngày 19/4/2026.\nĐịa điểm: Hội trường C2, Đại học Bách khoa Hà Nội"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_025",
+      "question_type": "simple",
+      "question": "Tại Job Fair 2026, sinh viên Bách khoa có những hoạt động gì?",
+      "gold_answer": "Sinh viên có thể tham gia phỏng vấn miễn phí, trải nghiệm gian hàng trò chơi tương tác, tham dự hội thảo xu hướng việc làm và nhận quà tặng từ các nhà tài trợ.",
+      "evidence_chunk_ids": [
+        "267aadce-7f4b-4aa2-b84a-e6b6c9fcdc0f"
+      ],
+      "ground_truth_context": [
+        "sinh viên sẽ có cơ hội trải nghiệm: Các chương trình phỏng vấn hoàn toàn miễn phí. Các gian hàng trò chơi tương tác ứng dụng. Tham dự hội thảo xu hướng việc làm tại phòng Hội thảo C2"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_026",
+      "question_type": "simple",
+      "question": "Thời gian đăng ký học phần cho học kỳ hè 2025-2026 (20253) là từ khi nào đến khi nào?",
+      "gold_answer": "Đăng ký học phần từ 10h00 ngày 16/3/2026 đến 16h ngày 19/4/2026.",
+      "evidence_chunk_ids": [
+        "33278482-6061-46c5-9591-80f6a3276efc"
+      ],
+      "ground_truth_context": [
+        "Đăng ký học phần: từ 10h00 ngày 16/3/2026 đến 16h ngày 19/4/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_027",
+      "question_type": "simple",
+      "question": "Học kỳ hè 2025-2026 (20253) được tổ chức trong bao nhiêu tuần và từ ngày nào đến ngày nào?",
+      "gold_answer": "Học kỳ hè kéo dài 5 tuần, từ tuần 46 đến tuần 50, tức từ 20/7/2026 đến 22/8/2026.",
+      "evidence_chunk_ids": [
+        "33278482-6061-46c5-9591-80f6a3276efc"
+      ],
+      "ground_truth_context": [
+        "Thời gian học kỳ hè: 5 tuần, từ tuần 46 đến tuần 50 (20/7/2026 - 22/8/2026)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_028",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký kế hoạch học tập trên hệ thống nào và đăng nhập bằng tài khoản gì?",
+      "gold_answer": "Sinh viên đăng ký trực tuyến trên hệ SIS tại http://ctt.hust.edu.vn, đăng nhập bằng tài khoản Email được cấp.",
+      "evidence_chunk_ids": [
+        "a227072b-b06a-4354-9e0e-afa8d84de998"
+      ],
+      "ground_truth_context": [
+        "Sinh viên các khoá đăng kế hoạch... trực tuyến trên hệ SIS tại địa chỉ http://ctt.hust.edu.vn (đăng nhập với tài khoản Email được cấp)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_029",
+      "question_type": "simple",
+      "question": "Số tín chỉ tối đa sinh viên được đăng ký trong học kỳ hè 2025-2026 là bao nhiêu?",
+      "gold_answer": "Tối đa 8 tín chỉ trong học kỳ hè.",
+      "evidence_chunk_ids": [
+        "33278482-6061-46c5-9591-80f6a3276efc"
+      ],
+      "ground_truth_context": [
+        "tối đa 8TC\nThời gian học kỳ hè: 5 tuần"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_030",
+      "question_type": "simple",
+      "question": "Khóa K70 có được mở đăng ký học kỳ hè 20253 không?",
+      "gold_answer": "Không, K70 sẽ không mở đăng ký học kỳ hè 20253.",
+      "evidence_chunk_ids": [
+        "33278482-6061-46c5-9591-80f6a3276efc"
+      ],
+      "ground_truth_context": [
+        "Chú ý: K70 sẽ không mở đăng ký học kỳ hè 20253."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_031",
+      "question_type": "simple",
+      "question": "Điều kiện điểm học tập để được xét Học bổng Trần Đại Nghĩa học kỳ II năm học 2025-2026 là bao nhiêu?",
+      "gold_answer": "Điểm học tập trung bình của học kỳ 2025.1 phải đạt ≥ 2,0.",
+      "evidence_chunk_ids": [
+        "18f2acf9-7293-4ebd-bd17-879618732b0f"
+      ],
+      "ground_truth_context": [
+        "Có điểm học tập trung bình của học kỳ 2025.1 ≥ 2,0"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_032",
+      "question_type": "simple",
+      "question": "Mức học bổng Trần Đại Nghĩa dành cho sinh viên nhóm b khoản 1 là bao nhiêu?",
+      "gold_answer": "Học bổng dành cho nhóm b có 2 mức: 5 triệu và 10 triệu đồng.",
+      "evidence_chunk_ids": [
+        "f9750ebc-1fed-4b34-a75f-bf8cf2a0b31c"
+      ],
+      "ground_truth_context": [
+        "Học bổng Trần Đại Nghĩa dành cho nhóm b khoản 1 có 2 mức tương ứng với 5 triệu và 10 triệu đồng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_033",
+      "question_type": "simple",
+      "question": "Hạn nộp hồ sơ học bổng Trần Đại Nghĩa học kỳ II năm 2025-2026 là khi nào và nộp ở đâu?",
+      "gold_answer": "Nộp hồ sơ bản giấy tại bàn số 3 phòng 103 nhà C1 trước 11h30 thứ 2 ngày 13/04/2026.",
+      "evidence_chunk_ids": [
+        "f30723ed-b476-4c8c-b62d-378188e76137"
+      ],
+      "ground_truth_context": [
+        "hoàn thành việc nộp hồ sơ bản giấy tại bàn số 3 phòng 103 nhà C1 trước 11h30 Thứ 2 ngày 13/04/2026."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_034",
+      "question_type": "simple",
+      "question": "Sinh viên nào bị loại khỏi xét học bổng Trần Đại Nghĩa kỳ 2025.2 do đã có học bổng khác?",
+      "gold_answer": "Sinh viên đã được nhận Học bổng KKHT hoặc học bổng tài trợ khác trong HK2025.2 sẽ không được xét.",
+      "evidence_chunk_ids": [
+        "9584d3fb-8652-454f-88d6-1721edec0963"
+      ],
+      "ground_truth_context": [
+        "Sinh viên đã được nhận Học bổng KKHT hoặc học bổng tài trợ khác trong HK2025.2."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_035",
+      "question_type": "simple",
+      "question": "Sinh viên tra cứu học phí học kỳ 2 năm 2025-2026 từ ngày nào và ở đâu?",
+      "gold_answer": "Sinh viên tra cứu từ ngày 10/03/2026 bằng cách đăng nhập Cổng thông tin sinh viên (ctt.hust.edu.vn), vào mục 'Dịch vụ' → 'Học phí – Công nợ'.",
+      "evidence_chunk_ids": [
+        "7e841748-8063-4755-956d-4367e76f5f2c"
+      ],
+      "ground_truth_context": [
+        "Sinh viên tra cứu học phí học kỳ 2 năm học 2025-2026 từ ngày 10/03/2026 bằng cách đăng nhập tài khoản trên Cổng thông tin sinh viên (ctt.hust.edu.vn), vào mục 'Dịch vụ' và sau đó vào xem tại phần 'Học phí – Công nợ'."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_036",
+      "question_type": "simple",
+      "question": "Sinh viên có thắc mắc về cách đóng học phí kỳ 2 năm 2025-2026 liên hệ ai?",
+      "gold_answer": "Liên hệ chuyên viên Nguyễn Thị Thùy Dương (Ban Đào tạo), email: duong.nguyenthithuy@hust.edu.vn",
+      "evidence_chunk_ids": [
+        "33b1e06e-085c-4bbb-a5f7-ee8cebe61df9"
+      ],
+      "ground_truth_context": [
+        "Hỗ trợ giải đáp các thắc mắc về cách đóng học phí: chuyên viên Nguyễn Thị Thùy Dương (Ban Đào tạo). Địa chỉ email: duong.nguyenthithuy@hust.edu.vn"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_037",
+      "question_type": "simple",
+      "question": "Thời gian mở đăng ký xét tốt nghiệp đợt 2025.1 tại Đại học Bách khoa Hà Nội là từ khi nào đến khi nào?",
+      "gold_answer": "Thời gian mở đăng ký từ ngày 03/3/2026 đến hết ngày 15/3/2026.",
+      "evidence_chunk_ids": [
+        "e8b2c51d-09fe-4e6c-b320-1b1cc8d7852a"
+      ],
+      "ground_truth_context": [
+        "Thời gian mở đăng ký: từ ngày 03/3/2026 đến hết ngày 15/3/2026."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_038",
+      "question_type": "simple",
+      "question": "Khi đăng ký xét tốt nghiệp, sinh viên cần điểm trong tài khoản nào là điểm chính thức?",
+      "gold_answer": "Điểm trong tài khoản CTT (Cổng thông tin) là điểm chính thức; điểm trên QLĐT chỉ là điểm nhập tạm thời.",
+      "evidence_chunk_ids": [
+        "f5398d42-849a-4c88-9dee-b91d09bd7220"
+      ],
+      "ground_truth_context": [
+        "lưu ý điểm xem trên QLĐT chỉ là nhập tạm thời, điểm trong tài khoản CTT mới là điểm chính thức"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_039",
+      "question_type": "simple",
+      "question": "Sinh viên có thắc mắc về điều kiện hoàn thành Giáo dục quốc phòng – an ninh (GD QP-AN) khi đăng ký tốt nghiệp liên hệ ai?",
+      "gold_answer": "Liên hệ chuyên viên Trần Lê Hùng, email: hung.tranle@hust.edu.vn",
+      "evidence_chunk_ids": [
+        "285e35cc-290a-40b0-bf04-7baec313ebb0"
+      ],
+      "ground_truth_context": [
+        "Nếu có thắc mắc về mục này sẽ liên hệ chuyên viên Trần Lê Hùng (email: hung.tranle@hust.edu.vn) để cập nhật điều kiện hoàn thành GD QP-AN và GDTC."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_040",
+      "question_type": "simple",
+      "question": "Sinh viên không tham gia BHYT quá bao nhiêu tháng sẽ bị gián đoạn thời gian tham gia BHYT 5 năm liên tục?",
+      "gold_answer": "Sinh viên không tham gia BHYT quá 3 tháng sẽ bị gián đoạn thời gian tham gia BHYT 5 năm liên tục.",
+      "evidence_chunk_ids": [
+        "aeddcaba-5a79-4b4e-a459-b160a9e3168a"
+      ],
+      "ground_truth_context": [
+        "Sinh viên không tham gia BHYT quá 3 tháng sẽ bị gián đoạn thời gian tham gia BHYT 5 năm liên tục và bị giảm quyền lợi khi khám chữa bệnh."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_041",
+      "question_type": "simple",
+      "question": "Thẻ BHYT của sinh viên hiện nay được xem trên ứng dụng nào?",
+      "gold_answer": "Thẻ BHYT được đưa lên ứng dụng VssID và VNeID, không phát hành thẻ giấy.",
+      "evidence_chunk_ids": [
+        "aeddcaba-5a79-4b4e-a459-b160a9e3168a"
+      ],
+      "ground_truth_context": [
+        "Do thẻ BHYT đã được đưa lên ứng dụng VssID và VNeID nên sẽ không phát hành thẻ giấy."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_042",
+      "question_type": "simple",
+      "question": "Thời gian nghỉ Tết Dương lịch năm 2026 tại Đại học Bách khoa Hà Nội là từ ngày nào đến ngày nào?",
+      "gold_answer": "Nghỉ từ thứ 5 ngày 01/01/2026 đến hết chủ nhật ngày 04/01/2026.",
+      "evidence_chunk_ids": [
+        "78cf807d-0e3e-4781-a9a1-ce3570f1faf1"
+      ],
+      "ground_truth_context": [
+        "Thời gian nghỉ từ thứ 5 ngày 01/01/2026 đến hết chủ nhật ngày 04/01/2026."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_043",
+      "question_type": "simple",
+      "question": "Kết quả học bổng KKHT kỳ II năm học 2025-2026, có bao nhiêu sinh viên được học bổng loại Xuất sắc (loại A)?",
+      "gold_answer": "Có 1.343 sinh viên được học bổng loại Xuất sắc (loại A).",
+      "evidence_chunk_ids": [
+        "34c72f82-4557-45f3-8281-171a1537f5a4"
+      ],
+      "ground_truth_context": [
+        "1.343 sinh viên được học bổng loại XUẤT SẮC (loại A)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_044",
+      "question_type": "simple",
+      "question": "Tổng số sinh viên nhận học bổng KKHT kỳ II năm học 2025-2026 là bao nhiêu?",
+      "gold_answer": "Tổng cộng 1.888 sinh viên được học bổng KKHT kỳ II năm học 2025-2026.",
+      "evidence_chunk_ids": [
+        "34c72f82-4557-45f3-8281-171a1537f5a4"
+      ],
+      "ground_truth_context": [
+        "Nhà trường trân trọng thông báo và chúc mừng 1.888 sinh viên có kết quả học tập và rèn luyện xuất sắc được học bổng khuyến khích học tập học kỳ II năm học 2025-2026."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_045",
+      "question_type": "simple",
+      "question": "Kết quả học bổng Trần Đại Nghĩa học kỳ I năm học 2025-2026, có bao nhiêu sinh viên được học bổng toàn phần?",
+      "gold_answer": "27 sinh viên được cấp học bổng toàn phần bằng 100% học phí.",
+      "evidence_chunk_ids": [
+        "4a927d20-6143-494f-97f3-82122971dbe7"
+      ],
+      "ground_truth_context": [
+        "27 sinh viên được cấp học bổng toàn phần bằng 100% học phí của các học phần học trong chương trình đào tạo"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_046",
+      "question_type": "simple",
+      "question": "Tổng số sinh viên nhận học bổng Trần Đại Nghĩa học kỳ I năm học 2025-2026 là bao nhiêu?",
+      "gold_answer": "69 sinh viên được nhận học bổng Trần Đại Nghĩa học kỳ I năm học 2025-2026.",
+      "evidence_chunk_ids": [
+        "4a927d20-6143-494f-97f3-82122971dbe7"
+      ],
+      "ground_truth_context": [
+        "69 sinh viên đã được nhận học bổng Trần Đại Nghĩa học kỳ I năm học 2025-2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_047",
+      "question_type": "simple",
+      "question": "Hạn đăng ký Học bổng The Best of MB Chasing 2025 là ngày nào?",
+      "gold_answer": "Hạn đăng ký là ngày 09/01/2026.",
+      "evidence_chunk_ids": [
+        "71573b22-636b-4bcb-8300-d8dcdbf74062"
+      ],
+      "ground_truth_context": [
+        "⏳Hạn đăng ký: 09/01/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_048",
+      "question_type": "simple",
+      "question": "Thời gian đóng học phí kỳ 1 năm học 2025-2026 đợt 2 là từ khi nào đến khi nào?",
+      "gold_answer": "Từ ngày 10/12/2025 đến hết ngày 21/12/2025.",
+      "evidence_chunk_ids": [
+        "bf4b9a73-6e6d-4fcd-bdde-c0e090d062fa"
+      ],
+      "ground_truth_context": [
+        "Sẽ bắt đầu đóng học phí từ ngày 10/12/2025 đến hết ngày 21/12/2025."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_049",
+      "question_type": "simple",
+      "question": "Sinh viên không hoàn thành học phí kỳ 1 năm học 2025-2026 sau đợt 2 sẽ bị xử lý như thế nào?",
+      "gold_answer": "Sinh viên sẽ bị xem xét đình chỉ học tập.",
+      "evidence_chunk_ids": [
+        "bf4b9a73-6e6d-4fcd-bdde-c0e090d062fa"
+      ],
+      "ground_truth_context": [
+        "Sinh viên không hoàn thành nghĩa vụ học phí khi hết Đợt 2 sẽ bị xem xét đình chỉ..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_050",
+      "question_type": "simple",
+      "question": "Sinh viên có thắc mắc về học phí kỳ 1 năm 2025-2026 liên hệ trực tiếp tại phòng nào hoặc số điện thoại nào?",
+      "gold_answer": "Liên hệ trực tiếp tại phòng C1-104 hoặc số điện thoại 0243.869.3108.",
+      "evidence_chunk_ids": [
+        "25e140ed-1814-48d9-9ee6-141eebd6c645"
+      ],
+      "ground_truth_context": [
+        "liên hệ trực tiếp tại phòng C1-104 hoặc qua số điện thoại: 0243.869.3108"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_051",
+      "question_type": "simple",
+      "question": "MIE Job Fair 2026 diễn ra vào thời gian nào và ở đâu?",
+      "gold_answer": "MIE Job Fair 2026 diễn ra từ 8:00 – 16:30 ngày 7–8/03/2026, tại Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "53931a10-8b89-4f53-91bf-544c687c977b"
+      ],
+      "ground_truth_context": [
+        "Thời gian: 8:00 – 16:30 | Thứ Bảy & Chủ Nhật, ngày 7 – 8/03/2026\nĐịa điểm: Đại học Bách khoa Hà Nội"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_052",
+      "question_type": "simple",
+      "question": "Hạn nộp hồ sơ học bổng Gắn kết quê hương học kỳ I năm 2025-2026 là khi nào và nộp ở đâu?",
+      "gold_answer": "Nộp hồ sơ bản giấy tại bàn số 2 phòng 103 nhà C1 trước 17h00 thứ 2 ngày 02/02/2026.",
+      "evidence_chunk_ids": [
+        "9b48a0f9-0787-475f-868f-26c1522fc401"
+      ],
+      "ground_truth_context": [
+        "hoàn thành việc nộp hồ sơ bản giấy tại bàn số 2 phòng 103 nhà C1 trước 17h00 Thứ 2 ngày 02/02/2026."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_053",
+      "question_type": "simple",
+      "question": "Trường hợp nào không được xét học bổng Gắn kết quê hương do vi phạm kỷ luật?",
+      "gold_answer": "Sinh viên đang chịu hình thức kỷ luật từ mức khiển trách trở lên tại thời điểm xét học bổng sẽ không được xét.",
+      "evidence_chunk_ids": [
+        "616a2ca5-475d-47b8-aa13-e1a539b2434f"
+      ],
+      "ground_truth_context": [
+        "Sinh viên đang chịu hình thức kỷ luật từ mức khiển trách trở lên tại thời điểm xét học bổng;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_054",
+      "question_type": "simple",
+      "question": "Gentherm thuộc tập đoàn nào và được niêm yết trên sàn chứng khoán nào?",
+      "gold_answer": "Gentherm thuộc Tập đoàn Gentherm Inc. (Mỹ) và được niêm yết trên sàn NASDAQ.",
+      "evidence_chunk_ids": [
+        "485914fb-d5cc-4e52-bb3c-3d050d6bc96b"
+      ],
+      "ground_truth_context": [
+        "Gentherm Việt Nam thuộc Tập đoàn Gentherm Inc., một tập đoàn đa quốc gia có trụ sở tại Mỹ, là công ty đại chúng niêm yết trên sàn chứng khoán NASDAQ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_055",
+      "question_type": "simple",
+      "question": "Chương trình tham quan Gentherm Việt Nam dành cho đối tượng sinh viên nào?",
+      "gold_answer": "Dành cho sinh viên các khóa hệ chính quy của Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "ba4d1c47-736d-4dcd-bc78-42231eb8867e"
+      ],
+      "ground_truth_context": [
+        "Đối tượng tham gia: Là sinh viên các khóa hệ chính quy của ĐH Bách khoa Hà Nội"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_056",
+      "question_type": "simple",
+      "question": "Địa điểm nhà máy tham quan của ASSA ABLOY Việt Nam ở đâu?",
+      "gold_answer": "Nhà máy tại Khu Công nghiệp và Dịch vụ Hàng hải (DEEP C 2B), Phường Đông Hải 2, Quận Hải An, Thành phố Hải Phòng.",
+      "evidence_chunk_ids": [
+        "0c0dbeb5-4613-4655-83d2-16c17916fd74"
+      ],
+      "ground_truth_context": [
+        "Địa điểm tham quan: Nhà máy tại Khu Công nghiệp và Dịch vụ Hàng hải (DEEP C 2B), Phường Đông Hải 2, Quận Hải An, Thành phố Hải Phòng"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_057",
+      "question_type": "simple",
+      "question": "Số lượng sinh viên tối đa được tham quan ASSA ABLOY Việt Nam mỗi đợt là bao nhiêu?",
+      "gold_answer": "Tối đa 80 sinh viên mỗi đợt tham quan.",
+      "evidence_chunk_ids": [
+        "0c0dbeb5-4613-4655-83d2-16c17916fd74"
+      ],
+      "ground_truth_context": [
+        "Số lượng tham gia: tối đa 80 sinh viên /đợt tham quan"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_058",
+      "question_type": "simple",
+      "question": "Gian hàng Rorze Robotech tại Job Fair 2026 Bách khoa diễn ra vào thời gian và địa điểm nào?",
+      "gold_answer": "7:30 - 17:00 Chủ Nhật ngày 19/04/2026 tại Hội trường C2 - ĐH Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "57108eb2-5cdc-4a7c-be0f-c2f59efba547"
+      ],
+      "ground_truth_context": [
+        "Thời gian: 7:30 - 17:00 Chủ Nhật ngày 19/04/2026\nĐịa điểm: Hội trường C2 - ĐH Bách khoa Hà Nội"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_059",
+      "question_type": "simple",
+      "question": "Công ty TNHH DENSO Việt Nam hoạt động trong lĩnh vực gì và trụ sở ở đâu?",
+      "gold_answer": "DENSO Việt Nam hoạt động trong lĩnh vực sản xuất và kinh doanh các sản phẩm liên quan đến động cơ ô tô, trụ sở tại Lô E1, Khu công nghiệp Thăng Long, Hà Nội.",
+      "evidence_chunk_ids": [
+        "4a327618-1612-411b-9598-c708b98f11de"
+      ],
+      "ground_truth_context": [
+        "Công ty TNHH DENSO Việt Nam (trụ sở chính tại Lô E1, Khu công nghiệp Thăng Long...), hoạt động trong lĩnh vực sản xuất và kinh doanh các sản phẩm liên quan đến động cơ ô tô"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_060",
+      "question_type": "simple",
+      "question": "Công ty TNHH Linh kiện điện tử SEI (Việt Nam) tọa lạc ở đâu và thuộc tập đoàn nào?",
+      "gold_answer": "SEEV tọa lạc tại Khu Công nghiệp Thăng Long, Hà Nội và thuộc tập đoàn Sumitomo Electric Industries.",
+      "evidence_chunk_ids": [
+        "ff3b2805-d0db-41b5-b904-7efac0a66d3c"
+      ],
+      "ground_truth_context": [
+        "Tọa lạc tại Khu Công nghiệp Thăng Long, Hà Nội, SEEV... thuộc tập đoàn danh tiếng Sumitomo Electric Industries."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_061",
+      "question_type": "simple",
+      "question": "Sự kiện 'NextGen for Digital Safety' diễn ra ngày nào và thu hút bao nhiêu sinh viên tham dự?",
+      "gold_answer": "Diễn ra ngày 07/12/2025 và thu hút hơn 3000 sinh viên từ ĐH Bách khoa Hà Nội và nhiều trường đại học.",
+      "evidence_chunk_ids": [
+        "3c7fd7a9-9d04-4b15-bd4f-66a3b246efe6"
+      ],
+      "ground_truth_context": [
+        "vào ngày 07/12/2025 sự kiện 'NextGen for Digital Safety'... cũng đã thu hút hơn 3000 sinh viên đến từ Đại học Bách khoa Hà Nội và nhiều trường đại học"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_062",
+      "question_type": "simple",
+      "question": "Tọa đàm về bạo lực giới sử dụng công nghệ ngày 11/12/2025 có bao nhiêu sinh viên tham gia?",
+      "gold_answer": "Hơn 1.000 sinh viên Đại học Bách khoa Hà Nội và các trường đại học tại Hà Nội tham gia.",
+      "evidence_chunk_ids": [
+        "cbfe11ee-3a94-48aa-adc7-4ce767f0000e"
+      ],
+      "ground_truth_context": [
+        "Ngày 11/12/2025, Hơn 1.000 sinh viên Đại học Bách khoa Hà Nội và các trường đại học tại Hà Nội đã tham gia"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_063",
+      "question_type": "simple",
+      "question": "Sinh viên tra cứu học phí kỳ 1 đợt 2 năm học 2025-2026 từ ngày nào?",
+      "gold_answer": "Từ ngày 10/12/2025.",
+      "evidence_chunk_ids": [
+        "f41d5bee-9e72-4ade-b152-4c8ab4218593"
+      ],
+      "ground_truth_context": [
+        "Sinh viên tra cứu học phí học kỳ 1 đợt 2 năm học 2025-2026 từ ngày 10/12/2025"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_064",
+      "question_type": "simple",
+      "question": "Phòng Thiết kế máy tại DAIZO TEC phù hợp với sinh viên ngành nào?",
+      "gold_answer": "Phù hợp với sinh viên ngành Cơ khí động lực (Phương tiện thủy).",
+      "evidence_chunk_ids": [
+        "ad142542-c4d3-42ba-9b4e-15053aa087bd"
+      ],
+      "ground_truth_context": [
+        "3. Phòng Thiết kế máy: tính toán công suất của hệ thống máy chính - phụ, thiết kế bản vẽ buồng máy... Chuyên ngành phù hợp: Cơ khí động lực (Phương tiện thủy)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_065",
+      "question_type": "simple",
+      "question": "Phòng Thiết kế điện tại DAIZO TEC phù hợp với sinh viên ngành nào?",
+      "gold_answer": "Phù hợp với sinh viên ngành Điện hoặc Tự động hóa.",
+      "evidence_chunk_ids": [
+        "ad142542-c4d3-42ba-9b4e-15053aa087bd"
+      ],
+      "ground_truth_context": [
+        "4. Phòng Thiết kế điện: thiết kế bố trí hệ thống đường điện và các thiết bị điện trên tàu. Chuyên ngành phù hợp: Điện / Tự động hóa"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_066",
+      "question_type": "simple",
+      "question": "Lịch thi cuối kỳ học kỳ 1 năm 2025-2026 (20251) xem ở đâu?",
+      "gold_answer": "Sinh viên xem lịch thi cuối kỳ 20251 chi tiết tại link trên trang ctt.hust.edu.vn (được cập nhật ngày 07.01.2026).",
+      "evidence_chunk_ids": [
+        "3c664c5d-8000-4afb-8bfd-456c3bef2e5e"
+      ],
+      "ground_truth_context": [
+        "LỊCH THI CUỐI KỲ 20251-AB XEM CHI TIẾT TẠI ĐÂY (CẬP NHẬT NGÀY 07.01.2026)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_067",
+      "question_type": "simple",
+      "question": "Hồ sơ đăng ký học bổng Gắn kết quê hương gồm những gì?",
+      "gold_answer": "Hồ sơ gồm: (a) Đơn đăng ký xét cấp học bổng theo mẫu; (b) Bản xác nhận của cơ quan/doanh nghiệp về kết quả ứng dụng đề tài ĐATN.",
+      "evidence_chunk_ids": [
+        "8486d59c-1a7b-4b20-ba5f-5e1a25ce76e5"
+      ],
+      "ground_truth_context": [
+        "Hồ sơ đăng ký học bổng gồm: a) Đơn đăng ký xét cấp học bổng theo mẫu... b) Bản xác nhận của cơ quan/doanh nghiệp về kết quả ứng dụng đề tài ĐATN"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_068",
+      "question_type": "simple",
+      "question": "Công ty Cổ phần Phòng Thử Nghiệm Phúc Gia (PGL) được thành lập vào ngày tháng năm nào?",
+      "gold_answer": "PGL được thành lập vào ngày 15 tháng 07 năm 2016.",
+      "evidence_chunk_ids": [
+        "be897027-c56d-4e09-8836-d683c163eadd"
+      ],
+      "ground_truth_context": [
+        "Công ty Cổ phần Phòng thử nghiệm Phúc Gia đã được thành lập vào ngày 15 tháng 07 năm 2016."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_069",
+      "question_type": "multi_hop",
+      "question": "Chương trình tuyển dụng cán bộ nguồn 2027 của Goertek Vina tuyển sinh viên chuyên ngành kỹ thuật nào và hạn báo danh là khi nào?",
+      "gold_answer": "Chương trình tuyển sinh viên chuyên ngành kỹ thuật như Điện - Điện tử, Tự động hóa, Cơ điện tử, Cơ khí, Điện tử viễn thông, v.v. Hạn báo danh đến hết ngày 10/05/2026.",
+      "evidence_chunk_ids": [
+        "dca512e6-269b-4ad8-be4c-c8d64cb607b2",
+        "82921303-6af6-42a8-a257-9978315c71d8"
+      ],
+      "ground_truth_context": [
+        "Chuyên ngành kỹ thuật: Điện - Điện tử, Tự động hóa, Cơ điện tử, Cơ khí, Điện tử viễn thông...",
+        "Thời gian báo danh: đến hết ngày 10 tháng 05 năm 2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_070",
+      "question_type": "multi_hop",
+      "question": "Học bổng Trần Đại Nghĩa học kỳ II 2025-2026 yêu cầu điểm học tập tối thiểu bao nhiêu và mức học bổng tối đa cho sinh viên nhóm a là bao nhiêu?",
+      "gold_answer": "Điểm học tập trung bình kỳ 2025.1 phải ≥ 2,0. Mức học bổng tối đa cho nhóm a là 100% học phí của các học phần trong chương trình đào tạo.",
+      "evidence_chunk_ids": [
+        "18f2acf9-7293-4ebd-bd17-879618732b0f",
+        "f9750ebc-1fed-4b34-a75f-bf8cf2a0b31c"
+      ],
+      "ground_truth_context": [
+        "Có điểm học tập trung bình của học kỳ 2025.1 ≥ 2,0",
+        "Học bổng Trần Đại Nghĩa dành cho nhóm a khoản 1 có 2 mức tương ứng với 50% và 100% học phí"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_071",
+      "question_type": "multi_hop",
+      "question": "Để đăng ký tốt nghiệp đợt 2025.1, sinh viên cần đăng ký trong khoảng thời gian nào và cần lưu ý điều gì về điểm số?",
+      "gold_answer": "Đăng ký từ ngày 03/3/2026 đến hết ngày 15/3/2026. Cần lưu ý chỉ đăng ký khi đã có đủ điểm chính thức trong tài khoản CTT (điểm trên QLĐT chỉ là tạm thời).",
+      "evidence_chunk_ids": [
+        "e8b2c51d-09fe-4e6c-b320-1b1cc8d7852a",
+        "f5398d42-849a-4c88-9dee-b91d09bd7220"
+      ],
+      "ground_truth_context": [
+        "Thời gian mở đăng ký: từ ngày 03/3/2026 đến hết ngày 15/3/2026.",
+        "Chỉ đăng ký xét tốt nghiệp khi đã có đủ điểm trong bảng kết quả học tập cá nhân trên CTT"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_072",
+      "question_type": "multi_hop",
+      "question": "Chương trình tham quan tuyển dụng Goertek Vina có hai hoạt động chính là hội thảo online và tham quan nhà máy. Hai sự kiện đó diễn ra cách nhau bao nhiêu ngày?",
+      "gold_answer": "Hội thảo online ngày 12/05/2026, tham quan nhà máy ngày 15/05/2026, cách nhau 3 ngày.",
+      "evidence_chunk_ids": [
+        "0fe3aa2d-cda5-4fa5-844a-ba73e3823030",
+        "ac83efd7-3854-4b11-bf72-007309dd45f3"
+      ],
+      "ground_truth_context": [
+        "Hội thảo online: Thời gian: 20h00 ngày 12/05/2026",
+        "Tham quan nhà máy: Thời gian: 7h00 ngày 15/05/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_073",
+      "question_type": "multi_hop",
+      "question": "Chương trình đào tạo cán bộ nguồn 2027 của Goertek Vina kéo dài bao lâu, sau đó sinh viên bắt đầu làm việc từ tháng nào?",
+      "gold_answer": "Chương trình đào tạo kéo dài 1 học kỳ (dự kiến từ 02-06/2027). Sau khi hoàn thành thực tập, sinh viên bắt đầu làm việc từ tháng 7/2027.",
+      "evidence_chunk_ids": [
+        "22ac7873-a3a0-47ac-b591-59009531051a"
+      ],
+      "ground_truth_context": [
+        "Thời gian tham gia: 1 Học kỳ tại trung tâm đào tạo công nghệ kỹ thuật Goertek Việt Nam (dự kiến từ 02-06/2027): Sau khi hoàn thành đợt thực tập, từ tháng 7..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_074",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn xét học bổng Gắn kết quê hương cần điểm học tập như thế nào và kết quả xét duyệt được công bố trong bao nhiêu ngày?",
+      "gold_answer": "Toàn bộ thành viên trong nhóm cần có điểm học tập đạt yêu cầu. Kết quả xét duyệt học bổng được công bố trong vòng 20 ngày.",
+      "evidence_chunk_ids": [
+        "eb9c3d45-9248-44f1-bc74-fe829ce0f1cc",
+        "9b48a0f9-0787-475f-868f-26c1522fc401"
+      ],
+      "ground_truth_context": [
+        "Toàn bộ các thành viên trong nhóm thực hiện đề tài ĐATN có điểm học tập...",
+        "Kết quả xét duyệt học bổng được công bố trong vòng 20 ngày"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_075",
+      "question_type": "multi_hop",
+      "question": "Sinh viên nhận BHYT năm 2026 cần cài ứng dụng nào để xem thẻ, và tại sao không còn phát hành thẻ giấy?",
+      "gold_answer": "Sinh viên cần cài ứng dụng VssID hoặc VNeID. Thẻ giấy không còn được phát hành vì thẻ BHYT đã được đưa lên các ứng dụng số này.",
+      "evidence_chunk_ids": [
+        "aeddcaba-5a79-4b4e-a459-b160a9e3168a"
+      ],
+      "ground_truth_context": [
+        "Do thẻ BHYT đã được đưa lên ứng dụng VssID và VNeID nên sẽ không phát hành thẻ giấy. Sinh viên chỉ cần mang theo CC/CCCD để khám chữa bệnh. Sinh viên cần cài ứng dụng VssID hoặc VNeID"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_076",
+      "question_type": "multi_hop",
+      "question": "Sinh viên muốn đăng ký dự tuyển sĩ quan dự bị năm 2026 phải đăng ký trong khoảng thời gian nào và nộp ở đâu?",
+      "gold_answer": "Sinh viên đăng ký online từ ngày 29/4-10/5/2026 tại https://forms.office.com/r/qXinuKawwy và kê khai lý lịch (thủ công).",
+      "evidence_chunk_ids": [
+        "6824ee6a-adad-43e6-a1df-59f0ddc26794",
+        "d46e5b39-9f11-429f-b62c-820091adcdcb"
+      ],
+      "ground_truth_context": [
+        "Thông báo tuyển chọn sinh viên đi đào tạo SQDB năm 2026: 29/4-10/5/2026; Sinh viên đăng ký (online) và kê khai lý lịch",
+        "Sinh viên đăng ký dự tuyển tại đây: https://forms.office.com/r/qXinuKawwy"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_077",
+      "question_type": "multi_hop",
+      "question": "Tại Lễ tốt nghiệp chiều ngày 09/5/2026, sinh viên mượn lễ phục lúc mấy giờ và chương trình chính thức kết thúc lúc mấy giờ?",
+      "gold_answer": "Sinh viên mượn lễ phục từ 13h00-13h45. Chương trình chính thức từ 14h00-17h30.",
+      "evidence_chunk_ids": [
+        "665139b9-1f34-41fe-86db-6d1d1ac0d7e5",
+        "3d3c0347-65fd-4c9b-b3fa-15f0a7505e6a"
+      ],
+      "ground_truth_context": [
+        "13h00-13h45: Sinh viên mượn Lễ phục tốt nghiệp",
+        "14h00-17h30: Chương trình Lễ tốt nghiệp chính thức bắt đầu"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_078",
+      "question_type": "multi_hop",
+      "question": "Job Fair 2026 Bách khoa có cả hoạt động trực tiếp và trực tuyến không? Hoạt động trực tiếp diễn ra ngày nào?",
+      "gold_answer": "Có cả hai hình thức. Hoạt động trực tiếp diễn ra Chủ Nhật ngày 19/4/2026 tại Hội trường C2. Hoạt động trực tuyến diễn ra từ thứ Hai ngày 20/4/2026.",
+      "evidence_chunk_ids": [
+        "c7231541-9cfd-40fe-b795-c457f23ea9cd"
+      ],
+      "ground_truth_context": [
+        "Thời gian: Chủ Nhật, ngày 19/4/2026. Địa điểm: Hội trường C2... Các hoạt động hướng nghiệp và tuyển dụng trực tuyến (Online) được tổ chức Thời gian: Thứ Hai, từ ngày 20/4/2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_079",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa muốn tham gia MIE Job Fair 2026 để tìm việc tại Nhật Bản thì sự kiện diễn ra vào ngày nào và cần đăng ký ở đâu?",
+      "gold_answer": "Sự kiện diễn ra ngày 7-8/03/2026 tại ĐH Bách khoa Hà Nội. Sinh viên đăng ký tại: https://events.sekisho-dx.com/entry/SCP2026/MIE_JOBFAIR2026",
+      "evidence_chunk_ids": [
+        "53931a10-8b89-4f53-91bf-544c687c977b",
+        "35073802-61a5-4119-86c0-5bec24d46b82"
+      ],
+      "ground_truth_context": [
+        "Thời gian: 8:00 – 16:30 | Thứ Bảy & Chủ Nhật, ngày 7 – 8/03/2026. Địa điểm: Đại học Bách khoa Hà Nội",
+        "Link đăng ký: https://events.sekisho-dx.com/entry/SCP2026/MIE_JOBFAIR2026"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_080",
+      "question_type": "multi_hop",
+      "question": "Chương trình tham quan tuyển dụng Goertek Vina có chế độ bảo hiểm xã hội như thế nào và sinh viên được hưởng phúc lợi gì về nghỉ phép?",
+      "gold_answer": "Tham gia BHXH đầy đủ ngay từ tháng thử việc đầu tiên. Về nghỉ phép: phép năm, thai sản, và nghỉ theo giờ 2 lần/tháng mỗi lần 2 giờ hưởng nguyên lương.",
+      "evidence_chunk_ids": [
+        "5a27e1fc-30e6-4671-a4c6-a1796c7a3858"
+      ],
+      "ground_truth_context": [
+        "Tham gia BHXH đầy đủ theo quy định; được đóng bảo hiểm ngay từ tháng thử việc. Chế độ nghỉ phép: phép năm, thai sản, nghỉ theo giờ (2 lần/tháng, mỗi lần 2 giờ, hưởng nguyên lương)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_081",
+      "question_type": "multi_hop",
+      "question": "Để đăng ký học phần học kỳ hè 20253, sinh viên cần đăng ký kế hoạch học tập trước, rồi đăng ký lớp sau. Thời gian đăng ký học phần kết thúc khi nào?",
+      "gold_answer": "Thời gian đăng ký học phần kết thúc lúc 16h ngày 19/4/2026. Việc đăng ký lớp sẽ có thông báo sau.",
+      "evidence_chunk_ids": [
+        "33278482-6061-46c5-9591-80f6a3276efc"
+      ],
+      "ground_truth_context": [
+        "Đăng ký học phần: từ 10h00 ngày 16/3/2026 đến 16h ngày 19/4/2026. Đăng ký lớp: sẽ có thông báo sau"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_082",
+      "question_type": "multi_hop",
+      "question": "Sinh viên thuộc diện chế độ chính sách khi đóng học phí kỳ 2 năm 2025-2026 được miễn giảm như thế nào và thắc mắc về số tiền học phí liên hệ ai?",
+      "gold_answer": "Sinh viên diện chính sách: tiền miễn giảm sẽ được trừ trực tiếp vào học phí Đợt 2. Thắc mắc về số tiền học phí liên hệ chuyên viên Trần Lê Hùng, email: hung.tranle@hust.edu.vn",
+      "evidence_chunk_ids": [
+        "e98302fd-2bc0-41cd-9522-3650fc5541f7",
+        "33b1e06e-085c-4bbb-a5f7-ee8cebe61df9"
+      ],
+      "ground_truth_context": [
+        "Với các sinh viên thuộc diện chế độ chính sách: số tiền miễn giảm sẽ được trừ trực tiếp vào học phí Đợt 2.",
+        "Hỗ trợ giải đáp các thắc mắc về số tiền học phí, định mức, số tín chỉ, dư nợ các kỳ trước…: chuyên viên Trần Lê Hùng (Ban Đào tạo). Địa chỉ email: hung.tranle@hust.edu.vn"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_083",
+      "question_type": "multi_hop",
+      "question": "Sinh viên quan tâm đến Phòng Thiết kế kết cấu của DAIZO TEC cần học ngành gì và công việc chính là gì?",
+      "gold_answer": "Phù hợp ngành Cơ khí động lực (Phương tiện thủy). Công việc là tính toán, thiết kế cấu trúc con tàu phù hợp với tính năng, đảm bảo độ bền thân tàu theo tiêu chuẩn đăng kiểm quốc tế/Nhật Bản.",
+      "evidence_chunk_ids": [
+        "22df57ea-d043-4d3d-8798-88cfd01d08d7"
+      ],
+      "ground_truth_context": [
+        "1. Phòng Thiết kế kết cấu: tính toán, thiết kế tạo nên cấu trúc con tàu phù hợp với tính năng của tàu, đảm bảo độ bền thân tàu (tuân theo tiêu chuẩn đăng kiểm quốc tế/Nhật Bản). Chuyên ngành phù hợp: Cơ khí động lực (Phương tiện thủy)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_084",
+      "question_type": "multi_hop",
+      "question": "Kết quả học bổng KKHT kỳ II năm học 2025-2026 có bao nhiêu loại và tổng số sinh viên nhận học bổng là bao nhiêu?",
+      "gold_answer": "Có 3 loại: Xuất sắc (A) - 1.343 SV, Giỏi (B) - 456 SV, và loại khác - 89 SV. Tổng cộng 1.888 sinh viên.",
+      "evidence_chunk_ids": [
+        "34c72f82-4557-45f3-8281-171a1537f5a4"
+      ],
+      "ground_truth_context": [
+        "1.888 sinh viên có kết quả học tập và rèn luyện xuất sắc được học bổng KKHT kỳ II năm học 2025-2026. 1.343 sinh viên được học bổng loại XUẤT SẮC (loại A). 456 sinh viên được học bổng loại GIỎI (loại B). 89 sinh viên..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_085",
+      "question_type": "multi_hop",
+      "question": "Kết quả thắc mắc học bổng KKHT kỳ II 2025-2026 được gửi qua kênh nào và hạn gửi thắc mắc là khi nào?",
+      "gold_answer": "Sinh viên chỉ gửi thắc mắc qua form tại link được cung cấp trước ngày 13/5/2026, không gửi qua email, yammer hay các kênh khác.",
+      "evidence_chunk_ids": [
+        "18a12c83-be3e-4614-bd6a-7ab799a1a999"
+      ],
+      "ground_truth_context": [
+        "13/5/2026 TẠI ĐÂY (link). Sinh viên KHÔNG GỬI THẮC MẮC QUA BẤT KỲ KÊNH NÀO KHÁC (như email, yammer, hệ thống hỏi đáp trên iCTSV,…)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_086",
+      "question_type": "multi_hop",
+      "question": "Tọa đàm về bạo lực giới ngày 11/12/2025 nhằm thực hiện công ước nào và tập trung trao quyền cho thanh niên như thế nào?",
+      "gold_answer": "Tọa đàm nhằm thực hiện Công ước Hà Nội về phòng, chống tội phạm mạng. Chương trình tập trung trao quyền cho thanh niên trong việc nhận diện, phòng ngừa, báo cáo các hành vi TF-GBV.",
+      "evidence_chunk_ids": [
+        "047b5a56-39e3-45fd-a643-ebe5b8f974b8"
+      ],
+      "ground_truth_context": [
+        "Tọa đàm nhằm góp phần thực hiện Công ước Hà Nội về phòng, chống tội phạm mạng... Chương trình tập trung trao quyền cho thanh niên trong việc nhận diện, phòng ngừa, báo cáo các hành vi..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_087",
+      "question_type": "multi_hop",
+      "question": "Chương trình tham quan Gentherm cung cấp thông tin gì cho sinh viên và sinh viên có thể nhận được cơ hội gì từ Gentherm?",
+      "gold_answer": "Cung cấp thông tin về môi trường làm việc thực tế. Sinh viên có thể nhận học bổng, cơ hội thực tập, tuyển dụng và lộ trình phát triển sự nghiệp từ vị trí Kỹ sư đến Quản lý, Lãnh đạo.",
+      "evidence_chunk_ids": [
+        "ba4d1c47-736d-4dcd-bc78-42231eb8867e"
+      ],
+      "ground_truth_context": [
+        "Cung cấp cho sinh viên thông tin về môi trường làm việc thực tế tại doanh nghiệp sản xuất. Thông tin tới sinh viên các cơ hội tại Gentherm: học bổng, thực tập, tuyển dụng và lộ trình phát triển sự nghiệp tại Gentherm ở các cấp bậc từ Kỹ sư đến vị trí Quản lý, Lãnh đạo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_088",
+      "question_type": "multi_hop",
+      "question": "Phòng Thiết kế sản xuất (PM) tại DAIZO TEC sử dụng công cụ nào và dựa trên kết quả từ phòng nào?",
+      "gold_answer": "Phòng PM sử dụng công cụ CAD 3D. Đây là công đoạn thiết kế sau cùng, dựa trên bản vẽ chi tiết từ các phòng thiết kế trước (kết cấu, trang thiết bị, máy, điện).",
+      "evidence_chunk_ids": [
+        "60e2d09f-fe4c-4b9e-81ad-34d00d34eea9"
+      ],
+      "ground_truth_context": [
+        "5. Phòng Thiết kế sản xuất (PM): đưa ra các thông số cắt tấm, các dữ liệu hợp nhất hệ thống ống cũng như các bộ phận kết cấu khác dựa trên công cụ CAD 3D. Là công đoạn thiết kế sau cùng, dựa trên bản vẽ chi tiết từ các phòng trên"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_089",
+      "question_type": "multi_hop",
+      "question": "Sinh viên nhóm nào của chương trình đào tạo từ K65 trở đi cần lưu ý gì khi đăng ký kế hoạch học tập kỳ hè?",
+      "gold_answer": "Sinh viên chương trình đào tạo từ K65 trở đi cần chú ý về các học phần thuộc Kỹ sư 180 TC và xem hướng dẫn học tập chương trình Kỹ sư chuyên sâu đặc thù 180 TC.",
+      "evidence_chunk_ids": [
+        "08c2114a-34e6-4841-8be4-647da824797c"
+      ],
+      "ground_truth_context": [
+        "Chương trình đào tạo từ K65 trở đi các em sinh viên chú ý về các học phần thuộc Kỹ sư 180 TC. Hướng dẫn học tập chương trình Kỹ sư chuyên sâu đặc thù 180 TC xem tại đây..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_090",
+      "question_type": "multi_hop",
+      "question": "Sinh viên có thắc mắc về BHYT kỳ 1 năm 2025-2026 liên hệ ai và qua email nào?",
+      "gold_answer": "Liên hệ Ban Công tác sinh viên qua email: chi.nghiemthikim@hust.edu.vn hoặc trực tiếp tại phòng C1-104.",
+      "evidence_chunk_ids": [
+        "25e140ed-1814-48d9-9ee6-141eebd6c645"
+      ],
+      "ground_truth_context": [
+        "Các thắc mắc về bảo hiểm y tế, số tiền bảo hiểm y tế, phí khám sức khỏe: sẽ gửi tới Ban Công tác sinh viên qua địa chỉ email: chi.nghiemthikim@hust.edu.vn hoặc liên hệ trực tiếp tại phòng C1-104"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_091",
+      "question_type": "multi_hop",
+      "question": "ASSA ABLOY Việt Nam chuyên sản xuất sản phẩm gì và thuộc tập đoàn nào?",
+      "gold_answer": "ASSA ABLOY Architectural Hardware Vietnam chuyên sản xuất tay cầm cửa và các giải pháp truy cập, thuộc ASSA ABLOY ASIA HOLDING AB (tập đoàn đầu tư từ Thụy Điển).",
+      "evidence_chunk_ids": [
+        "4b17c6ea-95bd-4bb2-8599-4b9da44968ad"
+      ],
+      "ground_truth_context": [
+        "ASSA ABLOY Architectural Hardware Vietnam là một doanh nghiệp thuộc ASSA ABLOY ASIA HOLDING AB (tập đoàn đầu tư từ Thụy Điển), chuyên sản xuất tay c..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_092",
+      "question_type": "multi_hop",
+      "question": "Học bổng Trần Đại Nghĩa kỳ II 2025-2026 cần hồ sơ gì và đăng ký trực tuyến ở đâu?",
+      "gold_answer": "Hồ sơ gồm đơn đăng ký có xác nhận địa phương và giấy chứng nhận hộ nghèo/cận nghèo hoặc minh chứng hoàn cảnh khó khăn. Đăng ký trực tuyến tại https://qldt.hust.edu.vn/ mục học bổng.",
+      "evidence_chunk_ids": [
+        "65d76565-37f4-4117-a560-3dacda3cf0b3",
+        "f30723ed-b476-4c8c-b62d-378188e76137"
+      ],
+      "ground_truth_context": [
+        "Hồ sơ: Đơn đăng ký xét, cấp Học bổng Trần Đại Nghĩa (theo mẫu) có xác nhận của địa phương; Giấy chứng nhận hộ nghèo/cận nghèo hoặc các giấy tờ minh chứng hoàn cảnh kinh tế gia đình khó khăn",
+        "Sinh viên đăng ký xét học bổng trực tuyến (online) trên hệ thống quản trị đại học: https://qldt.hust.edu.vn/ mục học bổng"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_093",
+      "question_type": "simple",
+      "question": "Chương trình Rorze Robotech thuộc tập đoàn nào và được thành lập năm nào?",
+      "gold_answer": "Rorze Robotech là thành viên của tập đoàn RORZE (Nhật Bản), được thành lập vào tháng 10 năm 1996.",
+      "evidence_chunk_ids": [
+        "70231ee8-3cd0-493e-82e7-28d346fe4526"
+      ],
+      "ground_truth_context": [
+        "Công ty TNHH RORZE ROBOTECH là một trong những công ty thành viên của tập đoàn RORZE, Nhật Bản... Được thành lập vào tháng 10 năm 1996"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_094",
+      "question_type": "simple",
+      "question": "ASSA ABLOY có bao nhiêu đồng nghiệp trên toàn thế giới và hoạt động tại bao nhiêu quốc gia?",
+      "gold_answer": "ASSA ABLOY có 63.000 đồng nghiệp tại hơn 70 quốc gia.",
+      "evidence_chunk_ids": [
+        "faca3f15-c83e-43ab-8eae-3dfcd14b4d85"
+      ],
+      "ground_truth_context": [
+        "Với 63.000 đồng nghiệp tại hơn 70 quốc gia khác nhau"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_095",
+      "question_type": "simple",
+      "question": "Sinh viên nào thuộc diện học bổng Gắn kết quê hương nếu đề tài ĐATN không được thực hiện ở trong nước?",
+      "gold_answer": "Sinh viên theo học chương trình đào tạo do trường đối tác nước ngoài cấp một văn bằng tốt nghiệp duy nhất sẽ không được xét học bổng.",
+      "evidence_chunk_ids": [
+        "616a2ca5-475d-47b8-aa13-e1a539b2434f"
+      ],
+      "ground_truth_context": [
+        "Sinh viên theo học chương trình đào tạo do trường đối tác nước ngoài cấp một văn bằng tốt nghiệp duy nhất"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_096",
+      "question_type": "simple",
+      "question": "Học bổng MB The Best of MB Chasing 2025 dành cho trường nào tại Bách khoa?",
+      "gold_answer": "Dành cho Trường Công nghệ Thông tin và Truyền thông – Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "9bd34a49-afe2-4480-8c70-ba14008ef5f9"
+      ],
+      "ground_truth_context": [
+        "học bổng 'The Best of MB Chasing' chính thức quay trở lại với Trường Công nghệ Thông tin và Truyền thông – Đại học Bách khoa Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_097",
+      "question_type": "simple",
+      "question": "Quyết định tiếp nhận tạm thời vào học chương trình KSCS đợt tháng 12 năm 2025 xem ở đâu?",
+      "gold_answer": "Xem tại trang ctt.hust.edu.vn theo đường dẫn cụ thể trong thông báo (file PDF).",
+      "evidence_chunk_ids": [
+        "d78b860f-2174-45c7-927e-4abb7c80cbd0"
+      ],
+      "ground_truth_context": [
+        "Quyết định tiếp nhận tạm thời vào học chương trình đào tạo Kỹ sư chuyên sâu (KSCS) đợt tháng 12 năm 2025 tại đây (link PDF)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_098",
+      "question_type": "simple",
+      "question": "Phòng Thiết kế trang thiết bị tại DAIZO TEC phụ trách thiết kế những gì trên tàu?",
+      "gold_answer": "Thiết kế bố trí các thiết bị liên quan đến hoạt động sinh hoạt, điều khiển, bốc xếp hàng, cập bến và ra khơi như nắp khoang hàng, hệ thống ống, thiết bị neo đậu...",
+      "evidence_chunk_ids": [
+        "35fec985-4148-4b70-b784-ef4812e062a8"
+      ],
+      "ground_truth_context": [
+        "2. Phòng Thiết kế trang thiết bị: thiết kế bố trí các thiết bị liên quan đến hoạt động sinh hoạt, điều khiển, bốc xếp hàng, cập bến và ra khơi... như: nắp khoang hàng, hệ thống ống, các thiết bị bốc dỡ hàng, thiết bị neo đậu..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_simple_099",
+      "question_type": "simple",
+      "question": "SEI Việt Nam (SEEV) là doanh nghiệp bao nhiêu phần trăm vốn nước ngoài?",
+      "gold_answer": "SEEV là doanh nghiệp 100% vốn Nhật Bản.",
+      "evidence_chunk_ids": [
+        "ff3b2805-d0db-41b5-b904-7efac0a66d3c"
+      ],
+      "ground_truth_context": [
+        "Công ty TNHH Linh Kiện Điện Tử SEI (Việt Nam) – SEEV là doanh nghiệp 100% vốn Nhật Bản"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "baiviet_all_chunks_multi_hop_100",
+      "question_type": "multi_hop",
+      "question": "Học bổng The Best of MB Chasing 2025 ưu tiên sinh viên tuyển dụng vào chương trình nào của MB và đăng ký ở đâu?",
+      "gold_answer": "Ưu tiên tuyển dụng vào các chương trình: MB Young Talent, MB Chasing, MB Trainee. Đăng ký tại: https://forms.gle/1DwxLDFqGjA8cUkQ9",
+      "evidence_chunk_ids": [
+        "9bd34a49-afe2-4480-8c70-ba14008ef5f9",
+        "71573b22-636b-4bcb-8300-d8dcdbf74062"
+      ],
+      "ground_truth_context": [
+        "Đăng ký Học bổng The Best of MB Chasing 2025 tại: https://forms.gle/1DwxLDFqGjA8cUkQ9",
+        "Ưu tiên tuyển dụng các chương trình dành cho Fresher: MB Young Talent, MB Chasing, MB Trainee."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

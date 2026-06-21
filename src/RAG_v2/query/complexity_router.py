@@ -22,11 +22,13 @@ logger = logging.getLogger(__name__)
 # Short-circuit: matched queries never reach the RAG pipeline.
 
 CHITCHAT_PATTERNS: list[str] = [
-    r"^(xin chào|hello|hi|chào|hey)\b",
-    r"^(ok|oke|okay|okie)\b",
+    r"^(?:dạ\s+|ạ\s+)?(?:xin chào|hello|hi|chào|hey)\b",
+    r"^(?:dạ\s+|ạ\s+|vâng\s+|ừ\s+|ờ\s+)?(?:ok|oke|okay|okie)(?:\s+(?:rồi|nha|nhé|bạn|ạ|a|em|anh|chị))*[\s!.,]*$",
     r"^(bạn là ai|you are|who are you)",
-    r"^(cảm ơn|thank|thanks)\b",
-    r"^(tạm biệt|bye|goodbye)\b",
+    r"^(?:dạ\s+|ok\s+|oke\s+)?(?:cảm ơn|cám ơn|thank|thanks)\b",
+    r"^(?:dạ\s+|ạ\s+)?(?:tạm biệt|bye|goodbye)\b",
+    # End-of-conversation combined pattern: "Ok cảm ơn bạn", "Oke thanks"
+    r"^(?:ok|oke|okay)[\s,]*(?:cảm ơn|cám ơn|thanks?)\b",
 ]
 
 # ─── Complex patterns ─────────────────────────────────────────────────────────
@@ -69,7 +71,7 @@ _COMPLEX_PATTERN_SPECS: list[tuple[str, str]] = [
     # The old personal_check subtype is intentionally removed. These route as
     # multi_source so query_v3 uses the normal Planner-Executor path.
     (
-        r"\b(tôi|mình|em)\b.{0,80}\b(có\s+thể|đủ\s+điều\s+kiện|đạt\s+điều\s+kiện|đạt\s+chuẩn|được\s+không|có\s+được)\b",
+        r"\b(tôi|mình|em)\b.{0,40}\b(có\s+thể|đủ\s+điều\s+kiện|đạt\s+điều\s+kiện|đạt\s+chuẩn|được\s+không|có\s+được)\b",
         "multi_source",
     ),
 
@@ -133,7 +135,7 @@ _FOLDED_SINGLE_FACT_RE: re.Pattern = re.compile(
 # Without this, no-diacritic input (common on mobile) such as
 # "toi co du dieu kien tot nghiep khong" falls through to ``simple``.
 _FOLDED_PERSONAL_ABILITY_RE: re.Pattern = re.compile(
-    r"\b(toi|minh|em)\b.{0,80}\b(co the|du dieu kien|dat dieu kien|dat chuan|du chuan|duoc khong|co duoc)\b",
+    r"\b(toi|minh|em)\b.{0,40}\b(co the|du dieu kien|dat dieu kien|dat chuan|du chuan|duoc khong|co duoc)\b",
     re.IGNORECASE,
 )
 

@@ -1,0 +1,472 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "4__QĐ_thi_Olympic_và_ĐMST_2023_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_001",
+      "question_type": "simple",
+      "question": "Quyết định ban hành Quy định về công tác tổ chức đội tuyển tham dự kỳ thi Olympic và ĐMST tại Đại học Bách khoa Hà Nội do ai ký?",
+      "gold_answer": "Do PGS.TS. Nguyễn Phong Điền – KT. Giám đốc / Phó Giám đốc Đại học Bách khoa Hà Nội ký.",
+      "evidence_chunk_ids": [
+        "be759c89-beb4-4d2f-9512-aafa86c90d01"
+      ],
+      "ground_truth_context": [
+        "Người ký: PGS.TS. Nguyễn Phong Điền – KT. Giám đốc / Phó Giám đốc"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_002",
+      "question_type": "simple",
+      "question": "Quyết định về công tác tổ chức đội tuyển thi Olympic và ĐMST tại Bách khoa Hà Nội được áp dụng từ năm học nào?",
+      "gold_answer": "Được áp dụng từ năm học 2023-2024.",
+      "evidence_chunk_ids": [
+        "b7b3c4b9-0cda-42ce-8356-7b5701a3d9b7"
+      ],
+      "ground_truth_context": [
+        "Quyết định này có hiệu lực kể từ ngày ký và được áp dụng từ năm học 2023-2024."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_003",
+      "question_type": "simple",
+      "question": "Quy định về tổ chức đội tuyển thi Olympic và ĐMST tại Bách khoa Hà Nội bao gồm những nội dung chính nào?",
+      "gold_answer": "Bao gồm: mục đích, nhiệm vụ và quy trình thực hiện của các đơn vị liên quan; trách nhiệm và quyền lợi của cá nhân tham gia; và phương thức hỗ trợ của Đại học.",
+      "evidence_chunk_ids": [
+        "0c6f18da-4bb1-499a-8af2-a3d643cd7203"
+      ],
+      "ground_truth_context": [
+        "bao gồm: mục đích, nhiệm vụ và quy trình thực hiện của các đơn vị liên quan, trách nhiệm và quyền lợi của cá nhân tham gia và phương thức hỗ trợ của Đại học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_004",
+      "question_type": "simple",
+      "question": "Thành viên đội tuyển tham dự kỳ thi Olympic môn học tại Bách khoa Hà Nội cần đáp ứng điều kiện gì?",
+      "gold_answer": "Phải là sinh viên hoặc học viên đang học tập tại Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "c90982d1-0a6a-4e9e-a398-e7779bf53aff"
+      ],
+      "ground_truth_context": [
+        "Thành viên đội tuyển tham dự kỳ thi Olympic môn học phải là sinh viên, học viên (sau đây gọi chung là sinh viên) đang học tập tại ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_005",
+      "question_type": "simple",
+      "question": "Đội tuyển tham dự kỳ thi Đổi mới sáng tạo và khởi nghiệp tại Bách khoa Hà Nội yêu cầu tối thiểu bao nhiêu phần trăm thành viên là sinh viên Bách khoa?",
+      "gold_answer": "Tối thiểu 50% thành viên trong mỗi đội tuyển phải là sinh viên Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "c90982d1-0a6a-4e9e-a398-e7779bf53aff"
+      ],
+      "ground_truth_context": [
+        "số lượng thành viên trong mỗi đội tuyển tối thiểu 50% là sinh viên ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_006",
+      "question_type": "simple",
+      "question": "Thành viên đội tuyển thi Đổi mới sáng tạo và khởi nghiệp tại Bách khoa Hà Nội có thể đến từ những đơn vị nào?",
+      "gold_answer": "Có thể là sinh viên đang học tại Đại học Bách khoa Hà Nội hoặc các cơ sở giáo dục đại học khác, miễn là tối thiểu 50% là sinh viên Bách khoa.",
+      "evidence_chunk_ids": [
+        "c90982d1-0a6a-4e9e-a398-e7779bf53aff"
+      ],
+      "ground_truth_context": [
+        "Thành viên đội tuyển tham dự kỳ thi về đổi mới, sáng tạo và khởi nghiệp là sinh viên đang học tập tại ĐHBK Hà Nội hoặc các cơ sở giáo dục đại học khác, tuy nhiên số lượng thành viên trong mỗi đội tuyển tối thiểu 50% là sinh viên ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_007",
+      "question_type": "simple",
+      "question": "Mục đích của việc tổ chức đội tuyển tham dự kỳ thi Olympic và ĐMST tại Bách khoa Hà Nội là gì?",
+      "gold_answer": "Khuyến khích sự sáng tạo, tích cực trong giảng dạy, học tập và nghiên cứu khoa học; tạo nguồn bồi dưỡng nhân tài; thúc đẩy tinh thần ĐMST và khởi nghiệp trong sinh viên; tạo tâm thế chủ động tìm kiếm việc làm sau tốt nghiệp; góp phần xây dựng thương hiệu và nâng cao vị thế của Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "231f382f-c9ba-4ac5-a7e6-5f3a0a494cb2"
+      ],
+      "ground_truth_context": [
+        "Mục đích tham dự kỳ thi nhằm khuyến khích sự sáng tạo, tích cực trong hoạt động giảng dạy, học tập và nghiên cứu khoa học; tạo nguồn bồi dưỡng, đào tạo nhân tài; thúc đẩy tinh thần đổi mới sáng tạo và khởi nghiệp trong sinh viên; tạo tâm thế chủ động tìm kiếm, tự tạo việc làm của sinh viên sau khi tốt nghiệp, đồng thời góp phần xây dựng thương hiệu và nâng cao vị thế của ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_008",
+      "question_type": "simple",
+      "question": "Đơn vị nào có trách nhiệm lập kế hoạch tổ chức đoàn tham dự kỳ thi Olympic môn học tại Bách khoa Hà Nội?",
+      "gold_answer": "Các Trường, Viện hoặc Khoa (đơn vị chuyên môn) phụ trách môn học lập kế hoạch và trình Giám đốc (qua Phòng/Ban Công tác sinh viên) phê duyệt.",
+      "evidence_chunk_ids": [
+        "e8b76bfb-5b0f-445f-bd1f-22735b850b47"
+      ],
+      "ground_truth_context": [
+        "các Trường, Viện hoặc Khoa (trong ĐHBK Hà Nội) phụ trách môn học (sau đây gọi chung là đơn vị chuyên môn) lập kế hoạch tổ chức đoàn tham dự và trình Giám đốc (qua Phòng/Ban chức năng Công tác sinh viên) phê duyệt."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_009",
+      "question_type": "simple",
+      "question": "Bản kế hoạch tổ chức đoàn tham dự kỳ thi Olympic môn học tại Bách khoa Hà Nội cần bao gồm những nội dung gì?",
+      "gold_answer": "Gồm: phương án tuyển chọn đội tuyển; kế hoạch tổ chức ôn luyện; kế hoạch tổ chức đoàn tham dự (trưởng đoàn, thành viên, thời gian, phương tiện, nơi lưu trú) kèm dự toán chi phí và đề xuất hỗ trợ của Đại học về cơ sở vật chất và kinh phí.",
+      "evidence_chunk_ids": [
+        "e8b76bfb-5b0f-445f-bd1f-22735b850b47"
+      ],
+      "ground_truth_context": [
+        "Bản kế hoạch bao gồm: Phương án tuyển chọn đội tuyển; kế hoạch tổ chức ôn luyện cho đội tuyển; kế hoạch tổ chức đoàn tham dự kỳ thi (đề xuất Trưởng đoàn và các thành viên của đoàn, thời gian thực hiện, phương tiện di chuyển và nơi lưu trú) kèm dự toán chi tiết về chi phí tham dự kỳ thi và đề xuất hỗ trợ của Đại học về cơ sở vật chất và kinh phí triển khai."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_010",
+      "question_type": "simple",
+      "question": "Khi có sự thay đổi về kế hoạch triển khai trong quá trình tham dự kỳ thi Olympic, Trưởng đoàn phải làm gì?",
+      "gold_answer": "Trưởng đoàn phải báo cáo Giám đốc Đại học (qua Phòng/Ban chức năng Công tác sinh viên) để quyết định điều chỉnh kế hoạch.",
+      "evidence_chunk_ids": [
+        "71c18d8e-8d4f-4b09-996f-2d6bf25b20ee"
+      ],
+      "ground_truth_context": [
+        "Trong trường hợp có sự thay đổi về kế hoạch triển khai, Trưởng đoàn phải báo cáo Giám đốc Đại học (qua Phòng/Ban chức năng Công tác sinh viên) quyết định điều chỉnh kế hoạch."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_011",
+      "question_type": "simple",
+      "question": "Sau khi kết thúc kỳ thi Olympic môn học, đơn vị chuyên môn tại Bách khoa Hà Nội phải làm gì?",
+      "gold_answer": "Đơn vị chuyên môn lập báo cáo bằng văn bản về kết quả hoạt động của đoàn và gửi Giám đốc Đại học qua Phòng/Ban chức năng Công tác sinh viên.",
+      "evidence_chunk_ids": [
+        "71c18d8e-8d4f-4b09-996f-2d6bf25b20ee"
+      ],
+      "ground_truth_context": [
+        "Sau khi kết thúc kỳ thi, đơn vị chuyên môn lập báo cáo bằng văn bản về kết quả hoạt động của đoàn và gửi Giám đốc Đại học (qua Phòng/Ban chức năng Công tác sinh viên)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_012",
+      "question_type": "simple",
+      "question": "Đơn vị nào chủ trì lập kế hoạch tuyển chọn và tổ chức đoàn tham dự kỳ thi Đổi mới sáng tạo và khởi nghiệp tại Bách khoa Hà Nội?",
+      "gold_answer": "Phòng/Ban chức năng Công tác sinh viên chủ trì lập kế hoạch và trình Giám đốc Đại học phê duyệt.",
+      "evidence_chunk_ids": [
+        "447c46fa-d9bc-450f-bfee-845a73025fe9"
+      ],
+      "ground_truth_context": [
+        "Phòng/Ban chức năng Công tác sinh viên lập kế hoạch tuyển chọn và tổ chức đoàn tham dự trình Giám đốc Đại học phê duyệt."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_013",
+      "question_type": "simple",
+      "question": "Sau khi tuyển chọn xong đội tuyển Đổi mới sáng tạo và khởi nghiệp, ai phụ trách bồi dưỡng kiến thức cho các thành viên?",
+      "gold_answer": "Phòng/Ban chức năng Công tác sinh viên chủ trì phối hợp với các đơn vị liên quan trong và ngoài Đại học mời chuyên gia phù hợp bồi dưỡng kiến thức cho các thành viên đội tuyển.",
+      "evidence_chunk_ids": [
+        "2a57e754-46bd-4fce-bad6-167d2450522e"
+      ],
+      "ground_truth_context": [
+        "Phòng/Ban chức năng Công tác sinh viên chủ trì phối hợp với các đơn vị liên quan trong và ngoài ĐHBK Hà Nội mời chuyên gia phù hợp bồi dưỡng kiến thức cho các thành viên của đội tuyển."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_014",
+      "question_type": "simple",
+      "question": "Thành viên đội tuyển thi Olympic và ĐMST tại Bách khoa Hà Nội có phải tự chi trả chi phí học bồi dưỡng và tham dự kỳ thi không?",
+      "gold_answer": "Không, thành viên không phải chi trả các khoản chi phí học tập bồi dưỡng và chi phí tham dự kỳ thi.",
+      "evidence_chunk_ids": [
+        "cc597d5b-9fa8-4e29-bca2-d2ab70c7080c"
+      ],
+      "ground_truth_context": [
+        "Thành viên tham gia đội tuyển được tạo điều kiện thuận lợi để dự thi, không phải chi trả các khoản chi phí học tập bồi dưỡng, chi phí tham dự kỳ thi"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_015",
+      "question_type": "simple",
+      "question": "Sinh viên đoạt giải kỳ thi Olympic môn học tại Bách khoa Hà Nội được hưởng quyền lợi gì về học tập?",
+      "gold_answer": "Được miễn thi và công nhận điểm học phần/môn học đoạt giải, hoặc được cộng điểm thưởng vào điểm thi kết thúc học phần theo quy định hiện hành của Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "cc597d5b-9fa8-4e29-bca2-d2ab70c7080c"
+      ],
+      "ground_truth_context": [
+        "Sinh viên đoạt giải của kỳ thi Olympic môn học được miễn thi và công nhận điểm học phần/môn học đoạt giải hoặc cộng điểm thưởng vào điểm thi kết thúc học phần theo quy định hiện hành của ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_016",
+      "question_type": "simple",
+      "question": "Giảng viên tham gia bồi dưỡng đội tuyển thi Olympic tại Bách khoa được ghi nhận thành tích trong trường hợp nào?",
+      "gold_answer": "Được ghi nhận thành tích khi bình xét thi đua khen thưởng theo quy định nếu có sinh viên đoạt giải cao trong kỳ thi.",
+      "evidence_chunk_ids": [
+        "cc597d5b-9fa8-4e29-bca2-d2ab70c7080c"
+      ],
+      "ground_truth_context": [
+        "Giảng viên, cán bộ của ĐHBK Hà Nội tham gia giảng dạy bồi dưỡng đội tuyển tham dự kỳ thi được ghi nhận thành tích khi bình xét thi đua khen thưởng theo quy định hiện hành của Đại học nếu có sinh viên đoạt giải cao trong kỳ thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_017",
+      "question_type": "simple",
+      "question": "Đại học Bách khoa Hà Nội hỗ trợ những gì cho sinh viên tham gia đội tuyển thi Olympic và ĐMST?",
+      "gold_answer": "Hỗ trợ: kinh phí và cơ sở vật chất bồi dưỡng; thủ tục và kinh phí đăng ký tham dự; áo đồng phục; kinh phí tổ chức buổi giao lưu gặp mặt; chi phí đi lại và lưu trú trong thời gian tham dự kỳ thi.",
+      "evidence_chunk_ids": [
+        "71768ee5-2e4c-45ab-8c82-88508ae4e7f0"
+      ],
+      "ground_truth_context": [
+        "ĐHBK Hà Nội hỗ trợ kinh phí và cơ sở vật chất đối với hoạt động bồi dưỡng kiến thức cho đội tuyển; hỗ trợ thủ tục, kinh phí đăng ký tham dự các kỳ thi; áo đồng phục ĐHBK Hà Nội cho sinh viên tham gia đội tuyển; kinh phí tổ chức buổi giao lưu gặp mặt đội tuyển; chi phí đi lại và lưu trú trong thời gian đoàn tham dự kỳ thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_018",
+      "question_type": "simple",
+      "question": "Kinh phí hỗ trợ đội tuyển thi Olympic và ĐMST tại Bách khoa Hà Nội được xác định như thế nào?",
+      "gold_answer": "Kinh phí hỗ trợ được xác định theo chi phí thực tế và không vượt quá dự toán đã được Giám đốc Đại học phê duyệt.",
+      "evidence_chunk_ids": [
+        "71768ee5-2e4c-45ab-8c82-88508ae4e7f0"
+      ],
+      "ground_truth_context": [
+        "Kinh phí hỗ trợ được xác định theo chi phí thực tế và không vượt quá dự toán đã được Giám đốc Đại học phê duyệt."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_019",
+      "question_type": "simple",
+      "question": "Phòng/Ban Công tác sinh viên tại Bách khoa Hà Nội có trách nhiệm gì đối với việc khen thưởng trong các kỳ thi Olympic và ĐMST?",
+      "gold_answer": "Đề xuất Giám đốc Đại học khen thưởng thành viên có nhiều đóng góp hoặc đạt thành tích cao, và chủ trì phối hợp tổ chức lễ khen thưởng cho cán bộ, sinh viên được khen thưởng.",
+      "evidence_chunk_ids": [
+        "5fdad7ac-7516-4844-bd51-ab35f6657e3b"
+      ],
+      "ground_truth_context": [
+        "Đề xuất Giám đốc Đại học khen thưởng thành viên có nhiều đóng góp hoặc đạt thành tích cao trong các kỳ thi Olympic môn học và kỳ thi về đổi mới, sáng tạo và khởi nghiệp. Chủ trì phối hợp với các đơn vị liên quan tổ chức lễ khen thưởng cho cán bộ, sinh viên được Giám đốc ĐHBK Hà Nội khen thưởng tại khoản 4 Điều này."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_020",
+      "question_type": "simple",
+      "question": "Phòng/Ban chức năng Đào tạo tại Bách khoa Hà Nội có trách nhiệm gì đối với sinh viên đoạt giải Olympic?",
+      "gold_answer": "Có trách nhiệm thực hiện thủ tục miễn thi và công nhận điểm học phần, cộng điểm thi kết thúc học phần cho sinh viên đạt giải trong kỳ thi Olympic môn học theo quy định hiện hành.",
+      "evidence_chunk_ids": [
+        "8506be76-c97f-493a-93aa-77a5abd758ce"
+      ],
+      "ground_truth_context": [
+        "Phòng/Ban chức năng Đào tạo: có trách nhiệm thực hiện thủ tục miễn thi và công nhận điểm học phần, cộng điểm thi kết thúc học phần cho sinh viên đạt giải trong kỳ thi Olympic môn học theo quy định hiện hành của ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_021",
+      "question_type": "simple",
+      "question": "BK-Holdings có vai trò gì trong công tác tổ chức đội tuyển thi ĐMST tại Bách khoa Hà Nội?",
+      "gold_answer": "BK-Holdings phối hợp với Phòng/Ban chức năng Công tác sinh viên trong công tác tuyển chọn đội tuyển và bồi dưỡng kiến thức cho các thành viên đội tuyển tham dự kỳ thi về Đổi mới sáng tạo và khởi nghiệp.",
+      "evidence_chunk_ids": [
+        "8e1fdef8-31cb-4bc5-93ea-79b96006f341"
+      ],
+      "ground_truth_context": [
+        "Công ty trách nhiệm hữu hạn một thành viên đầu tư và phát triển công nghệ Bách khoa Hà Nội (BK-Holdings): Phối hợp với Phòng/Ban chức năng Công tác sinh viên trong công tác tuyển chọn đội tuyển và bồi dưỡng kiến thức cho các thành viên đội tuyển tham dự kỳ thi về đổi mới, sáng tạo và khởi nghiệp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_multi_hop_022",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa đoạt giải Nhì kỳ thi Olympic Toán cấp quốc gia được hưởng những quyền lợi học tập nào và ai thực hiện thủ tục đó?",
+      "gold_answer": "Sinh viên được miễn thi và công nhận điểm học phần Toán đó, hoặc được cộng điểm thưởng vào điểm thi kết thúc học phần. Phòng/Ban chức năng Đào tạo có trách nhiệm thực hiện các thủ tục này.",
+      "evidence_chunk_ids": [
+        "cc597d5b-9fa8-4e29-bca2-d2ab70c7080c",
+        "8506be76-c97f-493a-93aa-77a5abd758ce"
+      ],
+      "ground_truth_context": [
+        "Sinh viên đoạt giải của kỳ thi Olympic môn học được miễn thi và công nhận điểm học phần/môn học đoạt giải hoặc cộng điểm thưởng vào điểm thi kết thúc học phần theo quy định hiện hành của ĐHBK Hà Nội.",
+        "Phòng/Ban chức năng Đào tạo: có trách nhiệm thực hiện thủ tục miễn thi và công nhận điểm học phần, cộng điểm thi kết thúc học phần cho sinh viên đạt giải trong kỳ thi Olympic môn học theo quy định hiện hành của ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_multi_hop_023",
+      "question_type": "multi_hop",
+      "question": "Một nhóm 4 sinh viên muốn tham dự kỳ thi khởi nghiệp quốc gia, trong đó 2 người từ Bách khoa Hà Nội và 2 người từ trường khác. Nhóm có đủ điều kiện tham gia đội tuyển Bách khoa không?",
+      "gold_answer": "Có đủ điều kiện. Quy định yêu cầu tối thiểu 50% thành viên là sinh viên Bách khoa, nhóm có 2/4 = 50% đúng mức tối thiểu, đồng thời các thành viên ngoài Bách khoa cũng được phép tham gia đội tuyển kỳ thi ĐMST.",
+      "evidence_chunk_ids": [
+        "c90982d1-0a6a-4e9e-a398-e7779bf53aff"
+      ],
+      "ground_truth_context": [
+        "Thành viên đội tuyển tham dự kỳ thi về đổi mới, sáng tạo và khởi nghiệp là sinh viên đang học tập tại ĐHBK Hà Nội hoặc các cơ sở giáo dục đại học khác, tuy nhiên số lượng thành viên trong mỗi đội tuyển tối thiểu 50% là sinh viên ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_multi_hop_024",
+      "question_type": "multi_hop",
+      "question": "So sánh đơn vị chủ trì lập kế hoạch và tổ chức đội tuyển giữa kỳ thi Olympic môn học và kỳ thi Đổi mới sáng tạo và khởi nghiệp tại Bách khoa Hà Nội?",
+      "gold_answer": "Kỳ thi Olympic: đơn vị chuyên môn (Trường/Viện/Khoa) phụ trách môn học chủ trì. Kỳ thi ĐMST: Phòng/Ban chức năng Công tác sinh viên chủ trì. Cả hai đều phải trình kế hoạch để Giám đốc Đại học phê duyệt.",
+      "evidence_chunk_ids": [
+        "e8b76bfb-5b0f-445f-bd1f-22735b850b47",
+        "447c46fa-d9bc-450f-bfee-845a73025fe9"
+      ],
+      "ground_truth_context": [
+        "các Trường, Viện hoặc Khoa... phụ trách môn học... lập kế hoạch tổ chức đoàn tham dự và trình Giám đốc (qua Phòng/Ban chức năng Công tác sinh viên) phê duyệt.",
+        "Phòng/Ban chức năng Công tác sinh viên lập kế hoạch tuyển chọn và tổ chức đoàn tham dự trình Giám đốc Đại học phê duyệt."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_multi_hop_025",
+      "question_type": "multi_hop",
+      "question": "Thành viên tham gia đội tuyển thi Olympic tại Bách khoa có những trách nhiệm gì và được hưởng những quyền lợi gì nếu đoạt giải?",
+      "gold_answer": "Trách nhiệm: tham dự đầy đủ khóa bồi dưỡng với thái độ tích cực và ý thức trách nhiệm cao. Quyền lợi khi đoạt giải: được Giám đốc Đại học khen thưởng theo quy định; được miễn thi và công nhận điểm học phần hoặc cộng điểm thưởng vào điểm thi kết thúc học phần.",
+      "evidence_chunk_ids": [
+        "cc597d5b-9fa8-4e29-bca2-d2ab70c7080c"
+      ],
+      "ground_truth_context": [
+        "Thành viên tham gia đội tuyển phải tham dự đầy đủ khóa học bồi dưỡng kiến thức theo kế hoạch của Đại học với thái độ học tập tích cực và ý thức trách nhiệm cao trong suốt quá trình học tập.",
+        "được Giám đốc Đại học khen thưởng nếu đoạt giải trong kỳ thi theo quy định hiện hành của ĐHBK Hà Nội.",
+        "Sinh viên đoạt giải của kỳ thi Olympic môn học được miễn thi và công nhận điểm học phần/môn học đoạt giải hoặc cộng điểm thưởng vào điểm thi kết thúc học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_multi_hop_026",
+      "question_type": "multi_hop",
+      "question": "Sau khi đội tuyển thi ĐMST kết thúc tham dự, đơn vị nào lập báo cáo và gửi đến ai?",
+      "gold_answer": "Phòng/Ban chức năng Công tác sinh viên lập báo cáo bằng văn bản về kết quả hoạt động của đoàn để báo cáo Giám đốc Đại học (khác với kỳ thi Olympic, đơn vị chuyên môn lập báo cáo gửi Giám đốc qua Phòng/Ban Công tác sinh viên).",
+      "evidence_chunk_ids": [
+        "2a57e754-46bd-4fce-bad6-167d2450522e",
+        "71c18d8e-8d4f-4b09-996f-2d6bf25b20ee"
+      ],
+      "ground_truth_context": [
+        "Sau khi kết thúc kỳ thi, Phòng/Ban chức năng Công tác sinh viên lập báo cáo bằng văn bản về kết quả hoạt động của đoàn để báo cáo Giám đốc Đại học.",
+        "Sau khi kết thúc kỳ thi, đơn vị chuyên môn lập báo cáo bằng văn bản về kết quả hoạt động của đoàn và gửi Giám đốc Đại học (qua Phòng/Ban chức năng Công tác sinh viên)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_multi_hop_027",
+      "question_type": "multi_hop",
+      "question": "Đơn vị chuyên môn tại Bách khoa có những trách nhiệm gì khi tổ chức đội tuyển thi Olympic môn học?",
+      "gold_answer": "Gồm: chủ trì lập kế hoạch tổ chức đoàn; tổ chức ôn luyện cho đội tuyển; cử cán bộ dẫn đoàn; lập báo cáo tổng kết sau kỳ thi; phối hợp với Phòng Công tác sinh viên trong tuyển chọn đội tuyển ĐMST; và cử cán bộ hướng dẫn chuyên môn cho kỳ thi ĐMST.",
+      "evidence_chunk_ids": [
+        "7e841156-f5f6-491b-b469-916185d70776"
+      ],
+      "ground_truth_context": [
+        "Chủ trì phối hợp với các đơn vị liên quan trong ĐHBK Hà Nội lập kế hoạch tổ chức đoàn tham dự kỳ thi Olympic môn học. Chịu trách nhiệm tổ chức ôn luyện cho đội tuyển tham dự kỳ thi Olympic môn học. Cử cán bộ dẫn đoàn tham dự kỳ thi Olympic môn học theo kế hoạch đã được Giám đốc Đại học phê duyệt. Lập báo cáo tổng kết kỳ thi Olympic môn học do đơn vị phụ trách. Phối hợp với Phòng/Ban chức năng Công tác sinh viên trong việc lựa chọn đội tuyển tham dự kỳ thi về đổi mới, sáng tạo và khởi nghiệp. Cử cán bộ hướng dẫn chuyên môn và tham gia dẫn đội/nhóm sinh viên tham dự kỳ thi về đổi mới, sáng tạo và khởi nghiệp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_multi_hop_028",
+      "question_type": "multi_hop",
+      "question": "Phòng/Ban Tài chính - Kế toán có vai trò gì trong việc hỗ trợ kinh phí cho đội tuyển thi Olympic và ĐMST tại Bách khoa Hà Nội?",
+      "gold_answer": "Hỗ trợ và hướng dẫn các đơn vị chuyên môn lập dự toán và làm thủ tục thanh toán, quyết toán các khoản kinh phí hỗ trợ theo Điều 7 của Quy định, tuân thủ các quy định hiện hành của Nhà nước và Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "8e1fdef8-31cb-4bc5-93ea-79b96006f341"
+      ],
+      "ground_truth_context": [
+        "Phòng/Ban chức năng Tài chính - Kế toán: Hỗ trợ, hướng dẫn các đơn vị chuyên môn lập dự toán và làm thủ tục thanh toán, quyết toán các khoản kinh phí do Đại học hỗ trợ quy định tại Điều 7 của Quy định này theo các quy định hiện hành của Nhà nước và của ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_multi_hop_029",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa muốn tham gia đội tuyển thi ĐMST cần chuẩn bị gì và trong quá trình bồi dưỡng, học viên được hỗ trợ những gì về tài chính?",
+      "gold_answer": "Sinh viên phải tham dự đầy đủ khóa bồi dưỡng với thái độ tích cực. Về tài chính, Đại học hỗ trợ toàn bộ kinh phí bồi dưỡng, chi phí đăng ký tham dự, áo đồng phục, chi phí giao lưu, đi lại và lưu trú – sinh viên không phải tự chi trả bất kỳ khoản nào.",
+      "evidence_chunk_ids": [
+        "cc597d5b-9fa8-4e29-bca2-d2ab70c7080c",
+        "71768ee5-2e4c-45ab-8c82-88508ae4e7f0"
+      ],
+      "ground_truth_context": [
+        "Thành viên tham gia đội tuyển phải tham dự đầy đủ khóa học bồi dưỡng kiến thức theo kế hoạch của Đại học với thái độ học tập tích cực và ý thức trách nhiệm cao.",
+        "không phải chi trả các khoản chi phí học tập bồi dưỡng, chi phí tham dự kỳ thi",
+        "ĐHBK Hà Nội hỗ trợ kinh phí và cơ sở vật chất đối với hoạt động bồi dưỡng kiến thức cho đội tuyển; hỗ trợ thủ tục, kinh phí đăng ký tham dự các kỳ thi; áo đồng phục ĐHBK Hà Nội cho sinh viên tham gia đội tuyển; kinh phí tổ chức buổi giao lưu gặp mặt đội tuyển; chi phí đi lại và lưu trú trong thời gian đoàn tham dự kỳ thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "4__QD_thi_Olympic_va_DMST_2023_simple_030",
+      "question_type": "simple",
+      "question": "Phòng/Ban Công tác sinh viên tại Bách khoa Hà Nội có vai trò gì trong việc tư vấn hướng dẫn các kỳ thi Olympic môn học?",
+      "gold_answer": "Tư vấn, hướng dẫn các đơn vị chuyên môn tổ chức đoàn tham dự các kỳ thi Olympic môn học.",
+      "evidence_chunk_ids": [
+        "5fdad7ac-7516-4844-bd51-ab35f6657e3b"
+      ],
+      "ground_truth_context": [
+        "Tư vấn, hướng dẫn các đơn vị chuyên môn tổ chức đoàn tham dự các kỳ thi Olympic môn học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    }
+  ]
+}

@@ -24,11 +24,13 @@ _DASH_TRANSLATION = str.maketrans(
 )
 
 _COURSE_CODE_RE = re.compile(
-    r"\b(?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED|JP|EM|BF|TEX)\s*-?\s*\d{4}[A-Z]?\b",
+    r"\b(?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED|JP|EM|BF|TEX"
+    r"|AI|DS|SE|CE|CS|BI|EN|SS|MR|HE|TE|TX|MS|EV|EP|BA|HS)\s*-?\s*\d{4}[A-Z]?\b",
     re.IGNORECASE,
 )
 _MAJOR_CODE_RE = re.compile(
-    r"\b(IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH|ME|CH|BF|MS|HE|TE|TX|TROY)\s*-?\s*(E\d{1,2}|EP|GU|LUH|NUT|IT|\d{1,2})\b",
+    r"\b(IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH|ME|CH|BF|MS|HE|TE|TX|TROY"
+    r"|AI|DS|SE|CE|CS)\s*-?\s*(E\d{1,2}|EP|GU|LUH|NUT|IT|\d{1,2})\b",
     re.IGNORECASE,
 )
 _COHORT_RE = re.compile(

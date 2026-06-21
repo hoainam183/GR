@@ -1,0 +1,469 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "ELITECH_K62_K64_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "chunks_001_simple_001",
+      "question_type": "simple",
+      "question": "Quy định áp dụng cho những chương trình nào?",
+      "gold_answer": "ĐTTN, PFIEV, Tiên tiến, CNTT Việt-Nhật và ICT",
+      "evidence_chunk_ids": [
+        "648800ef-6f78-4f14-b25d-0f6e15270055"
+      ],
+      "ground_truth_context": [
+        "ĐTTN, PFIEV, Tiên tiến, CNTT Việt-Nhật và ICT"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_002",
+      "question_type": "simple",
+      "question": "KSCLC yêu cầu TOEIC bao nhiêu?",
+      "gold_answer": "600",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297"
+      ],
+      "ground_truth_context": [
+        "600"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_003",
+      "question_type": "simple",
+      "question": "KSCLC yêu cầu chuẩn tiếng Pháp nào?",
+      "gold_answer": "DELF B1",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297"
+      ],
+      "ground_truth_context": [
+        "DELF B1"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_004",
+      "question_type": "simple",
+      "question": "Không đạt chuẩn ngoại ngữ KSCLC có thể làm gì?",
+      "gold_answer": "Đề nghị cấp bằng chính quy cùng ngành",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297"
+      ],
+      "ground_truth_context": [
+        "Đề nghị cấp bằng chính quy cùng ngành"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_005",
+      "question_type": "simple",
+      "question": "ĐTTN yêu cầu TOEIC bao nhiêu?",
+      "gold_answer": "600",
+      "evidence_chunk_ids": [
+        "40852fba-6e9d-4c21-a405-55e2dea22587"
+      ],
+      "ground_truth_context": [
+        "600"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_006",
+      "question_type": "simple",
+      "question": "ICT yêu cầu TOEIC bao nhiêu?",
+      "gold_answer": "650",
+      "evidence_chunk_ids": [
+        "40852fba-6e9d-4c21-a405-55e2dea22587"
+      ],
+      "ground_truth_context": [
+        "650"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_007",
+      "question_type": "simple",
+      "question": "CNTT Việt-Nhật yêu cầu chuẩn tiếng Nhật nào?",
+      "gold_answer": "JLPT N3",
+      "evidence_chunk_ids": [
+        "50de962d-960e-4575-a247-432f0806cc82"
+      ],
+      "ground_truth_context": [
+        "JLPT N3"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_008",
+      "question_type": "simple",
+      "question": "Sinh viên được thi chứng chỉ nội bộ bao nhiêu lần?",
+      "gold_answer": "Nhiều lần",
+      "evidence_chunk_ids": [
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Nhiều lần"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_009",
+      "question_type": "simple",
+      "question": "Điểm thi nội bộ được công nhận như thế nào?",
+      "gold_answer": "Lấy điểm cao nhất",
+      "evidence_chunk_ids": [
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Lấy điểm cao nhất"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_010",
+      "question_type": "simple",
+      "question": "Kết quả thi nội bộ có giá trị bao lâu?",
+      "gold_answer": "2 năm",
+      "evidence_chunk_ids": [
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "2 năm"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_011",
+      "question_type": "simple",
+      "question": "Chứng chỉ tiếng Anh được cấp bởi tổ chức nào được công nhận?",
+      "gold_answer": "ETS, British Council, ESOL, IDP",
+      "evidence_chunk_ids": [
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "ETS, British Council, ESOL, IDP"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_012",
+      "question_type": "simple",
+      "question": "Ai thẩm định trường hợp chứng chỉ khác?",
+      "gold_answer": "Trung tâm Ngoại ngữ",
+      "evidence_chunk_ids": [
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Trung tâm Ngoại ngữ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_013",
+      "question_type": "simple",
+      "question": "Chứng chỉ dùng xét tốt nghiệp phải như thế nào?",
+      "gold_answer": "Còn hiệu lực",
+      "evidence_chunk_ids": [
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Còn hiệu lực"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_014",
+      "question_type": "simple",
+      "question": "Sinh viên PFIEV cần đạt chuẩn tiếng Pháp nào?",
+      "gold_answer": "DELF B1",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297"
+      ],
+      "ground_truth_context": [
+        "DELF B1"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_015",
+      "question_type": "simple",
+      "question": "Sinh viên Tiên tiến cần đạt TOEIC bao nhiêu?",
+      "gold_answer": "650",
+      "evidence_chunk_ids": [
+        "40852fba-6e9d-4c21-a405-55e2dea22587"
+      ],
+      "ground_truth_context": [
+        "650"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_016",
+      "question_type": "simple",
+      "question": "Chứng chỉ tiếng Pháp hợp lệ do ai cấp?",
+      "gold_answer": "Đại diện Bộ Giáo dục/Bộ ĐH Pháp",
+      "evidence_chunk_ids": [
+        "802dab5c-4871-45a2-9e86-01e7a65c36d7"
+      ],
+      "ground_truth_context": [
+        "Đại diện Bộ Giáo dục/Bộ ĐH Pháp"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_017",
+      "question_type": "simple",
+      "question": "Ai quyết định trường hợp tiếng Pháp khác?",
+      "gold_answer": "Hiệu trưởng",
+      "evidence_chunk_ids": [
+        "802dab5c-4871-45a2-9e86-01e7a65c36d7"
+      ],
+      "ground_truth_context": [
+        "Hiệu trưởng"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_018",
+      "question_type": "simple",
+      "question": "CNTT Việt-Nhật có chấp nhận chứng chỉ tương đương JLPT không?",
+      "gold_answer": "Có",
+      "evidence_chunk_ids": [
+        "50de962d-960e-4575-a247-432f0806cc82"
+      ],
+      "ground_truth_context": [
+        "Có"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_019",
+      "question_type": "simple",
+      "question": "Quy định áp dụng cho khóa nào?",
+      "gold_answer": "K62-K64",
+      "evidence_chunk_ids": [
+        "7005fe8b-a430-4afa-8599-e9ed382cc02f"
+      ],
+      "ground_truth_context": [
+        "K62-K64"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_020",
+      "question_type": "simple",
+      "question": "ĐTTN và PFIEV có yêu cầu cùng TOEIC không?",
+      "gold_answer": "Có, 600",
+      "evidence_chunk_ids": [
+        "40852fba-6e9d-4c21-a405-55e2dea22587"
+      ],
+      "ground_truth_context": [
+        "Có, 600"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_021",
+      "question_type": "simple",
+      "question": "Điều kiện xét chuẩn tiếng Anh đầu ra là gì?",
+      "gold_answer": "Chứng chỉ còn hiệu lực và đủ mức quy đổi",
+      "evidence_chunk_ids": [
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Chứng chỉ còn hiệu lực và đủ mức quy đổi"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_simple_022",
+      "question_type": "simple",
+      "question": "Kết quả thi nội bộ dùng để làm gì?",
+      "gold_answer": "Xác định đạt chuẩn đầu ra",
+      "evidence_chunk_ids": [
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Xác định đạt chuẩn đầu ra"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "chunks_001_multihop_001",
+      "question_type": "multi_hop",
+      "question": "Điều kiện đạt chuẩn và xét tốt nghiệp KSCLC?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297",
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_002",
+      "question_type": "multi_hop",
+      "question": "Điểm chung giữa chuẩn ĐTTN và PFIEV?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297",
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên cần đáp ứng gì để được công nhận chuẩn tiếng Anh?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297",
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_004",
+      "question_type": "multi_hop",
+      "question": "Vai trò của chứng chỉ nội bộ trong xét đầu ra?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297",
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_005",
+      "question_type": "multi_hop",
+      "question": "CNTT Việt-Nhật và ICT khác nhau thế nào?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297",
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_006",
+      "question_type": "multi_hop",
+      "question": "Nếu chứng chỉ không thuộc tổ chức quy định thì sao?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297",
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên KSCLC không đạt chuẩn sẽ xử lý thế nào?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297",
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "chunks_001_multihop_008",
+      "question_type": "multi_hop",
+      "question": "Điều kiện tốt nghiệp của các CTĐB có điểm chung gì?",
+      "gold_answer": "Tổng hợp từ nhiều chunk.",
+      "evidence_chunk_ids": [
+        "26e290ff-48bf-4531-8e3d-4e6eb8cfb297",
+        "62e638d3-744a-451f-bf9f-ba21910b9635"
+      ],
+      "ground_truth_context": [
+        "Tổng hợp nhiều chunk"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

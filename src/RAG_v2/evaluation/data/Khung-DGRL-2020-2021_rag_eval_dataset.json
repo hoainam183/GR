@@ -1,0 +1,478 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "Khung-DGRL-2020-2021_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "Khung-DGRL-2020-2021_simple_001",
+      "question_type": "simple",
+      "question": "Khung đánh giá kết quả rèn luyện sinh viên năm học 2020 - 2021 được ban hành kèm theo quyết định số bao nhiêu?",
+      "gold_answer": "Khung đánh giá kết quả rèn luyện sinh viên năm học 2020 - 2021 được ban hành kèm theo Quyết định số 1722/QĐ-ĐHBK-CTSV.",
+      "evidence_chunk_ids": [
+        "60723d54-1300-47d0-8797-7a123ed3a9ca"
+      ],
+      "ground_truth_context": [
+        "(Ban hành kèm theo Quyết định số 1722/QĐ-ĐHBK-CTSV ngày 21/10/2020 của Hiệu trưởng trường ĐHBK HN)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_002",
+      "question_type": "simple",
+      "question": "Quyết định số 1722/QĐ-ĐHBK-CTSV về khung đánh giá kết quả rèn luyện sinh viên năm học 2020 - 2021 được ký ban hành vào ngày nào và do ai ký?",
+      "gold_answer": "Quyết định số 1722/QĐ-ĐHBK-CTSV được ban hành ngày 21/10/2020 do Hiệu trưởng trường ĐHBK HN ký.",
+      "evidence_chunk_ids": [
+        "60723d54-1300-47d0-8797-7a123ed3a9ca"
+      ],
+      "ground_truth_context": [
+        "(Ban hành kèm theo Quyết định số 1722/QĐ-ĐHBK-CTSV ngày 21/10/2020 của Hiệu trưởng trường ĐHBK HN)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_003",
+      "question_type": "simple",
+      "question": "Sinh viên có điểm trung bình học kỳ (GPA) từ 3.6 trở lên thì được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên có GPA ≥ 3.6 được cộng 20 điểm.",
+      "evidence_chunk_ids": [
+        "e9e62078-f727-4ba5-8e55-d64dba4708c8"
+      ],
+      "ground_truth_context": [
+        "| GPA ≥ 3.6 | * | 20 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_004",
+      "question_type": "simple",
+      "question": "Sinh viên có GPA từ 2.5 đến dưới 3.2 được cộng bao nhiêu điểm rèn luyện cho kết quả học tập?",
+      "gold_answer": "Sinh viên có 2.5 ≤ GPA < 3.2 được cộng 16 điểm.",
+      "evidence_chunk_ids": [
+        "e9e62078-f727-4ba5-8e55-d64dba4708c8"
+      ],
+      "ground_truth_context": [
+        "| 2.5 ≤ GPA < 3.2 | * | 16 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_005",
+      "question_type": "simple",
+      "question": "Tiêu chí 'Có nỗ lực trong học tập' được cộng tối đa bao nhiêu điểm và áp dụng cho những trường hợp nào?",
+      "gold_answer": "Tiêu chí này được cộng 8 điểm, áp dụng cho sinh viên có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6).",
+      "evidence_chunk_ids": [
+        "e9e62078-f727-4ba5-8e55-d64dba4708c8"
+      ],
+      "ground_truth_context": [
+        "| Có nỗ lực trong học tập (GPA kỳ đánh giá cao hơn kỳ trước, giảm mức cảnh cáo học tập, hoặc duy trì điểm GPA trên 3.6) | * | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_006",
+      "question_type": "simple",
+      "question": "Sinh viên đạt chứng chỉ ngoại ngữ tương đương TOEIC từ bao nhiêu điểm trở lên thì được cộng điểm rèn luyện, và được cộng bao nhiêu điểm?",
+      "gold_answer": "Sinh viên đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên được cộng 2 điểm.",
+      "evidence_chunk_ids": [
+        "2aaabf6b-272b-4108-89db-cffd2977922d"
+      ],
+      "ground_truth_context": [
+        "| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_007",
+      "question_type": "simple",
+      "question": "Sinh viên đạt yêu cầu tiền đồ ngoại ngữ của chương trình đào tạo được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên đạt yêu cầu tiền đồ của chương trình đào tạo được cộng 4 điểm.",
+      "evidence_chunk_ids": [
+        "2aaabf6b-272b-4108-89db-cffd2977922d"
+      ],
+      "ground_truth_context": [
+        "| Đạt yêu cầu tiền đồ của chương trình đào tạo | * | 4 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_008",
+      "question_type": "simple",
+      "question": "Sinh viên là thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu hoặc nhóm Khởi nghiệp được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên là thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "2aaabf6b-272b-4108-89db-cffd2977922d"
+      ],
+      "ground_truth_context": [
+        "| Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia Sinh hoạt công dân do Trường, Viện tổ chức được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia Sinh hoạt công dân do Trường, Viện tổ chức được cộng 7 điểm.",
+      "evidence_chunk_ids": [
+        "4d510c25-a575-4388-92ea-c8e82726aa90"
+      ],
+      "ground_truth_context": [
+        "| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "4d510c25-a575-4388-92ea-c8e82726aa90"
+      ],
+      "ground_truth_context": [
+        "| Tham gia thực tập tăng cường năng lực nghề nghiệp tại doanh nghiệp | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_011",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia hoạt động văn hóa như các sự kiện, phong trào văn nghệ, thi SVBK của Viện, Trường được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia hoạt động văn hóa (các sự kiện/phong trào văn nghệ, thi SVBK..., của Viện, Trường) được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "dc30f453-29c0-41d7-87fd-62d5535ddc20"
+      ],
+      "ground_truth_context": [
+        "| Tham gia hoạt động văn hóa (các sự kiện/phong trào văn nghệ, thi SVBK..., của Viện, Trường) | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "dc30f453-29c0-41d7-87fd-62d5535ddc20"
+      ],
+      "ground_truth_context": [
+        "| Tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_013",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "d76f97c5-65c2-4a50-aa90-e9d4ed6725f7"
+      ],
+      "ground_truth_context": [
+        "| Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_014",
+      "question_type": "simple",
+      "question": "Sinh viên tham gia chiến dịch tình nguyện 'mùa hè xanh', 'tình nguyện mùa đông', 'tiếp sức mùa thi' được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên tham gia đội tình nguyện của Viện, Đoàn TN - HSV, tham gia chiến dịch tình nguyện \"mùa hè xanh\", \"tình nguyện mùa đông\", \"tiếp sức mùa thi\"... được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "d76f97c5-65c2-4a50-aa90-e9d4ed6725f7"
+      ],
+      "ground_truth_context": [
+        "| Tham gia đội tình nguyện của Viện, Đoàn TN - HSV, tham gia chiến dịch tình nguyện \"mùa hè xanh\", \"tình nguyện mùa đông\", \"tiếp sức mùa thi\".... | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_015",
+      "question_type": "simple",
+      "question": "Sinh viên là cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận thì được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên là cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "d76f97c5-65c2-4a50-aa90-e9d4ed6725f7"
+      ],
+      "ground_truth_context": [
+        "| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_016",
+      "question_type": "simple",
+      "question": "Sinh viên hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú được cộng 8 điểm.",
+      "evidence_chunk_ids": [
+        "b07e445e-fa73-4944-9436-5978616b53ef"
+      ],
+      "ground_truth_context": [
+        "| Hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú | MC | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên khai báo thông tin liên lạc và nơi cư trú theo yêu cầu của Nhà trường được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên khai báo thông tin liên lạc và nơi cư trú theo yêu cầu của Nhà trường được cộng 4 điểm.",
+      "evidence_chunk_ids": [
+        "b07e445e-fa73-4944-9436-5978616b53ef"
+      ],
+      "ground_truth_context": [
+        "| Khai báo thông tin liên lạc và nơi cư trú theo yêu cầu của Nhà trường | * | 4 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_018",
+      "question_type": "simple",
+      "question": "Sinh viên đạt giải trong các cuộc thi sinh viên nghiên cứu khoa học, Olympic, thi khoa học kỹ thuật được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên đạt giải trong các cuộc thi SV NCKH, Olympic, thi khoa học kỹ thuật được cộng 4 điểm.",
+      "evidence_chunk_ids": [
+        "0d080170-888b-4acc-826e-488bdaffd210"
+      ],
+      "ground_truth_context": [
+        "| Đạt giải trong các cuộc thi SV NCKH, Olympic, thi khoa học kỹ thuật | MC | 4 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_019",
+      "question_type": "simple",
+      "question": "Sinh viên được kết nạp Đảng Cộng sản Việt Nam thì được cộng bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên được kết nạp Đảng Cộng sản Việt Nam được cộng 4 điểm.",
+      "evidence_chunk_ids": [
+        "0d080170-888b-4acc-826e-488bdaffd210"
+      ],
+      "ground_truth_context": [
+        "| Được kết nạp Đảng Cộng sản Việt Nam | MC | 4 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_020",
+      "question_type": "simple",
+      "question": "Sinh viên vi phạm quy chế thi từ mức cảnh cáo trở lên thì bị trừ bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên vi phạm quy chế thi từ cảnh cáo trở lên bị trừ 10 điểm.",
+      "evidence_chunk_ids": [
+        "a34736f5-7d39-4e76-8a59-ca1202c06cc8"
+      ],
+      "ground_truth_context": [
+        "| Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_021",
+      "question_type": "simple",
+      "question": "Sinh viên bị kỷ luật vì thi hộ thì bị trừ bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên bị kỷ luật khi thi hộ bị trừ 20 điểm.",
+      "evidence_chunk_ids": [
+        "a34736f5-7d39-4e76-8a59-ca1202c06cc8"
+      ],
+      "ground_truth_context": [
+        "| Bị kỷ luật khi thi hộ | * | -20 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_simple_022",
+      "question_type": "simple",
+      "question": "Sinh viên vi phạm pháp luật thuộc nhóm tội danh hình sự thì bị trừ bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Sinh viên vi phạm pháp luật thuộc nhóm tội danh hình sự bị trừ 50 điểm, đây cũng là mức điểm trừ tối đa theo quy định.",
+      "evidence_chunk_ids": [
+        "a34736f5-7d39-4e76-8a59-ca1202c06cc8"
+      ],
+      "ground_truth_context": [
+        "| Vi phạm pháp luật thuộc nhóm tội danh hình sự | * | -50 |",
+        "Tổng điểm trừ tối đa: -50 điểm"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Nếu một sinh viên đạt GPA từ 3.6 trở lên và có chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên thì được cộng tổng cộng bao nhiêu điểm rèn luyện từ hai tiêu chí kết quả học tập và trình độ ngoại ngữ?",
+      "gold_answer": "Sinh viên có GPA ≥ 3.6 được cộng 20 điểm, cộng thêm 2 điểm vì đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên, tổng cộng được cộng 22 điểm cho hai tiêu chí này.",
+      "evidence_chunk_ids": [
+        "e9e62078-f727-4ba5-8e55-d64dba4708c8",
+        "2aaabf6b-272b-4108-89db-cffd2977922d"
+      ],
+      "ground_truth_context": [
+        "| GPA ≥ 3.6 | * | 20 |",
+        "| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên có GPA từ 3.6 trở lên đồng thời tham gia hiến máu nhân đạo do Trường tổ chức thì được cộng tổng cộng bao nhiêu điểm rèn luyện từ hai hoạt động này?",
+      "gold_answer": "GPA ≥ 3.6 được cộng 20 điểm, tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức được cộng thêm 6 điểm, tổng cộng được cộng 26 điểm cho hai tiêu chí này.",
+      "evidence_chunk_ids": [
+        "e9e62078-f727-4ba5-8e55-d64dba4708c8",
+        "d76f97c5-65c2-4a50-aa90-e9d4ed6725f7"
+      ],
+      "ground_truth_context": [
+        "| GPA ≥ 3.6 | * | 20 |",
+        "| Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Sinh viên đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên và được kết nạp Đảng Cộng sản Việt Nam thì được cộng tổng cộng bao nhiêu điểm rèn luyện cho hai tiêu chí này?",
+      "gold_answer": "Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên được cộng 2 điểm, được kết nạp Đảng Cộng sản Việt Nam được cộng thêm 4 điểm, tổng cộng được cộng 6 điểm.",
+      "evidence_chunk_ids": [
+        "2aaabf6b-272b-4108-89db-cffd2977922d",
+        "0d080170-888b-4acc-826e-488bdaffd210"
+      ],
+      "ground_truth_context": [
+        "| Đạt chứng chỉ ngoại ngữ tương đương Toeic 600 điểm trở lên | MC | 2 |",
+        "| Được kết nạp Đảng Cộng sản Việt Nam | MC | 4 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Sinh viên tham gia Sinh hoạt công dân do Trường, Viện tổ chức và tham gia các hoạt động thể thao của Viện, Trường thì được cộng tổng cộng bao nhiêu điểm rèn luyện cho hai hoạt động này?",
+      "gold_answer": "Tham gia Sinh hoạt công dân do Trường, Viện tổ chức được cộng 7 điểm, tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp được cộng thêm 6 điểm, tổng cộng được cộng 13 điểm.",
+      "evidence_chunk_ids": [
+        "4d510c25-a575-4388-92ea-c8e82726aa90",
+        "dc30f453-29c0-41d7-87fd-62d5535ddc20"
+      ],
+      "ground_truth_context": [
+        "| Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7 |",
+        "| Tham gia các hoạt động thể thao, giải thể thao của Viện, Trường hoặc các tổ chức hợp pháp | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Nếu một sinh viên vừa được cộng điểm vì hiểu biết và chấp hành pháp luật của Nhà nước, vừa bị phát hiện vi phạm pháp luật thuộc nhóm tội danh hình sự thì điểm cộng và điểm trừ tương ứng với hai trường hợp này là bao nhiêu?",
+      "gold_answer": "Hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú được cộng 8 điểm, trong khi vi phạm pháp luật thuộc nhóm tội danh hình sự bị trừ 50 điểm.",
+      "evidence_chunk_ids": [
+        "b07e445e-fa73-4944-9436-5978616b53ef",
+        "a34736f5-7d39-4e76-8a59-ca1202c06cc8"
+      ],
+      "ground_truth_context": [
+        "| Hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú | MC | 8 |",
+        "| Vi phạm pháp luật thuộc nhóm tội danh hình sự | * | -50 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Một sinh viên có GPA từ 2.0 đến dưới 2.5 nhưng vi phạm quy chế thi từ mức cảnh cáo trở lên thì được cộng và bị trừ bao nhiêu điểm rèn luyện tương ứng với hai trường hợp này?",
+      "gold_answer": "Sinh viên có 2.0 ≤ GPA < 2.5 được cộng 14 điểm cho kết quả học tập, đồng thời vi phạm quy chế thi từ cảnh cáo trở lên bị trừ 10 điểm.",
+      "evidence_chunk_ids": [
+        "e9e62078-f727-4ba5-8e55-d64dba4708c8",
+        "a34736f5-7d39-4e76-8a59-ca1202c06cc8"
+      ],
+      "ground_truth_context": [
+        "| 2.0 ≤ GPA < 2.5 | * | 14 |",
+        "| Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "Sinh viên nắm vững quy định và quy chế của Nhà trường, đồng thời là cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận thì được cộng tổng cộng bao nhiêu điểm rèn luyện cho hai tiêu chí này?",
+      "gold_answer": "Nắm vững quy định và quy chế của Nhà trường được cộng 6 điểm, cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận được cộng thêm 6 điểm, tổng cộng được cộng 12 điểm.",
+      "evidence_chunk_ids": [
+        "4d510c25-a575-4388-92ea-c8e82726aa90",
+        "d76f97c5-65c2-4a50-aa90-e9d4ed6725f7"
+      ],
+      "ground_truth_context": [
+        "| Nắm vững quy định và quy chế của Nhà trường | MC | 6 |",
+        "| Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận | MC | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "Khung-DGRL-2020-2021_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Sinh viên hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú, đồng thời đạt danh hiệu Sinh viên năm tốt cấp Trường trở lên thì được cộng tổng cộng bao nhiêu điểm rèn luyện cho hai tiêu chí này?",
+      "gold_answer": "Hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú được cộng 8 điểm, đạt danh hiệu Sinh viên năm tốt cấp Trường trở lên được cộng thêm 4 điểm, tổng cộng được cộng 12 điểm.",
+      "evidence_chunk_ids": [
+        "b07e445e-fa73-4944-9436-5978616b53ef",
+        "0d080170-888b-4acc-826e-488bdaffd210"
+      ],
+      "ground_truth_context": [
+        "| Hiểu biết và chấp hành pháp luật của Nhà nước, quy định của nhà trường và nơi cư trú | MC | 8 |",
+        "| Đạt danh hiệu Sinh viên năm tốt cấp Trường trở lên, Giấy khen Cán bộ đoàn học tốt, Giấy khen Sinh viên tích cực đóng góp hoạt động của Nhà trường | MC | 4 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

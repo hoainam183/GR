@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import unicodedata
 from typing import Any, Dict, List, Literal, Optional
 
@@ -55,7 +56,15 @@ _CONTEXT_WINDOW = 5
 # confidence is below this threshold AND the query is short enough to
 # plausibly be a follow-up that needs history context.
 _TWO_PASS_CONFIDENCE_THRESHOLD: float = 0.65
-_TWO_PASS_SHORT_QUERY_WORDS: int = 6
+_TWO_PASS_SHORT_QUERY_WORDS: int = 8
+
+# Vietnamese demonstratives / anaphoric pronouns that signal the query
+# references prior conversation context and MUST have history prepended,
+# regardless of word count.
+_DEMONSTRATIVE_RE = re.compile(
+    r"\b(này|đó|nó|ở trên|vậy|kia|đấy|thế|ấy|trên|đây)\b",
+    re.IGNORECASE,
+)
 
 
 def build_routing_input(
@@ -77,10 +86,15 @@ def build_routing_input(
     """
     if not chat_history:
         return query
-    
-    # Avoid context bleeding: if the query is a complete sentence (>= 6 words), 
-    # it likely contains its own context. Do not prepend history.
-    if len(query.split()) >= 6:
+
+    # Queries containing demonstratives/anaphoric pronouns ("này", "vậy",
+    # "đó", …) reference prior context and MUST have history prepended,
+    # even when the query is long enough to look self-contained.
+    has_demonstrative = bool(_DEMONSTRATIVE_RE.search(query))
+
+    # Avoid context bleeding: if the query is a complete sentence (>= 6 words)
+    # AND does not contain a demonstrative, it likely contains its own context.
+    if len(query.split()) >= 6 and not has_demonstrative:
         return query
 
     recent = chat_history[-_CONTEXT_WINDOW:]

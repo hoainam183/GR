@@ -1,0 +1,472 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "1__QĐ_Học_bổng_KKHT_2023_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_001",
+      "question_type": "simple",
+      "question": "Quyết định ban hành Quy định xét cấp học bổng KKHT tại Đại học Bách khoa Hà Nội do ai ký?",
+      "gold_answer": "Do PGS.TS. Nguyễn Phong Điền – KT. Giám đốc / Phó Giám đốc Đại học Bách khoa Hà Nội ký.",
+      "evidence_chunk_ids": [
+        "89046781-0122-48eb-85c2-7baed599923d"
+      ],
+      "ground_truth_context": [
+        "Cơ quan ban hành: Giám đốc Đại học Bách khoa Hà Nội. Người ký: PGS.TS. Nguyễn Phong Điền – KT. Giám đốc / Phó Giám đốc"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_002",
+      "question_type": "simple",
+      "question": "Quy định xét cấp học bổng KKHT của Đại học Bách khoa Hà Nội áp dụng đối với đối tượng sinh viên nào?",
+      "gold_answer": "Áp dụng đối với sinh viên đại học hình thức đào tạo chính quy văn bằng thứ nhất của Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "2e44c6a8-8202-4de7-b6d0-bbbecd3885cc"
+      ],
+      "ground_truth_context": [
+        "Quy định này áp dụng đối với sinh viên đại học hình thức đào tạo chính quy văn bằng thứ nhất của ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_003",
+      "question_type": "simple",
+      "question": "Học bổng KKHT tại Đại học Bách khoa Hà Nội được xét theo chu kỳ nào trong năm học?",
+      "gold_answer": "Học bổng KKHT được xét theo từng học kỳ chính của năm học, căn cứ vào thành tích học tập và rèn luyện của sinh viên trong học kỳ chính liền trước đó.",
+      "evidence_chunk_ids": [
+        "075114cd-700b-422e-ae89-9f27c672dcd3"
+      ],
+      "ground_truth_context": [
+        "Học bổng khuyến khích học tập (KKHT) cấp cho các sinh viên được lựa chọn bởi Hội đồng xét cấp học bổng ĐHBK Hà Nội theo từng học kỳ chính của năm học, căn cứ vào thành tích học tập và rèn luyện của sinh viên trong học kỳ chính liền trước đó."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_004",
+      "question_type": "simple",
+      "question": "Quỹ học bổng KKHT tại Đại học Bách khoa Hà Nội được hình thành từ nguồn nào và chiếm bao nhiêu phần trăm?",
+      "gold_answer": "Quỹ học bổng KKHT hình thành từ nguồn học phí và bằng 8% học phí của học kỳ lấy điểm xét cấp học bổng.",
+      "evidence_chunk_ids": [
+        "075114cd-700b-422e-ae89-9f27c672dcd3"
+      ],
+      "ground_truth_context": [
+        "Quỹ học bổng KKHT hình thành từ nguồn học phí và bằng 8% (tám phần trăm) học phí của học kỳ lấy điểm xét cấp học bổng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_005",
+      "question_type": "simple",
+      "question": "Học bổng KKHT loại A (xuất sắc) tại Đại học Bách khoa Hà Nội có giá trị bằng bao nhiêu lần mức học bổng loại khá?",
+      "gold_answer": "Học bổng loại A (xuất sắc) bằng 1,5 lần mức học bổng loại khá (loại C).",
+      "evidence_chunk_ids": [
+        "075114cd-700b-422e-ae89-9f27c672dcd3"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại xuất sắc (loại A): Bằng 1,5 lần mức học bổng loại khá."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_006",
+      "question_type": "simple",
+      "question": "Học bổng KKHT loại B (giỏi) tại Đại học Bách khoa Hà Nội có giá trị bằng bao nhiêu lần mức học bổng loại khá?",
+      "gold_answer": "Học bổng loại B (giỏi) bằng 1,2 lần mức học bổng loại khá (loại C).",
+      "evidence_chunk_ids": [
+        "075114cd-700b-422e-ae89-9f27c672dcd3"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại giỏi (loại B): Bằng 1,2 lần mức học bổng loại khá."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_007",
+      "question_type": "simple",
+      "question": "Mức học bổng KKHT loại C (khá) được tính như thế nào tại Đại học Bách khoa Hà Nội?",
+      "gold_answer": "Học bổng loại khá (loại C) bằng tổng học phí của tất cả các học phần tính điểm trung bình học kỳ (GPA).",
+      "evidence_chunk_ids": [
+        "075114cd-700b-422e-ae89-9f27c672dcd3"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại khá (loại C): Bằng tổng học phí của tất cả các học phần tính điểm trung bình học kỳ (GPA)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_008",
+      "question_type": "simple",
+      "question": "Sinh viên Đại học Bách khoa Hà Nội cần đạt GPA và điểm rèn luyện tối thiểu bao nhiêu để được xét học bổng KKHT loại C (khá)?",
+      "gold_answer": "GPA ≥ 2,5 và điểm rèn luyện học kỳ ≥ 65 điểm.",
+      "evidence_chunk_ids": [
+        "2d9397a2-c900-4852-a039-a9eca2695ac2"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại C: GPA ≥ 2,5 và điểm rèn luyện học kỳ ≥ 65 điểm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên Đại học Bách khoa Hà Nội cần đạt GPA và điểm rèn luyện tối thiểu bao nhiêu để được xét học bổng KKHT loại B (giỏi)?",
+      "gold_answer": "GPA ≥ 3,2 và điểm rèn luyện học kỳ ≥ 80 điểm.",
+      "evidence_chunk_ids": [
+        "2d9397a2-c900-4852-a039-a9eca2695ac2"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại B: GPA ≥ 3,2 và điểm rèn luyện học kỳ ≥ 80 điểm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_010",
+      "question_type": "simple",
+      "question": "Sinh viên Đại học Bách khoa Hà Nội cần đạt GPA và điểm rèn luyện tối thiểu bao nhiêu để được xét học bổng KKHT loại A (xuất sắc)?",
+      "gold_answer": "GPA ≥ 3,6 và điểm rèn luyện học kỳ ≥ 90 điểm.",
+      "evidence_chunk_ids": [
+        "2d9397a2-c900-4852-a039-a9eca2695ac2"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại A: GPA ≥ 3,6 và điểm rèn luyện học kỳ ≥ 90 điểm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_011",
+      "question_type": "simple",
+      "question": "Kết quả của học kỳ nào được dùng để xét học bổng KKHT tại Đại học Bách khoa Hà Nội?",
+      "gold_answer": "Sử dụng kết quả học tập và rèn luyện của học kỳ liền trước để xét cấp học bổng cho học kỳ sau.",
+      "evidence_chunk_ids": [
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Sử dụng kết quả học tập và rèn luyện của học kỳ liền trước để xét cấp học bổng cho học kỳ sau."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_012",
+      "question_type": "simple",
+      "question": "Khi hai sinh viên có cùng GPA khi xét học bổng KKHT tại Bách khoa, tiêu chí nào được dùng để phân biệt thứ tự ưu tiên?",
+      "gold_answer": "Ưu tiên sinh viên có điểm rèn luyện cao hơn.",
+      "evidence_chunk_ids": [
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Trường hợp GPA bằng nhau thì sẽ ưu tiên sinh viên có điểm rèn luyện cao hơn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_013",
+      "question_type": "simple",
+      "question": "Học bổng KKHT tại Bách khoa Hà Nội được xét theo các nhóm nào và theo thứ tự ưu tiên ra sao?",
+      "gold_answer": "Học bổng được xét theo khóa và ngành đào tạo, theo thứ tự ưu tiên từ loại A đến loại C, từ GPA cao đến GPA thấp cho đến khi hết quỹ học bổng.",
+      "evidence_chunk_ids": [
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Học bổng được xét theo khóa, ngành đào tạo và theo thứ tự ưu tiên lần lượt từ loại A đến loại C, từ điểm GPA cao cho đến điểm GPA thấp cho đến khi hết quỹ học bổng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_014",
+      "question_type": "simple",
+      "question": "Sinh viên đang bị kỷ luật từ mức nào trở lên thì không được xét học bổng KKHT tại Bách khoa Hà Nội?",
+      "gold_answer": "Sinh viên đang chịu hình thức kỷ luật từ mức khiển trách trở lên tại thời điểm xét học bổng sẽ không được xét.",
+      "evidence_chunk_ids": [
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Chịu hình thức kỷ luật từ mức khiển trách trở lên tại thời điểm xét học bổng;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_015",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký học ít hơn bao nhiêu tín chỉ trong học kỳ lấy điểm xét học bổng sẽ không được xét học bổng KKHT tại Bách khoa?",
+      "gold_answer": "Đăng ký học ít hơn 15 tín chỉ (kể cả các học phần không tính GPA) tại học kỳ lấy điểm xét, trừ trường hợp học kỳ 1 năm học thứ nhất.",
+      "evidence_chunk_ids": [
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Đăng ký học ít hơn 15 tín chỉ (kể cả các học phần không tính điểm GPA) tại học kỳ lấy điểm xét, cấp học bổng, ngoại trừ học kỳ 1 năm học thứ nhất;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_016",
+      "question_type": "simple",
+      "question": "Sinh viên đăng ký học ít hơn bao nhiêu tín chỉ trong học kỳ được cấp học bổng sẽ không được nhận học bổng KKHT tại Bách khoa?",
+      "gold_answer": "Đăng ký học ít hơn 6 tín chỉ (kể cả các học phần không tính GPA) tại học kỳ được cấp học bổng.",
+      "evidence_chunk_ids": [
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Đăng ký học ít hơn 6 tín chỉ (kể cả các học phần không tính điểm GPA) tại học kỳ cấp học bổng;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên học chương trình đào tạo do trường đối tác nước ngoài cấp bằng duy nhất có được xét học bổng KKHT tại Bách khoa không?",
+      "gold_answer": "Không, sinh viên học chương trình đào tạo do trường đối tác nước ngoài cấp một văn bằng tốt nghiệp duy nhất không được xét cấp học bổng KKHT.",
+      "evidence_chunk_ids": [
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Học chương trình đào tạo do trường đối tác nước ngoài cấp một văn bằng tốt nghiệp duy nhất."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_018",
+      "question_type": "simple",
+      "question": "Kết quả xét học bổng KKHT tại Bách khoa Hà Nội được công bố chậm nhất vào tuần học thứ mấy và ở đâu?",
+      "gold_answer": "Công bố chậm nhất vào tuần học thứ 10 của học kỳ cấp học bổng, trên cổng thông tin sinh viên ctt.hust.edu.vn.",
+      "evidence_chunk_ids": [
+        "33e5f90d-f621-4fdd-9f9d-46e19b781547"
+      ],
+      "ground_truth_context": [
+        "Danh sách sinh viên được cấp học bổng... sẽ được công bố trên cổng thông tin sinh viên: ctt.hust.edu.vn, chậm nhất vào tuần học thứ 10 của học kỳ cấp học bổng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_019",
+      "question_type": "simple",
+      "question": "Học bổng KKHT tại Bách khoa Hà Nội được cấp theo hình thức nào?",
+      "gold_answer": "Học bổng được cấp theo hình thức chuyển khoản.",
+      "evidence_chunk_ids": [
+        "33e5f90d-f621-4fdd-9f9d-46e19b781547"
+      ],
+      "ground_truth_context": [
+        "Học bổng được cấp theo hình thức chuyển khoản."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_020",
+      "question_type": "simple",
+      "question": "Chủ tịch Hội đồng xét cấp học bổng KKHT tại Đại học Bách khoa Hà Nội là ai?",
+      "gold_answer": "Là một thành viên của Ban Giám đốc Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "f79864aa-2522-417b-bfed-06d466c27725"
+      ],
+      "ground_truth_context": [
+        "Chủ tịch Hội đồng: Là một thành viên của Ban Giám đốc ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_021",
+      "question_type": "simple",
+      "question": "Hội đồng xét cấp học bổng KKHT tại Bách khoa có những thành phần nào?",
+      "gold_answer": "Gồm: Chủ tịch là thành viên Ban Giám đốc; Ủy viên thường trực là Trưởng phòng/Ban Công tác sinh viên; Các ủy viên gồm đại diện Công tác sinh viên, Đào tạo, Tài chính-Kế toán, Đoàn Thanh niên và Hội Sinh viên.",
+      "evidence_chunk_ids": [
+        "f79864aa-2522-417b-bfed-06d466c27725"
+      ],
+      "ground_truth_context": [
+        "Chủ tịch Hội đồng: Là một thành viên của Ban Giám đốc ĐHBK Hà Nội. Ủy viên thường trực: Là Trưởng Phòng/ Ban chức năng Công tác sinh viên. Các ủy viên khác của Hội đồng gồm đại diện của các đơn vị: Phòng/ Ban chức năng Công tác sinh viên, Đào tạo, Tài chính-Kế toán, Đoàn Thanh niên Cộng sản Hồ Chí Minh và Hội Sinh viên ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_simple_022",
+      "question_type": "simple",
+      "question": "Quy định xét cấp học bổng KKHT tại Bách khoa Hà Nội có hiệu lực từ đợt xét học bổng nào?",
+      "gold_answer": "Có hiệu lực từ đợt xét, cấp học bổng học kỳ 1 năm học 2023-2024.",
+      "evidence_chunk_ids": [
+        "346ca798-e5db-4dad-bbad-904cfc80453b"
+      ],
+      "ground_truth_context": [
+        "Quy định này có hiệu lực thi hành từ đợt xét, cấp học bổng học kỳ 1 năm học 2023-2024."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_multi_hop_023",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa đạt GPA 3,7 và điểm rèn luyện 92 trong học kỳ vừa qua sẽ được xét học bổng loại gì và mức học bổng bằng bao nhiêu lần loại khá?",
+      "gold_answer": "Đủ điều kiện xét học bổng loại A (xuất sắc) vì GPA ≥ 3,6 và điểm rèn luyện ≥ 90. Học bổng loại A bằng 1,5 lần mức học bổng loại khá (loại C).",
+      "evidence_chunk_ids": [
+        "2d9397a2-c900-4852-a039-a9eca2695ac2",
+        "075114cd-700b-422e-ae89-9f27c672dcd3"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại A: GPA ≥ 3,6 và điểm rèn luyện học kỳ ≥ 90 điểm.",
+        "Học bổng loại xuất sắc (loại A): Bằng 1,5 lần mức học bổng loại khá."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_multi_hop_024",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa đạt GPA 3,3 và điểm rèn luyện 78 có được xét học bổng KKHT loại B không? Tại sao?",
+      "gold_answer": "Không, vì để đạt học bổng loại B cần GPA ≥ 3,2 (đủ) nhưng điểm rèn luyện phải ≥ 80 (sinh viên chỉ đạt 78, không đủ). Sinh viên cũng không đủ điều kiện loại C vì điểm rèn luyện < 65 là sai – thực ra điểm rèn luyện 78 ≥ 65 nên đủ điều kiện loại C (GPA 3,3 ≥ 2,5).",
+      "evidence_chunk_ids": [
+        "2d9397a2-c900-4852-a039-a9eca2695ac2"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại B: GPA ≥ 3,2 và điểm rèn luyện học kỳ ≥ 80 điểm.",
+        "Học bổng loại C: GPA ≥ 2,5 và điểm rèn luyện học kỳ ≥ 65 điểm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_multi_hop_025",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa năm nhất học kỳ 1 chỉ đăng ký 12 tín chỉ do chương trình mới nhập học, có bị loại khỏi xét học bổng KKHT không?",
+      "gold_answer": "Không bị loại vì quy định miễn trừ áp dụng cho 'học kỳ 1 năm học thứ nhất'. Điều khoản loại trừ ít hơn 15 tín chỉ không áp dụng cho trường hợp này.",
+      "evidence_chunk_ids": [
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Đăng ký học ít hơn 15 tín chỉ (kể cả các học phần không tính điểm GPA) tại học kỳ lấy điểm xét, cấp học bổng, ngoại trừ học kỳ 1 năm học thứ nhất;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_multi_hop_026",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa đạt GPA 3,8 và điểm rèn luyện 91 nhưng đang bị kỷ luật mức khiển trách thì có được nhận học bổng KKHT loại A không?",
+      "gold_answer": "Không được xét học bổng. Dù đạt đủ điều kiện GPA ≥ 3,6 và điểm rèn luyện ≥ 90 để đủ tiêu chuẩn loại A, sinh viên bị loại khỏi xét học bổng vì đang chịu hình thức kỷ luật từ mức khiển trách trở lên tại thời điểm xét.",
+      "evidence_chunk_ids": [
+        "2d9397a2-c900-4852-a039-a9eca2695ac2",
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại A: GPA ≥ 3,6 và điểm rèn luyện học kỳ ≥ 90 điểm.",
+        "Chịu hình thức kỷ luật từ mức khiển trách trở lên tại thời điểm xét học bổng;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_multi_hop_027",
+      "question_type": "multi_hop",
+      "question": "Học bổng KKHT loại A tại Bách khoa được tính bằng bao nhiêu lần tổng học phí của các học phần tính GPA?",
+      "gold_answer": "Học bổng loại A bằng 1,5 lần học bổng loại C. Mà học bổng loại C bằng tổng học phí các học phần tính GPA. Vậy học bổng loại A = 1,5 lần tổng học phí các học phần tính GPA.",
+      "evidence_chunk_ids": [
+        "075114cd-700b-422e-ae89-9f27c672dcd3"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại khá (loại C): Bằng tổng học phí của tất cả các học phần tính điểm trung bình học kỳ (GPA).",
+        "Học bổng loại xuất sắc (loại A): Bằng 1,5 lần mức học bổng loại khá."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_multi_hop_028",
+      "question_type": "multi_hop",
+      "question": "Hai sinh viên A và B cùng ngành cùng khóa đều có GPA 3,5 khi xét học bổng, sinh viên A có điểm rèn luyện 85 và B có điểm rèn luyện 82. Khi quỹ học bổng chỉ còn đủ cho một người, ai được ưu tiên và học bổng đó là loại gì?",
+      "gold_answer": "Sinh viên A được ưu tiên vì có điểm rèn luyện cao hơn (85 > 82) khi GPA bằng nhau. Tuy nhiên cả hai đều không đủ tiêu chuẩn loại A (GPA < 3,6) và không đủ tiêu chuẩn loại B (điểm rèn luyện < 80 với B là sai – cả hai đều ≥ 80). GPA 3,5 ≥ 3,2 và điểm rèn luyện ≥ 80 nên được xét loại B. Sinh viên A được ưu tiên nhận học bổng loại B.",
+      "evidence_chunk_ids": [
+        "2d9397a2-c900-4852-a039-a9eca2695ac2",
+        "01a026a0-8d35-4898-a00c-080a11634939"
+      ],
+      "ground_truth_context": [
+        "Học bổng loại B: GPA ≥ 3,2 và điểm rèn luyện học kỳ ≥ 80 điểm.",
+        "Trường hợp GPA bằng nhau thì sẽ ưu tiên sinh viên có điểm rèn luyện cao hơn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_multi_hop_029",
+      "question_type": "multi_hop",
+      "question": "Sinh viên nhận học bổng KKHT tại Bách khoa sẽ biết kết quả vào thời điểm nào và nhận tiền bằng cách nào?",
+      "gold_answer": "Kết quả công bố chậm nhất tuần học thứ 10 của học kỳ cấp học bổng, trên cổng thông tin ctt.hust.edu.vn. Học bổng được cấp theo hình thức chuyển khoản.",
+      "evidence_chunk_ids": [
+        "33e5f90d-f621-4fdd-9f9d-46e19b781547"
+      ],
+      "ground_truth_context": [
+        "Danh sách sinh viên được cấp học bổng... sẽ được công bố trên cổng thông tin sinh viên: ctt.hust.edu.vn, chậm nhất vào tuần học thứ 10 của học kỳ cấp học bổng.",
+        "Học bổng được cấp theo hình thức chuyển khoản."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "1__QD_Hoc_bong_KKHT_2023_multi_hop_030",
+      "question_type": "multi_hop",
+      "question": "Sinh viên học quá thời gian kế hoạch chuẩn của chương trình đào tạo và đang đăng ký 18 tín chỉ, đạt GPA 3,7 và điểm rèn luyện 91 có được xét học bổng KKHT không?",
+      "gold_answer": "Không được xét học bổng. Dù đạt đủ điều kiện về GPA và điểm rèn luyện cho loại A, sinh viên bị loại khỏi xét do đang học quá thời gian theo kế hoạch học tập chuẩn của chương trình đào tạo.",
+      "evidence_chunk_ids": [
+        "01a026a0-8d35-4898-a00c-080a11634939",
+        "2d9397a2-c900-4852-a039-a9eca2695ac2"
+      ],
+      "ground_truth_context": [
+        "Học quá thời gian theo kế hoạch học tập chuẩn của chương trình đào tạo;",
+        "Học bổng loại A: GPA ≥ 3,6 và điểm rèn luyện học kỳ ≥ 90 điểm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

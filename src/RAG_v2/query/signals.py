@@ -143,7 +143,8 @@ _PROGRAM_PATTERNS = (
 # NOT carrying any "when does it open / schedule / deadline" time markers.
 _COURSE_REFERENCE_PATTERNS = (
     r"\b(mon|hoc phan|mon hoc|hp)\b",
-    r"\b(?:it|mi|ee|et|me|ch|ph|ma|tl|fl|pe|ed|jp|em|bf|tex)\s*-?\s*\d{4}[a-z]?\b",
+    r"\b(?:it|mi|ee|et|me|ch|ph|ma|tl|fl|pe|ed|jp|em|bf|tex"
+    r"|ai|ds|se|ce|cs|bi|en|ss|mr|he|te|tx|ms|ev|ep|ba|hs)\s*-?\s*\d{4}[a-z]?\b",
 )
 _SEMESTER_PLACEMENT_PATTERNS = (
     r"\b(?:hoc\s*ky|hoc\s*ki|hki|hk|ky|ki)\s*(?:thu\s*)?(?:may|nao|bao nhieu)\b",
@@ -157,6 +158,12 @@ _WHEN_OPENING_PATTERNS = (
     r"\b(mo|bat dau|ket thuc|dong)\s+(?:dang ky|dang ki|cong|lop)\b",
     r"\bdot\s+(?:dang ky|dang ki|\d|mo lop)\b",
     r"\b(con slot|con cho|con lop|con bao nhieu|con\s+\w+\s+lop)\b",
+)
+# CTĐT context markers — when present, the query asks about curriculum
+# placement ("mở ở kỳ mấy trong CTĐT?") even if _WHEN_OPENING_PATTERNS match.
+# This overrides the suppression so curriculum_semester_intent stays True.
+_CTDT_CONTEXT_PATTERNS = (
+    r"\b(ctdt|chuong trinh dao tao|chuong trinh hoc|trong ctdt|trong chuong trinh|khung chuong trinh)\b",
 )
 
 
@@ -183,7 +190,10 @@ def analyze_query_signals(query: str) -> QuerySignals:
     curriculum_semester_intent = bool(
         _matches_any(folded, _COURSE_REFERENCE_PATTERNS)
         and _matches_any(folded, _SEMESTER_PLACEMENT_PATTERNS)
-        and not _matches_any(folded, _WHEN_OPENING_PATTERNS)
+        and (
+            not _matches_any(folded, _WHEN_OPENING_PATTERNS)
+            or _matches_any(folded, _CTDT_CONTEXT_PATTERNS)
+        )
     )
 
     has_program_context = _matches_any(folded, _PROGRAM_PATTERNS)
