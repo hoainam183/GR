@@ -219,7 +219,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     return () => {
       isMountedRef.current = false;
       if (flushRafRef.current !== null) {
-        cancelAnimationFrame(flushRafRef.current);
+        clearTimeout(flushRafRef.current);
         flushRafRef.current = null;
       }
       tokenBufferRef.current = '';
@@ -348,7 +348,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     // Flush buffered tokens into the assistant message in a single update.
     const drainTokenBuffer = () => {
       if (flushRafRef.current !== null) {
-        cancelAnimationFrame(flushRafRef.current);
+        clearTimeout(flushRafRef.current);
         flushRafRef.current = null;
       }
       const buffered = tokenBufferRef.current;
@@ -435,11 +435,11 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             if (!isMountedRef.current || !isCurrentRequest()) return;
             setChatPhase('streaming');
             setStatusMessage(null);
-            // Buffer the delta and flush on the next animation frame so a burst
+            // Buffer the delta and flush shortly after so a burst
             // of tokens coalesces into a single React update.
             tokenBufferRef.current += delta;
             if (flushRafRef.current === null) {
-              flushRafRef.current = requestAnimationFrame(drainTokenBuffer);
+              flushRafRef.current = setTimeout(drainTokenBuffer, 16) as unknown as number;
             }
           },
           onMetadata: (meta) => {
