@@ -258,6 +258,21 @@ TRAINING_DATA: List[Tuple[str, str]] = [
     ),
     ("Quy định chuẩn ngoại ngữ từ K70", LABEL_QUYDINH),
     ("Quy định ngoại ngữ từ K68", LABEL_QUYDINH),
+    # ── quydinh — quy đổi / công nhận / chuyển đổi tín chỉ & ECTS ───────────
+    # "Quy đổi tương đương tín chỉ sang ECTS" là CHÍNH SÁCH (quyết định, hướng
+    # dẫn của trường), KHÔNG phải tra cứu khối lượng môn trong CTĐT dù chứa
+    # "tín chỉ"/"tương đương". Tài liệu thực tế nằm ở collection quydinh.
+    ("Hướng dẫn quy đổi tương đương tín chỉ học tập sang hệ thống ECTS", LABEL_QUYDINH),
+    ("Quy đổi tín chỉ Đại học Bách Khoa Hà Nội sang ECTS thế nào?", LABEL_QUYDINH),
+    ("1 tín chỉ ĐHBK quy đổi bằng bao nhiêu ECTS?", LABEL_QUYDINH),
+    ("Quy đổi tín chỉ tích lũy sang hệ thống tín chỉ Châu Âu", LABEL_QUYDINH),
+    ("Quy định công nhận và chuyển đổi tín chỉ", LABEL_QUYDINH),
+    ("Tín chỉ học tập ở Bách Khoa tương đương bao nhiêu tín chỉ Châu Âu?", LABEL_QUYDINH),
+    ("Quy chế quy đổi tín chỉ giữa các hệ đào tạo", LABEL_QUYDINH),
+    ("Hệ thống chuyển đổi và tích lũy tín chỉ Châu Âu áp dụng thế nào ở trường?", LABEL_QUYDINH),
+    ("Quyết định ban hành hướng dẫn quy đổi tín chỉ sang ECTS", LABEL_QUYDINH),
+    ("Cách quy đổi điểm và tín chỉ khi đi trao đổi sinh viên ở nước ngoài", LABEL_QUYDINH),
+    ("Quy định công nhận tín chỉ học ở trường đối tác quốc tế", LABEL_QUYDINH),
     # ── ctdt — đồ án / ĐATN ────────────────────────────────────────────────
     ("Đồ án tốt nghiệp ngành CNTT bao nhiêu tín chỉ?", LABEL_CTDT),
     ("ĐATN ngành Điện tử viễn thông mấy tín chỉ?", LABEL_CTDT),
@@ -620,6 +635,15 @@ HARD_NEGATIVE_DATA: List[Tuple[str, str]] = [
     # ── ctdt ↔ quydinh — thực tập ───────────────────────────────────────────
     ("Ngành CNTT có môn thực tập trong chương trình không?", LABEL_CTDT),
     ("Điều kiện tín chỉ để được đăng ký thực tập?", LABEL_QUYDINH),
+    # ── ctdt ↔ quydinh — "tương đương": thay thế học phần vs. quy đổi tín chỉ ─
+    # ctdt = môn này thay được môn nào trong khung chương trình;
+    # quydinh = chính sách quy đổi/công nhận tín chỉ giữa các hệ / sang ECTS.
+    ("Học phần tương đương của môn Đại số tuyến tính là gì?", LABEL_CTDT),
+    ("Môn nào thay thế được Giải tích 1 trong chương trình?", LABEL_CTDT),
+    ("Quy đổi tương đương tín chỉ sang hệ thống ECTS thế nào?", LABEL_QUYDINH),
+    ("Tín chỉ của trường quy đổi sang ECTS theo tỷ lệ nào?", LABEL_QUYDINH),
+    ("Quy định công nhận tín chỉ khi chuyển đổi giữa các chương trình", LABEL_QUYDINH),
+    ("Bảng quy đổi tín chỉ tích lũy sang tín chỉ Châu Âu", LABEL_QUYDINH),
     # ── quydinh ↔ stsv — điểm số ────────────────────────────────────────────
     ("Quy định xử lý khi bị điểm F môn bắt buộc?", LABEL_QUYDINH),
     ("Xin phúc khảo điểm thi thì nộp đơn ở đâu?", LABEL_STSV),

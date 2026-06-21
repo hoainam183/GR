@@ -119,10 +119,20 @@ def _is_ctdt_course_lookup(query: str, collections: List[str]) -> bool:
     course_like = bool(
         re.search(r"\b(mon|hoc phan|ma hoc phan|tin chi|tien quyet|song hanh)\b", folded)
     )
+    # Quy đổi/công nhận/chuyển đổi tín chỉ và quy đổi sang ECTS là chính sách
+    # (quydinh), KHÔNG phải tra cứu khối lượng môn học trong CTĐT — dù query có
+    # "tín chỉ". Không bắt vào đây thì quydinh bị chặn augment và tài liệu
+    # hướng dẫn quy đổi ECTS (nằm ở collection quydinh) không bao giờ được tìm.
+    conversion_policy = bool(
+        re.search(
+            r"\b(ects|quy doi|cong nhan tin chi|chuyen doi tin chi|tin chi chau au)\b",
+            folded,
+        )
+    )
     rule_like = bool(
         re.search(r"\b(tot nghiep|xet tot nghiep|dieu kien|quy dinh|diem ren luyen)\b", folded)
     )
-    return course_like and not rule_like and not fee_context
+    return course_like and not rule_like and not fee_context and not conversion_policy
 
 
 def _is_foreign_language_policy_lookup(query: str) -> bool:
