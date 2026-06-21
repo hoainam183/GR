@@ -647,6 +647,40 @@ HARD_NEGATIVE_DATA: List[Tuple[str, str]] = [
     # ── quydinh ↔ stsv — điểm số ────────────────────────────────────────────
     ("Quy định xử lý khi bị điểm F môn bắt buộc?", LABEL_QUYDINH),
     ("Xin phúc khảo điểm thi thì nộp đơn ở đâu?", LABEL_STSV),
+
+    # ── kehoach: NỘI DUNG thông báo/bài viết (không có mốc thời gian) ──────────
+    # Bộ kehoach hiện tại lệch hẳn về câu hỏi "khi nào/lịch/deadline". Các thông
+    # báo (bài viết) nằm trong collection kehoach cũng bị hỏi về NỘI DUNG, không
+    # kèm dấu hiệu thời gian — classifier đang route nhầm sang quydinh/stsv/ctdt.
+    # (Đo được: kehoach recall ~0.50; xem evaluation/evaluate_domain_routing.py.)
+    #
+    # Tuyển dụng / ngày hội việc làm — bài viết thuần thông báo → kehoach
+    ("Công ty trong đợt tuyển dụng này yêu cầu sinh viên năm mấy?", LABEL_KEHOACH),
+    ("Mức lương thử việc của đợt tuyển dụng là bao nhiêu phần trăm lương chính thức?", LABEL_KEHOACH),
+    ("Doanh nghiệp tham gia ngày hội việc làm hoạt động trong lĩnh vực gì?", LABEL_KEHOACH),
+    ("Hồ sơ ứng tuyển chương trình tuyển dụng gửi về email nào?", LABEL_KEHOACH),
+    ("Chỉ tiêu tuyển dụng của chương trình thực tập doanh nghiệp là bao nhiêu?", LABEL_KEHOACH),
+    ("Địa điểm làm việc của công ty trong thông báo tuyển dụng ở đâu?", LABEL_KEHOACH),
+    ("Chế độ nghỉ phép tại công ty tuyển dụng được quy định thế nào?", LABEL_KEHOACH),
+    # Thông báo lịch nộp học phí — NỘI DUNG (đợt/đối tượng/cách kiểm tra) → kehoach
+    ("Học phí kỳ này được chia làm mấy đợt nộp?", LABEL_KEHOACH),
+    ("Đối tượng nào chưa được tính học phí trong đợt thu này?", LABEL_KEHOACH),
+    ("Thông báo nộp học phí hướng dẫn kiểm tra thông tin ở đâu?", LABEL_KEHOACH),
+    ("Liên hệ hỏi về học phí đợt này dùng email và tiêu đề thế nào?", LABEL_KEHOACH),
+    # ── hard negative bảo vệ ranh giới: QUY ĐỊNH chung (không phải thông báo) ──
+    ("Quy định về số tín chỉ tối đa được đăng ký mỗi học kỳ là gì?", LABEL_QUYDINH),
+    ("Quy định mức học phí tính theo tín chỉ như thế nào?", LABEL_QUYDINH),
+    ("Điều kiện chung để được xét học bổng khuyến khích học tập?", LABEL_QUYDINH),
+    # ── hard negative: GOVERNANCE/trách nhiệm (ai/đơn vị/hội đồng/vai trò) → quydinh
+    # Phân biệt với kehoach (khi nào/đợt/nội dung thông báo). Các câu hỏi về
+    # trách nhiệm tổ chức, thành phần hội đồng, vai trò đơn vị là quy định quản
+    # trị — dù có chữ "kế hoạch"/"tổ chức"/"học bổng".
+    ("Đơn vị nào chịu trách nhiệm tổ chức kỳ thi và lập kế hoạch tham dự?", LABEL_QUYDINH),
+    ("Hội đồng xét cấp học bổng gồm những thành phần nào?", LABEL_QUYDINH),
+    ("Ai là chủ tịch hội đồng xét cấp học bổng?", LABEL_QUYDINH),
+    ("Vai trò của phòng tài chính trong việc cấp kinh phí cho đội tuyển là gì?", LABEL_QUYDINH),
+    ("Trách nhiệm của các đơn vị khi tổ chức đoàn tham dự kỳ thi được quy định thế nào?", LABEL_QUYDINH),
+    ("Bộ phận nào phụ trách xếp lớp ban đầu cho sinh viên theo quy định?", LABEL_QUYDINH),
 ]
 
 
@@ -838,6 +872,38 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     (
         "Quy định phúc khảo bài thi và thủ tục nộp đơn phúc khảo",
         [LABEL_QUYDINH, LABEL_STSV],
+    ),
+    # ── kehoach cross-domain: thông báo/kế hoạch có nội dung overlap ──────────
+    # Học bổng có TÊN cụ thể / theo đợt = thông báo (kehoach) nhưng điều kiện xét
+    # cũng mang tính quy định (quydinh). Phân biệt với "quy định học bổng" chung
+    # (đã là hard-negative → quydinh đơn nhãn).
+    (
+        "Điều kiện điểm học tập để được xét học bổng tài trợ theo đợt là gì?",
+        [LABEL_KEHOACH, LABEL_QUYDINH],
+    ),
+    (
+        "Mức học bổng của đợt xét này dành cho mỗi sinh viên là bao nhiêu?",
+        [LABEL_KEHOACH, LABEL_QUYDINH],
+    ),
+    # Tham số trong kế hoạch đăng ký theo học kỳ cụ thể: vừa là mốc kế hoạch
+    # (kehoach) vừa chịu ràng buộc quy chế (quydinh).
+    (
+        "Số tín chỉ tối đa và tối thiểu khi đăng ký học kỳ này là bao nhiêu?",
+        [LABEL_KEHOACH, LABEL_QUYDINH],
+    ),
+    # Logistics đăng ký tốt nghiệp/kế hoạch học tập: mốc theo đợt (kehoach) +
+    # thao tác trên hệ thống/tài khoản sinh viên (stsv).
+    (
+        "Đăng ký xét tốt nghiệp đợt này thực hiện trên tài khoản nào?",
+        [LABEL_KEHOACH, LABEL_STSV],
+    ),
+    (
+        "Sinh viên đăng ký kế hoạch học tập trên hệ thống nào và đăng nhập bằng tài khoản gì?",
+        [LABEL_KEHOACH, LABEL_STSV],
+    ),
+    (
+        "Đăng ký tốt nghiệp đợt này kiểm tra điểm và gửi thắc mắc ở đâu?",
+        [LABEL_KEHOACH, LABEL_STSV],
     ),
 ]
 

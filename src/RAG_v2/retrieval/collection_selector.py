@@ -103,36 +103,15 @@ def _should_add_kehoach_low_confidence(
     return not strong_non_kehoach
 
 
-def _is_ctdt_course_lookup(query: str, collections: List[str]) -> bool:
-    """Return True for course/credit lookup that should stay in CTDT."""
-    if "ctdt" not in collections:
-        return False
-    folded = fold_vietnamese_text(query)
-
-    # "tín chỉ" có hai nghĩa: khối lượng môn học (ctdt) và đơn vị tính học phí
-    # (quydinh). Khi query mang ngữ cảnh học phí/mức thu, đây KHÔNG phải tra cứu
-    # chương trình đào tạo — để quydinh được augment vào collections.
-    fee_context = bool(
-        re.search(r"\b(hoc phi|muc thu|dong tien|tien hoc)\b", folded)
-    )
-
-    course_like = bool(
-        re.search(r"\b(mon|hoc phan|ma hoc phan|tin chi|tien quyet|song hanh)\b", folded)
-    )
-    # Quy đổi/công nhận/chuyển đổi tín chỉ và quy đổi sang ECTS là chính sách
-    # (quydinh), KHÔNG phải tra cứu khối lượng môn học trong CTĐT — dù query có
-    # "tín chỉ". Không bắt vào đây thì quydinh bị chặn augment và tài liệu
-    # hướng dẫn quy đổi ECTS (nằm ở collection quydinh) không bao giờ được tìm.
-    conversion_policy = bool(
-        re.search(
-            r"\b(ects|quy doi|cong nhan tin chi|chuyen doi tin chi|tin chi chau au)\b",
-            folded,
-        )
-    )
-    rule_like = bool(
-        re.search(r"\b(tot nghiep|xet tot nghiep|dieu kien|quy dinh|diem ren luyen)\b", folded)
-    )
-    return course_like and not rule_like and not fee_context and not conversion_policy
+# NOTE: ``_is_ctdt_course_lookup`` was removed (Phase 3, 2026-06-21). It was a
+# regex guard that blocked ``quydinh`` from being augmented in for course/credit
+# lookups, with hand-tuned ``fee_context``/``conversion_policy`` exceptions bolted
+# on to stop it mis-firing on tuition/ECTS queries (see
+# plan/artifacts/implementation_plan_routing.md). The v2 domain classifier now
+# disambiguates ctdt vs quydinh directly, so the guard was measured net-harmful:
+# removing it raised quydinh recall (0.944→0.952) and overall recall (0.865→0.870)
+# with no regression on the curated học-phí/ECTS edge cases. ``needs_regulations``
+# now augments ``quydinh`` whenever a policy/table/eligibility signal is present.
 
 
 def _is_foreign_language_policy_lookup(query: str) -> bool:
@@ -180,7 +159,6 @@ def augment_collections_for_query(
         else analyze_query_signals(query)
     )
     output = _dedup(list(collections))
-    ctdt_course_lookup = _is_ctdt_course_lookup(query, output)
     foreign_language_policy_lookup = _is_foreign_language_policy_lookup(query)
 
     # "Môn X học/đăng ký vào kỳ mấy?" — semester placement lives in the standard
@@ -205,7 +183,7 @@ def augment_collections_for_query(
     if foreign_language_policy_lookup:
         output = _dedup(["quydinh", *output])
 
-    if needs_regulations and not ctdt_course_lookup:
+    if needs_regulations:
         output = _dedup(["quydinh", *output])
 
     if signals.procedural_support:

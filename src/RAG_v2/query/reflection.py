@@ -19,6 +19,7 @@ from .prompts import (
     REWRITE_SYSTEM_PROMPT,
     REWRITE_WITH_HISTORY_TEMPLATE,
 )
+from .structured_query import COURSE_CODE_PREFIXES as _COURSE_CODE_PREFIXES
 from utils.terminology import expand_academic_abbreviations
 
 logger = logging.getLogger(__name__)
@@ -48,13 +49,17 @@ _PERSONAL_REFS = re.compile(
     re.IGNORECASE,
 )
 
-# Course code regex (e.g. IT4062E, MI1110)
+# Course code regex (e.g. IT4062E, MI1110, JP2111). The prefix list is shared
+# with ``query.structured_query`` (imported above) so the two never drift apart —
+# reflection used to define a narrower list (no JP|EM|BF|TEX, no separator) and
+# silently fail to recognise those codes, leaving entity extraction / course-code
+# preservation wrong for them.
 _COURSE_CODE_RE = re.compile(
-    r"\b(?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?\b",
+    rf"\b(?:{_COURSE_CODE_PREFIXES})\s*-?\s*\d{{4}}[A-Z]?\b",
     re.IGNORECASE,
 )
 _ADJACENT_COURSE_CODE_RE = re.compile(
-    r"\s*\(\s*((?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED)\d{4}[A-Z]?)\s*\)",
+    rf"\s*\(\s*((?:{_COURSE_CODE_PREFIXES})\s*-?\s*\d{{4}}[A-Z]?)\s*\)",
     re.IGNORECASE,
 )
 _PROFILE_DEPENDENT_QUERY_RE = re.compile(

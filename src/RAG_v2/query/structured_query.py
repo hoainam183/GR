@@ -23,11 +23,17 @@ _DASH_TRANSLATION = str.maketrans(
     }
 )
 
-_COURSE_CODE_RE = re.compile(
-    r"\b(?:IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED|JP|EM|BF|TEX"
-    r"|AI|DS|SE|CE|CS|BI|EN|SS|MR|HE|TE|TX|MS|EV|EP|BA|HS)\s*-?\s*\d{4}[A-Z]?\b",
-    re.IGNORECASE,
+# Canonical course-code prefix list — the single source of truth. ``reflection``
+# imports this so its course-code regex never drifts out of sync (it used to
+# omit JP|EM|BF|TEX and the optional separator, silently missing those codes).
+COURSE_CODE_PREFIXES = (
+    "IT|MI|EE|ET|ME|CH|PH|MA|TL|FL|PE|ED|JP|EM|BF|TEX"
+    "|AI|DS|SE|CE|CS|BI|EN|SS|MR|HE|TE|TX|MS|EV|EP|BA|HS"
 )
+# A course code is a prefix, an optional dash/space separator, 4 digits and an
+# optional trailing letter (e.g. IT4062E, MI 1110, JP2111).
+COURSE_CODE_PATTERN = rf"\b(?:{COURSE_CODE_PREFIXES})\s*-?\s*\d{{4}}[A-Z]?\b"
+_COURSE_CODE_RE = re.compile(COURSE_CODE_PATTERN, re.IGNORECASE)
 _MAJOR_CODE_RE = re.compile(
     r"\b(IT|MI|ET|EM|EP|EE|EV|HS|FL|BA|PH|ME|CH|BF|MS|HE|TE|TX|TROY"
     r"|AI|DS|SE|CE|CS)\s*-?\s*(E\d{1,2}|EP|GU|LUH|NUT|IT|\d{1,2})\b",

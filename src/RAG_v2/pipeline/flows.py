@@ -137,6 +137,29 @@ _strip_raw_urls = _sanitize_answer_urls
 
 # ── Streaming URL sanitizer ────────────────────────────────────────────────────
 
+def _raw_url_hold_index(buf: str) -> int:
+    """Index from which ``buf``'s tail should be held as a (partial) raw URL.
+
+    Returns ``len(buf)`` when nothing URL-like is pending.
+
+    A URL scheme (``http``) can arrive split across streaming chunks
+    (``"h"``, ``"tt"``, ``"p"``). ``str.rfind("http")`` only sees the whole
+    token once it is fully buffered, so the early characters would otherwise
+    flush out as plain text and the URL would leak unsanitized. This also
+    matches a *trailing prefix* of ``http`` (``h`` / ``ht`` / ``htt``) so the
+    sanitizer keeps buffering until it can tell whether a URL is forming.
+    """
+    pos = buf.rfind("http")
+    if pos != -1:
+        return pos
+    # No complete "http" yet — hold the longest suffix that is still a prefix
+    # of "http" (covers the scheme arriving one char at a time).
+    for n in range(min(len(buf), 3), 0, -1):
+        if "http".startswith(buf[-n:]):
+            return len(buf) - n
+    return len(buf)
+
+
 class _StreamUrlSanitizer:
     """Buffer streaming chunks to sanitize markdown links and raw URLs inline.
 
@@ -190,9 +213,12 @@ class _StreamUrlSanitizer:
                     return _sanitize_answer_urls(safe)
                 return ""
 
-        # Check for raw URL in progress (http:// or https:// not yet terminated)
-        http_pos = buf.rfind("http")
-        if http_pos != -1:
+        # Check for a raw URL (or the start of one) still streaming in. The
+        # scheme may be split across chunks, so ``_raw_url_hold_index`` also
+        # matches a trailing prefix of "http" — otherwise the URL leaks out
+        # char-by-char before ``rfind("http")`` ever sees the whole token.
+        http_pos = _raw_url_hold_index(buf)
+        if http_pos < len(buf):
             after_http = buf[http_pos:]
             # If URL looks incomplete (no whitespace/newline terminator yet),
             # keep buffering the URL portion.
@@ -4376,7 +4402,11 @@ def rag_flow_stream(
         logger.info("rag_flow_stream: streamed %d chars", generated_chars)
         _log_timings("rag_flow_stream", timings_ms)
 
-        stream_answer = "".join(full_cached_answer)
+        # Sanitize before caching: chunks were accumulated raw (the sanitizer
+        # only ran on what was *yielded*), so encode/wrap URLs here too. Keeps
+        # cached answers consistent with the streamed text — no raw URL can be
+        # served from cache even if a read path forgets to re-sanitize.
+        stream_answer = _sanitize_answer_urls("".join(full_cached_answer))
 
         # Note: Kehoach links are displayed via frontend source cards.
         # No footer appending needed.
