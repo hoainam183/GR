@@ -300,9 +300,19 @@ class Settings(BaseSettings):
     # Two-digit years in the "Ngày" column (e.g. "9/5/26") map to 2000 + yy.
     exam_schedule_two_digit_year_pivot: int = 2000
     # strptime formats tried (in order) for the "Ngày" column. "%d/%m/%Y" also
-    # parses non-zero-padded values like "9/5/2026".
+    # parses non-zero-padded values like "9/5/2026"; dotted "dd.mm.yyyy" (e.g.
+    # "06.07.2026") appears in some layouts. Keep in sync with
+    # utils.vn_datetime._DEFAULT_DATE_FORMATS.
     exam_schedule_date_formats: List[str] = Field(
-        default_factory=lambda: ["%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d", "%d/%m/%y"]
+        default_factory=lambda: [
+            "%d/%m/%Y",
+            "%d-%m-%Y",
+            "%d.%m.%Y",
+            "%Y-%m-%d",
+            "%d/%m/%y",
+            "%d-%m-%y",
+            "%d.%m.%y",
+        ]
     )
     # Folded Excel/PDF header → canonical field. Keys are accent-/case-folded via
     # query.signals.fold_vietnamese_text so matching is robust to diacritics. The

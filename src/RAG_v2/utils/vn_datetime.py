@@ -1,8 +1,9 @@
 """Vietnamese exam-schedule date & session normalisation helpers.
 
 The HUST exam schedule stores dates in the "Ngày" column as non-zero-padded
-``d/m/yyyy`` (e.g. ``9/5/2026``), occasionally as ``dd-mm-yyyy``, two-digit
-years, ``datetime`` cells (openpyxl), or raw Excel serial numbers. Sessions live
+``d/m/yyyy`` (e.g. ``9/5/2026``), occasionally as ``dd-mm-yyyy`` or dotted
+``dd.mm.yyyy`` (e.g. ``06.07.2026``), two-digit years, ``datetime`` cells
+(openpyxl), or raw Excel serial numbers. Sessions live
 in the "Kíp thi" column as ``Kíp 1`` … with no clock time; an optional map
 supplies a display start time (the PDF banner also prints these — see
 ``services/exam_schedule_parser.parse_kip_time_map``).
@@ -18,8 +19,16 @@ from datetime import datetime, timedelta
 # Excel's day-zero is 1899-12-30 (the 1900 leap-year bug is baked into this base).
 _EXCEL_EPOCH = datetime(1899, 12, 30)
 
-_DEFAULT_DATE_FORMATS = ["%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d", "%d/%m/%y"]
-_TWO_DIGIT_YEAR_RE = re.compile(r"^\d{1,2}[/-]\d{1,2}[/-]\d{2}$")
+_DEFAULT_DATE_FORMATS = [
+    "%d/%m/%Y",
+    "%d-%m-%Y",
+    "%d.%m.%Y",
+    "%Y-%m-%d",
+    "%d/%m/%y",
+    "%d-%m-%y",
+    "%d.%m.%y",
+]
+_TWO_DIGIT_YEAR_RE = re.compile(r"^\d{1,2}[/.\-]\d{1,2}[/.\-]\d{2}$")
 _KIP_NUM_RE = re.compile(r"(\d+)")
 
 
