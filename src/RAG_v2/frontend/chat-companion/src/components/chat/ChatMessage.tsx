@@ -180,8 +180,11 @@ function FriendlySourceCard({
   );
 }
 
-// Links in answer text are rendered as plain styled text. The frontend displays
-// source documents via FriendlySourceCard with proper "Xem tài liệu gốc" buttons.
+// Render markdown links as clickable hyperlinks. The URL is hidden behind
+// the anchor text (e.g. "Tại đây") — users click the text, not a raw URL.
+const isSafeExternalUrl = (href: string | undefined): href is string =>
+  typeof href === 'string' && /^(https?:|mailto:)/i.test(href.trim());
+
 const markdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>,
@@ -206,9 +209,14 @@ const markdownComponents: Components = {
   blockquote: ({ children }) => (
     <blockquote className="border-l-4 border-primary pl-3 italic my-2">{children}</blockquote>
   ),
-  a: ({ children }) => (
-    <span className="font-medium text-foreground">{children}</span>
-  ),
+  a: ({ children, href }) =>
+    isSafeExternalUrl(href) ? (
+      <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    ) : (
+      <>{children}</>
+    ),
 };
 
 const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
