@@ -28,8 +28,56 @@ _CATALOG_PATH = Path(__file__).resolve().parent / "models" / "course_catalog.jso
 # Lazy module-level cache: {major_code: [{code, name, name_folded, semester, credits}]}
 _CATALOG: Optional[Dict[str, List[Dict[str, Optional[str]]]]] = None
 
-_COURSE_ALIAS_PREFIXES = (
-    "lap trinh ",
+_ROMAN_TO_ARABIC = {
+    "i": "1",
+    "ii": "2",
+    "iii": "3",
+    "iv": "4",
+    "v": "5",
+    "vi": "6",
+    "vii": "7",
+    "viii": "8",
+    "ix": "9",
+    "x": "10",
+}
+_ARABIC_TO_ROMAN = {v: k for k, v in _ROMAN_TO_ARABIC.items()}
+
+_SAFE_SINGLE_TOKEN_ALIASES = {
+    "cnxhkh",
+    "csdl",
+    "datn",
+    "hcm",
+    "hdh",
+    "mmt",
+    "triet",
+    "xstk",
+}
+_GENERIC_ALIASES = {
+    "co so",
+    "dai cuong",
+    "do an",
+    "ky thuat",
+    "nhap mon",
+    "thuc tap",
+}
+
+_COMMON_COURSE_ALIASES = (
+    ("co so du lieu", ("csdl",)),
+    ("he dieu hanh", ("hdh",)),
+    ("nguyen ly he dieu hanh", ("hdh",)),
+    ("mang may tinh", ("mmt",)),
+    ("xac suat thong ke", ("xstk", "xac suat")),
+    ("triet hoc mac-lenin", ("triet", "triet mac")),
+    ("triet hoc mac - lenin", ("triet", "triet mac")),
+    ("triet hoc mac – lenin", ("triet", "triet mac")),
+    ("kinh te chinh tri mac-lenin", ("kinh te chinh tri",)),
+    ("kinh te chinh tri mac - lenin", ("kinh te chinh tri",)),
+    ("kinh te chinh tri mac – lenin", ("kinh te chinh tri",)),
+    ("chu nghia xa hoi khoa hoc", ("cnxhkh", "xa hoi khoa hoc")),
+    ("tu tuong ho chi minh", ("tu tuong hcm", "hcm")),
+    ("tu tuong hcm", ("tu tuong hcm", "hcm")),
+    ("phap luat dai cuong", ("phap luat",)),
+    ("do an tot nghiep", ("datn",)),
 )
 
 
@@ -72,6 +120,46 @@ def _phrase_matches(folded_query: str, phrase: str) -> bool:
     return bool(re.search(pattern, folded_query))
 
 
+def _replace_token(value: str, source: str, target: str) -> str:
+    pattern = r"(?<![0-9a-z])" + re.escape(source) + r"(?![0-9a-z])"
+    return re.sub(pattern, target, value)
+
+
+def _numeric_variants(value: str) -> List[str]:
+    """Return roman/arabic number variants for common course suffixes."""
+    variants: List[str] = []
+    tokens = set(re.findall(r"[0-9a-z]+", value))
+    for token in tokens:
+        if token in _ROMAN_TO_ARABIC:
+            variants.append(_replace_token(value, token, _ROMAN_TO_ARABIC[token]))
+        elif token in _ARABIC_TO_ROMAN:
+            variants.append(_replace_token(value, token, _ARABIC_TO_ROMAN[token]))
+    return variants
+
+
+def _strip_trailing_parenthetical(value: str) -> str:
+    return _normalise_course_phrase(re.sub(r"\s*\([^)]*\)\s*$", "", value))
+
+
+def _is_safe_generated_alias(alias: str) -> bool:
+    """Reject overly broad aliases that students may use in unrelated questions."""
+    if not alias or alias in _GENERIC_ALIASES:
+        return False
+
+    tokens = re.findall(r"[0-9a-z]+", alias)
+    if not tokens:
+        return False
+    if len(tokens) == 1:
+        return tokens[0] in _SAFE_SINGLE_TOKEN_ALIASES
+    return len(alias) >= 6
+
+
+def _add_generated_alias(aliases: List[str], alias: str) -> None:
+    alias = _normalise_course_phrase(alias)
+    if _is_safe_generated_alias(alias):
+        aliases.append(alias)
+
+
 def _course_aliases(name_folded: str) -> List[str]:
     """Return exact name first, followed by safe shorthand aliases."""
     name = _normalise_course_phrase(name_folded)
@@ -79,12 +167,35 @@ def _course_aliases(name_folded: str) -> List[str]:
         return []
 
     aliases = [name]
-    for prefix in _COURSE_ALIAS_PREFIXES:
-        if not name.startswith(prefix):
+    base_name = _strip_trailing_parenthetical(name)
+    if base_name != name:
+        _add_generated_alias(aliases, base_name)
+
+    for variant in _numeric_variants(name):
+        _add_generated_alias(aliases, variant)
+    for variant in _numeric_variants(base_name):
+        _add_generated_alias(aliases, variant)
+
+    for prefix in ("lap trinh ", "tieng "):
+        if not base_name.startswith(prefix):
             continue
-        alias = name[len(prefix) :].strip()
-        if len(alias.split()) >= 2:
-            aliases.append(alias)
+        shorthand = base_name[len(prefix) :].strip()
+        _add_generated_alias(aliases, shorthand)
+        for variant in _numeric_variants(shorthand):
+            _add_generated_alias(aliases, variant)
+
+    toeic = re.match(r"^tieng anh toeic (.+)$", base_name)
+    if toeic:
+        suffix = toeic.group(1).strip()
+        _add_generated_alias(aliases, f"toeic {suffix}")
+        for variant in _numeric_variants(f"toeic {suffix}"):
+            _add_generated_alias(aliases, variant)
+
+    for canonical, generated_aliases in _COMMON_COURSE_ALIASES:
+        if canonical not in {name, base_name}:
+            continue
+        for alias in generated_aliases:
+            _add_generated_alias(aliases, alias)
 
     unique: List[str] = []
     seen: set[str] = set()

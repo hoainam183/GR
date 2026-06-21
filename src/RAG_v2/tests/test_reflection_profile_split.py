@@ -10,9 +10,38 @@ Run:
 
 from __future__ import annotations
 
-from query.reflection import _extract_entities
+from query.reflection import _extract_entities, _strip_pii_and_noise
 
 AUTH = {"major_code": "IT-E6", "major": "Công nghệ thông tin Việt - Nhật", "cohort": "65"}
+
+
+# ── PII strip must not destroy self-declared academic profile ────────────────
+# Regression for: "tôi là sinh viên ngành IT1, học phí của tôi là bao nhiêu"
+# was wrongly stripped to "1, học phí của" because _PERSONAL_INTRO_RE (compiled
+# with re.IGNORECASE) treated the lowercase "sinh viên ngành IT" as a name.
+
+
+def test_strip_preserves_self_declared_major():
+    q = "tôi là sinh viên ngành IT1, học phí của tôi là bao nhiêu"
+    cleaned = _strip_pii_and_noise(q)
+    assert "IT1" in cleaned
+    assert "ngành" in cleaned
+    # The major survives the strip and is extracted as the query target.
+    ents = _extract_entities(cleaned)
+    assert ents["major_code"] == "IT1"
+
+
+def test_strip_still_removes_genuine_name_intro():
+    q = "Tôi là Phạm Nhật Anh, cho em hỏi học phí ngành IT1"
+    cleaned = _strip_pii_and_noise(q)
+    assert "Phạm Nhật Anh" not in cleaned
+    assert "học phí" in cleaned
+    assert "IT1" in cleaned
+
+
+def test_strip_leaves_general_pronoun_query_untouched():
+    q = "nếu tôi không nộp học phí thì sao"
+    assert _strip_pii_and_noise(q) == q
 
 
 def test_user_major_from_auth_only():

@@ -35,6 +35,7 @@ olmocr/cleaned/
 uv.lock
 .python-version
 node_modules/
+**/node_modules/
 
 # Temporary / cache / build files
 *.log

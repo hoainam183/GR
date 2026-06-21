@@ -31,6 +31,10 @@ REQUIRED_CASES = [
     # Case I from the report: foreign-language requirement → major (the language
     # rule matches before the graduation rule; report table lists this as major).
     ("TOEIC → major", "em cần TOEIC bao nhiêu để tốt nghiệp", "quydinh", {"major"}),
+    ("tuition → major", "học phí của tôi là bao nhiêu", "quydinh", {"major"}),
+    # Fee-waiver/scholarship procedure stays universal even though it contains
+    # "học phí" — the scholarship rule is checked before the tuition rule.
+    ("fee-waiver → none", "thủ tục miễn giảm học phí", "quydinh", set()),
     ("scholarship → none", "tôi muốn có học bổng thì phải làm thế nào", "quydinh", set()),
     ("training-reg → cohort", "quy chế đào tạo nào áp dụng cho tôi", "quydinh", {"cohort"}),
     ("graduation → major+cohort", "điều kiện tốt nghiệp của tôi", "quydinh", {"major", "cohort"}),
@@ -61,6 +65,16 @@ def test_scholarship_about_me_does_not_filter_by_major():
     r = _routing("quydinh")
     assert should_inject_profile_note(q, q, r, user_major="IT-E6") is False
     assert effective_major_for_retrieval(q, q, r, "IT-E6") is None
+
+
+def test_tuition_injects_and_filters_by_user_major():
+    """Tuition differs by program (IT-E6 vs IT1), so 'học phí của tôi' must inject
+    the profile note AND scope retrieval to the authenticated user's major."""
+    q = "học phí của tôi là bao nhiêu"
+    r = _routing("quydinh")
+    assert required_attributes(q, q, r) == {"major"}
+    assert should_inject_profile_note(q, q, r, user_major="IT1") is True
+    assert effective_major_for_retrieval(q, q, r, "IT1") == "IT1"
 
 
 def test_target_major_in_query_overrides_profile():

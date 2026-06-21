@@ -49,6 +49,11 @@ def _fold(text: str) -> str:
 # Scholarship / financial-aid procedures are the same for every student → no
 # profile attribute required (acceptance #4 — must NOT filter by major).
 _SCHOLARSHIP_RE = re.compile(r"\bhoc\s*bong\b|\btro\s*cap\b|\bmien\s*giam\s*hoc\s*phi\b")
+# Tuition (học phí) is program-specific — IT-E6 (Việt-Nhật) and IT1 (Khoa học
+# máy tính) charge different amounts — so "học phí của tôi" must resolve to the
+# user's major. The scholarship/fee-waiver check runs first so "miễn giảm học
+# phí" stays a universal procedure (set()).
+_TUITION_RE = re.compile(r"\bhoc\s*phi\b|\bmuc\s*hoc\s*phi\b|\bchi\s*phi\b.*\bhoc\b")
 # Foreign-language graduation requirement depends on the program/major
 # (English programs use TOEIC, Japanese programs use JLPT N3/N4, etc.).
 _FOREIGN_LANG_RE = re.compile(
@@ -89,6 +94,7 @@ def required_attributes(
 
     Decision order — most specific sub-topic first, then router-domain defaults:
       * học bổng / trợ cấp                → ``set()`` (universal procedure)
+      * học phí / mức học phí             → ``{"major"}`` (tuition varies by program)
       * ngoại ngữ / TOEIC / JLPT          → ``{"major"}``
       * tốt nghiệp / ra trường            → ``{"major", "cohort"}``
       * môn / học phần / chương trình ĐT  → ``{"major"}``
@@ -101,6 +107,8 @@ def required_attributes(
 
     if _SCHOLARSHIP_RE.search(text):
         return set()
+    if _TUITION_RE.search(text):
+        return {"major"}
     if _FOREIGN_LANG_RE.search(text):
         return {"major"}
     if _GRADUATION_RE.search(text):

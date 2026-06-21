@@ -23,8 +23,8 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 BASE_URL = "https://ctt.hust.edu.vn"
-INPUT_FILE = Path("output_full.json")
-OUTPUT_FILE = Path("output_full.json")  # overwrite in-place
+INPUT_FILE = Path("kehoach_list_output_full.json")
+OUTPUT_FILE = Path("kehoach_list_output_full.json")  # overwrite in-place
 
 _TEXT_BLOCK_TAGS = {
     "article",
