@@ -36,12 +36,13 @@ import {
 } from '@/services/adminApi';
 import type {
   DocumentDetail,
+  DocumentStatus,
   PipelineStep,
   ConverterOption,
   ChunkerOption,
   ChunkStrategySummary,
 } from '@/types/admin';
-import { CHUNKER_ALTERNATIVES } from '@/types/admin';
+import { CHUNKER_ALTERNATIVES, PIPELINE_STEPS } from '@/types/admin';
 import { ArrowLeft, Play, Zap, GitCompare, Check, RotateCcw } from 'lucide-react';
 
 type RetryingStep = PipelineStep['key'] | 'rollback';
@@ -177,8 +178,12 @@ export default function DocumentReview() {
         await triggerIndex(id);
       }
       toast.success('Đang xử lý…');
-      // Start polling
-      setTimeout(fetchDoc, 1000);
+      // Optimistic update: set running status immediately so polling starts
+      const stepDef = PIPELINE_STEPS.find((s) => s.key === step);
+      if (stepDef) {
+        setDoc((prev) => prev ? { ...prev, status: stepDef.runningStatus } : prev);
+      }
+      setTimeout(fetchDoc, 1500);
     } catch (error: unknown) {
       toast.error(apiErrorMessage(error, `Không thể chạy bước ${step}`));
     } finally {
@@ -203,7 +208,8 @@ export default function DocumentReview() {
     try {
       await triggerFullPipeline(id);
       toast.success('Pipeline tự động đã bắt đầu');
-      setTimeout(fetchDoc, 1000);
+      setDoc((prev) => prev ? { ...prev, status: 'converting' as DocumentStatus } : prev);
+      setTimeout(fetchDoc, 1500);
     } catch (error: unknown) {
       toast.error(apiErrorMessage(error, 'Không thể chạy pipeline'));
     }
@@ -250,10 +256,11 @@ export default function DocumentReview() {
     try {
       await triggerChunk(id, strategy);
       toast.success(`Đang chunk với strategy: ${strategy}`);
+      setDoc((prev) => prev ? { ...prev, status: 'chunking' as DocumentStatus } : prev);
       setTimeout(async () => {
         await fetchDoc();
         await fetchChunkSets();
-      }, 2000);
+      }, 1500);
     } catch (error: unknown) {
       toast.error(apiErrorMessage(error, 'Chunk thất bại'));
     } finally {

@@ -92,6 +92,29 @@ export default function AdminPage() {
     if (activeTab === 'documents') fetchDocuments();
   }, [fetchDocuments, activeTab]);
 
+  // Auto-poll document list when any document is still processing
+  const PROCESSING_STATUSES = ['converting', 'cleaning', 'chunking', 'embedding'];
+  const hasProcessing = documents.some((d) => PROCESSING_STATUSES.includes(d.status));
+
+  useEffect(() => {
+    if (activeTab !== 'documents' || !hasProcessing) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await listDocuments(
+          page,
+          limit,
+          statusFilter === '__all__' ? undefined : statusFilter,
+          collectionFilter === '__all__' ? undefined : collectionFilter,
+        );
+        setDocuments(res.documents);
+        setTotal(res.total);
+      } catch {
+        // silently ignore errors during background polling
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [activeTab, hasProcessing, page, statusFilter, collectionFilter]);
+
   const handleUploaded = () => {
     setPage(1);
     fetchDocuments();

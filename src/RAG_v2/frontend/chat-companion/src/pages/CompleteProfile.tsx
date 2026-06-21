@@ -56,7 +56,7 @@ const CompleteProfile = () => {
         });
       })
       .catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : "Failed to load profile.";
+        const message = err instanceof Error ? err.message : "Không thể tải hồ sơ.";
         toast.error(message);
       })
       .finally(() => setLoading(false));
@@ -65,19 +65,19 @@ const CompleteProfile = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.full_name.trim()) {
-      toast.error("Full name is required.");
+      toast.error("Họ và tên là bắt buộc.");
       return;
     }
     if (!form.student_id.trim()) {
-      toast.error("Student ID is required.");
+      toast.error("Mã số sinh viên là bắt buộc.");
       return;
     }
     if (!form.cohort) {
-      toast.error("Please select your cohort.");
+      toast.error("Vui lòng chọn khoá học.");
       return;
     }
     if (!selectedMajor) {
-      toast.error("Please select your major.");
+      toast.error("Vui lòng chọn ngành học.");
       return;
     }
 
@@ -97,7 +97,7 @@ const CompleteProfile = () => {
         }),
       });
 
-      await throwIfNotOk(res, "Failed to save profile.");
+      await throwIfNotOk(res, "Lưu hồ sơ thất bại.");
 
       const updatedUser = await res.json().catch(() => null);
       if (updatedUser) {
@@ -106,7 +106,7 @@ const CompleteProfile = () => {
 
       navigate("/chat");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to save profile.";
+      const message = err instanceof Error ? err.message : "Lưu hồ sơ thất bại.";
       toast.error(message);
     } finally {
       setSubmitting(false);

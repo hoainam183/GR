@@ -35,6 +35,30 @@ logger = logging.getLogger(__name__)
 
 _collection_selector = CollectionSelector()
 
+# ── Answer post-processing: strip markdown links ──────────────────────────────
+# Safety net: LLMs sometimes generate inline links despite prompt instructions.
+# Strip them so the frontend only shows links via FriendlySourceCard components.
+_MARKDOWN_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]*\)")
+_RAW_URL_RE = re.compile(r"(?<!\()(https?://\S+)")
+
+
+def _strip_answer_links(answer: str) -> str:
+    """Remove markdown links and raw URLs from LLM answer text.
+
+    Preserves the visible label text from markdown links and removes raw URLs
+    that would clutter the response. The frontend displays source documents
+    with proper link buttons via FriendlySourceCard.
+    """
+    # [label](url) → label
+    result = _MARKDOWN_LINK_RE.sub(r"\1", answer)
+    # Remove standalone raw URLs (not already inside parentheses)
+    result = _RAW_URL_RE.sub("", result)
+    # Clean up leftover artifacts like empty parentheses or double spaces
+    result = re.sub(r"\(\s*\)", "", result)
+    result = re.sub(r"  +", " ", result)
+    return result.strip()
+
+
 # Personal-pronoun pattern removed — entity extraction is now handled by QueryReflector._extract_entities
 
 # ── History budget ──────────────────────────────────────────────────────────────
@@ -1328,12 +1352,9 @@ def _format_context(
         # Posting date is kehoach-specific (freshness signal for notifications).
         if doc.get("collection") == "kehoach" and meta.get("date_str"):
             meta_parts.append(f"Ngày đăng: {meta['date_str']}")
-        # Expose a real source URL for ANY doc that has one (kehoach, web/Tavily,
-        # etc.) so the LLM can cite a verifiable link. Only inject genuine http(s)
-        # URLs — never relative/placeholder values that would render as a /chat link.
-        url = str(meta.get("url") or "").strip()
-        if url.startswith(("http://", "https://")):
-            meta_parts.append(f"URL: {url}")
+        # NOTE: URLs are no longer injected into context. The frontend displays
+        # source links via dedicated FriendlySourceCard components, providing
+        # better UX than inline markdown links in the answer text.
         meta_str = f" [{', '.join(meta_parts)}]" if meta_parts else ""
 
         text = str(doc.get("text", "") or "").strip()
@@ -1438,13 +1459,15 @@ def _kehoach_links_footer(answer: str, sources: List[Dict[str, Any]]) -> str:
     Idempotent: a doc whose URL already appears in ``answer`` is skipped, so the
     footer is never duplicated (e.g. when the LLM already embedded the link, or
     on a cache hit where the answer was stored with the footer).
+    
+    Uses generic link text to hide full URLs and improve UX.
     """
     if not answer or not sources:
         return ""
     answer_norm = _normalize_for_match(answer)
     answer_bigrams = _bigrams(answer_norm.split())
     seen_urls: Set[str] = set()
-    links: List[str] = []
+    links: List[tuple[str, str]] = []
     for doc in sources:
         meta = doc.get("metadata") or {}
         collection = (
@@ -1465,10 +1488,12 @@ def _kehoach_links_footer(answer: str, sources: List[Dict[str, Any]]) -> str:
         ):
             continue
         seen_urls.add(url)
-        links.append(f"- [{title}]({url})")
+        links.append((title, url))
     if not links:
         return ""
-    return f"\n\n{_KEHOACH_LINK_HEADER}\n" + "\n".join(links)
+    # Format links as simple items that can be rendered as cards on frontend
+    formatted_links = [f"- [{title}]({url})" for title, url in links]
+    return f"\n\n{_KEHOACH_LINK_HEADER}\n" + "\n".join(formatted_links)
 
 
 def _append_kehoach_source_links(
@@ -2250,9 +2275,7 @@ def rag_flow(
                 timings_ms["flow_total"] = _elapsed_ms(flow_t0)
                 return {
                     "question": question,
-                    "answer": _append_kehoach_source_links(
-                        _qcached["answer"], _qcached["sources"]
-                    ),
+                    "answer": _strip_answer_links(_qcached["answer"]),
                     "sources": _qcached["sources"],
                     "num_sources": len(_qcached["sources"]),
                     "intent": "rag",
@@ -2930,9 +2953,7 @@ def rag_flow(
                 timings_ms["flow_total"] = _elapsed_ms(flow_t0)
                 return {
                     "question": question,
-                    "answer": _append_kehoach_source_links(
-                        cached["answer"], cached["sources"]
-                    ),
+                    "answer": _strip_answer_links(cached["answer"]),
                     "sources": cached["sources"],
                     "num_sources": len(cached["sources"]),
                     "intent": "rag",
@@ -3245,8 +3266,9 @@ def rag_flow(
         web_fallback_used=web_fallback_used,
         web_fallback_reasons=pre_web_fallback_reasons,
     )
-    # Attach verifiable kehoach links before caching so cache + response agree.
-    answer = _append_kehoach_source_links(answer, reranked)
+    # Note: Kehoach links are displayed via the frontend's source cards,
+    # not appended to answer text, for better UX.
+    # Previously appended with: answer = _append_kehoach_source_links(answer, reranked)
     if llm_cache is not None and cache_final_answer:
         doc_ids = [str(doc.get("id", "")) for doc in reranked if doc.get("id")]
         llm_cache.put(
@@ -3282,7 +3304,7 @@ def rag_flow(
 
     return {
         "question": question,
-        "answer": answer,
+        "answer": _strip_answer_links(answer),
         "sources": reranked,
         "num_sources": len(reranked),
         "intent": "rag",
@@ -3425,9 +3447,7 @@ def rag_flow_stream(
 
                 def _cached_stream_early() -> Generator[str, None, None]:
                     yield from _chunk_cached_answer(
-                        _append_kehoach_source_links(
-                            _qcached["answer"], _qcached["sources"]
-                        )
+                        _strip_answer_links(_qcached["answer"])
                     )
 
                 return _cached_stream_early(), _qcached["sources"]
@@ -4130,9 +4150,7 @@ def rag_flow_stream(
 
                 def _cached_stream() -> Generator[str, None, None]:
                     yield from _chunk_cached_answer(
-                        _append_kehoach_source_links(
-                            cached["answer"], cached["sources"]
-                        )
+                        _strip_answer_links(cached["answer"])
                     )
                     timings_ms["stream_first_token"] = 0.1
                     timings_ms["stream_generate"] = 0.1
@@ -4201,12 +4219,8 @@ def rag_flow_stream(
 
         stream_answer = "".join(full_cached_answer)
 
-        # Append verifiable kehoach links once the full answer is known, and
-        # fold them into stream_answer so the cached copy stays consistent.
-        kehoach_footer = _kehoach_links_footer(stream_answer, reranked)
-        if kehoach_footer:
-            yield kehoach_footer
-            stream_answer += kehoach_footer
+        # Note: Kehoach links are displayed via frontend source cards.
+        # No footer appending needed.
 
         # Cache newly generated stream response (Phase 2)
         cache_stream_answer = _should_cache_final_answer(
@@ -4456,7 +4470,7 @@ def _tavily_fallback_result(
     # still useful for notices/deadlines and should be allowed to regenerate.
     if not web_context:
         return {
-            "answer": answer,
+            "answer": _strip_answer_links(answer),
             "timings": timings_ms,
             "sources": tavily_sources,
             "used": False,
@@ -4477,7 +4491,7 @@ def _tavily_fallback_result(
         timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
         logger.info("Tavily fallback generated %d chars", len(new_answer))
         return {
-            "answer": new_answer,
+            "answer": _strip_answer_links(new_answer),
             "timings": timings_ms,
             "sources": tavily_sources,
             "used": True,
@@ -4489,7 +4503,7 @@ def _tavily_fallback_result(
         )
         timings_ms["tavily_total"] = _elapsed_ms(fallback_t0)
         return {
-            "answer": answer,
+            "answer": _strip_answer_links(answer),
             "timings": timings_ms,
             "sources": tavily_sources,
             "used": False,
