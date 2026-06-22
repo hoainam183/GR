@@ -64,15 +64,21 @@ async def ingest_exam_schedule(
     source_file: str,
     source_doc_id: str | None = None,
     uploaded_by: str | None = None,
+    exam_type: str | None = None,
     es_store: ExamScheduleESStore | None = None,
 ) -> ExamScheduleUploadResponse:
-    """Parse and ingest one exam-schedule file idempotently."""
+    """Parse and ingest one exam-schedule file idempotently.
+
+    ``exam_type`` is the admin-selected term ("giua_ky"/"cuoi_ky"); when None
+    the parser auto-detects it from the file banner/filename.
+    """
     records, report = await parse_exam_workbook_async(
         path,
         settings,
         source_file=source_file,
         source_doc_id=source_doc_id,
         uploaded_by=uploaded_by,
+        exam_type_override=exam_type,
     )
 
     # Guard: never wipe existing data when the upload yields nothing usable.
@@ -88,6 +94,7 @@ async def ingest_exam_schedule(
             invalid=len(report.skipped_rows),
             replaced_existing=False,
             records_indexed=0,
+            exam_type=exam_type,
             report=report,
         )
 
@@ -122,6 +129,8 @@ async def ingest_exam_schedule(
         invalid=len(report.skipped_rows),
         replaced_existing=replaced_existing,
         records_indexed=records_indexed,
+        # Reflect what was actually stored (admin override or auto-detected).
+        exam_type=records[0].exam_type if records else exam_type,
         report=report,
     )
 

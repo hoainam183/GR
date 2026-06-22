@@ -14,6 +14,7 @@ import type {
   CollectionName,
   DocumentDetail,
   UploadKind,
+  ExamType,
   ExamScheduleUploadResponse,
   ExamScheduleSummary,
 } from '@/types/admin';
@@ -37,6 +38,11 @@ const EXAM_ACCEPTED_MIMES = new Set([
   'application/vnd.ms-excel.sheet.macroEnabled.12', // .xlsm
 ]);
 const EXAM_ACCEPTED_EXTS = ['.pdf', '.xlsx', '.xlsm'];
+const DOC_ACCEPTED_MIMES = new Set([
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+]);
+const DOC_ACCEPTED_EXTS = ['.pdf', '.docx'];
 
 function apiErrorMessage(error: unknown, fallback: string): string {
   const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
@@ -53,6 +59,8 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [collection, setCollection] = useState<CollectionName | ''>('');
   const [strategy, setStrategy] = useState<string>('');
+  // '' = auto-detect the exam term from the file banner/filename.
+  const [examType, setExamType] = useState<ExamType | ''>('');
   const [progress, setProgress] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [examResult, setExamResult] = useState<ExamScheduleUploadResponse | null>(null);
@@ -103,18 +111,17 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
   }, [isExam, dbSummary, summaryLoading, summaryError, refreshDbSummary]);
 
   const isAcceptedFile = (f: File): boolean => {
-    if (isExam) {
-      if (EXAM_ACCEPTED_MIMES.has(f.type)) return true;
-      const lower = f.name.toLowerCase();
-      return EXAM_ACCEPTED_EXTS.some((ext) => lower.endsWith(ext));
-    }
-    return f.type === 'application/pdf';
+    const mimes = isExam ? EXAM_ACCEPTED_MIMES : DOC_ACCEPTED_MIMES;
+    const exts = isExam ? EXAM_ACCEPTED_EXTS : DOC_ACCEPTED_EXTS;
+    // MIME first, then extension fallback — browsers sometimes report an empty
+    // or generic MIME for .docx/.xlsx.
+    if (mimes.has(f.type)) return true;
+    const lower = f.name.toLowerCase();
+    return exts.some((ext) => lower.endsWith(ext));
   };
 
   const rejectionMessage = (name: string): string =>
-    isExam
-      ? `${name}: chỉ hỗ trợ ${EXAM_ACCEPTED_EXTS.join('/')}`
-      : `${name}: chỉ hỗ trợ file PDF`;
+    `${name}: chỉ hỗ trợ ${(isExam ? EXAM_ACCEPTED_EXTS : DOC_ACCEPTED_EXTS).join('/')}`;
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
@@ -143,12 +150,14 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
     if (next === 'exam_schedule') {
       setCollection('');
       setStrategy('');
+    } else {
+      setExamType('');
     }
   };
 
   const handleUpload = async () => {
     if (files.length === 0) {
-      toast.error(isExam ? 'Vui lòng chọn 1 file lịch thi' : 'Vui lòng chọn ít nhất 1 file PDF');
+      toast.error(isExam ? 'Vui lòng chọn 1 file lịch thi' : 'Vui lòng chọn ít nhất 1 file PDF/DOCX');
       return;
     }
     if (!isExam && !collection) {
@@ -160,7 +169,7 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
     try {
       if (isExam) {
         setExamResult(null);
-        const report = await uploadExamSchedule(files[0], setProgress);
+        const report = await uploadExamSchedule(files[0], examType, setProgress);
         setExamResult(report);
         toast.success(
           `Lịch thi: ${report.parsed} dòng đã import` +
@@ -226,12 +235,12 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
         <p className="text-sm">
           {isExam
             ? `Kéo thả hoặc nhấn để chọn 1 file ${EXAM_ACCEPTED_EXTS.join('/')} (${MAX_SIZE_MB}MB)`
-            : `Kéo thả hoặc nhấn để chọn file PDF (tối đa ${maxFiles} file, ${MAX_SIZE_MB}MB/file)`}
+            : `Kéo thả hoặc nhấn để chọn file ${DOC_ACCEPTED_EXTS.join('/')} (tối đa ${maxFiles} file, ${MAX_SIZE_MB}MB/file)`}
         </p>
         <input
           ref={inputRef}
           type="file"
-          accept={isExam ? EXAM_ACCEPTED_EXTS.join(',') : '.pdf'}
+          accept={isExam ? EXAM_ACCEPTED_EXTS.join(',') : DOC_ACCEPTED_EXTS.join(',')}
           multiple={!isExam}
           className="hidden"
           onChange={(e) => addFiles(e.target.files)}
@@ -286,6 +295,28 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
         </div>
       )}
 
+      {/* Exam term selector — only for lịch thi. '' = auto-detect from file. */}
+      {isExam && (
+        <div className="space-y-1.5">
+          <Label>Kỳ thi</Label>
+          <Select
+            value={examType || 'auto'}
+            onValueChange={(v) => setExamType(v === 'auto' ? '' : (v as ExamType))}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">Tự động (từ file)</SelectItem>
+              <SelectItem value="giua_ky">Giữa kỳ</SelectItem>
+              <SelectItem value="cuoi_ky">Cuối kỳ</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Để "Tự động" sẽ nhận diện giữa/cuối kỳ từ banner trong file. Chọn thủ
+            công nếu file không ghi rõ hoặc nhận diện sai.
+          </p>
+        </div>
+      )}
+
       {/* Progress + Upload button */}
       {progress !== null && <Progress value={progress} className="h-2" />}
       <Button onClick={handleUpload} disabled={uploading || files.length === 0}>
@@ -311,9 +342,15 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
 
 // ─────────────────────────── Result card ───────────────────────────
 
+const EXAM_TYPE_LABEL: Record<ExamType, string> = {
+  giua_ky: 'Giữa kỳ',
+  cuoi_ky: 'Cuối kỳ',
+};
+
 function ExamResultCard({ result }: { result: ExamScheduleUploadResponse }) {
   const hasSkipped = result.skipped > 0;
   const success = result.parsed > 0;
+  const termLabel = result.exam_type ? EXAM_TYPE_LABEL[result.exam_type] : 'Không xác định';
   return (
     <div
       className={`rounded-md border p-3 text-sm ${
@@ -344,6 +381,7 @@ function ExamResultCard({ result }: { result: ExamScheduleUploadResponse }) {
             {result.replaced_existing ? 'Có' : 'Không'}
           </span>
         </li>
+        <li>Kỳ thi: <span className="font-medium text-foreground">{termLabel}</span></li>
       </ul>
       {hasSkipped && (
         <details className="mt-2 text-xs">

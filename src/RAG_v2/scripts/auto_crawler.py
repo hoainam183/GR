@@ -258,6 +258,7 @@ class GenericCrawler:
         tags: Optional[Dict[str, str]] = None,
         max_age_months: Optional[int] = None,
         backfill: bool = False,
+        base_url: str = BASE_URL,
     ):
         self.list_path = list_path
         self.id_param = id_param
@@ -269,25 +270,48 @@ class GenericCrawler:
         # When True, skip already-known IDs but keep scanning until cutoff_date
         # (used to backfill historical articles after widening retention window).
         self.backfill = backfill
+        self._base_url = base_url.rstrip("/")
+        # URLs that could not be fetched after retries (surfaced in run summary).
+        self._fetch_failures: List[Dict[str, str]] = []
         self._session = requests.Session()
         self._session.headers.update(HEADERS)
 
     # ── HTTP ──────────────────────────────────────────────────
 
-    def _fetch(self, url: str) -> Optional[BeautifulSoup]:
-        try:
-            res = self._session.get(url, timeout=15)
-            res.raise_for_status()
-            res.encoding = "utf-8"
-            return BeautifulSoup(res.text, "html.parser")
-        except requests.RequestException as e:
-            logger.error("Fetch failed %s: %s", url, e)
-            return None
+    def _fetch(
+        self, url: str, *, retries: int = 3, backoff: float = 1.5
+    ) -> Optional[BeautifulSoup]:
+        """Fetch + parse a page, retrying transient errors with backoff.
+
+        Returns ``None`` only after all attempts fail; the failure is recorded
+        in ``self._fetch_failures`` so the run summary can report dropped pages
+        instead of silently losing them. Runs in a worker thread, so the
+        ``time.sleep`` backoff does not block the event loop.
+        """
+        last_exc: Optional[Exception] = None
+        for attempt in range(1, retries + 1):
+            try:
+                res = self._session.get(url, timeout=15)
+                res.raise_for_status()
+                res.encoding = "utf-8"
+                return BeautifulSoup(res.text, "html.parser")
+            except requests.RequestException as e:
+                last_exc = e
+                logger.warning(
+                    "Fetch attempt %d/%d failed %s: %s", attempt, retries, url, e
+                )
+                if attempt < retries:
+                    time.sleep(backoff ** attempt)
+        logger.error(
+            "Fetch giving up after %d attempts %s: %s", retries, url, last_exc
+        )
+        self._fetch_failures.append({"url": url, "error": str(last_exc)})
+        return None
 
     # ── List parsing ──────────────────────────────────────────
 
     def _build_list_url(self, tag_encoded: str, page: int = 1) -> str:
-        return f"{BASE_URL}{self.list_path}?tag={tag_encoded}&page={page}"
+        return f"{self._base_url}{self.list_path}?tag={tag_encoded}&page={page}"
 
     def _parse_list_page(
         self, soup: BeautifulSoup, category: str
@@ -323,7 +347,7 @@ class GenericCrawler:
             articles.append(
                 {
                     "baiviet_id": article_id,
-                    "url": urljoin(BASE_URL, href_str),
+                    "url": urljoin(self._base_url, href_str),
                     "title": title_text,
                     "category": category,
                     "tag_in_title": tag_text,
@@ -549,9 +573,12 @@ class ChunkProcessor:
         self._chunker = KeHoachChunker()
         self._source_label = source_label
         self._chunks_file = chunks_file
+        # Articles that raised during chunking (surfaced in the run summary).
+        self.chunk_failures: List[Dict[str, str]] = []
 
     def chunk_articles(self, articles: List[Dict]) -> List[Dict]:
         all_chunks: List[Dict] = []
+        self.chunk_failures = []
         for art in articles:
             try:
                 chunks = self._chunker.chunk_document(art)
@@ -567,15 +594,19 @@ class ChunkProcessor:
                         ]
                 all_chunks.extend(chunks)
             except Exception as e:
+                self.chunk_failures.append(
+                    {"baiviet_id": str(art.get("baiviet_id")), "error": str(e)}
+                )
                 logger.warning(
                     "Chunk failed for baiviet_id=%s: %s",
                     art.get("baiviet_id"),
                     e,
                 )
         logger.info(
-            "Produced %d chunks from %d articles.",
+            "Produced %d chunks from %d articles (%d failed).",
             len(all_chunks),
             len(articles),
+            len(self.chunk_failures),
         )
         return all_chunks
 
@@ -1035,6 +1066,7 @@ class AutoCrawlPipeline:
             # Step 1: Crawl from all configured sources
             logger.info("─── STEP 1: Crawl [%s] ───", pipeline_name)
             all_new_articles: List[Dict] = []
+            fetch_failures: List[Dict[str, str]] = []
             for cfg in crawlers_config:
                 crawler = GenericCrawler(
                     list_path=cfg["list_path"],
@@ -1045,12 +1077,23 @@ class AutoCrawlPipeline:
                     tags=tags,
                     max_age_months=retention_months,
                     backfill=backfill,
+                    base_url=getattr(self._settings, "crawler_base_url", BASE_URL),
                 )
                 logger.info("  Crawling from %s …", cfg["label"])
                 new_arts = crawler.crawl_new()
                 all_new_articles.extend(new_arts)
+                fetch_failures.extend(getattr(crawler, "_fetch_failures", []))
 
             summary["new_articles"] = len(all_new_articles)
+            summary["fetch_failures"] = len(fetch_failures)
+            if fetch_failures:
+                # Cap the per-URL detail so a mass outage can't bloat the summary.
+                summary["fetch_failure_urls"] = [f["url"] for f in fetch_failures[:20]]
+                logger.warning(
+                    "Crawl [%s]: %d page(s) dropped after retries.",
+                    pipeline_name,
+                    len(fetch_failures),
+                )
 
             # Bài mới crawl được đóng dấu version hiện tại để lần crawl sau không
             # bị auto-heal xử lý lại (tránh stage trùng).
@@ -1088,6 +1131,7 @@ class AutoCrawlPipeline:
                 )
                 new_chunks = chunker.chunk_articles(to_process)
                 summary["new_chunks"] = len(new_chunks)
+                summary["chunk_failures"] = len(getattr(chunker, "chunk_failures", []))
 
                 if new_chunks:
                     logger.info(
@@ -1387,8 +1431,22 @@ class AutoCrawlPipeline:
                     }
                 )
 
-            db[CRAWLER_RUNS_COLLECTION].insert_one(run_doc)
-            db[CRAWLER_CHUNKS_COLLECTION].insert_many(chunk_docs)
+            # Insert chunks first, then the run. The run is what the admin UI
+            # lists, so it only becomes visible once its chunks are present —
+            # no ghost runs. On any failure, roll back partial inserts so a
+            # standalone (non-replica-set) MongoDB is left clean.
+            try:
+                if chunk_docs:
+                    db[CRAWLER_CHUNKS_COLLECTION].insert_many(chunk_docs)
+                db[CRAWLER_RUNS_COLLECTION].insert_one(run_doc)
+            except Exception:
+                db[CRAWLER_CHUNKS_COLLECTION].delete_many({"run_id": run_id})
+                db[CRAWLER_RUNS_COLLECTION].delete_one({"run_id": run_id})
+                logger.exception(
+                    "Failed to stage crawler run %s; rolled back partial inserts",
+                    run_id,
+                )
+                raise
             logger.info(
                 "Staged crawler run %s with %d chunks.", run_id, len(chunk_docs)
             )
@@ -1821,6 +1879,7 @@ if __name__ == "__main__":
                         output_file=cfg["output_file"],
                         source_label=cfg["source_label"],
                         delay=settings.crawler_delay,
+                        base_url=settings.crawler_base_url,
                     )
                     arts = crawler.crawl_new()
                     logger.info(
@@ -1852,6 +1911,7 @@ if __name__ == "__main__":
                     delay=settings.crawler_delay,
                     tags=pipeline._parse_tags(),
                     max_age_months=cfg["retention_months"],
+                    base_url=settings.crawler_base_url,
                 )
                 arts = crawler.crawl_new()
                 if not args.dry and arts:

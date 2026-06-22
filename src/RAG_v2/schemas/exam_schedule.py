@@ -35,6 +35,7 @@ class ExamScheduleUploadResponse(BaseModel):
     invalid: int  # alias for skipped count (rows that failed validation)
     replaced_existing: bool  # True when prior rows for source_file were removed
     records_indexed: int  # docs written to Elasticsearch
+    exam_type: str | None = None  # term stored on the rows: "giua_ky"|"cuoi_ky"|None
     report: ParseReport
 
 
@@ -68,6 +69,10 @@ class ExamScheduleQuery(BaseModel):
     subject_code: str | None = None
     subject_name: str | None = None
     exam_date: str | None = None  # ISO "yyyy-MM-dd" or display "dd/mm/yyyy"
+    exam_date_from: str | None = None  # inclusive range start
+    exam_date_to: str | None = None  # inclusive range end
     exam_room: str | None = None
     group: str | None = None
+    cohort: str | None = None  # e.g. "K70" (prefix match)
+    exam_type: str | None = None  # "giua_ky" | "cuoi_ky"
     limit: int | None = None

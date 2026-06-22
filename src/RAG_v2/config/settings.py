@@ -235,6 +235,7 @@ class Settings(BaseSettings):
 
     # --- Auto Crawler ---
     crawler_enabled: bool = True
+    crawler_base_url: str = "https://ctt.hust.edu.vn"
     crawler_schedule_hour: int = 2
     crawler_schedule_minute: int = 0
     crawler_delay: float = 1.0

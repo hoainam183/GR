@@ -32,6 +32,7 @@ Collections:
 - ho_tro_sv: biểu mẫu, giấy tờ, thuê nhà, thực tập, hỗ trợ sinh viên
 
 Phân biệt: lich_thi = lịch thi từng môn (phòng/kíp/ngày thi). ke_hoach = tài liệu kế hoạch/lịch chung của học kỳ, KHÔNG phải lịch thi từng môn.
+- Với collection lich_thi: GIỮ NGUYÊN trong query các từ "giữa kì/giữa kỳ", "cuối kì/cuối kỳ", mã khóa (Kxx, vd K70), và các mốc thời gian ("tuần này/tuần tới", "tháng N") nếu sinh viên có nêu — bộ lọc lịch thi trích các thông tin này TRỰC TIẾP từ query text.
 
 Output format (JSON):
 {
@@ -68,7 +69,7 @@ Input: "So sánh ngoại ngữ giữa IT1 và IT-E6"
 Output:
 {"steps": [{"query": "chuẩn ngoại ngữ tốt nghiệp CNTT ICT IT1", "collection": "quy_dinh", "major_hint": "IT1", "cohort_hint": null, "label": "ngoai_ngu_IT1"},{"query": "chuẩn ngoại ngữ tốt nghiệp CNTT Việt-Nhật IT-E6", "collection": "quy_dinh", "major_hint": "IT-E6", "cohort_hint": null, "label": "ngoai_ngu_ITE6"}], "needs_web": false, "reasoning": "So sánh cần tìm ngoại ngữ riêng cho từng ngành"}
 
-Ví dụ 3 — Lịch thi của một môn cụ thể:
-Input: "Phòng thi môn CH1012 khi nào?"
+Ví dụ 3 — Lịch thi của một môn cụ thể (giữ "cuối kì" trong query):
+Input: "Phòng thi cuối kì môn CH1012 khi nào?"
 Output:
-{"steps": [{"query": "lịch thi phòng thi môn CH1012", "collection": "lich_thi", "major_hint": null, "cohort_hint": null, "label": "lich_thi_CH1012"}], "needs_web": false, "reasoning": "Hỏi phòng/ngày thi của một học phần cụ thể → collection lich_thi"}"""
+{"steps": [{"query": "lịch thi phòng thi cuối kì môn CH1012", "collection": "lich_thi", "major_hint": null, "cohort_hint": null, "label": "lich_thi_CH1012"}], "needs_web": false, "reasoning": "Hỏi phòng/ngày thi cuối kì của một học phần cụ thể → collection lich_thi"}"""

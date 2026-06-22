@@ -36,6 +36,10 @@ class ExamScheduleRecord(BaseModel):
     exam_class_code: str = ""  # Mã lớp thi
     note: str = ""  # Ghi chú
 
+    # Kỳ thi: "giua_ky" (giữa kỳ) | "cuoi_ky" (cuối kỳ) | None (không xác định).
+    # File-level value: admin chọn khi upload, hoặc auto-detect từ banner file.
+    exam_type: str | None = None
+
     # Grouping / cohort
     group: str = ""  # Nhóm, e.g. "02,04-K70C"
     cohort: str | None = None  # extracted from group/note, e.g. "K70C"
@@ -106,6 +110,7 @@ class ExamScheduleRecord(BaseModel):
             "row_index": self.row_index,
             "subject_code": self.subject_code,
             "subject_name": self.subject_name,
+            "exam_type": self.exam_type,
             "mgmt_class_code": self.mgmt_class_code,
             "exam_class_code": self.exam_class_code,
             "note": self.note,

@@ -36,6 +36,10 @@ _COHORT_RE = re.compile(r"K\d{2,3}[A-Za-z]?")
 _INT_RE = re.compile(r"\d+")
 # Banner line, e.g. "Kíp 1 (7h00) - Kíp 2 (9h30) - Kíp 3 (12h30) - Kíp 4 (15h00)".
 _KIP_BANNER_RE = re.compile(r"kip\s*(\d+)\s*\(\s*(\d{1,2})\s*h\s*(\d{0,2})")
+# Folded markers for the exam term in the banner/filename. "k[yi]" covers both
+# "kỳ"→"ky" and "kì"→"ki"; the optional "hoc" matches "giữa/cuối HỌC kỳ".
+_GIUA_KY_RE = re.compile(r"giua\s*(?:hoc\s*)?k[yi]")
+_CUOI_KY_RE = re.compile(r"cuoi\s*(?:hoc\s*)?k[yi]")
 
 # Folded header → canonical field. The schedule ships in two column-naming
 # layouts that mean the same thing; both are aliased here so a single normalised
@@ -197,25 +201,31 @@ def parse_kip_time_map(text: str) -> dict[str, str]:
 def load_pdf_rows(
     path: str,
     column_map: dict[str, str] | None = None,
-) -> tuple[list[dict[str, Any]], dict[str, str]]:
-    """Read a text-based ``.pdf`` and return ``(mapped_rows, kip_time_map)``.
+) -> tuple[list[dict[str, Any]], dict[str, str], str]:
+    """Read a text-based ``.pdf`` and return ``(mapped_rows, kip_time_map, banner_text)``.
 
     Tables are extracted with pdfplumber. The banner + header repeat on every
     page; the header is re-detected per page and the rows below it are mapped,
     so continuation pages stay aligned. The Kíp→time legend in the banner is
-    parsed for display start times. Raises ``ValueError`` when no header is found.
+    parsed for display start times, and the first page's text is returned as
+    ``banner_text`` for exam-term detection. Raises ``ValueError`` when no
+    header is found.
     """
     import pdfplumber
 
     column_map = column_map or _DEFAULT_COLUMN_MAP
     mapped: list[dict[str, Any]] = []
     kip_time_map: dict[str, str] = {}
+    banner_text = ""
     last_col_field: dict[int, str] | None = None
 
     with pdfplumber.open(path) as pdf:
         for page in pdf.pages:
+            page_text = page.extract_text() or ""
+            if not banner_text and page_text:
+                banner_text = page_text
             if not kip_time_map:
-                kip_time_map = parse_kip_time_map(page.extract_text() or "")
+                kip_time_map = parse_kip_time_map(page_text)
             for table in page.extract_tables():
                 if not table:
                     continue
@@ -234,7 +244,24 @@ def load_pdf_rows(
 
     if last_col_field is None:
         raise ValueError("No exam-schedule header row found in PDF")
-    return _apply_forward_fill(mapped), kip_time_map
+    return _apply_forward_fill(mapped), kip_time_map, banner_text
+
+
+def detect_exam_type(banner_text: str, filename: str = "") -> str | None:
+    """Infer the exam term ("giua_ky"/"cuoi_ky") from the banner + filename.
+
+    Returns a value only when exactly one term is mentioned. A file that names
+    both (e.g. banner "LỊCH THI GIỮA HỌC KỲ ... VÀ CUỐI HỌC KỲ ...") or names
+    neither yields ``None`` — the admin override or the exam date disambiguates.
+    """
+    folded = _fold(f"{banner_text} {filename}")
+    has_giua = bool(_GIUA_KY_RE.search(folded))
+    has_cuoi = bool(_CUOI_KY_RE.search(folded))
+    if has_giua and not has_cuoi:
+        return "giua_ky"
+    if has_cuoi and not has_giua:
+        return "cuoi_ky"
+    return None
 
 
 def extract_cohort(*values: Any) -> str | None:
@@ -314,13 +341,18 @@ def _settings_value(settings: Any, name: str, default: Any) -> Any:
 def _load_rows(
     path: str,
     column_map: dict[str, str],
-) -> tuple[list[dict[str, Any]], dict[str, str]]:
-    """Dispatch to the right loader by extension; return (rows, kip_time_map)."""
+) -> tuple[list[dict[str, Any]], dict[str, str], str]:
+    """Dispatch to the right loader by extension.
+
+    Returns ``(rows, kip_time_map, banner_text)``. Excel exports carry no
+    extractable banner here, so ``banner_text`` is empty and term detection
+    falls back to the filename / admin override.
+    """
     suffix = Path(path).suffix.lower()
     if suffix == ".pdf":
         return load_pdf_rows(path, column_map)
     if suffix in (".xlsx", ".xlsm"):
-        return load_workbook_rows(path, column_map), {}
+        return load_workbook_rows(path, column_map), {}, ""
     raise ValueError(f"Unsupported exam-schedule file type: {suffix!r}")
 
 
@@ -331,8 +363,13 @@ def parse_exam_workbook(
     source_file: str,
     source_doc_id: str | None = None,
     uploaded_by: str | None = None,
+    exam_type_override: str | None = None,
 ) -> tuple[list[ExamScheduleRecord], ParseReport]:
-    """Parse a PDF/Excel file into records + a ParseReport. Blocking."""
+    """Parse a PDF/Excel file into records + a ParseReport. Blocking.
+
+    ``exam_type_override`` (admin selection) wins; otherwise the term is
+    auto-detected from the file banner/filename and applied to every row.
+    """
     column_map = _settings_value(
         settings, "exam_schedule_column_map", _DEFAULT_COLUMN_MAP
     )
@@ -340,9 +377,10 @@ def parse_exam_workbook(
     pivot = _settings_value(settings, "exam_schedule_two_digit_year_pivot", 2000)
     settings_kip = _settings_value(settings, "exam_schedule_kip_time_map", {})
 
-    raw_rows, detected_kip = _load_rows(path, column_map)
+    raw_rows, detected_kip, banner_text = _load_rows(path, column_map)
     # The PDF banner is authoritative for this file; settings fills any gaps.
     kip_time_map = {**settings_kip, **detected_kip}
+    file_exam_type = exam_type_override or detect_exam_type(banner_text, source_file)
 
     records: list[ExamScheduleRecord] = []
     skipped: list[SkippedRow] = []
@@ -353,6 +391,7 @@ def parse_exam_workbook(
             two_digit_year_pivot=pivot,
             kip_time_map=kip_time_map,
         )
+        fields["exam_type"] = file_exam_type
         reason = validate_row(fields)
         if reason is not None:
             skipped.append(SkippedRow(row_index=row_index, reason=reason))
@@ -390,6 +429,7 @@ async def parse_exam_workbook_async(
     source_file: str,
     source_doc_id: str | None = None,
     uploaded_by: str | None = None,
+    exam_type_override: str | None = None,
 ) -> tuple[list[ExamScheduleRecord], ParseReport]:
     """Async wrapper — offloads the blocking parse to a worker thread."""
 
@@ -400,6 +440,7 @@ async def parse_exam_workbook_async(
             source_file=source_file,
             source_doc_id=source_doc_id,
             uploaded_by=uploaded_by,
+            exam_type_override=exam_type_override,
         )
 
     return await anyio.to_thread.run_sync(_run)
@@ -411,6 +452,7 @@ __all__ = [
     "load_workbook_rows",
     "load_pdf_rows",
     "parse_kip_time_map",
+    "detect_exam_type",
     "map_row",
     "extract_cohort",
     "parse_student_count",

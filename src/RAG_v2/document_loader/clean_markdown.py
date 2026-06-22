@@ -19,21 +19,37 @@ def clean_markdown(text: str) -> str:
     lines = text.splitlines()
     cleaned_lines = []
     in_toc = False
+    # Số dòng "không giống mục lục" liên tiếp trong vùng TOC. Dùng để chặn
+    # việc xoá tràn: chỉ một heading "MỤC LỤC" không được phép nuốt toàn bộ
+    # phần thân còn lại nếu sau nó không có heading mới.
+    non_toc_streak = 0
 
     for line in lines:
         raw_line = line
         line = line.strip()
 
-        # Bỏ MỤC LỤC
+        # Bắt đầu vùng MỤC LỤC
         if re.match(r"^#{1,3}\s*MỤC LỤC", line, re.IGNORECASE):
             in_toc = True
+            non_toc_streak = 0
             continue
 
         if in_toc:
-            if re.match(r"^#{1,3}\s+", line):  # Gặp tiêu đề mới
+            if re.match(r"^#{1,3}\s+", line):
+                # Gặp tiêu đề mới → kết thúc TOC, xử lý dòng này như bình thường.
                 in_toc = False
-            else:
+            elif is_toc_table_row(line) or not line:
+                # Mục lục thật (dotted-leader) hoặc dòng trống → bỏ.
+                non_toc_streak = 0
                 continue
+            else:
+                # Dòng nội dung thật: bỏ tối đa 2 dòng; nếu có ≥3 dòng nội dung
+                # liên tiếp thì coi như TOC đã hết và giữ lại từ dòng này.
+                non_toc_streak += 1
+                if non_toc_streak >= 3:
+                    in_toc = False
+                else:
+                    continue
 
         # Bỏ dòng chỉ có ký tự căn dòng (nhưng giữ bảng)
         if re.match(r"^[\-_\.]{5,}$", line):  # Bỏ dòng gạch, không phải bảng

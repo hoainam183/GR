@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Annotated, Any, Optional
 
 from bson import ObjectId
@@ -49,7 +50,7 @@ from schemas.document import (
     DocumentListResponse,
     MarkdownContent,
 )
-from utils.storage import LocalStorage
+from utils.storage import LocalStorage, SUPPORTED_UPLOAD_EXTS
 
 logger = logging.getLogger(__name__)
 
@@ -208,7 +209,7 @@ async def upload_documents(
     chunking_strategy: Optional[str] = Form(None),
     metadata_overrides: Optional[str] = Form(None),
 ):
-    """Upload one or more PDF files for processing.
+    """Upload one or more PDF or DOCX files for processing.
 
     Returns a list of created document records.
     """
@@ -239,6 +240,18 @@ async def upload_documents(
             meta = json.loads(metadata_overrides)
         except json.JSONDecodeError:
             raise HTTPException(status_code=400, detail="Invalid metadata_overrides JSON")
+        if not isinstance(meta, dict):
+            raise HTTPException(
+                status_code=400, detail="metadata_overrides must be a JSON object"
+            )
+        from pipeline.document_pipeline import PROTECTED_CHUNK_META_KEYS
+
+        clashing = sorted(set(meta) & PROTECTED_CHUNK_META_KEYS)
+        if clashing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"metadata_overrides cannot set reserved keys: {clashing}",
+            )
 
     # Suggest chunking strategy if not provided
     strategy = chunking_strategy or COLLECTION_CHUNKER_MAP.get(collection, "recursive")
@@ -247,11 +260,15 @@ async def upload_documents(
     created = []
 
     for f in files:
-        # Validate file type
-        if not f.filename or not f.filename.lower().endswith(".pdf"):
+        # Validate file type (PDF or DOCX for the general document pipeline)
+        ext = Path(f.filename).suffix.lower() if f.filename else ""
+        if ext not in SUPPORTED_UPLOAD_EXTS:
             raise HTTPException(
                 status_code=400,
-                detail=f"Only PDF files are allowed. Got: {f.filename!r}",
+                detail=(
+                    f"Only {sorted(SUPPORTED_UPLOAD_EXTS)} files are allowed. "
+                    f"Got: {f.filename!r}"
+                ),
             )
 
         # Read content to check size
@@ -472,6 +489,11 @@ async def convert_document(
             status_code=400,
             detail=f"Invalid converter. Must be one of: {sorted(VALID_CONVERTERS)}",
         )
+
+    # DOCX can only be parsed by docling; reflect that in the DB/audit/polling
+    # immediately rather than after the background task corrects it.
+    if Path(doc.get("file_path", "")).suffix.lower() == ".docx":
+        effective_converter = "docling"
 
     await db[DOCUMENTS_COLLECTION].update_one(
         {"_id": ObjectId(doc_id)},

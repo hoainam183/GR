@@ -12,7 +12,10 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+import anyio.to_thread
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -38,6 +41,39 @@ _JSON_STRATEGIES = {"kehoach", "stsv"}
 
 # Valid PDF converter names
 VALID_CONVERTERS = {"pymupdf4llm", "docling"}
+
+# Chunk-metadata keys owned by the pipeline. Admin-supplied ``metadata_overrides``
+# must never clobber these — doing so breaks search filtering (``level``),
+# parent-context expansion (``parent_id``), Qdrant point identity (``qdrant_id``),
+# and cleanup-by-``document_id``.
+PROTECTED_CHUNK_META_KEYS = frozenset(
+    {
+        "strategy",
+        "document_id",
+        "filename",
+        "collection",
+        "parent_id",
+        "level",
+        "qdrant_id",
+        "chunker_original_id",
+        "id",
+    }
+)
+
+
+def _sanitize_metadata_overrides(
+    overrides: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Drop protected keys from admin metadata overrides, logging any rejected."""
+    if not overrides:
+        return {}
+    safe = {k: v for k, v in overrides.items() if k not in PROTECTED_CHUNK_META_KEYS}
+    rejected = [k for k in overrides if k in PROTECTED_CHUNK_META_KEYS]
+    if rejected:
+        logger.warning(
+            "Ignored protected metadata_overrides keys: %s", sorted(rejected)
+        )
+    return safe
 
 
 def _create_chunker(strategy: str, converter: str = "pymupdf4llm") -> Any:
@@ -244,30 +280,36 @@ class DocumentPipeline:
 
         return pymupdf4llm.to_markdown(str(pdf_path))
 
-    def _convert_with_docling(self, pdf_path: Any, doc_id: str) -> str:
-        """Convert a PDF to markdown using docling (handles scanned PDFs / OCR)."""
-        from pathlib import Path as _Path
+    def _convert_with_docling(self, source_path: Any, doc_id: str) -> str:
+        """Convert a PDF/DOCX to markdown using docling.
 
+        docling handles scanned PDFs (OCR) and natively parses .docx, emitting
+        ``#`` headers + GFM tables that the downstream chunkers expect.
+        """
         from document_loader.pdf_to_markdown.converters.docling_converter import (
             DoclingConverter,
         )
 
         conv = DoclingConverter(output_dir=str(self._storage.base_dir / doc_id))
-        result = conv.convert(pdf_path)
-        return _Path(result["markdown_path"]).read_text(encoding="utf-8")
+        result = conv.convert(source_path)
+        return Path(result["markdown_path"]).read_text(encoding="utf-8")
 
     def _convert_to_markdown(
-        self, pdf_path: Any, doc_id: str, converter: str
+        self, source_path: Any, doc_id: str, converter: str
     ) -> Tuple[str, str]:
-        """Convert *pdf_path* to markdown, returning ``(markdown, converter_used)``.
+        """Convert *source_path* to markdown, returning ``(markdown, converter_used)``.
 
-        On the default pymupdf4llm path, falls back to docling when the output
-        is empty/near-empty (scanned PDF) so it is not indexed as a blank doc.
+        - DOCX always uses docling (pymupdf4llm cannot read .docx).
+        - For PDF on the default pymupdf4llm path, falls back to docling when the
+          output is empty/near-empty (scanned PDF) so it is not indexed blank.
         """
-        if converter == "docling":
-            return self._convert_with_docling(pdf_path, doc_id), "docling"
+        if Path(source_path).suffix.lower() == ".docx":
+            return self._convert_with_docling(source_path, doc_id), "docling"
 
-        markdown = self._convert_with_pymupdf4llm(pdf_path)
+        if converter == "docling":
+            return self._convert_with_docling(source_path, doc_id), "docling"
+
+        markdown = self._convert_with_pymupdf4llm(source_path)
         if self._markdown_too_short(markdown):
             logger.warning(
                 "pymupdf4llm produced %d non-whitespace chars for %s; "
@@ -275,7 +317,7 @@ class DocumentPipeline:
                 len(markdown.strip()),
                 doc_id,
             )
-            return self._convert_with_docling(pdf_path, doc_id), "docling"
+            return self._convert_with_docling(source_path, doc_id), "docling"
         return markdown, converter
 
     async def convert_pdf(
@@ -284,19 +326,23 @@ class DocumentPipeline:
         db: AsyncIOMotorDatabase,
         converter: str = "pymupdf4llm",
     ) -> None:
-        """Convert a PDF document to markdown.
+        """Convert a PDF or DOCX document to markdown.
 
         Args:
             doc_id: Document ID.
             db: Motor database instance.
             converter: Converter to use — ``"pymupdf4llm"`` (default) or
-                ``"docling"``.
+                ``"docling"``. DOCX always uses docling regardless of this value.
 
         Updates status: ``converting`` → ``converted`` (or ``failed``).
         """
         try:
             doc = await self._get_doc(db, doc_id)
             if doc is None:
+                logger.warning(
+                    "Convert aborted: document %s not found (deleted mid-pipeline?)",
+                    doc_id,
+                )
                 return
 
             await self._update_status(
@@ -306,9 +352,11 @@ class DocumentPipeline:
                 {"error_message": None, "converter": converter},
             )
 
-            pdf_path = self._storage.base_dir / doc["file_path"]
-            markdown, converter = self._convert_to_markdown(
-                pdf_path, doc_id, converter
+            source_path = self._storage.base_dir / doc["file_path"]
+            # Offload the heavy, synchronous converter (pymupdf4llm / docling OCR)
+            # so it never blocks the event loop when run from BackgroundTasks.
+            markdown, converter = await anyio.to_thread.run_sync(
+                lambda: self._convert_to_markdown(source_path, doc_id, converter)
             )
 
             if self._markdown_too_short(markdown):
@@ -355,6 +403,10 @@ class DocumentPipeline:
         try:
             doc = await self._get_doc(db, doc_id)
             if doc is None:
+                logger.warning(
+                    "Clean aborted: document %s not found (deleted mid-pipeline?)",
+                    doc_id,
+                )
                 return
 
             await self._update_status(
@@ -367,7 +419,7 @@ class DocumentPipeline:
             raw_md = await self._storage.read_text(doc["markdown_path"])
 
             from document_loader.clean_markdown import clean_markdown
-            cleaned = clean_markdown(raw_md)
+            cleaned = await anyio.to_thread.run_sync(lambda: clean_markdown(raw_md))
 
             cleaned_rel = await self._storage.save_text(
                 cleaned, doc_id, "cleaned.md"
@@ -402,6 +454,10 @@ class DocumentPipeline:
         try:
             doc = await self._get_doc(db, doc_id)
             if doc is None:
+                logger.warning(
+                    "Chunk aborted: document %s not found (deleted mid-pipeline?)",
+                    doc_id,
+                )
                 return
 
             await self._update_status(
@@ -422,10 +478,13 @@ class DocumentPipeline:
 
             text_content = await self._storage.read_text(text_path)
 
-            # Create chunker and run
-            chunker = _create_chunker(strategy, converter=doc.get("converter", "pymupdf4llm"))
-            raw_chunks, stats = _run_chunker(
-                chunker, text_content, doc.get("filename", ""), strategy
+            # Create chunker and run. The chunker is CPU-heavy and synchronous;
+            # offload it so it never blocks the event loop under BackgroundTasks.
+            filename = doc.get("filename", "")
+            converter = doc.get("converter", "pymupdf4llm")
+            chunker = _create_chunker(strategy, converter=converter)
+            raw_chunks, stats = await anyio.to_thread.run_sync(
+                lambda: _run_chunker(chunker, text_content, filename, strategy)
             )
 
             # FALLBACK: If hierarchical/olmocr produces 0 chunks (e.g. not a legal doc), fallback to recursive
@@ -436,9 +495,11 @@ class DocumentPipeline:
                     doc_id,
                 )
                 strategy = "recursive"
-                chunker = _create_chunker(strategy, converter=doc.get("converter", "pymupdf4llm"))
-                raw_chunks, stats = _run_chunker(
-                    chunker, text_content, doc.get("filename", ""), strategy
+                fallback_chunker = _create_chunker(strategy, converter=converter)
+                raw_chunks, stats = await anyio.to_thread.run_sync(
+                    lambda: _run_chunker(
+                        fallback_chunker, text_content, filename, strategy
+                    )
                 )
 
             logger.info(
@@ -486,9 +547,10 @@ class DocumentPipeline:
                 chunker_original_id = ch.get("id", "")
                 if chunker_original_id:
                     chunk_meta["chunker_original_id"] = chunker_original_id
-                # Merge admin-provided metadata overrides
-                if doc.get("metadata_overrides"):
-                    chunk_meta.update(doc["metadata_overrides"])
+                # Merge admin-provided metadata overrides (protected keys dropped)
+                chunk_meta.update(
+                    _sanitize_metadata_overrides(doc.get("metadata_overrides"))
+                )
 
                 await db[DOCUMENT_CHUNKS_COLLECTION].insert_one(
                     {
@@ -584,6 +646,10 @@ class DocumentPipeline:
         try:
             doc = await self._get_doc(db, doc_id)
             if doc is None:
+                logger.warning(
+                    "Index aborted: document %s not found (deleted mid-pipeline?)",
+                    doc_id,
+                )
                 return
 
             if not doc.get("chunks_reviewed", False):
@@ -592,6 +658,11 @@ class DocumentPipeline:
             await self._update_status(
                 db, doc_id, "embedding", {"error_message": None}
             )
+
+            # Idempotent re-index: clear any prior vectors/ES docs for this
+            # document first, so re-indexing after a rollback + re-chunk does
+            # not orphan stale points (qdrant_id changes on every chunk run).
+            await self.delete_indexed_data(doc_id, doc.get("collection", ""))
 
             chunk_ids = doc.get("chunk_ids", [])
             if not chunk_ids:
@@ -665,20 +736,29 @@ class DocumentPipeline:
                 len(parent_id_remap),
                 doc_id,
             )
-            bge_embedder = self._get_bge_embedder()
-            e5_embedder = self._get_e5_embedder()
+            # Embedder construction loads model weights on first call; the
+            # embedding + store writes are all heavy synchronous work, so run
+            # them in a worker thread to keep the event loop responsive.
+            bge_embedder = await anyio.to_thread.run_sync(self._get_bge_embedder)
+            e5_embedder = await anyio.to_thread.run_sync(self._get_e5_embedder)
 
-            bge_vectors = bge_embedder.embed_documents(qdrant_texts)
-            e5_vectors = e5_embedder.embed_documents(qdrant_texts)
+            bge_vectors = await anyio.to_thread.run_sync(
+                lambda: bge_embedder.embed_documents(qdrant_texts)
+            )
+            e5_vectors = await anyio.to_thread.run_sync(
+                lambda: e5_embedder.embed_documents(qdrant_texts)
+            )
 
             collection_name = doc["collection"]
             qdrant_store = self._get_qdrant_store(collection_name)
-            qdrant_store.index_documents(
-                texts=qdrant_texts,
-                bge_m3_vectors=bge_vectors,
-                e5_vectors=e5_vectors,
-                metadatas=qdrant_metadatas,
-                ids=qdrant_ids,
+            await anyio.to_thread.run_sync(
+                lambda: qdrant_store.index_documents(
+                    texts=qdrant_texts,
+                    bge_m3_vectors=bge_vectors,
+                    e5_vectors=e5_vectors,
+                    metadatas=qdrant_metadatas,
+                    ids=qdrant_ids,
+                )
             )
 
             # --- Index to Elasticsearch (child/recursive/appendix only) ---
@@ -688,10 +768,12 @@ class DocumentPipeline:
                 es_ids = [c.get("qdrant_id", str(uuid.uuid5(uuid.NAMESPACE_OID, str(c["_id"])))) for c in es_chunks]
 
                 es_store = self._get_es_store(collection_name)
-                es_store.index_documents(
-                    texts=es_texts,
-                    metadatas=es_metadatas,
-                    ids=es_ids,
+                await anyio.to_thread.run_sync(
+                    lambda: es_store.index_documents(
+                        texts=es_texts,
+                        metadatas=es_metadatas,
+                        ids=es_ids,
+                    )
                 )
 
             await self._update_status(
@@ -738,22 +820,34 @@ class DocumentPipeline:
         """
         # Step 1: Convert
         await self.convert_pdf(doc_id, db, converter=converter)
-        doc = await self._get_doc(db, doc_id)
-        if doc is None or doc["status"] == "failed":
+        if self._pipeline_should_stop(await self._get_doc(db, doc_id), doc_id):
             return
 
         # Step 2: Clean
         await self.clean(doc_id, db)
-        doc = await self._get_doc(db, doc_id)
-        if doc is None or doc["status"] == "failed":
+        if self._pipeline_should_stop(await self._get_doc(db, doc_id), doc_id):
             return
 
         # Step 3: Chunk
-        strategy = doc.get("chunking_strategy") or "recursive"
-        await self.chunk(doc_id, strategy, db)
         doc = await self._get_doc(db, doc_id)
-        if doc is None or doc["status"] == "failed":
+        strategy = (doc or {}).get("chunking_strategy") or "recursive"
+        await self.chunk(doc_id, strategy, db)
+        if self._pipeline_should_stop(await self._get_doc(db, doc_id), doc_id):
             return
+
+    @staticmethod
+    def _pipeline_should_stop(doc: Optional[Dict], doc_id: str) -> bool:
+        """True when the full pipeline must stop (doc gone or a step failed)."""
+        if doc is None:
+            logger.warning(
+                "Full pipeline stopped: document %s not found (deleted mid-run?)",
+                doc_id,
+            )
+            return True
+        if doc.get("status") == "failed":
+            logger.info("Full pipeline stopped: document %s in 'failed' state.", doc_id)
+            return True
+        return False
 
     # ------------------------------------------------------------------
     # Cleanup: delete indexed data from vector stores
@@ -768,7 +862,9 @@ class DocumentPipeline:
         """
         try:
             qdrant_store = self._get_qdrant_store(collection_name)
-            qdrant_store.delete_by_metadata("document_id", doc_id)
+            await anyio.to_thread.run_sync(
+                lambda: qdrant_store.delete_by_metadata("document_id", doc_id)
+            )
         except Exception:
             logger.warning(
                 "Failed to delete from Qdrant for doc %s", doc_id, exc_info=True
@@ -776,7 +872,9 @@ class DocumentPipeline:
 
         try:
             es_store = self._get_es_store(collection_name)
-            es_store.delete_by_metadata("document_id", doc_id)
+            await anyio.to_thread.run_sync(
+                lambda: es_store.delete_by_metadata("document_id", doc_id)
+            )
         except Exception:
             logger.warning(
                 "Failed to delete from ES for doc %s", doc_id, exc_info=True

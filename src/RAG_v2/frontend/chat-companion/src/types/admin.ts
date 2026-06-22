@@ -127,6 +127,9 @@ export const PIPELINE_STEPS: PipelineStep[] = [
 /** Upload "kind" chosen by admin. Routes the form to the right backend pipeline. */
 export type UploadKind = 'document' | 'exam_schedule';
 
+/** Exam term for a lịch thi file. Empty string = auto-detect from the file. */
+export type ExamType = 'giua_ky' | 'cuoi_ky';
+
 /** Response from POST /admin/exam-schedules (schemas/exam_schedule.py). */
 export interface SkippedRow {
   row_index: number;
@@ -146,6 +149,7 @@ export interface ExamScheduleUploadResponse {
   invalid: number;
   replaced_existing: boolean;
   records_indexed: number;
+  exam_type: ExamType | null;
   report: ParseReport;
 }
 

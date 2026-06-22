@@ -117,9 +117,11 @@ _FOLDED_COMPARISON_RE: re.Pattern = re.compile(
 # Exam-schedule (lịch thi) fast-path. Kept SPECIFIC so "lịch học" / "lịch đăng
 # ký" (academic-calendar, routed to ke_hoach) do NOT match. These route to the
 # Planner-Executor, which emits a structured lich_thi step.
+# "phong thi" uses a negative lookahead so "phòng thí nghiệm" (→ "phong thi
+# nghiem", a lab room) does NOT false-match the exam fast-path.
 _FOLDED_EXAM_RE: re.Pattern = re.compile(
-    r"\b(lich thi|phong thi|kip thi|ngay thi|thi mon|mon thi|ma lop thi|dot thi"
-    r"|thi ngay|thi khi nao|thi vao|thi hom nao|thi luc nao)\b",
+    r"\b(lich thi|phong thi(?! nghiem)|kip thi|ngay thi|thi mon|mon thi|ma lop thi"
+    r"|dot thi|thi ngay|thi khi nao|thi vao|thi hom nao|thi luc nao)\b",
     re.IGNORECASE,
 )
 # Bare "may" (how many) is intentionally omitted: it collides with "máy"

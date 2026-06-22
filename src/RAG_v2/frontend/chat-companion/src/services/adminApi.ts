@@ -13,6 +13,7 @@ import type {
   ChunkStrategySummary,
   ExamScheduleUploadResponse,
   ExamScheduleSummary,
+  ExamType,
 } from '@/types/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -61,10 +62,13 @@ export async function uploadDocuments(
  */
 export async function uploadExamSchedule(
   file: File,
+  examType?: ExamType | '',
   onProgress?: (pct: number) => void,
 ): Promise<ExamScheduleUploadResponse> {
   const form = new FormData();
   form.append('file', file);
+  // Omit when empty so the backend auto-detects the term from the file.
+  if (examType) form.append('exam_type', examType);
 
   const { data } = await adminClient.post<ExamScheduleUploadResponse>(
     '/admin/exam-schedules',

@@ -15,6 +15,10 @@ from fastapi import UploadFile
 
 logger = logging.getLogger(__name__)
 
+# File extensions accepted for the general document pipeline (PDF + DOCX).
+# Excel keeps its own dedicated exam-schedule path and is intentionally absent.
+SUPPORTED_UPLOAD_EXTS = {".pdf", ".docx"}
+
 
 class StorageBackend(ABC):
     """Abstract file-storage interface."""
@@ -47,7 +51,7 @@ class LocalStorage(StorageBackend):
 
         {base_dir}/
             {doc_id}/
-                original.pdf
+                original.{pdf|docx}
                 markdown.md
                 cleaned.md
     """
@@ -62,9 +66,19 @@ class LocalStorage(StorageBackend):
         return d
 
     async def save_upload(self, file: UploadFile, doc_id: str) -> str:
-        """Save uploaded PDF, return relative path."""
+        """Save an uploaded PDF or DOCX, return relative path.
+
+        The stored basename is ``original`` plus the source extension; the raw
+        filename is never interpolated into the path (traversal-safe).
+        """
+        ext = Path(file.filename or "").suffix.lower()
+        if ext not in SUPPORTED_UPLOAD_EXTS:
+            raise ValueError(
+                f"Unsupported file extension: {ext!r}. "
+                f"Allowed: {sorted(SUPPORTED_UPLOAD_EXTS)}"
+            )
         doc_dir = self._doc_dir(doc_id)
-        dest = doc_dir / "original.pdf"
+        dest = doc_dir / f"original{ext}"
         content = await file.read()
         dest.write_bytes(content)
         return str(dest.relative_to(self.base_dir))

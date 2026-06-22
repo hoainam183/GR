@@ -14,7 +14,16 @@ from pathlib import Path
 from typing import Annotated, Any
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from auth.rbac import require_admin
@@ -36,6 +45,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 _ALLOWED_SUFFIXES = (".pdf", ".xlsx", ".xlsm")
+_ALLOWED_EXAM_TYPES = ("giua_ky", "cuoi_ky")
 
 
 def _save_upload(
@@ -58,8 +68,13 @@ async def upload_exam_schedule(
     user: Annotated[UserDocument, Depends(require_admin)],
     db: AsyncIOMotorDatabase = Depends(get_database),
     file: UploadFile = File(...),
+    exam_type: Annotated[str | None, Form()] = None,
 ) -> ExamScheduleUploadResponse:
-    """Upload one exam-schedule ``.pdf``/``.xlsx``; parse, replace, and index its rows."""
+    """Upload one exam-schedule ``.pdf``/``.xlsx``; parse, replace, and index its rows.
+
+    ``exam_type`` ("giua_ky"/"cuoi_ky") is optional: when omitted the term is
+    auto-detected from the file banner/filename.
+    """
     settings = Settings()
 
     suffix = Path(file.filename or "").suffix.lower()
@@ -69,6 +84,15 @@ async def upload_exam_schedule(
             detail=(
                 f"Only {', '.join(_ALLOWED_SUFFIXES)} files are allowed. "
                 f"Got: {file.filename!r}"
+            ),
+        )
+
+    if exam_type is not None and exam_type not in _ALLOWED_EXAM_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"exam_type must be one of {_ALLOWED_EXAM_TYPES} or omitted. "
+                f"Got: {exam_type!r}"
             ),
         )
 
@@ -92,6 +116,7 @@ async def upload_exam_schedule(
             source_file=file.filename or f"{doc_id}{suffix}",
             source_doc_id=doc_id,
             uploaded_by=str(user.id),
+            exam_type=exam_type,
         )
     except ValueError as exc:
         # Unreadable / not a recognisable exam file (no header row, etc.).

@@ -28,6 +28,7 @@ _EXAM_DATE_FORMAT = "yyyy-MM-dd||dd/MM/yyyy||epoch_millis"
 
 _KEYWORD_FIELDS = (
     "subject_code",
+    "exam_type",
     "exam_room",
     "exam_session",
     "start_time",
@@ -213,40 +214,68 @@ class ExamScheduleESStore:
         subject_code: str | None = None,
         subject_name: str | None = None,
         exam_date: str | None = None,
+        exam_date_from: str | None = None,
+        exam_date_to: str | None = None,
         exam_room: str | None = None,
         group: str | None = None,
+        cohort: str | None = None,
+        exam_type: str | None = None,
     ) -> dict[str, Any]:
-        """Build the ES bool query for the given filters (testable in isolation)."""
+        """Build the ES bool query for the given filters (testable in isolation).
+
+        ``exam_date`` matches one exact day; ``exam_date_from``/``exam_date_to``
+        give an inclusive range (e.g. "lịch thi tuần tới"). ``cohort`` uses a
+        ``prefix`` so "K70" still matches a stored "K70C".
+        """
         filter_clauses: list[dict[str, Any]] = []
         must_clauses: list[dict[str, Any]] = []
 
         if subject_code:
             filter_clauses.append({"term": {"subject_code": subject_code.upper()}})
+        if exam_type:
+            filter_clauses.append({"term": {"exam_type": exam_type}})
         if exam_room:
             filter_clauses.append({"term": {"exam_room": exam_room}})
         if group:
             filter_clauses.append({"term": {"group": group}})
+        if cohort:
+            filter_clauses.append({"prefix": {"cohort": cohort.upper()}})
         if exam_date:
             filter_clauses.append(
                 {"range": {"exam_date": {"gte": exam_date, "lte": exam_date}}}
             )
+        elif exam_date_from or exam_date_to:
+            bounds: dict[str, str] = {}
+            if exam_date_from:
+                bounds["gte"] = exam_date_from
+            if exam_date_to:
+                bounds["lte"] = exam_date_to
+            filter_clauses.append({"range": {"exam_date": bounds}})
+        should_clauses: list[dict[str, Any]] = []
         if subject_name:
-            must_clauses.append(
-                {
-                    "multi_match": {
-                        "query": subject_name,
-                        "fields": ["subject_name^2", "search_text"],
-                        "type": "best_fields",
-                        "operator": "or",
-                    }
+            name_clause = {
+                "multi_match": {
+                    "query": subject_name,
+                    "fields": ["subject_name^2", "search_text"],
+                    "type": "best_fields",
+                    "operator": "or",
                 }
-            )
+            }
+            # When other filters already narrow the set, treat the name as an
+            # optional booster (should) so generic words ("lịch thi cuối kì")
+            # cannot exclude valid rows. When it is the only signal, it must match.
+            if filter_clauses:
+                should_clauses.append(name_clause)
+            else:
+                must_clauses.append(name_clause)
 
         bool_query: dict[str, Any] = {}
         if filter_clauses:
             bool_query["filter"] = filter_clauses
         if must_clauses:
             bool_query["must"] = must_clauses
+        if should_clauses:
+            bool_query["should"] = should_clauses
         # No constraint at all → match everything (caller usually passes ≥1 filter).
         if not bool_query:
             return {"match_all": {}}
@@ -258,8 +287,12 @@ class ExamScheduleESStore:
         subject_code: str | None = None,
         subject_name: str | None = None,
         exam_date: str | None = None,
+        exam_date_from: str | None = None,
+        exam_date_to: str | None = None,
         exam_room: str | None = None,
         group: str | None = None,
+        cohort: str | None = None,
+        exam_type: str | None = None,
         limit: int = 20,
     ) -> list[dict[str, Any]]:
         """Return matching exam rows (``_source`` dicts) sorted by date then slot."""
@@ -267,8 +300,12 @@ class ExamScheduleESStore:
             subject_code=subject_code,
             subject_name=subject_name,
             exam_date=exam_date,
+            exam_date_from=exam_date_from,
+            exam_date_to=exam_date_to,
             exam_room=exam_room,
             group=group,
+            cohort=cohort,
+            exam_type=exam_type,
         )
         resp = self.client.search(
             index=self.index_name,

@@ -10,6 +10,7 @@ from threading import Lock
 from typing import Any
 
 from config.settings import Settings
+from query.signals import fold_vietnamese_text
 from retrieval.metadata_filters import (
     enrich_major_references_for_query,
     extract_major_codes,
@@ -55,6 +56,12 @@ EXAM_COLLECTION = "lich_thi"
 _SUBJECT_CODE_RE = re.compile(r"\b[A-Za-z]{2}\d{3,4}\b")
 _DATE_TOKEN_RE = re.compile(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b")
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+# Exam-query handles mined from free text (all matched against folded text where
+# noted): cohort "K70[C]", the exam term (giữa/cuối kỳ), and "tháng N[/YYYY]".
+_COHORT_RE = re.compile(r"\bK\d{2,3}[A-Za-z]?\b")
+_GIUA_KY_RE = re.compile(r"giua\s*(?:hoc\s*)?k[yi]")
+_CUOI_KY_RE = re.compile(r"cuoi\s*(?:hoc\s*)?k[yi]")
+_MONTH_RE = re.compile(r"thang\s+(\d{1,2})(?:\s*/?\s*(\d{4}))?")
 
 # ─── Simple RAG search cache ─────────────────────────────────────────────────
 # In-memory FIFO cache keyed by (query, collection, top_k, cohort, major).
@@ -797,23 +804,72 @@ def _to_es_date(value: str | None) -> str | None:
     return parsed.strftime("%Y-%m-%d") if parsed else value
 
 
-def _extract_exam_filters(
-    query: str,
-) -> tuple[str | None, str | None, str | None]:
-    """Derive (subject_code, subject_name, exam_date_iso) from a free-text query."""
-    cleaned = strip_personal_identifiers(query or "")
-    code_match = _SUBJECT_CODE_RE.search(cleaned)
-    subject_code = code_match.group(0).upper() if code_match else None
+def _extract_date_range(folded: str) -> tuple[str | None, str | None]:
+    """Resolve a relative range to ISO ``(from, to)``.
 
-    exam_date_iso: str | None = None
+    Handles "tuần này", "tuần tới"/"tuần sau", and "tháng N[/YYYY]". Anchored on
+    the real current date so "lịch thi tuần tới" filters the right week.
+    """
+    from datetime import date, timedelta
+
+    today = date.today()
+    if "tuan nay" in folded:
+        start = today - timedelta(days=today.weekday())
+        return start.isoformat(), (start + timedelta(days=6)).isoformat()
+    if "tuan toi" in folded or "tuan sau" in folded:
+        start = today - timedelta(days=today.weekday()) + timedelta(days=7)
+        return start.isoformat(), (start + timedelta(days=6)).isoformat()
+    month_match = _MONTH_RE.search(folded)
+    if month_match:
+        month = int(month_match.group(1))
+        year = int(month_match.group(2)) if month_match.group(2) else today.year
+        if 1 <= month <= 12:
+            start = date(year, month, 1)
+            next_month = date(year + month // 12, month % 12 + 1, 1)
+            return start.isoformat(), (next_month - timedelta(days=1)).isoformat()
+    return None, None
+
+
+def _extract_exam_filters(query: str) -> dict[str, Any]:
+    """Mine structured exam filters from a free-text query.
+
+    Returns only the keys present (subject_code, exam_type, cohort, exam_date or
+    exam_date_from/to, subject_name). A subject-name BM25 fallback is added only
+    when neither a subject code nor a cohort is found — otherwise a generic
+    "lịch thi K70 cuối kì" would wrongly require the name clause to match.
+    """
+    cleaned = strip_personal_identifiers(query or "")
+    folded = fold_vietnamese_text(cleaned)
+    filters: dict[str, Any] = {}
+
+    code_match = _SUBJECT_CODE_RE.search(cleaned)
+    if code_match:
+        filters["subject_code"] = code_match.group(0).upper()
+
+    # Exam term — "cuối" checked first so "giữa kỳ và cuối kỳ" leans final.
+    if _CUOI_KY_RE.search(folded):
+        filters["exam_type"] = "cuoi_ky"
+    elif _GIUA_KY_RE.search(folded):
+        filters["exam_type"] = "giua_ky"
+
+    cohort_match = _COHORT_RE.search(cleaned)
+    if cohort_match:
+        filters["cohort"] = cohort_match.group(0).upper()
+
     date_match = _DATE_TOKEN_RE.search(cleaned)
     if date_match:
-        exam_date_iso = _to_es_date(date_match.group(0))
+        filters["exam_date"] = _to_es_date(date_match.group(0))
+    else:
+        date_from, date_to = _extract_date_range(folded)
+        if date_from or date_to:
+            filters["exam_date_from"] = date_from
+            filters["exam_date_to"] = date_to
 
-    # Without a code, fall back to BM25 over subject_name/search_text using the
-    # whole (PII-stripped) question — the analyzer drops stopwords like "thi".
-    subject_name = None if subject_code else (cleaned or None)
-    return subject_code, subject_name, exam_date_iso
+    if not filters.get("subject_code") and not filters.get("cohort"):
+        # Fall back to BM25 over subject_name/search_text using the whole
+        # (PII-stripped) question — the analyzer drops stopwords like "thi".
+        filters["subject_name"] = cleaned or None
+    return filters
 
 
 def _format_exam_results(rows: list[dict[str, Any]]) -> str:
@@ -859,6 +915,8 @@ def _exam_schedule_search(
     exam_date: str | None = None,
     exam_room: str | None = None,
     group: str | None = None,
+    cohort: str | None = None,
+    exam_type: str | None = None,
     top_k: int | None = None,
 ) -> str:
     """Structured lookup against the exam-schedule ES index (no vector search)."""
@@ -867,14 +925,24 @@ def _exam_schedule_search(
     if store is None:
         return "[Loi: Kho du lieu lich thi chua san sang]"
 
-    # When the planner/agent passes no structured filters, mine them from the
-    # raw query (subject code regex + date token + BM25 subject-name fallback).
-    if not any((subject_code, subject_name, exam_date, exam_room, group)):
-        subject_code, subject_name, exam_date = _extract_exam_filters(query)
-    else:
-        exam_date = _to_es_date(exam_date)
+    # Explicit filters from the planner win; otherwise mine them from the raw
+    # query (subject code / cohort / exam term / date + BM25 name fallback).
+    explicit = {
+        key: value
+        for key, value in {
+            "subject_code": subject_code,
+            "subject_name": subject_name,
+            "exam_date": _to_es_date(exam_date),
+            "exam_room": exam_room,
+            "group": group,
+            "cohort": cohort,
+            "exam_type": exam_type,
+        }.items()
+        if value
+    }
+    filters = explicit or _extract_exam_filters(query)
 
-    if not any((subject_code, subject_name, exam_date, exam_room, group)):
+    if not any(filters.values()):
         return "[Loi: Khong xac dinh duoc mon/ngay thi tu cau hoi]"
 
     limit = int(
@@ -882,14 +950,20 @@ def _exam_schedule_search(
         if top_k is not None
         else getattr(runtime.settings, "exam_schedule_search_top_k", 20)
     )
-    rows = store.search(
-        subject_code=subject_code,
-        subject_name=subject_name,
-        exam_date=exam_date,
-        exam_room=exam_room,
-        group=group,
-        limit=limit,
-    )
+    rows = store.search(limit=limit, **filters)
+
+    # Flexible match: an exact subject_code that returned nothing (typo / wrong
+    # code) → retry by subject name (BM25), keeping any term/cohort narrowing.
+    if not rows and filters.get("subject_code"):
+        cleaned = strip_personal_identifiers(query)
+        if cleaned:
+            rows = store.search(
+                subject_name=cleaned,
+                exam_type=filters.get("exam_type"),
+                cohort=filters.get("cohort"),
+                limit=limit,
+            )
+
     _append_agent_docs(rows)
     return _format_exam_results(rows)
 
@@ -921,6 +995,8 @@ def execute_retrieval_plan(
                 query=step.get("query", ""),
                 subject_code=step.get("subject_code"),
                 exam_date=step.get("exam_date"),
+                cohort=step.get("cohort_hint") or step.get("cohort"),
+                exam_type=step.get("exam_type"),
                 top_k=None,
             )
         else:
