@@ -229,6 +229,55 @@ class DocumentPipeline:
     # Step 1: Convert PDF → Markdown
     # ------------------------------------------------------------------
 
+    def _markdown_too_short(self, markdown: str) -> bool:
+        """True when converted markdown has too little real text to index.
+
+        pymupdf4llm returns an empty/near-empty string (no exception) for
+        scanned / image-only PDFs; this gates the docling OCR fallback and the
+        final failure check.
+        """
+        return len(markdown.strip()) < self._settings.pdf_min_markdown_chars
+
+    def _convert_with_pymupdf4llm(self, pdf_path: Any) -> str:
+        """Convert a PDF to markdown using pymupdf4llm (text-layer extraction)."""
+        import pymupdf4llm
+
+        return pymupdf4llm.to_markdown(str(pdf_path))
+
+    def _convert_with_docling(self, pdf_path: Any, doc_id: str) -> str:
+        """Convert a PDF to markdown using docling (handles scanned PDFs / OCR)."""
+        from pathlib import Path as _Path
+
+        from document_loader.pdf_to_markdown.converters.docling_converter import (
+            DoclingConverter,
+        )
+
+        conv = DoclingConverter(output_dir=str(self._storage.base_dir / doc_id))
+        result = conv.convert(pdf_path)
+        return _Path(result["markdown_path"]).read_text(encoding="utf-8")
+
+    def _convert_to_markdown(
+        self, pdf_path: Any, doc_id: str, converter: str
+    ) -> Tuple[str, str]:
+        """Convert *pdf_path* to markdown, returning ``(markdown, converter_used)``.
+
+        On the default pymupdf4llm path, falls back to docling when the output
+        is empty/near-empty (scanned PDF) so it is not indexed as a blank doc.
+        """
+        if converter == "docling":
+            return self._convert_with_docling(pdf_path, doc_id), "docling"
+
+        markdown = self._convert_with_pymupdf4llm(pdf_path)
+        if self._markdown_too_short(markdown):
+            logger.warning(
+                "pymupdf4llm produced %d non-whitespace chars for %s; "
+                "falling back to docling (OCR).",
+                len(markdown.strip()),
+                doc_id,
+            )
+            return self._convert_with_docling(pdf_path, doc_id), "docling"
+        return markdown, converter
+
     async def convert_pdf(
         self,
         doc_id: str,
@@ -258,26 +307,18 @@ class DocumentPipeline:
             )
 
             pdf_path = self._storage.base_dir / doc["file_path"]
+            markdown, converter = self._convert_to_markdown(
+                pdf_path, doc_id, converter
+            )
 
-            if converter == "docling":
-                from document_loader.pdf_to_markdown.converters.docling_converter import (
-                    DoclingConverter,
+            if self._markdown_too_short(markdown):
+                await self._fail(
+                    db,
+                    doc_id,
+                    "Conversion produced empty/near-empty markdown "
+                    "(scanned or unreadable PDF).",
                 )
-
-                conv = DoclingConverter(
-                    output_dir=str(self._storage.base_dir / doc_id)
-                )
-                result = conv.convert(pdf_path)
-                from pathlib import Path as _Path
-
-                markdown = _Path(result["markdown_path"]).read_text(
-                    encoding="utf-8"
-                )
-            else:
-                # Default: pymupdf4llm
-                import pymupdf4llm
-
-                markdown = pymupdf4llm.to_markdown(str(pdf_path))
+                return
 
             md_rel = await self._storage.save_text(
                 markdown, doc_id, "markdown.md"

@@ -1088,11 +1088,6 @@ def _null_or_terms(field: str, values: List[str]) -> Dict[str, Any]:
     }
 
 
-def _match_only(field: str, value: str) -> Dict[str, Any]:
-    """ES fuzzy match-only query (without null fallback)."""
-    return {"match": {field: {"query": value, "fuzziness": "AUTO"}}}
-
-
 # ─── Collection-specific extractors ─────────────────────────────────────────────
 
 
@@ -1101,7 +1096,7 @@ class CtdtFilterExtractor(BaseFilterExtractor):
 
     Fallback order:
       1. ``major_code`` exact.
-      2. ``major_name`` fuzzy match.
+      2. ``major_name`` exact.
       3. ``major_code`` exact OR ``major_code`` missing (generic chunks).
       4. No filter (all chunks) when all above return zero hits.
     """
@@ -1122,8 +1117,11 @@ class CtdtFilterExtractor(BaseFilterExtractor):
             _term_any_mapping("major_code", major_code),
         ]
         if major_name:
-            # Fallback: fuzzy match on major_name (without null-expansion)
-            queries.append(_match_only("major_name", major_name))
+            # Fallback: exact major_name match (mapping-compatible term query).
+            # Must be exact — a fuzzy/analyzed match let close-but-distinct
+            # programs collide ("CNTT" vs "CNTT Việt Nhật", "Kỹ thuật điện"
+            # vs "Kỹ thuật điện tử"), returning the wrong CTDT.
+            queries.append(_term_any_mapping("major_name", major_name))
 
         # Late fallback: include generic chunks with missing major_code.
         queries.append(_null_or_term("major_code", major_code))

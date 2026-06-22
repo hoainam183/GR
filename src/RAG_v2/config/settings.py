@@ -288,6 +288,11 @@ class Settings(BaseSettings):
     # --- Admin / Document Upload ---
     superadmin_user_ids: str = ""  # comma-separated MongoDB ObjectIds
     upload_dir: str = "uploads"
+    # pymupdf4llm returns an empty string (no exception) for scanned / image-only
+    # PDFs. When the default converter yields fewer than this many non-whitespace
+    # characters, fall back to docling (which has OCR). Documents still empty
+    # after docling are marked failed instead of indexed with no content.
+    pdf_min_markdown_chars: int = 50
 
     # --- Exam schedule (lịch thi) — structured PDF/Excel ingestion ---
     # Exam schedules are tabular, not prose: they are parsed into a dedicated
