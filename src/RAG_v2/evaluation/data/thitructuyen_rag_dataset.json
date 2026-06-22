@@ -1,0 +1,469 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QD_ban_hanh_QD_to_chuc_thi_Truc_tuyen_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_001",
+      "question_type": "simple",
+      "question": "Quyết định 1791/QĐ-ĐHBK-ĐT về tổ chức thi trực tuyến tại Bách khoa Hà Nội được ban hành vào ngày tháng năm nào?",
+      "gold_answer": "Ngày 06 tháng 8 năm 2021.",
+      "evidence_chunk_ids": [
+        "cf8c7863-fa17-4efc-ab07-d4c51a943d4c"
+      ],
+      "ground_truth_context": [
+        "Ngày: Hà Nội, ngày 06 tháng 8 năm 2021"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_002",
+      "question_type": "simple",
+      "question": "Hệ thống thi trực tuyến tại Bách khoa Hà Nội bao gồm những phần mềm nào?",
+      "gold_answer": "Microsoft Teams (MS Teams), hệ thống Learning Management System (LMS) kết hợp với phần mềm Safe Exam Browser (SEB) và các phần mềm tổ chức thi khác do Hiệu trưởng quyết định.",
+      "evidence_chunk_ids": [
+        "00389c0c-7125-44f0-a15b-d992823ae0b0"
+      ],
+      "ground_truth_context": [
+        "Thi trực tuyến được thực hiện trên ứng dụng Microsoft Teams (MS Teams), hệ thống Learning Management System (LMS) kết hợp với phần mềm Safe Exam Browser (SEB) và các phần mềm tổ chức thi khác do Hiệu trưởng quyết định"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_003",
+      "question_type": "simple",
+      "question": "Quy định tổ chức thi trực tuyến tại Bách khoa Hà Nội áp dụng cho những loại hình thi nào?",
+      "gold_answer": "Áp dụng cho thi kết thúc học phần trong chương trình đào tạo; thi/kiểm tra ngoại ngữ để phân loại trình độ và phân lớp học; thi đánh giá năng lực ngoại ngữ theo số tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra.",
+      "evidence_chunk_ids": [
+        "747e2dfa-5162-44c0-b057-ea008bc56246"
+      ],
+      "ground_truth_context": [
+        "Văn bản này quy định về tổ chức kiểm tra đánh giá theo phương thức trực tuyến qua mạng internet đối với thi kết thúc học phần trong chương trình đào tạo; thi/kiểm tra ngoại ngữ để phân loại trình độ và phân lớp học; thi đánh giá năng lực ngoại ngữ theo số tín chỉ tích lũy và chuẩn ngoại ngữ đầu ra"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_004",
+      "question_type": "simple",
+      "question": "Có bao nhiêu hình thức thi trực tuyến được áp dụng tại Bách khoa Hà Nội và tên gọi của từng hình thức?",
+      "gold_answer": "Bốn hình thức: tự luận với đề thi dạng mở, trắc nghiệm khách quan, vấn đáp trực tuyến, hoặc phối hợp các hình thức trên.",
+      "evidence_chunk_ids": [
+        "d9fc3bd3-a9a0-42f7-8100-f567df23b78c"
+      ],
+      "ground_truth_context": [
+        "Các hình thức thi trực tuyến được áp dụng tại Trường bao gồm: tự luận với đề thi dạng mở, trắc nghiệm khách quan, vấn đáp trực tuyến, hoặc phối hợp các hình thức trên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_005",
+      "question_type": "simple",
+      "question": "Đối với học phần có nhiều lớp và số lượng sinh viên lớn, hình thức thi trực tuyến nào được ưu tiên tại Bách khoa?",
+      "gold_answer": "Ưu tiên tổ chức thi theo hình thức trắc nghiệm khách quan.",
+      "evidence_chunk_ids": [
+        "12abd944-cc6b-486f-ac55-2f9bd74b1b06"
+      ],
+      "ground_truth_context": [
+        "Ưu tiên tổ chức thi theo hình thức trắc nghiệm khách quan đối với học phần có nhiều lớp học phần, số lượng sinh viên lớn."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_006",
+      "question_type": "simple",
+      "question": "Khi thi tự luận trực tuyến tại Bách khoa, sinh viên nộp bài bằng cách nào và trong bao nhiêu phút sau hết giờ?",
+      "gold_answer": "Sinh viên chụp ảnh bài thi và tải lên hệ thống thi trực tuyến. Thời gian chụp ảnh và nộp bài tối đa là 10 phút sau hết giờ làm bài. Quá thời gian này bài thi sẽ không được công nhận.",
+      "evidence_chunk_ids": [
+        "28e75db5-29dc-42f4-8c0e-7b280feb3036"
+      ],
+      "ground_truth_context": [
+        "Sinh viên nộp bài bằng cách chụp ảnh rõ nét và tải (upload) lên hệ thống. Thời gian cho phép chụp ảnh và nộp bài tối đa là 10 phút sau hết giờ làm bài thi. Quá thời gian trên, bài thi sẽ không được công nhận."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_007",
+      "question_type": "simple",
+      "question": "Sinh viên dự thi trực tuyến tại Bách khoa cần đăng nhập bằng tài khoản gì và cần xuất trình giấy tờ nào?",
+      "gold_answer": "Đăng nhập bằng tài khoản của trường cấp và xuất trình thẻ sinh viên và/hoặc chứng minh nhân dân, căn cước công dân.",
+      "evidence_chunk_ids": [
+        "e2ec6ee0-ea82-4a5d-9895-9598ff5c29ad"
+      ],
+      "ground_truth_context": [
+        "Đăng nhập vào phần mềm thi/phòng thi trực tuyến bằng tài khoản của trường cấp và xuất trình thẻ sinh viên và/hoặc chứng minh nhân dân, căn cước công dân."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_008",
+      "question_type": "simple",
+      "question": "Sinh viên thi đánh giá chuẩn ngoại ngữ đầu ra trực tuyến tại Bách khoa cần có thêm thiết bị gì so với thi thông thường?",
+      "gold_answer": "Cần có thêm thiết bị camera thứ hai phục vụ cho việc giám sát thi.",
+      "evidence_chunk_ids": [
+        "e2ec6ee0-ea82-4a5d-9895-9598ff5c29ad"
+      ],
+      "ground_truth_context": [
+        "Đối với thi đánh giá chuẩn ngoại ngữ đầu ra, sinh viên phải có thêm thiết bị camera thứ hai phục vụ cho việc giám sát thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên có hành vi gian lận trong thi trực tuyến tại Bách khoa bị xử lý theo quy định nào?",
+      "gold_answer": "Bị xử lý kỷ luật theo các quy định hiện hành của Bộ Giáo dục và Đào tạo.",
+      "evidence_chunk_ids": [
+        "28e75db5-29dc-42f4-8c0e-7b280feb3036"
+      ],
+      "ground_truth_context": [
+        "Sinh viên có hành vi gian lận thi sẽ bị xử lý kỷ luật theo các quy định hiện hành của Bộ Giáo dục và Đào tạo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_010",
+      "question_type": "simple",
+      "question": "Đối với học phần có từ 30 sinh viên trở lên, thi tự luận dạng mở trực tuyến cần tối thiểu bao nhiêu đề thi cho một kíp thi?",
+      "gold_answer": "Tối thiểu 05 đề thi cho 1 kíp thi.",
+      "evidence_chunk_ids": [
+        "65f9798f-2ed9-4295-9068-f3c7fede4afb"
+      ],
+      "ground_truth_context": [
+        "Thi tự luận với đề thi dạng mở: tối thiểu 05 đề thi cho 1 kíp thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_011",
+      "question_type": "simple",
+      "question": "Đối với học phần có từ 30 sinh viên trở lên, thi vấn đáp trực tuyến cần tối thiểu bao nhiêu đề cho cả học phần?",
+      "gold_answer": "Tối thiểu 30 đề/học phần.",
+      "evidence_chunk_ids": [
+        "65f9798f-2ed9-4295-9068-f3c7fede4afb"
+      ],
+      "ground_truth_context": [
+        "Thi vấn đáp: tối thiểu 30 đề/học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_012",
+      "question_type": "simple",
+      "question": "Một đề thi bài tập lớn/tiểu luận trong thi trực tuyến tại Bách khoa dành cho tối đa bao nhiêu sinh viên?",
+      "gold_answer": "Tối đa 5 sinh viên mỗi đề.",
+      "evidence_chunk_ids": [
+        "65f9798f-2ed9-4295-9068-f3c7fede4afb"
+      ],
+      "ground_truth_context": [
+        "Bài tập lớn/tiểu luận: tối đa 5 sinh viên/một đề."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_013",
+      "question_type": "simple",
+      "question": "Thời gian thi tự luận trực tuyến tại Bách khoa là trong khoảng bao nhiêu phút?",
+      "gold_answer": "Trong khoảng 60 đến 120 phút.",
+      "evidence_chunk_ids": [
+        "dcffe438-793d-490c-936c-51defbc191a7"
+      ],
+      "ground_truth_context": [
+        "Thời gian thi tự luận với đề thi dạng mở trong khoảng 60 phút đến 120 phút."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_014",
+      "question_type": "simple",
+      "question": "Thời gian thi trắc nghiệm trực tuyến tại Bách khoa là trong khoảng bao nhiêu phút?",
+      "gold_answer": "Từ 40 đến 70 phút, căn cứ yêu cầu của học phần.",
+      "evidence_chunk_ids": [
+        "dcffe438-793d-490c-936c-51defbc191a7"
+      ],
+      "ground_truth_context": [
+        "Thời gian thi trắc nghiệm: 40 phút đến 70 phút căn cứ yêu cầu của học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_015",
+      "question_type": "simple",
+      "question": "Thời gian thi vấn đáp trực tuyến tối thiểu cho mỗi sinh viên tại Bách khoa là bao nhiêu phút?",
+      "gold_answer": "Tối thiểu từ 7 đến 10 phút mỗi sinh viên (hỏi-đáp).",
+      "evidence_chunk_ids": [
+        "dcffe438-793d-490c-936c-51defbc191a7"
+      ],
+      "ground_truth_context": [
+        "Thời gian thi vấn đáp tối thiểu từ 7 đến 10 phút/sinh viên (hỏi-đáp)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_016",
+      "question_type": "simple",
+      "question": "Bài tập lớn/tiểu luận để thi vấn đáp kết hợp phải nộp trước lịch thi học phần bao nhiêu ngày?",
+      "gold_answer": "Muộn nhất là 3 ngày trước lịch thi học phần.",
+      "evidence_chunk_ids": [
+        "dcffe438-793d-490c-936c-51defbc191a7"
+      ],
+      "ground_truth_context": [
+        "Thời hạn nộp bài tập lớn/tiểu luận để đánh giá kết hợp với thi vấn đáp: muộn nhất là 3 ngày trước lịch thi học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_017",
+      "question_type": "simple",
+      "question": "Bản ghi âm, ghi hình trong thi trực tuyến tại Bách khoa được lưu trữ tối thiểu bao lâu?",
+      "gold_answer": "Tối thiểu 1 năm kể từ ngày công bố kết quả thi.",
+      "evidence_chunk_ids": [
+        "f099b9d8-9b18-4364-87a5-106265d86b38"
+      ],
+      "ground_truth_context": [
+        "Các bản ghi âm, ghi hình được lưu trữ trên hệ thống máy chủ của Trường. Thời hạn lưu trữ tối thiểu là 1 năm kể từ ngày công bố kết quả thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_018",
+      "question_type": "simple",
+      "question": "Trong quy trình thi tự luận trực tuyến tại Bách khoa, CBCT cần có mặt trong phòng thi trực tuyến trước giờ thi bao lâu?",
+      "gold_answer": "Ít nhất 15 phút trước khi bắt đầu buổi thi.",
+      "evidence_chunk_ids": [
+        "5c926a52-9667-4e30-b5a1-bce0c01c8355"
+      ],
+      "ground_truth_context": [
+        "Cán bộ coi thi (CBCT) và sinh viên phải có mặt trong phòng thi trực tuyến ít nhất 15 phút trước khi bắt đầu buổi thi để kiểm tra điều kiện kỹ thuật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_019",
+      "question_type": "simple",
+      "question": "Trong thi vấn đáp trực tuyến tại Bách khoa, cần tối thiểu bao nhiêu giảng viên tham gia?",
+      "gold_answer": "Tối thiểu 02 giảng viên, thực hiện nhiệm vụ là CBCT và người hỏi thi.",
+      "evidence_chunk_ids": [
+        "87309df8-2f55-4cd6-8a71-0b2277f7e13c"
+      ],
+      "ground_truth_context": [
+        "Đảm bảo ít nhất 02 giảng viên khi thực hiện thi vấn đáp, thực hiện nhiệm vụ là CBCT và người hỏi thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_020",
+      "question_type": "simple",
+      "question": "Trong thi trắc nghiệm trực tuyến, mỗi phòng coi thi trên MS Teams tối đa được bao nhiêu sinh viên?",
+      "gold_answer": "Tối đa 49 sinh viên mỗi phòng thi.",
+      "evidence_chunk_ids": [
+        "7a850989-d916-4d19-8428-a8a6f7c9384b"
+      ],
+      "ground_truth_context": [
+        "Giảng viên được phân công tạo phòng coi thi trên MS Teams với quy mô tối đa 49 sinh viên/phòng thi"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_021",
+      "question_type": "simple",
+      "question": "Trong thi trắc nghiệm trực tuyến tại Bách khoa, CBCT và sinh viên cần có mặt trong phòng thi trực tuyến trước bao lâu?",
+      "gold_answer": "Ít nhất 30 phút trước khi bắt đầu buổi thi để kiểm tra điều kiện kỹ thuật.",
+      "evidence_chunk_ids": [
+        "7a850989-d916-4d19-8428-a8a6f7c9384b"
+      ],
+      "ground_truth_context": [
+        "CBCT và sinh viên phải có mặt trong phòng coi thi trực tuyến ít nhất 30 phút trước khi bắt đầu buổi thi để kiểm tra điều kiện kỹ thuật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_simple_022",
+      "question_type": "simple",
+      "question": "Trong thi ngoại ngữ trực tuyến tại Bách khoa, mỗi phòng coi thi tối đa bao nhiêu thí sinh và cần tối thiểu bao nhiêu CBCT?",
+      "gold_answer": "Tối đa 40 thí sinh mỗi phòng thi và cần tối thiểu 02 CBCT mỗi phòng.",
+      "evidence_chunk_ids": [
+        "7be41afa-0db9-40f4-ab24-accbd4e4cd90"
+      ],
+      "ground_truth_context": [
+        "Trung tâm CLA lập danh sách thi (tối đa 40 thí sinh/phòng thi)... Mỗi phòng coi thi phải có tối thiểu 02 CBCT"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_multi_hop_023",
+      "question_type": "multi_hop",
+      "question": "So sánh thời gian phải có mặt trước buổi thi trực tuyến giữa hình thức thi tự luận/vấn đáp và thi trắc nghiệm/ngoại ngữ tại Bách khoa?",
+      "gold_answer": "Thi tự luận và vấn đáp: CBCT và sinh viên phải có mặt ít nhất 15 phút trước giờ thi. Thi trắc nghiệm và thi ngoại ngữ: CBCT và sinh viên phải có mặt ít nhất 30 phút trước giờ thi.",
+      "evidence_chunk_ids": [
+        "5c926a52-9667-4e30-b5a1-bce0c01c8355",
+        "87309df8-2f55-4cd6-8a71-0b2277f7e13c",
+        "7a850989-d916-4d19-8428-a8a6f7c9384b"
+      ],
+      "ground_truth_context": [
+        "CBCT và sinh viên phải có mặt trong phòng thi trực tuyến ít nhất 15 phút trước khi bắt đầu buổi thi (tự luận)",
+        "ít nhất 15 phút trước khi bắt đầu buổi thi (vấn đáp)",
+        "ít nhất 30 phút trước khi bắt đầu buổi thi (trắc nghiệm)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_multi_hop_024",
+      "question_type": "multi_hop",
+      "question": "Sinh viên thi trắc nghiệm trực tuyến tại Bách khoa đăng nhập vào hệ thống thi bằng tài khoản gì và nhận mật khẩu bài thi từ ai?",
+      "gold_answer": "Sinh viên đăng nhập bằng Tài khoản Office 365 (email và mật khẩu email). Mật khẩu bài thi được CBCT cung cấp trong quá trình thi (Bước 4 của quy trình thi trắc nghiệm).",
+      "evidence_chunk_ids": [
+        "dcb87d87-a72d-4992-9e23-b84b44f3121f"
+      ],
+      "ground_truth_context": [
+        "CBCT cung cấp mật khẩu của bài thi cho sinh viên. Sinh viên đăng nhập bằng Tài khoản Office 365 (email và mật khẩu email), chờ đến giờ làm bài chính thức, tự mở bài thi và làm bài."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_multi_hop_025",
+      "question_type": "multi_hop",
+      "question": "Để thi vấn đáp trực tuyến tại Bách khoa, sinh viên chuẩn bị câu trả lời trong bao lâu và phải nộp gì trước khi bước vào phần hỏi-đáp?",
+      "gold_answer": "Sinh viên chuẩn bị trong khoảng 10-15 phút, viết tay những ý chính để trả lời. Trước khi vào phần hỏi-đáp, sinh viên phải chụp ảnh bài chuẩn bị và nộp cho CBCT trên hệ thống.",
+      "evidence_chunk_ids": [
+        "0a39c202-02fb-4908-89d6-9bddf65af39a"
+      ],
+      "ground_truth_context": [
+        "Sinh viên chuẩn bị trong khoảng thời gian từ 10–15 phút, viết tay những ý chính để trả lời câu hỏi, chụp ảnh và nộp bài chuẩn bị cho CBCT trên hệ thống."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_multi_hop_026",
+      "question_type": "multi_hop",
+      "question": "Điểm thi vấn đáp trực tuyến tại Bách khoa được thông báo cho sinh viên vào thời điểm nào, khác gì so với thi tự luận?",
+      "gold_answer": "Thi vấn đáp: giảng viên công bố kết quả ngay sau khi hoàn thành kíp thi của học phần. Thi tự luận: sau khi kết thúc kíp thi, giảng viên in bài thi và tổ chức chấm thi (không công bố ngay).",
+      "evidence_chunk_ids": [
+        "38903c65-fbfd-4af8-9844-18101b01c411"
+      ],
+      "ground_truth_context": [
+        "Giảng viên chấm thi vấn đáp công bố kết quả thi cho sinh viên ngay sau khi hoàn thành kíp thi của học phần.",
+        "Sau khi kết thúc kíp thi theo hình thức tự luận, giảng viên... in toàn bộ bài thi trên hệ thống thi trực tuyến và cho vào túi đựng bài thi... để bộ môn/nhóm chuyên môn tổ chức chấm thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_multi_hop_027",
+      "question_type": "multi_hop",
+      "question": "Phòng Đào tạo và bộ môn có phân công lập lịch thi trực tuyến ra sao đối với các hình thức thi khác nhau tại Bách khoa?",
+      "gold_answer": "Phòng Đào tạo lập lịch thi chi tiết cho thi tự luận, trắc nghiệm khách quan và thi ngoại ngữ. Bộ môn hoặc giảng viên lập lịch thi học phần theo hình thức vấn đáp.",
+      "evidence_chunk_ids": [
+        "e031f68c-f3d8-4e73-a473-3552222e836c"
+      ],
+      "ground_truth_context": [
+        "Phòng Đào tạo lập lịch thi chi tiết đối với các học phần được tổ chức thi theo hình thức tự luận (đề thi dạng mở), thi trắc nghiệm khách quan; thi ngoại ngữ.",
+        "Căn cứ kế hoạch thi trực tuyến, bộ môn hoặc giảng viên lập lịch thi học phần theo hình thức vấn đáp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_multi_hop_028",
+      "question_type": "multi_hop",
+      "question": "Bài thi tự luận và bài thi trắc nghiệm trực tuyến tại Bách khoa được lưu trữ ở đâu và trong bao lâu?",
+      "gold_answer": "Bài thi tự luận, bài tập lớn/tiểu luận được lưu trữ dưới dạng file tại bộ môn. Bài thi trắc nghiệm được lưu trữ trên máy chủ của Trường. Thời hạn lưu trữ bằng thời hạn lưu trữ bài thi trên giấy theo quy định của Trường.",
+      "evidence_chunk_ids": [
+        "f099b9d8-9b18-4364-87a5-106265d86b38"
+      ],
+      "ground_truth_context": [
+        "Bài thi tự luận, bài tập lớn, tiểu luận của sinh viên được lưu trữ dưới dạng file dữ liệu tại bộ môn. Bài thi trắc nghiệm được lưu trữ trên hệ thống máy chủ của Trường. Thời hạn lưu trữ dữ liệu bằng thời hạn lưu trữ bài thi trên giấy theo quy định của Trường."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_multi_hop_029",
+      "question_type": "multi_hop",
+      "question": "Sinh viên thi tự luận trực tuyến tại Bách khoa bị mất kết nối Internet trong lúc thi, quy định nào liên quan và cần liên hệ ai?",
+      "gold_answer": "Sinh viên phải duy trì kết nối video liên tục trong suốt quá trình thi (Điều 4). Khi gặp sự cố cần bật tín hiệu giơ tay/giơ tay trước camera và thực hiện theo chỉ dẫn của CBCT. CBCT theo dõi giám sát liên tục và sẽ xử lý các trường hợp phát sinh.",
+      "evidence_chunk_ids": [
+        "28e75db5-29dc-42f4-8c0e-7b280feb3036",
+        "5c926a52-9667-4e30-b5a1-bce0c01c8355"
+      ],
+      "ground_truth_context": [
+        "Đảm bảo duy trì liên lạc, kết nối video liên tục với phòng thi trực tuyến trong suốt quá trình thi; Khi cần liên lạc, sinh viên bật tín hiệu giơ tay hoặc giơ tay trước camera và thực hiện theo các chỉ dẫn của cán bộ coi thi.",
+        "CBCT phải theo dõi, giám sát trong suốt quá trình làm bài của sinh viên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_thi_truc_tuyen_multi_hop_030",
+      "question_type": "multi_hop",
+      "question": "Kết thúc kíp thi ngoại ngữ trực tuyến tại Bách khoa, CBCT phải thực hiện những công việc gì?",
+      "gold_answer": "CBCT yêu cầu tất cả thí sinh rời phòng thi; dừng chức năng recording; báo cáo Hội đồng thi về các trường hợp vắng thi, gặp sự cố kỹ thuật, vi phạm quy định thi; nộp biên bản coi thi và kết thúc kíp thi.",
+      "evidence_chunk_ids": [
+        "1b6d4629-9ccf-450e-ab1a-55b654f7c387"
+      ],
+      "ground_truth_context": [
+        "CBCT yêu cầu tất cả thí sinh rời khỏi phòng thi trực tuyến; dừng chức năng recording; báo cáo Hội đồng thi về các trường hợp vắng thi, gặp sự cố kỹ thuật, vi phạm quy định thi, nộp biên bản coi thi và kết thúc kíp thi."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

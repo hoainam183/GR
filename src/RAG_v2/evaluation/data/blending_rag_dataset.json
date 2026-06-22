@@ -1,0 +1,477 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QD_ban_hanh_QD_to_chuc_day_hoc_tren_nen_tang_CN_ket_noi_-_truc_tuyen_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_001",
+      "question_type": "simple",
+      "question": "Quyết định 1515/QĐ-ĐHBK-ĐT về tổ chức dạy-học trực tuyến tại Bách khoa Hà Nội được ban hành vào ngày tháng năm nào?",
+      "gold_answer": "Ngày 29 tháng 6 năm 2021.",
+      "evidence_chunk_ids": [
+        "d260b4dc-f8de-4bb5-850d-226941c0b923"
+      ],
+      "ground_truth_context": [
+        "Ngày: Hà Nội, ngày 29 tháng 6 năm 2021"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_002",
+      "question_type": "simple",
+      "question": "Quy định dạy-học trực tuyến tại Bách khoa Hà Nội được áp dụng cho những loại hình đào tạo nào?",
+      "gold_answer": "Áp dụng cho các loại hình đào tạo cấp văn bằng từ trình độ cử nhân đến trình độ tiến sĩ.",
+      "evidence_chunk_ids": [
+        "b2a74895-0b04-476e-a2a5-259ffa3ba6ba"
+      ],
+      "ground_truth_context": [
+        "Văn bản này áp dụng cho các loại hình đào tạo cấp văn bằng từ trình độ cử nhân đến trình độ tiến sĩ của Trường Đại học Bách khoa Hà Nội"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_003",
+      "question_type": "simple",
+      "question": "Dạy-học trực tuyến theo thời gian thực tại Bách khoa Hà Nội ưu tiên sử dụng phần mềm nào?",
+      "gold_answer": "Ưu tiên Microsoft Teams (MS Teams).",
+      "evidence_chunk_ids": [
+        "b59db2df-eead-4a9d-9150-b4400e361391"
+      ],
+      "ground_truth_context": [
+        "giảng viên cần sử dụng thành thạo các chức năng cơ bản của phần mềm giảng dạy trực tuyến, trong đó ưu tiên Microsoft Teams (MS Teams)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_004",
+      "question_type": "simple",
+      "question": "Tại Bách khoa Hà Nội, dạy-học trực tuyến được áp dụng mấy hình thức và tên gọi của từng hình thức là gì?",
+      "gold_answer": "Ba hình thức: (a) Dạy-học trực tuyến theo thời gian thực; (b) Dạy-học hỗn hợp (B-Learning); (c) Dạy-học trực tuyến ngoài khung thời khóa biểu để bổ trợ, ôn tập kiến thức.",
+      "evidence_chunk_ids": [
+        "01639421-9da0-41f4-853c-1976160c2896",
+        "5075916e-0bf3-4b35-bad6-a5032d1948c9"
+      ],
+      "ground_truth_context": [
+        "Trường áp dụng ba hình thức sau đối với dạy-học trực tuyến: a) Dạy-học trực tuyến theo thời gian thực...",
+        "b) Dạy-học hỗn hợp (B-Learning)... c) Dạy-học trực tuyến được tổ chức ngoài khung thời gian trong thời khóa biểu học tập nhằm bổ trợ, tổng kết, ôn tập kiến thức"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_005",
+      "question_type": "simple",
+      "question": "Dạy-học trực tuyến không được áp dụng với loại học phần nào tại Bách khoa Hà Nội?",
+      "gold_answer": "Không áp dụng với các học phần (hoặc một phần nội dung học phần) có yêu cầu nâng cao nhận thức qua trải nghiệm thực tế và rèn luyện kỹ năng như thí nghiệm, thực hành, thực tập.",
+      "evidence_chunk_ids": [
+        "5075916e-0bf3-4b35-bad6-a5032d1948c9"
+      ],
+      "ground_truth_context": [
+        "Không áp dụng dạy-học trực tuyến đối với các học phần (hoặc một phần nội dung của học phần) có yêu cầu nâng cao nhận thức qua trải nghiệm thực tế và rèn luyện kỹ năng cho người học như thí nghiệm, thực hành, thực tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_006",
+      "question_type": "simple",
+      "question": "Tổng số tín chỉ dạy-học trên LMS của các học phần B-Learning không được vượt quá bao nhiêu phần trăm tổng số tín chỉ của chương trình đào tạo?",
+      "gold_answer": "Không được vượt quá 30% tổng số tín chỉ của chương trình đào tạo.",
+      "evidence_chunk_ids": [
+        "83d42fb2-ce2f-4afd-aae9-c458efd880a8"
+      ],
+      "ground_truth_context": [
+        "phải đảm bảo tổng số tín chỉ được dạy-học trên LMS của các học phần không vượt quá 30% tổng số tín chỉ của chương trình đào tạo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_007",
+      "question_type": "simple",
+      "question": "Thời lượng kiến thức truyền phát trên LMS trong B-Learning tối đa bằng bao nhiêu phần trăm thời lượng học phần?",
+      "gold_answer": "Tối đa 70% thời lượng của học phần.",
+      "evidence_chunk_ids": [
+        "29e39d41-8258-4b90-a89b-65a96c8d4a60"
+      ],
+      "ground_truth_context": [
+        "Thời lượng kiến thức được truyền phát trên LMS tối đa là 70% thời lượng của học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_008",
+      "question_type": "simple",
+      "question": "Điểm quá trình có trọng số tối thiểu là bao nhiêu khi tính điểm học phần B-Learning tại Bách khoa?",
+      "gold_answer": "Điểm quá trình có trọng số tối thiểu là 0,3 khi tính điểm học phần.",
+      "evidence_chunk_ids": [
+        "29e39d41-8258-4b90-a89b-65a96c8d4a60"
+      ],
+      "ground_truth_context": [
+        "Điểm quá trình có trọng số tối thiểu là 0,3 khi tính điểm học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_009",
+      "question_type": "simple",
+      "question": "Đối với lớp học phần B-Learning có quy mô từ bao nhiêu người học trở lên phải bố trí trợ lý học tập?",
+      "gold_answer": "Lớp học phần có quy mô từ 40 người học trở lên phải có tối thiểu một trợ lý học tập.",
+      "evidence_chunk_ids": [
+        "5de4ef9c-bd9e-467a-80fe-356dd0948e2b"
+      ],
+      "ground_truth_context": [
+        "đơn vị chuyên môn phải có kế hoạch tuyển chọn và bố trí tối thiểu một (01) trợ lý học tập (sinh viên năm cuối, học viên cao học, NCS) đối với các lớp học phần có quy mô từ 40 người học trở lên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_010",
+      "question_type": "simple",
+      "question": "Trợ lý học tập trong B-Learning có thể là đối tượng nào?",
+      "gold_answer": "Sinh viên năm cuối, học viên cao học hoặc nghiên cứu sinh.",
+      "evidence_chunk_ids": [
+        "5de4ef9c-bd9e-467a-80fe-356dd0948e2b"
+      ],
+      "ground_truth_context": [
+        "tuyển chọn và bố trí tối thiểu một (01) trợ lý học tập (sinh viên năm cuối, học viên cao học, NCS)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_011",
+      "question_type": "simple",
+      "question": "Hội đồng chuyên môn thẩm định đề cương và bài giảng B-Learning tại Bách khoa do ai thành lập?",
+      "gold_answer": "Do Hiệu trưởng thành lập, căn cứ đề xuất của phòng chức năng về quản lý đào tạo.",
+      "evidence_chunk_ids": [
+        "9e223da1-ce19-4a11-b850-793860f1a8c0"
+      ],
+      "ground_truth_context": [
+        "Hội đồng chuyên môn do Hiệu trưởng thành lập, căn cứ đề xuất của phòng chức năng về quản lý đào tạo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_012",
+      "question_type": "simple",
+      "question": "Kết quả đánh giá hiệu quả B-Learning tại Bách khoa được dùng làm gì đối với giảng viên?",
+      "gold_answer": "Là một trong các căn cứ để giảng viên tự đánh giá hiệu quả công tác, đề nghị khen thưởng và xét duyệt danh hiệu thi đua cá nhân hàng năm.",
+      "evidence_chunk_ids": [
+        "06c81241-5745-423c-8095-5474e70f29f1"
+      ],
+      "ground_truth_context": [
+        "cũng là một trong các căn cứ để giảng viên tự đánh giá hiệu quả công tác, đề nghị được khen thưởng và xét duyệt danh hiệu thi đua cá nhân hàng năm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_013",
+      "question_type": "simple",
+      "question": "Bài giảng B-Learning do Bách khoa Hà Nội giao nhiệm vụ và cấp kinh phí thì ai là chủ sở hữu quyền tác giả?",
+      "gold_answer": "Giảng viên hoặc nhóm chuyên môn xây dựng được bảo hộ quyền tác giả và Trường là chủ sở hữu quyền tác giả.",
+      "evidence_chunk_ids": [
+        "91a139a1-e9b5-4602-bed7-6f9ceff9dcf3"
+      ],
+      "ground_truth_context": [
+        "giảng viên hoặc nhóm chuyên môn xây dựng được bảo hộ quyền tác giả và Trường là chủ sở hữu quyền tác giả đối với bài giảng đó."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_014",
+      "question_type": "simple",
+      "question": "Học liệu số từ nguồn mở chỉ được dùng như thế nào trong B-Learning tại Bách khoa?",
+      "gold_answer": "Chỉ được sử dụng như các học liệu bổ trợ trong giảng dạy học phần và phải tuân thủ các quy định pháp luật về bản quyền và sở hữu trí tuệ.",
+      "evidence_chunk_ids": [
+        "91a139a1-e9b5-4602-bed7-6f9ceff9dcf3"
+      ],
+      "ground_truth_context": [
+        "Học liệu số được khai thác từ các nguồn học liệu mở chỉ được sử dụng như các học liệu bổ trợ trong giảng dạy học phần, đồng thời việc sử dụng phải tuân thủ theo các quy định pháp luật về bản quyền và sở hữu trí tuệ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_015",
+      "question_type": "simple",
+      "question": "Trung tâm Mạng thông tin có vai trò gì trong hệ thống dạy-học trực tuyến tại Bách khoa?",
+      "gold_answer": "Đảm bảo yêu cầu kỹ thuật về hạ tầng kết nối và máy chủ; quản trị, vận hành hệ thống và phần mềm dùng chung toàn trường; lưu trữ dữ liệu đào tạo trực tuyến (kết quả học tập, minh chứng, tài liệu, học liệu số).",
+      "evidence_chunk_ids": [
+        "ee35346d-2962-4113-b5d4-d43f197379ed"
+      ],
+      "ground_truth_context": [
+        "Trung tâm Mạng thông tin đảm bảo các yêu cầu kỹ thuật về hạ tầng kết nối và máy chủ để vận hành các hệ thống dạy-học trực tuyến; quản trị, vận hành hệ thống và phần mềm dùng chung toàn trường; lưu trữ dữ liệu đào tạo trực tuyến (kết quả học tập, các minh chứng, tài liệu, học liệu số)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_016",
+      "question_type": "simple",
+      "question": "Quy định dạy-học trực tuyến 1515/QĐ-ĐHBK-ĐT được áp dụng từ học kỳ nào?",
+      "gold_answer": "Được áp dụng từ học kỳ 2 năm học 2020-2021.",
+      "evidence_chunk_ids": [
+        "ad526e92-c43c-47a6-ae20-aa357cda5dc5"
+      ],
+      "ground_truth_context": [
+        "Quy định này được áp dụng từ học kỳ 2 năm học 2020-2021."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_017",
+      "question_type": "simple",
+      "question": "Yêu cầu kỹ thuật tối thiểu về hình ảnh của video bài giảng B-Learning là gì?",
+      "gold_answer": "Hình ảnh HD 720p hoặc Full HD 1080p theo tỉ lệ khung hình 16:9, đảm bảo nhìn hình ảnh rõ nét và không lóa.",
+      "evidence_chunk_ids": [
+        "206ba038-5e6c-428d-b412-20d635078b52"
+      ],
+      "ground_truth_context": [
+        "Hình ảnh HD 720p hoặc Full HD 1080p theo tỉ lệ khung hình 16:9, đảm bảo nhìn hình ảnh rõ nét và không lóa."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_018",
+      "question_type": "simple",
+      "question": "Dung lượng tối đa của mỗi video bài giảng B-Learning tại Bách khoa là bao nhiêu?",
+      "gold_answer": "Tối đa 400 MB mỗi video.",
+      "evidence_chunk_ids": [
+        "206ba038-5e6c-428d-b412-20d635078b52"
+      ],
+      "ground_truth_context": [
+        "Dung lượng tối đa 400 MB/video."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_019",
+      "question_type": "simple",
+      "question": "Thời lượng video bài giảng B-Learning bao nhiêu phút tương đương 45 phút dạy-học trực tiếp trên lớp?",
+      "gold_answer": "Video bài giảng trong khoảng 15–30 phút tương đương với 45 phút dạy-học trực tiếp trên lớp.",
+      "evidence_chunk_ids": [
+        "10373bab-6651-47b6-881d-22da9dadfbd8"
+      ],
+      "ground_truth_context": [
+        "thời lượng video bài giảng trong khoảng 15–30 phút tương đương với 45 phút dạy-học trực tiếp trên lớp, tùy thuộc nội dung giảng dạy học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_020",
+      "question_type": "simple",
+      "question": "Mỗi video clip trong bài giảng B-Learning có thời lượng liên tục tối đa bao nhiêu phút?",
+      "gold_answer": "Tối đa 15 phút.",
+      "evidence_chunk_ids": [
+        "10373bab-6651-47b6-881d-22da9dadfbd8"
+      ],
+      "ground_truth_context": [
+        "Mỗi video clip trong nhóm gắn với một chủ đề kiến thức để người học dễ theo dõi và tiếp thu với thời lượng liên tục không quá 15 phút"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_021",
+      "question_type": "simple",
+      "question": "Giảng viên cần gửi bài giảng B-Learning hoàn chỉnh cho Ban điều phối chậm nhất là bao lâu trước học kỳ mới?",
+      "gold_answer": "Chậm nhất là 02 tháng trước học kỳ mới.",
+      "evidence_chunk_ids": [
+        "e6862ba0-3ca6-4ec6-a91c-9f1e0b38a5b5"
+      ],
+      "ground_truth_context": [
+        "Giảng viên hoàn thành toàn bộ bài giảng B-Learning theo ĐCHP, gửi Ban điều phối tổng hợp, chậm nhất là 02 tháng trước học kỳ mới."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_simple_022",
+      "question_type": "simple",
+      "question": "Trước khi bắt đầu học kỳ B-Learning, giảng viên phải hoàn thành cập nhật học liệu trên LMS chậm nhất bao nhiêu tuần?",
+      "gold_answer": "Chậm nhất là 01 tuần trước khi bắt đầu học kỳ.",
+      "evidence_chunk_ids": [
+        "69a4a819-6544-4525-b4be-2a2da9691a94"
+      ],
+      "ground_truth_context": [
+        "Chậm nhất là 01 tuần trước khi bắt đầu học kỳ, giảng viên hoàn thành việc chỉnh sửa, cập nhật, bổ sung học liệu, sắp xếp lịch trình học tập từng tuần theo ĐCHP."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_multi_hop_023",
+      "question_type": "multi_hop",
+      "question": "Sinh viên học học phần B-Learning tại Bách khoa Hà Nội có điểm quá trình được tính như thế nào và tối thiểu chiếm bao nhiêu phần trăm điểm học phần?",
+      "gold_answer": "Điểm quá trình có trọng số tối thiểu là 0,3 (30%) khi tính điểm học phần. Điểm quá trình được đánh giá qua các câu hỏi trắc nghiệm hoặc tự luận khi kết thúc mỗi chương/khối kiến thức và các bài kiểm tra trắc nghiệm ngắn trong video.",
+      "evidence_chunk_ids": [
+        "29e39d41-8258-4b90-a89b-65a96c8d4a60",
+        "b59db2df-eead-4a9d-9150-b4400e361391"
+      ],
+      "ground_truth_context": [
+        "Điểm quá trình có trọng số tối thiểu là 0,3 khi tính điểm học phần.",
+        "phải có các câu hỏi trắc nghiệm hoặc tự luận khi kết thúc mỗi chương/khối kiến thức của học phần để kiểm tra, đánh giá tiến bộ của người học trong quá trình học tập, làm căn cứ đánh giá điểm quá trình của học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_multi_hop_024",
+      "question_type": "multi_hop",
+      "question": "So sánh trách nhiệm của Phòng Đào tạo và Trung tâm Mạng thông tin trong việc triển khai B-Learning tại Bách khoa?",
+      "gold_answer": "Phòng Đào tạo: chủ trì xây dựng chương trình/kế hoạch, mở lớp học phần, phối hợp triển khai học liệu số và bồi dưỡng giảng viên, gửi danh sách lớp B-Learning cho Trung tâm Mạng. Trung tâm Mạng: đảm bảo hạ tầng kỹ thuật, quản trị LMS, lưu trữ dữ liệu đào tạo trực tuyến.",
+      "evidence_chunk_ids": [
+        "d7561386-99af-4a6b-a63b-c8be34f13c6b",
+        "ee35346d-2962-4113-b5d4-d43f197379ed",
+        "69a4a819-6544-4525-b4be-2a2da9691a94"
+      ],
+      "ground_truth_context": [
+        "Phòng Đào tạo chủ trì xây dựng chương trình, kế hoạch dạy-học trực tuyến, mở lớp học phần và tổ chức triển khai theo kế hoạch năm học.",
+        "Trung tâm Mạng thông tin đảm bảo các yêu cầu kỹ thuật về hạ tầng kết nối và máy chủ... quản trị, vận hành hệ thống... lưu trữ dữ liệu đào tạo trực tuyến.",
+        "Phòng Đào tạo gửi Trung tâm Mạng thông tin danh sách các lớp học phần theo hình thức B-Learning, kèm danh sách sinh viên các lớp để chuẩn bị dữ liệu các khóa học trên LMS."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_multi_hop_025",
+      "question_type": "multi_hop",
+      "question": "Quy trình đăng ký và thẩm định bài giảng B-Learning tại Bách khoa diễn ra trong bao nhiêu bước chính và ai thực hiện thẩm định cuối cùng?",
+      "gold_answer": "Quy trình gồm: (1) Ban điều phối tiếp nhận đăng ký tuần đầu HK; (2) GV gửi ĐCHP chậm nhất tuần 3; (3) Hội đồng chuyên môn thẩm định ĐCHP; (4) GV xây dựng bài giảng với hỗ trợ kỹ thuật; (5) GV gửi bài giảng hoàn chỉnh trước 2 tháng; (6) Hội đồng chuyên môn thẩm định bài giảng. Hội đồng chuyên môn do Hiệu trưởng thành lập thực hiện thẩm định cuối cùng.",
+      "evidence_chunk_ids": [
+        "f349778a-67bf-4a65-be8a-fd0379cc2e40",
+        "e6862ba0-3ca6-4ec6-a91c-9f1e0b38a5b5",
+        "9e223da1-ce19-4a11-b850-793860f1a8c0"
+      ],
+      "ground_truth_context": [
+        "Hội đồng chuyên môn do Hiệu trưởng thành lập tổ chức thẩm định ĐCHP",
+        "Giảng viên hoàn thành toàn bộ bài giảng B-Learning theo ĐCHP, gửi Ban điều phối tổng hợp, chậm nhất là 02 tháng trước học kỳ mới.",
+        "Hội đồng chuyên môn tổ chức thẩm định về quy cách, hình thức và chất lượng của bài giảng trước thời điểm mở đăng ký lớp học phần của học kỳ kế tiếp"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_multi_hop_026",
+      "question_type": "multi_hop",
+      "question": "Bài giảng B-Learning sử dụng nội dung từ bên ngoài cần có điều kiện gì, và học liệu số nguồn mở được dùng ở mức độ nào?",
+      "gold_answer": "Bài giảng có chủ sở hữu không phải tập thể/cá nhân của Trường chỉ được dùng nếu có văn bản cho phép của chủ sở hữu. Học liệu số từ nguồn mở chỉ được dùng làm học liệu bổ trợ (không phải bài giảng chính), và phải tuân thủ quy định bản quyền.",
+      "evidence_chunk_ids": [
+        "91a139a1-e9b5-4602-bed7-6f9ceff9dcf3"
+      ],
+      "ground_truth_context": [
+        "Bài giảng có chủ sở hữu quyền tác giả không phải là tập thể hoặc cá nhân của Trường chỉ được sử dụng làm bài giảng B-Learning nếu được chủ sở hữu quyền tác giả cho phép sử dụng (bằng văn bản).",
+        "Học liệu số được khai thác từ các nguồn học liệu mở chỉ được sử dụng như các học liệu bổ trợ trong giảng dạy học phần"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_multi_hop_027",
+      "question_type": "multi_hop",
+      "question": "Hai chỉ số đánh giá hiệu quả B-Learning của một học phần tại Bách khoa là gì và kết quả đó ảnh hưởng đến đơn vị như thế nào?",
+      "gold_answer": "Hai chỉ số: (a) Tỷ lệ sinh viên hài lòng/rất hài lòng; (b) Số SV tham gia x số TC quy chuẩn giảng dạy trên LMS. Kết quả là tiêu chí đánh giá KPI của đơn vị chuyên môn trong đổi mới nội dung và phương pháp đào tạo.",
+      "evidence_chunk_ids": [
+        "06c81241-5745-423c-8095-5474e70f29f1"
+      ],
+      "ground_truth_context": [
+        "a) Tỷ lệ sinh viên có phản hồi \"hài lòng\" hoặc \"rất hài lòng\" trên tổng số sinh viên tham gia lớp học phần... b) Số sinh viên tham gia học tập nhân với số tín chỉ quy chuẩn được giảng dạy trên hệ thống LMS... Kết quả đánh giá hiệu quả dạy-học theo B-Learning là một trong các tiêu chí đánh giá KPI của đơn vị chuyên môn trong đổi mới nội dung và phương pháp đào tạo"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_multi_hop_028",
+      "question_type": "multi_hop",
+      "question": "Giảng viên muốn tham gia triển khai B-Learning cần đáp ứng những yêu cầu gì so với giảng dạy trực tiếp thông thường?",
+      "gold_answer": "Ngoài yêu cầu cơ bản như giảng trực tiếp, cần: (1) sử dụng thành thạo các chức năng cơ bản và nâng cao của LMS; (2) có đề cương học phần phân định rõ nội dung trực tiếp và LMS; (3) bài giảng điện tử đã được phê duyệt theo yêu cầu Phụ lục 1; (4) có học liệu số bổ trợ.",
+      "evidence_chunk_ids": [
+        "29e39d41-8258-4b90-a89b-65a96c8d4a60",
+        "5de4ef9c-bd9e-467a-80fe-356dd0948e2b"
+      ],
+      "ground_truth_context": [
+        "Ngoài các yêu cầu cơ bản đối với giảng viên tương tự như giảng dạy trực tiếp, giảng viên cần sử dụng thành thạo các chức năng cơ bản của LMS, sử dụng được các chức năng nâng cao...",
+        "Bài giảng điện tử truyền phát trên LMS (sau đây gọi chung là bài giảng B-Learning) phải đáp ứng yêu cầu và được phê duyệt..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_multi_hop_029",
+      "question_type": "multi_hop",
+      "question": "Việc đánh giá kết quả học tập của sinh viên trong học phần dạy-học trực tuyến tại Bách khoa cần tuân thủ điều gì, và giảng viên/sinh viên còn phải tuân thủ quy định nào khác?",
+      "gold_answer": "Việc đánh giá kết quả học tập phải tuân thủ Quy chế đào tạo chính quy và các quy định liên quan của Trường. Ngoài ra giảng viên và người học phải tuân thủ các quy định pháp luật về sở hữu trí tuệ và an ninh mạng.",
+      "evidence_chunk_ids": [
+        "bfad2544-6bfb-4c51-bbab-b4688b9dee84"
+      ],
+      "ground_truth_context": [
+        "Việc đánh giá kết quả học tập của người học đối với học phần được dạy-học trực tuyến phải tuân thủ theo Quy chế đào tạo chính quy và các quy định khác có liên quan của Trường.",
+        "Giảng viên và người học phải tuân thủ các quy định của pháp luật về sở hữu trí tuệ và an ninh mạng trong quá trình thực hiện dạy-học trực tuyến."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_to_chuc_day_hoc_truc_tuyen_BLearning_multi_hop_030",
+      "question_type": "multi_hop",
+      "question": "Một tiết giảng dạy trực tuyến hoặc quy chuẩn trên LMS được tính tương đương như thế nào khi tính khối lượng giảng dạy của giảng viên?",
+      "gold_answer": "Được tính bằng một tiết giảng dạy trực tiếp trên lớp học với quy mô sinh viên tương đương khi tính khối lượng giảng dạy đã thực hiện.",
+      "evidence_chunk_ids": [
+        "83d42fb2-ce2f-4afd-aae9-c458efd880a8"
+      ],
+      "ground_truth_context": [
+        "Một tiết giảng dạy trực tuyến hoặc giảng dạy quy chuẩn trên LMS được tính bằng một tiết giảng dạy trực tiếp trên lớp học với quy mô sinh viên tương đương khi tính khối lượng giảng dạy đã thực hiện của giảng viên được phân công phụ trách học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    }
+  ]
+}

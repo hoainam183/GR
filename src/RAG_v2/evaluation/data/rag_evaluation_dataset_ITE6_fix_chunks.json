@@ -1,0 +1,500 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "ITE6_fix_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "ITE6_fix_chunks_simple_001",
+      "question_type": "simple",
+      "question": "Chương trình đào tạo Công nghệ thông tin Việt-Nhật (IT-E6) của Đại học Bách khoa Hà Nội có khối lượng kiến thức toàn khóa là bao nhiêu tín chỉ?",
+      "gold_answer": "148 tín chỉ.",
+      "evidence_chunk_ids": [
+        "9d21412b-50a6-4a46-9fad-ce8e4555b450"
+      ],
+      "ground_truth_context": [
+        "Khối lượng kiến thức toàn khóa: 148 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_002",
+      "question_type": "simple",
+      "question": "Theo mục tiêu chung của chương trình Công nghệ thông tin Việt-Nhật (IT-E6), sinh viên tốt nghiệp cần đạt trình độ tiếng Nhật tối thiểu là bậc nào?",
+      "gold_answer": "Tối thiểu đạt trình độ N3.",
+      "evidence_chunk_ids": [
+        "290b4102-1a2b-4e77-9bd9-528fd5616624"
+      ],
+      "ground_truth_context": [
+        "Đào tạo ra cử nhân trình độ cao có trình độ ngoại ngữ tiếng Anh và tiếng Nhật. Trong đó, khả năng tiếng Nhật tối thiểu đạt trình độ N3, là trình độ có thể giao tiếp đơn giản bằng tiếng Nhật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_003",
+      "question_type": "simple",
+      "question": "Chuẩn đầu ra 2.3.3 của chương trình Công nghệ thông tin Việt-Nhật (IT-E6) yêu cầu sinh viên đạt chứng chỉ tiếng Nhật nào?",
+      "gold_answer": "Chứng chỉ JLPT N3.",
+      "evidence_chunk_ids": [
+        "8fff645c-f76d-4495-8659-d05329aca74e"
+      ],
+      "ground_truth_context": [
+        "2.3.3 Có kỹ năng sử dụng tiếng Nhật hiệu quả trong công việc, đạt chứng chỉ JLPT N3."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_004",
+      "question_type": "simple",
+      "question": "Trong cấu trúc chung của chương trình Công nghệ thông tin Việt-Nhật (IT-E6), khối kiến thức Tiếng Nhật chiếm bao nhiêu tín chỉ tính vào CPA?",
+      "gold_answer": "7 tín chỉ tính CPA (ngoài ra còn có 16 tín chỉ tiếng Nhật không tính CPA).",
+      "evidence_chunk_ids": [
+        "bab0d66f-53e6-4cdd-addf-fdc1607989ee"
+      ],
+      "ground_truth_context": [
+        "| Tiếng Nhật | 7 | Ngoài 07 TC Tiếng Nhật tính CPA, còn có 16 TC Tiếng Nhật không tính CPA |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_005",
+      "question_type": "simple",
+      "question": "Hai học phần tiếng Anh bắt buộc của chương trình Công nghệ thông tin Việt-Nhật (IT-E6) có tên là gì?",
+      "gold_answer": "FL1101 – Tiếng Anh TOEIC I và FL1102 – Tiếng Anh TOEIC II.",
+      "evidence_chunk_ids": [
+        "afb5a0bb-c649-4a7c-a4ff-699755ea95a3"
+      ],
+      "ground_truth_context": [
+        "| 15 | FL1101 | Tiếng Anh TOEIC I | 3(0-6-0-6) | 1 |",
+        "| 16 | FL1102 | Tiếng Anh TOEIC II | 3(0-6-0-6) | 2 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_006",
+      "question_type": "simple",
+      "question": "Học phần Tiếng Nhật 8 (JP2220) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) được học vào kỳ thứ mấy và có bao nhiêu tín chỉ?",
+      "gold_answer": "Học vào kỳ 8, có 1 tín chỉ.",
+      "evidence_chunk_ids": [
+        "98b6d0d3-694d-476b-904c-0bb09e975ca7"
+      ],
+      "ground_truth_context": [
+        "| 25 | JP2220 | Tiếng Nhật 8 | 1(0-2-0-2) | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_007",
+      "question_type": "simple",
+      "question": "Module 1 (Trí tuệ nhân tạo và Dữ liệu lớn) thuộc khối tự chọn theo định hướng của chương trình Công nghệ thông tin Việt-Nhật (IT-E6) bao gồm những học phần nào?",
+      "gold_answer": "Bao gồm: IT4409 – Công nghệ Web và dịch vụ trực tuyến, IT4785 – Phát triển ứng dụng cho thiết bị di động, IT4542 – Quản trị phát triển phần mềm, IT4930 – Nhập môn Khoa học dữ liệu, IT3190 – Học máy và khai phá dữ liệu, IT4441 – Giao diện và trải nghiệm người dùng.",
+      "evidence_chunk_ids": [
+        "a057b784-1273-4f4f-8867-f5f0bf254539"
+      ],
+      "ground_truth_context": [
+        "**Module 1 – Trí tuệ nhân tạo và Dữ liệu lớn:**",
+        "| B.1 | IT4409 | Công nghệ Web và dịch vụ trực tuyến | 3(2-2-0-6) | 7 |",
+        "| B.2 | IT4785 | Phát triển ứng dụng cho thiết bị di động | 2(2-1-0-4) | 7 |",
+        "| B.3 | IT4542 | Quản trị phát triển phần mềm | 2(2-0-0-4) | 8 |",
+        "| B.4 | IT4930 | Nhập môn Khoa học dữ liệu | 2(2-1-0-4) | 8 |",
+        "| B.5 | IT3190 | Học máy và khai phá dữ liệu | 3(3-1-0-6) | 7 |",
+        "| B.6 | IT4441 | Giao diện và trải nghiệm người dùng | 3(2-2-0-6) | 6 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_008",
+      "question_type": "simple",
+      "question": "Học phần Thực tập công nghiệp (IT4948) của chương trình Công nghệ thông tin Việt-Nhật (IT-E6) được thực hiện vào học kỳ thứ mấy và có bao nhiêu tín chỉ?",
+      "gold_answer": "Thực hiện vào học kỳ 7 với 2 tín chỉ.",
+      "evidence_chunk_ids": [
+        "d21d121c-0983-4f96-981d-b8ed33b4fa66"
+      ],
+      "ground_truth_context": [
+        "| 72 | IT4948 | Thực tập công nghiệp | 2(0-0-4-4) | 7 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_009",
+      "question_type": "simple",
+      "question": "Sau khi hoàn thành học phần JP1110 và JP1120 (Tiếng Nhật 1, 2) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6), sinh viên hướng tới mục tiêu đạt bao nhiêu điểm trong kỳ thi thử trực tuyến trình độ N5?",
+      "gold_answer": "Đạt từ 80 điểm trở lên.",
+      "evidence_chunk_ids": [
+        "d639c809-4591-46a3-a375-41ca5dc2d66f"
+      ],
+      "ground_truth_context": [
+        "Mục tiêu JLPT: Đạt 80 điểm trở lên trong kỳ thi thử trực tuyến trình độ N5."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_010",
+      "question_type": "simple",
+      "question": "Học phần Tiếng Nhật 5 (JP2126) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) đặt mục tiêu tỷ lệ sinh viên đỗ kỳ thi N3 là bao nhiêu phần trăm?",
+      "gold_answer": "Tỷ lệ đỗ N3 là 60%.",
+      "evidence_chunk_ids": [
+        "1e627127-d84a-47f8-9529-424a53b1b4c9"
+      ],
+      "ground_truth_context": [
+        "Vì đây là mục tiêu cả năm nên sẽ áp dụng cho cả tiếng Nhật 5 và Tiếng Nhật 6. Sinh viên có thể hiểu được những điểm chính về các chủ đề thường gặp ở nơi làm việc, trường học, nơi giải trí. Tỷ lệ đỗ N3 là 60%."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_011",
+      "question_type": "simple",
+      "question": "Học phần Tiếng Nhật chuyên ngành 1 (JP3110) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) giúp sinh viên học từ vựng tiếng Nhật về những chủ đề IT nào?",
+      "gold_answer": "Học từ vựng và chủ đề liên quan đến mạng máy tính, các giao thức trong mạng máy tính, mạng LAN, mạng WAN, địa chỉ IP.",
+      "evidence_chunk_ids": [
+        "8ce4cb3a-b95c-4ba8-b6f8-3e201b8e9b76"
+      ],
+      "ground_truth_context": [
+        "Nội dung: Học tiếng Nhật thông qua một số chủ đề cụ thể trong IT như mạng máy tính, các giao thức trong mạng máy tính, mạng LAN, mạng WAN, địa chỉ IP. Học các từ chuyên ngành, các mẫu câu thường dùng trong IT. Tìm hiểu về các chủ đề IT. Thuyết trình bằng tiếng Nhật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_012",
+      "question_type": "simple",
+      "question": "Học phần IT2110 – Nhập môn công nghệ thông tin và truyền thông trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) được đánh giá theo tỷ lệ nào giữa điểm quá trình và điểm thi?",
+      "gold_answer": "30% điểm quá trình và 70% điểm thi.",
+      "evidence_chunk_ids": [
+        "7e62c67c-7212-4ebe-9bc0-8ce982560c09"
+      ],
+      "ground_truth_context": [
+        "Tỷ lệ đánh giá: 30% Quá trình + 70% Thi"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_013",
+      "question_type": "simple",
+      "question": "Học phần IT2120 – Kiến thức máy tính trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) giúp sinh viên nắm vững kiến thức cơ bản về hệ điều hành nào?",
+      "gold_answer": "Hệ điều hành Linux.",
+      "evidence_chunk_ids": [
+        "4a176a50-4d5e-4ca6-81ae-d28ac41459c7"
+      ],
+      "ground_truth_context": [
+        "Môn học này có mục tiêu giúp sinh viên nắm các kiến thức cơ bản về hệ điều hành Linux và sử dụng Linux như một môi trường làm việc phục vụ cho các môn học sau."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_014",
+      "question_type": "simple",
+      "question": "Học phần IT3362 – Kỹ năng ITSS 1 trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) được giảng dạy bằng ngôn ngữ nào?",
+      "gold_answer": "Được giảng dạy bằng tiếng Nhật.",
+      "evidence_chunk_ids": [
+        "595a82ab-2309-4149-b53f-8817f7b90e73"
+      ],
+      "ground_truth_context": [
+        "**IT3362 Kỹ năng ITSS 1 (học bằng tiếng Nhật)**"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_015",
+      "question_type": "simple",
+      "question": "Học phần IT3011 – Cấu trúc dữ liệu và thuật toán trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) có những học phần tiên quyết nào?",
+      "gold_answer": "Học phần tiên quyết là IT2110 và IT3210.",
+      "evidence_chunk_ids": [
+        "f7305dcb-f6f0-469f-93aa-8d7dfba3928d"
+      ],
+      "ground_truth_context": [
+        "**Học phần tiên quyết:** IT2110, IT3210"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_016",
+      "question_type": "simple",
+      "question": "Học phần Mạng máy tính (IT3080) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) có học phần học trước là gì?",
+      "gold_answer": "Học phần học trước là IT1110E hoặc IT2110.",
+      "evidence_chunk_ids": [
+        "1e4b8d29-2b4e-47b9-8137-26fa2d45a4a4"
+      ],
+      "ground_truth_context": [
+        "**Học phần học trước:** IT1110E / IT2110"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_017",
+      "question_type": "simple",
+      "question": "Học phần Kiến trúc máy tính (IT3283) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) yêu cầu học song hành với học phần nào?",
+      "gold_answer": "Học song hành với IT3280E (Thực hành kiến trúc máy tính).",
+      "evidence_chunk_ids": [
+        "ea6269ee-c919-42df-816a-9fee98d385b5"
+      ],
+      "ground_truth_context": [
+        "**Học phần song hành:** IT3280E"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_018",
+      "question_type": "simple",
+      "question": "Học phần Nghiên cứu tốt nghiệp 1 (IT5021) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) yêu cầu sinh viên đạt được kết quả báo cáo gì?",
+      "gold_answer": "Trình bày được vấn đề cần làm/cần nghiên cứu, các lý thuyết, công cụ liên quan với vấn đề đó, kế hoạch nghiên cứu và tài liệu tham khảo.",
+      "evidence_chunk_ids": [
+        "75d83010-2d66-4aa3-9a61-29d53beb1b91"
+      ],
+      "ground_truth_context": [
+        "Kết quả báo cáo của GR1 là trình bày được vấn đề cần làm/cần nghiên cứu, các lý thuyết, công cụ liên quan với vấn đề đó, kế hoạch nghiên cứu và tài liệu tham khảo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_019",
+      "question_type": "simple",
+      "question": "Học phần IT4549 – Phát triển phần mềm theo chuẩn ITSS trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) giúp sinh viên thực hành với những nguyên lý thiết kế phần mềm nào?",
+      "gold_answer": "Thực hành với các nguyên lý thiết kế phần mềm S.O.L.I.D.",
+      "evidence_chunk_ids": [
+        "348289ee-ef20-437a-8e2c-16cf50f9b1c3"
+      ],
+      "ground_truth_context": [
+        "Sinh viên được giảng dạy, trao đổi và thực hành với các nguyên lý thiết kế phần mềm S.O.L.I.D nhằm tạo ra các thiết kế tốt, linh hoạt, dễ mở rộng với case study xuyên suốt học phần theo nhóm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_020",
+      "question_type": "simple",
+      "question": "Học phần IT3323 – Xây dựng chương trình dịch trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) yêu cầu sinh viên thực hiện sản phẩm gì trong đồ án môn học?",
+      "gold_answer": "Yêu cầu cài đặt một trình biên dịch cho một ngôn ngữ lập trình cấp cao đơn giản.",
+      "evidence_chunk_ids": [
+        "be317ce6-2fa8-4833-98dc-af6d218e5fd7"
+      ],
+      "ground_truth_context": [
+        "Trong suốt đồ án môn học, sinh viên được yêu cầu cài đặt một trình biên dịch cho một ngôn ngữ lập trình cấp cao đơn giản."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_021",
+      "question_type": "simple",
+      "question": "Học phần IT4441 – Giao diện và trải nghiệm người dùng trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) có học phần tiên quyết là gì?",
+      "gold_answer": "Học phần tiên quyết là IT4082E (Kỹ thuật phần mềm).",
+      "evidence_chunk_ids": [
+        "15475fc4-228d-4f34-b0c2-6a21581b0076"
+      ],
+      "ground_truth_context": [
+        "**Học phần tiên quyết:** IT4082E"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_simple_022",
+      "question_type": "simple",
+      "question": "Học phần Đồ án tốt nghiệp (IT4125) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) có khối lượng bao nhiêu tín chỉ và yêu cầu những học phần học trước nào?",
+      "gold_answer": "Có khối lượng 6 tín chỉ và yêu cầu học phần học trước là IT5023E và IT5024E.",
+      "evidence_chunk_ids": [
+        "4bfc5417-0d3c-4007-91d7-6493abd3177f"
+      ],
+      "ground_truth_context": [
+        "**Khối lượng:** 6(0-0-12-12)",
+        "**Học phần học trước:** IT5023E, IT5024E"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ITE6_fix_chunks_multi_hop_001",
+      "question_type": "multi_hop",
+      "question": "Tổng số tín chỉ của 8 học phần Tiếng Nhật từ JP1110 đến JP2220 trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) là bao nhiêu, và theo cấu trúc chung của chương trình, có bao nhiêu tín chỉ trong số đó được tính vào CPA?",
+      "gold_answer": "Tổng tín chỉ của 8 học phần Tiếng Nhật (JP1110 đến JP2220) là 5+5+3+3+2+2+2+1 = 23 tín chỉ. Theo cấu trúc chung của chương trình, trong số 23 tín chỉ này chỉ có 7 tín chỉ được tính vào CPA, còn lại 16 tín chỉ không tính vào CPA.",
+      "evidence_chunk_ids": [
+        "98b6d0d3-694d-476b-904c-0bb09e975ca7",
+        "bab0d66f-53e6-4cdd-addf-fdc1607989ee"
+      ],
+      "ground_truth_context": [
+        "| 18 | JP1110 | Tiếng Nhật 1 | 5(0-10-0-10) | 1 |",
+        "| 19 | JP1120 | Tiếng Nhật 2 | 5(0-10-0-10) | 2 |",
+        "| 20 | JP1132 | Tiếng Nhật 3 | 3(0-6-0-6) | 3 |",
+        "| 21 | JP2111 | Tiếng Nhật 4 | 3(0-6-0-6) | 4 |",
+        "| 22 | JP2126 | Tiếng Nhật 5 | 2(0-4-0-4) | 5 |",
+        "| 23 | JP2132 | Tiếng Nhật 6 | 2(0-4-0-4) | 6 |",
+        "| 24 | JP2210 | Tiếng Nhật 7 | 2(0-4-0-4) | 7 |",
+        "| 25 | JP2220 | Tiếng Nhật 8 | 1(0-2-0-2) | 8 |",
+        "| Tiếng Nhật | 7 | Ngoài 07 TC Tiếng Nhật tính CPA, còn có 16 TC Tiếng Nhật không tính CPA |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ITE6_fix_chunks_multi_hop_002",
+      "question_type": "multi_hop",
+      "question": "Những học phần nào xuất hiện chung trong cả Module 1 (Trí tuệ nhân tạo và Dữ liệu lớn) và Module 2 (AI và IoT) thuộc khối tự chọn theo định hướng của chương trình Công nghệ thông tin Việt-Nhật (IT-E6)?",
+      "gold_answer": "Ba học phần xuất hiện chung trong cả hai module là: IT4409 – Công nghệ Web và dịch vụ trực tuyến, IT4785 – Phát triển ứng dụng cho thiết bị di động, và IT4542 – Quản trị phát triển phần mềm.",
+      "evidence_chunk_ids": [
+        "a057b784-1273-4f4f-8867-f5f0bf254539",
+        "57adfb06-4aa0-4e8e-b2e3-93809362b3e3"
+      ],
+      "ground_truth_context": [
+        "**Module 1 – Trí tuệ nhân tạo và Dữ liệu lớn:**",
+        "| B.1 | IT4409 | Công nghệ Web và dịch vụ trực tuyến | 3(2-2-0-6) | 7 |",
+        "| B.2 | IT4785 | Phát triển ứng dụng cho thiết bị di động | 2(2-1-0-4) | 7 |",
+        "| B.3 | IT4542 | Quản trị phát triển phần mềm | 2(2-0-0-4) | 8 |",
+        "**Module 2 – AI và IoT (AIoT):**",
+        "| I.1 | IT4409 | Công nghệ Web và dịch vụ trực tuyến | 3(2-2-0-6) | 7 |",
+        "| I.2 | IT4785 | Phát triển ứng dụng cho thiết bị di động | 2(2-1-0-4) | 7 |",
+        "| I.3 | IT4542 | Quản trị phát triển phần mềm | 2(2-0-0-4) | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ITE6_fix_chunks_multi_hop_003",
+      "question_type": "multi_hop",
+      "question": "Theo cấu trúc chung của chương trình Công nghệ thông tin Việt-Nhật (IT-E6), khối Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân gồm bao nhiêu tín chỉ, và cụ thể được chia thành những học phần nào theo kế hoạch học tập chuẩn?",
+      "gold_answer": "Khối Thực tập kỹ thuật và Đồ án tốt nghiệp Cử nhân có tổng cộng 8 tín chỉ. Cụ thể, khối này được chia thành hai học phần: IT4948 – Thực tập công nghiệp (2 tín chỉ, học kỳ 7) và IT4125 – Đồ án tốt nghiệp (6 tín chỉ, học kỳ 8).",
+      "evidence_chunk_ids": [
+        "bab0d66f-53e6-4cdd-addf-fdc1607989ee",
+        "d21d121c-0983-4f96-981d-b8ed33b4fa66"
+      ],
+      "ground_truth_context": [
+        "| Thực tập kỹ thuật và Đồ án TN cử nhân | 8 | Thực tập công nghiệp (2TC) + Đồ án TN cử nhân (6TC) |",
+        "| 72 | IT4948 | Thực tập công nghiệp | 2(0-0-4-4) | 7 |",
+        "| 73 | IT4125 | Đồ án tốt nghiệp | 6(0-0-12-12) | 8 |"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_fix_chunks_multi_hop_004",
+      "question_type": "multi_hop",
+      "question": "Trước khi học IT3011 – Cấu trúc dữ liệu và thuật toán trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6), sinh viên cần hoàn thành học phần nhập môn ngành nào, và học phần đó cung cấp kiến thức gì?",
+      "gold_answer": "Sinh viên cần hoàn thành học phần tiên quyết IT2110 – Nhập môn công nghệ thông tin và truyền thông (cùng với IT3210) trước khi học IT3011. Học phần IT2110 cung cấp các khái niệm cơ bản về Công nghệ thông tin và Truyền thông, bao gồm các hệ thống phần cứng, phần mềm, các phép toán trên số nhị phân, tổ chức của máy tính và công nghệ truyền thông, đồng thời giới thiệu khái niệm thuật toán, các ngôn ngữ lập trình, quản lý dữ liệu và phát triển hệ thống thông tin.",
+      "evidence_chunk_ids": [
+        "f7305dcb-f6f0-469f-93aa-8d7dfba3928d",
+        "7e62c67c-7212-4ebe-9bc0-8ce982560c09"
+      ],
+      "ground_truth_context": [
+        "**Học phần tiên quyết:** IT2110, IT3210",
+        "Môn học cung cấp các khái niệm cơ bản về Công nghệ thông tin và Truyền thông.",
+        "Môn học bao gồm các chủ đề về các hệ thống phần cứng, phần mềm như các phép toán trên số nhị phân, tổ chức của máy tính và công nghệ truyền thông. Môn học cũng giới thiệu khái niệm thuật toán, các ngôn ngữ lập trình, quản lý dữ liệu và phát triển hệ thống thông tin."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_fix_chunks_multi_hop_005",
+      "question_type": "multi_hop",
+      "question": "Mục tiêu cụ thể của chương trình Công nghệ thông tin Việt-Nhật (IT-E6) đề cập đến khả năng đọc hiểu tài liệu kỹ thuật bằng tiếng Nhật. Học phần Tiếng Nhật chuyên ngành nào trong chương trình trực tiếp rèn luyện kỹ năng này, và học phần đó dạy các chủ đề IT nào?",
+      "gold_answer": "Mục tiêu cụ thể của chương trình nêu rõ sinh viên cần có khả năng đọc hiểu các tài liệu kỹ thuật bằng tiếng Nhật. Học phần JP3110 – Tiếng Nhật chuyên ngành 1 trực tiếp rèn luyện kỹ năng này, dạy từ vựng và các chủ đề IT như mạng máy tính, các giao thức trong mạng máy tính, mạng LAN, mạng WAN, địa chỉ IP, đồng thời rèn luyện khả năng đọc hiểu tài liệu IT viết bằng tiếng Nhật và thuyết trình bằng tiếng Nhật.",
+      "evidence_chunk_ids": [
+        "74061d69-a88f-4f43-a49f-7716ada3affb",
+        "8ce4cb3a-b95c-4ba8-b6f8-3e201b8e9b76"
+      ],
+      "ground_truth_context": [
+        "Có khả năng nói tiếng Nhật cơ bản. Có khả năng đọc hiểu các tài liệu kỹ thuật bằng tiếng Nhật. Có khả năng thuyết trình, diễn đạt các nội dung kỹ thuật bằng tiếng Nhật.",
+        "Nội dung: Học tiếng Nhật thông qua một số chủ đề cụ thể trong IT như mạng máy tính, các giao thức trong mạng máy tính, mạng LAN, mạng WAN, địa chỉ IP. Học các từ chuyên ngành, các mẫu câu thường dùng trong IT. Tìm hiểu về các chủ đề IT. Thuyết trình bằng tiếng Nhật."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_fix_chunks_multi_hop_006",
+      "question_type": "multi_hop",
+      "question": "Trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6), để học được học phần IT4015 – Nhập môn an toàn thông tin, sinh viên cần hoàn thành những học phần nào trước đó, và một trong số đó (Nguyên lý hệ điều hành) cung cấp kiến thức gì?",
+      "gold_answer": "Sinh viên cần hoàn thành IT3020E (Toán rời rạc) và IT3070E (Nguyên lý hệ điều hành) trước khi học IT4015. Học phần IT3070 – Nguyên lý hệ điều hành cung cấp cho sinh viên hiểu biết cơ bản về nguyên lý hoạt động của các hệ điều hành hiện đại, giúp đánh giá các giải thuật sử dụng trong hệ điều hành và giới thiệu các dịch vụ hệ thống cơ bản của hệ điều hành Windows/Linux.",
+      "evidence_chunk_ids": [
+        "f360992e-d51b-42ae-91c2-3a2f91945e6a",
+        "e54da261-e8ea-43ca-8869-6b3a972ec95f"
+      ],
+      "ground_truth_context": [
+        "**Học phần học trước:** IT3020E; IT3070E",
+        "Học phần này nhằm cung cấp cho sinh viên những hiểu biết cơ bản về nguyên lý hoạt động của các hệ điều hành hiện đại; giúp sinh viên hiểu và đánh giá được các giải thuật sử dụng trong hệ điều hành qua đó có thể vận dụng các giải thuật này vào giải quyết các bài toán trong thực tế. Học phần cũng giới thiệu một số dịch vụ hệ thống cơ bản (liên quan tới tiến trình, luồng, mạng, bộ nhớ, thư mục, file) của hệ điều hành Windows/Linux."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_fix_chunks_multi_hop_007",
+      "question_type": "multi_hop",
+      "question": "So với học phần IT3362 – Kỹ năng ITSS 1, học phần IT3382 – Kỹ năng ITSS 2 trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) có điểm khác biệt gì về nội dung và mục tiêu?",
+      "gold_answer": "IT3362 – Kỹ năng ITSS 1 tập trung vào việc học một ngôn ngữ Front-end để hướng tới trở thành kỹ sư full-stack, nghiên cứu các case điển hình, học kỹ năng phân tích nguyên nhân và phương pháp Ho-Ren-Sou, đồng thời phát triển website theo phương pháp agile. Trong khi đó, IT3382 – Kỹ năng ITSS 2 yêu cầu sinh viên thực hiện các dự án mô phỏng tình huống thực tế, dựa trên kiến thức đã học ở năm 3 và 4 để nâng cao kỹ năng CNTT và hội thoại tiếng Nhật, làm quen với môi trường lập trình sử dụng tiếng Nhật, hướng tới mục tiêu thiết kế hệ thống Web theo chủ đề và sử dụng Scrum, có tính ứng dụng và độ phức tạp cao hơn so với IT3362.",
+      "evidence_chunk_ids": [
+        "595a82ab-2309-4149-b53f-8817f7b90e73",
+        "587b3470-6b4f-49ca-8030-c7ee75b665e6"
+      ],
+      "ground_truth_context": [
+        "Trong môn học này, sinh viên sẽ được học một ngôn ngữ Front-end nhằm mục tiêu trở thành một kỹ sư full-stack. Thông qua nghiên cứu các case điển hình, người học sẽ học hỏi các kỹ năng thực tế về công nghệ, phân tích nguyên nhân và phương pháp Ho-Ren-Sou, vốn rất quan trọng để đóng một vai trò tích cực trong công việc và cuộc sống tại Nhật Bản. Ngoài ra, sinh viên còn được phát triển các website của chính mình theo phương pháp agile như một cách tổng hợp và ứng dụng tất cả các kiến thức đã học.",
+        "Trong môn học này, sinh viên sẽ thực hiện các dự án dựa trên mô phỏng các tình huống phát sinh trên thực tế. Dựa vào những kiến thức đã được học ở năm thứ 3 và năm thứ 4, sinh viên sẽ tiếp tục học nâng cao các kỹ năng CNTT và hội thoại bằng tiếng Nhật; được làm quen với xu hướng phát triển, tập quán làm việc và môi trường lập trình có sử dụng tiếng Nhật. Mục tiêu đạt được: sinh viên có thể thiết kế hệ thống Web theo chủ đề, tạo các thông số kỹ thuật bao gồm nội dung cụ thể bằng tiếng Nhật, sử dụng Scrum và có sự chủ động trong việc chuẩn bị cho start up."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ITE6_fix_chunks_multi_hop_008",
+      "question_type": "multi_hop",
+      "question": "Trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6), học phần IT3230 – Lập trình C (cơ bản) yêu cầu tiên quyết là học phần nào, và bản thân học phần tiên quyết đó có yêu cầu tiên quyết riêng hay không?",
+      "gold_answer": "Học phần IT3230 – Lập trình C (cơ bản) yêu cầu tiên quyết là IT3220 – Thực hành ngôn ngữ lập trình C. Bản thân học phần IT3220 không có tiên quyết nào, sinh viên có thể học ngay từ đầu.",
+      "evidence_chunk_ids": [
+        "8a6aa7e8-88a6-4702-9ac8-1097bbd18644",
+        "dcb8b871-fabc-4fd4-ab52-90f40085adde"
+      ],
+      "ground_truth_context": [
+        "**Học phần tiên quyết:** Không",
+        "**Học phần tiên quyết:** IT3220"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}

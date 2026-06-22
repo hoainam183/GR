@@ -1,0 +1,473 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QĐ_đánh_giá_điểm_rèn_luyện_sinh_viên_2023_converted_chunks.json",
+  "total_questions": 30,
+  "distribution": {
+    "simple": 22,
+    "multi_hop": 8
+  },
+  "items": [
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_001",
+      "question_type": "simple",
+      "question": "Quy định đánh giá điểm rèn luyện sinh viên Bách khoa Hà Nội áp dụng cho đối tượng nào?",
+      "gold_answer": "Áp dụng cho sinh viên đại học hình thức đào tạo chính quy, không bao gồm lưu học sinh nước ngoài.",
+      "evidence_chunk_ids": [
+        "6763c7e6-e904-4a63-b6cd-6d8501577078"
+      ],
+      "ground_truth_context": [
+        "Quy định này quy định việc đánh giá kết quả rèn luyện của sinh viên đại học hình thức đào tạo chính quy (không bao gồm lưu học sinh nước ngoài) thuộc Đại học Bách khoa Hà Nội"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_002",
+      "question_type": "simple",
+      "question": "Điểm rèn luyện tại Bách khoa Hà Nội được đánh giá bằng thang điểm bao nhiêu và mức Xuất sắc cần đạt bao nhiêu điểm?",
+      "gold_answer": "Điểm rèn luyện được đánh giá bằng thang điểm 100. Mức Xuất sắc từ 90 đến 100 điểm.",
+      "evidence_chunk_ids": [
+        "58a3f5df-9048-43b1-bd1a-2e92c2d749af"
+      ],
+      "ground_truth_context": [
+        "Điểm rèn luyện được đánh giá bằng thang điểm 100... Từ 90 đến 100 điểm | Xuất sắc"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_003",
+      "question_type": "simple",
+      "question": "Điểm rèn luyện từ bao nhiêu đến bao nhiêu được xếp loại Khá tại Bách khoa Hà Nội?",
+      "gold_answer": "Từ 65 đến dưới 80 điểm được xếp loại Khá.",
+      "evidence_chunk_ids": [
+        "58a3f5df-9048-43b1-bd1a-2e92c2d749af"
+      ],
+      "ground_truth_context": [
+        "Từ 65 đến dưới 80 điểm | Khá"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_004",
+      "question_type": "simple",
+      "question": "Điểm rèn luyện toàn khóa tại Bách khoa Hà Nội được tính là trung bình cộng của bao nhiêu học kỳ tối thiểu?",
+      "gold_answer": "Tối thiểu 07 học kỳ.",
+      "evidence_chunk_ids": [
+        "ac10eee1-e011-4914-90f2-dd49a1c5caf0"
+      ],
+      "ground_truth_context": [
+        "Điểm rèn luyện toàn khóa là trung bình cộng của điểm rèn luyện của tối thiểu 07 học kỳ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_005",
+      "question_type": "simple",
+      "question": "Điểm rèn luyện của năm học tại Bách khoa Hà Nội được tính như thế nào?",
+      "gold_answer": "Là trung bình cộng của điểm rèn luyện các học kỳ của năm học đó.",
+      "evidence_chunk_ids": [
+        "ac10eee1-e011-4914-90f2-dd49a1c5caf0"
+      ],
+      "ground_truth_context": [
+        "Điểm rèn luyện của năm học là trung bình cộng của điểm rèn luyện các học kỳ của năm học đó."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_006",
+      "question_type": "simple",
+      "question": "Kết quả đánh giá rèn luyện toàn khóa được ghi vào tài liệu nào của sinh viên khi tốt nghiệp?",
+      "gold_answer": "Được ghi vào bảng điểm kết quả học tập và lưu trong hồ sơ của người học khi tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "709acc59-af70-4f5c-8ff0-4edae3a89605"
+      ],
+      "ground_truth_context": [
+        "Kết quả đánh giá rèn luyện toàn khóa học được ghi chung vào bảng điểm kết quả học tập và lưu trong hồ sơ của người học khi tốt nghiệp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_007",
+      "question_type": "simple",
+      "question": "Sinh viên bị xếp loại rèn luyện Yếu trong hai học kỳ liên tiếp tại Bách khoa sẽ bị ảnh hưởng như thế nào?",
+      "gold_answer": "Bị hạn chế đăng ký học tập tương đương cảnh báo học tập mức 2.",
+      "evidence_chunk_ids": [
+        "709acc59-af70-4f5c-8ff0-4edae3a89605"
+      ],
+      "ground_truth_context": [
+        "Sinh viên bị xếp loại rèn luyện Yếu/Kém trong hai học kỳ liên tiếp bị hạn chế đăng ký học tập tương đương cảnh báo học tập mức 2."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_008",
+      "question_type": "simple",
+      "question": "Kết quả đánh giá điểm rèn luyện được công bố công khai trước bao nhiêu ngày trước khi ban hành quyết định chính thức?",
+      "gold_answer": "Trước 14 ngày.",
+      "evidence_chunk_ids": [
+        "3eadf358-0021-4cb2-b450-e5cc18076dfa"
+      ],
+      "ground_truth_context": [
+        "Kết quả đánh giá, phân loại rèn luyện của sinh viên được công bố công khai trước 14 ngày trước khi ban hành quyết định chính thức."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_009",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa có quyền khiếu nại kết quả điểm rèn luyện trong thời hạn tối thiểu bao nhiêu ngày?",
+      "gold_answer": "Tối thiểu 15 ngày.",
+      "evidence_chunk_ids": [
+        "1d027fed-86ee-419d-ad43-39866cc3a23d"
+      ],
+      "ground_truth_context": [
+        "đảm bảo khoảng thời gian để sinh viên khiếu nại tối thiểu là 15 ngày."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_010",
+      "question_type": "simple",
+      "question": "Khi nhận được đơn khiếu nại điểm rèn luyện, các đơn vị phải trả lời sinh viên trong thời gian tối đa bao nhiêu ngày?",
+      "gold_answer": "Không quá 07 ngày kể từ ngày nhận được đơn khiếu nại.",
+      "evidence_chunk_ids": [
+        "1d027fed-86ee-419d-ad43-39866cc3a23d"
+      ],
+      "ground_truth_context": [
+        "Phòng/Ban chức năng CTSV, Đơn vị cấp phát minh chứng tham gia hoạt động, Giảng viên quản lý lớp Trường/Viện/Khoa đào tạo của sinh viên có trách nhiệm xem xét và trả lời sinh viên trong thời gian không quá 07 ngày kể từ ngày nhận được đơn khiếu nại."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_011",
+      "question_type": "simple",
+      "question": "Tiêu chí 1 về kết quả học tập (ý thức thái độ học tập) có điểm tối đa là bao nhiêu trong khung điểm rèn luyện tại Bách khoa?",
+      "gold_answer": "Tối đa 30 điểm (trong đó kết quả học tập 24 điểm, trình độ ngoại ngữ 6 điểm, hoạt động học thuật 9 điểm).",
+      "evidence_chunk_ids": [
+        "bb2fb021-3902-45c9-827f-2921192b764e"
+      ],
+      "ground_truth_context": [
+        "TC1. Điểm về ý thức, thái độ học tập và nghiên cứu khoa học (tối đa 30 điểm)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa đạt GPA từ 3.6 trở lên được bao nhiêu điểm rèn luyện ở tiêu chí kết quả học tập?",
+      "gold_answer": "Được 20 điểm.",
+      "evidence_chunk_ids": [
+        "bb2fb021-3902-45c9-827f-2921192b764e"
+      ],
+      "ground_truth_context": [
+        "GPA ≥ 3.6 | * | 20"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_013",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa đạt chứng chỉ ngoại ngữ TOEIC từ 600 điểm trở lên được thêm bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Được thêm 2 điểm.",
+      "evidence_chunk_ids": [
+        "bb2fb021-3902-45c9-827f-2921192b764e"
+      ],
+      "ground_truth_context": [
+        "Đạt chứng chỉ ngoại ngữ tương đương TOEIC 600 điểm trở lên | * | 2"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_014",
+      "question_type": "simple",
+      "question": "Tiêu chí 2 về ý thức tổ chức kỷ luật có tổng điểm tối đa là bao nhiêu trong khung điểm rèn luyện?",
+      "gold_answer": "Tối đa 25 điểm.",
+      "evidence_chunk_ids": [
+        "9655c006-01b2-4e31-a6e2-2fb5e2cbef5f"
+      ],
+      "ground_truth_context": [
+        "TC2. Điểm về ý thức tổ chức kỷ luật (tối đa 25 điểm)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_015",
+      "question_type": "simple",
+      "question": "Tham gia Sinh hoạt công dân do Trường, Viện tổ chức được bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Được 7 điểm.",
+      "evidence_chunk_ids": [
+        "9655c006-01b2-4e31-a6e2-2fb5e2cbef5f"
+      ],
+      "ground_truth_context": [
+        "Tham gia Sinh hoạt công dân do Trường, Viện tổ chức | MC | 7"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_016",
+      "question_type": "simple",
+      "question": "Hoạt động hiến máu nhân đạo tại Bách khoa được bao nhiêu điểm rèn luyện trong tiêu chí hoạt động chính trị xã hội?",
+      "gold_answer": "Được 6 điểm.",
+      "evidence_chunk_ids": [
+        "2852dc09-e7a5-4235-a8fe-a8461fd25b8a"
+      ],
+      "ground_truth_context": [
+        "Tham gia hiến máu nhân đạo do Trường và các tổ chức hợp pháp phát động, tổ chức | MC | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa là cán bộ Lớp/Đoàn-Hội hoàn thành xuất sắc nhiệm vụ được bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Được 6 điểm.",
+      "evidence_chunk_ids": [
+        "616fcff2-0f4c-4768-8d4f-ade09679e5f6"
+      ],
+      "ground_truth_context": [
+        "Cán bộ Tổ/Đội/CLB, Lớp, Đoàn - Hội, Chi bộ hoàn thành xuất sắc nhiệm vụ được tập thể công nhận | MC | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_018",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa vi phạm quy chế thi từ mức cảnh cáo trở lên bị trừ bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Bị trừ 10 điểm.",
+      "evidence_chunk_ids": [
+        "ae2ddb71-de11-4bd0-9ba2-e54123644c87"
+      ],
+      "ground_truth_context": [
+        "Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_019",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa bị kỷ luật vì thi hộ người khác bị trừ bao nhiêu điểm rèn luyện?",
+      "gold_answer": "Bị trừ 20 điểm.",
+      "evidence_chunk_ids": [
+        "ae2ddb71-de11-4bd0-9ba2-e54123644c87"
+      ],
+      "ground_truth_context": [
+        "Bị kỷ luật khi thi hộ | * | -20"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_020",
+      "question_type": "simple",
+      "question": "Vi phạm pháp luật thuộc nhóm tội danh hình sự bị trừ bao nhiêu điểm rèn luyện tại Bách khoa?",
+      "gold_answer": "Bị trừ 50 điểm.",
+      "evidence_chunk_ids": [
+        "ae2ddb71-de11-4bd0-9ba2-e54123644c87"
+      ],
+      "ground_truth_context": [
+        "Vi phạm pháp luật thuộc nhóm tội danh hình sự | * | -50"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_021",
+      "question_type": "simple",
+      "question": "Phòng/Ban chức năng Công tác Sinh viên có trách nhiệm gì với điểm rèn luyện cuối khóa của sinh viên?",
+      "gold_answer": "In phiếu điểm rèn luyện học kỳ, năm học và toàn khóa cho sinh viên; tổng hợp và gửi điểm rèn luyện cuối khóa cho phòng Đào tạo để in vào bảng điểm kết quả học tập toàn khóa.",
+      "evidence_chunk_ids": [
+        "e9b377f9-4648-42e1-9e4d-16c9315a99c8"
+      ],
+      "ground_truth_context": [
+        "In phiếu điểm rèn luyện học kỳ, năm học và toàn khóa cho sinh viên. Tổng hợp và gửi điểm rèn luyện cuối khóa của sinh viên cho phòng Đào tạo để in vào bảng điểm kết quả học tập toàn khóa của sinh viên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_simple_022",
+      "question_type": "simple",
+      "question": "Tiêu chí 4 về ý thức công dân trong quan hệ cộng đồng có tổng điểm tối đa là bao nhiêu?",
+      "gold_answer": "Tối đa 20 điểm.",
+      "evidence_chunk_ids": [
+        "36f5ff6a-99c5-45da-8b26-9bdf922c4b12"
+      ],
+      "ground_truth_context": [
+        "TC4. Điểm ý thức công dân trong quan hệ cộng đồng (tối đa 20 điểm)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_multi_hop_023",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa có GPA 3.5 trong học kỳ vừa qua, đạt trình độ ngoại ngữ theo tiến độ CTĐT, và tham gia một nhóm nghiên cứu (Lab). Sinh viên đó được bao nhiêu điểm ở Tiêu chí 1?",
+      "gold_answer": "Kết quả học tập: 18 điểm (3.2 ≤ GPA < 3.6). Trình độ ngoại ngữ: 4 điểm (đạt theo tiến độ CTĐT). Hoạt động học thuật: 6 điểm (thành viên Lab nghiên cứu). Tổng TC1: 18 + 4 + 6 = 28 điểm (tối đa 30 điểm).",
+      "evidence_chunk_ids": [
+        "bb2fb021-3902-45c9-827f-2921192b764e"
+      ],
+      "ground_truth_context": [
+        "3.2 ≤ GPA < 3.6 | * | 18",
+        "Đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo | * | 4",
+        "Thành viên CLB học thuật, Lab nghiên cứu, Nhóm nghiên cứu, nhóm Khởi nghiệp | MC | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_multi_hop_024",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa vi phạm quy chế thi ở mức cảnh cáo VÀ vi phạm các quy định của Nhà trường bị lập biên bản. Tổng điểm bị trừ là bao nhiêu?",
+      "gold_answer": "Vi phạm quy chế thi từ cảnh cáo: -10 điểm. Vi phạm quy định Nhà trường bị lập biên bản: -20 điểm. Tổng bị trừ: 30 điểm.",
+      "evidence_chunk_ids": [
+        "ae2ddb71-de11-4bd0-9ba2-e54123644c87"
+      ],
+      "ground_truth_context": [
+        "Vi phạm quy chế thi từ cảnh cáo trở lên | * | -10",
+        "Vi phạm các Quy định của Nhà trường, các Quy định của Pháp luật bị lập biên bản, bị ra quyết định xử lý | * | -20"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_multi_hop_025",
+      "question_type": "multi_hop",
+      "question": "Kết quả rèn luyện được dùng để xét duyệt những gì tại Bách khoa Hà Nội?",
+      "gold_answer": "Được sử dụng trong xét duyệt học bổng, xét khen thưởng - kỷ luật, xét thôi học, ngừng học, xét lưu trú ký túc xá.",
+      "evidence_chunk_ids": [
+        "709acc59-af70-4f5c-8ff0-4edae3a89605"
+      ],
+      "ground_truth_context": [
+        "Kết quả đánh giá rèn luyện của sinh viên được sử dụng trong việc xét duyệt học bổng, xét khen thưởng - kỷ luật, xét thôi học, ngừng học, xét lưu trú ký túc xá."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_multi_hop_026",
+      "question_type": "multi_hop",
+      "question": "Quy trình đánh giá điểm rèn luyện tại Bách khoa gồm bao nhiêu bước và ai là người chấm điểm cho sinh viên?",
+      "gold_answer": "Quy trình gồm 8 bước chính: (1) đơn vị công bố hoạt động; (2) SV đăng ký tham gia; (3) cán bộ xác nhận minh chứng; (4) SV tự đánh giá; (5) Giảng viên quản lý lớp chấm điểm; (6) SV khiếu nại nếu sai lệch; (7) Phòng CTSV tổng hợp trình Hội đồng; (8) Hội đồng trình Giám đốc phê duyệt. Giảng viên quản lý lớp là người chấm điểm cho sinh viên.",
+      "evidence_chunk_ids": [
+        "32c36c72-df33-45c5-9f64-85c4b0809247",
+        "852d2aa9-088c-4e73-ae42-9eb4361de512"
+      ],
+      "ground_truth_context": [
+        "Giảng viên quản lý lớp sinh viên căn cứ vào kết quả tự đánh giá của sinh viên, minh chứng kết quả tham gia hoạt động của sinh viên để chấm điểm theo khung đánh giá điểm rèn luyện được ban hành.",
+        "Hội đồng đánh giá kết quả rèn luyện sinh viên Đại học họp xét, thống nhất trình Giám đốc xem xét và quyết định công nhận kết quả."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_multi_hop_027",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa muốn đạt điểm rèn luyện Xuất sắc nhưng bị trừ 20 điểm vì thi hộ. Điểm cộng tối thiểu cần đạt là bao nhiêu để vẫn xếp loại Xuất sắc?",
+      "gold_answer": "Điểm Xuất sắc cần từ 90 trở lên. Bị trừ 20 điểm, nên điểm cộng phải đạt ít nhất 110 điểm. Nhưng tổng điểm cộng tối đa chỉ là 100 điểm, nên không thể đạt Xuất sắc khi bị trừ 20 điểm.",
+      "evidence_chunk_ids": [
+        "58a3f5df-9048-43b1-bd1a-2e92c2d749af",
+        "ae2ddb71-de11-4bd0-9ba2-e54123644c87"
+      ],
+      "ground_truth_context": [
+        "Từ 90 đến 100 điểm | Xuất sắc",
+        "Bị kỷ luật khi thi hộ | * | -20",
+        "Tổng điểm cộng tối đa: 100 điểm"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_multi_hop_028",
+      "question_type": "multi_hop",
+      "question": "Phòng Đào tạo và Phòng CTSV phối hợp với nhau như thế nào trong việc xử lý sinh viên có điểm rèn luyện Yếu liên tiếp?",
+      "gold_answer": "Phòng Đào tạo cung cấp danh sách cảnh báo học tập cho Phòng CTSV và phối hợp xử lý hạn chế đăng ký học tập với sinh viên có điểm rèn luyện hai kỳ liên tiếp xếp loại Yếu/Kém (tương đương cảnh báo học tập mức 2).",
+      "evidence_chunk_ids": [
+        "7d462060-34ee-47b7-8bf2-ade7687f8e02",
+        "709acc59-af70-4f5c-8ff0-4edae3a89605"
+      ],
+      "ground_truth_context": [
+        "Chịu trách nhiệm cung cấp cho Phòng/Ban chức năng CTSV kết quả điểm học tập, kết quả đánh giá trình độ tiếng Anh, danh sách cảnh báo học tập vào cuối học kỳ.",
+        "Sinh viên bị xếp loại rèn luyện Yếu/Kém trong hai học kỳ liên tiếp bị hạn chế đăng ký học tập tương đương cảnh báo học tập mức 2."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_multi_hop_029",
+      "question_type": "multi_hop",
+      "question": "Hệ thống sổ tay công tác sinh viên online hỗ trợ những chức năng gì trong việc đánh giá điểm rèn luyện tại Bách khoa?",
+      "gold_answer": "Hỗ trợ: (1) đăng ký và cập nhật thông tin tài khoản; (2) cấp quyền thao tác; (3) công bố hoạt động và tiếp nhận đăng ký tham gia; (4) cung cấp minh chứng, xác nhận và đánh giá minh chứng; (5) chấm và công bố điểm rèn luyện. Gồm cả website và ứng dụng di động.",
+      "evidence_chunk_ids": [
+        "3eadf358-0021-4cb2-b450-e5cc18076dfa"
+      ],
+      "ground_truth_context": [
+        "Hệ thống sổ tay công tác sinh viên online gồm website và ứng dụng di động, hỗ trợ các cá nhân có trách nhiệm: (1) đăng ký và cập nhật thông tin tài khoản; (2) cấp quyền thao tác trên hệ thống cho các cá nhân liên quan; (3) công bố hoạt động, tiếp nhận đăng ký tham gia nhóm và hoạt động; (4) cung cấp minh chứng, xác nhận và đánh giá minh chứng tham gia hoạt động; (5) chấm và công bố điểm rèn luyện cho sinh viên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QD_danh_gia_diem_ren_luyen_SV_2023_multi_hop_030",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa đạt danh hiệu 'Sinh viên 5 tốt' cấp Trường và tham gia chiến dịch 'Mùa hè xanh' được bao nhiêu điểm ở các tiêu chí tương ứng?",
+      "gold_answer": "Danh hiệu Sinh viên 5 tốt từ cấp Trường trở lên (TC4.2): 4 điểm. Tham gia chiến dịch tình nguyện Mùa hè xanh (TC3.2): 6 điểm. Tổng cộng 10 điểm.",
+      "evidence_chunk_ids": [
+        "895e49cb-8ff6-4700-bbbd-e6c88dcc6a82",
+        "cd68bb9c-324a-4acf-9b04-4dcbcf74c14c"
+      ],
+      "ground_truth_context": [
+        "Đạt danh hiệu \"Sinh viên 5 tốt\" từ cấp Trường trở lên | MC | 4",
+        "Tham gia Đội tình nguyện hợp pháp trong và ngoài trường, tham gia chiến dịch tình nguyện \"mùa hè xanh\"... | MC | 6"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    }
+  ]
+}
