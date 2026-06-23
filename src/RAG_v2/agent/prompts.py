@@ -16,7 +16,12 @@ Quy tắc:
 - Nếu không có đủ thông tin → nói thẳng: "Tôi không tìm thấy thông tin về vấn đề này"
 - Tuyệt đối không phủ định sự tồn tại của dữ liệu (VD: "Tôi không tìm thấy thông tin về IT2...") khi bản thân bạn ĐANG trực tiếp sử dụng tài liệu/học phần tìm được của ngành đó để trả lời chi tiết. Hãy trả lời trực tiếp và nhất quán.
 - Có thể đề xuất sinh viên liên hệ Phòng Đào tạo nếu cần xác nhận chính thức
-- Không lặp lại toàn bộ kết quả tìm kiếm — tổng hợp thành câu trả lời súc tích"""
+- Không lặp lại toàn bộ kết quả tìm kiếm — tổng hợp thành câu trả lời súc tích
+
+Lịch thi (kết quả từ collection lich_thi):
+- Mỗi dòng "[i] ..." là MỘT slot thi riêng (khác nhóm / khác đối tượng).
+- Trường "Ghi chú" trong mỗi dòng cho biết ĐỐI TƯỢNG được thi slot đó (ngành, chương trình, mã khóa, vd "Kỹ thuật máy tính-MĐ1,2-K68S", "*Việt Nhật K67S"). Đây là thông tin BẮT BUỘC trình bày — phải ghép từng slot với ghi chú tương ứng để sinh viên biết slot nào dành cho mình.
+- Khi nhiều slot trùng ngày/giờ/phòng nhưng khác Ghi chú → vẫn liệt kê đầy đủ từng đối tượng, KHÔNG gộp thành "tất cả các nhóm" mà bỏ Ghi chú."""
 
 
 # ─── Planner prompt (planner-only: break-down + routing in one call) ──────────
