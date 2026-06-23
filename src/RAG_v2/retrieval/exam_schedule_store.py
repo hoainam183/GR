@@ -274,10 +274,12 @@ class ExamScheduleESStore:
                     "operator": "or",
                 }
             }
-            # When other filters already narrow the set, treat the name as an
-            # optional booster (should) so generic words ("lịch thi cuối kì")
-            # cannot exclude valid rows. When it is the only signal, it must match.
-            if filter_clauses:
+            # Only downgrade name to an optional booster when subject_code (the
+            # primary key) is present — there it tolerates typos. Otherwise the
+            # name IS the discriminator: leaving it in `should` lets broad
+            # filters like exam_type alone return arbitrary rows date-sorted,
+            # truncating the requested subject out of the top-K.
+            if subject_code:
                 should_clauses.append(name_clause)
             else:
                 must_clauses.append(name_clause)
@@ -320,14 +322,22 @@ class ExamScheduleESStore:
             cohort=cohort,
             exam_type=exam_type,
         )
+        sort: list[dict[str, Any]] = []
+        # When name is the discriminator (no precise date pin), let BM25 rank
+        # first so the requested subject isn't truncated by chronological order.
+        if subject_name and not (exam_date or exam_date_from or exam_date_to):
+            sort.append({"_score": {"order": "desc"}})
+        sort.extend(
+            [
+                {"exam_date": {"order": "asc", "missing": "_last"}},
+                {"start_time": {"order": "asc", "missing": "_last"}},
+            ]
+        )
         resp = self.client.search(
             index=self.index_name,
             size=max(1, limit),
             query=query,
-            sort=[
-                {"exam_date": {"order": "asc", "missing": "_last"}},
-                {"start_time": {"order": "asc", "missing": "_last"}},
-            ],
+            sort=sort,
         )
         return [hit["_source"] for hit in resp["hits"]["hits"]]
 

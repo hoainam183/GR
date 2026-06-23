@@ -217,7 +217,10 @@ _COURSE_TITLE_SUFFIX_LOOKAHEAD = (
 
 MAJOR_PATTERNS: List[Tuple[str, str]] = [
     # SoICT
-    (r"\bIT[-\s]?E10\b|khoa học dữ liệu|trí tuệ nhân tạo|\bDATA\b|data\s+ai|artificial intelligence", "IT-E10"),
+    (
+        r"\bIT[-\s]?E10\b|khoa học dữ liệu|trí tuệ nhân tạo|\bDATA\b|data\s+ai|artificial intelligence",
+        "IT-E10",
+    ),
     (r"\bIT[-\s]?E15\b|an toàn không gian số|cyber|bảo mật số", "IT-E15"),
     (r"\bIT[-\s]?E6\b|việt.{0,4}nhật|ICTVJ", "IT-E6"),
     (r"\bIT[-\s]?E7\b|toàn cầu|global ICT|ICTG", "IT-E7"),
@@ -251,7 +254,10 @@ MAJOR_PATTERNS: List[Tuple[str, str]] = [
     # "kỹ thuật hóa học"/"hóa học" có thể là TÊN MÔN (vd "Hóa học 1",
     # "Hóa học đại cương") nên cần lookahead chặn trường hợp đó để không
     # bị nhận nhầm thành MÃ NGÀNH CH1/CH2.
-    (rf"\bCH[-\s]?1\b|kỹ thuật hóa học\b{_COURSE_TITLE_SUFFIX_LOOKAHEAD}", "CH1"),
+    (
+        rf"\bCH[-\s]?1\b|kỹ thuật hóa học\b{_COURSE_TITLE_SUFFIX_LOOKAHEAD}",
+        "CH1",
+    ),
     (rf"\bCH[-\s]?2\b|hóa học\b{_COURSE_TITLE_SUFFIX_LOOKAHEAD}", "CH2"),
     (r"\bBF[-\s]?1\b|kỹ thuật sinh học\b", "BF1"),
     (r"\bBF[-\s]?2\b|kỹ thuật thực phẩm\b", "BF2"),
@@ -612,7 +618,10 @@ def _build_major_labels(major_code: str) -> List[str]:
         labels.extend(MAJOR_NAME_ALIAS_MAPPING.get(major_name, []))
     for alias_name, aliases in MAJOR_NAME_ALIAS_MAPPING.items():
         alias_values = [alias_name, *aliases]
-        if any(_normalise_major_text(value).casefold() == major_code.casefold() for value in alias_values):
+        if any(
+            _normalise_major_text(value).casefold() == major_code.casefold()
+            for value in alias_values
+        ):
             labels.extend(alias_values)
 
     unique: List[str] = []
@@ -669,7 +678,9 @@ def _major_name_query_variants(name: str) -> list[str]:
     without_parentheses = re.sub(r"[()]", "", name)
     if without_parentheses != name:
         variants.append(re.sub(r"\s{2,}", " ", without_parentheses).strip())
-    without_program_note = re.sub(r"\s*\([^)]*chương trình[^)]*\)", "", name, flags=re.IGNORECASE)
+    without_program_note = re.sub(
+        r"\s*\([^)]*chương trình[^)]*\)", "", name, flags=re.IGNORECASE
+    )
     if without_program_note != name:
         variants.append(without_program_note.strip())
         variants.append(re.sub(r"[()]", "", without_program_note).strip())
@@ -719,7 +730,9 @@ def enrich_major_references_for_query(query: str) -> str:
             continue
         if name.casefold() in result.casefold():
             continue
-        code_pattern = re.escape(code).replace(r"\-", r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*")
+        code_pattern = re.escape(code).replace(
+            r"\-", r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*"
+        )
         result = re.sub(
             rf"\b{code_pattern}\b",
             f"{code} ({name})",
@@ -728,11 +741,19 @@ def enrich_major_references_for_query(query: str) -> str:
         )
 
     existing_codes = set(extract_major_codes(_normalise_major_text(result)))
-    for code, name in sorted(MAJOR_CODE_TO_NAME.items(), key=lambda item: len(item[1]), reverse=True):
+    for code, name in sorted(
+        MAJOR_CODE_TO_NAME.items(), key=lambda item: len(item[1]), reverse=True
+    ):
         if code in existing_codes:
             continue
-        for variant in sorted(_major_name_query_variants(name), key=len, reverse=True):
-            if re.search(rf"{re.escape(variant)}\s*\(\s*{re.escape(code)}\s*\)", result, re.IGNORECASE):
+        for variant in sorted(
+            _major_name_query_variants(name), key=len, reverse=True
+        ):
+            if re.search(
+                rf"{re.escape(variant)}\s*\(\s*{re.escape(code)}\s*\)",
+                result,
+                re.IGNORECASE,
+            ):
                 break
             # Negative lookahead: nếu sau tên ngành là digit/Roman/hậu tố
             # quen thuộc của tên môn ("đại cương", "cơ sở", ...) thì đây là
@@ -850,7 +871,9 @@ def build_cohort_comparison_subqueries_for_retrieval(
         return []
 
     topic_query = strip_cohort_comparison_scaffold_for_retrieval(raw_query)
-    return [f"{topic_query} cho {cohort}" for cohort in cohorts[:max_subqueries]]
+    return [
+        f"{topic_query} cho {cohort}" for cohort in cohorts[:max_subqueries]
+    ]
 
 
 def strip_major_comparison_scaffold_for_retrieval(query: str) -> str:
@@ -907,15 +930,58 @@ def build_major_comparison_subqueries_for_retrieval(
 
 
 _GENERIC_WORDS = {
-    "tôi", "mình", "em", "bạn", "chào", "xin",
-    "muốn", "cần", "hỏi", "biết", "tìm", "hiểu", "xem",
-    "thông", "tin", "chung", "chi", "tiết", "tổng", "quan", "giới", "thiệu",
-    "về", "của", "cho", "trong", "thuộc",
-    "là", "gì", "như", "thế", "nào", "ra", "sao", "ở", "đâu",
-    "có", "những", "cái", "các",
-    "vui", "lòng", "hãy",
-    "ngành", "chuyên", "học", "chương", "trình", "đào", "tạo"
+    "tôi",
+    "mình",
+    "em",
+    "bạn",
+    "chào",
+    "xin",
+    "muốn",
+    "cần",
+    "hỏi",
+    "biết",
+    "tìm",
+    "hiểu",
+    "xem",
+    "thông",
+    "tin",
+    "chung",
+    "chi",
+    "tiết",
+    "tổng",
+    "quan",
+    "giới",
+    "thiệu",
+    "về",
+    "của",
+    "cho",
+    "trong",
+    "thuộc",
+    "là",
+    "gì",
+    "như",
+    "thế",
+    "nào",
+    "ra",
+    "sao",
+    "ở",
+    "đâu",
+    "có",
+    "những",
+    "cái",
+    "các",
+    "vui",
+    "lòng",
+    "hãy",
+    "ngành",
+    "chuyên",
+    "học",
+    "chương",
+    "trình",
+    "đào",
+    "tạo",
 }
+
 
 def strip_major_from_query_for_retrieval(
     query: str,
@@ -975,7 +1041,7 @@ def strip_major_from_query_for_retrieval(
     if len(cleaned.split()) < 2:
         return raw_query
 
-    words = re.findall(r'\w+', cleaned.lower())
+    words = re.findall(r"\w+", cleaned.lower())
     non_generic = [w for w in words if w not in _GENERIC_WORDS]
     if len(non_generic) < 1:
         return raw_query
@@ -988,7 +1054,7 @@ def expand_major_in_query_for_reranking(
     resolved_major: Optional[str] = None,
 ) -> str:
     """Replace major codes with their full names to improve reranker scores.
-    
+
     Cross-encoders (like BGE) are trained on general text and often assign
     very low relevance scores to pairs where the query uses an internal code
     (e.g., "IT1") but the document uses the full name ("Khoa học máy tính").
@@ -1010,13 +1076,13 @@ def expand_major_in_query_for_reranking(
 
     labels = _build_major_labels(major_code)
     expanded = raw_query
-    
+
     replaced = False
     for label in labels:
         if label.lower() in expanded.lower():
             # Use regex to avoid replacing inside words, though codes usually stand alone.
             pattern = re.compile(rf"\b{re.escape(label)}\b", re.IGNORECASE)
-            # If the boundary regex doesn't match because of weird spacing, 
+            # If the boundary regex doesn't match because of weird spacing,
             # fall back to a direct replace
             if pattern.search(expanded):
                 expanded = pattern.sub(major_name, expanded)
@@ -1029,8 +1095,8 @@ def expand_major_in_query_for_reranking(
                 replaced = True
                 break
 
-    # Do not append the major name if it was successfully stripped, 
-    # as appending it hurts reranking scores for specific syllabus chunks 
+    # Do not append the major name if it was successfully stripped,
+    # as appending it hurts reranking scores for specific syllabus chunks
     # that only contain course names without mentioning the major.
 
     return expanded
