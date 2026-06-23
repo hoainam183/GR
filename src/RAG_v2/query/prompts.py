@@ -296,7 +296,35 @@ USER_PROFILE: (khong co)
 CHAT_HISTORY: (khong co)
 CÂU HỎI HIỆN TẠI: môn Giải tích 1 nằm ở kỳ mấy
 STANDALONE QUERY: Học phần Giải tích 1 nằm ở học kỳ mấy trong chương trình đào tạo?
-(LƯU Ý: hỏi VỊ TRÍ trong kế hoạch học tập, KHÔNG phải "khi nào mở đăng ký".)"""
+(LƯU Ý: hỏi VỊ TRÍ trong kế hoạch học tập, KHÔNG phải "khi nào mở đăng ký".)
+
+---
+Ví dụ 13 — Follow-up rút gọn kế thừa chủ đề từ CHAT_HISTORY (chỉ đổi ngành ở CURRENT_QUERY):
+USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt-Nhật (IT-E6)
+CHAT_HISTORY:
+- Người dùng: môn mạng máy tính có mấy tín chỉ
+- Trợ lý: Học phần IT3080 Mạng máy tính có 3 tín chỉ trong chương trình IT-E6.
+CÂU HỎI HIỆN TẠI: với IT1 thì sao
+STANDALONE QUERY: Môn Mạng máy tính (IT3080) trong ngành IT1 (Khoa học Máy tính) có mấy tín chỉ?
+(LƯU Ý: "với IT1 thì sao" là follow-up thiếu chủ đề → kế thừa "mạng máy tính / tín chỉ" từ history, chỉ đổi ngành sang IT1.)
+
+---
+Ví dụ 14 — Câu hỏi chuyển sang chủ đề mới giữa hội thoại: KHÔNG kế thừa, KHÔNG rò rỉ ngữ cảnh cũ:
+USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt-Nhật (IT-E6)
+CHAT_HISTORY:
+- Người dùng: môn mạng máy tính có mấy tín chỉ
+- Trợ lý: Học phần IT3080 Mạng máy tính có 3 tín chỉ.
+CÂU HỎI HIỆN TẠI: thủ tục xin giấy xác nhận sinh viên ở đâu
+STANDALONE QUERY: Thủ tục xin giấy xác nhận sinh viên ở đâu?
+(LƯU Ý: chủ đề mới hoàn toàn — KHÔNG thêm mạng máy tính/IT3080/IT-E6 từ history.)
+
+---
+Ví dụ 15 — Mã ngành nêu rõ trong CURRENT_QUERY thắng USER_PROFILE (KHÔNG đổi IT-E7 thành IT-E6):
+USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt-Nhật (IT-E6)
+CHAT_HISTORY: (khong co)
+CÂU HỎI HIỆN TẠI: môn mạng máy tính ITE7 mấy tín chỉ
+STANDALONE QUERY: Môn Mạng máy tính trong ngành IT-E7 (Công nghệ thông tin Global ICT) có mấy tín chỉ?
+(LƯU Ý: giữ IT-E7 từ câu hỏi, TUYỆT ĐỐI KHÔNG thay bằng IT-E6 của profile.)"""
 
 REWRITE_WITH_HISTORY_TEMPLATE = """\
 ### INPUT

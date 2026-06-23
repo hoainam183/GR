@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 VALID_COLLECTIONS = {"ctdt", "quydinh", "kehoach", "stsv", "test"}
 
 # Valid converter names
-VALID_CONVERTERS = {"pymupdf4llm", "docling"}
+VALID_CONVERTERS = {"pymupdf4llm", "docling", "pdfplumber"}
 
 # Collection → suggested chunker mapping
 COLLECTION_CHUNKER_MAP: dict[str, str] = {
@@ -34,6 +34,11 @@ CONVERTER_INFO = [
         "key": "docling",
         "label": "Docling (IBM)",
         "description": "Xử lý tốt bảng và cấu trúc phức tạp",
+    },
+    {
+        "key": "pdfplumber",
+        "label": "PDFPlumber",
+        "description": "Trích xuất text + bảng theo trang, nhẹ và chính xác",
     },
 ]
 

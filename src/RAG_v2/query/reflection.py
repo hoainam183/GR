@@ -78,19 +78,25 @@ _COMPARISON_FOLLOWUP_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Freshness-intent signals (unaccented / folded form) — used to detect generic
-# freshness queries that should NOT inherit academic scope from history.
+# Freshness-intent signals (accent-folded form). Used NOT as a pre-filter but as
+# an input to the post-LLM anti-bleeding guardrail: a generic "… mới nhất" query
+# must not inherit academic scope (major/cohort/semester/year) from history.
 _REFLECTION_FRESHNESS_ONLY_RE = re.compile(
     r"\b(?:moi\s*nhat|gan\s*day|hien\s*tai|ky\s*nay|ki\s*nay|"
     r"hoc\s*ky\s*moi|hoc\s*ki\s*moi|latest|recent|newest)\b",
     re.IGNORECASE,
 )
 
-# Anaphora signals — references to something from prior context.
-# Presence means history IS needed to resolve the reference.
-_ANAPHORA_SIGNALS_RE = re.compile(
-    r"\b(?:đó|này|kia|ấy|vậy|còn|thêm|nữa)\b",
-    re.IGNORECASE,
+# Academic-scope tokens — a major code, cohort (K65/khóa 65), semester code
+# (20252), dotted term (2025.2), academic year (2025-2026), or explicit "học kỳ N".
+# Presence in an LLM rewrite that was absent from the original query signals the
+# reflector bled scope from history/profile.
+_SEMESTER_CODE_SCOPE_RE = re.compile(r"\b20\d{2}[123]\b")
+_DOTTED_TERM_SCOPE_RE = re.compile(r"\b20\d{2}\.\d\b")
+_ACADEMIC_YEAR_SCOPE_RE = re.compile(r"\b20\d{2}\s*[-–]\s*20\d{2}\b")
+_COHORT_SCOPE_RE = re.compile(r"\bk\d{2,3}\b|khóa\s*\d{2,3}", re.IGNORECASE)
+_EXPLICIT_SEMESTER_SCOPE_RE = re.compile(
+    r"học\s*kỳ\s*[12hè]|\bhk\s*[12]\b", re.IGNORECASE
 )
 
 _TOPIC_HINTS: tuple[tuple[str, str], ...] = (
@@ -268,6 +274,31 @@ def _is_comparison_followup(query: str) -> bool:
         or explicit_major_count < 2
         or bool(_PERSONAL_REFS.search(raw))
     )
+
+
+def _is_generic_freshness(query: str) -> bool:
+    """Return True when the query asks for the latest/newest item generically."""
+    return bool(_REFLECTION_FRESHNESS_ONLY_RE.search(_fold_vietnamese(query or "")))
+
+
+def _contains_academic_scope(text: str) -> bool:
+    """Return True when *text* carries a major/cohort/semester/year scope token."""
+    if not text:
+        return False
+    if (
+        _SEMESTER_CODE_SCOPE_RE.search(text)
+        or _DOTTED_TERM_SCOPE_RE.search(text)
+        or _ACADEMIC_YEAR_SCOPE_RE.search(text)
+        or _COHORT_SCOPE_RE.search(text)
+        or _EXPLICIT_SEMESTER_SCOPE_RE.search(text)
+    ):
+        return True
+    try:
+        from retrieval.metadata_filters import extract_major_codes  # noqa: PLC0415
+
+        return bool(extract_major_codes(text))
+    except Exception:
+        return False
 
 
 def _extract_topic_hint(text: str) -> Optional[str]:
@@ -1097,31 +1128,23 @@ class QueryReflector:
             user_profile=user_profile,
         )
 
-        # For generic freshness queries, skip history to prevent academic-scope
-        # bleeding (e.g. prior assistant response mentioning "2025.2" should not
-        # cause the LLM to inject that term into "lịch đăng kí kì học mới nhất").
-        effective_history = (
-            chat_history
-            if self._should_use_history_for_reflection(query, chat_history)
-            else None
-        )
-        if chat_history and effective_history is None:
-            logger.info(
-                "Reflection: history suppressed for standalone query %r",
-                query[:60],
-            )
+        # Attach history whenever it exists. The rewrite LLM — guided by the
+        # system prompt's anti-bleeding rules (12/17) and few-shot examples —
+        # decides whether to inherit the prior topic or treat the query as
+        # standalone. We do NOT pre-filter follow-ups with regex: that judgment
+        # is open-ended (e.g. "với IT1 thì sao", "thế còn IT2") and pattern
+        # matching silently drops whole classes of valid follow-ups.
+        effective_history = chat_history or None
 
-        # Passthrough mode: skip LLM call when there is nothing to resolve.
-        # Without history, profile, personal references, anaphora, or comparison
-        # follow-up signals the LLM call has no information to add and only
-        # risks introducing spurious qualifiers or scope narrowing.
-        # The deterministic guardrails (major-code expansion, abbreviation
-        # expansion) are always applied regardless of this flag.
-        _needs_llm_rewrite = bool(
-            effective_history
-            or _has_profile_dependent_signal(query)
-            or _is_comparison_followup(query)
-            or _ANAPHORA_SIGNALS_RE.search(query)
+        # Passthrough mode: skip the LLM call only when there is genuinely no
+        # context to resolve against — no history AND no profile reference in
+        # the query. With neither, the LLM has nothing to add and only risks
+        # spurious qualifiers. The profile check is a narrow, closed-set
+        # possessive match ("của tôi", "ngành tôi"), not open-ended intent
+        # detection. The deterministic guardrails (major-code expansion,
+        # course-code injection, abbreviation expansion) always run regardless.
+        _needs_llm_rewrite = bool(effective_history) or _has_profile_dependent_signal(
+            query
         )
 
         if not _needs_llm_rewrite:
@@ -1186,6 +1209,30 @@ class QueryReflector:
         reflection_candidate: str = rewritten
         reflection_guardrail_reverted: bool = False
         reflection_rejected_scope: Optional[str] = None
+
+        # Anti-bleeding guardrail — a generic freshness query ("lịch ... mới
+        # nhất") that names no scope of its own must not inherit academic scope
+        # (major/cohort/semester/year) from history or profile. Now that history
+        # is always attached, this deterministic revert is the safety net that
+        # keeps stale terms like "2025.2" out of a "what's the latest" query.
+        # It does NOT affect topic-inheriting follow-ups such as "với IT1 thì
+        # sao" (not freshness, names an explicit major), nor profile-referencing
+        # queries like "kế hoạch mới nhất của ngành tôi" where resolving the
+        # profile major IS the intended behaviour.
+        if (
+            _is_generic_freshness(query)
+            and not _has_profile_dependent_signal(query)
+            and not _contains_academic_scope(query)
+            and _contains_academic_scope(reflection_candidate)
+        ):
+            logger.info(
+                "Reflection guardrail: reverted academic-scope bleed %r -> %r",
+                reflection_candidate[:80],
+                query[:80],
+            )
+            rewritten = query
+            reflection_guardrail_reverted = True
+            reflection_rejected_scope = "academic_term"
 
         deterministic_followup_applied = False
         deterministic_followup = _rewrite_comparison_followup(
@@ -1315,42 +1362,6 @@ class QueryReflector:
     # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
-
-    @staticmethod
-    def _should_use_history_for_reflection(
-        query: str,
-        chat_history: Optional[List[Dict[str, str]]],
-    ) -> bool:
-        """Return True when history context should be sent to the reflection LLM.
-
-        History is opt-in, not a default. It is used for:
-          - Queries with personal-profile references ("ngành của tôi", …)
-          - Short comparison follow-ups ("so sánh với", "khác gì", …)
-          - Queries with anaphoric references to prior context ("còn", "đó", …)
-
-        Examples that skip history:
-          "Lịch trình học kỳ mới nhất?"
-          "lịch đăng kí kì học mới nhất"
-          "môn hướng đối tượng được học vào kì mấy"
-        """
-        if not chat_history:
-            return False
-
-        if _has_profile_dependent_signal(query):
-            return True
-
-        if _is_comparison_followup(query):
-            return True
-
-        if _ANAPHORA_SIGNALS_RE.search(query):
-            return True
-
-        # Generic freshness query with no personal/anaphora/comparison signal:
-        # skip history to prevent scope bleeding from prior assistant context.
-        if _REFLECTION_FRESHNESS_ONLY_RE.search(_fold_vietnamese(query)):
-            return False
-
-        return False
 
     def _build_user_prompt(
         self,

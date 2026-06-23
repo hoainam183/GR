@@ -40,7 +40,7 @@ _TEXT_STRATEGIES = {"recursive", "hierarchical", "olmocr"}
 _JSON_STRATEGIES = {"kehoach", "stsv"}
 
 # Valid PDF converter names
-VALID_CONVERTERS = {"pymupdf4llm", "docling"}
+VALID_CONVERTERS = {"pymupdf4llm", "docling", "pdfplumber"}
 
 # Chunk-metadata keys owned by the pipeline. Admin-supplied ``metadata_overrides``
 # must never clobber these — doing so breaks search filtering (``level``),
@@ -294,6 +294,20 @@ class DocumentPipeline:
         result = conv.convert(source_path)
         return Path(result["markdown_path"]).read_text(encoding="utf-8")
 
+    def _convert_with_pdfplumber(self, source_path: Any, doc_id: str) -> str:
+        """Convert a PDF to markdown using pdfplumber.
+
+        Extracts text and tables per page.  Lighter than docling, more
+        table-aware than pymupdf4llm.  Does **not** support OCR.
+        """
+        from document_loader.pdf_to_markdown.converters.pdfplumber_converter import (
+            PDFPlumberConverter,
+        )
+
+        conv = PDFPlumberConverter(output_dir=str(self._storage.base_dir / doc_id))
+        result = conv.convert(source_path)
+        return Path(result["markdown_path"]).read_text(encoding="utf-8")
+
     def _convert_to_markdown(
         self, source_path: Any, doc_id: str, converter: str
     ) -> Tuple[str, str]:
@@ -302,12 +316,16 @@ class DocumentPipeline:
         - DOCX always uses docling (pymupdf4llm cannot read .docx).
         - For PDF on the default pymupdf4llm path, falls back to docling when the
           output is empty/near-empty (scanned PDF) so it is not indexed blank.
+        - pdfplumber: no auto-fallback (admin explicitly chose it).
         """
         if Path(source_path).suffix.lower() == ".docx":
             return self._convert_with_docling(source_path, doc_id), "docling"
 
         if converter == "docling":
             return self._convert_with_docling(source_path, doc_id), "docling"
+
+        if converter == "pdfplumber":
+            return self._convert_with_pdfplumber(source_path, doc_id), "pdfplumber"
 
         markdown = self._convert_with_pymupdf4llm(source_path)
         if self._markdown_too_short(markdown):

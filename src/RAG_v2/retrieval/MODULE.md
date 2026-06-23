@@ -464,7 +464,7 @@ KEHOACH_CLOSE_PROBABILITY_MARGIN = 0.10
 Every return path passes through `augment_collections_for_query(query, collections, query_signals)`:
 
 - Foreign-language/cohort policy lookups (`_is_foreign_language_policy_lookup`: FL-code or `K65–K70` cohort + FL hints) → prepend `quydinh`.
-- `eligibility_check` / `table_lookup` / `exact_policy_lookup` signals → prepend `quydinh`, **unless** the query is a focused CTDT course/credit lookup (`_is_ctdt_course_lookup`: course-like and not rule-like).
+- `eligibility_check` / `table_lookup` / `exact_policy_lookup` signals → prepend `quydinh`. (The former `_is_ctdt_course_lookup` guard that suppressed this for course/credit lookups was removed in Phase 3, 2026-06-21 — the v2 classifier disambiguates ctdt vs quydinh, and ablation showed the guard was net-harmful.)
 - `procedural_support` → append `stsv`.
 - `multi_domain` + `eligibility_check` → append `ctdt`.
 - `curriculum_semester_intent` without schedule/deadline/announcement/freshness signals → prepend `ctdt` (course semester placement lives in the standard study plan, not `kehoach`).

@@ -31,7 +31,7 @@ export const CHUNKER_ALTERNATIVES: Record<CollectionName, string[]> = {
 };
 
 /** Converter options for the convert step */
-export type ConverterName = 'pymupdf4llm' | 'docling';
+export type ConverterName = 'pymupdf4llm' | 'docling' | 'pdfplumber';
 
 export interface ConverterOption {
   key: ConverterName;

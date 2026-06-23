@@ -206,17 +206,18 @@ Major steps in `reflect()`:
 
 1. `_strip_pii_and_noise()` — strips MSSV, personal name introductions (`_PERSONAL_INTRO_RE`: pronoun/`là` lead-in + 1–5 capitalized tokens; preserves academic self-identifications like "tôi là sinh viên ngành IT1"), thanks/closing phrases, addressee noise. Reverts if result drops below 3 words.
 2. `_merge_user_major_into_context()` + `_merge_profile_context()` — normalize profile (`major`, `major_code`, `cohort`, `student_id`). `user_profile` dict overrides `user_context` per-key; string `user_profile` becomes `profile_note_override`.
-3. `_should_use_history_for_reflection()` — opts in to history only for: profile-dependent signal, comparison follow-up, or anaphora signal (`đó|này|kia|ấy|vậy|còn|thêm|nữa`). Generic freshness queries skip history.
-4. Passthrough check `_needs_llm_rewrite` — skip LLM unless: effective_history, profile-dependent signal, comparison follow-up, or anaphora signal present.
+3. History attachment — `effective_history = chat_history or None`. History is attached whenever it exists; there is **no** regex follow-up detection. The rewrite LLM (system prompt Rules 12/17 + few-shots) decides whether to inherit the prior topic ("với IT1 thì sao") or treat the query as standalone.
+4. Passthrough check `_needs_llm_rewrite = bool(effective_history) or _has_profile_dependent_signal(query)` — call the LLM only when there is context to resolve against (history exists, or the query references the user's profile). With neither, passthrough. Gates on context *existence*, not open-ended intent guessing.
 5. LLM rewrite (retry with exponential backoff: `_MAX_RETRIES=3`, `_BASE_RETRY_DELAY=2.0s` on 429/503).
-6. Deterministic comparison follow-up rewrite (`_rewrite_comparison_followup`) — runs regardless of LLM mode; produces `"So sánh {topic} giữa {code1} và {code2}"`. Checks history + profile for major codes and topic.
-7. `_extract_entities()` — resolves entities once after LLM rewrite.
-8. Guardrail 1: `_enforce_major_reference_rewrite()` — replaces residual personal major references using trusted profile data.
-9. Guardrail 2: `_preserve_curriculum_placement_verb()` — reverts reflection-introduced `đăng ký` back to `học` when original had `curriculum_semester_intent` and user did not write `đăng ký`.
-10. Guardrail 3: `_expand_major_codes_in_query()` — skipped when a deterministic comparison rewrite was applied.
-11. `expand_academic_abbreviations()` terminology expansion.
-12. `_preserve_explicit_course_code()` — if user typed a course code, ensure LLM did not swap it.
-13. Guardrail 4: `_inject_course_code()` — injects major-scoped catalog course code after course name in text (e.g. "Mạng máy tính" → "Mạng máy tính (IT3080)"). Only fires when `course_name_folded` is in entities and code is not already present. Handles alias matches; can replace an adjacent conflicting code unless `preserve_existing_codes=True`.
+6. Anti-bleeding guardrail — when the original query is a generic-freshness query (`_is_generic_freshness`) that has no profile reference and names no academic scope of its own, but the LLM candidate injected scope (`_contains_academic_scope`: major/cohort/semester/year), revert to the original and set `reflection_guardrail_reverted=True`, `reflection_rejected_scope="academic_term"`. Does not affect topic-inheriting follow-ups (not freshness, name an explicit major) or profile-referencing queries.
+7. Deterministic comparison follow-up rewrite (`_rewrite_comparison_followup`) — runs regardless of LLM mode; produces `"So sánh {topic} giữa {code1} và {code2}"`. Checks history + profile for major codes and topic.
+8. `_extract_entities()` — resolves entities once after LLM rewrite.
+9. Guardrail 1: `_enforce_major_reference_rewrite()` — replaces residual personal major references using trusted profile data.
+10. Guardrail 2: `_preserve_curriculum_placement_verb()` — reverts reflection-introduced `đăng ký` back to `học` when original had `curriculum_semester_intent` and user did not write `đăng ký`.
+11. Guardrail 3: `_expand_major_codes_in_query()` — skipped when a deterministic comparison rewrite was applied.
+12. `expand_academic_abbreviations()` terminology expansion.
+13. `_preserve_explicit_course_code()` — if user typed a course code, ensure LLM did not swap it.
+14. Guardrail 4: `_inject_course_code()` — injects major-scoped catalog course code after course name in text (e.g. "Mạng máy tính" → "Mạng máy tính (IT3080)"). Only fires when `course_name_folded` is in entities and code is not already present. Handles alias matches; can replace an adjacent conflicting code unless `preserve_existing_codes=True`.
 
 Entities (`_extract_entities`, all values may be `None`):
 
@@ -243,7 +244,7 @@ Current guardrail behavior:
 
 - Profile notes injected only when the current query has a profile-dependent signal (`_has_profile_dependent_signal`).
 - `profile_dependency.required_attributes` treats tuition (`học phí`/`mức học phí`) as `{"major"}` because amounts differ by program; scholarship/fee-waiver (`miễn giảm học phí`) stays universal (`set()`).
-- Generic freshness/latest queries skip history and do not inherit `major_code`, `cohort`, or semester terms from profile/history.
+- History is always attached when present; generic freshness/latest queries do not inherit `major_code`, `cohort`, or semester terms because the post-LLM anti-bleeding guardrail (step 6) reverts injected scope.
 - Standalone course queries with a profile use deterministic catalog lookup without calling the reflection LLM.
 - The reflection LLM provider/model/temperature/max_tokens come from `Settings`.
 
