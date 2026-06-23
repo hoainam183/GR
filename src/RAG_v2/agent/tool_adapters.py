@@ -833,10 +833,9 @@ def _extract_date_range(folded: str) -> tuple[str | None, str | None]:
 def _extract_exam_filters(query: str) -> dict[str, Any]:
     """Mine structured exam filters from a free-text query.
 
-    Returns only the keys present (subject_code, exam_type, cohort, exam_date or
-    exam_date_from/to, subject_name). A subject-name BM25 fallback is added only
-    when neither a subject code nor a cohort is found — otherwise a generic
-    "lịch thi K70 cuối kì" would wrongly require the name clause to match.
+    Returns only the keys present (subject_code, exam_type, exam_date or
+    exam_date_from/to, subject_name). Cohort is handled by the caller from the
+    raw user query so we never inject one the user did not actually type.
     """
     cleaned = strip_personal_identifiers(query or "")
     folded = fold_vietnamese_text(cleaned)
@@ -852,10 +851,6 @@ def _extract_exam_filters(query: str) -> dict[str, Any]:
     elif _GIUA_KY_RE.search(folded):
         filters["exam_type"] = "giua_ky"
 
-    cohort_match = _COHORT_RE.search(cleaned)
-    if cohort_match:
-        filters["cohort"] = cohort_match.group(0).upper()
-
     date_match = _DATE_TOKEN_RE.search(cleaned)
     if date_match:
         filters["exam_date"] = _to_es_date(date_match.group(0))
@@ -865,7 +860,11 @@ def _extract_exam_filters(query: str) -> dict[str, Any]:
             filters["exam_date_from"] = date_from
             filters["exam_date_to"] = date_to
 
-    if not filters.get("subject_code") and not filters.get("cohort"):
+    # A literal Kxx in the query counts as a structural narrowing signal too —
+    # skip the BM25 name fallback so a generic "lịch thi K70 cuối kì" can't be
+    # excluded by the name clause. The cohort itself is applied by the caller.
+    has_cohort_token = bool(_COHORT_RE.search(cleaned))
+    if not filters.get("subject_code") and not has_cohort_token:
         # Fall back to BM25 over subject_name/search_text using the whole
         # (PII-stripped) question — the analyzer drops stopwords like "thi".
         filters["subject_name"] = cleaned or None
@@ -915,7 +914,6 @@ def _exam_schedule_search(
     exam_date: str | None = None,
     exam_room: str | None = None,
     group: str | None = None,
-    cohort: str | None = None,
     exam_type: str | None = None,
     top_k: int | None = None,
 ) -> str:
@@ -926,7 +924,10 @@ def _exam_schedule_search(
         return "[Loi: Kho du lieu lich thi chua san sang]"
 
     # Explicit filters from the planner win; otherwise mine them from the raw
-    # query (subject code / cohort / exam term / date + BM25 name fallback).
+    # query (subject code / exam term / date + BM25 name fallback). Cohort is
+    # intentionally not accepted from the planner — it is sourced only from a
+    # literal Kxx token in the user's query (see below) so profile/context
+    # cannot silently narrow the search.
     explicit = {
         key: value
         for key, value in {
@@ -935,12 +936,18 @@ def _exam_schedule_search(
             "exam_date": _to_es_date(exam_date),
             "exam_room": exam_room,
             "group": group,
-            "cohort": cohort,
             "exam_type": exam_type,
         }.items()
         if value
     }
     filters = explicit or _extract_exam_filters(query)
+
+    # Cohort filter only applies when the user literally writes Kxx in the
+    # query — strip any inferred cohort and re-detect from the raw text.
+    filters.pop("cohort", None)
+    cohort_match = _COHORT_RE.search(query or "")
+    if cohort_match:
+        filters["cohort"] = cohort_match.group(0).upper()
 
     if not any(filters.values()):
         return "[Loi: Khong xac dinh duoc mon/ngay thi tu cau hoi]"
@@ -990,12 +997,14 @@ def execute_retrieval_plan(
     def _run(i: int, step: dict[str, Any]) -> None:
         if step.get("collection") == EXAM_COLLECTION:
             # Structured DB lookup — return all matching rows; do NOT cap by the
-            # chat-level top_k (which is sized for vector retrieval).
+            # chat-level top_k (which is sized for vector retrieval). Cohort is
+            # intentionally omitted: the exam tool re-derives it from the raw
+            # user query so a planner-injected cohort_hint (often pulled from
+            # the student's profile) cannot silently narrow the result set.
             result = _exam_schedule_search(
                 query=step.get("query", ""),
                 subject_code=step.get("subject_code"),
                 exam_date=step.get("exam_date"),
-                cohort=step.get("cohort_hint") or step.get("cohort"),
                 exam_type=step.get("exam_type"),
                 top_k=None,
             )
