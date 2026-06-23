@@ -906,6 +906,11 @@ def _format_exam_results(rows: list[dict[str, Any]]) -> str:
             segments.append(f"Nhóm {row['group']}")
         if row.get("exam_batch"):
             segments.append(f"Đợt {row['exam_batch']}")
+        # "Ghi chú" thường liệt kê các ngành/CTĐT được thi học phần này — giữ
+        # nguyên dạng raw để LLM tự suy luận khi user hỏi về ngành/chương trình.
+        note = (row.get("note") or "").strip()
+        if note:
+            segments.append(f"Ghi chú: {note}")
         lines.append(" | ".join(segments))
     return "\n".join(lines)
 
