@@ -204,6 +204,17 @@ MAJOR_CODE_TO_NAME: Dict[str, str] = {
 # Major-code patterns: list of (regex_pattern, major_code) tuples.
 # Patterns are tried in order; the first match wins.
 # Add new programmes here — no other code needs to change.
+
+# Hậu tố báo hiệu chuỗi token đứng trước là TÊN MÔN HỌC (vd "Hóa học 1",
+# "Vật lý đại cương", "Toán cao cấp III") chứ không phải tên ngành. Dùng làm
+# negative-lookahead để chặn nhận nhầm khi bare-name của ngành (vd "hóa học")
+# trùng prefix với tên môn. Áp dụng cho cả MAJOR_PATTERNS và
+# enrich_major_references_for_query để hành vi nhất quán.
+_COURSE_TITLE_SUFFIX_LOOKAHEAD = (
+    r"(?!\s+(?:\d|I{1,3}\b|IV\b|V\b|"
+    r"đại\s+cương|cơ\s+sở|nâng\s+cao|ứng\s+dụng))"
+)
+
 MAJOR_PATTERNS: List[Tuple[str, str]] = [
     # SoICT
     (r"\bIT[-\s]?E10\b|khoa học dữ liệu|trí tuệ nhân tạo|\bDATA\b|data\s+ai|artificial intelligence", "IT-E10"),
@@ -237,8 +248,11 @@ MAJOR_PATTERNS: List[Tuple[str, str]] = [
     # Hóa và Khoa học sự sống
     (r"\bCH[-\s]?E11\b|hóa dược", "CH-E11"),
     (r"\bBF[-\s]?E12\b|thực phẩm.*tiên tiến", "BF-E12"),
-    (r"\bCH[-\s]?1\b|kỹ thuật hóa học\b", "CH1"),
-    (r"\bCH[-\s]?2\b|hóa học\b", "CH2"),
+    # "kỹ thuật hóa học"/"hóa học" có thể là TÊN MÔN (vd "Hóa học 1",
+    # "Hóa học đại cương") nên cần lookahead chặn trường hợp đó để không
+    # bị nhận nhầm thành MÃ NGÀNH CH1/CH2.
+    (rf"\bCH[-\s]?1\b|kỹ thuật hóa học\b{_COURSE_TITLE_SUFFIX_LOOKAHEAD}", "CH1"),
+    (rf"\bCH[-\s]?2\b|hóa học\b{_COURSE_TITLE_SUFFIX_LOOKAHEAD}", "CH2"),
     (r"\bBF[-\s]?1\b|kỹ thuật sinh học\b", "BF1"),
     (r"\bBF[-\s]?2\b|kỹ thuật thực phẩm\b", "BF2"),
     # Vật liệu
@@ -699,6 +713,10 @@ def enrich_major_references_for_query(query: str) -> str:
             continue
         if re.search(rf"\({re.escape(code)}\)", result, re.IGNORECASE):
             continue
+        # Tôn trọng nhãn rõ ràng do user gõ kiểu "Tên ngành [IT-E6]" — không
+        # bơm thêm "(name)" vào trong ngoặc vuông, tránh "[IT-E6 (Tên...)]".
+        if re.search(rf"\[\s*{re.escape(code)}\s*\]", result, re.IGNORECASE):
+            continue
         if name.casefold() in result.casefold():
             continue
         code_pattern = re.escape(code).replace(r"\-", r"\s*[-\u2010\u2011\u2012\u2013\u2014\u2212]?\s*")
@@ -716,7 +734,14 @@ def enrich_major_references_for_query(query: str) -> str:
         for variant in sorted(_major_name_query_variants(name), key=len, reverse=True):
             if re.search(rf"{re.escape(variant)}\s*\(\s*{re.escape(code)}\s*\)", result, re.IGNORECASE):
                 break
-            pattern = rf"(?<![\w]){re.escape(variant)}(?![\w])"
+            # Negative lookahead: nếu sau tên ngành là digit/Roman/hậu tố
+            # quen thuộc của tên môn ("đại cương", "cơ sở", ...) thì đây là
+            # tên môn học (vd "Hóa học 1", "Vật lý đại cương"), KHÔNG enrich
+            # nó thành "(MÃ_NGÀNH)".
+            pattern = (
+                rf"(?<![\w]){re.escape(variant)}(?![\w])"
+                rf"{_COURSE_TITLE_SUFFIX_LOOKAHEAD}"
+            )
             if not re.search(pattern, result, re.IGNORECASE):
                 continue
             result = re.sub(

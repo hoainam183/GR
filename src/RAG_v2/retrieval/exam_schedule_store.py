@@ -17,7 +17,10 @@ from typing import Any
 
 from elasticsearch import Elasticsearch, helpers
 
-from retrieval.elasticsearch_store import VIETNAMESE_STOPWORDS, VIETNAMESE_SYNONYMS
+from retrieval.elasticsearch_store import (
+    VIETNAMESE_STOPWORDS,
+    VIETNAMESE_SYNONYMS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +109,9 @@ def build_exam_index_settings(use_vietnamese_plugin: bool) -> dict[str, Any]:
                 },
             },
             "index": {
-                "similarity": {"custom_bm25": {"type": "BM25", "k1": 1.5, "b": 0.5}}
+                "similarity": {
+                    "custom_bm25": {"type": "BM25", "k1": 1.5, "b": 0.5}
+                }
             },
         },
         "mappings": {"properties": properties},
@@ -125,7 +130,9 @@ class ExamScheduleESStore:
         self.index_name = index_name
         self.client = Elasticsearch(hosts=[f"http://{host}:{port}"])
         if not self.client.ping():
-            raise ConnectionError(f"Cannot connect to Elasticsearch at {host}:{port}")
+            raise ConnectionError(
+                f"Cannot connect to Elasticsearch at {host}:{port}"
+            )
         logger.info("Connected to Elasticsearch (exam) at %s:%d", host, port)
         self._ensure_index()
 
@@ -142,7 +149,9 @@ class ExamScheduleESStore:
                 settings=settings["settings"],
                 mappings=settings["mappings"],
             )
-            logger.info("Created exam index '%s' with vi_tokenizer.", self.index_name)
+            logger.info(
+                "Created exam index '%s' with vi_tokenizer.", self.index_name
+            )
         except Exception:
             if not self._is_missing_vietnamese_plugin_error():
                 raise
@@ -183,7 +192,9 @@ class ExamScheduleESStore:
             }
             for doc in records
         ]
-        success, errors = helpers.bulk(self.client, actions, raise_on_error=False)
+        success, errors = helpers.bulk(
+            self.client, actions, raise_on_error=False
+        )
         if errors:
             logger.warning("Exam bulk index errors: %s", errors[:1])
         self.client.indices.refresh(index=self.index_name)
@@ -231,7 +242,9 @@ class ExamScheduleESStore:
         must_clauses: list[dict[str, Any]] = []
 
         if subject_code:
-            filter_clauses.append({"term": {"subject_code": subject_code.upper()}})
+            filter_clauses.append(
+                {"term": {"subject_code": subject_code.upper()}}
+            )
         if exam_type:
             filter_clauses.append({"term": {"exam_type": exam_type}})
         if exam_room:
