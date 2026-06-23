@@ -8,17 +8,17 @@ from ..base.converter import BasePDFConverter
 
 
 class PDFPlumberConverter(BasePDFConverter):
-    """Converter sử dụng pdfplumber để trích xuất text + bảng từ PDF.
+    """Converter sử dụng pdfplumber để trích xuất **chỉ bảng** từ PDF.
 
-    Phù hợp cho tài liệu có bảng đơn giản, layout rõ ràng.
-    Nhẹ hơn docling, chính xác hơn pymupdf4llm khi PDF có nhiều bảng.
+    Chỉ extract tables, bỏ qua text thường. Phù hợp cho tài liệu
+    chứa dữ liệu dạng bảng (danh sách, thống kê, lịch thi, …).
     """
 
     def convert(self, pdf_path: Path) -> Dict[str, Any]:
-        """Convert PDF sang Markdown sử dụng pdfplumber."""
+        """Convert PDF sang Markdown — chỉ trích xuất bảng."""
         import pdfplumber
 
-        print(f"PDFPlumber → Đang convert: {pdf_path.name}")
+        print(f"PDFPlumber (table-only) → Đang convert: {pdf_path.name}")
 
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
@@ -26,27 +26,27 @@ class PDFPlumberConverter(BasePDFConverter):
         try:
             sections: List[str] = []
             num_pages = 0
+            table_count = 0
 
             with pdfplumber.open(str(pdf_path)) as pdf:
                 num_pages = len(pdf.pages)
                 for i, page in enumerate(pdf.pages, start=1):
-                    page_parts: List[str] = []
-
-                    if num_pages > 1:
-                        page_parts.append(f"## Page {i}\n")
-
-                    text = page.extract_text()
-                    if text and text.strip():
-                        page_parts.append(text.strip())
-
                     tables = page.extract_tables()
+                    if not tables:
+                        continue
+
+                    page_tables: List[str] = []
+                    if num_pages > 1:
+                        page_tables.append(f"## Page {i}\n")
+
                     for table in tables:
                         md_table = _render_markdown_table(table)
                         if md_table:
-                            page_parts.append(md_table)
+                            page_tables.append(md_table)
+                            table_count += 1
 
-                    if page_parts:
-                        sections.append("\n\n".join(page_parts))
+                    if page_tables:
+                        sections.append("\n\n".join(page_tables))
 
             markdown = "\n\n---\n\n".join(sections) if sections else ""
 
@@ -57,6 +57,7 @@ class PDFPlumberConverter(BasePDFConverter):
                 "converter": "pdfplumber",
                 "pdf_path": str(pdf_path),
                 "num_pages": num_pages,
+                "table_count": table_count,
             }
             json_path = self._save_metadata(metadata, stem)
 
@@ -68,10 +69,14 @@ class PDFPlumberConverter(BasePDFConverter):
                     "markdown_path": str(md_path),
                     "json_path": str(json_path),
                     "num_pages": num_pages,
+                    "table_count": table_count,
                 },
             )
 
-            print(f"   Đã lưu: {md_path.name} ({num_pages} trang, {stats['num_chars']} ký tự)")
+            print(
+                f"   Đã lưu: {md_path.name} "
+                f"({table_count} bảng từ {num_pages} trang, {stats['num_chars']} ký tự)"
+            )
             return stats
 
         except Exception as e:
