@@ -1516,12 +1516,22 @@ def _format_context(
             meta.get("title") or meta.get("source") or "TÃ i liá»‡u khÃ´ng rÃµ nguá»“n"
         )
 
-        # Inject metadata into document header so the LLM is aware of the program/major context
+        # Inject metadata into document header so the LLM is aware of the program/major context.
+        # If storage metadata has mismatched code/name, prefer the canonical name by code
+        # to avoid leaking contradictory labels (e.g. "Việt - Nhật [IT-E7]").
         meta_parts = []
-        if meta.get("major_code"):
-            meta_parts.append(f"MÃ£ ngÃ nh: {meta['major_code']}")
-        if meta.get("major_name"):
-            meta_parts.append(f"NgÃ nh: {meta['major_name']}")
+        major_code = str(meta.get("major_code") or "").strip()
+        major_name = str(meta.get("major_name") or "").strip()
+        canonical_major_name = MAJOR_CODE_TO_NAME.get(major_code) if major_code else None
+        if canonical_major_name and (
+            not major_name
+            or _fold_vietnamese(major_name) != _fold_vietnamese(canonical_major_name)
+        ):
+            major_name = canonical_major_name
+        if major_code:
+            meta_parts.append(f"MÃ£ ngÃ nh: {major_code}")
+        if major_name:
+            meta_parts.append(f"NgÃ nh: {major_name}")
         if meta.get("applicable_cohort"):
             meta_parts.append(f"KhÃ³a: {meta['applicable_cohort']}")
         # Posting date is kehoach-specific (freshness signal for notifications).
@@ -2128,11 +2138,16 @@ def _build_profile_note_from_user_context(
         parts.append(f"Sinh viÃªn: {user_context['full_name']}")
     if user_context.get("student_id"):
         parts.append(f"MÃ£ SV: {user_context['student_id']}")
-    if user_context.get("major"):
-        major_note = user_context["major"]
-        if user_context.get("major_code"):
-            major_note += f" [{user_context['major_code']}]"
+    major_code = str(user_context.get("major_code") or "").strip()
+    major_name = str(user_context.get("major") or "").strip()
+    if major_code:
+        canonical_name = MAJOR_CODE_TO_NAME.get(major_code)
+        if canonical_name:
+            major_name = canonical_name
+        major_note = f"{major_name} [{major_code}]" if major_name else major_code
         parts.append(f"NgÃ nh: {major_note}")
+    elif major_name:
+        parts.append(f"NgÃ nh: {major_name}")
     if user_context.get("cohort"):
         parts.append(f"KhoÃ¡: {user_context['cohort']}")
 
