@@ -826,7 +826,10 @@ def _extract_date_range(folded: str) -> tuple[str | None, str | None]:
         if 1 <= month <= 12:
             start = date(year, month, 1)
             next_month = date(year + month // 12, month % 12 + 1, 1)
-            return start.isoformat(), (next_month - timedelta(days=1)).isoformat()
+            return (
+                start.isoformat(),
+                (next_month - timedelta(days=1)).isoformat(),
+            )
     return None, None
 
 
