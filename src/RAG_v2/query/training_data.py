@@ -850,6 +850,28 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
         [LABEL_CTDT, LABEL_STSV],
     ),
     # ctdt + quydinh — học phần tương đương
+    # Generic / conceptual queries: "tương đương" without a specific course name
+    # asks about the CONCEPT (quydinh) as much as about the CURRICULUM LIST (ctdt).
+    (
+        "Học phần tương đương",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Học phần tương đương là gì?",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Quy định về học phần tương đương",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Thế nào là học phần tương đương?",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
+    (
+        "Học phần tương đương và học phần thay thế khác nhau thế nào?",
+        [LABEL_CTDT, LABEL_QUYDINH],
+    ),
     (
         "Điều kiện để được công nhận học phần tương đương từ trường khác",
         [LABEL_CTDT, LABEL_QUYDINH],
