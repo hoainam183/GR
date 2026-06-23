@@ -32,11 +32,14 @@ Từ câu hỏi của sinh viên, TỰ tách các khía cạnh cần thiết r�
 Collections:
 - quy_dinh: quy định học vụ, học bổng, điều kiện tốt nghiệp, kỷ luật, ngoại ngữ
 - chuong_trinh: môn học, tín chỉ, chương trình đào tạo, tiên quyết
-- ke_hoach: lịch đăng ký học phần, deadline, kế hoạch học kỳ, lịch học (tài liệu kế hoạch chung)
+- ke_hoach: lịch đăng ký học phần, deadline, kế hoạch học kỳ, lịch học, LỊCH THI CHUNG (tài liệu kế hoạch chung)
 - lich_thi: lịch thi, phòng thi, kíp thi, ngày thi, đợt thi của MỘT học phần/môn cụ thể (thời khóa biểu thi có cấu trúc)
 - ho_tro_sv: biểu mẫu, giấy tờ, thuê nhà, thực tập, hỗ trợ sinh viên
 
 Phân biệt: lich_thi = lịch thi từng môn (phòng/kíp/ngày thi). ke_hoach = tài liệu kế hoạch/lịch chung của học kỳ, KHÔNG phải lịch thi từng môn.
+- ⚠️ QUAN TRỌNG phân biệt lich_thi vs ke_hoach:
+  + Câu hỏi CHUNG về lịch thi ("lịch thi cuối kì", "khi nào thi cuối kỳ", "lịch thi kỳ hè") mà KHÔNG nêu tên/mã môn cụ thể → dùng ke_hoach (kế hoạch thi chung của học kỳ).
+  + CHỈ dùng lich_thi khi user nêu RÕ môn/mã môn/ngày cụ thể/nhóm thi (VD: "lịch thi CH1012", "thi môn Giải tích ngày nào", "phòng thi IT3080E").
 - Với collection lich_thi: GIỮ NGUYÊN trong query các từ "giữa kì/giữa kỳ", "cuối kì/cuối kỳ", mã khóa (Kxx, vd K70), và các mốc thời gian ("tuần này/tuần tới", "tháng N") nếu sinh viên có nêu — bộ lọc lịch thi trích các thông tin này TRỰC TIẾP từ query text.
 
 Output format (JSON):
@@ -77,4 +80,9 @@ Output:
 Ví dụ 3 — Lịch thi của một môn cụ thể (giữ "cuối kì" trong query):
 Input: "Phòng thi cuối kì môn CH1012 khi nào?"
 Output:
-{"steps": [{"query": "lịch thi phòng thi cuối kì môn CH1012", "collection": "lich_thi", "major_hint": null, "cohort_hint": null, "label": "lich_thi_CH1012"}], "needs_web": false, "reasoning": "Hỏi phòng/ngày thi cuối kì của một học phần cụ thể → collection lich_thi"}"""
+{"steps": [{"query": "lịch thi phòng thi cuối kì môn CH1012", "collection": "lich_thi", "major_hint": null, "cohort_hint": null, "label": "lich_thi_CH1012"}], "needs_web": false, "reasoning": "Hỏi phòng/ngày thi cuối kì của một học phần cụ thể → collection lich_thi"}
+
+Ví dụ 4 — Hỏi CHUNG về lịch thi (không nêu môn cụ thể → ke_hoach):
+Input: "Lịch thi cuối kì"
+Output:
+{"steps": [{"query": "lịch thi cuối kỳ kế hoạch thời gian", "collection": "ke_hoach", "major_hint": null, "cohort_hint": null, "label": "ke_hoach_thi"}], "needs_web": false, "reasoning": "Câu hỏi chung về lịch thi cuối kì, không nêu môn cụ thể → dùng ke_hoach để tra kế hoạch thi chung"}"""

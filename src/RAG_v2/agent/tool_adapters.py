@@ -960,6 +960,18 @@ def _exam_schedule_search(
     if not any(filters.values()):
         return "[Loi: Khong xac dinh duoc mon/ngay thi tu cau hoi]"
 
+    # Guard: if the only filter is exam_type (e.g. "cuối kỳ") without any
+    # subject, date, or cohort narrowing, the query is too broad for a
+    # structured lookup — it would return arbitrary top-K rows.
+    _narrowing_keys = {"subject_code", "subject_name", "exam_date",
+                       "exam_date_from", "exam_date_to", "exam_room",
+                       "group", "cohort"}
+    if not any(filters.get(k) for k in _narrowing_keys):
+        return (
+            "[Khong du thong tin de tra cuu lich thi cu the. "
+            "Vui long cho biet ten/ma mon hoc, ngay thi, hoac ma khoa (vd: K67).]"
+        )
+
     limit = int(
         top_k
         if top_k is not None

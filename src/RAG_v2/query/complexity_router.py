@@ -124,6 +124,30 @@ _FOLDED_EXAM_RE: re.Pattern = re.compile(
     r"|dot thi|thi ngay|thi khi nao|thi vao|thi hom nao|thi luc nao)\b",
     re.IGNORECASE,
 )
+# Specificity guard: the exam fast-path should only fire when the query names a
+# concrete subject, cohort, date, or group — not for generic schedule questions
+# like "lịch thi cuối kì" (which belong to ke_hoach). Patterns that already
+# imply a specific lookup ("thi mon", "mon thi", "ma lop thi") are exempt
+# because they inherently reference a particular subject.
+_EXAM_SPECIFIC_SIGNALS_RE: re.Pattern = re.compile(
+    r"(?:"
+    r"[A-Z]{2,4}\s*-?\s*\d{3,4}"       # Subject code: CH1012, IT3080E
+    r"|\bmon\s+\w+"                      # "môn <tên>"
+    r"|\bK\d{2,3}\b"                     # Cohort: K67, K70
+    r"|\b\d{1,2}[/-]\d{1,2}\b"          # Specific date: 29/6, 1-7
+    r"|\bnhom\s*\d"                      # "nhóm 1/2/..."
+    r"|\btuan\s*(nay|toi|sau|truoc)\b"   # "tuần này/tới" (temporal specificity)
+    r"|\bthang\s*\d"                     # "tháng 6/7/..."
+    r"|\bngay\s*\d"                      # "ngày 29/30..."
+    r")",
+    re.IGNORECASE,
+)
+# Patterns within _FOLDED_EXAM_RE that inherently imply a specific subject,
+# so no additional specificity guard is needed.
+_EXAM_INHERENTLY_SPECIFIC_RE: re.Pattern = re.compile(
+    r"\b(thi mon|mon thi|ma lop thi|thi ngay|thi vao|thi hom nao|thi luc nao|thi khi nao)\b",
+    re.IGNORECASE,
+)
 # Bare "may" (how many) is intentionally omitted: it collides with "máy"
 # (machine) after accent folding, so the how-many sense is detected via
 # ``query_signals.exact_policy_lookup`` (accent-aware) instead. "nhom may"
@@ -227,7 +251,14 @@ class ComplexityRouter:
         # 1b. Exam-schedule fast-path — route lịch thi questions to the agent so
         # the planner emits a structured lich_thi step (checked before the
         # single-fact gate, which would otherwise send "phòng thi môn X" to RAG).
-        if _FOLDED_EXAM_RE.search(q_folded):
+        # Guard: only fire when the query contains a specific subject/date/cohort
+        # signal, OR uses inherently-specific exam phrasing ("thi môn", "môn thi").
+        # Generic queries like "lịch thi cuối kì" lack specificity and should fall
+        # through to the ML classifier (which routes them to ke_hoach).
+        if _FOLDED_EXAM_RE.search(q_folded) and (
+            _EXAM_INHERENTLY_SPECIFIC_RE.search(q_folded)
+            or _EXAM_SPECIFIC_SIGNALS_RE.search(q)
+        ):
             result = {
                 "tier": "complex",
                 "reason": "signals: exam_schedule_lookup",
