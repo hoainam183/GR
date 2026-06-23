@@ -436,7 +436,11 @@ class GenericCrawler:
     # ── Incremental crawl ─────────────────────────────────────
 
     def crawl_new(self) -> List[Dict]:
-        """Return list of newly-crawled articles (with detail content)."""
+        """Return list of newly-crawled articles (with detail content).
+
+        Articles marked with ``_is_update=True`` are existing articles whose
+        ``date_str`` changed on the website (content was updated by the school).
+        """
         existing_ids = self._get_existing_ids()
         logger.info("Existing articles: %d", len(existing_ids))
 
@@ -448,31 +452,47 @@ class GenericCrawler:
             new_articles.extend(found)
 
         if not new_articles:
-            logger.info("No new articles found.")
+            logger.info("No new/updated articles found.")
             return []
 
-        # Crawl details
-        logger.info("Crawling details for %d new articles …", len(new_articles))
+        updated_count = sum(1 for a in new_articles if a.get("_is_update"))
+        logger.info(
+            "Crawling details for %d articles (%d new, %d updated) …",
+            len(new_articles),
+            len(new_articles) - updated_count,
+            updated_count,
+        )
         for i, art in enumerate(new_articles):
             logger.info(
-                "  [%d/%d] baiviet_id=%s",
+                "  [%d/%d] baiviet_id=%s%s",
                 i + 1,
                 len(new_articles),
                 art.get("baiviet_id"),
+                " (UPDATE)" if art.get("_is_update") else "",
             )
             self._crawl_article_detail(art)
             time.sleep(self.delay)
 
         return new_articles
 
-    def _get_existing_ids(self) -> Set[int]:
+    def _get_existing_ids(self) -> Dict[int, Optional[str]]:
+        """Return mapping of baiviet_id → date_str for all existing articles."""
         data = _load_json(self.output_file)
-        return {a["baiviet_id"] for a in data if a.get("baiviet_id")}
+        return {
+            a["baiviet_id"]: a.get("date_str")
+            for a in data
+            if a.get("baiviet_id")
+        }
 
     def _crawl_tag_incremental(
-        self, tag_encoded: str, category: str, existing_ids: Set[int]
+        self, tag_encoded: str, category: str, existing_ids: Dict[int, Optional[str]]
     ) -> List[Dict]:
-        """Crawl pages until we hit an already-known baiviet_id or exceed max_age_months."""
+        """Crawl pages until we hit an already-known baiviet_id or exceed max_age_months.
+
+        If an article has the same ID but a different ``date_str`` compared to
+        the stored version, it is treated as an **updated** article and will be
+        re-crawled (marked with ``_is_update=True``).
+        """
         page = 1
         new_arts: List[Dict] = []
 
@@ -482,6 +502,9 @@ class GenericCrawler:
                 days=self.max_age_months * 30
             )
 
+        # Track how many consecutive pages contain ONLY already-known (unchanged)
+        # articles. We stop after hitting one such page (like before), but updated
+        # articles on the same page do NOT count as "hit existing".
         while True:
             url = self._build_list_url(tag_encoded, page)
             logger.info("[%s] Fetching page %d …", category, page)
@@ -493,15 +516,30 @@ class GenericCrawler:
             if not items:
                 break
 
-            found_existing = False
+            found_existing_unchanged = False
             hit_cutoff = False
             for item in items:
                 bid = item.get("baiviet_id")
                 if bid and bid in existing_ids:
+                    # Same ID exists — check if date_str changed (content updated)
+                    existing_date = existing_ids[bid]
+                    current_date = item.get("date_str")
+                    if current_date and current_date != existing_date:
+                        # Date changed → re-crawl this article
+                        item["_is_update"] = True
+                        new_arts.append(item)
+                        logger.info(
+                            "[%s] Article %d updated (date %s → %s), will re-crawl.",
+                            category,
+                            bid,
+                            existing_date,
+                            current_date,
+                        )
+                        continue
                     if self.backfill:
                         # Skip known article but keep walking back in time.
                         continue
-                    found_existing = True
+                    found_existing_unchanged = True
                     break
 
                 # Check cutoff date
@@ -513,8 +551,8 @@ class GenericCrawler:
 
                 new_arts.append(item)
 
-            if found_existing:
-                logger.info("[%s] Hit existing article — stopping.", category)
+            if found_existing_unchanged:
+                logger.info("[%s] Hit existing unchanged article — stopping.", category)
                 break
 
             if hit_cutoff:
@@ -528,7 +566,7 @@ class GenericCrawler:
             page += 1
             time.sleep(self.delay)
 
-        logger.info("[%s] Found %d new articles.", category, len(new_arts))
+        logger.info("[%s] Found %d new/updated articles.", category, len(new_arts))
         return new_arts
 
     def save_to_file(self, new_articles: List[Dict]) -> None:
@@ -1041,6 +1079,7 @@ class AutoCrawlPipeline:
             "started_at": start_time.isoformat(),
             "status": "success",
             "new_articles": 0,
+            "updated_articles": 0,
             "new_chunks": 0,
             "indexed": 0,
             "expired_removed": 0,
@@ -1085,6 +1124,10 @@ class AutoCrawlPipeline:
                 fetch_failures.extend(getattr(crawler, "_fetch_failures", []))
 
             summary["new_articles"] = len(all_new_articles)
+            # Separate truly-new vs updated (same ID, different date)
+            updated_articles = [a for a in all_new_articles if a.get("_is_update")]
+            truly_new_articles = [a for a in all_new_articles if not a.get("_is_update")]
+            summary["updated_articles"] = len(updated_articles)
             summary["fetch_failures"] = len(fetch_failures)
             if fetch_failures:
                 # Cap the per-URL detail so a mass outage can't bloat the summary.
@@ -1095,12 +1138,35 @@ class AutoCrawlPipeline:
                     len(fetch_failures),
                 )
 
+            if updated_articles:
+                logger.info(
+                    "Crawl [%s]: %d articles updated (same ID, different date).",
+                    pipeline_name,
+                    len(updated_articles),
+                )
+
             # Bài mới crawl được đóng dấu version hiện tại để lần crawl sau không
             # bị auto-heal xử lý lại (tránh stage trùng).
             for art in all_new_articles:
                 art["processing_version"] = PROCESSING_VERSION
+                # Remove transient marker before persisting
+                art.pop("_is_update", None)
 
-            # Step 1b: Auto-heal — bài CŨ có <table> nhưng content_text chưa phải
+            # Step 1b: Remove old chunks for UPDATED articles from chunks file.
+            # The old chunks will be cleaned from Qdrant + ES during index step
+            # (the stage_pending_review stores updated_baiviet_ids for the admin
+            # index action to delete before upserting).
+            updated_baiviet_ids = [
+                a["baiviet_id"] for a in updated_articles if a.get("baiviet_id")
+            ]
+            if updated_baiviet_ids:
+                self._remove_chunks_for_ids(chunks_file, set(updated_baiviet_ids))
+                logger.info(
+                    "Removed old chunks from file for %d updated articles.",
+                    len(updated_baiviet_ids),
+                )
+
+            # Step 1c: Auto-heal — bài CŨ có <table> nhưng content_text chưa phải
             # Markdown (crawl trước khi có fix). Crawl tăng dần bỏ qua ID đã biết
             # nên cần bước này để tự sửa. Idempotent: bỏ qua bài đã là Markdown,
             # nên không stage trùng ở các lần crawl sau.
@@ -1147,6 +1213,7 @@ class AutoCrawlPipeline:
                         chunks_file=chunks_file,
                         new_chunks=new_chunks,
                         summary=summary,
+                        updated_baiviet_ids=updated_baiviet_ids,
                     )
                     summary["status"] = "pending_review"
                     summary["review_run_id"] = run_id
@@ -1218,6 +1285,33 @@ class AutoCrawlPipeline:
             art["processing_version"] = PROCESSING_VERSION
             healed.append(art)
         return healed
+
+    # ── Remove old chunks for updated articles ────────────────────
+
+    @staticmethod
+    def _remove_chunks_for_ids(chunks_file: Path, baiviet_ids: Set[int]) -> int:
+        """Remove chunks belonging to the given baiviet_ids from the chunks JSON file.
+
+        Returns the number of chunks removed.
+        """
+        chunks = _load_json(chunks_file)
+        if not chunks:
+            return 0
+        filtered = [
+            c
+            for c in chunks
+            if (c.get("metadata") or {}).get("baiviet_id") not in baiviet_ids
+        ]
+        removed = len(chunks) - len(filtered)
+        if removed > 0:
+            _save_json(filtered, chunks_file)
+            logger.info(
+                "Removed %d old chunks for %d updated baiviet_ids from %s.",
+                removed,
+                len(baiviet_ids),
+                chunks_file.name,
+            )
+        return removed
 
     # ── Reprocess: fix bài đã crawl từ content_html đã lưu ────────
 
@@ -1376,6 +1470,7 @@ class AutoCrawlPipeline:
         chunks_file: Path,
         new_chunks: List[Dict],
         summary: Dict[str, Any],
+        updated_baiviet_ids: Optional[List[int]] = None,
     ) -> str:
         if not self._settings:
             raise RuntimeError("Crawler review staging requires settings")
@@ -1402,6 +1497,7 @@ class AutoCrawlPipeline:
                 "output_file": str(output_file),
                 "chunks_file": str(chunks_file),
                 "new_articles": int(summary.get("new_articles", 0)),
+                "updated_articles": int(summary.get("updated_articles", 0)),
                 "new_chunks": len(new_chunks),
                 "indexed": 0,
                 "expired_removed": int(summary.get("expired_removed", 0)),
@@ -1410,6 +1506,8 @@ class AutoCrawlPipeline:
                 "indexed_at": None,
                 "error_message": None,
                 "summary": dict(summary),
+                # IDs that need old chunks deleted from Qdrant/ES before indexing
+                "updated_baiviet_ids": updated_baiviet_ids or [],
             }
             chunk_docs = []
             for index, chunk in enumerate(new_chunks):
@@ -1479,6 +1577,7 @@ class AutoCrawlPipeline:
             f"  Started:  {summary.get('started_at', '?')}\n"
             f"  Elapsed:  {summary.get('elapsed_seconds', '?')}s\n"
             f"  New articles: {summary.get('new_articles', 0)}\n"
+            f"  Updated articles: {summary.get('updated_articles', 0)}\n"
             f"  New chunks:   {summary.get('new_chunks', 0)}\n"
             f"  Indexed:      {summary.get('indexed', 0)}\n"
             f"  Expired removed: {summary.get('expired_removed', 0)}\n"
