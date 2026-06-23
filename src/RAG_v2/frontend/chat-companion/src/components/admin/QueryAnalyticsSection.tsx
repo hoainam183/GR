@@ -138,7 +138,7 @@ export default function QueryAnalyticsSection() {
         {/* Route distribution */}
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="text-sm font-semibold mb-3">Phân bố theo route</p>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
                 data={data.by_route}
@@ -146,14 +146,22 @@ export default function QueryAnalyticsSection() {
                 nameKey="route"
                 cx="50%"
                 cy="50%"
-                outerRadius={80}
-                label={({ route, count }) => `${route}: ${count}`}
+                outerRadius={70}
+                label={false}
               >
                 {data.by_route.map((_, idx) => (
                   <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(value: number) => [value, 'Số lượng']} />
+              <Legend
+                layout="vertical"
+                align="right"
+                verticalAlign="middle"
+                iconType="circle"
+                iconSize={8}
+                wrapperStyle={{ fontSize: '11px', lineHeight: '20px' }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>

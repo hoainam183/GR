@@ -103,11 +103,9 @@ export default function EvalPage() {
     <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center gap-4">
-          <Link to="/chat" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="w-4 h-4" /> Chat
+          <Link to="/admin" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="w-4 h-4" /> Admin
           </Link>
-          <div className="h-4 w-px bg-border" />
-          <Link to="/retrieval" className="text-sm text-muted-foreground hover:text-foreground">Retrieval</Link>
           <div className="h-4 w-px bg-border" />
           <div className="flex items-center gap-2">
             <BarChart4 className="w-4 h-4 text-primary" />

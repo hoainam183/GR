@@ -10,8 +10,6 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import CompleteProfile from "./pages/CompleteProfile";
-import TracePage from "./pages/TracePage";
-import RetrievalPage from "./pages/RetrievalPage";
 import EvalPage from "./pages/EvalPage";
 import AdminPage from "./pages/AdminPage";
 import DocumentReview from "./pages/DocumentReview";
@@ -67,6 +65,34 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RequireNonAdmin({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const [user, setUser] = useState<UserPublic | null>(() => getCurrentSessionUser());
+  const [checking, setChecking] = useState(() => getCurrentSessionUser() === null);
+  const verified = useRef(false);
+
+  useEffect(() => {
+    if (verified.current) return;
+    verified.current = true;
+
+    ensureSession()
+      .then((sessionUser) => {
+        setUser(sessionUser);
+      })
+      .catch(() => {
+        setUser(null);
+      })
+      .finally(() => {
+        setChecking(false);
+      });
+  }, []);
+
+  if (checking) return null;
+  if (!user) return <Navigate to={loginRedirect(location.pathname, location.search)} replace />;
+  if (user.role === "admin") return <Navigate to="/admin" replace />;
+  return <>{children}</>;
+}
+
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [user, setUser] = useState<UserPublic | null>(() => getCurrentSessionUser());
@@ -103,13 +129,11 @@ const App = () => (
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/chat" element={<RequireAuth><Index /></RequireAuth>} />
-          <Route path="/chat/:sessionId" element={<RequireAuth><Index /></RequireAuth>} />
+          <Route path="/chat" element={<RequireNonAdmin><Index /></RequireNonAdmin>} />
+          <Route path="/chat/:sessionId" element={<RequireNonAdmin><Index /></RequireNonAdmin>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/complete-profile" element={<RequireAuth><CompleteProfile /></RequireAuth>} />
-          <Route path="/trace" element={<RequireAdmin><TracePage /></RequireAdmin>} />
-          <Route path="/retrieval" element={<RequireAdmin><RetrievalPage /></RequireAdmin>} />
           <Route path="/eval" element={<RequireAdmin><EvalPage /></RequireAdmin>} />
           <Route path="/admin" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
           <Route path="/admin/documents/:id" element={<RequireAdmin><DocumentReview /></RequireAdmin>} />

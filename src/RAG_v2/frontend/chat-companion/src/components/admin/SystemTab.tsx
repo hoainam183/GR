@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -1028,10 +1028,10 @@ export default function SystemTab() {
         {docStatusData.length > 0 && (
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <p className="text-sm font-semibold mb-3">Tài liệu theo trạng thái</p>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={220}>
               <BarChart data={docStatusData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-20} textAnchor="end" height={40} />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -1043,7 +1043,7 @@ export default function SystemTab() {
         {docCollData.length > 0 && (
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <p className="text-sm font-semibold mb-3">Tài liệu theo collection</p>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
                   data={docCollData}
@@ -1052,13 +1052,21 @@ export default function SystemTab() {
                   cx="50%"
                   cy="50%"
                   outerRadius={70}
-                  label={({ name, value }) => `${name}: ${value}`}
+                  label={false}
                 >
                   {docCollData.map((_, idx) => (
                     <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip formatter={(value: number) => [value, 'Số lượng']} />
+                <Legend
+                  layout="vertical"
+                  align="right"
+                  verticalAlign="middle"
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: '11px', lineHeight: '20px' }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>

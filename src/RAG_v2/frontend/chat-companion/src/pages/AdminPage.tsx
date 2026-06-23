@@ -79,7 +79,7 @@ export default function AdminPage() {
     } catch (err: unknown) {
       if (getAdminApiError(err).status === 403) {
         toast.error('Bạn không có quyền truy cập trang admin');
-        navigate('/chat');
+        navigate('/');
         return;
       }
       toast.error('Không thể tải danh sách tài liệu');
@@ -183,9 +183,9 @@ export default function AdminPage() {
         </nav>
 
         <div className="border-t border-border p-3">
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/chat')}>
+          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/')}>
             <ArrowLeft className="h-4 w-4" />
-            Quay lại chat
+            Trang chủ
           </Button>
         </div>
       </aside>
@@ -198,8 +198,8 @@ export default function AdminPage() {
                 variant="ghost"
                 size="icon"
                 className="h-9 w-9 shrink-0 lg:hidden"
-                onClick={() => navigate('/chat')}
-                title="Quay lại chat"
+                onClick={() => navigate('/')}
+                title="Trang chủ"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -216,9 +216,9 @@ export default function AdminPage() {
               <span className="hidden rounded-lg border border-border bg-background px-3 py-2 text-sm text-muted-foreground md:inline-flex">
                 Khu vực quản trị
               </span>
-              <Button variant="outline" size="sm" className="hidden gap-2 sm:inline-flex" onClick={() => navigate('/chat')}>
+              <Button variant="outline" size="sm" className="hidden gap-2 sm:inline-flex" onClick={() => navigate('/')}>
                 <ArrowLeft className="h-4 w-4" />
-                Chat
+                Trang chủ
               </Button>
             </div>
           </div>

@@ -14,8 +14,6 @@ const isInternalPath = (value: string | null): value is string =>
 const isAdminPath = (value: string): boolean =>
   value === "/admin" ||
   value.startsWith("/admin/") ||
-  value === "/trace" ||
-  value === "/retrieval" ||
   value === "/eval";
 
 const safeNextPath = (value: string | null): string | null =>

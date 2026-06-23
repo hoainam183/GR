@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ChatContainer from '@/components/chat/ChatContainer';
 import { ConversationSidebar } from '@/components/sidebar/ConversationSidebar';
@@ -25,7 +25,7 @@ import {
 import { type UserPublic } from '@/services/authApi';
 import { ensureSession, logoutSession } from '@/services/authSession';
 import { getSessions } from '@/services/sessionApi';
-import { Activity, Bookmark, Loader2, LogOut, Moon, PanelLeft, Sun } from 'lucide-react';
+import { Bookmark, Loader2, LogOut, Moon, PanelLeft, Sun } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import HustLogo from '@/components/HustLogo';
 
@@ -114,7 +114,6 @@ const Index = () => {
   // Initialise synchronously from localStorage so ownerId is available on
   // the first render and the sessions query fires without waiting for an effect.
   const [user, setUser] = useState<UserPublic | null>(() => getStoredUser<UserPublic>());
-  const isAdmin = user?.role === 'admin';
   const isMobile = useIsMobile();
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme');
@@ -254,16 +253,6 @@ const Index = () => {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          {isAdmin && (
-            <Link
-              to="/trace"
-              className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              title="Pipeline Trace Debugger"
-            >
-              <Activity className="h-3.5 w-3.5" />
-              Trace
-            </Link>
-          )}
           {user && (
             <Button
               variant="ghost"
