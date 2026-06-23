@@ -457,6 +457,19 @@ export default function SystemTab() {
     };
   }, [crawlerStatus?.is_running, refreshCrawlerStatus]);
 
+  // Auto-load all chunks for pending_review runs (preview only shows first 5)
+  useEffect(() => {
+    const pendingRuns = crawlerStatus?.runs?.filter(
+      (r) => (r.review_status || r.status) === 'pending_review' && (r.review_run_id || r.run_id)
+    ) || [];
+    for (const run of pendingRuns) {
+      const rid = run.review_run_id || run.run_id || '';
+      if (rid && !runChunks[rid]) {
+        ensureRunChunks(rid).catch(() => {});
+      }
+    }
+  }, [crawlerStatus?.runs]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleToggle = async (key: string, newVal: boolean) => {
     setTogglingKey(key);
     try {
@@ -1230,13 +1243,31 @@ export default function SystemTab() {
 
                 {(!isIndexed || isRunExpanded) && (
                   <>
-                {result.saved_chunks.length > 0 ? (
+                {(runChunks[runId]?.length || result.saved_chunks.length) > 0 ? (
                   <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg border border-border">
-                    {result.saved_chunks.map((chunk) => {
+                    {/* Show load-all button when preview is limited */}
+                    {!runChunks[runId] && result.new_chunks > result.saved_chunks.length && (
+                      <div className="bg-muted/30 px-4 py-2 text-center">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs"
+                          disabled={loadingRunId === runId}
+                          onClick={() => ensureRunChunks(runId)}
+                        >
+                          {loadingRunId === runId ? (
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          ) : null}
+                          Hiển thị {result.saved_chunks.length}/{result.new_chunks} chunks — Tải tất cả
+                        </Button>
+                      </div>
+                    )}
+                    {/* Use full chunks list when loaded; fallback to preview */}
+                    {(runChunks[runId] || result.saved_chunks).map((chunk) => {
                       const chunkKey = `${runId}:${chunk.chunk_id}`;
                       const isExpanded = expandedChunkKey === chunkKey;
                       const fullChunk = runChunks[runId]?.find((item) => item.chunk_id === chunk.chunk_id);
-                      const draft = chunkDrafts[chunkKey] ?? fullChunk?.content ?? '';
+                      const draft = chunkDrafts[chunkKey] ?? fullChunk?.content ?? ('content' in chunk ? (chunk as CrawlerChunkDetail).content : '');
 
                       return (
                       <article key={chunk.chunk_id} className="bg-card px-4 py-3">

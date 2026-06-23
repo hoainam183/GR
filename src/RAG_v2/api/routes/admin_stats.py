@@ -221,7 +221,16 @@ async def _list_crawler_runs(
         .limit(limit)
     )
     docs = await cursor.to_list(length=limit)
-    return [await _crawler_run_with_preview(db, doc) for doc in docs]
+    # Pending/editable runs show ALL chunk previews so admin can review;
+    # indexed runs show a limited preview (just a summary).
+    editable = set(CRAWLER_EDITABLE_STATUSES)
+    return [
+        await _crawler_run_with_preview(
+            db, doc,
+            chunk_limit=500 if doc.get("status") in editable else 5,
+        )
+        for doc in docs
+    ]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
