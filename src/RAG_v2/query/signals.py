@@ -1,8 +1,14 @@
 """Query-level traits used by routing and adaptive retrieval.
 
-The helpers in this module are intentionally lightweight and deterministic.
-They do not decide the final answer; they expose reusable signals such as
-"this asks for a point/credit value" or "this needs personal eligibility data".
+Simplified version: only keeps signals that are safe and proven useful:
+- curriculum_semester_intent: distinguishes "which semester" (ctdt) from "when" (kehoach)
+- freshness / schedule / deadline / announcement: route to kehoach collection
+
+Removed signals (caused false positives and pipeline overrides):
+- exact_policy_lookup / table_lookup / _has_how_many_token: falsely triggered by
+  "kỳ mấy" → added quydinh collection + forced keyword=75% fusion → wrong results
+- eligibility_check / procedural_support / multi_domain: overrode router decisions
+  with brittle regex, adding wrong collections
 """
 
 from __future__ import annotations
@@ -15,14 +21,24 @@ from typing import Any, Dict, Iterable, List, Mapping
 
 @dataclass(frozen=True)
 class QuerySignals:
-    """Reusable query traits shared by router, selector, and retriever."""
+    """Reusable query traits shared by router, selector, and retriever.
 
+    Fields ``personal_reference``, ``eligibility_check``, ``exact_policy_lookup``,
+    ``table_lookup``, ``procedural_support``, and ``multi_domain`` are kept for
+    backward compatibility but always default to ``False``.  Their regex-based
+    detection was too brittle and caused retrieval failures (see bug analysis:
+    "kỳ mấy" false positive).
+    """
+
+    # ── Kept for backward compat (always False) ──────────────────────────────
     personal_reference: bool = False
     eligibility_check: bool = False
     exact_policy_lookup: bool = False
     table_lookup: bool = False
     procedural_support: bool = False
     multi_domain: bool = False
+
+    # ── Active signals ───────────────────────────────────────────────────────
     freshness: bool = False
     schedule_intent: bool = False
     deadline_intent: bool = False
@@ -55,61 +71,7 @@ def _matches_any(text: str, patterns: Iterable[str]) -> bool:
     return any(re.search(pattern, text) for pattern in patterns)
 
 
-# Vietnamese accent folding collapses "mấy" (how many) and "máy" (machine,
-# e.g. "máy tính" = computer) to the same token "may". A how-many lookup must
-# not be triggered by a major name like "Khoa học Máy tính". We detect the
-# how-many sense by counting folded "may" hits and subtracting those explained
-# by accented "máy"; no-diacritic input (mobile) still works because its "máy"
-# count is 0.
-_FOLDED_MAY_RE = re.compile(r"\bmay\b")
-_MACHINE_ACCENTED_RE = re.compile(r"\bmáy\b", re.IGNORECASE)
-
-
-def _has_how_many_token(query: str, folded: str) -> bool:
-    """Return True only for the "mấy" (how many) sense, not "máy" (machine)."""
-    folded_hits = len(_FOLDED_MAY_RE.findall(folded))
-    machine_hits = len(_MACHINE_ACCENTED_RE.findall(query))
-    return folded_hits > machine_hits
-
-
-_PERSONAL_PATTERNS = (
-    r"\b(?:cua\s+toi|cua\s+minh|cua\s+em)\b",
-    r"\b(?:nganh|chuong\s+trinh|hoc\s+phan|diem|cpa|gpa|khoa|truong)\s+(?:cua\s+)?(?:toi|minh|em)\b",
-    r"\b(?:toi|minh|em)\s+(?:hoc\s+nganh|la\s+sinh\s+vien)\b",
-    r"\bsinh\s+vien\s+nhu\s+(?:toi|minh|em)\b",
-)
-
-_ELIGIBILITY_PATTERNS = (
-    r"\b(du dieu kien|dat dieu kien|co du dieu kien)\b",
-    r"\bdieu kien\s+(?:xet|duoc xet|tot nghiep|nhan|cap|tham gia|dang ky)\b",
-    r"\b(tot nghiep|xet tot nghiep|dang ky tot nghiep|cong nhan tot nghiep)\b",
-    r"\b(chuan dau ra|ngoai ngu dau ra|gdtc|gdqp|giao duc the chat|quoc phong)\b",
-    r"\b(?:duoc xet|xet)\s+(?:hoc bong|mien giam|tot nghiep)\b",
-    r"\b(?:hoc bong|mien giam).{0,30}\b(?:du dieu kien|dat dieu kien|duoc xet)\b",
-)
-
-# NOTE: bare "may" (how many) is handled accent-aware via _has_how_many_token,
-# NOT listed here, so "máy" (machine) in major names does not false-trigger.
-_EXACT_LOOKUP_PATTERNS = (
-    r"\b(bao nhieu|muc nao|muc diem|thang diem|can bao nhieu)\b",
-    r"\b(duoc bao nhieu|cong bao nhieu|tinh bao nhieu)\b",
-    r"\b(diem ren luyen|diem cong|tin chi|hoc phi|muc thu|xep loai|quy doi)\b",
-)
-
-_TABLE_LOOKUP_PATTERNS = (
-    r"\b(bang|khung|phu luc|muc|thang diem|quy doi|xep loai)\b",
-    r"\b(diem ren luyen|diem cong|tin chi|hoc phi|muc thu|chuan)\b",
-    r"\b(thoi luong|ma hoc phan|co ma|ma\s+la gi|danh cho ai|xep hoc)\b",
-    r"\b(?:mon|hoc\s+phan|chuong\s+trinh|khung|bang|dao\s+tao).{0,30}\b(?:hoc\s+ky|ky)\s*\d+\b",
-    r"\b(thuoc nhom|nhom\s*(?:may|\d+)|bac\s*\d+(?:\.\d+)?)\b",
-    r"\bfl\d{4}\b",
-)
-
-_PROCEDURAL_PATTERNS = (
-    r"\b(chua nhan|chua duoc|khong nhan|khong duoc|bi thieu|sai diem)\b",
-    r"\b(minh chung|xac nhan|cap nhat|bo sung|nop|gui|lien he|bieu mau|form)\b",
-    r"\b(khieu nai|phuc khao|kiem tra lai|hoi ai|lam sao|can lam gi)\b",
-)
+# ── Active pattern groups ────────────────────────────────────────────────────
 
 _FRESHNESS_PATTERNS = (
     r"\b(moi nhat|gan day|hom nay|sap toi|hien nay|nam nay|ky moi|hoc ky moi)\b",
@@ -132,12 +94,7 @@ _ANNOUNCEMENT_PATTERNS = (
     r"\bdanh sach.{0,30}\b(nhan|duoc nhan|sinh vien|hoc bong)\b",
 )
 
-_PROGRAM_PATTERNS = (
-    r"\b(nganh|chuong trinh|ctdt|chuong trinh dao tao|khoa|k\d{2,3})\b",
-    r"\b(?:it|mi|et|em|ep|ee|ev|hs|fl|ba|ph|me|ms)-[a-z0-9]+\b",
-)
-
-# ── Curriculum semester placement ("môn X học/đăng ký vào kỳ mấy?") ───────────
+# ── Curriculum semester placement ("môn X học/đăng ký vào kỳ mấy?") ──────────
 # Distinguishes WHICH-semester-in-curriculum (ctdt) from WHEN-registration-opens
 # (kehoach). The question must reference a course AND ask which semester, while
 # NOT carrying any "when does it open / schedule / deadline" time markers.
@@ -168,16 +125,15 @@ _CTDT_CONTEXT_PATTERNS = (
 
 
 def analyze_query_signals(query: str) -> QuerySignals:
-    """Analyze a user query into stable retrieval/routing traits."""
+    """Analyze a user query into stable retrieval/routing traits.
+
+    Only computes signals that are proven safe and useful.  Signals that
+    previously caused false positives (``exact_policy_lookup``,
+    ``table_lookup``, ``eligibility_check``, ``procedural_support``,
+    ``multi_domain``) are always ``False``.
+    """
     folded = fold_vietnamese_text(query)
 
-    personal_reference = _matches_any(folded, _PERSONAL_PATTERNS)
-    eligibility_check = _matches_any(folded, _ELIGIBILITY_PATTERNS)
-    exact_policy_lookup = _matches_any(folded, _EXACT_LOOKUP_PATTERNS) or _has_how_many_token(
-        query, folded
-    )
-    table_lookup = _matches_any(folded, _TABLE_LOOKUP_PATTERNS)
-    procedural_support = _matches_any(folded, _PROCEDURAL_PATTERNS)
     freshness = _matches_any(folded, _FRESHNESS_PATTERNS)
     schedule_intent = _matches_any(folded, _SCHEDULE_PATTERNS)
     deadline_intent = _matches_any(folded, _DEADLINE_PATTERNS)
@@ -185,8 +141,7 @@ def analyze_query_signals(query: str) -> QuerySignals:
 
     # Curriculum semester placement: "môn X học/đăng ký vào kỳ mấy?" asks WHICH
     # semester a course sits in the standard study plan (ctdt), not WHEN
-    # registration opens (kehoach). Requires a course reference + a which-semester
-    # question, and is suppressed by any WHEN-opening / schedule / deadline marker.
+    # registration opens (kehoach).
     curriculum_semester_intent = bool(
         _matches_any(folded, _COURSE_REFERENCE_PATTERNS)
         and _matches_any(folded, _SEMESTER_PLACEMENT_PATTERNS)
@@ -196,24 +151,7 @@ def analyze_query_signals(query: str) -> QuerySignals:
         )
     )
 
-    has_program_context = _matches_any(folded, _PROGRAM_PATTERNS)
-    graduation_rule = bool(
-        re.search(r"\b(tot nghiep|xet tot nghiep|dieu kien)\b", folded)
-        and re.search(r"\b(quy dinh|chuong trinh|nganh|ctdt|tin chi|mon|hoc phan)\b", folded)
-    )
-    multi_domain = bool(
-        (eligibility_check and has_program_context)
-        or (procedural_support and (exact_policy_lookup or table_lookup))
-        or graduation_rule
-    )
-
     return QuerySignals(
-        personal_reference=personal_reference,
-        eligibility_check=eligibility_check,
-        exact_policy_lookup=exact_policy_lookup,
-        table_lookup=table_lookup,
-        procedural_support=procedural_support,
-        multi_domain=multi_domain,
         freshness=freshness,
         schedule_intent=schedule_intent,
         deadline_intent=deadline_intent,
@@ -221,6 +159,8 @@ def analyze_query_signals(query: str) -> QuerySignals:
         curriculum_semester_intent=curriculum_semester_intent,
     )
 
+
+# ── Key phrase extraction (used by BM25 boosting) ────────────────────────────
 
 _TOKEN_RE = re.compile(r"[0-9A-Za-zÀ-ỹĐđ]+(?:[-_][0-9A-Za-zÀ-ỹĐđ]+)*")
 _STOPWORDS = {

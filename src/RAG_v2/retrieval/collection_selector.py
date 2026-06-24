@@ -146,9 +146,9 @@ def augment_collections_for_query(
 ) -> List[str]:
     """Expand target collections using generic query traits.
 
-    Policy/table lookups should not miss ``quydinh``. Procedural support
-    queries should include ``stsv``. CTDT course/credit lookups are kept focused
-    unless the query also has explicit rule/eligibility intent.
+    Foreign-language policy queries ensure ``quydinh`` is searched.
+    Curriculum-semester lookups prioritise ``ctdt``.
+    Schedule/deadline/freshness signals route to ``kehoach``.
     """
     if not query:
         return list(collections)
@@ -175,22 +175,8 @@ def augment_collections_for_query(
         )
     )
 
-    needs_regulations = (
-        signals.eligibility_check
-        or signals.table_lookup
-        or signals.exact_policy_lookup
-    )
     if foreign_language_policy_lookup:
         output = _dedup(["quydinh", *output])
-
-    if needs_regulations:
-        output = _dedup(["quydinh", *output])
-
-    if signals.procedural_support:
-        output = _dedup([*output, "stsv"])
-
-    if signals.multi_domain and signals.eligibility_check:
-        output = _dedup([*output, "ctdt"])
 
     if curriculum_semester_lookup:
         output = _dedup(["ctdt", *output])

@@ -42,6 +42,10 @@ _GENERIC_POLICY_PHRASES = {
     "tot nghiep",
     "hoc bong",
     "quy dinh",
+    "chuong trinh dao tao",
+    "ctdt",
+    "hoc phan",
+    "mon hoc",
 }
 
 
@@ -866,9 +870,6 @@ class ElasticsearchStore:
                         }
                     }
                 )
-
-        if query_signals.table_lookup:
-            should_clause.append({"term": {"has_table": {"value": True, "boost": 2.5}}})
 
         # Exact course-code match. ``course_code`` is a keyword field, so it does
         # not contribute via the free-text multi_match above; a dedicated terms
