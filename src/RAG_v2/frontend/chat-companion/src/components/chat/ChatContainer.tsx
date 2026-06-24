@@ -685,7 +685,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
                   </div>
                 </div>
               ) : (
-                <ChatMessage key={message.id} message={message} showDebug={false} />
+                <ChatMessage key={message.id} message={message} showDebug={true} />
               ),
             )}
             {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} label={statusMessage ?? undefined} />}
