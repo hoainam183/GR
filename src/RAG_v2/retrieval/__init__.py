@@ -34,6 +34,7 @@ def create_retriever(settings: "Settings") -> MultiCollectionSearch:  # type: ig
         es_port=settings.elasticsearch_port,
         vector_weight=settings.vector_weight,
         keyword_weight=settings.keyword_weight,
+        rrf_k=settings.fusion_rrf_k,
     )
 
 

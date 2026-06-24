@@ -154,8 +154,16 @@ class RetrievalService:
 
         logger.info("RetrievalService: loading BGE-M3 embedder …")
         bge = BGEm3Embedder()
-        logger.info("RetrievalService: loading E5-multilingual embedder …")
-        e5 = E5MultilingualEmbedder()
+        
+        if settings.embedding_provider == "ensemble":
+            logger.info("RetrievalService: loading E5-multilingual embedder …")
+            e5 = E5MultilingualEmbedder()
+        else:
+            logger.info("RetrievalService: skipping E5 (embedding_provider != ensemble) …")
+            class DummyE5:
+                def embed_query(self, query: str) -> list[float]:
+                    return [0.0] * 1024
+            e5 = DummyE5()  # type: ignore
 
         logger.info(
             "RetrievalService: connecting to retrieval stores (collections=%s) …",
@@ -364,6 +372,7 @@ class RetrievalService:
                 "vector_pool_k": self.settings.vector_pool_k,
                 "keyword_pool_k": self.settings.keyword_pool_k,
                 "active_collections": active_collections,
+                "fusion_mode": getattr(self.settings, "fusion_mode", "rrf"),
             }
             if resolved_major:
                 search_kwargs["resolved_major"] = resolved_major

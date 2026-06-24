@@ -238,6 +238,9 @@ def _build_judge_client(settings: Settings) -> OpenAI:
     elif provider == "openai":
         base_url = "https://api.openai.com/v1"
         api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY", "")
+    elif provider == "deepseek":
+        base_url = "https://api.deepseek.com"
+        api_key = settings.deepseek_api_key or os.environ.get("DEEPSEEK_API_KEY", "")
     else:  # gemini (default) and any unknown provider
         base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
         api_key = settings.google_api_key or os.environ.get("GOOGLE_API_KEY", "")
@@ -308,7 +311,7 @@ def _safe_output_name(path: Path) -> str:
 # ─── Runtime (matches production /chat/v3 config) ───────────────────────────────
 
 
-def build_runtime() -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
+def build_runtime(fusion_mode: str = "rrf") -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
     """Build the production-config pipeline plus the judges used for scoring.
 
     Uses plain ``Settings()`` (same as ``api/main.py``) so retrieval and
@@ -320,9 +323,11 @@ def build_runtime() -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
     # Fresh answers only — do not read cached responses during evaluation.
     settings.use_redis_cache = False
     settings.redis_enabled = False
+    # Ghi đè fusion_mode theo argparse để benchmark
+    settings.fusion_mode = fusion_mode
 
     logger.info("Initializing RAGPipeline (production config, cache off) ...")
-    pipeline = RAGPipeline(settings=settings, llm_cache=None)
+    pipeline = RAGPipeline(settings=settings, mongo_logger=None, llm_cache=None)
 
     # Independent judge instance — production may run with self_eval disabled,
     # but we always score groundedness offline on the produced answer/context.
@@ -689,20 +694,34 @@ def _parse_args() -> argparse.Namespace:
         default=0.0,
         help="Seconds to sleep between questions to respect LLM rate limits.",
     )
+    parser.add_argument(
+        "--fusion-mode",
+        type=str,
+        default="rrf",
+        choices=["rrf", "linear"],
+        help="Retrieval fusion strategy: 'rrf' or 'linear'. Default: rrf",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = _parse_args()
     dataset_paths = resolve_dataset_paths(args.dataset)
-    settings, pipeline, self_evaluator, judge_client = build_runtime()
+    settings, pipeline, self_evaluator, judge_client = build_runtime(fusion_mode=args.fusion_mode)
     judge_model = settings.chat_model
+
+    # Adjust output directory based on fusion mode
+    output_base = args.output_dir
+    if args.fusion_mode == "rrf":
+        output_base = args.output_dir.parent / "result_RRF"
+    elif args.fusion_mode == "linear":
+        output_base = args.output_dir.parent / "result_linear"
 
     logger.info("Found %d dataset file(s).", len(dataset_paths))
     for dataset_path in dataset_paths:
         run_dataset(
             dataset_path=dataset_path,
-            output_dir=args.output_dir / _safe_output_name(dataset_path),
+            output_dir=output_base / _safe_output_name(dataset_path),
             pipeline=pipeline,
             self_evaluator=self_evaluator,
             judge_client=judge_client,

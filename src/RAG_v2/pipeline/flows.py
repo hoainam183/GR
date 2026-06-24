@@ -2779,13 +2779,14 @@ def rag_flow(
             top_k=raw_candidate_k,
             vector_top_k=cfg.get("vector_top_k", 20),
             keyword_top_k=cfg.get("keyword_top_k", 20),
-            vector_pool_k=cfg.get("vector_pool_k", 15),
-            keyword_pool_k=cfg.get("keyword_pool_k", 15),
+            vector_pool_k=cfg.get("vector_pool_k", 30),
+            keyword_pool_k=cfg.get("keyword_pool_k", 30),
             active_collections=local_active_collections,
             resolved_major=effective_resolved_major,
             resolved_cohort=resolved_cohort,
             disable_metadata_filter_collections=local_disable_metadata_filter_collections,
             trace_out=trace_piece,
+            fusion_mode=cfg.get("fusion_mode", "rrf"),
         )
         timings_ms["search"] = round(
             timings_ms.get("search", 0.0) + _elapsed_ms(search_t0),

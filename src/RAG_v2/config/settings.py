@@ -149,6 +149,11 @@ class Settings(BaseSettings):
     raw_candidate_min: int = 20
     vector_weight: float = 0.8
     keyword_weight: float = 0.2
+    
+    # --- Fusion ---
+    fusion_mode: str = "rrf"  # "rrf" | "linear"
+    fusion_rrf_k: int = 10
+    
     context_doc_char_limit: int = 2000
     context_total_char_budget: int = 12000
     context_list_total_char_budget: int = 24000

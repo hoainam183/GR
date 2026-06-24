@@ -128,7 +128,7 @@ class MultiCollectionSearch:
         qdrant_port: int = 6333,
         es_host: str = "localhost",
         es_port: int = 9200,
-        rrf_k: int = 60,
+        rrf_k: int = 10,
         vector_weight: float = 1.0,
         keyword_weight: float = 1.0,
         max_workers: int = 4,
@@ -323,7 +323,8 @@ class MultiCollectionSearch:
         fusion_vector_weight, fusion_keyword_weight, fusion_reason = (
             self._resolve_fusion_weights(query)
         )
-        if exact_policy_mode:
+        mode = (fusion_mode or "linear").strip().lower()
+        if exact_policy_mode and mode != "rrf":
             # Exact policy/code lookups want a strong keyword lean. Apply it even
             # when a course-bias was already chosen: min/max only ever leans MORE
             # toward keyword, so a query that is both course-like and exact-policy
@@ -490,21 +491,23 @@ class MultiCollectionSearch:
         all_keyword.sort(key=lambda x: x["score"], reverse=True)
         keyword_pool = self._dedup_pool(all_keyword, effective_keyword_pool_k)
         pinned_keyword_count = 0
-        if exact_policy_mode:
+        mode = (fusion_mode or "linear").strip().lower()
+        if exact_policy_mode and mode != "rrf":
             keyword_pool, pinned_keyword_count = self._pin_keyword_hits(
                 all_keyword,
                 keyword_pool,
                 effective_keyword_pool_k,
             )
 
-        mode = (fusion_mode or "linear").strip().lower()
         if mode == "rrf":
+            # For pure Reciprocal Rank Fusion, weights should be equal so that rank 
+            # determines the score. We ignore linear fusion weights.
             results = self._score_fusion_rrf(
                 vector_pool,
                 keyword_pool,
                 top_k,
-                vector_weight=fusion_vector_weight,
-                keyword_weight=fusion_keyword_weight,
+                vector_weight=1.0,
+                keyword_weight=1.0,
             )
         elif mode == "linear":
             results = self._score_fusion(
@@ -1041,11 +1044,13 @@ class MultiCollectionSearch:
         # rescale it to stay a ~5% nudge in this mode too.
         _rrf_scale = 1.0 / (self.rrf_k + 1)
         for entry in combined.values():
-            entry["score"] = (
+            raw_rrf_score = (
                 entry["vector_rrf"]
                 + entry["keyword_rrf"]
                 + kehoach_recency_bonus(entry) * _rrf_scale
             )
+            # Normalize back to [0, 1] scale so thresholds in flows.py (like web bypass) continue to work
+            entry["score"] = raw_rrf_score * (self.rrf_k + 1)
 
         ranked = sorted(combined.values(), key=lambda x: x["score"], reverse=True)
 
