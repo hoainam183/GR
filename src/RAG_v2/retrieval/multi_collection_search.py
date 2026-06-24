@@ -310,9 +310,31 @@ class MultiCollectionSearch:
         structured_query = parse_structured_query(query)
         exclude_terms = structured_query.exclude_terms
         query_signals = analyze_query_signals(query)
+        exact_policy_mode = bool(
+            query_signals.exact_policy_lookup or query_signals.table_lookup
+        )
+        effective_keyword_top_k = (
+            max(keyword_top_k, 120) if exact_policy_mode else keyword_top_k
+        )
+        effective_keyword_pool_k = (
+            max(keyword_pool_k, 80) if exact_policy_mode else keyword_pool_k
+        )
+
         fusion_vector_weight, fusion_keyword_weight, fusion_reason = (
             self._resolve_fusion_weights(query)
         )
+        if exact_policy_mode:
+            # Exact policy/code lookups want a strong keyword lean. Apply it even
+            # when a course-bias was already chosen: min/max only ever leans MORE
+            # toward keyword, so a query that is both course-like and exact-policy
+            # is no longer capped at the weaker course bias (vector 0.4/keyword 0.6).
+            fusion_vector_weight = min(fusion_vector_weight, 0.1)
+            fusion_keyword_weight = max(fusion_keyword_weight, 0.75)
+            fusion_reason = (
+                "exact_policy_keyword_bias"
+                if fusion_reason == "default"
+                else f"{fusion_reason}+exact_policy"
+            )
         if fusion_reason != "default":
             logger.info(
                 "Adaptive fusion weights: vector=%.2f keyword=%.2f (%s)",
@@ -396,7 +418,7 @@ class MultiCollectionSearch:
             )
             kws = hybrid.es.keyword_search(
                 query=query,
-                top_k=keyword_top_k,
+                top_k=effective_keyword_top_k,
                 filters=es_filter,
                 collection_name=name,
                 exclude_terms=exclude_terms,
@@ -466,7 +488,14 @@ class MultiCollectionSearch:
         vector_pool = self._dedup_pool(all_vector, vector_pool_k)
 
         all_keyword.sort(key=lambda x: x["score"], reverse=True)
-        keyword_pool = self._dedup_pool(all_keyword, keyword_pool_k)
+        keyword_pool = self._dedup_pool(all_keyword, effective_keyword_pool_k)
+        pinned_keyword_count = 0
+        if exact_policy_mode:
+            keyword_pool, pinned_keyword_count = self._pin_keyword_hits(
+                all_keyword,
+                keyword_pool,
+                effective_keyword_pool_k,
+            )
 
         mode = (fusion_mode or "linear").strip().lower()
         if mode == "rrf":
@@ -488,6 +517,14 @@ class MultiCollectionSearch:
         else:
             raise ValueError("fusion_mode must be 'linear' or 'rrf'")
 
+        if query_signals.procedural_support:
+            results = self._ensure_collection_evidence(
+                results,
+                keyword_pool,
+                top_k,
+                collection="stsv",
+            )
+
         # Populate trace_out if provided
         if trace_out is not None:
             trace_out["filters"] = filter_traces
@@ -503,9 +540,10 @@ class MultiCollectionSearch:
             trace_out["candidate_pool_sizes"] = {
                 "vector": len(vector_pool),
                 "keyword": len(keyword_pool),
-                "keyword_top_k": keyword_top_k,
-                "keyword_pool_k": keyword_pool_k,
+                "keyword_top_k": effective_keyword_top_k,
+                "keyword_pool_k": effective_keyword_pool_k,
             }
+            trace_out["pinned_keyword_hits"] = pinned_keyword_count
             trace_out["excluded_counts"] = {
                 "vector": excluded_vector_count,
                 "keyword": excluded_keyword_count,
