@@ -25,6 +25,8 @@ pyright_report.txt
 *.csv
 !src/RAG_v2/evaluation/results/*.csv
 !src/RAG_v2/evaluation/results/**/*.csv
+!src/RAG_v2/evaluation/result_RRF/*.csv
+!src/RAG_v2/evaluation/result_RRF/**/*.csv
 *.pdf
 outputs/
 training_data/
