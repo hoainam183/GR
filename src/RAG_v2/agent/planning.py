@@ -85,10 +85,17 @@ def resolve_entity_scope(
     2. If it names ≥2 majors → comparison mode: no single major, steps keep
        their own scope (``multi_major=True``).
     3. Otherwise fall back to the user profile (``user_context["major_code"]``),
-       unless the query carries comparison wording.
+       but ONLY when the query carries a personal reference ("ngành của tôi",
+       "tôi đang học…") — never for comparison wording. This mirrors the
+       reflection layer's Rule 11 (``_has_profile_dependent_signal``): a bare
+       question that does not reference the user must not be silently narrowed
+       to the user's own major/cohort. Without this guard a follow-up like
+       "với K63 thì sao" — which reflection deliberately leaves major-free —
+       would have the profile major forced back onto every step.
 
     Cohort is resolved symmetrically against ``user_context["cohort"]``.
     """
+    from query.signals import analyze_query_signals  # noqa: PLC0415
     from retrieval.metadata_filters import (  # noqa: PLC0415
         extract_cohort_codes,
         extract_major_codes,
@@ -101,14 +108,15 @@ def resolve_entity_scope(
 
     folded = (source_query or "").casefold()
     is_comparison = any(keyword in folded for keyword in _COMPARISON_KEYWORDS)
+    has_personal_ref = analyze_query_signals(source_query).personal_reference
     profile = user_context or {}
 
     major = _single_extracted_entity(query_majors)
-    if major is None and not multi_major and not is_comparison:
+    if major is None and not multi_major and not is_comparison and has_personal_ref:
         major = _clean_plan_hint(profile.get("major_code"))
 
     cohort = _single_extracted_entity(query_cohorts)
-    if cohort is None and not multi_cohort and not is_comparison:
+    if cohort is None and not multi_cohort and not is_comparison and has_personal_ref:
         cohort = _clean_plan_hint(profile.get("cohort"))
 
     return ResolvedScope(
