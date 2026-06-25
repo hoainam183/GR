@@ -1,0 +1,126 @@
+{
+  "total_queries": 30,
+  "avg_latency_ms": 14958.6,
+  "overall_metrics": {
+    "hit@3": 0.5667,
+    "precision@3": 0.2111,
+    "recall@3": 0.55,
+    "mrr@3": 0.4722,
+    "ndcg@3": 0.4809,
+    "hit@5": 0.6,
+    "precision@5": 0.1333,
+    "recall@5": 0.5833,
+    "mrr@5": 0.4806,
+    "ndcg@5": 0.4952,
+    "hit@7": 0.6667,
+    "precision@7": 0.1048,
+    "recall@7": 0.65,
+    "mrr@7": 0.4909,
+    "ndcg@7": 0.5182
+  },
+  "relevance_rate": 0.9333,
+  "faithfulness_rate": 0.8333,
+  "completeness_rate": 0.8333,
+  "hallucination_rate": 0.1333,
+  "hallucination_count": 4,
+  "ref_correct_rate": 0.7,
+  "ref_partial_rate": 0.0333,
+  "ref_incorrect_rate": 0.2667,
+  "by_question_type": {
+    "multi_hop": {
+      "count": 8,
+      "metrics": {
+        "hit@3": 0.375,
+        "precision@3": 0.2083,
+        "recall@3": 0.3125,
+        "mrr@3": 0.375,
+        "ndcg@3": 0.3166,
+        "hit@5": 0.375,
+        "precision@5": 0.125,
+        "recall@5": 0.3125,
+        "mrr@5": 0.375,
+        "ndcg@5": 0.3166,
+        "hit@7": 0.375,
+        "precision@7": 0.0893,
+        "recall@7": 0.3125,
+        "mrr@7": 0.375,
+        "ndcg@7": 0.3166
+      },
+      "faithfulness_rate": 0.625,
+      "ref_correct_rate": 0.125,
+      "avg_latency_ms": 16742.4
+    },
+    "simple": {
+      "count": 22,
+      "metrics": {
+        "hit@3": 0.6364,
+        "precision@3": 0.2121,
+        "recall@3": 0.6364,
+        "mrr@3": 0.5076,
+        "ndcg@3": 0.5406,
+        "hit@5": 0.6818,
+        "precision@5": 0.1364,
+        "recall@5": 0.6818,
+        "mrr@5": 0.5189,
+        "ndcg@5": 0.5602,
+        "hit@7": 0.7727,
+        "precision@7": 0.1104,
+        "recall@7": 0.7727,
+        "mrr@7": 0.533,
+        "ndcg@7": 0.5915
+      },
+      "faithfulness_rate": 0.9091,
+      "ref_correct_rate": 0.9091,
+      "avg_latency_ms": 14309.9
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "count": 22,
+      "metrics": {
+        "hit@3": 0.6364,
+        "precision@3": 0.2121,
+        "recall@3": 0.6364,
+        "mrr@3": 0.5076,
+        "ndcg@3": 0.5406,
+        "hit@5": 0.6818,
+        "precision@5": 0.1364,
+        "recall@5": 0.6818,
+        "mrr@5": 0.5189,
+        "ndcg@5": 0.5602,
+        "hit@7": 0.7727,
+        "precision@7": 0.1104,
+        "recall@7": 0.7727,
+        "mrr@7": 0.533,
+        "ndcg@7": 0.5915
+      },
+      "faithfulness_rate": 0.9091,
+      "ref_correct_rate": 0.9091,
+      "avg_latency_ms": 14309.9
+    },
+    "medium": {
+      "count": 8,
+      "metrics": {
+        "hit@3": 0.375,
+        "precision@3": 0.2083,
+        "recall@3": 0.3125,
+        "mrr@3": 0.375,
+        "ndcg@3": 0.3166,
+        "hit@5": 0.375,
+        "precision@5": 0.125,
+        "recall@5": 0.3125,
+        "mrr@5": 0.375,
+        "ndcg@5": 0.3166,
+        "hit@7": 0.375,
+        "precision@7": 0.0893,
+        "recall@7": 0.3125,
+        "mrr@7": 0.375,
+        "ndcg@7": 0.3166
+      },
+      "faithfulness_rate": 0.625,
+      "ref_correct_rate": 0.125,
+      "avg_latency_ms": 16742.4
+    }
+  },
+  "dataset": "06_Quy_dinh_ngoai_ngu_chunks.json"
+}

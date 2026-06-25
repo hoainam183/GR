@@ -691,7 +691,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--inter-question-sleep-s",
         type=float,
-        default=0.0,
+        default=16.0,
         help="Seconds to sleep between questions to respect LLM rate limits.",
     )
     parser.add_argument(
