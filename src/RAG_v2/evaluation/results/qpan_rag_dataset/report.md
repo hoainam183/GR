@@ -1,8 +1,8 @@
 # RAG Evaluation Report (production config)
 
-- **Date**: 2026-06-21 17:34:29
+- **Date**: 2026-06-25 18:31:23
 - **Total queries**: `30`
-- **Avg latency**: `20209.5 ms`
+- **Avg latency**: `20192.5 ms`
 
 ## E2E generation quality
 
@@ -12,9 +12,9 @@
 | Hallucination rate | `3.33%` (1) |
 | Answer relevance | `100.00%` |
 | Completeness | `90.00%` |
-| Correctness vs gold (correct) | `76.67%` |
+| Correctness vs gold (correct) | `80.00%` |
 | Correctness vs gold (partial) | `10.00%` |
-| Correctness vs gold (incorrect) | `13.33%` |
+| Correctness vs gold (incorrect) | `10.00%` |
 
 ## Retrieval metrics (averaged)
 
@@ -41,11 +41,11 @@
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | multi_hop | 8 | `87.5%` | `81.2%` | `75.8%` | `87.5%` | `62.5%` | `24715.5 ms` |
-| simple | 22 | `86.4%` | `86.4%` | `86.4%` | `100.0%` | `81.8%` | `18570.9 ms` |
+| simple | 22 | `86.4%` | `86.4%` | `86.4%` | `100.0%` | `86.4%` | `18547.8 ms` |
 
 ## Breakdown by difficulty
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| easy | 24 | `87.5%` | `87.5%` | `87.5%` | `100.0%` | `83.3%` | `18912.4 ms` |
+| easy | 24 | `87.5%` | `87.5%` | `87.5%` | `100.0%` | `87.5%` | `18891.1 ms` |
 | medium | 6 | `83.3%` | `75.0%` | `67.7%` | `83.3%` | `50.0%` | `25397.8 ms` |

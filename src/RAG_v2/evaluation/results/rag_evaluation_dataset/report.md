@@ -1,8 +1,8 @@
 # RAG Evaluation Report (production config)
 
-- **Date**: 2026-06-21 21:57:25
+- **Date**: 2026-06-25 18:31:51
 - **Total queries**: `100`
-- **Avg latency**: `31210.1 ms`
+- **Avg latency**: `31209.8 ms`
 
 ## E2E generation quality
 
@@ -41,11 +41,11 @@
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | multi_hop | 25 | `48.0%` | `44.0%` | `37.3%` | `100.0%` | `64.0%` | `23075.7 ms` |
-| simple | 75 | `41.3%` | `41.3%` | `36.8%` | `98.7%` | `45.3%` | `33921.6 ms` |
+| simple | 75 | `41.3%` | `41.3%` | `36.8%` | `98.7%` | `45.3%` | `33921.2 ms` |
 
 ## Breakdown by difficulty
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| easy | 75 | `41.3%` | `41.3%` | `36.8%` | `98.7%` | `45.3%` | `33921.6 ms` |
+| easy | 75 | `41.3%` | `41.3%` | `36.8%` | `98.7%` | `45.3%` | `33921.2 ms` |
 | medium | 25 | `48.0%` | `44.0%` | `37.3%` | `100.0%` | `64.0%` | `23075.7 ms` |

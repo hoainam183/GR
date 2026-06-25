@@ -1,6 +1,6 @@
 {
   "total_queries": 30,
-  "avg_latency_ms": 20209.5,
+  "avg_latency_ms": 20192.5,
   "overall_metrics": {
     "hit@3": 0.8333,
     "precision@3": 0.2889,
@@ -23,9 +23,9 @@
   "completeness_rate": 0.9,
   "hallucination_rate": 0.0333,
   "hallucination_count": 1,
-  "ref_correct_rate": 0.7667,
+  "ref_correct_rate": 0.8,
   "ref_partial_rate": 0.1,
-  "ref_incorrect_rate": 0.1333,
+  "ref_incorrect_rate": 0.1,
   "by_question_type": {
     "multi_hop": {
       "count": 8,
@@ -70,8 +70,8 @@
         "ndcg@7": 0.8636
       },
       "faithfulness_rate": 1.0,
-      "ref_correct_rate": 0.8182,
-      "avg_latency_ms": 18570.9
+      "ref_correct_rate": 0.8636,
+      "avg_latency_ms": 18547.8
     }
   },
   "by_difficulty": {
@@ -95,8 +95,8 @@
         "ndcg@7": 0.875
       },
       "faithfulness_rate": 1.0,
-      "ref_correct_rate": 0.8333,
-      "avg_latency_ms": 18912.4
+      "ref_correct_rate": 0.875,
+      "avg_latency_ms": 18891.1
     },
     "medium": {
       "count": 6,

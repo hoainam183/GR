@@ -1,6 +1,6 @@
 {
   "total_queries": 30,
-  "avg_latency_ms": 12959.2,
+  "avg_latency_ms": 12858.6,
   "overall_metrics": {
     "hit@3": 0.6667,
     "precision@3": 0.2333,
@@ -18,14 +18,14 @@
     "mrr@7": 0.6444,
     "ndcg@7": 0.6492
   },
-  "relevance_rate": 0.9333,
-  "faithfulness_rate": 0.9,
-  "completeness_rate": 0.9333,
-  "hallucination_rate": 0.0667,
-  "hallucination_count": 2,
-  "ref_correct_rate": 0.6667,
+  "relevance_rate": 0.9667,
+  "faithfulness_rate": 0.9333,
+  "completeness_rate": 0.9667,
+  "hallucination_rate": 0.0333,
+  "hallucination_count": 1,
+  "ref_correct_rate": 0.7,
   "ref_partial_rate": 0.0333,
-  "ref_incorrect_rate": 0.3,
+  "ref_incorrect_rate": 0.2667,
   "by_question_type": {
     "multi_hop": {
       "count": 8,
@@ -69,9 +69,9 @@
         "mrr@7": 0.6174,
         "ndcg@7": 0.6332
       },
-      "faithfulness_rate": 0.9091,
-      "ref_correct_rate": 0.5909,
-      "avg_latency_ms": 12545.5
+      "faithfulness_rate": 0.9545,
+      "ref_correct_rate": 0.6364,
+      "avg_latency_ms": 12408.4
     }
   },
   "by_difficulty": {
@@ -94,9 +94,9 @@
         "mrr@7": 0.6174,
         "ndcg@7": 0.6332
       },
-      "faithfulness_rate": 0.9091,
-      "ref_correct_rate": 0.5909,
-      "avg_latency_ms": 12545.5
+      "faithfulness_rate": 0.9545,
+      "ref_correct_rate": 0.6364,
+      "avg_latency_ms": 12408.4
     },
     "medium": {
       "count": 8,

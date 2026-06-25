@@ -1,6 +1,6 @@
 {
   "total_queries": 100,
-  "avg_latency_ms": 31210.1,
+  "avg_latency_ms": 31209.8,
   "overall_metrics": {
     "hit@3": 0.4,
     "precision@3": 0.1433,
@@ -71,7 +71,7 @@
       },
       "faithfulness_rate": 0.9867,
       "ref_correct_rate": 0.4533,
-      "avg_latency_ms": 33921.6
+      "avg_latency_ms": 33921.2
     }
   },
   "by_difficulty": {
@@ -96,7 +96,7 @@
       },
       "faithfulness_rate": 0.9867,
       "ref_correct_rate": 0.4533,
-      "avg_latency_ms": 33921.6
+      "avg_latency_ms": 33921.2
     },
     "medium": {
       "count": 25,
