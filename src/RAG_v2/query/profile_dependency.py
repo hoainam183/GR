@@ -29,6 +29,7 @@ from typing import Any, Dict, Mapping, Optional, Set
 
 __all__ = [
     "required_attributes",
+    "references_self",
     "resolve_sources",
     "should_inject_profile_note",
     "effective_major_for_retrieval",
@@ -82,6 +83,70 @@ def _domains(routing_result: Optional[Mapping[str, Any]]) -> Set[str]:
     return {str(d) for d in domains if d}
 
 
+# ── Self-reference signal (folded form) ──────────────────────────────────────
+# True only when the query OWNS the topic to the student via a possessive /
+# subject-of-study construction ("X của tôi", "ngành tôi", "tôi học ..."). A bare
+# politeness pronoun ("cho em hỏi ...") must NOT count, or every student question
+# would re-trigger profile injection (the original leak). See references_self.
+_SELF_REF_RE = re.compile(
+    r"\bcua\s+(?:toi|minh|em)\b"
+    r"|\b(?:nganh|khoa|chuong\s*trinh)\s+(?:toi|minh|em)\b"
+    r"|\b(?:toi|minh|em)\s+(?:hoc|dang\s*hoc|thuoc|la\s*sinh\s*vien)\b"
+)
+
+
+def references_self(question: Optional[str]) -> bool:
+    """True when the question explicitly scopes a topic to the asker.
+
+    Distinguishes a self-referential, program-personal question ("học phí của
+    tôi", "ngành tôi") from a general-policy question that merely contains a
+    topic keyword ("tiếng Anh cơ bản ảnh hưởng thế nào"). Possessive-based so a
+    bare politeness "em" ("cho em hỏi ...") is not a false positive.
+    """
+    return _SELF_REF_RE.search(_fold(question or "")) is not None
+
+
+def _classify(
+    question: str,
+    search_query: Optional[str],
+    routing_result: Optional[Mapping[str, Any]],
+) -> tuple[Set[str], bool]:
+    """Return ``(required_attrs, major_is_structural)``.
+
+    ``major_is_structural`` is True only when the major requirement comes from a
+    curriculum/course topic (the answer is meaningless without a program, so it
+    auto-scopes to the student even with no self-reference). Policy topics
+    (tuition / foreign-language / graduation-regulation) are structural=False:
+    they scope to the student's major only on an explicit self-reference or a
+    target major named in the query.
+
+    Decision order — most specific sub-topic first, then router-domain defaults.
+    """
+    text = _fold(f"{question or ''} {search_query or ''}")
+
+    if _SCHOLARSHIP_RE.search(text):
+        return set(), False
+    if _TUITION_RE.search(text):
+        return {"major"}, False
+    if _FOREIGN_LANG_RE.search(text):
+        return {"major"}, False
+    if _GRADUATION_RE.search(text):
+        return {"major", "cohort"}, False
+    if _COURSE_REGISTRATION_RE.search(text):
+        return set(), False
+    if _COURSE_CURRICULUM_RE.search(text):
+        return {"major"}, True
+    if _TRAINING_REG_RE.search(text):
+        return {"cohort"}, False
+
+    domains = _domains(routing_result)
+    if "ctdt" in domains:
+        return {"major"}, True
+    # kehoach (schedules), stsv (student services) and generic quydinh regulations
+    # are program-independent by default.
+    return set(), False
+
+
 def required_attributes(
     question: str,
     search_query: Optional[str],
@@ -91,41 +156,9 @@ def required_attributes(
 
     Values are a subset of ``{"major", "cohort"}``. Empty set means the answer is
     universal (do not inject a profile note, do not filter by major/cohort).
-
-    Decision order — most specific sub-topic first, then router-domain defaults:
-      * học bổng / trợ cấp                → ``set()`` (universal procedure)
-      * học phí / mức học phí             → ``{"major"}`` (tuition varies by program)
-      * ngoại ngữ / TOEIC / JLPT          → ``{"major"}``
-      * tốt nghiệp / ra trường            → ``{"major", "cohort"}``
-      * môn / học phần / chương trình ĐT  → ``{"major"}``
-      * quy chế đào tạo                   → ``{"cohort"}``
-      * domain ``ctdt`` (curriculum)      → ``{"major"}``
-      * domain ``kehoach`` / ``stsv``     → ``set()``
-      * otherwise (e.g. generic quydinh)  → ``set()``
+    Thin wrapper over :func:`_classify` (kept for the public/topic-only callers).
     """
-    text = _fold(f"{question or ''} {search_query or ''}")
-
-    if _SCHOLARSHIP_RE.search(text):
-        return set()
-    if _TUITION_RE.search(text):
-        return {"major"}
-    if _FOREIGN_LANG_RE.search(text):
-        return {"major"}
-    if _GRADUATION_RE.search(text):
-        return {"major", "cohort"}
-    if _COURSE_REGISTRATION_RE.search(text):
-        return set()
-    if _COURSE_CURRICULUM_RE.search(text):
-        return {"major"}
-    if _TRAINING_REG_RE.search(text):
-        return {"cohort"}
-
-    domains = _domains(routing_result)
-    if "ctdt" in domains:
-        return {"major"}
-    # kehoach (schedules), stsv (student services) and generic quydinh regulations
-    # are program-independent by default.
-    return set()
+    return _classify(question, search_query, routing_result)[0]
 
 
 def resolve_sources(
@@ -134,6 +167,8 @@ def resolve_sources(
     user_major: Optional[str] = None,
     target_major: Optional[str] = None,
     cohort: Optional[str] = None,
+    user_referenced: bool = False,
+    major_structural: bool = False,
 ) -> Dict[str, str]:
     """Map each required attribute to its SOURCE: ``target`` / ``user_profile`` / ``ask``.
 
@@ -141,13 +176,19 @@ def resolve_sources(
                          answer about that target, do not inject the user's profile.
     * ``user_profile`` — value comes from the authenticated profile; inject + filter.
     * ``ask``          — value is required but unknown; the model should ask.
+
+    For ``major``, the authenticated profile is used only when the requirement is
+    ``major_structural`` (curriculum — auto-scope) OR the query is
+    ``user_referenced`` (self-referential, e.g. "của tôi"). A program-personal
+    policy topic asked impersonally ("tiếng Anh cơ bản ảnh hưởng thế nào") stays
+    ``ask`` so it is answered universally, not silently scoped to one major.
     """
     sources: Dict[str, str] = {}
     for attr in required:
         if attr == "major":
             if target_major:
                 sources["major"] = "target"
-            elif user_major:
+            elif user_major and (major_structural or user_referenced):
                 sources["major"] = "user_profile"
             else:
                 sources["major"] = "ask"
@@ -172,11 +213,16 @@ def should_inject_profile_note(
     This is the single gate shared by generation (whether to prepend the profile
     note) — replacing the brittle pronoun regexes that disagreed across layers.
     """
-    required = required_attributes(question, search_query, routing_result)
+    required, major_structural = _classify(question, search_query, routing_result)
     if not required:
         return False
     sources = resolve_sources(
-        required, user_major=user_major, target_major=target_major, cohort=cohort
+        required,
+        user_major=user_major,
+        target_major=target_major,
+        cohort=cohort,
+        user_referenced=references_self(question),
+        major_structural=major_structural,
     )
     return any(src == "user_profile" for src in sources.values())
 
@@ -186,15 +232,30 @@ def effective_major_for_retrieval(
     search_query: Optional[str],
     routing_result: Optional[Mapping[str, Any]],
     resolved_major: Optional[str],
+    *,
+    target_major: Optional[str] = None,
+    user_major: Optional[str] = None,
 ) -> Optional[str]:
     """Return the major to pass to retrieval, or ``None`` to skip major filtering.
 
-    Drops the major filter when the topic does not depend on the major (e.g.
-    scholarships) so universal answers are not narrowed to one program. When the
-    major IS required, ``resolved_major`` already holds the right value (the query
-    target if one was named, otherwise the authenticated profile major).
+    Mirrors the generation gate so the two layers always agree: the filter is
+    applied only when the major's SOURCE is ``target`` or ``user_profile``.
+    Universal topics (scholarships) and program-personal POLICY topics asked
+    impersonally ("tiếng Anh cơ bản ảnh hưởng thế nào") drop the filter, so the
+    answer is not silently narrowed to one program. When ``target_major`` /
+    ``user_major`` are not supplied, falls back to ``resolved_major`` as the
+    user-profile candidate (legacy positional callers / topic-only tests).
     """
     if not resolved_major:
         return None
-    required = required_attributes(question, search_query, routing_result)
-    return resolved_major if "major" in required else None
+    required, major_structural = _classify(question, search_query, routing_result)
+    if "major" not in required:
+        return None
+    sources = resolve_sources(
+        required,
+        user_major=user_major or resolved_major,
+        target_major=target_major,
+        user_referenced=references_self(question),
+        major_structural=major_structural,
+    )
+    return resolved_major if sources.get("major") in {"target", "user_profile"} else None

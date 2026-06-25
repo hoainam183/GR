@@ -2183,27 +2183,23 @@ def _should_prepend_profile_note(question: str) -> bool:
 
 
 def _build_resolved_profile_note(
-    resolved_major: Optional[str],
+    major_for_note: Optional[str],
     resolved_cohort: Optional[str],
-    user_context: Optional[Dict[str, Any]],
 ) -> str:
-    """Build the generation profile note from facts resolved during reflection.
+    """Build the generation profile note from facts the caller already gated.
 
-    Prefers the authenticated ``user_context`` (precise display name + code). When
-    that is absent (anonymous request) it falls back to the major/cohort that
-    reflection already resolved, so the LLM still learns the program it must
-    answer for. This is what stops the model from re-asking "which program?" after
-    reflection has already injected the major into the retrieval query.
+    Caller (:func:`_profile_note_for_generation`) decides WHETHER the major may be
+    surfaced (target named, curriculum auto-scope, or a self-referential question)
+    and passes ``major_for_note=None`` otherwise. This deliberately does NOT read
+    ``user_context`` directly: the old "blind dump" of the authenticated profile
+    (name / student-id / major) leaked the asker's program into answers to general
+    questions that merely mentioned a profile-dependent topic.
     """
-    note = _build_profile_note_from_user_context(user_context)
-    if note:
-        return note
-
     parts: List[str] = []
-    if resolved_major:
-        major_text = MAJOR_CODE_TO_NAME.get(resolved_major, resolved_major)
-        if major_text and major_text != resolved_major:
-            major_text = f"{major_text} [{resolved_major}]"
+    if major_for_note:
+        major_text = MAJOR_CODE_TO_NAME.get(major_for_note, major_for_note)
+        if major_text and major_text != major_for_note:
+            major_text = f"{major_text} [{major_for_note}]"
         parts.append(f"NgÃ nh: {major_text}")
     if resolved_cohort:
         parts.append(f"KhoÃ¡: {resolved_cohort}")
@@ -2235,26 +2231,44 @@ def _profile_note_for_generation(
     generation note now share one gate, so a major reflection already resolved is
     never silently dropped â€” the model stops re-asking the program.
     """
-    from query.profile_dependency import (
-        should_inject_profile_note,
-    )  # noqa: PLC0415
+    from query.profile_dependency import (  # noqa: PLC0415
+        _classify,
+        references_self,
+        resolve_sources,
+    )
 
     user_major = resolved_user_major or (
         (user_context or {}).get("major_code")
         or (user_context or {}).get("major")
     )
-    inject = should_inject_profile_note(
-        question,
-        search_query,
-        routing_result,
+    required, major_structural = _classify(question, search_query, routing_result)
+    sources = resolve_sources(
+        required,
         user_major=user_major,
         target_major=resolved_target_major,
         cohort=resolved_cohort,
-    ) or _should_prepend_profile_note(question)
-    if not inject:
-        return ""
+        user_referenced=references_self(question),
+        major_structural=major_structural,
+    )
+    include_major = sources.get("major") in {"target", "user_profile"}
+
+    # Floor: a self-referential identity question ("ngành của tôi là gì") may not
+    # match any topic in required_attributes, but must still surface the program.
+    identity = _should_prepend_profile_note(question)
+    if identity and user_major:
+        include_major = True
+
+    # Cohort accompanies the note only when the note is relevant (the major is
+    # shown, the topic is cohort-scoped, or it is an identity question) — never on
+    # a purely universal topic (e.g. học bổng), which keeps an empty note empty.
+    include_cohort = bool(resolved_cohort) and (
+        include_major or "cohort" in required or identity
+    )
+
+    major_for_note = resolved_major if include_major else None
+    cohort_for_note = resolved_cohort if include_cohort else None
     return _build_resolved_profile_note(
-        resolved_major, resolved_cohort, user_context
+        major_for_note, cohort_for_note
     ) or _extract_session_profile(history)
 
 
@@ -2616,7 +2630,12 @@ def rag_flow(
     )  # noqa: PLC0415
 
     retrieval_major = effective_major_for_retrieval(
-        question, search_query, routing_result, resolved_major
+        question,
+        search_query,
+        routing_result,
+        resolved_major,
+        target_major=resolved_target_major,
+        user_major=resolved_user_major,
     )
 
     # 2. Collection-aware routing (Phase 8 â€” Tier 2 multi-domain)
@@ -3753,7 +3772,12 @@ def rag_flow_stream(
     )  # noqa: PLC0415
 
     retrieval_major = effective_major_for_retrieval(
-        question, search_query, routing_result, resolved_major
+        question,
+        search_query,
+        routing_result,
+        resolved_major,
+        target_major=resolved_target_major,
+        user_major=resolved_user_major,
     )
 
     # Collection-aware routing (Phase 8 â€” Tier 2 multi-domain)
