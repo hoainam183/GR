@@ -71,16 +71,18 @@ def coerce_record(row: dict) -> dict:
     return new_row
 
 
-def process_directory(base_dir: Path, fusion_mode: str, data_dir: Path):
+def process_directory(base_dir: Path, fusion_mode: str, data_dir: Path, pipeline, self_evaluator, judge_client, judge_model):
     if not base_dir.exists():
         logger.warning(f"Directory {base_dir} does not exist.")
         return
 
     logger.info(f"=== Processing directory: {base_dir} with fusion_mode={fusion_mode} ===")
     
-    # Build runtime once per fusion mode
-    settings, pipeline, self_evaluator, judge_client = build_runtime(fusion_mode=fusion_mode, vector_model="dual")
-    judge_model = settings.chat_model
+    # Update fusion mode dynamically
+    if hasattr(pipeline, "_retrieval_service") and hasattr(pipeline._retrieval_service, "settings"):
+        pipeline._retrieval_service.settings.fusion_mode = fusion_mode
+    else:
+        logger.warning("Could not set fusion_mode dynamically. Pipeline might not support it.")
 
     for sub_dir in sorted(base_dir.iterdir()):
         if not sub_dir.is_dir():
@@ -138,11 +140,19 @@ if __name__ == "__main__":
     base = PROJECT_ROOT
     data_dir = base / "evaluation" / "data"
 
-    # process_directory(base / "evaluation" / "result_RRF", "rrf", data_dir)
-    # process_directory(base / "evaluation" / "results", "linear", data_dir)
+    logger.info("Initializing global pipeline...")
+    import inspect
+    sig = inspect.signature(build_runtime)
+    kwargs = {}
+    if "fusion_mode" in sig.parameters:
+        kwargs["fusion_mode"] = "rrf"
+    if "vector_model" in sig.parameters:
+        kwargs["vector_model"] = "dual"
+    settings, pipeline, self_evaluator, judge_client = build_runtime(**kwargs)
+    judge_model = settings.chat_model
     
     logger.info("Processing result_RRF...")
-    process_directory(base / "evaluation" / "result_RRF", "rrf", data_dir)
+    process_directory(base / "evaluation" / "result_RRF", "rrf", data_dir, pipeline, self_evaluator, judge_client, judge_model)
     
     logger.info("Processing results...")
-    process_directory(base / "evaluation" / "results", "linear", data_dir)
+    process_directory(base / "evaluation" / "results", "linear", data_dir, pipeline, self_evaluator, judge_client, judge_model)
