@@ -1,0 +1,80 @@
+{
+  "total_queries": 2,
+  "avg_latency_ms": 6191.0,
+  "overall_metrics": {
+    "hit@3": 0.0,
+    "precision@3": 0.0,
+    "recall@3": 0.0,
+    "mrr@3": 0.0,
+    "ndcg@3": 0.0,
+    "hit@5": 0.0,
+    "precision@5": 0.0,
+    "recall@5": 0.0,
+    "mrr@5": 0.0,
+    "ndcg@5": 0.0,
+    "hit@7": 0.0,
+    "precision@7": 0.0,
+    "recall@7": 0.0,
+    "mrr@7": 0.0,
+    "ndcg@7": 0.0
+  },
+  "relevance_rate": 1.0,
+  "faithfulness_rate": 1.0,
+  "completeness_rate": 1.0,
+  "hallucination_rate": 0.0,
+  "hallucination_count": 0,
+  "ref_correct_rate": 1.0,
+  "ref_partial_rate": 0.0,
+  "ref_incorrect_rate": 0.0,
+  "by_question_type": {
+    "simple": {
+      "count": 2,
+      "metrics": {
+        "hit@3": 0.0,
+        "precision@3": 0.0,
+        "recall@3": 0.0,
+        "mrr@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 0.0,
+        "precision@5": 0.0,
+        "recall@5": 0.0,
+        "mrr@5": 0.0,
+        "ndcg@5": 0.0,
+        "hit@7": 0.0,
+        "precision@7": 0.0,
+        "recall@7": 0.0,
+        "mrr@7": 0.0,
+        "ndcg@7": 0.0
+      },
+      "faithfulness_rate": 1.0,
+      "ref_correct_rate": 1.0,
+      "avg_latency_ms": 6191.0
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "count": 2,
+      "metrics": {
+        "hit@3": 0.0,
+        "precision@3": 0.0,
+        "recall@3": 0.0,
+        "mrr@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 0.0,
+        "precision@5": 0.0,
+        "recall@5": 0.0,
+        "mrr@5": 0.0,
+        "ndcg@5": 0.0,
+        "hit@7": 0.0,
+        "precision@7": 0.0,
+        "recall@7": 0.0,
+        "mrr@7": 0.0,
+        "ndcg@7": 0.0
+      },
+      "faithfulness_rate": 1.0,
+      "ref_correct_rate": 1.0,
+      "avg_latency_ms": 6191.0
+    }
+  },
+  "dataset": "hbkkht_rag_dataset.json"
+}

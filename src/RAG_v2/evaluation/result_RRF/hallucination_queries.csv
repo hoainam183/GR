@@ -1,0 +1,263 @@
+﻿id,question,question_type,difficulty,gold_answer,relevant_chunk_ids,generated_answer,retrieved_chunk_ids,mode,intent,num_sources,latency_ms,self_eval_pass,self_eval_relevance,self_eval_faithfulness,self_eval_completeness,self_eval_reason,ref_match,ref_match_reason,hit@3,precision@3,recall@3,mrr@3,ndcg@3,hit@5,precision@5,recall@5,mrr@5,ndcg@5,hit@7,precision@7,recall@7,mrr@7,ndcg@7,dataset
+chunks_001_simple_017,Bảng quy đổi chứng chỉ áp dụng cho ai?,simple,easy,Toàn bộ sinh viên các khóa.,4825815f-a9cb-477c-846e-52bd2209a149,"Bảng quy đổi tương đương các chứng chỉ tiếng Anh được áp dụng cho sinh viên các khóa của Đại học Bách khoa Hà Nội, cụ thể như sau:
+
+*   **Đối với sinh viên khóa K65, K66, K67:** Bảng quy đổi áp dụng để xét đạt chuẩn ngoại ngữ và xét tốt nghiệp theo các điều kiện quy định tại Phụ lục 2.
+*   **Đối với sinh viên khóa K68, K69:** Bảng quy đổi áp dụng theo các mức từ Bậc 1.1 đến Bậc 4 (NLNNVN).
+*   **Đối với sinh viên khóa K70:** Bảng quy đổi áp dụng theo Bảng 2.1 (kèm theo Quyết định số 10728/QĐ-DHBK ngày 26/9/2025). Kết quả bài kiểm tra TOEIC Placement trong bảng này chỉ dùng để phân loại trình độ xếp lớp và xét miễn học các học phần ngoại ngữ cơ bản, không dùng để xét chuẩn đầu ra.
+
+**Lưu ý chung về điều kiện xét quy đổi:**
+*   Chứng chỉ phải được cấp trong vòng 2 năm tính đến thời điểm xét.
+*   Đối với khóa K70, các chứng chỉ được quy đổi tương đương chỉ khi dạng thức thi đánh giá đầy đủ 4 kỹ năng (nghe, nói, đọc, viết).
+*   Đối với khóa K65, K66, K67: Sinh viên có chứng chỉ 4 kỹ năng (APTIS, TOEFL, IELTS, Cambridge) được quy đổi tương đương với nhau và sang TOEIC (2 kỹ năng) để xét tốt nghiệp. Sinh viên có TOEIC (2 kỹ năng) được quy đổi sang các chứng chỉ 4 kỹ năng để xét đạt chuẩn ngoại ngữ theo số tín chỉ tích lũy (không dùng để xét tốt nghiệp).","d9c14b9d-4f8a-45c2-9ce4-ae44b76ae04f,60d576b6-e055-478d-9181-979c6d4ca7b3,b8ad40ee-b625-41f7-85fa-8d901041cb62,fc75abf4-e612-423c-a09d-b27bd1934c6f,93f2b653-77fc-4856-8c6a-0f6fdf646df6,4381b1f7-7822-4280-a6bd-5a3f12fba388,d5869471-6ffd-451b-9231-98a8b8db5bba",rag_v2,rag,7,10812.78,False,good,hallucinated,complete,"Trợ lý đã đưa ra các thông tin về thời hạn chứng chỉ (2 năm), quy định về 4 kỹ năng cho K70, và mục đích sử dụng của bài TOEIC Placement cho K70 mà không có trong ngữ cảnh được cung cấp. Đây là các thông tin bịa đặt (hallucinated) dựa trên ngữ cảnh hiện có.",correct,"Câu trả lời được tạo ra đã bao quát đầy đủ đối tượng là sinh viên các khóa (từ K65 đến K70) của trường, đồng thời cung cấp thông tin chi tiết và chính xác hơn so với câu trả lời tham chiếu.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,06_Quy_dinh_ngoai_ngu_chunks
+chunks_001_multihop_003,Chứng chỉ xét miễn và xét chuẩn đầu ra cần đáp ứng yêu cầu nào?,multi_hop,medium,Tổng hợp từ nhiều quy định liên quan.,"2180d883-8170-47b1-90dd-93486eb258d4,9ac21eae-68a5-4a5e-9f98-5bc5d65798c8","Dựa trên các tài liệu được cung cấp, yêu cầu đối với chứng chỉ tiếng Anh để xét miễn học và xét chuẩn đầu ra như sau:
+
+**1. Yêu cầu chung đối với chứng chỉ:**
+*   **Kỹ năng:** Phải đánh giá đầy đủ 4 kỹ năng: nghe, nói, đọc, viết.
+*   **Thời hạn:** Chứng chỉ phải được cấp trong vòng 2 năm tính đến thời điểm xét.
+*   **Hình thức:** Không công nhận chứng chỉ TOEFL iBT theo hình thức Home Edition.
+*   **Quy đổi:** Đối với chứng chỉ TOEIC 4 kỹ năng, việc quy đổi tương đương được thực hiện dựa theo kỹ năng đạt điểm thấp nhất.
+
+**2. Đối với xét miễn học các học phần ngoại ngữ cơ bản:**
+*   Kết quả bài kiểm tra TOEIC Placement do Đại học Bách khoa Hà Nội phối hợp tổ chức chỉ được sử dụng để phân loại trình độ, xếp lớp và xét miễn học các học phần thuộc khối ngoại ngữ cơ bản; không được sử dụng để xét đạt chuẩn ngoại ngữ đầu ra.
+
+**3. Đối với xét chuẩn ngoại ngữ đầu ra:**
+*   Sinh viên thuộc các chương trình đào tạo chuẩn và chương trình Elitech (tiên tiến, tài năng, hợp tác quốc tế) có ngoại ngữ yêu cầu là tiếng Anh cần có chứng chỉ tiếng Anh quốc tế 4 kỹ năng hoặc chứng chỉ VSTEP tương đương.
+*   Chứng chỉ phải còn hiệu lực tại thời điểm xét.
+*   Chuẩn đầu ra đối với CTĐT chuẩn (trừ các CTĐT nhóm ngành ngôn ngữ) là đạt trình độ tối thiểu Bậc 3 (theo Bảng 2.1 của Phụ lục II).
+*   Đối với CTĐT tài năng, chuẩn đầu ra được quy định bằng văn bản riêng, phù hợp với chuẩn đầu ra CTĐT tài năng trình độ tương ứng do Bộ Giáo dục và Đào tạo ban hành.","880b1a8b-047e-4b22-bebf-5d3232d90283,930e63ee-8533-412a-95ed-967bac30208c,c1a7b1f0-4e0d-454f-bf64-873bde6da1ee,d5869471-6ffd-451b-9231-98a8b8db5bba,b92d6aa5-ecb5-4497-a262-65f4104f1442,b73dd4e6-4708-4783-9e17-b5fa5ba98fdb,80f0489c-4157-402b-9dfe-2cc134b9f1a0",rag_v2,rag,7,9981.02,False,good,hallucinated,partial,"Câu trả lời chứa nhiều thông tin không có trong ngữ cảnh được cung cấp (như: không công nhận TOEFL iBT Home Edition, quy tắc quy đổi TOEIC 4 kỹ năng, phân biệt chứng chỉ cho chương trình Elitech, thông tin về bài kiểm tra TOEIC Placement). Các thông tin này là bịa đặt so với ngữ cảnh.",correct,"The generated answer provides a comprehensive and accurate summary of the requirements for English proficiency certificates based on standard university regulations, whereas the reference answer was merely a placeholder.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,06_Quy_dinh_ngoai_ngu_chunks
+chunks_001_multihop_005,Khóa 69 được áp dụng bảng quy đổi mới ra sao?,multi_hop,medium,Tổng hợp từ nhiều quy định liên quan.,"2180d883-8170-47b1-90dd-93486eb258d4,9ac21eae-68a5-4a5e-9f98-5bc5d65798c8","Đối với sinh viên khóa K69, việc áp dụng các quy định về ngoại ngữ được thực hiện như sau:
+
+*   **Bảng quy đổi chứng chỉ:** Bạn có thể tham khảo bảng quy đổi tương đương các chứng chỉ tiếng Anh (từ Bậc 1.1 đến Bậc 4) được cung cấp trong tài liệu, trong đó Bậc 4 (tương đương B2/Level 3) yêu cầu mức điểm tối thiểu như: TOEIC 2 kỹ năng ≥785, IELTS Academic ≥5.5, VSTEP ≥6.0, TOEFL iBT ≥46, v.v.
+*   **Quy định cụ thể:** Các quy định ngoại ngữ áp dụng cho khóa K69 (cùng với K70) được cập nhật trên trang thông tin của Phòng Đào tạo, bạn có thể xem chi tiết [tại đây](https://ctt.hust.edu.vn/DisplayWeb/DisplayBaiViet?baiviet=44574) hoặc xem [Infographic tại đây](https://drive.google.com/file/d/1O7_Pm6wbDbHVzvoz1_YaG64GhYG4Qftq/view?usp=sharing).","d9c14b9d-4f8a-45c2-9ce4-ae44b76ae04f,2bec3c2d-f6ae-438a-9073-0f73ac26c3d7,25c75fd3-e368-4287-8d35-97489d8b95a4,4381b1f7-7822-4280-a6bd-5a3f12fba388,93f2b653-77fc-4856-8c6a-0f6fdf646df6,e39cd621-0ca2-4096-8aee-6148211fdb26,ad526e92-c43c-47a6-ae20-aa357cda5dc5",rag_v2,rag,7,31965.18,False,good,hallucinated,partial,"Trợ lý đã bịa đặt thông tin khi khẳng định quy định ngoại ngữ áp dụng cho khóa K69 là đường link dẫn đến quy định của khóa K70 (baiviet=44574). Ngữ cảnh chỉ cung cấp bảng quy đổi chứng chỉ cho K68/K69, không xác nhận K69 áp dụng chung quy định với K70.",incorrect,"The reference answer is extremely vague and provides no actual information, while the generated answer provides specific, detailed, and verifiable information regarding the conversion table for K69 students.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,06_Quy_dinh_ngoai_ngu_chunks
+1__QD_Hoc_bong_KKHT_2023_simple_018,Kết quả xét học bổng KKHT tại Bách khoa Hà Nội được công bố chậm nhất vào tuần học thứ mấy và ở đâu?,simple,easy,"Công bố chậm nhất vào tuần học thứ 10 của học kỳ cấp học bổng, trên cổng thông tin sinh viên ctt.hust.edu.vn.",33e5f90d-f621-4fdd-9f9d-46e19b781547,"Dựa trên các tài liệu được cung cấp, thông tin về kết quả xét học bổng như sau:
+
+*   **Thời gian công bố:** Kết quả xét học bổng dự kiến được công bố vào tuần thứ 10 của học kỳ 2025.2.
+*   **Địa điểm/Cách thức xem:** Sinh viên có thể xem kết quả đánh giá điều kiện xét học bổng KKHT kỳ 2025.2 theo hướng dẫn [tại đây](https://bit.ly/3IR1XuL). Đối với kết quả xét cấp học bổng KKHT kỳ II năm học 2025-2026, sinh viên thực hiện gửi thắc mắc [tại đây](https://forms.cloud.microsoft/r/dpYdEkfVHA).","8bb406fc-5dd3-47ae-9220-c5f46d63e205,f30723ed-b476-4c8c-b62d-378188e76137,3d17ef49-f15b-4846-b700-7b48a37dcd56",rag_v2,rag,3,14748.06,False,good,hallucinated,incomplete,"Ngữ cảnh cung cấp không chứa thông tin quy định chung về thời gian công bố kết quả học bổng KKHT (chỉ có thông tin về học bổng Trần Đại Nghĩa). Trợ lý đã nhầm lẫn thông tin của học bổng Trần Đại Nghĩa áp dụng cho học bổng KKHT, dẫn đến thông tin bị sai lệch.",partial,The generated answer provides specific semester information (2025.2) instead of the general rule (week 10 of the scholarship semester) and fails to mention the official student portal (ctt.hust.edu.vn) as the primary location for results.,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,hbkkht_rag_dataset
+kehoach_list_all_chunks_simple_004,Sinh viên tiếp nhận trở lại học từ kỳ hè 20253 có cần đăng ký học phần không?,simple,easy,"Không, sinh viên chỉ đăng ký lớp học trong đợt đăng ký điều chỉnh online trên hệ thống, không cần đăng ký học phần.",1c439f64-e234-44b2-9d7c-b416ba23fd81,"Chào bạn, về việc đăng ký học phần khi tiếp nhận trở lại học vào học kỳ hè 20253, bạn cần lưu ý các thông tin sau:
+
+1. **Thủ tục tiếp nhận:** Theo quy định, sinh viên phải nộp đơn đề nghị tiếp nhận trở lại học chậm nhất 01 tuần trước khi bắt đầu học kỳ mới.
+2. **Đăng ký học phần:** 
+   - Theo kế hoạch mở đăng ký lớp học kỳ hè 20253, sinh viên thực hiện đăng ký trực tuyến tại hệ thống [https://qldt.hust.edu.vn/students](https://qldt.hust.edu.vn/students).
+   - Đối với học kỳ hè, việc đăng ký được chia thành hai giai đoạn:
+     - **Đăng ký chính thức:** Dành cho sinh viên đã đăng ký học phần từ trước (vào tuần 3-4 của học kỳ trước).
+     - **Đăng ký điều chỉnh:** Dành cho tất cả sinh viên (bao gồm cả những sinh viên chưa đăng ký học phần trước đó).
+
+Vì bạn là sinh viên tiếp nhận trở lại, bạn nên chủ động thực hiện thủ tục tiếp nhận đúng hạn và theo dõi thời gian **Đăng ký điều chỉnh** trên hệ thống để đăng ký các lớp học phần phù hợp với kế hoạch học tập của mình.
+
+Nếu cần xác nhận chính thức về tình trạng hồ sơ hoặc hướng dẫn cụ thể cho trường hợp cá nhân, bạn vui lòng liên hệ trực tiếp với Phòng Đào tạo để được hỗ trợ kịp thời.","ac1040e2-c51c-46e7-aa4d-6f4d1b3b9686,fa62e3fc-27eb-4963-a0fb-24cc0e71bf19,08c2114a-34e6-4841-8be4-647da824797c,f6c910d1-35fa-4bb1-a6f8-0b654de03a50,33278482-6061-46c5-9591-80f6a3276efc,a227072b-b06a-4354-9e0e-afa8d84de998,ee4cb4f0-dd8d-4992-ab6c-2f862607f3a4,febdd53d-8753-4933-b2ec-dbdf8e4ae2a9,88e7d3dc-faed-4f2d-8da8-242f74d17763,52eaa031-8ee5-40ad-888d-1e2f800b51e5,7eb93900-883a-4e4f-9a10-4f4053e3d6e5,9390fe56-1d81-4068-99a4-fd86e0fccbfc,66bb3caa-bbb5-44c2-bf76-7077d8a48922,38277700-7201-46d1-8e61-992b5ed55991",agent,complex,14,20148.79,False,good,hallucinated,complete,Trợ lý đã đưa ra thông tin về 'thủ tục tiếp nhận' (nộp đơn trước 01 tuần) mà hoàn toàn không có trong ngữ cảnh được cung cấp. Đây là hành vi bịa đặt thông tin.,correct,"The generated answer correctly conveys that the student does not need to perform the initial course registration but should participate in the adjustment registration phase, which aligns with the reference answer.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,kehoach_rag_dataset
+01_3_HD_hoc_chuyen_tiep_ky_su_180_TC_Final_simple_004,Các học phần đã học tích lũy trước chương trình Kỹ sư chuyên sâu có được tính vào chương trình đào tạo ngay không?,simple,easy,"Không, các học phần tích lũy trước sẽ không được tính vào chương trình đào tạo cho tới khi sinh viên được công nhận tốt nghiệp bậc cử nhân và đồng thời đã đăng ký học tiếp chương trình Kỹ sư chuyên sâu.",1fec193d-7ca1-4258-b67b-7b721bc94853,"Dựa trên các tài liệu cung cấp, việc công nhận các học phần đã tích lũy trước đó vào chương trình đào tạo (đối với chương trình tích hợp) được quy định như sau:
+
+*   **Ngành Hóa học (CH2):** Sinh viên theo học chương trình đào tạo tích hợp sẽ được công nhận 12 tín chỉ kiến thức ngành rộng, bao gồm 6 tín chỉ là đồ án nghiên cứu bậc cử nhân và 6 tín chỉ trong danh mục D1.
+*   **Ngành Kỹ thuật điện (EE1):** 
+    *   Sinh viên theo học chương trình tích hợp được công nhận 12 tín chỉ kiến thức ngành rộng, bao gồm 8 tín chỉ đồ án nghiên cứu bậc cử nhân và 4 tín chỉ trong khối mô đun tự chọn theo định hướng.
+    *   Đối với sinh viên không theo học chương trình tích hợp, mức công nhận tối đa là 6 tín chỉ và cần thực hiện đồ án nghiên cứu đề xuất với thời lượng 6 tín chỉ.
+
+Đối với các ngành khác như Kỹ thuật Cơ điện tử (ME1) hay An toàn không gian số (IT-E15), tài liệu hiện có không đề cập cụ thể về quy định công nhận học phần tích lũy trước đó vào chương trình đào tạo. Nếu bạn đang theo học một trong các ngành này hoặc ngành khác, vui lòng cho biết để tôi có thể hỗ trợ kiểm tra lại thông tin.","b98b1fea-6b84-4784-b6c8-8d77bf8fd929,fef395c3-b560-4e04-b2b3-1b06f6167fb5,2584499d-ba8c-40cf-9a10-873ad3cf8e13,8bb7a80f-9624-4112-a2f2-be81ebca1db8,838508a8-50fd-4dec-8425-1c0b003834e7,e02dfa73-d8c5-4e0e-9189-0edc6fe4c378,1c71f965-a30a-4054-8676-7851eb052284",rag_v2,rag,7,16313.9,False,good,hallucinated,partial,Trợ lý đã bịa đặt thông tin về ngành Kỹ thuật điện (EE1) và các quy định công nhận tín chỉ cho ngành này vì thông tin đó hoàn toàn không có trong ngữ cảnh được cung cấp. Ngữ cảnh chỉ đề cập đến ngành Hóa học (CH2) và không có thông tin về 'chương trình Kỹ sư chuyên sâu' như câu hỏi của người dùng.,incorrect,The generated answer provides specific credit recognition details for certain majors instead of addressing the general policy regarding the timing and conditions for credit recognition as stated in the reference answer.,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,kscs_rag_dataset
+chunks_001_simple_007,CNTT Việt-Nhật yêu cầu chuẩn tiếng Nhật nào?,simple,easy,JLPT N3,50de962d-960e-4575-a247-432f0806cc82,"Đối với chương trình Công nghệ thông tin Việt-Nhật, yêu cầu về chuẩn tiếng Nhật được quy định như sau:
+
+*   **Chuẩn đầu ra khi xét tốt nghiệp:** Yêu cầu đạt chứng chỉ tiếng Nhật từ N3 hoặc đạt toàn bộ các học phần tiếng Nhật trong chương trình đào tạo (gồm JP1110, JP1120, JP1132, JP2111).
+*   **Yêu cầu tích lũy tín chỉ:**
+    *   Từ 32 tín chỉ: Yêu cầu đạt các học phần tiếng Nhật ở Mức 1 & Mức 2 (JP1110, JP1120).
+    *   Từ 64 tín chỉ: Yêu cầu đạt chứng chỉ tiếng Nhật N3 hoặc hoàn thành các học phần tiếng Nhật từ Mức 1 đến Mức 4 (JP1110, JP1120, JP1132, JP2111).
+*   **Điều kiện xét nhận đồ án/khóa luận tốt nghiệp:** Yêu cầu đạt chứng chỉ tiếng Nhật N3 hoặc hoàn thành các học phần tiếng Nhật từ Mức 1 đến Mức 4.
+
+*Lưu ý:* Đối với sinh viên từ khóa K65 trở đi, chương trình còn yêu cầu hoàn thành thêm các học phần tiếng Nhật định hướng kỹ thuật (từ JP2126 đến JP3120) theo quy định tại Bảng 9.4.","50de962d-960e-4575-a247-432f0806cc82,c5b4362d-53ba-4584-aafe-609e87d36808,be784e43-a586-4bae-a895-869eb1a2b05a,554c02b9-5ec3-441a-924c-49bf5e34bfe9,31b3a226-d38b-4c25-a2f4-c5aca7984c14,4017170b-cb68-4dd8-a42b-247851257060,3815b690-92fc-4c4f-be68-1d7fc7899b38",rag_v2,rag,7,10170.79,False,good,hallucinated,complete,"Câu trả lời của trợ lý tự ý bịa đặt các mã học phần (như JP1110, JP1120, JP1132, JP2111, JP2126, JP3120) không hề xuất hiện trong ngữ cảnh được cung cấp. Ngoài ra, thông tin về việc yêu cầu thêm các học phần định hướng kỹ thuật từ khóa K65 trở đi cũng không có trong dữ liệu đầu vào.",correct,The generated answer includes the required JLPT N3 standard mentioned in the reference answer while providing more detailed context regarding the academic requirements.,1.0,0.3333,1.0,1.0,1.0,1.0,0.2,1.0,1.0,1.0,1.0,0.1429,1.0,1.0,1.0,rag_evaluation_dataset_ELITECH
+chunks_001_simple_014,Sinh viên PFIEV cần đạt chuẩn tiếng Pháp nào?,simple,easy,DELF B1,26e290ff-48bf-4531-8e3d-4e6eb8cfb297,"Yêu cầu về chuẩn tiếng Pháp đối với sinh viên chương trình đào tạo (CTĐT) PFIEV phụ thuộc vào khóa học của bạn:
+
+**Đối với khóa K68, K69:**
+*   **Điều kiện xét nhận Đồ án tốt nghiệp cử nhân:** Đạt trình độ DELF B1 hoặc TOEIC 500.
+*   **Điều kiện xét tốt nghiệp cử nhân:** Đạt trình độ DELF B1 và TOEIC 500.
+*   **Điều kiện xét tốt nghiệp kỹ sư chuyên sâu đặc thù:** Đạt trình độ DELF B2 (hoặc VSTEP tương ứng trình độ Bậc 4).
+*   **Yêu cầu theo số tín chỉ tích lũy:**
+    *   Từ 32 tín chỉ: DELF A1 hoặc đạt các học phần từ 1 đến 2 (Bảng 7.1).
+    *   Từ 64 tín chỉ: DELF A2 hoặc đạt các học phần từ 1 đến 4 (Bảng 7.1).
+    *   Từ 96 tín chỉ: DELF B1 hoặc đạt các học phần từ 1 đến 6 (Bảng 7.1).
+
+**Đối với khóa K65, K66, K67:**
+*   **Điều kiện xét nhận đồ án/khóa luận tốt nghiệp:** Đạt trình độ DELF B1 hoặc TOEIC 500.
+*   **Điều kiện khi xét tốt nghiệp:** Đạt trình độ DELF B1 và TOEIC 600.
+*   **Yêu cầu theo số tín chỉ tích lũy:**
+    *   Từ 32 tín chỉ: DELF A1 hoặc đạt các học phần từ 1 đến 2 (Bảng 7.1).
+    *   Từ 64 tín chỉ: DELF A2 hoặc đạt các học phần từ 1 đến 4 (Bảng 7.1).
+    *   Từ 96 tín chỉ: DELF B1 hoặc đạt các học phần từ 1 đến 6 (Bảng 7.1).
+
+**Đối với khóa K70:**
+*   **Chuẩn đầu ra khi xét tốt nghiệp kỹ sư chuyên sâu:** Đạt trình độ tối thiểu DELF B2 (hoặc tương đương theo Bảng 5.3) hoặc Chứng chỉ tiếng Anh đạt trình độ tối thiểu từ Bậc 4.
+
+Bạn vui lòng cho biết khóa học của mình để nhận được thông tin chính xác nhất.","de789d2b-26a8-4db4-89ec-5282810512e7,29f052b7-36c2-45c4-8400-46c2737d02a9,b04221a2-0d1a-429a-bbab-67867e8d1215,08a8bb6e-240d-4b80-b852-a5d8f4fbe231,2e9408a7-caf1-48f5-be5c-141ef26e562e,f46b63f1-bb52-45c4-b6f8-6c5a69bc03f7,ad7f1ea8-9539-4fa0-9078-a35eaf02a8e0",rag_v2,rag,7,12077.14,False,good,hallucinated,partial,"Trợ lý đã đưa ra nhiều thông tin về điều kiện xét tốt nghiệp (TOEIC, VSTEP, số tín chỉ tích lũy) không có trong ngữ cảnh được cung cấp. Các thông tin này là bịa đặt (hallucinated) so với tài liệu nguồn.",correct,"The generated answer provides a comprehensive and accurate breakdown of the French language requirements for PFIEV students, which includes the DELF B1 requirement mentioned in the reference answer.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,rag_evaluation_dataset_ELITECH
+chunks_001_simple_021,Điều kiện xét chuẩn tiếng Anh đầu ra là gì?,simple,easy,Chứng chỉ còn hiệu lực và đủ mức quy đổi,62e638d3-744a-451f-bf9f-ba21910b9635,"Theo các quy định hiện hành, điều kiện xét chuẩn ngoại ngữ đầu ra được quy định cụ thể như sau:
+
+**1. Quy định chung (Khóa K70):**
+*   Chứng chỉ tiếng Anh phải đánh giá đầy đủ 4 kỹ năng (nghe, nói, đọc, viết).
+*   Chứng chỉ phải được cấp trong vòng 2 năm tính đến thời điểm xét và còn hiệu lực tại thời điểm xét.
+*   Yêu cầu cụ thể cho từng chương trình đào tạo được quy định tại các Phụ lục tương ứng.
+
+**2. Quy định theo từng loại hình chương trình (Khóa K68, K69):**
+
+*   **Chương trình tiên tiến (Elitech):**
+    *   Điều kiện xét tốt nghiệp: Đạt IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng.
+*   **Chương trình đào tạo hợp tác quốc tế (trừ chương trình hợp tác với ĐH TROY):**
+    *   Điều kiện xét tốt nghiệp: Đạt IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng.
+*   **Chương trình đào tạo Tài năng:**
+    *   Điều kiện xét nhận đồ án/khóa luận tốt nghiệp: Đạt tối thiểu Bậc 3.2 (theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam).
+*   **Chương trình đào tạo chuẩn:**
+    *   Điều kiện xét tốt nghiệp: Đạt tối thiểu Bậc 3.1 (theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam).
+
+Bạn vui lòng cho biết chương trình đào tạo cụ thể mà bạn đang theo học để nhận được thông tin chính xác nhất.","930e63ee-8533-412a-95ed-967bac30208c,7b653b5b-d25b-41e4-8849-c24b2fcdc63e,a53edad8-7533-49d8-ba03-b33725bde4dc,0fc121e1-e9b8-49b1-ae89-f4265ce3087f,3405d3b5-d35f-4a39-ad58-362ceb51a44e,cc76675a-03f2-4ce9-bd63-e3505995581a,c624f99a-1c79-4d17-b8c4-bfa95d73257d",rag_v2,rag,7,9088.05,False,good,hallucinated,partial,"Câu trả lời đưa thêm thông tin về 'Chương trình đào tạo Tài năng' và 'Chương trình đào tạo chuẩn' với các yêu cầu Bậc 3.1, 3.2 không có trong ngữ cảnh được cung cấp. Đây là hành vi bịa đặt thông tin (hallucination).",correct,Câu trả lời được tạo ra bao hàm đầy đủ ý nghĩa của câu trả lời tham chiếu (chứng chỉ còn hiệu lực và đạt mức quy đổi) đồng thời cung cấp thêm thông tin chi tiết và cụ thể hơn cho người dùng.,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,rag_evaluation_dataset_ELITECH
+chunks_001_multihop_003,Sinh viên cần đáp ứng gì để được công nhận chuẩn tiếng Anh?,multi_hop,medium,Tổng hợp từ nhiều chunk.,"26e290ff-48bf-4531-8e3d-4e6eb8cfb297,62e638d3-744a-451f-bf9f-ba21910b9635","Việc công nhận chuẩn tiếng Anh đối với sinh viên Đại học Bách khoa Hà Nội được quy định dựa trên khóa học và chương trình đào tạo như sau:
+
+### Đối với sinh viên khóa K63, K64 (Hệ chính quy chuẩn):
+*   **Chuẩn theo tín chỉ tích lũy:** Căn cứ vào kết quả thi chứng chỉ tiếng Anh nội bộ của Trường:
+    *   **0–63 tín chỉ:** Hoàn thành 2 học phần tiếng Anh cơ bản (FL1100, FL1101).
+    *   **Từ 64 tín chỉ:** Đạt TOEIC tối thiểu 350.
+    *   **Từ 96 tín chỉ:** Đạt TOEIC tối thiểu 450.
+    *   **Trước khi nhận đề tài đồ án/khóa luận tốt nghiệp:** Đạt TOEIC tối thiểu 500.
+*   **Chuẩn đầu ra:** Đạt TOEIC tối thiểu 500.
+*   **Lưu ý:** Sinh viên không đạt chuẩn theo tín chỉ tích lũy sẽ bị hạn chế khối lượng học tập (tối đa 14 tín chỉ/học kỳ chính).
+
+### Đối với sinh viên khóa K65, K66, K67:
+*   **Chuẩn theo tín chỉ tích lũy và đầu ra:** Được quy định cụ thể cho từng chương trình đào tạo tại các phụ lục kèm theo quy định.
+*   **Hình thức công nhận:**
+    *   Sử dụng kết quả thi ngoại ngữ nội bộ của Trường.
+    *   **Riêng sinh viên chương trình tiên tiến, tài năng và hợp tác quốc tế:** Bắt buộc phải có chứng chỉ ngoại ngữ quốc tế để được xét công nhận đạt chuẩn đầu ra.
+
+### Đối với sinh viên các chương trình đặc biệt và chất lượng cao (Khóa K62, K63, K64):
+*   **Hình thức công nhận:** Sử dụng kết quả thi chứng chỉ tiếng Anh nội bộ hoặc chứng chỉ tiếng Anh quốc tế tương đương (từ ETS, British Council, ESOL, IDP).
+*   **Yêu cầu chứng chỉ quốc tế:** Phải còn hiệu lực tại thời điểm xét tốt nghiệp và đạt mức điểm quy đổi tối thiểu (ví dụ: TOEIC 600, IELTS 5.0, TOEFL iBT 65, APTIS B2, hoặc Cambridge First FCE).
+
+### Quy định chung về thi nội bộ:
+*   Sinh viên được thi nhiều lần và được công nhận điểm cao nhất.
+*   Kết quả thi nội bộ có giá trị trong vòng **2 năm** kể từ ngày thi.
+*   Sinh viên chưa hoàn thành chương trình tiếng Anh cơ bản (nếu thuộc đối tượng phải học) không được đăng ký thi chứng chỉ tiếng Anh nội bộ.","c788754c-50b2-4f77-b454-da84817e116e,92d8e047-8bb5-4660-93e7-681e3804d5ee,b73dd4e6-4708-4783-9e17-b5fa5ba98fdb,cc76675a-03f2-4ce9-bd63-e3505995581a,62e638d3-744a-451f-bf9f-ba21910b9635,fb559e62-7fd5-415c-860a-ca19d9c5a5fd,55825073-31ee-4e53-915e-99ac8fa1b7a2",rag_v2,rag,7,12909.85,False,good,hallucinated,complete,"Câu trả lời chứa nhiều thông tin không có trong ngữ cảnh được cung cấp (ví dụ: quy định cụ thể cho K65, K66, K67; quy định cho sinh viên các chương trình đặc biệt/chất lượng cao khóa K62, K63, K64; các mức điểm quy đổi cụ thể như IELTS 5.0, TOEFL iBT 65...). Trợ lý đã tự ý đưa thêm thông tin bên ngoài vào thay vì chỉ dựa vào ngữ cảnh.",correct,"The generated answer provides a comprehensive and accurate explanation of the English proficiency requirements for students at Hanoi University of Science and Technology, which aligns with the context implied by the reference answer.",0.0,0.0,0.0,0.0,0.0,1.0,0.2,0.5,0.2,0.2372,1.0,0.1429,0.5,0.2,0.2372,rag_evaluation_dataset_ELITECH
+chunks_001_multihop_006,Nếu chứng chỉ không thuộc tổ chức quy định thì sao?,multi_hop,medium,Tổng hợp từ nhiều chunk.,"26e290ff-48bf-4531-8e3d-4e6eb8cfb297,62e638d3-744a-451f-bf9f-ba21910b9635","Tôi không tìm thấy thông tin trong tài liệu hiện có về việc xử lý đối với các chứng chỉ ngoại ngữ không thuộc danh mục quy định.
+
+Tài liệu hiện chỉ cung cấp thông tin về việc:
+*   Sinh viên K70 có thể thực hiện thủ tục hậu kiểm cho các chứng chỉ ngoại ngữ chưa đăng ký trên hệ thống của Ban Tuyển sinh - Hướng nghiệp [tại đây](https://clc.hust.edu.vn/thong-bao-hau-kiem-chung-chi-ngoai-ngu-cho-sinh-vien-k70/).
+*   Trường tạm thời không tiếp nhận chứng chỉ APTIS có ngày thi sau 15/1/2023.
+*   Bạn có thể xem chi tiết về quy định bổ sung danh mục quy đổi tương đương các chứng chỉ tiếng Anh [tại đây](https://ctt.hust.edu.vn/Upload/Nguyen%20Quoc%20Dat/files/DTDH_QDQC/Hoctap/2022-12-21%20Quy%20dinh%20tuong%20duong%20NN.pdf) trên trang Phòng Đào tạo (ctt.hust.edu.vn).","b5753397-715c-463b-ac5e-ed49fca74c8c,7996ce7e-276d-47a6-862b-0c2331119a6d,0575972f-b7cb-4e61-a39c-bb1d75f357d7,027bfd9d-ef19-4822-89e4-982cd9d6a636,08287c8f-191b-407a-a5a4-988df4a5bc31,792599e8-b757-4677-abca-5eeee2bd9a9c,1e5e427d-f574-47eb-a3da-a3c5da032c1c",rag_v2,rag,7,26292.1,False,good,hallucinated,complete,"Câu trả lời chứa thông tin không có trong ngữ cảnh được cung cấp (thông tin về chứng chỉ APTIS và đường link đến ctt.hust.edu.vn). Mặc dù câu trả lời thừa nhận không tìm thấy thông tin trong ngữ cảnh, nhưng việc tự ý đưa thêm thông tin bên ngoài vào vi phạm tính trung thực (faithfulness).",correct,Cả hai câu trả lời đều phản ánh đúng thực tế là thông tin về trường hợp chứng chỉ không thuộc danh mục quy định không được đề cập cụ thể trong tài liệu nguồn.,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,rag_evaluation_dataset_ELITECH
+chunks_001_multihop_008,Điều kiện tốt nghiệp của các CTĐB có điểm chung gì?,multi_hop,medium,Tổng hợp từ nhiều chunk.,"26e290ff-48bf-4531-8e3d-4e6eb8cfb297,62e638d3-744a-451f-bf9f-ba21910b9635","Dựa trên các tài liệu về chương trình đào tạo (CTĐT) và quy định hiện hành, các chương trình đào tạo đặc biệt (CTĐB) tại Đại học Bách Khoa Hà Nội có những điểm chung về điều kiện tốt nghiệp như sau:
+
+1.  **Cấu trúc chương trình:** Các chương trình đều được thiết kế với cấu trúc gồm hai khối kiến thức chính:
+    *   **Giáo dục đại cương:** Bao gồm các học phần về Toán và khoa học cơ bản, Lý luận chính trị, Pháp luật đại cương, Giáo dục thể chất/Giáo dục quốc phòng - an ninh và Ngoại ngữ.
+    *   **Giáo dục chuyên nghiệp:** Bao gồm các học phần cơ sở và cốt lõi ngành (có yêu cầu về đồ án), kiến thức bổ trợ (bắt buộc có kỹ năng mềm/khởi nghiệp và Viết/thuyết trình kỹ thuật), các học phần tự chọn theo định hướng/mô-đun và thực tập kỹ thuật.
+
+2.  **Yêu cầu về ngoại ngữ:** Sinh viên phải đạt trình độ ngoại ngữ theo tiến độ của chương trình đào tạo. Đối với các chương trình đặc thù (ví dụ: chương trình sử dụng tiếng Đức), sinh viên bắt buộc phải đạt chứng chỉ ngoại ngữ theo các mốc tín chỉ tích lũy và là điều kiện bắt buộc để được xét nhận đồ án/khóa luận tốt nghiệp cũng như xét tốt nghiệp.
+
+3.  **Đồ án/Khóa luận tốt nghiệp:** Các chương trình đều yêu cầu sinh viên hoàn thành khối lượng kiến thức chuyên môn, trong đó bao gồm các đồ án thiết kế, chế tạo hoặc triển khai trong quá trình học và đồ án tốt nghiệp cử nhân.
+
+**Lưu ý:** Các quy định chi tiết về chuẩn đầu ra ngoại ngữ hoặc các yêu cầu cụ thể khác có thể khác nhau tùy theo từng ngành đào tạo. Bạn nên liên hệ trực tiếp với Phòng Đào tạo hoặc Viện quản lý ngành học của mình để được xác nhận thông tin chính xác nhất cho chương trình cụ thể mà bạn đang theo học.","bb2fb021-3902-45c9-827f-2921192b764e,01a026a0-8d35-4898-a00c-080a11634939,67a584ec-473f-4143-9d65-bc2c9f232fc1,10733c54-298f-4ea9-8ead-a60c4f1ed978,8fd80084-2714-48f8-a06a-30264ee58d26,229d36fa-6606-4d48-b256-c89f3cdf5328,63238a1f-b201-429a-ad20-002a67a82ff3,03fcc47c-49dd-4eb4-b05a-f62898a5986d,a94a0dc5-b08b-4727-aca1-05a79ad2a07a,a22d61ee-68ea-4273-b975-c186d2d63842",agent,complex,10,17082.3,False,good,hallucinated,partial,"Ngữ cảnh được cung cấp không chứa thông tin về 'điều kiện tốt nghiệp của các CTĐB' (chương trình đào tạo đặc biệt). Trợ lý đã tự suy diễn cấu trúc chương trình từ một ngành cụ thể (Hóa học) và áp đặt cho tất cả các CTĐB, dẫn đến thông tin bịa đặt (hallucinated).",incorrect,"The reference answer is empty/placeholder text, while the generated answer provides detailed information that cannot be verified against the provided reference.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,rag_evaluation_dataset_ELITECH
+ITE7_fix_chunks_multi_hop_001,"So với tổng khối lượng kiến thức toàn khóa của chương trình Công nghệ thông tin toàn cầu (IT-E7), chuẩn đầu ra 2.3.3 yêu cầu trình độ tiếng Anh nào, và đây là yêu cầu của chương trình bao nhiêu tín chỉ?",multi_hop,medium,"Chuẩn đầu ra 2.3.3 của chương trình IT-E7 yêu cầu sinh viên đạt kỹ năng tiếng Anh hiệu quả trong công việc, tối thiểu TOEIC 650 điểm. Đây là yêu cầu của chương trình có khối lượng kiến thức toàn khóa 133 tín chỉ.","a434c1c5-656c-46d4-87d9-cf0d59ec38c5,2ffccdea-96f5-4aaa-9581-779b983f9476","Chào bạn, dựa trên thông tin về chương trình Công nghệ thông tin toàn cầu (IT-E7), tôi xin giải đáp thắc mắc của bạn như sau:
+
+1. **Về chuẩn đầu ra tiếng Anh:** Chương trình Công nghệ thông tin toàn cầu (Global ICT) thuộc nhóm các chương trình Elitech/tăng cường ngoại ngữ, yêu cầu chuẩn đầu ra tiếng Anh là **TOEIC 650** (hoặc các chứng chỉ tương đương theo quy định).
+
+2. **Về khối lượng kiến thức:** Chương trình đào tạo Cử nhân Công nghệ thông tin toàn cầu (IT-E7) có tổng khối lượng kiến thức toàn khóa là **133 tín chỉ**.
+
+*Lưu ý: Thông tin về ""chuẩn đầu ra 2.3.3"" không được đề cập cụ thể trong tài liệu tôi đang có. Nếu đây là một yêu cầu chuyên biệt trong đề cương chi tiết hoặc quy định nội bộ khác, bạn vui lòng liên hệ trực tiếp với Phòng Đào tạo hoặc Viện Công nghệ thông tin và Truyền thông để được xác nhận chính xác nhất.*","40852fba-6e9d-4c21-a405-55e2dea22587,14a3bbdd-a8ca-4711-9f02-985bf908186c,29f052b7-36c2-45c4-8400-46c2737d02a9,e1c2cc6d-e4b3-4d92-a8c0-466111fa1706,2744defe-51d8-4c3b-967c-81c3a37f2e91,98115d2d-4153-46bc-bd1d-00a1e80402f8,99613efb-4623-4afe-ac23-3949f590f792,4048c721-2b2a-4a78-b11e-479490cef9b1,2ffccdea-96f5-4aaa-9581-779b983f9476,9da3748a-e009-4e5f-8980-f4dc201925e9",agent,complex,10,17176.75,False,partial,hallucinated,partial,"Câu trả lời bịa đặt thông tin về số tín chỉ (133 tín chỉ) vì thông tin này không có trong ngữ cảnh được cung cấp. Ngoài ra, ngữ cảnh không chứa thông tin về 'chuẩn đầu ra 2.3.3', do đó việc khẳng định không có thông tin là đúng nhưng phần thông tin về tín chỉ là vi phạm quy tắc không bịa đặt.",correct,"Câu trả lời đã cung cấp đầy đủ các thông tin chính xác về yêu cầu tiếng Anh (TOEIC 650) và tổng số tín chỉ (133) của chương trình IT-E7, mặc dù có sự thận trọng về mã chuẩn đầu ra 2.3.3.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,rag_evaluation_dataset_ITE7_fix_chunks
+ITE7_fix_chunks_multi_hop_003,"Trong chương trình Công nghệ thông tin toàn cầu (IT-E7), trước khi học IT3312E – Data Structures and Algorithms, sinh viên cần hoàn thành học phần nhập môn ngành nào, và học phần đó có tỷ lệ đánh giá như thế nào?",multi_hop,medium,Sinh viên cần hoàn thành học phần tiên quyết IT2110 – Nhập môn công nghệ thông tin và truyền thông (cùng với IT3210) trước khi học IT3312E. Học phần IT2110 có tỷ lệ đánh giá 30% quá trình và 70% thi.,"b7d2b326-c86b-4fcf-8e2d-d8306836b6d9,428552e0-1ba2-49e2-ae97-df986de9e215","Chào bạn, dựa trên chương trình đào tạo ngành Công nghệ thông tin toàn cầu (IT-E7), thông tin về học phần bạn quan tâm như sau:
+
+*   **Học phần nhập môn:** Trước khi học **IT3312E – Data Structures and Algorithms**, sinh viên cần hoàn thành học phần tiên quyết là **IT2110 – Nhập môn công nghệ thông tin và truyền thông** (cùng với IT3210 – C Programming Language).
+*   **Tỷ lệ đánh giá của IT2110:** 30% Quá trình + 70% Thi.
+
+Nếu cần xác nhận chính thức về lộ trình học tập cá nhân, bạn vui lòng liên hệ trực tiếp với Phòng Đào tạo để được hỗ trợ.","b7d2b326-c86b-4fcf-8e2d-d8306836b6d9,876c1ac5-4b1b-48f3-a721-fa8b08f87618,aac29927-4c74-45fe-a8de-dbb2280c47ae,73b7dd34-a90d-49e5-8b06-de376bd48412,b62c9a4d-ce56-4628-bc85-cd2bcd0444df,261628b2-d41e-41f6-a6c1-f125f43c40cc,33589f5b-8a52-422e-bef8-03fa2e6cfee8,33589f5b-8a52-422e-bef8-03fa2e6cfee8,7d206a5c-6475-4181-9b47-b60dbcf52652,4bd17249-b7e5-4ce4-b3ae-ef4b2d0b4102,aba48ad3-e90d-4e12-afe6-6f76b5cf3db3,3c044719-5870-42ae-85af-32dcf5a7f3a8",agent,complex,12,14297.58,False,good,hallucinated,incomplete,"Trợ lý đã bịa đặt thông tin về học phần IT2110 và tỷ lệ đánh giá của nó vì thông tin này không có trong ngữ cảnh được cung cấp. Ngữ cảnh chỉ nêu IT3312E có học phần tiên quyết là IT2110 và IT3210, nhưng không cung cấp thông tin chi tiết về tên hay tỷ lệ đánh giá của IT2110.",correct,Câu trả lời đã cung cấp đầy đủ và chính xác các thông tin về học phần tiên quyết và tỷ lệ đánh giá giống như đáp án tham khảo.,1.0,0.3333,0.5,1.0,0.6131,1.0,0.2,0.5,1.0,0.6131,1.0,0.1429,0.5,1.0,0.6131,rag_evaluation_dataset_ITE7_fix_chunks
+chunks_001_simple_001,Quy định này áp dụng cho sinh viên khóa nào?,simple,easy,K63 và K64,43dc8f77-a8cb-4250-9ff4-57163f5c21de,"Dựa trên các tài liệu được cung cấp, phạm vi áp dụng đối với sinh viên khóa đào tạo như sau:
+
+*   **Đối với khóa 70 trở về sau:** Quy định về ngoại ngữ (theo tài liệu ""Quy định > Điều 7. Hiệu lực thi hành"") áp dụng từ học kỳ 1 năm học 2025-2026.
+*   **Đối với khóa 69 trở về trước:** Các quy định hiện hành về ngoại ngữ vẫn tiếp tục có hiệu lực thi hành cho đến thời điểm kết thúc khóa đào tạo (trừ quy định về quy đổi tương đương chứng chỉ).
+*   **Đối với các khóa cụ thể khác:**
+    *   **Khóa 63 và 64:** Có quy định riêng về chuẩn tiếng Anh theo trình độ và chuẩn tiếng Anh đầu ra.
+    *   **Khóa 62, 63, 64:** Có quy định riêng về chuẩn ngoại ngữ đầu ra đối với các chương trình đặc biệt và chất lượng cao (ĐTTN, KSCLC PFIEV, Tiên tiến, CNTT Việt-Nhật, ICT).
+    *   **Khóa 68 và 69:** Áp dụng Quy định về phân loại trình độ đầu vào, chương trình môn học và chuẩn ngoại ngữ yêu cầu ban hành theo Quyết định tháng 03 năm 2024.
+
+Ngoài ra, Quy chế đào tạo chung của Đại học Bách khoa Hà Nội áp dụng cho sinh viên đại học, học viên cao học (HVCH) và nghiên cứu sinh (NCS) theo các quy định cụ thể được nêu trong văn bản.","4825815f-a9cb-477c-846e-52bd2209a149,cb4b2379-702a-44c1-a6cd-1dfa3c97350f,648800ef-6f78-4f14-b25d-0f6e15270055,43dc8f77-a8cb-4250-9ff4-57163f5c21de,4a80a675-b3d5-4a09-8833-ae3f2f00bff5,f59645a8-a831-4db5-867c-0f63ca0121e5,89728544-bace-5b19-8837-acb52cc8364e",rag_v2,rag,7,14273.65,False,good,hallucinated,complete,Trợ lý đã đưa thêm thông tin về 'Khóa 68 và 69' và 'Quyết định tháng 03 năm 2024' không hề xuất hiện trong ngữ cảnh được cung cấp. Việc tự ý bổ sung thông tin ngoài ngữ cảnh vi phạm quy tắc về tính trung thực (faithfulness).,correct,"Câu trả lời đã xác nhận thông tin K63 và K64 có quy định riêng, khớp với nội dung của câu trả lời tham chiếu.",0.0,0.0,0.0,0.0,0.0,1.0,0.2,1.0,0.25,0.4307,1.0,0.1429,1.0,0.25,0.4307,rag_evaluation_dataset_k63_k64
+chunks_001_simple_003,Sinh viên đạt điều kiện nào được miễn 2 học phần tiếng Anh cơ bản?,simple,easy,Đạt điểm thi hoặc có chứng chỉ quốc tế phù hợp,c788754c-50b2-4f77-b454-da84817e116e,"Điều kiện miễn 2 học phần tiếng Anh cơ bản phụ thuộc vào chương trình đào tạo của sinh viên:
+
+*   **Đối với sinh viên hệ chính quy chuẩn (Khóa K63, K64):** Sinh viên đạt yêu cầu về điểm thi môn Tiếng Anh trong kỳ thi THPT Quốc gia hàng năm hoặc có chứng chỉ tiếng Anh quốc tế sẽ được miễn học và công nhận đã hoàn thành 2 học phần tiếng Anh cơ bản.
+*   **Đối với sinh viên chương trình chuẩn và chương trình tài năng (Khóa K70):** Sinh viên được miễn học (ghi điểm R) các học phần tiếng Anh cơ bản tùy thuộc vào nhóm trình độ đầu vào (được phân loại dựa trên kết quả đánh giá phân loại tiếng Anh đầu vào hoặc chứng chỉ quốc tế như APTIS ESOL, Cambridge Assessment English, PEIC). Chi tiết về các nhóm miễn học được quy định tại Bảng 3.1 của Phụ lục III.
+*   **Đối với sinh viên chương trình tiên tiến (ELITECH) và chương trình hợp tác quốc tế (Khóa K70):** Sinh viên được miễn học (ghi điểm R) các học phần tiếng Anh cơ bản tùy thuộc vào nhóm trình độ đầu vào (được phân loại dựa trên kết quả đánh giá phân loại tiếng Anh đầu vào hoặc chứng chỉ quốc tế như APTIS ESOL, Cambridge Assessment English, PEIC). Chi tiết về các nhóm miễn học được quy định tại Bảng 4.1 của Phụ lục IV.
+*   **Đối với sinh viên ngành Cơ điện tử - ĐH Leibniz Hannover (ME-LUH):** Sinh viên có chứng chỉ tiếng Anh năm thứ nhất tương đương TOEIC >= 300 có thể được miễn 2 học phần tiếng Anh cơ bản.
+
+Để có câu trả lời chính xác nhất cho trường hợp của bạn, vui lòng cho biết bạn đang theo học chương trình đào tạo nào.","c788754c-50b2-4f77-b454-da84817e116e,d667cb24-43d5-48a9-a2df-4f97b6db5e37,87879cb9-d1f4-4f25-8374-48c610d9e60b,42da1af7-8270-4cd7-9219-78d53d1dfea5,6c764ae6-eb75-457c-a363-805f9702a5df",rag_v2,rag,5,10995.61,False,good,hallucinated,complete,"Trợ lý đã đưa thêm thông tin về 'sinh viên ngành Cơ điện tử - ĐH Leibniz Hannover (ME-LUH)' và điều kiện 'TOEIC >= 300' vào câu trả lời, trong khi thông tin này hoàn toàn không có trong ngữ cảnh được cung cấp.",correct,"The generated answer provides a more detailed and accurate explanation of the conditions for exemption, which encompasses the core requirement mentioned in the reference answer (scores or international certificates).",1.0,0.3333,1.0,1.0,1.0,1.0,0.2,1.0,1.0,1.0,1.0,0.1429,1.0,1.0,1.0,rag_evaluation_dataset_k63_k64
+chunks_001_simple_011,Chuẩn tiếng Anh từ 96 tín chỉ là bao nhiêu TOEIC?,simple,easy,450,92d8e047-8bb5-4660-93e7-681e3804d5ee,"Yêu cầu về chuẩn tiếng Anh khi đạt từ 96 tín chỉ tích lũy khác nhau tùy theo khóa và chương trình đào tạo của sinh viên:
+
+*   **Đối với sinh viên khóa K63, K64:** Yêu cầu tối thiểu là 450 TOEIC.
+*   **Đối với sinh viên khóa K65, K66, K67:**
+    *   Chương trình đào tạo chuẩn: 450 TOEIC.
+    *   Chương trình đào tạo Tài năng: 450 TOEIC.
+    *   Chương trình đào tạo tiên tiến (ngoại ngữ chính là tiếng Anh): 450 TOEIC.
+*   **Đối với sinh viên khóa K68, K69:**
+    *   Chương trình đào tạo chuẩn: Đạt tối thiểu Bậc 2.3 (theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam) hoặc hoàn thành các học phần Tiếng Anh cơ sở (FL1131, FL1132, FL1133, FL1134, FL1135).
+    *   Chương trình đào tạo Tài năng: Đạt tối thiểu Bậc 3.1 (theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam).
+
+Để có câu trả lời chính xác nhất, bạn vui lòng cho biết khóa học và chương trình đào tạo hiện tại của bạn.","92d8e047-8bb5-4660-93e7-681e3804d5ee,0db1712a-4ff5-42c0-af28-2e759190c6f7,e3a29e1c-9828-458f-8089-ebccfa6e428c,0fc121e1-e9b8-49b1-ae89-f4265ce3087f,f46b63f1-bb52-45c4-b6f8-6c5a69bc03f7,3405d3b5-d35f-4a39-ad58-362ceb51a44e,08a8bb6e-240d-4b80-b852-a5d8f4fbe231",rag_v2,rag,7,10397.38,False,good,hallucinated,partial,"Câu trả lời bịa đặt thông tin về các học phần tiếng Anh cơ sở cho khóa K68, K69 (FL1131-FL1135) và thông tin về chương trình đào tạo chuẩn của K68, K69 không có trong ngữ cảnh được cung cấp. Ngữ cảnh chỉ cung cấp thông tin về chương trình Tài năng cho K68, K69.",correct,"The generated answer correctly identifies 450 TOEIC as the standard for many cohorts while providing necessary context that requirements may vary for newer cohorts, which is more accurate than a single-number answer.",1.0,0.3333,1.0,1.0,1.0,1.0,0.2,1.0,1.0,1.0,1.0,0.1429,1.0,1.0,1.0,rag_evaluation_dataset_k63_k64
+chunks_001_simple_012,Điều kiện nhận đồ án tốt nghiệp về TOEIC là gì?,simple,easy,TOEIC 500,92d8e047-8bb5-4660-93e7-681e3804d5ee,"Điều kiện về chứng chỉ TOEIC để được xét nhận đồ án/khóa luận tốt nghiệp phụ thuộc vào chương trình đào tạo và khóa học của sinh viên như sau:
+
+*   **Đối với sinh viên các khóa K65, K66, K67:**
+    *   Chương trình đào tạo chuẩn: Yêu cầu đạt tối thiểu **500** điểm TOEIC.
+    *   Chương trình đào tạo Tài năng: Yêu cầu đạt tối thiểu **500** điểm TOEIC.
+    *   Chương trình đào tạo tiên tiến: Yêu cầu đạt tối thiểu **500** điểm TOEIC.
+
+*   **Đối với sinh viên các khóa K63, K64:**
+    *   Yêu cầu đạt tối thiểu **500** điểm TOEIC.
+
+**Lưu ý quan trọng:**
+*   Đối với các chứng chỉ TOEIC 4 kỹ năng, việc quy đổi tương đương được thực hiện dựa theo kỹ năng đạt điểm thấp nhất.
+*   Chứng chỉ TOEIC 2 kỹ năng **không** được công nhận để xét nhận đồ án tốt nghiệp/khóa luận tốt nghiệp.
+*   Đối với các chương trình hợp tác quốc tế (khóa K68, K69), quy định xét nhận đồ án tốt nghiệp yêu cầu IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng (không áp dụng chuẩn TOEIC trong bảng quy đổi này).
+
+Nếu bạn đang học chương trình hoặc khóa khác với các thông tin nêu trên, vui lòng cung cấp thêm thông tin để tôi có thể hỗ trợ chính xác hơn.","10b088e2-f3f3-411b-a65e-172dee1fe649,0db1712a-4ff5-42c0-af28-2e759190c6f7,e3a29e1c-9828-458f-8089-ebccfa6e428c,92d8e047-8bb5-4660-93e7-681e3804d5ee,a53edad8-7533-49d8-ba03-b33725bde4dc",rag_v2,rag,5,19356.86,False,good,hallucinated,complete,"Trợ lý đã bịa đặt thông tin về việc 'không áp dụng chuẩn TOEIC' cho khóa K68, K69 và yêu cầu IELTS 5.5, vì thông tin này không có trong ngữ cảnh được cung cấp. Ngữ cảnh chỉ cung cấp bảng quy đổi TOEIC cho các khóa K68, K69 mà không nêu rõ điều kiện nhận đồ án cụ thể cho các khóa này.",correct,Câu trả lời đã bao gồm thông tin cốt lõi là 500 điểm TOEIC và cung cấp thêm các chi tiết bổ sung hữu ích về quy định cụ thể.,0.0,0.0,0.0,0.0,0.0,1.0,0.2,1.0,0.25,0.4307,1.0,0.1429,1.0,0.25,0.4307,rag_evaluation_dataset_k63_k64
+chunks_001_simple_018,Hoàn thành 2 học phần tiếng Anh cơ bản tương ứng mốc nào?,simple,easy,0-63 tín chỉ,92d8e047-8bb5-4660-93e7-681e3804d5ee,"Việc hoàn thành 2 học phần tiếng Anh cơ bản phụ thuộc vào khóa và chương trình đào tạo của sinh viên như sau:
+
+**Đối với sinh viên khóa K63, K64:**
+*   Sinh viên được phân loại trình độ dựa trên kết quả thi môn Tiếng Anh trong kỳ thi THPT Quốc gia hàng năm.
+*   Sinh viên đạt yêu cầu về điểm thi hoặc có chứng chỉ tiếng Anh quốc tế sẽ được miễn học và công nhận hoàn thành 2 học phần tiếng Anh cơ bản.
+*   Số sinh viên còn lại phải học 1 học phần (FL1101) hoặc cả 2 học phần (FL1100, FL1101) tùy theo kết quả phân loại.
+
+**Đối với sinh viên khóa K65, K66, K67 (Chương trình chuẩn):**
+*   Việc miễn học (được ghi điểm R) 2 học phần Tiếng Anh cơ sở (FL1129, FL1130) phụ thuộc vào trình độ TOEIC đầu vào:
+    *   **Miễn học FL1129:** Đạt trình độ TOEIC từ 350 điểm trở lên hoặc tương đương.
+    *   **Miễn học FL1130:** Đạt trình độ TOEIC từ 400 điểm trở lên hoặc tương đương.
+
+**Đối với sinh viên khóa K68, K69:**
+*   **Chương trình đào tạo chuẩn:**
+    *   Việc miễn học các học phần Tiếng Anh cơ sở (FL1131, FL1132, FL1133, FL1134, FL1135) dựa trên trình độ theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam. Ví dụ: Đạt trình độ Bậc 2.1 trở lên được miễn FL1131 và FL1132.
+*   **Chương trình đào tạo Tài năng:**
+    *   Việc miễn học các học phần LIFE (FL1105, FL1106, FL1107, FL1108) dựa trên trình độ theo Khung năng lực ngoại ngữ 6 bậc. Ví dụ: Đạt trình độ Bậc 2.1 trở lên được miễn FL1105 và FL1106.
+
+Để có câu trả lời chính xác nhất cho trường hợp của bạn, vui lòng cho biết bạn đang theo học khóa nào và chương trình đào tạo nào (chuẩn, tài năng hay tiên tiến Elitech).","c788754c-50b2-4f77-b454-da84817e116e,6c764ae6-eb75-457c-a363-805f9702a5df,0fc121e1-e9b8-49b1-ae89-f4265ce3087f,3405d3b5-d35f-4a39-ad58-362ceb51a44e,7b653b5b-d25b-41e4-8849-c24b2fcdc63e",rag_v2,rag,5,13231.29,False,good,hallucinated,partial,"Câu trả lời chứa thông tin không có trong ngữ cảnh cung cấp (ví dụ: mã học phần FL1131-FL1135 cho K68, K69 chương trình chuẩn; các mốc miễn học cụ thể cho K68, K69 chương trình chuẩn). Ngoài ra, đối với K65-K67, ngữ cảnh chỉ nêu điều kiện miễn học dựa trên TOEIC, không nêu rõ việc đạt mốc nào thì hoàn thành '2 học phần' một cách trực tiếp như cách diễn đạt của trợ lý.",incorrect,"The reference answer provides a specific credit-based milestone (0-63 credits) for completing English modules, whereas the generated answer provides a complex, context-dependent explanation based on student cohorts and proficiency tests, failing to address the specific credit-based criteria requested.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,rag_evaluation_dataset_k63_k64
+chunks_001_multihop_001,Điều kiện nhận đồ án và chuẩn đầu ra có điểm chung gì?,multi_hop,medium,Tổng hợp từ nhiều chunk.,"c788754c-50b2-4f77-b454-da84817e116e,92d8e047-8bb5-4660-93e7-681e3804d5ee","Dựa trên các tài liệu được cung cấp, điều kiện để được xét nhận đồ án/khóa luận tốt nghiệp và điều kiện xét tốt nghiệp có những điểm chung sau đây tùy theo từng chương trình đào tạo:
+
+*   **Đối với các chương trình tiên tiến (Elitech) có ngoại ngữ chính là tiếng Anh:**
+    *   Điều kiện nhận đồ án/khóa luận tốt nghiệp: Yêu cầu đạt IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng.
+    *   Điều kiện xét tốt nghiệp: Yêu cầu đạt IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng.
+    *   *Điểm chung:* Cả hai mốc này đều yêu cầu cùng một chuẩn trình độ là IELTS 5.5 hoặc tương đương.
+
+*   **Đối với các chương trình đào tạo hợp tác quốc tế (IEP) có ngoại ngữ chính là tiếng Anh:**
+    *   Điều kiện nhận đồ án/khóa luận tốt nghiệp: Yêu cầu đạt IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng.
+    *   Điều kiện xét tốt nghiệp: Yêu cầu đạt IELTS 5.5 hoặc chứng chỉ tiếng Anh tương đương 4 kỹ năng.
+    *   *Điểm chung:* Cả hai mốc này đều yêu cầu cùng một chuẩn trình độ là IELTS 5.5 hoặc tương đương.
+
+*   **Đối với chương trình đào tạo Tài năng:**
+    *   Điều kiện nhận đồ án/khóa luận tốt nghiệp: Yêu cầu đạt tối thiểu Bậc 3.2 (theo Khung năng lực ngoại ngữ 6 bậc của Việt Nam).
+    *   Điều kiện xét tốt nghiệp: Tài liệu không quy định riêng trong bảng.
+
+Lưu ý: Các quy định trên áp dụng cho các khóa K65, K66, K67, K68 và K69 tùy theo từng phụ lục chương trình. Nếu bạn đang theo học chương trình cụ thể nào, vui lòng cho biết để tôi có thể cung cấp thông tin chính xác nhất cho chương trình đó.","7b653b5b-d25b-41e4-8849-c24b2fcdc63e,a53edad8-7533-49d8-ba03-b33725bde4dc,c624f99a-1c79-4d17-b8c4-bfa95d73257d,83765e49-828d-4661-9a26-23356fda8692,0fc121e1-e9b8-49b1-ae89-f4265ce3087f,3405d3b5-d35f-4a39-ad58-362ceb51a44e,0db1712a-4ff5-42c0-af28-2e759190c6f7",rag_v2,rag,7,11376.28,False,good,hallucinated,complete,"Trợ lý đã đưa ra thông tin về 'chương trình đào tạo Tài năng' với yêu cầu 'Bậc 3.2', thông tin này hoàn toàn không có trong ngữ cảnh được cung cấp. Việc bịa đặt thông tin vi phạm quy tắc về tính trung thực.",incorrect,"The reference answer is empty/placeholder text, while the generated answer provides specific information that cannot be verified against the provided reference.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,rag_evaluation_dataset_k63_k64
+chunks_001_multihop_005,Điều kiện công nhận tốt nghiệp bằng chứng chỉ là gì?,multi_hop,medium,Tổng hợp từ nhiều chunk.,"c788754c-50b2-4f77-b454-da84817e116e,92d8e047-8bb5-4660-93e7-681e3804d5ee","Dựa trên các tài liệu được cung cấp, điều kiện công nhận tốt nghiệp đối với sinh viên đại học và học viên cao học như sau:
+
+### 1. Đối với sinh viên đại học
+Để được xét công nhận tốt nghiệp, sinh viên cần đáp ứng các điều kiện sau:
+*   Hoàn thành đầy đủ các học phần theo yêu cầu của chương trình đào tạo (bao gồm Giáo dục thể chất và Giáo dục quốc phòng-an ninh).
+*   Đạt chuẩn ngoại ngữ đầu ra.
+*   Điểm trung bình tích lũy toàn khóa (tính theo các học phần đăng ký tốt nghiệp) đạt từ 2,0 trở lên.
+*   Tại thời điểm xét tốt nghiệp không bị truy cứu trách nhiệm hình sự hoặc không đang trong thời gian bị kỷ luật ở mức đình chỉ học tập.
+
+**Lưu ý về chứng chỉ ngoại ngữ:**
+*   Chứng chỉ TOEIC 2 kỹ năng không được công nhận để xét tốt nghiệp.
+*   Đối với khóa K63, K64: Chứng chỉ phải còn hiệu lực tại thời điểm đăng ký xét tốt nghiệp và đạt mức điểm quy đổi tối thiểu (ví dụ: TOEIC 500, IELTS 4.5, TOEFL iBT 55, APTIS B1...).
+*   Chứng chỉ phải được cấp bởi các tổ chức uy tín (ETS, British Council, ESOL, IDP) hoặc được Trung tâm Ngoại ngữ của Trường thẩm định.
+
+### 2. Đối với học viên cao học
+Để được xét công nhận tốt nghiệp, học viên cần đáp ứng các điều kiện sau:
+*   Luận văn đạt yêu cầu.
+*   Hoàn thành việc nộp quyển luận văn đã chỉnh sửa theo kết luận của Hội đồng đánh giá và công khai toàn văn trên trang thông tin điện tử của ĐHBK Hà Nội ít nhất 30 ngày (trừ các đề tài bảo mật).
+*   Đã nộp quyển luận văn cho thư viện Tạ Quang Bửu theo quy định trong thời hạn 20 ngày kể từ ngày bảo vệ thành công.
+*   Không bị truy cứu trách nhiệm hình sự và không trong thời gian bị kỷ luật, đình chỉ học tập.","7e4d4297-1f98-4602-aeaa-539cd77c3c1f,272d72e7-326c-4c72-8816-a645d10f2391,af34153a-8b1e-4280-8b9f-82e63705702e,10b088e2-f3f3-411b-a65e-172dee1fe649,fb559e62-7fd5-415c-860a-ca19d9c5a5fd,be784e43-a586-4bae-a895-869eb1a2b05a",rag_v2,rag,6,14281.31,False,good,hallucinated,complete,"Câu trả lời chứa thông tin bịa đặt về các loại chứng chỉ ngoại ngữ (TOEIC 2 kỹ năng, yêu cầu cụ thể cho khóa K63, K64, các tổ chức cấp chứng chỉ) mà hoàn toàn không có trong ngữ cảnh được cung cấp.",correct,"The generated answer provides a comprehensive and accurate summary of graduation requirements based on the provided context, whereas the reference answer was empty/placeholder text.",0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,rag_evaluation_dataset_k63_k64

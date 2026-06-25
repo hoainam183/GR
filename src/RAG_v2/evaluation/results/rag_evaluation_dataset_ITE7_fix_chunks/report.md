@@ -10,7 +10,7 @@
 | :--- | :---: |
 | Groundedness (Faithfulness) | `93.33%` |
 | Hallucination rate | `3.33%` (1) |
-| Answer relevance | `96.67%` |
+| Answer relevance | `100.00%` |
 | Completeness | `93.33%` |
 | Correctness vs gold (correct) | `80.00%` |
 | Correctness vs gold (partial) | `6.67%` |

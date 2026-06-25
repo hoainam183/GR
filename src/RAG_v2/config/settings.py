@@ -153,6 +153,8 @@ class Settings(BaseSettings):
     # --- Fusion ---
     fusion_mode: str = "rrf"  # "rrf" | "linear"
     fusion_rrf_k: int = 10
+    vector_bge_weight: float = 0.5
+    vector_e5_weight: float = 0.5
     
     context_doc_char_limit: int = 2000
     context_total_char_budget: int = 12000

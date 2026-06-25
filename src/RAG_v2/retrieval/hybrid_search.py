@@ -39,12 +39,16 @@ class HybridSearch:
         rrf_k: int = 60,
         vector_weight: float = 1.0,
         keyword_weight: float = 1.0,
+        vector_bge_weight: float = 0.5,
+        vector_e5_weight: float = 0.5,
     ) -> None:
         self.qdrant = qdrant_store
         self.es = es_store
         self.rrf_k = rrf_k
         self.vector_weight = vector_weight
         self.keyword_weight = keyword_weight
+        self.vector_bge_weight = vector_bge_weight
+        self.vector_e5_weight = vector_e5_weight
 
     # ------------------------------------------------------------------
     # Public API
@@ -98,6 +102,8 @@ class HybridSearch:
             top_k=vector_top_k,
             score_threshold=score_threshold,
             filters=qdrant_filters,
+            bge_weight=self.vector_bge_weight,
+            e5_weight=self.vector_e5_weight,
         )
 
         # Step 2 — Elasticsearch keyword search

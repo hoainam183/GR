@@ -224,7 +224,7 @@ export default function OverviewTab() {
       </div>
 
       {/* Registration trend */}
-      {breakdown?.registrations.length > 0 && (
+      {breakdown?.registrations?.length > 0 && (
         <section className="rounded-lg border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="h-4 w-4 text-primary" />

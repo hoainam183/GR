@@ -311,7 +311,7 @@ def _safe_output_name(path: Path) -> str:
 # ─── Runtime (matches production /chat/v3 config) ───────────────────────────────
 
 
-def build_runtime(fusion_mode: str = "rrf") -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
+def build_runtime(fusion_mode: str = "rrf", vector_model: str = "dual") -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
     """Build the production-config pipeline plus the judges used for scoring.
 
     Uses plain ``Settings()`` (same as ``api/main.py``) so retrieval and
@@ -325,6 +325,16 @@ def build_runtime(fusion_mode: str = "rrf") -> Tuple[Settings, RAGPipeline, Self
     settings.redis_enabled = False
     # Ghi đè fusion_mode theo argparse để benchmark
     settings.fusion_mode = fusion_mode
+
+    if vector_model == "bge":
+        settings.vector_bge_weight = 1.0
+        settings.vector_e5_weight = 0.0
+    elif vector_model == "e5":
+        settings.vector_bge_weight = 0.0
+        settings.vector_e5_weight = 1.0
+    else:
+        settings.vector_bge_weight = 0.5
+        settings.vector_e5_weight = 0.5
 
     logger.info("Initializing RAGPipeline (production config, cache off) ...")
     pipeline = RAGPipeline(settings=settings, mongo_logger=None, llm_cache=None)
@@ -691,7 +701,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--inter-question-sleep-s",
         type=float,
-        default=16.0,
+        default=16.0,  # Gemini free tier RPM = 15 (1 req / 4s). Each query takes ~4 LLM calls -> 16s sleep
         help="Seconds to sleep between questions to respect LLM rate limits.",
     )
     parser.add_argument(
@@ -701,21 +711,26 @@ def _parse_args() -> argparse.Namespace:
         choices=["rrf", "linear"],
         help="Retrieval fusion strategy: 'rrf' or 'linear'. Default: rrf",
     )
+    parser.add_argument(
+        "--vector-model",
+        type=str,
+        default="dual",
+        choices=["bge", "e5", "dual"],
+        help="Vector model to evaluate: 'bge', 'e5', or 'dual'. Default: dual",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = _parse_args()
     dataset_paths = resolve_dataset_paths(args.dataset)
-    settings, pipeline, self_evaluator, judge_client = build_runtime(fusion_mode=args.fusion_mode)
+    settings, pipeline, self_evaluator, judge_client = build_runtime(fusion_mode=args.fusion_mode, vector_model=args.vector_model)
     judge_model = settings.chat_model
 
-    # Adjust output directory based on fusion mode
+    # Adjust output directory based on fusion mode and vector model
     output_base = args.output_dir
-    if args.fusion_mode == "rrf":
-        output_base = args.output_dir.parent / "result_RRF"
-    elif args.fusion_mode == "linear":
-        output_base = args.output_dir.parent / "result_linear"
+    fusion_suffix = "RRF" if args.fusion_mode == "rrf" else "linear"
+    output_base = args.output_dir.parent / f"result_{args.vector_model}_{fusion_suffix}"
 
     logger.info("Found %d dataset file(s).", len(dataset_paths))
     for dataset_path in dataset_paths:

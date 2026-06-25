@@ -133,6 +133,8 @@ class MultiCollectionSearch:
         keyword_weight: float = 1.0,
         max_workers: int = 4,
         collection_score_weight: float = 1.0,
+        vector_bge_weight: float = 0.5,
+        vector_e5_weight: float = 0.5,
     ) -> "MultiCollectionSearch":
         """Convenience constructor — create stores from names.
 
@@ -144,6 +146,8 @@ class MultiCollectionSearch:
             rrf_k: RRF constant.
             vector_weight / keyword_weight: Score weights.
             max_workers: Thread pool size.
+            vector_bge_weight: BGE vector model weight in fusion.
+            vector_e5_weight: E5 vector model weight in fusion.
         """
         if es_index_names is None:
             es_index_names = collection_names
@@ -171,6 +175,8 @@ class MultiCollectionSearch:
                 rrf_k=rrf_k,
                 vector_weight=vector_weight,
                 keyword_weight=keyword_weight,
+                vector_bge_weight=vector_bge_weight,
+                vector_e5_weight=vector_e5_weight,
             )
             searchers.append((col, hybrid))
 
@@ -416,6 +422,8 @@ class MultiCollectionSearch:
                 top_k=vector_top_k,
                 score_threshold=score_threshold,
                 filters=qdrant_filter,
+                bge_weight=hybrid.vector_bge_weight,
+                e5_weight=hybrid.vector_e5_weight,
             )
             kws = hybrid.es.keyword_search(
                 query=query,
