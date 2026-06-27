@@ -344,9 +344,13 @@ def build_runtime(
     if retrieval_mode == "vector_only":
         settings.vector_weight = 1.0
         settings.keyword_weight = 0.0
+        settings.keyword_top_k = 0
+        settings.keyword_pool_k = 0
     elif retrieval_mode == "keyword_only":
         settings.vector_weight = 0.0
         settings.keyword_weight = 1.0
+        settings.vector_top_k = 0
+        settings.vector_pool_k = 0
 
     if disable_rerank:
         settings.reranker_provider = "none"

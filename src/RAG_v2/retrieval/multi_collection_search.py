@@ -320,10 +320,10 @@ class MultiCollectionSearch:
             query_signals.exact_policy_lookup or query_signals.table_lookup
         )
         effective_keyword_top_k = (
-            max(keyword_top_k, 120) if exact_policy_mode else keyword_top_k
+            max(keyword_top_k, 120) if exact_policy_mode and keyword_top_k > 0 else keyword_top_k
         )
         effective_keyword_pool_k = (
-            max(keyword_pool_k, 80) if exact_policy_mode else keyword_pool_k
+            max(keyword_pool_k, 80) if exact_policy_mode and keyword_pool_k > 0 else keyword_pool_k
         )
 
         fusion_vector_weight, fusion_keyword_weight, fusion_reason = (
@@ -416,22 +416,27 @@ class MultiCollectionSearch:
                     must_not=[parent_exclusion]
                 )
 
-            vecs = hybrid.qdrant.search(
-                bge_m3_query=bge_m3_query,
-                e5_query=e5_query,
-                top_k=vector_top_k,
-                score_threshold=score_threshold,
-                filters=qdrant_filter,
-                bge_weight=hybrid.vector_bge_weight,
-                e5_weight=hybrid.vector_e5_weight,
-            )
-            kws = hybrid.es.keyword_search(
-                query=query,
-                top_k=effective_keyword_top_k,
-                filters=es_filter,
-                collection_name=name,
-                exclude_terms=exclude_terms,
-            )
+            vecs = []
+            if vector_top_k > 0:
+                vecs = hybrid.qdrant.search(
+                    bge_m3_query=bge_m3_query,
+                    e5_query=e5_query,
+                    top_k=vector_top_k,
+                    score_threshold=score_threshold,
+                    filters=qdrant_filter,
+                    bge_weight=hybrid.vector_bge_weight,
+                    e5_weight=hybrid.vector_e5_weight,
+                )
+
+            kws = []
+            if effective_keyword_top_k > 0:
+                kws = hybrid.es.keyword_search(
+                    query=query,
+                    top_k=effective_keyword_top_k,
+                    filters=es_filter,
+                    collection_name=name,
+                    exclude_terms=exclude_terms,
+                )
             return name, vecs, kws
 
         collection_counts: Dict[str, Dict[str, Any]] = {}
