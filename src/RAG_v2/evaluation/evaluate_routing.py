@@ -19,8 +19,11 @@ from unittest.mock import patch, MagicMock
 
 class FakeRetrievalService:
     def __init__(self, *args, **kwargs):
+        import torch
         from embedding.bge_m3 import BGEm3Embedder
-        self.bge_embedder = BGEm3Embedder("BAAI/bge-m3", device="cpu")
+        device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+        print(f"Using device: {device} for BGE-M3 Embedder")
+        self.bge_embedder = BGEm3Embedder("BAAI/bge-m3", device=device)
         self.e5_embedder = None
         self.reranker = None
         self.tavily_tool = None
