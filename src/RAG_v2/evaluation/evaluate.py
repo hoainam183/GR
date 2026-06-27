@@ -311,7 +311,12 @@ def _safe_output_name(path: Path) -> str:
 # ─── Runtime (matches production /chat/v3 config) ───────────────────────────────
 
 
-def build_runtime(fusion_mode: str = "rrf", vector_model: str = "dual") -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
+def build_runtime(
+    fusion_mode: str = "rrf",
+    vector_model: str = "dual",
+    retrieval_mode: str = "hybrid",
+    disable_rerank: bool = False,
+) -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
     """Build the production-config pipeline plus the judges used for scoring.
 
     Uses plain ``Settings()`` (same as ``api/main.py``) so retrieval and
@@ -335,6 +340,16 @@ def build_runtime(fusion_mode: str = "rrf", vector_model: str = "dual") -> Tuple
     else:
         settings.vector_bge_weight = 0.5
         settings.vector_e5_weight = 0.5
+
+    if retrieval_mode == "vector_only":
+        settings.vector_weight = 1.0
+        settings.keyword_weight = 0.0
+    elif retrieval_mode == "keyword_only":
+        settings.vector_weight = 0.0
+        settings.keyword_weight = 1.0
+
+    if disable_rerank:
+        settings.reranker_provider = "none"
 
     logger.info("Initializing RAGPipeline (production config, cache off) ...")
     pipeline = RAGPipeline(settings=settings, mongo_logger=None, llm_cache=None)
@@ -718,19 +733,41 @@ def _parse_args() -> argparse.Namespace:
         choices=["bge", "e5", "dual"],
         help="Vector model to evaluate: 'bge', 'e5', or 'dual'. Default: dual",
     )
+    parser.add_argument(
+        "--retrieval-mode",
+        type=str,
+        default="hybrid",
+        choices=["hybrid", "vector_only", "keyword_only"],
+        help="Retrieval mode: 'hybrid', 'vector_only', or 'keyword_only'. Default: hybrid",
+    )
+    parser.add_argument(
+        "--disable-rerank",
+        action="store_true",
+        help="Run without reranker (sets reranker_provider to 'none').",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = _parse_args()
     dataset_paths = resolve_dataset_paths(args.dataset)
-    settings, pipeline, self_evaluator, judge_client = build_runtime(fusion_mode=args.fusion_mode, vector_model=args.vector_model)
+    settings, pipeline, self_evaluator, judge_client = build_runtime(
+        fusion_mode=args.fusion_mode,
+        vector_model=args.vector_model,
+        retrieval_mode=args.retrieval_mode,
+        disable_rerank=args.disable_rerank,
+    )
     judge_model = settings.chat_model
 
     # Adjust output directory based on fusion mode and vector model
-    output_base = args.output_dir
     fusion_suffix = "RRF" if args.fusion_mode == "rrf" else "linear"
-    output_base = args.output_dir.parent / f"result_{args.vector_model}_{fusion_suffix}"
+    out_name = f"result_{args.vector_model}_{fusion_suffix}"
+    if args.retrieval_mode != "hybrid":
+        out_name += f"_{args.retrieval_mode}"
+    if args.disable_rerank:
+        out_name += "_no_rerank"
+        
+    output_base = args.output_dir.parent / out_name
 
     logger.info("Found %d dataset file(s).", len(dataset_paths))
     for dataset_path in dataset_paths:
