@@ -1,0 +1,1529 @@
+{
+  "dataset_name": "rag_evaluation_dataset",
+  "source_file": "QCDT_2025_5445_QD-DHBK_converted_chunks.json",
+  "total_questions": 100,
+  "distribution": {
+    "simple": 74,
+    "multi_hop": 26
+  },
+  "items": [
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_001",
+      "question_type": "simple",
+      "question": "Quy chế đào tạo 5445/QĐ-DHBK của Đại học Bách khoa Hà Nội có hiệu lực thi hành từ học kỳ nào?",
+      "gold_answer": "Có hiệu lực thi hành từ học kỳ 1 năm học 2025–2026.",
+      "evidence_chunk_ids": [
+        "25c75fd3-e368-4287-8d35-97489d8b95a4"
+      ],
+      "ground_truth_context": [
+        "Quy chế này có hiệu lực thi hành từ học kỳ 1 năm học 2025–2026 và thay thế Quy chế đào tạo ban hành theo Quyết định số 4600/QĐ-DHBK ngày 09 tháng 6 năm 2023 của Giám đốc ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_002",
+      "question_type": "simple",
+      "question": "Quy chế đào tạo 5445/QĐ-DHBK thay thế quyết định nào trước đó của Đại học Bách khoa Hà Nội?",
+      "gold_answer": "Thay thế Quy chế đào tạo ban hành theo Quyết định số 4600/QĐ-DHBK ngày 09 tháng 6 năm 2023 của Giám đốc Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "25c75fd3-e368-4287-8d35-97489d8b95a4"
+      ],
+      "ground_truth_context": [
+        "thay thế Quy chế đào tạo ban hành theo Quyết định số 4600/QĐ-DHBK ngày 09 tháng 6 năm 2023 của Giám đốc ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_003",
+      "question_type": "simple",
+      "question": "Khối lượng tín chỉ tối thiểu và thời gian đào tạo theo kế hoạch chuẩn của chương trình cử nhân tại Bách khoa Hà Nội là bao nhiêu?",
+      "gold_answer": "Tối thiểu 132 tín chỉ, thời gian 4 năm.",
+      "evidence_chunk_ids": [
+        "6381c6e7-76fa-430e-b855-24e7c33898bb"
+      ],
+      "ground_truth_context": [
+        "Cử nhân | Tốt nghiệp THPT | 4 năm | 132 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_004",
+      "question_type": "simple",
+      "question": "Khối lượng tín chỉ tối thiểu và thời gian đào tạo theo kế hoạch chuẩn của chương trình Kỹ sư (tốt nghiệp cử nhân theo chương trình tích hợp) tại Bách khoa Hà Nội là bao nhiêu?",
+      "gold_answer": "Tối thiểu 48 tín chỉ, thời gian 1,5 năm.",
+      "evidence_chunk_ids": [
+        "6381c6e7-76fa-430e-b855-24e7c33898bb"
+      ],
+      "ground_truth_context": [
+        "Kỹ sư | Tốt nghiệp cử nhân theo chương trình tích hợp | 1,5 năm | 48 tín chỉ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_005",
+      "question_type": "simple",
+      "question": "Thời gian đào tạo hình thức vừa làm vừa học dài hơn đào tạo chính quy tối thiểu bao nhiêu phần trăm?",
+      "gold_answer": "Dài hơn tối thiểu 20% so với hình thức đào tạo chính quy của cùng chương trình đào tạo.",
+      "evidence_chunk_ids": [
+        "00853ca5-00e0-4e2d-88bc-1e426876c354"
+      ],
+      "ground_truth_context": [
+        "Thời gian theo kế hoạch học tập chuẩn toàn khoá đối với hình thức đào tạo vừa làm vừa học dài hơn tối thiểu 20% so với hình thức đào tạo chính quy của cùng CTĐT."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_006",
+      "question_type": "simple",
+      "question": "Một năm học tại Đại học Bách khoa Hà Nội gồm bao nhiêu học kỳ và có tổ chức học kỳ hè không?",
+      "gold_answer": "Một năm học gồm hai học kỳ chính và một học kỳ hè. Học kỳ hè được tổ chức theo yêu cầu của người học và khả năng bố trí giảng viên.",
+      "evidence_chunk_ids": [
+        "9d6ff65f-2a99-4a81-b296-37259497f611"
+      ],
+      "ground_truth_context": [
+        "Một năm học bao gồm hai học kỳ chính và một học kỳ hè. Học kỳ hè được tổ chức theo yêu cầu của người học và khả năng bố trí giảng viên của trường/khoa/viện phụ trách giảng dạy."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_007",
+      "question_type": "simple",
+      "question": "Một tín chỉ tại Đại học Bách khoa Hà Nội tương đương bao nhiêu giờ học tập định mức của người học?",
+      "gold_answer": "Một tín chỉ tương đương 50 giờ học tập định mức, bao gồm thời gian dự giờ giảng, giờ học có hướng dẫn, tự học, nghiên cứu, trải nghiệm và dự kiểm tra, đánh giá.",
+      "evidence_chunk_ids": [
+        "b0eee271-8716-4fb5-aea7-7a10250d5f72"
+      ],
+      "ground_truth_context": [
+        "Một TC được tính tương đương 50 giờ học tập định mức của người học, bao gồm cả thời gian dự giờ giảng, giờ học có hướng dẫn, tự học, nghiên cứu, trải nghiệm và dự kiểm tra, đánh giá."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_008",
+      "question_type": "simple",
+      "question": "Học phần thay thế tại Bách khoa Hà Nội được dùng trong trường hợp nào?",
+      "gold_answer": "Người học được phép học một học phần thay thế được trường/khoa/viện chỉ định để lấy kết quả thay cho một học phần yêu cầu trong chương trình nhưng không còn được giảng dạy.",
+      "evidence_chunk_ids": [
+        "3f7057bd-be25-4a6c-938d-aeef4dd5eb75"
+      ],
+      "ground_truth_context": [
+        "Người học được phép học một học phần thay thế được trường/khoa/viện chỉ định để lấy kết quả thay cho một học phần yêu cầu trong chương trình nhưng không còn được giảng dạy."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_009",
+      "question_type": "simple",
+      "question": "Trọng số điểm cuối kỳ so với điểm học phần tại Bách khoa Hà Nội được quy định trong khoảng nào?",
+      "gold_answer": "Điểm cuối kỳ có trọng số từ 0,5 đến 0,8 theo quy định trong đề cương chi tiết học phần.",
+      "evidence_chunk_ids": [
+        "2b0fbec5-5367-4be1-bb76-82c39b262de1"
+      ],
+      "ground_truth_context": [
+        "điểm cuối kỳ có trọng số từ 0,5 đến 0,8 theo quy định trong đề cương chi tiết học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_010",
+      "question_type": "simple",
+      "question": "Điểm đạt tối thiểu của học phần tốt nghiệp (đồ án/khóa luận tốt nghiệp) trong chương trình cử nhân và kỹ sư tại Bách khoa là bao nhiêu?",
+      "gold_answer": "Phải đạt từ điểm C trở lên (các học phần thông thường chỉ cần từ D trở lên).",
+      "evidence_chunk_ids": [
+        "03b524cd-cae3-43da-89ca-179ddb2dac13"
+      ],
+      "ground_truth_context": [
+        "Đối với CTĐT cử nhân và kỹ sư: từ điểm D trở lên, ngoại trừ các học phần tốt nghiệp (bao gồm đồ án tốt nghiệp/khóa luận tốt nghiệp cử nhân, đồ án tốt nghiệp kỹ sư) phải từ C trở lên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_011",
+      "question_type": "simple",
+      "question": "Điểm đạt tối thiểu của học phần trong chương trình thạc sĩ và tiến sĩ tại Bách khoa là bao nhiêu?",
+      "gold_answer": "Phải đạt từ điểm C trở lên.",
+      "evidence_chunk_ids": [
+        "03b524cd-cae3-43da-89ca-179ddb2dac13"
+      ],
+      "ground_truth_context": [
+        "Đối với CTĐT thạc sĩ và tiến sĩ: từ điểm C trở lên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_012",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa có được thi lại khi thi cuối kỳ không đạt không?",
+      "gold_answer": "Không, người học được thi cuối kỳ một lần đối với mỗi học phần đã đăng ký và không có lần thi lại.",
+      "evidence_chunk_ids": [
+        "9a1bc2c1-f6dd-496d-97eb-3ffbec889773"
+      ],
+      "ground_truth_context": [
+        "Người học được thi cuối kỳ một lần đối với mỗi học phần đã đăng ký học trong học kỳ (kể cả trường hợp có điểm quá trình là điểm liệt) và không có lần thi lại."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_013",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa không dự thi giữa kỳ vì ốm hoặc tai nạn được xử lý điểm như thế nào?",
+      "gold_answer": "Được hoãn thi sang lần thi gần nhất và điểm thi đó được tính là điểm giữa kỳ.",
+      "evidence_chunk_ids": [
+        "9a1bc2c1-f6dd-496d-97eb-3ffbec889773"
+      ],
+      "ground_truth_context": [
+        "Người học không dự thi giữa kỳ do bị ốm, tai nạn hoặc vì lý do chính đáng được hoãn thi sang lần thi gần nhất; điểm thi đó được tính là điểm giữa kỳ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_014",
+      "question_type": "simple",
+      "question": "Số tín chỉ tích lũy tại Bách khoa Hà Nội được tính như thế nào?",
+      "gold_answer": "Là tổng số tín chỉ của các học phần có điểm đạt kể từ đầu khóa, kể cả các học phần được miễn học, được công nhận tín chỉ.",
+      "evidence_chunk_ids": [
+        "76b4ca31-9305-4d56-a986-ee2455488086"
+      ],
+      "ground_truth_context": [
+        "Số TC tích lũy là tổng số TC của các học phần có điểm đạt kể từ đầu khóa kể cả các học phần được miễn học, được công nhận TC."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_015",
+      "question_type": "simple",
+      "question": "Điểm trung bình học kỳ (GPA) tại Bách khoa Hà Nội được tính như thế nào?",
+      "gold_answer": "Là trung bình cộng điểm số quy đổi theo thang 4 của các học phần đã học trong học kỳ.",
+      "evidence_chunk_ids": [
+        "76b4ca31-9305-4d56-a986-ee2455488086"
+      ],
+      "ground_truth_context": [
+        "Điểm trung bình học kỳ (GPA) là trung bình cộng điểm số quy đổi theo thang 4 của các học phần đã học trong học kỳ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_016",
+      "question_type": "simple",
+      "question": "Những sinh viên nào không được phép chuyển đến học tại cơ sở đào tạo khác theo Quy chế đào tạo của Bách khoa Hà Nội?",
+      "gold_answer": "Sinh viên năm thứ nhất, sinh viên năm cuối của khóa học và sinh viên đang bị xem xét buộc thôi học không được chuyển cơ sở đào tạo.",
+      "evidence_chunk_ids": [
+        "7f1c36ff-4967-4170-ac72-2f2dbbbb8444"
+      ],
+      "ground_truth_context": [
+        "Sinh viên năm thứ nhất, sinh viên năm cuối của khóa học và sinh viên đang bị xem xét buộc thôi học không được chuyển cơ sở đào tạo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_017",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa Hà Nội không nộp đủ học phí sau thời hạn quy định sẽ bị xử lý như thế nào?",
+      "gold_answer": "Bị đình chỉ đăng ký học tập một học kỳ kế tiếp.",
+      "evidence_chunk_ids": [
+        "3fa5596c-4f7a-4f02-97d0-ed9c49dced0c"
+      ],
+      "ground_truth_context": [
+        "Người học không nộp đủ học phí sau thời gian quy định tại khoản 1 Điều này sẽ bị đình chỉ đăng ký học tập một học kỳ kế tiếp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_018",
+      "question_type": "simple",
+      "question": "Học phí của lớp học phần rút gọn tại Bách khoa Hà Nội được tính bằng bao nhiêu phần trăm so với lớp học phần bình thường?",
+      "gold_answer": "Bằng 50% so với lớp học phần bình thường.",
+      "evidence_chunk_ids": [
+        "3bb352c2-0682-4b0a-a8e0-0ad7fd7ec72f"
+      ],
+      "ground_truth_context": [
+        "Học phí của lớp học phần rút gọn được tính ở mức 50% so với lớp học phần bình thường."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_019",
+      "question_type": "simple",
+      "question": "Sinh viên mới nhập học tại Bách khoa Hà Nội có phải thực hiện đăng ký học tập ngay từ học kỳ đầu không?",
+      "gold_answer": "Không, sinh viên mới nhập học được xếp thời khóa biểu theo kế hoạch học tập chuẩn mà không phải đăng ký, nhưng có thể tự điều chỉnh một số lớp.",
+      "evidence_chunk_ids": [
+        "29248444-b61a-40d7-b7c4-bcfc00db2e6f"
+      ],
+      "ground_truth_context": [
+        "trừ các sinh viên mới nhập học được xếp thời khóa biểu theo kế hoạch học tập chuẩn, không phải đăng ký học tập nhưng có thể tự điều chỉnh một số lớp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_020",
+      "question_type": "simple",
+      "question": "Điều kiện để mở lớp học phần rút gọn tại Bách khoa Hà Nội là gì?",
+      "gold_answer": "Sinh viên đã học học phần đó ít nhất 2 lần nhưng chưa đạt; điểm quá trình của học phần phải đạt yêu cầu theo quy định.",
+      "evidence_chunk_ids": [
+        "b696067a-87f6-4130-a37e-1e087edd1a28"
+      ],
+      "ground_truth_context": [
+        "Đối với học phần có giờ lên lớp, xem xét mở lớp học phần rút gọn căn cứ trên nguyện vọng của sinh viên khi thỏa mãn đồng thời các điều kiện sau: a) Sinh viên đã học học phần đó ít nhất 02 lần nhưng chưa đạt; b) Điểm quá trình của học phần phải đạt yêu cầu theo quy định."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_021",
+      "question_type": "simple",
+      "question": "Các môn học nào không được tính vào điểm tiến bộ học tập (CPA) của sinh viên đại học tại Bách khoa Hà Nội?",
+      "gold_answer": "Các học phần về ngoại ngữ cơ bản, Giáo dục thể chất, Giáo dục quốc phòng-an ninh không được tính vào CPA.",
+      "evidence_chunk_ids": [
+        "7c6bf82d-97c7-4769-a273-ce7824e6ba7a"
+      ],
+      "ground_truth_context": [
+        "điểm của các học phần đã học thuộc CTĐT nhưng không tính các học phần về ngoại ngữ cơ bản, Giáo dục thể chất, Giáo dục quốc phòng-an ninh"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_022",
+      "question_type": "simple",
+      "question": "Cuối mỗi học kỳ sinh viên Bách khoa cần làm gì để đánh giá chất lượng giảng dạy?",
+      "gold_answer": "Tham gia khảo sát lấy ý kiến phản hồi về các điều kiện bảo đảm chất lượng, hiệu quả học tập và sự hài lòng của người học đối với các lớp học phần.",
+      "evidence_chunk_ids": [
+        "4e7ffbde-2f12-4558-afe7-18d3d78cd91e"
+      ],
+      "ground_truth_context": [
+        "Kết thúc mỗi học kỳ, sinh viên tham gia khảo sát lấy ý kiến phản hồi về các điều kiện bảo đảm chất lượng, hiệu quả học tập và sự hài lòng của người học đối với các lớp học phần."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_023",
+      "question_type": "simple",
+      "question": "Sinh viên có thể thực hiện đồ án tốt nghiệp đại học ở đâu theo Quy chế đào tạo Bách khoa Hà Nội?",
+      "gold_answer": "Tại một cơ sở trong nước (cơ sở giáo dục đại học, viện nghiên cứu, doanh nghiệp...) hoặc tại cơ sở đào tạo ở nước ngoài theo chương trình trao đổi sinh viên đã được phê duyệt.",
+      "evidence_chunk_ids": [
+        "0caa867f-05b1-48d4-86fb-865a1103240b"
+      ],
+      "ground_truth_context": [
+        "Sinh viên được phép thực hiện đồ án tốt nghiệp/khóa luận tốt nghiệp tại một cơ sở trong nước (cơ sở giáo dục đại học, viện nghiên cứu, doanh nghiệp,...) hoặc tại một cơ sở đào tạo ở nước ngoài theo chương trình trao đổi sinh viên đã được phê duyệt."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_024",
+      "question_type": "simple",
+      "question": "Điểm cuối kỳ của đồ án tốt nghiệp đại học tại Bách khoa được tính như thế nào?",
+      "gold_answer": "Là điểm bảo vệ tại hội đồng chấm ĐATN, được tính bằng trung bình cộng điểm của các thành viên hội đồng, làm tròn tới một chữ số thập phân. Nếu điểm của một thành viên hội đồng cho dưới 5 thì điểm đó được xử lý theo quy định riêng.",
+      "evidence_chunk_ids": [
+        "31b424e3-fd6e-46e6-8e94-be90e99a667f"
+      ],
+      "ground_truth_context": [
+        "Điểm cuối kỳ là điểm bảo vệ tại hội đồng chấm ĐATN, được tính bằng trung bình cộng điểm của các thành viên hội đồng, làm tròn tới một chữ số thập phân. Nếu điểm của một thành viên hội đồng cho dưới 5 thì điể"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_025",
+      "question_type": "simple",
+      "question": "Đại học Bách khoa Hà Nội xét tốt nghiệp đại học mấy đợt trong năm và vào thời điểm nào?",
+      "gold_answer": "Xét 3 đợt trong năm: cuối mỗi học kỳ chính và cuối học kỳ hè.",
+      "evidence_chunk_ids": [
+        "b1cd7b78-9893-4784-8f6c-b6dce5f07eb5"
+      ],
+      "ground_truth_context": [
+        "ĐHBK Hà Nội xét tốt nghiệp theo 03 đợt trong năm, cụ thể là cuối mỗi học kỳ chính và cuối học kỳ hè."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_026",
+      "question_type": "simple",
+      "question": "Sinh viên đang bị truy cứu trách nhiệm hình sự tại thời điểm xét tốt nghiệp có được công nhận tốt nghiệp không?",
+      "gold_answer": "Không, một trong các điều kiện để được xét công nhận tốt nghiệp là tại thời điểm xét không bị truy cứu trách nhiệm hình sự hoặc không đang trong thời gian bị kỷ luật ở mức đình chỉ học tập.",
+      "evidence_chunk_ids": [
+        "7e4d4297-1f98-4602-aeaa-539cd77c3c1f"
+      ],
+      "ground_truth_context": [
+        "Tại thời điểm xét tốt nghiệp không bị truy cứu trách nhiệm hình sự hoặc không đang trong thời gian bị kỷ luật ở mức đình chỉ học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_027",
+      "question_type": "simple",
+      "question": "Điểm trung bình toàn khóa của sinh viên tốt nghiệp đại học tại Bách khoa Hà Nội được tính dựa trên cơ sở nào?",
+      "gold_answer": "Là điểm trung bình tích lũy toàn khóa tính theo các học phần đăng ký tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "e202e4b3-87a0-4985-95fa-9d5d5dc804fa"
+      ],
+      "ground_truth_context": [
+        "Điểm trung bình toàn khóa là điểm trung bình tích lũy toàn khóa tính theo các học phần đăng ký tốt nghiệp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_028",
+      "question_type": "simple",
+      "question": "Nghỉ học tạm thời tại Bách khoa Hà Nội được định nghĩa là trường hợp nào?",
+      "gold_answer": "Là trường hợp việc nghỉ học có hiệu lực từ 01 học kỳ trở lên.",
+      "evidence_chunk_ids": [
+        "88e7d3dc-faed-4f2d-8da8-242f74d17763"
+      ],
+      "ground_truth_context": [
+        "Nghỉ học tạm thời là trường hợp việc nghỉ học có hiệu lực từ 01 học kỳ trở lên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_029",
+      "question_type": "simple",
+      "question": "Khi chế độ nghỉ học tạm thời có hiệu lực, các học phần đã đăng ký trong học kỳ đó sẽ bị xử lý như thế nào?",
+      "gold_answer": "Các học phần đã đăng ký học trong học kỳ sẽ bị hủy và tính học phí theo quy định tại khoản 4 Điều 9 Quy chế (trừ một số trường hợp đặc biệt như điều động vào lực lượng vũ trang, ốm nặng, thai sản).",
+      "evidence_chunk_ids": [
+        "7eb93900-883a-4e4f-9a10-4f4053e3d6e5"
+      ],
+      "ground_truth_context": [
+        "Khi chế độ nghỉ tạm thời có hiệu lực thì các học phần đã đăng ký học trong học kỳ sẽ bị hủy và tính học phí theo quy định tại khoản 4 Điều 9 Quy chế này"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_030",
+      "question_type": "simple",
+      "question": "Sinh viên đại học xin nghỉ học tạm thời vì lý do thông thường (ngoài ốm, thai sản, nghĩa vụ quân sự) tối đa được nghỉ bao lâu và cần học tối thiểu bao lâu trước đó?",
+      "gold_answer": "Phải học ít nhất một học kỳ tại Bách khoa trước khi xin nghỉ. Thời gian nghỉ tối đa chưa được nêu rõ trong đoạn trích ngoài các trường hợp đặc biệt.",
+      "evidence_chunk_ids": [
+        "febdd53d-8753-4933-b2ec-dbdf8e4ae2a9"
+      ],
+      "ground_truth_context": [
+        "Đối với trường hợp xin nghỉ học tạm thời vì những lý do khác..., sinh viên phải học ít nhất"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_031",
+      "question_type": "simple",
+      "question": "Sinh viên muốn chuyển sang chương trình đào tạo khác tại Bách khoa Hà Nội phải đã học xong ít nhất bao nhiêu thời gian?",
+      "gold_answer": "Phải học hết năm học thứ nhất (tính cả thời gian nghỉ tạm thời nếu có).",
+      "evidence_chunk_ids": [
+        "38277700-7201-46d1-8e61-992b5ed55991"
+      ],
+      "ground_truth_context": [
+        "Sinh viên học hết năm học thứ nhất (tính cả thời gian nghỉ tạm thời nếu có) được xem xét chuyển sang học một CTĐT khác nếu đáp ứng đủ các điều kiện sau:"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_032",
+      "question_type": "simple",
+      "question": "Sinh viên bị buộc thôi học do kết quả học tập yếu kém tại Bách khoa Hà Nội có thể chuyển sang hình thức học nào?",
+      "gold_answer": "Được quyền đề nghị chuyển sang học một chương trình thuộc hình thức vừa làm vừa học (VLVH) của Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "f59f45fa-349c-48e5-86ca-2491427af916"
+      ],
+      "ground_truth_context": [
+        "Sinh viên bị buộc thôi học do kết quả học tập yếu kém; được quyền đề nghị chuyển sang học một chương trình thuộc hình thức VLVH của ĐHBK Hà Nội nếu có nguyện vọng:"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_033",
+      "question_type": "simple",
+      "question": "Thời gian tối đa được phép học đối với sinh viên học cùng lúc hai chương trình tại Bách khoa Hà Nội là bao lâu?",
+      "gold_answer": "Là thời gian tối đa quy định cho chương trình thứ nhất.",
+      "evidence_chunk_ids": [
+        "327bc26f-7338-4aba-a031-f9a2f3969019"
+      ],
+      "ground_truth_context": [
+        "Thời gian tối đa được phép học đối với sinh viên học cùng lúc hai chương trình là thời gian tối đa quy định cho chương trình thứ nhất."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_034",
+      "question_type": "simple",
+      "question": "Sinh viên Bách khoa bị nâng một mức cảnh báo học tập khi có số tín chỉ không đạt trong học kỳ là bao nhiêu?",
+      "gold_answer": "Khi số tín chỉ không đạt trong học kỳ lớn hơn 8.",
+      "evidence_chunk_ids": [
+        "a7139882-07f2-4698-a564-e44ce1f77bfa"
+      ],
+      "ground_truth_context": [
+        "Nâng một mức cảnh báo học tập đối với sinh viên có số TC không đạt trong học kỳ lớn hơn 8."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_035",
+      "question_type": "simple",
+      "question": "Sinh viên chương trình chuẩn đang bị cảnh báo học tập từ mức 2 trở lên tại Bách khoa được đăng ký tối đa bao nhiêu tín chỉ ở học kỳ 1 của năm học?",
+      "gold_answer": "Tối đa 14 tín chỉ.",
+      "evidence_chunk_ids": [
+        "2cd48eb8-7595-44e8-bad8-61741b6cbfaf"
+      ],
+      "ground_truth_context": [
+        "Sinh viên thuộc các CTĐT chuẩn được đăng ký tối đa 14 T"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_036",
+      "question_type": "simple",
+      "question": "Học viên chương trình kỹ sư tại Bách khoa Hà Nội được đăng ký tối thiểu và tối đa bao nhiêu tín chỉ mỗi học kỳ chính?",
+      "gold_answer": "Tối thiểu 12 TC và tối đa 24 TC trong một học kỳ chính.",
+      "evidence_chunk_ids": [
+        "da4da67a-5a72-4574-ba57-21e7c93be4c8"
+      ],
+      "ground_truth_context": [
+        "Học viên có thể đăng ký tối thiểu 12 TC và tối đa 24 TC trong một học kỳ chính."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_037",
+      "question_type": "simple",
+      "question": "Học viên chương trình kỹ sư tại Bách khoa được giao đề tài ĐATN kỹ sư khi nào?",
+      "gold_answer": "Chỉ khi đã được công nhận là học viên chính thức của chương trình đào tạo kỹ sư và đảm bảo các điều kiện học phần ĐATN kỹ sư theo đề cương chi tiết.",
+      "evidence_chunk_ids": [
+        "048eac25-bf44-4287-9011-9e8dfc5c8729"
+      ],
+      "ground_truth_context": [
+        "Học viên được giao đề tài Đồ án tốt nghiệp kỹ sư (DATN KS) chỉ khi đã được công nhận là học viên chính thức của CTĐT kỹ sư và đảm bảo các điều kiện học phần DATN KS, bao gồm điều kiện học phần học trước, tiên quyết, song hành theo đề cương"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_038",
+      "question_type": "simple",
+      "question": "Sau khi học viên kỹ sư đủ điều kiện tốt nghiệp tại Bách khoa Hà Nội, bằng tốt nghiệp được cấp trong thời hạn bao lâu?",
+      "gold_answer": "Trong thời hạn 03 tháng tính từ thời điểm đáp ứng đầy đủ điều kiện tốt nghiệp và hoàn thành các nghĩa vụ liên quan.",
+      "evidence_chunk_ids": [
+        "d7f2014c-ffbd-4eac-8bf1-8513e0ecf0c4"
+      ],
+      "ground_truth_context": [
+        "Giám đốc DHBK Hà Nội ra quyết định công nhận tốt nghiệp và cấp bằng tốt nghiệp trong thời hạn 03 tháng tính từ thời điểm đáp ứng đầy đủ điều kiện tốt nghiệp và hoàn thành các nghĩa vụ liên quan."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_039",
+      "question_type": "simple",
+      "question": "Học viên kỹ sư tại Bách khoa xin nghỉ học tạm thời vì lý do thông thường được nghỉ tối đa bao nhiêu học kỳ và thời gian đó có tính vào thời gian học không?",
+      "gold_answer": "Nghỉ tối đa 02 học kỳ chính và thời gian đó được tính vào thời gian học tập.",
+      "evidence_chunk_ids": [
+        "52eaa031-8ee5-40ad-888d-1e2f800b51e5"
+      ],
+      "ground_truth_context": [
+        "thời gian nghỉ học tối đa cho phép là 02 học kỳ chính và được tính vào thời gian học tập."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_040",
+      "question_type": "simple",
+      "question": "Học viên thạc sĩ hình thức chính quy tại Bách khoa Hà Nội được đăng ký tối đa bao nhiêu tín chỉ trong một học kỳ chính?",
+      "gold_answer": "Tối đa 24 tín chỉ trong một học kỳ chính.",
+      "evidence_chunk_ids": [
+        "4dba1154-7029-4117-beb7-8b8f6d0ff81d"
+      ],
+      "ground_truth_context": [
+        "Học viên được đào tạo theo hình thức chính quy có thể đăng ký tối đa 24 TC trong một học kỳ chính"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_041",
+      "question_type": "simple",
+      "question": "Học viên thạc sĩ tốt nghiệp đại học ngành phù hợp tại Bách khoa Hà Nội phải học bổ sung tối đa bao nhiêu tín chỉ?",
+      "gold_answer": "Phải học bổ sung tối đa 15 tín chỉ.",
+      "evidence_chunk_ids": [
+        "a68a1d75-9cef-4f0d-a75c-03d400c7d7ed"
+      ],
+      "ground_truth_context": [
+        "Học viên tốt nghiệp đại học ngành phù hợp so với ngành đăng ký ở trình độ thạc sĩ sẽ phải học bổ sung tối đa 15 TC."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_042",
+      "question_type": "simple",
+      "question": "Học viên chương trình tích hợp cử nhân-thạc sĩ tại Bách khoa được đăng ký học trước tối đa bao nhiêu tín chỉ thuộc chương trình thạc sĩ?",
+      "gold_answer": "Tối đa 15 tín chỉ.",
+      "evidence_chunk_ids": [
+        "eef54984-8702-4bed-80cc-c80308ef2150"
+      ],
+      "ground_truth_context": [
+        "Học viên học chương trình tích hợp cử nhân-thạc sĩ của ĐHBK Hà Nội được đăng ký học trước tối đa 15 TC các học phần thuộc CTĐT thạc sĩ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_043",
+      "question_type": "simple",
+      "question": "Học viên thạc sĩ Bách khoa có thể đăng ký đề tài luận văn theo những cách nào?",
+      "gold_answer": "Hai cách: (a) chọn đề tài từ danh mục do trường/khoa/viện đề xuất; (b) tự đề xuất tên đề tài và đề cương nghiên cứu.",
+      "evidence_chunk_ids": [
+        "92a5e3bb-c295-422e-aed1-45200838d227"
+      ],
+      "ground_truth_context": [
+        "Học viên thực hiện đăng ký đề tài luận văn trong học kỳ đầu của khóa học theo hai cách sau: a) Chọn lựa một đề tài và tên người hướng dẫn trong danh mục các đề tài do trường/khoa/viện đề xuất. b) Tự đề xuất tên đề tài luận văn, đề cương nghiên cứu"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_044",
+      "question_type": "simple",
+      "question": "Chuẩn ngoại ngữ đầu ra tối thiểu để học viên được bảo vệ luận văn thạc sĩ tại Bách khoa Hà Nội là gì?",
+      "gold_answer": "Đạt chuẩn ngoại ngữ đầu ra tương đương bậc 4/6 theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam hoặc các chứng chỉ tương đương.",
+      "evidence_chunk_ids": [
+        "4ad34138-cb34-4c81-8b21-acf5e4a1cc74"
+      ],
+      "ground_truth_context": [
+        "Đạt chuẩn ngoại ngữ đầu ra tương đương bậc 4/6 theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam hoặc các c"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_045",
+      "question_type": "simple",
+      "question": "Điểm luận văn thạc sĩ tại Bách khoa Hà Nội được tính như thế nào?",
+      "gold_answer": "Là điểm bảo vệ luận văn cộng điểm thưởng công bố khoa học của học viên (nếu có). Điểm bảo vệ là trung bình cộng điểm của các thành viên hội đồng có mặt, làm tròn tới một chữ số thập phân.",
+      "evidence_chunk_ids": [
+        "f385e878-06af-4651-8567-a26354ba7096"
+      ],
+      "ground_truth_context": [
+        "Điểm luận văn thạc sĩ là điểm bảo vệ luận văn cộng điểm thưởng công bố khoa học của học viên (nếu có)... Điểm bảo vệ luận văn là trung bình cộng điểm của các thành viên hội đồng đánh giá luận văn có mặt trong buổi bảo vệ và được làm tròn tới một chữ số thập phân."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_046",
+      "question_type": "simple",
+      "question": "Học viên thạc sĩ Bách khoa bảo vệ luận văn lần đầu không đạt được phép bảo vệ lại trong thời hạn bao lâu?",
+      "gold_answer": "Trong thời hạn 3 tháng tính từ ngày bảo vệ luận văn lần thứ nhất (nếu còn được phép học tối thiểu 3 tháng).",
+      "evidence_chunk_ids": [
+        "4f875c8c-ac20-46e8-9f72-1906d28a618e"
+      ],
+      "ground_truth_context": [
+        "học viên được phép chỉnh sửa, bổ sung luận văn để bảo vệ lần thứ hai trong thời hạn 3 tháng tính từ ngày bảo vệ luận văn lần thứ nhất."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_047",
+      "question_type": "simple",
+      "question": "Luận văn thạc sĩ sau khi được Hội đồng thông qua cần được công khai trực tuyến trong thời gian tối thiểu bao lâu trước khi xét tốt nghiệp?",
+      "gold_answer": "Ít nhất 30 ngày trên trang thông tin điện tử thuộc Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "af34153a-8b1e-4280-8b9f-82e63705702e"
+      ],
+      "ground_truth_context": [
+        "Công khai toàn văn quyển luận văn trên trang thông tin điện tử thuộc ĐHBK Hà Nội theo quy định trong thời gian ít nhất 30 ng"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_048",
+      "question_type": "simple",
+      "question": "Hạng tốt nghiệp thạc sĩ tại Bách khoa Hà Nội được xếp loại 'Xuất sắc' khi CPA đạt bao nhiêu?",
+      "gold_answer": "CPA từ 3,6 đến 4,0 được xếp loại Xuất sắc.",
+      "evidence_chunk_ids": [
+        "272d72e7-326c-4c72-8816-a645d10f2391"
+      ],
+      "ground_truth_context": [
+        "CPA | 2,0–2,49 | 2,5–3,19 | 3,2–3,59 | 3,6–4,0 | Xếp loại | Trung..."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_049",
+      "question_type": "simple",
+      "question": "Các học phần được công nhận (transfer credit) có được tính vào CPA xếp hạng tốt nghiệp thạc sĩ tại Bách khoa không?",
+      "gold_answer": "Không, các học phần được công nhận không đưa vào tính CPA để xếp hạng tốt nghiệp thạc sĩ.",
+      "evidence_chunk_ids": [
+        "272d72e7-326c-4c72-8816-a645d10f2391"
+      ],
+      "ground_truth_context": [
+        "Riêng các học phần được công nhận không đưa vào tính CPA để xếp hạng tốt nghiệp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_050",
+      "question_type": "simple",
+      "question": "Học viên thạc sĩ Bách khoa xin nghỉ học tạm thời vì lý do thông thường được nghỉ tối đa bao lâu và cần điều kiện gì?",
+      "gold_answer": "Tối đa 12 tháng, được tính vào thời gian học tập. Phải đã học ít nhất một học kỳ, không thuộc diện bị xem xét buộc thôi học hoặc xem xét kỷ luật.",
+      "evidence_chunk_ids": [
+        "66bb3caa-bbb5-44c2-bf76-7077d8a48922"
+      ],
+      "ground_truth_context": [
+        "Thời gian nghỉ học tối đa là 12 tháng và được tính vào thời gian học tập. Học viên thuộc diện này phải học ít nhất một học kỳ tại ĐHBK Hà Nội, không thuộc các trường hợp bị xem xét buộc thôi học hoặc xem xét kỷ luật"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_051",
+      "question_type": "simple",
+      "question": "Học viên thạc sĩ đã có quyết định thôi học tại Bách khoa Hà Nội có được tiếp nhận trở lại không?",
+      "gold_answer": "Không, học viên đã có quyết định cho thôi học không được tiếp nhận trở lại.",
+      "evidence_chunk_ids": [
+        "7881a221-cd8d-431e-9806-2629b2a9e170"
+      ],
+      "ground_truth_context": [
+        "Học viên đã có quyết định cho thôi học không được tiếp nhận trở lại."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_052",
+      "question_type": "simple",
+      "question": "Nghiên cứu sinh Bách khoa Hà Nội được coi là thành viên chính thức của đơn vị chuyên môn từ khi nào?",
+      "gold_answer": "Ngay sau khi có quyết định công nhận NCS.",
+      "evidence_chunk_ids": [
+        "a4a20f10-02dc-444f-9070-1b4472ea0eba"
+      ],
+      "ground_truth_context": [
+        "NCS được coi là thành viên chính thức của trường/khoa/viện (sau đây gọi là đơn vị chuyên môn) ngay sau khi có quyết định công nhận NCS;"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_053",
+      "question_type": "simple",
+      "question": "Nghiên cứu sinh đã có bằng thạc sĩ tại Bách khoa Hà Nội phải học bổ sung tối đa bao nhiêu tín chỉ?",
+      "gold_answer": "Khối lượng bổ sung được xác định căn cứ vào các học phần đã tích lũy ở trình độ thạc sĩ và yêu cầu của đề tài nghiên cứu (không nêu cụ thể số TC tối đa trong đoạn trích).",
+      "evidence_chunk_ids": [
+        "3b3e1961-e8f0-487a-9c7a-81df9e882802"
+      ],
+      "ground_truth_context": [
+        "Đối với NCS đã có bằng thạc sĩ: khối lượng kiến thức cần phải học bổ sung được xác định căn cứ vào các học phần đã tích lũy ở trình độ thạc sĩ, kiến thức cần cập nhật, bổ sung và yêu cầu của lĩnh vực, đề tài nghiên cứu."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_054",
+      "question_type": "simple",
+      "question": "Mỗi nghiên cứu sinh Bách khoa Hà Nội phải hoàn thành tối thiểu bao nhiêu tín chỉ học phần tiến sĩ?",
+      "gold_answer": "Tối thiểu 8 tín chỉ tương ứng 3–4 học phần tiến sĩ.",
+      "evidence_chunk_ids": [
+        "7acbdcd0-823c-46f6-b437-b92a2ac60caa"
+      ],
+      "ground_truth_context": [
+        "Mỗi NCS phải hoàn thành tối thiểu 8 TC tương ứng 3–4 học phần tiến sĩ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_055",
+      "question_type": "simple",
+      "question": "Nghiên cứu sinh Bách khoa có thể sử dụng nội dung bài báo nào để phát triển thành chuyên đề tiến sĩ?",
+      "gold_answer": "Có thể sử dụng nội dung bài báo liên quan trực tiếp đến kết quả luận án tiến sĩ công bố trên tạp chí ISI/Scopus.",
+      "evidence_chunk_ids": [
+        "765280f1-9149-4f97-a5a7-a168ab873448"
+      ],
+      "ground_truth_context": [
+        "NCS có thể sử dụng nội dung bài báo của mình liên quan trực tiếp đến kết quả luận án tiến sĩ công bố trên tạp chí ISI/Scopus để phát triển thành chuyên đề tiến sĩ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_056",
+      "question_type": "simple",
+      "question": "Nghiên cứu sinh Bách khoa Hà Nội cần là tác giả chính của tối thiểu bao nhiêu bài báo để đủ điều kiện bảo vệ luận án cấp cơ sở?",
+      "gold_answer": "Tối thiểu 2 bài báo về kết quả nghiên cứu của luận án, trong đó NCS là tác giả đứng tên đầu hoặc tác giả liên hệ duy nhất.",
+      "evidence_chunk_ids": [
+        "f327fb5e-7469-4715-86e0-99362f49f0dd"
+      ],
+      "ground_truth_context": [
+        "Là tác giả chính (tác giả đứng tên đầu hoặc tác giả liên hệ duy nhất) của tối thiểu 2 bài báo về kết quả nghiên cứu c"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_057",
+      "question_type": "simple",
+      "question": "Tổng điểm công trình nghiên cứu tối thiểu NCS Bách khoa cần đạt để được bảo vệ luận án cấp cơ sở là bao nhiêu?",
+      "gold_answer": "Phải đạt từ 2,0 điểm trở lên tính theo điểm tối đa do Hội đồng giáo sư Nhà nước quy định cho mỗi loại công trình.",
+      "evidence_chunk_ids": [
+        "c114157d-dc8f-4579-9f86-3d4a1e02d8d2"
+      ],
+      "ground_truth_context": [
+        "Tổng điểm của tất cả các công trình nghiên cứu trong khoản b mục 1 của Điều này phải đạt từ 2,0 điểm trở lên tính theo điểm tối đa do hội đồng giáo sư Nhà nước quy định cho mỗi loại công trình"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_058",
+      "question_type": "simple",
+      "question": "Luận án tiến sĩ tại Bách khoa bị hội đồng cấp Đại học không thông qua khi có bao nhiêu thành viên bỏ phiếu không đồng ý?",
+      "gold_answer": "Luận án không được thông qua nếu có từ 2 thành viên hội đồng cấp Đại học có mặt tại buổi bảo vệ bỏ phiếu không đồng ý.",
+      "evidence_chunk_ids": [
+        "da79c649-3f20-4e1e-9e13-e1cde64e5eb0"
+      ],
+      "ground_truth_context": [
+        "luận án không được thông qua nếu có từ 2 thành viên hội đồng cấp Đại học có mặt tại buổi bảo vệ trả lời bỏ phiếu không đồng ý."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_059",
+      "question_type": "simple",
+      "question": "NCS Bách khoa được phép đánh giá lại luận án tiến sĩ lần hai trong thời hạn bao lâu?",
+      "gold_answer": "Trong vòng 6 tháng nếu NCS còn thời gian theo quy định.",
+      "evidence_chunk_ids": [
+        "68fd120f-ebfd-41c8-9728-fcb20a96256b"
+      ],
+      "ground_truth_context": [
+        "NCS được phép chỉnh sửa, bổ sung luận án và đề nghị bảo vệ luận án lần thứ hai trong vòng 6 tháng nếu NCS còn thời gian theo quy định."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_060",
+      "question_type": "simple",
+      "question": "Toàn văn luận án tiến sĩ của NCS Bách khoa cần được đăng trực tuyến trong thời gian bao lâu trước khi được xét cấp bằng?",
+      "gold_answer": "Trong thời gian 3 tháng trên trang thông tin điện tử thuộc Đại học Bách khoa Hà Nội (trừ những luận án được đánh giá theo chế độ mật).",
+      "evidence_chunk_ids": [
+        "c003758b-eba0-426e-8a33-e8b3761171f1"
+      ],
+      "ground_truth_context": [
+        "Toàn văn luận án hoàn chỉnh cuối cùng của NCS được đăng trên trang thông tin điện tử thuộc DHBK Hà Nội (trừ những luận án được đánh giá theo chế độ mật) trong thời gian 3 tháng."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_061",
+      "question_type": "simple",
+      "question": "NCS Bách khoa Hà Nội được phép thay đổi đề tài luận án trong khoảng thời gian nào?",
+      "gold_answer": "Chỉ được phép trong khoảng nửa thời gian đầu của chương trình đào tạo tiến sĩ.",
+      "evidence_chunk_ids": [
+        "3ddc722d-21c5-4f9d-9ae9-f8c77e617dbb"
+      ],
+      "ground_truth_context": [
+        "Việc thay đổi đề tài luận án theo đề xuất của NCS và người hướng dẫn chỉ được phép trong khoảng nửa thời gian đầu của CTĐT tiến sĩ."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_062",
+      "question_type": "simple",
+      "question": "NCS Bách khoa Hà Nội muốn bổ sung hoặc thay đổi người hướng dẫn phải thực hiện chậm nhất trước khi nào?",
+      "gold_answer": "Chậm nhất trước 12 tháng tính đến ngày kết thúc khóa đào tạo tiến sĩ theo quyết định công nhận NCS (bao gồm cả thời gian gia hạn nếu có).",
+      "evidence_chunk_ids": [
+        "3ddc722d-21c5-4f9d-9ae9-f8c77e617dbb"
+      ],
+      "ground_truth_context": [
+        "Việc bổ sung hoặc thay đổi người hướng dẫn được thực hiện chậm nhất trước 12 tháng tính đến ngày kết thúc khoá đào tạo tiến sĩ theo quyết định công nhận NCS (bao gồm cả thời gian gia hạn nếu có)"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_063",
+      "question_type": "simple",
+      "question": "NCS Bách khoa bị buộc thôi học trong những trường hợp nào?",
+      "gold_answer": "Khi hết thời gian quy định mà không hoàn thành chương trình đào tạo hoặc luận án không được hội đồng cấp Đại học thông qua (kể cả sau khi đánh giá lại); hoặc vi phạm nghiêm trọng quy định về thực hiện trách nhiệm của NCS.",
+      "evidence_chunk_ids": [
+        "ba09a7a7-fd4f-4520-b85a-10a0928d3517"
+      ],
+      "ground_truth_context": [
+        "NCS bị buộc thôi học trong những trường hợp sau: a) Hết thời gian theo quy định, NCS không hoàn thành CTĐT hoặc luận án của NCS không được hội đồng đánh giá luận án cấp Đại học thông qua (bao gồm cả trường hợp cho phép đánh giá lại theo quy định tại Điều 43 Quy chế này). b) Vi phạm nghiêm trọng quy định về thực hiện trách nhiệm của NCS"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_064",
+      "question_type": "simple",
+      "question": "Kết quả các học phần tiến sĩ tại Bách khoa Hà Nội có giá trị công nhận trong thời hạn bao nhiêu năm?",
+      "gold_answer": "Trong thời hạn 05 năm.",
+      "evidence_chunk_ids": [
+        "04e35060-6754-4a01-8486-7ab68d475b75"
+      ],
+      "ground_truth_context": [
+        "Kết quả các học phần tiến sĩ có giá trị công nhận trong thời hạn 05 năm."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_065",
+      "question_type": "simple",
+      "question": "Chương trình ELITECH tại Đại học Bách khoa Hà Nội là viết tắt của cụm từ gì?",
+      "gold_answer": "ELITECH là viết tắt của cụm từ Elite Technology Program.",
+      "evidence_chunk_ids": [
+        "d2c3a4c4-dbc6-4542-b2b0-cb6897a7f654"
+      ],
+      "ground_truth_context": [
+        "Chương trình ELITECH (từ viết tắt của cụm từ Elite Technology Program) là CTĐT chất lượng cao"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_066",
+      "question_type": "simple",
+      "question": "Chương trình đào tạo Tài năng tại Bách khoa Hà Nội được thiết kế nhằm mục đích gì?",
+      "gold_answer": "Nhằm phát hiện, bồi dưỡng những sinh viên có năng lực xuất sắc, tư duy sáng tạo và khả năng nghiên cứu chuyên sâu.",
+      "evidence_chunk_ids": [
+        "e5f9f577-740f-40c6-9190-e4d675bc911e"
+      ],
+      "ground_truth_context": [
+        "Chương trình đào tạo Tài năng thuộc nhóm chương trình ELITECH, được thiết kế nhằm phát hiện, bồi dưỡng những sinh viên có năng lực xuất sắc, tư duy sáng tạo và khả năng nghiên cứu chuyên sâu."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_067",
+      "question_type": "simple",
+      "question": "Kết quả học tập đã tích lũy từ trình độ đào tạo khác hoặc cơ sở đào tạo khác có được xem xét công nhận tại Bách khoa Hà Nội không?",
+      "gold_answer": "Có, kết quả học tập đó được xem xét công nhận, chuyển đổi sang tín chỉ của những học phần trong chương trình đào tạo.",
+      "evidence_chunk_ids": [
+        "040125ca-904b-49d4-8ef6-ae3318bc1092"
+      ],
+      "ground_truth_context": [
+        "Kết quả học tập của người học đã tích lũy từ một trình độ đào tạo khác, một CTĐT khác hoặc từ một cơ sở đào tạo khác được xem xét công nhận, chuyển đổi sang TC của những học phần trong CTĐT."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_068",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa chưa đóng học phí và đang bị cảnh báo học tập mức 2 thì sẽ bị ảnh hưởng như thế nào khi đăng ký học kỳ tiếp theo?",
+      "gold_answer": "Bị đình chỉ đăng ký học tập một học kỳ do không đóng học phí (Điều 9), và nếu được đăng ký thì bị giới hạn tối đa 14 TC do cảnh báo mức 2 (Điều 19).",
+      "evidence_chunk_ids": [
+        "3fa5596c-4f7a-4f02-97d0-ed9c49dced0c",
+        "2cd48eb8-7595-44e8-bad8-61741b6cbfaf"
+      ],
+      "ground_truth_context": [
+        "Người học không nộp đủ học phí sau thời gian quy định tại khoản 1 Điều này sẽ bị đình chỉ đăng ký học tập một học kỳ kế tiếp.",
+        "Sinh viên thuộc các CTĐT chuẩn được đăng ký tối đa 14 T"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_069",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa muốn đăng ký lớp học phần rút gọn cần đáp ứng điều kiện gì và học phí cho lớp đó là bao nhiêu?",
+      "gold_answer": "Điều kiện: đã học học phần đó ít nhất 2 lần nhưng chưa đạt và điểm quá trình đạt yêu cầu. Học phí lớp rút gọn bằng 50% so với lớp học phần bình thường.",
+      "evidence_chunk_ids": [
+        "b696067a-87f6-4130-a37e-1e087edd1a28",
+        "3bb352c2-0682-4b0a-a8e0-0ad7fd7ec72f"
+      ],
+      "ground_truth_context": [
+        "Sinh viên đã học học phần đó ít nhất 02 lần nhưng chưa đạt; Điểm quá trình của học phần phải đạt yêu cầu theo quy định.",
+        "Học phí của lớp học phần rút gọn được tính ở mức 50% so với lớp học phần bình thường."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_070",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa thi trượt môn học cuối kỳ có được thi lại không, và nếu muốn học lại môn đó vào học kỳ sau thì điểm học phần trước có bị tính vào CPA không?",
+      "gold_answer": "Không được thi lại (không có lần thi lại theo Điều 6). Khi đăng ký học lại môn đó vào học kỳ sau, điểm của lần học mới sẽ được cập nhật; các học phần đã học được tính vào GPA/CPA theo quy định tại Điều 7.",
+      "evidence_chunk_ids": [
+        "9a1bc2c1-f6dd-496d-97eb-3ffbec889773",
+        "76b4ca31-9305-4d56-a986-ee2455488086"
+      ],
+      "ground_truth_context": [
+        "không có lần thi lại.",
+        "Số TC tích lũy là tổng số TC của các học phần có điểm đạt kể từ đầu khóa"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_071",
+      "question_type": "multi_hop",
+      "question": "Điểm đạt của học phần thông thường và học phần tốt nghiệp cử nhân tại Bách khoa khác nhau thế nào, và điểm học phần thạc sĩ có khác không?",
+      "gold_answer": "Học phần thông thường chương trình cử nhân/kỹ sư: từ D trở lên. Học phần tốt nghiệp (ĐATN/KLTN) cử nhân và ĐATN kỹ sư: phải từ C trở lên. Học phần thạc sĩ và tiến sĩ: từ C trở lên.",
+      "evidence_chunk_ids": [
+        "03b524cd-cae3-43da-89ca-179ddb2dac13"
+      ],
+      "ground_truth_context": [
+        "Đối với CTĐT cử nhân và kỹ sư: từ điểm D trở lên, ngoại trừ các học phần tốt nghiệp...phải từ C trở lên. Đối với CTĐT thạc sĩ và tiến sĩ: từ điểm C trở lên."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_072",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa nghỉ học tạm thời, khi trở lại các học phần đã đăng ký trước khi nghỉ sẽ được xử lý như thế nào và học phí có được hoàn lại không?",
+      "gold_answer": "Các học phần đã đăng ký bị hủy khi chế độ nghỉ có hiệu lực. Học phí được tính theo quy định khoản 4 Điều 9 (trừ trường hợp nghĩa vụ quân sự, ốm nặng, thai sản sẽ được hoàn lại toàn bộ học phí học kỳ đó).",
+      "evidence_chunk_ids": [
+        "7eb93900-883a-4e4f-9a10-4f4053e3d6e5"
+      ],
+      "ground_truth_context": [
+        "Khi chế độ nghỉ tạm thời có hiệu lực thì các học phần đã đăng ký học trong học kỳ sẽ bị hủy và tính học phí theo quy định tại khoản 4 Điều 9 Quy chế này"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_073",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa bị buộc thôi học do học tập yếu kém có thể học tiếp được không, và theo hình thức nào?",
+      "gold_answer": "Có thể, được quyền đề nghị chuyển sang học một chương trình thuộc hình thức vừa làm vừa học (VLVH) của Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "f59f45fa-349c-48e5-86ca-2491427af916"
+      ],
+      "ground_truth_context": [
+        "Sinh viên bị buộc thôi học do kết quả học tập yếu kém; được quyền đề nghị chuyển sang học một chương trình thuộc hình thức VLVH của ĐHBK Hà Nội"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_074",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa học chương trình thứ hai khi chương trình thứ nhất hết thời gian tối đa thì sao?",
+      "gold_answer": "Thời gian tối đa học chương trình thứ hai bằng thời gian tối đa của chương trình thứ nhất. Nếu chương trình thứ nhất đã hết thời gian tối đa, sinh viên cũng không được tiếp tục học chương trình thứ hai.",
+      "evidence_chunk_ids": [
+        "327bc26f-7338-4aba-a031-f9a2f3969019"
+      ],
+      "ground_truth_context": [
+        "Thời gian tối đa được phép học đối với sinh viên học cùng lúc hai chương trình là thời gian tối đa quy định cho chương trình thứ nhất."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_075",
+      "question_type": "multi_hop",
+      "question": "Học viên kỹ sư tại Bách khoa bị đình chỉ học do không đóng học phí có bị giới hạn số tín chỉ đăng ký ở học kỳ sau không?",
+      "gold_answer": "Bị đình chỉ đăng ký học tập một học kỳ kế tiếp (Điều 9). Chương trình kỹ sư không áp dụng ngưỡng cảnh báo tín chỉ như chương trình đại học, nên không bị giới hạn TC riêng do cảnh báo.",
+      "evidence_chunk_ids": [
+        "3fa5596c-4f7a-4f02-97d0-ed9c49dced0c",
+        "da4da67a-5a72-4574-ba57-21e7c93be4c8"
+      ],
+      "ground_truth_context": [
+        "Người học không nộp đủ học phí sau thời gian quy định tại khoản 1 Điều này sẽ bị đình chỉ đăng ký học tập một học kỳ kế tiếp.",
+        "Không áp dụng ngưỡn"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_076",
+      "question_type": "multi_hop",
+      "question": "Học viên thạc sĩ Bách khoa bảo vệ luận văn lần đầu không đạt muốn bảo vệ lần hai cần còn thời gian tối thiểu bao nhiêu và có thể sửa trong bao lâu?",
+      "gold_answer": "Cần còn được phép học tối thiểu 3 tháng và được phép chỉnh sửa, bổ sung luận văn để bảo vệ lần thứ hai trong thời hạn 3 tháng từ ngày bảo vệ lần đầu.",
+      "evidence_chunk_ids": [
+        "4f875c8c-ac20-46e8-9f72-1906d28a618e"
+      ],
+      "ground_truth_context": [
+        "học viên còn được phép học tối thiểu 3 tháng, học viên được phép chỉnh sửa, bổ sung luận văn để bảo vệ lần thứ hai trong thời hạn 3 tháng tính từ ngày bảo vệ luận văn lần thứ nhất."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_077",
+      "question_type": "multi_hop",
+      "question": "So sánh điều kiện bảo vệ luận văn thạc sĩ và điều kiện được xét tốt nghiệp thạc sĩ tại Bách khoa Hà Nội?",
+      "gold_answer": "Điều kiện bảo vệ luận văn (Điều 31): hoàn thành học phần, đạt chuẩn ngoại ngữ B2 tương đương. Điều kiện tốt nghiệp (Điều 34): luận văn đạt, nộp quyển đã chỉnh sửa, công khai luận văn ít nhất 30 ngày, không bị kỷ luật, hoàn thành nghĩa vụ liên quan.",
+      "evidence_chunk_ids": [
+        "4ad34138-cb34-4c81-8b21-acf5e4a1cc74",
+        "af34153a-8b1e-4280-8b9f-82e63705702e"
+      ],
+      "ground_truth_context": [
+        "Đạt chuẩn ngoại ngữ đầu ra tương đương bậc 4/6...",
+        "Luận văn đạt yêu cầu. Hoàn thành việc nộp quyển luận văn đã được chỉnh sửa... Công khai toàn văn quyển luận văn trên trang thông tin điện tử... trong thời gian ít nhất 30 ng"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_078",
+      "question_type": "multi_hop",
+      "question": "NCS Bách khoa muốn chuyển sang học thạc sĩ sau khi bị thôi học có được không, và kết quả học phần nào được công nhận?",
+      "gold_answer": "Được, nếu đáp ứng quy định của quy chế tuyển sinh và đào tạo thạc sĩ. Kết quả các học phần tiến sĩ đã tích lũy được xem xét bảo lưu và công nhận vào chương trình thạc sĩ, với điều kiện còn trong thời hạn giá trị 5 năm và đạt từ điểm C trở lên.",
+      "evidence_chunk_ids": [
+        "1d2d6f79-e9d1-40fd-b188-9a3e16afe397",
+        "04e35060-6754-4a01-8486-7ab68d475b75"
+      ],
+      "ground_truth_context": [
+        "NCS bị thôi học và có nguyện vọng được tiếp tục theo học CTĐT thạc sĩ ngành tương ứng nếu đáp ứng những quy định của quy chế tuyển sinh và đào tạo trình độ thạc sĩ hiện hành.",
+        "Kết quả các học phần tiến sĩ có giá trị công nhận trong thời hạn 05 năm. Những học phần được công nhận phải có điểm đánh giá đạt từ điểm C"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_079",
+      "question_type": "multi_hop",
+      "question": "So sánh chương trình kỹ sư tích hợp và chương trình kỹ sư thông thường tại Bách khoa về thời gian và số tín chỉ tối thiểu?",
+      "gold_answer": "Kỹ sư tích hợp (tốt nghiệp cử nhân chương trình tích hợp): 1,5 năm, tối thiểu 48 TC. Kỹ sư thông thường (tốt nghiệp cử nhân): 2 năm (khối lượng tối thiểu theo bảng trong Điều 2).",
+      "evidence_chunk_ids": [
+        "6381c6e7-76fa-430e-b855-24e7c33898bb"
+      ],
+      "ground_truth_context": [
+        "Kỹ sư | Tốt nghiệp cử nhân theo chương trình tích hợp | 1,5 năm | 48 tín chỉ | Kỹ sư | Tốt nghiệp cử nhân | 2 năm"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_080",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa học chương trình thứ hai được công nhận tín chỉ như thế nào và điểm đó có tính vào GPA chương trình thứ nhất không?",
+      "gold_answer": "Khi học chương trình thứ hai, sinh viên được công nhận tín chỉ của những học phần có nội dung và khối lượng học tập tương đương. Quy chế không quy định rõ ràng về việc điểm chương trình hai có tính vào GPA chương trình một hay không trong đoạn trích này.",
+      "evidence_chunk_ids": [
+        "327bc26f-7338-4aba-a031-f9a2f3969019"
+      ],
+      "ground_truth_context": [
+        "Khi học chương trình thứ hai, sinh viên được công nhận TC của những học phần có nội dung và khối lượng học tập tươ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_081",
+      "question_type": "multi_hop",
+      "question": "Học viên thạc sĩ Bách khoa bị thôi học và muốn nộp hồ sơ tuyển sinh lại có được không?",
+      "gold_answer": "Không, học viên thạc sĩ đã có quyết định cho thôi học không được tiếp nhận trở lại chương trình thạc sĩ đó.",
+      "evidence_chunk_ids": [
+        "7881a221-cd8d-431e-9806-2629b2a9e170"
+      ],
+      "ground_truth_context": [
+        "Học viên đã có quyết định cho thôi học không được tiếp nhận trở lại."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_082",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa muốn chuyển từ đại học chính quy sang vừa làm vừa học khi học lực tốt có được không, và những trường hợp nào được phép chuyển?",
+      "gold_answer": "Không, điểm ngoại ngữ cơ bản, GDTC và GDQP-AN không được tính vào CPA. Điều này có nghĩa là hạng tốt nghiệp được xếp theo điểm trung bình toàn khóa tính trên các học phần đăng ký tốt nghiệp, không bao gồm những môn học này.",
+      "evidence_chunk_ids": [
+        "7c6bf82d-97c7-4769-a273-ce7824e6ba7a",
+        "e202e4b3-87a0-4985-95fa-9d5d5dc804fa"
+      ],
+      "ground_truth_context": [
+        "không tính các học phần về ngoại ngữ cơ bản, Giáo dục thể chất, Giáo dục quốc phòng-an ninh",
+        "Điểm trung bình toàn khóa là điểm trung bình tích lũy toàn khóa tính theo các học phần đăng ký tốt nghiệp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_083",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa muốn chuyển sang chương trình đào tạo khác cần đáp ứng những điều kiện gì?",
+      "gold_answer": "Phải học hết năm học thứ nhất; đáp ứng điều kiện trúng tuyển của chương trình muốn chuyển sang; và xếp loại học lực đạt yêu cầu theo quy định của chương trình đó.",
+      "evidence_chunk_ids": [
+        "38277700-7201-46d1-8e61-992b5ed55991"
+      ],
+      "ground_truth_context": [
+        "Sinh viên học hết năm học thứ nhất... được xem xét chuyển sang học một CTĐT khác nếu đáp ứng đủ các điều kiện sau: a) Đáp ứng điều kiện trúng tuyển của CTĐT muốn chuyển sang học; b) Xếp loại"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_084",
+      "question_type": "multi_hop",
+      "question": "NCS Bách khoa bị thôi học nhưng muốn thi tuyển lại NCS, kết quả học phần tiến sĩ trước đó có được bảo lưu không và trong bao lâu?",
+      "gold_answer": "Có, kết quả học phần tiến sĩ được xem xét bảo lưu và công nhận khi NCS chuyển cơ sở đào tạo hoặc thi tuyển lại. Có giá trị trong thời hạn 5 năm và phải đạt từ điểm C trở lên.",
+      "evidence_chunk_ids": [
+        "04e35060-6754-4a01-8486-7ab68d475b75"
+      ],
+      "ground_truth_context": [
+        "Kết quả các học phần tiến sĩ có giá trị công nhận trong thời hạn 05 năm. Những học phần được công nhận phải có điểm đánh giá đạt từ điểm C"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_085",
+      "question_type": "multi_hop",
+      "question": "Quy chế đào tạo 5445/QĐ-DHBK có hiệu lực từ khi nào, và áp dụng cho tất cả các khóa không?",
+      "gold_answer": "Có hiệu lực từ học kỳ 1 năm học 2025-2026 và được áp dụng cho tất cả các khóa đào tạo, trừ một số điều khoản ngoại lệ (như điểm a khoản 2 Điều 15 về giảm hạng tốt nghiệp).",
+      "evidence_chunk_ids": [
+        "25c75fd3-e368-4287-8d35-97489d8b95a4"
+      ],
+      "ground_truth_context": [
+        "Quy chế này có hiệu lực thi hành từ học kỳ 1 năm học 2025–2026... Quy chế này được áp dụng từ học kỳ 1 năm học 2025–2026 cho tất cả các khoá đào tạo, trừ một số điều, khoản như sau: a) Điểm a khoản 2 Điều 15 (về việc giảm hạng tốt nghiệ"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_086",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa năm cuối muốn chuyển sang trường khác để tốt nghiệp có được không, và nếu đang bị xem xét buộc thôi học thì sao?",
+      "gold_answer": "Không, cả hai trường hợp đều không được chuyển cơ sở đào tạo: sinh viên năm cuối và sinh viên đang bị xem xét buộc thôi học đều bị cấm chuyển theo Điều 8.",
+      "evidence_chunk_ids": [
+        "7f1c36ff-4967-4170-ac72-2f2dbbbb8444"
+      ],
+      "ground_truth_context": [
+        "Sinh viên năm thứ nhất, sinh viên năm cuối của khóa học và sinh viên đang bị xem xét buộc thôi học không được chuyển cơ sở đào tạo."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_087",
+      "question_type": "multi_hop",
+      "question": "Học viên thạc sĩ Bách khoa nghỉ thai sản có được tính thời gian nghỉ vào thời gian học không và học phần đã đăng ký có bị hủy không?",
+      "gold_answer": "Học viên nghỉ thai sản là trường hợp đặc biệt được miễn trừ theo Điều 35: thời gian nghỉ không tính vào thời gian học và học phần đã đăng ký không bị hủy (tương tự các trường hợp ốm/tai nạn nặng).",
+      "evidence_chunk_ids": [
+        "e62eed5a-8c75-4981-a4fd-2baca01e7378"
+      ],
+      "ground_truth_context": [
+        "Học viên bị ốm hoặc tai nạn buộc phải điều trị trong thời gian dài, hoặc nghỉ thai sản theo quy định được"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_088",
+      "question_type": "multi_hop",
+      "question": "NCS Bách khoa muốn thay đổi người hướng dẫn vào tháng cuối cùng của chương trình có được không và quy định như thế nào?",
+      "gold_answer": "Không được, vì việc bổ sung hoặc thay đổi người hướng dẫn phải thực hiện chậm nhất trước 12 tháng tính đến ngày kết thúc khóa đào tạo. Tháng cuối cùng là quá trễ.",
+      "evidence_chunk_ids": [
+        "3ddc722d-21c5-4f9d-9ae9-f8c77e617dbb"
+      ],
+      "ground_truth_context": [
+        "Việc bổ sung hoặc thay đổi người hướng dẫn được thực hiện chậm nhất trước 12 tháng tính đến ngày kết thúc khoá đào tạo tiến sĩ theo quyết định công nhận NCS"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_089",
+      "question_type": "multi_hop",
+      "question": "Học viên thạc sĩ Bách khoa đã học từ chương trình tích hợp cử nhân-thạc sĩ, khi các học phần học trước được công nhận thì điểm các học phần đó có tính vào CPA xếp hạng tốt nghiệp thạc sĩ không?",
+      "gold_answer": "Không, theo Điều 28 điểm d và Điều 34, các học phần được công nhận không được sử dụng để tính điểm trung bình tích lũy (CPA) và không đưa vào tính CPA để xếp hạng tốt nghiệp.",
+      "evidence_chunk_ids": [
+        "eef54984-8702-4bed-80cc-c80308ef2150",
+        "272d72e7-326c-4c72-8816-a645d10f2391"
+      ],
+      "ground_truth_context": [
+        "Các học phần được công nhận không được sử dụng để tính điểm trung bình tích lũy",
+        "Riêng các học phần được công nhận không đưa vào tính CPA để xếp hạng tốt nghiệp."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_090",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa muốn chuyển từ đại học chính quy sang vừa làm vừa học mà không bị buộc thôi học có được không?",
+      "gold_answer": "Chỉ cho phép chuyển sang VLVH trong các trường hợp: sinh viên bị buộc thôi học do học tập yếu kém; sinh viên không hoàn thành; và một số trường hợp đặc biệt khác theo Điều 17. Sinh viên bình thường không có quy định được chuyển tự nguyện sang VLVH.",
+      "evidence_chunk_ids": [
+        "f59f45fa-349c-48e5-86ca-2491427af916"
+      ],
+      "ground_truth_context": [
+        "Sinh viên thuộc các trường hợp sau được quyền đề nghị chuyển sang học một chương trình thuộc hình thức VLVH của ĐHBK Hà Nội nếu có nguyện vọng: b) Sinh viên bị buộc thôi học do kết quả học tập yếu kém; c) Sinh viên không hoàn thàn"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_091",
+      "question_type": "simple",
+      "question": "Học phí của nghiên cứu sinh Bách khoa được tính theo đơn vị nào và bao gồm những gì?",
+      "gold_answer": "Tính theo năm học, đã bao gồm học phí của các học phần tiến sĩ (không bao gồm các học phần bổ sung).",
+      "evidence_chunk_ids": [
+        "3bb352c2-0682-4b0a-a8e0-0ad7fd7ec72f"
+      ],
+      "ground_truth_context": [
+        "Học phí đối với NCS được tính theo năm học, trong đó đã bao gồm học phí của các học phần tiến sĩ (không bao gồm các học phần bổ sung)."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_092",
+      "question_type": "simple",
+      "question": "Chương trình đào tạo tích hợp tại Bách khoa Hà Nội được thiết kế như thế nào?",
+      "gold_answer": "Được thiết kế tổng thể theo hướng tích hợp kiến thức, kỹ năng của hai bậc trình độ, đảm bảo học tập liên tục giữa các bậc đào tạo nhằm tối ưu hóa thời gian đào tạo cho người học.",
+      "evidence_chunk_ids": [
+        "0d0a90c8-c722-4c26-ae5c-66c4030a50f0"
+      ],
+      "ground_truth_context": [
+        "CTĐT tích hợp là chương trình được thiết kế tổng thể theo hướng tích hợp kiến thức, kỹ năng của hai bậc trình độ, đảm bảo học tập liên tục giữa các bậc đào tạo nhằm tối ưu hóa thời gian đào tạo cho người học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_093",
+      "question_type": "simple",
+      "question": "Điều kiện để nghiên cứu sinh Bách khoa bảo vệ luận án cấp cơ sở phải hoàn thành hồ sơ trong thời hạn bao lâu trước khi kết thúc thời gian học tập?",
+      "gold_answer": "Phải hoàn thành hồ sơ đăng ký bảo vệ cấp cơ sở trong thời hạn đủ 90 ngày tính đến thời điểm kết thúc thời gian học tập chương trình tiến sĩ.",
+      "evidence_chunk_ids": [
+        "468a7d38-6f22-417e-ae44-d1c86d110de8"
+      ],
+      "ground_truth_context": [
+        "NCS được bảo vệ luận án cấp cơ sở nếu đáp ứng đầy đủ các điều kiện quy định tại khoản 1 Điều 41 Quy chế này và hoàn thành hồ sơ đăng ký bảo vệ cấp cơ sở trong thời hạn đủ 90 ngày tính đến thời điểm kết thúc thời gian học tập chương trình tiến sĩ quy định tại khoản 3 Điều 3 Quy chế này."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_094",
+      "question_type": "simple",
+      "question": "Hội đồng đánh giá luận án tiến sĩ cấp Đại học tại Bách khoa do ai ra quyết định thành lập?",
+      "gold_answer": "Do Giám đốc Đại học Bách khoa Hà Nội ra quyết định thành lập.",
+      "evidence_chunk_ids": [
+        "64eda3e2-e1bc-4e97-a5e5-4819df114754"
+      ],
+      "ground_truth_context": [
+        "Hội đồng đánh giá luận án cấp Đại học do Giám đốc ĐHBK Hà Nội ra quyết định thành"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_095",
+      "question_type": "simple",
+      "question": "Quy chế đào tạo Bách khoa 5445 áp dụng quy chế tiến sĩ nào cho các khóa tuyển sinh có quyết định công nhận NCS sau ngày 01/8/2025?",
+      "gold_answer": "Áp dụng theo quy định của Quy chế tuyển sinh và đào tạo trình độ tiến sĩ ban hành kèm Thông tư số 18/2021/TT-BGDDT ngày 28 tháng 6 năm 2021 và Quy chế 5445.",
+      "evidence_chunk_ids": [
+        "e39cd621-0ca2-4096-8aee-6148211fdb26"
+      ],
+      "ground_truth_context": [
+        "Đối với các khoá tuyển sinh có quyết định công nhận NCS sau ngày 01 tháng 8 năm 2025, ĐHBK Hà Nội thực hiện theo quy định của Quy chế tuyển sinh và đào tạo trình độ tiến sĩ ban hành kèm thông tư số 18/2021/TT-BGDDT ngày 28 tháng 6 năm 2021 của Bộ trưởng Bộ GDDT và Quy chế này."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_096",
+      "question_type": "simple",
+      "question": "Học viên thạc sĩ điều động vào lực lượng vũ trang tại Bách khoa Hà Nội có bị tính thời gian nghỉ vào thời gian học không?",
+      "gold_answer": "Không, thời gian nghỉ học tạm thời do điều động vào lực lượng vũ trang (ghi trong quyết định của cấp có thẩm quyền) không tính vào thời gian học tại Đại học Bách khoa Hà Nội.",
+      "evidence_chunk_ids": [
+        "e62eed5a-8c75-4981-a4fd-2baca01e7378"
+      ],
+      "ground_truth_context": [
+        "Đối với học viên được điều động vào lực lượng vũ trang, đi làm nghĩa vụ quốc gia, quốc tế, thời gian nghỉ học tạm thời (là thời gian được ghi trong quyết định của cấp có thẩm quyền) không tính vào thời gian học tại ĐHBK Hà Nội."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_simple_097",
+      "question_type": "simple",
+      "question": "Luận án tiến sĩ cấp cơ sở tại Bách khoa Hà Nội được đánh giá theo hình thức nào?",
+      "gold_answer": "Được tổ chức dưới hình thức sinh hoạt khoa học, có thể tổ chức một lần hoặc nhiều lần, cho đến khi luận án được đề nghị đưa ra đánh giá ở hội đồng cấp Đại học.",
+      "evidence_chunk_ids": [
+        "6aa5f556-0293-4c5b-8633-a3448c4ba3d5"
+      ],
+      "ground_truth_context": [
+        "Luận án tiến sĩ được tiến hành đánh giá ở cấp cơ sở dưới hình thức sinh hoạt khoa học được tổ chức một lần hoặc nhiều lần, cho đến khi luận án được đề nghị đưa ra đánh giá ở hội đồng đánh giá luận án cấp Đại học."
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_098",
+      "question_type": "multi_hop",
+      "question": "Hội đồng đánh giá luận án tiến sĩ lần hai tại Bách khoa cần có tối thiểu bao nhiêu thành viên đã tham gia hội đồng lần đầu?",
+      "gold_answer": "Thành phần hội đồng đánh giá luận án cấp Đại học lần thứ hai phải có tối thiểu 5 thành viên đã tham gia hội đồng lần thứ nhất.",
+      "evidence_chunk_ids": [
+        "68fd120f-ebfd-41c8-9728-fcb20a96256b"
+      ],
+      "ground_truth_context": [
+        "Thành phần hội đồng đánh giá luận án cấp Đại học lần thứ hai phải có tối thiểu 5 thành viên đã tham gi"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "easy"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_099",
+      "question_type": "multi_hop",
+      "question": "Sinh viên Bách khoa học chương trình tích hợp cử nhân-kỹ sư được rút ngắn thời gian như thế nào so với học riêng lẻ từng chương trình?",
+      "gold_answer": "Cử nhân chuẩn: 4 năm. Kỹ sư từ cử nhân thường: 2 năm. Tổng 6 năm. Kỹ sư tích hợp (tốt nghiệp cử nhân chương trình tích hợp): chỉ cần thêm 1,5 năm, tổng khoảng 5,5 năm — rút ngắn khoảng 0,5 năm so với con đường học riêng lẻ.",
+      "evidence_chunk_ids": [
+        "6381c6e7-76fa-430e-b855-24e7c33898bb"
+      ],
+      "ground_truth_context": [
+        "Cử nhân | 4 năm | 132 tín chỉ | Kỹ sư | Tốt nghiệp cử nhân theo chương trình tích hợp | 1,5 năm | 48 tín chỉ | Kỹ sư | Tốt nghiệp cử nhân | 2 năm"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "single_chunk",
+      "difficulty": "medium"
+    },
+    {
+      "id": "QCDT_2025_5445_QD-DHBK_multi_hop_100",
+      "question_type": "multi_hop",
+      "question": "Nghiên cứu sinh Bách khoa viết chuyên đề tiến sĩ từ bài báo ISI cần đáp ứng điều kiện gì, và điều đó giúp ích gì cho việc bảo vệ luận án?",
+      "gold_answer": "Bài báo phải liên quan trực tiếp đến kết quả luận án và công bố trên tạp chí ISI/Scopus. Sử dụng bài báo làm chuyên đề giúp đáp ứng yêu cầu các chuyên đề tiến sĩ; đồng thời bài báo này cũng được tính điểm công trình (cần đạt tổng điểm ≥ 2,0) để đủ điều kiện bảo vệ luận án cấp cơ sở.",
+      "evidence_chunk_ids": [
+        "765280f1-9149-4f97-a5a7-a168ab873448",
+        "c114157d-dc8f-4579-9f86-3d4a1e02d8d2"
+      ],
+      "ground_truth_context": [
+        "NCS có thể sử dụng nội dung bài báo của mình liên quan trực tiếp đến kết quả luận án tiến sĩ công bố trên tạp chí ISI/Scopus để phát triển thành chuyên đề tiến sĩ",
+        "Tổng điểm của tất cả các công trình nghiên cứu... phải đạt từ 2,0 điểm trở lên"
+      ],
+      "is_answerable": true,
+      "reasoning_required": "multi_chunk",
+      "difficulty": "hard"
+    }
+  ]
+}
