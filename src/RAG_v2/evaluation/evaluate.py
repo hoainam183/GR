@@ -318,6 +318,8 @@ def build_runtime(
     disable_rerank: bool = False,
     provider: Optional[str] = None,
     model: Optional[str] = None,
+    vector_weight: Optional[float] = None,
+    keyword_weight: Optional[float] = None,
 ) -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
     """Build the production-config pipeline plus the judges used for scoring.
 
@@ -347,6 +349,11 @@ def build_runtime(
 
     if model:
         settings.chat_model = model
+
+    if vector_weight is not None:
+        settings.vector_weight = vector_weight
+    if keyword_weight is not None:
+        settings.keyword_weight = keyword_weight
 
     if vector_model == "bge":
         settings.vector_bge_weight = 1.0
@@ -779,6 +786,18 @@ def _parse_args() -> argparse.Namespace:
         default=None,
         help="Override Chat model for evaluation (e.g., deepseek-chat).",
     )
+    parser.add_argument(
+        "--vector-weight",
+        type=float,
+        default=None,
+        help="Override vector weight for RRF fusion (e.g., 0.8).",
+    )
+    parser.add_argument(
+        "--keyword-weight",
+        type=float,
+        default=None,
+        help="Override keyword weight for RRF fusion (e.g., 0.2).",
+    )
     return parser.parse_args()
 
 
@@ -792,6 +811,8 @@ def main() -> None:
         disable_rerank=args.disable_rerank,
         provider=args.provider,
         model=args.model,
+        vector_weight=args.vector_weight,
+        keyword_weight=args.keyword_weight,
     )
     judge_model = settings.chat_model
 
