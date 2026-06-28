@@ -316,6 +316,8 @@ def build_runtime(
     vector_model: str = "dual",
     retrieval_mode: str = "hybrid",
     disable_rerank: bool = False,
+    provider: Optional[str] = None,
+    model: Optional[str] = None,
 ) -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
     """Build the production-config pipeline plus the judges used for scoring.
 
@@ -330,6 +332,11 @@ def build_runtime(
     settings.redis_enabled = False
     # Ghi đè fusion_mode theo argparse để benchmark
     settings.fusion_mode = fusion_mode
+
+    if provider:
+        settings.llm_provider = provider
+    if model:
+        settings.chat_model = model
 
     if vector_model == "bge":
         settings.vector_bge_weight = 1.0
@@ -750,6 +757,18 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run without reranker (sets reranker_provider to 'none').",
     )
+    parser.add_argument(
+        "--provider",
+        type=str,
+        default=None,
+        help="Override LLM provider for evaluation (e.g., deepseek).",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=None,
+        help="Override Chat model for evaluation (e.g., deepseek-chat).",
+    )
     return parser.parse_args()
 
 
@@ -761,6 +780,8 @@ def main() -> None:
         vector_model=args.vector_model,
         retrieval_mode=args.retrieval_mode,
         disable_rerank=args.disable_rerank,
+        provider=args.provider,
+        model=args.model,
     )
     judge_model = settings.chat_model
 

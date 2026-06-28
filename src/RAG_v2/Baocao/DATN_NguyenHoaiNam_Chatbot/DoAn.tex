@@ -1,0 +1,349 @@
+\documentclass[a4paper,13pt,3p,twoside]{report}
+\usepackage{scrextend}
+\changefontsizes{13pt}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\usepackage[vietnamese]{babel}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{listingsutf8}   % hỗ trợ Unicode cho lstlisting
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=none,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  tabsize=4,
+  numbers=none,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{teal},
+  language=Python,
+  inputencoding=utf8,
+  extendedchars=true,
+  literate=
+    {á}{{\'a}}1 {à}{{\`a}}1 {ả}{{\r{a}}}1 {ã}{{\~a}}1 {ạ}{{\d{a}}}1
+    {ă}{{\u{a}}}1 {ắ}{{\'\u{a}}}1 {ằ}{{\`\u{a}}}1 {ẵ}{{\~\u{a}}}1 {ẳ}{{\r\u{a}}}1 {ặ}{{\d\u{a}}}1
+    {â}{{\^{a}}}1 {ấ}{{\^\'a}}1 {ầ}{{\^`a}}1 {ẩ}{{\^\r{a}}}1 {ẫ}{{\~\^{a}}}1 {ậ}{{\d\^{a}}}1
+    {đ}{{\dj}}1
+    {é}{{\'e}}1 {è}{{\`e}}1 {ẻ}{{\r{e}}}1 {ẽ}{{\~e}}1 {ẹ}{{\d{e}}}1
+    {ê}{{\^e}}1 {ế}{{\^\'e}}1 {ề}{{\^`e}}1 {ể}{{\^\r{e}}}1 {ễ}{{\~\^{e}}}1 {ệ}{{\d\^{e}}}1
+    {í}{{\'i}}1 {ì}{{\`i}}1 {ỉ}{{\r{i}}}1 {ĩ}{{\~i}}1 {ị}{{\d{i}}}1
+    {ó}{{\'o}}1 {ò}{{\`o}}1 {ỏ}{{\r{o}}}1 {õ}{{\~o}}1 {ọ}{{\d{o}}}1
+    {ô}{{\^o}}1 {ố}{{\^\'o}}1 {ồ}{{\^`o}}1 {ổ}{{\^\r{o}}}1 {ỗ}{{\~\^o}}1 {ộ}{{\d\^o}}1
+    {ơ}{{\o}}1 {ớ}{{\'\o}}1 {ờ}{{\`\o}}1 {ở}{{\r{\o}}}1 {ỡ}{{\~\o}}1 {ợ}{{\d\o}}1
+    {ú}{{\'u}}1 {ù}{{\`u}}1 {ủ}{{\r{u}}}1 {ũ}{{\~u}}1 {ụ}{{\d{u}}}1
+    {ư}{{\u{u}}}1 {ứ}{{\'\u{u}}}1 {ừ}{{\`\u{u}}}1 {ử}{{\r\u{u}}}1 {ữ}{{\~\u{u}}}1 {ự}{{\d\u{u}}}1
+    {ý}{{\'y}}1 {ỳ}{{\`y}}1 {ỷ}{{\r{y}}}1 {ỹ}{{\~y}}1 {ỵ}{{\d{y}}}1
+    {Á}{{\'A}}1 {À}{{\`A}}1 {Ả}{{\r{A}}}1 {Ã}{{\~A}}1 {Ạ}{{\d{A}}}1
+    {Ă}{{\u{A}}}1 {Ắ}{{\'\u{A}}}1 {Ằ}{{\`\u{A}}}1 {Ẵ}{{\~\u{A}}}1 {Ẳ}{{\r\u{A}}}1 {Ặ}{{\d\u{A}}}1
+    {Â}{{\^A}}1 {Ấ}{{\^\'A}}1 {Ầ}{{\^`A}}1 {Ẩ}{{\^\r{A}}}1 {Ẫ}{{\~\^{A}}}1 {Ậ}{{\d\^{A}}}1
+    {Đ}{{\DJ}}1
+    {É}{{\'E}}1 {È}{{\`E}}1 {Ẻ}{{\r{E}}}1 {Ẽ}{{\~E}}1 {Ẹ}{{\d{E}}}1
+    {Ê}{{\^E}}1 {Ế}{{\^\'E}}1 {Ề}{{\^`E}}1 {Ể}{{\^\r{E}}}1 {Ễ}{{\~\^{E}}}1 {Ệ}{{\d\^{E}}}1
+    {Í}{{\'I}}1 {Ì}{{\`I}}1 {Ỉ}{{\r{I}}}1 {Ĩ}{{\~I}}1 {Ị}{{\d{I}}}1
+    {Ó}{{\'O}}1 {Ò}{{\`O}}1 {Ỏ}{{\r{O}}}1 {Õ}{{\~O}}1 {Ọ}{{\d{O}}}1
+    {Ô}{{\^O}}1 {Ố}{{\^\'O}}1 {Ồ}{{\^`O}}1 {Ổ}{{\^\r{O}}}1 {Ỗ}{{\~\^O}}1 {Ộ}{{\d\^O}}1
+    {Ơ}{{\o}}1 {Ớ}{{\'\o}}1 {Ờ}{{\`\o}}1 {Ở}{{\r{\o}}}1 {Ỡ}{{\~\o}}1 {Ợ}{{\d\o}}1
+    {Ú}{{\'U}}1 {Ù}{{\`U}}1 {Ủ}{{\r{U}}}1 {Ũ}{{\~U}}1 {Ụ}{{\d{U}}}1
+    {Ư}{{\u{U}}}1 {Ứ}{{\'\u{U}}}1 {Ừ}{{\`\u{U}}}1 {Ử}{{\r\u{U}}}1 {Ữ}{{\~\u{U}}}1 {Ự}{{\d\u{U}}}1
+    {Ý}{{\'Y}}1 {Ỳ}{{\`Y}}1 {Ỷ}{{\r{Y}}}1 {Ỹ}{{\~Y}}1 {Ỵ}{{\d{Y}}}1
+}
+\usepackage[top=2cm, bottom=2cm, inner=3.5cm, outer=2.5cm]{geometry} % Adjusted for consistent margins
+\usepackage{xurl}
+\usepackage{appendix}
+\usepackage{babel}
+\usepackage{xcolor}
+\usepackage{outlines}
+\usepackage{graphicx} % Cho phép chèn hỉnh ảnh
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning, fit, calc, backgrounds, shadows, positioning, matrix, shapes.multipart}
+\usepackage{fancybox} % Tạo khung box
+\usepackage{indentfirst} % Thụt đầu dòng ở dòng đầu tiên trong đoạn
+\usepackage{amsthm} % Cho phép thêm các môi trường định nghĩa
+\usepackage{latexsym} % Các kí hiệu toán học
+\usepackage{amsmath} % Hỗ trợ một số biểu thức toán học
+\usepackage{amssymb} % Bổ sung thêm kí hiệu về toán học
+\usepackage{amsbsy} % Hỗ trợ các kí hiệu in đậm
+\usepackage{times} % Chọn font Time New Romans
+\usepackage{array} % Tạo bảng array
+\usepackage{enumitem} % Cho phép thay đổi kí hiệu của list
+\usepackage{subfiles} % Chèn các file nhỏ, giúp chia các chapter ra nhiều file hơn
+\usepackage{titlesec} % Giúp chỉnh sửa các tiêu đề, đề mục như chương, phần,..
+\usepackage{titletoc}
+\usepackage{chngcntr} % Dùng để thiết lập lại cách đánh số caption,..
+\usepackage{pdflscape} % Đưa các bảng có kích thước đặt theo chiều ngang giấy
+\usepackage{afterpage}
+\usepackage[ruled,vlined]{algorithm2e}  % Hỗ trợ viết các giải thuật
+\usepackage{capt-of} % Cho phép sử dụng caption lớn đối với landscape page
+\usepackage{multirow} % Merge cells
+\usepackage{fancyhdr} % Cho phép tùy biến header và footer
+% \usepackage[natbib,backend=biber,style=ieee]{biblatex} % Giúp chèn tài liệu tham khảo
+
+\usepackage[font=small,labelfont=bf]{caption}
+
+\usepackage{listings}
+\usepackage{float}
+\usepackage{subcaption}
+
+\usepackage[nonumberlist, nopostdot, nogroupskip, acronym]{glossaries}
+\usepackage{glossary-superragged}
+\setglossarystyle{superraggedheaderborder}
+\usepackage{setspace}
+\usepackage{parskip}
+
+% package content table
+\usepackage{tocbasic}
+
+\usepackage{blindtext}
+
+% ===================================================
+
+\renewcommand{\bibname}{Danh_sach_tai_lieu_tham_khao} 
+\usepackage[backend=bibtex,style=ieee]{biblatex}  %backend=biber is 'better'
+
+\addbibresource{Danh_sach_tai_lieu_tham_khao.bib} % chèn file chứa danh mục tài liệu tham khảo vào 
+
+\input{Chuong/lstlisting} % Phần này cho phép chèn code và formatting code như C, C++, Python
+
+\input{Chuong/Tu_viet_tat}
+
+% ===================================================
+
+\fancypagestyle{plain}{%
+\fancyhf{} % clear all header and footer fields
+\fancyfoot[RO,RE]{\thepage} %RO=right odd, RE=right even
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}}
+
+\setlength{\headheight}{10pt}
+
+\def \TITLE{ĐỒ ÁN TỐT NGHIỆP}
+\def \AUTHOR{Trần Văn A}
+
+% ===================================================
+\titleformat{\chapter}[hang]{\centering\bfseries}{CHƯƠNG \thechapter.\ }{0pt}{}[]
+
+\titleformat 
+    {\chapter} % command
+    [hang] % shape
+    {\centering\bfseries} % format
+    {CHƯƠNG \thechapter.\ } % label
+    {0pt} %sep
+    {} % before
+    [] % after
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+\titleformat
+    {\section} % command
+    [hang] % shape
+    {\bfseries} % format
+    {\thechapter.\arabic{section}\ \ \ \ } % label
+    {0pt} %sep
+    {} % before
+    [] % after
+\titlespacing{\section}{0pt}{\parskip}{0.5\parskip}
+
+\titleformat
+    {\subsection} % command
+    [hang] % shape
+    {\bfseries} % format
+    {\thechapter.\arabic{section}.\arabic{subsection}\ \ \ \ } % label
+    {0pt} %sep
+    {} % before
+    [] % after
+\titlespacing{\subsection}{30pt}{\parskip}{0.5\parskip}
+
+\renewcommand\thesubsubsection{\alph{subsubsection}}
+\titleformat
+    {\subsubsection} % command
+    [hang] % shape
+    {\bfseries} % format
+    {\alph{subsubsection}, \ } % label
+    {0pt} %sep
+    {} % before
+    [] % after
+\titlespacing{\subsubsection}{50pt}{\parskip}{0.5\parskip}
+
+% ===================================================
+\usepackage{hyperref}
+\hypersetup{pdfborder = {0 0 0}}
+\hypersetup{pdftitle={\TITLE},
+	pdfauthor={\AUTHOR}}
+	
+\usepackage[all]{hypcap} % Cho phép tham chiếu chính xác đến hình ảnh và bảng biểu
+
+\graphicspath{{figures/}{../figures/}} % Thư mục chứa các hình ảnh
+
+\counterwithin{figure}{chapter} % Đánh số hình ảnh kèm theo chapter. Ví dụ: Hình 1.1, 1.2,..
+
+\title{\bf \TITLE}
+\author{\AUTHOR}
+
+\setcounter{secnumdepth}{3} % Cho phép subsubsection trong report
+% \setcounter{tocdepth}{3} % Chèn subsubsection vào bảng mục lục
+
+\theoremstyle{definition}
+\newtheorem{example}{Ví dụ}[chapter] % Định nghĩa môi trường ví dụ
+
+\onehalfspacing
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{15pt}
+
+% =========================== BODY ===============
+\begin{document}
+% \newgeometry{top=2cm, bottom=2cm, left=2cm, right=2cm}
+\subfile{Bia} % Phần bìa
+% \restoregeometry
+
+% ===================================================
+\pagestyle{empty} % Header và footer rỗng
+
+\newpage
+\pagenumbering{gobble} % Xóa page numbering ở cuối trang
+\subfile{Chuong/0_2_Loi_cam_on.tex}
+
+\newpage
+\pagenumbering{gobble} % Xóa page numbering ở cuối trang
+\subfile{Chuong/0_3_Tom_tat_noi_dung.tex}
+
+% \newpage
+% \pagenumbering{gobble} % Xóa page numbering ở cuối trang
+% \subfile{Chuong/0_4_Tom_tat_noi_dung_eng.tex}
+
+% ===================================================
+\newpage
+\pagenumbering{gobble} % Xóa page numbering ở cuối trang
+\renewcommand*\contentsname{MỤC LỤC}
+\titlecontents{chapter}
+    [0.0cm]             % left margin
+    {\bfseries\vspace{0.3cm}}                  % above code
+    {{\bfseries{\scshape} CHƯƠNG \thecontentslabel.\ }} % numbered format
+    {}         % unnumbered format
+    {\titlerule*[0.3pc]{.}\contentspage}         % filler-page-format, e.g dots
+    
+\titlecontents{section}
+    [0.0cm]             % left margin
+    {\vspace{0.3cm}}                  % above code
+    {\thecontentslabel \ } % numbered format
+    {}         % unnumbered format
+    {\titlerule*[0.3pc]{.}\contentspage}         % filler-page-format, e.g dots
+    
+\titlecontents{subsection}
+    [1.0cm]             % left margin
+    {\vspace{0.3cm}}                  % above code
+    {\thecontentslabel \ } % numbered format
+    {}         % unnumbered format
+    {\titlerule*[0.3pc]{.}\contentspage}         % filler-page-format, e.g dots
+
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+\tableofcontents
+\thispagestyle{empty}
+\cleardoublepage
+
+% ===================================================
+% DANH MỤC TỪ VIẾT TẮT
+% ===================================================
+\newpage
+\pagenumbering{gobble}
+\chapter*{DANH MỤC TỪ VIẾT TẮT}
+\addcontentsline{toc}{chapter}{DANH MỤC TỪ VIẾT TẮT}
+\thispagestyle{empty}
+
+\noindent
+\begin{tabular}{p{2.8cm} p{1.0cm} p{10.5cm}}
+\textbf{Từ viết tắt} & & \textbf{Giải thích} \\[6pt]
+\hline \\[-4pt]
+% --- AI / Học máy ---
+RAG  & : & Retrieval-Augmented Generation (Sinh câu trả lời tăng cường bằng truy hồi) \\[4pt]
+LLM  & : & Large Language Model (Mô hình ngôn ngữ lớn) \\[4pt]
+NLP  & : & Natural Language Processing (Xử lý ngôn ngữ tự nhiên) \\[4pt]
+AI   & : & Artificial Intelligence (Trí tuệ nhân tạo) \\[4pt]
+BGE  & : & BAAI General Embedding (Mô hình embedding đa ngôn ngữ của BAAI) \\[4pt]
+BM25 & : & Best Match 25 (Thuật toán xếp hạng tìm kiếm từ khóa xác suất) \\[4pt]
+ANN  & : & Approximate Nearest Neighbor (Tìm kiếm láng giềng gần đúng) \\[4pt]
+TF-IDF & : & Term Frequency-Inverse Document Frequency \\[4pt]
+HyDE & : & Hypothetical Document Embeddings (Nhúng tài liệu giả định) \\[4pt]
+RRF  & : & Reciprocal Rank Fusion (Hợp nhất kết quả theo thứ hạng nghịch đảo) \\[4pt]
+MRR  & : & Mean Reciprocal Rank (Trung bình nghịch đảo thứ hạng) \\[4pt]
+nDCG & : & normalized Discounted Cumulative Gain (Lợi ích tích lũy chiết khấu chuẩn hóa) \\[4pt]
+E2E  & : & End-to-End (Đánh giá đầu-cuối toàn bộ pipeline) \\[4pt]
+FAISS & : & Facebook AI Similarity Search (Thư viện tìm kiếm vector của Meta) \\[4pt]
+OCR  & : & Optical Character Recognition (Nhận dạng ký tự quang học) \\[4pt]
+GPU  & : & Graphics Processing Unit (Đơn vị xử lý đồ họa) \\[4pt]
+CPU  & : & Central Processing Unit (Đơn vị xử lý trung tâm) \\[10pt]
+% --- Hệ thống / Phần mềm ---
+API  & : & Application Programming Interface (Giao diện lập trình ứng dụng) \\[4pt]
+REST & : & Representational State Transfer (Kiến trúc truyền tải trạng thái đại diện) \\[4pt]
+JWT  & : & JSON Web Token (Cơ chế xác thực dựa trên token JSON) \\[4pt]
+RBAC & : & Role-Based Access Control (Kiểm soát truy cập theo vai trò) \\[4pt]
+SSE  & : & Server-Sent Events (Cơ chế server đẩy dữ liệu theo thời gian thực) \\[4pt]
+OAuth & : & Open Authorization (Giao thức ủy quyền mở) \\[4pt]
+CORS & : & Cross-Origin Resource Sharing (Chia sẻ tài nguyên giữa các nguồn khác nhau) \\[4pt]
+HTTP & : & HyperText Transfer Protocol (Giao thức truyền tải siêu văn bản) \\[4pt]
+JSON & : & JavaScript Object Notation (Định dạng trao đổi dữ liệu nhẹ) \\[4pt]
+HTML & : & HyperText Markup Language (Ngôn ngữ đánh dấu siêu văn bản) \\[4pt]
+PDF  & : & Portable Document Format (Định dạng tài liệu di động) \\[4pt]
+UUID & : & Universally Unique Identifier (Định danh duy nhất toàn cầu) \\[4pt]
+URL  & : & Uniform Resource Locator (Địa chỉ tài nguyên thống nhất) \\[4pt]
+UI   & : & User Interface (Giao diện người dùng) \\[10pt]
+% --- Học vụ / Nhà trường ---
+HUST & : & Hanoi University of Science and Technology (Đại học Bách khoa Hà Nội) \\[4pt]
+ĐHBK & : & Đại học Bách khoa \\[4pt]
+CTĐT & : & Chương trình đào tạo \\[4pt]
+QCĐT & : & Quy chế đào tạo \\[4pt]
+STSV & : & Sổ tay sinh viên \\[4pt]
+\end{tabular}
+
+\cleardoublepage
+
+\renewcommand\appendixname{PHỤ LỤC}
+\renewcommand\appendixpagename{PHỤ LỤC}
+\renewcommand\appendixtocname{PHỤ LỤC}
+
+% ===================================================
+
+\newpage
+\pagenumbering{arabic}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RE, LO]{\leftmark}
+\fancyfoot[RE, LO]{\thepage}
+
+
+\chapter{GIỚI THIỆU ĐỀ TÀI}
+\subfile{Chuong/1_Gioi_thieu.tex}
+
+\newpage
+\chapter{CƠ SỞ LÝ THUYẾT}
+\subfile{Chuong/2_Co_so_ly_thuyet.tex}
+
+\newpage
+\chapter{ĐỀ XUẤT GIẢI PHÁP}
+\subfile{Chuong/3_De_xuat.tex}
+
+\newpage
+\chapter{PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG}
+\subfile{Chuong/4_Phan_tich_ly_thuyet.tex}
+
+\newpage
+\chapter{CHI TIẾT ĐÓNG GÓP KỸ THUẬT}
+\subfile{Chuong/5_thuc_nghiem.tex}
+
+\newpage
+\chapter{KẾT QUẢ VÀ ĐÁNH GIÁ}
+\subfile{Chuong/6_Ket_qua_danh_gia.tex}
+
+\newpage
+\begingroup
+\let\cleardoublepage\clearpage
+\chapter*{TÀI LIỆU THAM KHẢO}
+\addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
+\subfile{Chuong/7_Tai_lieu_tham_khao.tex}
+\endgroup
+
+\end{document}

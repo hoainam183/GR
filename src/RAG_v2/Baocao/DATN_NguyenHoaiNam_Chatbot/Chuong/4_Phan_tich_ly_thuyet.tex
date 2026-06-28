@@ -1,0 +1,824 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+% =========================================================
+\section{Mở đầu chương}
+% =========================================================
+
+Chương trước đã trình bày giải pháp RAG ở góc nhìn kiến trúc tổng thể và hai
+luồng xử lý chính. Tiếp nối, chương này chuyển trọng tâm sang phần
+\textbf{phân tích và thiết kế hệ thống phần mềm}: hệ thống được phân chia
+thành những thành phần nào, người dùng tương tác qua những chức năng gì, dữ
+liệu được tổ chức và lưu trữ ra sao, và API được thiết kế theo nguyên tắc nào.
+
+Về mặt tổng thể, hệ thống phục vụ hai nhóm người dùng chính. Sinh viên HUST
+sử dụng chatbot để tra cứu các vấn đề học vụ như chương trình đào tạo, quy
+chế, kế hoạch học kỳ và thủ tục hành chính. Quản trị viên sử dụng các chức
+năng cập nhật tài liệu, duyệt dữ liệu crawler, theo dõi log và đánh giá chất
+lượng câu trả lời.
+
+Nội dung chương gồm: phân tích yêu cầu chức năng và phi chức năng; xác định
+tác nhân và các use case nổi bật; thiết kế kiến trúc backend; thiết kế cơ sở
+dữ liệu; và thiết kế API cùng giao diện người dùng.
+
+% =========================================================
+\section{Yêu cầu chức năng}
+% =========================================================
+
+\subsection{Nhóm chức năng dành cho sinh viên}
+
+\begin{enumerate}[label=\textbf{F\arabic*.}]
+    \item \textbf{Đặt câu hỏi học vụ bằng ngôn ngữ tự nhiên.} Sinh viên nhập
+    câu hỏi tiếng Việt về chương trình đào tạo, quy chế, học bổng, kế hoạch
+    học kỳ, học phí, biểu mẫu hoặc thủ tục sinh viên.
+
+    \item \textbf{Nhận câu trả lời có căn cứ kèm trích dẫn nguồn.} Mỗi câu
+    trả lời được sinh từ tài liệu đã truy hồi, kèm danh sách nguồn để sinh
+    viên tự kiểm chứng.
+
+    \item \textbf{Hỏi tiếp trong cùng phiên hội thoại.} Sinh viên có thể đặt
+    câu hỏi nối tiếp; hệ thống sử dụng lịch sử hội thoại có kiểm soát để
+    hiểu đúng ngữ cảnh mà không gây nhiễu kết quả.
+
+    \item \textbf{Nhận câu trả lời được cá nhân hóa khi phù hợp.} Với câu
+    hỏi phụ thuộc vào hồ sơ cá nhân như ``ngành IT1 K67 cần học những môn
+    nào'', hệ thống tự động áp dụng bộ lọc theo khóa và ngành. Ngược lại,
+    với câu hỏi mang tính chung, hệ thống không lạm dụng hồ sơ cá nhân để
+    tránh nhiễu kết quả truy hồi.
+
+    \item \textbf{Xem và quản lý lịch sử hội thoại.} Sinh viên có thể tạo
+    phiên mới, xem lại các lượt hỏi trước, đổi tên hoặc xóa phiên.
+
+    \item \textbf{Lưu và quản lý câu trả lời quan trọng.} Sinh viên có thể
+    đánh dấu (bookmark) câu trả lời vào thư mục cá nhân để tra cứu sau.
+
+    \item \textbf{Gửi phản hồi về chất lượng câu trả lời.} Sinh viên đánh
+    giá câu trả lời đúng/sai kèm bình luận; dữ liệu này phục vụ phân tích
+    và cải thiện hệ thống.
+
+    \item \textbf{Nhận thông báo từ nhà trường.} Sinh viên nhận thông báo
+    liên quan đến kế hoạch học tập hoặc cập nhật dữ liệu mới.
+\end{enumerate}
+
+\subsection{Nhóm chức năng dành cho quản trị viên}
+
+\begin{enumerate}[label=\textbf{A\arabic*.}]
+    \item \textbf{Quản lý tài liệu học vụ.} Admin upload PDF, chuyển đổi
+    định dạng, chia chunk, review nội dung và đưa vào Qdrant cùng
+    Elasticsearch sau khi duyệt.
+
+    \item \textbf{Duyệt dữ liệu crawler trước khi index.} Dữ liệu thu thập
+    tự động được lưu ở trạng thái staging, chờ admin xem xét và chỉnh sửa
+    trước khi cho phép đưa vào kho tri thức.
+
+    \item \textbf{Rollback tài liệu khi cần.} Khi phát hiện lỗi, admin có
+    thể đưa tài liệu về trạng thái trước và xử lý lại từ đầu.
+
+    \item \textbf{Theo dõi thống kê và vận hành.} Admin xem số lượt hỏi,
+    chất lượng phản hồi, agent trace, feedback và kết quả đánh giá từ
+    evaluation framework.
+
+    \item \textbf{Cấu hình runtime hệ thống.} Admin thay đổi một số thông
+    số như mô hình ngôn ngữ hoặc toggle tính năng mà không cần khởi động
+    lại backend.
+
+    \item \textbf{Quản lý người dùng và phân quyền.} Admin kích hoạt, khóa
+    tài khoản và kiểm soát quyền truy cập các chức năng quản trị.
+\end{enumerate}
+
+% =========================================================
+\section{Yêu cầu phi chức năng}
+% =========================================================
+
+\textbf{Độ chính xác và tính tin cậy.} Câu trả lời phải được sinh từ tài liệu
+chính thức, có nguồn trích dẫn rõ ràng và tránh suy diễn ngoài phạm vi
+context. Khi không có nguồn đủ chắc chắn, hệ thống cần nêu rõ giới hạn thay
+vì khẳng định thiếu căn cứ.
+
+\textbf{Hiệu năng.} Pipeline xử lý nhiều bước tính toán nặng, nên backend
+khởi tạo sẵn các model (embedding, reranker) và pipeline một lần khi startup
+thay vì tải lại theo từng request. Streaming qua SSE được dùng để cải thiện
+cảm nhận về độ trễ. Redis cache được bổ sung cho các câu hỏi ổn định.
+
+\textbf{Khả năng mở rộng.} Các tầng FastAPI backend, Qdrant, Elasticsearch,
+MongoDB và Redis được phân tách để có thể mở rộng độc lập. Khi tải tăng, có
+thể chạy nhiều replica backend phía sau load balancer hoặc tách reranker và
+embedding thành service độc lập.
+
+\textbf{Tính sẵn sàng và cơ chế fail-soft.} Các thành phần phụ trợ không
+được gây dừng toàn bộ hệ thống khi gặp lỗi. Nếu Redis không khả dụng, hệ
+thống vẫn đọc lịch sử từ MongoDB và bỏ qua cache. Nếu agent lỗi, hệ thống
+fallback về classic RAG. Nhờ vậy, hệ thống duy trì được khả năng trả lời cơ
+bản ngay cả khi một số thành phần chưa sẵn sàng.
+
+\textbf{Bảo mật và phân quyền.} Hệ thống dùng JWT để xác thực request,
+refresh token để duy trì phiên đăng nhập và RBAC để kiểm soát quyền truy cập
+các route quản trị. Thông tin định danh lấy từ token luôn được ưu tiên hơn
+dữ liệu do client gửi lên, nhằm ngăn chặn giả mạo hồ sơ.
+
+\textbf{Khả năng quan sát.} Mỗi câu trả lời cần đi kèm trace đủ chi tiết
+để debug khi cần: route được chọn, collection scores, câu hỏi sau reflection,
+metadata filter, danh sách tài liệu truy hồi, rerank trace và thời gian từng
+bước.
+
+% =========================================================
+\section{Tác nhân sử dụng hệ thống}
+% =========================================================
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3.0cm}|p{4.8cm}|p{5.8cm}|}
+\hline
+\textbf{Tác nhân} & \textbf{Mục tiêu} & \textbf{Chức năng chính} \\
+\hline
+Sinh viên & Hỏi đáp học vụ, lưu lịch sử, cập nhật hồ sơ & Chat, streaming, xem
+session, cập nhật profile, bookmark, feedback, nhận thông báo. \\
+\hline
+Quản trị viên & Quản lý tri thức và giám sát vận hành & Upload tài liệu, review
+chunk, index/rollback, xem trace, dashboard, quản lý crawler, xem metrics. \\
+\hline
+Superadmin (lớp phủ qua biến môi trường, không phải vai trò trong DB) & Quản lý
+cấu hình nhạy cảm và tài khoản & Thay đổi cấu hình runtime, tạo tài khoản admin,
+khóa/mở tài khoản người dùng. \\
+\hline
+Crawler hệ thống & Thu thập dữ liệu từ nguồn chính thức & Crawl dữ liệu, đưa
+vào staging trong MongoDB để admin duyệt trước khi index. \\
+\hline
+Evaluation runner & Đánh giá chất lượng hệ thống & Chạy bộ test retrieval/E2E,
+lưu kết quả vào database để hiển thị trên dashboard. \\
+\hline
+\end{tabular}
+\caption{Các tác nhân sử dụng hệ thống}
+\end{table}
+
+% =========================================================
+\section{Use case}
+% =========================================================
+
+\subsection{Danh sách use case chính}
+
+Chương này tập trung vào các use case cốt lõi của hệ thống RAG. Các use case
+phụ như đăng ký, đăng nhập, đổi mật khẩu không được trình bày chi tiết do
+không khác biệt so với ứng dụng web thông thường.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{1.2cm}|p{3.8cm}|p{2.8cm}|p{5.8cm}|}
+\hline
+\textbf{Mã} & \textbf{Use case} & \textbf{Tác nhân} & \textbf{Mô tả ngắn} \\
+\hline
+UC01 & Đặt câu hỏi học vụ & Sinh viên & Sinh viên gửi câu hỏi, nhận câu trả
+lời có căn cứ kèm nguồn trích dẫn. \\
+\hline
+UC02 & Hỏi tiếp trong phiên & Sinh viên & Sinh viên đặt câu hỏi nối tiếp;
+hệ thống dùng lịch sử hội thoại để hiểu ngữ cảnh. \\
+\hline
+UC03 & Xem lịch sử hội thoại & Sinh viên & Sinh viên duyệt danh sách phiên,
+đọc lại lượt hỏi trước, đổi tên hoặc xóa session. \\
+\hline
+UC04 & Bookmark câu trả lời & Sinh viên & Sinh viên lưu câu trả lời vào thư
+mục cá nhân để tra cứu lại. \\
+\hline
+UC05 & Gửi feedback & Sinh viên & Sinh viên đánh giá câu trả lời; hệ thống
+lưu để phục vụ phân tích chất lượng. \\
+\hline
+UC06 & Upload và index tài liệu & Quản trị viên & Admin upload PDF, review
+chunk và đưa vào kho tri thức sau khi duyệt. \\
+\hline
+UC07 & Duyệt dữ liệu crawler & Quản trị viên & Admin xem chunk từ crawler,
+chỉnh sửa nếu cần rồi xác nhận index. \\
+\hline
+UC08 & Xem trace và metrics & Quản trị viên & Admin xem pipeline trace, thống
+kê sử dụng, feedback và dashboard evaluation. \\
+\hline
+UC09 & Tra cứu lịch thi & Sinh viên & Sinh viên hỏi lịch thi; hệ thống kích
+hoạt agent chuyên biệt để tra cứu và trả về thông tin theo môn/nhóm. \\
+\hline
+\end{tabular}
+\caption{Danh sách use case chính}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/usecase_diagram.png}
+    \caption{Biểu đồ Use Case tổng quát của hệ thống}
+    \label{fig:usecase_diagram}
+\end{figure}
+
+\subsection{UC01 -- UC02: sinh viên đặt câu hỏi và nhận câu trả lời}
+
+\textbf{Tác nhân chính}: sinh viên đã đăng nhập.\\
+\textbf{Tiền điều kiện}: backend hoạt động, người dùng có token hợp lệ, ít
+nhất một collection tri thức đã được index.\\
+\textbf{Luồng chính}:
+\begin{enumerate}
+    \item Sinh viên nhập câu hỏi trên giao diện web hoặc mobile.
+    \item Client gửi request tới \texttt{/chat/v3} hoặc mở kết nối SSE tới
+    \texttt{/chat/stream}.
+    \item Backend xác thực token, truy xuất hồ sơ người dùng và lịch sử
+    phiên hội thoại.
+    \item RAGPipeline trước hết thực hiện query reflection để viết lại và mở
+    rộng câu hỏi dựa trên lịch sử hội thoại, sau đó phân loại độ phức tạp trên
+    truy vấn đã viết lại: chitchat, simple hay complex.
+    \item Với câu hỏi simple, hệ thống xác định các collection đích (có thể một hoặc nhiều), truy hồi song song
+    từ Qdrant và Elasticsearch, rerank bằng cross-encoder và tổng hợp context.
+    \item Với câu hỏi complex, agent Planner--Executor phân rã câu hỏi (theo
+    kiểu so sánh hoặc đa nguồn), lập kế hoạch truy hồi nhiều bước và tổng hợp
+    kết quả.
+    \item Mô hình ngôn ngữ sinh câu trả lời từ context đã chọn; response
+    được chuẩn hóa và trả về client kèm nguồn trích dẫn.
+    \item Hệ thống ghi log turn, query log và trace vào MongoDB.
+\end{enumerate}
+\textbf{Luồng thay thế}:
+\begin{itemize}
+    \item Câu hỏi chitchat: hệ thống trả lời trực tiếp, không cần truy hồi.
+    \item Agent lỗi: hệ thống fallback về classic RAG (ở chế độ \texttt{auto}).
+    \item Không tìm được nguồn phù hợp: hệ thống thông báo chưa đủ dữ liệu.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/seq_uc01_diagram.png}
+    \caption{Biểu đồ Sequence cho luồng câu hỏi UC01 (Simple RAG)}
+    \label{fig:seq_uc01}
+\end{figure}
+
+\subsection{Các Use Case tương tác hệ thống khác (UC03, UC04, UC05, UC08)}
+
+Bên cạnh luồng hỏi đáp chính, hệ thống cung cấp các chức năng hỗ trợ quản lý lịch sử và đánh giá chất lượng:
+\begin{itemize}
+    \item \textbf{UC03 (Xem lịch sử hội thoại)}: Sinh viên truy cập danh sách các phiên trò chuyện cũ. Khi chọn một phiên, client gọi API lấy toàn bộ lịch sử hỏi đáp. Người dùng có thể đổi tên phiên để dễ tra cứu hoặc xóa phiên nếu không cần thiết.
+    \item \textbf{UC04 (Bookmark câu trả lời)}: Sinh viên nhấn nút lưu (bookmark) trên một câu trả lời cụ thể. Hệ thống lưu ID của câu trả lời vào bộ sưu tập cá nhân, giúp sinh viên truy cập lại nhanh chóng.
+    \item \textbf{UC05 (Gửi feedback)}: Với mỗi phản hồi từ hệ thống, người dùng có thể đánh giá (thích/không thích) hoặc để lại nhận xét văn bản. Dữ liệu này được lưu trực tiếp vào MongoDB gắn với ID của lượt hội thoại (turn), phục vụ việc tinh chỉnh hệ thống về sau.
+    \item \textbf{UC08 (Xem trace và metrics)}: Quản trị viên truy cập màn hình dashboard để theo dõi tổng số truy vấn, tỷ lệ phân loại miền, hoặc xem các chỉ số đo lường hiệu năng. Admin cũng có thể xem dấu vết (trace) chi tiết của từng lượt hỏi để gỡ lỗi các bước retrieval, reranking và generation.
+\end{itemize}
+
+\subsection{UC06: quản trị viên upload và index tài liệu}
+
+\textbf{Tác nhân chính}: quản trị viên.\\
+\textbf{Tiền điều kiện}: admin đã đăng nhập và có quyền truy cập chức năng
+quản lý tài liệu.\\
+\textbf{Luồng chính}:
+\begin{enumerate}
+    \item Admin tải lên file PDF hoặc DOCX và chọn collection đích.
+    \item Hệ thống lưu file gốc và tạo bản ghi tài liệu với trạng thái
+    \texttt{uploaded}.
+    \item DocumentPipeline xử lý tài liệu qua chuỗi bước tuần tự: chuyển đổi
+    sang Markdown, làm sạch nội dung rồi chia chunk. Tương ứng, trạng thái tài
+    liệu lần lượt đi qua \texttt{converting}, \texttt{converted},
+    \texttt{cleaning}, \texttt{cleaned}, \texttt{chunking} và dừng lại ở
+    \texttt{chunked} để chờ admin review.
+    \item Admin xem xét, chỉnh sửa hoặc xóa chunk không đạt yêu cầu, sau đó bật
+    cờ duyệt \texttt{chunks\_reviewed}.
+    \item Hệ thống embed các chunk đã duyệt bằng BGE-M3 và E5, đưa vào Qdrant
+    và Elasticsearch. Bước index chỉ được phép thực thi khi tài liệu đang ở
+    trạng thái \texttt{chunked} và cờ \texttt{chunks\_reviewed} đã được bật.
+    \item Trạng thái tài liệu chuyển sang \texttt{indexed}; cache liên quan
+    bị vô hiệu hóa; hệ thống có thể kích hoạt post-index evaluation tự động.
+\end{enumerate}
+\textbf{Luồng thay thế}: nếu chunk sai, admin rollback tài liệu về trạng
+thái trước và xử lý lại.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/seq_uc06_diagram.png}
+    \caption{Biểu đồ Sequence cho luồng UC06 (Upload và Index tài liệu)}
+    \label{fig:seq_uc06}
+\end{figure}
+
+\subsection{UC07: quản trị viên duyệt dữ liệu crawler}
+
+\textbf{Tác nhân chính}: quản trị viên.\\
+\textbf{Luồng chính}:
+\begin{enumerate}
+    \item Crawler thu thập dữ liệu từ nguồn chính thức theo lịch cấu hình
+    hoặc theo lệnh thủ công.
+    \item Hệ thống chia dữ liệu thành chunk, lưu vào staging với trạng thái
+    chờ duyệt.
+    \item Admin xem nội dung từng chunk, loại bỏ hoặc chỉnh sửa nếu cần.
+    \item Admin xác nhận index cho staged run đã rà soát.
+    \item Hệ thống embed, đưa vào Qdrant và Elasticsearch, vô hiệu hóa cache
+    liên quan và tạo thông báo cho sinh viên nếu phù hợp.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/seq_uc07_diagram.png}
+    \caption{Biểu đồ Sequence cho luồng UC07 (Duyệt dữ liệu crawler)}
+    \label{fig:seq_uc07}
+\end{figure}
+
+% =========================================================
+\section{Thiết kế kiến trúc phần mềm}
+% =========================================================
+
+\subsection{Lựa chọn kiến trúc}
+
+Hệ thống áp dụng kiến trúc phân lớp (\textit{Layered Architecture}) kết hợp
+với mô hình \textit{Pipeline} cho luồng xử lý câu hỏi. Kiến trúc phân lớp
+phân chia hệ thống thành các tầng độc lập theo trách nhiệm: tầng trình bày
+(client), tầng API, tầng nghiệp vụ (pipeline và agent), tầng truy hồi
+(retrieval service) và tầng lưu trữ. Các tầng chỉ phụ thuộc xuống tầng phía
+dưới, không phụ thuộc ngược lên, giúp giảm coupling và dễ thay thế từng thành
+phần.
+
+Trong phạm vi tầng nghiệp vụ, mô hình Pipeline được áp dụng để tổ chức các
+bước xử lý câu hỏi theo thứ tự: reflection $\to$ routing $\to$ retrieval $\to$
+reranking $\to$ generation. Cách tổ chức này tách biệt rõ từng bước xử lý,
+giúp dễ debug và dễ thay thế từng module mà không ảnh hưởng đến các bước còn
+lại.
+
+\textbf{Lý do chọn Layered + Pipeline.} Kiến trúc phân lớp giữ được sự phân
+tách trách nhiệm rõ ràng. Mô
+hình Pipeline bên trong tầng nghiệp vụ giải quyết đặc thù cốt lõi của RAG:
+mỗi bước xử lý là một biến đổi tuần tự và có thể thất bại độc lập, nên cần
+được tổ chức và debug theo từng bước riêng lẻ. Ngoài ra, kiến trúc này hỗ trợ
+tốt yêu cầu khởi tạo model một lần khi startup --- các mô hình embedding và
+reranker được load vào bộ nhớ một lần và dùng chung cho toàn bộ request,
+tránh overhead tải lại model theo từng request.
+
+\subsection{Ánh xạ kiến trúc vào hệ thống}
+
+Bảng~\ref{tab:ch4-layer-mapping} trình bày cách các tầng lý thuyết được hiện
+thực hóa trong hệ thống \texttt{BKAdvisor}.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3.2cm}|p{5.5cm}|p{5.0cm}|}
+\hline
+\textbf{Tầng lý thuyết} & \textbf{Thành phần trong hệ thống} & \textbf{Ghi chú} \\
+\hline
+Tầng trình bày & Web app (React/Vite), Mobile app (Expo/React Native), Admin
+panel & Client chỉ giao tiếp với backend qua HTTP và SSE. \\
+\hline
+Tầng API & FastAPI backend với các route chat, session, admin, auth, metrics &
+Xác thực, phân quyền và ánh xạ request/response. \\
+\hline
+Tầng nghiệp vụ & \texttt{RAGPipeline}, \texttt{DocumentPipeline}, LangGraph
+Agent, QueryReflector, ComplexityRouter & Orchestration toàn bộ luồng hỏi đáp
+và luồng xử lý dữ liệu. \\
+\hline
+Tầng truy hồi & \texttt{RetrievalService}, Qdrant searcher, Elasticsearch
+searcher, BGE reranker & Khởi tạo một lần khi startup, dùng chung cho cả
+RAG lẫn Agent. \\
+\hline
+Tầng lưu trữ & MongoDB, Qdrant, Elasticsearch, Redis, Local storage & Mỗi kho
+phục vụ một kiểu truy cập riêng. \\
+\hline
+\end{tabular}
+\caption{Ánh xạ kiến trúc phân lớp vào hệ thống}
+\label{tab:ch4-layer-mapping}
+\end{table}
+
+\subsection{Thiết kế tổng quan module backend}
+
+Mã nguồn backend được tổ chức theo module, mỗi module đảm nhận một nhóm trách
+nhiệm riêng biệt. Bảng~\ref{tab:ch4-modules} tóm tắt các module chính.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3.4cm}|p{10.3cm}|}
+\hline
+\textbf{Module} & \textbf{Trách nhiệm} \\
+\hline
+\texttt{api/} & Khởi tạo FastAPI app, đăng ký route, middleware và ánh xạ
+response. \\
+\hline
+\texttt{pipeline/} & Chứa \texttt{RAGPipeline}, luồng classic RAG, luồng
+streaming và \texttt{DocumentPipeline} phục vụ admin upload. \\
+\hline
+\texttt{query/} & Complexity routing, domain routing, query reflection,
+decomposition và entity extraction. \\
+\hline
+\texttt{retrieval/} & Qdrant searcher, Elasticsearch searcher, hybrid
+multi-collection search, metadata filter và retrieval service. \\
+\hline
+\texttt{embedding/}, \texttt{reranking/} & Quản lý mô hình BGE-M3, E5 và BGE
+cross-encoder reranker. \\
+\hline
+\texttt{agent/} & LangGraph Planner--Executor agent, retrieval adapter và
+agent trace. \\
+\hline
+\texttt{models/} & MongoDB models, MongoLogger, system config và persistence. \\
+\hline
+\texttt{cache/} & Redis session, history cache, LLM answer cache và rate limit. \\
+\hline
+\texttt{auth/} & JWT, refresh token rotation và RBAC
+\hline
+\end{tabular}
+\caption{Các module backend chính và trách nhiệm tương ứng}
+\label{tab:ch4-modules}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/component_diagram.png}
+    \caption{Biểu đồ Component của kiến trúc Backend}
+    \label{fig:component_backend}
+\end{figure}
+
+Các module được tổ chức theo nguyên tắc tầng dưới không phụ thuộc tầng trên.
+Cụ thể, \texttt{retrieval/} và \texttt{embedding/} không biết gì về
+\texttt{pipeline/} hay \texttt{api/}; \texttt{pipeline/} sử dụng
+\texttt{retrieval/}, \texttt{query/} và \texttt{agent/}; còn \texttt{api/}
+chỉ gọi vào \texttt{pipeline/} và \texttt{models/}. Cách phân tách này giúp
+thay đổi logic retrieval hoặc reranking mà không ảnh hưởng đến API contract.
+
+% =========================================================
+\section{Thiết kế cơ sở dữ liệu}
+% =========================================================
+
+\subsection{Nguyên tắc thiết kế lưu trữ đa kho}
+
+Hệ thống sử dụng nhiều loại kho dữ liệu, mỗi loại phục vụ một kiểu truy cập
+riêng biệt.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{2.8cm}|p{5.0cm}|p{5.8cm}|}
+\hline
+\textbf{Kho dữ liệu} & \textbf{Dữ liệu lưu trữ} & \textbf{Vai trò} \\
+\hline
+MongoDB & Users, sessions, turns, query logs, agent traces, documents,
+feedback, crawler runs, eval results & Nguồn lưu trạng thái bền vững; system
+of record cho toàn bộ ứng dụng. \\
+\hline
+Qdrant & Chunk embeddings với hai named vectors \texttt{bge\_m3} và \texttt{e5}
+(1024 chiều, cosine), payload metadata & Truy hồi ngữ nghĩa bằng ANN, lọc
+theo payload và lookup parent context. \\
+\hline
+Elasticsearch & Text index BM25 với Vietnamese analyzer, metadata keyword
+fields & Truy hồi từ khóa, mã học phần, mã ngành và metadata-only prefilter. \\
+\hline
+Redis & Session cache, history cache, LLM answer cache, rate limit keys & Tầng
+tăng tốc tùy chọn; fail-soft khi không khả dụng. \\
+\hline
+Local storage & File PDF upload gốc, Markdown trung gian, document lineage
+registry & Lưu blob nguồn cho ingestion và validity filter. \\
+\hline
+\end{tabular}
+\caption{Thiết kế lưu trữ đa kho dữ liệu}
+\label{tab:ch4-storage}
+\end{table}
+
+MongoDB là nguồn chân lý bền vững cho trạng thái ứng dụng. Redis hoạt động
+như tầng tăng tốc có cơ chế fail-soft: nếu Redis không khả dụng, session và
+history được đọc từ MongoDB, còn cache và rate limit bị bỏ qua mà không gây
+lỗi nghiêm trọng.
+
+\subsection{Thiết kế MongoDB collections}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3.6cm}|p{10.0cm}|}
+\hline
+\textbf{Collection} & \textbf{Mục đích và dữ liệu chính} \\
+\hline
+\texttt{users} & Tài khoản, email, vai trò, trạng thái kích hoạt và hồ sơ
+học vụ (khóa, ngành, mã sinh viên). \\
+\hline
+\texttt{sessions} & Metadata phiên hội thoại: ID phiên, user ID, tên phiên,
+thời điểm tạo và cập nhật. \\
+\hline
+\texttt{turns} & Từng lượt hỏi--đáp: câu hỏi, câu trả lời, nguồn, mode,
+route và session ID. \\
+\hline
+\texttt{query\_logs} & Log chi tiết pipeline: câu hỏi sau reflection, collection
+được chọn, filter áp dụng, tài liệu truy hồi, rerank trace và thời gian từng
+bước. \\
+\hline
+\texttt{agent\_traces} & Thông tin luồng agent: decomposition, plan steps,
+tool calls và kết quả từng step. \\
+\hline
+\texttt{documents} & Trạng thái tài liệu admin upload và vòng đời xử lý
+(uploaded $\to$ converted $\to$ cleaned $\to$ chunked $\to$ indexed). \\
+\hline
+\texttt{document\_chunks} & Chunk sau xử lý để admin review, kèm trạng thái
+duyệt và mapping tới tài liệu gốc. \\
+\hline
+\texttt{crawler\_runs/chunks} & Dữ liệu crawler ở trạng thái staging, chờ
+admin duyệt trước khi index. \\
+\hline
+\texttt{feedback} & Rating, comment, user ID và metadata câu trả lời phục vụ
+phân tích lỗi. \\
+\hline
+\texttt{eval\_runs} / \texttt{eval\_case\_results} & Kết quả đánh giá retrieval
+và generation: metric tổng hợp theo run và chi tiết từng case. \\
+\hline
+\end{tabular}
+\caption{Thiết kế các collection MongoDB chính}
+\label{tab:ch4-mongo}
+\end{table}
+
+Ba collection trung tâm của luồng hỏi đáp được thiết kế chi tiết như sau.
+
+\textbf{Collection \texttt{sessions}} lưu metadata của từng phiên hội thoại.
+Mỗi document bao gồm \texttt{session\_id} (UUID định danh phiên),
+\texttt{user\_id} (liên kết tới người dùng, có thể null với phiên ẩn danh),
+\texttt{title} (tên phiên do người dùng đặt hoặc sinh tự động),
+\texttt{created\_at} và \texttt{updated\_at} (datetime), cùng
+\texttt{turn\_count} (int đếm số lượt hỏi đáp). Collection này được index theo
+\texttt{user\_id} để hỗ trợ truy vấn danh sách phiên của một người dùng.
+
+\textbf{Collection \texttt{turns}} lưu từng lượt hỏi--đáp bên trong một phiên.
+Mỗi document gồm \texttt{session\_id} (liên kết tới phiên cha),
+\texttt{turn\_id} (số thứ tự trong phiên), \texttt{question} và \texttt{answer}
+(nội dung câu hỏi và câu trả lời), \texttt{intent} (nhãn phân loại ý định),
+\texttt{sources} (mảng các nguồn trích dẫn, mỗi phần tử chứa rank, content,
+score và metadata), \texttt{latency\_ms} (int thời gian xử lý tính bằng
+mili-giây), \texttt{timestamp} (datetime), và \texttt{mode}/\texttt{route}
+(chuỗi xác định tier và luồng xử lý đã chọn). Thiết kế tách \texttt{turns}
+ra khỏi \texttt{sessions} cho phép tải lại lịch sử theo trang và dùng $n$ lượt
+gần nhất làm context cho query reflection mà không cần load toàn bộ phiên.
+
+\textbf{Collection \texttt{documents}} theo dõi vòng đời của tài liệu admin
+upload. Mỗi document bao gồm \texttt{\_id} (ObjectId), \texttt{filename}
+(tên file gốc), \texttt{collection} (enum: \texttt{ctdt} | \texttt{quydinh} |
+\texttt{kehoach} | \texttt{stsv} xác định miền tri thức đích),
+\texttt{status} (chuỗi trạng thái tuần tự: \texttt{uploaded} $\to$
+\texttt{converting} $\to$ \texttt{converted} $\to$ \texttt{cleaning} $\to$
+\texttt{cleaned} $\to$ \texttt{chunking} $\to$ \texttt{chunked} $\to$
+\texttt{embedding} $\to$ \texttt{indexed} | \texttt{failed}),
+\texttt{uploaded\_by} (ObjectId liên kết
+admin), \texttt{chunk\_count} (int) và \texttt{chunk\_ids} (mảng string định
+danh các chunk đã index), \texttt{error\_message} (string|null ghi nhận lý do
+thất bại nếu có), và \texttt{audit\_log} (mảng bản ghi hành động gồm action,
+user\_id và timestamp, dùng để tra cứu ai đã duyệt hoặc rollback tài liệu).
+\texttt{status} là trường chốt kiểm soát: bước index chỉ được thực thi khi
+\texttt{status} đang ở \texttt{chunked} và flag \texttt{chunks\_reviewed}
+đã được admin bật.
+
+\subsection{Quan hệ dữ liệu chính}
+
+Quan hệ giữa các thực thể chính trong hệ thống như sau: một \texttt{user} có
+nhiều \texttt{sessions}; một \texttt{session} chứa nhiều \texttt{turns}; mỗi
+\texttt{turn} liên kết với \texttt{query\_log} và \texttt{agent\_trace} tương
+ứng. Về phía quản trị dữ liệu, một \texttt{document} được chia thành nhiều
+\texttt{document\_chunks}; một \texttt{crawler\_run} gồm nhiều
+\texttt{crawler\_chunks}. Quan trọng là mỗi chunk đã index cần có định danh
+nhất quán giữa MongoDB, Qdrant và Elasticsearch để đảm bảo khả năng rollback,
+debug và trích dẫn nguồn chính xác.
+
+% =========================================================
+\section{Thiết kế API}
+% =========================================================
+
+\subsection{Nguyên tắc thiết kế}
+
+API được thiết kế theo phong cách REST, dùng JSON cho request/response, JWT
+Bearer cho các route yêu cầu xác thực và SSE cho streaming. Schema được định
+nghĩa bằng Pydantic để đảm bảo tính nhất quán giữa backend, web và mobile.
+Đáng lưu ý, với chat API, response không chỉ chứa câu trả lời mà còn bao gồm
+trace metadata để phục vụ debug và đánh giá.
+
+\subsection{API chat và session}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3.8cm}|p{2.4cm}|p{7.5cm}|}
+\hline
+\textbf{Endpoint} & \textbf{Phương thức} & \textbf{Mục đích} \\
+\hline
+\texttt{/chat/v3} & POST & Endpoint chat chính cho web/mobile, trả về câu trả
+lời kèm trace metadata. \\
+\hline
+\texttt{/chat/stream} & POST & Streaming qua SSE: sinh viên nhận token từng
+phần trong khi hệ thống đang xử lý. \\
+\hline
+\texttt{/session} & POST & Tạo phiên hội thoại mới. \\
+\hline
+\texttt{/session/\{id\}} & GET/PATCH/DELETE & Đọc metadata và turns, đổi tên
+hoặc xóa phiên. \\
+\hline
+\texttt{/sessions/me} & GET & Liệt kê phiên của người dùng đang đăng nhập. \\
+\hline
+\texttt{/bookmark} & GET/POST/DELETE & Lưu, xóa và liệt kê các câu trả lời
+được sinh viên đánh dấu. \\
+\hline
+\texttt{/feedback} & POST & Gửi đánh giá (like/dislike) và bình luận cho
+câu trả lời. \\
+\hline
+\texttt{/lookup} & GET & Tra cứu nhanh thông tin học phần, ngành đào tạo. \\
+\hline
+\texttt{/notification} & GET/POST & Quản lý và lấy danh sách thông báo gửi
+đến sinh viên. \\
+\hline
+\end{tabular}
+\caption{API chat, session và tính năng sinh viên}
+\label{tab:ch4-api-chat}
+\end{table}
+
+\subsection{API quản trị và đánh giá}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{4.0cm}|p{9.7cm}|}
+\hline
+\textbf{Nhóm endpoint} & \textbf{Mục đích} \\
+\hline
+\texttt{/admin/documents*} & Upload, convert, clean, chunk, review, index và
+rollback tài liệu. \\
+\hline
+\texttt{/admin/crawler/*} & Chạy crawler, xem staged chunks, duyệt và index
+crawler run. \\
+\hline
+\texttt{/admin/stats/*} & Thống kê người dùng, số lượt hỏi, agent trace,
+feedback và lỗi hệ thống. \\
+\hline
+\texttt{/admin/config*} & Xem và cập nhật cấu hình runtime, invalidate cache. \\
+\hline
+\texttt{/metrics/eval} & Dữ liệu dashboard evaluation theo suite. \\
+\hline
+\texttt{/retrieval/search} & Endpoint diagnostic để kiểm tra retrieval thô. \\
+\hline
+\end{tabular}
+\caption{API quản trị và đánh giá}
+\label{tab:ch4-api-admin}
+\end{table}
+
+% =========================================================
+\section{Thiết kế giao diện người dùng}
+% =========================================================
+
+\subsection{Nguyên tắc thiết kế}
+
+Giao diện được thiết kế theo hướng mobile-first nhưng đồng thời hỗ trợ đầy
+đủ web app. Đối với sinh viên, trải nghiệm tập trung vào chat nhanh, dễ đọc
+nguồn trích dẫn và xem lại lịch sử. Đối với admin, trải nghiệm hướng tới
+review dữ liệu, xem trace và theo dõi dashboard. Cả web lẫn mobile đều dùng
+chung API backend và một shared TypeScript package để giảm thiểu sai lệch
+contract giữa hai nền tảng.
+
+\subsection{Giao diện web}
+
+Web app sử dụng React, Vite, TanStack Query và Tailwind CSS. Giao diện có
+hai vùng chính: sidebar trái liệt kê danh sách phiên hội thoại theo thời gian
+(hôm qua, 7 ngày trước...) với nút tạo phiên mới và ô tìm kiếm; vùng nội dung
+phải hiển thị lượt hỏi đáp, câu trả lời kèm nút xem nguồn trích dẫn, và các
+thao tác like/dislike/copy/bookmark trên từng câu trả lời. Màn hình chào khi
+chưa có hội thoại gợi ý bốn chủ đề phổ biến để sinh viên bắt đầu nhanh hơn.
+
+Hình~\ref{fig:ch4-ui-chat-welcome}, \ref{fig:ch4-ui-chat-short}
+và~\ref{fig:ch4-ui-chat-long} minh họa lần lượt màn hình chào, giao diện chat
+với câu trả lời ngắn và giao diện chat với câu trả lời dài có cấu trúc.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{ui_chat_welcome.jpg}
+    \caption{Màn hình chào của giao diện chat --- hiển thị bốn gợi ý chủ đề
+    phổ biến (Quy chế đào tạo, CTĐT ngành tôi, Chính sách học bổng, Lịch học
+    kỳ mới) để sinh viên bắt đầu nhanh hơn}
+    \label{fig:ch4-ui-chat-welcome}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{ui_chat_short.jpg}
+    \caption{Giao diện chat khi nhận được câu trả lời ngắn --- sidebar trái
+    liệt kê các phiên hội thoại theo thời gian; câu trả lời hiển thị kèm nút
+    ``Xem nguồn'' để sinh viên kiểm chứng tài liệu gốc; bên dưới có các gợi
+    ý câu hỏi liên quan}
+    \label{fig:ch4-ui-chat-short}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{ui_chat_long.jpg}
+    \caption{Giao diện chat khi nhận được câu trả lời dài có cấu trúc --- hệ
+    thống tổng hợp thông tin từ nhiều nguồn, trình bày theo danh sách có tiêu
+    đề rõ ràng; sinh viên có thể xem 7 nguồn trích dẫn hoặc thực hiện thao
+    tác like, dislike, bookmark trên từng câu trả lời}
+    \label{fig:ch4-ui-chat-long}
+\end{figure}
+
+\subsection{Giao diện quản trị (Admin Console)}
+
+Giao diện quản trị được tổ chức thành các trang chính: Tổng quan, Người dùng,
+Tài liệu, Phân tích, Feedback và Hệ thống. Trang Tài liệu
+(Hình~\ref{fig:ch4-ui-admin-upload}) cho phép upload file PDF/DOCX, chọn
+collection đích và chiến lược chia chunk, đồng thời hiển thị danh sách tài
+liệu đã xử lý cùng trạng thái và số chunk tương ứng.
+
+Sau khi upload, admin được chuyển đến trang review chi tiết
+(Hình~\ref{fig:ch4-ui-admin-review}) hiển thị tiến trình pipeline gồm bốn
+bước: Chuyển đổi PDF, Làm sạch, Chia chunk và Nhúng \& Lưu trữ. Admin có thể
+so sánh các chiến lược chunking, xem nội dung Markdown/Cleaned/Chunks/Metadata,
+rồi xác nhận bằng nút ``Lưu \& Duyệt'' hoặc Rollback về trạng thái trước.
+
+Trang Hệ thống (Hình~\ref{fig:ch4-ui-admin-crawler}) tích hợp quản lý Crawler
+--- hiển thị các run theo collection, trạng thái indexed và số chunk --- cùng
+phần Cấu hình nâng cao cho phép chỉnh tham số retrieval như Top K ngay trong
+giao diện mà không cần khởi động lại server.
+
+\subsection{Giao diện mobile}
+
+Ứng dụng mobile được xây dựng bằng Expo và React Native, dành riêng cho sinh
+viên. Giao diện tập trung vào ba chức năng cốt lõi: đặt câu hỏi học vụ, xem
+lại lịch sử hội thoại và lưu câu trả lời qua bookmark. Do dùng chung API
+backend và shared TypeScript package với web app, contract dữ liệu giữa hai
+nền tảng được đảm bảo nhất quán mà không cần duy trì hai codebase API riêng
+biệt. Xác thực trên mobile sử dụng cùng cơ chế JWT, với refresh token được
+lưu trong SecureStore thay vì HttpOnly cookie như trên web. Các chức năng
+quản trị không được đưa vào ứng dụng mobile; toàn bộ nghiệp vụ admin chỉ
+khả dụng qua giao diện web.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{ui_admin_upload.jpg}
+    \caption{Giao diện admin quản lý tài liệu --- phần trên cho phép upload
+    file PDF/DOCX, chọn collection đích và chunking strategy; phần dưới liệt
+    kê các tài liệu đã upload cùng trạng thái xử lý và số chunk tương ứng}
+    \label{fig:ch4-ui-admin-upload}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{ui_admin_review.jpg}
+    \caption{Giao diện admin review tài liệu sau khi upload --- hiển thị tiến
+    trình pipeline (Chuyển đổi PDF, Làm sạch, Chia chunk, Nhúng \& Lưu trữ);
+    cho phép admin chọn và so sánh chunking strategy trước khi xác nhận bằng
+    nút ``Lưu \& Duyệt''; có tùy chọn Rollback để quay về trạng thái trước}
+    \label{fig:ch4-ui-admin-review}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{ui_admin_crawler.jpg}
+    \caption{Giao diện admin quản lý hệ thống --- phần Crawler hiển thị các
+    crawler run theo collection với trạng thái indexed và số chunk đã tạo; phần
+    Cấu hình nâng cao cho phép thay đổi tham số retrieval (Top K, Vector Top K)
+    và lưu ngay vào database mà không cần khởi động lại server}
+    \label{fig:ch4-ui-admin-crawler}
+\end{figure}
+
+% =========================================================
+\section{Thiết kế logging và lưu lịch sử hội thoại}
+% =========================================================
+
+Logging trong hệ thống không chỉ lưu nội dung chat mà còn phục vụ đánh giá
+chất lượng pipeline RAG. Với mỗi lượt hỏi, hệ thống ghi lại: câu hỏi gốc và
+câu hỏi sau reflection, route được chọn, collection được truy hồi, filter áp
+dụng, danh sách tài liệu trước và sau rerank, thời gian từng bước, và phản hồi
+của người dùng. Nhờ đó, người phát triển có thể truy nguyên nguyên nhân lỗi
+đến đúng bước gây ra vấn đề thay vì dò toàn bộ pipeline.
+
+Mỗi phiên hội thoại được lưu trong collection \texttt{sessions}; mỗi lượt
+hỏi--đáp được lưu riêng trong \texttt{turns}. Thiết kế tách biệt này cho phép
+tải lại lịch sử khi mở lại phiên cũ, dùng lịch sử gần nhất làm context cho
+query reflection, và phân tích số lượt hỏi theo người dùng hoặc theo loại
+route. Với câu hỏi phức tạp qua agent, trace chi tiết của từng bước lập kế
+hoạch và truy hồi được lưu riêng trong \texttt{agent\_traces}.
+
+% =========================================================
+\section{Thiết kế bảo mật và phân quyền}
+% =========================================================
+
+Phương thức xác thực đang vận hành trong bản triển khai là đăng nhập bằng tài
+khoản (username/password), sau đó hệ thống cấp phát JWT cho các request tiếp
+theo.
+
+Access token dùng JWT có thời hạn ngắn (mặc định 15 phút). Refresh token là một
+chuỗi ngẫu nhiên được hash bằng SHA-256 rồi lưu trong MongoDB; hệ thống áp dụng
+cơ chế rotation theo family, khi phát hiện một refresh token đã bị dùng lại thì
+toàn bộ family bị thu hồi nhằm chống đánh cắp token. Trên web, refresh token
+được đặt trong HttpOnly cookie; trên mobile, token được lưu trong SecureStore.
+
+Phân quyền được thực hiện theo RBAC. Ở tầng cơ sở dữ liệu, người dùng có hai vai
+trò là sinh viên (mặc định) và admin. Mức superadmin không phải là một vai trò
+lưu trong DB mà là lớp phủ xác định qua biến môi trường
+\texttt{SUPERADMIN\_USER\_IDS}, dành cho các thao tác nhạy cảm như tạo tài khoản
+admin. Các route upload tài liệu, crawler, cấu hình hệ thống và quản lý người
+dùng đều yêu cầu quyền admin trở lên. Thông tin định danh lấy từ token luôn được
+ưu tiên hơn dữ liệu do client gửi lên, nhằm ngăn chặn khả năng giả mạo hồ sơ.
+
+Rate limit được thực hiện qua Redis với cấu hình mặc định 20 request mỗi phút
+và 200 request mỗi ngày cho mỗi người dùng, nhằm ngăn tình trạng gây nghẽn
+LLM hay reranker. Nếu Redis không khả dụng, rate limit bị bỏ qua theo hướng
+fail-soft.
+
+% =========================================================
+\section{Kết luận chương}
+% =========================================================
+
+Chương này đã trình bày phân tích và thiết kế hệ thống phần mềm cho trợ lý
+học vụ \texttt{BKAdvisor}. Hệ thống được tổ chức theo kiến trúc phân lớp kết hợp
+mô hình Pipeline: FastAPI backend trung tâm với RAGPipeline singleton điều phối
+cả classic RAG lẫn agent, tầng retrieval lai Qdrant--Elasticsearch, MongoDB làm
+nguồn lưu trạng thái bền vững, Redis cache fail-soft và hai client web/mobile
+dùng chung API contract.
+
+Một số quyết định thiết kế đáng lưu ý: tách biệt rõ read path (hỏi đáp) và
+write path (quản trị tài liệu); khởi tạo model một lần khi startup thay vì
+theo từng request; log đủ sâu để debug từng bước pipeline; và bước admin review
+bắt buộc trước khi index giúp kiểm soát chất lượng dữ liệu. Đây là nền tảng
+để Chương~5 trình bày các giải pháp và đóng góp kỹ thuật nổi bật.
+
+\end{document}

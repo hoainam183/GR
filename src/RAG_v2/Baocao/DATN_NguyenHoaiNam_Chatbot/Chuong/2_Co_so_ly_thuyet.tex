@@ -1,0 +1,608 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+% =========================================================
+\section{Mở đầu chương}
+% =========================================================
+
+Chương này trình bày các nền tảng lý thuyết phục vụ trực tiếp cho việc xây
+dựng hệ thống trợ lý học vụ dựa trên kiến trúc \textit{Retrieval-Augmented
+Generation} (RAG) --- tức kiến trúc sinh câu trả lời có bổ trợ truy hồi. Khác
+với các bài toán hỏi đáp thông thường, dữ liệu học vụ có tính đặc thù cao:
+mỗi quy định thường gắn với phạm vi áp dụng cụ thể, thời điểm hiệu lực, mã
+ngành và mã học phần nhất định. Do đó, mô hình ngôn ngữ lớn (LLM --- Large
+Language Model) không thể chỉ dựa vào tri thức tham số học được trong quá
+trình huấn luyện --- hệ thống cần có cơ chế truy hồi tài liệu có kiểm soát
+trước khi đưa ra câu trả lời.
+
+Về bố cục, nội dung chương được tổ chức theo trình tự từ bài toán đến giải
+pháp kỹ thuật. Phần đầu phân tích đặc thù của dữ liệu và truy vấn học vụ.
+Tiếp theo, chương trình bày nguyên lý RAG, quy trình xử lý tài liệu và phân
+đoạn nội dung (chunking), biểu diễn ngữ nghĩa bằng embedding vector, tìm kiếm
+từ khóa với BM25, truy hồi lai kết hợp Qdrant và Elasticsearch, lọc theo siêu
+dữ liệu, xếp hạng lại bằng mô hình cross-encoder, hiểu truy vấn và định tuyến,
+mô hình RAG có tác nhân (agentic RAG) theo kiến trúc Planner--Executor, cùng
+các cơ chế hỗ trợ như tìm kiếm web dự phòng và đánh giá hệ thống. Toàn bộ
+các khái niệm được trình bày ở mức tổng quát, đặt nền tảng lý thuyết cho phần
+đề xuất giải pháp và triển khai ở các chương sau.
+
+% =========================================================
+\section{Bối cảnh bài toán hỏi đáp học vụ}
+% =========================================================
+
+\subsection{Đặc thù nguồn tri thức học vụ}
+
+Nguồn tri thức học vụ không phải là một tập văn bản đồng nhất. Thực tế, nó
+bao gồm nhiều nhóm tài liệu có cấu trúc và mục đích khác nhau: chương trình
+đào tạo, quy định học vụ, kế hoạch học kỳ, biểu mẫu thủ tục và các dịch vụ
+hỗ trợ sinh viên. Vì mỗi nhóm có tiêu chí truy hồi riêng, hệ thống phân chia
+dữ liệu thành bốn kho tri thức theo miền --- bao gồm chương trình đào tạo, quy
+định học vụ, kế hoạch và thông báo, cùng sổ tay hỗ trợ sinh viên --- như đã
+định nghĩa trong Bảng~\ref{tab:ch1-collections} ở Chương~1.
+
+Việc phân chia theo miền như vậy giúp giảm nhiễu đáng kể trong quá trình truy
+hồi. Nếu toàn bộ tài liệu được gộp vào một chỉ mục chung, những đoạn có từ
+khóa tương tự nhưng khác mục đích sẽ dễ cạnh tranh nhầm với nhau trong danh
+sách kết quả --- chẳng hạn, một thông báo về kế hoạch học kỳ có thể lấn át
+thông tin quy định tốt nghiệp khi sinh viên hỏi về điều kiện ra trường.
+
+\subsection{Đặc điểm truy vấn của sinh viên}
+
+Truy vấn học vụ thường ngắn, mang tính tự nhiên và không phải lúc nào cũng
+trùng khớp với thuật ngữ trong văn bản gốc. Trong thực tế, sinh viên hay hỏi
+theo cách diễn đạt đời thường, ví dụ ``em cần điều kiện gì để tốt nghiệp'',
+``môn này học kỳ mấy'' hay ``ngành Việt Nhật có khác IT1 không''. Bên cạnh đó,
+truy vấn còn có thể chứa các thực thể cụ thể như mã ngành, mã học phần, khóa
+sinh viên hoặc học kỳ nhất định. Đặc biệt trong các cuộc hội thoại nhiều lượt,
+câu hỏi sau thường dùng đại từ và tham chiếu ngầm kiểu ``ngành của em'', ``môn
+đó'' hay ``so với chương trình kia''.
+
+Những đặc điểm này cho thấy bài toán hỏi đáp học vụ không đơn thuần là tìm
+kiếm văn bản. Hệ thống phải phối hợp đồng thời retrieval theo ngữ nghĩa,
+retrieval chính xác theo từ khóa, lọc theo siêu dữ liệu và xử lý ngữ cảnh hội
+thoại. Tuy nhiên, lịch sử hội thoại và thông tin hồ sơ cá nhân chỉ nên được
+sử dụng khi câu hỏi hiện tại thực sự phụ thuộc vào chúng. Nếu không kiểm soát
+tốt, hệ thống có thể rơi vào hiện tượng context bleed (*ngữ cảnh bị nhiễm
+chéo*) --- tức là mang sai thông tin ngành hoặc khóa từ lượt hỏi trước sang
+câu hỏi mới, dẫn đến kết quả truy hồi bị lệch hướng.
+
+\subsection{Yêu cầu đối với câu trả lời có căn cứ}
+
+Trong miền học vụ, một câu trả lời thoạt nghe hợp lý nhưng thiếu căn cứ có
+thể khiến sinh viên đưa ra quyết định sai, chẳng hạn đăng ký nhầm môn hoặc
+bỏ lỡ thời hạn quan trọng. Do đó, hệ thống hỏi đáp cần đáp ứng một số yêu
+cầu cốt lõi: truy hồi tài liệu liên quan trước khi sinh câu trả lời; ưu tiên
+văn bản còn hiệu lực và tránh dùng văn bản đã bị thay thế; xử lý được các
+tham chiếu điều khoản kiểu ``Điều~5, Khoản~1''; thừa nhận khi ngữ cảnh không
+đủ thông tin; và hỗ trợ kiểm tra hồi quy để phát hiện lỗi ở từng tầng xử lý.
+
+% =========================================================
+\section{Nguyên lý Retrieval-Augmented Generation}
+% =========================================================
+
+\subsection{Giới hạn của tìm kiếm từ khóa và mô hình sinh thuần túy}
+
+Tìm kiếm từ khóa truyền thống như TF--IDF hay BM25 có thế mạnh với các chuỗi
+chính xác --- mã học phần, số điều khoản, tên biểu mẫu --- nhưng dễ bỏ sót tài
+liệu khi người dùng diễn đạt khác so với văn bản gốc. Ở chiều ngược lại, LLM
+có khả năng hiểu ngôn ngữ tự nhiên và tổng hợp câu trả lời mạch lạc, nhưng lại
+không đảm bảo nắm được các văn bản nội bộ mới nhất và dễ sinh nội dung không
+được kiểm chứng --- hiện tượng thường gọi là hallucination (*sinh nội dung
+không có căn cứ*).
+
+RAG giải quyết hạn chế của cả hai hướng bằng cách tách quá trình trả lời thành
+hai bước rõ ràng: đầu tiên truy hồi các đoạn tài liệu phù hợp từ kho tri thức
+đã được lập chỉ mục, sau đó đưa các đoạn đó vào prompt để mô hình sinh câu trả
+lời bám theo nội dung đã cho. Nhờ kiến trúc tách biệt này, tri thức của hệ
+thống có thể được cập nhật đơn giản bằng cách cập nhật chỉ mục mà không cần
+huấn luyện lại mô hình.
+
+\subsection{Vòng đời của một hệ thống RAG}
+
+Nhìn tổng thể, một hệ thống RAG hoàn chỉnh gồm ba pha chính:
+
+\begin{enumerate}
+    \item \textbf{Lập chỉ mục (Indexing)}: chuyển đổi tài liệu thô, làm sạch
+    nội dung, phân đoạn thành các chunk nhỏ, tạo embedding vector rồi lưu văn
+    bản cùng siêu dữ liệu vào các vector database và elasticsearch.
+    \item \textbf{Retrieval}: hiểu truy vấn của người dùng, chọn kho tri thức
+    phù hợp, áp dụng bộ lọc siêu dữ liệu, lấy các ứng viên từ tìm kiếm vector
+    và tìm kiếm từ khóa, hợp nhất kết quả rồi xếp hạng lại để chọn ra nguồn
+    tốt nhất.
+    \item \textbf{Sinh câu trả lời (Generation)}: định dạng ngữ cảnh đã truy
+    hồi, sinh câu trả lời có căn cứ, đồng thời trả về thông tin nguồn để người
+    dùng kiểm chứng.
+\end{enumerate}
+
+Điểm cần nhấn mạnh là chất lượng RAG phụ thuộc vào toàn bộ chuỗi xử lý, không
+chỉ riêng mô hình sinh. Nói cách khác, nếu chunk bị phân chia sai, siêu dữ
+liệu thiếu hoặc bước reranking loại nhầm tài liệu, thì mô hình có thể tạo ra
+câu trả lời sai dù bản thân nó có năng lực tốt.
+
+\subsection{Grounded generation}
+
+Grounded generation là nguyên tắc yêu cầu mô hình chỉ trả lời dựa trên ngữ
+cảnh được cung cấp, không tự suy diễn vượt quá nguồn và phải thông báo khi
+không có đủ thông tin. Trong hệ thống này, tầng sinh câu trả lời cung cấp giao
+diện chung cho cả chế độ thông thường và phát trực tuyến (streaming); mô hình
+ngôn ngữ sử dụng có thể là DeepSeek, Gemini hoặc các điểm cuối tương thích
+chuẩn OpenAI. Nhờ lớp trừu tượng này, toàn bộ pipeline không phụ thuộc vào
+một thư viện cụ thể nào, trong khi vẫn đảm bảo nguyên tắc cốt lõi: bước sinh
+câu trả lời luôn là bước cuối cùng, sau khi retrieval và xử lý hậu kỳ đã hoàn
+tất.
+
+% =========================================================
+\section{Xử lý tài liệu và phân đoạn nội dung}
+% =========================================================
+
+\subsection{Chuyển đổi và làm sạch tài liệu}
+
+Tài liệu đầu vào của hệ thống có thể ở nhiều dạng: PDF, DOCX, Markdown hoặc
+JSON từ công cụ thu thập dữ liệu tự động (crawler). Bước chuyển đổi sang định
+dạng Markdown cần đảm bảo giữ được các cấu trúc quan trọng như tiêu đề phân
+cấp, danh sách, bảng và số thứ tự điều khoản --- vì nếu những cấu trúc này bị
+mất, các bước chunking và retrieval về sau sẽ khó xác định đúng ngữ cảnh cho
+từng đoạn. Sau khi chuyển đổi, bước làm sạch loại bỏ mục lục, dòng trang trí
+và khoảng trắng dư thừa, đồng thời cố gắng giữ lại bảng ở dạng Markdown chuẩn.
+
+\subsection{Chiến lược phân đoạn theo loại tài liệu}
+
+Chunk là đơn vị nội dung cơ bản được lưu trữ, mã hóa thành embedding vector và
+truy hồi. Chunk quá ngắn thường mất ngữ cảnh, còn chunk quá dài lại chứa nhiều
+ý không liên quan, vừa làm giảm độ chính xác khi reranking vừa tiêu tốn ngân
+sách context window của mô hình. Một chunk phù hợp cần bao trọn một đơn vị
+nghĩa tương đối độc lập và giữ đủ siêu dữ liệu để truy vết ngược về nguồn gốc.
+
+Do mỗi loại tài liệu học vụ có đặc điểm riêng, hệ thống áp dụng nhiều chiến
+lược chunking khác nhau thay vì tách cố định theo số ký tự. Cụ thể, văn bản
+quy định cần giữ cấu trúc Chương--Điều--Khoản; chương trình đào tạo cần bảo
+toàn nguyên vẹn bảng học phần; thông báo cần giữ ngày tháng và tiêu đề; sổ tay
+sinh viên cần giữ các bước thủ tục theo đúng trình tự.
+Bảng~\ref{tab:chunking_strategies} tóm tắt các chiến lược chính.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{4.0cm}|p{6.0cm}|}
+\hline
+\textbf{Chiến lược} & \textbf{Dữ liệu phù hợp} & \textbf{Ý tưởng chính} \\
+\hline
+Phân đoạn đệ quy & Chương trình đào tạo và văn bản Markdown tổng quát &
+Tách theo tiêu đề, đoạn, dòng; bảo vệ bảng học phần; tạo quan hệ cha--con. \\
+\hline
+Phân đoạn pháp quy & Văn bản quy định (đã qua nhận dạng ký tự) & Nhận diện
+Chương, Điều, Khoản và Phụ lục bằng quy tắc dựa trên chuỗi mẫu; tạo chunk
+tiêu đề, chunk cha và chunk con; có xử lý dự phòng khi thiếu cấu trúc pháp lý. \\
+\hline
+Phân đoạn kế hoạch & Kế hoạch và thông báo thu thập tự động & Tách theo bài,
+mục đánh số, kèm ngày đăng và siêu dữ liệu nguồn. \\
+\hline
+Phân đoạn sổ tay & Sổ tay và tài liệu hỗ trợ sinh viên & Tách theo mục, tiểu
+mục và các bước thủ tục. \\
+\hline
+\end{tabular}
+\caption{Các chiến lược chunking nội dung trong hệ thống}
+\label{tab:chunking_strategies}
+\end{table}
+
+\subsection{Quan hệ cha--con và siêu dữ liệu}
+
+Văn bản học vụ thường có cấu trúc phân cấp, do đó cách chia chunk cũng cần
+phản ánh điều này. Cụ thể, chunk cha giữ ngữ cảnh rộng hơn như tiêu đề hoặc
+toàn bộ nội dung một Điều, trong khi chunk con chứa nội dung trả lời trực tiếp
+câu hỏi. Chính sách lập chỉ mục phân biệt rõ hai mục đích: các chunk ở dạng
+tiêu đề được loại khỏi danh sách kết quả chính để tránh chiếm vị trí trong
+top-$k$, nhưng vẫn được lưu trong kho để sau bước reranking có thể truy xuất
+bổ sung ngữ cảnh thông qua ID chunk cha khi cần.
+
+Ngoài nội dung văn bản, mỗi chunk còn mang theo siêu dữ liệu cấu trúc như mã
+ngành, khóa áp dụng, loại tài liệu, ngày tháng, nguồn và ID tài liệu cha. Đặc
+biệt, đối với tài liệu quy định, thông tin về quan hệ kế thừa --- tức mối quan
+hệ thay thế giữa các phiên bản văn bản --- được lưu riêng để hệ thống có thể
+nhận biết và tránh sử dụng văn bản cũ khi đã có phiên bản mới hơn.
+
+% =========================================================
+\section{Biểu diễn ngữ nghĩa bằng vector}
+% =========================================================
+
+\subsection{Embedding vector và độ đo cosine}
+
+Embedding (*biểu diễn vector*) là phép ánh xạ chuyển văn bản thành một vector
+số trong không gian nhiều chiều. Khi hai đoạn văn có ý nghĩa gần nhau, các
+vector tương ứng cũng thường nằm gần nhau theo độ đo cosine:
+
+\begin{equation}
+\operatorname{cos}(u,v) =
+\frac{u \cdot v}{\|u\| \|v\|}
+\end{equation}
+
+Trong giai đoạn lập chỉ mục, mỗi chunk văn bản được chuyển thành embedding
+vector rồi lưu vào kho vector. Đến lúc xử lý truy vấn, câu hỏi của người dùng
+cũng được mã hóa theo cùng cách, sau đó so khớp với các vector tài liệu để tìm
+ra những ứng viên có ý nghĩa gần nhất. Tìm kiếm vector đặc biệt hữu ích khi
+người dùng diễn đạt khác hoàn toàn so với văn bản gốc, nhưng lại không đủ mạnh
+với các trường hợp cần khớp chính xác theo ký tự --- đây chính là lý do hệ
+thống cần kết hợp thêm tìm kiếm từ khóa.
+
+\subsection{Mô hình mã hóa BGE-M3 và E5 đa ngôn ngữ}
+
+Hệ thống sử dụng đồng thời hai mô hình mã hóa đa ngôn ngữ để tăng độ bao phủ
+khi truy hồi. Mô hình BGE-M3 \cite{bgem3} tạo embedding 1024 chiều và còn được dùng làm đặc
+trưng cho một số thành phần phân loại miền. Mô hình E5 \cite{e5model} đa ngôn ngữ cũng tạo
+embedding 1024 chiều, sử dụng tiền tố ``query:'' cho truy vấn và ``passage:''
+cho tài liệu theo đặc tả riêng của mô hình này.
+
+Hai embedding này được lưu riêng biệt trong Qdrant dưới dạng hai vector có tên
+thay vì trộn sẵn ngay từ khâu lập chỉ mục. Khi truy vấn, điểm tìm kiếm vector
+là tổ hợp có trọng số của hai mô hình (mặc định cân bằng $0{,}5$--$0{,}5$); nhờ
+lưu tách biệt, hệ thống có thể điều chỉnh mức đóng góp của từng mô hình mà không
+phải lập chỉ mục lại.
+
+\subsection{Kho vector Qdrant}
+
+Qdrant được sử dụng để lưu trữ embedding vector và siêu dữ liệu theo từng kho
+tri thức. Mỗi điểm dữ liệu tương ứng với một chunk văn bản, bao gồm hai vector
+1024 chiều và sử dụng khoảng cách cosine làm độ đo. Trường payload (*dữ liệu
+mở rộng*) chứa nội dung văn bản, siêu dữ liệu, thông tin nguồn và ID chunk cha.
+Ngoài khả năng tìm kiếm vector, Qdrant còn hỗ trợ lọc theo trường payload để
+phối hợp với tìm kiếm từ khóa từ Elasticsearch trong luồng truy hồi lai.
+
+% =========================================================
+\section{Tìm kiếm từ khóa và BM25}
+% =========================================================
+
+\subsection{Vai trò của sparse retrieval}
+
+Sparse retrieval (*tìm kiếm thưa, dựa trên từ vựng*) giữ lại tín hiệu từ vựng
+chính xác mà dense retrieval (*tìm kiếm dày, dựa trên vector*) có thể bỏ qua.
+Trong dữ liệu học vụ, các ký hiệu như ``IT-E6'', ``MI1111'', ``K70'' hay
+``Điều~5'' mang ý nghĩa rất cụ thể. Nếu hệ thống chỉ dùng tìm kiếm ngữ nghĩa,
+các ký hiệu này có thể bị làm mờ trong không gian vector khi cạnh tranh với
+những đoạn có ý nghĩa gần nhưng không đúng thực thể mà sinh viên đang hỏi. Vì
+vậy, Elasticsearch được tích hợp để thực hiện BM25, tìm kiếm theo siêu dữ liệu
+và tra cứu theo định danh.
+
+\subsection{Công thức BM25}
+
+BM25 \cite{bm25} là phương pháp tính điểm liên quan giữa tài liệu $D$ và truy vấn $Q =
+\{q_1, q_2, ..., q_n\}$ theo công thức:
+
+\begin{equation}
+\operatorname{BM25}(D,Q) =
+\sum_{i=1}^{n}
+\operatorname{IDF}(q_i)
+\frac{f(q_i,D)(k_1+1)}
+{f(q_i,D)+k_1\left(1-b+b\frac{|D|}{avgdl}\right)}
+\end{equation}
+
+Trong đó, $f(q_i,D)$ là tần suất xuất hiện của từ $q_i$ trong tài liệu, $|D|$
+là độ dài tài liệu, $avgdl$ là độ dài trung bình toàn corpus, $k_1$ điều khiển
+độ bão hòa tần suất và $b$ điều khiển mức chuẩn hóa theo độ dài tài liệu.
+Thành phần IDF (nghịch đảo tần suất tài liệu) được tính như sau:
+
+\begin{equation}
+\operatorname{IDF}(q_i) =
+\ln\left(
+\frac{N-n(q_i)+0.5}{n(q_i)+0.5}+1
+\right)
+\end{equation}
+
+Elasticsearch trong hệ thống được cấu hình với bộ phân tích tiếng Việt hỗ trợ
+tách từ phù hợp, cùng các bước xử lý chuyển về chữ thường, đồng nghĩa và chuẩn
+hóa ký tự ASCII. Bên cạnh tìm kiếm toàn văn trên nội dung, các trường như mã
+ngành, mã học phần và ngày tháng được lưu dạng từ khóa để phục vụ lọc chính xác.
+
+% =========================================================
+\section{Truy hồi lai và hợp nhất kết quả}
+% =========================================================
+
+\subsection{Lý do kết hợp dense retrieval và sparse retrieval}
+
+Dense retrieval và sparse retrieval là hai phương pháp bổ sung cho nhau. Dense
+retrieval tìm được các đoạn cùng nghĩa dù cách diễn đạt có khác nhau, trong
+khi sparse retrieval giữ được kết quả khớp chính xác cho mã ngành, mã môn, số
+điều khoản và các cụm từ đặc thù. Chính sự kết hợp này tạo ra khả năng bao phủ
+toàn diện hơn so với từng phương pháp riêng lẻ.
+
+Trong thực tế triển khai, hệ thống chạy tìm kiếm vector và tìm kiếm từ khóa
+song song cho từng kho tri thức, sau đó hợp nhất kết quả trên toàn bộ các kho
+đã được chọn.
+
+\subsection{Hợp nhất theo thứ hạng đảo nghịch (RRF)}
+
+Do điểm cosine và điểm BM25 nằm trên các thang đo khác nhau, việc cộng trực
+tiếp hai loại điểm là không phù hợp. Phương pháp hợp nhất mặc định của hệ thống
+là Hợp Nhất Theo Thứ Hạng Đảo Nghịch (Reciprocal Rank Fusion --- RRF \cite{rrf2009}): thay vì
+dựa vào độ lớn điểm gốc, RRF kết hợp kết quả dựa trên thứ hạng của mỗi tài liệu
+trong từng tập riêng lẻ. Dạng cơ bản của RRF được tính như sau:
+
+\begin{equation}
+\operatorname{RRF}(d) =
+\sum_{r \in R}
+\frac{1}{k + \operatorname{rank}_r(d)}
+\end{equation}
+
+Trong đó $\operatorname{rank}_r(d)$ là thứ hạng của tài liệu $d$ trong tập kết
+quả $r$, và $k$ là hằng số làm mượt. Trên cơ sở đó, hệ thống dùng một biến thể
+có trọng số nhằm vẫn ưu tiên tín hiệu ngữ nghĩa mà không đánh mất tính bền vững
+của RRF:
+
+\begin{equation}
+S(d) =
+w_v \cdot \frac{1}{k + \operatorname{rank}_v(d)}
++ w_k \cdot \frac{1}{k + \operatorname{rank}_k(d)}
++ B_{\text{recency}}(d)
+\end{equation}
+
+Ở đây $\operatorname{rank}_v$ và $\operatorname{rank}_k$ lần lượt là thứ hạng
+của tài liệu trong danh sách vector và danh sách từ khóa, $w_v$ và $w_k$ là
+trọng số tương ứng (cấu hình mặc định $w_v = 0{,}8$, $w_k = 0{,}2$ và hằng số
+$k = 10$), còn $B_{\text{recency}}$ là phần cộng thêm dành cho tài liệu thuộc
+kho kế hoạch có ngày đăng mới hơn. Cách hợp nhất theo thứ hạng đặc biệt hữu ích
+khi điểm của hai phương pháp khó so sánh trực tiếp, đồng thời miễn nhiễm với
+trường hợp một tập kết quả lấn át tập kia chỉ vì chênh lệch thang điểm. Ngoài
+ra, khi truy vấn chứa mã học phần hoặc yêu cầu tra bảng chính xác, tỷ lệ từ khóa
+được tự động tăng lên để ưu tiên các kết quả khớp đúng định danh.
+
+\subsection{Phương án hợp nhất tuyến tính theo điểm chuẩn hóa}
+
+Bên cạnh RRF, hệ thống còn cài đặt một phương án hợp nhất tuyến tính dựa trên
+độ lớn điểm sau chuẩn hóa, được dùng để đối chứng trong thực nghiệm. Ở phương
+án này, mỗi điểm trong từng tập kết quả được chia cho giá trị lớn nhất của tập
+đó (chuẩn hóa theo giá trị cao nhất, max-normalization); so với chuẩn hóa
+min-max thông thường, cách này giúp tài liệu có điểm thấp nhất vẫn giữ được một
+phần đóng góp khác không. Điểm hợp nhất khi đó là tổ hợp tuyến tính:
+
+\begin{equation}
+S(d) =
+w_v \cdot \widehat{S_v}(d)
++ w_k \cdot \widehat{S_k}(d)
++ B_{\text{recency}}(d)
+\end{equation}
+
+trong đó $\widehat{S_v}$ và $\widehat{S_k}$ là điểm vector và điểm từ khóa sau
+chuẩn hóa. Điểm khác biệt là phương án tuyến tính phản ánh trực tiếp khoảng cách
+điểm giữa các tài liệu, trong khi RRF chỉ quan tâm đến thứ hạng. Kết quả so sánh
+thực nghiệm giữa hai chiến lược hợp nhất này được trình bày chi tiết trong
+Chương~6.
+
+% =========================================================
+\section{Truy hồi nhận biết siêu dữ liệu}
+% =========================================================
+
+\subsection{Lọc theo siêu dữ liệu và kiểm tra hiệu lực}
+
+Lọc theo siêu dữ liệu giúp thu hẹp không gian tìm kiếm và tăng xác suất lấy
+đúng văn bản mà sinh viên cần. Luồng xử lý cơ bản diễn ra theo các bước: tạo
+bộ lọc theo kho tri thức, dùng Elasticsearch tìm định danh phù hợp dựa trên
+siêu dữ liệu, chuyển danh sách định danh sang điều kiện lọc cho Qdrant, rồi
+chạy tìm kiếm vector và từ khóa trên tập đã được lọc. Nếu bộ lọc quá chặt
+khiến kết quả rỗng, hệ thống có cơ chế tự động nới lỏng điều kiện để tránh
+trả lời ``không có thông tin'' quá sớm.
+
+Sau giai đoạn truy hồi, hệ thống thực hiện thêm hai bước xử lý hậu kỳ quan
+trọng. Thứ nhất, ValidityFilter (*bộ lọc hiệu lực*) đọc thông tin quan hệ kế
+thừa giữa các văn bản để loại bỏ những chunk thuộc văn bản đã bị thay thế, với
+điều kiện vẫn còn đủ nguồn sau khi lọc. Thứ hai, ReferenceResolver (*bộ giải
+tham chiếu*) phát hiện các dẫn chiếu như ``Điều~5'' hoặc ``Khoản~1 Điều~5'',
+rồi tìm chunk tương ứng bằng tra cứu siêu dữ liệu; nếu không tìm được, hệ
+thống chuyển sang tìm kiếm ngữ nghĩa có ràng buộc cùng nguồn.
+
+\subsection{Mở rộng ngữ cảnh từ chunk cha và HyDE dự phòng}
+
+Mở rộng ngữ cảnh từ chunk cha (parent context expansion) là kỹ thuật bổ sung
+nội dung chunk cha cho kết quả chunk con sau khi reranking, nhằm cung cấp thêm
+ngữ cảnh cho mô hình sinh mà không làm ảnh hưởng đến quá trình xếp hạng ứng
+viên ban đầu.
+
+Bên cạnh đó, HyDE (\textit{Hypothetical Document Embeddings} \cite{hyde2022} --- Nhúng Tài Liệu
+Giả Định) đóng vai trò cơ chế dự phòng khi kết quả sau reranking quá ít hoặc
+điểm quá thấp. Cụ thể, mô hình ngôn ngữ sinh ra một đoạn văn giả định phù hợp
+với câu hỏi, đoạn văn đó được mã hóa thành embedding vector để truy hồi thêm
+ứng viên. HyDE chỉ được kích hoạt khi chất lượng truy hồi không đạt ngưỡng tối
+thiểu, nhằm tránh tăng độ trễ không cần thiết cho những câu hỏi đã có kết quả
+tốt.
+
+% =========================================================
+\section{Xếp hạng lại bằng mô hình cross-encoder}
+% =========================================================
+
+\subsection{Bi-encoder và cross-encoder}
+
+Retrieval bằng embedding vector hoạt động theo cơ chế bi-encoder (*mã hóa hai
+chiều độc lập*): truy vấn và tài liệu được mã hóa tách rời rồi so sánh bằng
+khoảng cách vector. Cách này cho tốc độ nhanh và khả năng mở rộng tốt, nhưng
+không đánh giá được sự tương tác sâu giữa từng từ của truy vấn và tài liệu.
+
+Ngược lại, cross-encoder (*mã hóa chéo, đánh giá cặp*) nhận đồng thời cặp
+(truy vấn, tài liệu) làm đầu vào và cho điểm liên quan chi tiết hơn. Tuy nhiên,
+chi phí tính toán cao hơn đáng kể và chỉ phù hợp với tập ứng viên có kích thước
+nhỏ. Sự kết hợp bi-encoder (để lấy ứng viên nhanh) và cross-encoder (để rerank
+chính xác) là thiết kế phổ biến trong các hệ thống RAG hiện đại.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{4.2cm}|p{4.2cm}|}
+\hline
+\textbf{Tiêu chí} & \textbf{Bi-encoder} & \textbf{Cross-encoder} \\
+\hline
+Đầu vào & Truy vấn và tài liệu mã hóa tách rời & Cặp truy vấn--tài liệu mã hóa
+cùng lúc \\
+\hline
+Mục đích & Lấy ứng viên nhanh & Reranking ứng viên \\
+\hline
+Khả năng mở rộng & Tốt với chỉ mục vector & Phù hợp với tập ứng viên nhỏ \\
+\hline
+Độ chi tiết & Phụ thuộc khoảng cách vector & Đánh giá độ liên quan trực tiếp \\
+\hline
+\end{tabular}
+\caption{So sánh bi-encoder và cross-encoder}
+\label{tab:biencoder_crossencoder}
+\end{table}
+
+\subsection{Mô hình reranker BGE}
+
+Hệ thống sử dụng mô hình cross-encoder BGE (BAAI/bge-reranker-v2-m3) để chấm
+điểm từng cặp truy vấn--tài liệu sau giai đoạn truy hồi. Mô hình ghi điểm cho từng ứng viên, áp ngưỡng
+trước khi cắt top-$k$ và sử dụng cơ chế đảm bảo số tối thiểu để tránh trả
+kết quả rỗng khi tất cả điểm nằm dưới ngưỡng. Đáng chú ý, ngưỡng cho văn bản
+thường và chunk bảng được cấu hình riêng, vì bảng có cách biểu diễn tuyến tính
+khác với văn bản xuôi và thường cho điểm thấp hơn ngay cả khi nội dung liên
+quan.
+
+% =========================================================
+\section{Hiểu truy vấn và định tuyến}
+% =========================================================
+
+\subsection{Phân loại độ phức tạp theo ba tầng}
+
+Không phải câu hỏi nào cũng đòi hỏi tác nhân tự động hay nhiều lượt truy hồi.
+Vì vậy, hệ thống phân loại truy vấn thành ba nhóm theo mức độ phức tạp tăng
+dần:
+
+\begin{itemize}
+    \item \textbf{Hội thoại thông thường}: lời chào hoặc trao đổi xã giao
+    ngắn --- hệ thống trả lời trực tiếp mà không cần truy hồi;
+    \item \textbf{RAG đơn giản}: câu hỏi học vụ đơn miền hoặc tra cứu chính
+    sách đơn giản, đi qua luồng RAG tuyến tính thông thường;
+    \item \textbf{RAG phức tạp}: câu hỏi so sánh, cần nhiều nguồn hoặc nhiều
+    bước xử lý --- được chuyển sang tác nhân Lập Kế Hoạch--Thực Thi.
+\end{itemize}
+
+Cách phân loại ba tầng này giúp hệ thống tránh dùng pipeline nặng cho những
+câu hỏi đơn giản, từ đó kiểm soát được độ trễ và chi phí tính toán.
+
+\subsection{Phân loại miền và viết lại truy vấn}
+
+Sau khi xác định độ phức tạp, hệ thống tiếp tục phân loại miền để chọn đúng
+kho tri thức cần tìm kiếm. Bộ phân loại sử dụng embedding vector BGE-M3 làm
+đặc trưng và phân loại truy vấn thành một hoặc nhiều miền trong bốn kho tri
+thức đã định nghĩa. Khi độ tin cậy thấp hoặc khoảng cách giữa hai miền hẹp,
+pipeline có thể gọi thêm LLM để hiệu chỉnh kết quả phân loại.
+
+Song song với đó, thành phần viết lại truy vấn (QueryReflector) biến câu hỏi
+thực tế thành truy vấn rõ ràng hơn cho retrieval. Cụ thể, nó loại bỏ nhiễu
+hội thoại, viết lại câu hỏi thành dạng độc lập khi phát hiện đại từ hoặc tham
+chiếu ngầm, đồng thời trích xuất các thực thể như mã ngành, mã học phần và học
+kỳ. Một nguyên tắc quan trọng là hệ thống chỉ hợp nhất thông tin hồ sơ người
+dùng khi câu hỏi thực sự phụ thuộc vào thông tin đó, nhằm tránh hiện tượng
+context bleed đã đề cập ở phần trước.
+
+% =========================================================
+\section{RAG có tác nhân tự động}
+% =========================================================
+
+\subsection{Khi nào cần tác nhân}
+
+RAG tuyến tính phù hợp khi một lượt truy hồi và một lượt generation đủ để giải
+quyết câu hỏi. Tuy nhiên, một số câu hỏi học vụ đòi hỏi nhiều bước xử lý hơn:
+so sánh chuẩn ngoại ngữ giữa hai chương trình, kiểm tra điều kiện tốt nghiệp
+theo ngành và khóa cụ thể, hay tổng hợp thông tin từ nhiều văn bản khác nhau.
+Với những trường hợp như vậy, tác nhân tự động giúp phân rã câu hỏi, lập kế
+hoạch retrieval và tổng hợp kết quả một cách có cấu trúc hơn.
+
+\subsection{Mô hình Lập Kế Hoạch--Thực Thi (Planner--Executor)}
+
+Một cách triển khai agentic RAG phổ biến là mô hình Lập Kế Hoạch--Thực Thi
+(Planner--Executor). Trong mô hình này, bước Lập Kế Hoạch phân tích câu hỏi và
+tạo ra một kế hoạch gồm một số bước nhỏ (giới hạn ở vài bước), mỗi bước xác định
+truy vấn con, kho tri thức đích cùng các gợi ý phạm vi như mã ngành hoặc khóa.
+Tiếp theo, bước Thực Thi chạy song song các bước này bằng công cụ retrieval và
+tự nới lỏng bộ lọc rồi thử lại khi một bước chưa thu được kết quả. Cuối cùng,
+bước Tổng Hợp gộp kết quả của toàn bộ các bước và sinh ra câu trả lời. Luồng xử
+lý đi một chiều --- lập kế hoạch một lần, thực thi song song rồi tổng hợp --- giúp dễ
+kiểm soát độ trễ và chi phí hơn.
+
+Mô hình này phù hợp với bài toán học vụ vì nhiều câu hỏi không thể được giải
+quyết bằng một chunk tài liệu duy nhất. Để so sánh hai chương trình đào tạo,
+hệ thống cần truy hồi riêng thông tin của từng chương trình rồi mới tổng hợp;
+hay để kiểm tra điều kiện cá nhân, hệ thống có thể cần kết hợp thông tin từ
+hồ sơ người dùng, quy định đào tạo và chương trình học.
+
+Tuy vậy, tác nhân chỉ nên được kích hoạt khi câu hỏi thực sự cần lập kế hoạch
+nhiều bước. Nếu dùng tác nhân cho mọi câu hỏi, hệ thống sẽ tăng độ trễ và chi
+phí mà không thu được lợi ích tương xứng. Vì lý do này, hệ thống kết hợp tác
+nhân với cơ chế phân loại theo độ phức tạp như đã trình bày ở phần trước.
+
+% =========================================================
+\section{Tìm kiếm web dự phòng và tự đánh giá}
+% =========================================================
+
+Kho tri thức nội bộ phù hợp với các tài liệu đã được lập chỉ mục, nhưng một
+số câu hỏi về lịch đăng ký hoặc thời hạn mới có thể cần dữ liệu cập nhật hơn.
+Tìm kiếm web dự phòng (web fallback) là cơ chế tùy chọn bổ sung nguồn từ
+Internet, kích hoạt khi nguồn nội bộ không đủ mạnh hoặc câu trả lời bị đánh giá
+là thiếu căn cứ. Đây là một cơ chế có thể bật/tắt qua cấu hình và mặc định được
+để ở trạng thái thận trọng, chủ yếu nhắm vào nhóm dữ liệu biến động nhanh như
+kế hoạch và thông báo. Với miền học vụ, cơ chế này cần được giới hạn ở các nguồn
+chính thức để tránh lấy thông tin từ nguồn chưa được kiểm chứng.
+
+Bên cạnh đó, tự đánh giá (self-evaluation) là kỹ thuật sử dụng chính mô hình
+hoặc một mô hình đánh giá riêng để kiểm tra câu trả lời sau khi đã sinh ra.
+Các tiêu chí thường bao gồm mức độ liên quan, độ bám nguồn và độ đầy đủ. Kết
+quả đánh giá có thể giúp hệ thống quyết định thử lại, chuyển sang web fallback
+hoặc thông báo thiếu thông tin. Tuy nhiên, đây cũng là một tầng tùy chọn và mặc
+định được tắt để tránh tăng độ trễ cho mỗi truy vấn; quan trọng hơn,
+self-evaluation chỉ là một lớp kiểm tra bổ sung, không thể thay thế cho bộ đánh
+giá ngoại tuyến và kiểm thử hồi quy.
+
+% =========================================================
+\section{Lưu trữ, bộ nhớ đệm và bảo mật}
+% =========================================================
+
+Một hệ thống trợ lý RAG cần lưu trữ nhiều loại dữ liệu: thông tin người dùng,
+hồ sơ học vụ, phiên hội thoại, nhật ký truy vấn, dấu vết tác nhân, tài liệu
+tải lên, chunk trung gian, phản hồi và kết quả đánh giá. Cơ sở dữ liệu dạng
+tài liệu như MongoDB phù hợp với các trạng thái ứng dụng có cấu trúc linh hoạt.
+Trong khi đó, Redis có thể được dùng cho phiên làm việc, bộ nhớ đệm lịch sử
+hội thoại và giới hạn tốc độ truy cập nhằm giảm độ trễ cho các truy vấn lặp
+lại.
+
+Điều quan trọng là bộ nhớ đệm trong hệ thống RAG cần được thiết kế cẩn thận.
+Cụ thể, hệ thống không nên lưu đệm các câu trả lời thiếu nguồn, dùng web
+fallback hoặc bị self-evaluation đánh giá thấp. Thêm vào đó, khi tài liệu mới
+được lập chỉ mục, các bản ghi đệm liên quan cần được vô hiệu hóa kịp thời để
+tránh trả lời dựa trên nguồn cũ.
+
+Về bảo mật, xác thực người dùng giúp bảo vệ lịch sử hội thoại và hồ sơ cá
+nhân. Phân quyền giữa sinh viên và quản trị viên là cần thiết để kiểm soát các
+chức năng nhạy cảm như tải tài liệu lên, duyệt chunk hay thay đổi cấu hình hệ
+thống. Backend cần lấy định danh từ token (*mã xác thực*) thay vì tin vào thông
+tin do client gửi trong yêu cầu, nhằm ngăn chặn rủi ro giả mạo.
+
+% =========================================================
+\section{Truy vết và đánh giá}
+% =========================================================
+
+Do RAG bao gồm nhiều bước trung gian, hệ thống cần ghi lại đầy đủ thông tin
+truy vết để hỗ trợ phân tích lỗi. Nhờ các trường nhật ký ghi lại kho tri thức
+được chọn, xác suất định tuyến, truy vấn sau viết lại, bộ lọc áp dụng, kết
+quả theo kho, điểm reranking và thời gian từng bước, người phát triển có thể
+phân biệt được lỗi thuộc về định tuyến sai, bộ lọc quá chặt, retrieval thiếu
+nguồn hay generation không bám ngữ cảnh.
+
+Về đánh giá, các chỉ số retrieval thường dùng bao gồm Recall@K (nguồn đúng có
+xuất hiện trong top-$K$), MRR@K (vị trí của nguồn đúng đầu tiên) và nDCG@K
+(chất lượng thứ tự xếp hạng có chiết khấu logarit). Hệ thống tách thành hai
+lớp đánh giá độc lập: đánh giá theo chính sách hiện hành kiểm tra retrieval
+trên tài liệu hiện hành có xét đến quan hệ kế thừa, còn đánh giá theo lịch sử
+hội thoại kiểm tra khả năng xử lý câu hỏi tiếp nối và hành vi trong các phiên
+trước đó. Sự tách biệt này cần thiết vì chính sách học vụ có thể thay đổi theo
+thời gian; một câu trả lời lịch sử không còn đúng ở hiện tại không nhất thiết
+phản ánh lỗi của hệ thống retrieval hiện hành.
+
+% =========================================================
+\section{Kết luận chương}
+% =========================================================
+
+Chương này đã trình bày các nền tảng lý thuyết phục vụ trực tiếp cho hệ thống
+trợ lý học vụ. Các khái niệm được tổ chức theo trình tự từ bài toán đến giải
+pháp: từ đặc thù dữ liệu học vụ đa miền và yêu cầu câu trả lời có căn cứ, đến
+nguyên lý RAG, chunking phân cấp, embedding vector đa mô hình, truy hồi lai với
+hợp nhất theo thứ hạng đảo nghịch (RRF) và phương án tuyến tính dùng để đối
+chứng, lọc siêu dữ liệu, reranking bằng cross-encoder, phân loại độ phức tạp ba
+tầng, agentic RAG theo mô hình
+Lập Kế Hoạch--Thực Thi, web fallback có kiểm soát và đánh giá hồi quy. Toàn
+bộ nền tảng lý thuyết này sẽ được áp dụng cụ thể vào kiến trúc và triển khai
+hệ thống trong các chương tiếp theo.
+
+\end{document}

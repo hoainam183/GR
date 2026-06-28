@@ -1,0 +1,354 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+% =========================================================
+\section{Tổng quan giải pháp đề xuất}
+% =========================================================
+
+Chương này trình bày giải pháp tổng thể cho hệ thống trợ lý học vụ có tên
+\texttt{BKAdvisor}, phục vụ sinh viên Trường Đại học Bách khoa Hà Nội. Mục tiêu
+cốt lõi không chỉ là xây dựng một chatbot có khả năng trả lời tự nhiên, mà
+quan trọng hơn là tạo ra nền tảng hỏi đáp có căn cứ: câu trả lời được sinh từ
+tài liệu học vụ chính thức, có khả năng truy vết nguồn và có cơ chế kiểm soát
+rủi ro sinh nội dung sai lệch.
+
+Xuất phát từ các rủi ro đặc thù của dữ liệu học vụ --- nhiều miền tài liệu, thông tin có thời điểm hiệu lực, tham chiếu điều khoản và nguy cơ context bleed --- giải pháp được thiết kế xoay quanh ba nguyên tắc cốt lõi nhằm hiện thực hóa mục tiêu đã đề ra ở Chương 1: Grounded generation (sinh câu trả lời có căn cứ từ tài liệu), Domain-aware routing (định tuyến theo miền tri thức để giảm nhiễu) và Controlled personalization (cá nhân hóa có kiểm soát để tránh mất ngữ cảnh chung). Việc thiết kế hệ thống tuân thủ chặt chẽ ba nguyên tắc này nhằm giải quyết triệt để vấn đề ảo giác thông tin (hallucination) trong miền học vụ.
+
+Dựa trên ba nguyên tắc trên, hệ thống được thiết kế với hai luồng xử lý chính
+và một lớp đánh giá đi kèm. \textbf{Luồng hỏi đáp} nhận câu hỏi từ người dùng,
+chuẩn hóa truy vấn, định tuyến theo độ phức tạp, truy hồi tài liệu, xếp hạng
+lại ngữ cảnh và sinh câu trả lời có trích dẫn. \textbf{Luồng xử lý dữ liệu}
+chuyển đổi tài liệu --- gồm PDF/DOCX do admin tải lên và nội dung web do
+crawler thu thập --- thành các chunk có siêu dữ liệu, tạo embedding và đánh
+chỉ mục vào kho tri thức sau khi được admin duyệt. Hai
+luồng được thiết kế tách biệt để vừa tối ưu trải nghiệm hỏi đáp thời gian
+thực, vừa đảm bảo việc cập nhật tri thức được kiểm soát. Lớp đánh giá chạy
+song song để đo chất lượng retrieval và generation, đồng thời hỗ trợ phát hiện
+hồi quy khi dữ liệu hoặc cấu hình thay đổi.
+
+Về phạm vi của chương, phần tiếp theo trình bày kiến trúc tổng thể và thiết kế
+hai luồng chính ở mức tổng quan. Chi tiết từng module, cơ sở dữ liệu và API
+được trình bày ở Chương~4; cài đặt cụ thể và các đóng góp kỹ thuật nổi bật
+được trình bày ở Chương~5.
+
+% =========================================================
+\section{Kiến trúc tổng thể hệ thống}
+% =========================================================
+
+\subsection{Mô hình phân lớp}
+
+Hệ thống được tổ chức theo kiến trúc phân lớp rõ ràng, như minh họa trong
+Hình~\ref{fig:system_design}. Mỗi lớp đảm nhận một nhóm trách nhiệm riêng biệt
+và chỉ phụ thuộc xuống lớp phía dưới.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/system_design.png}
+    \caption{Kiến trúc tổng thể hệ thống \texttt{BKAdvisor}}
+    \label{fig:system_design}
+\end{figure}
+
+Người dùng --- sinh viên và quản trị viên --- tương tác với hệ thống qua web app
+hoặc mobile app. Mọi request đều đi qua FastAPI Backend, đây là điểm vào trung
+tâm chịu trách nhiệm xác thực, phân quyền và điều phối. Bên trong backend,
+\texttt{RAGPipeline} đảm nhiệm toàn bộ luồng hỏi đáp: từ hiểu truy vấn, định
+tuyến, retrieval đến sinh câu trả lời. Song song với đó, \texttt{DocumentPipeline}
+phục vụ luồng quản trị tài liệu. Tầng lưu trữ gồm Qdrant (vector), Elasticsearch
+(keyword), MongoDB (lưu phiên hội thoại, log truy vấn và trace tác nhân) và
+Redis, đảm nhiệm bộ nhớ đệm câu trả lời, lưu session và giới hạn tần suất. Redis
+được bật mặc định nhưng có cơ chế suy giảm mềm: khi không sẵn sàng, hệ thống vẫn
+hoạt động dựa trên MongoDB.
+
+\subsection{Định tuyến câu hỏi theo độ phức tạp}
+
+Một điểm thiết kế đáng chú ý là hệ thống không xử lý mọi câu hỏi theo cùng một
+luồng. Trước khi truy hồi, \texttt{RAGPipeline} phân loại câu hỏi và chọn một
+trong hai luồng xử lý chính:
+
+\begin{itemize}
+    \item \textbf{Simple RAG}: dành cho câu hỏi có nhu cầu thông tin rõ ràng,
+    kể cả khi phải tra cứu đồng thời trên nhiều collection (nhưng kết quả có thể trực tiếp trả về mà không cần đối chiếu logic chéo giữa các kho). Luồng này thực hiện một lượt
+    retrieval và một lượt generation, và được dùng cho phần lớn câu hỏi vì độ
+    trễ thấp, dễ đánh giá và dễ kiểm soát.
+    \item \textbf{Agent (Planner--Executor)}: dành cho câu hỏi so sánh, đa
+    nguồn mang tính suy luận (đòi hỏi mô hình phải kết nối, đối chiếu thông tin từ nhiều kho khác nhau để tự tổng hợp ra kết luận mới) hoặc cần nhiều bước suy luận. Tác nhân lập kế hoạch retrieval, thực
+    thi từng bước rồi tổng hợp kết quả.
+\end{itemize}
+
+Ngoài hai luồng trên, các câu mang tính giao tiếp xã giao --- chào hỏi, cảm ơn
+hay hỏi ngoài phạm vi học vụ --- được nhận diện sớm và trả lời trực tiếp mà
+không kích hoạt retrieval, tránh tiêu tốn tài nguyên cho những lượt không cần
+đến tri thức.
+
+Bản thân quyết định định tuyến không dựa vào một mô hình duy nhất mà được tổ
+chức theo nhiều tầng, nhằm cân bằng giữa độ chính xác và chi phí. Tầng đầu dùng
+các luật chính quy (regex) để bắt nhanh những trường hợp đã rõ ràng. Nếu tín
+hiệu chưa đủ chắc chắn, hệ thống chuyển sang một bộ phân loại học máy đa nhãn để
+ước lượng các miền tri thức liên quan. Chỉ khi vẫn còn mơ hồ --- điển hình là
+khi nhiều miền cùng được kích hoạt --- một mô hình ngôn ngữ mới được gọi để phán
+đoán cuối cùng. Cách bố trí này giúp phần lớn câu hỏi thường gặp không phải trả
+chi phí gọi LLM ngay ở bước phân loại.
+
+Câu hỏi tự nhiên đặt ra là vì sao không đưa mọi câu hỏi qua agent cho đồng nhất.
+Lý do xuất phát từ thực tế phân bố câu hỏi: đa số câu hỏi học vụ hàng ngày là
+đơn giản --- ``học phí kỳ này bao nhiêu'', ``môn IT3080 học kỳ mấy'' --- và chỉ
+cần một lượt retrieval. Đẩy tất cả lên agent sẽ làm tăng độ trễ và chi phí tính
+toán một cách không cần thiết; ngược lại, ép một câu hỏi so sánh đa nguồn vào
+luồng Simple RAG lại khiến hệ thống xử lý thiếu bước và bỏ sót nguồn. Việc tách
+hai luồng và để bộ định tuyến nhiều tầng quyết định chính là cách dung hòa giữa
+hai thái cực đó. Chi tiết về cơ chế định tuyến được trình bày trong
+Phần~\ref{sec:ch5-complexity-routing} (Chương~5).
+
+\subsection{Tổ chức tri thức theo collection}
+
+Kho tri thức được phân chia thành bốn collection theo miền nghiệp vụ như đã
+định nghĩa trong Bảng~\ref{tab:ch1-collections} (Chương~1). Trong phạm vi thiết
+kế giải pháp, Bảng~\ref{tab:chapter3-collections} bổ sung thêm ví dụ câu hỏi
+tiêu biểu để minh họa rõ hơn loại truy vấn mà mỗi collection phục vụ và lý do
+cần định tuyến riêng biệt.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{2.4cm}|p{3.8cm}|p{6.2cm}|}
+\hline
+\textbf{Collection} & \textbf{Nội dung} & \textbf{Ví dụ câu hỏi tiêu biểu} \\
+\hline
+\texttt{ctdt} & Chương trình đào tạo, học phần, tín chỉ, điều kiện tiên quyết.
+& ``Môn IT3080 học kỳ mấy?'', ``Ngành IT-E6 cần bao nhiêu tín chỉ tốt nghiệp?'' \\
+\hline
+\texttt{quydinh} & Quy chế, học bổng, cảnh báo học tập, chuẩn ngoại ngữ, tốt
+nghiệp. & ``Điều kiện nhận học bổng khuyến khích?'', ``Điều kiện ngoại ngữ tốt
+nghiệp K67?'' \\
+\hline
+\texttt{kehoach} & Kế hoạch học kỳ, thông báo, lịch đăng ký, học phí, deadline.
+& ``Khi nào nộp học phí kỳ này?'', ``Lịch đăng ký học kỳ tới như thế nào?'' \\
+\hline
+\texttt{stsv} & Sổ tay sinh viên, thủ tục, biểu mẫu, dịch vụ hỗ trợ. &
+``Xin giấy xác nhận sinh viên ở đâu?'', ``Cách đăng ký ký túc xá?'' \\
+\hline
+\end{tabular}
+\caption{Ví dụ câu hỏi tiêu biểu theo từng collection}
+\label{tab:chapter3-collections}
+\end{table}
+
+% =========================================================
+\section{Luồng hỏi đáp}
+% =========================================================
+
+\subsection{Tổng quan pipeline hỏi đáp}
+
+Luồng hỏi đáp bắt đầu khi người dùng gửi câu hỏi, và kết thúc khi câu trả lời
+có trích dẫn nguồn được trả về client. Nhìn tổng thể, pipeline đi qua năm giai
+đoạn chính như minh họa trong Hình~\ref{fig:chapter3-rag-pipeline}.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\begin{minipage}{0.94\textwidth}
+    \centering
+    \small
+    Câu hỏi người dùng
+    $\rightarrow$ Hiểu truy vấn (phân loại, viết lại, định tuyến miền)
+    $\rightarrow$ Retrieval lai (vector + BM25, nhiều collection)
+    $\rightarrow$ Reranking + hậu xử lý (ValidityFilter, ReferenceResolver)
+    $\rightarrow$ Generation có trích dẫn
+    $\rightarrow$ Câu trả lời + nguồn
+    \end{minipage}}
+    \caption{Tổng quan pipeline hỏi đáp của \texttt{RAGPipeline}}
+    \label{fig:chapter3-rag-pipeline}
+\end{figure}
+
+\subsection{Giai đoạn hiểu truy vấn}
+
+Trước khi thực hiện retrieval, hệ thống cần hiểu đúng câu hỏi trong ngữ cảnh
+hiện tại. Giai đoạn này gồm ba việc: (1) viết lại truy vấn bằng QueryReflector
+để tạo câu truy vấn rõ ràng, độc lập với ngữ cảnh hội thoại; (2) phân loại miền
+để chọn collection cần tìm; và (3) phân loại độ phức tạp để chọn luồng xử lý phù
+hợp. Truy vấn đã viết lại được dùng làm đầu vào cho cả hai bước phân loại.
+
+Cơ chế controlled personalization được áp dụng ở đây: QueryReflector chỉ tích
+hợp thông tin hồ sơ sinh viên (ngành, khóa) vào truy vấn khi câu hỏi thực sự
+phụ thuộc vào thông tin đó, không tự động áp dụng cho mọi câu hỏi.
+
+\subsection{Giai đoạn retrieval và hậu xử lý}
+
+Sau khi có truy vấn đã được chuẩn hóa, hệ thống thực hiện retrieval lai: tìm
+kiếm vector trong Qdrant và tìm kiếm từ khóa trong Elasticsearch song song,
+rồi hợp nhất và reranking kết quả bằng mô hình BGE cross-encoder.
+
+Hai bước hậu xử lý tiếp theo là đặc trưng riêng của hệ thống này. ValidityFilter
+loại bỏ chunk thuộc văn bản đã bị thay thế dựa trên đồ thị lineage, đảm bảo
+câu trả lời không dùng quy định lỗi thời. Sau đó, ReferenceResolver phát hiện
+và bổ sung chunk bị dẫn chiếu chéo (``Điều 5 Khoản 2'') nhưng chưa có trong
+kết quả retrieval.
+
+Về cơ chế kiểm soát hallucination: ở tầng dữ liệu, thông tin lineage giúp hệ
+thống tránh dùng văn bản đã bị thay thế; ở tầng truy vấn, QueryReflector có
+guardrail để không tự thêm ngành/khóa khi câu hỏi không yêu cầu; ở tầng
+generation, prompt yêu cầu mô hình chỉ trả lời từ context được cung cấp và phải
+thừa nhận khi không có đủ thông tin. Nếu được cấu hình, SelfEvaluator kiểm tra
+câu trả lời sau khi sinh và có thể kích hoạt web fallback hoặc thông báo thiếu
+thông tin. Chi tiết về các cơ chế này được trình bày trong Chương~5.
+
+% =========================================================
+\section{Luồng xử lý dữ liệu}
+% =========================================================
+
+\subsection{Tổng quan pipeline dữ liệu}
+
+Pipeline dữ liệu có nhiệm vụ biến tài liệu học vụ thành các chunk có thể truy
+hồi được. Đầu vào đến từ hai nguồn: tài liệu PDF/DOCX do admin tải lên, và nội
+dung web do crawler thu thập cho các miền cập nhật thường xuyên như kế hoạch học
+kỳ và sổ tay sinh viên. Đầu ra là tập chunk đã có siêu dữ liệu, embedding và chỉ
+mục trong cả Qdrant lẫn Elasticsearch.
+
+Hình~\ref{fig:chapter3-ingestion} mô tả chuỗi xử lý từ tài liệu thô đến kho
+truy hồi.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\begin{minipage}{0.94\textwidth}
+    \centering
+    \small
+    Upload / Crawl
+    $\rightarrow$ Convert (PDF/DOCX $\to$ Markdown)
+    $\rightarrow$ Clean
+    $\rightarrow$ Chunk + Metadata
+    $\rightarrow$ \textbf{Admin Review}
+    $\rightarrow$ BGE-M3/E5 Embedding
+    $\rightarrow$ Qdrant + Elasticsearch
+    \end{minipage}}
+    \caption{Pipeline xử lý dữ liệu và đánh chỉ mục tài liệu}
+    \label{fig:chapter3-ingestion}
+\end{figure}
+
+\subsection{Bước Admin Review --- human gate trước khi index}
+
+Điểm khác biệt quan trọng trong thiết kế pipeline dữ liệu là bước Admin Review
+bắt buộc trước khi index. Dù dữ liệu đến từ upload thủ công hay từ crawler, tất
+cả chunk đều phải được admin rà soát và xác nhận trước khi đưa vào Qdrant và
+Elasticsearch. Đây là \textit{human gate} giúp loại bỏ chunk chất lượng thấp,
+sai siêu dữ liệu hoặc nội dung không phù hợp trước khi chúng ảnh hưởng đến câu
+trả lời cho sinh viên.
+
+Phương án thay thế là tự động index ngay sau khi chunking xong mà không cần
+bước duyệt thủ công --- đơn giản hơn và cập nhật dữ liệu nhanh hơn. Tuy nhiên,
+cách này chấp nhận rủi ro đưa chunk sai vào corpus trước khi phát hiện lỗi. Với
+hệ thống hỏi đáp học vụ, một chunk bị chia sai giữa điều khoản, mất bảng học
+phần hoặc mang siêu dữ liệu sai về khóa/ngành có thể tạo ra câu trả lời sai
+lệch cho nhiều sinh viên trước khi lỗi được phát hiện qua feedback. Bước admin
+review do đó là sự đánh đổi có chủ đích giữa tốc độ cập nhật và mức độ kiểm
+soát chất lượng dữ liệu --- hoàn toàn phù hợp với nguyên tắc grounded generation
+đã đề ra.
+
+Quy trình duyệt áp dụng cho cả tài liệu admin tải lên lẫn nội dung do crawler
+thu thập: dữ liệu crawl được lưu ở trạng thái chờ duyệt và chỉ được đưa vào chỉ
+mục sau khi admin xác nhận, thay vì index trực tiếp. Sau khi một batch chunk
+được index, lớp đánh giá có thể được chạy lại trên tập câu hỏi tham chiếu để
+kiểm tra dữ liệu mới không làm giảm chất lượng câu trả lời trước đó. Thiết kế
+của admin review pipeline được trình bày chi tiết trong
+Phần~\ref{sec:ch5-admin-review} (Chương~5).
+
+\subsection{Chiến lược chunking và quan hệ parent--child}
+
+Do tài liệu học vụ có cấu trúc phân cấp --- chương, mục, điều, khoản --- hệ
+thống áp dụng các chiến lược chunking khác nhau tùy loại tài liệu thay vì tách
+cố định theo số ký tự. Văn bản quy định được tách theo cấu trúc Điều--Khoản,
+trong khi chương trình đào tạo được xử lý để bảo toàn bảng học phần nguyên vẹn.
+
+Quan hệ parent--child được lưu lại để sau reranking có thể mở rộng context bằng
+chunk cha khi cần thêm ngữ cảnh, mà không làm ảnh hưởng đến quá trình xếp hạng
+ứng viên ban đầu. Ngoài ra, thông tin lineage giữa các phiên bản văn bản cho
+phép ValidityFilter nhận biết và loại bỏ văn bản đã bị thay thế trong quá trình
+retrieval.
+
+% =========================================================
+\section{Lớp đánh giá và quan sát}
+% =========================================================
+
+Bên cạnh hai luồng chính, hệ thống có lớp đánh giá độc lập nhằm đo chất lượng
+của từng giai đoạn trong pipeline. Việc đánh giá tách bạch từng khâu giúp xác
+định chính xác nguyên nhân khi câu trả lời sai, thay vì chỉ nhìn vào kết quả
+cuối cùng.
+
+Lớp đánh giá gồm hai nhóm công cụ. Nhóm thứ nhất đánh giá toàn trình
+(end-to-end): chạy lại đúng pipeline đang vận hành trên tập câu hỏi đã gán nhãn,
+đo các chỉ số retrieval (hit@K, precision@K, recall@K, MRR@K, nDCG@K) so với
+tập chunk bằng chứng, đồng thời chấm chất lượng câu trả lời theo nhiều tiêu chí
+--- mức độ có căn cứ, dấu hiệu hallucination, độ liên quan, độ đầy đủ và độ khớp
+với đáp án chuẩn --- bằng cơ chế LLM làm giám khảo. Nhóm thứ hai đánh giá riêng
+khâu định tuyến: kiểm tra việc viết lại truy vấn, quyết định độ phức tạp và lựa
+chọn collection mà không cần chạy retrieval lẫn generation, nhờ đó có thể kiểm
+thử hồi quy phần định tuyến một cách nhanh và rẻ trước khi chạy toàn trình.
+
+Mỗi lượt hỏi đáp đều được ghi log đầy đủ: collection được chọn, filter áp dụng,
+điểm reranker, thời gian từng bước và trace tác nhân. Nhờ đó, khi phát hiện lỗi,
+người phát triển có thể truy vết đến đúng bước gây ra vấn đề thay vì phải dò
+toàn bộ pipeline. Kết quả thực nghiệm và phân tích chi tiết được trình bày ở
+Chương~6.
+
+% =========================================================
+\section{Nhìn lại ba nguyên tắc qua từng quyết định thiết kế}
+% =========================================================
+
+Ba nguyên tắc cốt lõi được đề ra ở đầu chương không chỉ là tuyên ngôn thiết kế
+mà còn là tiêu chí để đánh giá từng quyết định kiến trúc cụ thể. Bảng dưới đây
+tóm tắt mối liên hệ giữa các quyết định thiết kế chính và nguyên tắc tương ứng
+mà chúng phục vụ.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{4.2cm}|p{3.8cm}|p{5.6cm}|}
+\hline
+\textbf{Quyết định thiết kế} & \textbf{Nguyên tắc phục vụ} & \textbf{Phương án
+thay thế và lý do không chọn} \\
+\hline
+4 collection riêng biệt theo miền & Domain-aware routing & Một chỉ mục chung:
+đơn giản hơn nhưng gây nhiễu giữa các loại tài liệu. \\
+\hline
+Admin review bắt buộc trước index & Grounded generation & Auto-index: nhanh hơn
+nhưng không kiểm soát được chất lượng chunk. \\
+\hline
+Hybrid retrieval (vector + BM25) & Domain-aware routing & Chỉ vector: bỏ sót
+exact match cho mã ngành, mã học phần, số điều khoản. \\
+\hline
+Định tuyến độ phức tạp nhiều tầng (regex $\to$ ML $\to$ LLM) chọn giữa Simple
+RAG và agent & Grounded generation & Luôn dùng agent: tốn độ trễ và chi phí cho
+câu hỏi đơn giản; chỉ dùng Simple RAG: thiếu bước với câu hỏi đa nguồn. \\
+\hline
+Guardrail trong QueryReflector & Controlled personalization & Luôn đưa hồ sơ
+vào: cá nhân hóa tối đa nhưng gây context bleed. \\
+\hline
+ValidityFilter + lineage tracking & Grounded generation & Không lọc: đơn giản
+hơn nhưng có thể dùng văn bản đã bị thay thế. \\
+\hline
+\end{tabular}
+\caption{Ánh xạ quyết định thiết kế sang nguyên tắc cốt lõi}
+\label{tab:ch3-design-decisions}
+\end{table}
+
+Nhìn qua bảng trên, có thể thấy phần lớn quyết định thiết kế phức tạp hơn
+phương án thay thế tương ứng. Đây là sự đánh đổi có chủ đích: mỗi lớp phức
+tạp thêm đều nhằm kiểm soát một rủi ro cụ thể của miền học vụ, không phải
+phức tạp hóa vô cớ. Nguyên tắc chung xuyên suốt là ưu tiên tính đúng đắn và
+khả năng kiểm soát được trước tính đơn giản --- điều này phù hợp với đặc thù
+của dữ liệu có tính pháp lý cao và ảnh hưởng trực tiếp đến quyết định học tập
+của sinh viên.
+
+% =========================================================
+\section{Tổng kết chương}
+% =========================================================
+
+Chương này đã trình bày giải pháp tổng thể cho hệ thống trợ lý học vụ
+\texttt{BKAdvisor}. Hệ thống được thiết kế theo hướng có căn cứ, có định tuyến
+miền tri thức, có retrieval lai, có kiểm soát hiệu lực văn bản và có khả năng
+đánh giá hồi quy. Điểm đặc trưng của giải pháp so với RAG tuyến tính thông
+thường là cơ chế định tuyến theo độ phức tạp, cho phép xử lý linh hoạt từ câu
+hỏi đơn giản đến câu hỏi phức tạp đa nguồn, đồng thời bước admin review bắt buộc
+giúp kiểm soát chất lượng dữ liệu trước khi đưa vào kho tri thức.
+
+Các chương tiếp theo sẽ đi vào chi tiết hơn: Chương~4 trình bày phân tích và
+thiết kế hệ thống phần mềm; Chương~5 trình bày các giải pháp và đóng góp kỹ
+thuật nổi bật; Chương~6 trình bày kết quả thực nghiệm và đánh giá.
+
+\end{document}

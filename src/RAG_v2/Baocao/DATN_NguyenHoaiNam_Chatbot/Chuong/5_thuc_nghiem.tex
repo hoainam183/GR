@@ -1,0 +1,644 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+% =========================================================
+\section{Mở đầu chương}
+% =========================================================
+
+Các chương trước đã trình bày thiết kế kiến trúc và luồng xử lý tổng thể. Để tránh trùng lặp, chương này không đi sâu lại vào nguyên lý (đã bàn ở Chương 3) mà tập trung hoàn toàn vào chi tiết cài đặt kỹ thuật (Technical Implementation) của 8 thuật toán và module nòng cốt. Mỗi mục dưới đây sẽ chỉ ra cách biến các ý tưởng từ Chương 3 thành mã nguồn thực tế để xử lý các thách thức của bài toán.
+Mỗi đóng góp được trình bày theo ba phần: (i)~bài toán cần giải quyết,
+(ii)~giải pháp cài đặt, và (iii)~kết quả đạt được.
+
+Chương này bao gồm tám đóng góp kỹ thuật chính:
+\begin{enumerate}
+    \item Phân đoạn nội dung theo miền dữ liệu;
+    \item Truy hồi lai với chuẩn hóa theo giá trị cao nhất và hai mô hình mã hóa song song;
+    \item Phân loại độ phức tạp ba tầng kết hợp phân loại miền với hai ngưỡng;
+    \item Tác nhân Lập Kế Hoạch--Thực Thi trên nền LangGraph cho câu hỏi phức tạp;
+    \item Cơ chế truy hồi bổ sung bằng tài liệu giả định (HyDE) khi truy hồi kém;
+    \item Bộ lọc hiệu lực văn bản và bộ giải tham chiếu điều khoản;
+    \item Quy trình duyệt dữ liệu thủ công trước khi lập chỉ mục;
+    \item Tác nhân tra cứu lịch thi chuyên biệt.
+\end{enumerate}
+
+Lưu ý rằng nội dung chương này không lặp lại các phần đã trình bày chi tiết ở
+các chương trước. Những nội dung được đề cập sơ lược ở Chương~3 và Chương~4 sẽ
+được phân tích sâu hơn tại đây.
+
+% =========================================================
+\section{Phân đoạn nội dung theo miền dữ liệu}
+\label{sec:ch5-chunking}
+% =========================================================
+
+\subsection{Bài toán}
+
+Một trong những bước quan trọng trong pipeline RAG là chia tài liệu thành các
+đoạn nhỏ để lưu vào kho tri thức. Với nhiều hệ thống, bước này thường được thực
+hiện bằng cách tách theo số ký tự cố định và thêm phần chồng lấn. Cách tiếp
+cận đó phù hợp với văn bản thuần nhất, nhưng dữ liệu học vụ của Đại học Bách
+khoa Hà Nội lại có cấu trúc đa dạng và đặc thù theo từng loại:
+
+\begin{itemize}
+    \item \textbf{Văn bản quy chế, quy định} có cấu trúc pháp quy phân cấp rõ
+    ràng: Chương $\to$ Mục $\to$ Điều $\to$ Khoản $\to$ Điểm. Phân đoạn theo
+    ký tự dễ cắt ngang giữa hai Khoản của cùng một Điều, làm mất đi tính hoàn
+    chỉnh của một điều khoản pháp lý.
+    \item \textbf{Chương trình đào tạo} chứa nhiều bảng biểu mã học phần, số
+    tín chỉ, học phần tiên quyết và khối kiến thức. Ranh giới phân đoạn theo ký
+    tự không tận dụng được cấu trúc bảng, dẫn đến mất thông tin khi cắt giữa
+    các dòng.
+    \item \textbf{Kế hoạch học tập, thông báo} có yếu tố thời điểm quan trọng:
+    ngày tháng, thời hạn, kỳ học. Phân đoạn không phân biệt được ngữ cảnh thời
+    gian, khiến bước xếp hạng lại khó ưu tiên thông tin mới hơn.
+    \item \textbf{Sổ tay sinh viên} là văn bản hỗn hợp gồm các mục theo chủ đề
+    thủ tục, biểu mẫu và hướng dẫn, thường có cấu trúc liệt kê đa cấp bằng số
+    La Mã và số thường.
+\end{itemize}
+
+Từ những điểm khác biệt trên, bài toán đặt ra là thiết kế các chiến lược phân
+đoạn riêng cho từng loại tài liệu, sao cho mỗi đoạn giữ được ngữ nghĩa hoàn
+chỉnh và siêu dữ liệu đủ phong phú để phục vụ lọc và truy hồi chính xác.
+
+\subsection{Giải pháp --- Bộ phân đoạn theo miền}
+
+Hệ thống triển khai bốn bộ phân đoạn chuyên biệt, mỗi bộ xử lý một nhóm tài
+liệu nhất định. Tất cả đều sản sinh đoạn văn bản theo cấu trúc cha--con: đoạn
+cha chứa tiêu đề và ngữ cảnh tổng quan, đoạn con chứa nội dung thực sự được
+đưa vào chỉ mục. Chính sách lập chỉ mục chỉ đưa đoạn con vào Qdrant và
+Elasticsearch, trong khi đoạn cha được giữ lại để phục vụ mở rộng ngữ cảnh khi
+cần.
+
+\subsubsection{Bộ phân đoạn pháp quy (cho tài liệu quy định)}
+
+Bộ phân đoạn pháp quy sử dụng biểu thức chính quy để nhận dạng cấu trúc pháp
+quy: xác định Chương theo ký hiệu La Mã hoặc chữ số; xác định Điều theo dạng
+``Điều [số]'' (mỗi Điều tương ứng một đoạn cha); xác định Khoản và Điểm theo
+ký hiệu số thứ tự và chữ cái. Vì văn bản gốc đi qua nhiều công cụ chuyển đổi
+PDF khác nhau, hệ thống hiện thực ba biến thể bộ phân đoạn pháp quy ứng với ba
+định dạng đầu vào: văn bản dạng thuần (kết quả của công cụ OCR, nhận dạng
+``CHƯƠNG'' và ``Điều'' trực tiếp trong văn bản không có ký hiệu định dạng);
+văn bản Markdown từ Docling (tiêu đề phân cấp theo ký hiệu thăng \#); và văn bản
+từ PyMuPDF (tiêu đề in đậm theo tên chương, điều). Cả ba biến thể chia sẻ cùng
+một logic phân cấp cha--con và cùng ngưỡng kích thước đoạn con.
+
+Khi một Điều ngắn (dưới 1.000 ký tự), toàn bộ nội dung được giữ thành một đoạn
+con duy nhất. Khi Điều quá dài, hệ thống tách tại ranh giới Khoản; nếu Khoản
+chứa bảng, bảng được tách ra thành đoạn riêng và được đánh dấu để xử lý phù
+hợp ở bước xếp hạng lại. Cách tiếp cận này đảm bảo không có đoạn nào cắt ngang
+giữa điều khoản và nội dung điều khoản đó điều chỉnh.
+
+Bên cạnh phân chia cấu trúc, bộ phân đoạn pháp quy còn gắn cho từng đoạn các
+trường siêu dữ liệu cấu trúc rút trực tiếp từ quá trình phân đoạn: số điều, số
+chương, số khoản, cờ phụ lục và cờ bảng. Song song, một bước làm giàu siêu dữ
+liệu riêng (áp dụng chủ yếu cho tài liệu chương trình đào tạo) bổ sung các
+trường ở cấp tài liệu --- ngày hiệu lực, khóa sinh viên áp dụng (K65--K70), mã
+ngành và loại chương trình --- bằng cách trích xuất từ tên tệp và phần tiêu đề
+đầu tài liệu, rồi gắn xuống các đoạn con. Nhờ đó tầng truy hồi có thể lọc theo
+khóa và ngành ngay từ trước khi tìm kiếm.
+
+\subsubsection{Bộ phân đoạn đệ quy (cho chương trình đào tạo và quy định dạng Markdown)}
+
+Với tài liệu chương trình đào tạo và một số văn bản quy định ở dạng Markdown có
+tiêu đề phân cấp, hệ thống dùng bộ phân đoạn đệ quy: đoạn cha được xác định
+theo tiêu đề cấp~2, đoạn con là các đoạn nội dung bên trong. Bộ phân đoạn này
+thực hiện một số bước xử lý hậu kỳ đáng chú ý: gộp đoạn quá nhỏ vào đoạn liền
+kề, sửa lại ngữ cảnh tiêu đề cho đoạn bắt đầu bằng dữ liệu bảng, và bổ sung
+ngữ cảnh số thứ tự cho đoạn bắt đầu bằng chữ cái liệt kê mà thiếu Khoản cha.
+Siêu dữ liệu bao gồm đường dẫn phân cấp tiêu đề, loại tài liệu, cờ bảng và
+đầy đủ các trường ngữ cảnh học vụ.
+
+\subsubsection{Bộ phân đoạn kế hoạch (cho tài liệu kế hoạch và thông báo)}
+
+Dữ liệu kế hoạch và thông báo đến từ công cụ thu thập tự động dưới dạng JSON
+với các trường nội dung, tiêu đề, ngày đăng, danh mục và đường dẫn nguồn. Bộ
+phân đoạn này áp dụng ba chiến lược tùy theo độ dài: bài ngắn dưới 1.500 ký tự
+giữ nguyên thành một đoạn; bài có cấu trúc liệt kê đánh số tách tại ranh giới
+mục; bài còn lại dùng tách đệ quy. Mỗi đoạn được gắn tiền tố ngữ cảnh từ tiêu
+đề bài viết và giữ lại đầy đủ siêu dữ liệu thời gian. Siêu dữ liệu này về sau
+phục vụ tính điểm ưu tiên thông tin mới trong quá trình hợp nhất kết quả, cho
+phép ưu tiên thông báo mới hơn khi câu hỏi có tín hiệu liên quan đến thời hạn.
+
+\subsubsection{Bộ phân đoạn sổ tay sinh viên}
+
+Sổ tay sinh viên thường có cấu trúc liệt kê đa cấp: mục La Mã (I, II, III) ở
+tầng trên, mục số thường ở tầng dưới. Bộ phân đoạn nhận dạng ranh giới theo La
+Mã trước, rồi tiếp tục tách theo mục số bên trong. Tiền tố ngữ cảnh được xây
+dựng từ tổ hợp tiêu đề, loại tài liệu và mục La Mã hiện tại, giúp mỗi đoạn
+mang đủ ngữ cảnh dù bị tách khỏi tài liệu gốc.
+
+\subsubsection{Xử lý bảng Markdown}
+
+Các bộ phân đoạn dùng chung một mô-đun xử lý bảng Markdown. Bảng được phát
+hiện theo cú pháp ký tự dọc ``|'', phân tích thành cấu trúc có tiêu đề và hàng,
+rồi định dạng lại theo chuẩn thống nhất. Cách này đảm bảo bảng học phần không
+bị méo khi đi qua bước phân đoạn rồi đến mã hóa vector.
+
+\subsection{Kết quả đạt được}
+
+Phân đoạn theo miền giải quyết vấn đề mà một bộ phân đoạn chung không thể xử
+lý tốt: mỗi Điều trong văn bản quy chế là một đơn vị ngữ nghĩa hoàn chỉnh và
+được giữ nguyên trong một đoạn, tránh trường hợp mô hình ngôn ngữ nhận được nửa
+điều khoản thiếu ngữ cảnh. Siêu dữ liệu phong phú từ quá trình phân đoạn ---
+đặc biệt là khóa áp dụng, ngày hiệu lực và ngày đăng --- cho phép tầng truy hồi
+áp bộ lọc chính xác trước khi tìm kiếm, thay vì phải lọc sau khi đã lấy về
+toàn bộ kết quả. Quan hệ cha--con được lưu lại qua định danh đoạn cha, tạo cơ
+sở cho mở rộng ngữ cảnh khi đoạn con cần được bổ sung ngữ cảnh từ đoạn cha.
+
+% =========================================================
+\section{Truy hồi lai với chuẩn hóa theo giá trị cao nhất và hai mô hình mã hóa song song}
+\label{sec:ch5-hybrid-retrieval}
+% =========================================================
+
+\subsection{Bài toán}
+
+Tài liệu học vụ đặt ra hai yêu cầu truy hồi khác nhau về bản chất. Một mặt,
+sinh viên thường diễn đạt câu hỏi theo ngôn ngữ tự nhiên và không nhất thiết
+dùng đúng thuật ngữ trong văn bản gốc --- trường hợp này cần truy hồi theo ngữ
+nghĩa. Mặt khác, nhiều câu hỏi chứa các ký hiệu định danh rất cụ thể như mã
+học phần ``MI1111'', mã ngành ``IT-E6'', khóa ``K67'' hay số điều khoản ``Điều~5
+Khoản~1'' --- trường hợp này cần khớp chính xác từ khóa.
+
+Nếu chỉ dùng tìm kiếm vector, những ký hiệu ngắn và đặc thù này dễ bị làm mờ
+trong không gian biểu diễn vector khi cạnh tranh với các đoạn văn có nghĩa gần.
+Ngược lại, nếu chỉ dùng BM25, những câu hỏi diễn đạt tự nhiên khác với từ ngữ
+trong tài liệu sẽ bị bỏ sót. Ngoài ra, một mô hình mã hóa đơn lẻ có thể bỏ
+sót một số khía cạnh ngữ nghĩa mà mô hình khác bắt được tốt hơn. Bài toán đặt
+ra là kết hợp các phương pháp sao cho tận dụng được ưu điểm của từng phía, đồng
+thời xử lý được vấn đề thang điểm không đồng nhất khi hợp nhất kết quả.
+
+\subsection{Giải pháp}
+
+\subsubsection{Hai mô hình mã hóa song song với Qdrant}
+
+Hệ thống sử dụng đồng thời hai mô hình mã hóa vector (embedding): BGE-M3 \cite{bgem3} (1024
+chiều) và E5 \cite{e5model} (1024 chiều) để tận dụng thế mạnh riêng của từng mô hình. Câu hỏi tài liệu khi lập chỉ mục được mã
+hóa bởi cả hai mô hình và lưu thành hai vector riêng biệt trong Qdrant. Khi xử
+lý truy vấn, hệ thống gửi cả hai vector trong một yêu cầu duy nhất đến Qdrant,
+lấy tối đa hai lần $k$ ứng viên từ mỗi mô hình, sau đó hợp nhất bằng chuẩn hóa
+theo giá trị cao nhất (max-normalization): điểm của mỗi mô hình được chia
+cho điểm lớn nhất trong tập kết quả tương ứng, rồi cộng theo trọng số cố định
+(mặc định 0,5/0,5 giữa BGE và E5). Tài liệu nào không được mô hình nào tìm
+thấy sẽ có đóng góp bằng 0 từ phía đó.
+
+Lý do sử dụng song song hai mô hình là để bổ sung cho nhau về điểm mạnh: BGE-M3
+được huấn luyện tối ưu cho truy hồi đa ngôn ngữ theo ngữ nghĩa, trong khi E5
+đa ngôn ngữ có hướng tiếp cận học chuyển giao đa ngôn ngữ khác. Trong thực tế,
+có những câu hỏi mà một mô hình trả về đoạn đúng nhưng mô hình kia không tìm
+được; kết hợp hai mô hình giúp tăng độ bao phủ mà không cần một mô hình duy
+nhất phải tối ưu cho mọi trường hợp.
+
+\subsubsection{Hợp nhất kết quả vector và từ khóa}
+
+Song song với Qdrant, Elasticsearch thực hiện tìm kiếm BM25 với bộ phân tích
+tiếng Việt tùy chỉnh: tách từ, danh sách từ đồng nghĩa học vụ (ví dụ
+``CTĐT'', ``STSV'', ``CNTT''), từ dừng và một bước chuẩn hóa loại bỏ dấu giữ
+lại cả dạng gốc. Mỗi phía --- vector và từ khóa --- lấy tối đa 50 ứng viên độc lập.
+
+Vấn đề cốt lõi khi hợp nhất là điểm cosine (trong khoảng $[0,1]$) và điểm BM25
+(thang không giới hạn, phụ thuộc vào corpus) không thể so sánh trực tiếp. Hệ thống tính điểm tài liệu dựa trên công thức Hợp nhất theo thứ hạng đảo nghịch (RRF) có trọng số đã trình bày ở Công thức (2.4) trong Chương~2. Thay vì tính điểm trung bình thông thường, thuật toán cộng dồn điểm dựa trên thứ hạng $\text{rank}$ của tài liệu trong từng danh sách kết quả (vector và từ khóa) được nhân với trọng số tương ứng, sử dụng hằng số dập $k$ (cấu hình là 10) để làm giảm ảnh hưởng của các vị trí xếp hạng thấp. Đối với kho kế hoạch, nếu câu hỏi có tín hiệu liên quan đến tính thời sự, tài liệu còn được cộng thêm phần thưởng nhỏ $B_{\text{recency}}$ nhằm ưu tiên thông báo mới hơn. Tài liệu chỉ xuất hiện ở một danh sách nguồn vẫn được tính điểm từ danh sách đó mà không bị loại bỏ. Bài toán đặt
+ra là kết hợp các phương pháp sao cho tận dụng được ưu điểm của từng phía, đồng
+thời xử lý được vấn đề thang điểm không đồng nhất khi hợp nhất kết quả.
+
+Bên cạnh RRF, hệ thống còn hiện thực một chế độ hợp nhất tuyến tính có trọng số
+như phương án cấu hình được. Ở chế độ này, điểm vector và từ khóa trước hết
+được chuẩn hóa theo giá trị cao nhất (mỗi điểm chia cho điểm lớn nhất của tập
+đó, đưa về khoảng $[0,1]$ mà không ép điểm thấp nhất về 0 như min-max), rồi
+cộng theo trọng số $S(d) = w_v \widehat{S_v}(d) + w_k \widehat{S_k}(d) +
+B_{\text{recency}}(d)$ với khả năng tăng trọng số từ khóa cho các câu hỏi chứa
+mã học phần hay mã ngành. Tuy nhiên, cấu hình mặc định cũng như các lần chạy
+đánh giá chính của hệ thống đều dùng RRF, vì hợp nhất theo thứ hạng ổn định hơn
+trước sự chênh lệch thang điểm giữa hai nguồn. So sánh định lượng giữa hai
+chiến lược hợp nhất được trình bày ở Chương~6.
+
+\subsection{Kết quả đạt được}
+
+Kiến trúc truy hồi lai giúp hệ thống bao phủ được cả hai loại truy vấn phổ biến
+trong dữ liệu học vụ. Các câu hỏi chứa mã định danh cụ thể như ``IT-E6'' hay
+``MI1111'' được xử lý chính xác nhờ BM25 không bị làm mờ trong không gian vector,
+trong khi các câu hỏi diễn đạt tự nhiên vẫn tìm được đoạn phù hợp nhờ tìm kiếm
+vector. Việc dùng song song hai mô hình mã hóa tăng độ bao phủ: trường hợp một
+mô hình không tìm được đoạn phù hợp, mô hình kia vẫn có thể bắt được. Kết quả
+định lượng của toàn bộ pipeline truy hồi, bao gồm các chỉ số Hit@K, Recall@K và
+nDCG@K theo từng chiến lược hợp nhất, được trình bày chi tiết trong Chương~6.
+
+% =========================================================
+\section{Phân loại độ phức tạp ba tầng kết hợp phân loại miền với hai ngưỡng}
+\label{sec:ch5-complexity-routing}
+% =========================================================
+
+\subsection{Bài toán}
+
+Trong thực tế, các câu hỏi học vụ có độ phức tạp rất khác nhau. Câu hỏi
+``chatbot có thể làm gì?'' chỉ cần trả lời trực tiếp mà không cần truy hồi.
+Câu hỏi ``học phần MI1111 là môn gì?'' cần một lượt truy hồi đơn giản. Trong
+khi đó, câu hỏi ``so sánh điều kiện tốt nghiệp giữa IT1 và IT-E6'' cần tổng
+hợp thông tin từ hai nguồn riêng biệt theo kế hoạch nhiều bước.
+
+Nếu xử lý tất cả câu hỏi theo cùng một pipeline nặng qua tác nhân tự động, chi
+phí tính toán và độ trễ tăng cao không cần thiết. Ngược lại, nếu chỉ dùng RAG
+tuyến tính cho mọi câu hỏi, những câu hỏi phức tạp sẽ cho câu trả lời thiếu
+đầy đủ hoặc kết hợp sai nguồn. Song song với đó, việc phân loại sai miền dữ
+liệu cũng gây hậu quả tương tự: tìm kiếm nhầm kho tri thức đồng nghĩa với câu
+trả lời hoàn toàn không liên quan dù kỹ thuật truy hồi hoạt động đúng. Bài toán
+đặt ra là thiết kế đồng thời cơ chế phân loại độ phức tạp và phân loại miền,
+đủ chính xác để định tuyến sang nhánh xử lý phù hợp mà vẫn kiểm soát được chi
+phí tính toán.
+
+\subsection{Giải pháp}
+
+\subsubsection{Phân loại độ phức tạp ba tầng}
+
+Hệ thống thiết kế bộ phân loại độ phức tạp chia câu hỏi thành ba tầng theo mức
+độ phức tạp tăng dần:
+
+\begin{itemize}
+    \item \textbf{Tầng~1 --- Hội thoại thông thường}: câu hỏi xã giao, lời chào
+    hoặc hỏi về khả năng hệ thống. Hệ thống trả lời trực tiếp mà không cần truy
+    hồi, giảm thiểu độ trễ xuống mức tối thiểu.
+    \item \textbf{Tầng~2 --- RAG đơn giản}: câu hỏi học vụ đơn miền hoặc có
+    phạm vi rõ ràng. Hệ thống thực hiện một lượt truy hồi và một lượt sinh câu
+    trả lời theo luồng RAG thông thường. Đây là nhánh mặc định cho phần lớn câu
+    hỏi thực tế.
+    \item \textbf{Tầng~3 --- Tác nhân}: câu hỏi so sánh, đa nguồn mang tính suy luận logic (đòi hỏi mô hình phải kết nối, đối chiếu thông tin từ nhiều kho khác nhau để tự tổng hợp ra kết luận mới), đa bước hoặc
+    cần phân tích (ví dụ: ``So sánh chuẩn ngoại ngữ IT1 và IT-E6'').thống kích hoạt tác nhân Lập Kế
+    Hoạch--Thực Thi để phân rã câu hỏi và tổng hợp kết quả.
+\end{itemize}
+
+Bên cạnh phân loại theo tầng, hệ thống còn xác định kiểu câu hỏi phức tạp cho
+Tầng~3, bao gồm câu hỏi so sánh hai đối tượng, câu hỏi cần tổng hợp từ nhiều
+kho tri thức và câu hỏi phức tạp chưa xác định rõ dạng. Kiểu câu hỏi này được
+truyền xuống tác nhân để định hướng cách lập kế hoạch truy hồi. Một cơ chế
+quan trọng là \textbf{dự phòng theo chuỗi}: nếu tác nhân bị tắt trong cấu hình
+hoặc gặp lỗi khi chạy, hệ thống tự động quay về Tầng~2 thay vì báo lỗi.
+
+Việc xác định tầng được thực hiện theo một chuỗi quyết định nhiều bước nhằm cân
+bằng giữa độ chính xác và chi phí tính toán. Trước hết, một lớp biểu thức chính
+quy nhẹ bắt nhanh các trường hợp rõ ràng: lời chào và câu xã giao, hay những
+mẫu câu so sánh và đa nguồn điển hình. Khi tín hiệu chưa đủ rõ, hệ thống dùng
+bộ phân loại học máy trên vector BGE-M3 để ước lượng số miền dữ liệu liên quan;
+chỉ những câu hỏi chạm tới từ hai miền trở lên --- dấu hiệu có thể cần tổng hợp
+đa nguồn --- mới được đưa lên mô hình ngôn ngữ ở bước cuối để phán quyết tầng.
+Nhờ chuỗi quyết định này, phần lớn câu hỏi được phân tầng mà không phải gọi mô
+hình ngôn ngữ, vốn là bước tốn kém nhất.
+
+\subsubsection{Bộ phân loại miền với hai ngưỡng}
+
+Sau khi xác định tầng, bộ phân loại miền xếp câu hỏi vào một hoặc nhiều trong
+bốn kho tri thức. Bộ phân loại sử dụng vector BGE-M3 làm đặc trưng và được thiết kế theo kiến trúc 2 giai đoạn: giai đoạn 1 dùng hồi quy logistic để phân loại ý định (chitchat, rag, tool search), giai đoạn 2 dùng chiến lược One-vs-Rest (OvR) với các bộ phân loại logistic độc lập cho từng miền để hỗ trợ gán đa nhãn. Mô hình được khởi tạo một lần khi hệ thống khởi động và thực hiện phân
+loại trong vài mili giây.
+
+Điểm đặc biệt là quyết định có cần gọi mô hình ngôn ngữ để hiệu chỉnh hay không
+dựa trên \textbf{hai ngưỡng cùng lúc}: ngưỡng độ tin cậy (xác suất dự đoán cao
+nhất) đặt ở 0,55 và ngưỡng khoảng cách (chênh lệch giữa xác suất hạng nhất và
+hạng nhì) đặt ở 0,25. Hệ thống chỉ chuyển câu hỏi lên mô hình ngôn ngữ khi
+\textit{cả hai} cùng cho thấy sự mơ hồ --- tức là độ tin cậy dưới 0,55 và đồng
+thời khoảng cách dưới 0,25. Ngược lại, chỉ cần một trong hai vượt ngưỡng là hệ
+thống tin tưởng kết quả của bộ phân loại.
+
+Vai trò của ngưỡng khoảng cách là tránh những lần gọi mô hình ngôn ngữ tốn kém
+một cách không cần thiết: ngay cả khi độ tin cậy tuyệt đối thấp, nếu một miền
+nổi trội rõ rệt so với phần còn lại thì kết quả vẫn đáng tin. Chẳng hạn, với
+phân bố xác suất kế hoạch~0,53 và chương trình đào tạo~0,18, độ tin cậy tuy
+dưới 0,55 nhưng khoảng cách 0,35 đủ lớn để khẳng định miền kế hoạch, nên bước
+gọi mô hình ngôn ngữ được bỏ qua. Trái lại, khi xác suất cao nhất là 0,50 cho
+miền quy định và 0,42 cho miền chương trình đào tạo (khoảng cách chỉ 0,08), cả
+độ tin cậy lẫn khoảng cách đều thấp --- hệ thống nhận diện đây là trường hợp
+thực sự mơ hồ ở ranh giới hai miền và chuyển lên mô hình ngôn ngữ để phán quyết.
+
+Bên cạnh bộ phân loại học máy, hệ thống còn rút từ câu hỏi một tập \textit{tín
+hiệu xác định} bằng biểu thức chính quy, chẳng hạn tín hiệu thời sự, tín hiệu
+lịch thi và lịch đăng ký, tín hiệu cần thủ tục hỗ trợ, hay tín hiệu tra cứu
+chính xác theo mã. Khác với phân loại miền, các tín hiệu này không trực tiếp
+chọn kho mà tác động ở tầng truy hồi: câu hỏi mang tín hiệu thủ tục hỗ trợ được
+đảm bảo có thêm bằng chứng từ kho sổ tay trong tập kết quả hợp nhất, còn câu
+hỏi mang tín hiệu thời sự được cộng điểm ưu tiên cho kho kế hoạch. Nhờ tách bạch
+giữa phân loại miền (chọn kho tri thức) và tín hiệu truy hồi (điều chỉnh kết
+quả), hệ thống giảm được lỗi bỏ sót nguồn ở những câu hỏi có ngữ cảnh chính
+sách rõ ràng mà một mình bộ phân loại có thể bỏ qua.
+
+\subsection{Kết quả đạt được}
+
+Cơ chế phân tầng giúp hầu hết các câu hỏi đơn giản --- chiếm phần lớn lượng
+truy vấn thực tế --- được xử lý nhanh qua Tầng~2 mà không tốn chi phí của tác
+nhân. Các câu hỏi phức tạp được đưa lên Tầng~3 và nhận câu trả lời có cấu trúc
+hơn, kết hợp thông tin từ nhiều nguồn. Cơ chế dự phòng đảm bảo tính sẵn sàng
+của hệ thống khi tác nhân gặp sự cố. Về phân loại miền, việc kết hợp hai ngưỡng
+giúp cân bằng giữa độ chính xác và chi phí: những câu hỏi thực sự mơ hồ ở ranh
+giới hai miền được chuyển lên mô hình ngôn ngữ để phán quyết, trong khi những
+câu hỏi có một miền nổi trội rõ rệt được giữ lại ở bộ phân loại nhằm tiết kiệm
+một lần gọi mô hình ngôn ngữ không cần thiết.
+
+% =========================================================
+\section{Tác nhân Lập Kế Hoạch--Thực Thi trên nền LangGraph}
+\label{sec:ch5-agent}
+% =========================================================
+
+\subsection{Bài toán}
+
+RAG tuyến tính xử lý tốt các câu hỏi có câu trả lời nằm trong một hoặc vài
+đoạn thuộc cùng một kho tri thức. Tuy nhiên, một số loại câu hỏi học vụ vượt
+quá khả năng của luồng xử lý tuyến tính, chẳng hạn:
+
+\begin{itemize}
+    \item \textit{So sánh}: ``Chuẩn ngoại ngữ tốt nghiệp của IT1 và IT-E6 khác
+    nhau như thế nào?'' --- cần truy hồi riêng từng chương trình rồi mới tổng hợp.
+    \item \textit{Đa nguồn}: ``Em K67 IT-E6 cần điều kiện gì để tốt nghiệp và
+    thủ tục nộp hồ sơ ra sao?'' --- cần kết hợp thông tin từ kho quy định và kho
+    sổ tay hỗ trợ sinh viên.
+    \item \textit{Đa bước}: ``Môn X có điều kiện tiên quyết nào và môn đó học kỳ
+    mấy?'' --- cần truy hồi theo chuỗi, kết quả bước trước ảnh hưởng đến bước sau.
+\end{itemize}
+
+Với những câu hỏi này, một lượt truy hồi đơn lẻ không thể thu thập đủ bằng
+chứng để sinh câu trả lời chính xác và đầy đủ.
+
+\subsection{Giải pháp}
+
+Hệ thống cài đặt tác nhân theo mô hình Lập Kế Hoạch--Thực Thi sử dụng LangGraph \cite{langgraph}
+--- một thư viện xây dựng luồng xử lý dạng đồ thị trạng thái cho tác nhân tự
+động. Tác nhân được tổ chức thành đồ thị với ba nút xử lý chính:
+
+\begin{enumerate}
+    \item \textbf{Lập kế hoạch (planner)}: phân tích câu hỏi và sinh kế hoạch
+    truy hồi dưới dạng danh sách các bước có cấu trúc, mỗi bước chứa truy vấn
+    con, kho tri thức mục tiêu và mục tiêu cần thu thập.
+    \item \textbf{Thực thi (executor)}: thực thi các bước truy hồi, có thể chạy
+    song song để giảm độ trễ. Mỗi bước gọi vào dịch vụ truy hồi với tham số từ
+    kế hoạch.
+    \item \textbf{Tổng hợp (synthesize)}: tổng hợp kết quả từ tất cả các bước
+    thành câu trả lời cuối cùng có cấu trúc rõ ràng và trích dẫn nguồn cho từng
+    phần.
+\end{enumerate}
+
+Giữa bước lập kế hoạch và bước thực thi, một cạnh điều kiện đóng vai trò kiểm
+tra tính hợp lệ của kế hoạch trước khi cho phép thực thi: các bước phải có truy
+vấn và kho tri thức đúng định dạng, và số bước không được vượt ngưỡng cho phép.
+
+Một thiết kế đáng chú ý là kho tri thức trong kế hoạch tác nhân sử dụng tên
+thân thiện (ví dụ: ``chương trình đào tạo'', ``quy định'') được ánh xạ về tên
+kho nội bộ. Cách này giúp bộ lập kế hoạch không cần biết tên kỹ thuật của từng
+kho, đồng thời dễ thêm kho mới mà không phải cập nhật câu lệnh hướng dẫn.
+
+Về mô hình ngôn ngữ, cả bước lập kế hoạch và bước tổng hợp đều dùng chung một
+mô hình được cấu hình riêng cho tác nhân, ưu tiên chất lượng tiếng Việt cho câu
+trả lời cuối cùng. Số vòng lặp tối đa của tác nhân được giới hạn ở 3 lần để
+tránh tiêu tốn tài nguyên không kiểm soát.
+
+Khi toàn bộ các bước truy hồi trả về rỗng, hệ thống thử lại một lần bằng cách
+nới lỏng bộ lọc ngành và khóa. Nếu vẫn không có kết quả, tác nhân trả về thông
+báo không tìm thấy thay vì tiếp tục vòng lặp vô hạn --- cơ chế quan trọng để
+tránh tác nhân tiêu tốn tài nguyên không cần thiết.
+
+\subsection{Kết quả đạt được}
+
+Tác nhân xử lý được các câu hỏi so sánh và đa nguồn mà RAG tuyến tính không
+giải quyết tốt. Kiến trúc Lập Kế Hoạch--Thực Thi tách biệt rõ bước lập kế
+hoạch và bước thực thi, giúp dễ phân tích lỗi khi tác nhân trả sai: toàn bộ
+kế hoạch, kết quả từng bước và lý do nếu bước nào thất bại đều được ghi lại đầy
+đủ. Cơ chế dự phòng về RAG tuyến tính đảm bảo hệ thống không bị gián đoạn khi
+tác nhân gặp lỗi.
+
+% =========================================================
+\section{Cơ chế truy hồi bổ sung bằng tài liệu giả định}
+\label{sec:ch5-hyde}
+% =========================================================
+
+\subsection{Bài toán}
+
+Trong một số trường hợp, câu hỏi của sinh viên có cách diễn đạt khác nhiều so
+với ngôn ngữ trong tài liệu gốc. Ví dụ, sinh viên hỏi ``em bị cảnh báo học tập
+rồi thì có bị đuổi học không?'' trong khi tài liệu dùng thuật ngữ ``buộc thôi
+học do vi phạm quy chế'' và ``mức cảnh báo thứ hai''. Trong những trường hợp
+như vậy, kể cả sau bước xếp hạng lại, các đoạn đứng đầu vẫn có thể có điểm
+thấp hoặc số lượng kết quả ít hơn ngưỡng tối thiểu cần thiết để mô hình sinh
+câu trả lời có căn cứ.
+
+\subsection{Giải pháp}
+
+HyDE (Nhúng Tài Liệu Giả Định --- Hypothetical Document Embeddings \cite{hyde2022}, đã giới
+thiệu ở Mục~2.8.2) là một kỹ thuật mở rộng truy vấn. Khi người dùng đặt những, kích hoạt khi số lượng
+ứng viên sau xếp hạng lại thấp hơn ngưỡng cấu hình hoặc điểm xếp hạng lại của
+tất cả ứng viên đều quá thấp.
+
+Thay vì mã hóa trực tiếp câu hỏi của người dùng, hệ thống yêu cầu mô hình ngôn
+ngữ sinh ra một \textit{đoạn văn giả định} mô tả câu trả lời lý tưởng cho câu
+hỏi đó --- như thể đoạn văn đó đã tồn tại trong tài liệu học vụ. Đoạn văn giả
+định này được mã hóa thành vector và dùng làm truy vấn bổ sung để tìm kiếm thêm
+ứng viên từ kho tri thức. Về mặt trực quan, một đoạn văn mô tả câu trả lời sẽ
+gần hơn về mặt ngữ nghĩa với tài liệu chứa câu trả lời thực so với câu hỏi gốc.
+
+HyDE chỉ được kích hoạt theo điều kiện, không chạy mặc định cho mọi câu hỏi.
+Cụ thể, cơ chế này được gọi khi không còn đoạn nào trụ lại sau xếp hạng lại,
+khi điểm xếp hạng lại cao nhất nằm dưới ngưỡng (cụ thể là mang giá trị âm),
+hoặc khi số đoạn còn lại ít hơn mức tối thiểu cấu hình (mặc định là 3). Cách
+tiếp cận có điều kiện này tránh thêm độ trễ không cần thiết vào những câu hỏi
+đã có truy hồi tốt, đồng thời vẫn cung cấp một lớp phòng thủ thứ hai cho những
+câu hỏi khó.
+
+\subsection{Kết quả đạt được}
+
+HyDE đóng vai trò là lớp phòng thủ thứ hai sau khi truy hồi thông thường cho
+kết quả kém. Cấu hình mặc định đặt mục tiêu cung cấp tối đa bảy đoạn tốt nhất
+sau xếp hạng lại làm ngữ cảnh cho mô hình ngôn ngữ; khi số đoạn trụ lại tụt
+xuống dưới mức tối thiểu, HyDE bổ sung thêm ứng viên nhằm giảm tỷ lệ câu trả
+lời rỗng hoặc thiếu căn cứ. Kết hợp với cơ chế nới lỏng bộ lọc khi truy hồi
+trả rỗng, hệ thống xử lý được phần lớn các trường hợp ngôn ngữ câu hỏi khác
+biệt đáng kể so với tài liệu.
+
+% =========================================================
+\section{Bộ lọc hiệu lực văn bản và bộ giải tham chiếu điều khoản}
+\label{sec:ch5-validity}
+% =========================================================
+
+\subsection{Bài toán}
+
+Tài liệu học vụ có vòng đời: một quy định có thể bị thay thế bởi quy định mới,
+một thông tư có thể được điều chỉnh hoặc hủy bỏ. Kho tri thức có thể chứa đồng
+thời cả văn bản cũ lẫn văn bản mới cho cùng một chủ đề. Nếu truy hồi lấy trúng
+văn bản cũ đã bị thay thế, câu trả lời sẽ sai về mặt pháp lý ngay cả khi
+pipeline hoạt động đúng về mặt kỹ thuật.
+
+Bên cạnh đó, nhiều văn bản quy định sử dụng phong cách tham chiếu chéo nội bộ:
+``theo Điều~5 Khoản~2 của quy chế này'' hay ``căn cứ Phụ lục~I''. Khi một đoạn
+chứa tham chiếu như vậy được truy hồi, nhưng đoạn đích của tham chiếu lại không
+nằm trong kết quả, mô hình ngôn ngữ sẽ thiếu thông tin cần thiết để trả lời đầy
+đủ.
+
+\subsection{Giải pháp}
+
+Hệ thống cài đặt hai bước xử lý hậu kỳ riêng biệt sau khi xếp hạng lại:
+
+\textbf{Bộ lọc hiệu lực (ValidityFilter)} đọc tệp ghi lại quan hệ kế thừa giữa
+các văn bản --- một đồ thị biểu diễn mối quan hệ thay thế giữa các tài liệu ---
+để xác định những đoạn thuộc văn bản đã bị thay thế. Nếu văn bản~A đã được thay
+thế bởi văn bản~B, các đoạn của A bị loại bỏ khỏi ngữ cảnh trước khi đưa vào
+mô hình ngôn ngữ, với điều kiện vẫn còn đủ số đoạn tối thiểu sau khi lọc. Nếu
+việc lọc khiến ngữ cảnh còn lại quá ít, hệ thống giữ nguyên danh sách gốc để
+tránh mất toàn bộ nguồn. Nguyên tắc quan trọng ở đây là chỉ loại bỏ khi có
+phiên bản thay thế trong kết quả: nếu văn bản mới chưa được lập chỉ mục, văn
+bản cũ vẫn được giữ lại thay vì bị xóa và để lại ngữ cảnh trống.
+
+\textbf{Bộ giải tham chiếu (ReferenceResolver)} hoạt động ở bước tiếp theo. Nó
+phát hiện các chuỗi tham chiếu trong nội dung đoạn đã truy hồi như ``Điều~5'',
+``Khoản~1 Điều~3'', ``Phụ lục~II'' và tìm kiếm đoạn tương ứng bằng tra cứu siêu
+dữ liệu --- ưu tiên tìm trong cùng tài liệu gốc. Nếu không tìm được qua siêu
+dữ liệu, hệ thống chuyển sang tìm kiếm ngữ nghĩa có ràng buộc cùng nguồn. Các
+đoạn tham chiếu tìm được sẽ được chèn vào ngữ cảnh để mô hình ngôn ngữ có đủ
+thông tin giải nghĩa điều khoản liên quan. Để tránh bổ sung quá nhiều ngữ cảnh
+không cần thiết, bộ giải tham chiếu giới hạn số tham chiếu xử lý mỗi truy vấn
+và ngăn vòng lặp tham chiếu tuần hoàn.
+
+\subsection{Kết quả đạt được}
+
+Bộ lọc hiệu lực giúp hệ thống tránh trả lời theo văn bản đã lỗi thời --- một
+rủi ro đặc biệt quan trọng trong lĩnh vực học vụ, nơi quy định thay đổi theo
+từng năm học. Bộ giải tham chiếu giúp câu trả lời về các quy định có dẫn chiếu
+chéo đầy đủ hơn, thay vì chỉ trích dẫn một phần điều khoản mà bỏ qua nội dung
+điều khoản được dẫn chiếu tới. Hai thành phần này cùng nhau đóng vai trò là lớp
+kiểm soát chất lượng ngữ cảnh giữa bước truy hồi và bước sinh câu trả lời.
+
+% =========================================================
+\section{Quy trình duyệt dữ liệu thủ công trước khi lập chỉ mục}
+\label{sec:ch5-admin-review}
+% =========================================================
+
+\subsection{Bài toán}
+
+Chất lượng câu trả lời của hệ thống RAG phụ thuộc trực tiếp vào chất lượng dữ
+liệu trong kho tri thức. Nếu một đoạn bị chia sai --- ví dụ cắt ngang giữa một
+điều khoản, mất bảng học phần hoặc giữ lại nội dung tiêu đề không có giá trị
+--- câu trả lời cho các câu hỏi liên quan sẽ bị ảnh hưởng dù pipeline hoạt động
+đúng. Với dữ liệu học vụ có tính pháp lý cao, một đoạn sai trong kho tri thức
+gây hệ quả nghiêm trọng hơn nhiều so với hệ thống hỏi đáp thông thường.
+
+Câu hỏi đặt ra là làm thế nào để kiểm soát chất lượng dữ liệu trước khi đưa
+vào chỉ mục mà không làm chậm quá trình cập nhật tri thức của hệ thống.
+
+\subsection{Giải pháp}
+
+Hệ thống thiết kế quy trình xử lý dữ liệu với bước duyệt thủ công bắt buộc
+trước khi lập chỉ mục --- một cổng kiểm soát con người (human gate) nằm giữa
+bước phân đoạn và bước mã hóa vector.
+
+Với tài liệu tải lên thủ công, quy trình diễn ra như sau. Quản trị viên tải tệp
+PDF lên hệ thống; hệ thống xử lý tài liệu tự động chuyển đổi PDF sang Markdown,
+làm sạch nội dung và chia đoạn theo chiến lược phù hợp với loại tài liệu (sử
+dụng các bộ phân đoạn đã trình bày ở Mục~\ref{sec:ch5-chunking}). Các đoạn được
+lưu vào MongoDB với trạng thái chờ duyệt. Quản trị viên truy cập giao diện xem
+xét tài liệu, đọc từng đoạn, chỉnh sửa nội dung hoặc siêu dữ liệu nếu cần, xóa
+các đoạn chất lượng thấp và xác nhận duyệt. Chỉ sau khi cờ đánh dấu ``đã duyệt
+xong'' được bật, hệ thống mới cho phép chạy mã hóa vector và lập chỉ mục vào
+Qdrant cùng Elasticsearch. Đáng chú ý, hàm lập chỉ mục được thiết kế yêu cầu
+bắt buộc cờ này --- không có đường nào bỏ qua bước duyệt để đi thẳng vào lập
+chỉ mục.
+
+Với dữ liệu từ công cụ thu thập tự động, quy trình tương tự nhưng dữ liệu được
+lưu vào vùng chứa tạm thời thay vì đi thẳng vào pipeline. Quản trị viên xem xét
+và phê duyệt lô dữ liệu tạm trước khi hệ thống tiến hành lập chỉ mục chính thức.
+
+Sau khi lập chỉ mục thành công, hệ thống thực hiện hai hành động tự động: vô
+hiệu hóa bộ nhớ đệm liên quan (để tránh trả lời bằng dữ liệu cũ) và kích hoạt
+đánh giá sau lập chỉ mục để kiểm tra dữ liệu mới không gây hồi quy cho các câu
+hỏi hiện có. Ngoài ra, khi phát hiện lỗi sau khi đã lập chỉ mục, quản trị viên
+có thể khôi phục tài liệu để xóa dữ liệu khỏi Qdrant và Elasticsearch, đưa tài
+liệu về trạng thái trước và xử lý lại.
+
+\subsection{Kết quả đạt được}
+
+Bước duyệt thủ công ngăn chặn dữ liệu chất lượng thấp đi vào kho tri thức trước
+khi ảnh hưởng đến người dùng. Cơ chế khôi phục giúp khắc phục lỗi mà không cần
+xóa toàn bộ kho. Hơn nữa, cơ chế đánh giá sau lập chỉ mục tạo vòng phản hồi
+liên tục: mỗi lần cập nhật dữ liệu đều được kiểm tra tác động ngay lập tức thay
+vì chờ người dùng báo lỗi.
+
+% =========================================================
+\section{Tác nhân tra cứu lịch thi chuyên biệt}
+\label{sec:ch5-exam-agent}
+% =========================================================
+
+\subsection{Bài toán}
+
+Trước khi có tác nhân lịch thi, khi sinh viên hỏi về lịch thi một môn cụ thể,
+hệ thống xử lý câu hỏi theo luồng RAG thông thường: tìm kiếm trong kho văn bản
+đã lập chỉ mục và trả về đoạn nội dung gần nhất cùng đường dẫn tệp gốc để sinh
+viên tự tra cứu thêm. Cách này có hai hạn chế rõ ràng. Thứ nhất, dữ liệu lịch
+thi là bảng có cấu trúc cao --- mỗi dòng chứa tổ hợp môn học, nhóm thi, phòng
+thi, ngày giờ và địa điểm --- nên khi được chia thành đoạn văn bản và lập chỉ
+mục thông thường, ranh giới đoạn dễ cắt ngang giữa các dòng trong bảng, làm mất
+tính toàn vẹn của thông tin. Thứ hai, khi sinh viên hỏi ``môn IT3080 nhóm~05
+thi ở đâu'', hệ thống cần khớp chính xác theo tổ hợp môn và nhóm --- yêu cầu
+này không phù hợp với tìm kiếm ngữ nghĩa vốn hoạt động tốt với câu hỏi diễn đạt
+tự nhiên hơn là tra cứu điểm dữ liệu cụ thể.
+
+Nói cách khác, lịch thi là dữ liệu có cấu trúc cần được truy vấn như một cơ sở
+dữ liệu, không phải kho văn bản cần tìm kiếm ngữ nghĩa.
+
+\subsection{Giải pháp}
+
+Giải pháp là tách lịch thi ra khỏi pipeline RAG thông thường và xây dựng một
+luồng xử lý riêng với hai phần: luồng nhập dữ liệu từ quản trị viên và luồng
+tra cứu thông qua công cụ tác nhân.
+
+\textbf{Luồng nhập dữ liệu.} Quản trị viên tải tệp lịch thi (Excel hoặc PDF)
+lên hệ thống. Hệ thống phân tích tệp, chuẩn hóa các trường dữ liệu theo bảng
+ánh xạ cột, xử lý các định dạng ngày tháng đa dạng và lập chỉ mục toàn bộ vào
+một Elasticsearch chỉ mục riêng dành cho lịch thi. Dữ liệu được lưu dưới dạng
+bản ghi có cấu trúc với các trường riêng biệt: mã môn, tên môn, ngày thi, phòng
+thi, nhóm thi, khóa và loại kỳ thi. Khi quản trị viên tải tệp mới cho cùng một
+kỳ thi, dữ liệu cũ được thay thế hoàn toàn thay vì tích lũy, tránh nhầm lẫn
+giữa các phiên bản.
+
+\textbf{Luồng tra cứu.} Khi sinh viên hỏi về lịch thi, bộ phân loại độ phức
+tạp nhận diện tín hiệu lịch thi trong câu hỏi và kích hoạt công cụ tìm kiếm
+lịch thi chuyên biệt thay vì đi vào pipeline RAG thông thường. Công cụ này không
+gọi Qdrant hay tìm kiếm toàn văn trong Elasticsearch --- thay vào đó, nó trích
+xuất các thực thể từ câu hỏi (tên môn, mã môn, nhóm thi, ngày thi nếu có) và
+thực hiện truy vấn có cấu trúc trực tiếp vào chỉ mục lịch thi với các trường
+lọc tùy chọn.
+
+Điểm quan trọng là kho lịch thi không nằm trong danh sách kho tri thức thông
+thường của tác nhân --- đây là thiết kế có chủ đích để phân biệt rõ giữa kho
+Qdrant (dữ liệu văn bản, tìm kiếm ngữ nghĩa) và chỉ mục Elasticsearch có cấu
+trúc (dữ liệu bảng, truy vấn trực tiếp). Cùng một Elasticsearch được dùng cho
+hai mục đích hoàn toàn tách biệt về chỉ mục và logic xử lý.
+
+Kết quả tra cứu được trả về dưới dạng danh sách có cấu trúc, sau đó tổng hợp
+thành câu trả lời bằng tiếng Việt tự nhiên. Trong trường hợp câu hỏi kết hợp
+lịch thi với thông tin học vụ khác --- ví dụ ``môn Giải tích~1 thi khi nào và
+có tiên quyết là môn nào'' --- tác nhân Lập Kế Hoạch--Thực Thi tạo kế hoạch
+hai bước: một bước dùng công cụ lịch thi cho phần lịch thi, một bước truy hồi
+thông thường trong kho chương trình đào tạo cho phần tiên quyết, rồi tổng hợp
+hai kết quả thành câu trả lời thống nhất.
+
+\subsection{Kết quả đạt được}
+
+Thiết kế này giải quyết được hạn chế căn bản của cách tiếp cận trước: thay vì
+trả về đoạn văn bản mô tả chung về lịch thi kèm đường dẫn để sinh viên tự tra
+cứu, hệ thống giờ trả về thông tin cụ thể cho đúng môn và nhóm mà sinh viên
+hỏi. Việc tách riêng luồng nhập dữ liệu lịch thi còn cho phép quản trị viên cập
+nhật theo từng kỳ một cách độc lập mà không ảnh hưởng đến pipeline RAG chính.
+Ngoài ra, khi lịch thi thay đổi, quản trị viên chỉ cần tải tệp mới lên --- dữ
+liệu cũ tự động bị thay thế mà không cần can thiệp vào Qdrant hay kho văn bản
+học vụ.
+
+% =========================================================
+\section{Kết luận chương}
+% =========================================================
+
+Chương này đã trình bày tám đóng góp kỹ thuật chính trong quá trình xây dựng
+hệ thống trợ lý học vụ. Mỗi đóng góp xuất phát từ một bài toán cụ thể của miền
+học vụ và được giải quyết bằng thiết kế có chủ đích: phân đoạn theo miền để bảo
+toàn ngữ nghĩa và làm giàu siêu dữ liệu; truy hồi lai kết hợp hai mô hình mã
+hóa song song (hợp nhất bằng chuẩn hóa theo giá trị cao nhất) với tìm kiếm từ
+khóa BM25, hợp nhất theo thứ hạng để bao phủ cả hai loại truy vấn;
+phân loại độ phức tạp kết hợp phân loại miền với hai ngưỡng để định tuyến chính
+xác và tiết kiệm tài nguyên; tác nhân Lập Kế Hoạch--Thực Thi để xử lý câu hỏi
+đa bước; cơ chế truy hồi bổ sung bằng tài liệu giả định để phục hồi khi truy
+hồi kém; bộ lọc hiệu lực và bộ giải tham chiếu để kiểm soát chất lượng ngữ
+cảnh; quy trình duyệt thủ công để kiểm soát chất lượng dữ liệu; và tác nhân
+lịch thi để xử lý dữ liệu có cấu trúc đặc thù.
+
+Kết quả định lượng chi tiết của toàn hệ thống, bao gồm các chỉ số truy hồi, sinh
+câu trả lời và phân tích lỗi, được trình bày trong Chương~6.
+
+\end{document}
