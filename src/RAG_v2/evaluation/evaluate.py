@@ -320,7 +320,9 @@ def build_runtime(
     model: Optional[str] = None,
     vector_weight: Optional[float] = None,
     keyword_weight: Optional[float] = None,
-) -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI]:
+    judge_provider: Optional[str] = None,
+    judge_model: Optional[str] = None,
+) -> Tuple[Settings, RAGPipeline, SelfEvaluator, OpenAI, str]:
     """Build the production-config pipeline plus the judges used for scoring.
 
     Uses plain ``Settings()`` (same as ``api/main.py``) so retrieval and
@@ -382,11 +384,34 @@ def build_runtime(
     logger.info("Initializing RAGPipeline (production config, cache off) ...")
     pipeline = RAGPipeline(settings=settings, mongo_logger=None, llm_cache=None)
 
+    import copy
+    judge_settings = copy.deepcopy(settings)
+    if judge_provider:
+        judge_settings.llm_provider = judge_provider
+        if not judge_model:
+            if judge_provider == "deepseek":
+                judge_settings.chat_model = "deepseek-v4-flash"
+            elif judge_provider == "gemini":
+                judge_settings.chat_model = "gemini-3.1-flash-lite"
+            elif judge_provider == "openai":
+                judge_settings.chat_model = "gpt-4o-mini"
+            elif judge_provider == "lm_studio":
+                judge_settings.chat_model = "local-model"
+    if judge_model:
+        judge_settings.chat_model = judge_model
+
     # Independent judge instance — production may run with self_eval disabled,
     # but we always score groundedness offline on the produced answer/context.
-    self_evaluator = SelfEvaluator(llm=pipeline._chat)
-    judge_client = _build_judge_client(settings)
-    return settings, pipeline, self_evaluator, judge_client
+    if judge_provider or judge_model:
+        from llm import create_llm
+        judge_llm = create_llm(judge_settings)
+    else:
+        judge_llm = pipeline._chat
+
+    self_evaluator = SelfEvaluator(llm=judge_llm)
+    judge_client = _build_judge_client(judge_settings)
+    
+    return settings, pipeline, self_evaluator, judge_client, judge_settings.chat_model
 
 
 # ─── Per-item evaluation ────────────────────────────────────────────────────────
@@ -798,13 +823,25 @@ def _parse_args() -> argparse.Namespace:
         default=None,
         help="Override keyword weight for RRF fusion (e.g., 0.2).",
     )
+    parser.add_argument(
+        "--judge-provider",
+        type=str,
+        default=None,
+        help="LLM provider for the judge (e.g., gemini).",
+    )
+    parser.add_argument(
+        "--judge-model",
+        type=str,
+        default=None,
+        help="Chat model for the judge (e.g., gemini-3.1-pro).",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = _parse_args()
     dataset_paths = resolve_dataset_paths(args.dataset)
-    settings, pipeline, self_evaluator, judge_client = build_runtime(
+    settings, pipeline, self_evaluator, judge_client, judge_model = build_runtime(
         fusion_mode=args.fusion_mode,
         vector_model=args.vector_model,
         retrieval_mode=args.retrieval_mode,
@@ -813,8 +850,9 @@ def main() -> None:
         model=args.model,
         vector_weight=args.vector_weight,
         keyword_weight=args.keyword_weight,
+        judge_provider=args.judge_provider,
+        judge_model=args.judge_model,
     )
-    judge_model = settings.chat_model
 
     # Adjust output directory based on fusion mode and vector model
     fusion_suffix = "RRF" if args.fusion_mode == "rrf" else "linear"
