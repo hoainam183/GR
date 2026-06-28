@@ -1,6 +1,6 @@
 # Module: `chunking`
 
-Source-verified: 2026-06-12 from `chunking/*.py` and `chunking/chunker/*.py` (main.py, main_v2.py, standalone_pipeline.py, batch_process_pymupdf.py, batch_standalone.py, enrich_metadata.py, contextualizer.py, chunker/_init_.py, base_chunker.py, recursive_chunker.py, hierarchical_legal_chunker.py, hierarchical_legal_chunker_pymupdf.py, olmocr_legal_chunker.py, kehoach_chunker.py, stsv_chunker.py, chunking.py).
+Source-verified: 2026-06-24 from `chunking/*.py` and `chunking/chunker/*.py` (main.py, standalone_pipeline.py, enrich_metadata.py, contextualizer.py, chunker/_init_.py, base_chunker.py, recursive_chunker.py, hierarchical_legal_chunker.py, hierarchical_legal_chunker_pymupdf.py, olmocr_legal_chunker.py, kehoach_chunker.py, stsv_chunker.py, chunking.py, markdown_table.py).
 
 ## Purpose
 
@@ -13,13 +13,11 @@ chunking/
   main.py                         CLI + pipelines: main_pipeline (hierarchical/olmocr/recursive),
                                   stsv_pipeline, kehoach_pipeline, process_folder.
                                   Chunker selection via --chunker {hierarchical,olmocr,recursive,stsv,kehoach}.
-  main_v2.py                      ChunkingProcessor (BaseProcessor framework) wrapping
-                                  ArticleLevelLegalChunker for Markdown folders.
+
   standalone_pipeline.py          Dependency-light PDF -> markdown (PyMuPDF fitz) -> simple
                                   article/paragraph chunks via simple_chunk_by_article().
                                   No chunker classes used — fully standalone.
-  batch_process_pymupdf.py        Batch driver for ArticleLegalChunkerPyMuPDF over .md folders.
-  batch_standalone.py             Batch driver wrapping standalone_pipeline over a PDF folder.
+
   enrich_metadata.py              CTDT document-metadata extraction/enrichment (effective_date,
                                   applicable_cohort, applicable_major, document_type) written
                                   back into chunk JSON. expiry_date is always None for CTDT.
@@ -46,6 +44,8 @@ chunking/
     olmocr_legal_chunker.py       OlmOcrLegalChunker (+ ChunkLevel/ChunkData/DocumentMetadata
                                   dataclasses): plain-text legal docs, appendix + recursive fallback.
                                   The real chunker for OLM-OCR quydinh documents.
+    markdown_table.py             Table parser and formatters. Provides utilities for extracting,
+                                  formatting, and serializing Markdown tables cleanly.
     kehoach_chunker.py            KeHoachChunker: crawled plan/notice JSON articles.
     stsv_chunker.py               STSVChunker: student-handbook JSON (Roman/numbered sections).
     chunking.py                   ⚠️ DEAD CODE. Legacy functional helpers:
@@ -196,7 +196,7 @@ External module boundaries:
 - `chunking.py` is confirmed dead code. It only handles `## Điều` (h2-only) — not `# CHƯƠNG` headers, not plain-text OLM-OCR format. It hardcodes an absolute path to a specific file and uses `print()` throughout. Nothing in the pipeline imports it.
 - `chunker/_init_.py` imports `HierarchicalLegalChunker` (class does not exist — actual name is `ArticleLevelLegalChunker`) → would raise `ImportError` if used as a package. Callers import concrete modules directly.
 - `DocumentChunker` (`base_chunker.py`) is NOT subclassed by any production chunker; its `chunk_document` calls `post_process_chunks` which is a no-op hook. It is a design artifact.
-- `main_v2.py` depends on `common.BaseProcessor` (not in this module tree); the `main()` example is non-functional without that sibling module being on `sys.path`.
+
 - `OlmOcrLegalChunker` output does NOT include a top-level `id` field (only `chunk_id`, `readable_id`). The indexing pipeline must handle this difference vs. `RecursiveChunker`/`ArticleLevelLegalChunker`.
 - `ArticleLegalChunkerPyMuPDF` sets `chunk_overlap=0` by default; `ArticleLevelLegalChunker` defaults to `chunk_overlap=150`.
 - Keep metadata fields aligned with `data/MODULE.md` and retrieval filters. The `effective_date`, `expiry_date`, `applicable_cohort`, `applicable_major`, `document_type` fields are reserved slots in `RecursiveChunker` output (all `None`; filled later by `enrich_metadata`).

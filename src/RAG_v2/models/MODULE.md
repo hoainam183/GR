@@ -1,6 +1,6 @@
 # Module: `models`
 
-Source-verified: 2026-06-12 from `models/__init__.py`, `models/database.py`, `models/mongo_logger.py`, `models/user.py`, `models/document.py`, `models/document_chunk.py`, `models/crawler.py`, `models/system_config.py`.
+Source-verified: 2026-06-24 from `models/__init__.py`, `models/database.py`, `models/mongo_logger.py`, `models/user.py`, `models/document.py`, `models/document_chunk.py`, `models/crawler.py`, `models/exam_schedule.py`, `models/system_config.py`.
 
 ## Purpose
 
@@ -22,6 +22,7 @@ models/
   document.py        DocumentRecord and embedded AuditEntry for the admin upload pipeline.
   document_chunk.py  DocumentChunk review/indexing model.
   crawler.py         CrawlerRun and CrawlerChunk staged-review models + status constants.
+  exam_schedule.py   ExamScheduleRecord parsed row model for tabular ingestion.
   system_config.py   Single-document Mongo LLM config overrides and managed API key registry helpers.
 ```
 
@@ -49,6 +50,7 @@ Collection name constants are all defined in `database.py`. Main collections:
 | `system_config` | `models/system_config.py`, `api/routes/admin_stats.py` | Fixed `_id=llm_config` doc: LLM overrides + `api_keys` registry. |
 | `crawler_runs` | `models/crawler.py`, `scripts/auto_crawler.py`, `api/routes/admin_stats.py` | Staged crawler run review metadata. |
 | `crawler_chunks` | `models/crawler.py`, `scripts/auto_crawler.py`, `api/routes/admin_stats.py` | Reviewable/editable crawler chunk content + per-chunk index status. |
+| `exam_schedules` | `api/routes/exam_schedules.py` | Tabular rows from uploaded PDF/Excel exam schedules. |
 
 ## `database.py`
 
@@ -249,6 +251,14 @@ Run-level metadata in `crawler_runs`. Fields: `id`/`_id`, `run_id: str`, `pipeli
 ### `CrawlerChunk`
 
 Per-chunk content in `crawler_chunks`. Fields: `id`/`_id`, `run_id: str`, `chunk_id: str`, `chunk_index: int`, `content: str`, `original_content: str`, `metadata: dict` (default `{}`), `edited: bool` (default `False`), `index_status: str` (default **`"pending"`** — distinct from run-level `"pending_review"`), `created_at`, `updated_at`. `from_mongo(doc)` classmethod.
+
+## `exam_schedule.py`
+
+### `ExamScheduleRecord`
+
+One parsed row of a HUST exam schedule, stored in `exam_schedules` collection and Elasticsearch. Pure data + transform model without I/O.
+**Fields**: `source_file`, `source_doc_id`, `row_index`, `subject_code`, `subject_name`, `mgmt_class_code`, `exam_class_code`, `note`, `exam_type` (`"giua_ky" | "cuoi_ky" | None`), `group`, `cohort`, `exam_week`, `weekday`, `exam_date`, `exam_date_str`, `exam_session`, `start_time`, `exam_room`, `student_count`, `exam_batch`, `raw`, `uploaded_by`, `created_at`, `updated_at`.
+**Methods**: `from_parsed_row(fields, ...)`, `to_mongo()`, `to_es()`.
 
 ## `system_config.py`
 

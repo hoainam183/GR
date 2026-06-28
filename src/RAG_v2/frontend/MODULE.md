@@ -1,6 +1,6 @@
 # Module: `frontend`
 
-Source-verified: 2026-06-12 from `frontend/chat-companion/package.json`, `vite.config.ts`, `src/App.tsx`, `src/main.tsx`, `src/pages/*`, `src/components/**`, `src/services/*`, `src/types/*`, `src/hooks/*`, `src/lib/utils.ts`, `packages/shared/src/index.ts`, root `package.json`, `turbo.json`.
+Source-verified: 2026-06-24 from `frontend/chat-companion/package.json`, `vite.config.ts`, `src/App.tsx`, `src/main.tsx`, `src/pages/*`, `src/components/**`, `src/services/*`, `src/types/*`, `src/hooks/*`, `src/lib/utils.ts`, `packages/shared/src/index.ts`, root `package.json`, `turbo.json`.
 
 ## Purpose
 
@@ -9,7 +9,7 @@ Source-verified: 2026-06-12 from `frontend/chat-companion/package.json`, `vite.c
 - Authenticated chat UI with SSE streaming, conversation history, and session management.
 - Auth flow (login, register, complete-profile) backed by JWT + HttpOnly refresh-cookie.
 - Admin panel: document upload → pipeline (convert/clean/chunk/index) → review/edit, plus overview/users/analytics/feedback/system dashboard tabs.
-- Admin-only debug pages: pipeline trace (`/trace`), retrieval diagnostics (`/retrieval`), eval dashboard (`/eval`), per-document review (`/admin/documents/:id`).
+- Admin-only debug pages: eval dashboard (`/eval`), per-document review (`/admin/documents/:id`).
 - Bookmarks and push-notification pages (using `@rag/shared` API client).
 
 The module does not contain backend logic; it consumes the FastAPI backend at `VITE_API_URL` (default `http://localhost:8000`).
@@ -32,7 +32,7 @@ frontend/
       logo.png                Static asset (HUST logo PNG).
     src/
       main.tsx                ReactDOM.createRoot → <App />.
-      App.tsx                 BrowserRouter route table + RequireAuth / RequireAdmin guards.
+      App.tsx                 BrowserRouter route table + RequireAuth / RequireAdmin / RequireNonAdmin guards.
       App.css / index.css     Global/Tailwind styles.
       pages/
         LandingPage.tsx       Public landing (redirects logged-in users to /chat).
@@ -40,8 +40,6 @@ frontend/
         RegisterPage.tsx      Registration form.
         CompleteProfile.tsx   Post-register profile completion.
         Index.tsx             Chat shell: header, resizable sidebar, ChatContainer.
-        TracePage.tsx         Admin: send query, render pipeline/agent trace. (RequireAdmin)
-        RetrievalPage.tsx     Admin: raw retrieval search debug UI. (RequireAdmin)
         EvalPage.tsx          Admin: eval dashboard (TanStack Query, getEvalDashboard). (RequireAdmin)
         AdminPage.tsx         Admin: tabbed shell (overview/users/documents/analytics/feedback/system). (RequireAdmin)
         DocumentReview.tsx    Admin: per-doc pipeline step control + markdown/chunk review. (RequireAdmin)
@@ -164,13 +162,11 @@ npm run preview                    # vite preview (serve dist/)
 | Route | Component | Guard |
 |---|---|---|
 | `/` | `LandingPage` | none |
-| `/chat` | `Index` | `RequireAuth` |
-| `/chat/:sessionId` | `Index` | `RequireAuth` |
+| `/chat` | `Index` | `RequireNonAdmin` |
+| `/chat/:sessionId` | `Index` | `RequireNonAdmin` |
 | `/login` | `LoginPage` | none |
 | `/register` | `RegisterPage` | none |
 | `/complete-profile` | `CompleteProfile` | `RequireAuth` |
-| `/trace` | `TracePage` | `RequireAdmin` |
-| `/retrieval` | `RetrievalPage` | `RequireAdmin` |
 | `/eval` | `EvalPage` | `RequireAdmin` |
 | `/admin` | `AdminPage` | `RequireAdmin` |
 | `/admin/documents/:id` | `DocumentReview` | `RequireAdmin` |
@@ -180,10 +176,11 @@ npm run preview                    # vite preview (serve dist/)
 
 **Guard logic (`App.tsx`):**
 
-- `RequireAuth` and `RequireAdmin` call `getCurrentSessionUser()` synchronously for an optimistic render; then `ensureSession()` runs once on mount (guarded by a `verified` ref to prevent repeated calls within the same component lifetime).
+- `RequireAuth`, `RequireAdmin`, and `RequireNonAdmin` call `getCurrentSessionUser()` synchronously for an optimistic render; then `ensureSession()` runs once on mount (guarded by a `verified` ref to prevent repeated calls within the same component lifetime).
 - While the first check is in flight and no cached user exists, the guard renders `null` (blank screen).
 - No valid session → redirect to `/login?next=<encoded path+search>`.
 - `RequireAdmin` additionally checks `user.role !== 'admin'`; non-admin redirects to `/chat`.
+- `RequireNonAdmin` additionally checks `user.role === 'admin'`; admin redirects to `/admin`.
 
 ## API Client + SSE Streaming Integration
 

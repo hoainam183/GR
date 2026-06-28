@@ -1,6 +1,6 @@
 # Module: `cache`
 
-Source-verified: 2026-06-12 from `cache/__init__.py`, `cache/redis_client.py`, `cache/session_store.py`, `cache/history_cache.py`, `cache/llm_cache.py`, `cache/rate_limiter.py`.
+Source-verified: 2026-06-24 from `cache/__init__.py`, `cache/redis_client.py`, `cache/session_store.py`, `cache/history_cache.py`, `cache/llm_cache.py`, `cache/rate_limiter.py`.
 
 ## Purpose
 

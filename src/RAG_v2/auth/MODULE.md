@@ -1,6 +1,6 @@
 # Module: `auth`
 
-Source-verified: 2026-06-12 from `auth/__init__.py`, `auth/jwt_handler.py`, `auth/refresh_tokens.py`, `auth/microsoft.py`, `auth/password.py`, `auth/rbac.py`, plus `routers/auth.py` and `models/user.py`.
+Source-verified: 2026-06-24 from `auth/__init__.py`, `auth/jwt_handler.py`, `auth/refresh_tokens.py`, `auth/password.py`, `auth/rbac.py`, plus `routers/auth.py` and `models/user.py`.
 
 ## Purpose
 
@@ -13,7 +13,6 @@ auth/
   __init__.py       Empty package marker (no exports).
   jwt_handler.py    JWT creation/verification and FastAPI current-user dependencies.
   refresh_tokens.py Opaque refresh-token sessions, rotation, hashing, revocation.
-  microsoft.py      Microsoft OAuth URL, token exchange, Graph user-info retrieval.
   password.py       bcrypt password hashing and verification helpers.
   rbac.py           Admin and superadmin role-enforcement dependencies.
 ```
@@ -81,27 +80,6 @@ Chat and other client routes use optional auth; admin and destructive/session ro
 
 Web clients receive refresh tokens through an HttpOnly cookie (set in `routers/auth.py`). Mobile clients (`client_type="mobile"`) receive/send the opaque refresh token in the API JSON response.
 
-## Microsoft OAuth
-
-`microsoft.py` owns the full OAuth 2.0 code-exchange flow. All settings are read at call-time (not import time) so tests can safely monkeypatch `os.environ`.
-
-**Env config (read by `_settings() -> tuple[str, str, str, str]`):**
-
-| Variable | Default | Required |
-|----------|---------|----------|
-| `MICROSOFT_TENANT_ID` | `"common"` | No |
-| `MICROSOFT_CLIENT_ID` | — | Yes (`KeyError` if missing) |
-| `MICROSOFT_CLIENT_SECRET` | — | Yes (`KeyError` if missing) |
-| `MICROSOFT_REDIRECT_URI` | `http://localhost:8000/auth/callback` | No |
-
-**Public functions:**
-
-- `get_authorization_url() -> str` — builds the v2.0 authorize URL. Requested scopes: `openid profile email User.Read`. Uses `response_mode=query` so FastAPI can read `code` as a `Query(...)` parameter.
-- `async exchange_code_for_token(code: str) -> dict` — POSTs to the v2.0 token endpoint via `httpx` (timeout 15 s). Raises `HTTPException 502` on HTTP error, `503` if Microsoft is unreachable.
-- `async get_microsoft_user_info(access_token: str) -> dict` — `GET https://graph.microsoft.com/v1.0/me` (timeout 10 s). Returns a dict with `id`, `displayName`, `mail` (may be `None` for some tenants), `userPrincipalName`. Same `502`/`503` error mapping.
-
-The router layer (`routers/auth.py`) handles HUST/SIS domain validation and user upsert; this module is stateless.
-
 ## Passwords
 
 `password.py` wraps `bcrypt` directly — no passlib dependency.
@@ -125,7 +103,6 @@ Do not compare plain-text passwords in route handlers; always delegate to these 
 ```mermaid
 flowchart TD
   AuthRouter["routers/auth.py"] --> Password["password.hash_password / verify_password"]
-  AuthRouter --> OAuth["microsoft.get_authorization_url / exchange_code_for_token / get_microsoft_user_info"]
   AuthRouter --> JWTCreate["jwt_handler.create_access_token"]
   AuthRouter --> Refresh["refresh_tokens.create_refresh_session / rotate / revoke"]
   Refresh --> MongoRefresh[("refresh_tokens collection")]
@@ -146,7 +123,6 @@ External module boundaries:
 
 - If JWT payload fields change, update `models/user.py`, frontend/mobile auth stores, and all JWT tests.
 - If refresh-token session fields change, update `models/database.py` indexes, `routers/auth.py`, web/mobile auth clients, and refresh tests.
-- `MICROSOFT_CLIENT_ID` and `MICROSOFT_CLIENT_SECRET` raise `KeyError` at the first OAuth call if unset (not at startup). Add startup validation if early-fail is preferred.
 - `require_superadmin` re-reads `SUPERADMIN_USER_IDS` on every request. This is intentional (runtime override without restart) but adds a tiny `os.environ` access per call.
 - Keep route-level auth rules in `routers/auth.py`; never duplicate role checks across routers.
 - Never trust body-supplied `user_id` when a Bearer token is present — `get_current_user` reads identity exclusively from the `sub` claim.
@@ -155,7 +131,7 @@ External module boundaries:
 
 ```bash
 # Syntax check all auth submodules
-python -m py_compile auth/jwt_handler.py auth/refresh_tokens.py auth/microsoft.py auth/password.py auth/rbac.py
+python -m py_compile auth/jwt_handler.py auth/refresh_tokens.py auth/password.py auth/rbac.py
 
 # Run auth-related tests (no integration calls)
 python -m pytest tests/test_auth_refresh.py tests/test_rbac.py -q -m "not integration"

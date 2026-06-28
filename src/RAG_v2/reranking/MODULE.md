@@ -1,6 +1,6 @@
 # Module: `reranking`
 
-Source-verified: 2026-06-12 from `reranking/__init__.py`, `reranking/base.py`, `reranking/bge_reranker.py`, `config/settings.py`.
+Source-verified: 2026-06-24 from `reranking/__init__.py`, `reranking/base.py`, `reranking/bge_reranker.py`, `config/settings.py`.
 
 ## Purpose
 

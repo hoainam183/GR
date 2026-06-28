@@ -1,6 +1,6 @@
 # Module: `pipeline`
 
-Source-verified: 2026-06-12 from `pipeline/__init__.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, `pipeline/document_pipeline.py` (and the module-local test files `test_rag_pipeline.py`, `test_flows_major_fallback.py`).
+Source-verified: 2026-06-24 from `pipeline/__init__.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, `pipeline/document_pipeline.py`.
 
 ## Purpose
 
@@ -19,8 +19,6 @@ pipeline/
   rag_pipeline.py               RAGPipeline class: routing, classic RAG, agent, streaming, LLM hot-reload.
   flows.py                      Functional flow implementations: chitchat_flow(_stream), rag_flow(_stream), Tavily web fallback, context/rerank helpers.
   document_pipeline.py          Admin ingestion: convert → clean → chunk → embed+index, delete, rollback.
-  test_rag_pipeline.py          Module-local RAGPipeline tests.
-  test_flows_major_fallback.py  Module-local flow tests (major-strip / fallback behaviour).
 ```
 
 ## `RAGPipeline` Construction
@@ -358,5 +356,5 @@ home directory (was `/Users/nam.nguyen/...` in a previous version).
 
 ```bash
 python -m py_compile pipeline/*.py
-python -m pytest pipeline/test_rag_pipeline.py pipeline/test_flows_major_fallback.py tests/test_chat_route_mode.py tests/test_document_pipeline.py -q -m "not integration"
+python -m pytest tests/test_chat_route_mode.py tests/test_document_pipeline.py -q -m "not integration"
 ```

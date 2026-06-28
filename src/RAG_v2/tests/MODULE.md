@@ -1,6 +1,6 @@
 # Module: `tests`
 
-Source-verified: 2026-06-12 from `tests/*.py`, `tests/retrieval/*.py`, `tests/conversation_regression_queries.jsonl`, root `pytest.ini`, and root `conftest.py`.
+Source-verified: 2026-06-24 from `tests/*.py`, `tests/retrieval/*.py`, `tests/conversation_regression_queries.jsonl`, root `pytest.ini`, and root `conftest.py`.
 
 ## Purpose
 
@@ -97,7 +97,7 @@ Patterns observed in the suite:
 
 ## Maintenance Notes
 
-- **New files since last doc revision (2026-06-07):** `test_audit_fixes.py`, `test_p0_fixes.py`, `test_reflection_profile_split.py`, `test_domain_routing_evaluator.py` — all four are unit-only (no external services). Add them to targeted runs as appropriate.
+- **New files since last doc revision (2026-06-07):** `test_audit_fixes.py`, `test_p0_fixes.py`, `test_reflection_profile_split.py`, `test_domain_routing_evaluator.py`, `e2e_test_url_exposure.py`, `test_api_key.py`, `test_clean_markdown.py`, `test_complexity_router_exam.py`, `test_complexity_tiers.py`, `test_components.py`, `test_crawler_admin_staging.py`, `test_crawler_date_update.py`, `test_crawler_robustness.py`, `test_embedding.py`, `test_es.py`, `test_evaluation_metrics.py`, `test_exam_es_store.py`, `test_exam_ingestion.py`, `test_exam_schedule_model.py`, `test_exam_schedule_parser.py`, `test_exam_schedule_service.py`, `test_exam_schedule_summary_route.py`, `test_exam_tool.py`, `test_expand.py`, `test_fix_url_exposure.py`, `test_fixes.py`, `test_flows_major_fallback.py`, `test_kehoach_table_chunking.py`, `test_normalise.py`, `test_planner_routing_exam.py`, `test_rag_pipeline.py`, `test_reflection.py`, `test_reflection_followup.py`, `test_reflection_pii_strip.py`, `test_regex.py`, `test_remote_embedder.py`, `test_remote_reranker.py`, `test_retrieval.py`, `test_retrieval_docs.py`, `test_routing_edge_cases.py`, `test_routing_fixes.py`, `test_signals_check.py`, `test_url_sanitization.py`, `test_vn_datetime.py` — ensure these are added to targeted runs as appropriate.
 - Several files exercise logic re-implemented locally (`test_parent_context_phase2.py`) to avoid importing heavy dependencies (openai, torch). Treat them as logic-equivalence checks, not direct imports of `flows.py`/`tool_adapters.py`.
 - `test_phase1_improvements.py` mocks a large dependency tree via `_mock_heavy_deps()` at import time; duplicate test class names in that file mean the later definitions shadow earlier ones at collection time.
 - `run_prompt_tune.py` and `retrieval/test_{elasticsearch,qdrant}_store.py`, `retrieval/test_hybrid_search.py` carry `__main__` script entrypoints in addition to pytest functions.

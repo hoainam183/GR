@@ -1,6 +1,6 @@
 # Module: `document_loader`
 
-Source-verified: 2026-06-12 from `document_loader/__init__.py`, `document_loader/main.py`, `document_loader/main_v2.py`, `document_loader/clean_markdown.py`, `document_loader/pdf_to_markdown/__init__.py`, `pdf_to_markdown/base/converter.py`, `pdf_to_markdown/converters/{docling_converter,pymupdf4llm_converter,__init__}.py`, `pdf_to_markdown/core/{processor,vietnamese_processor,__init__}.py`, `pdf_to_markdown/batch_converter.py`, `pdf_to_markdown/test_components.py`, and `pipeline/document_pipeline.py` (consumer).
+Source-verified: 2026-06-24 from `document_loader/__init__.py`, `document_loader/main.py`, `document_loader/clean_markdown.py`, `document_loader/pdf_to_markdown/__init__.py`, `pdf_to_markdown/base/converter.py`, `pdf_to_markdown/converters/{docling_converter,pymupdf4llm_converter,pdfplumber_converter,__init__}.py`, `pdf_to_markdown/core/{processor,vietnamese_processor,__init__}.py`, and `pipeline/document_pipeline.py` (consumer).
 
 ## Purpose
 
@@ -13,21 +13,21 @@ document_loader/
   __init__.py                              Empty package marker (1 line).
   clean_markdown.py                        Markdown cleanup (clean_markdown, is_toc_table_row); also a standalone batch-clean script.
   main.py                                  Legacy CLI: builds a converter + PDFProcessor, converts one hardcoded file. Bare imports (no package prefix); must be run from document_loader/ dir.
-  main_v2.py                               DocumentLoaderProcessor over common.BaseProcessor; PDF/DOCX -> .md + _metadata.json with skip logic. BROKEN: imports `from common import BaseProcessor` which does not exist in the project.
+
   pdf_to_markdown/
     __init__.py                            Package marker (__version__ = "1.0.0").
     base/converter.py                      BasePDFConverter ABC: convert() contract + _save_markdown/_save_metadata/_get_stats helpers.
     base/__init__.py                       Empty.
     converters/
-      __init__.py                          Imports DoclingConverter, PyMuPDF4LLMConverter. __all__ also names UnifiedPDFConverter and PDFPlumberConverter — neither has a source file (dead exports).
+      __init__.py                          Imports DoclingConverter, PyMuPDF4LLMConverter, PDFPlumberConverter.
       docling_converter.py                 DoclingConverter — wraps docling.document_converter.DocumentConverter.
       pymupdf4llm_converter.py             PyMuPDF4LLMConverter — wraps pymupdf4llm.to_markdown(); plus convert_with_images().
+      pdfplumber_converter.py              PDFPlumberConverter — extracts ONLY tables using pdfplumber.
     core/
       __init__.py                          Imports VietnameseTextProcessor. __all__ also names PDFDetector — no source file (dead export).
       processor.py                         PDFProcessor — process_single / process_directory orchestration over a converter.
       vietnamese_processor.py              VietnameseTextProcessor — Vietnamese encoding/Unicode/tone normalization.
-    batch_converter.py                     Standalone batch script. BROKEN: imports simple_converter (no such module).
-    test_components.py                     Manual smoke script (skipped under pytest). BROKEN: imports core.pdf_detector (missing).
+
     output_quick_test/                     Sample generated .md fixtures (committed artifacts; not used by any test).
 ```
 
@@ -41,6 +41,7 @@ Implemented converters:
 
 - `DoclingConverter(output_dir)` — uses `docling.document_converter.DocumentConverter`. Metadata JSON is the full `document.export_to_dict()`, which includes a `"pages"` list. Stats include `num_pages`.
 - `PyMuPDF4LLMConverter(output_dir, **kwargs)` — uses `pymupdf4llm.to_markdown(pdf_path, **conversion_options)`. `**kwargs` are stored as `self.conversion_options` and forwarded on every call. Returns `{"status": "failed", ...}` on error instead of raising. Extra `convert_with_images(pdf_path, image_dir, dpi)` re-runs via a temporary converter with `write_images=True, image_path=image_dir, dpi=dpi`.
+- `PDFPlumberConverter(output_dir)` — extracts ONLY tables from PDF using `pdfplumber.open()`, rendering them as Markdown tables. Ignores normal text. Stats include `num_pages` and `table_count`.
 
 `PDFProcessor(converter)` (`core/processor.py`) drives a converter over a single file (`process_single(pdf_path)`) or a directory glob (`process_directory(pdf_dir, pattern="*.pdf", show_progress=True)`), collecting per-file stats dicts.
 
@@ -89,10 +90,7 @@ Public API:
 - **Pipeline asymmetry**: `DoclingConverter` is used via the class; `PyMuPDF4LLMConverter` is bypassed — the pipeline calls `pymupdf4llm.to_markdown` directly. If pymupdf4llm conversion options need changing for the admin upload path, edit `pipeline/document_pipeline.py`, not `PyMuPDF4LLMConverter`.
 - **Dead/broken entry points** (not on the pipeline path):
   - `main.py` — hardcoded absolute paths to `D:\GR\src\RAG\...`; bare imports require running from `document_loader/` dir.
-  - `main_v2.py` — `from common import BaseProcessor` fails; `common` module does not exist in this project.
-  - `batch_converter.py` — `from simple_converter import convert_vietnamese_pdf` fails; no such module.
-  - `test_components.py` — `from core.pdf_detector import PDFDetector` fails; no source file for `PDFDetector`.
-- **Dead `__all__` entries**: `converters/__init__.py` lists `UnifiedPDFConverter` and `PDFPlumberConverter`; `core/__init__.py` lists `PDFDetector` — none are implemented.
+- **Dead `__all__` entries**: `converters/__init__.py` lists `UnifiedPDFConverter` which is not implemented; `core/__init__.py` lists `PDFDetector` — no source file.
 - Converter output directly affects chunking and retrieval quality; update chunking/eval docs when changing conversion options.
 - Do not make admin upload depend on the committed `output_quick_test/` fixtures.
 

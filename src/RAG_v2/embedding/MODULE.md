@@ -1,6 +1,6 @@
 # Module: `embedding`
 
-Source-verified: 2026-06-12 from `embedding/__init__.py`, `embedding/base.py`, `embedding/bge_m3.py`, `embedding/e5_multilingual.py`, `embedding/ensemble.py`, `embedding/test_embedding.py`.
+Source-verified: 2026-06-24 from `embedding/__init__.py`, `embedding/base.py`, `embedding/bge_m3.py`, `embedding/e5_multilingual.py`, `embedding/ensemble.py`.
 
 ## Purpose
 
@@ -22,7 +22,6 @@ embedding/
                       query/passage prefixes; normalizes embeddings; LRU query cache.
                       Also defines _EmbeddingCache and _resolve_torch_device (local copies — duplicated).
   ensemble.py         EnsembleEmbedder — weighted average of multiple BaseEmbedder instances, L2-normalized.
-  test_embedding.py   Manual smoke script (auto-skips under pytest); loads BGE-M3 + E5, checks dims/cosine.
 ```
 
 ## Public API
@@ -198,7 +197,6 @@ flowchart TD
 - LRU cache only covers `embed_query`; repeated document batches (e.g., re-indexing) are not cached. This is intentional — document sets are large and non-repetitive.
 - The `use_fp16=True` default in `BGEm3Embedder.__init__` is misleading: it is silently overridden to `False` on non-CUDA devices. MPS and CPU always run fp32.
 - `EnsembleEmbedder` weights are re-normalized to sum to 1. Passing `weights=[0.6, 0.4]` (already summing to 1) is safe; passing unnormalized values is also safe.
-- `test_embedding.py` expects similar-pair cosine ≥ 0.70 and dissimilar-pair < 0.70 as sanity thresholds. These are smoke-test heuristics, not hard model contracts.
 
 ## Useful Checks
 
@@ -207,8 +205,4 @@ flowchart TD
 python -m py_compile src/RAG_v2/embedding/base.py src/RAG_v2/embedding/bge_m3.py \
     src/RAG_v2/embedding/e5_multilingual.py src/RAG_v2/embedding/ensemble.py \
     src/RAG_v2/embedding/__init__.py
-
-# Manual smoke test — loads both models, checks dims + cosine similarity
-# (auto-skipped under pytest; run directly)
-python src/RAG_v2/embedding/test_embedding.py
 ```

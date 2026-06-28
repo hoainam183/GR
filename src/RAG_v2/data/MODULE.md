@@ -1,6 +1,6 @@
 # Module: `data`
 
-Source-verified: 2026-06-12 from `data/document_lineage.json`; all 6 `.py` helper scripts; sampled chunk JSON from `ctdt/soict/chunks_recursive_parent_child/IT2_fix_chunks.json`, `quydinh/olmocr/chunks_recursive_parent_child_3/QCDT_2025_5445_QD-DHBK_converted_chunks.json`, `quydinh/chunks/quydinh_all_chunks.json`, `quydinh/admin_upload/6a081c2e06007b85128d5f7a_recursive_chunks.json`, `kehoach/chunks/kehoach_list_all_chunks.json`, `stsv/chunks/stsv_all_chunks.json`.
+Source-verified: 2026-06-24 from `data/document_lineage.json`; all 6 `.py` helper scripts; sampled chunk JSON from `ctdt/soict/chunks_recursive_parent_child/IT2_fix_chunks.json`, `quydinh/olmocr/chunks_recursive_parent_child_3/QCDT_2025_5445_QD-DHBK_converted_chunks.json`, `quydinh/chunks/quydinh_all_chunks.json`, `quydinh/admin_upload/6a081c2e06007b85128d5f7a_recursive_chunks.json`, `kehoach/chunks/kehoach_list_all_chunks.json`, `stsv/chunks/stsv_all_chunks.json`.
 
 ## Purpose
 

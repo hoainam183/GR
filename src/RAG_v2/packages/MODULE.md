@@ -1,6 +1,6 @@
 # Module: `packages`
 
-Source-verified: 2026-06-12 from `packages/shared/package.json`, `packages/shared/src/index.ts`, `packages/shared/src/api/**`, `packages/shared/src/types/**`, `packages/shared/src/stores/**`, `packages/shared/src/utils/**`, `packages/shared/src/profileOptions.ts`.
+Source-verified: 2026-06-24 from `packages/shared/package.json`, `packages/shared/src/index.ts`, `packages/shared/src/api/**`, `packages/shared/src/types/**`, `packages/shared/src/stores/**`, `packages/shared/src/utils/**`, `packages/shared/src/profileOptions.ts`.
 
 ## Purpose
 

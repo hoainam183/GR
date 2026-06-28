@@ -1,6 +1,6 @@
 # Module: `config`
 
-Source-verified: 2026-06-12 from `config/__init__.py`, `config/settings.py`.
+Source-verified: 2026-06-24 from `config/__init__.py`, `config/settings.py`.
 
 ## Purpose
 
@@ -251,11 +251,22 @@ evaluating impact.
 ### Admin / document upload
 
 | Field | Type | Default | Notes |
-|---|---|---|---|
 | `superadmin_user_ids` | `str` | `""` | Comma-separated MongoDB ObjectIds |
 | `upload_dir` | `str` | `"uploads"` | |
 | `max_upload_size_mb` | `int` | `50` | |
 | `max_upload_batch` | `int` | `5` | |
+| `pdf_min_markdown_chars` | `int` | `50` | Fallback to docling (OCR) if pymupdf4llm yields fewer chars |
+
+### Exam schedule (lịch thi)
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `exam_schedule_es_index` | `str` | `"exam_schedules"` | Elasticsearch index for structured ingestion |
+| `exam_schedule_search_top_k` | `int` | `500` | Structured DB lookup cap (not vector search) |
+| `exam_schedule_two_digit_year_pivot` | `int` | `2000` | YY maps to 2000+YY |
+| `exam_schedule_date_formats` | `List[str]` | `["%d/%m/%Y", "%d-%m-%Y", ...]` | strptime patterns for parsing dates |
+| `exam_schedule_column_map` | `dict[str, str]` | Folded aliases map | Canonical field mapping for folded Excel/PDF headers |
+| `exam_schedule_kip_time_map` | `dict[str, str]` | `{}` | Fallback for "Kíp thi" start-time |
 
 ### Server / CORS
 

@@ -1,6 +1,6 @@
 # Module: `routers`
 
-Source-verified: 2026-06-12 from `routers/__init__.py`, `routers/auth.py`, `api/main.py`, `schemas/user.py`.
+Source-verified: 2026-06-24 from `routers/__init__.py`, `routers/auth.py`, `api/main.py`, `schemas/user.py`.
 
 ## Purpose
 

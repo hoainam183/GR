@@ -1,6 +1,6 @@
 # Module: `mobile`
 
-Source-verified: 2026-06-12 from `mobile/App.tsx`, `mobile/index.ts`, `mobile/package.json`, `mobile/app.json`, `mobile/babel.config.js`, `mobile/tsconfig.json`, `mobile/src/navigation/**`, `mobile/src/screens/**`, `mobile/src/hooks/**`, `mobile/src/services/**`, `mobile/src/stores/**`, `mobile/src/theme/theme.tsx`, `mobile/src/utils/constants.ts`.
+Source-verified: 2026-06-24 from `mobile/App.tsx`, `mobile/index.ts`, `mobile/package.json`, `mobile/app.json`, `mobile/babel.config.js`, `mobile/tsconfig.json`, `mobile/src/navigation/**`, `mobile/src/screens/**`, `mobile/src/hooks/**`, `mobile/src/services/**`, `mobile/src/stores/**`, `mobile/src/components/**`, `mobile/src/theme/theme.tsx`, `mobile/src/utils/constants.ts`.
 
 ## Purpose
 

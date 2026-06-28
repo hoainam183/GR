@@ -1,6 +1,6 @@
 # Module: `agent`
 
-Source-verified: 2026-06-12 from `agent/__init__.py`, `agent/react_agent.py`, `agent/planning.py`, `agent/tool_adapters.py`, `agent/graph_state.py`, `agent/state.py`, `agent/prompts.py`, `agent/lc_tools.py`.
+Source-verified: 2026-06-24 from `agent/__init__.py`, `agent/react_agent.py`, `agent/planning.py`, `agent/tool_adapters.py`, `agent/graph_state.py`, `agent/state.py`, `agent/prompts.py`, `agent/lc_tools.py`.
 
 ## Purpose
 
@@ -115,6 +115,7 @@ Supported direct tool names:
 - `compare_cohorts` — rejects major codes (redirects to `compare_programs`); runs two parallel `_rag_search` calls
 - `compare_programs` — rejects cohort codes (redirects to `compare_cohorts`); runs two parallel `_rag_search` calls; accepts optional `course_keyword`
 - `web_search`
+- `exam_schedule_search` — structured query for exam schedules bypassing Qdrant to use Elasticsearch.
 
 `_web_search` respects `TAVILY_FALLBACK_ENABLED` setting — if false it returns a static disabled message regardless of planner's `needs_web`. `web_search_for_executor()` additionally strips personal identifiers before calling `_web_search`.
 
@@ -126,6 +127,8 @@ Agent-facing collection aliases (`COLLECTION_MAP`):
 | `quy_dinh` | `quydinh` |
 | `ke_hoach` | `kehoach` |
 | `ho_tro_sv` | `stsv` |
+
+Note: `lich_thi` is another valid agent collection but it is NOT in `COLLECTION_MAP` because it bypasses Qdrant entirely to use a structured Elasticsearch/Mongo store.
 
 `_MAJOR_FILTERABLE_COLLECTIONS = frozenset({"chuong_trinh"})` — only `ctdt` supports `resolved_major` filter in Qdrant; other collections rely on query text for scoping.
 
@@ -154,7 +157,7 @@ Agent-facing collection aliases (`COLLECTION_MAP`):
 
 ## Runtime Injection And Thread Safety
 
-`tool_adapters` owns an `_AdapterRuntime` dataclass: `settings`, `bge_embedder`, `e5_embedder`, `searcher` (`MultiCollectionSearch`), `reranker` (optional), `tavily_tool` (optional). Runtime is normally injected via `inject_from_retrieval_service()` from the shared `RetrievalService`. `_build_runtime()` is the lazy fallback; `set_runtime(None)` resets to lazy mode.
+`tool_adapters` owns an `_AdapterRuntime` dataclass: `settings`, `bge_embedder`, `e5_embedder`, `searcher` (`MultiCollectionSearch`), `reranker` (optional), `tavily_tool` (optional), `exam_es_store` (optional). Runtime is normally injected via `inject_from_retrieval_service()` from the shared `RetrievalService`. `_build_runtime()` is the lazy fallback; `set_runtime(None)` resets to lazy mode.
 
 `_rag_search()` orchestration: `_build_rag_request()` → cache check → `_search_rag_candidates()` (embeds with BGE+E5, calls searcher) → `_rerank_or_trim_results()` → `_expand_parent_context_if_enabled()` → `_append_agent_docs()` → `_format_search_results()` → cache write.
 
@@ -195,6 +198,7 @@ Main settings consumed by this module:
 - `reranker_min_top_k`, `reranker_score_threshold`, `reranker_table_score_threshold`
 - `tavily_api_key`, `tavily_cache_maxsize`, `tavily_cache_ttl_seconds`, `tavily_fallback_enabled`, `tavily_max_results`, `tavily_search_depth`, `tavily_web_result_count`, `tavily_web_content_char_limit`
 - `parent_context_enabled`, `parent_max_chars_agent`
+- `elasticsearch_host`, `elasticsearch_port`, `exam_schedule_es_index` (for `lich_thi` search)
 
 Supported synthesis providers: `"gemini"` (via Google generative language OpenAI-compat endpoint, default model `gemini-3.1-flash-lite`), `"ollama"` (via local Ollama `/v1`), or LM Studio/OpenAI-compatible fallback (all via `ChatOpenAI`). `localhost` in base URLs is substituted with `127.0.0.1` for macOS LM Studio compatibility.
 

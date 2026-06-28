@@ -1,6 +1,6 @@
 # Module: `llm`
 
-Source-verified: 2026-06-12 from `llm/__init__.py`, `llm/base.py`, `llm/deepseek.py`, `llm/gemini.py`, `llm/lm_studio.py`, `llm/chat_model.py`, `llm/self_eval.py`, `llm/prompts.py`.
+Source-verified: 2026-06-24 from `llm/__init__.py`, `llm/base.py`, `llm/deepseek.py`, `llm/gemini.py`, `llm/lm_studio.py`, `llm/chat_model.py`, `llm/self_eval.py`, `llm/prompts.py`.
 
 ## Purpose
 

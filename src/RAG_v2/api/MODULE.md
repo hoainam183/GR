@@ -1,6 +1,6 @@
 # Module: `api`
 
-Source-verified: 2026-06-12 from `api/main.py`, `api/dependencies.py`, `api/response_mapper.py`, `api/schemas.py`, `api/__init__.py`, `api/middleware/rate_limit.py`, `api/services/notification_delivery.py`, and `api/routes/*.py` (chat, health, session, metrics, retrieval, upload, bookmark, feedback, lookup, notification, notification_admin, admin_stats).
+Source-verified: 2026-06-24 from `api/main.py`, `api/dependencies.py`, `api/response_mapper.py`, `api/schemas.py`, `api/__init__.py`, `api/middleware/rate_limit.py`, `api/services/notification_delivery.py`, and `api/routes/*.py` (admin_stats, bookmark, chat, exam_schedules, feedback, health, lookup, metrics, notification, notification_admin, retrieval, session, upload).
 
 ## Purpose
 
@@ -25,18 +25,18 @@ api/
     notification_delivery.py  DB notification creation + best-effort Expo push delivery.
   routes/
     __init__.py
-    chat.py               /chat, /chat/v3, /api/chat/v3, /chat/suggest, /chat/stream
-    health.py             /health, /api/admin/reload-validity
-    session.py            /session, /session/{id}, /sessions, /sessions/me (prefix /session)
-    metrics.py            /metrics/usage, /metrics/eval
-    retrieval.py          /retrieval/search diagnostic endpoint (prefix /retrieval)
-    upload.py             /admin/documents* pipeline + /admin/converters, /admin/chunkers (prefix /admin)
     bookmark.py           /bookmarks*, /bookmark-folders*
-    feedback.py           /feedback, /feedback/list, /feedback/stats
+    chat.py               /chat, /chat/v3, /chat/suggest, /chat/stream
+    exam_schedules.py     /admin/exam-schedules* (prefix /admin)
+    feedback.py           /feedback
+    health.py             /health
     lookup.py             /lookup/ctdt/{major_code}, /lookup/regulations, /lookup/calendar, /lookup/compare
-    notification.py       /notifications* user inbox + subscribe/unsubscribe
-    notification_admin.py /admin/notifications, /admin/notifications/broadcast (prefix /admin/notifications)
-    admin_stats.py        /admin/stats/*, /admin/users/{id}/status, /admin/crawler/*, /admin/config* (prefix /admin)
+    metrics.py            /metrics/eval
+    notification.py       /notifications* user inbox + subscribe
+    notification_admin.py /admin/notifications (prefix /admin/notifications)
+    retrieval.py          /retrieval/search diagnostic endpoint (prefix /retrieval)
+    session.py            /session, /session/{id}, /sessions, /sessions/me (prefix /session)
+    upload.py             /admin/documents* pipeline + /admin/converters, /admin/chunkers (prefix /admin)
 ```
 
 Ignore `api/.agent/` if present locally; it is not part of the FastAPI runtime.
@@ -72,19 +72,20 @@ Shutdown stops the scheduler and closes Redis resources when present.
 
 | Router file | Prefix | Public surface |
 | --- | --- | --- |
-| `chat.py` | none | `/chat`, `/chat/v3`, `/api/chat/v3`, `/chat/suggest`, `/chat/stream` |
-| `health.py` | none | `/health`, `/api/admin/reload-validity` |
+| `chat.py` | none | `/chat`, `/chat/v3`, `/chat/suggest`, `/chat/stream` |
+| `exam_schedules.py` | `/admin` | `/admin/exam-schedules*`, `/admin/exam-schedules/summary` |
+| `health.py` | none | `/health` |
 | `session.py` | `/session` | `/session`, `/session/{id}` (GET/DELETE/PATCH), `/sessions`, `/sessions/me` |
-| `metrics.py` | none | `/metrics/usage`, `/metrics/eval` |
+| `metrics.py` | none | `/metrics/eval` |
 | `retrieval.py` | `/retrieval` | `/retrieval/search` |
 | `upload.py` | `/admin` | `/admin/documents*`, `/admin/converters`, `/admin/chunkers` |
 | `bookmark.py` | none | `/bookmarks*`, `/bookmark-folders*` |
-| `feedback.py` | none | `/feedback`, `/feedback/list`, `/feedback/stats` |
+| `feedback.py` | none | `/feedback` |
 | `lookup.py` | `/lookup` | `/lookup/ctdt/{major_code}`, `/lookup/regulations`, `/lookup/calendar`, `/lookup/compare` |
-| `notification.py` | none | `/notifications*` user inbox + subscribe/unsubscribe |
-| `notification_admin.py` | `/admin/notifications` | `POST /admin/notifications`, `POST /admin/notifications/broadcast` |
+| `notification.py` | none | `/notifications*` user inbox + subscribe |
+| `notification_admin.py` | `/admin/notifications` | `POST /admin/notifications` |
 | `admin_stats.py` | `/admin` | `/admin/stats/*`, `/admin/users/{id}/status`, `/admin/crawler/*`, `/admin/config*` |
-| `routers/auth.py` | `/auth` | auth/login/callback/register/refresh/me/logout/admin endpoints |
+| `routers/auth.py` | `/auth` | auth/login/register/refresh/me/logout/admin endpoints |
 
 `create_app()` also defines `GET /` (service banner).
 
@@ -126,7 +127,7 @@ External module boundaries:
 `routes/chat.py` is the main runtime API.
 
 - `POST /chat` (`response_model=ChatResponse`): routes by `mode` — `agent` → `pipeline.query_agent(require_agent=True)`, `rag` → `pipeline.query`, else (`auto`) → `pipeline.query_v3`. Maps via `ChatResponseMapper.to_chat_response`.
-- `POST /chat/v3` and `POST /api/chat/v3`: same mode control, returns the normalized v3 dict (`normalize_v3_result`). When `mode=agent` but the agent is disabled, returns a RAG fallback with `agent_error="Agent is disabled"` — no 503 raised.
+- `POST /chat/v3`: same mode control, returns the normalized v3 dict (`normalize_v3_result`). When `mode=agent` but the agent is disabled, returns a RAG fallback with `agent_error="Agent is disabled"` — no 503 raised.
 - `GET /chat/suggest`: lightweight suggested questions personalized by `cohort`/`major` query params or the authenticated profile.
 - `POST /chat/stream`: SSE streaming via `pipeline.query_stream`.
 
@@ -195,11 +196,11 @@ Admin-only (`require_admin`), prefix `/admin`. Owns the observability dashboard,
 
 ## Notifications
 
-User notification routes (`routes/notification.py`) require a valid access token (`get_current_user`). Inbox: list (paginated, optional `unread_only`), unread-count, mark-read, mark-all-read, delete. Subscribe: `POST /notifications/subscribe` stores an Expo push token + topic list (upsert). Unsubscribe: `POST /notifications/unsubscribe` removes topics or deletes the subscription entirely.
+User notification routes (`routes/notification.py`) require a valid access token (`get_current_user`). Inbox: list (paginated, optional `unread_only`), mark-read, mark-all-read, delete. Subscribe: `POST /notifications/subscribe` stores an Expo push token + topic list (upsert).
 
 `api/services/notification_delivery.py` is the shared delivery boundary for admin/system-created notifications. `broadcast_user_notification` resolves target users (by topic subscription or all users when topics are empty), inserts Mongo notification rows, then calls `send_expo_push_notifications` which batches Expo push messages (`https://exp.host/--/api/v2/push/send`, 100 per batch, 5 s timeout) and prunes `DeviceNotRegistered` tokens via `delete_many` without failing DB creation. Push is controlled by `PUSH_NOTIFICATIONS_ENABLED` env var (default `true`).
 
-Admin notification routes (`routes/notification_admin.py`) require `require_admin` and create topic-scoped or broadcast notifications by delegating to `broadcast_user_notification`.
+Admin notification routes (`routes/notification_admin.py`) require `require_admin` and create topic-scoped notifications by delegating to `broadcast_user_notification`.
 
 ## Session Routes (`routes/session.py`)
 

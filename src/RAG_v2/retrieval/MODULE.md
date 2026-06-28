@@ -1,6 +1,6 @@
 # Module: `retrieval`
 
-Source-verified: 2026-06-12 from every `retrieval/*.py` file (`__init__.py`, `base.py`, `service.py`, `qdrant_store.py`, `elasticsearch_store.py`, `hybrid_search.py`, `multi_collection_search.py`, `metadata_filters.py`, `collection_selector.py`, `query_expander.py`, `hyde.py`, `parent_context.py`, `validity_filter.py`, `reference_resolver.py`, `search_stsv.py`, `index_stsv_to_es.py`, `config.py`), plus routing integration points in `query/router.py`, `query/complexity_router.py`, `query/signals.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, `config/settings.py`, and `tools/tavily_search.py`.
+Source-verified: 2026-06-24 from every `retrieval/*.py` file (`__init__.py`, `base.py`, `service.py`, `qdrant_store.py`, `elasticsearch_store.py`, `exam_schedule_store.py`, `hybrid_search.py`, `multi_collection_search.py`, `metadata_filters.py`, `collection_selector.py`, `query_expander.py`, `hyde.py`, `parent_context.py`, `validity_filter.py`, `reference_resolver.py`, `config.py`), plus routing integration points in `query/router.py`, `query/complexity_router.py`, `query/signals.py`, `pipeline/rag_pipeline.py`, `pipeline/flows.py`, `config/settings.py`, and `tools/tavily_search.py`.
 
 ## Purpose
 
@@ -102,6 +102,7 @@ retrieval/
   service.py                   RetrievalService singleton + _SearchResultCache (TTL/LRU).
   qdrant_store.py              QdrantStore — dual named-vector collection (BGE-M3 + E5), batched search + fusion, CRUD/metadata helpers.
   elasticsearch_store.py       ElasticsearchStore — BM25 keyword + metadata-filter search, CocCoc Vietnamese analyzer, ID resolution, freshness query.
+  exam_schedule_store.py       ExamScheduleStore — specialized Elasticsearch search for exam schedules, formatting results into Markdown tables.
   hybrid_search.py             HybridSearch — per-collection vector/keyword RRF fusion (DEPRECATED in main flow; used by tests/demo).
   multi_collection_search.py   MultiCollectionSearch — parallel global multi-collection search and fusion.
   metadata_filters.py          Per-collection filter extractors, major/cohort/date helpers, comparison subqueries, recency bonus.
@@ -111,8 +112,7 @@ retrieval/
   parent_context.py            ParentContextExpander — attach parent chunk content to child results.
   validity_filter.py           ValidityFilter — drop superseded documents using data/document_lineage.json.
   reference_resolver.py        ReferenceResolver — resolve legal references such as Điều/Khoản.
-  search_stsv.py               Standalone hybrid-search demo (uses HybridSearch directly; COLLECTION hardcoded to "stsv").
-  index_stsv_to_es.py          ES indexing utility (scroll Qdrant → bulk-index to ES); despite the filename, COLLECTION/ES_INDEX default to "quydinh".
+
   config.py                    HyDE fallback config constants (mirrored in config/settings.py; HYDE_ENABLED defaults to False here).
 ```
 
@@ -239,7 +239,7 @@ External module boundaries:
 
 ## HybridSearch (Per-Collection, deprecated in main flow)
 
-`HybridSearch.search()` fuses single-collection vector + keyword results via RRF. **It is not used by the production flow** — `MultiCollectionSearch._fetch_one()` calls `hybrid.qdrant.search()` and `hybrid.es.keyword_search()` directly. `HybridSearch` is retained for unit tests and `search_stsv.py`.
+`HybridSearch.search()` fuses single-collection vector + keyword results via RRF. **It is not used by the production flow** — `MultiCollectionSearch._fetch_one()` calls `hybrid.qdrant.search()` and `hybrid.es.keyword_search()` directly. `HybridSearch` is retained for unit tests.
 
 - `rrf_score(rank, k=60) = 1/(k + rank)`; `fused = vector_weight × rrf(v_rank) + keyword_weight × rrf(k_rank)`; missing component = 0.
 - Optional `hybrid_score_threshold` filter; exclusion terms applied to both lists.
@@ -580,5 +580,5 @@ Tavily is wired through `RetrievalService.tavily_tool` but called from `pipeline
 ```bash
 python -m py_compile retrieval/*.py
 python -m pytest tests/retrieval -q -m "not integration"
-python retrieval/search_stsv.py "câu hỏi của bạn"   # standalone hybrid-search demo
+
 ```

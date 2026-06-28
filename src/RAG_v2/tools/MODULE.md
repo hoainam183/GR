@@ -1,6 +1,6 @@
 # Module: `tools`
 
-Source-verified: 2026-06-12 from `tools/__init__.py`, `tools/tavily_search.py`, `config/settings.py`, `retrieval/service.py`, `agent/tool_adapters.py`, `pipeline/rag_pipeline.py`.
+Source-verified: 2026-06-24 from `tools/__init__.py`, `tools/tavily_search.py`, `config/settings.py`, `retrieval/service.py`, `agent/tool_adapters.py`, `pipeline/rag_pipeline.py`.
 
 ## Purpose
 

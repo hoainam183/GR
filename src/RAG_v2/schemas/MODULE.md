@@ -1,6 +1,6 @@
 # Module: `schemas`
 
-Source-verified: 2026-06-12 from `schemas/__init__.py`, `schemas/chat.py`, `schemas/constants.py`, `schemas/document.py`, `schemas/mobile.py`, `schemas/user.py`.
+Source-verified: 2026-06-24 from `schemas/__init__.py`, `schemas/chat.py`, `schemas/constants.py`, `schemas/document.py`, `schemas/exam_schedule.py`, `schemas/mobile.py`, `schemas/user.py`.
 
 ## Purpose
 
@@ -19,6 +19,7 @@ schemas/
   chat.py           Chat request/response, score/filter/collection trace models, agent trace, health response.
   constants.py      CLARIFY_SENTINEL + RouteMode / PipelineMode / AgentRoute constant classes.
   document.py       Admin upload, document list/detail, chunk review/edit schemas + collection/converter/chunker metadata constants.
+  exam_schedule.py  DTOs for the admin exam-schedule ingestion endpoint and Elasticsearch tool query structure.
   mobile.py         Bookmark, feedback, notification subscribe/unsubscribe, lookup, internal-notification schemas.
   user.py           OAuth + manual auth, profile update, public user, token + admin-create schemas.
 ```
@@ -447,6 +448,57 @@ Response for `POST /auth/login`. No `ConfigDict`.
 | `cohort` | `str` | default `"N/A"` |
 | `major` | `str` | default `"N/A"` |
 | `major_code` | `str` | default `""` |
+
+---
+
+## Exam Schedule Schemas (`exam_schedule.py`)
+
+Consumers: `api/routes/exam_schedules.py` and `tools.elasticsearch.exam_schedule`. Not re-exported from `__init__.py`.
+
+### Models
+
+#### `SkippedRow`
+| Field | Type |
+|-------|------|
+| `row_index` | `int` |
+| `reason` | `str` |
+
+#### `ParseReport`
+| Field | Type | Default |
+|-------|------|---------|
+| `total_rows` | `int` | `0` |
+| `valid_rows` | `int` | `0` |
+| `skipped_rows` | `list[SkippedRow]` | `default_factory=list` |
+
+#### `ExamScheduleUploadResponse`
+| Field | Type |
+|-------|------|
+| `source_file` | `str` |
+| `parsed` | `int` |
+| `skipped` | `int` |
+| `invalid` | `int` |
+| `replaced_existing` | `bool` |
+| `records_indexed` | `int` |
+| `exam_type` | `str \| None` |
+| `report` | `ParseReport` |
+
+#### `ExamScheduleSourceSummary`
+| Field | Type |
+|-------|------|
+| `source_file` | `str` |
+| `row_count` | `int` |
+| `latest_uploaded_at` | `datetime \| None` |
+
+#### `ExamScheduleSummary`
+| Field | Type |
+|-------|------|
+| `total_rows` | `int` |
+| `distinct_subjects` | `int` |
+| `distinct_exam_dates` | `int` |
+| `sources` | `list[ExamScheduleSourceSummary]` |
+
+#### `ExamScheduleQuery`
+Internal tool DTO (not HTTP surface). `model_config = ConfigDict(extra="forbid")`. Optional string fields for structured search: `subject_code`, `subject_name`, `exam_date`, `exam_date_from`, `exam_date_to`, `exam_room`, `group`, `cohort`, `exam_type`. Plus `limit` (int).
 
 ---
 

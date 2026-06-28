@@ -1,6 +1,6 @@
 # Module: `utils`
 
-Source-verified: 2026-06-12 from `utils/__init__.py`, `utils/storage.py`, `utils/tracing.py`, `utils/chunk_indexing.py`, `utils/terminology.py`, `utils/parse_hust_email.py`, `utils/vietnamese_segmenter.py`, `utils/extract_questions.py`, `utils/extract_text.py`.
+Source-verified: 2026-06-24 from `utils/__init__.py`, `utils/storage.py`, `utils/tracing.py`, `utils/chunk_indexing.py`, `utils/terminology.py`, `utils/parse_hust_email.py`, `utils/vietnamese_segmenter.py`, `utils/extract_questions.py`, `utils/extract_text.py`.
 
 ## Purpose
 
