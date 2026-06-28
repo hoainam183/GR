@@ -11,8 +11,10 @@ import { Platform } from 'react-native';
  * - iOS simulator:    `localhost` works directly
  * - Physical device:  replace with your machine's LAN IP
  */
-const envBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
+let baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim()?.replace(/\/$/, '') || 'http://localhost:8000';
 
-export const API_BASE_URL =
-  envBaseUrl?.replace(/\/$/, '') ||
-  (Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'http://localhost:8000');
+if (Platform.OS === 'android' && baseUrl.includes('localhost')) {
+  baseUrl = baseUrl.replace('localhost', '10.0.2.2');
+}
+
+export const API_BASE_URL = baseUrl;
