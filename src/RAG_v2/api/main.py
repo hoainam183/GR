@@ -238,6 +238,7 @@ async def lifespan(app: FastAPI):
                 minute=settings.crawler_schedule_minute,
                 id="auto_crawl_kehoach",
                 replace_existing=True,
+                misfire_grace_time=None,
             )
             scheduler.start()
             logger.info(

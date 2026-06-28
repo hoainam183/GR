@@ -59,7 +59,7 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     if (!error.response) {
       console.error('[API] Network error - check EXPO_PUBLIC_API_BASE_URL and backend is running');
-      console.error('[API] URL attempted:', error.config?.baseURL, error.config?.url);
+      console.error(`[API] URL attempted: ${error.config?.baseURL || ''}${error.config?.url || ''}`);
     }
 
     const original = error.config as RetryConfig | undefined;
