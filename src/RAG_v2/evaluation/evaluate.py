@@ -745,7 +745,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--inter-question-sleep-s",
         type=float,
-        default=15.0,  # Gemini free tier RPM = 15. Without reflection: ~3 LLM calls -> ~12-15s sleep
+        default=0.0,  # Gemini free tier RPM = 15. Without reflection: ~3 LLM calls -> ~12-15s sleep
         help="Seconds to sleep between questions to respect LLM rate limits.",
     )
     parser.add_argument(

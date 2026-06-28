@@ -1,0 +1,149 @@
+{
+  "total_queries": 30,
+  "avg_latency_ms": 36403.9,
+  "overall_metrics": {
+    "hit@3": 0.8,
+    "precision@3": 0.2889,
+    "recall@3": 0.7833,
+    "mrr@3": 0.6444,
+    "ndcg@3": 0.6714,
+    "hit@5": 0.9,
+    "precision@5": 0.1933,
+    "recall@5": 0.8667,
+    "mrr@5": 0.6678,
+    "ndcg@5": 0.7075,
+    "hit@7": 0.9,
+    "precision@7": 0.1429,
+    "recall@7": 0.8833,
+    "mrr@7": 0.6678,
+    "ndcg@7": 0.7143
+  },
+  "relevance_rate": 0.8,
+  "faithfulness_rate": 0.8667,
+  "completeness_rate": 0.7667,
+  "hallucination_rate": 0.1333,
+  "hallucination_count": 4,
+  "ref_correct_rate": 0.5333,
+  "ref_partial_rate": 0.0,
+  "ref_incorrect_rate": 0.4667,
+  "by_question_type": {
+    "multi_hop": {
+      "count": 8,
+      "metrics": {
+        "hit@3": 0.75,
+        "precision@3": 0.3333,
+        "recall@3": 0.6875,
+        "mrr@3": 0.6042,
+        "ndcg@3": 0.5908,
+        "hit@5": 0.875,
+        "precision@5": 0.225,
+        "recall@5": 0.75,
+        "mrr@5": 0.6354,
+        "ndcg@5": 0.6238,
+        "hit@7": 0.875,
+        "precision@7": 0.1786,
+        "recall@7": 0.8125,
+        "mrr@7": 0.6354,
+        "ndcg@7": 0.6493
+      },
+      "faithfulness_rate": 0.75,
+      "ref_correct_rate": 0.25,
+      "avg_latency_ms": 45737.8
+    },
+    "simple": {
+      "count": 22,
+      "metrics": {
+        "hit@3": 0.8182,
+        "precision@3": 0.2727,
+        "recall@3": 0.8182,
+        "mrr@3": 0.6591,
+        "ndcg@3": 0.7007,
+        "hit@5": 0.9091,
+        "precision@5": 0.1818,
+        "recall@5": 0.9091,
+        "mrr@5": 0.6795,
+        "ndcg@5": 0.7379,
+        "hit@7": 0.9091,
+        "precision@7": 0.1299,
+        "recall@7": 0.9091,
+        "mrr@7": 0.6795,
+        "ndcg@7": 0.7379
+      },
+      "faithfulness_rate": 0.9091,
+      "ref_correct_rate": 0.6364,
+      "avg_latency_ms": 33009.7
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "count": 23,
+      "metrics": {
+        "hit@3": 0.7826,
+        "precision@3": 0.2608,
+        "recall@3": 0.7826,
+        "mrr@3": 0.6304,
+        "ndcg@3": 0.6703,
+        "hit@5": 0.8696,
+        "precision@5": 0.1739,
+        "recall@5": 0.8696,
+        "mrr@5": 0.65,
+        "ndcg@5": 0.7058,
+        "hit@7": 0.8696,
+        "precision@7": 0.1243,
+        "recall@7": 0.8696,
+        "mrr@7": 0.65,
+        "ndcg@7": 0.7058
+      },
+      "faithfulness_rate": 0.913,
+      "ref_correct_rate": 0.6087,
+      "avg_latency_ms": 33464.7
+    },
+    "hard": {
+      "count": 1,
+      "metrics": {
+        "hit@3": 0.0,
+        "precision@3": 0.0,
+        "recall@3": 0.0,
+        "mrr@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 1.0,
+        "precision@5": 0.2,
+        "recall@5": 0.5,
+        "mrr@5": 0.25,
+        "ndcg@5": 0.2641,
+        "hit@7": 1.0,
+        "precision@7": 0.2857,
+        "recall@7": 1.0,
+        "mrr@7": 0.25,
+        "ndcg@7": 0.4685
+      },
+      "faithfulness_rate": 1.0,
+      "ref_correct_rate": 0.0,
+      "avg_latency_ms": 47374.2
+    },
+    "medium": {
+      "count": 6,
+      "metrics": {
+        "hit@3": 1.0,
+        "precision@3": 0.4444,
+        "recall@3": 0.9167,
+        "mrr@3": 0.8056,
+        "ndcg@3": 0.7877,
+        "hit@5": 1.0,
+        "precision@5": 0.2667,
+        "recall@5": 0.9167,
+        "mrr@5": 0.8056,
+        "ndcg@5": 0.7877,
+        "hit@7": 1.0,
+        "precision@7": 0.1905,
+        "recall@7": 0.9167,
+        "mrr@7": 0.8056,
+        "ndcg@7": 0.7877
+      },
+      "faithfulness_rate": 0.6667,
+      "ref_correct_rate": 0.3333,
+      "avg_latency_ms": 45842.4
+    }
+  },
+  "dataset": "renluyen_rag_dataset.json"
+}
