@@ -335,6 +335,16 @@ def build_runtime(
 
     if provider:
         settings.llm_provider = provider
+        if not model:
+            if provider == "deepseek":
+                settings.chat_model = "deepseek-v4-flash"
+            elif provider == "gemini":
+                settings.chat_model = "gemini-3.1-flash-lite"
+            elif provider == "openai":
+                settings.chat_model = "gpt-4o-mini"
+            elif provider == "lm_studio":
+                settings.chat_model = "local-model"
+
     if model:
         settings.chat_model = model
 
