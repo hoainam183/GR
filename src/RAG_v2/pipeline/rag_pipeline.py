@@ -1016,6 +1016,8 @@ class RAGPipeline:
         top_k: Optional[int] = None,
         session_id: Optional[str] = None,
         user_context: Optional[Dict[str, Any]] = None,
+        *,
+        skip_reflection: bool = False,
     ) -> Dict[str, Any]:
         """Smart entrypoint for Week 3 integration.
 
@@ -1029,12 +1031,17 @@ class RAGPipeline:
         runtime = self._llm_runtime_snapshot()
 
         # Step 1: Reflection FIRST — so routing sees the expanded query
-        reflected_question, ref_result, reflection_ms = self._run_reflection(
-            question,
-            history,
-            user_context,
-            runtime,
-        )
+        if skip_reflection:
+            reflected_question = question
+            ref_result = None
+            reflection_ms = 0.0
+        else:
+            reflected_question, ref_result, reflection_ms = self._run_reflection(
+                question,
+                history,
+                user_context,
+                runtime,
+            )
 
         # Step 2: Tiered complexity decision on the REFLECTED query
         # (Tier 0 regex → Tier 1 ML multi-label → Tier 2 LLM on borderline).

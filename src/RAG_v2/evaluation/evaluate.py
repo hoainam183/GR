@@ -447,13 +447,14 @@ def evaluate_item(
 
     t_start = time.perf_counter()
     try:
-        # Identical call to api/routes/chat.py /chat/v3.
+        # Evaluate full pipeline (routing) but skip reflection to save LLMs calls
         result = pipeline.query_v3(
             question=question,
             history=None,
             top_k=top_k,
             session_id=None,
             user_context=None,
+            skip_reflection=True,
         )
     except Exception as exc:  # noqa: BLE001 — one bad item must not abort the run
         logger.error("Pipeline crashed on %s: %s", base["id"], exc, exc_info=True)
@@ -720,7 +721,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--inter-question-sleep-s",
         type=float,
-        default=16.0,  # Gemini free tier RPM = 15 (1 req / 4s). Each query takes ~4 LLM calls -> 16s sleep
+        default=15.0,  # Gemini free tier RPM = 15. Without reflection: ~3 LLM calls -> ~12-15s sleep
         help="Seconds to sleep between questions to respect LLM rate limits.",
     )
     parser.add_argument(
