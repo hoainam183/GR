@@ -1033,7 +1033,7 @@ class RAGPipeline:
         # Step 1: Reflection FIRST — so routing sees the expanded query
         if skip_reflection:
             reflected_question = question
-            ref_result = None
+            ref_result = {"rewritten": question, "entities": {}}
             reflection_ms = 0.0
         else:
             reflected_question, ref_result, reflection_ms = self._run_reflection(
