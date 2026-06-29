@@ -549,8 +549,8 @@ def main() -> None:
     parser.add_argument(
         "--inter-question-sleep-s",
         type=float,
-        default=4.5,
-        help="Seconds to sleep between questions (rate limit protection).",
+        default=8.0,
+        help="Seconds to sleep between questions (safe for Gemini RPM=15 limit).",
     )
     parser.add_argument(
         "--dry-run",
