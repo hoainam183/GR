@@ -1,51 +1,51 @@
 # RAG Evaluation Report (production config)
 
-- **Date**: 2026-06-25 18:25:56
+- **Date**: 2026-06-30 11:31:50
 - **Total queries**: `100`
-- **Avg latency**: `20166.6 ms`
+- **Avg latency**: `20328.8 ms`
 
 ## E2E generation quality
 
 | Metric | Score |
 | :--- | :---: |
-| Groundedness (Faithfulness) | `100.00%` |
-| Hallucination rate | `0.00%` (0) |
+| Groundedness (Faithfulness) | `98.00%` |
+| Hallucination rate | `2.00%` (2) |
 | Answer relevance | `100.00%` |
-| Completeness | `100.00%` |
-| Correctness vs gold (correct) | `61.00%` |
-| Correctness vs gold (partial) | `5.00%` |
-| Correctness vs gold (incorrect) | `34.00%` |
+| Completeness | `98.00%` |
+| Correctness vs gold (correct) | `77.00%` |
+| Correctness vs gold (partial) | `7.00%` |
+| Correctness vs gold (incorrect) | `16.00%` |
 
 ## Retrieval metrics (averaged)
 
 | Metric | Score |
 | :--- | :---: |
-| hit@3 | `53.00%` |
-| precision@3 | `19.00%` |
-| recall@3 | `51.50%` |
-| mrr@3 | `46.67%` |
-| ndcg@3 | `47.29%` |
-| hit@5 | `55.00%` |
-| precision@5 | `12.20%` |
-| recall@5 | `54.50%` |
-| mrr@5 | `47.17%` |
-| ndcg@5 | `48.68%` |
-| hit@7 | `55.00%` |
-| precision@7 | `8.86%` |
-| recall@7 | `55.00%` |
-| mrr@7 | `47.17%` |
-| ndcg@7 | `48.90%` |
+| hit@3 | `68.00%` |
+| precision@3 | `24.00%` |
+| recall@3 | `66.50%` |
+| mrr@3 | `59.67%` |
+| ndcg@3 | `60.81%` |
+| hit@5 | `71.00%` |
+| precision@5 | `15.40%` |
+| recall@5 | `70.50%` |
+| mrr@5 | `60.37%` |
+| ndcg@5 | `62.59%` |
+| hit@7 | `71.00%` |
+| precision@7 | `11.15%` |
+| recall@7 | `71.00%` |
+| mrr@7 | `60.37%` |
+| ndcg@7 | `62.81%` |
 
 ## Breakdown by question type
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| multi_hop | 25 | `48.0%` | `46.0%` | `42.6%` | `100.0%` | `60.0%` | `14332.6 ms` |
-| simple | 75 | `57.3%` | `57.3%` | `50.7%` | `100.0%` | `61.3%` | `22111.3 ms` |
+| multi_hop | 25 | `52.0%` | `50.0%` | `46.6%` | `100.0%` | `64.0%` | `14339.9 ms` |
+| simple | 75 | `77.3%` | `77.3%` | `67.9%` | `97.3%` | `81.3%` | `22325.0 ms` |
 
 ## Breakdown by difficulty
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| easy | 75 | `57.3%` | `57.3%` | `50.7%` | `100.0%` | `61.3%` | `22111.3 ms` |
-| medium | 25 | `48.0%` | `46.0%` | `42.6%` | `100.0%` | `60.0%` | `14332.6 ms` |
+| easy | 75 | `77.3%` | `77.3%` | `67.9%` | `97.3%` | `81.3%` | `22325.0 ms` |
+| medium | 25 | `52.0%` | `50.0%` | `46.6%` | `100.0%` | `64.0%` | `14339.9 ms` |

@@ -1,8 +1,8 @@
 # RAG Evaluation Report (production config)
 
-- **Date**: 2026-06-24 20:48:23
+- **Date**: 2026-06-30 11:12:13
 - **Total queries**: `30`
-- **Avg latency**: `14958.6 ms`
+- **Avg latency**: `15452.8 ms`
 
 ## E2E generation quality
 
@@ -12,9 +12,9 @@
 | Hallucination rate | `13.33%` (4) |
 | Answer relevance | `100.00%` |
 | Completeness | `83.33%` |
-| Correctness vs gold (correct) | `70.00%` |
+| Correctness vs gold (correct) | `73.33%` |
 | Correctness vs gold (partial) | `3.33%` |
-| Correctness vs gold (incorrect) | `26.67%` |
+| Correctness vs gold (incorrect) | `23.33%` |
 
 ## Retrieval metrics (averaged)
 
@@ -25,27 +25,27 @@
 | recall@3 | `55.00%` |
 | mrr@3 | `47.22%` |
 | ndcg@3 | `48.09%` |
-| hit@5 | `60.00%` |
-| precision@5 | `13.33%` |
-| recall@5 | `58.33%` |
-| mrr@5 | `48.06%` |
-| ndcg@5 | `49.52%` |
-| hit@7 | `66.67%` |
-| precision@7 | `10.48%` |
-| recall@7 | `65.00%` |
-| mrr@7 | `49.09%` |
-| ndcg@7 | `51.82%` |
+| hit@5 | `63.33%` |
+| precision@5 | `14.00%` |
+| recall@5 | `61.67%` |
+| mrr@5 | `48.89%` |
+| ndcg@5 | `50.96%` |
+| hit@7 | `70.00%` |
+| precision@7 | `10.95%` |
+| recall@7 | `68.33%` |
+| mrr@7 | `49.92%` |
+| ndcg@7 | `53.25%` |
 
 ## Breakdown by question type
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | multi_hop | 8 | `37.5%` | `31.2%` | `31.7%` | `62.5%` | `12.5%` | `16742.4 ms` |
-| simple | 22 | `68.2%` | `68.2%` | `56.0%` | `90.9%` | `90.9%` | `14309.9 ms` |
+| simple | 22 | `72.7%` | `72.7%` | `58.0%` | `90.9%` | `95.5%` | `14983.8 ms` |
 
 ## Breakdown by difficulty
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| easy | 22 | `68.2%` | `68.2%` | `56.0%` | `90.9%` | `90.9%` | `14309.9 ms` |
+| easy | 22 | `72.7%` | `72.7%` | `58.0%` | `90.9%` | `95.5%` | `14983.8 ms` |
 | medium | 8 | `37.5%` | `31.2%` | `31.7%` | `62.5%` | `12.5%` | `16742.4 ms` |

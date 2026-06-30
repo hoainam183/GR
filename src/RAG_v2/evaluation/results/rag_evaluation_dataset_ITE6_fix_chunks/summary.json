@@ -1,31 +1,31 @@
 {
   "total_queries": 30,
-  "avg_latency_ms": 11366.3,
+  "avg_latency_ms": 12952.3,
   "overall_metrics": {
-    "hit@3": 0.9,
-    "precision@3": 0.3444,
-    "recall@3": 0.8333,
-    "mrr@3": 0.8667,
-    "ndcg@3": 0.8205,
-    "hit@5": 0.9,
-    "precision@5": 0.2067,
-    "recall@5": 0.8333,
-    "mrr@5": 0.8667,
-    "ndcg@5": 0.8284,
-    "hit@7": 0.9,
-    "precision@7": 0.1477,
-    "recall@7": 0.8333,
-    "mrr@7": 0.8667,
-    "ndcg@7": 0.8421
+    "hit@3": 0.9333,
+    "precision@3": 0.3555,
+    "recall@3": 0.8667,
+    "mrr@3": 0.9,
+    "ndcg@3": 0.8539,
+    "hit@5": 0.9333,
+    "precision@5": 0.2133,
+    "recall@5": 0.8667,
+    "mrr@5": 0.9,
+    "ndcg@5": 0.8618,
+    "hit@7": 0.9333,
+    "precision@7": 0.1524,
+    "recall@7": 0.8667,
+    "mrr@7": 0.9,
+    "ndcg@7": 0.8754
   },
   "relevance_rate": 1.0,
-  "faithfulness_rate": 0.9667,
-  "completeness_rate": 0.9667,
-  "hallucination_rate": 0.0333,
-  "hallucination_count": 1,
-  "ref_correct_rate": 0.9,
+  "faithfulness_rate": 0.9333,
+  "completeness_rate": 0.9333,
+  "hallucination_rate": 0.0667,
+  "hallucination_count": 2,
+  "ref_correct_rate": 0.9333,
   "ref_partial_rate": 0.0667,
-  "ref_incorrect_rate": 0.0333,
+  "ref_incorrect_rate": 0.0,
   "by_question_type": {
     "multi_hop": {
       "count": 8,
@@ -46,57 +46,57 @@
         "mrr@7": 0.9375,
         "ndcg@7": 0.8289
       },
-      "faithfulness_rate": 1.0,
+      "faithfulness_rate": 0.875,
       "ref_correct_rate": 0.875,
-      "avg_latency_ms": 11949.0
+      "avg_latency_ms": 13787.3
     },
     "simple": {
       "count": 22,
       "metrics": {
-        "hit@3": 0.8636,
-        "precision@3": 0.2879,
-        "recall@3": 0.8636,
-        "mrr@3": 0.8409,
-        "ndcg@3": 0.8469,
-        "hit@5": 0.8636,
-        "precision@5": 0.1727,
-        "recall@5": 0.8636,
-        "mrr@5": 0.8409,
-        "ndcg@5": 0.8469,
-        "hit@7": 0.8636,
-        "precision@7": 0.1234,
-        "recall@7": 0.8636,
-        "mrr@7": 0.8409,
-        "ndcg@7": 0.8469
+        "hit@3": 0.9091,
+        "precision@3": 0.303,
+        "recall@3": 0.9091,
+        "mrr@3": 0.8864,
+        "ndcg@3": 0.8923,
+        "hit@5": 0.9091,
+        "precision@5": 0.1818,
+        "recall@5": 0.9091,
+        "mrr@5": 0.8864,
+        "ndcg@5": 0.8923,
+        "hit@7": 0.9091,
+        "precision@7": 0.1299,
+        "recall@7": 0.9091,
+        "mrr@7": 0.8864,
+        "ndcg@7": 0.8923
       },
       "faithfulness_rate": 0.9545,
-      "ref_correct_rate": 0.9091,
-      "avg_latency_ms": 11154.5
+      "ref_correct_rate": 0.9545,
+      "avg_latency_ms": 12648.6
     }
   },
   "by_difficulty": {
     "easy": {
       "count": 22,
       "metrics": {
-        "hit@3": 0.8636,
-        "precision@3": 0.2879,
-        "recall@3": 0.8636,
-        "mrr@3": 0.8409,
-        "ndcg@3": 0.8469,
-        "hit@5": 0.8636,
-        "precision@5": 0.1727,
-        "recall@5": 0.8636,
-        "mrr@5": 0.8409,
-        "ndcg@5": 0.8469,
-        "hit@7": 0.8636,
-        "precision@7": 0.1234,
-        "recall@7": 0.8636,
-        "mrr@7": 0.8409,
-        "ndcg@7": 0.8469
+        "hit@3": 0.9091,
+        "precision@3": 0.303,
+        "recall@3": 0.9091,
+        "mrr@3": 0.8864,
+        "ndcg@3": 0.8923,
+        "hit@5": 0.9091,
+        "precision@5": 0.1818,
+        "recall@5": 0.9091,
+        "mrr@5": 0.8864,
+        "ndcg@5": 0.8923,
+        "hit@7": 0.9091,
+        "precision@7": 0.1299,
+        "recall@7": 0.9091,
+        "mrr@7": 0.8864,
+        "ndcg@7": 0.8923
       },
       "faithfulness_rate": 0.9545,
-      "ref_correct_rate": 0.9091,
-      "avg_latency_ms": 11154.5
+      "ref_correct_rate": 0.9545,
+      "avg_latency_ms": 12648.6
     },
     "hard": {
       "count": 2,
@@ -140,10 +140,10 @@
         "mrr@7": 0.9167,
         "ndcg@7": 0.7761
       },
-      "faithfulness_rate": 1.0,
+      "faithfulness_rate": 0.8333,
       "ref_correct_rate": 0.8333,
-      "avg_latency_ms": 11655.1
+      "avg_latency_ms": 14106.2
     }
   },
-  "dataset": "rag_evaluation_dataset_ITE6_fix_chunks.json"
+  "dataset": "rag_evaluation_dataset_ITE6_fix_chunks"
 }

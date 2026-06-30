@@ -1,6 +1,6 @@
 {
   "total_queries": 30,
-  "avg_latency_ms": 11782.4,
+  "avg_latency_ms": 12940.5,
   "overall_metrics": {
     "hit@3": 0.8667,
     "precision@3": 0.3111,
@@ -71,7 +71,7 @@
       },
       "faithfulness_rate": 1.0,
       "ref_correct_rate": 0.8636,
-      "avg_latency_ms": 10528.4
+      "avg_latency_ms": 12107.7
     }
   },
   "by_difficulty": {
@@ -96,7 +96,7 @@
       },
       "faithfulness_rate": 1.0,
       "ref_correct_rate": 0.8261,
-      "avg_latency_ms": 11111.4
+      "avg_latency_ms": 12622.0
     },
     "hard": {
       "count": 1,
@@ -145,5 +145,5 @@
       "avg_latency_ms": 14621.8
     }
   },
-  "dataset": "renluyen_rag_dataset.json"
+  "dataset": "renluyen_rag_dataset"
 }

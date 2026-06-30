@@ -1,6 +1,6 @@
 {
   "total_queries": 30,
-  "avg_latency_ms": 19538.3,
+  "avg_latency_ms": 20336.0,
   "overall_metrics": {
     "hit@3": 0.9,
     "precision@3": 0.3444,
@@ -71,7 +71,7 @@
       },
       "faithfulness_rate": 1.0,
       "ref_correct_rate": 0.9091,
-      "avg_latency_ms": 22765.5
+      "avg_latency_ms": 23853.3
     }
   },
   "by_difficulty": {
@@ -96,7 +96,7 @@
       },
       "faithfulness_rate": 1.0,
       "ref_correct_rate": 0.9,
-      "avg_latency_ms": 23684.5
+      "avg_latency_ms": 24881.1
     },
     "hard": {
       "count": 1,
@@ -145,5 +145,5 @@
       "avg_latency_ms": 11526.2
     }
   },
-  "dataset": "Khung-DGRL-2020-2021_rag_eval_dataset.json"
+  "dataset": "Khung-DGRL-2020-2021_rag_eval_dataset"
 }

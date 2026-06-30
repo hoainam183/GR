@@ -1,6 +1,6 @@
 {
   "total_queries": 30,
-  "avg_latency_ms": 13465.5,
+  "avg_latency_ms": 15758.4,
   "overall_metrics": {
     "hit@3": 0.6,
     "precision@3": 0.2,
@@ -18,14 +18,14 @@
     "mrr@7": 0.5344,
     "ndcg@7": 0.5156
   },
-  "relevance_rate": 1.0,
+  "relevance_rate": 0.9333,
   "faithfulness_rate": 0.7333,
-  "completeness_rate": 0.8667,
-  "hallucination_rate": 0.2,
-  "hallucination_count": 6,
-  "ref_correct_rate": 0.7,
+  "completeness_rate": 0.8,
+  "hallucination_rate": 0.2333,
+  "hallucination_count": 7,
+  "ref_correct_rate": 0.7667,
   "ref_partial_rate": 0.1,
-  "ref_incorrect_rate": 0.2,
+  "ref_incorrect_rate": 0.1333,
   "by_question_type": {
     "multi_hop": {
       "count": 8,
@@ -46,9 +46,9 @@
         "mrr@7": 0.4,
         "ndcg@7": 0.2596
       },
-      "faithfulness_rate": 0.5,
-      "ref_correct_rate": 0.625,
-      "avg_latency_ms": 15930.7
+      "faithfulness_rate": 0.625,
+      "ref_correct_rate": 0.75,
+      "avg_latency_ms": 19163.6
     },
     "simple": {
       "count": 22,
@@ -69,9 +69,9 @@
         "mrr@7": 0.5833,
         "ndcg@7": 0.6088
       },
-      "faithfulness_rate": 0.8182,
-      "ref_correct_rate": 0.7273,
-      "avg_latency_ms": 12569.0
+      "faithfulness_rate": 0.7727,
+      "ref_correct_rate": 0.7727,
+      "avg_latency_ms": 14520.2
     }
   },
   "by_difficulty": {
@@ -94,9 +94,9 @@
         "mrr@7": 0.5833,
         "ndcg@7": 0.6088
       },
-      "faithfulness_rate": 0.8182,
-      "ref_correct_rate": 0.7273,
-      "avg_latency_ms": 12569.0
+      "faithfulness_rate": 0.7727,
+      "ref_correct_rate": 0.7727,
+      "avg_latency_ms": 14520.2
     },
     "medium": {
       "count": 8,
@@ -117,10 +117,10 @@
         "mrr@7": 0.4,
         "ndcg@7": 0.2596
       },
-      "faithfulness_rate": 0.5,
-      "ref_correct_rate": 0.625,
-      "avg_latency_ms": 15930.7
+      "faithfulness_rate": 0.625,
+      "ref_correct_rate": 0.75,
+      "avg_latency_ms": 19163.6
     }
   },
-  "dataset": "rag_evaluation_dataset_ELITECH.json"
+  "dataset": "rag_evaluation_dataset_ELITECH"
 }

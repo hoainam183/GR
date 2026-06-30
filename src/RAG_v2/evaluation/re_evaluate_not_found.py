@@ -139,13 +139,13 @@ def main():
     parser.add_argument(
         "--not-found-csv", 
         type=Path, 
-        default=PROJECT_ROOT / "evaluation" / "result_RRF" / "not_found_queries.csv",
+        default=PROJECT_ROOT / "evaluation" / "results" / "not_found_queries.csv",
         help="Path to the CSV file containing 'not found' queries."
     )
     parser.add_argument(
         "--base-result-dir", 
         type=Path, 
-        default=PROJECT_ROOT / "evaluation" / "result_RRF",
+        default=PROJECT_ROOT / "evaluation" / "results",
         help="Base directory where the dataset results (query_results.csv, report.md) are stored."
     )
     parser.add_argument(

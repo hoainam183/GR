@@ -1,31 +1,31 @@
 {
   "total_queries": 30,
-  "avg_latency_ms": 21179.5,
+  "avg_latency_ms": 21216.0,
   "overall_metrics": {
     "hit@3": 0.5667,
     "precision@3": 0.2111,
     "recall@3": 0.55,
     "mrr@3": 0.4722,
     "ndcg@3": 0.4809,
-    "hit@5": 0.6,
-    "precision@5": 0.1333,
-    "recall@5": 0.5833,
-    "mrr@5": 0.4806,
-    "ndcg@5": 0.4952,
-    "hit@7": 0.6667,
-    "precision@7": 0.1048,
-    "recall@7": 0.65,
-    "mrr@7": 0.4909,
-    "ndcg@7": 0.5182
+    "hit@5": 0.6333,
+    "precision@5": 0.14,
+    "recall@5": 0.6167,
+    "mrr@5": 0.4889,
+    "ndcg@5": 0.5096,
+    "hit@7": 0.7,
+    "precision@7": 0.1095,
+    "recall@7": 0.6833,
+    "mrr@7": 0.4992,
+    "ndcg@7": 0.5325
   },
-  "relevance_rate": 0.9667,
+  "relevance_rate": 1.0,
   "faithfulness_rate": 0.9,
   "completeness_rate": 0.9,
   "hallucination_rate": 0.0333,
   "hallucination_count": 1,
-  "ref_correct_rate": 0.6,
+  "ref_correct_rate": 0.6333,
   "ref_partial_rate": 0.1333,
-  "ref_incorrect_rate": 0.2667,
+  "ref_incorrect_rate": 0.2333,
   "by_question_type": {
     "multi_hop": {
       "count": 8,
@@ -58,20 +58,20 @@
         "recall@3": 0.6364,
         "mrr@3": 0.5076,
         "ndcg@3": 0.5406,
-        "hit@5": 0.6818,
-        "precision@5": 0.1364,
-        "recall@5": 0.6818,
-        "mrr@5": 0.5189,
-        "ndcg@5": 0.5602,
-        "hit@7": 0.7727,
-        "precision@7": 0.1104,
-        "recall@7": 0.7727,
-        "mrr@7": 0.533,
-        "ndcg@7": 0.5915
+        "hit@5": 0.7273,
+        "precision@5": 0.1455,
+        "recall@5": 0.7273,
+        "mrr@5": 0.5303,
+        "ndcg@5": 0.5797,
+        "hit@7": 0.8182,
+        "precision@7": 0.1169,
+        "recall@7": 0.8182,
+        "mrr@7": 0.5444,
+        "ndcg@7": 0.6111
       },
       "faithfulness_rate": 0.9545,
-      "ref_correct_rate": 0.7727,
-      "avg_latency_ms": 21693.2
+      "ref_correct_rate": 0.8182,
+      "avg_latency_ms": 21743.0
     }
   },
   "by_difficulty": {
@@ -83,20 +83,20 @@
         "recall@3": 0.6364,
         "mrr@3": 0.5076,
         "ndcg@3": 0.5406,
-        "hit@5": 0.6818,
-        "precision@5": 0.1364,
-        "recall@5": 0.6818,
-        "mrr@5": 0.5189,
-        "ndcg@5": 0.5602,
-        "hit@7": 0.7727,
-        "precision@7": 0.1104,
-        "recall@7": 0.7727,
-        "mrr@7": 0.533,
-        "ndcg@7": 0.5915
+        "hit@5": 0.7273,
+        "precision@5": 0.1455,
+        "recall@5": 0.7273,
+        "mrr@5": 0.5303,
+        "ndcg@5": 0.5797,
+        "hit@7": 0.8182,
+        "precision@7": 0.1169,
+        "recall@7": 0.8182,
+        "mrr@7": 0.5444,
+        "ndcg@7": 0.6111
       },
       "faithfulness_rate": 0.9545,
-      "ref_correct_rate": 0.7727,
-      "avg_latency_ms": 21693.2
+      "ref_correct_rate": 0.8182,
+      "avg_latency_ms": 21743.0
     },
     "medium": {
       "count": 8,
@@ -122,5 +122,5 @@
       "avg_latency_ms": 19766.8
     }
   },
-  "dataset": "06_Quy_dinh_ngoai_ngu_chunks.json"
+  "dataset": "06_Quy_dinh_ngoai_ngu_chunks"
 }

@@ -1,6 +1,6 @@
 {
   "total_queries": 30,
-  "avg_latency_ms": 13366.5,
+  "avg_latency_ms": 14747.2,
   "overall_metrics": {
     "hit@3": 0.5333,
     "precision@3": 0.1889,
@@ -48,7 +48,7 @@
       },
       "faithfulness_rate": 0.75,
       "ref_correct_rate": 0.625,
-      "avg_latency_ms": 14896.3
+      "avg_latency_ms": 18176.2
     },
     "simple": {
       "count": 22,
@@ -71,7 +71,7 @@
       },
       "faithfulness_rate": 0.6818,
       "ref_correct_rate": 0.7273,
-      "avg_latency_ms": 12810.2
+      "avg_latency_ms": 13500.2
     }
   },
   "by_difficulty": {
@@ -96,7 +96,7 @@
       },
       "faithfulness_rate": 0.6818,
       "ref_correct_rate": 0.7273,
-      "avg_latency_ms": 12810.2
+      "avg_latency_ms": 13500.2
     },
     "medium": {
       "count": 8,
@@ -119,8 +119,8 @@
       },
       "faithfulness_rate": 0.75,
       "ref_correct_rate": 0.625,
-      "avg_latency_ms": 14896.3
+      "avg_latency_ms": 18176.2
     }
   },
-  "dataset": "rag_evaluation_dataset_k63_k64.json"
+  "dataset": "rag_evaluation_dataset_k63_k64"
 }

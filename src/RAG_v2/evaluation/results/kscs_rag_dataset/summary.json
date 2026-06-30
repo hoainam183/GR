@@ -1,6 +1,6 @@
 {
   "total_queries": 30,
-  "avg_latency_ms": 20160.3,
+  "avg_latency_ms": 19629.5,
   "overall_metrics": {
     "hit@3": 0.8,
     "precision@3": 0.2778,
@@ -71,7 +71,7 @@
       },
       "faithfulness_rate": 1.0,
       "ref_correct_rate": 0.9091,
-      "avg_latency_ms": 19601.2
+      "avg_latency_ms": 18877.4
     }
   },
   "by_difficulty": {
@@ -96,7 +96,7 @@
       },
       "faithfulness_rate": 1.0,
       "ref_correct_rate": 0.9048,
-      "avg_latency_ms": 18771.4
+      "avg_latency_ms": 18013.2
     },
     "medium": {
       "count": 9,
@@ -122,5 +122,5 @@
       "avg_latency_ms": 23401.1
     }
   },
-  "dataset": "kscs_rag_dataset.json"
+  "dataset": "kscs_rag_dataset"
 }
