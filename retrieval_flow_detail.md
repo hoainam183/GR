@@ -1,92 +1,156 @@
-# KIẾN TRÚC LUỒNG TRUY XUẤT THÔNG TIN (QUERY RETRIEVAL FLOW) - RAG V2
+# KIẾN TRÚC LUỒNG TRUY XUẤT THÔNG TIN (QUERY RETRIEVAL FLOW) — RAG V2
 
-Tài liệu này mô tả chi tiết, đầy đủ và trực quan nhất toàn bộ hành trình xử lý của một truy vấn (query) từ khi người dùng nhập vào hệ thống cho tới khi kết xuất dữ liệu ngữ cảnh (Context) hoàn chỉnh để đưa vào mô hình ngôn ngữ lớn (LLM) sinh câu trả lời.
+Tài liệu này mô tả chi tiết, đầy đủ và chính xác toàn bộ hành trình xử lý của một truy vấn (query) từ khi người dùng nhập vào hệ thống (Frontend) cho tới khi LLM sinh câu trả lời và trả về cho người dùng qua SSE streaming.
+
+> **Lưu ý:** Tài liệu này phản ánh chính xác code hiện tại tại thời điểm cập nhật. Mọi tham số, hàm, điều kiện rẽ nhánh đều trích từ source code thực tế.
 
 ---
 
-## 1. TỔNG QUAN LUỒNG ĐI CỦA TRUY VẤN (END-TO-END RAG FLOW)
+## 0. TỔNG QUAN KIẾN TRÚC FRONTEND → BACKEND
 
-Khi người dùng gửi một câu hỏi, hệ thống sẽ đưa nó qua một chuỗi các bước xử lý nối tiếp được phân chia làm 4 giai đoạn lớn: **Tiền xử lý & Định tuyến**, **Lập bộ lọc & Tìm kiếm song song (Vector + BM25)**, **Hợp nhất điểm số (Fusion)**, và **Hậu xử lý & Tối ưu ngữ cảnh**.
+### Frontend (React/Vite)
+- **Stack**: React + Vite + TypeScript, giao tiếp qua `VITE_API_URL` (mặc định `http://localhost:8000`).
+- **Primary Endpoint**: `POST /chat/stream` — SSE streaming (dùng cho giao diện chat chính).
+- **Fallback Endpoint**: `POST /chat/v3` — non-streaming (dùng cho `sendMessageV3`).
+- **Request Schema** (`ChatRequest`):
+  ```json
+  {
+    "question": "string (1-4096 chars)",
+    "mode": "auto | rag | agent",
+    "top_k": 7,
+    "history": [{"role": "user|assistant", "content": "..."}],
+    "session_id": "optional",
+    "user_context": {"student_id", "cohort", "major", "major_code", "full_name"},
+    "user_id": "optional"
+  }
+  ```
+- **SSE Event Types**: `session` → `status` → `token` (streaming) → `metadata` → `done`.
+- **Identity Resolution**: Frontend tự động resolve `userContext` từ JWT localStorage fallback nếu không truyền explicit.
 
-Dưới đây là sơ đồ tổng quát toàn bộ luồng đi của truy vấn:
+### Backend (FastAPI)
+- **Entrypoint**: `api/routes/chat.py` → `RAGPipeline.query_stream()` (streaming) hoặc `RAGPipeline.query_v3()` (non-streaming).
+- **Mode Routing** tại API layer:
+  - `mode=auto` (mặc định) → `pipeline.query_v3()` / `pipeline.query_stream()` (smart routing).
+  - `mode=rag` → `pipeline.query()` (force classic RAG).
+  - `mode=agent` → `pipeline.query_agent()` (force LangGraph agent).
+
+---
+
+## 1. TỔNG QUAN LUỒNG ĐI CỦA TRUY VẤN (END-TO-END PIPELINE FLOW)
+
+Khi `mode=auto` (mặc định từ frontend), hệ thống chạy pipeline `query_v3` / `query_stream` với kiến trúc **Reflection-First** — viết lại query TRƯỚC routing:
 
 ```mermaid
 graph TD
-    A[User Query] --> B[Step 1: Normalisation & Pre-Routing Context]
-    B --> C[Step 2: Domain Router & Intent Classification]
-    C --> D[Step 3: Query Reflection & Entity Extraction]
-    D --> E[Step 4: Comparison Decomposition & Major Stripping]
-    E --> F[Step 5: Collection Selector & Freshness Lock]
-    F --> G[Step 6: Metadata Pre-Filtering Chain]
-    G --> H[Step 7: Dual-Embedding & Parallel Collection Search]
-    H --> I[Step 8: Candidate Pooling & Score Fusion]
-    I --> J[Step 9: Sibling Expansion & Reranking]
-    J --> K[Step 10: Validity Filtering & Cross-Reference Resolution]
-    K --> L[Step 11: Score Cliff & Web Search Fallback]
-    L --> M[Step 12: Profile Prepended & Context Budgeting]
-    M --> N[Context Ready for LLM Generation]
+    A[User Query from Frontend] --> B["Step 1: Reflection — Query Rewrite & Entity Extraction"]
+    B --> C["Step 2: Tiered Complexity Routing (Tier 0→1→2)"]
+    C -->|chitchat| D[Chitchat Handler — No Retrieval]
+    C -->|simple| E["Step 3: Classic RAG Flow (rag_flow)"]
+    C -->|complex| F["Step 3b: Planner-Executor Agent (LangGraph)"]
+
+    subgraph "Classic RAG Flow (rag_flow)"
+        E --> G["P0: Query Cache Check"]
+        G -->|miss| H["Step 4: Re-Route on Reflected Query"]
+        H --> I["Step 5: Collection Selector & Freshness Lock"]
+        I --> J["Step 6: Metadata Pre-Filtering Chain"]
+        J --> K["Step 7: Dual-Embedding → Parallel Hybrid Search"]
+        K --> L["Step 8: Global Pooling & Score Fusion"]
+        L --> M["Step 9: Sibling Expansion (C1, optional)"]
+        M --> N["Step 10: Cross-Encoder Reranking + Fallback"]
+        N --> O["Step 10.5: HyDE Post-Rerank Fallback"]
+        O --> P["Step 11: Validity Filter & Cross-Reference Resolver"]
+        P --> Q["Step 12: Score Cliff & Parent Context Expansion (C5)"]
+        Q --> R["LLM Response Cache Check"]
+        R -->|miss| S["Pre-Generation Web Decision"]
+        S --> T["Step 13: Context Budgeting & Profile Injection"]
+        T --> U["Step 14: LLM Generation"]
+        U --> V["Step 15: Self-Evaluation & Quality Gate"]
+        V --> W["Step 16: Post-Generation Web Fallback (Tavily)"]
+        W --> X["Step 17: Cache Write & Response"]
+    end
+
+    F -->|fallback| E
 ```
 
 ---
 
-## 2. CHI TIẾT CÁC BƯỚC XỬ LÝ TRONG LUỒNG RETRIEVAL
+## 2. CHI TIẾT CÁC BƯỚC XỬ LÝ
 
-### BƯỚC 1: TIỀN XỬ LÝ VÀ CHUẨN HÓA TRUY VẤN (NORMALISATION)
-Ngay khi nhận được truy vấn từ người dùng, hệ thống áp dụng các phép chuẩn hóa:
-- **Unicode NFC Normalisation**: Chuyển đổi toàn bộ văn bản về dạng tổ hợp Unicode NFC chuẩn hóa. Điều này khắc phục triệt để lỗi gõ dấu tiếng Việt (ví dụ: chữ ký gõ tổ hợp hoặc dựng sẵn đều được quy về một dạng duy nhất).
-- **Whitespace Stripping**: Loại bỏ các khoảng trắng thừa ở đầu, cuối và giữa câu.
+### BƯỚC 1: PHẢN CHIẾU TRUY VẤN VÀ TRÍCH XUẤT THỰC THỂ (REFLECTION)
+*File nguồn: [reflection.py](file:///d:/GR/src/RAG_v2/query/reflection.py), [rag_pipeline.py](file:///d:/GR/src/RAG_v2/pipeline/rag_pipeline.py)*
 
----
+> **Quan trọng**: Trong kiến trúc hiện tại, Reflection chạy **TRƯỚC** routing (khác với tài liệu cũ mô tả routing trước). Mục đích: routing nhận đầu vào là câu hỏi đã được viết lại thành dạng standalone, tránh conversation bleed.
 
-### BƯỚC 2: PHÂN LOẠI Ý ĐỊNH VÀ ĐỊNH TUYẾN MIỀN (QUERY ROUTER)
-*File nguồn tham chiếu: [router.py](file:///d:/GR/src/RAG_v2/query/router.py), [domain_classifier.py](file:///d:/GR/src/RAG_v2/query/domain_classifier.py)*
-
-Định tuyến giúp xác định xem câu hỏi thuộc nhóm hội thoại thông thường (**Chitchat**), tra cứu tri thức (**RAG**), hay cần tìm kiếm web ngoại tuyến (**Tool Search**). GR RAG v2 hỗ trợ hai chế độ định tuyến:
-- Chế độ **LLM**: Dùng GPT-4o-mini với prompt Few-Shot.
-- Chế độ **Classifier**: Dùng bộ phân loại học máy nhẹ dạng SVM (`DomainClassifier`) huấn luyện trên các vector nhúng của BGE-M3. Chế độ này có chi phí bằng 0 và độ trễ cực thấp (~10-50 ms).
-
-#### Cơ chế Định tuyến hai bước (Two-Pass Routing)
-Để xử lý hoàn hảo các câu hỏi ngắn hoặc câu hỏi tiếp nối ở các lượt chat sau (ví dụ: *"Còn điều kiện tiên quyết là gì?"* sau khi hỏi về môn học ở lượt trước):
-1. **Pass 1 (Raw Query Search)**: Định tuyến câu hỏi gốc mà không có lịch sử chat để tránh hiện tượng "nhiễu lịch sử" với các câu hỏi tự thân rõ ràng.
-2. **Pass 2 (Context Prepend Fallback)**: Nếu điểm tin cậy (Confidence) của Pass 1 thấp hơn ngưỡng `_TWO_PASS_CONFIDENCE_THRESHOLD = 0.65` **VÀ** câu hỏi ngắn hơn 6 từ:
-   - Hệ thống quét lịch sử hội thoại gần nhất (`_CONTEXT_WINDOW = 5` lượt chat).
-   - Nối các tin nhắn trước thành chuỗi định dạng: `[CTX: {history}] {query}`.
-   - Định tuyến lại câu hỏi đã ghép ngữ cảnh. Giữ kết quả của Pass nào có điểm tin cậy cao hơn.
-
-Kết quả đầu ra của bộ Router gồm: `intent` (ý định), `domain` (chủ đề chính), `domains` (danh sách chủ đề liên quan), và điểm tin cậy `confidence`.
+- **Model**: `gemini-3.1-flash-lite` (provider: Gemini), temperature `0.0`, max tokens `1024`.
+- **Chức năng**:
+  1. **Viết lại câu hỏi (Rewriting)**: Chuyển câu hỏi khẩu ngữ thành văn phong hành chính/pháp lý. Bake conversation context vào câu hỏi standalone (ví dụ: *"Còn điều kiện gì?"* → *"Điều kiện tiên quyết môn mạng máy tính IT3080 là gì?"*).
+  2. **Trích xuất thực thể (Entity Extraction)**: Trích `major_code`, `major_name`, `cohort`, `user_major_code`, `target_major_code` từ query + user_context + history.
+  3. **Deterministic Fallback**: Nếu LLM Reflection lỗi, hàm `_extract_entities` chạy regex cục bộ để nhận diện mã ngành HUST và khóa sinh viên.
+- **Đầu ra**: `{rewritten, prompt, entities: {major_code, cohort, user_major_code, target_major_code}}`.
 
 ---
 
-### BƯỚC 3: PHẢN CHIẾU TRUY VẤN VÀ TRÍCH XUẤT THỰC THỂ (REFLECTION)
-*File nguồn tham chiếu: [reflection.py](file:///d:/GR/src/RAG_v2/query/reflection.py)*
+### BƯỚC 2: PHÂN LOẠI ĐỘ PHỨC TẠP 3 TẦNG (TIERED COMPLEXITY ROUTING)
+*File nguồn: [rag_pipeline.py](file:///d:/GR/src/RAG_v2/pipeline/rag_pipeline.py) → `_decide_complexity()`, [router.py](file:///d:/GR/src/RAG_v2/query/router.py), [domain_classifier.py](file:///d:/GR/src/RAG_v2/query/domain_classifier.py)*
 
-Nếu ý định là `rag`, câu hỏi sẽ được đưa qua mô hình phản chiếu `QueryReflector`:
-- **Viết lại câu hỏi (Rewriting)**: Chuyển đổi câu hỏi khẩu ngữ tự nhiên của sinh viên thành câu văn phong hành chính/pháp lý học thuật phù hợp nhất với cấu trúc tài liệu lưu trữ (như Điều/Khoản trong quy chế).
-- **Trích xuất thực thể (Entity Extraction)**: Trích xuất các thực thể học vụ như mã ngành/tên ngành (`major_code`, `major_name`) và khóa học/khóa sinh viên (`cohort`, ví dụ: `K64`, `K65`).
-- **Hạ cấp suy luận thực thể (Deterministic Fallback)**: Nếu mô hình LLM Reflection lỗi hoặc không trích xuất được thực thể, hệ thống kích hoạt hàm `_extract_entities` chạy cục bộ bằng các biểu thức chính quy (Regex) và phân tích lịch sử hội thoại để nhận diện mã ngành HUST và khóa học sinh viên một cách chính xác tuyệt đối.
+Quyết định rẽ nhánh `chitchat` / `simple` / `complex` qua 3 tầng:
+
+#### Tier 0 — Deterministic Patterns (`ComplexityRouter`)
+- Regex nhận diện: chitchat (chào hỏi, cảm ơn), single-fact lookup, pronoun-based eligibility, explicit comparison.
+- Nếu kết quả rõ ràng → return ngay. Nếu `"unknown"` → tiếp Tier 1.
+
+#### Tier 1 — ML Domain Classifier (Two-Stage Embedding-Based)
+- **Stage 1**: `CalibratedClassifierCV(LogisticRegression)` trên BGE-M3 embeddings → phân loại intent: `{chitchat, rag, tool_search}`.
+- **Stage 2**: `OneVsRestClassifier(LogisticRegression)` → phân loại RAG domain: `{ctdt, quydinh, kehoach, stsv}`.
+- **Multi-label threshold**: `0.35`. Nếu < 2 active collections → `simple`.
+- **Low-confidence ceiling**: `0.55` → trigger LLM fallback (Tier 2).
+- Latency: ~10-50ms (chi phí bằng 0, không gọi LLM).
+
+#### Tier 2 — LLM Judge (Borderline Cases)
+- Chỉ chạy khi ≥2 collections active HOẶC có `multi_domain` signal.
+- LLM judge quyết định `simple` vs `complex` + `subtype` (comparison, multi_source, …).
+
+#### Kết quả rẽ nhánh:
+- **`chitchat`** → trả lời canned response ngay (không retrieval).
+- **`simple`** → vào **Classic RAG Flow** (`rag_flow`).
+- **`complex`** → vào **Planner-Executor Agent** (LangGraph). Nếu agent disabled/lỗi → fallback về RAG.
 
 ---
 
-### BƯỚC 4: TẤN CÔNG SO SÁNH VÀ CHUẨN HÓA MÃ NGÀNH (COMPARISON DECOMPOSITION & STRIPPING)
-*File nguồn tham chiếu: [metadata_filters.py](file:///d:/GR/src/RAG_v2/retrieval/metadata_filters.py)*
+### BƯỚC 3: CLASSIC RAG FLOW (`rag_flow`)
+*File nguồn: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py) → `rag_flow()`*
 
-Đối với các truy vấn chứa ý định so sánh giữa nhiều đối tượng hoặc giới hạn chặt ngành học:
-- **Cohort Comparison Decomposition**: Nhận diện các mẫu so sánh như *"quy định của K64 và K65"*. Tách truy vấn thành các truy vấn con tương ứng với từng khóa (`K64`, `K65`) để tìm kiếm riêng biệt rồi ghép lại, tăng cường độ phủ thông tin (Recall).
-- **Major Comparison Decomposition**: Nhận diện so sánh mã ngành, ví dụ: *"môn mạng máy tính của IT-E7 và IT-E6"*. Hệ thống lập kế hoạch truy xuất chia nhỏ thành các tiểu truy vấn riêng biệt cho từng mã ngành học.
-- **Major Stripping**: Khi đã xác định được mã ngành cụ thể và đã lên kế hoạch lọc theo siêu dữ liệu (Metadata), hệ thống sẽ chủ động lược bỏ tên ngành/mã ngành học ra khỏi chuỗi truy vấn từ khóa gửi đi (`strip_major_from_query_for_retrieval`). Việc này giúp công cụ tìm kiếm từ khóa (Elasticsearch BM25) tập trung hoàn toàn vào nội dung chủ đề cốt lõi (ví dụ: *"mạng máy tính"*) mà không bị nhiễu bởi các ký tự mã ngành.
+Toàn bộ pipeline dưới đây chạy khi route = `simple` hoặc `mode=rag`:
+
+#### 3.0 Pre-Retrieval Query Cache (P0)
+- Nếu `LLMResponseCache` có `get_by_query()` → kiểm tra cache bằng `(question, model, profile)`.
+- **Profile scope**: `major|cohort` để tránh cross-student data leak.
+- Cache hit → trả kết quả ngay, tiết kiệm toàn bộ ~13-25s pipeline.
+- Cache skip nếu: dynamic/freshness query, hoặc cached answer chứa "no_info" signal.
+
+#### 3.1 Re-Route trên Reflected Query
+- Gọi `_reroute_reflected(search_query, routing_result)`: chạy lại classifier trên câu hỏi đã viết lại (không có history) → routing bleed-free.
+- Chạy TRƯỚC collection selection.
+
+#### 3.2 Effective Major for Retrieval
+- Module `query.profile_dependency` quyết định: giữ hay bỏ major filter cho retrieval.
+- Các topic universal (ví dụ: "học bổng") → bỏ major filter để không thu hẹp sai.
+- Các topic major-dependent (ví dụ: "chương trình đào tạo") → giữ major filter.
 
 ---
 
-### BƯỚC 5: LỰA CHỌN CƠ SỞ DỮ LIỆU VÀ KHÓA ĐƯỜNG DẪN KẾ HOẠCH (COLLECTION SELECTOR)
-*File nguồn tham chiếu: [collection_selector.py](file:///d:/GR/src/RAG_v2/retrieval/collection_selector.py)*
+### BƯỚC 4: LỰA CHỌN COLLECTION & FRESHNESS LOCK
+*File nguồn: [collection_selector.py](file:///d:/GR/src/RAG_v2/retrieval/collection_selector.py)*
 
-Hệ thống GR lưu trữ tài liệu trong 4 cơ sở dữ liệu (Collection) tương ứng với các miền nghiệp vụ khác nhau:
-1. `ctdt`: Chương trình đào tạo / Khung chương trình môn học.
-2. `quydinh`: Quy chế, quy định học vụ chính thức.
-3. `kehoach`: Kế hoạch học tập, thời khóa biểu, thông báo hành chính định kỳ.
-4. `stsv`: Hỗ trợ sinh viên, thủ tục hành chính một cửa, học bổng.
+4 collections chính:
+| Collection | Nội dung |
+|:-----------|:---------|
+| `ctdt` | Chương trình đào tạo, khung môn học |
+| `quydinh` | Quy chế, quy định học vụ |
+| `kehoach` | Kế hoạch, thông báo hành chính, lịch trình |
+| `stsv` | Hỗ trợ sinh viên, thủ tục, học bổng |
 
-Bộ `CollectionSelector` ánh xạ kết quả định tuyến miền từ Router sang các Collection đích:
+**Ánh xạ domain → collections**:
 ```python
 DOMAIN_TO_COLLECTIONS = {
     "ctdt":    ["ctdt"],
@@ -96,264 +160,396 @@ DOMAIN_TO_COLLECTIONS = {
 }
 ```
 
-#### Cơ chế xử lý điểm tin cậy thấp và Khóa đường dẫn (Freshness Lock)
-- Nếu độ tin cậy định tuyến $\geq 0.55$: Chỉ truy xuất trên các cơ sở dữ liệu được ánh xạ.
-- Nếu độ tin cậy định tuyến $< 0.55$: Mở rộng không gian tìm kiếm sang các Collection dự phòng thông qua `MULTI_DOMAIN_FALLBACK = ["quydinh", "stsv", "ctdt"]`.
-- **KeHoach Freshness Route Lock**: Nếu trong câu hỏi chứa các từ khóa chỉ thị thời gian hoặc kế hoạch học tập thực tế (ví dụ: *"lịch đăng ký lớp học kỳ mới"*, *"thông báo đóng học phí"*), hệ thống kích hoạt hàm `_should_lock_kehoach_route` để **khóa cứng** bộ lọc tìm kiếm chỉ trỏ về Collection `kehoach`, ngăn chặn kết quả bị loãng bởi tài liệu quy chế tĩnh của `quydinh`.
+**Xử lý confidence**:
+- Confidence ≥ `0.55` → chỉ search collections được ánh xạ.
+- Confidence < `0.55` → mở rộng sang `MULTI_DOMAIN_FALLBACK = ["quydinh", "stsv", "ctdt"]`.
+- `find_all=True` → bypass routing, search tất cả collections.
+
+**KeHoach Freshness Route Lock**: Nếu query chứa từ khóa thời gian/kế hoạch (ví dụ: "lịch đăng ký", "thông báo mới") → khóa cứng `target_collections = ["kehoach"]`.
 
 ---
 
-### BƯỚC 6: CHUỖI BỘ LỌC SIÊU DỮ LIỆU TRƯỚC TRUY XUẤT (METADATA PRE-FILTERING CHAIN)
-*File nguồn tham chiếu: [metadata_filters.py](file:///d:/GR/src/RAG_v2/retrieval/metadata_filters.py), [elasticsearch_store.py](file:///d:/GR/src/RAG_v2/retrieval/elasticsearch_store.py)*
+### BƯỚC 5: COMPARISON DECOMPOSITION & MAJOR STRIPPING
+*File nguồn: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)*
 
-Đây là một trong những cơ chế tinh vi nhất của GR RAG v2 giúp tối ưu hóa hiệu suất tìm kiếm lai (Hybrid Search). Trước khi thực hiện tìm kiếm Vector trên Qdrant hay BM25 trên Elasticsearch, hệ thống xây dựng một **Chuỗi các truy vấn lọc Elasticsearch (ES Fallback Filter Chain)** để trích xuất danh sách ID tài liệu hợp lệ trước.
+- **Major Comparison**: Nhận diện *"IT-E7 và IT-E6"* → tạo `[(subquery_1, major_1), (subquery_2, major_2)]`, mỗi sub-query search riêng với major filter riêng.
+- **Cohort Comparison**: Nhận diện *"K64 và K65"* → tách thành sub-queries per cohort.
+- **Major Stripping**: Lược bỏ tên/mã ngành khỏi retrieval query khi đã có metadata filter, giúp BM25 focus vào nội dung chủ đề.
+- **Rerank query**: Dùng bản stripped (không chứa scaffold so sánh) để reranker đánh giá công bằng.
+
+---
+
+### BƯỚC 6: CHUỖI BỘ LỌC SIÊU DỮ LIỆU (METADATA PRE-FILTERING CHAIN)
+*File nguồn: [metadata_filters.py](file:///d:/GR/src/RAG_v2/retrieval/metadata_filters.py), [elasticsearch_store.py](file:///d:/GR/src/RAG_v2/retrieval/elasticsearch_store.py)*
+
+Trước khi hybrid search, hệ thống xây dựng **ES Fallback Filter Chain** để thu hẹp không gian tìm kiếm:
 
 ```mermaid
 flowchart TD
-    Start[Trích xuất Thực thể & Tín chỉ] --> Chain{Thiết lập chuỗi bộ lọc}
-    Chain -->|Thử bộ lọc 1: Exact Match| ES1[Chạy truy vấn lọc ES chính xác nhất]
-    ES1 --> Match1{Có kết quả ID?}
-    Match1 -->|Có| Win[Đồng ý danh sách ID trúng tuyển]
-    Match1 -->|Không| ES2[Thử bộ lọc 2: Fuzzy/Match Looser]
-    ES2 --> Match2{Có kết quả ID?}
-    Match2 -->|Có| Win
-    Match2 -->|Không| ES3[Thử bộ lọc 3: Chấp nhận ID chung / Không chứa tag]
-    ES3 --> Match3{Có kết quả ID?}
-    Match3 -->|Có| Win
-    Match3 -->|Không| Fallback[Không áp dụng bộ lọc: Quét toàn bộ Collection]
-    Win --> Apply[Áp dụng ID trúng tuyển làm bộ lọc cứng]
+    Start[Entity Extraction] --> Chain{Build Filter Chain}
+    Chain -->|Filter 1: Exact| ES1[ES exact match query]
+    ES1 --> Match1{Results?}
+    Match1 -->|Yes| Win[Use matched doc IDs]
+    Match1 -->|No| ES2[Filter 2: Fuzzy/Loose]
+    ES2 --> Match2{Results?}
+    Match2 -->|Yes| Win
+    Match2 -->|No| ES3[Filter 3: Generic/No-tag]
+    ES3 --> Match3{Results?}
+    Match3 -->|Yes| Win
+    Match3 -->|No| Fallback[No filter — full collection scan]
+    Win --> Apply[Apply ID filter]
     Apply --> Qdrant[Qdrant: HasIdCondition]
-    Apply --> ES[Elasticsearch: Term filter]
+    Apply --> ES[ES: ids filter]
 ```
 
-#### Thiết lập chuỗi bộ lọc cho từng Collection
-Hệ thống định nghĩa chuỗi fallback ưu tiên cho từng Collection như sau:
-
-1. **Đối với miền đào tạo (`ctdt`)**:
-   - *Ưu tiên 1 (Exact Code)*: Lọc chính xác theo mã ngành (ví dụ: `{term: {major_code: "IT-E10"}}`).
-   - *Ưu tiên 2 (Fuzzy Name)*: Tìm khớp mờ theo tên ngành (ví dụ: `{match: {major_name: "Công nghệ thông tin"}}`).
-   - *Ưu tiên 3 (Generic Fallback)*: Tìm các tài liệu quy định chung không gắn nhãn mã ngành hoặc đúng mã ngành được chỉ định.
-   - *Ưu tiên 4 (No Filter)*: Tìm trên toàn bộ kho nếu tất cả các bước trên trả về 0 kết quả.
-
-2. **Đối với miền quy định (`quydinh`)**:
-   - *Ưu tiên 1*: Khớp chính xác khóa học sinh viên (`applicable_cohort`) hoặc tài liệu áp dụng chung (không chứa khóa học cụ thể).
-   - *Ưu tiên 2 (No Filter)*: Không lọc nếu không phát hiện tín hiệu khóa tuyển sinh.
-
-3. **Đối với miền thông báo kế hoạch (`kehoach`)**:
-   - *Lọc mốc thời gian rõ ràng*: Nếu người dùng hỏi tháng/năm cụ thể (ví dụ: *"lịch đăng ký tháng 3 năm 2026"*), hệ thống tạo truy vấn wildcard Elasticsearch trên trường `date_str` kiểu từ khóa: `{wildcard: {date_str: "*/3/2026"}}`.
-   - *Đường dẫn tươi mới (Freshness Path)*: Nếu phát hiện ý định hỏi tin tức gần đây (như *"mới nhất"*, *"gần đây"*, *"học kỳ mới"*) nhưng không chỉ định ngày cụ thể:
-     1. Gọi hàm cục bộ `get_latest_chunk_ids_by_date(max_n=200)` để thu thập 200 ID tài liệu mới nhất dựa trên thời gian đăng tin (phân tích chuỗi `"D/M/YYYY"` và sắp xếp ở phía Python).
-     2. Gán 200 ID này thành một bộ lọc ID cứng (`HasIdCondition` trên Qdrant và bộ lọc `ids` trên Elasticsearch) nhằm đảm bảo thông tin cũ của các năm trước không thể "cướp điểm" của tin mới qua điểm số từ khóa thuần túy.
-
-4. **Đối với miền hỗ trợ sinh viên (`stsv`)**:
-   - Không áp dụng bộ lọc siêu dữ liệu trước truy xuất (tận dụng tìm kiếm lai toàn diện).
+**Per-collection filter chains**:
+1. **`ctdt`**: Exact major_code → Fuzzy major_name → Generic (no major tag) → No filter.
+2. **`quydinh`**: Exact applicable_cohort OR generic (no cohort tag) → No filter.
+3. **`kehoach`**:
+   - Explicit date: `{wildcard: {date_str: "*/3/2026"}}`.
+   - Freshness intent: `get_latest_chunk_ids_by_date(max_n=200)` → Hard ID filter.
+4. **`stsv`**: Không áp dụng pre-filter.
 
 ---
 
-### BƯỚC 7: TÌM KIẾM SONG SONG ĐA THƯ VIỆN VÀ TÌM KIẾM LAI HỖ TRỢ BỞI DUAL-EMBEDDING
-*File nguồn tham chiếu: [multi_collection_search.py](file:///d:/GR/src/RAG_v2/retrieval/multi_collection_search.py), [qdrant_store.py](file:///d:/GR/src/RAG_v2/retrieval/qdrant_store.py), [elasticsearch_store.py](file:///d:/GR/src/RAG_v2/retrieval/elasticsearch_store.py)*
+### BƯỚC 7: TÌM KIẾM SONG SONG ĐA COLLECTION — DUAL EMBEDDING HYBRID SEARCH
+*File nguồn: [multi_collection_search.py](file:///d:/GR/src/RAG_v2/retrieval/multi_collection_search.py), [qdrant_store.py](file:///d:/GR/src/RAG_v2/retrieval/qdrant_store.py), [elasticsearch_store.py](file:///d:/GR/src/RAG_v2/retrieval/elasticsearch_store.py)*
 
-Sau khi thiết lập các bộ lọc ID tài liệu hợp lệ cho từng Collection đích, hệ thống khởi chạy tìm kiếm song song đa luồng bằng `ThreadPoolExecutor` với tối đa `max_workers = 4`. Đối với mỗi cơ sở dữ liệu, một quy trình Tìm kiếm Lai (Hybrid Search) đồng thời được thực thi:
+Song song hóa bằng `ThreadPoolExecutor(max_workers=4)`:
 
-#### A. Tìm kiếm Vector Song song hóa (Qdrant Dual-Vector Search)
-1. **Truy vấn Dual-Embedding**: Nhúng câu hỏi thông qua cả hai mô hình nhúng tiên tiến:
-   - `BGEm3Embedder` tạo vector dense 1024 chiều.
-   - `E5MultilingualEmbedder` tạo vector dense 1024 chiều.
-2. **Batching Request**: Thay vì gọi tuần tự làm tăng độ trễ, GR RAG v2 thực hiện gộp hai yêu cầu tìm kiếm vector vào một gói tin mạng duy nhất qua `client.query_batch_points()`, giúp **giảm thiểu độ trễ gRPC/REST xuống ~30%**.
-3. **Over-fetching**: Tìm kiếm với số lượng ứng viên dự phòng mở rộng `per_vector_k = min(top_k * 2, 100)` nhằm tránh bỏ sót kết quả chất lượng cao trước khi hợp nhất.
-4. **Hợp nhất Dual-Vector**: Chuẩn hóa điểm số cosine của cả hai mô hình nhúng về miền $[0,1]$ độc lập và hợp nhất theo công thức tuyến tính:
-   $$\text{Fused Score (Qdrant)} = 0.5 \times \text{Norm BGE} + 0.5 \times \text{Norm E5}$$
+#### A. Qdrant Dual-Vector Search
+1. **BGE-M3** (`BAAI/bge-m3`, FlagEmbedding) → dense vector 1024D.
+2. **E5** (`intfloat/multilingual-e5-large`, sentence-transformers) → dense vector 1024D.
+3. **Batch request**: `client.query_batch_points()` — gộp 2 vector queries trong 1 gRPC call, giảm ~30% latency.
+4. **Over-fetching**: `per_vector_k = min(top_k * 2, 100)`.
+5. **Dual-vector fusion**:
+   $$\text{Score}_{vector} = 0.5 \times \text{Norm}_{BGE} + 0.5 \times \text{Norm}_{E5}$$
 
-#### B. Tìm kiếm Từ khóa Tối ưu hóa (Elasticsearch BM25 Keyword Search)
-1. **Phân tích từ vựng Tiếng Việt**: Trình phân tích `vietnamese_analyzer` sử dụng `icu_tokenizer` tích hợp bộ lọc `icu_folding` (hỗ trợ phân tách âm tiết tiếng Việt chuẩn xác, chuyển sang chữ thường và loại bỏ dấu tiếng Việt một cách thông minh). Nếu thiếu thư viện ICU, hệ thống tự động hạ cấp xuống trình phân tích chuẩn sử dụng bộ lọc `asciifolding` thay thế.
-2. **Cơ chế tìm kiếm từ khóa Hai bước (Two-Pass BM25 Search)**:
-   - **Pass 1 (Exact Phrase Match)**: Sử dụng các mệnh đề tìm kiếm cụm từ khớp chính xác `match_phrase` trên nhiều trường với các trọng số boost khác nhau nhằm ưu tiên tuyệt đối văn bản chứa chính xác cụm từ tìm kiếm (ví dụ: `text^2.0`, `title^1.8`, `section_h2^1.3`). Nếu câu hỏi có yêu cầu tìm bảng biểu (được trích xuất từ tín hiệu truy vấn), thêm điểm thưởng boost cho trường `has_table` (`boost = 2.5`).
-   - **Pass 2 (Fuzzy Fallback Search)**: Nếu bộ lọc khớp cụm từ chính xác ở Pass 1 trả về quá ít kết quả, hệ thống kích hoạt tìm kiếm mờ hỗ trợ sửa lỗi gõ sai chữ bằng cấu hình `"fuzziness": "AUTO"`.
-   - **Hợp nhất kết quả từ khóa**: Ghép kết quả của hai Pass và loại bỏ tài liệu trùng lặp qua hàm `_merge_keyword_results`.
+#### B. Elasticsearch BM25 Two-Pass Search
+1. **Vietnamese Analyzer**: `icu_tokenizer` + `icu_folding` (fallback: `asciifolding`).
+2. **Pass 1 — Exact Phrase**: `match_phrase` trên `text^2.0`, `title^1.8`, `section_h2^1.3`. Boost `has_table=2.5` nếu query yêu cầu bảng.
+3. **Pass 2 — Fuzzy Fallback**: `fuzziness: "AUTO"` nếu Pass 1 ít kết quả.
+4. **Merge**: Dedup + merge kết quả 2 passes.
 
-#### C. Lọc từ loại trừ (Structured Exclusion Filter)
-*File nguồn tham chiếu: [structured_query.py](file:///d:/GR/src/RAG_v2/query/structured_query.py)*
-
-Nếu người dùng đưa vào câu hỏi từ khóa phủ định bằng ký hiệu gạch ngang (ví dụ: *"học bổng khuyến khích -tín chỉ"*), hệ thống tự động:
-- Cấu hình mệnh đề `must_not` trong Elasticsearch để loại trừ các tài liệu chứa từ này ngay từ tầng tìm kiếm từ khóa.
-- Thực hiện hậu lọc (Post-filtering) lọc bỏ mọi kết quả từ Qdrant chứa từ phủ định trong các trường văn bản, tiêu đề, hoặc mã môn học.
+#### C. Structured Exclusion Filter
+*File: [structured_query.py](file:///d:/GR/src/RAG_v2/query/structured_query.py)*
+- Dấu gạch ngang phủ định: *"học bổng -tín chỉ"* → `must_not` trong ES + post-filter Qdrant.
 
 ---
 
-### BƯỚC 8: TẬP TRUNG ỨNG VIÊN TOÀN CỤC VÀ HỢP NHẤT ĐIỂM SỐ CHUYỂN ĐỔI THÍCH ỨNG (SCORE FUSION)
-*File nguồn tham chiếu: [multi_collection_search.py](file:///d:/GR/src/RAG_v2/retrieval/multi_collection_search.py)*
+### BƯỚC 8: GLOBAL POOLING & SCORE FUSION
+*File nguồn: [multi_collection_search.py](file:///d:/GR/src/RAG_v2/retrieval/multi_collection_search.py)*
 
-Sau khi nhận kết quả ứng viên từ tất cả các Collection song song, hệ thống thực hiện hai bước xử lý lớn tiếp theo:
+#### A. Global Pooling
+- **Vector Pool**: Top `vector_pool_k=40` (deduped, sorted by cosine score).
+- **Keyword Pool**: Top `keyword_pool_k=40` (deduped, sorted by BM25 score).
+- **Keyword Hits Pinning**: Docs với `_keyword_exact_phrase_hit` hoặc `_keyword_table_lookup_hit` được ghim cứng.
 
-#### A. Gom cụm và Bảo tồn ứng viên Keyword (Global Pooling)
-- **Vector Pool**: Gộp tất cả kết quả tìm kiếm vector từ các Collection, sắp xếp giảm dần theo điểm số cosine thô, loại bỏ trùng lặp ID tài liệu, chỉ giữ lại top `vector_pool_k` (mặc định = 40).
-- **Keyword Pool**: Gộp tất cả kết quả tìm kiếm từ khóa, sắp xếp giảm dần theo điểm BM25 thô, loại bỏ trùng lặp ID tài liệu, giữ lại top `keyword_pool_k` (mặc định = 40).
-- **Keyword Hits Pinning**: Các tài liệu chứa bảng biểu khớp chính xác hay cụm từ khóa khớp cứng có trường thuộc tính đặc biệt `_keyword_exact_phrase_hit` hoặc `_keyword_table_lookup_hit` sẽ được **ghim cứng (Pinning)** để chắc chắn sống sót qua bộ lọc phân nhóm từ khóa, bất chấp việc điểm số BM25 thô của chúng có thể bị thấp do tài liệu ngắn.
+#### B. Adaptive Weight Adjustment
+| Loại query | `vector_weight` | `keyword_weight` |
+|:-----------|:---------------|:----------------|
+| Thông thường | `0.80` | `0.20` |
+| Course-like (mã môn, "tín chỉ", "tiên quyết"…) | `0.40` | `0.60` |
+| Exact policy mode (bảng biểu) | `0.45` | `0.55` |
 
-#### B. Điều chỉnh Trọng số Thích ứng (Adaptive Weight Adjustment)
-Để đảm bảo hệ thống phản hồi cực tốt cho các câu hỏi chuyên biệt về mã môn học hoặc thông tin khóa đào tạo (vốn cần tìm từ khóa khớp chính xác cao):
-- **Nhận diện môn học**: Sử dụng Regex nhận diện mã môn học Bách khoa (ví dụ: `IT3080`, `EE2020`) hoặc kiểm tra xem câu hỏi có chứa các từ khóa định vị môn học tiếng Việt (nhas: *"môn"*, *"môn học"*, *"tín chỉ"*, *"học phần"*, *"tiên quyết"*, *"song hành"*, *"khối lượng"*).
-- **Thay đổi trọng số (Weight Shift)**:
-  - Ở câu hỏi thông thường: Ưu tiên tìm kiếm ngữ nghĩa sâu bằng cách gán trọng số Vector $0.8$ và trọng số Keyword $0.2$.
-  - Khi phát hiện ý định hỏi môn học (Course-like Query): Giảm trọng số Vector xuống $0.4$ và đẩy trọng số Keyword lên $0.6$.
-  - Khi phát hiện tìm kiếm bảng biểu chính xác (`exact_policy_mode`): Đặt trọng số Vector thành $0.45$ và Keyword thành $0.55$.
+#### C. Fusion Modes
+**Chế độ `"rrf"` (mặc định hiện tại, `fusion_mode=rrf`, `fusion_rrf_k=10`)**:
+$$\text{Score}_{RRF} = \left(w_v \times \frac{1}{k + r_v}\right) + \left(w_k \times \frac{1}{k + r_k}\right) + \text{recency\_bonus}$$
 
-#### C. Công thức Hợp nhất điểm số Lai (Linear / RRF Fusion)
-GR RAG v2 hỗ trợ hai chế độ trộn kết quả lai toàn cục:
-1. **Chế độ `"linear"` (Mặc định)**:
-   Chuẩn hóa Min-Max điểm số trong Vector Pool và Keyword Pool về miền $[0,1]$ độc lập để cân bằng phổ điểm, tránh trường hợp điểm BM25 cực lớn lấn át hoàn toàn điểm Cosine bé. Điểm số hợp nhất cuối cùng tính theo công thức:
-   $$\text{Final Score} = (\text{vector\_weight} \times \text{Norm Vector Score}) + (\text{keyword\_weight} \times \text{Norm Keyword Score}) + \text{kehoach\_recency\_bonus}$$
-2. **Chế độ `"rrf"` (Reciprocal Rank Fusion)**:
-   Không quan tâm đến điểm số thô mà chỉ phụ thuộc vào thứ hạng (Rank) của tài liệu trong từng danh sách pool:
-   $$\text{Score RRF} = \left(\text{vector\_weight} \times \frac{1}{60 + \text{vector\_rank}}\right) + \left(\text{keyword\_weight} \times \frac{1}{60 + \text{keyword\_rank}}\right) + \text{kehoach\_recency\_bonus}$$
+**Chế độ `"linear"`**:
+$$\text{Score}_{linear} = (w_v \times \text{Norm}_v) + (w_k \times \text{Norm}_k) + \text{recency\_bonus}$$
 
-#### D. Điểm thưởng độ tươi mới cho Kế hoạch (`kehoach` Recency Bonus)
-Để khuyến khích hiển thị các thông báo thời sự đăng tải gần đây nhất trong miền thông tin `kehoach`, hệ thống cộng điểm thưởng suy biến tuyến tính theo thời gian thực (áp dụng cho cả hai chế độ trộn điểm):
-- Công thức tính điểm thưởng:
-  $$\text{Bonus} = \max\left(0, 1 - \frac{\text{age\_days}}{365}\right) \times 0.05$$
-- Tài liệu đăng tải hôm nay được nhận điểm thưởng tối đa $+0.05$.
-- Tài liệu đăng tải cách đây nửa năm được cộng $+0.025$.
-- Tài liệu đăng cũ hơn 1 năm (365 ngày) không nhận được điểm thưởng ($+0.0$).
-- Các tài liệu không thuộc nhóm `kehoach` nhận điểm thưởng cố định bằng $0.0$.
+#### D. KeHoach Recency Bonus
+$$\text{Bonus} = \max\left(0, 1 - \frac{\text{age\_days}}{365}\right) \times 0.05$$
 
 ---
 
-### BƯỚC 9: MỞ RỘNG LÂN CẬN VÀ TÁI SẮP XẾP BỞI MÔ HÌNH HỌC SÂU (SIBLING EXPANSION & RERANKING)
-*File nguồn tham chiếu: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py), [query_expander.py](file:///d:/GR/src/RAG_v2/retrieval/query_expander.py)*
+### BƯỚC 9: SIBLING EXPANSION (C1, optional) → RERANKING
+*File nguồn: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)*
 
-Sau khi hợp nhất điểm số lai, danh sách tài liệu trải qua quy trình cải tiến ngữ cảnh chất lượng cao:
+#### A. Sibling Chunk Expansion (khi `sibling_expansion_enabled=True`)
+- Top `expand_top_n=3` docs → tìm chunks liền trước/sau (`window=1`, `max_expansion=6`).
+- Chạy **TRƯỚC** reranking để reranker đánh giá trên context đầy đủ hơn.
 
-#### A. Mở rộng tài liệu liền kề trước tái sắp xếp (Sibling Chunk Expansion - C1)
-- Đối với các tài liệu trúng tuyển hàng đầu (`expand_top_n = 3`), hệ thống chủ động tìm kiếm các đoạn văn bản liền trước và liền sau của nó trong cùng một văn bản gốc (`window = 1`).
-- Các đoạn lân cận này được ghép nối trực tiếp vào đoạn văn hiện tại để đảm bảo cung cấp đầy đủ ngữ cảnh bao quanh khi gửi tới bộ tái sắp xếp, loại bỏ tình trạng cắt đoạn thô bạo làm đứt mạch thông tin ở tầng Chunking.
+#### B. Cross-Encoder Reranking
+- **Model**: `BAAI/bge-reranker-v2-m3` (BGE Reranker).
+- **Reranker params**:
+  - `top_k = 7` (hoặc scaled cho list queries).
+  - `score_threshold = 0.0` (regular docs).
+  - `table_score_threshold = -1.0` (table docs — relaxed).
+  - `min_top_k = 3` (luôn giữ ít nhất 3 docs dù score thấp).
+- **Reranker Fallback Chain**:
+  1. Nếu reranked empty hoặc best score < 0 → retry rerank với `question` gốc (không phải reflected).
+  2. Nếu vẫn thất bại → dùng raw top-k by fusion score (last resort).
 
-#### B. Tái sắp xếp ngữ nghĩa chuyên sâu (Cross-Encoder Reranking)
-Hệ thống sử dụng mô hình tái sắp xếp Cross-Encoder để chấm điểm tương đồng ngữ nghĩa trực tiếp giữa câu hỏi (đã chuẩn hóa/khôi phục tên ngành đầy đủ) và đoạn văn bản ngữ cảnh ứng viên:
-1. **Reranker Quality Gate**: Đánh giá và sắp xếp lại các ứng viên, lọc bỏ các tài liệu có điểm tương đồng âm cực thấp.
-2. **Cơ chế chống trôi phản chiếu (Reranker Fallback)**:
-   - Nếu bộ lọc của Cross-Encoder loại bỏ sạch các ứng viên (hoặc toàn bộ điểm số đều âm) do câu hỏi phản chiếu (Reflection) chứa các từ mô phỏng sai lệch với văn bản gốc:
-   - Hệ thống tự động kích hoạt **truy xuất tái sắp xếp khẩn cấp bằng câu hỏi gốc của người dùng** (`question`), bảo đảm không xảy ra tình huống mất trắng dữ liệu ngữ cảnh do dịch dịch sai nghĩa.
-   - Nếu vẫn không có tài liệu nào vượt qua vòng tuyển chọn của mô hình học sâu, hệ thống sử dụng danh sách ứng viên thô sắp xếp theo điểm số lai Fusion làm giải pháp cứu cánh cuối cùng.
-
----
-
-### BƯỚC 10: KIỂM TRA HIỆU LỰC TÀI LIỆU VÀ GIẢI QUYẾT LIÊN KẾT ĐIỀU KHOẢN (VALIDITY & CROSS-REFERENCE)
-*File nguồn tham chiếu: [validity_filter.py](file:///d:/GR/src/RAG_v2/retrieval/validity_filter.py), [reference_resolver.py](file:///d:/GR/src/RAG_v2/retrieval/reference_resolver.py)*
-
-Đây là bước hậu xử lý nghiệp vụ nghiệp ngặt bảo đảm tính pháp lý và đầy đủ của ngữ cảnh:
-
-#### A. Lọc tài liệu hết hiệu lực (Validity Filtering)
-- Tải tệp thông tin phả hệ văn bản học vụ `data/document_lineage.json`.
-- Quét và loại bỏ tất cả các đoạn trích đến từ các tài liệu có thuộc tính trạng thái `"superseded"` (đã bị thay thế bởi văn bản quy chế mới ban hành sau này).
-- **Safety guard**: Nếu việc lọc làm mất đi quá nhiều tài liệu, hệ thống tự động giữ lại tối thiểu `min_results = 2` tài liệu cũ để đảm bảo mô hình vẫn có dữ liệu nền phản hồi thay vì trả về ngữ cảnh trống rỗng.
-
-#### B. Tự động giải quyết liên kết điều khoản (Cross-Reference Resolution)
-Trong các văn bản quy chế học vụ thường chứa các cụm từ dẫn chiếu pháp lý, ví dụ: *"được thực hiện theo quy định tại khoản 1 và khoản 2 Điều 5 quy chế này"*. Để giúp LLM hiểu được nội dung tham chiếu mà không cần người dùng hỏi trực tiếp Điều 5:
-1. **Nhận diện liên kết**: Sử dụng Regex quét nội dung đoạn trích để tìm các cấu trúc dẫn chiếu dạng tiếng Việt: `"khoản ... Điều ..."` hoặc `"Điều ... khoản ..."`.
-2. **Tìm kiếm tham chiếu siêu tốc (Fast Scroll Lookup ~5ms)**:
-   - Truy vấn trực tiếp bằng mã tài liệu `document_id` và Collection gốc trong Qdrant.
-   - Quét qua phân đoạn văn bản và tiêu đề phụ chứa tiêu đề `"Điều {article}"`.
-   - Ưu tiên chọn các đoạn trích chứa đúng số hiệu khoản dẫn chiếu cụ thể.
-3. **Tìm kiếm ngữ nghĩa dự phòng (Semantic Fallback Search)**: Nếu tìm cục bộ thất bại, khởi chạy một luồng tìm kiếm lai nội bộ với từ khóa dạng `"Điều {article} {filename}"` để định vị chính xác phân đoạn cần tìm.
-4. **Chèn dữ liệu liên kết**: Chèn đoạn văn bản chứa nội dung điều khoản tham chiếu được tìm thấy trực tiếp ngay phía sau đoạn văn bản gốc có dẫn chiếu với thẻ đánh dấu đặc biệt `_cross_reference=True` để LLM nắm bắt được cấu trúc quan hệ.
+#### C. HyDE Post-Rerank Fallback (khi `hyde_enabled=True`)
+- **Trigger**: Reranked empty, HOẶC best score < 0, HOẶC reranked < `hyde_min_results=3`.
+- **Flow**: LLM sinh hypothetical answer → embed bằng BGE-M3 → search lại → merge + dedup → re-rerank.
+- Mục đích: Cải thiện recall cho các query khó mà retrieval ban đầu miss.
 
 ---
 
-### BƯỚC 11: LỌC RƠI ĐIỂM SỐ VÀ TỰ ĐỘNG TÌM KIẾM WEB NGOẠI TUYẾN (SCORE CLIFF & WEB FALLBACK)
-*File nguồn tham chiếu: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)*
+### BƯỚC 10: VALIDITY FILTERING & CROSS-REFERENCE RESOLUTION
+*File nguồn: [validity_filter.py](file:///d:/GR/src/RAG_v2/retrieval/validity_filter.py), [reference_resolver.py](file:///d:/GR/src/RAG_v2/retrieval/reference_resolver.py)*
 
-#### A. Mức rơi điểm số theo Collection (Per-collection Score Cliff - B1)
-Để loại bỏ các đoạn văn bản có độ liên quan kém vượt trội so với các đoạn văn bản dẫn đầu:
-- Hệ thống tính toán độ dốc giảm điểm số trong cùng một Collection.
-- Nếu điểm số của đoạn văn bản phía sau rơi thẳng đứng vượt quá ngưỡng tỷ lệ chiết khấu so với đoạn đầu bảng, hệ thống chủ động cắt bỏ toàn bộ phân khúc tài liệu kém chất lượng phía sau để giữ độ sạch tuyệt đối cho ngữ cảnh đầu vào của LLM.
+#### A. Document Validity Filtering
+- Tải `data/document_lineage.json` — registry theo dõi supersession giữa các quy chế.
+- Loại bỏ docs có status `"superseded"` (đã bị thay thế bởi văn bản mới).
+- **Safety guard**: Giữ tối thiểu `min_results=2` để tránh context trống.
 
-#### B. Quyết định tìm kiếm web (Tavily Fallback Search)
-Trước khi đưa văn bản vào sinh câu trả lời, hệ thống chạy một hàm đánh giá chất lượng `_build_pre_generation_web_decision` để kiểm tra xem có cần tìm kiếm Web ngoại tuyến (qua Tavily Search API) hay không.
-- **Điều kiện kích hoạt**:
-  - Không tìm thấy tài liệu cục bộ nào sau tất cả các bước truy xuất.
-  - Hoặc Router dự đoán độ tin cậy kết quả nội bộ cực thấp.
-  - Hoặc câu hỏi chứa ý định hỏi về các sự kiện thời sự/năm học mới phát sinh vượt ngoài dữ liệu tĩnh của hệ thống.
-- **Hợp nhất dữ liệu Web**: Dữ liệu tìm kiếm web trả về được dán nhãn `collection = "web"`, chuẩn hóa cấu trúc và trộn trực tiếp vào kho ngữ cảnh cục bộ để bổ khuyết thông tin.
+#### B. Cross-Reference Resolution
+- Regex quét dẫn chiếu: *"khoản 1 Điều 5"*, *"Điều 5 khoản 2"*.
+- **Fast Scroll Lookup (~5ms)**: Truy vấn Qdrant bằng `document_id` + quét tiêu đề `"Điều {N}"`.
+- **Semantic Fallback**: Nếu scroll thất bại → hybrid search `"Điều {N} {filename}"`.
+- Insert đoạn tham chiếu ngay sau đoạn gốc với tag `_cross_reference=True`.
 
 ---
 
-### BƯỚC 12: ĐÓNG GÓI NGỮ CẢNH VÀ QUẢN LÝ TÀI NGUYÊN (CONTEXT BUDGETING & PROFILE INJECTION)
-*File nguồn tham chiếu: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)*
+### BƯỚC 11: SCORE CLIFF & PARENT CONTEXT EXPANSION (C5)
+*File nguồn: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)*
 
-Bước cuối cùng chuẩn bị dữ liệu đầu vào hoàn thiện cho LLM:
-1. **Thiết lập hạn ngạch từ (Context Budgeting)**:
-   - Dựa trên kiểu truy vấn, hệ thống phân bổ mức giới hạn ký tự và số lượng tài liệu (`_resolve_context_budget`).
-   - Ví dụ, các câu hỏi liệt kê hoặc so sánh sẽ được cấp hạn ngạch ký tự văn bản rộng hơn hẳn để tránh hiện tượng cắt nửa chừng tài liệu.
-2. **Bơm thông tin hồ sơ sinh viên (Student Profile Injection)**:
-   - Quét thông tin tài khoản người dùng đăng nhập (`user_context`) hoặc phân tích lịch sử hội thoại để trích xuất các thuộc tính: mã ngành, khóa tuyển sinh, điểm học tập CPA hiện tại.
-   - Đóng gói thành một dòng tóm tắt hồ sơ ngắn đầu trang ngữ cảnh:
-     `"Thông tin sinh viên: ngành CNTT-Việt Nhật, năm 3, khóa K65, CPA=3.2."`
-   - Điều này cho phép LLM trả lời xuất sắc các câu hỏi cá nhân hóa sâu sắc (như *"Với CPA của tôi thì có đủ điều kiện nhận học bổng không?"*) bằng cách kết nối trực tiếp dữ liệu hồ sơ cá nhân với các quy chế học bổng học tập có trong tài liệu quy định trích xuất được.
+#### A. Per-collection Score Cliff (B1, khi `score_cliff_enabled=True`)
+- Tính độ dốc giảm score trong cùng collection → cắt bỏ docs rơi thẳng đứng.
+
+#### B. Parent Context Expansion (C5, mặc định `parent_context_enabled=True`)
+- Sau rerank, fetch parent chunk content cho mỗi doc có `parent_id`.
+- `parent_max_chars = 1500` (RAG), `parent_max_chars_agent = 500` (Agent).
+- Mục đích: Cung cấp context bao quanh rộng hơn cho LLM mà không cần sibling expansion.
 
 ---
 
-## 3. BẢNG TỔNG HỢP CÁC THAM SỐ TRUY XUẤT HỆ THỐNG
-
-Các tham số cấu hình chính điều phối hành trình xử lý truy vấn:
-
-| Tham số | Giá trị mặc định | File định nghĩa | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `CONFIDENCE_THRESHOLD` | `0.55` | `collection_selector.py` | Ngưỡng tin cậy tối thiểu để sử dụng trực tiếp miền định tuyến. |
-| `_TWO_PASS_CONFIDENCE_THRESHOLD` | `0.65` | `router.py` | Ngưỡng tin cậy của ý định để kích hoạt ghép lịch sử hội thoại. |
-| `vector_weight` (Linear) | `0.80` | `config/settings.py` | Trọng số ưu tiên tìm kiếm vector/ngữ nghĩa trong điều kiện thường. |
-| `keyword_weight` (Linear) | `0.20` | `config/settings.py` | Trọng số tìm kiếm từ khóa BM25 trong điều kiện thường. |
-| `vector_weight` (Course) | `0.40` | `multi_collection_search.py` | Trọng số vector khi phát hiện ý định hỏi mã môn học/ngành. |
-| `keyword_weight` (Course) | `0.60` | `multi_collection_search.py` | Trọng số từ khóa khi phát hiện ý định hỏi mã môn học/ngành. |
-| `rrf_k` | `60` | `hybrid_search.py` | Hằng số làm mượt thứ hạng trong công thức RRF Fusion. |
-| `max_workers` | `4` | `multi_collection_search.py` | Số luồng tìm kiếm song song các cơ sở dữ liệu đích. |
-| `vector_top_k` | `50` | `config/settings.py` | Số lượng tài liệu tối đa lấy ra từ Qdrant cho mỗi Collection. |
-| `keyword_top_k` | `50` | `config/settings.py` | Số lượng tài liệu tối đa lấy ra từ ES cho mỗi Collection. |
-| `vector_pool_k` | `40` | `config/settings.py` | Số lượng tài liệu tối đa giữ lại trong Vector Pool toàn cục. |
-| `keyword_pool_k` | `40` | `config/settings.py` | Số lượng tài liệu tối đa giữ lại trong Keyword Pool toàn cục. |
-| `top_k` | `5` | `config/settings.py` | Số lượng tài liệu tối đa đưa vào bước Reranking cuối cùng. |
-| `KEHOACH_RECENCY_BONUS_MAX` | `0.05` | `metadata_filters.py` | Điểm cộng tối đa cho tài liệu kế hoạch đăng mới trong ngày. |
+### BƯỚC 12: LLM RESPONSE CACHE CHECK (Phase 2)
+- Key: `(question, doc_ids, model, profile)`.
+- Cache hit → trả kết quả ngay (skip generation hoàn toàn).
+- Skip nếu: `dynamic_web_query`, `pre_web_fallback_reasons` có.
+- Cache ignore nếu cached answer chứa "no_info" signal.
 
 ---
 
-## 4. TÓM TẮT ĐƯỜNG ĐI CỦA TỪNG THÀNH PHẦN CHÍNH (RETRIEVAL PATHWAY)
+### BƯỚC 13: PRE-GENERATION WEB DECISION & CONTEXT BUDGETING
+*File nguồn: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py) → `_build_pre_generation_web_decision()`*
 
-### Luồng đi của Hybrid Search (Tìm kiếm lai)
+#### A. Pre-Generation Web Decision
+Quyết định có cần tìm kiếm web **TRƯỚC** generation hay không:
+- **Triggers**: `no_sources`, `freshness_query` (không có local kehoach evidence mới < 90 ngày), `dynamic_query` (không có high local confidence), `low_retrieval_confidence`.
+- **Suppression**: Nếu local rerank score ≥ `web_bypass_min_local_score=0.5` → suppress dynamic_query trigger.
+- Nếu triggered & `tavily_fallback_enabled=True` → gọi Tavily, merge web docs vào context.
+
+#### B. Context Budgeting (`_resolve_context_budget`)
+| Param | Giá trị mặc định |
+|:------|:-----------------|
+| `context_doc_char_limit` | `2000` chars/doc |
+| `context_total_char_budget` | `12000` chars |
+| `context_list_total_char_budget` | `24000` chars (list queries) |
+| `context_total_char_budget_with_expansion` | `16000` chars (khi sibling enabled) |
+| `sibling_per_doc_limit` | `800` chars/sibling |
+
+#### C. Profile Injection
+- Module `query.profile_dependency` quyết định: khi nào inject profile note vào context.
+- Inject khi: topic major-dependent + user có profile, hoặc self-referential query (*"ngành của tôi"*).
+- **KHÔNG** inject khi: topic universal (*"học bổng"*) — tránh bias.
+- Format: `"Thông tin sinh viên: ngành CNTT [IT-E10] | Khóa: K68."`.
+
+---
+
+### BƯỚC 14: LLM GENERATION
+*File nguồn: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)*
+
+- **Model mặc định**: `deepseek-v4-flash` (provider: DeepSeek), temperature `0.0`, max tokens `1500`.
+- **Mode**: `"rag"` → system prompt chuyên biệt cho trả lời dựa trên context.
+- **Context-length error recovery**:
+  1. Nếu context quá dài → retry với `reranked[:2]`, `per_doc_limit=600`, `total_budget=1500`, `history_limit=3`.
+  2. Nếu vẫn lỗi → raise error yêu cầu user bắt đầu session mới.
+
+---
+
+### BƯỚC 15: SELF-EVALUATION & ANSWER QUALITY GATE
+*File nguồn: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)*
+
+#### A. Self-Evaluation (khi `self_eval_enabled=True`, mặc định `False`)
+- Chỉ chạy khi `top_score < self_eval_min_top_score` (mặc định `100.0` — effectively always skip do BGE raw logits).
+- LLM judge đánh giá: relevance, faithfulness, completeness.
+
+#### B. Answer Quality Gate (`_build_answer_quality_gate`)
+- Quét `no_info` patterns trong answer text.
+- Kết hợp tín hiệu: `dynamic_query`, `freshness_query`, `no_sources`, self-eval result.
+- Quyết định: `answer_status` ∈ {`answered`, `insufficient`, `stale_risk`} + `should_web_search`.
+
+#### C. Local Evidence Retry
+- Nếu quality gate yêu cầu web search BUT local evidence strong (best score ≥ `0.5`) → retry generate với local context trước khi fallback web.
+- Mục đích: Tránh gọi Tavily không cần thiết khi local docs đã tốt.
+
+---
+
+### BƯỚC 16: POST-GENERATION WEB FALLBACK (TAVILY)
+*File nguồn: [flows.py](file:///d:/GR/src/RAG_v2/pipeline/flows.py)*
+
+Nếu quality gate vẫn yêu cầu web search AND `tavily_fallback_enabled=True`:
+- **Tavily Search API**: Web search với domain whitelists (HUST official: `hust.edu.vn`, `ctt.hust.edu.vn`, …).
+- **Params**: `max_results=5`, `search_depth="basic"`, `web_result_count=3`, `content_char_limit=1500`.
+- **Rate limiting**: 1 req/sec, 3 retries exponential backoff.
+- **TTL cache**: 200 entries, 1 hour.
+- Kết quả web → re-generate answer với combined (local + web) context.
+- Web sources prepend vào `reranked` list (primary evidence cho new answer).
+
+---
+
+### BƯỚC 17: CACHE WRITE & RESPONSE
+
+- Cache final answer nếu: không phải no_info, không phải web fallback dynamic, quality OK.
+- **Dual cache**: `llm_cache.put()` (doc_id-based) + `llm_cache.put_by_query()` (query-only, cho P0 cache).
+- Return dict chứa: `answer`, `sources`, `timings_ms`, `rerank_trace`, `context_trace`, `answer_quality_gate`, `fusion_weights`, `collection_scores`, …
+
+---
+
+## 3. LUỒNG AGENT (COMPLEX QUERIES)
+
+*File nguồn: [react_agent.py](file:///d:/GR/src/RAG_v2/agent/react_agent.py), [planning.py](file:///d:/GR/src/RAG_v2/agent/planning.py), [tool_adapters.py](file:///d:/GR/src/RAG_v2/agent/tool_adapters.py)*
+
+Khi `_decide_complexity() → "complex"`, hệ thống sử dụng LangGraph StateGraph:
+
 ```text
-[BGE Embedding & E5 Embedding] ────────> [Qdrant Dual-Vector Search (BGE + E5)] ──┐
-                                                                                  ├──> [RRF / Linear Fusion]
-[User Query / Structured Query] ───────> [ES BM25 Keyword Search (Exact/Fuzzy)] ──┘
+START → Planner → Executor → Synthesize → END
 ```
 
-### Luồng xử lý Query (Query Processing)
+### Agent Components
+| Component | Model | Mô tả |
+|:----------|:------|:------|
+| **Planner** | `qwen2.5-7b-instruct` (local LM Studio) | Tool selection, retrieval plan generation (JSON) |
+| **Executor** | — | Thực thi plan steps song song, retry-with-relaxation |
+| **Synthesizer** | `gemini-3.1-flash-lite` (Gemini) | Final answer generation (quality-critical) |
+
+### Agent Tools
+| Tool | Mô tả |
+|:-----|:------|
+| `rag_search` | Single-collection vector search + reranking |
+| `multi_rag_search` | Multi-collection batch search |
+| `compare_cohorts` | So sánh 2 khóa sinh viên (K65 vs K70) |
+| `compare_programs` | So sánh 2 chương trình đào tạo (IT-E6 vs IT-E7) |
+| `web_search` | Tavily web search (wrapped) |
+| `exam_schedule_search` | Structured ES query cho lịch thi |
+
+### Agent Params
+- `max_iterations = 3`, `agent_temperature = 0.0`, `agent_max_tokens = 1200`.
+- `agent_tool_result_limit = 5000` chars/ToolMessage.
+- `agent_synthesis_max_tokens = 2500`.
+- Fallback: nếu agent fail → chạy classic RAG flow.
+
+---
+
+## 4. BẢNG TỔNG HỢP THAM SỐ HỆ THỐNG
+
+### Retrieval Parameters
+| Tham số | Giá trị | File |
+|:--------|:--------|:-----|
+| `top_k` | `7` | `settings.py` |
+| `vector_top_k` | `50` | `settings.py` |
+| `keyword_top_k` | `50` | `settings.py` |
+| `vector_pool_k` | `40` | `settings.py` |
+| `keyword_pool_k` | `40` | `settings.py` |
+| `vector_weight` | `0.80` | `settings.py` |
+| `keyword_weight` | `0.20` | `settings.py` |
+| `fusion_mode` | `"rrf"` | `settings.py` |
+| `fusion_rrf_k` | `10` | `settings.py` |
+| `vector_bge_weight` | `0.50` | `settings.py` |
+| `vector_e5_weight` | `0.50` | `settings.py` |
+| `raw_candidate_multiplier` | `4.0` | `settings.py` |
+| `raw_candidate_min` | `20` | `settings.py` |
+
+### Reranker Parameters
+| Tham số | Giá trị | File |
+|:--------|:--------|:-----|
+| `reranker_model` | `BAAI/bge-reranker-v2-m3` | `settings.py` |
+| `reranker_top_k` | `7` | `settings.py` |
+| `reranker_score_threshold` | `0.0` | `settings.py` |
+| `reranker_table_score_threshold` | `-1.0` | `settings.py` |
+| `reranker_min_top_k` | `3` | `settings.py` |
+
+### LLM Models
+| Vai trò | Provider | Model | Temperature | Max Tokens |
+|:--------|:---------|:------|:------------|:-----------|
+| **Answer Generation** | DeepSeek | `deepseek-v4-flash` | `0.0` | `1500` |
+| **Reflection** | Gemini | `gemini-3.1-flash-lite` | `0.0` | `1024` |
+| **Agent Planning** | LM Studio (local) | `qwen2.5-7b-instruct` | `0.0` | `1200` |
+| **Agent Synthesis** | Gemini | `gemini-3.1-flash-lite` | `0.2` | `2500` |
+
+### Routing Thresholds
+| Tham số | Giá trị | File |
+|:--------|:--------|:-----|
+| `domain_confidence_threshold` | `0.65` | `settings.py` |
+| `CONFIDENCE_THRESHOLD` (collection selector) | `0.55` | `collection_selector.py` |
+| `MULTI_LABEL_THRESHOLD` (classifier) | `0.35` | `domain_classifier.py` |
+| `LOW_CONFIDENCE_CEILING` | `0.55` | `domain_classifier.py` |
+
+### Feature Flags
+| Flag | Mặc định | Mô tả |
+|:-----|:---------|:------|
+| `reflection_enabled` | `True` | Query rewriting |
+| `domain_routing_enabled` | `True` | Collection-aware routing |
+| `hyde_enabled` | `True` | HyDE post-rerank fallback |
+| `parent_context_enabled` | `True` | Parent chunk expansion |
+| `agent_enabled` | `True` | LangGraph agent path |
+| `sibling_expansion_enabled` | `False` | Sibling chunk expansion |
+| `score_cliff_enabled` | `False` | Per-collection score cliff |
+| `self_eval_enabled` | `False` | LLM self-evaluation |
+| `tavily_fallback_enabled` | `False` | Tavily web fallback |
+| `web_fallback_on_dynamic` | `False` | Web fallback on dynamic queries |
+| `web_fallback_on_no_info` | `False` | Web fallback on no-info |
+
+---
+
+## 5. EMBEDDING MODELS
+
+| Model | Class | Dimension | Library | LRU Cache |
+|:------|:------|:----------|:--------|:----------|
+| `BAAI/bge-m3` | `BGEm3Embedder` | 1024 | FlagEmbedding (`BGEM3FlagModel`) | 512 entries |
+| `intfloat/multilingual-e5-large` | `E5MultilingualEmbedder` | 1024 | sentence-transformers | 512 entries |
+| Ensemble (default) | `EnsembleEmbedder` | 1024 | Weighted average + L2 norm | — |
+
+- Device auto-detection: CUDA → MPS → CPU.
+- BGE-M3 hỗ trợ sparse embeddings cho hybrid search.
+- E5 tự thêm prefix `"query: "` / `"passage: "`.
+
+---
+
+## 6. TÓM TẮT ĐƯỜNG ĐI CÁC THÀNH PHẦN
+
+### Full Pipeline Path (mode=auto, route=simple)
 ```text
-[Raw Query Input]
-       │
-       ▼ (Unicode NFC chuẩn hóa & Dọn dẹp khoảng trắng)
-[Normalized Query]
-       │
-       ▼ (Định tuyến ý định: RAG / Chitchat / Tool)
-[Intent & Domain Classified]
-       │
-       ▼ (Viết lại văn phong học thuật & Trích thực thể ngành/khóa)
-[Reflected & Entity Extracted]
-       │
-       ▼ (Tách nhỏ nếu hỏi so sánh hoặc bóc tách từ khóa gây loãng)
-[Comparison Decomposed / Stripped Query] ─────> (Sẵn sàng đi vào tìm kiếm lai)
+Frontend (POST /chat/stream)
+  └─ Backend: query_stream()
+       ├─ 1. Reflection (Gemini flash-lite) → rewritten query + entities
+       ├─ 2. Complexity Routing (Tier 0→1→2) → "simple"
+       ├─ 3. Re-route on reflected query (classifier, no history)
+       ├─ 4. Collection selection + freshness lock
+       ├─ 5. Metadata pre-filtering (ES fallback chain)
+       ├─ 6. Dual-embed (BGE + E5) → Parallel hybrid search per collection
+       ├─ 7. Global pooling → RRF fusion (k=10)
+       ├─ 8. [Optional] Sibling expansion
+       ├─ 9. Reranking (BGE-reranker-v2-m3) + fallback chain
+       ├─ 10. [Optional] HyDE second-pass retrieval
+       ├─ 11. Validity filter + cross-reference resolution
+       ├─ 12. [Optional] Score cliff + parent context expansion
+       ├─ 13. LLM cache check
+       ├─ 14. Pre-generation web decision
+       ├─ 15. Context budgeting + profile injection
+       ├─ 16. LLM generation (DeepSeek v4-flash, streaming)
+       ├─ 17. Quality gate + [optional] web fallback
+       └─ 18. Cache write → SSE stream to frontend
 ```
 
-### Luồng xử lý BM25 Search (Tìm kiếm từ khóa)
+### Hybrid Search Detail
 ```text
-[Stripped Search Query]
-       │
-       ▼ (Quét từ loại trừ & Thiết lập must_not)
-[Negation Exclusion Handled]
-       │
-       ▼ (Pass 1: Match cụm từ chính xác cao + Tín chỉ/Bảng biểu Boost)
-[Exact Phrase Matches]
-       │
-       ▼ (Kiểm tra số lượng: Nếu ít ứng viên -> kích hoạt Pass 2)
-[Fuzzy Fallback Matching (fuzziness: AUTO)]
-       │
-       ▼ (Gộp và Sắp xếp kết quả thô BM25)
-[Merged Keyword Results]
+[BGE-M3 Embedding + E5 Embedding] ──→ [Qdrant Dual-Vector Batch Search] ──┐
+                                                                           ├──→ [RRF / Linear Fusion]
+[Reflected Query + Metadata Filters] ──→ [ES BM25 Two-Pass Search] ───────┘
+```
+
+### BM25 Search Detail
+```text
+[Retrieval Query]
+    ├─ Negation exclusion (must_not)
+    ├─ Pass 1: match_phrase (exact) + table boost
+    ├─ [if sparse] Pass 2: fuzzy fallback (AUTO)
+    └─ Merge + dedup → Keyword Pool
 ```
