@@ -563,12 +563,79 @@ def process_ctdt_directory(ctdt_root: str):
     return results
 
 
+def process_fill_empty_source(data_root: str):
+    """
+    Quét toàn bộ thư mục ctdt và quydinh.
+    Nếu metadata['source'] bị rỗng, điền tên file (thay khoảng trắng bằng _, bỏ đuôi _chunks).
+    """
+    data_path = Path(data_root)
+
+    print(f"\n{'='*70}")
+    print(f"📂 FILL EMPTY SOURCE - METADATA ENRICHMENT")
+    print(f"   Root: {data_path}")
+    print(f"{'='*70}\n")
+
+    targets = []
+    quydinh_dir = data_path / "quydinh"
+    ctdt_dir = data_path / "ctdt"
+
+    if quydinh_dir.exists():
+        targets.extend(list(quydinh_dir.rglob("*_chunks.json")))
+    if ctdt_dir.exists():
+        targets.extend(list(ctdt_dir.rglob("*_chunks.json")))
+
+    updated_files = 0
+    updated_chunks = 0
+
+    for file_path in targets:
+        with open(file_path, "r", encoding="utf-8") as f:
+            chunks = json.load(f)
+
+        source_name = file_path.stem.replace(" ", "_")
+        if source_name.endswith("_chunks"):
+            source_name = source_name[:-7]
+        if source_name.endswith("_converted"):
+            source_name = source_name[:-10]
+
+        changed = False
+        for chunk in chunks:
+            meta = chunk.get("metadata")
+            if meta is None:
+                meta = {}
+                chunk["metadata"] = meta
+            
+            if not meta.get("source"):
+                meta["source"] = source_name
+                changed = True
+                updated_chunks += 1
+
+        if changed:
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(chunks, f, ensure_ascii=False, indent=2)
+            updated_files += 1
+            print(f"  ✅ Updated: {file_path.name} -> source: {source_name}")
+        else:
+            print(f"  ➖ Skipped: {file_path.name} (no empty sources)")
+
+    print(f"\n{'='*70}")
+    print(f"📊 SUMMARY")
+    print(f"   Total files scanned: {len(targets)}")
+    print(f"   Files updated: {updated_files}")
+    print(f"   Chunks updated: {updated_chunks}")
+    print(f"{'='*70}\n")
+
+
 if __name__ == "__main__":
     import sys
+    import argparse
 
-    if len(sys.argv) > 1:
-        ctdt_root = sys.argv[1]
+    parser = argparse.ArgumentParser(description="Metadata Enrichment")
+    parser.add_argument("--fill-source", action="store_true", help="Fill empty source in quydinh & ctdt")
+    parser.add_argument("ctdt_root", nargs="?", default=str(Path(__file__).parent.parent / "data" / "ctdt"))
+    args = parser.parse_args()
+
+    if args.fill_source:
+        data_root = str(Path(__file__).parent.parent / "data")
+        process_fill_empty_source(data_root)
     else:
-        ctdt_root = str(Path(__file__).parent.parent / "data" / "ctdt")
-
-    process_ctdt_directory(ctdt_root)
+        process_ctdt_directory(args.ctdt_root)

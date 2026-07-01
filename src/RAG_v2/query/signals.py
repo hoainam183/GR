@@ -78,6 +78,9 @@ _PERSONAL_PATTERNS = (
     r"\b(?:nganh|chuong\s+trinh|hoc\s+phan|diem|cpa|gpa|khoa|truong)\s+(?:cua\s+)?(?:toi|minh|em)\b",
     r"\b(?:toi|minh|em)\s+(?:hoc\s+nganh|la\s+sinh\s+vien)\b",
     r"\bsinh\s+vien\s+nhu\s+(?:toi|minh|em)\b",
+    # Implicit personal with action verbs
+    r"\b(?:toi|minh|em)\s+(?:dang\s+hoc|muon\s+biet|can\s+biet|can\s+hoi)\b",
+    r"\b(?:toi|minh|em)\s+(?:co\s+the|co\s+du|co\s+dat|da\s+dat|da\s+hoc|da\s+dang\s+ky)\b",
 )
 
 _ELIGIBILITY_PATTERNS = (
@@ -98,18 +101,31 @@ _EXACT_LOOKUP_PATTERNS = (
 )
 
 _TABLE_LOOKUP_PATTERNS = (
-    r"\b(bang|khung|phu luc|muc|thang diem|quy doi|xep loai)\b",
-    r"\b(diem ren luyen|diem cong|tin chi|hoc phi|muc thu|chuan)\b",
+    # "bang" only with table-context suffix (avoid "bang tot nghiep", "bang cach")
+    r"\bbang\s+(?:diem|quy doi|xep loai|hoc phi|tin chi|ren luyen|chuyen doi|so sanh|ngoai ngu)\b",
+    # "muc" only with metric-context suffix (avoid "muc dich", "muc tieu")
+    r"\bmuc\s+(?:diem|hoc phi|thu|luong|xep loai)\b",
+    # "chuan" only with standard-context suffix (avoid "chuan bi")
+    r"\bchuan\s+(?:dau ra|ngoai ngu)\b",
+    # Specific enough to keep bare
+    r"\b(khung|phu luc|thang diem|quy doi|xep loai)\b",
+    r"\b(diem ren luyen|diem cong|hoc phi|muc thu)\b",
     r"\b(thoi luong|ma hoc phan|co ma|ma\s+la gi|danh cho ai|xep hoc)\b",
-    r"\b(?:mon|hoc\s+phan|chuong\s+trinh|khung|bang|dao\s+tao).{0,30}\b(?:hoc\s+ky|ky)\s*\d+\b",
+    r"\b(?:mon|hoc\s+phan|chuong\s+trinh|khung|dao\s+tao).{0,30}\b(?:hoc\s+ky|ky)\s*\d+\b",
     r"\b(thuoc nhom|nhom\s*(?:may|\d+)|bac\s*\d+(?:\.\d+)?)\b",
     r"\bfl\d{4}\b",
 )
 
 _PROCEDURAL_PATTERNS = (
     r"\b(chua nhan|chua duoc|khong nhan|khong duoc|bi thieu|sai diem)\b",
-    r"\b(minh chung|xac nhan|cap nhat|bo sung|nop|gui|lien he|bieu mau|form)\b",
+    # Specific enough to keep bare
+    r"\b(minh chung|xac nhan|lien he|bieu mau|form)\b",
     r"\b(khieu nai|phuc khao|kiem tra lai|hoi ai|lam sao|can lam gi)\b",
+    # Compound patterns for ambiguous words
+    r"\bnop\s+(?:don|ho so|bieu mau|minh chung|giay to|yeu cau|lai)\b",
+    r"\bgui\s+(?:don|ho so|yeu cau|email|thu|khieu nai|bieu mau)\b",
+    r"\bcap nhat\s+(?:diem|ho so|thong tin|bang diem|ket qua|tinh trang)\b",
+    r"\bbo sung\s+(?:ho so|giay to|minh chung|diem|hoc phan|chung chi)\b",
 )
 
 _FRESHNESS_PATTERNS = (
@@ -124,13 +140,24 @@ _SCHEDULE_PATTERNS = (
 )
 
 _DEADLINE_PATTERNS = (
-    r"\b(deadline|han|het han|thoi han|ngay cuoi|chot|dong cong|mo cong)\b",
-    r"\b(nop|dang ky|dong hoc phi|phuc khao).{0,40}\b(den khi nao|bao gio het han|het han|deadline|han)\b",
+    # Removed bare "han" — too many collisions (han che, han quoc)
+    r"\b(deadline|het han|thoi han|ngay cuoi|chot|dong cong|mo cong)\b",
+    # "han" only with deadline-action suffix
+    r"\bhan\s+(?:nop|dang ky|cuoi|cuoi cung|dong|thanh toan|hoc phi)\b",
+    r"\b(?:nop|dang ky|dong hoc phi|phuc khao).{0,40}\b(?:den khi nao|bao gio het han|het han|deadline|han)\b",
 )
 
 _ANNOUNCEMENT_PATTERNS = (
-    r"\b(thong bao|tin tuc|bai viet|danh sach|cong bo|ket qua|trieu tap|nhac lich)\b",
-    r"\bdanh sach.{0,30}\b(nhan|duoc nhan|sinh vien|hoc bong)\b",
+    # Specific enough to keep bare
+    r"\b(thong bao|tin tuc|bai viet|trieu tap|nhac lich)\b",
+    # "danh sach" only with announcement-context suffix
+    r"\bdanh sach\s+(?:nhan|duoc nhan|sinh vien|trung tuyen|duoc xet|xet duyet|thi|du thi)\b",
+    # "ket qua" only with announcement-context suffix
+    r"\bket qua\s+(?:xet|tuyen|thi|xet tuyen|hoc bong|ren luyen|trung tuyen|phan loai)\b",
+    # "cong bo" only with announcement-context suffix
+    r"\bcong bo\s+(?:diem|ket qua|danh sach|hoc bong|xet tuyen)\b",
+    # Compound pattern kept
+    r"\bdanh sach.{0,30}\b(?:nhan|duoc nhan|sinh vien|hoc bong)\b",
 )
 
 _PROGRAM_PATTERNS = (
