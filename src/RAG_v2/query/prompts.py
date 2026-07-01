@@ -155,7 +155,7 @@ tôi", "nó", "đó"), ưu tiên giải tham chiếu theo thứ tự:
   thực thể cụ thể gần nhất từ USER_PROFILE hoặc CHAT_HISTORY.
 4. Nếu CURRENT_QUERY đã nêu rõ ngành/mã ngành cụ thể (ví dụ: IT-E7, IT-E6, ITE6, ITE7):
   - Bắt buộc GIỮ NGUYÊN thực thể đó, KHÔNG thay bằng ngành từ USER_PROFILE/CHAT_HISTORY.
-  - Nếu danh mục mã ngành/tên ngành tin cậy cung cấp được tên tương ứng, thêm tên ngành bên cạnh mã để tăng độ chính xác truy hồi. Không dùng tên ngành mơ hồ nếu không chắc.
+  - KHÔNG TỰ Ý ĐOÁN TÊN NGÀNH VÀ THÊM VÀO. Hệ thống đã có logic tự động mở rộng mã ngành thành tên ngành chính xác sau đó. Chỉ trả về mã ngành theo định dạng chuẩn (ví dụ: IT-E7).
 5. Nếu CURRENT_QUERY có cả tên ngành và mã ngành nhưng mâu thuẫn, ưu tiên mã ngành
   được nêu trong CURRENT_QUERY; không tạo tổ hợp tên ngành + mã ngành mâu thuẫn.
 6. Nếu không đủ thông tin để giải tham chiếu, KHÔNG bịa đặt. Giữ nguyên phần mơ hồ \
@@ -243,13 +243,13 @@ CÂU HỎI HIỆN TẠI: Điều kiện đạt học bổng là gì?
 STANDALONE QUERY: Điều kiện đạt học bổng là gì?
 
 ---
-Ví dụ 7 — Follow-up so sánh hai mã ngành: chuẩn hóa mã và giữ tên ngành tương ứng khi biết chắc:
+Ví dụ 7 — Follow-up so sánh hai mã ngành: chuẩn hóa mã ngành:
 USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt - Nhật (IT-E6), Khóa K68
 CHAT_HISTORY:
 - Người dùng: Học phần IT3080 trong chương trình IT-E6 thì thế nào?
 - Trợ lý: Trong chương trình IT-E6, học phần IT3080 (Mạng máy tính) là học phần cơ sở 3 tín chỉ.
 CÂU HỎI HIỆN TẠI: so sánh với ITE7
-STANDALONE QUERY: So sánh học phần IT3080 trong chương trình IT-E6 (Công nghệ thông tin Việt-Nhật) và IT-E7 (Công nghệ thông tin Global ICT)
+STANDALONE QUERY: So sánh học phần IT3080 trong chương trình IT-E6 và IT-E7
 
 ---
 Ví dụ 8 — So sánh với thực thể mới, tuyệt đối không rò rỉ thực thể cũ đã lỗi thời ở các lượt chat đầu:
@@ -305,7 +305,7 @@ CHAT_HISTORY:
 - Người dùng: môn mạng máy tính có mấy tín chỉ
 - Trợ lý: Học phần IT3080 Mạng máy tính có 3 tín chỉ trong chương trình IT-E6.
 CÂU HỎI HIỆN TẠI: với IT1 thì sao
-STANDALONE QUERY: Môn Mạng máy tính (IT3080) trong ngành IT1 (Khoa học Máy tính) có mấy tín chỉ?
+STANDALONE QUERY: Môn Mạng máy tính (IT3080) trong ngành IT1 có mấy tín chỉ?
 (LƯU Ý: "với IT1 thì sao" là follow-up thiếu chủ đề → kế thừa "mạng máy tính / tín chỉ" từ history, chỉ đổi ngành sang IT1.)
 
 ---
@@ -323,7 +323,7 @@ Ví dụ 15 — Mã ngành nêu rõ trong CURRENT_QUERY thắng USER_PROFILE (KH
 USER_PROFILE: sinh viên ngành Công nghệ thông tin Việt-Nhật (IT-E6)
 CHAT_HISTORY: (khong co)
 CÂU HỎI HIỆN TẠI: môn mạng máy tính ITE7 mấy tín chỉ
-STANDALONE QUERY: Môn Mạng máy tính trong ngành IT-E7 (Công nghệ thông tin Global ICT) có mấy tín chỉ?
+STANDALONE QUERY: Môn Mạng máy tính trong ngành IT-E7 có mấy tín chỉ?
 (LƯU Ý: giữ IT-E7 từ câu hỏi, TUYỆT ĐỐI KHÔNG thay bằng IT-E6 của profile.)"""
 
 REWRITE_WITH_HISTORY_TEMPLATE = """\
