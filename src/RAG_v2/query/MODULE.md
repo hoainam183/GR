@@ -1,10 +1,10 @@
 # Module: `query`
 
-Source-verified: 2026-06-24 from `query/complexity_router.py`, `query/router.py`, `query/domain_classifier.py`, `query/reflection.py`, `query/course_catalog.py`, `query/profile_dependency.py`, `query/decomposer.py`, `query/signals.py`, `query/structured_query.py`, `query/prompts.py`, `query/training_data.py`, `query/train_classifier.py`, and `query/__init__.py`.
+Source-verified: 2026-06-24 from `query/complexity_router.py`, `query/router.py`, `query/domain_classifier.py`, `query/reflection.py`, `query/course_catalog.py`, `query/signals.py`, `query/structured_query.py`, `query/prompts.py`, `query/training_data.py`, `query/train_classifier.py`, and `query/__init__.py`.
 
 ## Purpose
 
-`query` converts raw user text plus session/profile context into routing and retrieval-ready structured information. It handles complexity routing, domain classification, query decomposition, query rewriting/reflection, deterministic entity extraction, reusable query signals, and structured exclusion parsing.
+`query` converts raw user text plus session/profile context into routing and retrieval-ready structured information. It handles complexity routing, domain classification, query rewriting/reflection, deterministic entity extraction, reusable query signals, and structured exclusion parsing.
 
 ## File Map
 
@@ -15,8 +15,6 @@ query/
   domain_classifier.py  Two-stage BGE-M3 + sklearn intent + multi-label domain classifier.
   reflection.py         PII strip, profile merge, LLM rewrite, guardrails, entity extraction.
   course_catalog.py     Major-scoped course-name/alias -> course-code lookup (lazy JSON load).
-  profile_dependency.py Topic gate for whether major/cohort should affect retrieval/generation.
-  decomposer.py         LLM subquery decomposition for multi-source/comparison queries.
   signals.py            QuerySignals dataclass + accent-insensitive analysis and phrase extraction.
   structured_query.py   Text normalization, code/cohort extraction, exclude-term parsing.
   prompts.py            Router, rewrite/reflection, and Tier-3 domain-classification prompts.
