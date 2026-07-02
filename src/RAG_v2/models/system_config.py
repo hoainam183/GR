@@ -36,6 +36,8 @@ PERSISTABLE_LLM_FIELDS = frozenset(
         "agent_synthesis_model",
         "reflection_model",
         "reflection_provider",
+        "llm_clean_provider",
+        "llm_clean_model",
     }
 )
 

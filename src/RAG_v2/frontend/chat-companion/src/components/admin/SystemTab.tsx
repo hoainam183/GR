@@ -67,6 +67,16 @@ const AUX_PROVIDER_OPTIONS: ModelOption[] = [
   { value: 'ollama', label: 'Ollama' },
 ];
 
+// Sentinel used only in this form to represent "unset" — Radix Select rejects
+// an empty-string item value. Reformat inherits the main Chat provider/model
+// (llm_clean_provider/model = "") when this is selected.
+const LLM_CLEAN_DEFAULT = '__default__';
+
+const LLM_CLEAN_PROVIDER_OPTIONS: ModelOption[] = [
+  { value: LLM_CLEAN_DEFAULT, label: 'Mặc định (theo Chat Provider)' },
+  ...LLM_PROVIDER_OPTIONS,
+];
+
 const DEEPSEEK_MODEL_OPTIONS: ModelOption[] = [
   { value: 'deepseek-v4-flash', label: 'DeepSeek V4 Flash' },
 ];
@@ -405,6 +415,8 @@ export default function SystemTab() {
           agent_synthesis_model: cfg.agent_synthesis_model,
           reflection_provider: cfg.reflection_provider,
           reflection_model: cfg.reflection_model,
+          llm_clean_provider: cfg.llm_clean_provider,
+          llm_clean_model: cfg.llm_clean_model,
         });
       })
       .catch(() => toast.error('Không thể tải cấu hình LLM'))
@@ -516,6 +528,23 @@ export default function SystemTab() {
     });
   };
 
+  // llm_clean_provider/model may legitimately be blank ("" = inherit the main
+  // Chat provider/model) — the LLM_CLEAN_DEFAULT sentinel round-trips that.
+  const llmCleanModelOptions = [
+    { value: LLM_CLEAN_DEFAULT, label: 'Mặc định (theo Chat Model)' },
+    ...chatModelOptionsForProvider(llmForm.llm_clean_provider || llmForm.llm_provider),
+  ];
+
+  const handleLlmCleanProviderChange = (raw: string) => {
+    const llm_clean_provider = raw === LLM_CLEAN_DEFAULT ? '' : raw;
+    setLlmForm((prev) => ({ ...prev, llm_clean_provider }));
+  };
+
+  const handleLlmCleanModelChange = (raw: string) => {
+    const llm_clean_model = raw === LLM_CLEAN_DEFAULT ? '' : raw;
+    setLlmForm((prev) => ({ ...prev, llm_clean_model }));
+  };
+
   const handleLLMSave = async () => {
     setLlmSaving(true);
     try {
@@ -540,6 +569,10 @@ export default function SystemTab() {
         body.reflection_provider = llmForm.reflection_provider;
       if (llmForm.reflection_model && llmForm.reflection_model !== llmConfig?.reflection_model)
         body.reflection_model = llmForm.reflection_model;
+      if (llmForm.llm_clean_provider && llmForm.llm_clean_provider !== llmConfig?.llm_clean_provider)
+        body.llm_clean_provider = llmForm.llm_clean_provider;
+      if (llmForm.llm_clean_model && llmForm.llm_clean_model !== llmConfig?.llm_clean_model)
+        body.llm_clean_model = llmForm.llm_clean_model;
       const temp = parseFloat(llmForm.chat_temperature);
       if (!isNaN(temp) && temp !== llmConfig?.chat_temperature)
         body.chat_temperature = temp;
@@ -568,6 +601,8 @@ export default function SystemTab() {
         agent_synthesis_model: cfg.agent_synthesis_model,
         reflection_provider: cfg.reflection_provider,
         reflection_model: cfg.reflection_model,
+        llm_clean_provider: cfg.llm_clean_provider,
+        llm_clean_model: cfg.llm_clean_model,
       }));
     } catch {
       toast.error('Không thể cập nhật cấu hình LLM');
@@ -933,7 +968,26 @@ export default function SystemTab() {
                   value={llmForm.reflection_model}
                   onValueChange={(reflection_model) => setLlmForm((p) => ({ ...p, reflection_model }))}
                 />
+                <ModelSelectField
+                  id="llm-clean-provider"
+                  label="LLM Reformat Provider"
+                  options={LLM_CLEAN_PROVIDER_OPTIONS}
+                  value={llmForm.llm_clean_provider || LLM_CLEAN_DEFAULT}
+                  onValueChange={handleLlmCleanProviderChange}
+                />
+                <ModelSelectField
+                  id="llm-clean-model"
+                  label="LLM Reformat Model"
+                  options={llmCleanModelOptions}
+                  value={llmForm.llm_clean_model || LLM_CLEAN_DEFAULT}
+                  onValueChange={handleLlmCleanModelChange}
+                />
               </div>
+              <p className="text-xs text-muted-foreground">
+                Provider/model dùng cho bước "LLM Reformat" tùy chọn trong pipeline
+                upload tài liệu (chuẩn hoá heading/bảng trước khi chunk). Để mặc định
+                sẽ tái dùng Chat Provider/Model ở trên.
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="chat-temp" className="text-xs">Temperature</Label>

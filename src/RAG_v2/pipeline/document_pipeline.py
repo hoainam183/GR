@@ -348,6 +348,9 @@ class DocumentPipeline:
 
         reformat_settings = self._settings.model_copy(
             update={
+                "llm_provider": (
+                    self._settings.llm_clean_provider or self._settings.llm_provider
+                ),
                 "chat_max_tokens": self._settings.llm_clean_max_tokens,
                 "chat_model": (
                     self._settings.llm_clean_model or self._settings.chat_model
@@ -356,6 +359,27 @@ class DocumentPipeline:
             }
         )
         return create_llm(reformat_settings)
+
+    async def _apply_persisted_llm_config(self, db: AsyncIOMotorDatabase) -> None:
+        """Best-effort pick up admin-configured LLM overrides (e.g. reformat provider).
+
+        DocumentPipeline builds its own ``Settings()`` once at process start and
+        is not part of the ``RAGPipeline`` hot-reload path, so it re-reads the
+        persisted admin config before each reformat to stay in sync with changes
+        made via the admin LLM config panel without requiring a restart.
+        """
+        try:
+            from models.system_config import get_llm_config, merge_llm_config_into_settings
+
+            persisted = await get_llm_config(db)
+            if persisted:
+                merge_llm_config_into_settings(self._settings, persisted)
+        except Exception:
+            logger.warning(
+                "Failed to load persisted LLM config for reformat; "
+                "using current settings.",
+                exc_info=True,
+            )
 
     async def llm_clean(self, doc_id: str, db: AsyncIOMotorDatabase) -> None:
         """LLM-based markdown structure reformat (optional step after regex clean).
@@ -390,6 +414,7 @@ class DocumentPipeline:
 
             from document_loader.llm_reformatter import LLMDocumentReformatter
 
+            await self._apply_persisted_llm_config(db)
             llm = self._build_reformat_llm()
             reformatter = LLMDocumentReformatter(
                 llm,

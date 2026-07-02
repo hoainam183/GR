@@ -246,16 +246,20 @@ export default function DocumentReview() {
     if (!window.confirm('Bạn có chắc muốn rollback lại một bước? Dữ liệu của bước hiện tại/lỗi sẽ bị xóa và lùi về trạng thái trước đó.')) return;
     setRetrying('rollback');
     try {
+      // POST /rollback is synchronous on the backend — the DB/file changes are
+      // already committed by the time this resolves. Refresh state (and only
+      // clear `retrying` in `finally`, below) BEFORE returning, so the button
+      // stays disabled until the UI reflects the new status. Doing this via a
+      // setTimeout previously left a window where a second click could fire a
+      // real second rollback against a stale on-screen status.
       await rollbackDocument(id);
       toast.success('Đã rollback lại một bước thành công');
-      setTimeout(async () => {
-        setMdContent(null);
-        setCleanedContent(null);
-        setLlmCleanedContent(null);
-        setChunkSets([]);
-        setViewingStrategy(undefined);
-        await fetchDoc();
-      }, 1000);
+      setMdContent(null);
+      setCleanedContent(null);
+      setLlmCleanedContent(null);
+      setChunkSets([]);
+      setViewingStrategy(undefined);
+      await fetchDoc();
     } catch (error: unknown) {
       toast.error(apiErrorMessage(error, 'Rollback thất bại'));
     } finally {

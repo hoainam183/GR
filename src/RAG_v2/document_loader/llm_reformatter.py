@@ -78,11 +78,17 @@ class LLMDocumentReformatter:
         max_section_tokens: int = 2500,
         length_ratio_min: float = 0.85,
         length_ratio_max: float = 1.20,
+        min_section_chars_for_llm: int = 20,
     ) -> None:
         self._llm = llm
         self.max_section_tokens = max_section_tokens
         self.length_ratio_min = length_ratio_min
         self.length_ratio_max = length_ratio_max
+        # Sections shorter than this (e.g. a bare heading with no body between
+        # it and the next heading) are passed through unchanged: not worth an
+        # LLM round trip, and their tiny absolute length makes the length-ratio
+        # check noisy (a 1-2 char difference swings the ratio wildly).
+        self.min_section_chars_for_llm = min_section_chars_for_llm
 
     # ------------------------------------------------------------------
     # Public API
@@ -97,9 +103,26 @@ class LLMDocumentReformatter:
 
         sections = self._split_into_sections(cleaned_md)
         context = self._build_context(doc_metadata)
-        reformatted = [self._reformat_section(s, context) for s in sections]
+
+        reformatted: List[str] = []
+        warnings: List[str] = []
+        for idx, section in enumerate(sections):
+            result_section = self._reformat_section(section, context)
+            reformatted.append(result_section)
+            # Only sections actually sent to the LLM can have drifted — skip
+            # validating pass-through (trivial) sections.
+            if not self._is_trivial(section):
+                warnings.extend(
+                    self._validate_section_preservation(
+                        section, result_section, self._section_label(section, idx)
+                    )
+                )
+
         merged = self._merge_sections(reformatted)
-        warnings = self._validate_preservation(cleaned_md, merged)
+        # Whole-document check as a backstop: catches cross-section issues
+        # (e.g. a section dropped entirely during merge) that a per-section
+        # comparison alone wouldn't see.
+        warnings.extend(self._validate_preservation(cleaned_md, merged))
         logger.info(
             "Reformatted document into %d section(s); %d preservation warning(s).",
             len(sections),
@@ -163,9 +186,26 @@ class LLMDocumentReformatter:
     # ------------------------------------------------------------------
 
     def _reformat_section(self, section: str, context: Optional[str]) -> str:
-        """Call the LLM to structurally normalise one section (blocking)."""
+        """Call the LLM to structurally normalise one section (blocking).
+
+        Trivial sections (see :meth:`_is_trivial`) are returned unchanged —
+        skips a wasted LLM round trip for e.g. a bare heading with no body.
+        """
+        if self._is_trivial(section):
+            return section
         raw = self._llm.generate(section, context=context, mode="reformat")
         return self._strip_code_fence(raw)
+
+    def _is_trivial(self, section: str) -> bool:
+        """True for sections too small to meaningfully reformat or validate."""
+        return len(section.strip()) < self.min_section_chars_for_llm
+
+    @staticmethod
+    def _section_label(section: str, index: int) -> str:
+        """Short human-readable pointer to a section, for per-section warnings."""
+        first_line = next((ln.strip() for ln in section.splitlines() if ln.strip()), "")
+        snippet = first_line[:60]
+        return f"mục {index + 1}: {snippet}" if snippet else f"mục {index + 1}"
 
     @staticmethod
     def _strip_code_fence(text: str) -> str:
@@ -194,14 +234,31 @@ class LLMDocumentReformatter:
 
     def _validate_preservation(self, original: str, reformatted: str) -> List[str]:
         """Compare output vs input; return warnings (never raises, never drops)."""
-        warnings: List[str] = []
-
         if not reformatted.strip():
-            warnings.append(
-                "Kết quả reformat rỗng — LLM có thể đã xoá toàn bộ nội dung."
-            )
-            return warnings
+            return ["Kết quả reformat rỗng — LLM có thể đã xoá toàn bộ nội dung."]
+        return self._run_preservation_checks(original, reformatted)
 
+    def _validate_section_preservation(
+        self, original: str, reformatted: str, label: str
+    ) -> List[str]:
+        """Same checks as :meth:`_validate_preservation`, scoped to one section.
+
+        A whole-document aggregate check can mask a single section's content
+        loss when other (larger) sections are faithfully reproduced — this
+        catches that case and tags the message with *label* so the admin
+        knows where to look.
+        """
+        if not reformatted.strip():
+            return [
+                f"[{label}] Kết quả reformat rỗng — LLM có thể đã xoá toàn bộ nội dung."
+            ]
+        return [
+            f"[{label}] {w}"
+            for w in self._run_preservation_checks(original, reformatted)
+        ]
+
+    def _run_preservation_checks(self, original: str, reformatted: str) -> List[str]:
+        warnings: List[str] = []
         warnings.extend(self._check_length_ratio(original, reformatted))
         warnings.extend(
             self._check_missing_tokens(

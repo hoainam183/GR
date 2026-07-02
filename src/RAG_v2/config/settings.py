@@ -316,6 +316,10 @@ class Settings(BaseSettings):
     # Max input tokens per LLM call; keep below llm_clean_max_tokens so the
     # (roughly equal-length) reformatted output has headroom to fit.
     llm_clean_max_section_tokens: int = 2500
+    # Empty = reuse llm_provider; set (deepseek | gemini | lm_studio) to run the
+    # reformat step on a different provider than answer generation. Admin-editable
+    # at runtime via the persisted LLM config (models/system_config.py).
+    llm_clean_provider: str = ""
     # Empty = reuse chat_model; set to override the model for reformat only.
     llm_clean_model: str = ""
     # Preservation guardrail: reformatted/original character-length ratio outside

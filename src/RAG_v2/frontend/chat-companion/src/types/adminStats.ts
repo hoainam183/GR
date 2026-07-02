@@ -122,6 +122,8 @@ export interface LLMConfig {
   reflection_enabled: boolean;
   reflection_provider: string;
   reflection_model: string;
+  llm_clean_provider: string;
+  llm_clean_model: string;
 }
 
 export interface LLMConfigUpdateBody {
@@ -137,6 +139,8 @@ export interface LLMConfigUpdateBody {
   agent_synthesis_model?: string;
   reflection_provider?: string;
   reflection_model?: string;
+  llm_clean_provider?: string;
+  llm_clean_model?: string;
 }
 
 export interface LLMConfigUpdateResponse {
