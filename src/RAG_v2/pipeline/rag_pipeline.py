@@ -27,7 +27,7 @@ from agent.react_agent import ReActAgent
 from config.settings import Settings
 from llm import BaseLLM, create_llm
 from llm.self_eval import SelfEvaluator
-from query.decomposer import QueryDecomposer
+
 from query.domain_classifier import MULTI_LABEL_THRESHOLD
 from query.prompts import (
     COMPLEXITY_CLASSIFICATION_PROMPT,
@@ -269,7 +269,7 @@ class _PreparedLLMRuntime:
     chat: BaseLLM
     self_evaluator: Optional[SelfEvaluator]
     reflector: Optional[QueryReflector]
-    decomposer: Optional[QueryDecomposer]
+
     agent: Optional[ReActAgent]
     tavily_tool: Any | None
 
@@ -345,16 +345,7 @@ class RAGPipeline:
                     exc_info=True,
                 )
 
-        # Query decomposer (multi-domain decomposition — same provider as reflector)
-        try:
-            self._decomposer = QueryDecomposer(settings=settings)
-            logger.info("Query decomposer loaded.")
-        except Exception:
-            self._decomposer = None
-            logger.warning(
-                "Failed to load QueryDecomposer, decomposition disabled",
-                exc_info=True,
-            )
+
 
         # Query router (zero-cost local classifier)
         self._router = QueryRouter(
@@ -429,7 +420,7 @@ class RAGPipeline:
                 chat=self._chat,
                 self_evaluator=self._self_eval,
                 reflector=self._reflector,
-                decomposer=self._decomposer,
+
                 agent=self.agent,
                 tavily_tool=self._tavily,
             )
@@ -450,7 +441,7 @@ class RAGPipeline:
             if cfg.get("reflection_enabled", True)
             else None
         )
-        decomposer = QueryDecomposer(settings=settings)
+
         agent = ReActAgent(settings) if settings.agent_enabled else None
         tavily_tool = _build_tavily_tool(settings)
         return _PreparedLLMRuntime(
@@ -458,7 +449,7 @@ class RAGPipeline:
             chat=chat,
             self_evaluator=self_evaluator,
             reflector=reflector,
-            decomposer=decomposer,
+
             agent=agent,
             tavily_tool=tavily_tool,
         )
@@ -474,7 +465,7 @@ class RAGPipeline:
             self._chat = prepared.chat
             self._self_eval = prepared.self_evaluator
             self._reflector = prepared.reflector
-            self._decomposer = prepared.decomposer
+
             self.agent = prepared.agent
             self._tavily = prepared.tavily_tool
             self._retrieval_service.settings = settings
@@ -489,9 +480,7 @@ class RAGPipeline:
             "reflector": (
                 settings.reflection_model if prepared.reflector else "disabled"
             ),
-            "decomposer": (
-                settings.reflection_model if prepared.decomposer else "disabled"
-            ),
+
             "agent": settings.agent_model if prepared.agent else "disabled",
             "tavily": "reloaded" if prepared.tavily_tool else "disabled",
             "caches": "cleared",
