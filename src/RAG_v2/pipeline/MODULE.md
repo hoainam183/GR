@@ -17,9 +17,36 @@ It coordinates the other modules (`query`, `retrieval`, `reranking`, `llm`, `age
 pipeline/
   __init__.py                   Lazy `__getattr__` export of RAGPipeline and DocumentPipeline.
   rag_pipeline.py               RAGPipeline class: routing, classic RAG, agent, streaming, LLM hot-reload.
-  flows.py                      Functional flow implementations: chitchat_flow(_stream), rag_flow(_stream), Tavily web fallback, context/rerank helpers.
-  document_pipeline.py          Admin ingestion: convert → clean → chunk → embed+index, delete, rollback.
+  rag_helpers.py                Free helpers: _should_trigger_tier3, timings (_elapsed_ms/_merge_timings/_log_timings/_chunk_for_stream), _build_cache_key, route-cache + Tier-3 constants.
+  rag_runtime.py                Runtime construction: _settings_to_cfg, _should_enable_self_evaluator, _build_tavily_tool, _PreparedLLMRuntime dataclass.
+  document_pipeline.py          Admin ingestion: convert → clean → chunk → embed+index, delete, rollback (DocumentPipeline class).
+  chunker_factory.py            Chunker strategy factory: _create_chunker, _run_chunker, _sanitize_metadata_overrides + strategy/converter/PROTECTED_CHUNK_META_KEYS constants.
+  flows/                        Functional flow implementations, split by responsibility (was the single flows.py).
+    __init__.py                 Re-exports the full historical `pipeline.flows` API (every top-level name) — import surface unchanged.
+    common.py                   Shared low-level utils + cfg readers (_elapsed_ms, _cfg_*, _fold_vietnamese, _dedup_text_values, _is_context_length_error, …).
+    url_sanitize.py             Answer/stream URL sanitization (_sanitize_answer_urls, _StreamUrlSanitizer, _strip_raw_urls, …).
+    history.py                  Chat-history trimming + budgets (_trim_history).
+    title_match.py              Kehoach source-link title-mention matching (_title_mentioned, …).
+    profile.py                  Session profile extraction + generation profile notes.
+    rerank_scoring.py           Score-cliff pruning, rerank traces, local-evidence scoring.
+    retrieval_helpers.py        top_k/candidate-pool/reranker-kwargs, sibling/parent expansion, dedup, ordering, collection scores.
+    context.py                  Context formatting + budget resolution + local/web merge (_format_context, …).
+    web_fallback.py             Dynamic/freshness detection, kehoach route lock, web-search query build, pre/post web decision + quality gate.
+    cache_policy.py             Answer-cache gating + query-cache bypass (_should_cache_final_answer, _should_bypass_query_cache, _build_cache_profile).
+    hyde.py                     HyDE post-rerank fallback (_should_trigger_hyde, _hyde_fallback_post_rerank).
+    tavily.py                   Tavily search/extract execution + web fallback result assembly.
+    coordinators.py             The orchestrators: chitchat_flow(_stream), rag_flow(_stream), _chunk_cached_answer; owns _collection_selector singleton.
 ```
+
+> Refactor note (2026-07-02): `flows.py` was split into the `flows/` package and free
+> functions were extracted from `rag_pipeline.py`/`document_pipeline.py` into
+> `rag_helpers.py`/`rag_runtime.py`/`chunker_factory.py`. Code was moved **verbatim**
+> (no logic change); the `flows/` submodules form an acyclic DAG
+> (common/url_sanitize/history/title_match → profile/rerank_scoring/retrieval_helpers/context
+> → web_fallback/hyde/tavily/cache_policy → coordinators). Every previously importable
+> name (`from pipeline.flows import X`, `from pipeline.rag_pipeline import Y`,
+> `from pipeline.document_pipeline import Z`) is re-exported, so external callers,
+> tests, and `agent/react_agent.py`'s lazy `_trim_history` import are unaffected.
 
 ## `RAGPipeline` Construction
 
