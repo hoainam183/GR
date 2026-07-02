@@ -1629,48 +1629,6 @@ def _title_mentioned(
     return overlap >= _TITLE_MENTION_MIN_BIGRAM_OVERLAP
 
 
-def _kehoach_links_footer(answer: str, sources: List[Dict[str, Any]]) -> str:
-    """Return a Markdown link footer for kehoach docs the answer references.
-
-    Idempotent: a doc whose URL already appears in ``answer`` is skipped, so the
-    footer is never duplicated (e.g. when the LLM already embedded the link, or
-    on a cache hit where the answer was stored with the footer).
-    
-    Uses generic link text to hide full URLs and improve UX.
-    """
-    if not answer or not sources:
-        return ""
-    answer_norm = _normalize_for_match(answer)
-    answer_bigrams = _bigrams(answer_norm.split())
-    seen_urls: Set[str] = set()
-    links: List[tuple[str, str]] = []
-    for doc in sources:
-        meta = doc.get("metadata") or {}
-        collection = (
-            doc.get("collection")
-            or meta.get("collection")
-            or meta.get("source")
-        )
-        if collection != "kehoach":
-            continue
-        url = str(meta.get("url") or "").strip()
-        if not url.startswith(("http://", "https://")):
-            continue
-        if url in answer or url in seen_urls:
-            continue
-        title = str(meta.get("title") or "").strip()
-        if not title or not _title_mentioned(
-            answer_norm, answer_bigrams, title
-        ):
-            continue
-        seen_urls.add(url)
-        links.append((title, url))
-    if not links:
-        return ""
-    # Format links as simple items that can be rendered as cards on frontend
-    formatted_links = [f"- [{title}]({url})" for title, url in links]
-    return f"\n\n{_KEHOACH_LINK_HEADER}\n" + "\n".join(formatted_links)
-
 
 
 def _cfg_int(cfg: Dict[str, Any], key: str, default: int) -> int:

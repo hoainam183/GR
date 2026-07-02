@@ -221,7 +221,7 @@ Implemented in `flows.py:rag_flow()` (all-keyword signature: `question`, `histor
    supplied (from `query_v3`/`query_stream`), uses it directly without re-calling the LLM.
    Falls back to `query.reflection._extract_entities` when reflection misses major/cohort.
 5. Re-route on reflected standalone query via `reroute_reflected` callback (bleed-free).
-6. Decide `retrieval_major` via `query.profile_dependency.effective_major_for_retrieval`
+6. Set `retrieval_major` to `resolved_major`.
    (drops the major filter for topics like scholarships whose answer is universal).
 7. Route domain and select collections (`CollectionSelector`); optionally lock kehoach
    for freshness/dynamic queries (`_should_lock_kehoach_route`).
@@ -252,7 +252,7 @@ Important current behaviour:
 - Raw candidate pool size is configurable (`raw_candidate_multiplier`, `raw_candidate_min`); low-confidence routing can double the resolved pool when `low_conf_pool_expand_enabled` is true.
 - Classic and streaming RAG pass configured reranker knobs through every rerank attempt: `reranker_score_threshold`, `reranker_table_score_threshold`, and `reranker_min_top_k` capped to the effective `top_k`.
 - Freshness/plan queries routed to `kehoach` can lock collection selection to `kehoach` (`_should_lock_kehoach_route`); policy-type signals in the query suppress this lock.
-- Profile notes are injected only when `query.profile_dependency.should_inject_profile_note` returns True OR `_should_prepend_profile_note` matches (personal-pronoun pattern). Generic latest/freshness queries do not inherit major/cohort from profile/history.
+- Profile notes are injected only when `_should_prepend_profile_note` matches (personal-pronoun pattern). Generic latest/freshness queries do not inherit major/cohort from profile/history.
 - `_query_decomposed()` remains a legacy helper; `query_v3()` routes multi-source complex questions to the Planner-Executor agent rather than bypassing it.
 - If BGE reranking returns an empty list or only negative scores from raw candidates, both `rag_flow()` and `rag_flow_stream()` retry reranking with the original question. If still empty or only negative explicit scores, they use raw fusion top-k, set `timings_ms["rerank_raw_fallback"] = 1.0`, and update `rerank_trace` (`fallback_reason`, `rerank_fallback`, `rerank_raw_fallback`, final counts).
 - RAG answer-cache writes are gated by `_should_cache_final_answer`: only for stable local answers (`answer_status == "answered"`, no no-info text, no `should_web_search`, no `no_sources`/`no_info`, no `self_eval_failed`, no dynamic/stale-risk signal, no pre/post web fallback). Cache hits return minimal trace fields.
