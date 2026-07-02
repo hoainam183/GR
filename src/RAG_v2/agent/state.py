@@ -73,9 +73,6 @@ class AgentState:
     _log_tool_results: list[ToolResult] = field(
         default_factory=list, init=False, repr=False
     )
-    _tool_call_signatures: set[str] = field(
-        default_factory=set, init=False, repr=False
-    )
 
     def is_done(self) -> bool:
         return (
@@ -83,12 +80,6 @@ class AgentState:
             or self.iteration >= self.max_iterations
             or self.error is not None
         )
-
-    def has_called_tool(self, tool_name: str, args: dict[str, Any] | None = None) -> bool:
-        """Check whether a tool (optionally with the same args) was called before."""
-        if args is None:
-            return tool_name in self.tool_call_history
-        return self._build_call_signature(tool_name, args) in self._tool_call_signatures
 
     def add_tool_result(
         self,
@@ -129,7 +120,7 @@ class AgentState:
             self.tool_results = self.tool_results[-_CONTEXT_WINDOW_TOOL_LIMIT:]
 
         self.tool_call_history.append(tool_name)
-        self._tool_call_signatures.add(self._build_call_signature(tool_name, parsed_args))
+
 
     def get_context_summary(self) -> str:
         """Return last N tool results formatted for LLM context injection."""
@@ -170,11 +161,3 @@ class AgentState:
         if self.synthesis_trace is not None:
             payload["synthesis_trace"] = self.synthesis_trace
         return payload
-
-    @staticmethod
-    def _build_call_signature(tool_name: str, args: dict[str, Any]) -> str:
-        try:
-            serialized_args = json.dumps(args, ensure_ascii=False, sort_keys=True)
-        except TypeError:
-            serialized_args = repr(args)
-        return f"{tool_name}:{serialized_args}"

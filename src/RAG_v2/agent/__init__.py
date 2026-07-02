@@ -10,7 +10,6 @@ from .state import AgentState, ToolResult
 from .tool_adapters import (
     cache_clear,
     execute_retrieval_plan,
-    execute_tool,
     get_agent_docs,
     init_agent_docs,
     set_runtime,
@@ -23,7 +22,6 @@ __all__ = [
     "ToolResult",
     "AgentGraphState",
     # Execution
-    "execute_tool",
     "execute_retrieval_plan",
     "cache_clear",
     "set_runtime",

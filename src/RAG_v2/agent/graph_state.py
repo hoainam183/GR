@@ -22,16 +22,13 @@ class AgentGraphState(TypedDict):
         to return the *new* messages they produce.
     tool_call_history
         Ordered list of executor tool names, preserved for trace/log output.
-    tool_call_signatures
-        Legacy compatibility list for callers that still inspect exact tool
-        signatures. The Planner-Executor graph does not use it for routing.
     """
 
     messages: Annotated[list, add_messages]
     query: str
     session_id: str
     tool_call_history: list[str]
-    tool_call_signatures: list[str]
+
     iteration: int
     max_iterations: int
     final_answer: str | None
@@ -48,5 +45,5 @@ class AgentGraphState(TypedDict):
     synthesis_trace: dict | None        # Trace-only synthesis prompt/context metadata
     user_context: dict | None           # {student_id, cohort, major, major_code, full_name}
     history: list[dict[str, str]] | None # Trimmed conversation history ({role, content}) for prompt context
-    empty_result_count: int             # Tracks consecutive empty tool returns for retry logic
+
     top_k: int | None                   # Effective retrieval top_k supplied by the pipeline

@@ -14,7 +14,6 @@ from query.signals import fold_vietnamese_text
 from retrieval.metadata_filters import (
     enrich_major_references_for_query,
     extract_major_codes,
-    strip_major_comparison_scaffold_for_retrieval,
     strip_major_from_query_for_retrieval,
 )
 
@@ -302,34 +301,6 @@ def _get_runtime() -> _AdapterRuntime:
     return _RUNTIME
 
 
-# ─── Public dispatch ──────────────────────────────────────────────────────────
-
-
-def execute_tool(tool_name: str, args: dict[str, Any]) -> str:
-    """Dispatch tool execution and always return a safe string response."""
-    dispatch = {
-        "rag_search": _rag_search,
-        "multi_rag_search": _multi_rag_search,
-        "compare_cohorts": _compare_cohorts,
-        "compare_programs": _compare_programs,
-        "web_search": _web_search,
-        "exam_schedule_search": _exam_schedule_search,
-    }
-    adapter = dispatch.get(tool_name)
-    if adapter is None:
-        return f"[Loi he thong: Tool '{tool_name}' khong duoc ho tro]"
-    try:
-        result = adapter(**args)
-        logger.info("Tool %s executed (chars=%d)", tool_name, len(result))
-        return result
-    except TypeError as exc:
-        logger.error("Tool %s wrong args %s: %s", tool_name, args, exc)
-        return f"[Loi: Tham so khong dung cho tool {tool_name}: {exc}]"
-    except Exception as exc:  # pragma: no cover
-        logger.error("Tool %s failed: %s", tool_name, exc, exc_info=True)
-        return f"[Loi khi tim kiem: {exc}]"
-
-
 # ─── Tool implementations ─────────────────────────────────────────────────────
 
 
@@ -583,160 +554,6 @@ def _rag_search(
         _cache_set(cache_key, formatted)
     return formatted
 
-
-def _multi_rag_search(queries: list[dict[str, Any]]) -> str:
-    if not queries:
-        return "[Loi: Khong co query nao duoc cung cap]"
-
-    parts: list[str] = []
-    for item in queries[:4]:
-        query_text = str(item.get("query", "")).strip()
-        collection = str(item.get("collection", "")).strip()
-        if not query_text or not collection:
-            continue
-        result = _rag_search(
-            query=query_text,
-            collection=collection,
-            resolved_cohort=str(item.get("resolved_cohort", "") or "") or None,
-            resolved_major=str(item.get("resolved_major", "") or "") or None,
-        )
-        header = f"### Thong tin tu [{collection}] - '{query_text}'"
-        parts.append(f"{header}\n{result}")
-
-    if not parts:
-        return "Khong tim thay thong tin tu cac nguon duoc yeu cau."
-    return "\n\n---\n\n".join(parts)
-
-
-def _topic_with_course_focus(topic: str, course_keyword: str | None) -> str:
-    raw_topic = (topic or "").strip()
-    raw_course = (course_keyword or "").strip()
-
-    if not raw_course:
-        return raw_topic
-
-    if not raw_topic:
-        return f"mon {raw_course}"
-
-    if raw_course.lower() in raw_topic.lower():
-        return raw_topic
-
-    return f"{raw_topic} (tap trung vao mon {raw_course})"
-
-
-def _compare_cohorts(
-    topic: str,
-    cohort_a: str,
-    cohort_b: str,
-    collection: str,
-) -> str:
-    """
-    So sánh quy định / chính sách giữa 2 **khóa** sinh viên (K65, K70, …).
-
-    Chỉ chấp nhận mã khóa (Kxx).  Nếu nhận mã ngành, trả về hướng dẫn
-    chuyển sang compare_programs.
-    """
-    label_a = (cohort_a or "").strip()
-    label_b = (cohort_b or "").strip()
-
-    # Guard: từ chối nếu user truyền mã ngành thay vì mã khóa
-    major_a = _extract_single_major_code(label_a)
-    major_b = _extract_single_major_code(label_b)
-    if major_a or major_b:
-        return (
-            f"'{label_a}' hoặc '{label_b}' trông giống mã ngành, không phải mã khóa (Kxx).\n"
-            "Vui lòng dùng tool compare_programs để so sánh giữa 2 mã ngành."
-        )
-
-    resolved_cohort_a = _normalise_cohort_token(label_a) or label_a
-    resolved_cohort_b = _normalise_cohort_token(label_b) or label_b
-
-    query_a = f"{topic} {resolved_cohort_a}".strip()
-    query_b = f"{topic} {resolved_cohort_b}".strip()
-
-    # Parallel search — halves latency for the two independent retrievals.
-    with ThreadPoolExecutor(max_workers=2) as pool:
-        future_a = pool.submit(
-            _rag_search,
-            query=query_a,
-            collection=collection,
-            resolved_cohort=resolved_cohort_a,
-        )
-        future_b = pool.submit(
-            _rag_search,
-            query=query_b,
-            collection=collection,
-            resolved_cohort=resolved_cohort_b,
-        )
-        result_a = future_a.result(timeout=45)
-        result_b = future_b.result(timeout=45)
-
-    return (
-        f"### {topic} — {resolved_cohort_a}\n{result_a}\n\n"
-        f"---\n\n"
-        f"### {topic} — {resolved_cohort_b}\n{result_b}"
-    )
-
-
-def _compare_programs(
-    topic: str,
-    major_a: str,
-    major_b: str,
-    collection: str,
-    course_keyword: str | None = None,
-) -> str:
-    """
-    So sánh chương trình đào tạo / môn học giữa 2 **mã ngành** (IT-E6, IT-E7, …).
-
-    Chỉ chấp nhận mã ngành.  Nếu nhận mã khóa (Kxx), trả về hướng dẫn
-    chuyển sang compare_cohorts.
-    """
-    label_a = (major_a or "").strip()
-    label_b = (major_b or "").strip()
-
-    # Guard: từ chối nếu user truyền mã khóa thay vì mã ngành
-    cohort_a = _normalise_cohort_token(label_a)
-    cohort_b = _normalise_cohort_token(label_b)
-    if cohort_a or cohort_b:
-        return (
-            f"'{label_a}' hoặc '{label_b}' trông giống mã khóa (Kxx), không phải mã ngành.\n"
-            "Vui lòng dùng tool compare_cohorts để so sánh giữa 2 khóa."
-        )
-
-    resolved_major_a = _extract_single_major_code(label_a) or label_a
-    resolved_major_b = _extract_single_major_code(label_b) or label_b
-
-    focused_topic = _topic_with_course_focus(topic, course_keyword)
-    clean_topic = strip_major_comparison_scaffold_for_retrieval(focused_topic)
-    if not clean_topic.strip():
-        clean_topic = focused_topic or "chuong trinh dao tao"
-
-    query_a = f"{clean_topic} ngành {resolved_major_a}".strip()
-    query_b = f"{clean_topic} ngành {resolved_major_b}".strip()
-
-    # Parallel search — halves latency for the two independent retrievals.
-    with ThreadPoolExecutor(max_workers=2) as pool:
-        future_a = pool.submit(
-            _rag_search,
-            query=query_a,
-            collection=collection,
-            resolved_major=resolved_major_a,
-        )
-        future_b = pool.submit(
-            _rag_search,
-            query=query_b,
-            collection=collection,
-            resolved_major=resolved_major_b,
-        )
-        result_a = future_a.result(timeout=45)
-        result_b = future_b.result(timeout=45)
-
-    header = focused_topic or topic
-    return (
-        f"### {header} — {resolved_major_a}\n{result_a}\n\n"
-        f"---\n\n"
-        f"### {header} — {resolved_major_b}\n{result_b}"
-    )
 
 
 def _web_search(query: str) -> str:
