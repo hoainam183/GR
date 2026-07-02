@@ -21,6 +21,7 @@ import {
   getDocument,
   triggerConvert,
   triggerClean,
+  triggerLlmClean,
   triggerChunk,
   triggerIndex,
   triggerFullPipeline,
@@ -28,6 +29,8 @@ import {
   updateMarkdown,
   getCleanedContent,
   updateCleaned,
+  getLlmCleaned,
+  updateLlmCleaned,
   listConverters,
   listChunkers,
   listChunkStrategies,
@@ -64,6 +67,7 @@ export default function DocumentReview() {
   const [retrying, setRetrying] = useState<RetryingStep | null>(null);
   const [mdContent, setMdContent] = useState<string | null>(null);
   const [cleanedContent, setCleanedContent] = useState<string | null>(null);
+  const [llmCleanedContent, setLlmCleanedContent] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Converter / chunker selection
@@ -135,7 +139,7 @@ export default function DocumentReview() {
   }, [doc?.status, fetchChunkSets]);
 
   // Polling for in-progress statuses
-  const isProcessing = doc && ['converting', 'cleaning', 'chunking', 'embedding'].includes(doc.status);
+  const isProcessing = doc && ['converting', 'cleaning', 'llm_cleaning', 'chunking', 'embedding'].includes(doc.status);
 
   useEffect(() => {
     if (isProcessing) {
@@ -149,8 +153,13 @@ export default function DocumentReview() {
   // Load markdown/cleaned content when status allows
   useEffect(() => {
     if (!doc || !id) return;
-    const statusOrder = ['uploaded', 'converting', 'converted', 'cleaning', 'cleaned', 'chunking', 'chunked', 'embedding', 'indexed'];
+    const statusOrder = [
+      'uploaded', 'converting', 'converted', 'cleaning', 'cleaned',
+      'llm_cleaning', 'llm_cleaned', 'chunking', 'chunked', 'embedding', 'indexed',
+    ];
     const idx = statusOrder.indexOf(doc.status);
+    const llmCleanEngaged = doc.llm_clean_requested || Boolean(doc.llm_cleaned_at)
+      || doc.status === 'llm_cleaning' || doc.status === 'llm_cleaned';
 
     if (idx >= statusOrder.indexOf('converted') && mdContent === null) {
       getMarkdown(id).then((r) => setMdContent(r.content)).catch(() => {});
@@ -158,7 +167,10 @@ export default function DocumentReview() {
     if (idx >= statusOrder.indexOf('cleaned') && cleanedContent === null) {
       getCleanedContent(id).then((r) => setCleanedContent(r.content)).catch(() => {});
     }
-  }, [doc, id, mdContent, cleanedContent]);
+    if (llmCleanEngaged && llmCleanedContent === null) {
+      getLlmCleaned(id).then((r) => setLlmCleanedContent(r.content)).catch(() => {});
+    }
+  }, [doc, id, mdContent, cleanedContent, llmCleanedContent]);
 
   const handleTriggerStep = async (step: PipelineStep['key']) => {
     if (!id) return;
@@ -167,9 +179,20 @@ export default function DocumentReview() {
       if (step === 'convert') {
         await triggerConvert(id, selectedConverter);
       } else if (step === 'chunk') {
+        if (doc?.status === 'llm_cleaned' && !doc.llm_cleaned_reviewed) {
+          const warnCount = doc.llm_clean_warnings?.length || 0;
+          const msg = warnCount > 0
+            ? `Nội dung LLM Reformat có ${warnCount} cảnh báo và chưa được duyệt. Vẫn tiếp tục chunk?`
+            : 'Nội dung LLM Reformat chưa được duyệt. Vẫn tiếp tục chunk?';
+          if (!window.confirm(msg)) {
+            return;
+          }
+        }
         await triggerChunk(id, selectedChunker || undefined);
       } else if (step === 'clean') {
         await triggerClean(id);
+      } else if (step === 'llm_clean') {
+        await triggerLlmClean(id);
       } else if (step === 'index') {
         if (doc && !doc.chunks_reviewed) {
           toast.error('Duyệt chunks trước khi index');
@@ -196,7 +219,10 @@ export default function DocumentReview() {
     const nextMap: Record<string, PipelineStep['key']> = {
       uploaded: 'convert',
       converted: 'clean',
+      // 'cleaned' skips straight to chunk — LLM Reformat is optional and
+      // triggered explicitly from the "LLM Reformat" tab, not via "Bước tiếp".
       cleaned: 'chunk',
+      llm_cleaned: 'chunk',
       chunked: 'index',
     };
     const next = nextMap[doc.status];
@@ -225,6 +251,7 @@ export default function DocumentReview() {
       setTimeout(async () => {
         setMdContent(null);
         setCleanedContent(null);
+        setLlmCleanedContent(null);
         setChunkSets([]);
         setViewingStrategy(undefined);
         await fetchDoc();
@@ -247,6 +274,13 @@ export default function DocumentReview() {
     if (!id) return;
     await updateCleaned(id, content);
     setCleanedContent(content);
+    await fetchDoc();
+  };
+
+  const handleSaveLlmCleaned = async (content: string) => {
+    if (!id) return;
+    await updateLlmCleaned(id, content);
+    setLlmCleanedContent(content);
     await fetchDoc();
   };
 
@@ -292,11 +326,15 @@ export default function DocumentReview() {
 
   if (!doc) return null;
 
-  const canRunNext = ['uploaded', 'converted', 'cleaned', 'chunked'].includes(doc.status);
-  const statusOrder = ['uploaded', 'converting', 'converted', 'cleaning', 'cleaned', 'chunking', 'chunked', 'embedding', 'indexed'];
+  const canRunNext = ['uploaded', 'converted', 'cleaned', 'llm_cleaned', 'chunked'].includes(doc.status);
+  const statusOrder = [
+    'uploaded', 'converting', 'converted', 'cleaning', 'cleaned',
+    'llm_cleaning', 'llm_cleaned', 'chunking', 'chunked', 'embedding', 'indexed',
+  ];
   const statusIdx = statusOrder.indexOf(doc.status);
   const canConvert = doc.status === 'uploaded' || doc.status === 'failed';
   const canChunk = statusIdx >= statusOrder.indexOf('cleaned') || doc.status === 'failed';
+  const canLlmClean = doc.status === 'cleaned';
   const hasChunks = statusIdx >= statusOrder.indexOf('chunked');
 
   return (
@@ -479,6 +517,14 @@ export default function DocumentReview() {
         <TabsList>
           <TabsTrigger value="markdown">Markdown</TabsTrigger>
           <TabsTrigger value="cleaned">Cleaned</TabsTrigger>
+          <TabsTrigger value="llm_clean">
+            LLM Reformat
+            {doc.llm_clean_warnings && doc.llm_clean_warnings.length > 0 && (
+              <span className="ml-1.5 rounded-full bg-amber-500 px-1.5 text-[10px] font-semibold text-white">
+                {doc.llm_clean_warnings.length}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="chunks">Chunks</TabsTrigger>
           <TabsTrigger value="metadata">Metadata</TabsTrigger>
         </TabsList>
@@ -510,6 +556,49 @@ export default function DocumentReview() {
             <p className="py-8 text-center text-sm text-muted-foreground">
               Chưa có nội dung đã làm sạch. Chạy bước &quot;Làm sạch&quot; trước.
             </p>
+          )}
+        </TabsContent>
+
+        <TabsContent value="llm_clean" className="space-y-4">
+          {doc.llm_clean_warnings && doc.llm_clean_warnings.length > 0 && (
+            <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+              <p className="mb-1 font-medium">
+                ⚠ {doc.llm_clean_warnings.length} cảnh báo về nội dung — LLM có thể đã làm thay đổi nội dung gốc.
+                Hãy kiểm tra kỹ trước khi duyệt.
+              </p>
+              <ul className="list-disc space-y-0.5 pl-5">
+                {doc.llm_clean_warnings.map((w, i) => (
+                  <li key={i}>{w}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {llmCleanedContent !== null ? (
+            <MarkdownEditor
+              content={llmCleanedContent}
+              onSave={handleSaveLlmCleaned}
+              approved={doc.llm_cleaned_reviewed}
+              title="Nội dung sau LLM Reformat"
+            />
+          ) : (
+            <div className="space-y-3 py-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                {canLlmClean
+                  ? 'Bước tùy chọn: dùng LLM để chuẩn hoá heading/bảng trước khi chunk. Không bắt buộc.'
+                  : 'Chưa có nội dung LLM Reformat. Chạy bước "Làm sạch" trước.'}
+              </p>
+              {canLlmClean && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleTriggerStep('llm_clean')}
+                  disabled={retrying === 'llm_clean'}
+                >
+                  <Play className="mr-1 h-4 w-4" />
+                  Chạy LLM Reformat
+                </Button>
+              )}
+            </div>
           )}
         </TabsContent>
 

@@ -9,6 +9,15 @@ interface PipelineProgressProps {
   retrying?: PipelineStep['key'] | null;
 }
 
+/** Steps to render for this document: 'llm_clean' only shows once opted into or run. */
+function visibleSteps(doc: DocumentDetail): PipelineStep[] {
+  const llmCleanEngaged = doc.llm_clean_requested
+    || Boolean(doc.llm_cleaned_at)
+    || doc.status === 'llm_cleaning'
+    || doc.status === 'llm_cleaned';
+  return PIPELINE_STEPS.filter((step) => !step.optional || llmCleanEngaged);
+}
+
 /** Determine per-step state based on the overall document status. */
 function stepState(
   step: PipelineStep,
@@ -31,6 +40,7 @@ function stepState(
     'uploaded',
     'converting', 'converted',
     'cleaning', 'cleaned',
+    'llm_cleaning', 'llm_cleaned',
     'chunking', 'chunked',
     'embedding', 'indexed',
   ];
@@ -57,16 +67,18 @@ function stepState(
 /** Refine stepState for the 'failed' case using timestamps */
 function getStepStates(doc: DocumentDetail): Record<PipelineStep['key'], 'idle' | 'running' | 'success' | 'failed'> {
   const result: Record<string, 'idle' | 'running' | 'success' | 'failed'> = {};
+  const steps = visibleSteps(doc);
   const timestamps: Record<PipelineStep['key'], string | null> = {
     convert: doc.converted_at,
     clean: doc.cleaned_at,
+    llm_clean: doc.llm_cleaned_at,
     chunk: doc.chunked_at,
     index: doc.indexed_at,
   };
 
   if (doc.status === 'failed') {
     let foundFailed = false;
-    for (const step of PIPELINE_STEPS) {
+    for (const step of steps) {
       if (timestamps[step.key]) {
         result[step.key] = 'success';
       } else if (!foundFailed) {
@@ -79,8 +91,8 @@ function getStepStates(doc: DocumentDetail): Record<PipelineStep['key'], 'idle' 
     return result as Record<PipelineStep['key'], 'idle' | 'running' | 'success' | 'failed'>;
   }
 
-  for (const step of PIPELINE_STEPS) {
-    result[step.key] = stepState(step, doc.status, PIPELINE_STEPS);
+  for (const step of steps) {
+    result[step.key] = stepState(step, doc.status, steps);
   }
   return result as Record<PipelineStep['key'], 'idle' | 'running' | 'success' | 'failed'>;
 }
@@ -101,17 +113,18 @@ const LABELS = {
 
 export default function PipelineProgress({ document: doc, onRetry, retrying }: PipelineProgressProps) {
   const states = getStepStates(doc);
+  const steps = visibleSteps(doc);
 
   return (
     <div className="space-y-3">
-      {PIPELINE_STEPS.map((step, idx) => {
+      {steps.map((step, idx) => {
         const state = states[step.key];
         return (
           <div key={step.key} className="flex items-center gap-3">
             {/* Connector */}
             <div className="flex flex-col items-center">
               {ICONS[state]}
-              {idx < PIPELINE_STEPS.length - 1 && (
+              {idx < steps.length - 1 && (
                 <div className={`mt-1 h-6 w-0.5 ${state === 'success' ? 'bg-green-300' : 'bg-muted'}`} />
               )}
             </div>
@@ -130,6 +143,11 @@ export default function PipelineProgress({ document: doc, onRetry, retrying }: P
                     ({doc.chunking_strategy})
                   </span>
                 )}
+                {step.key === 'llm_clean' && state === 'success' && doc.llm_clean_warnings?.length ? (
+                  <span className="ml-2 text-xs font-normal text-amber-600">
+                    ({doc.llm_clean_warnings.length} cảnh báo)
+                  </span>
+                ) : null}
               </p>
               <p className={`text-xs ${state === 'failed' ? 'text-destructive' : 'text-muted-foreground'}`}>
                 {state === 'failed' && doc.error_message ? doc.error_message : LABELS[state]}

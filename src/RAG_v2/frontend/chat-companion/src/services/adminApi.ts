@@ -8,6 +8,7 @@ import type {
   ChunksResponse,
   MarkdownContent,
   CleanedContent,
+  LLMCleanedContent,
   ConverterOption,
   ChunkerOption,
   ChunkStrategySummary,
@@ -153,6 +154,10 @@ export async function triggerClean(id: string): Promise<void> {
   await adminClient.post(`/admin/documents/${id}/clean`, null, { headers: authHeaders() });
 }
 
+export async function triggerLlmClean(id: string): Promise<void> {
+  await adminClient.post(`/admin/documents/${id}/llm-clean`, null, { headers: authHeaders() });
+}
+
 export async function triggerChunk(id: string, strategy?: string): Promise<void> {
   const params = strategy ? { strategy } : {};
   await adminClient.post(`/admin/documents/${id}/chunk`, null, { headers: authHeaders(), params });
@@ -192,6 +197,17 @@ export async function getCleanedContent(id: string): Promise<CleanedContent> {
 
 export async function updateCleaned(id: string, content: string): Promise<void> {
   await adminClient.put(`/admin/documents/${id}/cleaned`, { content }, { headers: authHeaders() });
+}
+
+export async function getLlmCleaned(id: string): Promise<LLMCleanedContent> {
+  const { data } = await adminClient.get<LLMCleanedContent>(`/admin/documents/${id}/llm-cleaned`, {
+    headers: authHeaders(),
+  });
+  return data;
+}
+
+export async function updateLlmCleaned(id: string, content: string): Promise<void> {
+  await adminClient.put(`/admin/documents/${id}/llm-cleaned`, { content }, { headers: authHeaders() });
 }
 
 export async function getChunks(

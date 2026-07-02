@@ -6,6 +6,8 @@ export type DocumentStatus =
   | 'converted'
   | 'cleaning'
   | 'cleaned'
+  | 'llm_cleaning'
+  | 'llm_cleaned'
   | 'chunking'
   | 'chunked'
   | 'embedding'
@@ -66,12 +68,16 @@ export interface DocumentDetail {
   markdown_reviewed: boolean;
   cleaned_reviewed: boolean;
   chunks_reviewed: boolean;
+  llm_clean_requested: boolean;
+  llm_cleaned_reviewed: boolean;
+  llm_clean_warnings: string[] | null;
   metadata_overrides: Record<string, unknown>;
   uploaded_by: string;
   uploaded_at: string;
   error_message: string | null;
   converted_at: string | null;
   cleaned_at: string | null;
+  llm_cleaned_at: string | null;
   chunked_at: string | null;
   indexed_at: string | null;
 }
@@ -109,17 +115,26 @@ export interface CleanedContent {
   content: string;
 }
 
+/** LLM-reformatted content + content-preservation warnings for admin review. */
+export interface LLMCleanedContent {
+  content: string;
+  warnings: string[];
+}
+
 /** Pipeline step definition for UI rendering */
 export interface PipelineStep {
-  key: 'convert' | 'clean' | 'chunk' | 'index';
+  key: 'convert' | 'clean' | 'llm_clean' | 'chunk' | 'index';
   label: string;
   runningStatus: DocumentStatus;
   doneStatus: DocumentStatus;
+  /** Optional steps are hidden from the stepper unless the doc opted in. */
+  optional?: boolean;
 }
 
 export const PIPELINE_STEPS: PipelineStep[] = [
   { key: 'convert', label: 'Chuyển đổi PDF', runningStatus: 'converting', doneStatus: 'converted' },
   { key: 'clean', label: 'Làm sạch', runningStatus: 'cleaning', doneStatus: 'cleaned' },
+  { key: 'llm_clean', label: 'LLM Reformat', runningStatus: 'llm_cleaning', doneStatus: 'llm_cleaned', optional: true },
   { key: 'chunk', label: 'Chia chunk', runningStatus: 'chunking', doneStatus: 'chunked' },
   { key: 'index', label: 'Nhúng & Lưu trữ', runningStatus: 'embedding', doneStatus: 'indexed' },
 ];

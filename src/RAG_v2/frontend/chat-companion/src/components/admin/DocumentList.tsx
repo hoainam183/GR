@@ -19,6 +19,8 @@ const STATUS_BADGE: Record<string, { label: string; variant: 'default' | 'second
   converted: { label: 'Đã chuyển đổi', variant: 'default' },
   cleaning: { label: 'Đang làm sạch', variant: 'secondary' },
   cleaned: { label: 'Đã làm sạch', variant: 'default' },
+  llm_cleaning: { label: 'Đang LLM reformat', variant: 'secondary' },
+  llm_cleaned: { label: 'Đã LLM reformat', variant: 'default' },
   chunking: { label: 'Đang chia chunk', variant: 'secondary' },
   chunked: { label: 'Đã chia chunk', variant: 'default' },
   embedding: { label: 'Đang nhúng', variant: 'secondary' },

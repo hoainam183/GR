@@ -19,6 +19,7 @@ const STATUS_OPTIONS = [
   { value: 'uploaded', label: 'Đã upload' },
   { value: 'converted', label: 'Đã chuyển đổi' },
   { value: 'cleaned', label: 'Đã làm sạch' },
+  { value: 'llm_cleaned', label: 'Đã LLM reformat' },
   { value: 'chunked', label: 'Đã chia chunk' },
   { value: 'indexed', label: 'Đã lưu trữ' },
   { value: 'failed', label: 'Lỗi' },
@@ -93,7 +94,7 @@ export default function AdminPage() {
   }, [fetchDocuments, activeTab]);
 
   // Auto-poll document list when any document is still processing
-  const PROCESSING_STATUSES = ['converting', 'cleaning', 'chunking', 'embedding'];
+  const PROCESSING_STATUSES = ['converting', 'cleaning', 'llm_cleaning', 'chunking', 'embedding'];
   const hasProcessing = documents.some((d) => PROCESSING_STATUSES.includes(d.status));
 
   useEffect(() => {
