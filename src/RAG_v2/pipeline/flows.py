@@ -2231,39 +2231,16 @@ def _profile_note_for_generation(
     generation note now share one gate, so a major reflection already resolved is
     never silently dropped â€” the model stops re-asking the program.
     """
-    from query.profile_dependency import (  # noqa: PLC0415
-        _classify,
-        references_self,
-        resolve_sources,
-    )
-
     user_major = resolved_user_major or (
         (user_context or {}).get("major_code")
         or (user_context or {}).get("major")
     )
-    required, major_structural = _classify(question, search_query, routing_result)
-    sources = resolve_sources(
-        required,
-        user_major=user_major,
-        target_major=resolved_target_major,
-        cohort=resolved_cohort,
-        user_referenced=references_self(question),
-        major_structural=major_structural,
-    )
-    include_major = sources.get("major") in {"target", "user_profile"}
 
-    # Floor: a self-referential identity question ("ngành của tôi là gì") may not
-    # match any topic in required_attributes, but must still surface the program.
+    # Simplified profile note injection: surface the program and cohort
+    # if the question is self-referential ("tôi", "em", "mình") or directly involves personal profile.
     identity = _should_prepend_profile_note(question)
-    if identity and user_major:
-        include_major = True
-
-    # Cohort accompanies the note only when the note is relevant (the major is
-    # shown, the topic is cohort-scoped, or it is an identity question) — never on
-    # a purely universal topic (e.g. học bổng), which keeps an empty note empty.
-    include_cohort = bool(resolved_cohort) and (
-        include_major or "cohort" in required or identity
-    )
+    include_major = identity and bool(user_major)
+    include_cohort = identity and bool(resolved_cohort)
 
     major_for_note = resolved_major if include_major else None
     cohort_for_note = resolved_cohort if include_cohort else None
@@ -2623,20 +2600,9 @@ def rag_flow(
 
     # Drop the major metadata filter for topics whose answer does not depend on the
     # program (e.g. há»c bá»•ng) so universal answers are not narrowed to one major.
-    # When major IS required, retrieval_major == resolved_major. See
-    # query.profile_dependency. Decided once here, reused for every sub-query.
-    from query.profile_dependency import (
-        effective_major_for_retrieval,
-    )  # noqa: PLC0415
-
-    retrieval_major = effective_major_for_retrieval(
-        question,
-        search_query,
-        routing_result,
-        resolved_major,
-        target_major=resolved_target_major,
-        user_major=resolved_user_major,
-    )
+    # After profile_dependency refactor, we simply use the resolved major.
+    # If the major was explicitly extracted from the query or user profile, we use it for retrieval.
+    retrieval_major = resolved_major
 
     # 2. Collection-aware routing (Phase 8 â€” Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
@@ -3765,20 +3731,9 @@ def rag_flow_stream(
 
     # Drop the major metadata filter for topics whose answer does not depend on the
     # program (e.g. há»c bá»•ng) so universal answers are not narrowed to one major.
-    # When major IS required, retrieval_major == resolved_major. See
-    # query.profile_dependency. Decided once here, reused for every sub-query.
-    from query.profile_dependency import (
-        effective_major_for_retrieval,
-    )  # noqa: PLC0415
-
-    retrieval_major = effective_major_for_retrieval(
-        question,
-        search_query,
-        routing_result,
-        resolved_major,
-        target_major=resolved_target_major,
-        user_major=resolved_user_major,
-    )
+    # After profile_dependency refactor, we simply use the resolved major.
+    # If the major was explicitly extracted from the query or user profile, we use it for retrieval.
+    retrieval_major = resolved_major
 
     # Collection-aware routing (Phase 8 â€” Tier 2 multi-domain)
     target_collections: Optional[List[str]] = None
