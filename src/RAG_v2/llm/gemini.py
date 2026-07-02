@@ -15,6 +15,7 @@ from llm.base import BaseLLM
 from llm.prompts import (
     build_chitchat_messages,
     build_rag_messages,
+    build_reformat_messages,
     build_self_eval_messages,
 )
 
@@ -207,4 +208,6 @@ class GeminiLLM(BaseLLM):
             return build_chitchat_messages(query, history)
         if mode == "self_eval":
             return build_self_eval_messages(query)
+        if mode == "reformat":
+            return build_reformat_messages(query, context)
         return build_rag_messages(query, context or "", history)

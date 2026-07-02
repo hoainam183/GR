@@ -302,6 +302,27 @@ class Settings(BaseSettings):
     # after docling are marked failed instead of indexed with no content.
     pdf_min_markdown_chars: int = 50
 
+    # --- LLM Reformat (optional step after regex clean, before chunk) ---
+    # An optional admin-triggered pass that uses the chat LLM to repair markdown
+    # STRUCTURE only (heading levels, broken tables, split Vietnamese diacritics)
+    # so the recursive chunker parses parent/child sections correctly. It must
+    # NOT paraphrase content; a preservation check emits warnings for admin review
+    # (see LLMDocumentReformatter). Reuses the configured LLM provider via
+    # create_llm() with the overrides below — no separate client/key.
+    llm_clean_enabled: bool = True  # global kill-switch for the reformat feature
+    # Answer generation caps output at chat_max_tokens (1500); reformat output ≈
+    # input length, so it needs a much larger cap or sections get truncated.
+    llm_clean_max_tokens: int = 8000
+    # Max input tokens per LLM call; keep below llm_clean_max_tokens so the
+    # (roughly equal-length) reformatted output has headroom to fit.
+    llm_clean_max_section_tokens: int = 2500
+    # Empty = reuse chat_model; set to override the model for reformat only.
+    llm_clean_model: str = ""
+    # Preservation guardrail: reformatted/original character-length ratio outside
+    # [min, max] raises a warning for the admin (it does NOT auto-discard output).
+    llm_clean_length_ratio_min: float = 0.85
+    llm_clean_length_ratio_max: float = 1.20
+
     # --- Exam schedule (lịch thi) — structured PDF/Excel ingestion ---
     # Exam schedules are tabular, not prose: they are parsed into a dedicated
     # Mongo collection + ES index and queried with structured filters instead of

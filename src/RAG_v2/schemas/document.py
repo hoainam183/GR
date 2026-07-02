@@ -98,12 +98,16 @@ class DocumentDetail(BaseModel):
     markdown_reviewed: bool = False
     cleaned_reviewed: bool = False
     chunks_reviewed: bool = False
+    llm_clean_requested: bool = False
+    llm_cleaned_reviewed: bool = False
+    llm_clean_warnings: Optional[List[str]] = None
     metadata_overrides: dict = Field(default_factory=dict)
     uploaded_by: str
     uploaded_at: datetime
     error_message: Optional[str] = None
     converted_at: Optional[datetime] = None
     cleaned_at: Optional[datetime] = None
+    llm_cleaned_at: Optional[datetime] = None
     chunked_at: Optional[datetime] = None
     indexed_at: Optional[datetime] = None
 
@@ -122,12 +126,16 @@ class DocumentDetail(BaseModel):
             markdown_reviewed=doc.get("markdown_reviewed", False),
             cleaned_reviewed=doc.get("cleaned_reviewed", False),
             chunks_reviewed=doc.get("chunks_reviewed", False),
+            llm_clean_requested=doc.get("llm_clean_requested", False),
+            llm_cleaned_reviewed=doc.get("llm_cleaned_reviewed", False),
+            llm_clean_warnings=doc.get("llm_clean_warnings"),
             metadata_overrides=doc.get("metadata_overrides", {}),
             uploaded_by=str(doc["uploaded_by"]),
             uploaded_at=doc["uploaded_at"],
             error_message=doc.get("error_message"),
             converted_at=doc.get("converted_at"),
             cleaned_at=doc.get("cleaned_at"),
+            llm_cleaned_at=doc.get("llm_cleaned_at"),
             chunked_at=doc.get("chunked_at"),
             indexed_at=doc.get("indexed_at"),
         )
@@ -194,5 +202,11 @@ class MarkdownContent(BaseModel):
 
 class CleanedContent(BaseModel):
     """Cleaned markdown content for review/edit."""
+
+    content: str
+
+
+class LLMCleanedContent(BaseModel):
+    """LLM-reformatted markdown content for review/edit."""
 
     content: str

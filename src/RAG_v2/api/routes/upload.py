@@ -48,6 +48,7 @@ from schemas.document import (
     CleanedContent,
     DocumentDetail,
     DocumentListResponse,
+    LLMCleanedContent,
     MarkdownContent,
 )
 from utils.storage import LocalStorage, SUPPORTED_UPLOAD_EXTS
@@ -676,6 +677,108 @@ async def update_cleaned(
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# POST /admin/documents/{id}/llm-clean — LLM reformat (background, optional)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@router.post("/documents/{doc_id}/llm-clean", status_code=status.HTTP_202_ACCEPTED)
+async def llm_clean_document(
+    doc_id: str,
+    user: Annotated[UserDocument, Depends(require_admin)],
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+):
+    """Trigger optional LLM markdown reformat in background (after regex clean)."""
+    from config.settings import Settings
+
+    if not Settings().llm_clean_enabled:
+        raise HTTPException(status_code=409, detail="LLM clean is disabled")
+
+    doc = await _get_doc_or_404(db, doc_id)
+
+    if doc["status"] not in ("cleaned", "failed"):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot LLM-clean document in status '{doc['status']}'",
+        )
+
+    if not doc.get("cleaned_path"):
+        raise HTTPException(status_code=409, detail="No cleaned content to reformat")
+
+    await db[DOCUMENTS_COLLECTION].update_one(
+        {"_id": ObjectId(doc_id)},
+        {
+            "$set": {"status": "llm_cleaning", "error_message": None},
+            "$push": {"audit_log": _audit("llm_clean", str(user.id))},
+        },
+    )
+
+    background_tasks.add_task(_bg_llm_clean, doc_id, db)
+
+    return {"doc_id": doc_id, "status": "llm_cleaning"}
+
+
+async def _bg_llm_clean(doc_id: str, db: AsyncIOMotorDatabase) -> None:
+    """Background: LLM-reformat markdown content via DocumentPipeline."""
+    pipeline = _get_pipeline()
+    await pipeline.llm_clean(doc_id, db)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GET /admin/documents/{id}/llm-cleaned — Get reformatted content + warnings
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@router.get("/documents/{doc_id}/llm-cleaned")
+async def get_llm_cleaned(
+    doc_id: str,
+    user: Annotated[UserDocument, Depends(require_admin)],
+    db: AsyncIOMotorDatabase = Depends(get_database),
+):
+    """Get LLM-reformatted markdown content + preservation warnings for review."""
+    doc = await _get_doc_or_404(db, doc_id)
+    if not doc.get("llm_cleaned_path"):
+        raise HTTPException(
+            status_code=404, detail="LLM-cleaned content not available yet"
+        )
+
+    storage = _get_storage()
+    content = await storage.read_text(doc["llm_cleaned_path"])
+    return {"content": content, "warnings": doc.get("llm_clean_warnings") or []}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PUT /admin/documents/{id}/llm-cleaned — Edit/approve reformatted content
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@router.put("/documents/{doc_id}/llm-cleaned")
+async def update_llm_cleaned(
+    doc_id: str,
+    body: LLMCleanedContent,
+    user: Annotated[UserDocument, Depends(require_admin)],
+    db: AsyncIOMotorDatabase = Depends(get_database),
+):
+    """Edit and/or approve LLM-reformatted markdown."""
+    doc = await _get_doc_or_404(db, doc_id)
+
+    storage = _get_storage()
+    llm_cleaned_rel = await storage.save_text(body.content, doc_id, "llm_cleaned.md")
+
+    await db[DOCUMENTS_COLLECTION].update_one(
+        {"_id": ObjectId(doc_id)},
+        {
+            "$set": {
+                "llm_cleaned_path": llm_cleaned_rel,
+                "llm_cleaned_reviewed": True,
+            },
+            "$push": {"audit_log": _audit("approve_llm_cleaned", str(user.id))},
+        },
+    )
+    return {"detail": "LLM-cleaned content updated and approved"}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # POST /admin/documents/{id}/chunk — Chunk document (background)
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -691,7 +794,7 @@ async def chunk_document(
     """Trigger chunking in background. Optionally override strategy via query param."""
     doc = await _get_doc_or_404(db, doc_id)
 
-    if doc["status"] not in ("cleaned", "converted", "failed"):
+    if doc["status"] not in ("llm_cleaned", "cleaned", "converted", "failed"):
         raise HTTPException(
             status_code=409,
             detail=f"Cannot chunk document in status '{doc['status']}'",

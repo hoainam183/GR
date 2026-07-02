@@ -48,7 +48,8 @@ class DocumentRecord(BaseModel):
     # --- Pipeline status ---
     status: str = "uploaded"
     # Values: uploaded | converting | converted | cleaning | cleaned |
-    #         chunking | chunked | embedding | indexed | failed
+    #         llm_cleaning | llm_cleaned | chunking | chunked |
+    #         embedding | indexed | failed
 
     # --- Ownership ---
     uploaded_by: PyObjectId
@@ -59,6 +60,9 @@ class DocumentRecord(BaseModel):
     # --- Processed artifact paths ---
     markdown_path: Optional[str] = None
     cleaned_path: Optional[str] = None
+    # Optional LLM-reformatted markdown (structure repaired), used in place of
+    # cleaned_path for chunking when present.
+    llm_cleaned_path: Optional[str] = None
 
     # --- Chunks ---
     chunk_count: Optional[int] = None
@@ -72,6 +76,11 @@ class DocumentRecord(BaseModel):
     markdown_reviewed: bool = False
     cleaned_reviewed: bool = False
     chunks_reviewed: bool = False
+    # Per-document opt-in for the LLM reformat step (admin chooses per upload).
+    llm_clean_requested: bool = False
+    llm_cleaned_reviewed: bool = False
+    # Preservation-check warnings from the last reformat pass (for admin review).
+    llm_clean_warnings: Optional[List[str]] = None
 
     # --- Optional metadata overrides ---
     metadata_overrides: dict = Field(default_factory=dict)
@@ -82,6 +91,7 @@ class DocumentRecord(BaseModel):
     # --- Step timestamps ---
     converted_at: Optional[datetime] = None
     cleaned_at: Optional[datetime] = None
+    llm_cleaned_at: Optional[datetime] = None
     chunked_at: Optional[datetime] = None
     indexed_at: Optional[datetime] = None
 

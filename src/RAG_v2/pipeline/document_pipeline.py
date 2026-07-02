@@ -334,6 +334,100 @@ class DocumentPipeline:
             await self._fail(db, doc_id, str(exc))
 
     # ------------------------------------------------------------------
+    # Step 2b: LLM Reformat (optional, after regex clean)
+    # ------------------------------------------------------------------
+
+    def _build_reformat_llm(self):
+        """Build a BaseLLM configured for reformat (larger max_tokens, temp 0).
+
+        Reuses the configured provider via ``create_llm`` with a copied Settings
+        so answer-generation limits (chat_max_tokens) don't truncate the
+        (roughly input-length) reformatted output.
+        """
+        from llm import create_llm
+
+        reformat_settings = self._settings.model_copy(
+            update={
+                "chat_max_tokens": self._settings.llm_clean_max_tokens,
+                "chat_model": (
+                    self._settings.llm_clean_model or self._settings.chat_model
+                ),
+                "chat_temperature": 0.0,
+            }
+        )
+        return create_llm(reformat_settings)
+
+    async def llm_clean(self, doc_id: str, db: AsyncIOMotorDatabase) -> None:
+        """LLM-based markdown structure reformat (optional step after regex clean).
+
+        Repairs markdown structure via the configured LLM and saves
+        ``llm_cleaned.md``. Content-preservation warnings are stored on the
+        document for admin review — the output is NOT auto-discarded.
+
+        Updates status: ``llm_cleaning`` → ``llm_cleaned`` (or ``failed``).
+        """
+        try:
+            doc = await self._get_doc(db, doc_id)
+            if doc is None:
+                logger.warning(
+                    "LLM clean aborted: document %s not found (deleted mid-pipeline?)",
+                    doc_id,
+                )
+                return
+
+            if not self._settings.llm_clean_enabled:
+                raise ValueError("LLM clean is disabled (llm_clean_enabled=False)")
+
+            await self._update_status(
+                db, doc_id, "llm_cleaning", {"error_message": None}
+            )
+
+            text_path = doc.get("cleaned_path") or doc.get("markdown_path")
+            if not text_path:
+                raise ValueError("No cleaned content available for LLM reformat")
+
+            source_md = await self._storage.read_text(text_path)
+
+            from document_loader.llm_reformatter import LLMDocumentReformatter
+
+            llm = self._build_reformat_llm()
+            reformatter = LLMDocumentReformatter(
+                llm,
+                max_section_tokens=self._settings.llm_clean_max_section_tokens,
+                length_ratio_min=self._settings.llm_clean_length_ratio_min,
+                length_ratio_max=self._settings.llm_clean_length_ratio_max,
+            )
+            result = await anyio.to_thread.run_sync(
+                lambda: reformatter.reformat(
+                    source_md, {"filename": doc.get("filename", "")}
+                )
+            )
+
+            llm_cleaned_rel = await self._storage.save_text(
+                result.text, doc_id, "llm_cleaned.md"
+            )
+
+            await self._update_status(
+                db,
+                doc_id,
+                "llm_cleaned",
+                {
+                    "llm_cleaned_path": llm_cleaned_rel,
+                    "llm_cleaned_at": datetime.now(timezone.utc),
+                    "llm_cleaned_reviewed": False,
+                    "llm_clean_warnings": result.warnings,
+                },
+            )
+            logger.info(
+                "LLM-reformatted document %s (%d preservation warning(s)).",
+                doc_id,
+                len(result.warnings),
+            )
+        except Exception as exc:
+            logger.exception("LLM clean failed for document %s", doc_id)
+            await self._fail(db, doc_id, str(exc))
+
+    # ------------------------------------------------------------------
     # Step 3: Chunk
     # ------------------------------------------------------------------
 
@@ -365,8 +459,12 @@ class DocumentPipeline:
                 },
             )
 
-            # Prefer cleaned content, fall back to markdown
-            text_path = doc.get("cleaned_path") or doc.get("markdown_path")
+            # Prefer LLM-reformatted content, then regex-cleaned, then raw markdown
+            text_path = (
+                doc.get("llm_cleaned_path")
+                or doc.get("cleaned_path")
+                or doc.get("markdown_path")
+            )
             if not text_path:
                 raise ValueError("No text content available for chunking")
 
@@ -722,6 +820,14 @@ class DocumentPipeline:
         if self._pipeline_should_stop(await self._get_doc(db, doc_id), doc_id):
             return
 
+        # Step 2b: Optional LLM reformat. When requested, stop for admin review
+        # before chunking — LLM output must be checked (it is not guaranteed
+        # to preserve content).
+        doc = await self._get_doc(db, doc_id)
+        if (doc or {}).get("llm_clean_requested") and self._settings.llm_clean_enabled:
+            await self.llm_clean(doc_id, db)
+            return
+
         # Step 3: Chunk
         doc = await self._get_doc(db, doc_id)
         strategy = (doc or {}).get("chunking_strategy") or "recursive"
@@ -807,11 +913,24 @@ class DocumentPipeline:
 
         elif status in ("chunked", "chunking"):
             await db[DOCUMENT_CHUNKS_COLLECTION].delete_many({"document_id": ObjectId(doc_id)})
-            await self._update_status(db, doc_id, "cleaned", {
+            # Return to whichever text artifact fed the chunker (preserve LLM work).
+            prev_status = "llm_cleaned" if doc.get("llm_cleaned_path") else "cleaned"
+            await self._update_status(db, doc_id, prev_status, {
                 "chunked_at": None,
                 "chunk_count": None,
                 "chunk_ids": None,
                 "chunking_strategy": None,
+                "error_message": None
+            })
+            logger.info("Rolled back document %s from %s to %s.", doc_id, status, prev_status)
+
+        elif status in ("llm_cleaned", "llm_cleaning"):
+            _delete_file_safely(doc.get("llm_cleaned_path"))
+            await self._update_status(db, doc_id, "cleaned", {
+                "llm_cleaned_at": None,
+                "llm_cleaned_path": None,
+                "llm_cleaned_reviewed": False,
+                "llm_clean_warnings": None,
                 "error_message": None
             })
             logger.info("Rolled back document %s from %s to cleaned.", doc_id, status)
@@ -841,6 +960,16 @@ class DocumentPipeline:
                 await self.delete_indexed_data(doc_id, doc.get("collection", ""))
                 await self._update_status(db, doc_id, "chunked", {"indexed_at": None, "error_message": None})
                 logger.info("Rolled back failed document %s to chunked.", doc_id)
+            elif doc.get("llm_cleaned_at"):
+                _delete_file_safely(doc.get("llm_cleaned_path"))
+                await self._update_status(db, doc_id, "cleaned", {
+                    "llm_cleaned_at": None,
+                    "llm_cleaned_path": None,
+                    "llm_cleaned_reviewed": False,
+                    "llm_clean_warnings": None,
+                    "error_message": None
+                })
+                logger.info("Rolled back failed document %s to cleaned (from llm_clean).", doc_id)
             elif doc.get("cleaned_at"):
                 await db[DOCUMENT_CHUNKS_COLLECTION].delete_many({"document_id": ObjectId(doc_id)})
                 await self._update_status(db, doc_id, "cleaned", {

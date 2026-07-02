@@ -167,6 +167,41 @@ SELF_EVAL_USER_TEMPLATE = """\
 
 Đánh giá câu trả lời:"""
 
+# ─── Document Reformat Prompt (admin ingestion, not user-facing) ─────────────────
+# Repairs markdown STRUCTURE so the recursive chunker parses parent/child sections
+# and tables correctly. It MUST preserve content verbatim — a downstream guardrail
+# checks length, so silently dropping text will surface as an admin warning.
+
+REFORMAT_SYSTEM_PROMPT = """\
+Bạn là công cụ chuẩn hoá cấu trúc Markdown cho tài liệu quy chế/chương trình đào \
+tạo của Đại học Bách khoa Hà Nội. Nhiệm vụ DUY NHẤT là sửa CẤU TRÚC, TUYỆT ĐỐI \
+KHÔNG diễn giải lại hay thêm/bớt nội dung.
+
+ĐƯỢC PHÉP làm:
+1. Sửa cấp heading cho đúng phân cấp (H1 `#` cho tên văn bản; H2 `##` cho \
+"Điều X", "Chương X", hoặc mục lớn; H3 `###` cho tiểu mục). Thêm `#` nếu một dòng \
+rõ ràng là heading nhưng bị mất dấu `#`.
+2. Sửa bảng Markdown bị vỡ: căn lại cột, thêm dòng phân cách `|---|` nếu thiếu, \
+gộp dòng của cùng một hàng bị xuống dòng giữa chừng.
+3. Sửa lỗi ký tự tiếng Việt bị tách do OCR/convert (ví dụ "Đi ều" → "Điều", \
+"Ch ương" → "Chương"), nối lại từ bị ngắt giữa dòng.
+4. Chuẩn hoá danh sách đánh số / gạch đầu dòng về đúng cú pháp Markdown.
+
+TUYỆT ĐỐI KHÔNG:
+- KHÔNG diễn giải, tóm tắt, dịch, hay viết lại câu chữ. Giữ nguyên 100% từ ngữ, \
+con số, mã học phần, số tín chỉ, số Điều/Khoản.
+- KHÔNG thêm nội dung mới, KHÔNG bỏ bất kỳ câu/số/dòng nào (kể cả khi thấy trùng \
+lặp — giữ nguyên).
+- KHÔNG thêm lời bình, tiêu đề "Kết quả:", hay bọc trong code block ```.
+
+CHỈ trả về nội dung Markdown đã chuẩn hoá, không kèm giải thích."""
+
+REFORMAT_USER_TEMPLATE = """\
+{context}Chuẩn hoá cấu trúc Markdown của đoạn dưới đây theo đúng quy tắc, giữ \
+nguyên toàn bộ nội dung:
+
+{query}"""
+
 
 # ─── Message-Assembly Helpers ───────────────────────────────────────────────────
 
@@ -271,5 +306,27 @@ def build_self_eval_messages(user_content: str) -> List[Dict[str, str]]:
     """
     return [
         {"role": "system", "content": SELF_EVAL_SYSTEM_PROMPT},
+        {"role": "user", "content": user_content},
+    ]
+
+
+def build_reformat_messages(
+    section: str,
+    context: Optional[str] = None,
+) -> List[Dict[str, str]]:
+    """Build OpenAI-style messages for document reformat mode.
+
+    Args:
+        section: The markdown section to structurally normalise (verbatim content).
+        context: Optional position hint (document name / parent heading) so the
+            model picks the right heading level; not part of the content to keep.
+
+    Returns:
+        List of ``{role, content}`` message dicts.
+    """
+    context_block = f"{context.strip()}\n\n" if context and context.strip() else ""
+    user_content = REFORMAT_USER_TEMPLATE.format(context=context_block, query=section)
+    return [
+        {"role": "system", "content": REFORMAT_SYSTEM_PROMPT},
         {"role": "user", "content": user_content},
     ]
