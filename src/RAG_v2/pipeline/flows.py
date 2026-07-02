@@ -830,17 +830,6 @@ def _is_dynamic_web_query(
     return bool(_WEB_FALLBACK_DYNAMIC_QUERY_RE.search(folded))
 
 
-def _has_textual_freshness_or_dynamic_intent(
-    question: str, search_query: str
-) -> bool:
-    """Return True when the current text asks for fresh/dynamic information."""
-    combined = f"{question}\n{search_query}"
-    if has_freshness_intent(combined):
-        return True
-    return bool(
-        _WEB_FALLBACK_DYNAMIC_QUERY_RE.search(_fold_vietnamese(combined))
-    )
-
 
 def _routing_top_domain(
     routing_result: Optional[Dict[str, Any]],
@@ -1683,12 +1672,6 @@ def _kehoach_links_footer(answer: str, sources: List[Dict[str, Any]]) -> str:
     return f"\n\n{_KEHOACH_LINK_HEADER}\n" + "\n".join(formatted_links)
 
 
-def _append_kehoach_source_links(
-    answer: str, sources: List[Dict[str, Any]]
-) -> str:
-    """Append the kehoach link footer to ``answer`` (no-op when none apply)."""
-    return answer + _kehoach_links_footer(answer, sources)
-
 
 def _cfg_int(cfg: Dict[str, Any], key: str, default: int) -> int:
     """Read an integer config value with a safe fallback."""
@@ -2123,35 +2106,6 @@ def _extract_session_profile(history: Optional[List[Dict[str, str]]]) -> str:
 
     return "Th\u00f4ng tin sinh vi\u00ean: " + ", ".join(parts) + "."
 
-
-def _build_profile_note_from_user_context(
-    user_context: Optional[Dict[str, Any]],
-) -> str:
-    """Build a compact profile note from the authenticated user's profile dict.
-    Used only inside the reflector prompt â€” NOT for post-reflection bracketing.
-    """
-    if not user_context:
-        return ""
-
-    parts: List[str] = []
-    if user_context.get("full_name"):
-        parts.append(f"Sinh viÃªn: {user_context['full_name']}")
-    if user_context.get("student_id"):
-        parts.append(f"MÃ£ SV: {user_context['student_id']}")
-    major_code = str(user_context.get("major_code") or "").strip()
-    major_name = str(user_context.get("major") or "").strip()
-    if major_code:
-        canonical_name = MAJOR_CODE_TO_NAME.get(major_code)
-        if canonical_name:
-            major_name = canonical_name
-        major_note = f"{major_name} [{major_code}]" if major_name else major_code
-        parts.append(f"NgÃ nh: {major_note}")
-    elif major_name:
-        parts.append(f"NgÃ nh: {major_name}")
-    if user_context.get("cohort"):
-        parts.append(f"KhoÃ¡: {user_context['cohort']}")
-
-    return " | ".join(parts) if parts else ""
 
 
 def _build_cache_profile(user_context: Optional[Dict[str, Any]]) -> str:
