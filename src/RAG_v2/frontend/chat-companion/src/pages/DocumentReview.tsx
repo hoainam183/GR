@@ -13,6 +13,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import {
+  didPipelineFinish,
+  notifyPipelineDone,
+  requestNotifyPermission,
+} from '@/lib/pipelineNotify';
 import PipelineProgress from '@/components/admin/PipelineProgress';
 import MarkdownEditor from '@/components/admin/MarkdownEditor';
 import ChunkViewer from '@/components/admin/ChunkViewer';
@@ -69,6 +74,8 @@ export default function DocumentReview() {
   const [cleanedContent, setCleanedContent] = useState<string | null>(null);
   const [llmCleanedContent, setLlmCleanedContent] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Last seen status — used to notify once the pipeline reaches a terminal state.
+  const prevStatusRef = useRef<DocumentStatus | undefined>(undefined);
 
   // Converter / chunker selection
   const [converters, setConverters] = useState<ConverterOption[]>([]);
@@ -82,6 +89,17 @@ export default function DocumentReview() {
     if (!id) return;
     try {
       const d = await getDocument(id);
+      if (didPipelineFinish(prevStatusRef.current, d.status)) {
+        if (d.status === 'indexed') {
+          toast.success(`Đã index xong: ${d.filename}`);
+        } else {
+          toast.error(
+            `Index thất bại: ${d.filename}${d.error_message ? ` — ${d.error_message}` : ''}`,
+          );
+        }
+        notifyPipelineDone(d.filename, d.status);
+      }
+      prevStatusRef.current = d.status;
       setDoc(d);
       return d;
     } catch (error: unknown) {
@@ -174,6 +192,9 @@ export default function DocumentReview() {
 
   const handleTriggerStep = async (step: PipelineStep['key']) => {
     if (!id) return;
+    // Ask for notification permission on this user gesture so we can alert the
+    // admin when a long-running step (index) finishes on another tab.
+    requestNotifyPermission();
     setRetrying(step);
     try {
       if (step === 'convert') {
@@ -231,6 +252,7 @@ export default function DocumentReview() {
 
   const handleFullPipeline = async () => {
     if (!id) return;
+    requestNotifyPermission();
     try {
       await triggerFullPipeline(id);
       toast.success('Pipeline tự động đã bắt đầu');

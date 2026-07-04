@@ -6,7 +6,13 @@ import { toast } from 'sonner';
 import FileUploader from '@/components/admin/FileUploader';
 import DocumentList from '@/components/admin/DocumentList';
 import { listDocuments, deleteDocument } from '@/services/adminApi';
-import type { DocumentDetail } from '@/types/admin';
+import type { DocumentDetail, DocumentStatus } from '@/types/admin';
+import {
+  PROCESSING_STATUSES,
+  didPipelineFinish,
+  notifyPipelineDone,
+  requestNotifyPermission,
+} from '@/lib/pipelineNotify';
 import { ArrowLeft, Bot, ThumbsUp, LayoutDashboard, Users, MessageSquare, FileText, Settings } from 'lucide-react';
 import OverviewTab from '@/components/admin/OverviewTab';
 import UsersTab from '@/components/admin/UsersTab';
@@ -64,7 +70,27 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState('__all__');
   const [collectionFilter, setCollectionFilter] = useState('__all__');
   const scrollAreaRef = useRef<HTMLElement>(null);
+  // Last seen status per document — used to toast/notify on pipeline completion.
+  const prevStatusRef = useRef<Map<string, DocumentStatus>>(new Map());
   const limit = 20;
+
+  // Apply a fresh document list, notifying on any processing -> terminal transition.
+  const applyDocuments = useCallback((docs: DocumentDetail[]) => {
+    const prev = prevStatusRef.current;
+    for (const doc of docs) {
+      if (!didPipelineFinish(prev.get(doc.id), doc.status)) continue;
+      if (doc.status === 'indexed') {
+        toast.success(`Đã index xong: ${doc.filename}`);
+      } else {
+        toast.error(
+          `Index thất bại: ${doc.filename}${doc.error_message ? ` — ${doc.error_message}` : ''}`,
+        );
+      }
+      notifyPipelineDone(doc.filename, doc.status);
+    }
+    prevStatusRef.current = new Map(docs.map((d) => [d.id, d.status]));
+    setDocuments(docs);
+  }, []);
 
   const fetchDocuments = useCallback(async () => {
     setLoading(true);
@@ -75,7 +101,7 @@ export default function AdminPage() {
         statusFilter === '__all__' ? undefined : statusFilter,
         collectionFilter === '__all__' ? undefined : collectionFilter,
       );
-      setDocuments(res.documents);
+      applyDocuments(res.documents);
       setTotal(res.total);
     } catch (err: unknown) {
       if (getAdminApiError(err).status === 403) {
@@ -87,14 +113,16 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, collectionFilter, navigate]);
+  }, [page, statusFilter, collectionFilter, navigate, applyDocuments]);
 
   useEffect(() => {
-    if (activeTab === 'documents') fetchDocuments();
+    if (activeTab === 'documents') {
+      requestNotifyPermission();
+      fetchDocuments();
+    }
   }, [fetchDocuments, activeTab]);
 
   // Auto-poll document list when any document is still processing
-  const PROCESSING_STATUSES = ['converting', 'cleaning', 'llm_cleaning', 'chunking', 'embedding'];
   const hasProcessing = documents.some((d) => PROCESSING_STATUSES.includes(d.status));
 
   useEffect(() => {
@@ -107,14 +135,14 @@ export default function AdminPage() {
           statusFilter === '__all__' ? undefined : statusFilter,
           collectionFilter === '__all__' ? undefined : collectionFilter,
         );
-        setDocuments(res.documents);
+        applyDocuments(res.documents);
         setTotal(res.total);
       } catch {
         // silently ignore errors during background polling
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [activeTab, hasProcessing, page, statusFilter, collectionFilter]);
+  }, [activeTab, hasProcessing, page, statusFilter, collectionFilter, applyDocuments]);
 
   const handleUploaded = () => {
     setPage(1);

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ChatResponse, ChatV3Response, Message, Turn, UserContext } from '@/types/chat';
 import { sendMessageStream, resolveChatIdentity } from '@/services/chatApi';
-import { getSession } from '@/services/sessionApi';
+import { getSession, getSessions } from '@/services/sessionApi';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import TypingIndicator from './TypingIndicator';
@@ -32,6 +32,10 @@ interface PendingChatTurn {
   question: string;
   startedAt: string;
 }
+
+// Sentinel session id for a turn sent before the server returned a real
+// session_id (brand-new chat). Lets us recover it after a very fast refresh.
+const NEW_SESSION_SENTINEL = 'new';
 
 const pendingKey = (sessionId: string) => `pending-chat:${sessionId}`;
 
@@ -169,6 +173,8 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
   // Token batching (B3): buffer deltas, flush via rAF to cut re-renders per token.
   const tokenBufferRef = useRef('');
   const flushRafRef = useRef<number | null>(null);
+  // Controls the in-flight /chat/stream fetch so the user can Stop a response.
+  const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   // Set to true before calling navigate() from within handleSendMessage so the
@@ -223,6 +229,10 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         flushRafRef.current = null;
       }
       tokenBufferRef.current = '';
+      // NOTE: intentionally do NOT abort the in-flight request here. This
+      // component keeps the stream alive across unmount so the backend still
+      // persists the turn and the sessionStorage-polling recovery works.
+      // Aborting is only ever user-initiated via the Stop button.
     };
   }, []);
 
@@ -251,7 +261,56 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     setChatPhase('idle');
     setLastResponsePayload(null);
 
-    if (!sessionIdProp) return () => {};
+    if (!sessionIdProp) {
+      // Base /chat route. If we sent a turn but refreshed before the server
+      // returned a session_id, recover it: show the question, then poll the
+      // session list for the freshly-created session and hand off to the
+      // normal per-session recovery by re-keying the pending turn.
+      const pending = readPendingTurn(NEW_SESSION_SENTINEL);
+      if (!pending) return () => {};
+
+      const ageMs = Date.now() - parseUtcDate(pending.startedAt).getTime();
+      if (ageMs > 60_000) {
+        clearPendingTurn(NEW_SESSION_SENTINEL);
+        return () => {};
+      }
+
+      setMessages(pendingMessages(pending));
+      setChatPhase('thinking');
+
+      const startedAtMs = parseUtcDate(pending.startedAt).getTime();
+      pollId = setInterval(() => {
+        getSessions(resolvedIdentity.userId)
+          .then((sessions) => {
+            if (cancelled) return;
+            const match = sessions
+              .filter(
+                (s) =>
+                  s.turn_count >= 1 &&
+                  parseUtcDate(s.created_at).getTime() >= startedAtMs - 5000,
+              )
+              .sort(
+                (a, b) =>
+                  parseUtcDate(b.created_at).getTime() - parseUtcDate(a.created_at).getTime(),
+              )[0];
+            if (match && pollId) {
+              clearInterval(pollId);
+              pollId = undefined;
+              writePendingTurn({ ...pending, sessionId: match.session_id });
+              clearPendingTurn(NEW_SESSION_SENTINEL);
+              navigate(`/chat/${match.session_id}`, { replace: true });
+            }
+          })
+          .catch((err) => {
+            console.error('Failed to reconcile pending turn:', err);
+          });
+      }, 2500);
+
+      return () => {
+        cancelled = true;
+        if (pollId) clearInterval(pollId);
+      };
+    }
 
     setIsLoadingHistory(true);
 
@@ -309,7 +368,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       cancelled = true;
       if (pollId) clearInterval(pollId);
     };
-  }, [sessionIdProp, queryClient, resolvedIdentity.userId]);
+  }, [sessionIdProp, queryClient, resolvedIdentity.userId, navigate]);
 
   const handleSendMessage = async (
     content: string,
@@ -338,6 +397,10 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     setChatPhase('thinking');
     setStatusMessage(null);
     forceScrollToBottom();
+
+    // Fresh AbortController per request so the user can Stop this response.
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     let responseSessionId = capturedSessionId;
     let receivedMetadata: Partial<ChatV3Response> | undefined;
@@ -387,9 +450,9 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       });
     };
 
-    if (capturedSessionId) {
-      persistPending(capturedSessionId);
-    }
+    // Persist immediately — even before the server assigns a session_id — so a
+    // refresh in the tiny window before onSessionId doesn't lose the question.
+    persistPending(capturedSessionId ?? NEW_SESSION_SENTINEL);
 
     try {
       // Build history from existing messages (last 6 turns)
@@ -409,6 +472,8 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
           onSessionId: (sid) => {
             responseSessionId = sid;
             persistPending(sid);
+            // Re-key from the sentinel to the real session id.
+            if (!capturedSessionId) clearPendingTurn(NEW_SESSION_SENTINEL);
             if (!isMountedRef.current) return;
             suppressNextHistoryLoad.current = true;
             setActiveSessionId(sid);
@@ -472,6 +537,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             drainTokenBuffer();
             clearPendingTurn(responseSessionId);
           },
+          signal: controller.signal,
         },
       );
 
@@ -541,10 +607,28 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       }
     } catch (error) {
       drainTokenBuffer();
+      // User pressed Stop (or the component unmounted): keep whatever text has
+      // already streamed in, finalise the bubble, and skip the error message.
+      const isAbort = error instanceof Error && error.name === 'AbortError';
+      if (isAbort) {
+        clearPendingTurn(responseSessionId);
+        if (!capturedSessionId) clearPendingTurn(NEW_SESSION_SENTINEL);
+        if (isMountedRef.current && isCurrentRequest()) {
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === assistantMessageId
+                ? { ...message, isStreaming: false }
+                : message,
+            ),
+          );
+        }
+        return;
+      }
       // Only show error in the session that initiated the request
       if (isMountedRef.current && isCurrentRequest()) {
         console.error('Failed to get response:', error);
         clearPendingTurn(responseSessionId);
+        if (!capturedSessionId) clearPendingTurn(NEW_SESSION_SENTINEL);
         const errorMessage: Message = {
           id: `error-${Date.now()}`,
           role: 'assistant',
@@ -577,6 +661,10 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     }
   };
 
+  const handleStop = () => {
+    abortControllerRef.current?.abort();
+  };
+
   const handleRetry = (question: string, errorMessageId: string) => {
     setMessages((prev) => prev.filter((message) => message.id !== errorMessageId));
     handleSendMessage(question, { isRetry: true });
@@ -588,12 +676,23 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     lastMessage?.role === 'assistant' &&
     !lastMessage.isStreaming &&
     !lastMessage.isError;
+  // Accent-fold + lowercase so "Học phí" and "hoc phi" compare equal.
+  const foldText = (value: string) =>
+    value
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/đ/gi, 'd')
+      .toLowerCase()
+      .trim();
+  const lastUserQuestion = [...messages].reverse().find((m) => m.role === 'user')?.content ?? '';
+  const foldedLastQuestion = foldText(lastUserQuestion);
+  // Drop any suggestion the user just asked so it doesn't reappear right after.
   const followUpChips = [
     'Học phí kỳ này',
     'Lịch thi cuối kỳ',
     'Điều kiện tốt nghiệp',
     'Học bổng KKHT',
-  ];
+  ].filter((chip) => foldText(chip) !== foldedLastQuestion);
 
   const greeting = user ? `Xin chào, ${user.full_name.split(' ').pop()}!` : 'Bắt đầu trò chuyện';
   const suggestions: Array<{ icon: LucideIcon; label: string; query: string }> = [
@@ -689,7 +788,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
               ),
             )}
             {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} label={statusMessage ?? undefined} />}
-            {showFollowUps && (
+            {showFollowUps && followUpChips.length > 0 && (
               <div className="flex flex-wrap gap-2 pl-10 sm:pl-11" aria-label="Gợi ý câu hỏi tiếp theo">
                 {followUpChips.map((chip) => (
                   <button
@@ -729,7 +828,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       {/* Input Area */}
       <div className="relative z-20 shrink-0 overscroll-contain border-t border-border bg-background/90 p-3 backdrop-blur-sm sm:p-4 md:p-6">
         <div className="mx-auto w-full max-w-3xl">
-          <ChatInput onSend={handleSendMessage} disabled={chatPhase !== 'idle'} />
+          <ChatInput onSend={handleSendMessage} isBusy={chatPhase !== 'idle'} onStop={handleStop} />
           {isAdmin && (
             <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
               <summary className="cursor-pointer select-none text-muted-foreground">

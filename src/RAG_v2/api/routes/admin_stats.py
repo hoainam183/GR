@@ -264,6 +264,8 @@ class LLMConfigBody(BaseModel):
     reflection_enabled: bool | None = None
     reflection_provider: str | None = None
     reflection_model: str | None = None
+    llm_clean_provider: str | None = None
+    llm_clean_model: str | None = None
 
 
 class ApiKeyCreateBody(BaseModel):
@@ -1627,6 +1629,8 @@ async def get_llm_config(
         "reflection_enabled": settings.reflection_enabled,
         "reflection_provider": settings.reflection_provider,
         "reflection_model": settings.reflection_model,
+        "llm_clean_provider": settings.llm_clean_provider,
+        "llm_clean_model": settings.llm_clean_model,
     }
 
 

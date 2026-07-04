@@ -546,7 +546,12 @@ async def get_markdown(
         raise HTTPException(status_code=404, detail="Markdown not available yet")
 
     storage = _get_storage()
-    content = await storage.read_text(doc["markdown_path"])
+    try:
+        content = await storage.read_text(doc["markdown_path"])
+    except FileNotFoundError:
+        # The DB pointer can outlive the file for a moment if a concurrent
+        # rollback/re-run deleted it after this request read `doc`.
+        raise HTTPException(status_code=404, detail="Markdown not available yet")
     return {"content": content}
 
 
@@ -641,7 +646,10 @@ async def get_cleaned(
         raise HTTPException(status_code=404, detail="Cleaned content not available yet")
 
     storage = _get_storage()
-    content = await storage.read_text(doc["cleaned_path"])
+    try:
+        content = await storage.read_text(doc["cleaned_path"])
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Cleaned content not available yet")
     return {"content": content}
 
 
@@ -743,7 +751,12 @@ async def get_llm_cleaned(
         )
 
     storage = _get_storage()
-    content = await storage.read_text(doc["llm_cleaned_path"])
+    try:
+        content = await storage.read_text(doc["llm_cleaned_path"])
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404, detail="LLM-cleaned content not available yet"
+        )
     return {"content": content, "warnings": doc.get("llm_clean_warnings") or []}
 
 
@@ -794,7 +807,7 @@ async def chunk_document(
     """Trigger chunking in background. Optionally override strategy via query param."""
     doc = await _get_doc_or_404(db, doc_id)
 
-    if doc["status"] not in ("llm_cleaned", "cleaned", "converted", "failed"):
+    if doc["status"] not in ("llm_cleaned", "cleaned", "converted", "failed", "chunked"):
         raise HTTPException(
             status_code=409,
             detail=f"Cannot chunk document in status '{doc['status']}'",
@@ -1181,11 +1194,37 @@ async def index_document(
 async def _bg_index(
     doc_id: str, db: AsyncIOMotorDatabase, app: Any = None
 ) -> None:
-    """Background: embed + index chunks, then invalidate stale answer caches."""
-    pipeline = _get_pipeline()
-    await pipeline.embed_and_index(doc_id, db)
+    """Background: embed + index chunks, then invalidate stale answer caches.
+
+    Runs detached in a BackgroundTask, so any unhandled error would otherwise
+    leave the document stuck in ``embedding`` forever. We guarantee the document
+    reaches a terminal status: ``embed_and_index`` already marks its own failures
+    as ``failed``; this wrapper additionally catches errors raised *outside* it
+    (e.g. pipeline construction) and never lets a cache-invalidation error flip a
+    successfully-indexed document to ``failed``.
+    """
+    try:
+        pipeline = _get_pipeline()
+        await pipeline.embed_and_index(doc_id, db)
+    except Exception as exc:  # noqa: BLE001 - background task must not leave a zombie doc
+        logger.exception("Background index failed for document %s", doc_id)
+        try:
+            await db[DOCUMENTS_COLLECTION].update_one(
+                {"_id": ObjectId(doc_id)},
+                {
+                    "$set": {"status": "failed", "error_message": str(exc)},
+                    "$push": {"audit_log": _audit("index_failed", "system")},
+                },
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception("Could not mark document %s as failed", doc_id)
+        return
+
     if app is not None:
-        _invalidate_search_caches(app)
+        try:
+            _invalidate_search_caches(app)
+        except Exception:  # noqa: BLE001 - indexing already succeeded; cache is best-effort
+            logger.exception("Cache invalidation failed after indexing %s", doc_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
