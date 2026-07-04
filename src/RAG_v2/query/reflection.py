@@ -78,6 +78,27 @@ _COMPARISON_FOLLOWUP_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Institution-name leak guard (Rule 18). REWRITE_SYSTEM_PROMPT no longer names
+# the university, but the rewrite LLM can still echo it unprompted from prior
+# training/context. Only strip when the user's own query didn't say it.
+_INSTITUTION_NAME_RE = re.compile(
+    r"(?:\btại\s+)?(?:trường\s+)?đại\s+học\s+bách\s+khoa\s+hà\s+nội"
+    r"|\bbách\s+khoa\s+hà\s+nội\b"
+    r"|\bđhbkhn\b"
+    r"|\bhust\b",
+    re.IGNORECASE,
+)
+
+# Explicit compare-hint words — mirrors retrieval.metadata_filters._COMPARE_HINT_RE.
+# A genuine multi-major question always carries one of these; its absence
+# means a rewrite with 2+ major codes dropped a swap connector rather than
+# reflecting real intent to compare (Rule 19).
+_MAJOR_COMPARE_HINT_RE = re.compile(
+    r"\b(?:so\s*s[aá]nh|kh[aá]c\s+nhau|kh[aá]c\s+g[iì]|đ[oố]i\s*chi[eế]u|"
+    r"doi\s*chieu|ph[aâ]n\s*bi[eệ]t|phan\s*biet)\b",
+    re.IGNORECASE,
+)
+
 # Freshness-intent signals (accent-folded form). Used NOT as a pre-filter but as
 # an input to the post-LLM anti-bleeding guardrail: a generic "… mới nhất" query
 # must not inherit academic scope (major/cohort/semester/year) from history.
@@ -445,6 +466,103 @@ def _expand_major_codes_in_query(query: str) -> str:
     if result != query:
         logger.debug("Major reference expansion: %r → %r", query[:80], result[:80])
     return result
+
+
+def _strip_institution_name_leak(query: str, candidate: str) -> tuple[str, bool]:
+    """Remove an institution-name qualifier the reflector added on its own.
+
+    Only strips when the phrase is absent from the user's own (PII-stripped)
+    query — a user who actually asks about the university by name must not
+    have that context erased.
+    """
+    if not candidate or _INSTITUTION_NAME_RE.search(query or ""):
+        return candidate, False
+    stripped, count = _INSTITUTION_NAME_RE.subn("", candidate)
+    if not count:
+        return candidate, False
+    stripped = re.sub(r"\s{2,}", " ", stripped)
+    stripped = re.sub(r"\s+([.,?!])", r"\1", stripped)
+    stripped = stripped.strip(" ,")
+    return stripped, True
+
+
+def _strip_stale_major_reference(text: str, code: str, name: Optional[str]) -> str:
+    """Remove one stale major-code mention (and its adjacent name) from *text*."""
+    code_pattern = re.escape(code).replace(
+        r"\-", r"\s*[-‐‑‒–—−]?\s*"
+    )
+    if name:
+        try:
+            from retrieval.metadata_filters import (  # noqa: PLC0415
+                _major_name_query_variants,
+            )
+
+            variants = sorted(_major_name_query_variants(name), key=len, reverse=True)
+        except Exception:
+            variants = [name]
+        for variant in variants:
+            variant_pattern = re.escape(variant)
+            stripped, count = re.subn(
+                rf"{variant_pattern}\s*\(\s*{code_pattern}\s*\)",
+                "",
+                text,
+                flags=re.IGNORECASE,
+            )
+            if count:
+                return stripped
+            stripped, count = re.subn(
+                rf"\b{code_pattern}\b\s*\(\s*{variant_pattern}\s*\)",
+                "",
+                text,
+                flags=re.IGNORECASE,
+            )
+            if count:
+                return stripped
+    return re.sub(rf"\b{code_pattern}\b", "", text, flags=re.IGNORECASE)
+
+
+def _revert_major_code_conflation(query: str, rewritten: str) -> tuple[str, bool]:
+    """Fix a follow-up that kept a stale major code instead of swapping to the new one.
+
+    A follow-up like "với ITE7 thì sao" after a turn about IT-E6 must replace
+    the old major entirely (REWRITE_SYSTEM_PROMPT few-shot #13), not
+    concatenate both. A genuine multi-major question always carries an
+    explicit compare hint ("so sánh", "khác nhau", ...); its absence here
+    means the rewrite dropped the connector rather than the user wanting both.
+    """
+    if not rewritten:
+        return rewritten, False
+    try:
+        from retrieval.metadata_filters import (  # noqa: PLC0415
+            MAJOR_CODE_TO_NAME,
+            extract_major_codes,
+        )
+    except Exception:
+        return rewritten, False
+
+    rewritten_codes = list(dict.fromkeys(extract_major_codes(rewritten)))
+    if len(rewritten_codes) < 2:
+        return rewritten, False
+    if _MAJOR_COMPARE_HINT_RE.search(query or ""):
+        return rewritten, False
+
+    query_codes = set(extract_major_codes(query or ""))
+    if not query_codes:
+        return rewritten, False
+
+    stale_codes = [code for code in rewritten_codes if code not in query_codes]
+    if not stale_codes:
+        return rewritten, False
+
+    result = rewritten
+    for code in stale_codes:
+        result = _strip_stale_major_reference(result, code, MAJOR_CODE_TO_NAME.get(code))
+
+    result = re.sub(r"\s{2,}", " ", result).strip()
+    result = re.sub(r"\s+([.,?!])", r"\1", result)
+    if not result or result == rewritten:
+        return rewritten, False
+    return result, True
 
 
 def _clean_profile_value(value: Any) -> Optional[str]:
@@ -1234,6 +1352,16 @@ class QueryReflector:
             reflection_guardrail_reverted = True
             reflection_rejected_scope = "academic_term"
 
+        # Institution-name leak guard (Rule 18) — see _INSTITUTION_NAME_RE.
+        rewritten, reflection_institution_leak_reverted = _strip_institution_name_leak(
+            query, rewritten
+        )
+        if reflection_institution_leak_reverted:
+            logger.info(
+                "Reflection guardrail: stripped institution-name leak -> %r",
+                rewritten[:80],
+            )
+
         deterministic_followup_applied = False
         deterministic_followup = _rewrite_comparison_followup(
             query=query,
@@ -1285,6 +1413,18 @@ class QueryReflector:
         if not deterministic_followup_applied:
             rewritten = _expand_major_codes_in_query(rewritten)
 
+        # Guardrail 3b — Revert stale major-code conflation (Rule 19). See
+        # _revert_major_code_conflation for why this only fires without an
+        # explicit compare hint in the current query.
+        rewritten, reflection_major_conflation_reverted = _revert_major_code_conflation(
+            query, rewritten
+        )
+        if reflection_major_conflation_reverted:
+            logger.info(
+                "Reflection guardrail: reverted major-code conflation -> %r",
+                rewritten[:80],
+            )
+
         terminology_candidate = rewritten
         rewritten = expand_academic_abbreviations(rewritten)
         terminology_expanded = rewritten != terminology_candidate
@@ -1334,6 +1474,8 @@ class QueryReflector:
             "reflection_candidate": reflection_candidate,
             "reflection_guardrail_reverted": reflection_guardrail_reverted,
             "reflection_rejected_scope": reflection_rejected_scope,
+            "reflection_institution_leak_reverted": reflection_institution_leak_reverted,
+            "reflection_major_conflation_reverted": reflection_major_conflation_reverted,
             "terminology_expanded": terminology_expanded,
         }
 

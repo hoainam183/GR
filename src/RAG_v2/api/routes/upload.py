@@ -1205,6 +1205,19 @@ async def _bg_index(
     """
     try:
         pipeline = _get_pipeline()
+        # Reuse the query-time embedders already loaded in app.state.pipeline
+        # instead of letting DocumentPipeline lazily load a second BGE-M3 + E5
+        # copy (each ~2GB) — the duplicate load has been observed to exhaust
+        # memory and silently kill the backend process mid-index.
+        if app is not None:
+            retrieval_service = getattr(app.state, "pipeline", None)
+            retrieval_service = getattr(retrieval_service, "retrieval_service", None) or getattr(
+                retrieval_service, "_retrieval_service", None
+            )
+            pipeline.set_shared_embedders(
+                getattr(retrieval_service, "bge_embedder", None),
+                getattr(retrieval_service, "e5_embedder", None),
+            )
         await pipeline.embed_and_index(doc_id, db)
     except Exception as exc:  # noqa: BLE001 - background task must not leave a zombie doc
         logger.exception("Background index failed for document %s", doc_id)

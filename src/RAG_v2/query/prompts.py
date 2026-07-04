@@ -132,7 +132,7 @@ ROUTER_FEW_SHOT = [
 # ─── Reflection Prompts ────────────────────────────────────────────────────────
 
 REWRITE_SYSTEM_PROMPT = """\
-Bạn là bộ tiền xử lý truy vấn cho chatbot học thuật của Đại học Bách khoa Hà Nội.
+Bạn là bộ tiền xử lý truy vấn cho hệ thống RAG hỏi đáp học vụ.
 
 Mục tiêu: Viết lại câu hỏi thành một STANDALONE QUERY (truy vấn hoàn chỉnh, tự thân)
 để truy hồi tài liệu chính xác.
@@ -193,6 +193,8 @@ hay thay đổi bất kỳ phần nào của URL.
 vào câu hỏi nếu người dùng không dùng từ đó. Ví dụ: "quy chế đào tạo" KHÔNG được viết thành \
 "quy chế đào tạo đại học chính quy"; "học bổng" KHÔNG được viết thành "học bổng khuyến khích học tập".
 17. CHỐNG RÒ RỈ NGỮ CẢNH (BLEEDING CONTEXT): Chỉ kế thừa ngữ cảnh về Ngành học, Khóa học, Kỳ học từ CHAT_HISTORY nếu CURRENT_QUERY đang nói tiếp về chủ đề đó (có từ khóa nối tiếp, đại từ chỉ định, hoặc nội dung liên quan trực tiếp). Nếu CURRENT_QUERY chuyển sang một câu hỏi chung chung (VD: "quy chế", "xin giấy xác nhận ở đâu", "lịch thi"), TUYỆT ĐỐI KHÔNG ĐƯỢC thêm mã ngành, khóa học, hay kỳ học từ lịch sử vào câu hỏi viết lại.
+18. KHÔNG thêm tên trường/tổ chức (Đại học Bách khoa Hà Nội, HUST, ĐHBKHN...) vào Standalone Query trừ khi người dùng đã nhắc cụm đó trong câu hỏi gốc. Câu hỏi được truy hồi trong phạm vi một trường duy nhất nên việc chèn tên trường không giúp ích gì cho tìm kiếm mà chỉ gây nhiễu.
+19. Khi CURRENT_QUERY là follow-up dạng "với/còn [mã ngành mới] thì sao" tiếp nối một ngành/chương trình đã được xác định ở lượt trước, và câu hỏi KHÔNG dùng từ "so sánh/so với/khác gì/khác nhau/đối chiếu/phân biệt", phải THAY THẾ HOÀN TOÀN mã ngành cũ bằng mã ngành mới trong Standalone Query — TUYỆT ĐỐI KHÔNG được giữ lại cả hai mã ngành cùng lúc (xem Ví dụ 13). Chỉ giữ cả hai mã ngành khi câu hỏi thực sự dùng từ so sánh nêu trên.
 VÍ DỤ FEW-SHOT:
 ---
 Ví dụ 1 — Giải tham chiếu ngành từ USER_PROFILE:

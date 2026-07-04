@@ -9,6 +9,22 @@
     <meta name="theme-color" content="#C22727" />
     <link rel="icon" type="image/png" href="/hust-logo.png" />
 
+    <!--
+      Apply the persisted theme before React mounts. Previously this only ran
+      inside Index.tsx's own effect, so a hard reload on any other route
+      (/bookmarks, /notifications, ...) always rendered in light mode
+      regardless of the saved preference — there was no other page applying
+      the `dark` class on load. Mirrors the same localStorage/matchMedia
+      fallback Index.tsx uses so both stay in sync.
+    -->
+    <script>
+      (function () {
+        var saved = localStorage.getItem('theme');
+        var dark = saved === 'dark' || (saved !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      })();
+    </script>
+
     <meta property="og:title" content="Trợ Lý Học Vụ — ĐHBK Hà Nội" />
     <meta property="og:description" content="Trợ lý học vụ thông minh dành cho sinh viên Bách Khoa Hà Nội." />
     <meta property="og:type" content="website" />

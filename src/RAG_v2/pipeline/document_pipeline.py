@@ -86,6 +86,21 @@ class DocumentPipeline:
             logger.info("E5-multilingual embedder loaded.")
         return self._e5_embedder
 
+    def set_shared_embedders(self, bge: Any = None, e5: Any = None) -> None:
+        """Reuse already-loaded query-time embedders instead of loading a second
+        copy of BGE-M3 + E5 in-process (each ~2GB; loading duplicates has been
+        observed to OOM-kill the backend during admin indexing). No-op for any
+        embedder already lazily loaded by this pipeline, or for a candidate that
+        lacks ``embed_documents`` — RetrievalService substitutes a query-only
+        stub (e.g. ``DummyE5``) for ``e5_embedder`` when
+        ``settings.embedding_provider != "ensemble"``, which cannot batch-embed
+        chunks for indexing.
+        """
+        if bge is not None and self._bge_embedder is None and hasattr(bge, "embed_documents"):
+            self._bge_embedder = bge
+        if e5 is not None and self._e5_embedder is None and hasattr(e5, "embed_documents"):
+            self._e5_embedder = e5
+
     def _get_qdrant_store(self, collection_name: str) -> Any:
         from retrieval.qdrant_store import QdrantStore
 

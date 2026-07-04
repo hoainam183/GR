@@ -689,13 +689,17 @@ class DualIndexer:
         self.batch_size = batch_size
         self.collection = collection
 
-        # Reuse embedders if provided, else create new
-        if bge is None:
+        # Reuse embedders if provided, else create new. A provided embedder may
+        # be RetrievalService's query-only stub (e.g. DummyE5, used when
+        # settings.embedding_provider != "ensemble") which lacks
+        # embed_documents — fall back to a real one in that case rather than
+        # crashing indexing with an AttributeError.
+        if bge is None or not hasattr(bge, "embed_documents"):
             from embedding.bge_m3 import BGEm3Embedder
 
             logger.info("Loading BGE-M3 embedder …")
             bge = BGEm3Embedder()
-        if e5 is None:
+        if e5 is None or not hasattr(e5, "embed_documents"):
             from embedding.e5_multilingual import E5MultilingualEmbedder
 
             logger.info("Loading E5-multilingual embedder …")

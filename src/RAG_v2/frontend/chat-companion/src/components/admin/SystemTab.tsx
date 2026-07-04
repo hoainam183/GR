@@ -698,7 +698,7 @@ export default function SystemTab() {
       });
       return response.chunks;
     } catch {
-      toast.error('KhÃ´ng thá»ƒ táº£i ná»™i dung chunk');
+      toast.error('Không thể tải nội dung chunk');
       return [];
     } finally {
       setLoadingRunId(null);
@@ -728,10 +728,10 @@ export default function SystemTab() {
         )),
       }));
       setChunkDrafts((prev) => ({ ...prev, [key]: updated.content }));
-      toast.success('ÄÃ£ lÆ°u chunk');
+      toast.success('Đã lưu chunk');
       await refreshCrawlerStatus();
     } catch {
-      toast.error('KhÃ´ng thá»ƒ lÆ°u chunk');
+      toast.error('Không thể lưu chunk');
     } finally {
       setSavingChunkKey(null);
     }
@@ -741,10 +741,10 @@ export default function SystemTab() {
     setIndexingRunId(runId);
     try {
       await indexCrawlerRun(runId);
-      toast.success('ÄÃ£ báº¯t Ä‘áº§u index run');
+      toast.success('Đã bắt đầu index run');
       await refreshCrawlerStatus();
     } catch {
-      toast.error('KhÃ´ng thá»ƒ index run');
+      toast.error('Không thể index run');
     } finally {
       setIndexingRunId(null);
     }
@@ -1342,7 +1342,7 @@ export default function SystemTab() {
                                 className="h-8 w-8 p-0"
                                 disabled={loadingRunId === runId}
                                 onClick={() => handleExpandChunk(runId, chunk.chunk_id)}
-                                title="Xem/sá»­a chunk"
+                                title="Xem/sửa chunk"
                               >
                                 {loadingRunId === runId ? (
                                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

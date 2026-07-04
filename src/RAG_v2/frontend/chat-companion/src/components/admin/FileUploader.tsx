@@ -220,7 +220,7 @@ export default function FileUploader({ onUploaded }: FileUploaderProps) {
         <p className="text-xs text-muted-foreground">
           {isExam
             ? 'File sẽ được parse thành các dòng lịch thi (mã HP, phòng, kíp, ngày...) và lưu vào MongoDB + Elasticsearch. Up lại cùng tên sẽ thay thế dữ liệu cũ.'
-            : 'File sẽ đi qua pipeline convert → clean → chunk → embed và lưu vào Qdrant + Elasticsearch.'}
+            : 'Sau khi upload, tài liệu sẽ ở trạng thái "Đã upload" — vào trang chi tiết tài liệu (biểu tượng mắt) và chạy pipeline convert → clean → chunk → embed thủ công hoặc bằng nút "Tự động". Duyệt chunks trước khi index.'}
         </p>
       </div>
 
