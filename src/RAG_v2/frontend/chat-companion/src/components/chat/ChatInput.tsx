@@ -46,7 +46,10 @@ const ChatInput = ({ onSend, isBusy = false, onStop }: ChatInputProps) => {
       onStop?.();
       return;
     }
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // Skip submit while the IME is composing (Vietnamese Telex/VNI): pressing
+    // Enter commits the composition, and handling it here would clear the input
+    // just before the commit's trailing onChange re-populates it.
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       handleSubmit(e);
     }
