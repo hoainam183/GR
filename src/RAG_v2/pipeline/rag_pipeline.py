@@ -1166,6 +1166,15 @@ class RAGPipeline:
             history = self._mongo_logger.get_history(session_id)
             pipeline_timings["history_load"] = _elapsed_ms(load_t0)
 
+        # Progress event for every path: reflection + routing run synchronously
+        # before the first token, so without this the UI would show a bare
+        # spinner while the query is analysed and routed.
+        yield {
+            "type": "status",
+            "stage": "reflection",
+            "message": "Đang phân tích câu hỏi...",
+        }
+
         # ── Step 1: Reflection FIRST — so routing sees the expanded query ────
         reflected_question, ref_result, reflection_ms = self._run_reflection(
             question,
@@ -1332,6 +1341,14 @@ class RAGPipeline:
             # Tier-3 LLM domain fallback already ran inside _route_with_cache (so
             # its result is cached and not recomputed on every repeat).
 
+            # Retrieval + rerank run eagerly inside rag_flow_stream() (it blocks
+            # until the first token is ready), so surface progress before it.
+            yield {
+                "type": "status",
+                "stage": "retrieval",
+                "message": "Đang tìm kiếm tài liệu liên quan...",
+            }
+
             flow_cfg = {**runtime.cfg, "top_k": effective_top_k}
             flow_timings: Dict[str, float] = {}
             flow_metadata: Dict[str, Any] = {}
@@ -1380,6 +1397,13 @@ class RAGPipeline:
             _st.last_fusion_weights = flow_metadata.get("fusion_weights")
             _st.last_tools_used = list(flow_metadata.get("tools_used") or [])
             _st.last_tool_calls = list(flow_metadata.get("tool_calls") or [])
+
+            # Sources are selected; last beat before tokens start flowing.
+            yield {
+                "type": "status",
+                "stage": "synthesis",
+                "message": "Đang tổng hợp câu trả lời...",
+            }
 
             for chunk in stream:
                 full_answer_chunks.append(chunk)

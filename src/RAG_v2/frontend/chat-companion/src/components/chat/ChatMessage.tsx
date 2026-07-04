@@ -563,14 +563,21 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
         )}
 
         <div className="prose prose-sm max-w-none break-words text-sm leading-relaxed dark:prose-invert">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={markdownComponents}
-          >
-            {message.content}
-          </ReactMarkdown>
-          {message.isStreaming && (
-            <span className="inline-block w-1.5 h-3.5 bg-current opacity-70 animate-pulse rounded-sm align-middle ml-0.5" />
+          {message.isStreaming ? (
+            // While streaming, render raw text (cheap) instead of re-parsing the
+            // whole growing markdown AST on every token flush. We swap to
+            // ReactMarkdown once streaming finishes so the AST is built once.
+            <span className="whitespace-pre-wrap">
+              {message.content}
+              <span className="inline-block w-1.5 h-3.5 bg-current opacity-70 animate-pulse rounded-sm align-middle ml-0.5" />
+            </span>
+          ) : (
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={markdownComponents}
+            >
+              {message.content}
+            </ReactMarkdown>
           )}
         </div>
 
@@ -620,7 +627,7 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
         {hasSources && (
           <button
             onClick={() => setShowSources(!showSources)}
-            className="mt-3 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+            className="mt-3 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline animate-fade-in-up"
           >
             <FileText className="h-3.5 w-3.5" />
             {showSources ? 'Ẩn' : 'Xem'} nguồn ({message.sources?.length})
@@ -629,7 +636,7 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
 
         {/* Sources Display */}
         {showSources && hasSources && (
-          <div className="mt-3 space-y-2 border-t border-border pt-3">
+          <div className="mt-3 space-y-2 border-t border-border pt-3 animate-fade-in-up">
             {!showDebug && (
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Nguồn tham khảo

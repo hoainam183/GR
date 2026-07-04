@@ -54,7 +54,7 @@
       "count": 22,
       "metrics": {
         "hit@3": 0.8636,
-        "precision@3": 0.2879,
+        "precision@3": 0.2878,
         "recall@3": 0.8636,
         "mrr@3": 0.8182,
         "ndcg@3": 0.8301,

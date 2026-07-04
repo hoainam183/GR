@@ -583,4 +583,14 @@ async def chat_stream(
                 + "\n\n"
             )
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            # Keep tokens flowing token-by-token: stop reverse proxies (nginx)
+            # and browsers from buffering the SSE body into chunks.
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )

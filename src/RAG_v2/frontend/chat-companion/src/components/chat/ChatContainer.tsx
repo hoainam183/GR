@@ -37,6 +37,13 @@ interface PendingChatTurn {
 // session_id (brand-new chat). Lets us recover it after a very fast refresh.
 const NEW_SESSION_SENTINEL = 'new';
 
+// Typewriter reveal pacing (see revealTick). Each animation frame reveals at
+// least REVEAL_MIN_CHARS characters; when the buffer is large it reveals
+// ceil(len / REVEAL_CATCHUP_DIVISOR) so a backlog drains quickly and the UI
+// never falls behind a fast stream.
+const REVEAL_MIN_CHARS = 2;
+const REVEAL_CATCHUP_DIVISOR = 6;
+
 const pendingKey = (sessionId: string) => `pending-chat:${sessionId}`;
 
 const readPendingTurn = (sessionId: string): PendingChatTurn | null => {
@@ -225,7 +232,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     return () => {
       isMountedRef.current = false;
       if (flushRafRef.current !== null) {
-        clearTimeout(flushRafRef.current);
+        cancelAnimationFrame(flushRafRef.current);
         flushRafRef.current = null;
       }
       tokenBufferRef.current = '';
@@ -240,6 +247,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     messagesEndRef,
     [messages, chatPhase],
     messagesContainerRef,
+    chatPhase === 'streaming',
   );
 
   // When the URL session param changes (user clicks sidebar item or New Chat),
@@ -408,15 +416,8 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     const isCurrentRequest = () =>
       !capturedSessionId || activeSessionIdRef.current === capturedSessionId || activeSessionIdRef.current === responseSessionId;
 
-    // Flush buffered tokens into the assistant message in a single update.
-    const drainTokenBuffer = () => {
-      if (flushRafRef.current !== null) {
-        clearTimeout(flushRafRef.current);
-        flushRafRef.current = null;
-      }
-      const buffered = tokenBufferRef.current;
-      tokenBufferRef.current = '';
-      if (!buffered || !isMountedRef.current || !isCurrentRequest()) return;
+    // Append a slice of text to the assistant message in a single state update.
+    const appendToAssistant = (slice: string) => {
       setMessages((prev) => {
         const existing = prev.find((message) => message.id === assistantMessageId);
         if (!existing) {
@@ -425,7 +426,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             {
               id: assistantMessageId,
               role: 'assistant',
-              content: buffered,
+              content: slice,
               timestamp: new Date(),
               sessionId: responseSessionId,
               isStreaming: true,
@@ -434,10 +435,42 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
         }
         return prev.map((message) =>
           message.id === assistantMessageId
-            ? { ...message, content: `${message.content}${buffered}`, isStreaming: true }
+            ? { ...message, content: `${message.content}${slice}`, isStreaming: true }
             : message,
         );
       });
+    };
+
+    // Paced typewriter reveal, aligned to the display refresh via rAF. Each frame
+    // reveals a slice of the buffer so tokens flow evenly instead of arriving in
+    // jerky bursts; a large backlog drains faster so we never lag behind the stream.
+    const revealTick = () => {
+      flushRafRef.current = null;
+      const buffered = tokenBufferRef.current;
+      if (!buffered) return;
+      if (!isMountedRef.current || !isCurrentRequest()) {
+        tokenBufferRef.current = '';
+        return;
+      }
+      const take = Math.max(REVEAL_MIN_CHARS, Math.ceil(buffered.length / REVEAL_CATCHUP_DIVISOR));
+      tokenBufferRef.current = buffered.slice(take);
+      appendToAssistant(buffered.slice(0, take));
+      if (tokenBufferRef.current) {
+        flushRafRef.current = requestAnimationFrame(revealTick) as unknown as number;
+      }
+    };
+
+    // Dump everything remaining immediately (on metadata / done / stop) so the
+    // final text never lags behind the paced reveal.
+    const drainTokenBuffer = () => {
+      if (flushRafRef.current !== null) {
+        cancelAnimationFrame(flushRafRef.current);
+        flushRafRef.current = null;
+      }
+      const buffered = tokenBufferRef.current;
+      tokenBufferRef.current = '';
+      if (!buffered || !isMountedRef.current || !isCurrentRequest()) return;
+      appendToAssistant(buffered);
     };
 
     const persistPending = (sessionId: string) => {
@@ -504,7 +537,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             // of tokens coalesces into a single React update.
             tokenBufferRef.current += delta;
             if (flushRafRef.current === null) {
-              flushRafRef.current = setTimeout(drainTokenBuffer, 16) as unknown as number;
+              flushRafRef.current = requestAnimationFrame(revealTick) as unknown as number;
             }
           },
           onMetadata: (meta) => {

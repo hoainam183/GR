@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback, RefObject } from 'react';
 export function useSmartScroll(
   messagesEndRef: RefObject<HTMLDivElement>,
   dependencies: unknown[] = [],
-  scrollContainerRef?: RefObject<HTMLElement>
+  scrollContainerRef?: RefObject<HTMLElement>,
+  isStreaming = false
 ) {
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -50,12 +51,15 @@ export function useSmartScroll(
     [messagesEndRef, scrollContainerRef],
   );
 
-  // The auto-scroll function only triggers if user is already near bottom
+  // The auto-scroll function only triggers if user is already near bottom.
+  // While streaming we pin to the bottom with 'auto' (instant) so we don't stack
+  // a fresh smooth-scroll animation on every token flush — that stacking is what
+  // makes the view stutter during a response.
   const smartScrollToBottom = useCallback(() => {
     if (isNearBottom) {
-      scrollToBottom('smooth');
+      scrollToBottom(isStreaming ? 'auto' : 'smooth');
     }
-  }, [isNearBottom, scrollToBottom]);
+  }, [isNearBottom, scrollToBottom, isStreaming]);
 
   // A forced scroll for when user explicitly clicks down or sends a message
   const forceScrollToBottom = useCallback(() => {

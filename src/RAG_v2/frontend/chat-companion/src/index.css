@@ -321,3 +321,26 @@
 .animate-bell-shake {
   animation: bell-shake 0.6s ease-in-out;
 }
+
+/* Sources reveal — soft fade+rise so citations don't pop in abruptly when the
+   terminal metadata frame arrives after the answer finishes streaming. */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.28s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    animation: none;
+  }
+}

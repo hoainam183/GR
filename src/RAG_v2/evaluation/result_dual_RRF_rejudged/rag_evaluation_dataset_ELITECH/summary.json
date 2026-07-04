@@ -54,7 +54,7 @@
       "count": 22,
       "metrics": {
         "hit@3": 0.6818,
-        "precision@3": 0.2273,
+        "precision@3": 0.2272,
         "recall@3": 0.6818,
         "mrr@3": 0.5833,
         "ndcg@3": 0.6088,
@@ -79,7 +79,7 @@
       "count": 22,
       "metrics": {
         "hit@3": 0.6818,
-        "precision@3": 0.2273,
+        "precision@3": 0.2272,
         "recall@3": 0.6818,
         "mrr@3": 0.5833,
         "ndcg@3": 0.6088,

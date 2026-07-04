@@ -1,6 +1,6 @@
 # RAG Evaluation Report (production config)
 
-- **Date**: 2026-06-29 01:29:37
+- **Date**: 2026-06-29 15:09:45
 - **Total queries**: `30`
 - **Avg latency**: `24833.0 ms`
 
