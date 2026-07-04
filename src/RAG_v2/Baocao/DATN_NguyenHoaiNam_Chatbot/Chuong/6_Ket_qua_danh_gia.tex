@@ -13,9 +13,9 @@ xếp hạng lại, lọc hiệu lực văn bản, cho đến sinh câu trả l�
 chất lượng đầu ra.
 
 Nội dung chương gồm: thiết lập thực nghiệm, định nghĩa các chỉ số đánh giá, kết
-quả tổng thể khi so sánh hai chiến lược hợp nhất kết quả, đánh giá tách thành
-phần (ablation study) của phương pháp truy hồi, phân tích kết quả, hạn
-chế còn tồn tại và hướng phát triển tiếp theo.
+quả tổng thể khi so sánh các cấu hình truy hồi, đánh giá tách thành phần
+(ablation study), phân tích kết quả, hạn chế còn tồn tại và hướng phát triển
+tiếp theo.
 
 % =========================================================
 \section{Thiết lập thực nghiệm}
@@ -26,29 +26,49 @@ chế còn tồn tại và hướng phát triển tiếp theo.
 Hệ thống được đánh giá trong chương này là toàn bộ pipeline trợ lý học vụ với
 cấu hình gần với môi trường vận hành thực tế: bật tác nhân tự động, bật cơ chế
 truy hồi bổ sung bằng tài liệu giả định (HyDE), bật bộ lọc hiệu lực văn bản,
-ngưỡng điểm xếp hạng lại ở mức 0,0 (thiết lập này được chọn có chủ đích để giữ lại tối đa tài liệu, nhằm đánh giá trọn vẹn năng lực xếp hạng của mô hình thay vì lọc bỏ sớm), số đoạn tối thiểu sau xếp hạng lại là 3, và
-lấy tối đa 7 đoạn cho mỗi lượt truy hồi. Khác biệt duy nhất so với hệ thống
-thực là tắt bộ nhớ đệm để mỗi truy vấn luôn sinh câu trả lời mới hoàn toàn.
-Nhờ đó, số liệu phản ánh trung thực hành vi mà người dùng cuối nhận được thay
-vì đo kết quả từ bộ nhớ đệm. Mô hình ngôn ngữ được sử dụng cho cả quá trình sinh câu trả lời (generation) và tự động đánh giá (LLM judge) trong thực nghiệm này là Gemini 1.5 Flash nhằm đảm bảo tính nhất quán và khả năng tái hiện.
+ngưỡng điểm xếp hạng lại ở mức 0,0, số đoạn tối thiểu sau xếp hạng lại là 3,
+và lấy tối đa 7 đoạn cho mỗi lượt truy hồi. Thiết lập ngưỡng 0,0 được chọn có
+chủ đích để giữ lại tối đa tài liệu sau bước xếp hạng lại, qua đó đánh giá năng
+lực xếp hạng của mô hình thay vì loại bỏ ứng viên quá sớm. Khác biệt duy nhất
+so với hệ thống thực là tắt bộ nhớ đệm để mỗi truy vấn luôn sinh câu trả lời
+mới hoàn toàn. Nhờ đó, số liệu phản ánh hành vi đầu cuối mà người dùng nhận
+được thay vì đo kết quả từ bộ nhớ đệm.
 
 Bộ đánh giá gọi trực tiếp vào điểm vào chính của pipeline chat --- cùng điểm vào
 với API thực tế --- và ghi lại tập đoạn truy hồi được (để tính chỉ số truy hồi),
 câu trả lời sinh ra, cùng các nhãn đánh giá đầu cuối do mô hình đánh giá và bộ
 so khớp đáp án vàng gán.
 
-Lưu ý về cơ chế HyDE: Vì ngưỡng xếp hạng lại được đặt ở mức 0,0, điều kiện kích hoạt HyDE (toàn bộ ứng viên có điểm logit âm) trở thành một cơ chế bảo vệ dự phòng (fallback) khắt khe cho các câu hỏi nhiễu. Trong suốt quá trình thực nghiệm, do chất lượng truy hồi sơ bộ khá tốt, tài liệu trả về luôn có điểm vượt ngưỡng 0,0 nên HyDE không bị kích hoạt. Việc "bật HyDE" trong cấu hình mang ý nghĩa đánh giá hệ thống ở trạng thái phòng thủ đầy đủ, nhưng các chỉ số đo lường thu được thực chất phản ánh thuần túy 100\% năng lực của luồng truy hồi lai cốt lõi (Retrieval + Reranking).
+Lưu ý về cơ chế HyDE: Vì ngưỡng xếp hạng lại được đặt ở mức 0,0, điều kiện
+kích hoạt HyDE (toàn bộ ứng viên có điểm logit âm) trở thành một cơ chế bảo vệ
+dự phòng khắt khe cho các câu hỏi nhiễu. Trong các lượt thực nghiệm được dùng
+cho báo cáo này, chất lượng truy hồi sơ bộ đủ tốt để tài liệu trả về vượt qua
+ngưỡng 0,0; do đó các chỉ số đo lường chủ yếu phản ánh năng lực của luồng truy
+hồi và xếp hạng lại cốt lõi.
 
 \subsection{Bộ dữ liệu thực nghiệm}
 
-Thực nghiệm được tiến hành trên tập dữ liệu đánh giá bao quát cả bốn kho tri thức: chương trình đào tạo, quy định học vụ, kế hoạch học kỳ và sổ tay sinh viên. Các câu hỏi được thiết kế để kiểm tra khả năng trả lời chính xác các thông tin học vụ, từ các câu hỏi tra cứu thông tin đơn giản đến các truy vấn đòi hỏi tổng hợp từ nhiều nguồn.
+Thực nghiệm được tiến hành trên tập dữ liệu đánh giá bao quát cả bốn kho tri
+thức: chương trình đào tạo, quy định học vụ, kế hoạch học kỳ và sổ tay sinh
+viên. Các câu hỏi được thiết kế để kiểm tra khả năng trả lời chính xác các
+thông tin học vụ, từ các câu hỏi tra cứu thông tin đơn giản đến các truy vấn
+đòi hỏi tổng hợp từ nhiều nguồn.
 
-\subsection{Hai chiến lược hợp nhất được so sánh}
+Tại thời điểm tổng hợp báo cáo, bộ \texttt{rag\_evaluation\_dataset} đang được
+đánh giá lại ở cấu hình RRF cân bằng trọng số. Vì vậy, chương này tạm thời sử
+dụng 15 bộ dữ liệu còn lại với tổng cộng 470 truy vấn. Cách chọn này bảo đảm
+tất cả cấu hình được so sánh trên cùng một phạm vi dữ liệu, tránh sai lệch do
+thiếu kết quả ở một cấu hình riêng lẻ.
 
-Như đã trình bày ở Chương~2, hệ thống hỗ trợ hai chiến lược hợp nhất kết quả
-truy hồi. Cả hai đều kết hợp tập kết quả vector (theo độ đo cosine) và tập kết
-quả từ khóa (theo BM25) với cùng trọng số 0,8 cho vector và 0,2 cho từ khóa.
-Sự khác biệt nằm ở cơ chế kết hợp điểm:
+\subsection{Các cấu hình được so sánh}
+
+Như đã trình bày ở Chương~2, hệ thống hỗ trợ hợp nhất kết quả truy hồi từ hai
+nguồn: tìm kiếm vector và tìm kiếm từ khóa BM25. Chương này so sánh ba nhóm
+cấu hình chính. Nhóm thứ nhất đánh giá chiến lược hợp nhất tuyến tính và RRF
+với cùng trọng số mặc định 0,8 cho vector và 0,2 cho từ khóa. Nhóm thứ hai khảo
+sát RRF với trọng số cân bằng 0,5/0,5, trong đó kết quả đã được đánh giá lại
+bằng Gemini. Nhóm thứ ba là các thí nghiệm tách thành phần gồm vector-only,
+keyword-only và no-rerank.
 
 \begin{table}[H]
 \centering
@@ -68,11 +88,15 @@ Hợp nhất theo thứ hạng: $0{,}8 \cdot \frac{1}{k + r_v} + 0{,}2 \cdot
 cách giữa các hạng liền kề \\
 \hline
 \end{tabular}
-\caption{So sánh hai chiến lược hợp nhất kết quả truy hồi}
+\caption{So sánh hai cơ chế hợp nhất kết quả truy hồi}
 \label{tab:ch6-fusion}
 \end{table}
 
-Cấu hình mặc định của hệ thống hiện tại sử dụng chiến lược hợp nhất theo thứ hạng (RRF). Đồng thời, để làm rõ hiệu quả của từng thành phần, đồ án cũng thực hiện tách thành phần (ablation study) nhằm so sánh hiệu năng giữa phương pháp tìm kiếm vector thuần túy, tìm kiếm từ khóa thuần túy và phương pháp truy hồi lai.
+Cấu hình RRF 0,8/0,2 là cấu hình vận hành chính được đánh giá trong chương
+này. Cấu hình RRF 0,5/0,5 được xem là thí nghiệm bổ sung nhằm khảo sát độ nhạy
+của hệ thống khi tăng tỷ trọng tín hiệu từ khóa. Các cấu hình vector-only,
+keyword-only và no-rerank được dùng để làm rõ vai trò của từng thành phần trong
+pipeline.
 
 % =========================================================
 \section{Định nghĩa chỉ số đánh giá}
@@ -135,73 +159,77 @@ Tỷ lệ ảo giác (Hallucination rate) & Tỷ lệ câu trả lời chứa n�
 \section{Kết quả thực nghiệm}
 % =========================================================
 
-\subsection{Kết quả tổng thể: hợp nhất tuyến tính so với hợp nhất theo thứ hạng}
+\subsection{Kết quả tổng thể giữa các cấu hình hợp nhất}
 
-Bảng~\ref{tab:ch6-main} trình bày kết quả tổng hợp trên toàn bộ tập dữ liệu đánh giá. Số liệu được tính theo hai cách: macro (trung bình đều trên các bộ) và micro (trung bình có trọng số theo số truy vấn). Giá trị in đậm là chế độ tốt hơn ở mỗi chỉ số.
+Bảng~\ref{tab:ch6-main} trình bày kết quả tổng hợp theo micro-average trên
+15 bộ dữ liệu đang được dùng trong báo cáo. Giá trị in đậm là cấu hình tốt
+hơn ở mỗi chỉ số. Đối với tỷ lệ ảo giác, giá trị thấp hơn là tốt hơn.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{|p{2.4cm}|p{2.8cm}|r|r|r|r|}
+\begin{tabular}{|p{2.2cm}|p{2.7cm}|>{\centering\arraybackslash}p{2.4cm}|>{\centering\arraybackslash}p{2.2cm}|>{\centering\arraybackslash}p{2.2cm}|}
 \hline
-\textbf{Nhóm} & \textbf{Chỉ số} & \textbf{Tuyến tính} & \textbf{RRF} & \textbf{Tuyến tính} & \textbf{RRF} \\
- & & \textbf{(macro)} & \textbf{(macro)} & \textbf{(micro)} & \textbf{(micro)} \\
+\textbf{Nhóm} & \textbf{Chỉ số} & \textbf{Linear 0,8/0,2} & \textbf{RRF 0,8/0,2} & \textbf{RRF 0,5/0,5} \\
 \hline
-Truy hồi & nDCG@3 & 0,671 & \textbf{0,706} & 0,623 & \textbf{0,670} \\
-& nDCG@5 & 0,685 & \textbf{0,718} & 0,638 & \textbf{0,683} \\
-& nDCG@7 & 0,693 & \textbf{0,724} & 0,645 & \textbf{0,688} \\
-& Recall@5 & 0,730 & \textbf{0,759} & 0,684 & \textbf{0,727} \\
-& MRR@5 & 0,684 & \textbf{0,721} & 0,635 & \textbf{0,682} \\
-& hit@5 & 0,758 & \textbf{0,789} & 0,709 & \textbf{0,753} \\
+Truy hồi & nDCG@3 & \textbf{0,736} & \textbf{0,736} & 0,684 \\
+& nDCG@5 & \textbf{0,757} & 0,755 & 0,712 \\
+& nDCG@7 & \textbf{0,765} & 0,762 & 0,716 \\
+& Recall@5 & \textbf{0,812} & 0,804 & 0,783 \\
+& MRR@5 & \textbf{0,754} & 0,753 & 0,701 \\
+& hit@5 & \textbf{0,843} & 0,834 & 0,811 \\
 \hline
-Sinh câu trả lời & Độ bám nguồn & \textbf{0,937} & 0,934 & \textbf{0,944} & 0,942 \\
-& Tỷ lệ ảo giác & \textbf{0,037} & 0,047 & \textbf{0,033} & 0,040 \\
-& Độ đầy đủ & 0,952 & \textbf{0,960} & 0,956 & \textbf{0,965} \\
-& Độ liên quan & 0,988 & \textbf{0,990} & 0,990 & \textbf{0,991} \\
-& Độ đúng & 0,770 & \textbf{0,804} & 0,730 & \textbf{0,777} \\
+Sinh câu trả lời & Độ bám nguồn & 0,926 & \textbf{0,928} & 0,845 \\
+& Tỷ lệ ảo giác & \textbf{0,043} & 0,053 & 0,136 \\
+& Độ đầy đủ & 0,943 & \textbf{0,949} & 0,755 \\
+& Độ liên quan & \textbf{0,996} & \textbf{0,996} & 0,847 \\
+& Độ đúng & 0,845 & \textbf{0,862} & 0,819 \\
 \hline
 \end{tabular}
-\caption{So sánh hợp nhất tuyến tính và RRF trên toàn bộ tập dữ liệu đánh giá}
+\caption{So sánh các cấu hình hợp nhất trên 15 bộ dữ liệu đánh giá (micro-average)}
 \label{tab:ch6-main}
 \end{table}
 
-\subsection{Kết quả tách thành phần: từ khóa, vector và truy hồi lai}
+\subsection{Kết quả tách thành phần}
 
-Để làm rõ đóng góp của từng phương pháp truy hồi, Bảng~\ref{tab:ch6-ablation-retrieval} và Bảng~\ref{tab:ch6-ablation-generation} trình bày kết quả đánh giá tách thành phần (ablation study) so sánh trực tiếp ba thiết lập: tìm kiếm từ khóa thuần túy (BM25), tìm kiếm vector thuần túy (mô hình nhúng), và kiến trúc truy hồi lai (RRF).
+Để làm rõ đóng góp của từng thành phần trong pipeline, Bảng~\ref{tab:ch6-ablation-retrieval}
+và Bảng~\ref{tab:ch6-ablation-generation} so sánh bốn thiết lập: tìm kiếm vector
+thuần túy, tìm kiếm từ khóa thuần túy, RRF 0,8/0,2 nhưng tắt reranker, và RRF
+0,8/0,2 đầy đủ. Các giá trị trong bảng cũng được tính theo micro-average.
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabular}{|l|c|c|c|}
+\scriptsize
+\begin{tabular}{|p{2.0cm}|>{\centering\arraybackslash}p{2.0cm}|>{\centering\arraybackslash}p{2.0cm}|>{\centering\arraybackslash}p{2.7cm}|>{\centering\arraybackslash}p{2.1cm}|}
 \hline
-\textbf{Chỉ số} & \textbf{Vector thuần túy} & \textbf{Từ khóa (BM25)} & \textbf{Truy hồi lai (RRF)} \\
+\textbf{Chỉ số} & \textbf{Vector-only} & \textbf{Keyword-only} & \textbf{No-rerank 0,8/0,2} & \textbf{RRF 0,8/0,2} \\
 \hline
-nDCG@3 & 0,601 & 0,640 & \textbf{0,727} \\
-nDCG@5 & 0,637 & 0,677 & \textbf{0,739} \\
-nDCG@7 & 0,650 & 0,688 & \textbf{0,745} \\
-Recall@5 & 0,660 & 0,733 & \textbf{0,758} \\
-Hit@5 & 0,728 & 0,770 & \textbf{0,808} \\
-MRR@5 & 0,626 & 0,671 & \textbf{0,738} \\
+nDCG@3 & 0,622 & 0,608 & 0,506 & \textbf{0,736} \\
+nDCG@5 & 0,655 & 0,641 & 0,540 & \textbf{0,755} \\
+nDCG@7 & 0,664 & 0,649 & 0,558 & \textbf{0,762} \\
+Recall@5 & 0,719 & 0,699 & 0,651 & \textbf{0,804} \\
+Hit@5 & 0,745 & 0,732 & 0,683 & \textbf{0,834} \\
+MRR@5 & 0,644 & 0,634 & 0,516 & \textbf{0,753} \\
 \hline
 \end{tabular}
-\caption{So sánh các chỉ số truy hồi giữa mô hình đơn lẻ và mô hình lai}
+\caption{So sánh các chỉ số truy hồi trong thí nghiệm tách thành phần}
 \label{tab:ch6-ablation-retrieval}
 \end{table}
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabular}{|l|c|c|c|}
+\scriptsize
+\begin{tabular}{|p{3.0cm}|>{\centering\arraybackslash}p{1.8cm}|>{\centering\arraybackslash}p{1.8cm}|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.0cm}|}
 \hline
-\textbf{Chỉ số} & \textbf{Vector thuần túy} & \textbf{Từ khóa (BM25)} & \textbf{Truy hồi lai (RRF)} \\
+\textbf{Chỉ số} & \textbf{Vector-only} & \textbf{Keyword-only} & \textbf{No-rerank 0,8/0,2} & \textbf{RRF 0,8/0,2} \\
 \hline
-Độ đúng (Correctness) & 75,8\% & 81,2\% & \textbf{83,6\%} \\
-Độ bám nguồn (Faithfulness) & 94,0\% & 92,8\% & \textbf{95,4\%} \\
-Tỷ lệ ảo giác & 3,3\% & 5,4\% & \textbf{2,9\%} \\
-Độ đầy đủ (Completeness) & 93,8\% & 94,2\% & \textbf{95,8\%} \\
+Độ đúng (Correctness) & 72,8\% & 62,8\% & 68,7\% & \textbf{86,2\%} \\
+Độ bám nguồn (Faithfulness) & 87,7\% & 71,5\% & 77,2\% & \textbf{92,8\%} \\
+Tỷ lệ ảo giác & 10,6\% & 26,2\% & 19,1\% & \textbf{5,3\%} \\
+Độ đầy đủ (Completeness) & 87,4\% & 72,3\% & 78,9\% & \textbf{94,9\%} \\
 \hline
 \end{tabular}
-\caption{So sánh các chỉ số sinh câu trả lời giữa mô hình đơn lẻ và mô hình lai}
+\caption{So sánh các chỉ số sinh câu trả lời trong thí nghiệm tách thành phần}
 \label{tab:ch6-ablation-generation}
 \end{table}
 
@@ -209,43 +237,89 @@ Tỷ lệ ảo giác & 3,3\% & 5,4\% & \textbf{2,9\%} \\
 \section{Phân tích kết quả}
 % =========================================================
 
-\subsection{Tại sao từ khóa (BM25) vượt trội hơn vector thuần túy}
+\subsection{Vai trò của tìm kiếm vector và tìm kiếm từ khóa}
 
-Dựa vào các số liệu thực tế trên Bảng~\ref{tab:ch6-ablation-retrieval}, phương pháp từ khóa thuần túy (BM25) đạt nDCG@5 là 0,677, vượt trội rõ rệt so với 0,637 của phương pháp vector thuần túy. Nguyên nhân chính bắt nguồn từ đặc thù nội dung của tập dữ liệu học vụ. Cụ thể, kết quả khảo sát cho thấy khoảng 85\% đến 90\% số lượng câu hỏi đều chứa các định danh yêu cầu khớp chính xác tuyệt đối. 
+Kết quả tách thành phần cho thấy cả hai phương pháp đơn lẻ đều chưa đủ mạnh
+khi đứng một mình. Vector-only đạt nDCG@5 là 0,655 và Recall@5 là 0,719, nhỉnh
+hơn keyword-only với nDCG@5 là 0,641 và Recall@5 là 0,699. Điều này cho thấy
+mô hình nhúng có lợi thế trong các câu hỏi diễn đạt tự nhiên hoặc có cách hỏi
+khác với văn bản gốc. Ngược lại, tìm kiếm từ khóa vẫn có vai trò quan trọng đối
+với các truy vấn chứa mã học phần, số hiệu văn bản, mốc thời gian hoặc các cụm
+từ hành chính cần khớp chính xác.
 
-Kết quả khảo sát chi tiết trên 20 tập dữ liệu con thuộc hệ thống cho thấy tỷ lệ câu hỏi mang tính chất tra cứu chính xác là rất lớn:
-\begin{itemize}
-    \item \textbf{Kho chương trình đào tạo (\texttt{ctdt}):} Khoảng 85\%--90\% câu hỏi chứa mã học phần cứng (ví dụ: \texttt{IT4015}, \texttt{MI1114}) hoặc mã chương trình.
-    \item \textbf{Kho kế hoạch học kỳ (\texttt{kehoach}):} Hơn 90\% câu hỏi liên quan đến định danh thời gian chính xác như ngày tháng cụ thể, học kỳ, hoặc tuần học.
-    \item \textbf{Kho quy định học vụ (\texttt{quydinh}):} Khoảng 40\%--50\% câu hỏi truy vấn về các giới hạn định lượng (ví dụ: \texttt{GPA $\ge$ 2,5}), mức học bổng, hoặc số hiệu văn bản hành chính (\texttt{5445/QĐ-ĐHBK}).
-    \item \textbf{Kho sổ tay sinh viên (\texttt{stsv}):} Khoảng 60\% câu hỏi chứa các từ khóa cụ thể như tên các phòng ban, số điện thoại hỗ trợ, hoặc quy trình bảo hiểm y tế.
-\end{itemize}
+Việc một phương pháp đơn lẻ không đạt kết quả tốt nhất là phù hợp với đặc thù
+của dữ liệu học vụ. Nhiều câu hỏi cần đồng thời hai loại tín hiệu: khớp chính
+xác các định danh như mã học phần, học kỳ, số quyết định; và hiểu quan hệ ngữ
+nghĩa giữa câu hỏi của sinh viên với cách diễn đạt trong văn bản quy định. Vì
+vậy, kiến trúc truy hồi lai vẫn là lựa chọn hợp lý hơn so với chỉ dùng một
+nguồn tín hiệu.
 
-Những token mang tính chất định danh này có tần suất nghịch đảo tài liệu (high-IDF) rất cao. BM25 xử lý nhóm token này vô cùng hiệu quả, biến chúng thành tín hiệu phân biệt mạnh mẽ. Trái lại, mô hình nhúng vector, mặc dù xuất sắc trong việc nắm bắt ngữ nghĩa tổng thể, lại làm loãng sức mạnh của các chuỗi ký tự kết hợp số hoặc tên riêng. Điều này thể hiện rõ nhất trên tập dữ liệu quy định học bổng khuyến khích học tập (\texttt{hbkkht}), nơi văn bản mang tính hành chính cao: BM25 đạt nDCG@5 lên đến 0,861, bỏ xa mức 0,487 của phương pháp vector thuần túy.
+\subsection{Vai trò của reranker trong pipeline}
 
-\subsection{Truy hồi lai (RRF) bù trừ điểm yếu của từng phương pháp}
+Khi tắt reranker, chất lượng truy hồi giảm rõ rệt: nDCG@5 chỉ đạt 0,540 và
+Recall@5 đạt 0,651, thấp hơn đáng kể so với RRF 0,8/0,2 đầy đủ (0,755 và
+0,804). Chất lượng câu trả lời cũng bị ảnh hưởng trực tiếp, với độ đúng giảm
+từ 86,2\% xuống 68,7\%. Kết quả này cho thấy reranker không chỉ là bước tinh
+chỉnh thứ tự tài liệu, mà còn là thành phần quyết định trong việc đưa bằng
+chứng phù hợp lên các vị trí đầu, nơi mô hình sinh câu trả lời sử dụng nhiều
+nhất.
 
-Không dừng lại ở việc dùng các phương pháp đơn lẻ, kiến trúc truy hồi lai (RRF) kết hợp thành công khả năng khớp chính xác của BM25 với khả năng khái quát ngữ nghĩa của vector. Nhờ đó, RRF đạt nDCG@5 tổng thể là 0,739, cao hơn so với 0,677 của BM25 và 0,637 của vector. Sự cải thiện này cũng phản ánh trên độ đúng (Correctness) của câu trả lời sinh ra, đạt mức 83,6\% đối với RRF so với mức 81,2\% và 75,8\% của hai phương pháp còn lại.
+\subsection{So sánh Linear và RRF ở trọng số 0,8/0,2}
 
-Về độ an toàn, RRF duy trì mức tỷ lệ ảo giác thấp nhất (2,9\%) trong khi vẫn đạt độ bám nguồn cao nhất (95,4\%). Điều này cho thấy hệ thống khi áp dụng truy hồi lai không hề hy sinh độ an toàn; ngược lại, việc tiếp nhận ngữ cảnh bổ trợ đa chiều từ cả hai phương pháp giúp mô hình sinh bám sát tài liệu nguồn hiệu quả hơn.
+Ở cùng trọng số vector/keyword 0,8/0,2, Linear và RRF cho kết quả khá sát nhau
+ở tầng truy hồi. Linear nhỉnh nhẹ ở nDCG@5 (0,757 so với 0,755), Recall@5
+(0,812 so với 0,804) và tỷ lệ ảo giác thấp hơn (4,3\% so với 5,3\%). Ngược
+lại, RRF đạt độ đúng so với đáp án vàng cao hơn, 86,2\% so với 84,5\%, đồng
+thời có độ bám nguồn và độ đầy đủ cao hơn một chút.
 
-\subsection{Hợp nhất RRF vượt trội so với hợp nhất tuyến tính}
+Kết quả này không cho phép kết luận RRF vượt trội tuyệt đối trên mọi tiêu chí.
+Thay vào đó, có thể xem RRF 0,8/0,2 là cấu hình cân bằng tốt hơn khi ưu tiên
+độ đúng cuối cùng của câu trả lời, còn Linear 0,8/0,2 là một đối chứng mạnh ở
+các chỉ số truy hồi thuần túy và mức ảo giác.
 
-Xét về phương thức hợp nhất, RRF cải thiện đồng đều các chỉ số xếp hạng so với hợp nhất tuyến tính. Cụ thể theo Bảng~\ref{tab:ch6-main}, nDCG@5 của RRF tăng lên mức 0,683 (micro) so với 0,638 của tuyến tính. Hợp nhất tuyến tính thực hiện phép cộng trên các điểm số tuyệt đối, dẫn đến tình trạng một trong hai tập kết quả (vector hoặc BM25) có thể lấn át tập còn lại khi thang điểm không đồng đều. Khác biệt với cách tiếp cận trên, RRF chỉ tính toán thông qua thứ hạng, miễn nhiễm hoàn toàn với độ lệch thang điểm. Điều này lý giải tại sao RRF mang lại ưu thế ổn định và nhất quán trên phần lớn các nhóm dữ liệu.
+\subsection{Ảnh hưởng của trọng số cân bằng 0,5/0,5}
 
-Tuy nhiên, về khía cạnh tỷ lệ ảo giác, hợp nhất tuyến tính nhỉnh hơn một chút (3,3\% so với 4,0\% micro). RRF đôi khi đẩy những đoạn văn bản chứa nhiều nhiễu lên thứ hạng cao hơn, tạo cơ hội cho mô hình sinh suy diễn. Dẫu vậy, khoảng chênh lệch này nhỏ và không ổn định qua các phép đo, do đó RRF vẫn là chiến lược tổng thể ưu việt hơn.
+Cấu hình RRF 0,5/0,5 được đánh giá nhằm kiểm tra giả thuyết rằng tăng tỷ trọng
+BM25 có thể cải thiện các câu hỏi chứa định danh chính xác. Tuy nhiên, trên 15
+bộ dữ liệu hiện tại, cấu hình này thấp hơn RRF 0,8/0,2 ở hầu hết các chỉ số:
+nDCG@5 đạt 0,712 so với 0,755, Recall@5 đạt 0,783 so với 0,804, và độ đúng đạt
+81,9\% so với 86,2\%. Tỷ lệ ảo giác cũng tăng từ 5,3\% lên 13,6\%.
 
-\subsection{Nút thắt nằm ở truy hồi, không phải sinh câu trả lời}
+Dù vậy, RRF 0,5/0,5 vẫn vượt các cấu hình đơn lẻ về truy hồi và độ đúng: nDCG@5
+0,712 cao hơn vector-only (0,655) và keyword-only (0,641), còn độ đúng 81,9\%
+cũng cao hơn 72,8\% và 62,8\%. Do đó, kết quả này không phủ nhận giá trị của
+truy hồi lai; nó cho thấy với tập dữ liệu hiện tại, tăng keyword weight lên 0,5
+chưa phải lựa chọn tối ưu.
 
-Một quan sát đáng chú ý từ kết quả là độ bám nguồn thường duy trì ở mức trên 94\% và độ liên quan đạt trên 98\%, cho thấy khi đã có ngữ cảnh đúng thì mô hình trả lời tốt. Trong khi đó, các chỉ số nDCG@5 và Recall@5 tổng thể thường dao động ở mức 0,68--0,76 --- đây mới là nút thắt thực sự. Kết luận quan trọng là hướng cải thiện tiếp theo nên ưu tiên việc tinh chỉnh khả năng phân đoạn, làm sạch dữ liệu, và phương pháp định tuyến, thay vì chỉ tập trung vào câu lệnh hướng dẫn sinh câu trả lời. 
+\subsection{Nút thắt nằm ở truy hồi và xếp hạng}
+
+Một quan sát đáng chú ý là khi cấu hình truy hồi tốt, độ liên quan của câu trả
+lời duy trì ở mức rất cao (99,6\% với cả Linear 0,8/0,2 và RRF 0,8/0,2), cho
+thấy mô hình sinh có khả năng bám khá tốt vào ngữ cảnh được cung cấp. Trong khi
+đó, các thay đổi ở tầng truy hồi và xếp hạng lại làm nDCG@5 dao động từ 0,540
+(no-rerank) đến 0,755--0,757 (các cấu hình đầy đủ). Vì vậy, hướng cải thiện
+quan trọng tiếp theo nên tập trung vào chất lượng phân đoạn, bao phủ tài liệu,
+định tuyến miền và xếp hạng lại, thay vì chỉ tinh chỉnh prompt sinh câu trả
+lời.
 
 \subsection{Khuyến nghị cấu hình}
 
-Dựa trên kết quả thực nghiệm tổng hợp, cấu hình hợp nhất theo thứ hạng (RRF) kết hợp giữa tìm kiếm vector và tìm kiếm từ khóa được giữ làm mặc định vận hành. RRF cải thiện rõ rệt chất lượng truy hồi và độ đúng câu trả lời --- những yếu tố sát người dùng nhất.
+Dựa trên kết quả hiện tại, cấu hình RRF 0,8/0,2 có reranker là lựa chọn phù hợp
+nhất nếu ưu tiên độ đúng của câu trả lời cuối cùng. Linear 0,8/0,2 vẫn là một
+đối chứng mạnh và có tỷ lệ ảo giác thấp hơn, nhưng RRF 0,8/0,2 đạt correctness
+cao nhất trong nhóm fusion. Cấu hình RRF 0,5/0,5 nên được xem là thí nghiệm độ
+nhạy trọng số, chưa nên thay thế cấu hình vận hành mặc định.
 
 % =========================================================
 \section{Hạn chế}
 % =========================================================
+
+\textbf{Phạm vi số liệu tạm thời.} Báo cáo hiện sử dụng 15/16 bộ dữ liệu đánh
+giá do bộ \texttt{rag\_evaluation\_dataset} đang được đánh giá lại ở cấu hình
+RRF 0,5/0,5. Khi kết quả của bộ này hoàn tất, các bảng tổng hợp cần được tính
+lại trên đủ 16 bộ dữ liệu để có kết luận cuối cùng. Tuy nhiên, trong phạm vi
+hiện tại, tất cả cấu hình được so sánh đều sử dụng cùng một tập 15 bộ dữ liệu,
+do đó tính công bằng giữa các cấu hình vẫn được bảo đảm.
 
 \textbf{Giới hạn của bộ dữ liệu đánh giá.} Đáp án chuẩn (ground-truth) của
 mỗi câu hỏi hiện được sinh từ một tệp đoạn duy nhất, chưa tính đến tính đa
@@ -257,11 +331,12 @@ tế. Hướng khắc phục là xây dựng đáp án chuẩn đa nguồn --- b
 câu hỏi đến từ nhiều tệp đoạn và nhiều kho tri thức --- để các chỉ số phản ánh
 chính xác hơn.
 
-\textbf{Ảo giác ở mức độ nhỏ vẫn còn.} Một số câu trả lời bị đánh dấu đúng
-một phần do mô hình tự bổ sung thêm đường dẫn hoặc chi tiết ngoài ngữ cảnh,
-dù ý chính vẫn đúng. Câu lệnh hướng dẫn bám nguồn chưa hoàn toàn ngăn chặn
-được việc mô hình suy diễn nhẹ ra ngoài phạm vi nguồn, đặc biệt với RRF khi
-ngữ cảnh chứa đoạn có nội dung gần nhau.
+\textbf{Ảo giác vẫn phụ thuộc mạnh vào cấu hình truy hồi.} Với các cấu hình
+tốt nhất, tỷ lệ ảo giác nằm ở mức tương đối thấp (4,3\% với Linear 0,8/0,2 và
+5,3\% với RRF 0,8/0,2). Tuy nhiên, khi thay đổi trọng số sang RRF 0,5/0,5 hoặc
+tắt reranker, tỷ lệ này tăng lên đáng kể. Điều này cho thấy việc kiểm soát ảo
+giác không chỉ phụ thuộc vào prompt sinh câu trả lời, mà còn phụ thuộc trực
+tiếp vào chất lượng ngữ cảnh được truy hồi và thứ tự các đoạn bằng chứng.
 
 \textbf{Phạm vi thực nghiệm chưa bao phủ toàn bộ tính năng.} Kết quả trong
 chương này chủ yếu là của luồng xử lý RAG cốt lõi. Khả năng tìm kiếm web dự phòng, tác nhân lập kế hoạch, và tính năng phát trực tuyến (streaming) chưa được đo lường định lượng một cách toàn diện trong bộ thực nghiệm hiện tại do yêu cầu thiết kế đáp án chuẩn phức tạp hơn cho các tác vụ đa bước.
@@ -279,8 +354,22 @@ việc cần bổ sung khi hệ thống được đưa ra ngoài.
 
 \subsection{Kết luận}
 
-Thực nghiệm đầu cuối trên tập dữ liệu bao quát cả bốn kho tri thức cho thấy hệ thống trợ lý học vụ đạt kết quả khả quan ở cả tầng truy hồi lẫn sinh câu trả lời. Đặc biệt, thông qua đánh giá tách thành phần, kiến trúc truy hồi lai (RRF) chứng minh được sự vượt trội rõ rệt: nDCG@5 đạt 0,739, cao hơn hẳn so với mức 0,677 của tìm kiếm từ khóa thuần túy và 0,637 của vector thuần túy. Hệ thống ghi nhận độ bám nguồn rất cao (trên 95\%) cùng tỷ lệ ảo giác cực thấp (chỉ 2,9\%), khẳng định tính an toàn cần thiết đối với một ứng dụng tư vấn quy chế.
+Thực nghiệm đầu cuối trên 15 bộ dữ liệu đánh giá cho thấy hệ thống trợ lý học
+vụ đạt kết quả khả quan ở cả tầng truy hồi lẫn sinh câu trả lời. Trong nhóm
+cấu hình hợp nhất đầy đủ, RRF 0,8/0,2 đạt độ đúng cao nhất so với đáp án vàng
+(86,2\%), đồng thời duy trì độ bám nguồn 92,8\% và độ đầy đủ 94,9\%. Linear
+0,8/0,2 nhỉnh nhẹ ở một số chỉ số truy hồi và có tỷ lệ ảo giác thấp hơn, vì
+vậy hai cấu hình này cần được nhìn nhận như hai lựa chọn có đánh đổi, không
+phải quan hệ thắng tuyệt đối trên mọi tiêu chí.
 
-Điểm đáng chú ý trong kết quả là phương pháp từ khóa (BM25) vượt trội hơn vector khi hoạt động độc lập. Điều này xuất phát từ đặc trưng của lĩnh vực học vụ, nơi câu hỏi thường chứa các định danh chính xác tuyệt đối như số hiệu quy chế hay mã học phần. Việc kết hợp thông qua hợp nhất theo thứ hạng (RRF) đã phát huy tối đa điểm mạnh của cả hai cách tiếp cận: vừa nắm bắt ngữ nghĩa khái quát, vừa bảo toàn khả năng tìm kiếm chính xác theo từ khóa, qua đó duy trì hiệu năng ổn định và cải thiện trực tiếp mức độ chính xác của câu trả lời cuối cùng. Tóm lại, nút thắt hiện tại nằm ở chất lượng phân đoạn và bao phủ tài liệu tại bước truy hồi, và hệ thống truy hồi lai đã tối ưu hóa hiệu quả các nguồn tín hiệu sẵn có.
+Kết quả tách thành phần khẳng định vai trò quan trọng của kiến trúc truy hồi
+lai và reranker. Vector-only và keyword-only đều thấp hơn rõ rệt so với cấu
+hình đầy đủ, trong khi việc tắt reranker làm nDCG@5 giảm xuống 0,540 và độ đúng
+giảm xuống 68,7\%. Thí nghiệm RRF 0,5/0,5 cho thấy tăng trọng số từ khóa lên
+mức cân bằng không cải thiện kết quả tổng thể trên tập dữ liệu hiện tại; cấu
+hình này vẫn tốt hơn các phương pháp đơn lẻ, nhưng thấp hơn RRF 0,8/0,2 ở cả
+truy hồi, độ đúng và tỷ lệ ảo giác. Do đó, cấu hình được khuyến nghị ở thời
+điểm hiện tại là RRF 0,8/0,2 có reranker, đồng thời tiếp tục hoàn thiện dữ liệu
+và đánh giá lại khi đủ 16 bộ dữ liệu.
 
 \end{document}
