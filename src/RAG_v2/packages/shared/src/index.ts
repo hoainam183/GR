@@ -66,6 +66,7 @@ export {
   renameBookmarkFolder,
   deleteBookmarkFolder,
   submitFeedback,
+  deleteFeedback,
   getFeedback,
   getFeedbackStats,
   listAllFeedback,

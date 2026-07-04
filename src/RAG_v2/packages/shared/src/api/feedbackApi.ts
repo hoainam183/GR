@@ -13,6 +13,14 @@ export const submitFeedback = async (
   return response.data;
 };
 
+export const deleteFeedback = async (
+  client: AxiosInstance,
+  sessionId: string,
+  turnId: number,
+): Promise<void> => {
+  await client.delete(API_PATHS.FEEDBACK, { params: { session_id: sessionId, turn_id: turnId } });
+};
+
 export const getFeedback = async (
   client: AxiosInstance,
   sessionId: string,

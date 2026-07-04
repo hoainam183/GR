@@ -20,7 +20,7 @@ export {
   renameBookmarkFolder,
   deleteBookmarkFolder,
 } from './bookmarkApi';
-export { submitFeedback, getFeedback, getFeedbackStats, listAllFeedback } from './feedbackApi';
+export { submitFeedback, deleteFeedback, getFeedback, getFeedbackStats, listAllFeedback } from './feedbackApi';
 export {
   lookupCTDT,
   lookupRegulations,
