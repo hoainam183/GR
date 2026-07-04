@@ -101,6 +101,23 @@ async def get_feedback(
     return {"feedback": _serialize_feedback(doc)}
 
 
+@router.delete("/feedback")
+async def delete_feedback(
+    session_id: Annotated[str, Query()],
+    turn_id: Annotated[int, Query(ge=1)],
+    current_user: Annotated[UserDocument, Depends(get_current_user)],
+    db: Annotated[AsyncIOMotorDatabase, Depends(get_database)],
+) -> dict[str, str]:
+    """Clear the current user's rating for a turn (un-rate / toggle off)."""
+    user_id = str(current_user.id)
+    result = await db[FEEDBACK_COLLECTION].delete_one(
+        {"user_id": user_id, "session_id": session_id, "turn_id": turn_id}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Feedback not found")
+    return {"status": "deleted"}
+
+
 @router.get("/feedback/list")
 async def list_feedback(
     _admin: Annotated[UserDocument, Depends(require_admin)],

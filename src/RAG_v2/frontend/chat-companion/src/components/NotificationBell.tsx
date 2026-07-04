@@ -148,15 +148,19 @@ export function NotificationBell() {
   });
   const notifications = notifData?.notifications ?? [];
 
-  // Bell shake animation khi count tăng
+  // Bell shake animation khi count tăng. Capture + advance the ref on every
+  // run (not just the non-shaking branch) — otherwise a stale ref keeps
+  // comparing against an old count and the bell re-shakes on every 30s poll
+  // even though unreadCount hasn't changed since the last shake.
   const [shaking, setShaking] = useState(false);
   useEffect(() => {
-    if (unreadCount > prevCountRef.current && prevCountRef.current !== 0) {
+    const previousCount = prevCountRef.current;
+    prevCountRef.current = unreadCount;
+    if (unreadCount > previousCount && previousCount !== 0) {
       setShaking(true);
       const timer = setTimeout(() => setShaking(false), 600);
       return () => clearTimeout(timer);
     }
-    prevCountRef.current = unreadCount;
   }, [unreadCount]);
 
   // Click outside → đóng dropdown

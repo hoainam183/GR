@@ -413,8 +413,15 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
     let responseSessionId = capturedSessionId;
     let receivedMetadata: Partial<ChatV3Response> | undefined;
 
+    // True while the user is still looking at this request's session — either
+    // the brand-new-chat startup window (both still undefined) or the session
+    // it was assigned. Deliberately does NOT short-circuit on `!capturedSessionId`:
+    // that used to make every new-chat request "current" forever, so switching
+    // away mid-stream let its tokens/status leak into whatever session the user
+    // navigated to next (appendToAssistant falls back to pushing a new bubble
+    // when assistantMessageId isn't found in the now-different message list).
     const isCurrentRequest = () =>
-      !capturedSessionId || activeSessionIdRef.current === capturedSessionId || activeSessionIdRef.current === responseSessionId;
+      activeSessionIdRef.current === capturedSessionId || activeSessionIdRef.current === responseSessionId;
 
     // Append a slice of text to the assistant message in a single state update.
     const appendToAssistant = (slice: string) => {
@@ -507,7 +514,13 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             persistPending(sid);
             // Re-key from the sentinel to the real session id.
             if (!capturedSessionId) clearPendingTurn(NEW_SESSION_SENTINEL);
-            if (!isMountedRef.current) return;
+            if (resolvedIdentity.userId) {
+              queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
+            }
+            // If the user already switched to a different session while this
+            // (new-chat) request was still waiting on its session_id, don't
+            // hijack their navigation back to the abandoned request.
+            if (!isMountedRef.current || !isCurrentRequest()) return;
             suppressNextHistoryLoad.current = true;
             setActiveSessionId(sid);
             activeSessionIdRef.current = sid;
@@ -520,9 +533,6 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
             );
             if (sid !== capturedSessionId) {
               navigate(`/chat/${sid}`, { replace: true });
-            }
-            if (resolvedIdentity.userId) {
-              queryClient.invalidateQueries({ queryKey: ['sessions', resolvedIdentity.userId] });
             }
           },
           onStatus: (status) => {

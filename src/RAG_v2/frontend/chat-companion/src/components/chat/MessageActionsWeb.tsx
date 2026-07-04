@@ -3,6 +3,7 @@ import { ThumbsUp, ThumbsDown, Bookmark, Copy, Check } from 'lucide-react';
 import {
   createApiClient,
   submitFeedback,
+  deleteFeedback,
   getFeedback,
   createBookmark,
   deleteBookmark,
@@ -68,7 +69,8 @@ const MessageActionsWeb = ({ sessionId, turnId, content }: Props) => {
       toast.error('Vui lòng đăng nhập để gửi đánh giá.');
       return;
     }
-    const newRating = feedback === rating ? null : rating;
+    const previous = feedback;
+    const newRating = previous === rating ? null : rating;
     setFeedback(newRating);
     setShowCategoryPicker(false);
 
@@ -82,9 +84,20 @@ const MessageActionsWeb = ({ sessionId, turnId, content }: Props) => {
         await submitFeedback(client, { session_id: sessionId, turn_id: turnId, rating: 'up' });
         toast.success('Cảm ơn bạn đã đánh giá!');
       } catch {
-        setFeedback(null);
+        setFeedback(previous);
         toast.error('Không thể lưu đánh giá. Vui lòng thử lại.');
       }
+      return;
+    }
+
+    // Toggling an already-selected rating off (newRating === null): clear the
+    // persisted feedback too, otherwise a reload re-fetches the old rating
+    // and the icon "un-toggles itself" back on.
+    try {
+      await deleteFeedback(client, sessionId, turnId);
+    } catch {
+      setFeedback(previous);
+      toast.error('Không thể bỏ đánh giá. Vui lòng thử lại.');
     }
   };
 
