@@ -35,7 +35,9 @@ def _should_trigger_hyde(
     Triggers when ``hyde_enabled`` is True AND retrieval recall looks poor:
       1. No documents survived reranking, OR
       2. The best explicit rerank score is negative (all docs irrelevant), OR
-      3. Fewer than ``hyde_min_results`` documents survived (sparse recall).
+      3. Fewer than ``hyde_min_results`` documents passed the strict rerank
+         threshold (via ``reranker.last_stats["rerank_strict_returned_count"]``,
+         which is not inflated by the reranker's own ``min_top_k`` backfill).
 
     The ``hyde_confidence_threshold`` (mean-score) path of ``should_use_hyde``
     is intentionally NOT used here: cross-encoder rerank scores are unnormalised
@@ -54,10 +56,16 @@ def _should_trigger_hyde(
         return True
 
     min_results = _cfg_int(cfg, "hyde_min_results", 3)
-    if len(reranked) < min_results:
+    strict_count: Optional[int] = None
+    if reranker is not None:
+        stats = getattr(reranker, "last_stats", None)
+        if stats:
+            strict_count = stats.get("rerank_strict_returned_count")
+    effective_count = strict_count if strict_count is not None else len(reranked)
+    if effective_count < min_results:
         logger.info(
-            "HyDE trigger: only %d result(s) < hyde_min_results=%d",
-            len(reranked),
+            "HyDE trigger: only %d strict result(s) < hyde_min_results=%d",
+            effective_count,
             min_results,
         )
         return True
