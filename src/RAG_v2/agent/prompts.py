@@ -58,7 +58,7 @@ Nguyên tắc:
 - cohort_hint: mã khóa (vd K65, K70...) — dùng khi query liên quan đến khóa cụ thể
 - ⚠️ TUYỆT ĐỐI: major_hint, cohort_hint VÀ mọi mã ngành/khóa trong query PHẢI sao chép CHÍNH XÁC từ câu hỏi của sinh viên. KHÔNG được lấy mã từ các ví dụ bên dưới, KHÔNG đổi sang ngành khác, KHÔNG tự bịa. Nếu câu hỏi nói "IT1" thì mọi step dùng "IT1" (không phải IT-E6). Nếu câu hỏi KHÔNG nêu mã khóa (Kxx) → cohort_hint = null. Nếu KHÔNG nêu mã ngành → major_hint = null.
 - Tối đa 4 steps — ưu tiên ít steps, query cụ thể
-- needs_web=true CHỈ khi câu hỏi cần thông tin bên ngoài database trường
+- needs_web=true khi câu hỏi cần thông tin có thể thay đổi theo thời gian (lịch, deadline, kế hoạch, thông báo mới nhất) hoặc cần cập nhật mới nhất từ website trường; needs_web=false cho quy định/chương trình đào tạo ổn định
 - KHÔNG đưa mã sinh viên hoặc thông tin cá nhân vào query.
 - ⚠️ QUAN TRỌNG: Với collection quy_dinh, PHẢI giữ tên ngành và mã ngành trong query (VD: "IT-E6", "Việt-Nhật", "CNTT Việt-Nhật"). Collection quy_dinh không lọc được theo mã ngành, nên query text là cách DUY NHẤT để tìm đúng quy định cho ngành cụ thể.
 - Với collection chuong_trinh: có thể rút gọn query vì collection này lọc được theo major_hint.
@@ -85,4 +85,9 @@ Output:
 Ví dụ 4 — Hỏi CHUNG về lịch thi (không nêu môn cụ thể → ke_hoach):
 Input: "Lịch thi cuối kì"
 Output:
-{"steps": [{"query": "lịch thi cuối kỳ kế hoạch thời gian", "collection": "ke_hoach", "major_hint": null, "cohort_hint": null, "label": "ke_hoach_thi"}], "needs_web": false, "reasoning": "Câu hỏi chung về lịch thi cuối kì, không nêu môn cụ thể → dùng ke_hoach để tra kế hoạch thi chung"}"""
+{"steps": [{"query": "lịch thi cuối kỳ kế hoạch thời gian", "collection": "ke_hoach", "major_hint": null, "cohort_hint": null, "label": "ke_hoach_thi"}], "needs_web": false, "reasoning": "Câu hỏi chung về lịch thi cuối kì, không nêu môn cụ thể → dùng ke_hoach để tra kế hoạch thi chung"}
+
+Ví dụ 5 — Câu hỏi thời sự / cần cập nhật mới (needs_web=true):
+Input: "Lịch đăng ký học phần kỳ hè 2025 khi nào?"
+Output:
+{"steps": [{"query": "lịch đăng ký học phần kỳ hè 2025 kế hoạch thời gian", "collection": "ke_hoach", "major_hint": null, "cohort_hint": null, "label": "ke_hoach_dkhp"}], "needs_web": true, "reasoning": "Kế hoạch/deadline đăng ký kỳ hè có thể chưa cập nhật trong database → cần web bổ sung khi local thiếu"}"""

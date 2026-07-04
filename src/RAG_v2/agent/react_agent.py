@@ -35,6 +35,15 @@ _NO_INFO_ANSWER = (
     "Xin loi, toi khong tim thay thong tin phu hop trong co so du lieu de tra loi cau hoi nay."
 )
 
+# Bracketed status/error strings returned by web_search_for_executor when the
+# query is invalid, the API key is missing, or the master switch is off. These
+# are NOT real web content and must never be fed to synthesis as a tool result.
+_WEB_ERROR_PREFIXES = ("[loi", "[web fallback dang tat")
+
+
+def _is_web_error_text(text: str) -> bool:
+    return str(text or "").strip().casefold().startswith(_WEB_ERROR_PREFIXES)
+
 
 def _make_call_sig(tool_name: str, tool_args: dict[str, Any]) -> str:
     """Legacy compact signature helper kept for compatibility with old checks."""
@@ -522,6 +531,10 @@ class ReActAgent:
         tool_messages: list[ToolMessage],
     ) -> None:
         web_result = web_search_for_executor(query=query)
+        # Bracketed status/error strings ("[Loi: ...]", "[Web fallback dang tat ...]")
+        # are not real web content — treat them as empty so they never leak into
+        # synthesis, since _is_empty_result_text only catches "khong tim thay".
+        is_empty = _is_empty_result_text(web_result) or _is_web_error_text(web_result)
         new_history.append("planned_web_search")
         executor_results.append(
             {
@@ -529,10 +542,10 @@ class ReActAgent:
                 "query": query,
                 "collection": "web",
                 "result_chars": len(str(web_result or "")),
-                "empty_result": _is_empty_result_text(web_result),
+                "empty_result": is_empty,
             }
         )
-        if not _is_empty_result_text(web_result):
+        if not is_empty:
             tool_messages.append(
                 ToolMessage(
                     content=web_result[: self._tool_result_limit],

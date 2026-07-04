@@ -994,9 +994,9 @@ def _format_web_results(results: Any) -> str:
     _append_agent_docs(all_results)
 
     settings = _formatting_settings()
-    web_count = int(getattr(settings, "tavily_web_result_count", 3) or 3)
+    web_count = int(getattr(settings, "tavily_web_result_count", 5) or 5)
     web_char_limit = int(
-        getattr(settings, "tavily_web_content_char_limit", 1500) or 1500
+        getattr(settings, "tavily_web_content_char_limit", 3000) or 3000
     )
 
     chunks: list[str] = []

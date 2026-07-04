@@ -105,7 +105,7 @@ Ranh giới với các module bên ngoài (External module boundaries):
 
 ## Các Collection và Tra cứu đặc biệt
 
-`web_search_for_executor()` là wrapper cho việc tìm kiếm web, nó tuân thủ thiết lập `TAVILY_FALLBACK_ENABLED` — nếu là `False`, nó trả về thông báo bị tắt vô điều kiện bất kể giá trị `needs_web` của planner. Nó ngoài ra còn xóa các thông tin định danh cá nhân trước khi gọi Tavily API.
+`web_search_for_executor()` là wrapper cho việc tìm kiếm web, nó tuân thủ thiết lập `TAVILY_FALLBACK_ENABLED` — nếu là `False`, nó trả về thông báo bị tắt vô điều kiện bất kể giá trị `needs_web` của planner. Nó ngoài ra còn xóa các thông tin định danh cá nhân trước khi gọi Tavily API. Các chuỗi trạng thái/lỗi dạng ngoặc (`[Loi: ...]`, `[Web fallback dang tat ...]`) do wrapper trả về được `_append_web_executor_result()` coi là rỗng (qua `_is_web_error_text`) và KHÔNG bao giờ được đưa vào synthesis như một tool result.
 
 Bảng định danh collection cho Agent (`COLLECTION_MAP`):
 

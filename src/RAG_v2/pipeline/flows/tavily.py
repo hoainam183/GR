@@ -103,7 +103,11 @@ def _tavily_search_context(
             "used": False,
         }
     try:
-        from tools.tavily_search import HUST_OFFICIAL_DOMAINS
+        from tools.tavily_search import (
+            EDU_AUTHORITATIVE_DOMAINS,
+            HUST_EXTENDED_DOMAINS,
+            HUST_OFFICIAL_DOMAINS,
+        )
 
         tavily_query = query.strip()
         web_context = ""
@@ -133,7 +137,11 @@ def _tavily_search_context(
                 tavily_query,
                 max_results=max_results,
                 search_depth=search_depth,
-                include_domains=HUST_OFFICIAL_DOMAINS,
+                include_domains=(
+                    HUST_OFFICIAL_DOMAINS
+                    + HUST_EXTENDED_DOMAINS
+                    + EDU_AUTHORITATIVE_DOMAINS
+                ),
                 result_count=result_count,
                 content_char_limit=content_char_limit,
                 query_year=(

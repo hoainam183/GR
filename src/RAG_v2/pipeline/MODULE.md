@@ -304,8 +304,10 @@ post-gen Tavily in the streaming branch.
 
 `_tavily_search_context` has two paths:
 - **Path A**: caller supplies `extract_urls` → Tavily Extract API directly.
-- **Path B**: normal keyword search, filtered to `HUST_OFFICIAL_DOMAINS`. If search
-  returns empty context, falls back to `tavily_tool.extract` on the top URL (Path B2).
+- **Path B**: normal keyword search, filtered to the full 16-domain whitelist
+  (`HUST_OFFICIAL_DOMAINS + HUST_EXTENDED_DOMAINS + EDU_AUTHORITATIVE_DOMAINS`) so the
+  classic path is at parity with the agent path. If search returns empty context, falls
+  back to `tavily_tool.extract` on the top URL (Path B2).
 
 Both stages require `tavily_fallback_enabled` and a valid Tavily tool; web context
 is merged deterministically with local context (`_merge_local_and_web_context`).

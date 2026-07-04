@@ -201,13 +201,13 @@ class Settings(BaseSettings):
         "basic"  # basic (1 credit) | advanced (2 credits)
     )
     tavily_max_results: int = (
-        5  # fetch pool size (filter xuống tavily_web_result_count)
+        7  # fetch pool size (filter xuống tavily_web_result_count)
     )
     tavily_web_content_char_limit: int = (
-        1500  # per-result content char limit cho web results
+        3000  # per-result content char limit cho web results
     )
     tavily_web_result_count: int = (
-        3  # số results giữ lại sau filter (≤ max_results)
+        5  # số results giữ lại sau filter (≤ max_results)
     )
     web_fallback_dynamic_collections: List[str] = ["kehoach"]
     # Granular sub-flags that control which conditions trigger Tavily.
