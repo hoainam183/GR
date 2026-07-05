@@ -2,6 +2,8 @@
 
 Sơ đồ dấu vết (trace) chi tiết khi một câu hỏi (query) đi từ lúc người dùng gửi API cho đến lúc nhận được câu trả lời từ LLM. Giả định đây là một query đặc biệt đi qua đầy đủ tất cả các bước của hệ thống: Routing → Reflection/Rewrite → Decomposition → Retrieval → Reranking → HyDE → Web Search fallback → LLM Generation → Response mapping.
 
+> **Edge case riêng — lịch thi (Mục 7.7):** câu hỏi lịch thi theo môn cụ thể (vd "phòng thi CH1012 ở đâu") đi theo một nhánh hoàn toàn khác: routing (Mục 1) đưa nó sang Agent thay vì RAG, nhưng bản thân việc tra cứu lại **bỏ qua toàn bộ** Reflection/Decomposition/Retrieval-Qdrant/Reranking/HyDE (Mục 3-7) — nó là một structured lookup thẳng vào Elasticsearch riêng (`exam_schedules` index), không phải vector search. Câu hỏi lịch thi CHUNG (không nêu môn cụ thể, vd "lịch thi cuối kì") thì vẫn đi đúng luồng RAG v2 cổ điển qua collection `kehoach`.
+
 > Tài liệu này đã được đối chiếu trực tiếp với source code (không suy đoán). Mọi tên hàm, số dòng, hằng số, giá trị mặc định đều được đọc từ code thực tế tại thời điểm viết.
 
 ---
@@ -30,6 +32,7 @@ Sơ đồ dấu vết (trace) chi tiết khi một câu hỏi (query) đi từ l
 
   **Bộ định tuyến độ phức tạp — `_decide_complexity()` (L1044-1101):** đây là **cascade 3 tầng**, không phải một `complexity_router` duy nhất:
   - **Tier 0** — `self.complexity_router.route(reflected_question)`, với `self.complexity_router = ComplexityRouter()` (`query/complexity_router.py`, khởi tạo L186). Thuần regex/pattern, trả `{"tier": "chitchat"|"simple"|"complex"|"unknown", "complex_subtype", "query_signals"}` (`ComplexityRouter.route`, L216-465). Nếu tier ≠ `"unknown"` → quyết định luôn, dừng ở đây.
+    - **Tier 0, bước "1b" — fast-path lịch thi (mới)** (`query/complexity_router.py:251-273`, chạy ngay sau chitchat, trước mọi check Tier 0 khác): khớp `_FOLDED_EXAM_RE` (L122-126, regex trên text đã fold dấu: `"lich thi"`, `"phong thi"` — có negative lookahead loại `"phong thi nghiem"` = phòng thí nghiệm —, `"kip thi"`, `"ngay thi"`, `"thi mon"`, `"mon thi"`, `"ma lop thi"`, `"dot thi"`, `"thi ngay"`, `"thi khi nao"`, `"thi vao"`, `"thi hom nao"`, `"thi luc nao"`) **VÀ** thoả specificity guard (L132-150): câu hỏi khớp `_EXAM_INHERENTLY_SPECIFIC_RE` (các cụm tự thân đã cụ thể như `"thi mon"`/`"mon thi"`/`"ma lop thi"`...) **HOẶC** khớp `_EXAM_SPECIFIC_SIGNALS_RE` (mã môn `AA1234`, `"mon <tên>"`, mã khóa `Kxx`, ngày `d/m`, `"nhom N"`, `"tuan nay/toi/sau/truoc"`, `"thang N"`, `"ngay N"`). Khi khớp → trả ngay `{"tier": "complex", "reason": "signals: exam_schedule_lookup", "complex_subtype": "general", ...}`, đưa câu hỏi sang Agent (`query_agent()`) mà **không** qua Tier 1/Tier 2. Câu hỏi CHUNG kiểu `"lịch thi cuối kì"` (không có tín hiệu cụ thể nào) **không** thoả guard này → tiếp tục rơi qua các bước Tier 0 khác rồi Tier 1/2 như bình thường; ở tầng Agent Planner, câu hỏi chung như vậy được LLM planner tự route vào `ke_hoach`, không vào `lich_thi` (xem Mục 7.7).
   - **Tier 1** — chỉ chạy nếu Tier 0 trả `"unknown"`. Gọi `self._router.route(reflected_question)` với `self._router = QueryRouter(mode=cfg.get("router_mode", "classifier"), embedder=self._bge)` (khởi tạo L145) — **chính là bộ phân loại intent/domain ở Mục 2**, được tái sử dụng ở đây chỉ để lấy tín hiệu domain đa nhãn. Nếu `routing["intent"] != "rag"` → `"simple"`. Ngược lại kiểm tra có ≥2 domain active (`_count_active_domains`) hoặc tín hiệu `multi_domain` xác định hay không; nếu không → `"simple"`.
   - **Tier 2** — chỉ chạy nếu ≥2 domain/`multi_domain` được kích hoạt ở Tier 1. Gọi `self._classify_complexity_llm()` (LLM judge qua `chat.generate(..., mode="chitchat")`), trả `"simple"` hoặc `"complex"` + subtype (`comparison`/`multi_source`/`general`), mặc định `"simple"` nếu parse/exception lỗi.
 
@@ -45,7 +48,8 @@ Sơ đồ dấu vết (trace) chi tiết khi một câu hỏi (query) đi từ l
   ```
   (L151-173)
   - **Intents** (`VALID_INTENTS`, L29): `{"chitchat", "rag", "tool_search"}`.
-  - **Domains** (`VALID_DOMAINS`, L30): `{"ctdt", "quydinh", "kehoach", "stsv"}`.
+  - **Domains** (`VALID_DOMAINS`, L30): `{"ctdt", "quydinh", "kehoach", "stsv"}` — **không đổi**, vẫn chỉ 4 domain.
+  - > **Lưu ý:** `lich_thi` (lịch thi/exam schedule) **không** phải domain thứ 5 ở đây và **không** nằm trong `VALID_DOMAINS`. Nó là một collection riêng chỉ tồn tại ở tầng **Agent Planner-Executor** (`ReActAgent._VALID_COLLECTIONS`, `agent/react_agent.py:95-97`), hoàn toàn bỏ qua `QueryRouter`, Tier-1 domain classifier, `MultiCollectionSearch` và Qdrant. Xem Mục 7.7.
   - **Cơ chế — được chọn ở constructor, KHÔNG phải "LLM hoặc ML" tùy ý; mặc định production là ML, không phải LLM:**
     - `mode="classifier"` (**mặc định** — pipeline khởi tạo `QueryRouter(mode=cfg.get("router_mode", "classifier"), ...)` tại `rag_pipeline.py:145`) → `_route_classifier()` (L179-245): dùng `DomainClassifier` dựa trên embedding (BGE-M3 + bộ phân loại đa nhãn đã huấn luyện, ~10-50ms, không tốn LLM call). Có cơ chế **two-pass**: Pass 1 route trên câu hỏi thô; Pass 2 (ghép thêm lịch sử hội thoại qua `build_routing_input`) chỉ chạy nếu confidence Pass 1 `< 0.65` (`_TWO_PASS_CONFIDENCE_THRESHOLD`) **và** câu hỏi ngắn (`< 8` từ) — giữ lại pass nào có confidence cao hơn.
     - `mode="llm"` → `_route_llm()` (L251-279): gọi LLM chat completion với `ROUTER_SYSTEM_PROMPT` + few-shot `ROUTER_FEW_SHOT` (cả hai định nghĩa tại `query/prompts.py`, dòng 7 và 40), parse JSON qua `_parse_response()`. Chỉ được dùng khi config `router_mode` set tường minh là `"llm"`.
@@ -182,10 +186,76 @@ HyDE không chạy mặc định, chỉ kích hoạt khi kết quả rerank quá
 ### Agent Mode (`pipeline.query_agent()`)
 
 - **File:** `agent/react_agent.py`, `agent/tool_adapters.py`.
+- **Collection vocabulary của Agent khác với `VALID_DOMAINS` ở Mục 2** — Planner-Executor dùng 5 tên riêng (`ReActAgent._VALID_COLLECTIONS`, `react_agent.py:95-97`): `quy_dinh`, `chuong_trinh`, `ke_hoach`, `ho_tro_sv` (4 tên này map 1-1 sang tên Qdrant collection thật qua `COLLECTION_MAP`, `agent/tool_adapters.py:41-46`: `quy_dinh→quydinh`, `chuong_trinh→ctdt`, `ke_hoach→kehoach`, `ho_tro_sv→stsv`) và **`lich_thi`** (`EXAM_COLLECTION`, `tool_adapters.py:52`) — tên thứ 5 này chủ đích **không** có trong `COLLECTION_MAP` vì nó không map sang Qdrant collection nào cả. `_valid_plan_steps()` (`react_agent.py:575-589`) loại ngay các step mà LLM planner sinh ra với `collection` không thuộc 5 tên này. Chi tiết đầy đủ về `lich_thi` ở Mục 7.7.
 - `needs_web` **không** phải do một bộ dò "tính thời sự" riêng đặt — đây là field boolean do chính **LLM planner** xuất ra trong lần gọi sinh kế hoạch JSON duy nhất (`_planner_node`, prompt tại `agent/prompts.py:61`: hướng dẫn set `needs_web=true` cho thông tin thời gian thực như lịch/deadline/thông báo, `false` cho quy chế/chương trình ổn định).
 - **`needs_web=true` một mình chưa đủ để trigger web search.** Trong `_executor_node` (`react_agent.py:414`): `if plan.get("needs_web") and not tool_messages:` — web search chỉ chạy như **fallback khi toàn bộ các bước retrieval RAG nội bộ trả về rỗng** (`tool_messages` rỗng). Đây là fallback-cuối-cùng theo thiết kế (có comment tường minh, và test `test_web_not_called_when_rag_has_results`, `test_web_called_as_fallback_when_rag_empty` trong `tests/test_agent_langgraph.py` xác nhận).
 - `web_search_for_executor()` (`tool_adapters.py:597`) bọc `_web_search()` (L559), vẫn bị gate bởi `settings.tavily_fallback_enabled` (cùng công tắc với RAG mode) — nếu tắt, trả chuỗi `"[Web fallback dang tat ...]"` được coi như rỗng, không lọt vào bước synthesis.
 - Kết quả web (nếu có) trở thành một `ToolMessage` đưa vào `_synthesize_node`, kết hợp với kết quả tool nội bộ không rỗng (nếu có) để sinh câu trả lời cuối.
+
+---
+
+## 7.7. Lịch Thi (Exam Schedule) — Structured Lookup, Bỏ Qua Toàn Bộ Retrieval Qdrant
+
+> Đây là một **hệ thống con song song** (parallel subsystem) với toàn bộ Mục 4-8 phía trên — `lich_thi` không phải Qdrant collection, không qua `MultiCollectionSearch`, không BGE/E5 embedding, không reranker, không HyDE, không sibling expansion, không `metadata_filters.py`. Nó là một tra cứu có cấu trúc (structured lookup) thẳng vào Elasticsearch (Mongo làm nguồn ghi), chỉ tồn tại trong nhánh **Agent Planner-Executor** (Mục 7.6) — nhánh RAG v2 cổ điển (`rag_flow()`) không có khái niệm này.
+
+### 7.7.1. Kích hoạt — khi nào một câu hỏi đi vào `lich_thi`
+
+- **Bước 1 (routing, Mục 1):** fast-path "1b" của `ComplexityRouter.route()` (`query/complexity_router.py:251-273`) chỉ quyết định **"đi Agent hay RAG"** (trả `tier="complex"`) — nó **không** tự chọn collection `lich_thi`.
+- **Bước 2 (chọn collection, tại Agent):** `_planner_node` (`agent/react_agent.py:294`) gọi LLM planner với `PLANNER_SYSTEM_PROMPT` (`agent/prompts.py:29-93`) — LLM này mới thực sự quyết định step nào dùng `"collection": "lich_thi"`. Prompt phân biệt rõ (L32-43):
+  - **`lich_thi`** — CHỈ dùng khi câu hỏi nêu RÕ môn/mã môn/ngày cụ thể/nhóm thi (vd "lịch thi CH1012", "phòng thi IT3080E", "thi môn Giải tích ngày nào").
+  - **`ke_hoach`** — câu hỏi CHUNG về lịch thi ("lịch thi cuối kì", "khi nào thi cuối kỳ", "lịch thi kỳ hè") không nêu môn cụ thể → vẫn dùng `ke_hoach` (tài liệu kế hoạch thi chung của học kỳ, retrieval qua nhánh Qdrant ở Mục 4-8), **không** phải `lich_thi`. Đây chính là điểm rơi cho câu hỏi chung bị fast-path 1b bỏ qua ở Mục 1.
+  - Với step dùng `lich_thi`, prompt yêu cầu **GIỮ NGUYÊN** trong `query` các từ "giữa kì/giữa kỳ", "cuối kì/cuối kỳ", mã khóa (Kxx), mốc thời gian ("tuần này/tuần tới", "tháng N") — vì bộ lọc lịch thi (7.7.3) trích các thông tin này trực tiếp từ chuỗi `query`, không qua entity extraction chung của Mục 3.
+  - `agent/react_agent.py:95-97` — `_VALID_COLLECTIONS = frozenset({"quy_dinh", "chuong_trinh", "ke_hoach", "ho_tro_sv", "lich_thi"})`; nếu LLM planner hallucinate tên collection khác, step đó bị `_valid_plan_steps()` (L575-589) loại thầm lặng, không raise lỗi.
+
+### 7.7.2. Executor — dispatch bỏ qua vector search
+
+- `execute_retrieval_plan()` (`agent/tool_adapters.py:818-873`), trong `_run(i, step)` (L834) rẽ nhánh ngay tại dispatch (L835): `if step.get("collection") == EXAM_COLLECTION:` → gọi `_exam_schedule_search(...)` (structured DB lookup); **else** → `_rag_search(...)` (nhánh Qdrant bình thường cho 4 collection còn lại). Đây là điểm rẽ nhánh duy nhất — mọi collection khác trong Agent Mode đi qua `_rag_search` như Mục 4-8, chỉ riêng `lich_thi` đi tắt.
+- Gọi với `top_k=None` (L846) — cố ý **không** giới hạn theo `top_k` cấp chat (kích thước dành cho vector retrieval); mặc định `exam_schedule_search_top_k=500` (`config/settings.py:337`) đủ trả hầu hết tập kết quả khớp.
+- Cohort **bị bỏ qua có chủ đích** ở tầng planner: dù step có `cohort_hint` (thường lấy từ profile sinh viên), `_run()` **không** truyền `cohort_hint` vào `_exam_schedule_search` (L841-847 chỉ truyền `query`, `subject_code`, `exam_date`, `exam_type`) — cohort chỉ được `_exam_schedule_search` tự trích lại từ **chuỗi `query` gốc** (7.7.3), để tránh profile sinh viên âm thầm thu hẹp kết quả tra cứu lịch thi của người khác.
+
+### 7.7.3. Trích lọc filter — `_extract_exam_filters()` (`tool_adapters.py:653-691`)
+
+Thuần regex trên `query` đã strip PII + fold dấu, **không LLM**:
+- `subject_code` — `_SUBJECT_CODE_RE` (`AA\d{3,4}`, vd `CH1012`).
+- `exam_type` — `_CUOI_KY_RE`/`_GIUA_KY_RE` (L61-62), check "cuối" **trước** "giữa" (nếu câu hỏi nêu cả hai, nghiêng về cuối kỳ).
+- `exam_date` (một ngày, `_DATE_TOKEN_RE`) **hoặc** `exam_date_from`/`exam_date_to` qua `_extract_date_range()` (`tool_adapters.py:624-650`) — xử lý "tuần này"/"tuần tới"/"tuần sau" (neo theo `date.today()` thật) và "tháng N[/YYYY]".
+- `cohort` — khớp trên chuỗi query gốc chưa fold, dùng lại ở `_exam_schedule_search` (L772-775), **không** lấy từ planner/profile (xem 7.7.2).
+  - > **Lưu ý (shadowing, đã xác nhận từng dòng code):** `tool_adapters.py` có **2 định nghĩa** `_COHORT_RE` ở module scope — L60: `r"\bK\d{2,3}[A-Za-z]?\b"` (có chữ hậu tố tùy chọn, dành riêng cho lịch thi theo comment tại L58-59) và **L143 (định nghĩa sau, đè lên)**: `r"\bK\d{2,3}\b"` (không cho phép chữ hậu tố). Vì Python resolve tên global tại thời điểm **gọi**, không phải tại định nghĩa, mọi nơi dùng `_COHORT_RE` — kể cả trong lịch thi (`_extract_exam_filters` L686, `_exam_schedule_search` L773) và trong `_extract_cohort()` dùng cho 4 collection RAG khác (L1029-1031) — đều chạy bản L143. Bản L60 là **dead code**, không bao giờ được gọi. Hệ quả thực tế: câu hỏi chứa mã khóa có hậu tố chữ liền sau số (vd `"K70C"`, `"K67S"` — đúng dạng ví dụ trong `SYNTHESIS_PROMPT`, xem 7.7.6) sẽ **không** được regex này nhận diện làm cohort token (vì `\b` không khớp giữa chữ số và chữ cái liền sau); `has_cohort_token` (7.7.4) sẽ là `False` cho các câu hỏi đó, khiến pipeline rơi vào fallback BM25-theo-tên-môn thay vì được coi là "đã có tín hiệu thu hẹp qua mã khóa".
+- Fallback BM25 theo tên môn (`subject_name`): chỉ áp dụng khi câu hỏi **không** có `subject_code` VÀ **không** có token cohort khớp được (L686-690) — nếu có mã khóa trần (dạng không hậu tố chữ), bỏ fallback theo tên để câu như "lịch thi K70 cuối kì" không bị lọc nhầm bởi cụm tên môn rỗng.
+
+### 7.7.4. Guard chặn tra cứu quá rộng
+
+- `_exam_schedule_search()` (`tool_adapters.py:735-812`) có 2 lớp chặn trước khi query ES:
+  1. Không filter nào có giá trị (`not any(filters.values())`, L777) → trả `"[Loi: Khong xac dinh duoc mon/ngay thi tu cau hoi]"`.
+  2. Chỉ có `exam_type` (vd chỉ "cuối kỳ") mà **không** có filter thu hẹp nào khác (`subject_code`/`subject_name`/`exam_date(_from/_to)`/`exam_room`/`group`/`cohort` — `_narrowing_keys`, L783-790) → trả câu nhắc người dùng cung cấp tên/mã môn/ngày/mã khóa, **không** query ES (tránh trả ngẫu nhiên top-K dòng không liên quan khi câu hỏi chung dạng "lịch thi cuối kỳ" lẫn lọt qua được guard đặc trưng ở Mục 1 nhờ một tín hiệu khác).
+- Fallback theo tên khi mã môn sai/không khớp: tra theo `subject_code` mà `rows` rỗng (L801-809) → thử lại bằng `subject_name` (chuỗi query đã strip PII), giữ nguyên `exam_type`/`cohort` đã xác định — bắt các trường hợp gõ sai mã môn nhưng đúng tên môn.
+
+### 7.7.5. Truy vấn Elasticsearch — `ExamScheduleESStore` (`retrieval/exam_schedule_store.py`)
+
+- Index riêng `exam_schedules` (`config/settings.py:334`, đổi được qua `exam_schedule_es_index`) — **tách hoàn toàn** khỏi index chunk tài liệu (`ElasticsearchStore`), vì dữ liệu lịch thi có dạng bảng cố định (13 cột), không phải văn bản tự do.
+- `build_query()` (L223-297, testable độc lập): filter chính xác (`subject_code`, `exam_type`, `exam_room`, `group`, `exam_date`/khoảng ngày, và `cohort` — dùng `prefix` match để "K70" vẫn khớp bản ghi "K70C") đi vào `filter` clause (không ảnh hưởng score). `subject_name` (BM25 trên `subject_name^2` + `search_text`) đi vào **`should`** (booster) nếu đã có `subject_code`, nhưng vào **`must`** (bắt buộc, là discriminator chính) nếu **không** có `subject_code` — tránh trường hợp chỉ có `exam_type` + tên môn optional trả về dòng ngẫu nhiên sắp theo ngày.
+- Sort (`search()`, L299-342): tra theo tên môn mà không có ngày cụ thể → sort theo `_score` (BM25) trước, để môn được hỏi không bị dòng ngày sớm hơn đẩy khỏi top-K; ngược lại (có `subject_code`/ngày cụ thể) → sort theo `exam_date` rồi `start_time` tăng dần.
+- Field ES: `exam_date` kiểu `date` (chấp ISO/`dd/MM/yyyy`/epoch millis); còn lại `keyword` (`subject_code`, `exam_type`, `exam_room`, `exam_session`, `start_time`, `group`, `cohort`, `exam_week`, `weekday`, `exam_batch`, `mgmt_class_code`, `exam_class_code`, `exam_date_str`, `source_file`) — dùng chung Vietnamese analyzer/synonym/stopword với `ElasticsearchStore`, tự fallback sang tokenizer `standard` nếu thiếu plugin tiếng Việt.
+
+### 7.7.6. Kết quả trả về cho LLM
+
+- `_format_exam_results()` (`tool_adapters.py:694-732`): mỗi dòng ES → một dòng text `"[i] {mã} — {tên} | {ngày/kíp thi} | Phòng {phòng} | Nhóm {nhóm} | Đợt {đợt} | Ghi chú: {note}"`.
+- `SYNTHESIS_PROMPT` (`agent/prompts.py:10-24`) có đoạn hướng dẫn riêng cho lịch thi (L21-24): mỗi dòng `"[i] ..."` là **một slot thi riêng** (khác nhóm/khác đối tượng); trường `"Ghi chú"` cho biết **đối tượng** được thi slot đó (ngành/chương trình/mã khóa, vd `"Kỹ thuật máy tính-MĐ1,2-K68S"`, `"*Việt Nhật K67S"`) — bắt buộc phải trình bày; LLM **không được** gộp các slot trùng ngày/giờ/phòng thành "tất cả các nhóm" mà bỏ mất Ghi chú riêng của từng slot.
+
+### 7.7.7. Runtime & hạ tầng (khác biệt so với Qdrant path)
+
+- `_AdapterRuntime.exam_es_store` (`tool_adapters.py:155`) được dựng **độc lập** khỏi `RetrievalService` — cả `_build_runtime()` (lazy fallback, L214-243) và `inject_from_retrieval_service()` (đường dùng chung với pipeline, L261-289) đều tự gọi `_build_exam_es_store(settings)` (L189-211) riêng, vì index lịch thi không được `RetrievalService` expose sẵn.
+- Kết nối ES thất bại (`ConnectionError` hoặc bất kỳ exception) → `_build_exam_es_store` **không raise**, trả `None` và log warning — `_exam_schedule_search` khi đó trả `"[Loi: Kho du lieu lich thi chua san sang]"` (degrade gracefully) thay vì crash toàn bộ Agent.
+- Retry-relax của Executor (`_relaxed_steps`, `react_agent.py:558-573`) drop `major_hint`/`cohort_hint` khi TOÀN BỘ step đều rỗng — áp dụng đồng nhất cho mọi collection, nhưng với `lich_thi` gần như luôn là no-op: planner được hướng dẫn không set `major_hint`/`cohort_hint` cho step `lich_thi` (7.7.1), và `_run()` cũng không truyền `cohort_hint` cho exam tool (7.7.2).
+
+### 7.7.8. Ingestion — Admin upload lịch thi (khác hoàn toàn pipeline `/admin/documents`)
+
+- **File:** `api/routes/exam_schedules.py`. Endpoint `POST /admin/exam-schedules` (L62-123, `require_admin`): nhận `file` (`.pdf`/`.xlsx`/`.xlsm`, `_ALLOWED_SUFFIXES` L47) + `exam_type` tùy chọn qua multipart form (`_ALLOWED_EXAM_TYPES = ("giua_ky", "cuoi_ky")`, L48; 400 nếu giá trị khác). Đây **không** phải state machine convert→clean→chunk→embed như `/admin/documents` — file được lưu đĩa (`uploads/exam_schedules/{doc_id}.{ext}`, `_save_upload` L51-59) rồi parse **đồng bộ ngay trong request** (`ingest_exam_schedule`), trả `201 + ParseReport` cho admin thấy ngay số dòng parse được/bị skip.
+- **Parse:** `services/exam_schedule_parser.py` — `parse_exam_workbook()`/`_async()` (L359-445) dispatch theo đuôi file: `load_pdf_rows` (pdfplumber, PDF dạng bảng text) hoặc `load_workbook_rows` (openpyxl) — cùng schema 13-cột cố định qua `_DEFAULT_COLUMN_MAP`/`settings.exam_schedule_column_map` (2 layout tên cột khác nhau được alias vào cùng field, vd `"ma lop qt"`/`"ma lop"` → `mgmt_class_code`). **Không dùng LLM** để parse.
+- **`exam_type` auto-detect:** `detect_exam_type(banner_text, filename)` (L250-264) — nếu admin không chọn tường minh, suy ra từ banner PDF/tên file bằng `_GIUA_KY_RE`/`_CUOI_KY_RE`; banner nêu **cả hai** kỳ hoặc **không** kỳ nào → trả `None` (không đoán khi mơ hồ), để trống trên record.
+- **Idempotent theo `source_file`:** `ingest_exam_schedule()` (`services/exam_schedule_service.py:59-135`) — file parse ra **0 dòng hợp lệ** → **giữ nguyên** dữ liệu cũ (không xóa gì, tránh 1 lần upload lỗi xóa sạch lịch thi đang có, L84-99). Ngược lại: xóa hết dòng cũ cùng `source_file` ở **cả** Mongo (`EXAM_SCHEDULES_COLLECTION`) và ES (`delete_by_source_file`) rồi insert dòng mới — re-upload cùng file sẽ **thay thế** (replace), không cộng dồn/trùng lặp.
+- **Blocking I/O offload:** mọi lệnh gọi Elasticsearch (sync client) trong service này được bọc `anyio.to_thread.run_sync` (`services/exam_schedule_service.py:107-109, 121-123, 169-171`); Mongo dùng driver async (Motor) trực tiếp, không cần offload.
+- Endpoint bổ trợ: `GET /admin/exam-schedules/summary` (L152-186, đếm `total_rows`/`distinct_subjects`/`distinct_exam_dates`/theo từng `source_file`) và `DELETE /admin/exam-schedules?source_file=...` (L189-217, xóa cả Mongo + ES + file trên đĩa, idempotent — file không tồn tại trả về count 0, không 404).
 
 ---
 
