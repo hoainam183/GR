@@ -44,7 +44,6 @@ from .flows import (
     chitchat_flow_stream,
     rag_flow,
     rag_flow_stream,
-    try_query_cache,
 )
 from .rag_helpers import (
     _LLM_FALLBACK_THRESHOLD,
@@ -814,49 +813,6 @@ class RAGPipeline:
         """
         runtime = self._llm_runtime_snapshot()
 
-        # ── P2: pre-reflection query-cache probe ─────────────────────────────
-        # A hit here skips the reflection LLM round-trip AND complexity routing
-        # entirely (rag_flow's own probe only runs after those, once query() is
-        # called). Only ever serves stable, previously-answered RAG results; the
-        # store path never caches dynamic/web/no-info answers. Turn logging below
-        # mirrors the full path so cached hits still appear in history. Guarded
-        # with getattr so it's a clean no-op in production when a piece is
-        # missing (and for unit tests that stub a minimal runtime/pipeline).
-        early_t0 = time.perf_counter()
-        _cache = getattr(self, "_llm_cache", None)
-        _chat = getattr(runtime, "chat", None)
-        _cfg = getattr(runtime, "cfg", None)
-        cached = (
-            try_query_cache(
-                question=question,
-                chat_model=_chat,
-                cfg=_cfg,
-                llm_cache=_cache,
-                user_context=user_context,
-            )
-            if _cache is not None and _chat is not None and _cfg is not None
-            else None
-        )
-        if cached is not None:
-            cached["mode"] = "rag_v2"
-            cached["route"] = "simple"
-            cached.setdefault("tools_used", [])
-            cached.setdefault("tool_calls", [])
-            cached.setdefault("iterations", 0)
-            cached.setdefault("agent_trace", None)
-            if session_id and self._mongo_logger:
-                latency_ms = int((time.perf_counter() - early_t0) * 1000)
-                turn_id = self._mongo_logger.log_turn(
-                    session_id=session_id,
-                    question=question,
-                    result=cached,
-                    reflected_question=cached.get("reflected_question"),
-                    latency_ms=latency_ms,
-                    timings_ms=cached.get("timings_ms"),
-                )
-                cached["turn_id"] = turn_id
-            return cached
-
         # Step 1: Reflection FIRST — so routing sees the expanded query
         if skip_reflection:
             reflected_question = question
@@ -1209,86 +1165,6 @@ class RAGPipeline:
             load_t0 = time.perf_counter()
             history = self._mongo_logger.get_history(session_id)
             pipeline_timings["history_load"] = _elapsed_ms(load_t0)
-
-        # ── P2: pre-reflection query-cache probe (stream) ────────────────────
-        # A hit streams the cached answer immediately, skipping the reflection
-        # LLM round-trip + complexity routing. See query_v3 for rationale; the
-        # stream-variant probe inside rag_flow_stream only runs after those.
-        _cache = getattr(self, "_llm_cache", None)
-        _chat = getattr(runtime, "chat", None)
-        _cfg = getattr(runtime, "cfg", None)
-        cached = (
-            try_query_cache(
-                question=question,
-                chat_model=_chat,
-                cfg=_cfg,
-                llm_cache=_cache,
-                user_context=user_context,
-                timings_ms=pipeline_timings,
-            )
-            if _cache is not None and _chat is not None and _cfg is not None
-            else None
-        )
-        if cached is not None:
-            answer = cached["answer"]
-            sources = cached["sources"]
-            for piece in _chunk_for_stream(answer):
-                yield piece
-
-            timings_ms = _merge_timings(pipeline_timings)
-            timings_ms["pipeline_total"] = _elapsed_ms(pipeline_t0)
-
-            turn_id = None
-            if session_id and self._mongo_logger:
-                latency_ms = int((time.perf_counter() - pipeline_t0) * 1000)
-                turn_id = self._mongo_logger.log_turn(
-                    session_id=session_id,
-                    question=question,
-                    result={
-                        "answer": answer,
-                        "intent": "rag",
-                        "route": "rag",
-                        "mode": "rag_v2",
-                        "num_sources": len(sources),
-                        "sources": sources,
-                        "model_name": runtime.chat.model,
-                        "timings_ms": timings_ms,
-                        "rerank_trace": cached.get("rerank_trace"),
-                        "answer_quality_gate": cached.get("answer_quality_gate"),
-                        "answer_status": "answered",
-                    },
-                    reflected_question=question,
-                    latency_ms=latency_ms,
-                    timings_ms=timings_ms,
-                )
-
-            if metadata_out is not None:
-                metadata_out.update(
-                    {
-                        "mode": "rag_v2",
-                        "route": "rag",
-                        "intent": "rag",
-                        "num_sources": len(sources),
-                        "retrieved_documents": sources,
-                        "timings_ms": timings_ms,
-                        "reflected_question": question,
-                        "target_collections": None,
-                        "collection_scores": {},
-                        "routing_probabilities": None,
-                        "applied_filters": None,
-                        "collection_results": None,
-                        "context_trace": cached.get("context_trace"),
-                        "rerank_trace": cached.get("rerank_trace"),
-                        "answer_quality_gate": cached.get("answer_quality_gate"),
-                        "fusion_weights": None,
-                        "agent_trace": None,
-                        "tools_used": [],
-                        "tool_calls": [],
-                        "iterations": 0,
-                        "turn_id": turn_id,
-                    }
-                )
-            return
 
         # Progress event for every path: reflection + routing run synchronously
         # before the first token, so without this the UI would show a bare
