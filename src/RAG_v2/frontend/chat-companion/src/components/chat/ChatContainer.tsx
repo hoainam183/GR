@@ -23,6 +23,7 @@ import {
 interface ChatContainerProps {
   user?: UserPublic | null;
   sessionId?: string;
+  showDebug?: boolean;
 }
 
 interface PendingChatTurn {
@@ -165,7 +166,7 @@ const buildUserContextFromUser = (
   };
 };
 
-const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) => {
+const ChatContainer = ({ user, sessionId: sessionIdProp, showDebug = false }: ChatContainerProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatPhase, setChatPhase] = useState<'idle' | 'thinking' | 'streaming'>('idle');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -827,7 +828,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
                   </div>
                 </div>
               ) : (
-                <ChatMessage key={message.id} message={message} showDebug={true} />
+                <ChatMessage key={message.id} message={message} showDebug={showDebug} />
               ),
             )}
             {chatPhase !== 'idle' && !messages[messages.length - 1]?.isStreaming && <TypingIndicator phase={chatPhase as 'thinking' | 'streaming'} label={statusMessage ?? undefined} />}
@@ -872,7 +873,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp }: ChatContainerProps) =
       <div className="relative z-20 shrink-0 overscroll-contain border-t border-border bg-background/90 p-3 backdrop-blur-sm sm:p-4 md:p-6">
         <div className="mx-auto w-full max-w-3xl">
           <ChatInput onSend={handleSendMessage} isBusy={chatPhase !== 'idle'} onStop={handleStop} />
-          {isAdmin && (
+          {isAdmin && showDebug && (
             <details className="mt-3 rounded-md border border-border/80 bg-muted/20 px-3 py-2 text-xs">
               <summary className="cursor-pointer select-none text-muted-foreground">
                 Debug runtime info

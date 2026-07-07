@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
@@ -13,7 +14,8 @@ import {
   notifyPipelineDone,
   requestNotifyPermission,
 } from '@/lib/pipelineNotify';
-import { ArrowLeft, Bot, ThumbsUp, LayoutDashboard, Users, MessageSquare, FileText, Settings } from 'lucide-react';
+import { ArrowLeft, Bot, ThumbsUp, LayoutDashboard, Users, MessageSquare, FileText, Settings, LogOut, Loader2 } from 'lucide-react';
+import { logoutSession } from '@/services/authSession';
 import OverviewTab from '@/components/admin/OverviewTab';
 import UsersTab from '@/components/admin/UsersTab';
 import AnalyticsTab from '@/components/admin/AnalyticsTab';
@@ -62,7 +64,9 @@ function getAdminApiError(error: unknown) {
 
 export default function AdminPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [documents, setDocuments] = useState<DocumentDetail[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -160,6 +164,18 @@ export default function AdminPage() {
     }
   };
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logoutSession();
+    } catch (error) {
+      console.warn('Logout request failed, clearing local session anyway:', error);
+    } finally {
+      queryClient.clear();
+      navigate('/login', { replace: true });
+    }
+  };
+
   const handleView = (id: string) => navigate(`/admin/documents/${id}`);
   const handleTabChange = (tab: AdminTab) => {
     setActiveTab(tab);
@@ -211,10 +227,19 @@ export default function AdminPage() {
           </div>
         </nav>
 
-        <div className="border-t border-border p-3">
+        <div className="space-y-2 border-t border-border p-3">
           <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/')}>
             <ArrowLeft className="h-4 w-4" />
             Trang chủ
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+          >
+            {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+            Đăng xuất
           </Button>
         </div>
       </aside>
@@ -248,6 +273,17 @@ export default function AdminPage() {
               <Button variant="outline" size="sm" className="hidden gap-2 sm:inline-flex" onClick={() => navigate('/')}>
                 <ArrowLeft className="h-4 w-4" />
                 Trang chủ
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                title="Đăng xuất"
+              >
+                {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                <span className="hidden sm:inline">Đăng xuất</span>
               </Button>
             </div>
           </div>

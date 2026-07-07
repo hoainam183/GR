@@ -25,7 +25,7 @@ import {
 import { type UserPublic } from '@/services/authApi';
 import { ensureSession, logoutSession } from '@/services/authSession';
 import { getSessions } from '@/services/sessionApi';
-import { Bookmark, Loader2, LogOut, Moon, PanelLeft, Sun } from 'lucide-react';
+import { Bookmark, Bug, Loader2, LogOut, Moon, PanelLeft, Sun } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import HustLogo from '@/components/HustLogo';
 
@@ -121,6 +121,13 @@ const Index = () => {
     if (saved === 'light') return false;
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+  // Debug view: reveals the pipeline/agent trace and raw source ranking on each
+  // answer. Off by default so students see a clean chat; persisted per browser.
+  const [showDebug, setShowDebug] = useState(() => localStorage.getItem('chat-debug') === 'on');
+
+  useEffect(() => {
+    localStorage.setItem('chat-debug', showDebug ? 'on' : 'off');
+  }, [showDebug]);
 
   useEffect(() => {
     if (isDark) {
@@ -266,6 +273,19 @@ const Index = () => {
             </Button>
           )}
           {user && <NotificationBell />}
+          {user && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowDebug((prev) => !prev)}
+              aria-label={showDebug ? 'Tắt chế độ gỡ lỗi' : 'Bật chế độ gỡ lỗi'}
+              aria-pressed={showDebug}
+              title={showDebug ? 'Tắt debug' : 'Bật debug'}
+              className={`h-8 w-8 ${showDebug ? 'text-primary bg-primary/10' : ''}`}
+            >
+              <Bug className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -286,7 +306,7 @@ const Index = () => {
     <main className="flex h-full min-h-0 flex-1 flex-col overflow-hidden overscroll-none">
       {header}
       <div className="min-h-0 flex-1 overflow-hidden">
-        <ChatContainer user={user} sessionId={sessionId} />
+        <ChatContainer user={user} sessionId={sessionId} showDebug={showDebug} />
       </div>
     </main>
   );

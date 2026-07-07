@@ -123,7 +123,7 @@ const LandingPage = () => {
               Đăng nhập
             </Button>
             <Button
-              className="text-sm font-medium bg-white text-foreground hover:bg-white/90"
+              className="text-sm font-medium bg-white text-primary hover:bg-white/90"
               onClick={() => navigate("/register")}
             >
               Đăng ký
