@@ -162,11 +162,11 @@ def _expand_parent_context_post_rerank(
         return reranked
 
     try:
-        from retrieval.parent_context import ParentContextExpander
+        from retrieval.parent_context import get_parent_expander
         from config.settings import Settings
 
         settings = Settings()
-        expander = ParentContextExpander(
+        expander = get_parent_expander(
             qdrant_host=settings.qdrant_host,
             qdrant_port=settings.qdrant_port,
             max_parent_chars=_cfg_int(cfg, "parent_max_chars", 1500),

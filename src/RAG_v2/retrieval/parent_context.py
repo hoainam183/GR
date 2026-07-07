@@ -23,7 +23,8 @@ Usage::
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Set
+import threading
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from qdrant_client import QdrantClient
 
@@ -205,3 +206,40 @@ class ParentContextExpander:
             }
 
         return result
+
+
+# ── Process-wide expander cache ───────────────────────────────────────────────
+# Building a ParentContextExpander lazily opens a new QdrantClient (a fresh TCP
+# connection). Parent expansion runs on almost every RAG query, so constructing
+# one per call reconnects to Qdrant each time. Cache expanders by their config so
+# the client is opened once and reused; the client is used read-only (retrieve),
+# which is safe to share across the pipeline threadpool.
+_EXPANDER_CACHE: Dict[Tuple[str, int, int], "ParentContextExpander"] = {}
+_EXPANDER_CACHE_LOCK = threading.Lock()
+
+
+def get_parent_expander(
+    qdrant_host: str = "localhost",
+    qdrant_port: int = 6333,
+    max_parent_chars: int = 3000,
+) -> "ParentContextExpander":
+    """Return a cached :class:`ParentContextExpander` for the given config.
+
+    Reuses one expander (and its lazily-opened Qdrant connection) per distinct
+    ``(host, port, max_parent_chars)`` instead of building a new one — and a new
+    ``QdrantClient`` — on every query.
+    """
+    key = (qdrant_host, qdrant_port, max_parent_chars)
+    cached = _EXPANDER_CACHE.get(key)
+    if cached is not None:
+        return cached
+    with _EXPANDER_CACHE_LOCK:
+        cached = _EXPANDER_CACHE.get(key)
+        if cached is None:
+            cached = ParentContextExpander(
+                qdrant_host=qdrant_host,
+                qdrant_port=qdrant_port,
+                max_parent_chars=max_parent_chars,
+            )
+            _EXPANDER_CACHE[key] = cached
+        return cached

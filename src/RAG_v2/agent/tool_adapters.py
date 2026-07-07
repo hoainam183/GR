@@ -496,9 +496,9 @@ def _expand_parent_context_if_enabled(
     if not getattr(settings, "parent_context_enabled", True):
         return results
     try:
-        from retrieval.parent_context import ParentContextExpander
+        from retrieval.parent_context import get_parent_expander
 
-        expander = ParentContextExpander(
+        expander = get_parent_expander(
             qdrant_host=settings.qdrant_host,
             qdrant_port=settings.qdrant_port,
             max_parent_chars=getattr(settings, "parent_max_chars_agent", 500),

@@ -118,11 +118,13 @@ async def chat(
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
     redis_session = getattr(request.app.state, "redis_session", None)
     resolved_user_id = user_id_from_user(current_user) or body.user_id
-    session_id = resolve_session(
-        session_id=body.session_id,
-        user_id=resolved_user_id,
-        mongo_logger=mongo_logger,
-        redis_session=redis_session,
+    session_id = await anyio.to_thread.run_sync(
+        lambda: resolve_session(
+            session_id=body.session_id,
+            user_id=resolved_user_id,
+            mongo_logger=mongo_logger,
+            redis_session=redis_session,
+        )
     )
     history = parse_history(body.history)
     mode = (body.mode or RouteMode.AUTO).lower()
@@ -180,17 +182,21 @@ async def chat(
             )
 
         if mongo_logger is not None:
-            _log_legacy_turn_for_agent_response(
+            await anyio.to_thread.run_sync(
+                lambda: _log_legacy_turn_for_agent_response(
+                    mongo_logger=mongo_logger,
+                    session_id=session_id,
+                    question=body.question,
+                    result=result,
+                    request_started_at=request_t0,
+                )
+            )
+        await anyio.to_thread.run_sync(
+            lambda: sync_redis_session_from_mongo(
+                redis_session=redis_session,
                 mongo_logger=mongo_logger,
                 session_id=session_id,
-                question=body.question,
-                result=result,
-                request_started_at=request_t0,
             )
-        sync_redis_session_from_mongo(
-            redis_session=redis_session,
-            mongo_logger=mongo_logger,
-            session_id=session_id,
         )
 
         return ChatResponseMapper.to_chat_response(
@@ -236,11 +242,13 @@ async def chat_v3(
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
     redis_session = getattr(request.app.state, "redis_session", None)
     resolved_user_id = user_id_from_user(current_user) or body.user_id
-    session_id = resolve_session(
-        session_id=body.session_id,
-        user_id=resolved_user_id,
-        mongo_logger=mongo_logger,
-        redis_session=redis_session,
+    session_id = await anyio.to_thread.run_sync(
+        lambda: resolve_session(
+            session_id=body.session_id,
+            user_id=resolved_user_id,
+            mongo_logger=mongo_logger,
+            redis_session=redis_session,
+        )
     )
     history = parse_history(body.history)
     mode = (body.mode or RouteMode.AUTO).lower()
@@ -263,10 +271,12 @@ async def chat_v3(
             result.setdefault("route", AgentRoute.SIMPLE)
             result.setdefault("tools_used", [])
             result.setdefault("iterations", 0)
-            sync_redis_session_from_mongo(
-                redis_session=redis_session,
-                mongo_logger=mongo_logger,
-                session_id=session_id,
+            await anyio.to_thread.run_sync(
+                lambda: sync_redis_session_from_mongo(
+                    redis_session=redis_session,
+                    mongo_logger=mongo_logger,
+                    session_id=session_id,
+                )
             )
             return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
@@ -298,10 +308,12 @@ async def chat_v3(
                     "final_answer_length": 0,
                     "error": "Agent is disabled",
                 }
-                sync_redis_session_from_mongo(
-                    redis_session=redis_session,
-                    mongo_logger=mongo_logger,
-                    session_id=session_id,
+                await anyio.to_thread.run_sync(
+                    lambda: sync_redis_session_from_mongo(
+                        redis_session=redis_session,
+                        mongo_logger=mongo_logger,
+                        session_id=session_id,
+                    )
                 )
                 return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
@@ -316,10 +328,12 @@ async def chat_v3(
                     require_agent=False,
                 ),
             )
-            sync_redis_session_from_mongo(
-                redis_session=redis_session,
-                mongo_logger=mongo_logger,
-                session_id=session_id,
+            await anyio.to_thread.run_sync(
+                lambda: sync_redis_session_from_mongo(
+                    redis_session=redis_session,
+                    mongo_logger=mongo_logger,
+                    session_id=session_id,
+                )
             )
             return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
@@ -333,10 +347,12 @@ async def chat_v3(
                 user_context=user_context_payload,
             ),
         )
-        sync_redis_session_from_mongo(
-            redis_session=redis_session,
-            mongo_logger=mongo_logger,
-            session_id=session_id,
+        await anyio.to_thread.run_sync(
+            lambda: sync_redis_session_from_mongo(
+                redis_session=redis_session,
+                mongo_logger=mongo_logger,
+                session_id=session_id,
+            )
         )
         return ChatResponseMapper.normalize_v3_result(result, session_id or "")
 
@@ -422,11 +438,13 @@ async def chat_stream(
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
     redis_session = getattr(request.app.state, "redis_session", None)
     resolved_user_id = user_id_from_user(current_user) or body.user_id
-    session_id = resolve_session(
-        session_id=body.session_id,
-        user_id=resolved_user_id,
-        mongo_logger=mongo_logger,
-        redis_session=redis_session,
+    session_id = await anyio.to_thread.run_sync(
+        lambda: resolve_session(
+            session_id=body.session_id,
+            user_id=resolved_user_id,
+            mongo_logger=mongo_logger,
+            redis_session=redis_session,
+        )
     )
     history = parse_history(body.history)
     user_context_payload = user_context_from_user(current_user) or (
@@ -511,10 +529,12 @@ async def chat_stream(
                 )
                 continue
             if chunk is None:
-                sync_redis_session_from_mongo(
-                    redis_session=redis_session,
-                    mongo_logger=mongo_logger,
-                    session_id=session_id,
+                await anyio.to_thread.run_sync(
+                    lambda: sync_redis_session_from_mongo(
+                        redis_session=redis_session,
+                        mongo_logger=mongo_logger,
+                        session_id=session_id,
+                    )
                 )
                 # ── Emit metadata SSE event before done ──────────────────────
                 if not producer_error:

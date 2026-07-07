@@ -96,6 +96,88 @@ _SELF_EVAL_DOC_CHAR_LIMIT = 600
 _SELF_EVAL_TOTAL_CHAR_BUDGET = 1800
 
 
+def try_query_cache(
+    *,
+    question: str,
+    chat_model: Any,
+    cfg: Dict[str, Any],
+    llm_cache: Optional[Any],
+    user_context: Optional[Dict[str, Any]] = None,
+    routing_result: Optional[Dict[str, Any]] = None,
+    timings_ms: Optional[Dict[str, Any]] = None,
+) -> Optional[Dict[str, Any]]:
+    """Pre-reflection query-cache probe (profile-scoped).
+
+    Returns a fully-formed RAG result dict on a cache hit, else ``None``. Safe to
+    call before reflection/routing: the bypass guard is text-based on the raw
+    question, and the store path never caches dynamic/web/no-info answers, so an
+    early probe can only ever serve a stable, previously-answered result.
+
+    ``rag_flow``/``rag_flow_stream`` keep their own inline probe for the direct
+    ``query()`` path; this lets ``query_v3``/``query_stream`` skip the reflection
+    LLM round-trip + complexity routing on a hit.
+    """
+    if timings_ms is None:
+        timings_ms = {}
+    if llm_cache is None or not hasattr(llm_cache, "get_by_query"):
+        return None
+    if _should_bypass_query_cache(
+        question=question,
+        search_query=question,
+        target_collections=None,
+        routing_result=routing_result,
+        cfg=cfg,
+    ):
+        timings_ms["query_cache_bypassed"] = 1.0
+        return None
+
+    cache_profile = _build_cache_profile(user_context)
+    _qcached = llm_cache.get_by_query(
+        question, chat_model.model, profile=cache_profile
+    )
+    if _qcached is None:
+        return None
+    if _answer_has_no_info_signal(str(_qcached.get("answer", ""))):
+        timings_ms["query_cache_ignored_no_info"] = 1.0
+        return None
+
+    timings_ms["query_cache_hit"] = 1.0
+    sources = _qcached["sources"]
+    return {
+        "question": question,
+        "answer": _strip_raw_urls(_qcached["answer"]),
+        "sources": sources,
+        "num_sources": len(sources),
+        "intent": "rag",
+        "model_name": chat_model.model,
+        "timings_ms": timings_ms,
+        "cache_hit": True,
+        "query_cache_hit": True,
+        "target_collections": None,
+        "collection_scores": {},
+        "reflected_question": question,
+        "routing_probabilities": None,
+        "reflection_prompt": None,
+        "llm_prompt": "(cached)",
+        "applied_filters": None,
+        "collection_results": None,
+        "rerank_trace": {
+            "cache_hit": True,
+            "query_cache_hit": True,
+            "rerank_candidate_count": len(sources),
+            "rerank_returned_count": len(sources),
+        },
+        "answer_quality_gate": {
+            "answer_status": "answered",
+            "cache_hit": True,
+        },
+        "context_trace": {
+            "cache_hit": True,
+            "context_docs_used": len(sources),
+        },
+    }
+
+
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Chitchat Flow
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

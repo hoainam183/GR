@@ -6,6 +6,8 @@ import logging
 from datetime import datetime
 from typing import Annotated, Any, Dict, Iterable, Optional
 
+import anyio
+import anyio.to_thread
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, field_validator
 
@@ -134,8 +136,12 @@ async def create_session(
     user_id = str(current_user.id) if current_user is not None else body.user_id if body else None
 
     if redis_session is not None:
-        session_id = redis_session.new_session(user_id=user_id)
-        session = redis_session.get_session(session_id)
+
+        def _create_redis() -> tuple[str, Any]:
+            sid = redis_session.new_session(user_id=user_id)
+            return sid, redis_session.get_session(sid)
+
+        session_id, session = await anyio.to_thread.run_sync(_create_redis)
         return {
             "session_id": session_id,
             "created_at": session["created_at"] if session else None,
@@ -144,8 +150,11 @@ async def create_session(
     if mongo_logger is None:
         raise HTTPException(status_code=503, detail="No session store available")
 
-    session_id = mongo_logger.new_session(user_id=user_id)
-    session = mongo_logger.get_session(session_id)
+    def _create_mongo() -> tuple[str, Any]:
+        sid = mongo_logger.new_session(user_id=user_id)
+        return sid, mongo_logger.get_session(sid)
+
+    session_id, session = await anyio.to_thread.run_sync(_create_mongo)
     return {
         "session_id": session_id,
         "created_at": session["created_at"] if session else None,
@@ -170,12 +179,9 @@ async def get_session(
     redis_session = getattr(request.app.state, "redis_session", None)
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
 
-    session = None
-    if redis_session is not None:
-        session = redis_session.get_session(session_id)
-
-    if session is None and mongo_logger is not None:
-        session = mongo_logger.get_session(session_id)
+    session = await anyio.to_thread.run_sync(
+        lambda: _get_session_from_stores(redis_session, mongo_logger, session_id)
+    )
 
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -184,7 +190,9 @@ async def get_session(
 
     # Turns are always stored in MongoDB
     if mongo_logger is not None:
-        turns = mongo_logger.get_turns(session_id)
+        turns = await anyio.to_thread.run_sync(
+            lambda: mongo_logger.get_turns(session_id)
+        )
         session["turns"] = turns
     else:
         session["turns"] = []
@@ -221,13 +229,17 @@ async def list_sessions(
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
 
     if redis_session is not None:
-        sessions = redis_session.list_sessions(user_id=user_id, limit=limit)
+        sessions = await anyio.to_thread.run_sync(
+            lambda: redis_session.list_sessions(user_id=user_id, limit=limit)
+        )
         return {"sessions": sessions, "count": len(sessions)}
 
     if mongo_logger is None:
         raise HTTPException(status_code=503, detail="No session store available")
 
-    sessions = mongo_logger.list_sessions(user_id=user_id, limit=limit)
+    sessions = await anyio.to_thread.run_sync(
+        lambda: mongo_logger.list_sessions(user_id=user_id, limit=limit)
+    )
     return {"sessions": sessions, "count": len(sessions)}
 
 
@@ -243,24 +255,28 @@ async def list_my_sessions(
     owner_aliases = _user_owner_aliases(current_user)
 
     if redis_session is not None:
-        sessions = _merge_sessions(
-            (
-                redis_session.list_sessions(user_id=owner_id, limit=limit)
-                for owner_id in owner_aliases
-            ),
-            limit,
+        sessions = await anyio.to_thread.run_sync(
+            lambda: _merge_sessions(
+                (
+                    redis_session.list_sessions(user_id=owner_id, limit=limit)
+                    for owner_id in owner_aliases
+                ),
+                limit,
+            )
         )
         return {"sessions": sessions, "count": len(sessions)}
 
     if mongo_logger is None:
         raise HTTPException(status_code=503, detail="No session store available")
 
-    sessions = _merge_sessions(
-        (
-            mongo_logger.list_sessions(user_id=owner_id, limit=limit)
-            for owner_id in owner_aliases
-        ),
-        limit,
+    sessions = await anyio.to_thread.run_sync(
+        lambda: _merge_sessions(
+            (
+                mongo_logger.list_sessions(user_id=owner_id, limit=limit)
+                for owner_id in owner_aliases
+            ),
+            limit,
+        )
     )
     return {"sessions": sessions, "count": len(sessions)}
 
@@ -275,15 +291,21 @@ async def delete_session(
     redis_session = getattr(request.app.state, "redis_session", None)
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
 
-    session = _get_session_from_stores(redis_session, mongo_logger, session_id)
+    session = await anyio.to_thread.run_sync(
+        lambda: _get_session_from_stores(redis_session, mongo_logger, session_id)
+    )
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
     owner_id = _assert_session_owned(session, current_user)
 
     if redis_session is not None:
-        deleted = redis_session.delete_session(session_id, user_id=owner_id)
+        deleted = await anyio.to_thread.run_sync(
+            lambda: redis_session.delete_session(session_id, user_id=owner_id)
+        )
     elif mongo_logger is not None:
-        deleted = mongo_logger.delete_session(session_id)
+        deleted = await anyio.to_thread.run_sync(
+            lambda: mongo_logger.delete_session(session_id)
+        )
     else:
         raise HTTPException(status_code=503, detail="No session store available")
 
@@ -303,15 +325,21 @@ async def update_session(
     redis_session = getattr(request.app.state, "redis_session", None)
     mongo_logger = getattr(request.app.state, "mongo_logger", None)
 
-    session = _get_session_from_stores(redis_session, mongo_logger, session_id)
+    session = await anyio.to_thread.run_sync(
+        lambda: _get_session_from_stores(redis_session, mongo_logger, session_id)
+    )
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
     _assert_session_owned(session, current_user)
 
     if redis_session is not None:
-        updated = redis_session.update_session_title(session_id, body.title)
+        updated = await anyio.to_thread.run_sync(
+            lambda: redis_session.update_session_title(session_id, body.title)
+        )
     elif mongo_logger is not None:
-        updated = mongo_logger.update_session_title(session_id, body.title)
+        updated = await anyio.to_thread.run_sync(
+            lambda: mongo_logger.update_session_title(session_id, body.title)
+        )
     else:
         raise HTTPException(status_code=503, detail="No session store available")
 

@@ -487,9 +487,9 @@ class RetrievalService:
             return results
 
         try:
-            from retrieval.parent_context import ParentContextExpander
+            from retrieval.parent_context import get_parent_expander
 
-            expander = ParentContextExpander(
+            expander = get_parent_expander(
                 qdrant_host=self.settings.qdrant_host,
                 qdrant_port=self.settings.qdrant_port,
                 max_parent_chars=self.settings.parent_max_chars,

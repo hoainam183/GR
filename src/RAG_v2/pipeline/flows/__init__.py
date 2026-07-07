@@ -133,4 +133,5 @@ from .coordinators import (
     rag_flow,
     _chunk_cached_answer,
     rag_flow_stream,
+    try_query_cache,
 )
