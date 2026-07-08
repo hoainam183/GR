@@ -129,8 +129,8 @@ class MultiCollectionSearch:
         es_host: str = "localhost",
         es_port: int = 9200,
         rrf_k: int = 10,
-        vector_weight: float = 1.0,
-        keyword_weight: float = 1.0,
+        vector_weight: float = 0.8,
+        keyword_weight: float = 0.2,
         max_workers: int = 4,
         collection_score_weight: float = 1.0,
         vector_bge_weight: float = 0.5,
@@ -519,8 +519,8 @@ class MultiCollectionSearch:
                 vector_pool,
                 keyword_pool,
                 top_k,
-                vector_weight=1.0,
-                keyword_weight=1.0,
+                vector_weight=0.8,
+                keyword_weight=0.2,
             )
         elif mode == "linear":
             results = self._score_fusion(

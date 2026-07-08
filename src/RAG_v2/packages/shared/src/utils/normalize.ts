@@ -24,6 +24,35 @@ const asNumber = (value: unknown): number | undefined => {
   return undefined;
 };
 
+const asNonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim() ? value.trim() : undefined;
+
+const hasUsefulMetadata = (metadata: Record<string, unknown>): boolean =>
+  [
+    'title',
+    'heading',
+    'doc_title',
+    'document_title',
+    'article_title',
+    'source',
+    'file_name',
+    'filename',
+    'url',
+    'source_url',
+    'link',
+    'href',
+    'file_url',
+    'pdf_url',
+    'page',
+    'page_number',
+    'pages',
+  ].some((key) => asNonEmptyString(metadata[key]));
+
+export const isDisplayableRetrievedDocument = (
+  doc: RetrievedDocument,
+): boolean =>
+  Boolean(doc.content.trim()) || hasUsefulMetadata(doc.metadata);
+
 /**
  * Map a raw source object from the backend into a typed RetrievedDocument.
  */
@@ -57,9 +86,11 @@ export const normalizeRetrievedDocuments = (
   sources: unknown,
 ): RetrievedDocument[] =>
   Array.isArray(sources)
-    ? sources.map((source, index) =>
-        mapSourceToRetrieved(asRecord(source) ?? {}, index + 1),
-      )
+    ? sources
+        .map((source, index) =>
+          mapSourceToRetrieved(asRecord(source) ?? {}, index + 1),
+        )
+        .filter(isDisplayableRetrievedDocument)
     : [];
 
 /**
@@ -99,12 +130,7 @@ export const normalizeV3Response = (
     question: typeof payload.question === 'string' ? payload.question : '',
     answer: typeof payload.answer === 'string' ? payload.answer : '',
     retrieved_documents: retrievedDocs,
-    num_documents:
-      typeof payload.num_documents === 'number'
-        ? payload.num_documents
-        : typeof payload.num_sources === 'number'
-          ? payload.num_sources
-          : retrievedDocs.length,
+    num_documents: retrievedDocs.length,
     model_name:
       typeof payload.model_name === 'string'
         ? payload.model_name

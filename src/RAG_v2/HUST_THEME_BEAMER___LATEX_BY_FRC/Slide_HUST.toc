@@ -1,0 +1,6 @@
+\beamer@sectionintoc {1}{Đặt vấn đề}{3}{0}{1}
+\beamer@sectionintoc {2}{Phân tích yêu cầu}{5}{0}{2}
+\beamer@sectionintoc {3}{Công nghệ sử dụng}{8}{0}{3}
+\beamer@sectionintoc {4}{Thiết kế và xây dựng hệ thống}{10}{0}{4}
+\beamer@sectionintoc {5}{Đóng góp nổi bật}{17}{0}{5}
+\beamer@sectionintoc {6}{Kết luận và hướng phát triển}{23}{0}{6}

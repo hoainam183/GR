@@ -276,12 +276,12 @@ class ComplexityRouter:
         # 2. Signal-based overrides for broad/personal requests. These cover
         # variants like "điều kiện tốt nghiệp của tôi", where the personal
         # reference appears after the eligibility concept.
-        if len(re.findall(r'\bcho\b', q_lower)) >= 2 and (re.search(r"\bvà\b", q_lower) or re.search(r"\bva\b", q_folded)):
+        if (re.search(r"\bvà\b", q_lower) or re.search(r"\bva\b", q_folded)):
             result = {
                 "tier": "complex",
                 "reason": "signals: repeated_request_connector",
                 "confidence": "high",
-                "complex_subtype": "general",
+                "complex_subtype": "multi_source",
                 "query_signals": query_signals_dict,
             }
             logger.info(
@@ -369,7 +369,7 @@ class ComplexityRouter:
                 "tier": "complex",
                 "reason": "signals: multi_step_connector",
                 "confidence": "high",
-                "complex_subtype": "general",
+                "complex_subtype": "multi_source",
                 "query_signals": query_signals_dict,
             }
             logger.info(
@@ -405,7 +405,7 @@ class ComplexityRouter:
                     "tier": "complex",
                     "reason": f"heuristic: word_count={word_count}>30 + multi_topic_connector",
                     "confidence": "medium",
-                    "complex_subtype": "general",
+                    "complex_subtype": "multi_source",
                     "query_signals": query_signals_dict,
                 }
                 logger.info(
@@ -425,7 +425,7 @@ class ComplexityRouter:
                 "tier": "complex",
                 "reason": f"heuristic: multiple_questions={q.count('?')}",
                 "confidence": "medium",
-                "complex_subtype": "general",
+                "complex_subtype": "multi_source",
                 "query_signals": query_signals_dict,
             }
             logger.info(
@@ -440,7 +440,7 @@ class ComplexityRouter:
                 "tier": "complex",
                 "reason": f"heuristic: conjunction_count={q_lower.count(' và ')}>=3",
                 "confidence": "medium",
-                "complex_subtype": "general",
+                "complex_subtype": "multi_source",
                 "query_signals": query_signals_dict,
             }
             logger.info(

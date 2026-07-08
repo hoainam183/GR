@@ -187,7 +187,7 @@ class Settings(BaseSettings):
 
     # --- Evaluation & Fallback ---
     self_eval_enabled: bool = (
-        False  # disabled by default — adds ~2-5s per query
+        True  # disabled by default — adds ~2-5s per query
     )
     # BGE reranker returns raw logits, not probabilities. Keep this very high
     # to avoid skipping self-eval just because a raw logit is greater than 0.72.
@@ -196,7 +196,7 @@ class Settings(BaseSettings):
     # when this is True AND a trigger condition fires (no_info pattern / no_sources
     # / dynamic_query / freshness_query). Set self_eval_enabled=True as well to
     # additionally use the LLM quality judge as a Tavily trigger.
-    tavily_fallback_enabled: bool = False
+    tavily_fallback_enabled: bool = True
     tavily_search_depth: str = (
         "basic"  # basic (1 credit) | advanced (2 credits)
     )
@@ -214,8 +214,8 @@ class Settings(BaseSettings):
     # These also govern LLM response-cache bypass: dynamic/freshness queries
     # bypass the cache even when tavily_fallback_enabled=False, because their
     # answers can go stale regardless of whether web search is enabled.
-    web_fallback_on_dynamic: bool = False
-    web_fallback_on_no_info: bool = False
+    web_fallback_on_dynamic: bool = True
+    web_fallback_on_no_info: bool = True
     tavily_cache_ttl_seconds: int = 3600
     tavily_cache_maxsize: int = 200
 
@@ -276,7 +276,7 @@ class Settings(BaseSettings):
     )
     sibling_expansion_enabled: bool = False  # C1: sibling chunk expansion
     parent_context_enabled: bool = True  # C5: parent-child context expansion
-    freshness_tavily_check_enabled: bool = False  # C3: date_str freshness check
+    freshness_tavily_check_enabled: bool = True  # C3: date_str freshness check
     low_conf_pool_expand_enabled: bool = (
         False  # C4: 2x candidate pool in Tier 3
     )

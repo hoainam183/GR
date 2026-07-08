@@ -92,6 +92,7 @@ export {
   normalizeV3Response,
   mapSourceToRetrieved,
   normalizeRetrievedDocuments,
+  isDisplayableRetrievedDocument,
   API_PATHS,
   CLARIFY_SENTINEL,
 } from './utils';

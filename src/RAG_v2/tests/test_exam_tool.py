@@ -12,7 +12,7 @@ from agent.tool_adapters import (
     _AdapterRuntime,
     _extract_exam_filters,
     _format_exam_results,
-    execute_tool,
+    get_agent_docs,
     init_agent_docs,
     set_runtime,
 )
@@ -50,16 +50,16 @@ def _reset_runtime():
 
 
 def test_extract_subject_code() -> None:
-    code, name, date = _extract_exam_filters("Phòng thi môn CH1012 ở đâu?")
-    assert code == "CH1012"
-    assert name is None
+    filters = _extract_exam_filters("Phòng thi môn CH1012 ở đâu?")
+    assert filters["subject_code"] == "CH1012"
+    assert "subject_name" not in filters
 
 
 def test_extract_date_to_iso() -> None:
-    code, name, date = _extract_exam_filters("Lịch thi ngày 9/5/2026 có môn nào?")
-    assert code is None
-    assert date == "2026-05-09"
-    assert name is not None
+    filters = _extract_exam_filters("Lịch thi ngày 9/5/2026 có môn nào?")
+    assert "subject_code" not in filters
+    assert filters["exam_date"] == "2026-05-09"
+    assert filters["subject_name"]
 
 
 def test_search_passes_extracted_code() -> None:
@@ -67,10 +67,22 @@ def test_search_passes_extracted_code() -> None:
     store.search.return_value = [_ROW]
     set_runtime(_runtime(store))
 
-    out = execute_tool("exam_schedule_search", {"query": "phòng thi CH1012"})
+    out = tool_adapters._exam_schedule_search(query="phòng thi CH1012")
     assert isinstance(out, str)
     assert "CH1012" in out and "D3-201" in out
     assert store.search.call_args.kwargs["subject_code"] == "CH1012"
+
+
+def test_exam_schedule_rows_do_not_become_retrieved_sources() -> None:
+    store = MagicMock()
+    store.search.return_value = [_ROW]
+    set_runtime(_runtime(store))
+
+    out = tool_adapters._exam_schedule_search(query="phòng thi CH1012")
+    assert "CH1012" in out
+    assert "D3-201" in out
+    assert "Kíp 1" in out
+    assert get_agent_docs() == []
 
 
 def test_explicit_date_filter_is_normalised() -> None:

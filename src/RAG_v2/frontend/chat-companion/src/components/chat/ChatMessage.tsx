@@ -102,6 +102,33 @@ const citationLink = (
 ): string | undefined =>
   metadataText(metadata, ['url', 'source_url', 'link', 'href', 'file_url', 'pdf_url']);
 
+const isDisplayableSource = (source: RetrievedDocument): boolean => {
+  if (normalizeText(sourceText(source))) {
+    return true;
+  }
+  return Boolean(
+    metadataText(source.metadata, [
+      'title',
+      'heading',
+      'doc_title',
+      'document_title',
+      'article_title',
+      'source',
+      'file_name',
+      'filename',
+      'url',
+      'source_url',
+      'link',
+      'href',
+      'file_url',
+      'pdf_url',
+      'page',
+      'page_number',
+      'pages',
+    ])
+  );
+};
+
 function FriendlySourceCard({
   source,
   index,
@@ -222,7 +249,11 @@ const markdownComponents: Components = {
 const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
   const isUser = message.role === 'user';
   const [showSources, setShowSources] = useState(false);
-  const hasSources = message.sources && message.sources.length > 0;
+  const displayableSources = useMemo(
+    () => (message.sources ?? []).filter(isDisplayableSource),
+    [message.sources]
+  );
+  const hasSources = displayableSources.length > 0;
 
   const clarifyToolCall = (message.toolCalls ?? []).find(
     (toolCall) => toolCall.tool === 'clarify_question'
@@ -264,8 +295,8 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
     ? {
         question: agentTraceQuestion,
         answer: message.content,
-        retrieved_documents: message.sources ?? [],
-        num_documents: message.sources?.length ?? 0,
+        retrieved_documents: displayableSources,
+        num_documents: displayableSources.length,
         model_name: message.modelName ?? 'agent',
         intent: message.route ?? message.agentTrace?.route ?? 'complex',
         session_id: message.sessionId ?? message.agentTrace?.session_id ?? '',
@@ -294,15 +325,15 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
     }
     const hasPipelineData =
       Boolean(message.timingsMs && Object.keys(message.timingsMs).length > 0) ||
-      (message.sources?.length ?? 0) > 0;
+      displayableSources.length > 0;
     if (!hasPipelineData) {
       return null;
     }
     return {
       question: message.question || message.reflectedQuestion || '',
       answer: message.content,
-      retrieved_documents: message.sources ?? [],
-      num_documents: message.sources?.length ?? 0,
+      retrieved_documents: displayableSources,
+      num_documents: displayableSources.length,
       model_name: message.modelName ?? 'rag_v2',
       intent: message.route ?? 'rag',
       target_collections: message.targetCollections,
@@ -317,7 +348,7 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
       mode: message.mode,
       route: message.route,
     };
-  }, [showDebug, isUser, message]);
+  }, [showDebug, isUser, message, displayableSources]);
 
   const timingEntries = Object.entries(message.timingsMs ?? {}).filter(
     ([, value]) => Number.isFinite(value)
@@ -630,7 +661,7 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
             className="mt-3 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline animate-fade-in-up"
           >
             <FileText className="h-3.5 w-3.5" />
-            {showSources ? 'Ẩn' : 'Xem'} nguồn ({message.sources?.length})
+            {showSources ? 'Ẩn' : 'Xem'} nguồn ({displayableSources.length})
           </button>
         )}
 
@@ -642,7 +673,7 @@ const ChatMessage = ({ message, showDebug = false }: ChatMessageProps) => {
                 Nguồn tham khảo
               </p>
             )}
-            {message.sources?.map((source, index) => {
+            {displayableSources.map((source, index) => {
               const displaySource = normalizeSourceForDisplay(source, index);
               return (
               showDebug ? (

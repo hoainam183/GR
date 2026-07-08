@@ -65,6 +65,34 @@ def _optional_dict_list(raw_value: Any) -> list[dict[str, Any]] | None:
     return values or None
 
 
+_USEFUL_SOURCE_METADATA_KEYS = (
+    "title",
+    "heading",
+    "doc_title",
+    "document_title",
+    "article_title",
+    "source",
+    "file_name",
+    "filename",
+    "url",
+    "source_url",
+    "link",
+    "href",
+    "file_url",
+    "pdf_url",
+    "page",
+    "page_number",
+    "pages",
+)
+
+
+def _has_useful_source_metadata(metadata: dict[str, Any]) -> bool:
+    return any(
+        isinstance(metadata.get(key), str) and metadata[key].strip()
+        for key in _USEFUL_SOURCE_METADATA_KEYS
+    )
+
+
 class ChatResponseMapper:
     """Static helpers that convert raw pipeline dicts → Pydantic response models."""
 
@@ -98,10 +126,14 @@ class ChatResponseMapper:
             if not isinstance(metadata, dict):
                 metadata = {}
 
+            content = str(doc.get("content", ""))
+            if not content.strip() and not _has_useful_source_metadata(metadata):
+                continue
+
             retrieved_docs.append(
                 RetrievedDocument(
                     rank=int(doc.get("rank", idx) or idx),
-                    content=str(doc.get("content", "")),
+                    content=content,
                     score=_safe_float(doc.get("score", 0.0)),
                     hybrid_score=_optional_float(doc.get("hybrid_score")),
                     rerank_score=_optional_float(doc.get("rerank_score")),
@@ -112,11 +144,7 @@ class ChatResponseMapper:
                 )
             )
 
-        num_documents = normalized.get("num_documents")
-        if num_documents is None:
-            num_documents = normalized.get("num_sources")
-        if num_documents is None:
-            num_documents = len(retrieved_docs)
+        num_documents = len(retrieved_docs)
 
         mode = str(normalized.get("mode")) if normalized.get("mode") is not None else None
         route = str(normalized.get("route")) if normalized.get("route") is not None else None
@@ -194,12 +222,7 @@ class ChatResponseMapper:
                 ChatResponseMapper._to_retrieved_documents(normalized.get("sources"))
             )
 
-        normalized.setdefault(
-            "num_documents",
-            normalized.get(
-                "num_sources", len(normalized.get("retrieved_documents", []))
-            ),
-        )
+        normalized["num_documents"] = len(normalized.get("retrieved_documents", []))
         normalized.setdefault("tools_used", [])
         normalized.setdefault("tool_calls", [])
         normalized.setdefault("iterations", 0)
@@ -392,17 +415,29 @@ class ChatResponseMapper:
         for idx, doc in enumerate(sources, 1):
             if not isinstance(doc, dict):
                 continue
+            metadata = doc.get("metadata")
+            if not isinstance(metadata, dict):
+                metadata = {}
+            content = (
+                doc.get("text")
+                or doc.get("content")
+                or doc.get("chunk_text")
+                or ""
+            )
+            content = str(content)
+            if not content.strip() and not _has_useful_source_metadata(metadata):
+                continue
             converted.append(
                 {
                     "rank": idx,
-                    "content": doc.get("text", ""),
+                    "content": content,
                     "score": doc.get("rerank_score", doc.get("score", 0.0)),
                     "hybrid_score": doc.get("score"),
                     "rerank_score": doc.get("rerank_score"),
                     "vector_score": doc.get("vector_score"),
                     "keyword_score": doc.get("keyword_score"),
                     "collection": doc.get("collection"),
-                    "metadata": doc.get("metadata", {}),
+                    "metadata": metadata,
                 }
             )
         return converted

@@ -47,6 +47,32 @@ class TestNormalizeV3Result:
         assert len(docs) == 1
         assert docs[0]["content"] == "doc content"
 
+    def test_filters_empty_structured_rows_from_retrieved_documents(self) -> None:
+        from api.response_mapper import ChatResponseMapper
+
+        result = ChatResponseMapper.normalize_v3_result(
+            {
+                "sources": [
+                    {
+                        "subject_code": "CH1012",
+                        "subject_name": "Hóa học 1",
+                        "exam_room": "D3-201",
+                    }
+                ]
+            },
+            session_id="s",
+        )
+        assert result["retrieved_documents"] == []
+
+    def test_accepts_chunk_text_sources(self) -> None:
+        from api.response_mapper import ChatResponseMapper
+
+        result = ChatResponseMapper.normalize_v3_result(
+            {"sources": [{"chunk_text": "chunk body", "metadata": {"source": "doc.pdf"}}]},
+            session_id="s",
+        )
+        assert result["retrieved_documents"][0]["content"] == "chunk body"
+
     def test_backfills_tool_calls_from_agent_trace(self) -> None:
         from api.response_mapper import ChatResponseMapper
 

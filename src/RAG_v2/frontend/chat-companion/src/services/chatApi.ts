@@ -233,6 +233,8 @@ const mapSourceToRetrieved = (
       ? source.content
       : typeof source.text === 'string'
       ? source.text
+      : typeof source.chunk_text === 'string'
+      ? source.chunk_text
       : '';
   const rerankScore =
     typeof source.rerank_score === 'number' ? source.rerank_score : undefined;
@@ -269,6 +271,33 @@ const mapSourceToRetrieved = (
   };
 };
 
+const usefulSourceMetadataKeys = [
+  'title',
+  'heading',
+  'doc_title',
+  'document_title',
+  'article_title',
+  'source',
+  'file_name',
+  'filename',
+  'url',
+  'source_url',
+  'link',
+  'href',
+  'file_url',
+  'pdf_url',
+  'page',
+  'page_number',
+  'pages',
+];
+
+const isDisplayableRetrievedDocument = (doc: RetrievedDocument): boolean =>
+  Boolean(doc.content.trim()) ||
+  usefulSourceMetadataKeys.some((key) => {
+    const value = doc.metadata[key];
+    return typeof value === 'string' && value.trim();
+  });
+
 const normalizeV3Response = (
   payload: Record<string, unknown>,
   fallbackSessionId?: string,
@@ -276,11 +305,11 @@ const normalizeV3Response = (
   const retrievedDocs = Array.isArray(payload.retrieved_documents)
     ? (payload.retrieved_documents as Record<string, unknown>[]).map((source, index) =>
         mapSourceToRetrieved(source, index + 1),
-      )
+      ).filter(isDisplayableRetrievedDocument)
     : Array.isArray(payload.sources)
     ? (payload.sources as Record<string, unknown>[]).map((source, index) =>
         mapSourceToRetrieved(source, index + 1),
-      )
+      ).filter(isDisplayableRetrievedDocument)
     : [];
 
   const toolsFromTrace =
@@ -301,12 +330,7 @@ const normalizeV3Response = (
     question: typeof payload.question === 'string' ? payload.question : '',
     answer: typeof payload.answer === 'string' ? payload.answer : '',
     retrieved_documents: retrievedDocs,
-    num_documents:
-      typeof payload.num_documents === 'number'
-        ? payload.num_documents
-        : typeof payload.num_sources === 'number'
-        ? payload.num_sources
-        : retrievedDocs.length,
+    num_documents: retrievedDocs.length,
     model_name:
       typeof payload.model_name === 'string'
         ? payload.model_name

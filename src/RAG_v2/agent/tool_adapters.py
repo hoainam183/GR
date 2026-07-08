@@ -808,7 +808,6 @@ def _exam_schedule_search(
                 limit=limit,
             )
 
-    _append_agent_docs(rows)
     return _format_exam_results(rows)
 
 

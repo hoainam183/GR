@@ -1,20 +1,20 @@
 # RAG Evaluation Report (production config)
 
-- **Date**: 2026-06-30 11:31:50
+- **Date**: 2026-07-08 22:11:57
 - **Total queries**: `100`
-- **Avg latency**: `20328.8 ms`
+- **Avg latency**: `20413.2 ms`
 
 ## E2E generation quality
 
 | Metric | Score |
 | :--- | :---: |
-| Groundedness (Faithfulness) | `98.00%` |
-| Hallucination rate | `2.00%` (2) |
+| Groundedness (Faithfulness) | `100.00%` |
+| Hallucination rate | `0.00%` (0) |
 | Answer relevance | `100.00%` |
-| Completeness | `98.00%` |
-| Correctness vs gold (correct) | `77.00%` |
+| Completeness | `100.00%` |
+| Correctness vs gold (correct) | `78.00%` |
 | Correctness vs gold (partial) | `7.00%` |
-| Correctness vs gold (incorrect) | `16.00%` |
+| Correctness vs gold (incorrect) | `15.00%` |
 
 ## Retrieval metrics (averaged)
 
@@ -41,11 +41,11 @@
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | multi_hop | 25 | `52.0%` | `50.0%` | `46.6%` | `100.0%` | `64.0%` | `14339.9 ms` |
-| simple | 75 | `77.3%` | `77.3%` | `67.9%` | `97.3%` | `81.3%` | `22325.0 ms` |
+| simple | 75 | `77.3%` | `77.3%` | `67.9%` | `100.0%` | `82.7%` | `22437.6 ms` |
 
 ## Breakdown by difficulty
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| easy | 75 | `77.3%` | `77.3%` | `67.9%` | `97.3%` | `81.3%` | `22325.0 ms` |
+| easy | 75 | `77.3%` | `77.3%` | `67.9%` | `100.0%` | `82.7%` | `22437.6 ms` |
 | medium | 25 | `52.0%` | `50.0%` | `46.6%` | `100.0%` | `64.0%` | `14339.9 ms` |

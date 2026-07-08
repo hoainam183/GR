@@ -753,7 +753,7 @@ const ChatContainer = ({ user, sessionId: sessionIdProp, showDebug = false }: Ch
     {
       icon: BookOpen,
       label: 'Chính sách học bổng',
-      query: 'Các loại học bổng hiện có tại BKHN?',
+      query: 'Các loại học bổng hiện có',
     },
     {
       icon: CalendarDays,

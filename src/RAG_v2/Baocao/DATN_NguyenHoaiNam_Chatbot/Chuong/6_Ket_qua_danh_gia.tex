@@ -54,11 +54,10 @@ viên. Các câu hỏi được thiết kế để kiểm tra khả năng trả 
 thông tin học vụ, từ các câu hỏi tra cứu thông tin đơn giản đến các truy vấn
 đòi hỏi tổng hợp từ nhiều nguồn.
 
-Tại thời điểm tổng hợp báo cáo, bộ \texttt{rag\_evaluation\_dataset} đang được
-đánh giá lại ở cấu hình RRF cân bằng trọng số. Vì vậy, chương này tạm thời sử
-dụng 15 bộ dữ liệu còn lại với tổng cộng 470 truy vấn. Cách chọn này bảo đảm
-tất cả cấu hình được so sánh trên cùng một phạm vi dữ liệu, tránh sai lệch do
-thiếu kết quả ở một cấu hình riêng lẻ.
+Tại thời điểm tổng hợp báo cáo, toàn bộ 16 bộ dữ liệu đều đã có kết quả đánh
+giá ở các cấu hình chính, với tổng cộng 570 truy vấn. Vì vậy, các bảng tổng
+hợp trong chương này được tính trên cùng một phạm vi 16 bộ dữ liệu, bảo đảm
+tính nhất quán khi so sánh giữa các cấu hình.
 
 \subsection{Các cấu hình được so sánh}
 
@@ -162,7 +161,7 @@ Tỷ lệ ảo giác (Hallucination rate) & Tỷ lệ câu trả lời chứa n�
 \subsection{Kết quả tổng thể giữa các cấu hình hợp nhất}
 
 Bảng~\ref{tab:ch6-main} trình bày kết quả tổng hợp theo micro-average trên
-15 bộ dữ liệu đang được dùng trong báo cáo. Giá trị in đậm là cấu hình tốt
+16 bộ dữ liệu đánh giá. Giá trị in đậm là cấu hình tốt
 hơn ở mỗi chỉ số. Đối với tỷ lệ ảo giác, giá trị thấp hơn là tốt hơn.
 
 \begin{table}[H]
@@ -172,21 +171,21 @@ hơn ở mỗi chỉ số. Đối với tỷ lệ ảo giác, giá trị thấp 
 \hline
 \textbf{Nhóm} & \textbf{Chỉ số} & \textbf{Linear 0,8/0,2} & \textbf{RRF 0,8/0,2} & \textbf{RRF 0,5/0,5} \\
 \hline
-Truy hồi & nDCG@3 & \textbf{0,736} & \textbf{0,736} & 0,684 \\
-& nDCG@5 & \textbf{0,757} & 0,755 & 0,712 \\
-& nDCG@7 & \textbf{0,765} & 0,762 & 0,716 \\
-& Recall@5 & \textbf{0,812} & 0,804 & 0,783 \\
-& MRR@5 & \textbf{0,754} & 0,753 & 0,701 \\
-& hit@5 & \textbf{0,843} & 0,834 & 0,811 \\
+Truy hồi & nDCG@3 & 0,710 & \textbf{0,719} & 0,667 \\
+& nDCG@5 & 0,730 & \textbf{0,739} & 0,697 \\
+& nDCG@7 & 0,738 & \textbf{0,745} & 0,703 \\
+& Recall@5 & 0,790 & \textbf{0,795} & 0,775 \\
+& MRR@5 & 0,725 & \textbf{0,733} & 0,682 \\
+& hit@5 & 0,818 & \textbf{0,821} & 0,800 \\
 \hline
-Sinh câu trả lời & Độ bám nguồn & 0,926 & \textbf{0,928} & 0,845 \\
-& Tỷ lệ ảo giác & \textbf{0,043} & 0,053 & 0,136 \\
-& Độ đầy đủ & 0,943 & \textbf{0,949} & 0,755 \\
-& Độ liên quan & \textbf{0,996} & \textbf{0,996} & 0,847 \\
-& Độ đúng & 0,845 & \textbf{0,862} & 0,819 \\
+Sinh câu trả lời & Độ bám nguồn & 0,932 & \textbf{0,960} & 0,870 \\
+& Tỷ lệ ảo giác & 0,042 & \textbf{0,021} & 0,114 \\
+& Độ đầy đủ & 0,947 & \textbf{0,963} & 0,795 \\
+& Độ liên quan & 0,996 & \textbf{0,998} & 0,872 \\
+& Độ đúng & 0,832 & \textbf{0,849} & 0,814 \\
 \hline
 \end{tabular}
-\caption{So sánh các cấu hình hợp nhất trên 15 bộ dữ liệu đánh giá (micro-average)}
+\caption{So sánh các cấu hình hợp nhất trên 16 bộ dữ liệu đánh giá, 570 truy vấn (micro-average)}
 \label{tab:ch6-main}
 \end{table}
 
@@ -204,12 +203,12 @@ thuần túy, tìm kiếm từ khóa thuần túy, RRF 0,8/0,2 nhưng tắt rera
 \hline
 \textbf{Chỉ số} & \textbf{Vector-only} & \textbf{Keyword-only} & \textbf{No-rerank 0,8/0,2} & \textbf{RRF 0,8/0,2} \\
 \hline
-nDCG@3 & 0,622 & 0,608 & 0,506 & \textbf{0,736} \\
-nDCG@5 & 0,655 & 0,641 & 0,540 & \textbf{0,755} \\
-nDCG@7 & 0,664 & 0,649 & 0,558 & \textbf{0,762} \\
-Recall@5 & 0,719 & 0,699 & 0,651 & \textbf{0,804} \\
-Hit@5 & 0,745 & 0,732 & 0,683 & \textbf{0,834} \\
-MRR@5 & 0,644 & 0,634 & 0,516 & \textbf{0,753} \\
+nDCG@3 & 0,587 & 0,574 & 0,491 & \textbf{0,719} \\
+nDCG@5 & 0,618 & 0,604 & 0,523 & \textbf{0,739} \\
+nDCG@7 & 0,627 & 0,612 & 0,540 & \textbf{0,745} \\
+Recall@5 & 0,680 & 0,659 & 0,626 & \textbf{0,795} \\
+Hit@5 & 0,704 & 0,688 & 0,653 & \textbf{0,821} \\
+MRR@5 & 0,606 & 0,595 & 0,500 & \textbf{0,733} \\
 \hline
 \end{tabular}
 \caption{So sánh các chỉ số truy hồi trong thí nghiệm tách thành phần}
@@ -223,10 +222,10 @@ MRR@5 & 0,644 & 0,634 & 0,516 & \textbf{0,753} \\
 \hline
 \textbf{Chỉ số} & \textbf{Vector-only} & \textbf{Keyword-only} & \textbf{No-rerank 0,8/0,2} & \textbf{RRF 0,8/0,2} \\
 \hline
-Độ đúng (Correctness) & 72,8\% & 62,8\% & 68,7\% & \textbf{86,2\%} \\
-Độ bám nguồn (Faithfulness) & 87,7\% & 71,5\% & 77,2\% & \textbf{92,8\%} \\
-Tỷ lệ ảo giác & 10,6\% & 26,2\% & 19,1\% & \textbf{5,3\%} \\
-Độ đầy đủ (Completeness) & 87,4\% & 72,3\% & 78,9\% & \textbf{94,9\%} \\
+Độ đúng (Correctness) & 71,4\% & 63,2\% & 62,5\% & \textbf{84,9\%} \\
+Độ bám nguồn (Faithfulness) & 87,5\% & 74,4\% & 71,9\% & \textbf{96,0\%} \\
+Tỷ lệ ảo giác & 11,1\% & 23,7\% & 25,1\% & \textbf{2,1\%} \\
+Độ đầy đủ (Completeness) & 87,7\% & 75,1\% & 73,5\% & \textbf{96,3\%} \\
 \hline
 \end{tabular}
 \caption{So sánh các chỉ số sinh câu trả lời trong thí nghiệm tách thành phần}
@@ -240,8 +239,8 @@ Tỷ lệ ảo giác & 10,6\% & 26,2\% & 19,1\% & \textbf{5,3\%} \\
 \subsection{Vai trò của tìm kiếm vector và tìm kiếm từ khóa}
 
 Kết quả tách thành phần cho thấy cả hai phương pháp đơn lẻ đều chưa đủ mạnh
-khi đứng một mình. Vector-only đạt nDCG@5 là 0,655 và Recall@5 là 0,719, nhỉnh
-hơn keyword-only với nDCG@5 là 0,641 và Recall@5 là 0,699. Điều này cho thấy
+khi đứng một mình. Vector-only đạt nDCG@5 là 0,618 và Recall@5 là 0,680, nhỉnh
+hơn keyword-only với nDCG@5 là 0,604 và Recall@5 là 0,659. Điều này cho thấy
 mô hình nhúng có lợi thế trong các câu hỏi diễn đạt tự nhiên hoặc có cách hỏi
 khác với văn bản gốc. Ngược lại, tìm kiếm từ khóa vẫn có vai trò quan trọng đối
 với các truy vấn chứa mã học phần, số hiệu văn bản, mốc thời gian hoặc các cụm
@@ -256,10 +255,10 @@ nguồn tín hiệu.
 
 \subsection{Vai trò của reranker trong pipeline}
 
-Khi tắt reranker, chất lượng truy hồi giảm rõ rệt: nDCG@5 chỉ đạt 0,540 và
-Recall@5 đạt 0,651, thấp hơn đáng kể so với RRF 0,8/0,2 đầy đủ (0,755 và
-0,804). Chất lượng câu trả lời cũng bị ảnh hưởng trực tiếp, với độ đúng giảm
-từ 86,2\% xuống 68,7\%. Kết quả này cho thấy reranker không chỉ là bước tinh
+Khi tắt reranker, chất lượng truy hồi giảm rõ rệt: nDCG@5 chỉ đạt 0,523 và
+Recall@5 đạt 0,626, thấp hơn đáng kể so với RRF 0,8/0,2 đầy đủ (0,739 và
+0,795). Chất lượng câu trả lời cũng bị ảnh hưởng trực tiếp, với độ đúng giảm
+từ 84,9\% xuống 62,5\%. Kết quả này cho thấy reranker không chỉ là bước tinh
 chỉnh thứ tự tài liệu, mà còn là thành phần quyết định trong việc đưa bằng
 chứng phù hợp lên các vị trí đầu, nơi mô hình sinh câu trả lời sử dụng nhiều
 nhất.
@@ -267,37 +266,38 @@ nhất.
 \subsection{So sánh Linear và RRF ở trọng số 0,8/0,2}
 
 Ở cùng trọng số vector/keyword 0,8/0,2, Linear và RRF cho kết quả khá sát nhau
-ở tầng truy hồi. Linear nhỉnh nhẹ ở nDCG@5 (0,757 so với 0,755), Recall@5
-(0,812 so với 0,804) và tỷ lệ ảo giác thấp hơn (4,3\% so với 5,3\%). Ngược
-lại, RRF đạt độ đúng so với đáp án vàng cao hơn, 86,2\% so với 84,5\%, đồng
-thời có độ bám nguồn và độ đầy đủ cao hơn một chút.
+ở tầng truy hồi, nhưng RRF nhỉnh hơn nhất quán trên các chỉ số chính: nDCG@5
+đạt 0,739 so với 0,730, Recall@5 đạt 0,795 so với 0,790, và hit@5 đạt 0,821
+so với 0,818. Khác biệt không lớn, nhưng cho thấy cách hợp nhất theo thứ hạng
+giúp giảm phụ thuộc vào thang điểm tuyệt đối của cosine và BM25.
 
-Kết quả này không cho phép kết luận RRF vượt trội tuyệt đối trên mọi tiêu chí.
-Thay vào đó, có thể xem RRF 0,8/0,2 là cấu hình cân bằng tốt hơn khi ưu tiên
-độ đúng cuối cùng của câu trả lời, còn Linear 0,8/0,2 là một đối chứng mạnh ở
-các chỉ số truy hồi thuần túy và mức ảo giác.
+Ở tầng sinh câu trả lời, RRF 0,8/0,2 cũng đạt kết quả tốt hơn sau khi đánh giá
+lại: độ đúng so với đáp án vàng đạt 84,9\% so với 83,2\% của Linear, độ bám
+nguồn đạt 96,0\% so với 93,2\%, và tỷ lệ ảo giác thấp hơn (2,1\% so với
+4,2\%). Do đó, trong lần tổng hợp hiện tại, RRF 0,8/0,2 là cấu hình tốt nhất
+trong nhóm fusion đầy đủ.
 
 \subsection{Ảnh hưởng của trọng số cân bằng 0,5/0,5}
 
 Cấu hình RRF 0,5/0,5 được đánh giá nhằm kiểm tra giả thuyết rằng tăng tỷ trọng
-BM25 có thể cải thiện các câu hỏi chứa định danh chính xác. Tuy nhiên, trên 15
+BM25 có thể cải thiện các câu hỏi chứa định danh chính xác. Tuy nhiên, trên 16
 bộ dữ liệu hiện tại, cấu hình này thấp hơn RRF 0,8/0,2 ở hầu hết các chỉ số:
-nDCG@5 đạt 0,712 so với 0,755, Recall@5 đạt 0,783 so với 0,804, và độ đúng đạt
-81,9\% so với 86,2\%. Tỷ lệ ảo giác cũng tăng từ 5,3\% lên 13,6\%.
+nDCG@5 đạt 0,697 so với 0,739, Recall@5 đạt 0,775 so với 0,795, và độ đúng đạt
+81,4\% so với 84,9\%. Tỷ lệ ảo giác cũng tăng từ 2,1\% lên 11,4\%.
 
 Dù vậy, RRF 0,5/0,5 vẫn vượt các cấu hình đơn lẻ về truy hồi và độ đúng: nDCG@5
-0,712 cao hơn vector-only (0,655) và keyword-only (0,641), còn độ đúng 81,9\%
-cũng cao hơn 72,8\% và 62,8\%. Do đó, kết quả này không phủ nhận giá trị của
+0,697 cao hơn vector-only (0,618) và keyword-only (0,604), còn độ đúng 81,4\%
+cũng cao hơn 71,4\% và 63,2\%. Do đó, kết quả này không phủ nhận giá trị của
 truy hồi lai; nó cho thấy với tập dữ liệu hiện tại, tăng keyword weight lên 0,5
 chưa phải lựa chọn tối ưu.
 
 \subsection{Nút thắt nằm ở truy hồi và xếp hạng}
 
 Một quan sát đáng chú ý là khi cấu hình truy hồi tốt, độ liên quan của câu trả
-lời duy trì ở mức rất cao (99,6\% với cả Linear 0,8/0,2 và RRF 0,8/0,2), cho
-thấy mô hình sinh có khả năng bám khá tốt vào ngữ cảnh được cung cấp. Trong khi
-đó, các thay đổi ở tầng truy hồi và xếp hạng lại làm nDCG@5 dao động từ 0,540
-(no-rerank) đến 0,755--0,757 (các cấu hình đầy đủ). Vì vậy, hướng cải thiện
+lời duy trì ở mức rất cao (99,6\% với Linear 0,8/0,2 và 99,8\% với RRF
+0,8/0,2), cho thấy mô hình sinh có khả năng bám khá tốt vào ngữ cảnh được cung
+cấp. Trong khi đó, các thay đổi ở tầng truy hồi và xếp hạng lại làm nDCG@5 dao
+động từ 0,523 (no-rerank) đến 0,730--0,739 (các cấu hình đầy đủ). Vì vậy, hướng cải thiện
 quan trọng tiếp theo nên tập trung vào chất lượng phân đoạn, bao phủ tài liệu,
 định tuyến miền và xếp hạng lại, thay vì chỉ tinh chỉnh prompt sinh câu trả
 lời.
@@ -305,21 +305,23 @@ lời.
 \subsection{Khuyến nghị cấu hình}
 
 Dựa trên kết quả hiện tại, cấu hình RRF 0,8/0,2 có reranker là lựa chọn phù hợp
-nhất nếu ưu tiên độ đúng của câu trả lời cuối cùng. Linear 0,8/0,2 vẫn là một
-đối chứng mạnh và có tỷ lệ ảo giác thấp hơn, nhưng RRF 0,8/0,2 đạt correctness
-cao nhất trong nhóm fusion. Cấu hình RRF 0,5/0,5 nên được xem là thí nghiệm độ
-nhạy trọng số, chưa nên thay thế cấu hình vận hành mặc định.
+nhất nếu ưu tiên độ đúng của câu trả lời cuối cùng, độ bám nguồn và kiểm soát
+ảo giác. Linear 0,8/0,2 vẫn là một đối chứng mạnh vì các chỉ số truy hồi rất
+sát với RRF, nhưng chưa vượt RRF ở bất kỳ chỉ số tổng hợp chính nào trong lần
+đánh giá hiện tại. Cấu hình RRF 0,5/0,5 nên được xem là thí nghiệm độ nhạy
+trọng số, chưa nên thay thế cấu hình vận hành mặc định.
 
 % =========================================================
 \section{Hạn chế}
 % =========================================================
 
-\textbf{Phạm vi số liệu tạm thời.} Báo cáo hiện sử dụng 15/16 bộ dữ liệu đánh
-giá do bộ \texttt{rag\_evaluation\_dataset} đang được đánh giá lại ở cấu hình
-RRF 0,5/0,5. Khi kết quả của bộ này hoàn tất, các bảng tổng hợp cần được tính
-lại trên đủ 16 bộ dữ liệu để có kết luận cuối cùng. Tuy nhiên, trong phạm vi
-hiện tại, tất cả cấu hình được so sánh đều sử dụng cùng một tập 15 bộ dữ liệu,
-do đó tính công bằng giữa các cấu hình vẫn được bảo đảm.
+\textbf{Giới hạn của đánh giá tự động.} Các nhãn độ bám nguồn, độ liên quan,
+độ đầy đủ và độ đúng so với đáp án vàng được gán bằng mô hình đánh giá tự động.
+Cách làm này giúp đánh giá được toàn bộ 570 truy vấn một cách nhất quán, nhưng
+vẫn có thể sai khác với nhận định của chuyên gia ở các câu hỏi cần suy luận
+ngữ cảnh hoặc có nhiều cách diễn đạt đáp án đúng. Vì vậy, các số liệu trong
+chương nên được xem là kết quả định lượng có khả năng so sánh giữa cấu hình,
+không thay thế hoàn toàn cho đánh giá thủ công.
 
 \textbf{Giới hạn của bộ dữ liệu đánh giá.} Đáp án chuẩn (ground-truth) của
 mỗi câu hỏi hiện được sinh từ một tệp đoạn duy nhất, chưa tính đến tính đa
@@ -332,11 +334,12 @@ câu hỏi đến từ nhiều tệp đoạn và nhiều kho tri thức --- đ�
 chính xác hơn.
 
 \textbf{Ảo giác vẫn phụ thuộc mạnh vào cấu hình truy hồi.} Với các cấu hình
-tốt nhất, tỷ lệ ảo giác nằm ở mức tương đối thấp (4,3\% với Linear 0,8/0,2 và
-5,3\% với RRF 0,8/0,2). Tuy nhiên, khi thay đổi trọng số sang RRF 0,5/0,5 hoặc
-tắt reranker, tỷ lệ này tăng lên đáng kể. Điều này cho thấy việc kiểm soát ảo
-giác không chỉ phụ thuộc vào prompt sinh câu trả lời, mà còn phụ thuộc trực
-tiếp vào chất lượng ngữ cảnh được truy hồi và thứ tự các đoạn bằng chứng.
+tốt nhất, tỷ lệ ảo giác nằm ở mức tương đối thấp (4,2\% với Linear 0,8/0,2 và
+2,1\% với RRF 0,8/0,2). Tuy nhiên, khi thay đổi trọng số sang RRF 0,5/0,5 hoặc
+tắt reranker, tỷ lệ này tăng lần lượt lên 11,4\% và 25,1\%. Điều này cho thấy
+việc kiểm soát ảo giác không chỉ phụ thuộc vào prompt sinh câu trả lời, mà còn
+phụ thuộc trực tiếp vào chất lượng ngữ cảnh được truy hồi và thứ tự các đoạn
+bằng chứng.
 
 \textbf{Phạm vi thực nghiệm chưa bao phủ toàn bộ tính năng.} Kết quả trong
 chương này chủ yếu là của luồng xử lý RAG cốt lõi. Khả năng tìm kiếm web dự phòng, tác nhân lập kế hoạch, và tính năng phát trực tuyến (streaming) chưa được đo lường định lượng một cách toàn diện trong bộ thực nghiệm hiện tại do yêu cầu thiết kế đáp án chuẩn phức tạp hơn cho các tác vụ đa bước.
@@ -354,22 +357,22 @@ việc cần bổ sung khi hệ thống được đưa ra ngoài.
 
 \subsection{Kết luận}
 
-Thực nghiệm đầu cuối trên 15 bộ dữ liệu đánh giá cho thấy hệ thống trợ lý học
+Thực nghiệm đầu cuối trên 16 bộ dữ liệu đánh giá cho thấy hệ thống trợ lý học
 vụ đạt kết quả khả quan ở cả tầng truy hồi lẫn sinh câu trả lời. Trong nhóm
 cấu hình hợp nhất đầy đủ, RRF 0,8/0,2 đạt độ đúng cao nhất so với đáp án vàng
-(86,2\%), đồng thời duy trì độ bám nguồn 92,8\% và độ đầy đủ 94,9\%. Linear
-0,8/0,2 nhỉnh nhẹ ở một số chỉ số truy hồi và có tỷ lệ ảo giác thấp hơn, vì
-vậy hai cấu hình này cần được nhìn nhận như hai lựa chọn có đánh đổi, không
-phải quan hệ thắng tuyệt đối trên mọi tiêu chí.
+(84,9\%), đồng thời duy trì độ bám nguồn 96,0\%, độ đầy đủ 96,3\% và tỷ lệ
+ảo giác 2,1\%. Linear 0,8/0,2 là một đối chứng mạnh với chất lượng truy hồi
+gần sát RRF, nhưng trong lần đánh giá hiện tại RRF 0,8/0,2 nhỉnh hơn ở cả
+truy hồi, độ đúng và kiểm soát ảo giác.
 
 Kết quả tách thành phần khẳng định vai trò quan trọng của kiến trúc truy hồi
 lai và reranker. Vector-only và keyword-only đều thấp hơn rõ rệt so với cấu
-hình đầy đủ, trong khi việc tắt reranker làm nDCG@5 giảm xuống 0,540 và độ đúng
-giảm xuống 68,7\%. Thí nghiệm RRF 0,5/0,5 cho thấy tăng trọng số từ khóa lên
+hình đầy đủ, trong khi việc tắt reranker làm nDCG@5 giảm xuống 0,523 và độ đúng
+giảm xuống 62,5\%. Thí nghiệm RRF 0,5/0,5 cho thấy tăng trọng số từ khóa lên
 mức cân bằng không cải thiện kết quả tổng thể trên tập dữ liệu hiện tại; cấu
 hình này vẫn tốt hơn các phương pháp đơn lẻ, nhưng thấp hơn RRF 0,8/0,2 ở cả
 truy hồi, độ đúng và tỷ lệ ảo giác. Do đó, cấu hình được khuyến nghị ở thời
 điểm hiện tại là RRF 0,8/0,2 có reranker, đồng thời tiếp tục hoàn thiện dữ liệu
-và đánh giá lại khi đủ 16 bộ dữ liệu.
+đánh giá đa nguồn và kiểm tra thủ công các trường hợp còn sai.
 
 \end{document}
