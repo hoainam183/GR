@@ -254,6 +254,49 @@ TRAINING_DATA: List[Tuple[str, str]] = [
     ("Bị buộc thôi học có được phúc khảo không?", LABEL_QUYDINH),
     ("Quy định Olympic và đổi mới sáng tạo", LABEL_QUYDINH),
     ("Điều kiện xét tham gia Olympic cấp trường", LABEL_QUYDINH),
+    # Olympic/ĐMST — chính sách HỖ TRỢ đội tuyển (kinh phí/khen thưởng/chế độ).
+    # Nội dung nằm trong quyết định/quy định của trường -> quydinh đơn nhãn.
+    # Trước đây thiếu nhóm này nên câu "hỗ trợ SV thi Olympic" bị bật thêm
+    # stsv/kehoach -> route Agent (xem eval-miss).
+    (
+        "Đại học Bách khoa hỗ trợ những gì cho sinh viên tham gia đội tuyển thi Olympic và ĐMST?",
+        LABEL_QUYDINH,
+    ),
+    (
+        "Nhà trường hỗ trợ gì cho sinh viên trong đội tuyển thi Olympic?",
+        LABEL_QUYDINH,
+    ),
+    (
+        "Kinh phí hỗ trợ đội tuyển thi Olympic và ĐMST được xác định thế nào?",
+        LABEL_QUYDINH,
+    ),
+    ("Chế độ hỗ trợ cho sinh viên tham gia đội tuyển ĐMST", LABEL_QUYDINH),
+    (
+        "Sinh viên đoạt giải thi Olympic được khen thưởng như thế nào?",
+        LABEL_QUYDINH,
+    ),
+    (
+        "Mức thưởng cho sinh viên đạt giải Olympic và khởi nghiệp đổi mới sáng tạo",
+        LABEL_QUYDINH,
+    ),
+    # Hard boundary: "hỗ trợ sinh viên" thường kéo về stsv (hỗ trợ khuyết tật/tài
+    # chính). Khi gắn với đội tuyển/Olympic/ĐMST thì là chính sách -> quydinh.
+    (
+        "Sinh viên tham gia đội tuyển thi Olympic được nhà trường hỗ trợ kinh phí và trang thiết bị gì?",
+        LABEL_QUYDINH,
+    ),
+    (
+        "Chính sách hỗ trợ và khen thưởng sinh viên có thành tích trong các kỳ thi Olympic và ĐMST",
+        LABEL_QUYDINH,
+    ),
+    (
+        "Đội tuyển thi Olympic của trường được hưởng những chế độ hỗ trợ gì?",
+        LABEL_QUYDINH,
+    ),
+    (
+        "Sinh viên tham gia hoạt động đổi mới sáng tạo và khởi nghiệp được hỗ trợ những gì?",
+        LABEL_QUYDINH,
+    ),
     ("Quy định đánh giá môn quốc phòng an ninh", LABEL_QUYDINH),
     (
         "Sinh viên cần bao nhiêu tín chỉ để đủ điều kiện ra trường?",
@@ -849,295 +892,273 @@ HARD_NEGATIVE_DATA: List[Tuple[str, str]] = [
 # Queries that genuinely span multiple domains.  Each label list is ordered
 # from primary (most relevant) to secondary domain(s).
 MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
-    # ctdt + quydinh
     (
         "Học kỳ 3 ngành KHMT học những môn gì và học phí tính thế nào?",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Ngành CNTT cần bao nhiêu tín chỉ và điều kiện tốt nghiệp ra sao?",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Môn học kỳ 1 ngành Điện tử và quy định điểm D tính thế nào?",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Chương trình đào tạo kỹ sư tài năng và điều kiện xét tuyển vào",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Số tín chỉ ngành KTMT và mức học phí mỗi tín chỉ",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
-    # ctdt + kehoach
     (
         "Lịch đăng ký môn học kỳ 2 ngành Cơ điện tử",
-        [LABEL_KEHOACH, LABEL_CTDT],
+        ["ctdt", "kehoach"],
     ),
     (
         "Lịch đăng ký môn trong CTĐT ngành CNTT và số tín chỉ của môn đó",
-        [LABEL_KEHOACH, LABEL_CTDT],
+        ["ctdt", "kehoach"],
     ),
     (
         "Khi nào đăng ký thực tập và điều kiện là gì?",
-        [LABEL_KEHOACH, LABEL_CTDT],
+        ["ctdt", "kehoach"],
     ),
-    # quydinh + stsv
     (
         "Điều kiện nhận học bổng và nộp hồ sơ ở đâu?",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Quy định bảo lưu kết quả học tập và thủ tục xin bảo lưu",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Chính sách miễn giảm học phí và cách đăng ký",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Điều kiện được ở KTX và cách đăng ký phòng",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Quy định sinh viên nước ngoài và thủ tục nhập học",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Tiêu chuẩn xét học bổng khuyến khích và hướng dẫn nộp đơn",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
-    # quydinh + stsv — học bổng: truy vấn tổng quan / khám phá (overview)
-    # Trước đây thiếu hẳn nhóm này: các câu hỏi chung chung về học bổng
-    # ("thông tin về học bổng", "có bao nhiêu loại học bổng") rơi vào vùng
-    # không xác định → xác suất khuếch tán, quydinh tụt dưới ngưỡng. Bổ sung để
-    # neo nhóm học bổng tổng quan về quydinh (+stsv), tránh lan sang ctdt.
     (
         "Thông tin về học bổng",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Có bao nhiêu loại học bổng",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Có những loại học bổng nào",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Các loại học bổng của trường",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Trường có những học bổng gì",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Giới thiệu về các chương trình học bổng",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Tổng quan về học bổng tại trường",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Học bổng gồm những gì",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Danh mục các học bổng dành cho sinh viên",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
     (
         "Các chương trình học bổng hiện có",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
-    # quydinh + kehoach
     (
         "Điều kiện phúc khảo bài thi và thời hạn nộp đơn",
-        [LABEL_QUYDINH, LABEL_KEHOACH],
+        ["kehoach", "quydinh"],
     ),
     (
         "Quy trình đăng ký học lại và deadline đăng ký",
-        [LABEL_QUYDINH, LABEL_KEHOACH],
+        ["kehoach", "quydinh"],
     ),
     (
         "Thời hạn nộp đơn phúc khảo và quy định điểm phúc khảo",
-        [LABEL_QUYDINH, LABEL_KEHOACH],
+        ["kehoach", "quydinh"],
     ),
-    # kehoach + stsv
     (
         "Thời gian đăng ký KTX học kỳ tới và thủ tục",
-        [LABEL_KEHOACH, LABEL_STSV],
+        ["kehoach", "stsv"],
     ),
     (
         "Bao giờ đóng bảo hiểm y tế và đóng ở đâu?",
-        [LABEL_KEHOACH, LABEL_STSV],
+        ["kehoach", "stsv"],
     ),
     (
         "Lịch nhận bằng tốt nghiệp và cần mang giấy tờ gì?",
-        [LABEL_KEHOACH, LABEL_STSV],
+        ["kehoach", "stsv"],
     ),
     (
         "Thông báo nhận học bổng và thủ tục nhận ở đâu",
-        [LABEL_KEHOACH, LABEL_STSV],
+        ["kehoach", "stsv"],
     ),
-    # ctdt + quydinh — đồ án / ĐATN
     (
         "Điều kiện tín chỉ tích lũy để đăng ký đồ án tốt nghiệp ngành CNTT",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Đồ án tốt nghiệp bao nhiêu TC và quy định điểm tối thiểu để qua?",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Chương trình đào tạo kỹ sư tài năng có ĐATN riêng không và điều kiện xét?",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
-    # ctdt + kehoach — đồ án timeline
     (
         "Khi nào đăng ký đề tài đồ án tốt nghiệp và quy trình chọn GVHD?",
-        [LABEL_KEHOACH, LABEL_CTDT],
+        ["ctdt", "kehoach"],
     ),
     (
         "Lịch bảo vệ đồ án tốt nghiệp và số tín chỉ của môn đó",
-        [LABEL_KEHOACH, LABEL_CTDT],
+        ["ctdt", "kehoach"],
     ),
-    # ctdt + stsv — đồ án thủ tục
     (
         "Quy trình nộp báo cáo đồ án tốt nghiệp và mẫu báo cáo lấy ở đâu?",
-        [LABEL_CTDT, LABEL_STSV],
+        ["ctdt", "stsv"],
     ),
-    # ctdt + quydinh — học phần tương đương
-    # Generic / conceptual queries: "tương đương" without a specific course name
-    # asks about the CONCEPT (quydinh) as much as about the CURRICULUM LIST (ctdt).
     (
         "Học phần tương đương",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Học phần tương đương là gì?",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Quy định về học phần tương đương",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Thế nào là học phần tương đương?",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Học phần tương đương và học phần thay thế khác nhau thế nào?",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Điều kiện để được công nhận học phần tương đương từ trường khác",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
     (
         "Bảng môn tương đương ngành CNTT và quy định nộp đơn xin miễn học",
-        [LABEL_CTDT, LABEL_QUYDINH],
+        ["ctdt", "quydinh"],
     ),
-    # ctdt + kehoach — thực tập
     (
         "Điều kiện đăng ký thực tập doanh nghiệp và hạn đăng ký kỳ này",
-        [LABEL_CTDT, LABEL_KEHOACH],
+        ["ctdt", "kehoach"],
     ),
-    # quydinh + kehoach — GPA / cảnh báo
     (
         "CPA bao nhiêu thì bị cảnh báo và thời hạn khắc phục?",
-        [LABEL_QUYDINH, LABEL_KEHOACH],
+        ["kehoach", "quydinh"],
     ),
-    # quydinh + stsv — điểm số
     (
         "Quy định phúc khảo bài thi và thủ tục nộp đơn phúc khảo",
-        [LABEL_QUYDINH, LABEL_STSV],
+        ["quydinh", "stsv"],
     ),
-    # ── kehoach cross-domain: thông báo/kế hoạch có nội dung overlap ──────────
-    # Học bổng có TÊN cụ thể / theo đợt = thông báo (kehoach) nhưng điều kiện xét
-    # cũng mang tính quy định (quydinh). Phân biệt với "quy định học bổng" chung
-    # (đã là hard-negative → quydinh đơn nhãn).
     (
         "Điều kiện điểm học tập để được xét học bổng tài trợ theo đợt là gì?",
-        [LABEL_KEHOACH, LABEL_QUYDINH],
+        ["kehoach", "quydinh"],
     ),
     (
         "Mức học bổng của đợt xét này dành cho mỗi sinh viên là bao nhiêu?",
-        [LABEL_KEHOACH, LABEL_QUYDINH],
+        ["kehoach", "quydinh"],
     ),
-    # Tham số trong kế hoạch đăng ký theo học kỳ cụ thể: vừa là mốc kế hoạch
-    # (kehoach) vừa chịu ràng buộc quy chế (quydinh).
     (
         "Số tín chỉ tối đa và tối thiểu khi đăng ký học kỳ này là bao nhiêu?",
-        [LABEL_KEHOACH, LABEL_QUYDINH],
+        ["kehoach", "quydinh"],
     ),
-    # Logistics đăng ký tốt nghiệp/kế hoạch học tập: mốc theo đợt (kehoach) +
-    # thao tác trên hệ thống/tài khoản sinh viên (stsv).
     (
         "Đăng ký xét tốt nghiệp đợt này thực hiện trên tài khoản nào?",
-        [LABEL_KEHOACH, LABEL_STSV],
+        ["kehoach", "stsv"],
     ),
     (
         "Sinh viên đăng ký kế hoạch học tập trên hệ thống nào và đăng nhập bằng tài khoản gì?",
-        [LABEL_KEHOACH, LABEL_STSV],
+        ["kehoach", "stsv"],
     ),
     (
         "Đăng ký tốt nghiệp đợt này kiểm tra điểm và gửi thắc mắc ở đâu?",
-        [LABEL_KEHOACH, LABEL_STSV],
+        ["kehoach", "stsv"],
     ),
-    # --- Auto-injected from evaluation misroutes ---
     (
         "Thời hạn nộp đơn xin miễn học phần ngoại ngữ cơ bản là khi nào?",
         ["kehoach", "quydinh"],
     ),
-    ("Chứng chỉ quốc tế cần làm gì trước khi xét miễn?", ["ctdt", "quydinh"]),
+    (
+        "Chứng chỉ quốc tế cần làm gì trước khi xét miễn?",
+        ["ctdt", "quydinh"],
+    ),
     (
         "Kết quả TOEIC Placement dùng để xét chuẩn đầu ra không?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
-    ("TOEFL iBT Home Edition có được công nhận không?", ["kehoach", "quydinh"]),
+    (
+        "TOEFL iBT Home Edition có được công nhận không?",
+        ["quydinh"],
+    ),
     (
         "Sinh viên cần chuẩn bị gì trước khi nộp đơn miễn học?",
         ["quydinh", "stsv"],
     ),
     (
         "Quyết định 1515/QĐ-ĐHBK-ĐT về tổ chức dạy-học trực tuyến tại Bách khoa Hà Nội được ban hành vào ngày tháng năm nào?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Dạy-học trực tuyến theo thời gian thực tại Bách khoa Hà Nội ưu tiên sử dụng phần mềm nào?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Tại Bách khoa Hà Nội, dạy-học trực tuyến được áp dụng mấy hình thức và tên gọi của từng hình thức là gì?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Dạy-học trực tuyến không được áp dụng với loại học phần nào tại Bách khoa Hà Nội?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Học liệu số từ nguồn mở chỉ được dùng như thế nào trong B-Learning tại Bách khoa?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Trung tâm Mạng thông tin có vai trò gì trong hệ thống dạy-học trực tuyến tại Bách khoa?",
-        ["quydinh", "stsv"],
+        ["quydinh"],
     ),
     (
         "Thời lượng video bài giảng B-Learning bao nhiêu phút tương đương 45 phút dạy-học trực tiếp trên lớp?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "So sánh trách nhiệm của Phòng Đào tạo và Trung tâm Mạng thông tin trong việc triển khai B-Learning tại Bách khoa?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Quy trình đăng ký và thẩm định bài giảng B-Learning tại Bách khoa diễn ra trong bao nhiêu bước chính và ai thực hiện thẩm định cuối cùng?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Kết quả xét học bổng KKHT tại Bách khoa Hà Nội được công bố chậm nhất vào tuần học thứ mấy và ở đâu?",
@@ -1249,23 +1270,23 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Bản kế hoạch tổ chức đoàn tham dự kỳ thi Olympic môn học tại Bách khoa Hà Nội cần bao gồm những nội dung gì?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Sau khi kết thúc kỳ thi Olympic môn học, đơn vị chuyên môn tại Bách khoa Hà Nội phải làm gì?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Đơn vị nào chủ trì lập kế hoạch tuyển chọn và tổ chức đoàn tham dự kỳ thi Đổi mới sáng tạo và khởi nghiệp tại Bách khoa Hà Nội?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "BK-Holdings có vai trò gì trong công tác tổ chức đội tuyển thi ĐMST tại Bách khoa Hà Nội?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Sau khi đội tuyển thi ĐMST kết thúc tham dự, đơn vị nào lập báo cáo và gửi đến ai?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Một năm học tại Đại học Bách khoa Hà Nội gồm bao nhiêu học kỳ và có tổ chức học kỳ hè không?",
@@ -1285,45 +1306,31 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Chương trình ELITECH tại Đại học Bách khoa Hà Nội là viết tắt của cụm từ gì?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Chương trình đào tạo Tài năng tại Bách khoa Hà Nội được thiết kế nhằm mục đích gì?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "So sánh chương trình kỹ sư tích hợp và chương trình kỹ sư thông thường tại Bách khoa về thời gian và số tín chỉ tối thiểu?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Chương trình đào tạo tích hợp tại Bách khoa Hà Nội được thiết kế như thế nào?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Khi gặp vướng mắc trong quá trình tổ chức thực hiện Thông tư liên tịch 18/2015, các đơn vị cần phản ánh về đâu?",
         ["quydinh", "stsv"],
     ),
     (
-        "Thời hạn nộp đơn xin miễn học phần ngoại ngữ cơ bản là khi nào?",
-        ["kehoach", "quydinh"],
-    ),
-    ("Chứng chỉ quốc tế cần làm gì trước khi xét miễn?", ["ctdt", "quydinh"]),
-    (
-        "Kết quả TOEIC Placement dùng để xét chuẩn đầu ra không?",
-        ["kehoach", "quydinh"],
-    ),
-    ("TOEFL iBT Home Edition có được công nhận không?", ["kehoach", "quydinh"]),
-    (
-        "Sinh viên cần chuẩn bị gì trước khi nộp đơn miễn học?",
-        ["quydinh", "stsv"],
-    ),
-    (
         "Lương thử việc tại Goertek Vina bằng bao nhiêu phần trăm lương chính thức và ước tính khoảng bao nhiêu tiền?",
-        ["kehoach", "quydinh"],
+        ["kehoach"],
     ),
     (
         "Goertek Vina được thành lập năm nào và ở đâu tại Việt Nam?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Điều kiện về tuổi đời khi tham gia đào tạo sĩ quan dự bị năm 2026 là gì?",
@@ -1339,7 +1346,7 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Địa điểm làm việc của Công ty TNHH DAIZO TEC tại Hà Nội ở đâu?",
-        ["kehoach", "stsv"],
+        ["kehoach"],
     ),
     (
         "Điều kiện điểm học tập để được xét Học bổng Trần Đại Nghĩa học kỳ II năm học 2025-2026 là bao nhiêu?",
@@ -1387,35 +1394,35 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Gentherm thuộc tập đoàn nào và được niêm yết trên sàn chứng khoán nào?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Chương trình tham quan Gentherm Việt Nam dành cho đối tượng sinh viên nào?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Địa điểm nhà máy tham quan của ASSA ABLOY Việt Nam ở đâu?",
-        ["kehoach", "stsv"],
+        ["kehoach"],
     ),
     (
         "Số lượng sinh viên tối đa được tham quan ASSA ABLOY Việt Nam mỗi đợt là bao nhiêu?",
-        ["kehoach", "quydinh"],
+        ["kehoach"],
     ),
     (
         "Công ty TNHH DENSO Việt Nam hoạt động trong lĩnh vực gì và trụ sở ở đâu?",
-        ["kehoach", "stsv"],
+        ["kehoach"],
     ),
     (
         "Công ty TNHH Linh kiện điện tử SEI (Việt Nam) tọa lạc ở đâu và thuộc tập đoàn nào?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Phòng Thiết kế máy tại DAIZO TEC phù hợp với sinh viên ngành nào?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Phòng Thiết kế điện tại DAIZO TEC phù hợp với sinh viên ngành nào?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Hồ sơ đăng ký học bổng Gắn kết quê hương gồm những gì?",
@@ -1423,7 +1430,7 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Công ty Cổ phần Phòng Thử Nghiệm Phúc Gia (PGL) được thành lập vào ngày tháng năm nào?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Học bổng Trần Đại Nghĩa học kỳ II 2025-2026 yêu cầu điểm học tập tối thiểu bao nhiêu và mức học bổng tối đa cho sinh viên nhóm a là bao nhiêu?",
@@ -1435,7 +1442,7 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Chương trình tham quan tuyển dụng Goertek Vina có chế độ bảo hiểm xã hội như thế nào và sinh viên được hưởng phúc lợi gì về nghỉ phép?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Sinh viên thuộc diện chế độ chính sách khi đóng học phí kỳ 2 năm 2025-2026 được miễn giảm như thế nào và thắc mắc về số tiền học phí liên hệ ai?",
@@ -1443,7 +1450,7 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Sinh viên quan tâm đến Phòng Thiết kế kết cấu của DAIZO TEC cần học ngành gì và công việc chính là gì?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Tọa đàm về bạo lực giới ngày 11/12/2025 nhằm thực hiện công ước nào và tập trung trao quyền cho thanh niên như thế nào?",
@@ -1451,11 +1458,11 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Chương trình tham quan Gentherm cung cấp thông tin gì cho sinh viên và sinh viên có thể nhận được cơ hội gì từ Gentherm?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Phòng Thiết kế sản xuất (PM) tại DAIZO TEC sử dụng công cụ nào và dựa trên kết quả từ phòng nào?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Sinh viên có thắc mắc về BHYT kỳ 1 năm 2025-2026 liên hệ ai và qua email nào?",
@@ -1463,7 +1470,7 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "ASSA ABLOY Việt Nam chuyên sản xuất sản phẩm gì và thuộc tập đoàn nào?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Học bổng Trần Đại Nghĩa kỳ II 2025-2026 cần hồ sơ gì và đăng ký trực tuyến ở đâu?",
@@ -1471,11 +1478,11 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Chương trình Rorze Robotech thuộc tập đoàn nào và được thành lập năm nào?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "ASSA ABLOY có bao nhiêu đồng nghiệp trên toàn thế giới và hoạt động tại bao nhiêu quốc gia?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "Sinh viên nào thuộc diện học bổng Gắn kết quê hương nếu đề tài ĐATN không được thực hiện ở trong nước?",
@@ -1483,65 +1490,84 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Học bổng MB The Best of MB Chasing 2025 dành cho trường nào tại Bách khoa?",
-        ["kehoach", "stsv"],
+        ["kehoach"],
     ),
     (
         "Phòng Thiết kế trang thiết bị tại DAIZO TEC phụ trách thiết kế những gì trên tàu?",
-        ["ctdt", "kehoach"],
+        ["kehoach"],
     ),
     (
         "SEI Việt Nam (SEEV) là doanh nghiệp bao nhiêu phần trăm vốn nước ngoài?",
-        ["kehoach", "quydinh"],
+        ["kehoach"],
     ),
     (
         "Học bổng The Best of MB Chasing 2025 ưu tiên sinh viên tuyển dụng vào chương trình nào của MB và đăng ký ở đâu?",
         ["kehoach", "stsv"],
     ),
-    ("Kết quả thi nội bộ có giá trị bao lâu?", ["kehoach", "quydinh"]),
-    ("Chứng chỉ dùng xét tốt nghiệp phải như thế nào?", ["quydinh", "stsv"]),
-    ("Kết quả thi nội bộ dùng để làm gì?", ["kehoach", "quydinh"]),
-    ("Vai trò của chứng chỉ nội bộ trong xét đầu ra?", ["kehoach", "quydinh"]),
-    ("CNTT Việt-Nhật và ICT khác nhau thế nào?", ["ctdt", "quydinh"]),
+    (
+        "Kết quả thi nội bộ có giá trị bao lâu?",
+        ["quydinh"],
+    ),
+    (
+        "Chứng chỉ dùng xét tốt nghiệp phải như thế nào?",
+        ["quydinh"],
+    ),
+    (
+        "Kết quả thi nội bộ dùng để làm gì?",
+        ["quydinh"],
+    ),
+    (
+        "Vai trò của chứng chỉ nội bộ trong xét đầu ra?",
+        ["quydinh"],
+    ),
+    (
+        "CNTT Việt-Nhật và ICT khác nhau thế nào?",
+        ["ctdt"],
+    ),
     (
         "Theo mục tiêu chung của chương trình Công nghệ thông tin Việt-Nhật (IT-E6), sinh viên tốt nghiệp cần đạt trình độ tiếng Nhật tối thiểu là bậc nào?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Chuẩn đầu ra 2.3.3 của chương trình Công nghệ thông tin Việt-Nhật (IT-E6) yêu cầu sinh viên đạt chứng chỉ tiếng Nhật nào?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Sau khi hoàn thành học phần JP1110 và JP1120 (Tiếng Nhật 1, 2) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6), sinh viên hướng tới mục tiêu đạt bao nhiêu điểm trong kỳ thi thử trực tuyến trình độ N5?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Học phần Tiếng Nhật 5 (JP2126) trong chương trình Công nghệ thông tin Việt-Nhật (IT-E6) đặt mục tiêu tỷ lệ sinh viên đỗ kỳ thi N3 là bao nhiêu phần trăm?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Theo mục tiêu chung của chương trình Công nghệ thông tin toàn cầu (IT-E7), sinh viên tốt nghiệp cần đạt trình độ ngoại ngữ tiếng Anh ở mức nào?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Chuẩn đầu ra 2.3.3 của chương trình Công nghệ thông tin toàn cầu (IT-E7) yêu cầu sinh viên đạt trình độ tiếng Anh tối thiểu là bao nhiêu điểm TOEIC?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Học phần IT2120 – Kiến thức máy tính trong chương trình Công nghệ thông tin toàn cầu (IT-E7) có tỷ lệ đánh giá như thế nào?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Lần cập nhật 02 của chương trình Công nghệ thông tin toàn cầu (IT-E7) ký ngày 22/2/2022 đã thay đổi điều kiện của học phần nào?",
-        ["ctdt", "quydinh"],
+        ["ctdt"],
     ),
     (
         "Trượt học phần tiếng Anh cơ bản phải làm gì?",
         ["ctdt", "quydinh", "stsv"],
     ),
-    ("Kết quả thi nội bộ có giá trị bao lâu?", ["kehoach", "quydinh"]),
-    ("Chứng chỉ dùng xét tốt nghiệp phải như thế nào?", ["quydinh", "stsv"]),
-    ("Chứng nhận nội bộ có hiệu lực bao lâu?", ["kehoach", "quydinh"]),
-    ("Mối liên hệ giữa chuẩn đầu ra và đồ án?", ["ctdt", "quydinh"]),
+    (
+        "Chứng nhận nội bộ có hiệu lực bao lâu?",
+        ["quydinh"],
+    ),
+    (
+        "Mối liên hệ giữa chuẩn đầu ra và đồ án?",
+        ["ctdt", "quydinh"],
+    ),
     (
         "Kết quả đánh giá điểm rèn luyện được công bố công khai trước bao nhiêu ngày trước khi ban hành quyết định chính thức?",
         ["kehoach", "quydinh"],
@@ -1640,19 +1666,19 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Điều kiện để sinh viên Bách khoa được kết nạp vào Đảng là gì?",
-        ["quydinh", "stsv"],
+        ["stsv"],
     ),
     (
         "Đảng bộ Đại học Bách khoa Hà Nội có bao nhiêu chi bộ sinh viên?",
-        ["ctdt", "stsv"],
+        ["stsv"],
     ),
     (
         "Chi bộ sinh viên Bách khoa họp định kỳ như thế nào?",
-        ["quydinh", "stsv"],
+        ["stsv"],
     ),
     (
         "Đảng viên sinh viên Khoa Vật lý Kỹ thuật sinh hoạt tại Chi bộ sinh viên nào ở Bách khoa?",
-        ["ctdt", "stsv"],
+        ["stsv"],
     ),
     (
         "Theo bảo hiểm thân thể tự nguyện K70 tại Bách khoa, tử vong do tai nạn được bảo hiểm chi trả bao nhiêu tiền?",
@@ -1756,39 +1782,39 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Quyết định 1791/QĐ-ĐHBK-ĐT về tổ chức thi trực tuyến tại Bách khoa Hà Nội được ban hành vào ngày tháng năm nào?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Hệ thống thi trực tuyến tại Bách khoa Hà Nội bao gồm những phần mềm nào?",
-        ["ctdt", "kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Có bao nhiêu hình thức thi trực tuyến được áp dụng tại Bách khoa Hà Nội và tên gọi của từng hình thức?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Đối với học phần có nhiều lớp và số lượng sinh viên lớn, hình thức thi trực tuyến nào được ưu tiên tại Bách khoa?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Khi thi tự luận trực tuyến tại Bách khoa, sinh viên nộp bài bằng cách nào và trong bao nhiêu phút sau hết giờ?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Sinh viên dự thi trực tuyến tại Bách khoa cần đăng nhập bằng tài khoản gì và cần xuất trình giấy tờ nào?",
-        ["kehoach", "quydinh", "stsv"],
+        ["quydinh"],
     ),
     (
         "Thời gian thi tự luận trực tuyến tại Bách khoa là trong khoảng bao nhiêu phút?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Thời gian thi trắc nghiệm trực tuyến tại Bách khoa là trong khoảng bao nhiêu phút?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Thời gian thi vấn đáp trực tuyến tối thiểu cho mỗi sinh viên tại Bách khoa là bao nhiêu phút?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Bài tập lớn/tiểu luận để thi vấn đáp kết hợp phải nộp trước lịch thi học phần bao nhiêu ngày?",
@@ -1796,39 +1822,39 @@ MULTI_LABEL_DATA: List[Tuple[str, List[str]]] = [
     ),
     (
         "Trong quy trình thi tự luận trực tuyến tại Bách khoa, CBCT cần có mặt trong phòng thi trực tuyến trước giờ thi bao lâu?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Trong thi trắc nghiệm trực tuyến tại Bách khoa, CBCT và sinh viên cần có mặt trong phòng thi trực tuyến trước bao lâu?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "So sánh thời gian phải có mặt trước buổi thi trực tuyến giữa hình thức thi tự luận/vấn đáp và thi trắc nghiệm/ngoại ngữ tại Bách khoa?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Sinh viên thi trắc nghiệm trực tuyến tại Bách khoa đăng nhập vào hệ thống thi bằng tài khoản gì và nhận mật khẩu bài thi từ ai?",
-        ["kehoach", "quydinh", "stsv"],
+        ["quydinh"],
     ),
     (
         "Để thi vấn đáp trực tuyến tại Bách khoa, sinh viên chuẩn bị câu trả lời trong bao lâu và phải nộp gì trước khi bước vào phần hỏi-đáp?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Điểm thi vấn đáp trực tuyến tại Bách khoa được thông báo cho sinh viên vào thời điểm nào, khác gì so với thi tự luận?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Phòng Đào tạo và bộ môn có phân công lập lịch thi trực tuyến ra sao đối với các hình thức thi khác nhau tại Bách khoa?",
-        ["kehoach", "quydinh"],
+        ["quydinh"],
     ),
     (
         "Bài thi tự luận và bài thi trắc nghiệm trực tuyến tại Bách khoa được lưu trữ ở đâu và trong bao lâu?",
-        ["quydinh", "stsv"],
+        ["quydinh"],
     ),
     (
         "Kết thúc kíp thi ngoại ngữ trực tuyến tại Bách khoa, CBCT phải thực hiện những công việc gì?",
-        ["ctdt", "quydinh"],
+        ["quydinh"],
     ),
 ]
 
