@@ -106,9 +106,47 @@ def clear_agent_docs() -> None:
 
 
 def get_agent_docs() -> list[dict[str, Any]]:
-    """Trả về danh sách docs của request hiện tại (thread-safe)."""
+    """Trả về danh sách docs của request hiện tại (thread-safe), đã được dedup và sắp xếp theo score."""
     docs = _agent_docs_ctx.get(None)
-    return list(docs) if docs is not None else []
+    if not docs:
+        return []
+
+    # Dedup and sort globally by score
+    seen = {}
+    for doc in docs:
+        if hasattr(doc, "payload"):
+            payload = getattr(doc, "payload", {}) or {}
+            doc_id = str(getattr(doc, "id", ""))
+            score = float(getattr(doc, "score", 0.0))
+            rerank_score = float(payload.get("rerank_score", score))
+        elif isinstance(doc, dict):
+            metadata = doc.get("metadata", {}) or {}
+            doc_id = str(doc.get("id") or metadata.get("id") or metadata.get("source") or "")
+            rerank_score = float(doc.get("rerank_score", doc.get("score", 0.0)))
+        else:
+            continue
+            
+        _id = doc_id if doc_id else str(id(doc))
+        
+        current_max = 0.0
+        if _id in seen:
+            prev_doc = seen[_id]
+            if hasattr(prev_doc, "payload"):
+                current_max = float((getattr(prev_doc, "payload", {}) or {}).get("rerank_score", getattr(prev_doc, "score", 0.0)))
+            elif isinstance(prev_doc, dict):
+                current_max = float(prev_doc.get("rerank_score", prev_doc.get("score", 0.0)))
+                
+        if _id not in seen or rerank_score > current_max:
+            seen[_id] = doc
+
+    def _get_sort_score(d: Any) -> float:
+        if isinstance(d, dict):
+            return float(d.get("rerank_score", d.get("score", 0.0)))
+        elif hasattr(d, "payload"):
+            return float((getattr(d, "payload", {}) or {}).get("rerank_score", getattr(d, "score", 0.0)))
+        return 0.0
+
+    return sorted(seen.values(), key=_get_sort_score, reverse=True)
 
 
 def _append_agent_docs(items: list) -> None:
