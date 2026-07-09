@@ -33,6 +33,7 @@ pyright_report.txt
 !src/RAG_v2/evaluation/result_dual_RRF_vector_only/**/*.csv
 !src/RAG_v2/evaluation/result_dual_RRF/**/*.csv
 !src/RAG_v2/evaluation/result_dual_RRF_no_rerank/**/*.csv
+!src/RAG_v2/evaluation/result_dual_RRF_0.8_0.2/**/*.csv
 *.pdf
 outputs/
 training_data/
