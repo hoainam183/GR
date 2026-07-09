@@ -276,12 +276,12 @@ class ComplexityRouter:
         # 2. Signal-based overrides for broad/personal requests. These cover
         # variants like "điều kiện tốt nghiệp của tôi", where the personal
         # reference appears after the eligibility concept.
-        if (re.search(r"\bvà\b", q_lower) or re.search(r"\bva\b", q_folded)):
+        if len(re.findall(r'\bcho\b', q_lower)) >= 2 and (re.search(r"\bvà\b", q_lower) or re.search(r"\bva\b", q_folded)):
             result = {
                 "tier": "complex",
                 "reason": "signals: repeated_request_connector",
                 "confidence": "high",
-                "complex_subtype": "multi_source",
+                "complex_subtype": "general",
                 "query_signals": query_signals_dict,
             }
             logger.info(
@@ -405,7 +405,7 @@ class ComplexityRouter:
                     "tier": "complex",
                     "reason": f"heuristic: word_count={word_count}>30 + multi_topic_connector",
                     "confidence": "medium",
-                    "complex_subtype": "multi_source",
+                    "complex_subtype": "general",
                     "query_signals": query_signals_dict,
                 }
                 logger.info(
