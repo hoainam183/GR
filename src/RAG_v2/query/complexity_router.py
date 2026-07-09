@@ -369,7 +369,7 @@ class ComplexityRouter:
                 "tier": "complex",
                 "reason": "signals: multi_step_connector",
                 "confidence": "high",
-                "complex_subtype": "multi_source",
+                "complex_subtype": "general",
                 "query_signals": query_signals_dict,
             }
             logger.info(
@@ -425,7 +425,7 @@ class ComplexityRouter:
                 "tier": "complex",
                 "reason": f"heuristic: multiple_questions={q.count('?')}",
                 "confidence": "medium",
-                "complex_subtype": "multi_source",
+                "complex_subtype": "general",
                 "query_signals": query_signals_dict,
             }
             logger.info(
@@ -440,7 +440,7 @@ class ComplexityRouter:
                 "tier": "complex",
                 "reason": f"heuristic: conjunction_count={q_lower.count(' và ')}>=3",
                 "confidence": "medium",
-                "complex_subtype": "multi_source",
+                "complex_subtype": "general",
                 "query_signals": query_signals_dict,
             }
             logger.info(
