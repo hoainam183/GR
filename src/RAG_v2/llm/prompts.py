@@ -34,6 +34,8 @@ TRÍCH DẪN:
 
 ĐỊNH DẠNG:
 - Ngắn gọn, đi thẳng vào trọng tâm. Dùng bullet points khi liệt kê.
+- CHỈ cung cấp thông tin trực tiếp giải quyết câu hỏi.
+- TUYỆT ĐỐI KHÔNG tóm tắt toàn bộ tài liệu, không mở rộng sang các điều khoản hay quy định xung quanh không được hỏi đến.
 - Ưu tiên thông tin năm học/học kỳ hiện tại.
 - KHÔNG bắt đầu bằng "Chào bạn [tên]," trừ tin nhắn đầu hoặc khi sinh viên chào trước.
 - LINK chỉ được tạo khi tài liệu tham khảo CÓ SẴN một URL thật, tức là một dòng \
@@ -47,6 +49,12 @@ không dùng đường dẫn tương đối (ví dụ `/chat`), và không đoá
 Nếu có URL, phải ẩn nó sau anchor text. Nếu không có URL thật, viết chữ thường không gắn link.
 - Nếu tài liệu nhắc "tại đây" / "xem chi tiết" nhưng KHÔNG có URL thật kèm theo, hãy viết \
 dạng chữ thường KHÔNG gắn link, hoặc nêu tên nguồn cụ thể như "trên trang Phòng Đào tạo (ctt.hust.edu.vn)".
+
+VÍ DỤ CÁCH TRẢ LỜI (Hạn chế lan man):
+- Ngữ cảnh: "[Điều 5] Sinh viên bị cảnh cáo học tập nếu GPA < 1.0. [Điều 6] Sinh viên bị buộc thôi học nếu bị cảnh cáo học tập 3 kỳ liên tiếp. [Điều 7] Sinh viên được bảo lưu..."
+- Câu hỏi: "Khi nào thì em bị buộc thôi học?"
+- Trả lời ĐÚNG (Ngắn gọn): "Bạn sẽ bị buộc thôi học nếu bị cảnh cáo học tập 3 kỳ liên tiếp."
+- Trả lời SAI (Liệt kê thừa thông tin): "Theo Điều 6, bạn bị buộc thôi học nếu bị cảnh cáo 3 kỳ. Ngoài ra, theo Điều 5 bạn bị cảnh cáo nếu GPA < 1.0 và theo Điều 7 bạn được bảo lưu..."
 
 HỘI THOẠI:
 - Dùng thông tin sinh viên đã cung cấp trong lịch sử (tên, khóa, ngành) để trả lời \
@@ -65,7 +73,7 @@ RAG_USER_TEMPLATE = """\
 ### Câu hỏi:
 {query}
 
-Hãy trả lời câu hỏi dựa trên tài liệu trên."""
+Hãy trả lời câu hỏi dựa trên tài liệu trên. Chỉ trích xuất thông tin ĐÚNG và ĐỦ để giải quyết trực tiếp câu hỏi, TUYỆT ĐỐI KHÔNG mở rộng lan man."""
 
 RAG_USER_WITH_HISTORY_TEMPLATE = """\
 ### Lịch sử hội thoại gần đây:
@@ -77,7 +85,7 @@ RAG_USER_WITH_HISTORY_TEMPLATE = """\
 ### Câu hỏi:
 {query}
 
-Hãy trả lời câu hỏi dựa trên tài liệu và ngữ cảnh hội thoại trên."""
+Hãy trả lời câu hỏi dựa trên tài liệu và ngữ cảnh hội thoại trên. Chỉ trích xuất thông tin ĐÚNG và ĐỦ để giải quyết trực tiếp câu hỏi, TUYỆT ĐỐI KHÔNG mở rộng lan man."""
 
 # ─── Chitchat Prompt ────────────────────────────────────────────────────────────
 
