@@ -1,0 +1,472 @@
+\documentclass[t, aspectratio=169]{beamer}
+\usepackage{iftex}
+\ifPDFTeX
+	\usepackage[utf8]{inputenc}
+	\usepackage[T5]{fontenc}
+	\usepackage[vietnamese]{babel}
+\else
+	\usepackage{fontspec}
+	\IfFontExistsTF{TeX Gyre Heros}{
+		\setmainfont{TeX Gyre Heros}
+		\setsansfont{TeX Gyre Heros}
+	}{
+		\setmainfont{Arial}[
+			Path=/System/Library/Fonts/Supplemental/,
+			Extension=.ttf,
+			UprightFont=*,
+			BoldFont=* Bold,
+			ItalicFont=* Italic,
+			BoldItalicFont=* Bold Italic
+		]
+		\setsansfont{Arial}[
+			Path=/System/Library/Fonts/Supplemental/,
+			Extension=.ttf,
+			UprightFont=*,
+			BoldFont=* Bold,
+			ItalicFont=* Italic,
+			BoldItalicFont=* Bold Italic
+		]
+	}
+\fi
+\usefonttheme{professionalfonts}
+\usepackage{amsthm,amsmath,amssymb}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% --- CẤU HÌNH LỀ ---
+\def\slideContentLeftMargin{0.5cm}
+\def\slideContentRightMargin{1cm}
+\def\hustHeaderHeight{1cm}
+\def\slideContentBotMargin{3.5cm}
+
+\usepackage[red, 169]{beamerthemeHUST}
+\definecolor{hustprimary}{HTML}{ce1628}
+\makeatletter
+\renewcommand{\hust@colorname}{red}
+\makeatother
+\renewcommand{\hustbg}[1]{hust-red-169-#1.png}
+
+\setbeamerfont{block title}{size=\normalsize,series=\bfseries}
+\setbeamerfont{block body}{size=\small}
+\setbeamerfont{itemize/enumerate body}{size=\small}
+\setbeamerfont{itemize/enumerate subbody}{size=\scriptsize}
+\setbeamercolor{structure}{fg=hustprimary}
+\setbeamercolor{item}{fg=hustprimary}
+\setbeamercolor{itemize item}{fg=hustprimary}
+\setbeamercolor{itemize subitem}{fg=hustprimary}
+\setbeamercolor{enumerate item}{fg=hustprimary}
+\setbeamercolor{block title}{fg=hustprimary}
+\setbeamercolor{block title alerted}{fg=hustprimary}
+\setlength{\parskip}{0.12cm}
+
+\renewcommand{\titlePageTitleX}{-0.5cm}
+\renewcommand{\titlePageTitleY}{-0.5cm}
+\renewcommand{\hustTitleAlign}{\alignLeft}
+\renewcommand{\hustSubtitleAlign}{\alignLeft}
+\renewcommand{\hustAuthorAlign}{\alignLeft}
+\renewcommand{\hustInstAlign}{\alignLeft}
+
+\title{BKADVISOR: HỆ THỐNG RAG TƯ VẤN HỌC VỤ}
+\subtitle{Ingestion dữ liệu, định tuyến ba tầng, truy hồi lai và fallback nguồn}
+\author{\texorpdfstring{Nguyễn Hoài Nam \\ GVHD: TS. Cao Tuấn Dũng}{Nguyễn Hoài Nam, GVHD: TS. Cao Tuấn Dũng}}
+\institute{Chương trình Công nghệ thông tin Việt--Nhật}
+
+\newcommand{\agendaColor}{%
+	\ifnum\value{section}=0
+		\color{black}\bfseries
+	\else
+		\color{black!28}\bfseries
+	\fi
+}
+
+\setbeamertemplate{section in toc}{%
+	\leavevmode
+	\leftskip=1.5em
+	\ifnum\inserttocsectionnumber=\value{section}
+		{\color{black}\bfseries\Large\inserttocsectionnumber.\hskip1.25em\inserttocsection}
+	\else
+		{\agendaColor\Large\inserttocsectionnumber.\hskip1.25em\inserttocsection}
+	\fi
+	\par\vspace{0.35cm}
+}
+
+\newcommand{\agendaItem}[2]{%
+	\par\noindent
+	\ifnum\value{section}=#1
+		{\color{black}\bfseries\Large #1. #2}
+	\else
+		\ifnum\value{section}=0
+			{\color{black}\bfseries\Large #1. #2}
+		\else
+			{\color{black!28}\bfseries\Large #1. #2}
+		\fi
+	\fi
+	\par\vspace{0.34cm}
+}
+
+\newcommand{\agendaFrame}{
+	{
+		\setbeamertemplate{background}{
+			\begin{tikzpicture}[remember picture, overlay]
+				\node[anchor=south west, inner sep=0pt] at (current page.south west)
+				{\includegraphics[width=\paperwidth,height=\paperheight]{hust-red-169-content-hust-full.png}};
+				\begin{scope}
+					\clip (current page.south west) rectangle ([xshift=0.37\paperwidth]current page.north west);
+					\node[anchor=south west, inner sep=0pt]
+					at (current page.south west)
+					{\includegraphics[height=\paperheight]{hust-red-169-section.png}};
+				\end{scope}
+				\fill[white] ([xshift=0.37\paperwidth]current page.south west) rectangle (current page.north east);
+				\node[
+					font=\bfseries\fontsize{34}{38}\selectfont,
+					text=white
+				] at ([xshift=-0.31\paperwidth]current page.center) {HUST};
+				\node[
+					anchor=south west,
+					font=\scriptsize\bfseries,
+					text=white
+				] at ([xshift=0.035\paperwidth,yshift=0.45cm]current page.south west)
+				{hust.edu.vn \quad fb.com/dhbkhn};
+			\end{tikzpicture}
+			\drawHustPageNum
+		}
+		\begin{frame}[plain]
+			\begin{tikzpicture}[remember picture, overlay]
+				\node[anchor=north west, inner sep=0pt]
+				at ([xshift=0.39\paperwidth,yshift=-0.65cm]current page.north west)
+				{
+					\begin{minipage}{0.59\paperwidth}
+						\centering
+						{\color{hustprimary}\bfseries\fontsize{24}{28}\selectfont NỘI DUNG TRÌNH BÀY\par}
+						\vspace{0.45cm}
+						\raggedright
+						\agendaItem{1}{Dữ liệu và Ingestion}
+						\agendaItem{2}{Phân loại Intent và Định tuyến}
+						\agendaItem{3}{Truy hồi, Rerank và Fallback}
+					\end{minipage}
+				};
+			\end{tikzpicture}
+		\end{frame}
+	}
+}
+
+\newif\ifShowSectionAgenda
+\ShowSectionAgendafalse
+\AtBeginSection[]{
+	\ifShowSectionAgenda
+		\agendaFrame
+	\else
+		\global\ShowSectionAgendatrue
+	\fi
+}
+
+\begin{document}
+
+	\husttitlepage
+
+	\resetPageCount
+	\showPageNumber
+	\useStyleHustFull
+	\useThinBar
+	\agendaFrame
+
+	% ================================================================
+	\section{Dữ liệu và Ingestion}
+
+	\begin{frame}{Bốn vector collection và một kho lịch thi có cấu trúc}
+		\scriptsize
+		\setlength{\tabcolsep}{3pt}
+		\renewcommand{\arraystretch}{1.2}
+		\begin{tabular}{|>{\bfseries}l|p{4.6cm}|p{5.0cm}|}
+			\hline
+			Collection & Nguồn & Cách xử lý \\
+			\hline
+			\texttt{quydinh} & OCR/convert PDF + admin upload (\emph{không crawl}) & Recursive chunk theo Điều/Chương, có parent chunk \\
+			\hline
+			\texttt{ctdt} & Web các khoa (soict, cokhi, dien\dots) & Recursive chunk theo heading, có parent chunk \\
+			\hline
+			\texttt{stsv} & JSON cổng CTT, đã làm sạch HTML & Chunk phẳng theo số La Mã và mục số \\
+			\hline
+			\texttt{kehoach} & Crawl từ \texttt{ctt.hust.edu.vn} & Chunk phẳng theo mục số \\
+			\hline
+			\texttt{lichthi} & PDF lịch thi (\emph{không vector}) & Mongo + Elasticsearch, query bằng filter \\
+			\hline
+		\end{tabular}
+
+		\vspace{0.3cm}
+		\centering
+		\normalsize Parent chunk chỉ có ở \texttt{ctdt} và \texttt{quydinh} để mở rộng context.
+	\end{frame}
+
+	\begin{frame}{Hai luồng đưa dữ liệu vào hệ thống}
+		\begin{columns}[T,onlytextwidth]
+			\begin{column}{0.48\textwidth}
+				\begin{block}{UC -- Admin upload tài liệu}
+					\begin{itemize}
+						\item Admin tải PDF/DOCX quy chế, quy định vào collection tương ứng.
+						\item Hệ thống OCR/convert sang Markdown (fallback OCR khi cần).
+						\item Bổ sung metadata nguồn, phiên bản, trạng thái hiệu lực.
+						\item Admin review trước khi index.
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.48\textwidth}
+				\begin{block}{UC -- Crawler thu thập web}
+					\begin{itemize}
+						\item \texttt{kehoach}: crawl kế hoạch, thông báo từ \texttt{ctt.hust.edu.vn}.
+						\item \texttt{ctdt}: thu thập CTĐT từ web các khoa.
+						\item \texttt{stsv}: lấy JSON từ cổng CTT.
+						\item Làm sạch HTML bằng BeautifulSoup rồi chunk theo đầu mục (table-aware).
+					\end{itemize}
+				\end{block}
+			\end{column}
+		\end{columns}
+
+		\vspace{0.2cm}
+		\centering
+		\scriptsize Hai nguồn khác nhau về metadata: \texttt{kehoach} có \texttt{category, date\_str}; \texttt{stsv} có \texttt{type\_doc, section\_context}; \texttt{ctdt}/\texttt{quydinh} có \texttt{chapter, article, hierarchy\_path}.
+	\end{frame}
+
+	\begin{frame}{Chuẩn hóa, embedding và lưu trữ}
+		\begin{columns}[T,onlytextwidth]
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Chuẩn hóa và chunking}
+					\begin{enumerate}
+						\item Raw $\rightarrow$ Markdown có cấu trúc (\texttt{pymupdf4llm}, \texttt{docling}, \texttt{pdfplumber}).
+						\item Chunk theo heading \texttt{\#}, \texttt{\#\#}, \texttt{\#\#\#}.
+						\item Nguồn web: làm sạch HTML rồi chunk theo đầu mục.
+					\end{enumerate}
+				\end{block}
+			\end{column}
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Embedding và lưu trữ}
+					\begin{itemize}
+						\item Embed bằng cả BGE-M3 (1024) và E5 multilingual (1024).
+						\item Qdrant: hai named vector (\texttt{bge\_m3}, \texttt{e5}) trong một collection.
+						\item Elasticsearch: index theo collection, chỉ giữ child chunk.
+					\end{itemize}
+				\end{block}
+			\end{column}
+		\end{columns}
+	\end{frame}
+
+	\begin{frame}{Truy hồi lai với hai embedding model}
+		\begin{columns}[T,onlytextwidth]
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Vì sao hai model}
+					\begin{itemize}
+						\item Hai model bổ trợ điểm yếu của nhau.
+						\item Fusion dùng max-normalization để không model nào áp đảo do khác thang điểm.
+						\item Trọng số \texttt{bge 0.5 / e5 0.5}.
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Chi phí thời gian}
+					\begin{itemize}
+						\item Hai vector search gộp thành một round-trip (\texttt{query\_batch\_points}), giảm $\sim$30\% latency.
+						\item Chi phí thêm chỉ là một lần embed query, không phải hai lần gọi DB.
+					\end{itemize}
+				\end{block}
+			\end{column}
+		\end{columns}
+
+		\vspace{0.35cm}
+		\begin{alertblock}{Ghi chú kỹ thuật}
+			\small Đây là hai named vector kết hợp bằng score fusion, không phải \texttt{EnsembleEmbedder} (vector trung bình). Có thể bật/tắt qua \texttt{embedding\_provider}.
+		\end{alertblock}
+	\end{frame}
+
+	% ================================================================
+	\section{Phân loại Intent và Định tuyến}
+
+	\begin{frame}{Định tuyến độ phức tạp: một hàm ba tầng}
+		\begin{columns}[T,onlytextwidth]
+			\begin{column}{0.33\textwidth}
+				\begin{block}{Tầng 0 -- Regex}
+					\scriptsize
+					\begin{itemize}
+						\item Chạy đầu tiên, bắt nhanh mẫu rõ ràng.
+						\item Chào hỏi, so sánh, điều kiện cá nhân, fast-path lịch thi, single-fact.
+						\item Không khớp $\rightarrow$ \texttt{unknown}, chuyển xuống tầng ML.
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.33\textwidth}
+				\begin{block}{Tầng 1 -- ML}
+					\scriptsize
+					\begin{itemize}
+						\item LogisticRegression đã calibrate.
+						\item Intent: \texttt{chitchat}, \texttt{rag}, \texttt{tool\_search}.
+						\item Domain multi-label, active khi $p \geq 0.35$.
+						\item $<2$ domain $\rightarrow$ simple; $\geq 2$ $\rightarrow$ escalate.
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.33\textwidth}
+				\begin{block}{Tầng 2 -- LLM}
+					\scriptsize
+					\begin{itemize}
+						\item Chỉ chạy cho query chạm nhiều miền.
+						\item LLM phán quyết cuối simple/complex.
+						\item Mặc định simple nếu lỗi.
+					\end{itemize}
+				\end{block}
+			\end{column}
+		\end{columns}
+	\end{frame}
+
+	\begin{frame}{Query phức tạp: Agent Planner--Executor}
+		\centering
+		\vspace{0.1cm}
+		\begin{tikzpicture}[
+			node distance=0.85cm,
+			box/.style={draw=hustprimary, thick, rounded corners, fill=hustprimary!8, minimum height=0.95cm, minimum width=2.2cm, font=\small\bfseries, align=center},
+			arr/.style={-{Stealth[length=3mm]}, thick, hustprimary}
+		]
+			\node[box] (start) {START};
+			\node[box, right=of start] (plan) {planner};
+			\node[box, right=of plan] (exec) {executor};
+			\node[box, right=of exec] (syn) {synthesize};
+			\node[box, right=of syn] (end) {END};
+			\draw[arr] (start) -- (plan);
+			\draw[arr] (plan) -- (exec);
+			\draw[arr] (exec) -- (syn);
+			\draw[arr] (syn) -- (end);
+		\end{tikzpicture}
+
+		\vspace{0.35cm}
+		\begin{columns}[T,onlytextwidth]
+			\begin{column}{0.32\textwidth}
+				\begin{block}{planner}
+					\small Phân rã query và định tuyến trong một lần gọi LLM.
+				\end{block}
+			\end{column}
+			\begin{column}{0.32\textwidth}
+				\begin{block}{executor}
+					\small Chạy các bước RAG search song song.
+				\end{block}
+			\end{column}
+			\begin{column}{0.32\textwidth}
+				\begin{block}{synthesize}
+					\small Tổng hợp thành câu trả lời cuối.
+				\end{block}
+			\end{column}
+		\end{columns}
+	\end{frame}
+
+	% ================================================================
+	\section{Truy hồi, Rerank và Fallback}
+
+	\begin{frame}{Reflection: viết lại truy vấn}
+		\begin{columns}[T,onlytextwidth]
+			\begin{column}{0.5\textwidth}
+				\begin{block}{Mở rộng thực thể (deterministic)}
+					\begin{itemize}
+						\item Mã ngành $\leftrightarrow$ tên ngành hai chiều.
+						\item Mã môn: tên môn $\rightarrow$ \texttt{Mạng máy tính (IT3080)}.
+						\item Viết tắt học thuật: NCS, ĐRL, NCKH, TKB\dots
+						\item ``ngành của tôi'' $\rightarrow$ tên và mã từ profile.
+						\item Trích filter: cohort, học kỳ, năm học.
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Làm sạch thông tin nhạy cảm}
+					\begin{itemize}
+						\item MSSV (\texttt{mssv|msv} + 6--12 số).
+						\item Tên tự giới thiệu (``Em/Tôi/Mình là\dots'').
+						\item Lời cảm ơn, xưng hô thừa.
+						\item Rò rỉ tên trường khi user không tự gõ.
+					\end{itemize}
+				\end{block}
+				\centering\scriptsize Lấy năm message gần nhất làm ngữ cảnh.
+			\end{column}
+		\end{columns}
+	\end{frame}
+
+	\begin{frame}{Hybrid search: ứng viên và boost}
+		\begin{columns}[T,onlytextwidth]
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Số lượng ứng viên}
+					\begin{itemize}
+						\item Query embed bằng cả BGE và E5, search song song mỗi collection: Qdrant và Elasticsearch.
+						\item Lấy 50 vector + 50 keyword mỗi collection.
+						\item Gộp cross-collection về pool 40 + 40.
+						\item RRF chọn top 28 đưa vào rerank $(4.0 \times 7)$.
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Boost keyword (Elasticsearch)}
+					\scriptsize
+					\begin{itemize}
+						\item BM25 tuỳ chỉnh: k1=1.5, b=0.5.
+						\item Theo field: \texttt{search\_text}\,$^{3.0}$, \texttt{title}\,$^{2.0}$, \texttt{text}\,$^{1.6}$\dots
+						\item Mã môn (\texttt{course\_code}): boost 8.0.
+						\item match\_phrase key-phrase: 10.0 rồi 5.0.
+						\item Table-lookup hit: $\times 1.2$.
+					\end{itemize}
+				\end{block}
+			\end{column}
+		\end{columns}
+
+		\vspace{0.1cm}
+		\centering
+		\scriptsize \texttt{exam\_type}, cohort và date-range là filter trước search, không phải boost.
+	\end{frame}
+
+	\begin{frame}{Fusion và Rerank}
+		\begin{columns}[T,onlytextwidth]
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Fusion: weighted RRF + recency}
+					\begin{itemize}
+						\item \texttt{fusion\_mode="rrf"}, \texttt{rrf\_k=10}.
+						\item Trọng số vector 0.8 / keyword 0.2.
+						\item Recency bonus cho \texttt{kehoach}: tối đa +0.05, decay 365 ngày.
+						\item Linear max-norm chỉ dùng khi đánh giá.
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Rerank (BGE-reranker-v2-m3)}
+					\begin{itemize}
+						\item Giữ tối đa 7 doc, chỉ giữ score $\geq 0$.
+						\item Query dạng liệt kê nâng lên tối đa 12.
+						\item Chunk bảng dùng ngưỡng nới lỏng $-1.0$.
+						\item Vẫn giữ 3 doc tốt nhất nếu quá ít doc qua ngưỡng.
+					\end{itemize}
+				\end{block}
+			\end{column}
+		\end{columns}
+	\end{frame}
+
+	\begin{frame}{Fallback: HyDE và Web search}
+		\begin{columns}[T,onlytextwidth]
+			\begin{column}{0.48\textwidth}
+				\begin{block}{HyDE (sau rerank)}
+					\begin{itemize}
+						\item Trước HyDE có bước rerank-retry bằng query gốc.
+						\item Kích hoạt khi không doc nào qua rerank, hoặc best score $<0$, hoặc số doc qua strict $<3$.
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Web search (Tavily)}
+					\begin{itemize}
+						\item Kích hoạt khi thiếu nguồn, độ tin cậy thấp, câu hỏi cần dữ liệu mới, hoặc câu trả lời báo không có thông tin.
+						\item Chỉ tìm trên domain chính thức của trường.
+					\end{itemize}
+				\end{block}
+			\end{column}
+		\end{columns}
+
+		\vspace{0.3cm}
+		\centering
+		\small Fallback tăng dần: rerank-retry $\rightarrow$ HyDE $\rightarrow$ web search, đảm bảo câu trả lời luôn có căn cứ nguồn.
+	\end{frame}
+
+	\hustthankyou
+
+\end{document}
