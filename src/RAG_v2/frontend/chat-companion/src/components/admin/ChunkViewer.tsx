@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,29 +56,38 @@ export default function ChunkViewer({
   const [draftContent, setDraftContent] = useState('');
   const [savingChunkId, setSavingChunkId] = useState<string | null>(null);
   const [deletingChunkId, setDeletingChunkId] = useState<string | null>(null);
+  // Monotonic request id — only the most recent load is allowed to commit its
+  // result, so overlapping loads (e.g. page change + reload-after-delete) can't
+  // race and paint a stale page.
+  const requestIdRef = useRef(0);
 
   const loadChunks = useCallback(
-    async (targetPage: number) => {
-      setLoading(true);
+    // `silent` skips the full-screen skeleton so an in-place refresh (after a
+    // delete) doesn't collapse the list height and yank the scroll to the top.
+    async (targetPage: number, { silent = false }: { silent?: boolean } = {}) => {
+      const requestId = ++requestIdRef.current;
+      if (!silent) setLoading(true);
       try {
         const res = await getChunks(documentId, targetPage, CHUNK_PAGE_LIMIT, strategy);
-        setData(res);
+        if (requestId === requestIdRef.current) setData(res);
       } catch {
-        toast.error('Không thể tải chunks');
+        if (requestId === requestIdRef.current) toast.error('Không thể tải chunks');
       } finally {
-        setLoading(false);
+        if (requestId === requestIdRef.current) setLoading(false);
       }
     },
     [documentId, strategy],
   );
 
+  // Reset to the first page whenever the document or strategy changes.
   useEffect(() => {
     setPage(1);
-    void loadChunks(1);
-  }, [loadChunks]);
+  }, [documentId, strategy]);
 
+  // Load whenever the page (or the document/strategy, via loadChunks) changes.
+  // Driving every load from a single effect — including page 1 — is what lets
+  // "Trước" navigate back to page 1 (the old code skipped page 1 here).
   useEffect(() => {
-    if (page === 1) return;
     void loadChunks(page);
   }, [loadChunks, page]);
 
@@ -125,11 +134,14 @@ export default function ChunkViewer({
     try {
       await deleteDocumentChunk(documentId, chunk.chunk_id);
       toast.success('Đã xóa chunk');
-      const nextPage = data && data.chunks.length === 1 && page > 1 ? page - 1 : page;
-      if (nextPage !== page) {
-        setPage(nextPage);
+      if (data && data.chunks.length === 1 && page > 1) {
+        // Removed the last chunk on this page — step back; the page effect reloads.
+        setPage(page - 1);
+      } else {
+        // Refresh the current page in place (no skeleton) so the scroll position
+        // is preserved instead of jumping to the top.
+        await loadChunks(page, { silent: true });
       }
-      await loadChunks(nextPage);
       onChanged?.();
     } catch (error: unknown) {
       toast.error(apiErrorMessage(error, 'Không thể xóa chunk'));

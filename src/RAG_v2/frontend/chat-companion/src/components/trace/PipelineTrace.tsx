@@ -183,6 +183,12 @@ export default function PipelineTrace({ response, question }: Props) {
 
   // All docs (post-rerank)
   const docs = response.retrieved_documents ?? [];
+  const localDocs = docs.filter(
+    (doc) => (doc.metadata?.provider as string)?.toLowerCase() !== 'tavily'
+  );
+  const webDocs = docs.filter(
+    (doc) => (doc.metadata?.provider as string)?.toLowerCase() === 'tavily'
+  );
 
   return (
     <div className="space-y-1">
@@ -482,10 +488,10 @@ export default function PipelineTrace({ response, question }: Props) {
             </span>
             <span className="text-muted-foreground ml-auto">→ min-max score fusion</span>
           </div>
-          {docs.map((doc, i) => (
-            <DocRow key={doc.rank ?? i} doc={doc} rank={i + 1} showRerank={false} />
+          {localDocs.map((doc, i) => (
+            <DocRow key={doc.rank ?? i} doc={doc} rank={doc.rank ?? i + 1} showRerank={false} />
           ))}
-          {docs.length === 0 && (
+          {localDocs.length === 0 && (
             <p className="text-xs text-muted-foreground">No documents retrieved.</p>
           )}
         </div>
@@ -509,8 +515,8 @@ export default function PipelineTrace({ response, question }: Props) {
           Cross-encoder scores each (query, doc) pair; docs are re-sorted by rerank_score.
         </p>
         <div className="space-y-1">
-          {docs.map((doc, i) => (
-            <DocRow key={doc.rank ?? i} doc={doc} rank={i + 1} showRerank={true} />
+          {localDocs.map((doc, i) => (
+            <DocRow key={doc.rank ?? i} doc={doc} rank={doc.rank ?? i + 1} showRerank={true} />
           ))}
         </div>
       </LayerCard>
@@ -612,6 +618,14 @@ export default function PipelineTrace({ response, question }: Props) {
                   <TimingBadge ms={t['tavily_generate']} />
                   <span className="text-xs text-muted-foreground">re-generate</span>
                 </div>
+                {webDocs.length > 0 && (
+                  <div className="pt-2 space-y-1">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide pb-1">Web Results</p>
+                    {webDocs.map((doc, i) => (
+                      <DocRow key={doc.rank ?? i} doc={doc} rank={doc.rank ?? i + 1} showRerank={false} />
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-2 text-green-600 text-xs font-medium">

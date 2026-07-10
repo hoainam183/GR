@@ -52,6 +52,22 @@ const TABS: Array<{ id: AdminTab; label: string; icon: React.ElementType }> = [
   { id: 'system', label: 'Hệ thống', icon: Settings },
 ];
 
+// Persist the selected tab so a page reload (or coming back from a document
+// detail page) restores where the admin was instead of snapping to "Tổng quan".
+const ACTIVE_TAB_STORAGE_KEY = 'admin.activeTab';
+
+function loadInitialTab(): AdminTab {
+  try {
+    const saved = window.localStorage.getItem(ACTIVE_TAB_STORAGE_KEY);
+    if (saved && TABS.some((tab) => tab.id === saved)) {
+      return saved as AdminTab;
+    }
+  } catch {
+    // localStorage may be unavailable (private mode / SSR) — fall back silently.
+  }
+  return 'overview';
+}
+
 function getAdminApiError(error: unknown) {
   if (!error || typeof error !== 'object' || !('response' in error)) {
     return {};
@@ -65,7 +81,7 @@ function getAdminApiError(error: unknown) {
 export default function AdminPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [activeTab, setActiveTab] = useState<AdminTab>(loadInitialTab);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [documents, setDocuments] = useState<DocumentDetail[]>([]);
   const [total, setTotal] = useState(0);
@@ -179,6 +195,11 @@ export default function AdminPage() {
   const handleView = (id: string) => navigate(`/admin/documents/${id}`);
   const handleTabChange = (tab: AdminTab) => {
     setActiveTab(tab);
+    try {
+      window.localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, tab);
+    } catch {
+      // Ignore persistence failures — tab still switches for this session.
+    }
     scrollAreaRef.current?.scrollTo({ top: 0 });
   };
   const activeTabInfo = TABS.find((tab) => tab.id === activeTab) ?? TABS[0];

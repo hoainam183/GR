@@ -76,6 +76,12 @@ export default function DocumentReview() {
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Last seen status — used to notify once the pipeline reaches a terminal state.
   const prevStatusRef = useRef<DocumentStatus | undefined>(undefined);
+  // Which review tab is shown. Controlled so we can auto-jump to a step's output
+  // as soon as that step finishes, instead of leaving the admin on "Markdown".
+  const [reviewTab, setReviewTab] = useState('markdown');
+  // Status seen by the auto-jump effect — lets us fire only on real transitions,
+  // so a manual tab click (which doesn't change status) is never overridden.
+  const prevTabStatusRef = useRef<DocumentStatus | undefined>(undefined);
 
   // Converter / chunker selection
   const [converters, setConverters] = useState<ConverterOption[]>([]);
@@ -189,6 +195,26 @@ export default function DocumentReview() {
       getLlmCleaned(id).then((r) => setLlmCleanedContent(r.content)).catch(() => {});
     }
   }, [doc, id, mdContent, cleanedContent, llmCleanedContent]);
+
+  // Auto-jump to the tab showing a step's output the moment that step finishes.
+  // Only fires on a real status transition, so a manual tab click (which leaves
+  // the status unchanged) is never overridden.
+  useEffect(() => {
+    const status = doc?.status;
+    if (!status) return;
+    const prev = prevTabStatusRef.current;
+    prevTabStatusRef.current = status;
+    if (prev === status) return;
+    const tabForStatus: Partial<Record<DocumentStatus, string>> = {
+      converted: 'markdown',
+      cleaned: 'cleaned',
+      llm_cleaned: 'llm_clean',
+      chunked: 'chunks',
+      indexed: 'chunks',
+    };
+    const nextTab = tabForStatus[status];
+    if (nextTab) setReviewTab(nextTab);
+  }, [doc?.status]);
 
   const handleTriggerStep = async (step: PipelineStep['key']) => {
     if (!id) return;
@@ -539,7 +565,7 @@ export default function DocumentReview() {
       )}
 
       {/* Tabs for review */}
-      <Tabs defaultValue="markdown">
+      <Tabs value={reviewTab} onValueChange={setReviewTab}>
         <TabsList>
           <TabsTrigger value="markdown">Markdown</TabsTrigger>
           <TabsTrigger value="cleaned">Cleaned</TabsTrigger>
