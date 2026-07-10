@@ -190,6 +190,7 @@ export interface CrawlerSavedChunkPreview {
   run_id?: string;
   chunk_id: string;
   chunk_index?: number;
+  article_id?: string;
   title: string;
   source: string;
   url: string;

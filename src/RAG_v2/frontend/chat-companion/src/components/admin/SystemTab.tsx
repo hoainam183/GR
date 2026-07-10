@@ -172,6 +172,7 @@ function toSavedChunkPreview(value: unknown): CrawlerSavedChunkPreview | null {
     run_id: stringFromUnknown(record.run_id) || undefined,
     chunk_id: stringFromUnknown(record.chunk_id),
     chunk_index: numberFromUnknown(record.chunk_index) || undefined,
+    article_id: stringFromUnknown(record.article_id) || undefined,
     title: stringFromUnknown(record.title),
     source: stringFromUnknown(record.source),
     url: stringFromUnknown(record.url),
@@ -218,6 +219,39 @@ function collectCrawlerCollectionResults(value: unknown): CrawlerCollectionResul
     indexed_at: stringFromUnknown(record.indexed_at) || null,
     error_message: stringFromUnknown(record.error_message) || null,
   }, ...nested];
+}
+
+type CrawlerArticleGroup = {
+  articleId: string;
+  title: string;
+  source: string;
+  url: string;
+  chunks: CrawlerSavedChunkPreview[];
+};
+
+// Group a run's chunks by their source article (baiviet_id / kehoach_id) so each
+// bài viết / kế hoạch renders in its own container. Order of first appearance is
+// preserved; chunks without an article_id fall back to url/title as the key.
+function groupChunksByArticle(chunks: CrawlerSavedChunkPreview[]): CrawlerArticleGroup[] {
+  const groups: CrawlerArticleGroup[] = [];
+  const byKey = new Map<string, CrawlerArticleGroup>();
+  for (const chunk of chunks) {
+    const key = chunk.article_id || chunk.url || chunk.title || chunk.chunk_id;
+    let group = byKey.get(key);
+    if (!group) {
+      group = {
+        articleId: chunk.article_id || '',
+        title: chunk.title || 'Bài không tiêu đề',
+        source: chunk.source || '',
+        url: chunk.url || '',
+        chunks: [],
+      };
+      byKey.set(key, group);
+      groups.push(group);
+    }
+    group.chunks.push(chunk);
+  }
+  return groups;
 }
 
 function EnvConfigSection() {
@@ -1316,125 +1350,141 @@ export default function SystemTab() {
                         </Button>
                       </div>
                     )}
-                    {/* Use full chunks list when loaded; fallback to preview.
-                        Each chunk is its own bordered card + numbered badge so the
-                        boundary between crawled bài is obvious without reading titles. */}
-                    {(runChunks[runId] || result.saved_chunks).map((chunk, chunkIdx) => {
-                      const chunkKey = `${runId}:${chunk.chunk_id}`;
-                      const isExpanded = expandedChunkKey === chunkKey;
-                      const fullChunk = runChunks[runId]?.find((item) => item.chunk_id === chunk.chunk_id);
-                      const draft = chunkDrafts[chunkKey] ?? fullChunk?.content ?? ('content' in chunk ? (chunk as CrawlerChunkDetail).content : '');
-                      const chunkNumber = (chunk.chunk_index ?? chunkIdx) + 1;
-
-                      return (
-                      <article
-                        key={chunk.chunk_id}
-                        className="rounded-lg border border-border bg-card px-4 py-3 shadow-sm transition-colors hover:border-primary/40"
+                    {/* Group chunks by article (baiviet_id / kehoach_id) so each
+                        bài viết / kế hoạch is its own container — admin phân biệt
+                        được ranh giới giữa các bài mà không phải đọc từng title. */}
+                    {groupChunksByArticle(runChunks[runId] || result.saved_chunks).map((group, groupIdx) => (
+                      <div
+                        key={group.articleId || group.url || group.title || groupIdx}
+                        className="overflow-hidden rounded-xl border-2 border-border bg-muted/20"
                       >
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div className="flex min-w-0 items-start gap-2.5">
-                            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                              {chunkNumber}
-                            </span>
-                            <div className="min-w-0">
-                              <p className="break-words text-sm font-medium text-foreground">
-                                {chunk.title || 'Chunk mới'}
-                              </p>
-                              <p className="mt-1 break-all text-xs text-muted-foreground">
-                                {chunk.chunk_id}
-                              </p>
+                        {/* Article header — shown once per bài */}
+                        <div className="flex min-w-0 items-start gap-2.5 border-b border-border bg-secondary/40 px-4 py-3">
+                          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
+                            {groupIdx + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="break-words text-sm font-semibold text-foreground">
+                              {group.title}
+                            </p>
+                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              {group.articleId && (
+                                <Badge variant="outline" className="font-mono">ID {group.articleId}</Badge>
+                              )}
+                              {group.source && <Badge variant="secondary">{group.source}</Badge>}
+                              <span>{group.chunks.length} chunks</span>
                             </div>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            {runId && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 p-0"
-                                disabled={loadingRunId === runId}
-                                onClick={() => handleExpandChunk(runId, chunk.chunk_id)}
-                                title="Xem/sửa chunk"
+                            {group.url && (
+                              <a
+                                className="mt-1 inline-flex max-w-full items-center gap-1 truncate text-xs text-primary hover:underline"
+                                href={group.url}
+                                title={group.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
                               >
-                                {loadingRunId === runId ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : isExpanded ? (
-                                  <ChevronDown className="h-3.5 w-3.5" />
-                                ) : (
-                                  <ChevronRight className="h-3.5 w-3.5" />
-                                )}
-                              </Button>
+                                <span className="truncate">{group.url}</span>
+                                <ExternalLink className="h-3 w-3 shrink-0" />
+                              </a>
                             )}
-                            {chunk.source && <Badge variant="outline">{chunk.source}</Badge>}
-                            {chunk.section_label && <Badge variant="secondary">Mục {chunk.section_label}</Badge>}
                           </div>
                         </div>
-                        {chunk.url && (
-                          <a
-                            className="mt-2 inline-flex max-w-full items-center gap-1 truncate text-xs text-primary hover:underline"
-                            href={chunk.url}
-                            title={chunk.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <span className="truncate">{chunk.url}</span>
-                            <ExternalLink className="h-3 w-3 shrink-0" />
-                          </a>
-                        )}
-                        {chunk.content_preview && (
-                          <p className="mt-2 break-words text-xs leading-5 text-muted-foreground">
-                            {chunk.content_preview}
-                          </p>
-                        )}
-                        {isExpanded && (
-                          <div className="mt-3 space-y-2 rounded-lg border border-border bg-background p-3">
-                            {fullChunk ? (
-                              <>
-                                <Textarea
-                                  className="min-h-[180px] resize-y text-xs leading-5"
-                                  value={draft}
-                                  readOnly={!result.can_edit}
-                                  onChange={(event) => setChunkDrafts((prev) => ({
-                                    ...prev,
-                                    [chunkKey]: event.target.value,
-                                  }))}
-                                />
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    {fullChunk.edited && <Badge variant="secondary">edited</Badge>}
-                                    {fullChunk.content_length !== undefined && (
-                                      <span className="text-xs text-muted-foreground">
-                                        {fullChunk.content_length} chars
-                                      </span>
+
+                        {/* Chunks belonging to this article */}
+                        <div className="space-y-2 p-3">
+                          {group.chunks.map((chunk, chunkIdx) => {
+                            const chunkKey = `${runId}:${chunk.chunk_id}`;
+                            const isExpanded = expandedChunkKey === chunkKey;
+                            const fullChunk = runChunks[runId]?.find((item) => item.chunk_id === chunk.chunk_id);
+                            const draft = chunkDrafts[chunkKey] ?? fullChunk?.content ?? ('content' in chunk ? (chunk as CrawlerChunkDetail).content : '');
+                            const chunkNumber = (chunk.chunk_index ?? chunkIdx) + 1;
+
+                            return (
+                            <article
+                              key={chunk.chunk_id}
+                              className="rounded-lg border border-border bg-card px-3 py-2.5 shadow-sm transition-colors hover:border-primary/40"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="flex min-w-0 items-center gap-2">
+                                  <Badge variant="secondary" className="shrink-0">Chunk {chunkNumber}</Badge>
+                                  {chunk.section_label && <Badge variant="outline">Mục {chunk.section_label}</Badge>}
+                                </div>
+                                {runId && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                    disabled={loadingRunId === runId}
+                                    onClick={() => handleExpandChunk(runId, chunk.chunk_id)}
+                                    title="Xem/sửa chunk"
+                                  >
+                                    {loadingRunId === runId ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : isExpanded ? (
+                                      <ChevronDown className="h-3.5 w-3.5" />
+                                    ) : (
+                                      <ChevronRight className="h-3.5 w-3.5" />
                                     )}
-                                  </div>
-                                  {result.can_edit && (
-                                    <Button
-                                      size="sm"
-                                      className="gap-2"
-                                      disabled={savingChunkKey === chunkKey}
-                                      onClick={() => handleSaveCrawlerChunk(runId, fullChunk)}
-                                    >
-                                      {savingChunkKey === chunkKey ? (
-                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                      ) : (
-                                        <Save className="h-3.5 w-3.5" />
-                                      )}
-                                      Save
-                                    </Button>
+                                  </Button>
+                                )}
+                              </div>
+                              {chunk.content_preview && (
+                                <p className="mt-2 break-words text-xs leading-5 text-muted-foreground">
+                                  {chunk.content_preview}
+                                </p>
+                              )}
+                              {isExpanded && (
+                                <div className="mt-3 space-y-2 rounded-lg border border-border bg-background p-3">
+                                  {fullChunk ? (
+                                    <>
+                                      <Textarea
+                                        className="min-h-[180px] resize-y text-xs leading-5"
+                                        value={draft}
+                                        readOnly={!result.can_edit}
+                                        onChange={(event) => setChunkDrafts((prev) => ({
+                                          ...prev,
+                                          [chunkKey]: event.target.value,
+                                        }))}
+                                      />
+                                      <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          {fullChunk.edited && <Badge variant="secondary">edited</Badge>}
+                                          {fullChunk.content_length !== undefined && (
+                                            <span className="text-xs text-muted-foreground">
+                                              {fullChunk.content_length} chars
+                                            </span>
+                                          )}
+                                        </div>
+                                        {result.can_edit && (
+                                          <Button
+                                            size="sm"
+                                            className="gap-2"
+                                            disabled={savingChunkKey === chunkKey}
+                                            onClick={() => handleSaveCrawlerChunk(runId, fullChunk)}
+                                          >
+                                            {savingChunkKey === chunkKey ? (
+                                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                            ) : (
+                                              <Save className="h-3.5 w-3.5" />
+                                            )}
+                                            Save
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                      Loading chunk...
+                                    </div>
                                   )}
                                 </div>
-                              </>
-                            ) : (
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                Loading chunk...
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </article>
-                      );
-                    })}
+                              )}
+                            </article>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <p className="mt-3 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
