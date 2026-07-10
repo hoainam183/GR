@@ -1298,10 +1298,10 @@ export default function SystemTab() {
                 {(!isIndexed || isRunExpanded) && (
                   <>
                 {(runChunks[runId]?.length || result.saved_chunks.length) > 0 ? (
-                  <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg border border-border">
+                  <div className="mt-3 space-y-2.5">
                     {/* Show load-all button when preview is limited */}
                     {!runChunks[runId] && result.new_chunks > result.saved_chunks.length && (
-                      <div className="bg-muted/30 px-4 py-2 text-center">
+                      <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-2 text-center">
                         <Button
                           size="sm"
                           variant="ghost"
@@ -1316,23 +1316,34 @@ export default function SystemTab() {
                         </Button>
                       </div>
                     )}
-                    {/* Use full chunks list when loaded; fallback to preview */}
-                    {(runChunks[runId] || result.saved_chunks).map((chunk) => {
+                    {/* Use full chunks list when loaded; fallback to preview.
+                        Each chunk is its own bordered card + numbered badge so the
+                        boundary between crawled bài is obvious without reading titles. */}
+                    {(runChunks[runId] || result.saved_chunks).map((chunk, chunkIdx) => {
                       const chunkKey = `${runId}:${chunk.chunk_id}`;
                       const isExpanded = expandedChunkKey === chunkKey;
                       const fullChunk = runChunks[runId]?.find((item) => item.chunk_id === chunk.chunk_id);
                       const draft = chunkDrafts[chunkKey] ?? fullChunk?.content ?? ('content' in chunk ? (chunk as CrawlerChunkDetail).content : '');
+                      const chunkNumber = (chunk.chunk_index ?? chunkIdx) + 1;
 
                       return (
-                      <article key={chunk.chunk_id} className="bg-card px-4 py-3">
+                      <article
+                        key={chunk.chunk_id}
+                        className="rounded-lg border border-border bg-card px-4 py-3 shadow-sm transition-colors hover:border-primary/40"
+                      >
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="break-words text-sm font-medium text-foreground">
-                              {chunk.title || 'Chunk mới'}
-                            </p>
-                            <p className="mt-1 break-all text-xs text-muted-foreground">
-                              {chunk.chunk_id}
-                            </p>
+                          <div className="flex min-w-0 items-start gap-2.5">
+                            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                              {chunkNumber}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="break-words text-sm font-medium text-foreground">
+                                {chunk.title || 'Chunk mới'}
+                              </p>
+                              <p className="mt-1 break-all text-xs text-muted-foreground">
+                                {chunk.chunk_id}
+                              </p>
+                            </div>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
                             {runId && (
