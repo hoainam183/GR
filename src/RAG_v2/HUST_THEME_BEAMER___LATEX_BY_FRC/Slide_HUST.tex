@@ -68,9 +68,43 @@
 \renewcommand{\hustInstAlign}{\alignLeft}
 
 \title{BKADVISOR: CHATBOT TƯ VẤN SINH VIÊN}
-\subtitle{RAG học vụ có truy hồi lai, định tuyến theo độ phức tạp và kiểm soát nguồn}
-\author{\texorpdfstring{Nguyễn Hoài Nam \\ GVHD: TS. Cao Tuấn Dũng}{Nguyễn Hoài Nam, GVHD: TS. Cao Tuấn Dũng}}
+\newcommand{\hustPresenter}{Nguyễn Hoài Nam}
+\newcommand{\hustAdvisor}{GVHD: TS. Cao Tuấn Dũng}
+\author{\texorpdfstring{\hustPresenter \\ \hustAdvisor}{Nguyễn Hoài Nam, GVHD: TS. Cao Tuấn Dũng}}
 \institute{Chương trình Công nghệ thông tin Việt--Nhật}
+
+\renewcommand{\husttitlepage}{
+	{
+		\setbeamertemplate{background}{
+			\includegraphics[width=\paperwidth,height=\paperheight]{\hustbg{title}}
+			\drawHustPageNum
+		}
+		\begin{frame}[plain]
+			\begin{tikzpicture}[remember picture, overlay]
+				\node[
+					anchor=center,
+					xshift=\titlePageTitleX,
+					yshift=\titlePageTitleY,
+					text width=0.85\paperwidth,
+				]
+				at (current page.center)
+				{
+					{\hustTitleAlign \Huge \bfseries \color{hustprimary} \MakeUppercase{\inserttitle} \par}
+					{\hustSubtitleAlign \Large \bfseries \color{black!80} \insertsubtitle \par}
+					\vspace{0.3cm}
+					{\hustAuthorAlign
+						{\color{hustprimary} \large \textbf{Người thực hiện:}} {\color{black} \large \hustPresenter} \par
+						{\color{black} \hustAdvisor} \par
+					}
+					{\hustInstAlign
+						{\small \color{hustprimary} \bfseries \insertinstitute} \par
+						\vspace{0.2cm}
+					}
+				};
+			\end{tikzpicture}
+		\end{frame}
+	}
+}
 
 \newcommand{\agendaColor}{%
 	\ifnum\value{section}=0
@@ -141,12 +175,11 @@
 						{\color{hustprimary}\bfseries\fontsize{24}{28}\selectfont NỘI DUNG TRÌNH BÀY\par}
 						\vspace{0.45cm}
 						\raggedright
-						\agendaItem{1}{Đặt vấn đề}
-						\agendaItem{2}{Phân tích yêu cầu}
-						\agendaItem{3}{Công nghệ sử dụng}
-						\agendaItem{4}{Thiết kế và xây dựng hệ thống}
-						\agendaItem{5}{Đóng góp nổi bật}
-						\agendaItem{6}{Kết luận và hướng phát triển}
+						\agendaItem{1}{Bài toán}
+						\agendaItem{2}{Dữ liệu và xử lý dữ liệu}
+						\agendaItem{3}{Tổng quan hệ thống}
+						\agendaItem{4}{Đóng góp nổi bật}
+						\agendaItem{5}{Đánh giá và kết luận}
 					\end{minipage}
 				};
 			\end{tikzpicture}
@@ -175,486 +208,306 @@
 	\agendaFrame
 
 	% ================================================================
-	\section{Đặt vấn đề}
+	\section{Bài toán}
 
-	\begin{frame}{Ba vấn đề chính}
+	\begin{frame}{Bài toán tư vấn học vụ}
 		\begin{columns}[T,onlytextwidth]
 			\begin{column}{0.32\textwidth}
 				\begin{block}{Thông tin phân tán}
-					CTĐT, quy định, kế hoạch, thông báo và thủ tục nằm ở nhiều nguồn khác nhau.
+					Chương trình đào tạo, quy định, kế hoạch, thông báo và thủ tục nằm ở nhiều nguồn khác nhau.
 				\end{block}
 			\end{column}
 			\begin{column}{0.32\textwidth}
-				\begin{block}{Câu hỏi tự nhiên}
-					Sinh viên hỏi bằng tiếng Việt đời thường, có mã học phần, khóa, ngành hoặc ngữ cảnh.
+				\begin{block}{Hỏi đáp thủ công}
+					Sinh viên thường phải gửi mail cho giảng viên hoặc phòng ban và chờ phản hồi.
 				\end{block}
 			\end{column}
 			\begin{column}{0.32\textwidth}
-				\begin{block}{Cần căn cứ rõ ràng}
-					Câu trả lời sai nguồn hoặc lỗi thời có thể dẫn đến quyết định học vụ sai.
+				\begin{block}{Giảng viên quá tải}
+					Nhiều câu hỏi lặp lại về chương trình đào tạo, quy định và deadline làm tăng khối lượng giải đáp.
 				\end{block}
 			\end{column}
 		\end{columns}
 
-		\vspace{0.6cm}
-		\centering
-		\textbf{Bài toán:} xây dựng trợ lý học vụ hỏi đáp tự nhiên, truy hồi đúng nguồn và trả lời có thể kiểm chứng.
-	\end{frame}
-
-	\begin{frame}{Mục tiêu của BKAdvisor}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Trải nghiệm hỏi đáp}
-					\begin{itemize}
-						\item Nhận câu hỏi tiếng Việt tự nhiên.
-						\item Trả lời dựa trên tài liệu đã truy hồi.
-						\item Hiển thị nguồn và metadata để kiểm chứng.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Vận hành tri thức}
-					\begin{itemize}
-						\item Tổ chức kho tri thức theo miền học vụ.
-						\item Hỗ trợ upload, review và index tài liệu mới.
-						\item Theo dõi trace, feedback và metric chất lượng.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
-	\end{frame}
-
-	% ================================================================
-	\section{Phân tích yêu cầu}
-
-	\begin{frame}{Use case trọng tâm}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{UC01 -- Sinh viên chat học vụ}
-					\begin{itemize}
-						\item Sinh viên gửi câu hỏi tiếng Việt tự nhiên.
-						\item Hệ thống truy hồi tài liệu học vụ phù hợp.
-						\item Trả lời trong phiên hội thoại, kèm nguồn và metadata để kiểm chứng.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{UC02 -- Admin upload và index tài liệu}
-					\begin{itemize}
-						\item Admin tải PDF/DOCX hoặc duyệt dữ liệu crawler.
-						\item Hệ thống chuyển đổi, chuẩn hóa, chunk và tạo embedding.
-						\item Admin review trước khi index vào Qdrant và Elasticsearch.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
-
-		\vspace{0.25cm}
-		\begin{alertblock}{Phân định phạm vi}
-			\small Các thao tác như xem nguồn, metadata, session, bookmark hay feedback là chức năng trong luồng UC01, không tách thành use case trọng tâm.
+		\vspace{0.4cm}
+		\begin{alertblock}{Mục tiêu của BKAdvisor}
+			\small Xây dựng trợ lý học vụ hỏi đáp tự nhiên, truy hồi đúng tài liệu, trả lời có trích dẫn nguồn, giúp sinh viên tự tra cứu nhanh và giảm tải công việc giải đáp cho giảng viên.
 		\end{alertblock}
 	\end{frame}
 
-	\begin{frame}{Phạm vi dữ liệu và chức năng}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Bốn collection}
-					\begin{itemize}
-						\item \texttt{ctdt}: CTĐT, học phần, tín chỉ, tiên quyết.
-						\item \texttt{quydinh}: quy chế, học bổng, tốt nghiệp.
-						\item \texttt{kehoach}: kế hoạch học kỳ, thông báo, deadline.
-						\item \texttt{stsv}: thủ tục, biểu mẫu, hỗ trợ sinh viên.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Nhóm chức năng}
-					\begin{itemize}
-						\item Chat thường, metadata và streaming.
-						\item Session, auth, bookmark, feedback.
-						\item Upload, review và index tài liệu.
-						\item Evaluation, trace và notification.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
+	% ================================================================
+	\section{Dữ liệu và xử lý dữ liệu}
+
+	\begin{frame}{Nguồn dữ liệu học vụ}
+		\scriptsize
+		\setlength{\tabcolsep}{3pt}
+		\renewcommand{\arraystretch}{1.22}
+		\begin{tabular}{|>{\bfseries}l|>{\raggedright\arraybackslash}p{4.2cm}|>{\raggedright\arraybackslash}p{5.2cm}|}
+			\hline
+			Collection & Nội dung chính & Cách xử lý chính \\
+			\hline
+			Chương trình đào tạo & Học phần, tín chỉ, tiên quyết & Upload PDF/DOCX, convert/OCR sang Markdown, chunk theo heading và table \\
+			\hline
+			Quy định & Quy chế, học bổng, tốt nghiệp & Upload PDF/DOCX, convert/OCR sang Markdown, chunk theo heading và table \\
+			\hline
+			Kế hoạch & Kế hoạch học kỳ, thông báo, deadline & Crawl từ cổng thông tin, giữ ngày tháng, danh mục và trạng thái hiệu lực \\
+			\hline
+			Sổ tay sinh viên & Thủ tục, biểu mẫu, hỗ trợ sinh viên & Làm sạch JSON/HTML, chunk theo mục và ngữ cảnh thủ tục \\
+			\hline
+		\end{tabular}
+
+		\vspace{0.35cm}
+		\begin{alertblock}{Nguyên tắc dữ liệu}
+			\small Mỗi chunk phải giữ được nguồn, metadata quan trọng và trạng thái hiệu lực để câu trả lời có thể kiểm chứng.
+		\end{alertblock}
 	\end{frame}
 
 	% ================================================================
-	\section{Công nghệ sử dụng}
-
-	\begin{frame}{Công nghệ theo vai trò}
-		\small
-		\centering
-		\begin{minipage}{0.92\textwidth}
-			\scriptsize\textbf{Nguyên tắc chọn:} ưu tiên công nghệ phục vụ nhập dữ liệu, truy hồi, kiểm soát nguồn và vận hành RAG học vụ.
-		\end{minipage}
-		\vspace{0.08cm}
-
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Giao diện}
-					\begin{itemize}
-						\item React/Vite cho web app.
-						\item Expo/React Native cho mobile app.
-						\item TypeScript package dùng chung API contract.
-					\end{itemize}
-				\end{block}
-				\begin{block}{Backend}
-					\begin{itemize}
-						\item FastAPI điều phối chat, streaming, session.
-						\item Auth, document admin, feedback, lookup, notification.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Dữ liệu}
-					\begin{itemize}
-						\item MongoDB lưu nghiệp vụ.
-						\item Redis cache, session, rate limit.
-						\item Qdrant vector; Elasticsearch BM25.
-					\end{itemize}
-				\end{block}
-				\begin{block}{AI/Search}
-					\begin{itemize}
-						\item BGE-M3, E5 multilingual, BGE reranker.
-						\item LangGraph agent, LLM generation.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
-	\end{frame}
-
-	% ================================================================
-	\section{Thiết kế và xây dựng hệ thống}
+	\section{Tổng quan hệ thống}
 
 	\begin{frame}{Kiến trúc tổng thể}
 		\centering
-		\includegraphics[width=0.96\textwidth,height=5.7cm,keepaspectratio]{figures/system_design.png}
+		\includegraphics[width=0.98\textwidth,height=5.55cm,keepaspectratio]{figures/system_design_2.png}
 
-		\vspace{0.1cm}
-		\scriptsize
-		\textbf{Luồng chính:} Client $\rightarrow$ FastAPI $\rightarrow$ RAGPipeline/DocumentPipeline $\rightarrow$ Retrieval service $\rightarrow$ MongoDB/Qdrant/Elasticsearch/Redis.
-	\end{frame}
-
-	\begin{frame}{Thiết kế dữ liệu}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{MongoDB}
-					\begin{itemize}
-						\item \texttt{users}, \texttt{sessions}, \texttt{chat\_turns}.
-						\item \texttt{documents}, \texttt{chunks}, \texttt{agent\_traces}.
-						\item \texttt{bookmarks}, \texttt{feedback}, \texttt{notifications}.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Kho truy hồi}
-					\begin{itemize}
-						\item Qdrant lưu vector BGE-M3 và E5 theo collection.
-						\item Elasticsearch lưu BM25 với Vietnamese analyzer + \texttt{vi\_tokenizer}.
-						\item Redis cache session, history, response và rate limit.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
-
-		\vspace{0.3cm}
-		\centering
-		\small\textbf{Định danh tham chiếu liên kho:} \texttt{document\_id}, \texttt{chunk\_id}, collection, source/version và trạng thái hiệu lực.
-	\end{frame}
-
-	\begin{frame}{Luồng hỏi đáp RAGPipeline}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.32\textwidth}
-				\begin{block}{1. Hiểu truy vấn}
-					\begin{itemize}
-						\item Viết lại câu hỏi khi cần.
-						\item Nhận diện miền và thực thể học vụ.
-						\item Chọn chitchat, Simple RAG hoặc Agent.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.32\textwidth}
-				\begin{block}{2. Truy hồi}
-					\begin{itemize}
-						\item Vector search trên Qdrant.
-						\item BM25 trên Elasticsearch.
-						\item Rerank và lọc hiệu lực tài liệu.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.32\textwidth}
-				\begin{block}{3. Trả lời}
-					\begin{itemize}
-						\item Bổ sung tham chiếu điều khoản.
-						\item Sinh câu trả lời có nguồn.
-						\item Lưu trace, feedback và metadata.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
-	\end{frame}
-
-	\begin{frame}{Luồng xử lý dữ liệu}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Đầu vào}
-					\begin{itemize}
-						\item Tài liệu PDF/DOCX do admin upload.
-						\item Nội dung web do crawler thu thập.
-						\item Metadata nguồn, miền dữ liệu và trạng thái xử lý.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Các bước chính}
-					\begin{enumerate}
-						\item Convert sang Markdown.
-						\item LLM chuẩn hóa Markdown: heading, bảng, danh sách.
-						\item Làm sạch và chunk theo miền.
-						\item Admin review.
-						\item Embedding BGE-M3/E5.
-						\item Index vào Qdrant và Elasticsearch.
-					\end{enumerate}
-				\end{block}
-			\end{column}
-		\end{columns}
-
-		\vspace{0.25cm}
-		\centering
-		\small\textbf{Human gate:} admin review trước khi index để ngăn chunk lỗi, metadata sai hoặc bảng/heading bị méo đi vào kho tri thức.
-	\end{frame}
-
-	\begin{frame}{Minh họa sản phẩm: hỏi đáp sinh viên}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.34\textwidth}
-				\begin{block}{Màn hình chào}
-					\small Gợi ý câu hỏi theo chủ đề học vụ, thanh nhập câu hỏi và lịch sử phiên hội thoại.
-				\end{block}
-				\begin{block}{Câu trả lời}
-					\small Nội dung trả lời có cấu trúc, trích dẫn nguồn, metadata và trạng thái xử lý.
-				\end{block}
-				\begin{block}{Tương tác}
-					\small Streaming, bookmark, feedback và tiếp tục hỏi trong cùng ngữ cảnh hội thoại.
-				\end{block}
-			\end{column}
-			\begin{column}{0.62\textwidth}
-				\centering
-				\includegraphics[width=\textwidth,height=5.45cm,keepaspectratio]{figures/ui_chat_long.jpg}
-			\end{column}
-		\end{columns}
-	\end{frame}
-
-	\begin{frame}{Minh họa sản phẩm: quản trị tri thức}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.34\textwidth}
-				\begin{block}{Upload}
-					\small Admin tải PDF/DOCX, chọn collection, thêm metadata nguồn và theo dõi trạng thái xử lý.
-				\end{block}
-				\begin{block}{Review}
-					\small Kiểm tra chunk, nội dung Markdown, metadata và lỗi chuyển đổi trước khi index.
-				\end{block}
-				\begin{block}{Index/Evaluate}
-					\small Đưa dữ liệu vào Qdrant, Elasticsearch và chạy đánh giá hồi quy sau khi cập nhật.
-				\end{block}
-			\end{column}
-			\begin{column}{0.62\textwidth}
-				\centering
-				\includegraphics[width=\textwidth,height=2.62cm,keepaspectratio]{figures/ui_admin_upload.jpg}
-				\vspace{0.08cm}
-
-				\includegraphics[width=\textwidth,height=2.62cm,keepaspectratio]{figures/ui_admin_review.jpg}
-			\end{column}
-		\end{columns}
+		\vspace{0.08cm}
+		\begin{minipage}{0.93\textwidth}
+			\centering
+			\scriptsize\textbf{Luồng chính:} ngữ cảnh người dùng $\rightarrow$ router $\rightarrow$ trò chuyện thường / Simple RAG / RAG đa bước $\rightarrow$ RetrievalService (hybrid, RRF, rerank) $\rightarrow$ câu trả lời có nguồn và truy vết.
+		\end{minipage}
 	\end{frame}
 
 	% ================================================================
 	\section{Đóng góp nổi bật}
 
-	\begin{frame}{Truy hồi lai cho dữ liệu học vụ}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Dense retrieval}
-					\begin{itemize}
-						\item BGE-M3 và E5 multilingual chạy song song.
-						\item Phù hợp với câu hỏi diễn đạt khác văn bản gốc.
-						\item Tăng độ bao phủ khi một mô hình bỏ sót ứng viên.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Sparse retrieval}
-					\begin{itemize}
-						\item BM25 trên Elasticsearch.
-						\item Giữ tín hiệu mã môn, mã ngành, khóa, ngày tháng.
-						\item Hữu ích với điều khoản và cụm từ chính xác.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
+				\begin{frame}{1. Định tuyến và xử lý đa bước}
+					\begin{columns}[T,onlytextwidth]
+						\begin{column}{0.48\textwidth}
+							{\bfseries\color{hustprimary} Chọn đúng đường xử lý}
+							\vspace{0.08cm}
 
-		\vspace{0.35cm}
-		\begin{alertblock}{Hợp nhất RRF}
-			\small Kết hợp theo thứ hạng giúp ổn định hơn khi cosine similarity và BM25 có thang điểm khác nhau.
-		\end{alertblock}
-	\end{frame}
+							\small
+							\begin{itemize}
+								\setlength{\itemsep}{0.12cm}
+								\item Trò chuyện thường hoặc ngoài phạm vi.
+								\item Simple RAG cho câu hỏi rõ nguồn.
+								\item RAG đa bước cho câu hỏi phức tạp, so sánh, đa nguồn.
+								\item Nếu bộ định tuyến thiếu tự tin: mở rộng miền dữ liệu hoặc dùng luồng dự phòng.
+							\end{itemize}
+						\end{column}
+						\begin{column}{0.48\textwidth}
+							{\bfseries\color{hustprimary} Bộ định tuyến ba tầng}
+							\vspace{0.08cm}
 
-	\begin{frame}{Định tuyến theo độ phức tạp}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Ba nhóm câu hỏi}
-					\begin{enumerate}
-						\item Chitchat hoặc ngoài phạm vi.
-						\item Simple RAG cho câu hỏi rõ nguồn.
-						\item Agent cho câu hỏi phức tạp, so sánh, đa nguồn.
-					\end{enumerate}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Ba tầng quyết định}
-					\begin{itemize}
-						\item Regex xử lý nhanh trường hợp rõ ràng.
-						\item Bộ phân loại đa nhãn ước lượng miền tri thức.
-						\item LLM chỉ dùng khi câu hỏi mơ hồ hoặc chạm nhiều miền.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
-	\end{frame}
+							\small
+							\begin{itemize}
+								\setlength{\itemsep}{0.12cm}
+								\item Regex xử lý nhanh trường hợp rõ ràng.
+								\item ML chọn ý định: \texttt{blocked}, \texttt{chitchat}, \texttt{tool\_search}, \texttt{rag}.
+								\item Nếu là \texttt{rag}: ML chọn miền dữ liệu \texttt{ctdt}, \texttt{quydinh}, \texttt{kehoach}, \texttt{stsv}.
+								\item LLM chỉ đánh giá độ phức tạp khi câu hỏi chạm nhiều miền.
+							\end{itemize}
+						\end{column}
+					\end{columns}
 
-	\begin{frame}{Agent Planner--Executor}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Khi cần agent}
-					\begin{itemize}
-						\item Câu hỏi so sánh giữa nhiều chương trình.
-						\item Câu hỏi cần tổng hợp quy định và kế hoạch.
-						\item Câu hỏi nhiều bước hoặc cần đối chiếu logic.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Cách xử lý}
-					\begin{itemize}
-						\item Planner chia câu hỏi thành truy vấn con.
-						\item Executor truy hồi theo từng miền.
-						\item Synthesizer tổng hợp câu trả lời cuối.
-						\item Fallback về Simple RAG khi agent lỗi.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
-	\end{frame}
+					\vspace{0.22cm}
+					{\bfseries\color{hustprimary} Planner--Executor đa bước}
 
-	\begin{frame}{Kiểm soát nguồn trước khi trả lời}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Trước retrieval}
-					\begin{itemize}
-						\item Chunking theo miền giữ Điều--Khoản, bảng CTĐT, ngày thông báo.
-						\item Metadata-aware retrieval lọc theo ngành, khóa, collection và loại tài liệu.
-					\end{itemize}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Sau retrieval}
-					\begin{itemize}
-						\item ValidityFilter tránh dùng văn bản đã bị thay thế.
-						\item ReferenceResolver bổ sung điều khoản được dẫn chiếu.
-						\item HyDE fallback khi ngữ cảnh ban đầu yếu.
-					\end{itemize}
-				\end{block}
-			\end{column}
-		\end{columns}
-	\end{frame}
+					\vspace{0.02cm}
+					\small Với câu hỏi nhiều bước, Planner phân rã truy vấn, Executor truy hồi theo từng miền, Synthesizer tổng hợp câu trả lời cuối; nếu lỗi thì fallback về Simple RAG.
+				\end{frame}
 
-	\begin{frame}{Tóm tắt đóng góp kỹ thuật}
-		\small
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{enumerate}
-					\item Phân đoạn nội dung theo miền dữ liệu.
-					\item Truy hồi lai với BGE-M3, E5 và BM25.
-					\item Phân loại độ phức tạp ba tầng.
-					\item Phân loại miền với ngưỡng tin cậy.
-				\end{enumerate}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{enumerate}
-					\setcounter{enumi}{4}
-					\item Agent Planner--Executor trên LangGraph.
-					\item HyDE fallback khi truy hồi yếu.
-					\item ValidityFilter và ReferenceResolver.
-					\item Admin review trước khi lập chỉ mục.
-				\end{enumerate}
-			\end{column}
-		\end{columns}
-	\end{frame}
+				\begin{frame}{2. Truy hồi lai}
+			\begin{columns}[T,onlytextwidth]
+				\begin{column}{0.48\textwidth}
+					\begin{block}{Nguồn truy hồi}
+						\scriptsize
+						\begin{itemize}
+								\item Vector search trên Qdrant.
+								\item \textbf{BM25 Elasticsearch}: bộ phân tích tiếng Việt CocCoc.
+								\item Hai nguồn bổ trợ nhau: khớp ngữ nghĩa và khớp chính xác theo mã/ngày/thuật ngữ học vụ.
+						\end{itemize}
+					\end{block}
+				\end{column}
+				\begin{column}{0.48\textwidth}
+					\begin{block}{RRF}
+						\scriptsize
+						\begin{itemize}
+							\item Hợp nhất danh sách vector và keyword theo \textbf{thứ hạng}, không nội suy điểm thô.
+							\item Điểm ưu tiên độ mới cho \texttt{kehoach} là tín hiệu phụ sau hợp nhất: tối đa $+0.05$, giảm dần tới 365 ngày.
+						\end{itemize}
+					\end{block}
+				\end{column}
+			\end{columns}
 
-	% ================================================================
-	\section{Kết luận và hướng phát triển}
+			\vspace{0.06cm}
+				{\scriptsize\textbf{Sau hợp nhất:} rerank cross-encoder $\rightarrow$ HyDE khi rerank yếu $\rightarrow$ mở rộng cha-con $\rightarrow$ lọc hiệu lực.}
 
-	\begin{frame}{Kết quả, kiểm thử và triển khai}
-		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.47\textwidth}
-				\begin{block}{Kết quả nổi bật}
-					\scriptsize
-					\setlength{\tabcolsep}{3pt}
-					\begin{tabular}{|l|c|c|c|}
-						\hline
-						\textbf{Chỉ số} & \textbf{Vector} & \textbf{BM25} & \textbf{RRF} \\
-						\hline
-						nDCG@5 & 0,637 & 0,677 & \textbf{0,739} \\
-						Recall@5 & 0,660 & 0,733 & \textbf{0,758} \\
-						Độ đúng & 75,8\% & 81,2\% & \textbf{83,6\%} \\
-						Ảo giác & 3,3\% & 5,4\% & \textbf{2,9\%} \\
-						\hline
-					\end{tabular}
-				\end{block}
-			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Kiểm thử}
+			\vspace{0.04cm}
+			{\scriptsize\textbf{Tìm kiếm web:} Tavily khi thiếu nguồn/thông tin mới; giới hạn tên miền chính thức và đưa vào ngữ cảnh kèm URL.}
+		\end{frame}
+
+		\begin{frame}{3. Truy hồi nhận biết hồ sơ}
+			\begin{columns}[T,onlytextwidth]
+				\begin{column}{0.48\textwidth}
+					\begin{block}{Ánh xạ theo chương trình}
+						\scriptsize
+						\begin{itemize}
+							\setlength{\itemsep}{0.04cm}
+							\item Phân biệt ngành của sinh viên và ngành được hỏi.
+							\item Tra danh mục học phần theo CTĐT: ``Mạng máy tính'' $\rightarrow$ \texttt{IT3080} (IT-E6) hoặc \texttt{IT3080E} (IT-E7).
+							\item Giữ mã môn trong câu hỏi truy hồi để tránh lấy nhầm CTĐT.
+						\end{itemize}
+					\end{block}
+				\end{column}
+				\begin{column}{0.48\textwidth}
+					\begin{block}{Dùng hồ sơ có kiểm soát}
+						\scriptsize
+						\begin{itemize}
+							\setlength{\itemsep}{0.04cm}
+							\item Chỉ đưa hồ sơ vào khi câu hỏi phụ thuộc ngành/khóa; câu hỏi chung không bị lẫn ngữ cảnh cá nhân.
+							\item Nếu câu hỏi nêu ngành cụ thể, ưu tiên ngành được hỏi thay vì ngành của người hỏi.
+							\item Với văn bản quy định, giữ thông tin ngành khi tài liệu không luôn gắn mã ngành trực tiếp.
+						\end{itemize}
+					\end{block}
+				\end{column}
+			\end{columns}
+
+			\vspace{0.04cm}
+			{\color{hustprimary}\bfseries\scriptsize Lọc theo ngữ cảnh trước khi tìm kiếm:}
+			{\tiny CTĐT theo mã/tên ngành; quy định theo khóa áp dụng; kế hoạch theo tháng, năm hoặc độ mới.}
+		\end{frame}
+
+			\begin{frame}{4. Kiểm soát nguồn và chất lượng dữ liệu}
+			\vspace{0.18cm}
+			\begin{columns}[T,onlytextwidth]
+				\begin{column}{0.48\textwidth}
+					{\bfseries\color{hustprimary} Trước khi lập chỉ mục}
+					\vspace{0.08cm}
+
 					\small
 					\begin{itemize}
-						\item Routing và reflection.
-						\item Retrieval fusion và reranking.
-						\item Reference resolution, upload pipeline, cache và agent.
+						\setlength{\itemsep}{0.22cm}
+						\item Chia đoạn theo miền, giữ điều khoản, bảng CTĐT và ngày thông báo.
+						\item Gắn siêu dữ liệu theo ngành, khóa, bộ dữ liệu và loại tài liệu.
+						\item Rà soát quản trị trước khi lập chỉ mục để chặn dữ liệu lỗi.
 					\end{itemize}
-				\end{block}
-				\begin{block}{Triển khai}
+				\end{column}
+				\begin{column}{0.48\textwidth}
+					{\bfseries\color{hustprimary} Trước khi trả lời}
+					\vspace{0.08cm}
+
+					\small
 					\begin{itemize}
-						\item FastAPI và web/mobile clients.
-						\item MongoDB, Redis, Qdrant, Elasticsearch.
-						\item Fallback bật/tắt bằng cấu hình.
+						\setlength{\itemsep}{0.22cm}
+						\item \texttt{ValidityFilter} tránh dùng văn bản đã bị thay thế.
+						\item \texttt{ReferenceResolver} bổ sung điều khoản được dẫn chiếu.
+						\item Truy vết, phản hồi và chỉ số giúp kiểm tra lại từng phản hồi đáp.
 					\end{itemize}
-				\end{block}
+				\end{column}
+			\end{columns}
+
+			\vspace{0.28cm}
+			{\bfseries\color{hustprimary} Nguyên tắc thiết kế}
+
+				\vspace{0.04cm}
+				\small Câu trả lời học vụ cần \textbf{đúng nguồn} trước khi cần hay; hệ thống biến nguyên tắc này thành quy trình có kiểm soát.
+				\end{frame}
+
+	% ================================================================
+	\section{Đánh giá và kết luận}
+
+	\begin{frame}{Đánh giá kết luận}
+		\begin{alertblock}{So sánh cấu hình truy hồi}
+			\centering
+			\tiny
+			\setlength{\tabcolsep}{3pt}
+			\renewcommand{\arraystretch}{1.08}
+			\begin{tabular}{|>{\raggedright\arraybackslash}p{1.9cm}|>{\centering\arraybackslash}p{1.85cm}|>{\centering\arraybackslash}p{1.95cm}|>{\centering\arraybackslash}p{1.75cm}|>{\centering\arraybackslash}p{1.55cm}|}
+				\hline
+				\textbf{Chỉ số} & \textbf{Keyword + rerank} & \textbf{Hybrid no-rerank} & \textbf{Vector + rerank} & \textbf{RRF} \\
+				\hline
+				nDCG@5 & 60,3\% & 52,3\% & 61,8\% & \textbf{73,9\%} \\
+				\hline
+				Recall@5 & 65,9\% & 62,6\% & 68,0\% & \textbf{79,5\%} \\
+				\hline
+				Độ đúng & 63,2\% & 62,5\% & 71,4\% & \textbf{84,9\%} \\
+				\hline
+				Bám nguồn & 74,4\% & 71,9\% & 87,5\% & \textbf{96,0\%} \\
+				\hline
+				Ảo giác & 23,7\% & 25,1\% & 11,1\% & \textbf{2,1\%} \\
+				\hline
+			\end{tabular}
+		\end{alertblock}
+
+		\vspace{0.28cm}
+		\begin{columns}[T,totalwidth=0.92\textwidth]
+			\begin{column}{0.44\textwidth}
+				{\color{hustprimary}\bfseries\normalsize Thiết lập đánh giá}
+				\vspace{0.03cm}
+				\begin{itemize}
+					\scriptsize
+					\setlength{\itemsep}{0.04cm}
+					\item 16 bộ dữ liệu, 570 câu hỏi: 421 simple, 149 multi-hop.
+					\item Có \texttt{gold\_answer} và \texttt{evidence\_chunk\_ids}.
+					\item Chạy end-to-end như API thực tế, tắt cache.
+					\item LLM-as-judge cố định theo run.
+				\end{itemize}
+			\end{column}
+			\begin{column}{0.44\textwidth}
+				{\color{hustprimary}\bfseries\normalsize Kết luận chính}
+				\vspace{0.03cm}
+				\begin{itemize}
+					\scriptsize
+					\setlength{\itemsep}{0.04cm}
+					\item RRF + rerank cải thiện truy hồi, độ đúng và bám nguồn.
+					\item Hybrid no-rerank thấp vì tắt riêng cross-encoder.
+					\item BKAdvisor ưu tiên \textbf{đúng nguồn}: human gate, trace và kiểm soát dữ liệu học vụ.
+				\end{itemize}
 			\end{column}
 		\end{columns}
 	\end{frame}
 
-	\begin{frame}{Kết luận và hướng phát triển}
+	\begin{frame}{Hướng phát triển ứng dụng}
 		\begin{columns}[T,onlytextwidth]
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Kết luận chính}
-					BKAdvisor là hệ thống RAG học vụ có nhập dữ liệu, truy hồi lai, định tuyến và kiểm soát nguồn.
-				\end{block}
-				\begin{block}{Thông điệp}
-					Câu trả lời học vụ cần đúng nguồn trước khi cần hay; RAG giúp đưa nguyên tắc đó vào pipeline vận hành.
+			\begin{column}{0.32\textwidth}
+				\begin{block}{Tích hợp QLĐT}
+					\scriptsize
+					\begin{itemize}
+						\setlength{\itemsep}{0.05cm}
+						\item Kết nối với hệ thống quản lý đào tạo để hiểu ngữ cảnh từng sinh viên.
+						\item Sử dụng thông tin ngành, khóa, kế hoạch học tập và kết quả học phần.
+						\item Trả lời theo tình huống cá nhân thay vì chỉ tra cứu tài liệu chung.
+					\end{itemize}
 				\end{block}
 			\end{column}
-			\begin{column}{0.48\textwidth}
-				\begin{block}{Hướng phát triển}
+			\begin{column}{0.32\textwidth}
+				\begin{block}{Hỗ trợ học tập}
+					\scriptsize
 					\begin{itemize}
-						\item Mở rộng ground-truth đa nguồn.
-						\item Đo độ trễ trong môi trường triển khai thật.
-						\item Cải thiện metadata và lineage văn bản.
-						\item Tối ưu admin review và học từ feedback.
-						\item Mở rộng agent cho tác vụ học vụ có cấu trúc.
+						\setlength{\itemsep}{0.05cm}
+						\item Phân tích điểm số để nhận diện nhóm học phần sinh viên đang yếu.
+						\item Gợi ý phần kiến thức cần củng cố và học phần nên ưu tiên cải thiện.
+						\item Hỗ trợ cố vấn học tập nắm nhanh tình trạng của từng sinh viên.
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.32\textwidth}
+				\begin{block}{Nhắc việc học vụ}
+					\scriptsize
+					\begin{itemize}
+						\setlength{\itemsep}{0.05cm}
+						\item Gợi ý việc cần làm: đăng ký học, học bổng, deadline.
+						\item Nhắc các mốc quan trọng theo học kỳ và theo hồ sơ cá nhân.
+						\item Chủ động cảnh báo khi có rủi ro về tiến độ, điều kiện học vụ.
 					\end{itemize}
 				\end{block}
 			\end{column}
 		\end{columns}
+
+		\vspace{0.18cm}
+		\begin{alertblock}{Giá trị ứng dụng}
+			\scriptsize BKAdvisor không chỉ trả lời câu hỏi học vụ, mà trở thành trợ lý đồng hành: hiểu hồ sơ học tập, chỉ ra vấn đề cần cải thiện và nhắc sinh viên đúng việc vào đúng thời điểm.
+		\end{alertblock}
 	\end{frame}
 
 	\hustthankyou
