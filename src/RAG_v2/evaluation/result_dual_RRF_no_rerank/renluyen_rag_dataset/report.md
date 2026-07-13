@@ -1,6 +1,6 @@
 # RAG Evaluation Report (production config)
 
-- **Date**: 2026-06-29 18:19:07
+- **Date**: 2026-07-13 20:45:40
 - **Total queries**: `30`
 - **Avg latency**: `18783.0 ms`
 
@@ -8,13 +8,13 @@
 
 | Metric | Score |
 | :--- | :---: |
-| Groundedness (Faithfulness) | `0.00%` |
-| Hallucination rate | `100.00%` (30) |
-| Answer relevance | `0.00%` |
-| Completeness | `0.00%` |
-| Correctness vs gold (correct) | `0.00%` |
-| Correctness vs gold (partial) | `0.00%` |
-| Correctness vs gold (incorrect) | `100.00%` |
+| Groundedness (Faithfulness) | `3.33%` |
+| Hallucination rate | `96.67%` (29) |
+| Answer relevance | `96.67%` |
+| Completeness | `23.33%` |
+| Correctness vs gold (correct) | `86.67%` |
+| Correctness vs gold (partial) | `6.67%` |
+| Correctness vs gold (incorrect) | `6.67%` |
 
 ## Retrieval metrics (averaged)
 
@@ -24,7 +24,7 @@
 | precision@3 | `27.78%` |
 | recall@3 | `75.00%` |
 | mrr@3 | `64.44%` |
-| ndcg@3 | `66.75%` |
+| ndcg@3 | `66.74%` |
 | hit@5 | `86.67%` |
 | precision@5 | `18.67%` |
 | recall@5 | `83.33%` |
@@ -40,13 +40,13 @@
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| multi_hop | 8 | `87.5%` | `75.0%` | `61.2%` | `0.0%` | `0.0%` | `20156.3 ms` |
-| simple | 22 | `86.4%` | `86.4%` | `73.5%` | `0.0%` | `0.0%` | `18283.6 ms` |
+| multi_hop | 8 | `87.5%` | `75.0%` | `61.2%` | `0.0%` | `75.0%` | `20156.3 ms` |
+| simple | 22 | `86.4%` | `86.4%` | `73.5%` | `4.5%` | `90.9%` | `18283.6 ms` |
 
 ## Breakdown by difficulty
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| easy | 23 | `82.6%` | `82.6%` | `70.3%` | `0.0%` | `0.0%` | `18655.1 ms` |
-| hard | 1 | `100.0%` | `100.0%` | `69.3%` | `0.0%` | `0.0%` | `33081.7 ms` |
-| medium | 6 | `100.0%` | `83.3%` | `70.0%` | `0.0%` | `0.0%` | `16890.2 ms` |
+| easy | 23 | `82.6%` | `82.6%` | `70.3%` | `4.3%` | `87.0%` | `18655.1 ms` |
+| hard | 1 | `100.0%` | `100.0%` | `69.3%` | `0.0%` | `100.0%` | `33081.7 ms` |
+| medium | 6 | `100.0%` | `83.3%` | `70.0%` | `0.0%` | `83.3%` | `16890.2 ms` |

@@ -6,7 +6,7 @@
     "precision@3": 0.2778,
     "recall@3": 0.75,
     "mrr@3": 0.6444,
-    "ndcg@3": 0.6675,
+    "ndcg@3": 0.6674,
     "hit@5": 0.8667,
     "precision@5": 0.1867,
     "recall@5": 0.8333,
@@ -18,14 +18,14 @@
     "mrr@7": 0.6661,
     "ndcg@7": 0.702
   },
-  "relevance_rate": 0.0,
-  "faithfulness_rate": 0.0,
-  "completeness_rate": 0.0,
-  "hallucination_rate": 1.0,
-  "hallucination_count": 30,
-  "ref_correct_rate": 0.0,
-  "ref_partial_rate": 0.0,
-  "ref_incorrect_rate": 1.0,
+  "relevance_rate": 0.9667,
+  "faithfulness_rate": 0.0333,
+  "completeness_rate": 0.2333,
+  "hallucination_rate": 0.9667,
+  "hallucination_count": 29,
+  "ref_correct_rate": 0.8667,
+  "ref_partial_rate": 0.0667,
+  "ref_incorrect_rate": 0.0667,
   "by_question_type": {
     "multi_hop": {
       "count": 8,
@@ -34,7 +34,7 @@
         "precision@3": 0.3333,
         "recall@3": 0.6875,
         "mrr@3": 0.5625,
-        "ndcg@3": 0.5789,
+        "ndcg@3": 0.5788,
         "hit@5": 0.875,
         "precision@5": 0.225,
         "recall@5": 0.75,
@@ -47,7 +47,7 @@
         "ndcg@7": 0.6119
       },
       "faithfulness_rate": 0.0,
-      "ref_correct_rate": 0.0,
+      "ref_correct_rate": 0.75,
       "avg_latency_ms": 20156.3
     },
     "simple": {
@@ -69,8 +69,8 @@
         "mrr@7": 0.6924,
         "ndcg@7": 0.7348
       },
-      "faithfulness_rate": 0.0,
-      "ref_correct_rate": 0.0,
+      "faithfulness_rate": 0.0455,
+      "ref_correct_rate": 0.9091,
       "avg_latency_ms": 18283.6
     }
   },
@@ -94,8 +94,8 @@
         "mrr@7": 0.6623,
         "ndcg@7": 0.7029
       },
-      "faithfulness_rate": 0.0,
-      "ref_correct_rate": 0.0,
+      "faithfulness_rate": 0.0435,
+      "ref_correct_rate": 0.8696,
       "avg_latency_ms": 18655.1
     },
     "hard": {
@@ -118,7 +118,7 @@
         "ndcg@7": 0.6934
       },
       "faithfulness_rate": 0.0,
-      "ref_correct_rate": 0.0,
+      "ref_correct_rate": 1.0,
       "avg_latency_ms": 33081.7
     },
     "medium": {
@@ -133,17 +133,17 @@
         "precision@5": 0.2333,
         "recall@5": 0.8333,
         "mrr@5": 0.7083,
-        "ndcg@5": 0.7002,
+        "ndcg@5": 0.7003,
         "hit@7": 1.0,
         "precision@7": 0.1667,
         "recall@7": 0.8333,
         "mrr@7": 0.7083,
-        "ndcg@7": 0.7002
+        "ndcg@7": 0.7003
       },
       "faithfulness_rate": 0.0,
-      "ref_correct_rate": 0.0,
+      "ref_correct_rate": 0.8333,
       "avg_latency_ms": 16890.2
     }
   },
-  "dataset": "renluyen_rag_dataset.json"
+  "dataset": "renluyen_rag_dataset"
 }

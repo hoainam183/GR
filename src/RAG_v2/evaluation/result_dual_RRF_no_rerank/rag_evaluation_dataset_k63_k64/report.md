@@ -1,6 +1,6 @@
 # RAG Evaluation Report (production config)
 
-- **Date**: 2026-06-29 18:02:28
+- **Date**: 2026-07-13 20:40:49
 - **Total queries**: `30`
 - **Avg latency**: `23960.1 ms`
 
@@ -8,20 +8,20 @@
 
 | Metric | Score |
 | :--- | :---: |
-| Groundedness (Faithfulness) | `56.67%` |
-| Hallucination rate | `40.00%` (12) |
-| Answer relevance | `63.33%` |
-| Completeness | `60.00%` |
-| Correctness vs gold (correct) | `36.67%` |
-| Correctness vs gold (partial) | `6.67%` |
-| Correctness vs gold (incorrect) | `56.67%` |
+| Groundedness (Faithfulness) | `66.67%` |
+| Hallucination rate | `30.00%` (9) |
+| Answer relevance | `86.67%` |
+| Completeness | `70.00%` |
+| Correctness vs gold (correct) | `63.33%` |
+| Correctness vs gold (partial) | `10.00%` |
+| Correctness vs gold (incorrect) | `26.67%` |
 
 ## Retrieval metrics (averaged)
 
 | Metric | Score |
 | :--- | :---: |
 | hit@3 | `50.00%` |
-| precision@3 | `16.67%` |
+| precision@3 | `16.66%` |
 | recall@3 | `48.33%` |
 | mrr@3 | `38.33%` |
 | ndcg@3 | `40.02%` |
@@ -40,12 +40,12 @@
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| multi_hop | 8 | `12.5%` | `6.2%` | `7.7%` | `0.0%` | `12.5%` | `24791.4 ms` |
-| simple | 22 | `63.6%` | `63.6%` | `51.8%` | `77.3%` | `45.5%` | `23657.8 ms` |
+| multi_hop | 8 | `12.5%` | `6.2%` | `7.7%` | `37.5%` | `62.5%` | `24791.4 ms` |
+| simple | 22 | `63.6%` | `63.6%` | `51.8%` | `77.3%` | `63.6%` | `23657.8 ms` |
 
 ## Breakdown by difficulty
 
 | Group | Count | Hit@5 | Recall@5 | nDCG@5 | Faithfulness | Ref correct | Avg latency |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| easy | 22 | `63.6%` | `63.6%` | `51.8%` | `77.3%` | `45.5%` | `23657.8 ms` |
-| medium | 8 | `12.5%` | `6.2%` | `7.7%` | `0.0%` | `12.5%` | `24791.4 ms` |
+| easy | 22 | `63.6%` | `63.6%` | `51.8%` | `77.3%` | `63.6%` | `23657.8 ms` |
+| medium | 8 | `12.5%` | `6.2%` | `7.7%` | `37.5%` | `62.5%` | `24791.4 ms` |
