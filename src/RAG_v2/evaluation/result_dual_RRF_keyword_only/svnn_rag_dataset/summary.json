@@ -18,14 +18,14 @@
     "mrr@7": 0.8325,
     "ndcg@7": 0.8156
   },
-  "relevance_rate": 0.0,
-  "faithfulness_rate": 0.0,
-  "completeness_rate": 0.0,
-  "hallucination_rate": 1.0,
-  "hallucination_count": 30,
-  "ref_correct_rate": 0.0,
-  "ref_partial_rate": 0.0,
-  "ref_incorrect_rate": 1.0,
+  "relevance_rate": 1.0,
+  "faithfulness_rate": 0.2,
+  "completeness_rate": 0.5,
+  "hallucination_rate": 0.8,
+  "hallucination_count": 24,
+  "ref_correct_rate": 0.8667,
+  "ref_partial_rate": 0.0333,
+  "ref_incorrect_rate": 0.1,
   "by_question_type": {
     "multi_hop": {
       "count": 8,
@@ -47,14 +47,14 @@
         "ndcg@7": 0.6836
       },
       "faithfulness_rate": 0.0,
-      "ref_correct_rate": 0.0,
+      "ref_correct_rate": 0.875,
       "avg_latency_ms": 31454.5
     },
     "simple": {
       "count": 22,
       "metrics": {
         "hit@3": 0.8636,
-        "precision@3": 0.2879,
+        "precision@3": 0.2878,
         "recall@3": 0.8636,
         "mrr@3": 0.8636,
         "ndcg@3": 0.8636,
@@ -69,8 +69,8 @@
         "mrr@7": 0.8636,
         "ndcg@7": 0.8636
       },
-      "faithfulness_rate": 0.0,
-      "ref_correct_rate": 0.0,
+      "faithfulness_rate": 0.2727,
+      "ref_correct_rate": 0.8636,
       "avg_latency_ms": 19185.7
     }
   },
@@ -79,7 +79,7 @@
       "count": 22,
       "metrics": {
         "hit@3": 0.8636,
-        "precision@3": 0.2879,
+        "precision@3": 0.2878,
         "recall@3": 0.8636,
         "mrr@3": 0.8636,
         "ndcg@3": 0.8636,
@@ -94,8 +94,8 @@
         "mrr@7": 0.8636,
         "ndcg@7": 0.8636
       },
-      "faithfulness_rate": 0.0,
-      "ref_correct_rate": 0.0,
+      "faithfulness_rate": 0.2727,
+      "ref_correct_rate": 0.8636,
       "avg_latency_ms": 19185.7
     },
     "medium": {
@@ -118,9 +118,9 @@
         "ndcg@7": 0.6836
       },
       "faithfulness_rate": 0.0,
-      "ref_correct_rate": 0.0,
+      "ref_correct_rate": 0.875,
       "avg_latency_ms": 31454.5
     }
   },
-  "dataset": "svnn_rag_dataset.json"
+  "dataset": "svnn_rag_dataset"
 }
